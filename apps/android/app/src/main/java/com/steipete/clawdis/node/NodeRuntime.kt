@@ -1,6 +1,7 @@
 package com.steipete.clawdis.node
 
 import android.content.Context
+import android.os.Build
 import com.steipete.clawdis.node.bridge.BridgeDiscovery
 import com.steipete.clawdis.node.bridge.BridgeEndpoint
 import com.steipete.clawdis.node.bridge.BridgePairingClient
@@ -182,6 +183,8 @@ class NodeRuntime(context: Context) {
                 token = null,
                 platform = "Android",
                 version = "dev",
+                deviceFamily = "Android",
+                modelIdentifier = Build.MODEL,
               ),
           )
         } else {
@@ -204,6 +207,8 @@ class NodeRuntime(context: Context) {
             token = authToken,
             platform = "Android",
             version = "dev",
+            deviceFamily = "Android",
+            modelIdentifier = Build.MODEL,
           ),
       )
     }

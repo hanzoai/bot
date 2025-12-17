@@ -24,6 +24,8 @@ class BridgePairingClient {
     val token: String?,
     val platform: String?,
     val version: String?,
+    val deviceFamily: String?,
+    val modelIdentifier: String?,
   )
 
   data class PairResult(val ok: Boolean, val token: String?, val error: String? = null)
@@ -55,6 +57,8 @@ class BridgePairingClient {
             hello.token?.let { put("token", JsonPrimitive(it)) }
             hello.platform?.let { put("platform", JsonPrimitive(it)) }
             hello.version?.let { put("version", JsonPrimitive(it)) }
+            hello.deviceFamily?.let { put("deviceFamily", JsonPrimitive(it)) }
+            hello.modelIdentifier?.let { put("modelIdentifier", JsonPrimitive(it)) }
           },
         )
 
@@ -76,6 +80,8 @@ class BridgePairingClient {
                 hello.displayName?.let { put("displayName", JsonPrimitive(it)) }
                 hello.platform?.let { put("platform", JsonPrimitive(it)) }
                 hello.version?.let { put("version", JsonPrimitive(it)) }
+                hello.deviceFamily?.let { put("deviceFamily", JsonPrimitive(it)) }
+                hello.modelIdentifier?.let { put("modelIdentifier", JsonPrimitive(it)) }
               },
             )
 

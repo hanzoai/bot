@@ -2111,6 +2111,8 @@ describe("gateway server", () => {
         platform: "test",
         mode: "ui",
         instanceId: "abc",
+        deviceFamily: "Mac",
+        modelIdentifier: "Mac16,6",
       },
     });
 
@@ -2133,6 +2135,8 @@ describe("gateway server", () => {
     expect(clientEntry?.host).toBe("fingerprint");
     expect(clientEntry?.version).toBe("9.9.9");
     expect(clientEntry?.mode).toBe("ui");
+    expect(clientEntry?.deviceFamily).toBe("Mac");
+    expect(clientEntry?.modelIdentifier).toBe("Mac16,6");
 
     ws.close();
     await server.close();
