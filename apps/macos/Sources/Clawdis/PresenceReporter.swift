@@ -45,6 +45,8 @@ final class PresenceReporter {
             "version": AnyHashable(version),
             "reason": AnyHashable(reason),
         ]
+        params["deviceFamily"] = AnyHashable("Mac")
+        if let model = InstanceIdentity.modelIdentifier { params["modelIdentifier"] = AnyHashable(model) }
         if let lastInput { params["lastInputSeconds"] = AnyHashable(lastInput) }
         do {
             try await ControlChannel.shared.sendSystemEvent(text, params: params)

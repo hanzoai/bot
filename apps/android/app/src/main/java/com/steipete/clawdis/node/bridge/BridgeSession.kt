@@ -39,6 +39,8 @@ class BridgeSession(
     val token: String?,
     val platform: String?,
     val version: String?,
+    val deviceFamily: String?,
+    val modelIdentifier: String?,
   )
 
   data class InvokeRequest(val id: String, val command: String, val paramsJson: String?)
@@ -191,6 +193,8 @@ class BridgeSession(
             hello.token?.let { put("token", JsonPrimitive(it)) }
             hello.platform?.let { put("platform", JsonPrimitive(it)) }
             hello.version?.let { put("version", JsonPrimitive(it)) }
+            hello.deviceFamily?.let { put("deviceFamily", JsonPrimitive(it)) }
+            hello.modelIdentifier?.let { put("modelIdentifier", JsonPrimitive(it)) }
           },
         )
 

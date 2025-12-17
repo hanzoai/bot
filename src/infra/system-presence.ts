@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import os from "node:os";
 
 export type SystemPresence = {
@@ -5,6 +6,8 @@ export type SystemPresence = {
   ip?: string;
   version?: string;
   platform?: string;
+  deviceFamily?: string;
+  modelIdentifier?: string;
   lastInputSeconds?: number;
   mode?: string;
   reason?: string;
@@ -47,6 +50,17 @@ function initSelfPresence() {
   const ip = resolvePrimaryIPv4() ?? undefined;
   const version =
     process.env.CLAWDIS_VERSION ?? process.env.npm_package_version ?? "unknown";
+  const modelIdentifier = (() => {
+    const p = os.platform();
+    if (p === "darwin") {
+      const res = spawnSync("sysctl", ["-n", "hw.model"], {
+        encoding: "utf-8",
+      });
+      const out = typeof res.stdout === "string" ? res.stdout.trim() : "";
+      return out.length > 0 ? out : undefined;
+    }
+    return os.arch();
+  })();
   const platform = (() => {
     const p = os.platform();
     const rel = os.release();
@@ -54,12 +68,21 @@ function initSelfPresence() {
     if (p === "win32") return `windows ${rel}`;
     return `${p} ${rel}`;
   })();
+  const deviceFamily = (() => {
+    const p = os.platform();
+    if (p === "darwin") return "Mac";
+    if (p === "win32") return "Windows";
+    if (p === "linux") return "Linux";
+    return p;
+  })();
   const text = `Gateway: ${host}${ip ? ` (${ip})` : ""} · app ${version} · mode gateway · reason self`;
   const selfEntry: SystemPresence = {
     host,
     ip,
     version,
     platform,
+    deviceFamily,
+    modelIdentifier,
     mode: "gateway",
     reason: "self",
     text,
@@ -123,6 +146,8 @@ type SystemPresencePayload = {
   ip?: string;
   version?: string;
   platform?: string;
+  deviceFamily?: string;
+  modelIdentifier?: string;
   lastInputSeconds?: number;
   mode?: string;
   reason?: string;
@@ -147,6 +172,8 @@ export function updateSystemPresence(payload: SystemPresencePayload) {
     ip: payload.ip ?? parsed.ip ?? existing.ip,
     version: payload.version ?? parsed.version ?? existing.version,
     platform: payload.platform ?? existing.platform,
+    deviceFamily: payload.deviceFamily ?? existing.deviceFamily,
+    modelIdentifier: payload.modelIdentifier ?? existing.modelIdentifier,
     mode: payload.mode ?? parsed.mode ?? existing.mode,
     lastInputSeconds:
       payload.lastInputSeconds ??
