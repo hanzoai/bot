@@ -172,6 +172,10 @@ import {
   type HookMappingResolved,
   resolveHookMappings,
 } from "./hooks-mapping.js";
+import {
+  startGmailWatcher,
+  stopGmailWatcher,
+} from "../hooks/gmail-watcher.js";
 
 ensureClawdisCliOnPath();
 
@@ -6691,6 +6695,20 @@ export async function startGatewayServer(
     logBrowser.error(`server failed to start: ${String(err)}`);
   }
 
+  // Start Gmail watcher if configured (hooks.gmail.account).
+  if (process.env.CLAWDIS_SKIP_GMAIL_WATCHER !== "1") {
+    try {
+      const gmailResult = await startGmailWatcher(cfgAtStart);
+      if (gmailResult.started) {
+        logHooks.info("gmail watcher started");
+      } else if (gmailResult.reason && gmailResult.reason !== "hooks not enabled" && gmailResult.reason !== "no gmail account configured") {
+        logHooks.warn(`gmail watcher not started: ${gmailResult.reason}`);
+      }
+    } catch (err) {
+      logHooks.error(`gmail watcher failed to start: ${String(err)}`);
+    }
+  }
+
   // Launch configured providers (WhatsApp Web, Discord, Telegram) so gateway replies via the
   // surface the message came from. Tests can opt out via CLAWDIS_SKIP_PROVIDERS.
   if (process.env.CLAWDIS_SKIP_PROVIDERS !== "1") {
@@ -6749,6 +6767,7 @@ export async function startGatewayServer(
       await stopDiscordProvider();
       await stopSignalProvider();
       await stopIMessageProvider();
+      await stopGmailWatcher();
       cron.stop();
       heartbeatRunner.stop();
       broadcast("shutdown", {
