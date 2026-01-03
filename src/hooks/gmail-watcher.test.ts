@@ -1,5 +1,5 @@
-import { EventEmitter } from "node:events";
 import type { ChildProcess } from "node:child_process";
+import { EventEmitter } from "node:events";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const runtimeConfig = {
@@ -27,9 +27,10 @@ class MockChild extends EventEmitter {
 const spawnMock = vi.fn(() => new MockChild() as unknown as ChildProcess);
 
 vi.mock("node:child_process", async () => {
-  const actual = await vi.importActual<typeof import("node:child_process")>(
-    "node:child_process",
-  );
+  const actual =
+    await vi.importActual<typeof import("node:child_process")>(
+      "node:child_process",
+    );
   return {
     ...actual,
     spawn: spawnMock,

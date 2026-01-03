@@ -75,6 +75,7 @@ import {
 } from "../discord/index.js";
 import { type DiscordProbe, probeDiscord } from "../discord/probe.js";
 import { isVerbose } from "../globals.js";
+import { startGmailWatcher, stopGmailWatcher } from "../hooks/gmail-watcher.js";
 import {
   monitorIMessageProvider,
   sendMessageIMessage,
@@ -172,10 +173,6 @@ import {
   type HookMappingResolved,
   resolveHookMappings,
 } from "./hooks-mapping.js";
-import {
-  startGmailWatcher,
-  stopGmailWatcher,
-} from "../hooks/gmail-watcher.js";
 
 ensureClawdisCliOnPath();
 
@@ -6701,7 +6698,11 @@ export async function startGatewayServer(
       const gmailResult = await startGmailWatcher(cfgAtStart);
       if (gmailResult.started) {
         logHooks.info("gmail watcher started");
-      } else if (gmailResult.reason && gmailResult.reason !== "hooks not enabled" && gmailResult.reason !== "no gmail account configured") {
+      } else if (
+        gmailResult.reason &&
+        gmailResult.reason !== "hooks not enabled" &&
+        gmailResult.reason !== "no gmail account configured"
+      ) {
         logHooks.warn(`gmail watcher not started: ${gmailResult.reason}`);
       }
     } catch (err) {
