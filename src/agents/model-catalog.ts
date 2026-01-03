@@ -63,6 +63,10 @@ export async function loadModelCatalog(params?: {
         // If we found nothing, don't cache this result so we can try again.
         modelCatalogPromise = null;
       }
+      if (models.length === 0) {
+        // If we found nothing, don't cache this result so we can try again.
+        modelCatalogPromise = null;
+      }
     } catch {
       // Leave models empty on discovery errors and don't cache.
       modelCatalogPromise = null;

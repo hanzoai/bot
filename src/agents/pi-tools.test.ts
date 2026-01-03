@@ -72,6 +72,50 @@ describe("createClawdisCodingTools", () => {
     }
   });
 
+  it("keeps anyOf variants for non-Gemini providers", () => {
+    const tools = createClawdisCodingTools({ provider: "openai" });
+    const browser = tools.find((tool) => tool.name === "browser");
+    expect(browser).toBeDefined();
+    const parameters = browser?.parameters as {
+      anyOf?: Array<{ properties?: Record<string, unknown> }>;
+    };
+    expect(Array.isArray(parameters.anyOf)).toBe(true);
+    expect(parameters.anyOf?.length ?? 0).toBeGreaterThan(0);
+    const hasConst = parameters.anyOf?.some((variant) => {
+      const action = variant.properties?.action as
+        | { const?: unknown }
+        | undefined;
+      return typeof action?.const === "string";
+    });
+    expect(hasConst).toBe(true);
+  });
+
+  it("strips anyOf for google-gemini-cli tools", () => {
+    const tools = createClawdisCodingTools({ provider: "google-gemini-cli" });
+    const browser = tools.find((tool) => tool.name === "browser");
+    expect(browser).toBeDefined();
+    const parameters = browser?.parameters as {
+      anyOf?: unknown;
+      properties?: Record<string, unknown>;
+      required?: string[];
+    };
+    expect(parameters.anyOf).toBeUndefined();
+    expect(parameters.properties?.action).toBeDefined();
+    expect(parameters.required ?? []).toContain("action");
+  });
+
+  it("strips anyOf for google-antigravity tools", () => {
+    const tools = createClawdisCodingTools({ provider: "google-antigravity" });
+    const browser = tools.find((tool) => tool.name === "browser");
+    expect(browser).toBeDefined();
+    const parameters = browser?.parameters as {
+      anyOf?: unknown;
+      properties?: Record<string, unknown>;
+    };
+    expect(parameters.anyOf).toBeUndefined();
+    expect(parameters.properties?.action).toBeDefined();
+  });
+
   it("includes bash and process tools", () => {
     const tools = createClawdisCodingTools();
     expect(tools.some((tool) => tool.name === "bash")).toBe(true);
