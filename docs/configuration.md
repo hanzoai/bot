@@ -701,6 +701,7 @@ Endpoints:
 Mapping notes:
 - `match.path` matches the sub-path after `/hooks` (e.g. `/hooks/gmail` → `gmail`).
 - `match.source` matches a payload field (e.g. `{ source: "gmail" }`) so you can use a generic `/hooks/ingest` path.
+- `hooks.mappings` are evaluated before presets; first match wins.
 - Templates like `{{messages[0].subject}}` read from the payload.
 - `transform` can point to a JS/TS module that returns a hook action.
 

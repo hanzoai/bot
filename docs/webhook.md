@@ -89,6 +89,7 @@ code transforms.
 Mapping options (summary):
 - `hooks.presets: ["gmail"]` enables the built-in Gmail mapping.
 - `hooks.mappings` lets you define `match`, `action`, and templates in config.
+- `hooks.mappings` are evaluated before presets; first match wins.
 - `hooks.transformsDir` + `transform.module` loads a JS/TS module for custom logic.
 - Use `match.source` to keep a generic ingest endpoint (payload-driven routing).
 - TS transforms require a TS loader (e.g. `tsx`) or precompiled `.js` at runtime.

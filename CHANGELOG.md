@@ -7,6 +7,7 @@
 - Agent runtime: update pi-mono dependencies to 0.31.1 (agent-core split).
 - Dependencies: bump to latest compatible versions (TypeBox, grammY, Zod, Rolldown, oxlint-tsgolint).
 - Tests: cover read tool image metadata + text output.
+- Hooks: treat null transforms as handled skips (204) and let explicit mappings override presets (#117) — thanks @jverdi.
 
 ### Breaking
 - Skills config schema moved under `skills.*`:
