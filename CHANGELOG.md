@@ -35,7 +35,7 @@
 - Browser tools: add remote CDP URL support, Linux launcher options (`executablePath`, `noSandbox`), and surface `cdpUrl` in status.
 
 ### Fixes
-- Gmail hooks: auto-restart watcher on gateway restart, prevent double-start, redact gog tokens (thanks @jverdi).
+- Gmail hooks: auto-restart watcher on gateway restart, prevent double-start, redact gog tokens (#87) — thanks @jverdi.
 - Chat UI: keep the chat scrolled to the latest message after switching sessions.
 - WebChat: stream live updates for sessions even when runs start outside the chat UI.
 - Gateway CLI: read `CLAWDIS_GATEWAY_PASSWORD` from environment in `callGateway()` — allows `doctor`/`health` commands to auth without explicit `--password` flag.
