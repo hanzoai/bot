@@ -408,6 +408,8 @@ export async function runEmbeddedPiAgent(params: {
         const promptSkills = resolvePromptSkills(skillsSnapshot, skillEntries);
         const tools = createClawdisCodingTools({
           bash: params.config?.agent?.bash,
+          provider,
+          surface: params.surface,
         });
         const machineName = await getMachineDisplayName();
         const runtimeInfo = {
