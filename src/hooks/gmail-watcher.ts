@@ -22,8 +22,32 @@ const log = createSubsystemLogger("gmail-watcher");
 
 let watcherProcess: ChildProcess | null = null;
 let renewInterval: ReturnType<typeof setInterval> | null = null;
+let restartTimer: ReturnType<typeof setTimeout> | null = null;
 let shuttingDown = false;
 let currentConfig: GmailHookRuntimeConfig | null = null;
+const redactedValue = "<redacted>";
+const redactedFlags = new Set(["--token", "--hook-token", "--hook-url"]);
+
+function redactArgs(args: string[]): string[] {
+  const redacted = [...args];
+  for (let i = 0; i < redacted.length; i += 1) {
+    if (redactedFlags.has(redacted[i] ?? "") && redacted[i + 1]) {
+      redacted[i + 1] = redactedValue;
+      i += 1;
+    }
+  }
+  return redacted;
+}
+
+function scheduleRestart(reason: string) {
+  if (shuttingDown || !currentConfig || restartTimer) return;
+  log.warn(`${reason}; restarting in 5s`);
+  restartTimer = setTimeout(() => {
+    restartTimer = null;
+    if (shuttingDown || !currentConfig) return;
+    watcherProcess = spawnGogServe(currentConfig);
+  }, 5000);
+}
 
 /**
  * Check if gog binary is available
@@ -59,8 +83,12 @@ async function startGmailWatch(
  */
 function spawnGogServe(cfg: GmailHookRuntimeConfig): ChildProcess {
   const args = buildGogWatchServeArgs(cfg);
-  log.info(`starting gog ${args.join(" ")}`);
-  
+  if (restartTimer) {
+    clearTimeout(restartTimer);
+    restartTimer = null;
+  }
+  log.info(`starting gog ${redactArgs(args).join(" ")}`);
+
   const child = spawn("gog", args, {
     stdio: ["ignore", "pipe", "pipe"],
     detached: false,
@@ -78,16 +106,18 @@ function spawnGogServe(cfg: GmailHookRuntimeConfig): ChildProcess {
 
   child.on("error", (err) => {
     log.error(`gog process error: ${String(err)}`);
+    if (watcherProcess === child) {
+      watcherProcess = null;
+    }
+    scheduleRestart("gog process error");
   });
 
   child.on("exit", (code, signal) => {
     if (shuttingDown) return;
-    log.warn(`gog exited (code=${code}, signal=${signal}); restarting in 5s`);
-    watcherProcess = null;
-    setTimeout(() => {
-      if (shuttingDown || !currentConfig) return;
-      watcherProcess = spawnGogServe(currentConfig);
-    }, 5000);
+    if (watcherProcess === child) {
+      watcherProcess = null;
+    }
+    scheduleRestart(`gog exited (code=${code}, signal=${signal})`);
   });
 
   return child;
@@ -127,6 +157,23 @@ export async function startGmailWatcher(
   }
 
   const runtimeConfig = resolved.value;
+  if (isGmailWatcherRunning()) {
+    log.info("gmail watcher already running; skipping start");
+    return { started: true };
+  }
+
+  if (renewInterval) {
+    clearInterval(renewInterval);
+    renewInterval = null;
+  }
+  if (restartTimer) {
+    clearTimeout(restartTimer);
+    restartTimer = null;
+  }
+  if (watcherProcess) {
+    watcherProcess = null;
+  }
+
   currentConfig = runtimeConfig;
 
   // Set up Tailscale endpoint if needed
@@ -176,6 +223,11 @@ export async function startGmailWatcher(
 export async function stopGmailWatcher(): Promise<void> {
   shuttingDown = true;
 
+  if (restartTimer) {
+    clearTimeout(restartTimer);
+    restartTimer = null;
+  }
+
   if (renewInterval) {
     clearInterval(renewInterval);
     renewInterval = null;
@@ -211,5 +263,9 @@ export async function stopGmailWatcher(): Promise<void> {
  * Check if the Gmail watcher is running.
  */
 export function isGmailWatcherRunning(): boolean {
-  return watcherProcess !== null && !shuttingDown;
+  return (
+    watcherProcess !== null &&
+    !shuttingDown &&
+    watcherProcess.exitCode === null
+  );
 }
