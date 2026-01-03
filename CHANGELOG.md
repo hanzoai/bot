@@ -53,6 +53,7 @@
 - Skills: add tmux-first coding-agent skill + `requires.anyBins` gate for multi-CLI setup (thanks @sreekaransrinath).
 
 ### Fixes
+- Gog calendar: format date ranges as RFC 3339 with timezone to satisfy Google Calendar API (thanks @jayhickey).
 - Chat UI: keep the chat scrolled to the latest message after switching sessions.
 - Auto-reply: stream completed reply blocks as soon as they finish (configurable default + break); skip empty tool-only blocks unless verbose.
 - Providers: make outbound text chunk limits configurable via `*.textChunkLimit` (defaults remain 4000/Discord 2000).
