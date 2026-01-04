@@ -244,6 +244,61 @@ export type DiscordGuildChannelConfig = {
   requireMention?: boolean;
 };
 
+export type SlackDmConfig = {
+  /** If false, ignore all incoming Slack DMs. Default: true. */
+  enabled?: boolean;
+  /** Allowlist for DM senders (ids). */
+  allowFrom?: Array<string | number>;
+  /** If true, allow group DMs (default: false). */
+  groupEnabled?: boolean;
+  /** Optional allowlist for group DM channels (ids or slugs). */
+  groupChannels?: Array<string | number>;
+};
+
+export type SlackChannelConfig = {
+  allow?: boolean;
+  requireMention?: boolean;
+};
+
+export type SlackReactionNotificationMode = "off" | "own" | "all" | "allowlist";
+
+export type SlackActionConfig = {
+  reactions?: boolean;
+  messages?: boolean;
+  pins?: boolean;
+  memberInfo?: boolean;
+  emojiList?: boolean;
+};
+
+export type SlackSlashCommandConfig = {
+  /** Enable handling for the configured slash command (default: false). */
+  enabled?: boolean;
+  /** Slash command name (default: "clawd"). */
+  name?: string;
+  /** Session key prefix for slash commands (default: "slack:slash"). */
+  sessionPrefix?: string;
+  /** Reply ephemerally (default: true). */
+  ephemeral?: boolean;
+};
+
+export type SlackConfig = {
+  /** If false, do not start the Slack provider. Default: true. */
+  enabled?: boolean;
+  botToken?: string;
+  appToken?: string;
+  textChunkLimit?: number;
+  replyToMode?: ReplyToMode;
+  mediaMaxMb?: number;
+  /** Reaction notification mode (off|own|all|allowlist). Default: own. */
+  reactionNotifications?: SlackReactionNotificationMode;
+  /** Allowlist for reaction notifications when mode is allowlist. */
+  reactionAllowlist?: Array<string | number>;
+  actions?: SlackActionConfig;
+  slashCommand?: SlackSlashCommandConfig;
+  dm?: SlackDmConfig;
+  channels?: Record<string, SlackChannelConfig>;
+};
+
 export type DiscordReactionNotificationMode =
   | "off"
   | "own"
@@ -1412,6 +1467,56 @@ export const ClawdisSchema = z.object({
         .optional(),
     })
     .optional(),
+  slack: z
+    .object({
+      enabled: z.boolean().optional(),
+      botToken: z.string().optional(),
+      appToken: z.string().optional(),
+      textChunkLimit: z.number().int().positive().optional(),
+      replyToMode: ReplyToModeSchema.optional(),
+      mediaMaxMb: z.number().positive().optional(),
+      reactionNotifications: z
+        .enum(["off", "own", "all", "allowlist"])
+        .optional(),
+      reactionAllowlist: z.array(z.union([z.string(), z.number()])).optional(),
+      actions: z
+        .object({
+          reactions: z.boolean().optional(),
+          messages: z.boolean().optional(),
+          pins: z.boolean().optional(),
+          memberInfo: z.boolean().optional(),
+          emojiList: z.boolean().optional(),
+        })
+        .optional(),
+      slashCommand: z
+        .object({
+          enabled: z.boolean().optional(),
+          name: z.string().optional(),
+          sessionPrefix: z.string().optional(),
+          ephemeral: z.boolean().optional(),
+        })
+        .optional(),
+      dm: z
+        .object({
+          enabled: z.boolean().optional(),
+          allowFrom: z.array(z.union([z.string(), z.number()])).optional(),
+          groupEnabled: z.boolean().optional(),
+          groupChannels: z.array(z.union([z.string(), z.number()])).optional(),
+        })
+        .optional(),
+      channels: z
+        .record(
+          z.string(),
+          z
+            .object({
+              allow: z.boolean().optional(),
+              requireMention: z.boolean().optional(),
+            })
+            .optional(),
+        )
+        .optional(),
+    })
+    .optional(),
   signal: z
     .object({
       enabled: z.boolean().optional(),
@@ -2059,3 +2164,4 @@ export async function writeConfigFile(cfg: ClawdisConfig) {
   const json = JSON.stringify(cfg, null, 2).trimEnd().concat("\n");
   await fs.promises.writeFile(CONFIG_PATH_CLAWDIS, json, "utf-8");
 }
+
