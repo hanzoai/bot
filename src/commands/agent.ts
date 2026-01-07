@@ -35,7 +35,7 @@ import {
   DEFAULT_IDLE_MINUTES,
   loadSessionStore,
   resolveSessionKey,
-  resolveSessionTranscriptPath,
+  resolveSessionFilePath,
   resolveStorePath,
   type SessionEntry,
   saveSessionStore,
@@ -377,7 +377,7 @@ export async function agentCommand(
       catalog: catalogForThinking,
     });
   }
-  const sessionFile = resolveSessionTranscriptPath(sessionId);
+  const sessionFile = resolveSessionFilePath(sessionId, sessionEntry);
 
   const startedAt = Date.now();
   let lifecycleEnded = false;
