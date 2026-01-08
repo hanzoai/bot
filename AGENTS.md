@@ -38,6 +38,7 @@
 
 ## Commit & Pull Request Guidelines
 - Create commits with `scripts/committer "<msg>" <file...>`; avoid manual `git add`/`git commit` so staging stays scoped.
+- **Never commit directly to `main`**. Always work on a branch and open a PR; merge via the PR flow.
 - Follow concise, action-oriented commit messages (e.g., `CLI: add verbose flag to send`).
 - Group related changes; avoid bundling unrelated refactors.
 - PRs should summarize scope, note testing performed, and mention any user-facing changes or new flags.
