@@ -31,7 +31,7 @@ import type {
   ResetScope,
 } from "./onboard-types.js";
 
-export function guardCancel<T>(value: T, runtime: RuntimeEnv): T {
+export function guardCancel<T>(value: T | symbol, runtime: RuntimeEnv): T {
   if (isCancel(value)) {
     cancel(stylePromptTitle("Setup cancelled.") ?? "Setup cancelled.");
     runtime.exit(0);
