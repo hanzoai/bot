@@ -157,6 +157,8 @@ const INLINE_SIMPLE_COMMAND_ALIASES = new Map<string, string>([
 const INLINE_SIMPLE_COMMAND_RE =
   /(?:^|\s)\/(help|commands|whoami|id)(?=$|\s|:)/i;
 
+const INLINE_STATUS_RE = /(?:^|\s)\/(?:status|usage)(?=$|\s|:)(?:\s*:\s*)?/gi;
+
 function extractInlineSimpleCommand(body?: string): {
   command: string;
   cleaned: string;
@@ -169,6 +171,19 @@ function extractInlineSimpleCommand(body?: string): {
   if (!command) return null;
   const cleaned = body.replace(match[0], " ").replace(/\s+/g, " ").trim();
   return { command, cleaned };
+}
+
+function stripInlineStatus(body: string): {
+  cleaned: string;
+  didStrip: boolean;
+} {
+  const trimmed = body.trim();
+  if (!trimmed) return { cleaned: "", didStrip: false };
+  const cleaned = trimmed
+    .replace(INLINE_STATUS_RE, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return { cleaned, didStrip: cleaned !== trimmed };
 }
 
 function resolveElevatedAllowList(
@@ -499,6 +514,14 @@ export async function getReplyFromConfig(
     parsedDirectives.hasModelDirective ||
     parsedDirectives.hasQueueDirective;
   if (hasDirective) {
+    // `/status` is special: strip it for inline messages, but only treat it as an
+    // actionable directive when the message is otherwise "directive-only".
+    if (
+      parsedDirectives.hasStatusDirective &&
+      parsedDirectives.cleaned.trim().length > 0
+    ) {
+      parsedDirectives = { ...parsedDirectives, hasStatusDirective: false };
+    }
     const stripped = stripStructuralPrefixes(parsedDirectives.cleaned);
     const noMentions = isGroup
       ? stripMentions(stripped, ctx, cfg, agentId)
@@ -552,6 +575,8 @@ export async function getReplyFromConfig(
     }).cleaned;
     return `${head}${cleanedTail}`;
   })();
+
+  cleanedBody = stripInlineStatus(cleanedBody).cleaned;
 
   sessionCtx.Body = cleanedBody;
   sessionCtx.BodyStripped = cleanedBody;
