@@ -47,6 +47,7 @@
 ### Fixes
 - Models/Onboarding: configure MiniMax (minimax.io) via Anthropic-compatible `/anthropic` endpoint by default (keep `minimax-api` as a legacy alias).
 - Models: normalize Gemini 3 pro/flash IDs to preview names for Google providers and docs. (#769) — thanks @steipete.
+- CLI: fix guardCancel typing for configure prompts to avoid TS build errors. (#769) — thanks @steipete.
 - Gateway/WebChat: include handshake validation details in the WebSocket close reason for easier debugging; preserve close codes.
 - Gateway/Auth: send invalid connect responses before closing the handshake; stabilize invalid-connect auth test.
 - Gateway: tighten gateway listener detection.
