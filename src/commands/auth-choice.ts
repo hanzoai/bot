@@ -307,7 +307,7 @@ export async function applyAuthChoice(params: {
     nextConfig = applyAuthProfileConfig(nextConfig, {
       profileId: CLAUDE_CLI_PROFILE_ID,
       provider: "anthropic",
-      mode: "token",
+      mode: "oauth",
     });
   } else if (
     params.authChoice === "setup-token" ||
@@ -368,7 +368,7 @@ export async function applyAuthChoice(params: {
     nextConfig = applyAuthProfileConfig(nextConfig, {
       profileId: CLAUDE_CLI_PROFILE_ID,
       provider: "anthropic",
-      mode: "token",
+      mode: "oauth",
     });
   } else if (params.authChoice === "token") {
     const provider = (await params.prompter.select({
