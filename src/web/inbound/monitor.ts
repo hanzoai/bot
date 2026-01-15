@@ -5,6 +5,7 @@ import { logVerbose, shouldLogVerbose } from "../../globals.js";
 import { recordChannelActivity } from "../../infra/channel-activity.js";
 import { createSubsystemLogger, getChildLogger } from "../../logging.js";
 import { saveMediaBuffer } from "../../media/store.js";
+import { createInboundDebouncer } from "../../auto-reply/inbound-debounce.js";
 import { jidToE164, resolveJidToE164 } from "../../utils.js";
 import { createWaSocket, getStatusCode, waitForWaConnection } from "../session.js";
 import { checkInboundAccessControl } from "./access-control.js";
@@ -30,6 +31,8 @@ export async function monitorWebInbox(options: {
   sendReadReceipts?: boolean;
   /** Debounce window (ms) for batching rapid consecutive messages from the same sender (0 to disable). */
   debounceMs?: number;
+  /** Optional debounce gating predicate. */
+  shouldDebounce?: (msg: WebInboundMessage) => boolean;
 }) {
   const inboundLogger = getChildLogger({ module: "web-inbound" });
   const inboundConsoleLog = createSubsystemLogger("gateway/channels/whatsapp").child("inbound");
@@ -58,27 +61,45 @@ export async function monitorWebInbox(options: {
 
   const selfJid = sock.user?.id;
   const selfE164 = selfJid ? jidToE164(selfJid) : null;
-  // Message batching for debounce
-  const debounceWindowMs = options.debounceMs ?? 0;
-  const messageBuffer = new Map<
-    string,
-    { messages: WebInboundMessage[]; timeout: ReturnType<typeof setTimeout> | null }
-  >();
-
-  const processBufferedMessages = async (key: string) => {
-    const buffered = messageBuffer.get(key);
-    if (!buffered) return;
-    const { messages } = buffered;
-    messageBuffer.delete(key);
-    if (messages.length === 0) return;
-    if (messages.length === 1) {
-      await options.onMessage(messages[0]);
-      return;
-    }
-    const combinedBody = messages.map((m) => m.body).join("\n");
-    const combinedMessage: WebInboundMessage = { ...messages[0], body: combinedBody };
-    await options.onMessage(combinedMessage);
-  };
+  const debouncer = createInboundDebouncer<WebInboundMessage>({
+    debounceMs: options.debounceMs ?? 0,
+    buildKey: (msg) => {
+      const senderKey =
+        msg.chatType === "group"
+          ? msg.senderJid ?? msg.senderE164 ?? msg.senderName ?? msg.from
+          : msg.from;
+      if (!senderKey) return null;
+      const conversationKey = msg.chatType === "group" ? msg.chatId : msg.from;
+      return `${msg.accountId}:${conversationKey}:${senderKey}`;
+    },
+    shouldDebounce: options.shouldDebounce,
+    onFlush: async (entries) => {
+      const last = entries.at(-1);
+      if (!last) return;
+      if (entries.length === 1) {
+        await options.onMessage(last);
+        return;
+      }
+      const mentioned = new Set<string>();
+      for (const entry of entries) {
+        for (const jid of entry.mentionedJids ?? []) mentioned.add(jid);
+      }
+      const combinedBody = entries
+        .map((entry) => entry.body)
+        .filter(Boolean)
+        .join("\n");
+      const combinedMessage: WebInboundMessage = {
+        ...last,
+        body: combinedBody,
+        mentionedJids: mentioned.size > 0 ? Array.from(mentioned) : undefined,
+      };
+      await options.onMessage(combinedMessage);
+    },
+    onError: (err) => {
+      inboundLogger.error({ error: String(err) }, "failed handling inbound web message");
+      inboundConsoleLog.error(`Failed handling inbound web message: ${String(err)}`);
+    },
+  });
   const groupMetaCache = new Map<
     string,
     { subject?: string; participants?: string[]; expires: number }
@@ -270,28 +291,7 @@ export async function monitorWebInbox(options: {
         mediaType,
       };
       try {
-        const task = Promise.resolve(
-          (async () => {
-            // Apply debounce batching if configured
-            if (debounceWindowMs > 0) {
-              const bufferKey = group ? remoteJid : from;
-              const existing = messageBuffer.get(bufferKey);
-              if (existing) {
-                if (existing.timeout) clearTimeout(existing.timeout);
-                existing.messages.push(inboundMessage);
-                existing.timeout = setTimeout(() => processBufferedMessages(bufferKey), debounceWindowMs);
-              } else {
-                messageBuffer.set(bufferKey, {
-                  messages: [inboundMessage],
-                  timeout: setTimeout(() => processBufferedMessages(bufferKey), debounceWindowMs),
-                });
-              }
-            } else {
-              // No debouncing, process immediately
-              await options.onMessage(inboundMessage);
-            }
-          })(),
-        );
+        const task = Promise.resolve(debouncer.enqueue(inboundMessage));
         void task.catch((err) => {
           inboundLogger.error({ error: String(err) }, "failed handling inbound web message");
           inboundConsoleLog.error(`Failed handling inbound web message: ${String(err)}`);
