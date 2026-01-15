@@ -109,7 +109,9 @@ export function createSignalEventHandler(deps: SignalEventHandlerDeps) {
       Body: combinedBody,
       RawBody: entry.bodyText,
       CommandBody: entry.bodyText,
-      From: entry.isGroup ? `group:${entry.groupId ?? "unknown"}` : `signal:${entry.senderRecipient}`,
+      From: entry.isGroup
+        ? `group:${entry.groupId ?? "unknown"}`
+        : `signal:${entry.senderRecipient}`,
       To: signalTo,
       SessionKey: route.sessionKey,
       AccountId: route.accountId,
@@ -207,7 +209,7 @@ export function createSignalEventHandler(deps: SignalEventHandlerDeps) {
   const inboundDebouncer = createInboundDebouncer<SignalInboundEntry>({
     debounceMs: inboundDebounceMs,
     buildKey: (entry) => {
-      const conversationId = entry.isGroup ? entry.groupId ?? "unknown" : entry.senderPeerId;
+      const conversationId = entry.isGroup ? (entry.groupId ?? "unknown") : entry.senderPeerId;
       if (!conversationId || !entry.senderPeerId) return null;
       return `signal:${deps.accountId}:${conversationId}:${entry.senderPeerId}`;
     },

@@ -63,24 +63,30 @@ export function createDiscordMessageHandler(params: {
     onFlush: async (entries) => {
       const last = entries.at(-1);
       if (!last) return;
-      const combinedBaseText =
-        entries.length === 1
-          ? resolveDiscordMessageText(last.data.message, { includeForwarded: false })
-          : entries
-              .map((entry) =>
-                resolveDiscordMessageText(entry.data.message, { includeForwarded: false }),
-              )
-              .filter(Boolean)
-              .join("\n");
+      if (entries.length === 1) {
+        const ctx = await preflightDiscordMessage({
+          ...params,
+          ackReactionScope,
+          groupPolicy,
+          data: last.data,
+          client: last.client,
+        });
+        if (!ctx) return;
+        await processDiscordMessage(ctx);
+        return;
+      }
+      const combinedBaseText = entries
+        .map((entry) => resolveDiscordMessageText(entry.data.message, { includeForwarded: false }))
+        .filter(Boolean)
+        .join("\n");
       const syntheticMessage = {
         ...last.data.message,
         content: combinedBaseText,
         attachments: [],
-        message_snapshots: [],
-        messageSnapshots: [],
+        message_snapshots: (last.data.message as { message_snapshots?: unknown }).message_snapshots,
+        messageSnapshots: (last.data.message as { messageSnapshots?: unknown }).messageSnapshots,
         rawData: {
           ...(last.data.message as { rawData?: Record<string, unknown> }).rawData,
-          message_snapshots: [],
         },
       };
       const syntheticData: DiscordMessageEvent = {
@@ -96,9 +102,7 @@ export function createDiscordMessageHandler(params: {
       });
       if (!ctx) return;
       if (entries.length > 1) {
-        const ids = entries
-          .map((entry) => entry.data.message?.id)
-          .filter(Boolean) as string[];
+        const ids = entries.map((entry) => entry.data.message?.id).filter(Boolean) as string[];
         if (ids.length > 0) {
           const ctxBatch = ctx as typeof ctx & {
             MessageSids?: string[];

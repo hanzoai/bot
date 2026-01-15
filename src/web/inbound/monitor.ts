@@ -66,7 +66,7 @@ export async function monitorWebInbox(options: {
     buildKey: (msg) => {
       const senderKey =
         msg.chatType === "group"
-          ? msg.senderJid ?? msg.senderE164 ?? msg.senderName ?? msg.from
+          ? (msg.senderJid ?? msg.senderE164 ?? msg.senderName ?? msg.from)
           : msg.from;
       if (!senderKey) return null;
       const conversationKey = msg.chatType === "group" ? msg.chatId : msg.from;

@@ -45,7 +45,7 @@ export function createSlackMessageHandler(params: {
       if (!last) return;
       const combinedText =
         entries.length === 1
-          ? last.message.text ?? ""
+          ? (last.message.text ?? "")
           : entries
               .map((entry) => entry.message.text ?? "")
               .filter(Boolean)
