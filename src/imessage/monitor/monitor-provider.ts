@@ -86,7 +86,7 @@ export async function monitorIMessageProvider(opts: MonitorIMessageOpts = {}): P
       const conversationId =
         entry.message.chat_id != null
           ? `chat:${entry.message.chat_id}`
-          : entry.message.chat_guid ?? entry.message.chat_identifier ?? "unknown";
+          : (entry.message.chat_guid ?? entry.message.chat_identifier ?? "unknown");
       return `imessage:${accountInfo.accountId}:${conversationId}:${sender}`;
     },
     shouldDebounce: (entry) => {
@@ -119,7 +119,6 @@ export async function monitorIMessageProvider(opts: MonitorIMessageOpts = {}): P
   });
 
   async function handleMessageNow(message: IMessagePayload) {
-
     const senderRaw = message.sender ?? "";
     const sender = senderRaw.trim();
     if (!sender) return;
