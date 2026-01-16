@@ -26,7 +26,10 @@ import {
   maybeScanExtraGatewayServices,
 } from "./doctor-gateway-services.js";
 import { noteSourceInstallIssues } from "./doctor-install.js";
-import { noteMacLaunchAgentOverrides, noteMacLaunchctlGatewayEnvOverrides } from "./doctor-platform-notes.js";
+import {
+  noteMacLaunchAgentOverrides,
+  noteMacLaunchctlGatewayEnvOverrides,
+} from "./doctor-platform-notes.js";
 import { createDoctorPrompter, type DoctorOptions } from "./doctor-prompter.js";
 import { maybeRepairSandboxImages, noteSandboxScopeWarnings } from "./doctor-sandbox.js";
 import { noteSecurityWarnings } from "./doctor-security.js";
