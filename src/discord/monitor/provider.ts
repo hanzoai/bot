@@ -321,9 +321,60 @@ export async function monitorDiscordProvider(opts: MonitorDiscordOpts = {}) {
     throw new Error("Failed to resolve Discord application id");
   }
 
-  const skillCommands =
+  const maxDiscordCommands = 100;
+  let skillCommands =
     nativeEnabled && nativeSkillsEnabled ? listSkillCommandsForAgents({ cfg }) : [];
-  const commandSpecs = nativeEnabled ? listNativeCommandSpecsForConfig(cfg, { skillCommands }) : [];
+  let commandSpecs = nativeEnabled ? listNativeCommandSpecsForConfig(cfg, { skillCommands }) : [];
+  const initialCommandCount = commandSpecs.length;
+  if (nativeEnabled && nativeSkillsEnabled && commandSpecs.length > maxDiscordCommands) {
+    const baseSpecs = listNativeCommandSpecsForConfig(cfg, { skillCommands: [] });
+    const canAddFallback = baseSpecs.length + 1 <= maxDiscordCommands;
+    if (canAddFallback) {
+      commandSpecs = [
+        ...baseSpecs,
+        {
+          name: "skill",
+          description: "Run a skill by name.",
+          acceptsArgs: true,
+          args: [
+            {
+              name: "name",
+              description: "Skill name",
+              type: "string",
+              required: true,
+            },
+            {
+              name: "input",
+              description: "Skill input",
+              type: "string",
+              captureRemaining: true,
+            },
+          ],
+        },
+      ];
+      skillCommands = [];
+      runtime.log?.(
+        warn(
+          `discord: ${initialCommandCount} commands exceeds limit; deploying /skill only for skills.`,
+        ),
+      );
+    } else {
+      commandSpecs = baseSpecs;
+      skillCommands = [];
+      runtime.log?.(
+        warn(
+          `discord: ${initialCommandCount} commands exceeds limit; skill commands disabled for this account.`,
+        ),
+      );
+    }
+  }
+  if (nativeEnabled && commandSpecs.length > maxDiscordCommands) {
+    runtime.log?.(
+      warn(
+        `discord: ${commandSpecs.length} commands exceeds limit; some commands may fail to deploy.`,
+      ),
+    );
+  }
   const commands = commandSpecs.map((spec) =>
     createDiscordNativeCommand({
       command: spec,
