@@ -37,6 +37,15 @@ describe("resolveSkillCommandInvocation", () => {
     });
     expect(invocation).toBeNull();
   });
+
+  it("supports /skill with name argument", () => {
+    const invocation = resolveSkillCommandInvocation({
+      commandBodyNormalized: "/skill demo-skill do the thing",
+      skillCommands: [{ name: "demo_skill", skillName: "demo-skill", description: "Demo" }],
+    });
+    expect(invocation?.command.name).toBe("demo_skill");
+    expect(invocation?.args).toBe("do the thing");
+  });
 });
 
 describe("listSkillCommandsForAgents", () => {
