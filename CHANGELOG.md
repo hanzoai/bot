@@ -41,6 +41,7 @@ Docs: https://docs.clawd.bot
 - Google Chat: tighten email allowlist matching, typing cleanup, media caps, and onboarding/docs/tests. (#1635) Thanks @iHildy.
 - Google Chat: normalize space targets without double `spaces/` prefix.
 - Messaging: keep newline chunking safe for fenced markdown blocks across channels.
+- Tests: cap Vitest workers to reduce CI timeouts, especially on macOS.
 
 ## 2026.1.23-1
 
