@@ -2,6 +2,19 @@ import type { AgentMessage } from "@mariozechner/pi-agent-core";
 
 import type { ClawdbotConfig } from "../../config/config.js";
 
+const THREAD_SUFFIX_MARKERS = [":thread:", ":topic:"];
+
+function stripThreadSuffix(value: string): string {
+  const lower = value.toLowerCase();
+  let idx = -1;
+  for (const marker of THREAD_SUFFIX_MARKERS) {
+    const pos = lower.lastIndexOf(marker);
+    if (pos > idx) idx = pos;
+  }
+  if (idx <= 0) return value;
+  return value.slice(0, idx);
+}
+
 /**
  * Limits conversation history to the last N user turns (and their associated
  * assistant responses). This reduces token usage for long-running DM sessions.
@@ -44,7 +57,8 @@ export function getDmHistoryLimitFromSessionKey(
   if (!provider) return undefined;
 
   const kind = providerParts[1]?.toLowerCase();
-  const userId = providerParts.slice(2).join(":");
+  const userIdRaw = providerParts.slice(2).join(":");
+  const userId = stripThreadSuffix(userIdRaw);
   if (kind !== "dm") return undefined;
 
   const getLimit = (

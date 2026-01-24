@@ -20,9 +20,11 @@ import {
 } from "../config/group-policy.js";
 import { loadSessionStore, resolveStorePath } from "../config/sessions.js";
 import { danger, logVerbose, shouldLogVerbose } from "../globals.js";
+import { createSubsystemLogger } from "../logging/subsystem.js";
 import { enqueueSystemEvent } from "../infra/system-events.js";
 import { getChildLogger } from "../logging.js";
 import { resolveAgentRoute } from "../routing/resolve-route.js";
+import { resolveThreadSessionKeys } from "../routing/session-key.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { resolveTelegramAccount } from "./accounts.js";
 import {
@@ -161,7 +163,18 @@ export function createTelegramBot(opts: TelegramBotOptions) {
     return skipped;
   };
 
+  const rawUpdateLogger = createSubsystemLogger("gateway/channels/telegram/raw-update");
+
   bot.use(async (ctx, next) => {
+    if (shouldLogVerbose()) {
+      try {
+        const raw = JSON.stringify(ctx.update ?? null);
+        const preview = raw.length > 8000 ? raw.slice(0, 8000) + "…" : raw;
+        rawUpdateLogger.debug(`telegram update: ${preview}`);
+      } catch (err) {
+        rawUpdateLogger.debug(`telegram update log failed: ${String(err)}`);
+      }
+    }
     await next();
     recordUpdateId(ctx);
   });
@@ -372,13 +385,20 @@ export function createTelegramBot(opts: TelegramBotOptions) {
         accountId: account.accountId,
         peer: { kind: isGroup ? "group" : "dm", id: peerId },
       });
+      const baseSessionKey = route.sessionKey;
+      const dmThreadId = !isGroup ? resolvedThreadId : undefined;
+      const threadKeys =
+        dmThreadId != null
+          ? resolveThreadSessionKeys({ baseSessionKey, threadId: String(dmThreadId) })
+          : null;
+      const sessionKey = threadKeys?.sessionKey ?? baseSessionKey;
 
       // Enqueue system event for each added reaction
       for (const r of addedReactions) {
         const emoji = r.emoji;
         const text = `Telegram reaction added: ${emoji} by ${senderLabel} on msg ${messageId}`;
         enqueueSystemEvent(text, {
-          sessionKey: route.sessionKey,
+          sessionKey: sessionKey,
           contextKey: `telegram:reaction:add:${chatId}:${messageId}:${user?.id ?? "anon"}:${emoji}`,
         });
         logVerbose(`telegram: reaction event enqueued: ${text}`);
