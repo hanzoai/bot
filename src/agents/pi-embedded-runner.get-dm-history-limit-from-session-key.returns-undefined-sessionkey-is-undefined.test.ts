@@ -131,6 +131,16 @@ describe("getDmHistoryLimitFromSessionKey", () => {
     expect(getDmHistoryLimitFromSessionKey("agent:main:telegram:dm:123:topic:555", config)).toBe(7);
     expect(getDmHistoryLimitFromSessionKey("telegram:dm:123:thread:999", config)).toBe(7);
   });
+  it("keeps non-numeric thread markers in dm ids", () => {
+    const config = {
+      channels: {
+        telegram: { dms: { "user:thread:abc": { historyLimit: 9 } } },
+      },
+    } as ClawdbotConfig;
+    expect(getDmHistoryLimitFromSessionKey("agent:main:telegram:dm:user:thread:abc", config)).toBe(
+      9,
+    );
+  });
   it("returns undefined for non-dm session kinds", () => {
     const config = {
       channels: {
