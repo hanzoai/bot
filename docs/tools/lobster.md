@@ -148,7 +148,19 @@ If you want to use a custom binary location, pass an **absolute** `lobsterPath` 
 
 ## Enable the tool
 
-Lobster is an **optional** plugin tool (not enabled by default). Allow it per agent:
+Lobster is an **optional** plugin tool (not enabled by default).
+
+Recommended (additive, safe):
+
+```json
+{
+  "tools": {
+    "alsoAllow": ["lobster"]
+  }
+}
+```
+
+Or per-agent:
 
 ```json
 {
@@ -157,7 +169,7 @@ Lobster is an **optional** plugin tool (not enabled by default). Allow it per ag
       {
         "id": "main",
         "tools": {
-          "allow": ["lobster"]
+          "alsoAllow": ["lobster"]
         }
       }
     ]
@@ -165,7 +177,7 @@ Lobster is an **optional** plugin tool (not enabled by default). Allow it per ag
 }
 ```
 
-You can also allow it globally with `tools.allow` if every agent should see it.
+Avoid using `tools.allow: ["lobster"]` unless you intend to run in restrictive allowlist mode.
 
 Note: allowlists are opt-in for optional plugins. If your allowlist only names
 plugin tools (like `lobster`), Clawdbot keeps core tools enabled. To restrict core
