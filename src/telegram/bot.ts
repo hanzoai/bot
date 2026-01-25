@@ -164,12 +164,36 @@ export function createTelegramBot(opts: TelegramBotOptions) {
   };
 
   const rawUpdateLogger = createSubsystemLogger("gateway/channels/telegram/raw-update");
+  const MAX_RAW_UPDATE_CHARS = 8000;
+  const MAX_RAW_UPDATE_STRING = 500;
+  const MAX_RAW_UPDATE_ARRAY = 20;
+  const stringifyUpdate = (update: unknown) => {
+    const seen = new WeakSet<object>();
+    return JSON.stringify(update ?? null, (key, value) => {
+      if (typeof value === "string" && value.length > MAX_RAW_UPDATE_STRING) {
+        return `${value.slice(0, MAX_RAW_UPDATE_STRING)}...`;
+      }
+      if (Array.isArray(value) && value.length > MAX_RAW_UPDATE_ARRAY) {
+        return [
+          ...value.slice(0, MAX_RAW_UPDATE_ARRAY),
+          `...(${value.length - MAX_RAW_UPDATE_ARRAY} more)`,
+        ];
+      }
+      if (value && typeof value === "object") {
+        const obj = value as object;
+        if (seen.has(obj)) return "[Circular]";
+        seen.add(obj);
+      }
+      return value;
+    });
+  };
 
   bot.use(async (ctx, next) => {
     if (shouldLogVerbose()) {
       try {
-        const raw = JSON.stringify(ctx.update ?? null);
-        const preview = raw.length > 8000 ? raw.slice(0, 8000) + "…" : raw;
+        const raw = stringifyUpdate(ctx.update);
+        const preview =
+          raw.length > MAX_RAW_UPDATE_CHARS ? `${raw.slice(0, MAX_RAW_UPDATE_CHARS)}...` : raw;
         rawUpdateLogger.debug(`telegram update: ${preview}`);
       } catch (err) {
         rawUpdateLogger.debug(`telegram update log failed: ${String(err)}`);

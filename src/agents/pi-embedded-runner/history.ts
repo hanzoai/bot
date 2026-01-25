@@ -2,17 +2,11 @@ import type { AgentMessage } from "@mariozechner/pi-agent-core";
 
 import type { ClawdbotConfig } from "../../config/config.js";
 
-const THREAD_SUFFIX_MARKERS = [":thread:", ":topic:"];
+const THREAD_SUFFIX_REGEX = /^(.*)(?::(?:thread|topic):\d+)$/i;
 
 function stripThreadSuffix(value: string): string {
-  const lower = value.toLowerCase();
-  let idx = -1;
-  for (const marker of THREAD_SUFFIX_MARKERS) {
-    const pos = lower.lastIndexOf(marker);
-    if (pos > idx) idx = pos;
-  }
-  if (idx <= 0) return value;
-  return value.slice(0, idx);
+  const match = value.match(THREAD_SUFFIX_REGEX);
+  return match?.[1] ?? value;
 }
 
 /**
