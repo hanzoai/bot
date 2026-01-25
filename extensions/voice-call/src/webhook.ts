@@ -78,6 +78,11 @@ export class VoiceCallWebhookServer {
           `[voice-call] Transcript for ${providerCallId}: ${transcript}`,
         );
 
+        // Clear TTS queue on barge-in (user started speaking, interrupt current playback)
+        if (this.provider.name === "twilio") {
+          (this.provider as TwilioProvider).clearTtsQueue(providerCallId);
+        }
+
         // Look up our internal call ID from the provider call ID
         const call = this.manager.getCallByProviderCallId(providerCallId);
         if (!call) {

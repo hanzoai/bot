@@ -51,6 +51,11 @@ export class MediaStreamHandler {
   private sessions = new Map<string, StreamSession>();
   private config: MediaStreamConfig;
 
+  /** TTS playback queues per stream (serialize audio to prevent overlap) */
+  private ttsQueues = new Map<string, Array<() => Promise<void>>>();
+  /** Whether TTS is currently playing per stream */
+  private ttsPlaying = new Map<string, boolean>();
+
   constructor(config: MediaStreamConfig) {
     this.config = config;
   }
@@ -226,6 +231,51 @@ export class MediaStreamHandler {
    */
   clearAudio(streamSid: string): void {
     this.sendToStream(streamSid, { event: "clear", streamSid });
+  }
+
+  /**
+   * Queue a TTS operation for sequential playback.
+   * Only one TTS operation plays at a time per stream to prevent overlap.
+   */
+  async queueTts(streamSid: string, playFn: () => Promise<void>): Promise<void> {
+    if (!this.ttsQueues.has(streamSid)) {
+      this.ttsQueues.set(streamSid, []);
+    }
+    const queue = this.ttsQueues.get(streamSid)!;
+    queue.push(playFn);
+
+    // Process queue if not already playing
+    if (!this.ttsPlaying.get(streamSid)) {
+      await this.processQueue(streamSid);
+    }
+  }
+
+  /**
+   * Process the TTS queue for a stream.
+   */
+  private async processQueue(streamSid: string): Promise<void> {
+    const queue = this.ttsQueues.get(streamSid);
+    if (!queue || queue.length === 0) {
+      this.ttsPlaying.set(streamSid, false);
+      return;
+    }
+
+    this.ttsPlaying.set(streamSid, true);
+    const playFn = queue.shift()!;
+
+    try {
+      await playFn();
+    } finally {
+      await this.processQueue(streamSid);
+    }
+  }
+
+  /**
+   * Clear TTS queue and interrupt current playback (barge-in).
+   */
+  clearTtsQueue(streamSid: string): void {
+    this.ttsQueues.set(streamSid, []);
+    this.clearAudio(streamSid);
   }
 
   /**
