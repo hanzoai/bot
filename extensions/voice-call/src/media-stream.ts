@@ -252,21 +252,24 @@ export class MediaStreamHandler {
 
   /**
    * Process the TTS queue for a stream.
+   * Uses iterative approach to avoid stack accumulation from recursion.
    */
   private async processQueue(streamSid: string): Promise<void> {
-    const queue = this.ttsQueues.get(streamSid);
-    if (!queue || queue.length === 0) {
-      this.ttsPlaying.set(streamSid, false);
-      return;
-    }
-
     this.ttsPlaying.set(streamSid, true);
-    const playFn = queue.shift()!;
 
-    try {
-      await playFn();
-    } finally {
-      await this.processQueue(streamSid);
+    while (true) {
+      const queue = this.ttsQueues.get(streamSid);
+      if (!queue || queue.length === 0) {
+        this.ttsPlaying.set(streamSid, false);
+        return;
+      }
+
+      const playFn = queue.shift()!;
+      try {
+        await playFn();
+      } catch (error) {
+        console.error("[MediaStream] TTS playback error:", error);
+      }
     }
   }
 
