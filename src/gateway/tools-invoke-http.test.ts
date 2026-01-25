@@ -1,9 +1,19 @@
-import { describe, expect, it } from "vitest";
+import fs from "node:fs/promises";
+import path from "node:path";
 
+import { beforeEach, describe, expect, it } from "vitest";
+
+import { CONFIG_PATH_CLAWDBOT } from "../config/config.js";
 import { installGatewayTestHooks, getFreePort, startGatewayServer } from "./test-helpers.server.js";
 import { testState } from "./test-helpers.mocks.js";
 
 installGatewayTestHooks({ scope: "suite" });
+
+beforeEach(() => {
+  // Ensure these tests are not affected by host env vars.
+  delete process.env.CLAWDBOT_GATEWAY_TOKEN;
+  delete process.env.CLAWDBOT_GATEWAY_PASSWORD;
+});
 
 describe("POST /tools/invoke", () => {
   it("invokes a tool and returns {ok:true,result}", async () => {
@@ -34,6 +44,36 @@ describe("POST /tools/invoke", () => {
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body).toHaveProperty("result");
+
+    await server.close();
+  });
+
+  it("supports tools.alsoAllow as additive allowlist (profile stage)", async () => {
+    // No explicit tool allowlist; rely on profile + alsoAllow.
+    testState.agentsConfig = {
+      list: [{ id: "main" }],
+    } as any;
+
+    // minimal profile does NOT include sessions_list, but alsoAllow should.
+    await fs.mkdir(path.dirname(CONFIG_PATH_CLAWDBOT), { recursive: true });
+    await fs.writeFile(
+      CONFIG_PATH_CLAWDBOT,
+      JSON.stringify({ tools: { profile: "minimal", alsoAllow: ["sessions_list"] } }, null, 2),
+      "utf-8",
+    );
+
+    const port = await getFreePort();
+    const server = await startGatewayServer(port, { bind: "loopback" });
+
+    const res = await fetch(`http://127.0.0.1:${port}/tools/invoke`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tool: "sessions_list", action: "json", args: {}, sessionKey: "main" }),
+    });
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
 
     await server.close();
   });

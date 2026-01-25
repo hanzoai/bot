@@ -149,6 +149,7 @@ export const SandboxPruneSchema = z
 export const ToolPolicySchema = z
   .object({
     allow: z.array(z.string()).optional(),
+    alsoAllow: z.array(z.string()).optional(),
     deny: z.array(z.string()).optional(),
   })
   .strict()
@@ -201,6 +202,7 @@ export const ToolProfileSchema = z
 export const ToolPolicyWithProfileSchema = z
   .object({
     allow: z.array(z.string()).optional(),
+    alsoAllow: z.array(z.string()).optional(),
     deny: z.array(z.string()).optional(),
     profile: ToolProfileSchema,
   })
@@ -230,6 +232,7 @@ export const AgentToolsSchema = z
   .object({
     profile: ToolProfileSchema,
     allow: z.array(z.string()).optional(),
+    alsoAllow: z.array(z.string()).optional(),
     deny: z.array(z.string()).optional(),
     byProvider: z.record(z.string(), ToolPolicyWithProfileSchema).optional(),
     elevated: z
@@ -424,6 +427,7 @@ export const ToolsSchema = z
   .object({
     profile: ToolProfileSchema,
     allow: z.array(z.string()).optional(),
+    alsoAllow: z.array(z.string()).optional(),
     deny: z.array(z.string()).optional(),
     byProvider: z.record(z.string(), ToolPolicyWithProfileSchema).optional(),
     web: ToolsWebSchema,
