@@ -77,7 +77,7 @@ export { registerPluginHttpRoute } from "../plugins/http-registry.js";
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 export type { BotConfig } from "../config/config.js";
 /** @deprecated Use BotConfig instead */
-export type { BotConfig as Hanzo BotConfig } from "../config/config.js";
+export type { BotConfig as HanzoBotConfig } from "../config/config.js";
 export type { ChannelDock } from "../channels/dock.js";
 export { getChatChannelMeta } from "../channels/registry.js";
 export type {

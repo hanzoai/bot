@@ -1,4 +1,4 @@
-import type { ChannelMeta, ChannelPlugin, Hanzo BotConfig } from "bot/plugin-sdk";
+import type { ChannelMeta, ChannelPlugin, BotConfig } from "bot/plugin-sdk";
 import { DEFAULT_ACCOUNT_ID, PAIRING_APPROVED_MESSAGE } from "bot/plugin-sdk";
 import type { ResolvedFeishuAccount, FeishuConfig } from "./types.js";
 import {
@@ -165,7 +165,7 @@ export const feishuPlugin: ChannelPlugin<ResolvedFeishuAccount> = {
 
       if (isDefault) {
         // Delete entire feishu config
-        const next = { ...cfg } as Hanzo BotConfig;
+        const next = { ...cfg } as BotConfig;
         const nextChannels = { ...cfg.channels };
         delete (nextChannels as Record<string, unknown>).feishu;
         if (Object.keys(nextChannels).length > 0) {

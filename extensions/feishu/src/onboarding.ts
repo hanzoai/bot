@@ -1,7 +1,7 @@
 import type {
   ChannelOnboardingAdapter,
   ChannelOnboardingDmPolicy,
-  Hanzo BotConfig,
+  BotConfig,
   DmPolicy,
   WizardPrompter,
 } from "bot/plugin-sdk";
@@ -12,7 +12,7 @@ import { probeFeishu } from "./probe.js";
 
 const channel = "feishu" as const;
 
-function setFeishuDmPolicy(cfg: Hanzo BotConfig, dmPolicy: DmPolicy): Hanzo BotConfig {
+function setFeishuDmPolicy(cfg: BotConfig, dmPolicy: DmPolicy): BotConfig {
   const allowFrom =
     dmPolicy === "open"
       ? addWildcardAllowFrom(cfg.channels?.feishu?.allowFrom)?.map((entry) => String(entry))
@@ -30,7 +30,7 @@ function setFeishuDmPolicy(cfg: Hanzo BotConfig, dmPolicy: DmPolicy): Hanzo BotC
   };
 }
 
-function setFeishuAllowFrom(cfg: Hanzo BotConfig, allowFrom: string[]): Hanzo BotConfig {
+function setFeishuAllowFrom(cfg: BotConfig, allowFrom: string[]): BotConfig {
   return {
     ...cfg,
     channels: {
@@ -51,9 +51,9 @@ function parseAllowFromInput(raw: string): string[] {
 }
 
 async function promptFeishuAllowFrom(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   prompter: WizardPrompter;
-}): Promise<Hanzo BotConfig> {
+}): Promise<BotConfig> {
   const existing = params.cfg.channels?.feishu?.allowFrom ?? [];
   await params.prompter.note(
     [
@@ -105,9 +105,9 @@ async function noteFeishuCredentialHelp(prompter: WizardPrompter): Promise<void>
 }
 
 function setFeishuGroupPolicy(
-  cfg: Hanzo BotConfig,
+  cfg: BotConfig,
   groupPolicy: "open" | "allowlist" | "disabled",
-): Hanzo BotConfig {
+): BotConfig {
   return {
     ...cfg,
     channels: {
@@ -121,7 +121,7 @@ function setFeishuGroupPolicy(
   };
 }
 
-function setFeishuGroupAllowFrom(cfg: Hanzo BotConfig, groupAllowFrom: string[]): Hanzo BotConfig {
+function setFeishuGroupAllowFrom(cfg: BotConfig, groupAllowFrom: string[]): BotConfig {
   return {
     ...cfg,
     channels: {
