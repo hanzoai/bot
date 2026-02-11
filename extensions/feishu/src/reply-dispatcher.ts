@@ -2,7 +2,7 @@ import {
   createReplyPrefixContext,
   createTypingCallbacks,
   logTypingFailure,
-  type Hanzo BotConfig,
+  type BotConfig,
   type RuntimeEnv,
   type ReplyPayload,
 } from "bot/plugin-sdk";
@@ -29,7 +29,7 @@ function shouldUseCard(text: string): boolean {
 }
 
 export type CreateFeishuReplyDispatcherParams = {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   agentId: string;
   runtime: RuntimeEnv;
   chatId: string;
