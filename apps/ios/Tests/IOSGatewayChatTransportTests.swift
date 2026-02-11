@@ -1,6 +1,6 @@
-import OpenClawKit
+import BotKit
 import Testing
-@testable import OpenClaw
+@testable import HanzoBot
 
 @Suite struct IOSGatewayChatTransportTests {
     @Test func requestsFailFastWhenGatewayNotConnected() async {

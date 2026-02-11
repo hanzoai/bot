@@ -24,10 +24,10 @@ async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
     },
     {
       env: {
-        OPENCLAW_AGENT_DIR: (home) => path.join(home, ".openclaw", "agent"),
-        PI_CODING_AGENT_DIR: (home) => path.join(home, ".openclaw", "agent"),
+        BOT_AGENT_DIR: (home) => path.join(home, ".bot", "agent"),
+        PI_CODING_AGENT_DIR: (home) => path.join(home, ".bot", "agent"),
       },
-      prefix: "openclaw-rawbody-",
+      prefix: "bot-rawbody-",
     },
   );
 }
@@ -64,7 +64,7 @@ describe("RawBody directive parsing", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
             },
           },
           channels: { whatsapp: { allowFrom: ["*"] } },
@@ -98,7 +98,7 @@ describe("RawBody directive parsing", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
               models: {
                 "anthropic/claude-opus-4-5": {},
               },
@@ -135,7 +135,7 @@ describe("RawBody directive parsing", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
             },
           },
           channels: { whatsapp: { allowFrom: ["*"] } },
@@ -173,7 +173,7 @@ describe("RawBody directive parsing", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
             },
           },
           channels: { whatsapp: { allowFrom: ["+1222"] } },
@@ -219,7 +219,7 @@ describe("RawBody directive parsing", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
             },
           },
           channels: { whatsapp: { allowFrom: ["*"] } },

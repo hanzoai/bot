@@ -1,12 +1,12 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import HanzoBot
 
 @Suite struct VoiceWakeGatewaySyncTests {
     @Test func decodeGatewayTriggersFromJSONSanitizes() {
-        let payload = #"{"triggers":[" openclaw  ","", "computer"]}"#
+        let payload = #"{"triggers":[" hanzo-bot  ","", "computer"]}"#
         let triggers = VoiceWakePreferences.decodeGatewayTriggers(from: payload)
-        #expect(triggers == ["openclaw", "computer"])
+        #expect(triggers == ["hanzo-bot", "computer"])
     }
 
     @Test func decodeGatewayTriggersFromJSONFallsBackWhenEmpty() {

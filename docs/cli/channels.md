@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `openclaw channels` (accounts, status, login/logout, logs)"
+summary: "CLI reference for `hanzo-bot channels` (accounts, status, login/logout, logs)"
 read_when:
   - You want to add/remove channel accounts (WhatsApp/Telegram/Discord/Google Chat/Slack/Mattermost (plugin)/Signal/iMessage)
   - You want to check channel status or tail channel logs
 title: "channels"
 ---
 
-# `openclaw channels`
+# `hanzo-bot channels`
 
 Manage chat channel accounts and their runtime status on the Gateway.
 
@@ -18,43 +18,43 @@ Related docs:
 ## Common commands
 
 ```bash
-openclaw channels list
-openclaw channels status
-openclaw channels capabilities
-openclaw channels capabilities --channel discord --target channel:123
-openclaw channels resolve --channel slack "#general" "@jane"
-openclaw channels logs --channel all
+hanzo-bot channels list
+hanzo-bot channels status
+hanzo-bot channels capabilities
+hanzo-bot channels capabilities --channel discord --target channel:123
+hanzo-bot channels resolve --channel slack "#general" "@jane"
+hanzo-bot channels logs --channel all
 ```
 
 ## Add / remove accounts
 
 ```bash
-openclaw channels add --channel telegram --token <bot-token>
-openclaw channels remove --channel telegram --delete
+hanzo-bot channels add --channel telegram --token <bot-token>
+hanzo-bot channels remove --channel telegram --delete
 ```
 
-Tip: `openclaw channels add --help` shows per-channel flags (token, app token, signal-cli paths, etc).
+Tip: `hanzo-bot channels add --help` shows per-channel flags (token, app token, signal-cli paths, etc).
 
 ## Login / logout (interactive)
 
 ```bash
-openclaw channels login --channel whatsapp
-openclaw channels logout --channel whatsapp
+hanzo-bot channels login --channel whatsapp
+hanzo-bot channels logout --channel whatsapp
 ```
 
 ## Troubleshooting
 
-- Run `openclaw status --deep` for a broad probe.
-- Use `openclaw doctor` for guided fixes.
-- `openclaw channels list` prints `Claude: HTTP 403 ... user:profile` → usage snapshot needs the `user:profile` scope. Use `--no-usage`, or provide a claude.ai session key (`CLAUDE_WEB_SESSION_KEY` / `CLAUDE_WEB_COOKIE`), or re-auth via Claude Code CLI.
+- Run `hanzo-bot status --deep` for a broad probe.
+- Use `hanzo-bot doctor` for guided fixes.
+- `hanzo-bot channels list` prints `Claude: HTTP 403 ... user:profile` → usage snapshot needs the `user:profile` scope. Use `--no-usage`, or provide a claude.ai session key (`CLAUDE_WEB_SESSION_KEY` / `CLAUDE_WEB_COOKIE`), or re-auth via Claude Code CLI.
 
 ## Capabilities probe
 
 Fetch provider capability hints (intents/scopes where available) plus static feature support:
 
 ```bash
-openclaw channels capabilities
-openclaw channels capabilities --channel discord --target channel:123
+hanzo-bot channels capabilities
+hanzo-bot channels capabilities --channel discord --target channel:123
 ```
 
 Notes:
@@ -68,9 +68,9 @@ Notes:
 Resolve channel/user names to IDs using the provider directory:
 
 ```bash
-openclaw channels resolve --channel slack "#general" "@jane"
-openclaw channels resolve --channel discord "My Server/#support" "@someone"
-openclaw channels resolve --channel matrix "Project Room"
+hanzo-bot channels resolve --channel slack "#general" "@jane"
+hanzo-bot channels resolve --channel discord "My Server/#support" "@someone"
+hanzo-bot channels resolve --channel matrix "Project Room"
 ```
 
 Notes:
