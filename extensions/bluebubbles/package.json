@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/bluebubbles",
+  "name": "@hanzo/bot-bluebubbles",
   "version": "2026.2.9",
-  "description": "OpenClaw BlueBubbles channel plugin",
+  "description": "HanzoBot BlueBubbles channel plugin",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "hanzo-bot": "workspace:*"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -28,7 +28,7 @@
       "order": 75
     },
     "install": {
-      "npmSpec": "@openclaw/bluebubbles",
+      "npmSpec": "@hanzo/bot-bluebubbles",
       "localPath": "extensions/bluebubbles",
       "defaultChoice": "npm"
     }
