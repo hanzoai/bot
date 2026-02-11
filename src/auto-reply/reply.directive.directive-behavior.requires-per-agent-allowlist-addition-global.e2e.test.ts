@@ -27,10 +27,10 @@ async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
     },
     {
       env: {
-        OPENCLAW_AGENT_DIR: (home) => path.join(home, ".openclaw", "agent"),
-        PI_CODING_AGENT_DIR: (home) => path.join(home, ".openclaw", "agent"),
+        BOT_AGENT_DIR: (home) => path.join(home, ".bot", "agent"),
+        PI_CODING_AGENT_DIR: (home) => path.join(home, ".bot", "agent"),
       },
-      prefix: "openclaw-reply-",
+      prefix: "bot-reply-",
     },
   );
 }
@@ -79,7 +79,7 @@ describe("directive behavior", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
             },
             list: [
               {
@@ -126,7 +126,7 @@ describe("directive behavior", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
             },
             list: [
               {
@@ -172,7 +172,7 @@ describe("directive behavior", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
               sandbox: { mode: "off" },
             },
           },
@@ -210,7 +210,7 @@ describe("directive behavior", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
             },
           },
           tools: {
@@ -246,7 +246,7 @@ describe("directive behavior", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-opus-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
             },
           },
           tools: {

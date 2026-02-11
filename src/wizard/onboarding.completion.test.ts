@@ -9,12 +9,12 @@ describe("setupOnboardingShellCompletion", () => {
     };
 
     const deps = {
-      resolveCliName: () => "openclaw",
+      resolveCliName: () => "bot",
       checkShellCompletionStatus: vi.fn(async () => ({
         shell: "zsh",
         profileInstalled: false,
         cacheExists: false,
-        cachePath: "/tmp/openclaw.zsh",
+        cachePath: "/tmp/bot.zsh",
         usesSlowPattern: false,
       })),
       ensureCompletionCacheExists: vi.fn(async () => true),
@@ -24,8 +24,8 @@ describe("setupOnboardingShellCompletion", () => {
     await setupOnboardingShellCompletion({ flow: "quickstart", prompter, deps });
 
     expect(prompter.confirm).not.toHaveBeenCalled();
-    expect(deps.ensureCompletionCacheExists).toHaveBeenCalledWith("openclaw");
-    expect(deps.installCompletion).toHaveBeenCalledWith("zsh", true, "openclaw");
+    expect(deps.ensureCompletionCacheExists).toHaveBeenCalledWith("bot");
+    expect(deps.installCompletion).toHaveBeenCalledWith("zsh", true, "bot");
     expect(prompter.note).toHaveBeenCalled();
   });
 
@@ -36,12 +36,12 @@ describe("setupOnboardingShellCompletion", () => {
     };
 
     const deps = {
-      resolveCliName: () => "openclaw",
+      resolveCliName: () => "bot",
       checkShellCompletionStatus: vi.fn(async () => ({
         shell: "zsh",
         profileInstalled: false,
         cacheExists: false,
-        cachePath: "/tmp/openclaw.zsh",
+        cachePath: "/tmp/bot.zsh",
         usesSlowPattern: false,
       })),
       ensureCompletionCacheExists: vi.fn(async () => true),
