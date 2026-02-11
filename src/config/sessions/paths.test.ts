@@ -7,16 +7,16 @@ describe("resolveStorePath", () => {
     vi.unstubAllEnvs();
   });
 
-  it("uses OPENCLAW_HOME for tilde expansion", () => {
-    vi.stubEnv("OPENCLAW_HOME", "/srv/openclaw-home");
+  it("uses BOT_HOME for tilde expansion", () => {
+    vi.stubEnv("BOT_HOME", "/srv/bot-home");
     vi.stubEnv("HOME", "/home/other");
 
-    const resolved = resolveStorePath("~/.openclaw/agents/{agentId}/sessions/sessions.json", {
+    const resolved = resolveStorePath("~/.bot/agents/{agentId}/sessions/sessions.json", {
       agentId: "research",
     });
 
     expect(resolved).toBe(
-      path.resolve("/srv/openclaw-home/.openclaw/agents/research/sessions/sessions.json"),
+      path.resolve("/srv/bot-home/.bot/agents/research/sessions/sessions.json"),
     );
   });
 });
