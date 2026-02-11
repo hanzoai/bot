@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig, RuntimeEnv } from "bot/plugin-sdk";
+import type { BotConfig, RuntimeEnv } from "bot/plugin-sdk";
 import {
   buildPendingHistoryContextFromMap,
   recordPendingHistoryEntryIfEnabled,
@@ -335,7 +335,7 @@ function inferPlaceholder(messageType: string): string {
  * Similar to Discord's resolveMediaList().
  */
 async function resolveFeishuMediaList(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   messageId: string;
   messageType: string;
   content: string;
@@ -520,7 +520,7 @@ export function parseFeishuMessageEvent(
 }
 
 export async function handleFeishuMessage(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   event: FeishuMessageEvent;
   botOpenId?: string;
   runtime?: RuntimeEnv;
