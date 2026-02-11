@@ -1,4 +1,4 @@
-import OpenClawKit
+import BotKit
 import SwiftUI
 import WebKit
 
