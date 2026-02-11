@@ -1,6 +1,6 @@
-name: OpenClaw
+name: HanzoBot
 options:
-  bundleIdPrefix: ai.openclaw
+  bundleIdPrefix: ai.hanzo.bot
   deploymentTarget:
     iOS: "18.0"
   xcodeVersion: "16.0"
@@ -10,33 +10,33 @@ settings:
     SWIFT_VERSION: "6.0"
 
 packages:
-  OpenClawKit:
-    path: ../shared/OpenClawKit
+  BotKit:
+    path: ../shared/BotKit
   Swabble:
     path: ../../Swabble
 
 schemes:
-  OpenClaw:
+  HanzoBot:
     shared: true
     build:
       targets:
-        OpenClaw: all
+        HanzoBot: all
     test:
       targets:
-        - OpenClawTests
+        - HanzoBotTests
 
 targets:
-  OpenClaw:
+  HanzoBot:
     type: application
     platform: iOS
     sources:
       - path: Sources
     dependencies:
-      - package: OpenClawKit
-      - package: OpenClawKit
-        product: OpenClawChatUI
-      - package: OpenClawKit
-        product: OpenClawProtocol
+      - package: BotKit
+      - package: BotKit
+        product: BotChatUI
+      - package: BotKit
+        product: HanzoBotProtocol
       - package: Swabble
         product: SwabbleKit
       - sdk: AppIntents.framework
@@ -71,15 +71,15 @@ targets:
         CODE_SIGN_IDENTITY: "Apple Development"
         CODE_SIGN_STYLE: Manual
         DEVELOPMENT_TEAM: Y5PE65HELJ
-        PRODUCT_BUNDLE_IDENTIFIER: ai.openclaw.ios
-        PROVISIONING_PROFILE_SPECIFIER: "ai.openclaw.ios Development"
+        PRODUCT_BUNDLE_IDENTIFIER: ai.hanzo.bot.ios
+        PROVISIONING_PROFILE_SPECIFIER: "ai.hanzo.bot.ios Development"
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
         ENABLE_APPINTENTS_METADATA: NO
     info:
       path: Sources/Info.plist
       properties:
-        CFBundleDisplayName: OpenClaw
+        CFBundleDisplayName: HanzoBot
         CFBundleIconName: AppIcon
         CFBundleShortVersionString: "2026.2.9"
         CFBundleVersion: "20260202"
@@ -88,16 +88,16 @@ targets:
           UIApplicationSupportsMultipleScenes: false
         UIBackgroundModes:
           - audio
-        NSLocalNetworkUsageDescription: OpenClaw discovers and connects to your OpenClaw gateway on the local network.
+        NSLocalNetworkUsageDescription: HanzoBot discovers and connects to your HanzoBot gateway on the local network.
         NSAppTransportSecurity:
           NSAllowsArbitraryLoadsInWebContent: true
         NSBonjourServices:
-          - _openclaw-gw._tcp
-        NSCameraUsageDescription: OpenClaw can capture photos or short video clips when requested via the gateway.
-        NSLocationWhenInUseUsageDescription: OpenClaw uses your location when you allow location sharing.
-        NSLocationAlwaysAndWhenInUseUsageDescription: OpenClaw can share your location in the background when you enable Always.
-        NSMicrophoneUsageDescription: OpenClaw needs microphone access for voice wake.
-        NSSpeechRecognitionUsageDescription: OpenClaw uses on-device speech recognition for voice wake.
+          - _bot-gw._tcp
+        NSCameraUsageDescription: HanzoBot can capture photos or short video clips when requested via the gateway.
+        NSLocationWhenInUseUsageDescription: HanzoBot uses your location when you allow location sharing.
+        NSLocationAlwaysAndWhenInUseUsageDescription: HanzoBot can share your location in the background when you enable Always.
+        NSMicrophoneUsageDescription: HanzoBot needs microphone access for voice wake.
+        NSSpeechRecognitionUsageDescription: HanzoBot uses on-device speech recognition for voice wake.
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationPortraitUpsideDown
@@ -109,26 +109,26 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
 
-  OpenClawTests:
+  HanzoBotTests:
     type: bundle.unit-test
     platform: iOS
     sources:
       - path: Tests
     dependencies:
-      - target: OpenClaw
+      - target: HanzoBot
       - package: Swabble
         product: SwabbleKit
       - sdk: AppIntents.framework
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: ai.openclaw.ios.tests
+        PRODUCT_BUNDLE_IDENTIFIER: ai.hanzo.bot.ios.tests
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/OpenClaw.app/OpenClaw"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/HanzoBot.app/HanzoBot"
         BUNDLE_LOADER: "$(TEST_HOST)"
     info:
       path: Tests/Info.plist
       properties:
-        CFBundleDisplayName: OpenClawTests
+        CFBundleDisplayName: HanzoBotTests
         CFBundleShortVersionString: "2026.2.9"
         CFBundleVersion: "20260202"
