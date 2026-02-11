@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "bot/plugin-sdk";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -23,7 +23,7 @@ export type DownloadMessageResourceResult = {
  * Used for downloading images sent in messages.
  */
 export async function downloadImageFeishu(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   imageKey: string;
   accountId?: string;
 }): Promise<DownloadImageResult> {
@@ -101,7 +101,7 @@ export async function downloadImageFeishu(params: {
  * Used for downloading files, audio, and video from messages.
  */
 export async function downloadMessageResourceFeishu(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   messageId: string;
   fileKey: string;
   type: "image" | "file";
@@ -197,7 +197,7 @@ export type SendMediaResult = {
  * Supports: JPEG, PNG, WEBP, GIF, TIFF, BMP, ICO
  */
 export async function uploadImageFeishu(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   image: Buffer | string; // Buffer or file path
   imageType?: "message" | "avatar";
   accountId?: string;
@@ -243,7 +243,7 @@ export async function uploadImageFeishu(params: {
  * Max file size: 30MB
  */
 export async function uploadFileFeishu(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   file: Buffer | string; // Buffer or file path
   fileName: string;
   fileType: "opus" | "mp4" | "pdf" | "doc" | "xls" | "ppt" | "stream";
@@ -291,7 +291,7 @@ export async function uploadFileFeishu(params: {
  * Send an image message using an image_key
  */
 export async function sendImageFeishu(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   to: string;
   imageKey: string;
   replyToMessageId?: string;
@@ -354,7 +354,7 @@ export async function sendImageFeishu(params: {
  * Send a file message using a file_key
  */
 export async function sendFileFeishu(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   to: string;
   fileKey: string;
   replyToMessageId?: string;
@@ -465,7 +465,7 @@ function isLocalPath(urlOrPath: string): boolean {
  * Upload and send media (image or file) from URL, local path, or buffer
  */
 export async function sendMediaFeishu(params: {
-  cfg: Hanzo BotConfig;
+  cfg: BotConfig;
   to: string;
   mediaUrl?: string;
   mediaBuffer?: Buffer;
