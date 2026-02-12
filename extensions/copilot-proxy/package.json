@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-copilot-proxy",
-  "version": "2026.2.9",
+  "version": "2026.2.10",
   "private": true,
   "description": "HanzoBot Copilot Proxy provider plugin",
   "type": "module",
