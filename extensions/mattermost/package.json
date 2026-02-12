@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-mattermost",
-  "version": "2026.2.9",
+  "version": "2026.2.10",
   "private": true,
   "description": "HanzoBot Mattermost channel plugin",
   "type": "module",
