@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-feishu",
-  "version": "2026.2.9",
+  "version": "2026.2.10",
   "description": "HanzoBot Feishu/Lark channel plugin (community maintained by @m1heng)",
   "type": "module",
   "dependencies": {

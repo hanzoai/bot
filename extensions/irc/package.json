@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-irc",
-  "version": "2026.2.9",
+  "version": "2026.2.10",
   "description": "HanzoBot IRC channel plugin",
   "type": "module",
   "devDependencies": {
