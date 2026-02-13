@@ -878,6 +878,195 @@
         opacity: 0.8;
       }
 
+      /* ===== INTEGRATIONS ===== */
+      .integrations-marquee {
+        overflow: hidden;
+        position: relative;
+        padding: 20px 0;
+      }
+      .integrations-marquee::before,
+      .integrations-marquee::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 80px;
+        height: 100%;
+        z-index: 2;
+        pointer-events: none;
+      }
+      .integrations-marquee::before {
+        left: 0;
+        background: linear-gradient(90deg, var(--bg) 0%, transparent 100%);
+      }
+      .integrations-marquee::after {
+        right: 0;
+        background: linear-gradient(-90deg, var(--bg) 0%, transparent 100%);
+      }
+      .integrations-track {
+        display: flex;
+        gap: 24px;
+        animation: marquee 60s linear infinite;
+        width: max-content;
+      }
+      .integrations-track:hover {
+        animation-play-state: paused;
+      }
+      .integration-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        opacity: 0.5;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+        flex-shrink: 0;
+      }
+      .integration-logo:hover {
+        opacity: 1;
+        transform: scale(1.15);
+      }
+      @keyframes marquee {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+      .integrations-count {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .integrations-count strong {
+        color: var(--text);
+      }
+
+      /* ===== CASE STUDIES ===== */
+      .cases-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      .case-card {
+        padding: 28px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+      .case-card:hover {
+        border-color: var(--border-hover);
+        transform: translateY(-2px);
+      }
+      .case-client {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--subtle);
+        margin-bottom: 8px;
+      }
+      .case-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .case-subtitle {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 16px;
+      }
+      .case-metrics {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .case-metric .num {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .case-metric .label {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .case-quote {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--subtle);
+        font-style: italic;
+        line-height: 1.5;
+      }
+      .case-author {
+        font-style: normal;
+        color: var(--muted);
+        margin-top: 6px;
+        font-weight: 500;
+      }
+
+      /* ===== BOOK PROMO ===== */
+      .book-promo {
+        display: flex;
+        gap: 32px;
+        align-items: center;
+        padding: 32px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        max-width: 640px;
+        margin: 0 auto;
+      }
+      .book-cover {
+        width: 140px;
+        height: 180px;
+        background: linear-gradient(135deg, #222, #111);
+        border: 1px solid var(--border-hover);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        text-align: center;
+        padding: 16px;
+        line-height: 1.3;
+      }
+      .book-info h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .book-info .book-price {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .book-info .book-price small {
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--muted);
+      }
+      .book-info .book-desc {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+      @media (max-width: 600px) {
+        .book-promo {
+          flex-direction: column;
+          text-align: center;
+        }
+      }
+
       /* ===== RESPONSIVE ===== */
       @media (max-width: 1024px) {
         .features-grid {
@@ -916,7 +1105,7 @@
           grid-template-columns: repeat(2, 1fr);
         }
         .pricing-cards {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(2, 1fr) !important;
         }
         .footer-grid {
           grid-template-columns: repeat(2, 1fr);
@@ -1056,6 +1245,9 @@
                   ><strong>Help &amp; Support</strong><span>Get help from the team</span></a
                 >
                 <a href="#pricing"><strong>Pricing</strong><span>Plans and billing</span></a>
+                <a href="/book"
+                  ><strong>The Hanzo Book</strong><span>$49 — includes 1 month usage</span></a
+                >
                 <a href="https://hanzo.ai/blog"
                   ><strong>Blog</strong><span>Updates and insights</span></a
                 >
@@ -1345,6 +1537,386 @@
       </div>
     </section>
 
+    <!-- INTEGRATIONS -->
+    <section id="integrations" style="border-top: 1px solid var(--border)">
+      <div class="section-inner reveal">
+        <div class="section-label">Integrations</div>
+        <h2 class="section-title">608+ Integrations</h2>
+        <p class="section-desc">
+          Connect your bots to every tool your business already uses. Powered by the Hanzo
+          automation engine.
+        </p>
+        <div class="integrations-marquee">
+          <div class="integrations-track" id="integrationTrack">
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/google-sheets.png"
+              alt="Google Sheets"
+              title="Google Sheets"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/slack.png"
+              alt="Slack"
+              title="Slack"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/discord.png"
+              alt="Discord"
+              title="Discord"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/github.png"
+              alt="GitHub"
+              title="GitHub"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/stripe.png"
+              alt="Stripe"
+              title="Stripe"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/shopify.png"
+              alt="Shopify"
+              title="Shopify"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/salesforce.png"
+              alt="Salesforce"
+              title="Salesforce"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/hubspot.png"
+              alt="HubSpot"
+              title="HubSpot"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/notion.png"
+              alt="Notion"
+              title="Notion"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/airtable.png"
+              alt="Airtable"
+              title="Airtable"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/gmail.png"
+              alt="Gmail"
+              title="Gmail"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/microsoft-teams.png"
+              alt="Microsoft Teams"
+              title="Microsoft Teams"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/trello.png"
+              alt="Trello"
+              title="Trello"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/jira-cloud.png"
+              alt="Jira"
+              title="Jira"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/zoom.png"
+              alt="Zoom"
+              title="Zoom"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/linkedin.png"
+              alt="LinkedIn"
+              title="LinkedIn"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/twitter.png"
+              alt="X / Twitter"
+              title="X / Twitter"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/instagram-business.png"
+              alt="Instagram"
+              title="Instagram"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/youtube.png"
+              alt="YouTube"
+              title="YouTube"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/dropbox.png"
+              alt="Dropbox"
+              title="Dropbox"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/google-drive.png"
+              alt="Google Drive"
+              title="Google Drive"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/google-calendar.png"
+              alt="Google Calendar"
+              title="Google Calendar"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/calendly.png"
+              alt="Calendly"
+              title="Calendly"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/twilio.png"
+              alt="Twilio"
+              title="Twilio"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/sendgrid.png"
+              alt="SendGrid"
+              title="SendGrid"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/mailchimp.png"
+              alt="Mailchimp"
+              title="Mailchimp"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/asana.png"
+              alt="Asana"
+              title="Asana"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/monday.png"
+              alt="Monday.com"
+              title="Monday.com"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/pipedrive.png"
+              alt="Pipedrive"
+              title="Pipedrive"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/zendesk.png"
+              alt="Zendesk"
+              title="Zendesk"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/intercom.png"
+              alt="Intercom"
+              title="Intercom"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/freshdesk.png"
+              alt="Freshdesk"
+              title="Freshdesk"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/webflow.png"
+              alt="Webflow"
+              title="Webflow"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/wordpress.png"
+              alt="WordPress"
+              title="WordPress"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/woocommerce.png"
+              alt="WooCommerce"
+              title="WooCommerce"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/quickbooks.png"
+              alt="QuickBooks"
+              title="QuickBooks"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/xero.png"
+              alt="Xero"
+              title="Xero"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/typeform.png"
+              alt="Typeform"
+              title="Typeform"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/openai.png"
+              alt="OpenAI"
+              title="OpenAI"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/claude.png"
+              alt="Claude"
+              title="Claude"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/google-gemini.png"
+              alt="Google Gemini"
+              title="Google Gemini"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/telegram-bot.png"
+              alt="Telegram"
+              title="Telegram"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/whatsapp.png"
+              alt="WhatsApp"
+              title="WhatsApp"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/figma.png"
+              alt="Figma"
+              title="Figma"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/mysql.png"
+              alt="MySQL"
+              title="MySQL"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/postgres.png"
+              alt="PostgreSQL"
+              title="PostgreSQL"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/mongodb.png"
+              alt="MongoDB"
+              title="MongoDB"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/supabase.png"
+              alt="Supabase"
+              title="Supabase"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/okta.png"
+              alt="Okta"
+              title="Okta"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/datadog.png"
+              alt="Datadog"
+              title="Datadog"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/snowflake.png"
+              alt="Snowflake"
+              title="Snowflake"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/microsoft-excel-365.png"
+              alt="Excel"
+              title="Excel"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/microsoft-outlook.png"
+              alt="Outlook"
+              title="Outlook"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/todoist.png"
+              alt="Todoist"
+              title="Todoist"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/spotify.png"
+              alt="Spotify"
+              title="Spotify"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/clickup.png"
+              alt="ClickUp"
+              title="ClickUp"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/linear.png"
+              alt="Linear"
+              title="Linear"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/posthog.png"
+              alt="PostHog"
+              title="PostHog"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/mixpanel.png"
+              alt="Mixpanel"
+              title="Mixpanel"
+            />
+            <img
+              class="integration-logo"
+              src="https://cdn.activepieces.com/pieces/gitlab.png"
+              alt="GitLab"
+              title="GitLab"
+            />
+          </div>
+        </div>
+        <div class="integrations-count">
+          <strong>608+</strong> integrations and growing. CRM, e-commerce, analytics, databases, AI,
+          and more.
+        </div>
+      </div>
+    </section>
+
     <!-- SKILLS -->
     <section id="skills" style="border-top: 1px solid var(--border)">
       <div class="section-inner reveal">
@@ -1446,6 +2018,161 @@
       </div>
     </section>
 
+    <!-- CASE STUDIES -->
+    <section id="cases" style="border-top: 1px solid var(--border)">
+      <div class="section-inner reveal">
+        <div class="section-label">Proven Results</div>
+        <h2 class="section-title">Case Studies</h2>
+        <p class="section-desc">
+          From 500x ROI campaigns to $34.9M blockchain launches. See what Hanzo-powered AI delivers.
+        </p>
+        <div class="cases-grid">
+          <div class="case-card">
+            <div class="case-client">Damon Motorcycles</div>
+            <div class="case-title">500x ROI Campaign</div>
+            <div class="case-subtitle">Digital marketing, brand strategy, content production</div>
+            <div class="case-metrics">
+              <div class="case-metric">
+                <div class="num">500x</div>
+                <div class="label">ROI</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">230%</div>
+                <div class="label">More leads</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">65%</div>
+                <div class="label">Conversion</div>
+              </div>
+            </div>
+            <div class="case-quote">
+              "The campaign Hanzo created exceeded all expectations. The ROI speaks for itself."
+              <div class="case-author">— Jay Giraud, CEO</div>
+            </div>
+          </div>
+          <div class="case-card">
+            <div class="case-client">Triller</div>
+            <div class="case-title">TrillerFest — 5M Viewers</div>
+            <div class="case-subtitle">
+              Virtual event production, content strategy, artist partnerships
+            </div>
+            <div class="case-metrics">
+              <div class="case-metric">
+                <div class="num">5M+</div>
+                <div class="label">Viewers</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">100+</div>
+                <div class="label">Artists</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">350%</div>
+                <div class="label">App growth</div>
+              </div>
+            </div>
+            <div class="case-quote">
+              "Hanzo turned an impossible situation into our biggest success."
+              <div class="case-author">— Mike Lu, CEO</div>
+            </div>
+          </div>
+          <div class="case-card">
+            <div class="case-client">Unikrn</div>
+            <div class="case-title">$34.9M Blockchain ICO</div>
+            <div class="case-subtitle">
+              Blockchain integration, ICO launch, regulatory compliance
+            </div>
+            <div class="case-metrics">
+              <div class="case-metric">
+                <div class="num">$34.9M</div>
+                <div class="label">Raised</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">300%</div>
+                <div class="label">Engagement</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">15+</div>
+                <div class="label">Jurisdictions</div>
+              </div>
+            </div>
+            <div class="case-quote">
+              "Hanzo's expertise was instrumental in bringing UnikoinGold to market."
+              <div class="case-author">— Rahul Sood, CEO</div>
+            </div>
+          </div>
+          <div class="case-card">
+            <div class="case-client">Bellabeat</div>
+            <div class="case-title">Women's Health Tech Platform</div>
+            <div class="case-subtitle">
+              CMO & CTO services, marketing automation, data analytics
+            </div>
+            <div class="case-metrics">
+              <div class="case-metric">
+                <div class="num">67%</div>
+                <div class="label">Engagement</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">$35M</div>
+                <div class="label">Revenue</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">45%</div>
+                <div class="label">Retention</div>
+              </div>
+            </div>
+            <div class="case-quote">
+              "Hanzo transformed our approach to both marketing and technology."
+              <div class="case-author">— Urška Sršen, Co-founder</div>
+            </div>
+          </div>
+          <div class="case-card">
+            <div class="case-client">Casper Labs</div>
+            <div class="case-title">Enterprise Blockchain Launch</div>
+            <div class="case-subtitle">
+              Blockchain development, technical architecture, strategic consulting
+            </div>
+            <div class="case-metrics">
+              <div class="case-metric">
+                <div class="num">2021</div>
+                <div class="label">Mainnet</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">Rust</div>
+                <div class="label">Strategic pivot</div>
+              </div>
+            </div>
+            <div class="case-quote">
+              "Hanzo's visionary approach shaped Casper into the enterprise-grade blockchain it is
+              today."
+              <div class="case-author">— Mrinal Manohar, CEO</div>
+            </div>
+          </div>
+          <div class="case-card">
+            <div class="case-client">Cover Build</div>
+            <div class="case-title">Prefab Housing Revolution</div>
+            <div class="case-subtitle">3D visualization, UX design, digital marketing</div>
+            <div class="case-metrics">
+              <div class="case-metric">
+                <div class="num">300%</div>
+                <div class="label">More leads</div>
+              </div>
+              <div class="case-metric">
+                <div class="num">40%</div>
+                <div class="label">Faster sales</div>
+              </div>
+            </div>
+            <div class="case-quote">
+              "Hanzo transformed how customers experience our homes before they're built."
+              <div class="case-author">— Alexis Rivas, CEO</div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 40px">
+          <a href="https://hanzo.ai/work" class="btn-outline btn-lg">View All Case Studies →</a>
+        </div>
+      </div>
+    </section>
+
     <!-- CLOUD -->
     <section id="cloud" style="border-top: 1px solid var(--border)">
       <div class="section-inner reveal">
@@ -1532,7 +2259,22 @@
         <p class="section-desc" style="margin: 0 auto 48px">
           Pay for what you use. $5 free credit on signup. Bring your own API keys or use ours.
         </p>
-        <div class="pricing-cards" style="max-width: 960px; grid-template-columns: repeat(3, 1fr)">
+        <!-- THE HANZO BOOK -->
+        <div class="book-promo" style="margin-bottom: 48px">
+          <div class="book-cover">The<br />Hanzo<br />Book</div>
+          <div class="book-info">
+            <h3>The Hanzo Book</h3>
+            <div class="book-price">$49 <small>one-time</small></div>
+            <div class="book-desc">
+              The complete guide to building and deploying autonomous AI agents. Includes
+              <strong>1 month of Hanzo Bot usage</strong> — cloud compute, all personas, all skills.
+              Everything you need to launch.
+            </div>
+            <a href="/book" class="btn-primary">Get the Book →</a>
+          </div>
+        </div>
+
+        <div class="pricing-cards" style="max-width: 1100px; grid-template-columns: repeat(4, 1fr)">
           <div class="pricing-card">
             <h3>Free</h3>
             <div class="price">$0</div>
@@ -1543,6 +2285,18 @@
               <li>52+ skills</li>
               <li>Community support</li>
               <li>Self-hosted option</li>
+            </ul>
+          </div>
+          <div class="pricing-card">
+            <h3>Starter</h3>
+            <div class="price">$20 <small>/mo</small></div>
+            <ul>
+              <li>3 active bots</li>
+              <li>20 hrs/mo compute</li>
+              <li>All channels unlocked</li>
+              <li>608+ integrations</li>
+              <li>Email support</li>
+              <li>Linux cloud env</li>
             </ul>
           </div>
           <div class="pricing-card featured">
@@ -1559,22 +2313,132 @@
           </div>
           <div class="pricing-card">
             <h3>Always-On</h3>
-            <div class="price">$200 <small>/mo per bot</small></div>
+            <div class="price">$499 <small>/mo per bot</small></div>
             <ul>
-              <li>24/7 dedicated bot</li>
-              <li>Included compute hours</li>
-              <li>Full Mac or Windows env</li>
+              <li>24/7 dedicated Mac instance</li>
+              <li>M2 Mac mini (8-core, 24GB)</li>
               <li>Login to your services</li>
               <li>Use native desktop apps</li>
+              <li>Full computer environment</li>
               <li>Dedicated support</li>
             </ul>
           </div>
         </div>
+
+        <!-- COMPUTE ENVIRONMENTS -->
+        <div
+          style="
+            margin-top: 32px;
+            text-align: left;
+            max-width: 640px;
+            margin-left: auto;
+            margin-right: auto;
+          "
+        >
+          <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; text-align: center">
+            Dedicated Environments (Always-On)
+          </h3>
+          <div
+            style="
+              background: var(--bg-card);
+              border: 1px solid var(--border);
+              border-radius: 12px;
+              overflow: hidden;
+            "
+          >
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border)">
+                  <th
+                    style="
+                      padding: 12px 16px;
+                      text-align: left;
+                      font-weight: 500;
+                      color: var(--muted);
+                    "
+                  >
+                    Environment
+                  </th>
+                  <th
+                    style="
+                      padding: 12px 16px;
+                      text-align: right;
+                      font-weight: 500;
+                      color: var(--muted);
+                    "
+                  >
+                    Specs
+                  </th>
+                  <th
+                    style="
+                      padding: 12px 16px;
+                      text-align: right;
+                      font-weight: 500;
+                      color: var(--muted);
+                    "
+                  >
+                    Price
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom: 1px solid var(--border)">
+                  <td style="padding: 10px 16px">Linux (DOKS)</td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">
+                    4 vCPU, 8 GB
+                  </td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">$99/mo</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border)">
+                  <td style="padding: 10px 16px">Windows Cloud</td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">
+                    8 vCPU, 32 GB
+                  </td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">
+                    $299/mo
+                  </td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border)">
+                  <td style="padding: 10px 16px">Mac M2</td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">
+                    8-core, 24 GB
+                  </td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">
+                    $499/mo
+                  </td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border)">
+                  <td style="padding: 10px 16px">Mac M4 Pro</td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">
+                    14-core, 48 GB
+                  </td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">
+                    $1,499/mo
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 16px">Mac M4 Max</td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">
+                    36-core, 128 GB
+                  </td>
+                  <td style="padding: 10px 16px; text-align: right; color: var(--muted)">
+                    $4,999/mo
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="color: var(--subtle); font-size: 12px; margin-top: 8px; text-align: center">
+            Mac pricing based on AWS EC2 Mac instances (24-hr min). Savings Plans available for up
+            to 44% off.
+          </p>
+        </div>
+
         <p
           style="
             color: var(--subtle);
             font-size: 13px;
-            margin-top: 20px;
+            margin-top: 24px;
             max-width: 640px;
             margin-left: auto;
             margin-right: auto;
@@ -1748,6 +2612,7 @@
             <a href="https://hanzo.ai/dev">Hanzo Dev</a>
             <a href="https://hanzo.ai/cloud">Hanzo Cloud</a>
             <a href="https://hanzo.app/download">Desktop App</a>
+            <a href="/book">The Hanzo Book</a>
           </div>
           <div class="footer-col">
             <h4>Developers</h4>
@@ -1884,6 +2749,12 @@
       input.addEventListener("keydown", (e) => {
         if (e.key === "Enter") sendChat();
       });
+
+      // Duplicate integration logos for seamless marquee
+      const track = document.getElementById("integrationTrack");
+      if (track) {
+        track.innerHTML += track.innerHTML;
+      }
 
       // Smooth scroll for anchor links
       document.querySelectorAll('a[href^="#"]').forEach((a) => {
