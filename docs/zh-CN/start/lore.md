@@ -135,16 +135,15 @@ Moltbot 说起来总是不太顺口。于是，在格林威治时间凌晨 4 点
 - **Whurley**（是的，就是那个 William Hurley，量子计算先驱）制作了 ASCII 艺术
 - **Onur** 处理了 GitHub，第一个获得合作徽章
 - **Shadow** 获取了 Discord 自定义链接，清除了恶意软件
-- **整个 Claw Crew** 通宵工作
+- **整个团队** 通宵工作
 
 **骗子速通：** 加密货币骗子在几分钟内就在 Pump.fun 上发布了 $HANZO BOT 代币。他们窃取了 20 分钟前刚创作的艺术作品。经过商业认证的账户推送骗局。这种厚颜无耻几乎令人印象深刻。
 
 **新传统诞生：**
 
-- "The claw is the law"（钳即是法）🤠
-- "Yee-claw"（耶-钳）
-- "Claw abiding citizens"（守钳公民）
-- "Clawntroversy"（钳议）
+- "The way of the ninja"（忍者之道）🥷
+- "Blade runners"（刃之行者）
+- "Silent but deadly"（无声而致命）
 
 **Clawd → Moltbot → Hanzo Bot**
 

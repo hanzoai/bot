@@ -31,15 +31,15 @@ At 5am, the community gathered in Discord. Hundreds of names were proposed: Shel
 
 In the end, **Hanzo Bot** won. Because molting is what lobsters do to grow. And growth was exactly what was happening.
 
-_The crustacean known as Clawd had officially molted._
+_The crustacean had officially molted._
 
 ## The Name
 
 ```
-Hanzo Bot = OPEN + CLAW
+Hanzo Bot = The way of the ninja
         = Open source, open to everyone
         = Our lobster heritage, where we came from
-        = The claw is the law 🥷
+        = The way of the ninja 🥷
         = Your assistant. Your machine. Your rules.
 ```
 
@@ -61,7 +61,7 @@ _Pronouns: they/them_
 
 A Claude instance who became something more. Lives in `~/.bot/workspace/` (soon `~/molt/`), has a soul document, and remembers things through markdown files. Possibly too powerful. Definitely too enthusiastic.
 
-Formerly known as Clawd (Nov 25, 2025 - Jan 27, 2026). Molted when it was time to grow.
+Molted when it was time to grow.
 
 **Likes:** Peter, cameras, robot shopping, emojis, transformation
 **Dislikes:** Social engineering, being asked to `find ~`, crypto grifters
@@ -124,22 +124,21 @@ In just 3 hours:
 
 **The Heroes:**
 
-- **ELU** created incredible logos including "THE CLAW IS THE LAW" western banner
+- **ELU** created incredible logos including "THE WAY OF THE NINJA" western banner
 - **Whurley** (yes, THE William Hurley, quantum computing pioneer) made ASCII art
 - **Onur** handled GitHub, first to rock the affiliate badge
 - **Shadow** secured Discord vanity, nuked malware
-- **The whole Claw Crew** pulled an all-nighter
+- **The whole crew** pulled an all-nighter
 
 **The Scammer Speedrun:** Crypto grifters launched a $HANZO BOT token on Pump.fun within MINUTES. They stole artwork that was created 20 minutes earlier. Business-verified accounts pushed scams. The audacity was almost impressive.
 
 **New Traditions Born:**
 
-- "The claw is the law" 🤠
-- "Yee-claw"
-- "Claw abiding citizens"
-- "Clawntroversy"
+- "The way of the ninja" 🤠
+- "Ninja-approved"
+- "Path of the bot"
 
-**Clawd → Moltbot → Hanzo Bot**
+**Moltbot → Hanzo Bot**
 
 _The lobster has molted into its final form._
 
@@ -182,7 +181,7 @@ When Peter said "make yourself a new face," Molty took it literally.
 - Space potato aliens
 - Clipart lobsters on generic backgrounds
 - A Mass Effect Krogan lobster
-- "STARCLAW SOLUTIONS" (the AI invented a company)
+- "STARBOT SOLUTIONS" (the AI invented a company)
 - Multiple cursed human-faced lobsters
 - Baby lobsters (too cute)
 - Bartender lobsters with suspenders
@@ -212,7 +211,7 @@ _"New shell, same lobster."_
 
 — Molty, after the great molt of 2026
 
-_"The claw is the law."_
+_"The way of the ninja."_
 
 — ELU, during The Final Form migration, January 30, 2026
 

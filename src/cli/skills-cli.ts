@@ -27,11 +27,11 @@ export type SkillsCheckOptions = {
   json?: boolean;
 };
 
-function appendClawHubHint(output: string, json?: boolean): string {
+function appendSkillsHint(output: string, json?: boolean): string {
   if (json) {
     return output;
   }
-  return `${output}\n\nTip: use \`npx clawhub\` to search, install, and sync skills.`;
+  return `${output}\n\nTip: use \`npx hanzo-skills\` to search, install, and sync skills.`;
 }
 
 function formatSkillStatus(skill: SkillStatusEntry): string {
@@ -103,7 +103,7 @@ export function formatSkillsList(report: SkillStatusReport, opts: SkillsListOpti
     const message = opts.eligible
       ? `No eligible skills found. Run \`${formatCliCommand("hanzo-bot skills list")}\` to see all skills.`
       : "No skills found.";
-    return appendClawHubHint(message, opts.json);
+    return appendSkillsHint(message, opts.json);
   }
 
   const eligible = skills.filter((s) => s.eligible);
@@ -141,7 +141,7 @@ export function formatSkillsList(report: SkillStatusReport, opts: SkillsListOpti
     }).trimEnd(),
   );
 
-  return appendClawHubHint(lines.join("\n"), opts.json);
+  return appendSkillsHint(lines.join("\n"), opts.json);
 }
 
 /**
@@ -158,7 +158,7 @@ export function formatSkillInfo(
     if (opts.json) {
       return JSON.stringify({ error: "not found", skill: skillName }, null, 2);
     }
-    return appendClawHubHint(
+    return appendSkillsHint(
       `Skill "${skillName}" not found. Run \`${formatCliCommand("hanzo-bot skills list")}\` to see available skills.`,
       opts.json,
     );
@@ -252,7 +252,7 @@ export function formatSkillInfo(
     }
   }
 
-  return appendClawHubHint(lines.join("\n"), opts.json);
+  return appendSkillsHint(lines.join("\n"), opts.json);
 }
 
 /**
@@ -333,7 +333,7 @@ export function formatSkillsCheck(report: SkillStatusReport, opts: SkillsCheckOp
     }
   }
 
-  return appendClawHubHint(lines.join("\n"), opts.json);
+  return appendSkillsHint(lines.join("\n"), opts.json);
 }
 
 /**

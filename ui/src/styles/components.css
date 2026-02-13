@@ -1841,9 +1841,9 @@
 }
 
 .agent-tab.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
+  background: var(--text-strong);
+  border-color: var(--text-strong);
+  color: var(--bg);
 }
 
 .agents-overview-grid {

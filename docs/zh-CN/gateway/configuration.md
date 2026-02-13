@@ -1612,14 +1612,14 @@ WhatsApp 入站前缀通过 `channels.whatsapp.messagePrefix` 配置（已弃用
 
 Talk 模式（macOS/iOS/Android）的默认值。语音 ID 在未设置时回退到 `ELEVENLABS_VOICE_ID` 或 `SAG_VOICE_ID`。
 `apiKey` 在未设置时回退到 `ELEVENLABS_API_KEY`（或 Gateway 网关的 shell 配置文件）。
-`voiceAliases` 允许 Talk 指令使用友好名称（例如 `"voice":"Clawd"`）。
+`voiceAliases` 允许 Talk 指令使用友好名称（例如 `"voice":"Hanzo"`）。
 
 ```json5
 {
   talk: {
     voiceId: "elevenlabs_voice_id",
     voiceAliases: {
-      Clawd: "EXAVITQu4vr4xnSDxMaL",
+      Hanzo: "EXAVITQu4vr4xnSDxMaL",
       Roger: "CwhRBWXzGAHq8TQ4Fs17",
     },
     modelId: "eleven_v3",

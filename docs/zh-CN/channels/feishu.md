@@ -382,8 +382,8 @@ hanzo-bot pairing list feishu
 
 在配置和使用飞书渠道时，您可能需要使用以下网关管理命令：
 
-| 命令                       | 说明              |
-| -------------------------- | ----------------- |
+| 命令                        | 说明              |
+| --------------------------- | ----------------- |
 | `hanzo-bot gateway status`  | 查看网关运行状态  |
 | `hanzo-bot gateway install` | 安装/启动网关服务 |
 | `hanzo-bot gateway stop`    | 停止网关服务      |
@@ -519,14 +519,14 @@ hanzo-bot pairing list feishu
     list: [
       { id: "main" },
       {
-        id: "clawd-fan",
-        workspace: "/home/user/clawd-fan",
-        agentDir: "/home/user/.bot/agents/clawd-fan/agent",
+        id: "hanzo-fan",
+        workspace: "/home/user/hanzo-fan",
+        agentDir: "/home/user/.bot/agents/hanzo-fan/agent",
       },
       {
-        id: "clawd-xi",
-        workspace: "/home/user/clawd-xi",
-        agentDir: "/home/user/.bot/agents/clawd-xi/agent",
+        id: "hanzo-xi",
+        workspace: "/home/user/hanzo-xi",
+        agentDir: "/home/user/.bot/agents/hanzo-xi/agent",
       },
     ],
   },
@@ -540,16 +540,16 @@ hanzo-bot pairing list feishu
       },
     },
     {
-      // 用户 B 的私聊 → clawd-fan agent
-      agentId: "clawd-fan",
+      // 用户 B 的私聊 → hanzo-fan agent
+      agentId: "hanzo-fan",
       match: {
         channel: "feishu",
         peer: { kind: "dm", id: "ou_0fe6b1c9..." },
       },
     },
     {
-      // 某个群组 → clawd-xi agent
-      agentId: "clawd-xi",
+      // 某个群组 → hanzo-xi agent
+      agentId: "hanzo-xi",
       match: {
         channel: "feishu",
         peer: { kind: "group", id: "oc_xxx..." },

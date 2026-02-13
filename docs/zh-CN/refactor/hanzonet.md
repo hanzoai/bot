@@ -2,18 +2,18 @@
 read_when:
   - 规划节点 + 操作者客户端的统一网络协议
   - 重新设计跨设备的审批、配对、TLS 和在线状态
-summary: Clawnet 重构：统一网络协议、角色、认证、审批、身份
-title: Clawnet 重构
+summary: HanzoNet 重构：统一网络协议、角色、认证、审批、身份
+title: HanzoNet 重构
 x-i18n:
   generated_at: "2026-02-03T07:55:03Z"
   model: claude-opus-4-5
   provider: pi
   source_hash: 719b219c3b326479658fe6101c80d5273fc56eb3baf50be8535e0d1d2bb7987f
-  source_path: refactor/clawnet.md
+  source_path: refactor/hanzonet.md
   workflow: 15
 ---
 
-# Clawnet 重构（协议 + 认证统一）
+# HanzoNet 重构（协议 + 认证统一）
 
 ## 嗨
 
@@ -115,7 +115,7 @@ x-i18n:
 
 ---
 
-# 提议的新状态（Clawnet）
+# 提议的新状态（HanzoNet）
 
 ## 一个协议，两个角色
 
@@ -292,7 +292,7 @@ x-i18n:
 
 仅人类标签。
 
-- 示例：`scarlet-claw`、`saltwave`、`mantis-pinch`。
+- 示例：`shadow-blade`、`saltwave`、`mantis-pinch`。
 - 存储在 Gateway 网关注册表中，可编辑。
 - 冲突处理：`-2`、`-3`。
 

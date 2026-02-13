@@ -755,7 +755,7 @@ function renderAgentTabs(active: AgentsPanel, onSelect: (panel: AgentsPanel) => 
     { id: "tools", label: "Tools" },
     { id: "skills", label: "Skills" },
     { id: "channels", label: "Channels" },
-    { id: "cron", label: "Cron Jobs" },
+    { id: "cron", label: "Jobs" },
   ];
   return html`
     <div class="agent-tabs">
@@ -1244,7 +1244,7 @@ function renderAgentCron(params: {
       </section>
     </section>
     <section class="card">
-      <div class="card-title">Agent Cron Jobs</div>
+      <div class="card-title">Agent Jobs</div>
       <div class="card-sub">Scheduled jobs targeting this agent.</div>
       ${
         jobs.length === 0

@@ -374,8 +374,8 @@ hanzo-bot pairing list feishu
 
 ## Gateway management commands
 
-| Command                    | Description                   |
-| -------------------------- | ----------------------------- |
+| Command                     | Description                   |
+| --------------------------- | ----------------------------- |
 | `hanzo-bot gateway status`  | Show gateway status           |
 | `hanzo-bot gateway install` | Install/start gateway service |
 | `hanzo-bot gateway stop`    | Stop gateway service          |
@@ -474,14 +474,14 @@ Use `bindings` to route Feishu DMs or groups to different agents.
     list: [
       { id: "main" },
       {
-        id: "clawd-fan",
-        workspace: "/home/user/clawd-fan",
-        agentDir: "/home/user/.bot/agents/clawd-fan/agent",
+        id: "hanzo-fan",
+        workspace: "/home/user/hanzo-fan",
+        agentDir: "/home/user/.bot/agents/hanzo-fan/agent",
       },
       {
-        id: "clawd-xi",
-        workspace: "/home/user/clawd-xi",
-        agentDir: "/home/user/.bot/agents/clawd-xi/agent",
+        id: "hanzo-xi",
+        workspace: "/home/user/hanzo-xi",
+        agentDir: "/home/user/.bot/agents/hanzo-xi/agent",
       },
     ],
   },
@@ -494,14 +494,14 @@ Use `bindings` to route Feishu DMs or groups to different agents.
       },
     },
     {
-      agentId: "clawd-fan",
+      agentId: "hanzo-fan",
       match: {
         channel: "feishu",
         peer: { kind: "direct", id: "ou_yyy" },
       },
     },
     {
-      agentId: "clawd-xi",
+      agentId: "hanzo-xi",
       match: {
         channel: "feishu",
         peer: { kind: "group", id: "oc_zzz" },

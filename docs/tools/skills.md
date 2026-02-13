@@ -47,22 +47,22 @@ You can gate them via `metadata.bot.requires.config` on the plugin’s config
 entry. See [Plugins](/tools/plugin) for discovery/config and [Tools](/tools) for the
 tool surface those skills teach.
 
-## ClawHub (install + sync)
+## Hanzo Skills (install + sync)
 
-ClawHub is the public skills registry for Hanzo Bot. Browse at
-[https://clawhub.com](https://clawhub.com). Use it to discover, install, update, and back up skills.
-Full guide: [ClawHub](/tools/clawhub).
+Hanzo Skills is the public skills registry for Hanzo Bot. Browse at
+[https://skills.hanzo.bot](https://skills.hanzo.bot). Use it to discover, install, update, and back up skills.
+Full guide: [Hanzo Skills](/tools/hanzo-skills).
 
 Common flows:
 
 - Install a skill into your workspace:
-  - `clawhub install <skill-slug>`
+  - `hanzo-skills install <skill-slug>`
 - Update all installed skills:
-  - `clawhub update --all`
+  - `hanzo-skills update --all`
 - Sync (scan + publish updates):
-  - `clawhub sync --all`
+  - `hanzo-skills sync --all`
 
-By default, `clawhub` installs into `./skills` under your current working
+By default, `hanzo-skills` installs into `./skills` under your current working
 directory (or falls back to the configured Hanzo Bot workspace). Hanzo Bot picks
 that up as `<workspace>/skills` on the next session.
 
@@ -295,6 +295,6 @@ See [Skills config](/tools/skills-config) for the full configuration schema.
 
 ## Looking for more skills?
 
-Browse [https://clawhub.com](https://clawhub.com).
+Browse [https://skills.hanzo.bot](https://skills.hanzo.bot).
 
 ---

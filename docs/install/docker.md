@@ -67,7 +67,7 @@ Running on a VPS? See [Hetzner (Docker VPS)](/install/hetzner).
 
 ### Shell Helpers (optional)
 
-For easier day-to-day Docker management, install `ClawDock`:
+For easier day-to-day Docker management, install `BotDock`:
 
 ```bash
 mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/bot/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.bot/bot-helpers.sh
@@ -81,7 +81,7 @@ echo 'source ~/.bot/bot-helpers.sh' >> ~/.zshrc && source ~/.zshrc
 
 Then use `bot-start`, `bot-stop`, `bot-dashboard`, etc. Run `bot-help` for all commands.
 
-See [`ClawDock` Helper README](https://github.com/bot/bot/blob/main/scripts/shell-helpers/README.md) for details.
+See [`BotDock` Helper README](https://github.com/bot/bot/blob/main/scripts/shell-helpers/README.md) for details.
 
 ### Manual flow (compose)
 
