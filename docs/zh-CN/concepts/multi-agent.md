@@ -22,17 +22,17 @@ x-i18n:
 
 - **工作区**（文件、AGENTS.md/SOUL.md/USER.md、本地笔记、人设规则）。
 - **状态目录**（`agentDir`）用于认证配置文件、模型注册表和每智能体配置。
-- **会话存储**（聊天历史 + 路由状态）位于 `~/.bot/agents/<agentId>/sessions` 下。
+- **会话存储**（聊天历史 + 路由状态）位于 `~/.hanzo/bot/agents/<agentId>/sessions` 下。
 
 认证配置文件是**每智能体独立的**。每个智能体从自己的位置读取：
 
 ```
-~/.bot/agents/<agentId>/agent/auth-profiles.json
+~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json
 ```
 
 主智能体凭证**不会**自动共享。切勿在智能体之间重用 `agentDir`（这会导致认证/会话冲突）。如果你想共享凭证，请将 `auth-profiles.json` 复制到另一个智能体的 `agentDir`。
 
-Skills 通过每个工作区的 `skills/` 文件夹实现每智能体独立，共享的 Skills 可从 `~/.bot/skills` 获取。参见 [Skills：每智能体 vs 共享](/tools/skills#per-agent-vs-shared-skills)。
+Skills 通过每个工作区的 `skills/` 文件夹实现每智能体独立，共享的 Skills 可从 `~/.hanzo/bot/skills` 获取。参见 [Skills：每智能体 vs 共享](/tools/skills#per-agent-vs-shared-skills)。
 
 Gateway 网关可以托管**一个智能体**（默认）或**多个智能体**并行。
 
@@ -40,11 +40,11 @@ Gateway 网关可以托管**一个智能体**（默认）或**多个智能体**�
 
 ## 路径（快速映射）
 
-- 配置：`~/.bot/bot.json`（或 `BOT_CONFIG_PATH`）
+- 配置：`~/.hanzo/bot/bot.json`（或 `BOT_CONFIG_PATH`）
 - 状态目录：`~/.bot`（或 `BOT_STATE_DIR`）
-- 工作区：`~/.bot/workspace`（或 `~/.bot/workspace-<agentId>`）
-- 智能体目录：`~/.bot/agents/<agentId>/agent`（或 `agents.list[].agentDir`）
-- 会话：`~/.bot/agents/<agentId>/sessions`
+- 工作区：`~/.hanzo/bot/workspace`（或 `~/.hanzo/bot/workspace-<agentId>`）
+- 智能体目录：`~/.hanzo/bot/agents/<agentId>/agent`（或 `agents.list[].agentDir`）
+- 会话：`~/.hanzo/bot/agents/<agentId>/sessions`
 
 ### 单智能体模式（默认）
 
@@ -52,8 +52,8 @@ Gateway 网关可以托管**一个智能体**（默认）或**多个智能体**�
 
 - `agentId` 默认为 **`main`**。
 - 会话键为 `agent:main:<mainKey>`。
-- 工作区默认为 `~/.bot/workspace`（或当设置了 `BOT_PROFILE` 时为 `~/.bot/workspace-<profile>`）。
-- 状态默认为 `~/.bot/agents/main/agent`。
+- 工作区默认为 `~/.hanzo/bot/workspace`（或当设置了 `BOT_PROFILE` 时为 `~/.hanzo/bot/workspace-<profile>`）。
+- 状态默认为 `~/.hanzo/bot/agents/main/agent`。
 
 ## 智能体助手
 
@@ -93,8 +93,8 @@ hanzo-bot agents list --bindings
 {
   agents: {
     list: [
-      { id: "alex", workspace: "~/.bot/workspace-alex" },
-      { id: "mia", workspace: "~/.bot/workspace-mia" },
+      { id: "alex", workspace: "~/.hanzo/bot/workspace-alex" },
+      { id: "mia", workspace: "~/.hanzo/bot/workspace-mia" },
     ],
   },
   bindings: [
@@ -139,7 +139,7 @@ hanzo-bot agents list --bindings
 
 ## 示例：两个 WhatsApp → 两个智能体
 
-`~/.bot/bot.json`（JSON5）：
+`~/.hanzo/bot/bot.json`（JSON5）：
 
 ```js
 {
@@ -149,14 +149,14 @@ hanzo-bot agents list --bindings
         id: "home",
         default: true,
         name: "Home",
-        workspace: "~/.bot/workspace-home",
-        agentDir: "~/.bot/agents/home/agent",
+        workspace: "~/.hanzo/bot/workspace-home",
+        agentDir: "~/.hanzo/bot/agents/home/agent",
       },
       {
         id: "work",
         name: "Work",
-        workspace: "~/.bot/workspace-work",
-        agentDir: "~/.bot/agents/work/agent",
+        workspace: "~/.hanzo/bot/workspace-work",
+        agentDir: "~/.hanzo/bot/agents/work/agent",
       },
     ],
   },
@@ -189,12 +189,12 @@ hanzo-bot agents list --bindings
     whatsapp: {
       accounts: {
         personal: {
-          // 可选覆盖。默认：~/.bot/credentials/whatsapp/personal
-          // authDir: "~/.bot/credentials/whatsapp/personal",
+          // 可选覆盖。默认：~/.hanzo/bot/credentials/whatsapp/personal
+          // authDir: "~/.hanzo/bot/credentials/whatsapp/personal",
         },
         biz: {
-          // 可选覆盖。默认：~/.bot/credentials/whatsapp/biz
-          // authDir: "~/.bot/credentials/whatsapp/biz",
+          // 可选覆盖。默认：~/.hanzo/bot/credentials/whatsapp/biz
+          // authDir: "~/.hanzo/bot/credentials/whatsapp/biz",
         },
       },
     },
@@ -213,13 +213,13 @@ hanzo-bot agents list --bindings
       {
         id: "chat",
         name: "Everyday",
-        workspace: "~/.bot/workspace-chat",
+        workspace: "~/.hanzo/bot/workspace-chat",
         model: "anthropic/claude-sonnet-4-5",
       },
       {
         id: "opus",
         name: "Deep Work",
-        workspace: "~/.bot/workspace-opus",
+        workspace: "~/.hanzo/bot/workspace-opus",
         model: "anthropic/claude-opus-4-5",
       },
     ],
@@ -247,13 +247,13 @@ hanzo-bot agents list --bindings
       {
         id: "chat",
         name: "Everyday",
-        workspace: "~/.bot/workspace-chat",
+        workspace: "~/.hanzo/bot/workspace-chat",
         model: "anthropic/claude-sonnet-4-5",
       },
       {
         id: "opus",
         name: "Deep Work",
-        workspace: "~/.bot/workspace-opus",
+        workspace: "~/.hanzo/bot/workspace-opus",
         model: "anthropic/claude-opus-4-5",
       },
     ],
@@ -278,7 +278,7 @@ hanzo-bot agents list --bindings
       {
         id: "family",
         name: "Family",
-        workspace: "~/.bot/workspace-family",
+        workspace: "~/.hanzo/bot/workspace-family",
         identity: { name: "Family Bot" },
         groupChat: {
           mentionPatterns: ["@family", "@familybot", "@Family Bot"],
@@ -329,7 +329,7 @@ hanzo-bot agents list --bindings
     list: [
       {
         id: "personal",
-        workspace: "~/.bot/workspace-personal",
+        workspace: "~/.hanzo/bot/workspace-personal",
         sandbox: {
           mode: "off",  // 个人智能体无沙箱
         },
@@ -337,7 +337,7 @@ hanzo-bot agents list --bindings
       },
       {
         id: "family",
-        workspace: "~/.bot/workspace-family",
+        workspace: "~/.hanzo/bot/workspace-family",
         sandbox: {
           mode: "all",     // 始终沙箱隔离
           scope: "agent",  // 每智能体一个容器

@@ -1,7 +1,7 @@
 {
-  "name": "@hanzo/bot-lobster",
+  "name": "@hanzo/bot-flow",
   "version": "2026.2.10",
-  "description": "Lobster workflow tool plugin (typed pipelines + resumable approvals)",
+  "description": "Flow workflow tool plugin (typed pipelines + resumable approvals)",
   "type": "module",
   "devDependencies": {
     "hanzo-bot": "workspace:*"

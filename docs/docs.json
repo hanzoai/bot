@@ -7,8 +7,8 @@
     "library": "lucide"
   },
   "logo": {
-    "light": "/assets/pixel-lobster.svg",
-    "dark": "/assets/pixel-lobster.svg"
+    "light": "/assets/hanzo-logo.svg",
+    "dark": "/assets/hanzo-logo.svg"
   },
   "fonts": {
     "body": {
@@ -18,7 +18,7 @@
       "family": "DM Sans"
     }
   },
-  "favicon": "/assets/pixel-lobster.svg",
+  "favicon": "/assets/hanzo-logo.svg",
   "colors": {
     "primary": "#FF5A36",
     "dark": "#FF5A36",
@@ -253,31 +253,23 @@
     },
     {
       "source": "/clawd",
-      "destination": "/start/hanzo-bot"
+      "destination": "/start/bot"
     },
     {
       "source": "/start/clawd",
-      "destination": "/start/hanzo-bot"
+      "destination": "/start/bot"
     },
     {
       "source": "/start/clawd/",
-      "destination": "/start/hanzo-bot"
-    },
-    {
-      "source": "/clawhub",
-      "destination": "/tools/hanzo-skills"
+      "destination": "/start/bot"
     },
     {
       "source": "/clawdhub",
-      "destination": "/tools/hanzo-skills"
+      "destination": "/tools/skills"
     },
     {
       "source": "/tools/clawdhub",
-      "destination": "/tools/hanzo-skills"
-    },
-    {
-      "source": "/tools/clawhub",
-      "destination": "/tools/hanzo-skills"
+      "destination": "/tools/skills"
     },
     {
       "source": "/configuration",
@@ -950,7 +942,7 @@
               {
                 "group": "Built-in tools",
                 "pages": [
-                  "tools/lobster",
+                  "tools/flow",
                   "tools/llm-task",
                   "tools/exec",
                   "tools/web",
@@ -979,7 +971,7 @@
                   "tools/slash-commands",
                   "tools/skills",
                   "tools/skills-config",
-                  "tools/hanzo-skills",
+                  "tools/skills-hub",
                   "tools/plugin"
                 ]
               },
@@ -1465,7 +1457,7 @@
               {
                 "group": "内置工具",
                 "pages": [
-                  "zh-CN/tools/lobster",
+                  "zh-CN/tools/flow",
                   "zh-CN/tools/llm-task",
                   "zh-CN/tools/exec",
                   "zh-CN/tools/web",
@@ -1498,7 +1490,7 @@
                   "zh-CN/tools/slash-commands",
                   "zh-CN/tools/skills",
                   "zh-CN/tools/skills-config",
-                  "zh-CN/tools/hanzo-skills",
+                  "zh-CN/tools/skills-hub",
                   "zh-CN/tools/plugin"
                 ]
               },
