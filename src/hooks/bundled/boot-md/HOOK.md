@@ -1,7 +1,7 @@
 ---
 name: boot-md
 description: "Run BOOT.md on gateway startup"
-homepage: https://docs.bot.ai/hooks#boot-md
+homepage: https://docs.hanzo.bot/hooks#boot-md
 metadata:
   {
     "bot":
