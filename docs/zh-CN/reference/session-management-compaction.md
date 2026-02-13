@@ -64,8 +64,8 @@ Hanzo Bot 在两个层中持久化会话：
 
 在 Gateway 网关主机上，每个智能体：
 
-- 存储：`~/.bot/agents/<agentId>/sessions/sessions.json`
-- 记录：`~/.bot/agents/<agentId>/sessions/<sessionId>.jsonl`
+- 存储：`~/.hanzo/bot/agents/<agentId>/sessions/sessions.json`
+- 记录：`~/.hanzo/bot/agents/<agentId>/sessions/<sessionId>.jsonl`
   - Telegram 话题会话：`.../<sessionId>-topic-<threadId>.jsonl`
 
 Hanzo Bot 通过 `src/config/sessions.ts` 解析这些位置。

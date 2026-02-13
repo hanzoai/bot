@@ -39,9 +39,9 @@ Notes:
 - Know how you installed: **global** (npm/pnpm) vs **from source** (git clone).
 - Know how your Gateway is running: **foreground terminal** vs **supervised service** (launchd/systemd).
 - Snapshot your tailoring:
-  - Config: `~/.bot/bot.json`
-  - Credentials: `~/.bot/credentials/`
-  - Workspace: `~/.bot/workspace`
+  - Config: `~/.hanzo/bot/bot.json`
+  - Credentials: `~/.hanzo/bot/credentials/`
+  - Workspace: `~/.hanzo/bot/workspace`
 
 ## Update (global install)
 
@@ -135,7 +135,7 @@ hanzo-bot health
 
 Notes:
 
-- `pnpm build` matters when you run the packaged `bot` binary ([`bot.mjs`](https://github.com/bot/bot/blob/main/bot.mjs)) or use Node to run `dist/`.
+- `pnpm build` matters when you run the packaged `bot` binary ([`bot.mjs`](https://github.com/hanzoai/bot/blob/main/bot.mjs)) or use Node to run `dist/`.
 - If you run from a repo checkout without a global install, use `pnpm hanzo-bot ...` for CLI commands.
 - If you run directly from TypeScript (`pnpm hanzo-bot ...`), a rebuild is usually unnecessary, but **config migrations still apply** → run doctor.
 - Switching between global and git installs is easy: install the other flavor, then run `hanzo-bot doctor` so the gateway service entrypoint is rewritten to the current install.
@@ -228,4 +228,4 @@ git pull
 
 - Run `hanzo-bot doctor` again and read the output carefully (it often tells you the fix).
 - Check: [Troubleshooting](/gateway/troubleshooting)
-- Ask in Discord: [https://discord.gg/hanzo](https://discord.gg/hanzo)
+- Ask in Discord: [https://discord.gg/XthHQQj](https://discord.gg/XthHQQj)

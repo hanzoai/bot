@@ -201,7 +201,7 @@ describe("resolveBotMetadata", () => {
           events: ["command"],
           install: [
             { id: "bundled", kind: "bundled", label: "Bundled with Hanzo Bot" },
-            { id: "npm", kind: "npm", package: "@bot/hook" },
+            { id: "npm", kind: "npm", package: "@hanzo/bot-hook" },
           ],
         },
       }),
@@ -211,7 +211,7 @@ describe("resolveBotMetadata", () => {
     expect(result?.install).toHaveLength(2);
     expect(result?.install?.[0].kind).toBe("bundled");
     expect(result?.install?.[1].kind).toBe("npm");
-    expect(result?.install?.[1].package).toBe("@bot/hook");
+    expect(result?.install?.[1].package).toBe("@hanzo/bot-hook");
   });
 
   it("handles os restrictions", () => {
@@ -233,7 +233,7 @@ describe("resolveBotMetadata", () => {
     const content = `---
 name: session-memory
 description: "Save session context to memory when /new command is issued"
-homepage: https://docs.bot.ai/hooks#session-memory
+homepage: https://docs.hanzo.bot/hooks#session-memory
 metadata:
   {
     "bot":

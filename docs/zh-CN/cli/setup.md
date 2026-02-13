@@ -15,7 +15,7 @@ x-i18n:
 
 # `hanzo-bot setup`
 
-初始化 `~/.bot/bot.json` 和智能体工作区。
+初始化 `~/.hanzo/bot/bot.json` 和智能体工作区。
 
 相关内容：
 
@@ -26,7 +26,7 @@ x-i18n:
 
 ```bash
 hanzo-bot setup
-hanzo-bot setup --workspace ~/.bot/workspace
+hanzo-bot setup --workspace ~/.hanzo/bot/workspace
 ```
 
 通过 setup 运行向导：

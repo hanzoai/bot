@@ -17,7 +17,7 @@ For a high-level overview, see [Onboarding Wizard](/start/wizard).
 
 <Steps>
   <Step title="Existing config detection">
-    - If `~/.bot/bot.json` exists, choose **Keep / Modify / Reset**.
+    - If `~/.hanzo/bot/bot.json` exists, choose **Keep / Modify / Reset**.
     - Re-running the wizard does **not** wipe anything unless you explicitly choose **Reset**
       (or pass `--reset`).
     - If the config is invalid or contains legacy keys, the wizard stops and asks
@@ -34,7 +34,7 @@ For a high-level overview, see [Onboarding Wizard](/start/wizard).
     - **OpenAI Code (Codex) subscription (Codex CLI)**: if `~/.codex/auth.json` exists, the wizard can reuse it.
     - **OpenAI Code (Codex) subscription (OAuth)**: browser flow; paste the `code#state`.
       - Sets `agents.defaults.model` to `openai-codex/gpt-5.2` when model is unset or `openai/*`.
-    - **OpenAI API key**: uses `OPENAI_API_KEY` if present or prompts for a key, then saves it to `~/.bot/.env` so launchd can read it.
+    - **OpenAI API key**: uses `OPENAI_API_KEY` if present or prompts for a key, then saves it to `~/.hanzo/bot/.env` so launchd can read it.
     - **xAI (Grok) API key**: prompts for `XAI_API_KEY` and configures xAI as a model provider.
     - **OpenCode Zen (multi-model proxy)**: prompts for `OPENCODE_API_KEY` (or `OPENCODE_ZEN_API_KEY`, get it at https://opencode.ai/auth).
     - **API key**: stores the key for you.
@@ -52,16 +52,16 @@ For a high-level overview, see [Onboarding Wizard](/start/wizard).
     - **Skip**: no auth configured yet.
     - Pick a default model from detected options (or enter provider/model manually).
     - Wizard runs a model check and warns if the configured model is unknown or missing auth.
-    - OAuth credentials live in `~/.bot/credentials/oauth.json`; auth profiles live in `~/.bot/agents/<agentId>/agent/auth-profiles.json` (API keys + OAuth).
+    - OAuth credentials live in `~/.hanzo/bot/credentials/oauth.json`; auth profiles live in `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json` (API keys + OAuth).
     - More detail: [/concepts/oauth](/concepts/oauth)
     <Note>
     Headless/server tip: complete OAuth on a machine with a browser, then copy
-    `~/.bot/credentials/oauth.json` (or `$BOT_STATE_DIR/credentials/oauth.json`) to the
+    `~/.hanzo/bot/credentials/oauth.json` (or `$BOT_STATE_DIR/credentials/oauth.json`) to the
     gateway host.
     </Note>
   </Step>
   <Step title="Workspace">
-    - Default `~/.bot/workspace` (configurable).
+    - Default `~/.hanzo/bot/workspace` (configurable).
     - Seeds the workspace files needed for the agent bootstrap ritual.
     - Full workspace layout + backup guide: [Agent workspace](/concepts/agent-workspace)
   </Step>
@@ -210,7 +210,7 @@ Add `--json` for a machine‑readable summary.
 
 ```bash
 hanzo-bot agents add work \
-  --workspace ~/.bot/workspace-work \
+  --workspace ~/.hanzo/bot/workspace-work \
   --model openai/gpt-5.2 \
   --bind whatsapp:biz \
   --non-interactive \
@@ -227,7 +227,7 @@ Clients (macOS app, Control UI) can render steps without re‑implementing onboa
 The wizard can install `signal-cli` from GitHub releases:
 
 - Downloads the appropriate release asset.
-- Stores it under `~/.bot/tools/signal-cli/<version>/`.
+- Stores it under `~/.hanzo/bot/tools/signal-cli/<version>/`.
 - Writes `channels.signal.cliPath` to your config.
 
 Notes:
@@ -238,7 +238,7 @@ Notes:
 
 ## What the wizard writes
 
-Typical fields in `~/.bot/bot.json`:
+Typical fields in `~/.hanzo/bot/bot.json`:
 
 - `agents.defaults.workspace`
 - `agents.defaults.model` / `models.providers` (if Minimax chosen)
@@ -254,8 +254,8 @@ Typical fields in `~/.bot/bot.json`:
 
 `hanzo-bot agents add` writes `agents.list[]` and optional `bindings`.
 
-WhatsApp credentials go under `~/.bot/credentials/whatsapp/<accountId>/`.
-Sessions are stored under `~/.bot/agents/<agentId>/sessions/`.
+WhatsApp credentials go under `~/.hanzo/bot/credentials/whatsapp/<accountId>/`.
+Sessions are stored under `~/.hanzo/bot/agents/<agentId>/sessions/`.
 
 Some channels are delivered as plugins. When you pick one during onboarding, the wizard
 will prompt to install it (npm or a local path) before it can be configured.

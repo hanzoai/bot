@@ -119,7 +119,7 @@ Direct URLs are fetched as-is. This uses the `web_fetch` tool (or `exec` for POS
 
 OpenProse programs map to Hanzo Bot primitives:
 
-| OpenProse concept         | Hanzo Bot tool    |
+| OpenProse concept         | Hanzo Bot tool   |
 | ------------------------- | ---------------- |
 | Spawn session / Task tool | `sessions_spawn` |
 | File read/write           | `read` / `write` |
@@ -131,4 +131,4 @@ If your tool allowlist blocks these tools, OpenProse programs will fail. See [Sk
 
 Treat `.prose` files like code. Review before running. Use Hanzo Bot tool allowlists and approval gates to control side effects.
 
-For deterministic, approval-gated workflows, compare with [Lobster](/tools/lobster).
+For deterministic, approval-gated workflows, compare with [Flow](/tools/flow).

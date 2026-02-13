@@ -18,8 +18,8 @@ Related:
 
 ```bash
 hanzo-bot agents list
-hanzo-bot agents add work --workspace ~/.bot/workspace-work
-hanzo-bot agents set-identity --workspace ~/.bot/workspace --from-identity
+hanzo-bot agents add work --workspace ~/.hanzo/bot/workspace-work
+hanzo-bot agents set-identity --workspace ~/.hanzo/bot/workspace --from-identity
 hanzo-bot agents set-identity --agent main --avatar avatars/bot.png
 hanzo-bot agents delete work
 ```
@@ -28,7 +28,7 @@ hanzo-bot agents delete work
 
 Each agent workspace can include an `IDENTITY.md` at the workspace root:
 
-- Example path: `~/.bot/workspace/IDENTITY.md`
+- Example path: `~/.hanzo/bot/workspace/IDENTITY.md`
 - `set-identity --from-identity` reads from the workspace root (or an explicit `--identity-file`)
 
 Avatar paths resolve relative to the workspace root.
@@ -45,13 +45,13 @@ Avatar paths resolve relative to the workspace root.
 Load from `IDENTITY.md`:
 
 ```bash
-hanzo-bot agents set-identity --workspace ~/.bot/workspace --from-identity
+hanzo-bot agents set-identity --workspace ~/.hanzo/bot/workspace --from-identity
 ```
 
 Override fields explicitly:
 
 ```bash
-hanzo-bot agents set-identity --agent main --name "Hanzo Bot" --emoji "🥷" --avatar avatars/bot.png
+hanzo-bot agents set-identity --agent main --name "Hanzo Bot" --emoji "🤖" --avatar avatars/bot.png
 ```
 
 Config sample:
@@ -64,8 +64,8 @@ Config sample:
         id: "main",
         identity: {
           name: "Hanzo Bot",
-          theme: "space lobster",
-          emoji: "🥷",
+          theme: "AI assistant",
+          emoji: "🤖",
           avatar: "avatars/bot.png",
         },
       },

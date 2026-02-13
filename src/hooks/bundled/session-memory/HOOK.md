@@ -1,7 +1,7 @@
 ---
 name: session-memory
 description: "Save session context to memory when /new command is issued"
-homepage: https://docs.bot.ai/hooks#session-memory
+homepage: https://docs.hanzo.bot/hooks#session-memory
 metadata:
   {
     "bot":
@@ -82,7 +82,7 @@ Example configuration:
 
 The hook automatically:
 
-- Uses your workspace directory (`~/.bot/workspace` by default)
+- Uses your workspace directory (`~/.hanzo/bot/workspace` by default)
 - Uses your configured LLM for slug generation
 - Falls back to timestamp slugs if LLM is unavailable
 

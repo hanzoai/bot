@@ -12,7 +12,7 @@ x-i18n:
   workflow: 15
 ---
 
-# Hanzo Bot 🥷
+# Hanzo Bot
 
 <p align="center">
     <img
@@ -29,7 +29,7 @@ x-i18n:
     />
 </p>
 
-> _「EXFOLIATE! EXFOLIATE!」_ — たぶん宇宙ロブスター
+> _「Your personal AI assistant.」_
 
 <p align="center">
   <strong>WhatsApp、Telegram、Discord、iMessageなどに対応した、あらゆるOS向けのAIエージェントgateway。</strong><br />
@@ -123,7 +123,7 @@ Gatewayの起動後、ブラウザでControl UIを開きます。
 
 ## 設定（オプション）
 
-設定は`~/.bot/bot.json`にあります。
+設定は`~/.hanzo/bot/bot.json`にあります。
 
 - **何もしなければ**、Hanzo BotはバンドルされたPiバイナリをRPCモードで使用し、送信者ごとのセッションを作成します。
 - 制限を設けたい場合は、`channels.whatsapp.allowFrom`と（グループの場合）メンションルールから始めてください。

@@ -100,7 +100,7 @@ describe("installPluginFromArchive", () => {
     fs.writeFileSync(
       path.join(pkgDir, "package.json"),
       JSON.stringify({
-        name: "@bot/voice-call",
+        name: "@hanzo/bot-voice-call",
         version: "0.0.1",
         bot: { extensions: ["./dist/index.js"] },
       }),
@@ -138,7 +138,7 @@ describe("installPluginFromArchive", () => {
     fs.writeFileSync(
       path.join(pkgDir, "package.json"),
       JSON.stringify({
-        name: "@bot/voice-call",
+        name: "@hanzo/bot-voice-call",
         version: "0.0.1",
         bot: { extensions: ["./dist/index.js"] },
       }),
@@ -180,7 +180,7 @@ describe("installPluginFromArchive", () => {
     zip.file(
       "package/package.json",
       JSON.stringify({
-        name: "@bot/zipper",
+        name: "@hanzo/bot-zipper",
         version: "0.0.1",
         bot: { extensions: ["./dist/index.js"] },
       }),
@@ -214,7 +214,7 @@ describe("installPluginFromArchive", () => {
     fs.writeFileSync(
       path.join(pkgDir, "package.json"),
       JSON.stringify({
-        name: "@bot/voice-call",
+        name: "@hanzo/bot-voice-call",
         version: "0.0.1",
         bot: { extensions: ["./dist/index.js"] },
       }),
@@ -232,7 +232,7 @@ describe("installPluginFromArchive", () => {
       fs.writeFileSync(
         path.join(pkgDir, "package.json"),
         JSON.stringify({
-          name: "@bot/voice-call",
+          name: "@hanzo/bot-voice-call",
           version: "0.0.2",
           bot: { extensions: ["./dist/index.js"] },
         }),
@@ -347,7 +347,7 @@ describe("installPluginFromArchive", () => {
     fs.mkdirSync(pkgDir, { recursive: true });
     fs.writeFileSync(
       path.join(pkgDir, "package.json"),
-      JSON.stringify({ name: "@bot/nope", version: "0.0.1" }),
+      JSON.stringify({ name: "@hanzo/bot-nope", version: "0.0.1" }),
       "utf-8",
     );
 

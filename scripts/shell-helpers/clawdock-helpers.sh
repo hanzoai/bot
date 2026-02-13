@@ -4,8 +4,8 @@
 # https://til.simonwillison.net/llms/hanzo-bot-docker
 #
 # Installation:
-#   mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/hanzoai/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.bot/bot-helpers.sh
-#   echo 'source ~/.bot/bot-helpers.sh' >> ~/.zshrc
+#   mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/hanzoai/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.hanzo/bot/bot-helpers.sh
+#   echo 'source ~/.hanzo/bot/bot-helpers.sh' >> ~/.zshrc
 #
 # Usage:
 #   bot-help    # Show all available commands
@@ -97,7 +97,7 @@ _bot_ensure_dir() {
 
   if [[ -n "$found_path" ]]; then
     echo ""
-    echo "🥷 Found Hanzo Bot at: $found_path"
+    echo "🤖 Found Hanzo Bot at: $found_path"
     echo -n "   Use this location? [Y/n] "
     read -r response
     if [[ "$response" =~ ^[Nn] ]]; then
@@ -184,7 +184,7 @@ bot-config() {
 }
 
 bot-workspace() {
-  cd ~/.bot/workspace
+  cd ~/.hanzo/bot/workspace
 }
 
 # Container Access
@@ -274,7 +274,7 @@ bot-fix-token() {
 bot-dashboard() {
   _bot_ensure_dir || return 1
 
-  echo "🥷 Getting dashboard URL..."
+  echo "🤖 Getting dashboard URL..."
   local output status url
   output=$(_bot_compose run --rm hanzo-bot-cli dashboard --no-open 2>&1)
   status=$?
@@ -350,7 +350,7 @@ bot-approve() {
 
 # Show all available bot helper commands
 bot-help() {
-  echo -e "\n${_CLR_BOLD}${_CLR_CYAN}🥷 BotDock - Docker Helpers for Hanzo Bot${_CLR_RESET}\n"
+  echo -e "\n${_CLR_BOLD}${_CLR_CYAN}🤖 BotDock - Docker Helpers for Hanzo Bot${_CLR_RESET}\n"
 
   echo -e "${_CLR_BOLD}${_CLR_MAGENTA}⚡ Basic Operations${_CLR_RESET}"
   echo -e "  $(_cmd bot-start)       ${_CLR_DIM}Start the gateway${_CLR_RESET}"
@@ -408,6 +408,6 @@ bot-help() {
   echo ""
 
   echo -e "${_CLR_CYAN}💡 All commands guide you through next steps!${_CLR_RESET}"
-  echo -e "${_CLR_BLUE}📚 Docs: ${_CLR_RESET}${_CLR_CYAN}https://docs.bot.ai${_CLR_RESET}"
+  echo -e "${_CLR_BLUE}📚 Docs: ${_CLR_RESET}${_CLR_CYAN}https://docs.hanzo.bot${_CLR_RESET}"
   echo ""
 }

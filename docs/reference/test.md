@@ -16,7 +16,7 @@ title: "Tests"
 
 ## Model latency bench (local keys)
 
-Script: [`scripts/bench-model.ts`](https://github.com/bot/bot/blob/main/scripts/bench-model.ts)
+Script: [`scripts/bench-model.ts`](https://github.com/hanzoai/bot/blob/main/scripts/bench-model.ts)
 
 Usage:
 

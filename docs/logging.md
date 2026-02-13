@@ -25,7 +25,7 @@ By default, the Gateway writes a rolling log file under:
 
 The date uses the gateway host's local timezone.
 
-You can override this in `~/.bot/bot.json`:
+You can override this in `~/.hanzo/bot/bot.json`:
 
 ```json
 {
@@ -98,7 +98,7 @@ Console formatting is controlled by `logging.consoleStyle`.
 
 ## Configuring logging
 
-All logging configuration lives under `logging` in `~/.bot/bot.json`.
+All logging configuration lives under `logging` in `~/.hanzo/bot/bot.json`.
 
 ```json
 {

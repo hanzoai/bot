@@ -30,11 +30,7 @@ function formatSkillHint(skill: {
   return combined.length > maxLen ? `${combined.slice(0, maxLen - 1)}…` : combined;
 }
 
-function upsertSkillEntry(
-  cfg: BotConfig,
-  skillKey: string,
-  patch: { apiKey?: string },
-): BotConfig {
+function upsertSkillEntry(cfg: BotConfig, skillKey: string, patch: { apiKey?: string }): BotConfig {
   const entries = { ...cfg.skills?.entries };
   const existing = (entries[skillKey] as { apiKey?: string } | undefined) ?? {};
   entries[skillKey] = { ...existing, ...patch };
@@ -194,7 +190,7 @@ export async function setupSkills(
       runtime.log(
         `Tip: run \`${formatCliCommand("hanzo-bot doctor")}\` to review skills + requirements.`,
       );
-      runtime.log("Docs: https://docs.bot.ai/skills");
+      runtime.log("Docs: https://docs.hanzo.bot/skills");
     }
   }
 

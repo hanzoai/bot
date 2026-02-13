@@ -78,7 +78,7 @@ Gateway -> Node Service (WS)
 Security + ask + allowlist are stored locally on the Mac in:
 
 ```
-~/.bot/exec-approvals.json
+~/.hanzo/bot/exec-approvals.json
 ```
 
 Example:

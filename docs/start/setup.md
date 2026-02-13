@@ -17,7 +17,7 @@ Last updated: 2026-01-01
 
 ## TL;DR
 
-- **Tailoring lives outside the repo:** `~/.bot/workspace` (workspace) + `~/.bot/bot.json` (config).
+- **Tailoring lives outside the repo:** `~/.hanzo/bot/workspace` (workspace) + `~/.hanzo/bot/bot.json` (config).
 - **Stable workflow:** install the macOS app; let it run the bundled Gateway.
 - **Bleeding edge workflow:** run the Gateway yourself via `pnpm gateway:watch`, then let the macOS app attach in Local mode.
 
@@ -31,8 +31,8 @@ Last updated: 2026-01-01
 
 If you want “100% tailored to me” _and_ easy updates, keep your customization in:
 
-- **Config:** `~/.bot/bot.json` (JSON/JSON5-ish)
-- **Workspace:** `~/.bot/workspace` (skills, prompts, memories; make it a private git repo)
+- **Config:** `~/.hanzo/bot/bot.json` (JSON/JSON5-ish)
+- **Workspace:** `~/.hanzo/bot/workspace` (skills, prompts, memories; make it a private git repo)
 
 Bootstrap once:
 
@@ -118,26 +118,26 @@ hanzo-bot health
 
 - **Wrong port:** Gateway WS defaults to `ws://127.0.0.1:18789`; keep app + CLI on the same port.
 - **Where state lives:**
-  - Credentials: `~/.bot/credentials/`
-  - Sessions: `~/.bot/agents/<agentId>/sessions/`
+  - Credentials: `~/.hanzo/bot/credentials/`
+  - Sessions: `~/.hanzo/bot/agents/<agentId>/sessions/`
   - Logs: `/tmp/bot/`
 
 ## Credential storage map
 
 Use this when debugging auth or deciding what to back up:
 
-- **WhatsApp**: `~/.bot/credentials/whatsapp/<accountId>/creds.json`
+- **WhatsApp**: `~/.hanzo/bot/credentials/whatsapp/<accountId>/creds.json`
 - **Telegram bot token**: config/env or `channels.telegram.tokenFile`
 - **Discord bot token**: config/env (token file not yet supported)
 - **Slack tokens**: config/env (`channels.slack.*`)
-- **Pairing allowlists**: `~/.bot/credentials/<channel>-allowFrom.json`
-- **Model auth profiles**: `~/.bot/agents/<agentId>/agent/auth-profiles.json`
-- **Legacy OAuth import**: `~/.bot/credentials/oauth.json`
+- **Pairing allowlists**: `~/.hanzo/bot/credentials/<channel>-allowFrom.json`
+- **Model auth profiles**: `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
+- **Legacy OAuth import**: `~/.hanzo/bot/credentials/oauth.json`
   More detail: [Security](/gateway/security#credential-storage-map).
 
 ## Updating (without wrecking your setup)
 
-- Keep `~/.bot/workspace` and `~/.bot/` as “your stuff”; don’t put personal prompts/config into the `bot` repo.
+- Keep `~/.hanzo/bot/workspace` and `~/.hanzo/bot/` as “your stuff”; don’t put personal prompts/config into the `bot` repo.
 - Updating source: `git pull` + `pnpm install` (when lockfile changed) + keep using `pnpm gateway:watch`.
 
 ## Linux (systemd user service)

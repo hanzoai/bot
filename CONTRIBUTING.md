@@ -1,11 +1,11 @@
 # Contributing to Hanzo Bot
 
-Welcome to the lobster tank! 🥷
+Welcome! 🤖
 
 ## Quick Links
 
-- **GitHub:** https://github.com/bot/bot
-- **Discord:** https://discord.gg/qkhbAGHRBT
+- **GitHub:** https://github.com/hanzoai/bot
+- **Discord:** https://discord.gg/XthHQQj
 - **X/Twitter:** [@steipete](https://x.com/steipete) / [@bot](https://x.com/bot)
 
 ## Maintainers
@@ -16,7 +16,7 @@ Welcome to the lobster tank! 🥷
 - **Shadow** - Discord + Slack subsystem
   - GitHub: [@thewilloftheshadow](https://github.com/thewilloftheshadow) · X: [@4shad0wed](https://x.com/4shad0wed)
 
-- **Vignesh** - Memory (QMD), formal modeling, TUI, and Lobster
+- **Vignesh** - Memory (QMD), formal modeling, TUI, and Flow
   - GitHub: [@vignesh07](https://github.com/vignesh07) · X: [@\_vgnsh](https://x.com/_vgnsh)
 
 - **Jos** - Telegram, API, Nix mode
@@ -34,7 +34,7 @@ Welcome to the lobster tank! 🥷
 ## How to Contribute
 
 1. **Bugs & small fixes** → Open a PR!
-2. **New features / architecture** → Start a [GitHub Discussion](https://github.com/bot/bot/discussions) or ask in Discord first
+2. **New features / architecture** → Start a [GitHub Discussion](https://github.com/hanzoai/bot/discussions) or ask in Discord first
 3. **Questions** → Discord #setup-help
 
 ## Before You PR
@@ -79,20 +79,20 @@ We are currently prioritizing:
 
 - **Stability**: Fixing edge cases in channel connections (WhatsApp/Telegram).
 - **UX**: Improving the onboarding wizard and error messages.
-- **Skills**: For skill contributions, head to [Hanzo Skills](https://skills.hanzo.bot/) — the community hub for Hanzo Bot skills.
+- **Skills**: For skill contributions, head to [Hanzo Skills Hub](https://skills-hub.ai/) — the community hub for Hanzo Bot skills.
 - **Performance**: Optimizing token usage and compaction logic.
 
-Check the [GitHub Issues](https://github.com/bot/bot/issues) for "good first issue" labels!
+Check the [GitHub Issues](https://github.com/hanzoai/bot/issues) for "good first issue" labels!
 
 ## Report a Vulnerability
 
 We take security reports seriously. Report vulnerabilities directly to the repository where the issue lives:
 
-- **Core CLI and gateway** — [bot/bot](https://github.com/bot/bot)
-- **macOS desktop app** — [bot/bot](https://github.com/bot/bot) (apps/macos)
-- **iOS app** — [bot/bot](https://github.com/bot/bot) (apps/ios)
-- **Android app** — [bot/bot](https://github.com/bot/bot) (apps/android)
-- **Hanzo Skills** — [bot/hanzo-skills](https://github.com/bot/hanzo-skills)
+- **Core CLI and gateway** — [bot/bot](https://github.com/hanzoai/bot)
+- **macOS desktop app** — [bot/bot](https://github.com/hanzoai/bot) (apps/macos)
+- **iOS app** — [bot/bot](https://github.com/hanzoai/bot) (apps/ios)
+- **Android app** — [bot/bot](https://github.com/hanzoai/bot) (apps/android)
+- **Hanzo Skills Hub** — [bot/skills-hub](https://github.com/bot/skills-hub)
 - **Trust and threat model** — [bot/trust](https://github.com/bot/trust)
 
 For issues that don't fit a specific repo, or if you're unsure, email **security@hanzo.bot** and we'll route it.

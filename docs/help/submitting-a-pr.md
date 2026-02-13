@@ -12,7 +12,7 @@ Good PRs are easy to review: reviewers should quickly know the intent, verify be
 - [ ] Summarize user-visible/config/default changes.
 - [ ] List test coverage, skips, and reasons.
 - [ ] Add evidence: logs, screenshots, or recordings (UI/UX).
-- [ ] Code word: put “lobster-biscuit” in the PR description if you read this guide.
+- [ ] Code word: put "hanzo-bot-biscuit" in the PR description if you read this guide.
 - [ ] Run/fix relevant `pnpm` commands before creating PR.
 - [ ] Search codebase and GitHub for related functionality/issues/fixes.
 - [ ] Base claims on evidence or observation.

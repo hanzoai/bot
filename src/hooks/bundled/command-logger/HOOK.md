@@ -1,7 +1,7 @@
 ---
 name: command-logger
 description: "Log all command events to a centralized audit file"
-homepage: https://docs.bot.ai/hooks#command-logger
+homepage: https://docs.hanzo.bot/hooks#command-logger
 metadata:
   {
     "bot":
@@ -22,7 +22,7 @@ Logs all command events (`/new`, `/reset`, `/stop`, etc.) to a centralized audit
 Every time you issue a command to the agent:
 
 1. **Captures event details** - Command action, timestamp, session key, sender ID, source
-2. **Appends to log file** - Writes a JSON line to `~/.bot/logs/commands.log`
+2. **Appends to log file** - Writes a JSON line to `~/.hanzo/bot/logs/commands.log`
 3. **Silent operation** - Runs in the background without user notifications
 
 ## Output Format
@@ -43,7 +43,7 @@ Log entries are written in JSONL (JSON Lines) format:
 
 ## Log File Location
 
-`~/.bot/logs/commands.log`
+`~/.hanzo/bot/logs/commands.log`
 
 ## Requirements
 
@@ -86,7 +86,7 @@ The hook does not automatically rotate logs. To manage log size, you can:
 1. **Manual rotation**:
 
    ```bash
-   mv ~/.bot/logs/commands.log ~/.bot/logs/commands.log.old
+   mv ~/.hanzo/bot/logs/commands.log ~/.hanzo/bot/logs/commands.log.old
    ```
 
 2. **Use logrotate** (Linux):
@@ -106,17 +106,17 @@ The hook does not automatically rotate logs. To manage log size, you can:
 View recent commands:
 
 ```bash
-tail -n 20 ~/.bot/logs/commands.log
+tail -n 20 ~/.hanzo/bot/logs/commands.log
 ```
 
 Pretty-print with jq:
 
 ```bash
-cat ~/.bot/logs/commands.log | jq .
+cat ~/.hanzo/bot/logs/commands.log | jq .
 ```
 
 Filter by action:
 
 ```bash
-grep '"action":"new"' ~/.bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.hanzo/bot/logs/commands.log | jq .
 ```

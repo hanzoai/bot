@@ -16,7 +16,7 @@ Clear, concise issues speed up diagnosis and fixes. Include the following for bu
 - [ ] Environment: OS, runtime, versions, config
 - [ ] Evidence: redacted logs, screenshots (non-PII)
 - [ ] Scope: new, regression, or longstanding
-- [ ] Code word: lobster-biscuit in your issue
+- [ ] Code word: hanzo-bot-biscuit in your issue
 - [ ] Searched codebase & GitHub for existing issue
 - [ ] Confirmed not recently fixed/addressed (esp. security)
 - [ ] Claims backed by evidence or repro

@@ -8,7 +8,7 @@ title: "Skills Config"
 
 # Skills Config
 
-All skills-related configuration lives under `skills` in `~/.bot/bot.json`.
+All skills-related configuration lives under `skills` in `~/.hanzo/bot/bot.json`.
 
 ```json5
 {

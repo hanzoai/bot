@@ -299,8 +299,8 @@ Live tests discover credentials the same way the CLI does. Practical implication
 - If the CLI works, live tests should find the same keys.
 - If a live test says “no creds”, debug the same way you’d debug `hanzo-bot models list` / model selection.
 
-- Profile store: `~/.bot/credentials/` (preferred; what “profile keys” means in the tests)
-- Config: `~/.bot/bot.json` (or `BOT_CONFIG_PATH`)
+- Profile store: `~/.hanzo/bot/credentials/` (preferred; what “profile keys” means in the tests)
+- Config: `~/.hanzo/bot/bot.json` (or `BOT_CONFIG_PATH`)
 
 If you want to rely on env keys (e.g. exported in your `~/.profile`), run local tests after `source ~/.profile`, or use the Docker runners below (they can mount `~/.profile` into the container).
 
@@ -322,7 +322,7 @@ These run `pnpm test:live` inside the repo Docker image, mounting your local con
 Useful env vars:
 
 - `BOT_CONFIG_DIR=...` (default: `~/.bot`) mounted to `/home/node/.bot`
-- `BOT_WORKSPACE_DIR=...` (default: `~/.bot/workspace`) mounted to `/home/node/.bot/workspace`
+- `BOT_WORKSPACE_DIR=...` (default: `~/.hanzo/bot/workspace`) mounted to `/home/node/.hanzo/bot/workspace`
 - `BOT_PROFILE_FILE=...` (default: `~/.profile`) mounted to `/home/node/.profile` and sourced before running tests
 - `BOT_LIVE_GATEWAY_MODELS=...` / `BOT_LIVE_MODELS=...` to narrow the run
 - `BOT_LIVE_REQUIRE_PROFILE_KEYS=1` to ensure creds come from the profile store (not env)

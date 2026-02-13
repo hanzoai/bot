@@ -9,7 +9,7 @@ title: "Ansible"
 
 # Ansible Installation
 
-The recommended way to deploy Hanzo Bot to production servers is via **[bot-ansible](https://github.com/bot/bot-ansible)** — an automated installer with security-first architecture.
+The recommended way to deploy Hanzo Bot to production servers is via **[bot-ansible](https://github.com/hanzoai/bot-ansible)** — an automated installer with security-first architecture.
 
 ## Quick Start
 
@@ -19,7 +19,7 @@ One-command install:
 curl -fsSL https://raw.githubusercontent.com/bot/bot-ansible/main/install.sh | bash
 ```
 
-> **📦 Full guide: [github.com/bot/bot-ansible](https://github.com/bot/bot-ansible)**
+> **📦 Full guide: [github.com/hanzoai/bot-ansible](https://github.com/hanzoai/bot-ansible)**
 >
 > The bot-ansible repo is the source of truth for Ansible deployment. This page is a quick overview.
 
@@ -118,7 +118,7 @@ If you prefer manual control over the automation:
 sudo apt update && sudo apt install -y ansible git
 
 # 2. Clone repository
-git clone https://github.com/bot/bot-ansible.git
+git clone https://github.com/hanzoai/bot-ansible.git
 cd bot-ansible
 
 # 3. Install Ansible collections
@@ -196,13 +196,13 @@ hanzo-bot channels login
 
 For detailed security architecture and troubleshooting:
 
-- [Security Architecture](https://github.com/bot/bot-ansible/blob/main/docs/security.md)
-- [Technical Details](https://github.com/bot/bot-ansible/blob/main/docs/architecture.md)
-- [Troubleshooting Guide](https://github.com/bot/bot-ansible/blob/main/docs/troubleshooting.md)
+- [Security Architecture](https://github.com/hanzoai/bot-ansible/blob/main/docs/security.md)
+- [Technical Details](https://github.com/hanzoai/bot-ansible/blob/main/docs/architecture.md)
+- [Troubleshooting Guide](https://github.com/hanzoai/bot-ansible/blob/main/docs/troubleshooting.md)
 
 ## Related
 
-- [bot-ansible](https://github.com/bot/bot-ansible) — full deployment guide
+- [bot-ansible](https://github.com/hanzoai/bot-ansible) — full deployment guide
 - [Docker](/install/docker) — containerized gateway setup
 - [Sandboxing](/gateway/sandboxing) — agent sandbox configuration
 - [Multi-Agent Sandbox & Tools](/tools/multi-agent-sandbox-tools) — per-agent isolation

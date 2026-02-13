@@ -32,7 +32,7 @@ x-i18n:
 
 ```bash
 # Clone the repo
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 
 # Create a new Fly app (pick your own name)
@@ -85,13 +85,13 @@ primary_region = "iad"
 
 **关键设置：**
 
-| 设置                           | 原因                                                                      |
-| ------------------------------ | ------------------------------------------------------------------------- |
-| `--bind lan`                   | 绑定到 `0.0.0.0` 以便 Fly 的代理可以访问 Gateway 网关                     |
-| `--allow-unconfigured`         | 无需配置文件启动（你稍后会创建一个）                                      |
-| `internal_port = 3000`         | 必须与 `--port 3000`（或 `BOT_GATEWAY_PORT`）匹配以进行 Fly 健康检查 |
-| `memory = "2048mb"`            | 512MB 太小；推荐 2GB                                                      |
-| `BOT_STATE_DIR = "/data"` | 在卷上持久化状态                                                          |
+| 设置                      | 原因                                                                 |
+| ------------------------- | -------------------------------------------------------------------- |
+| `--bind lan`              | 绑定到 `0.0.0.0` 以便 Fly 的代理可以访问 Gateway 网关                |
+| `--allow-unconfigured`    | 无需配置文件启动（你稍后会创建一个）                                 |
+| `internal_port = 3000`    | 必须与 `--port 3000`（或 `BOT_GATEWAY_PORT`）匹配以进行 Fly 健康检查 |
+| `memory = "2048mb"`       | 512MB 太小；推荐 2GB                                                 |
+| `BOT_STATE_DIR = "/data"` | 在卷上持久化状态                                                     |
 
 ## 3）设置密钥
 

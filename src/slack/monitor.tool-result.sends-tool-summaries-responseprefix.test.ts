@@ -109,7 +109,7 @@ describe("monitorSlackProvider tool results", () => {
           {
             id: "main",
             default: true,
-            identity: { name: "Mainbot", theme: "space lobster", emoji: "🦞" },
+            identity: { name: "Mainbot", theme: "AI assistant", emoji: "🤖" },
           },
           {
             id: "rich",

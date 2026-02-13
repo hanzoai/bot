@@ -143,7 +143,7 @@ Example:
 2. Create an **Azure Bot** (App ID + secret + tenant ID).
 3. Build a **Teams app package** that references the bot and includes the RSC permissions below.
 4. Upload/install the Teams app into a team (or personal scope for DMs).
-5. Configure `msteams` in `~/.bot/bot.json` (or env vars) and start the gateway.
+5. Configure `msteams` in `~/.hanzo/bot/bot.json` (or env vars) and start the gateway.
 6. The gateway listens for Bot Framework webhook traffic on `/api/messages` by default.
 
 ## Azure Bot Setup (Prerequisites)
@@ -155,14 +155,14 @@ Before configuring Hanzo Bot, you need to create an Azure Bot resource.
 1. Go to [Create Azure Bot](https://portal.azure.com/#create/Microsoft.AzureBot)
 2. Fill in the **Basics** tab:
 
-   | Field              | Value                                                    |
-   | ------------------ | -------------------------------------------------------- |
+   | Field              | Value                                               |
+   | ------------------ | --------------------------------------------------- |
    | **Bot handle**     | Your bot name, e.g., `bot-msteams` (must be unique) |
-   | **Subscription**   | Select your Azure subscription                           |
-   | **Resource group** | Create new or use existing                               |
-   | **Pricing tier**   | **Free** for dev/testing                                 |
-   | **Type of App**    | **Single Tenant** (recommended - see note below)         |
-   | **Creation type**  | **Create new Microsoft App ID**                          |
+   | **Subscription**   | Select your Azure subscription                      |
+   | **Resource group** | Create new or use existing                          |
+   | **Pricing tier**   | **Free** for dev/testing                            |
+   | **Type of App**    | **Single Tenant** (recommended - see note below)    |
+   | **Creation type**  | **Create new Microsoft App ID**                     |
 
 > **Deprecation notice:** Creation of new multi-tenant bots was deprecated after 2025-07-31. Use **Single Tenant** for new bots.
 
@@ -597,7 +597,7 @@ Uploaded files are stored in a `/Hanzo BotShared/` folder in the configured Shar
 Hanzo Bot sends Teams polls as Adaptive Cards (there is no native Teams poll API).
 
 - CLI: `hanzo-bot message poll --channel msteams --target conversation:<id> ...`
-- Votes are recorded by the gateway in `~/.bot/msteams-polls.json`.
+- Votes are recorded by the gateway in `~/.hanzo/bot/msteams-polls.json`.
 - The gateway must stay online to record votes.
 - Polls do not auto-post result summaries yet (inspect the store file if needed).
 

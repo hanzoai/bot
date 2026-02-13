@@ -224,7 +224,7 @@ describe("web auto-reply", () => {
       channels: { whatsapp: { allowFrom: ["*"] } },
       messages: {
         messagePrefix: undefined,
-        responsePrefix: "🦞",
+        responsePrefix: "🤖",
       },
     }));
 
@@ -255,7 +255,7 @@ describe("web auto-reply", () => {
     });
 
     // Reply should have responsePrefix prepended
-    expect(reply).toHaveBeenCalledWith("🦞 hello there");
+    expect(reply).toHaveBeenCalledWith("🤖 hello there");
     resetLoadConfigMock();
   });
   it("applies channel responsePrefix override to replies", async () => {
@@ -303,7 +303,7 @@ describe("web auto-reply", () => {
           {
             id: "main",
             default: true,
-            identity: { name: "Mainbot", emoji: "🦞", theme: "space lobster" },
+            identity: { name: "Mainbot", emoji: "🤖", theme: "AI assistant" },
           },
         ],
       },
@@ -350,7 +350,7 @@ describe("web auto-reply", () => {
       channels: { whatsapp: { allowFrom: ["*"] } },
       messages: {
         messagePrefix: undefined,
-        responsePrefix: "🦞",
+        responsePrefix: "🤖",
       },
     }));
 
@@ -389,7 +389,7 @@ describe("web auto-reply", () => {
       channels: { whatsapp: { allowFrom: ["*"] } },
       messages: {
         messagePrefix: undefined,
-        responsePrefix: "🦞",
+        responsePrefix: "🤖",
       },
     }));
 
@@ -405,7 +405,7 @@ describe("web auto-reply", () => {
     };
 
     // Resolver returns text that already has prefix
-    const resolver = vi.fn().mockResolvedValue({ text: "🦞 already prefixed" });
+    const resolver = vi.fn().mockResolvedValue({ text: "🤖 already prefixed" });
 
     await monitorWebChannel(false, listenerFactory, false, resolver);
     expect(capturedOnMessage).toBeDefined();
@@ -421,7 +421,7 @@ describe("web auto-reply", () => {
     });
 
     // Should not double-prefix
-    expect(reply).toHaveBeenCalledWith("🦞 already prefixed");
+    expect(reply).toHaveBeenCalledWith("🤖 already prefixed");
     resetLoadConfigMock();
   });
 });

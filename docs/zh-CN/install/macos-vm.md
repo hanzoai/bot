@@ -157,7 +157,7 @@ hanzo-bot onboard --install-daemon
 编辑配置文件：
 
 ```bash
-nano ~/.bot/bot.json
+nano ~/.hanzo/bot/bot.json
 ```
 
 添加你的渠道：
@@ -267,11 +267,11 @@ lume run hanzo-bot --no-display
 
 ## 故障排除
 
-| 问题                    | 解决方案                                                         |
-| ----------------------- | ---------------------------------------------------------------- |
-| 无法 SSH 进入 VM        | 检查 VM 的系统设置中是否启用了"远程登录"                         |
-| VM IP 未显示            | 等待 VM 完全启动，再次运行 `lume get bot`                   |
-| 找不到 Lume 命令        | 将 `~/.local/bin` 添加到你的 PATH                                |
+| 问题                    | 解决方案                                                          |
+| ----------------------- | ----------------------------------------------------------------- |
+| 无法 SSH 进入 VM        | 检查 VM 的系统设置中是否启用了"远程登录"                          |
+| VM IP 未显示            | 等待 VM 完全启动，再次运行 `lume get bot`                         |
+| 找不到 Lume 命令        | 将 `~/.local/bin` 添加到你的 PATH                                 |
 | WhatsApp 二维码扫描失败 | 确保运行 `hanzo-bot channels login` 时你是登录到 VM（而不是主机） |
 
 ---

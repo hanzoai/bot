@@ -6,11 +6,11 @@ If you believe you've found a security issue in Hanzo Bot, please report it priv
 
 Report vulnerabilities directly to the repository where the issue lives:
 
-- **Core CLI and gateway** — [bot/bot](https://github.com/bot/bot)
-- **macOS desktop app** — [bot/bot](https://github.com/bot/bot) (apps/macos)
-- **iOS app** — [bot/bot](https://github.com/bot/bot) (apps/ios)
-- **Android app** — [bot/bot](https://github.com/bot/bot) (apps/android)
-- **Hanzo Skills** — [bot/hanzo-skills](https://github.com/bot/hanzo-skills)
+- **Core CLI and gateway** — [bot/bot](https://github.com/hanzoai/bot)
+- **macOS desktop app** — [bot/bot](https://github.com/hanzoai/bot) (apps/macos)
+- **iOS app** — [bot/bot](https://github.com/hanzoai/bot) (apps/ios)
+- **Android app** — [bot/bot](https://github.com/hanzoai/bot) (apps/android)
+- **Hanzo Skills Hub** — [bot/skills-hub](https://github.com/bot/skills-hub)
 - **Trust and threat model** — [bot/trust](https://github.com/bot/trust)
 
 For issues that don't fit a specific repo, or if you're unsure, email **security@hanzo.bot** and we'll route it.
@@ -49,7 +49,7 @@ The best way to help the project right now is by sending PRs.
 
 For threat model + hardening guidance (including `hanzo-bot security audit --deep` and `--fix`), see:
 
-- `https://docs.bot.ai/gateway/security`
+- `https://docs.hanzo.bot/gateway/security`
 
 ### Web Interface Safety
 

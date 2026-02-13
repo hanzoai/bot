@@ -12,7 +12,7 @@ Status: WhatsApp Web via Baileys only. Gateway owns the session(s).
 ## Quick setup (beginner)
 
 1. Use a **separate phone number** if possible (recommended).
-2. Configure WhatsApp in `~/.bot/bot.json`.
+2. Configure WhatsApp in `~/.hanzo/bot/bot.json`.
 3. Run `hanzo-bot channels login` to scan the QR code (Linked Devices).
 4. Start the gateway.
 
@@ -125,9 +125,9 @@ the prefix (use `""` to remove it).
 - Login command: `hanzo-bot channels login` (QR via Linked Devices).
 - Multi-account login: `hanzo-bot channels login --account <id>` (`<id>` = `accountId`).
 - Default account (when `--account` is omitted): `default` if present, otherwise the first configured account id (sorted).
-- Credentials stored in `~/.bot/credentials/whatsapp/<accountId>/creds.json`.
+- Credentials stored in `~/.hanzo/bot/credentials/whatsapp/<accountId>/creds.json`.
 - Backup copy at `creds.json.bak` (restored on corruption).
-- Legacy compatibility: older installs stored Baileys files directly in `~/.bot/credentials/`.
+- Legacy compatibility: older installs stored Baileys files directly in `~/.hanzo/bot/credentials/`.
 - Logout: `hanzo-bot channels logout` (or `--account <id>`) deletes WhatsApp auth state (but keeps shared `oauth.json`).
 - Logged-out socket => error instructs re-link.
 

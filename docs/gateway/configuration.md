@@ -1,5 +1,5 @@
 ---
-summary: "All configuration options for ~/.bot/bot.json with examples"
+summary: "All configuration options for ~/.hanzo/bot/bot.json with examples"
 read_when:
   - Adding or modifying config fields
 title: "Configuration"
@@ -7,9 +7,9 @@ title: "Configuration"
 
 # Configuration 🔧
 
-Hanzo Bot reads an optional **JSON5** config from `~/.bot/bot.json` (comments + trailing commas allowed).
+Hanzo Bot reads an optional **JSON5** config from `~/.hanzo/bot/bot.json` (comments + trailing commas allowed).
 
-If the file is missing, Hanzo Bot uses safe-ish defaults (embedded Pi agent + per-sender sessions + workspace `~/.bot/workspace`). You usually only need a config to:
+If the file is missing, Hanzo Bot uses safe-ish defaults (embedded Pi agent + per-sender sessions + workspace `~/.hanzo/bot/workspace`). You usually only need a config to:
 
 - restrict who can trigger the bot (`channels.whatsapp.allowFrom`, `channels.telegram.allowFrom`, etc.)
 - control group allowlists + mention behavior (`channels.whatsapp.groups`, `channels.telegram.groups`, `channels.discord.guilds`, `agents.list[].groupChat`)
@@ -51,7 +51,7 @@ Use `config.apply` to validate + write the full config and restart the Gateway i
 It writes a restart sentinel and pings the last active session after the Gateway comes back.
 
 Warning: `config.apply` replaces the **entire config**. If you want to change only a few keys,
-use `config.patch` or `hanzo-bot config set`. Keep a backup of `~/.bot/bot.json`.
+use `config.patch` or `hanzo-bot config set`. Keep a backup of `~/.hanzo/bot/bot.json`.
 
 Params:
 
@@ -66,7 +66,7 @@ Example (via `gateway call`):
 ```bash
 hanzo-bot gateway call config.get --params '{}' # capture payload.hash
 hanzo-bot gateway call config.apply --params '{
-  "raw": "{\\n  agents: { defaults: { workspace: \\"~/.bot/workspace\\" } }\\n}\\n",
+  "raw": "{\\n  agents: { defaults: { workspace: \\"~/.hanzo/bot/workspace\\" } }\\n}\\n",
   "baseHash": "<hash-from-config.get>",
   "sessionKey": "agent:main:whatsapp:dm:+15555550123",
   "restartDelayMs": 1000
@@ -108,7 +108,7 @@ hanzo-bot gateway call config.patch --params '{
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
@@ -126,7 +126,7 @@ To prevent the bot from responding to WhatsApp @-mentions in groups (only respon
 ```json5
 {
   agents: {
-    defaults: { workspace: "~/.bot/workspace" },
+    defaults: { workspace: "~/.hanzo/bot/workspace" },
     list: [
       {
         id: "main",
@@ -155,7 +155,7 @@ Split your config into multiple files using the `$include` directive. This is us
 ### Basic usage
 
 ```json5
-// ~/.bot/bot.json
+// ~/.hanzo/bot/bot.json
 {
   gateway: { port: 18789 },
 
@@ -170,10 +170,10 @@ Split your config into multiple files using the `$include` directive. This is us
 ```
 
 ```json5
-// ~/.bot/agents.json5
+// ~/.hanzo/bot/agents.json5
 {
   defaults: { sandbox: { mode: "all", scope: "session" } },
-  list: [{ id: "main", workspace: "~/.bot/workspace" }],
+  list: [{ id: "main", workspace: "~/.hanzo/bot/workspace" }],
 }
 ```
 
@@ -225,7 +225,7 @@ Included files can themselves contain `$include` directives (up to 10 levels dee
 ### Example: Multi-client legal setup
 
 ```json5
-// ~/.bot/bot.json
+// ~/.hanzo/bot/bot.json
 {
   gateway: { port: 18789, auth: { token: "secret" } },
 
@@ -248,7 +248,7 @@ Included files can themselves contain `$include` directives (up to 10 levels dee
 ```
 
 ```json5
-// ~/.bot/clients/mueller/agents.json5
+// ~/.hanzo/bot/clients/mueller/agents.json5
 [
   { id: "mueller-transcribe", workspace: "~/clients/mueller/transcribe" },
   { id: "mueller-docs", workspace: "~/clients/mueller/docs" },
@@ -256,7 +256,7 @@ Included files can themselves contain `$include` directives (up to 10 levels dee
 ```
 
 ```json5
-// ~/.bot/clients/mueller/broadcast.json5
+// ~/.hanzo/bot/clients/mueller/broadcast.json5
 {
   "120363403215116621@g.us": ["mueller-transcribe", "mueller-docs"],
 }
@@ -271,7 +271,7 @@ Hanzo Bot reads env vars from the parent process (shell, launchd/systemd, CI, et
 Additionally, it loads:
 
 - `.env` from the current working directory (if present)
-- a global fallback `.env` from `~/.bot/.env` (aka `$BOT_STATE_DIR/.env`)
+- a global fallback `.env` from `~/.hanzo/bot/.env` (aka `$BOT_STATE_DIR/.env`)
 
 Neither `.env` file overrides existing env vars.
 
@@ -359,13 +359,13 @@ You can reference environment variables directly in any config string value usin
 
 Hanzo Bot stores **per-agent** auth profiles (OAuth + API keys) in:
 
-- `<agentDir>/auth-profiles.json` (default: `~/.bot/agents/<agentId>/agent/auth-profiles.json`)
+- `<agentDir>/auth-profiles.json` (default: `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`)
 
 See also: [/concepts/oauth](/concepts/oauth)
 
 Legacy OAuth imports:
 
-- `~/.bot/credentials/oauth.json` (or `$BOT_STATE_DIR/credentials/oauth.json`)
+- `~/.hanzo/bot/credentials/oauth.json` (or `$BOT_STATE_DIR/credentials/oauth.json`)
 
 The embedded Pi agent maintains a runtime cache at:
 
@@ -373,7 +373,7 @@ The embedded Pi agent maintains a runtime cache at:
 
 Legacy agent dir (pre multi-agent):
 
-- `~/.bot/agent/*` (migrated by `hanzo-bot doctor` into `~/.bot/agents/<defaultAgentId>/agent/*`)
+- `~/.hanzo/bot/agent/*` (migrated by `hanzo-bot doctor` into `~/.hanzo/bot/agents/<defaultAgentId>/agent/*`)
 
 Overrides:
 
@@ -544,8 +544,8 @@ Run multiple WhatsApp accounts in one gateway:
         default: {}, // optional; keeps the default id stable
         personal: {},
         biz: {
-          // Optional override. Default: ~/.bot/credentials/whatsapp/biz
-          // authDir: "~/.bot/credentials/whatsapp/biz",
+          // Optional override. Default: ~/.hanzo/bot/credentials/whatsapp/biz
+          // authDir: "~/.hanzo/bot/credentials/whatsapp/biz",
         },
       },
     },
@@ -740,8 +740,8 @@ Inbound messages are routed to an agent via bindings.
   - `default`: optional; when multiple are set, the first wins and a warning is logged.
     If none are set, the **first entry** in the list is the default agent.
   - `name`: display name for the agent.
-  - `workspace`: default `~/.bot/workspace-<agentId>` (for `main`, falls back to `agents.defaults.workspace`).
-  - `agentDir`: default `~/.bot/agents/<agentId>/agent`.
+  - `workspace`: default `~/.hanzo/bot/workspace-<agentId>` (for `main`, falls back to `agents.defaults.workspace`).
+  - `agentDir`: default `~/.hanzo/bot/agents/<agentId>/agent`.
   - `model`: per-agent default model, overrides `agents.defaults.model` for that agent.
     - string form: `"provider/model"`, overrides only `agents.defaults.model.primary`
     - object form: `{ primary, fallbacks }` (fallbacks override `agents.defaults.model.fallbacks`; `[]` disables global fallbacks for that agent)
@@ -799,7 +799,7 @@ Full access (no sandbox):
     list: [
       {
         id: "personal",
-        workspace: "~/.bot/workspace-personal",
+        workspace: "~/.hanzo/bot/workspace-personal",
         sandbox: { mode: "off" },
       },
     ],
@@ -815,7 +815,7 @@ Read-only tools + read-only workspace:
     list: [
       {
         id: "family",
-        workspace: "~/.bot/workspace-family",
+        workspace: "~/.hanzo/bot/workspace-family",
         sandbox: {
           mode: "all",
           scope: "agent",
@@ -846,7 +846,7 @@ No filesystem access (messaging/session tools enabled):
     list: [
       {
         id: "public",
-        workspace: "~/.bot/workspace-public",
+        workspace: "~/.hanzo/bot/workspace-public",
         sandbox: {
           mode: "all",
           scope: "agent",
@@ -892,8 +892,8 @@ Example: two WhatsApp accounts → two agents:
 {
   agents: {
     list: [
-      { id: "home", default: true, workspace: "~/.bot/workspace-home" },
-      { id: "work", workspace: "~/.bot/workspace-work" },
+      { id: "home", default: true, workspace: "~/.hanzo/bot/workspace-home" },
+      { id: "work", workspace: "~/.hanzo/bot/workspace-work" },
     ],
   },
   bindings: [
@@ -1437,11 +1437,11 @@ exec ssh -T gateway-host imsg "$@"
 
 Sets the **single global workspace directory** used by the agent for file operations.
 
-Default: `~/.bot/workspace`.
+Default: `~/.hanzo/bot/workspace`.
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
 }
 ```
 
@@ -1516,7 +1516,7 @@ See [Messages](/concepts/messages) for queueing, sessions, and streaming context
 ```json5
 {
   messages: {
-    responsePrefix: "🥷", // or "auto"
+    responsePrefix: "🤖", // or "auto"
     ackReaction: "👀",
     ackReactionScope: "group-mentions",
     removeAckAfterReply: false,
@@ -1615,7 +1615,7 @@ voice notes; other channels send MP3 audio.
       },
       maxTextLength: 4000,
       timeoutMs: 30000,
-      prefsPath: "~/.bot/settings/tts.json",
+      prefsPath: "~/.hanzo/bot/settings/tts.json",
       elevenlabs: {
         apiKey: "elevenlabs_api_key",
         baseUrl: "https://api.elevenlabs.io",
@@ -1662,14 +1662,14 @@ Notes:
 
 Defaults for Talk mode (macOS/iOS/Android). Voice IDs fall back to `ELEVENLABS_VOICE_ID` or `SAG_VOICE_ID` when unset.
 `apiKey` falls back to `ELEVENLABS_API_KEY` (or the gateway’s shell profile) when unset.
-`voiceAliases` lets Talk directives use friendly names (e.g. `"voice":"Hanzo"`).
+`voiceAliases` lets Talk directives use friendly names (e.g. `"voice":"Bot"`).
 
 ```json5
 {
   talk: {
     voiceId: "elevenlabs_voice_id",
     voiceAliases: {
-      Hanzo: "EXAVITQu4vr4xnSDxMaL",
+      Bot: "EXAVITQu4vr4xnSDxMaL",
       Roger: "CwhRBWXzGAHq8TQ4Fs17",
     },
     modelId: "eleven_v3",
@@ -2304,7 +2304,7 @@ Defaults (if enabled):
 - scope: `"agent"` (one container + workspace per agent)
 - Debian bookworm-slim based image
 - agent workspace access: `workspaceAccess: "none"` (default)
-  - `"none"`: use a per-scope sandbox workspace under `~/.bot/sandboxes`
+  - `"none"`: use a per-scope sandbox workspace under `~/.hanzo/bot/sandboxes`
 - `"ro"`: keep the sandbox workspace at `/workspace`, and mount the agent workspace read-only at `/agent` (disables `write`/`edit`/`apply_patch`)
   - `"rw"`: mount the agent workspace read/write at `/workspace`
 - auto-prune: idle > 24h OR age > 7d
@@ -2331,7 +2331,7 @@ For package installs, ensure network egress, a writable root FS, and a root user
         mode: "non-main", // off | non-main | all
         scope: "agent", // session | agent | shared (agent is default)
         workspaceAccess: "none", // none | ro | rw
-        workspaceRoot: "~/.bot/sandboxes",
+        workspaceRoot: "~/.hanzo/bot/sandboxes",
         docker: {
           image: "bot-sandbox:bookworm-slim",
           containerPrefix: "bot-sbx-",
@@ -2445,12 +2445,12 @@ Allowlists for remote control:
 
 Hanzo Bot uses the **pi-coding-agent** model catalog. You can add custom providers
 (LiteLLM, local OpenAI-compatible servers, Anthropic proxies, etc.) by writing
-`~/.bot/agents/<agentId>/agent/models.json` or by defining the same schema inside your
+`~/.hanzo/bot/agents/<agentId>/agent/models.json` or by defining the same schema inside your
 Hanzo Bot config under `models.providers`.
 Provider-by-provider overview + examples: [/concepts/model-providers](/concepts/model-providers).
 
 When `models.providers` is present, Hanzo Bot writes/merges a `models.json` into
-`~/.bot/agents/<agentId>/agent/` on startup:
+`~/.hanzo/bot/agents/<agentId>/agent/` on startup:
 
 - default behavior: **merge** (keeps existing providers, overrides on name)
 - set `models.mode: "replace"` to overwrite the file contents
@@ -2748,7 +2748,7 @@ Notes:
   `google-generative-ai`
 - Use `authHeader: true` + `headers` for custom auth needs.
 - Override the agent config root with `BOT_AGENT_DIR` (or `PI_CODING_AGENT_DIR`)
-  if you want `models.json` stored elsewhere (default: `~/.bot/agents/main/agent`).
+  if you want `models.json` stored elsewhere (default: `~/.hanzo/bot/agents/main/agent`).
 
 ### `session`
 
@@ -2773,9 +2773,9 @@ Controls session scoping, reset policy, reset triggers, and where the session st
       group: { mode: "idle", idleMinutes: 120 },
     },
     resetTriggers: ["/new", "/reset"],
-    // Default is already per-agent under ~/.bot/agents/<agentId>/sessions/sessions.json
+    // Default is already per-agent under ~/.hanzo/bot/agents/<agentId>/sessions/sessions.json
     // You can override with {agentId} templating:
-    store: "~/.bot/agents/{agentId}/sessions/sessions.json",
+    store: "~/.hanzo/bot/agents/{agentId}/sessions/sessions.json",
     maintenance: {
       mode: "warn",
       pruneAfter: "30d",
@@ -2827,7 +2827,7 @@ Fields:
 ### `skills` (skills config)
 
 Controls bundled allowlist, install preferences, extra skill folders, and per-skill
-overrides. Applies to **bundled** skills and `~/.bot/skills` (workspace skills
+overrides. Applies to **bundled** skills and `~/.hanzo/bot/skills` (workspace skills
 still win on name conflicts).
 
 Fields:
@@ -2875,7 +2875,7 @@ Example:
 ### `plugins` (extensions)
 
 Controls plugin discovery, allow/deny, and per-plugin config. Plugins are loaded
-from `~/.bot/extensions`, `<workspace>/.bot/extensions`, plus any
+from `~/.hanzo/bot/extensions`, `<workspace>/.hanzo/bot/extensions`, plus any
 `plugins.load.paths` entries. **Config changes require a gateway restart.**
 See [/plugin](/tools/plugin) for full usage.
 
@@ -2926,7 +2926,7 @@ Defaults:
 - evaluateEnabled: `true` (set `false` to disable `act:evaluate` and `wait --fn`)
 - control service: loopback only (port derived from `gateway.port`, default `18791`)
 - CDP URL: `http://127.0.0.1:18792` (control service + 1, legacy single-profile)
-- profile color: `#FF4500` (lobster-orange)
+- profile color: `#FF4500` (bot-orange)
 - Note: the control server is started by the running gateway (Hanzo Bot.app menubar, or `hanzo-bot gateway`).
 - Auto-detect order: default browser if Chromium-based; otherwise Chrome → Brave → Edge → Chromium → Chrome Canary.
 
@@ -3056,7 +3056,7 @@ Remote client defaults (CLI):
 
 macOS app behavior:
 
-- Hanzo Bot.app watches `~/.bot/bot.json` and switches modes live when `gateway.mode` or `gateway.remote.url` changes.
+- Hanzo Bot.app watches `~/.hanzo/bot/bot.json` and switches modes live when `gateway.mode` or `gateway.remote.url` changes.
 - If `gateway.mode` is unset but `gateway.remote.url` is set, the macOS app treats it as remote mode.
 - When you change connection mode in the macOS app, it writes `gateway.mode` (and `gateway.remote.url` + `gateway.remote.transport` in remote mode) back to the config file.
 
@@ -3090,7 +3090,7 @@ Direct transport example (macOS app):
 
 ### `gateway.reload` (Config hot reload)
 
-The Gateway watches `~/.bot/bot.json` (or `BOT_CONFIG_PATH`) and applies changes automatically.
+The Gateway watches `~/.hanzo/bot/bot.json` (or `BOT_CONFIG_PATH`) and applies changes automatically.
 
 Modes:
 
@@ -3114,7 +3114,7 @@ Modes:
 
 Files watched:
 
-- `~/.bot/bot.json` (or `BOT_CONFIG_PATH`)
+- `~/.hanzo/bot/bot.json` (or `BOT_CONFIG_PATH`)
 
 Hot-applied (no full gateway restart):
 
@@ -3155,7 +3155,7 @@ See [Multiple gateways](/gateway/multiple-gateways) for browser/CDP port isolati
 Example:
 
 ```bash
-BOT_CONFIG_PATH=~/.bot/a.json \
+BOT_CONFIG_PATH=~/.hanzo/bot/a.json \
 BOT_STATE_DIR=~/.bot-a \
 hanzo-bot gateway --port 19001
 ```
@@ -3181,7 +3181,7 @@ Defaults:
     // Set [] to deny all explicit `agentId` routing.
     allowedAgentIds: ["hooks", "main"],
     presets: ["gmail"],
-    transformsDir: "~/.bot/hooks",
+    transformsDir: "~/.hanzo/bot/hooks",
     mappings: [
       {
         match: { path: "gmail" },
@@ -3278,7 +3278,7 @@ If you need the backend to receive the prefixed path, set
 
 The Gateway serves a directory of HTML/CSS/JS over HTTP so iOS/Android nodes can simply `canvas.navigate` to it.
 
-Default root: `~/.bot/workspace/canvas`  
+Default root: `~/.hanzo/bot/workspace/canvas`  
 Default port: `18793` (chosen to avoid the hanzo-bot browser CDP port `18792`)  
 The server listens on the **gateway bind host** (LAN or Tailnet) so nodes can reach it.
 
@@ -3298,7 +3298,7 @@ Disable live reload (and file watching) if the directory is large or you hit `EM
 ```json5
 {
   canvasHost: {
-    root: "~/.bot/workspace/canvas",
+    root: "~/.hanzo/bot/workspace/canvas",
     port: 18793,
     liveReload: true,
   },
@@ -3354,9 +3354,9 @@ Auto-generated certs require `openssl` on PATH; if generation fails, the bridge 
     bind: "tailnet",
     tls: {
       enabled: true,
-      // Uses ~/.bot/bridge/tls/bridge-{cert,key}.pem when omitted.
-      // certPath: "~/.bot/bridge/tls/bridge-cert.pem",
-      // keyPath: "~/.bot/bridge/tls/bridge-key.pem"
+      // Uses ~/.hanzo/bot/bridge/tls/bridge-{cert,key}.pem when omitted.
+      // certPath: "~/.hanzo/bot/bridge/tls/bridge-cert.pem",
+      // keyPath: "~/.hanzo/bot/bridge/tls/bridge-key.pem"
     },
   },
 }
@@ -3379,7 +3379,7 @@ Controls LAN mDNS discovery broadcasts (`_bot-gw._tcp`).
 
 ### `discovery.wideArea` (Wide-Area Bonjour / unicast DNS‑SD)
 
-When enabled, the Gateway writes a unicast DNS-SD zone for `_bot-gw._tcp` under `~/.bot/dns/` using the configured discovery domain (example: `bot.internal.`).
+When enabled, the Gateway writes a unicast DNS-SD zone for `_bot-gw._tcp` under `~/.hanzo/bot/dns/` using the configured discovery domain (example: `bot.internal.`).
 
 To make iOS/Android discover across networks (Vienna ⇄ London), pair this with:
 
@@ -3445,4 +3445,4 @@ Fields:
 
 ---
 
-_Next: [Agent Runtime](/concepts/agent)_ 🥷
+_Next: [Agent Runtime](/concepts/agent)_

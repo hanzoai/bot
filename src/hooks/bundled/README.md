@@ -10,7 +10,7 @@ Automatically saves session context to memory when you issue `/new`.
 
 **Events**: `command:new`
 **What it does**: Creates a dated memory file with LLM-generated slug based on conversation content.
-**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.bot/workspace`)
+**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.hanzo/bot/workspace`)
 
 **Enable**:
 
@@ -24,7 +24,7 @@ Logs all command events to a centralized audit file.
 
 **Events**: `command` (all commands)
 **What it does**: Appends JSONL entries to command log file.
-**Output**: `~/.bot/logs/commands.log`
+**Output**: `~/.hanzo/bot/logs/commands.log`
 
 **Enable**:
 
@@ -39,7 +39,7 @@ Swaps injected `SOUL.md` content with `SOUL_EVIL.md` during a purge window or by
 **Events**: `agent:bootstrap`
 **What it does**: Overrides the injected SOUL content before the system prompt is built.
 **Output**: No files written; swaps happen in-memory only.
-**Docs**: https://docs.bot.ai/hooks/soul-evil
+**Docs**: https://docs.hanzo.bot/hooks/soul-evil
 
 **Enable**:
 
@@ -82,9 +82,8 @@ session-memory/
 ---
 name: my-hook
 description: "Short description"
-homepage: https://docs.bot.ai/hooks#my-hook
-metadata:
-  { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
+homepage: https://docs.hanzo.bot/hooks#my-hook
+metadata: { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
 ---
 # Hook Title
 
@@ -108,7 +107,7 @@ Documentation goes here...
 To create your own hooks, place them in:
 
 - **Workspace hooks**: `<workspace>/hooks/` (highest precedence)
-- **Managed hooks**: `~/.bot/hooks/` (shared across workspaces)
+- **Managed hooks**: `~/.hanzo/bot/hooks/` (shared across workspaces)
 
 Custom hooks follow the same structure as bundled hooks.
 
@@ -141,7 +140,7 @@ hanzo-bot hooks disable command-logger
 
 ## Configuration
 
-Hooks can be configured in `~/.bot/bot.json`:
+Hooks can be configured in `~/.hanzo/bot/bot.json`:
 
 ```json
 {
@@ -221,4 +220,4 @@ Test your hooks by:
 
 ## Documentation
 
-Full documentation: https://docs.bot.ai/hooks
+Full documentation: https://docs.hanzo.bot/hooks

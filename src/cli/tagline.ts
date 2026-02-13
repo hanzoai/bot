@@ -6,7 +6,7 @@ const HOLIDAY_TAGLINES = {
   lunarNewYear:
     "Lunar New Year: May your builds be lucky, your branches prosperous, and your merge conflicts chased away with fireworks.",
   christmas:
-    "Christmas: Ho ho ho—Santa's little ninja-ssistant is here to ship joy, roll back chaos, and stash the keys safely.",
+    "Christmas: Ho ho ho—Santa's little bot-sistant is here to ship joy, roll back chaos, and stash the keys safely.",
   eid: "Eid al-Fitr: Celebration mode: queues cleared, tasks completed, and good vibes committed to main with clean history.",
   diwali:
     "Diwali: Let the logs sparkle and the bugs flee—today we light up the terminal and ship with pride.",
@@ -23,7 +23,7 @@ const HOLIDAY_TAGLINES = {
 } as const;
 
 const TAGLINES: string[] = [
-  "Your terminal just grew wings—type something and let the bot handle the busywork.",
+  "Your terminal just leveled up—type something and let the bot handle the busywork.",
   "Welcome to the command line: where dreams compile and confidence segfaults.",
   'I run on caffeine, JSON5, and the audacity of "it worked on my machine."',
   "Gateway online—please keep hands, feet, and appendages inside the shell at all times.",
@@ -60,13 +60,13 @@ const TAGLINES: string[] = [
   "I don't just autocomplete—I auto-commit (emotionally), then ask you to review (logically).",
   'Less clicking, more shipping, fewer "where did that file go" moments.',
   "Blades out, commit in—let's ship something mildly responsible.",
-  "I'll butter your workflow like a lobster roll: messy, delicious, effective.",
-  "Shell yeah—I'm here to pinch the toil and leave you the glory.",
+  "I'll streamline your workflow like a ninja: silent, precise, effective.",
+  "Shell yeah—I'm here to cut the toil and leave you the glory.",
   "If it's repetitive, I'll automate it; if it's hard, I'll bring jokes and a rollback plan.",
   "Because texting yourself reminders is so 2024.",
   "Your inbox, your infra, your rules.",
   'Turning "I\'ll reply later" into "my bot replied instantly".',
-  "The only ninja in your contacts you actually want to hear from. 🥷",
+  "The only AI in your contacts that actually gets things done. 🥷",
   "Chat automation for people who peaked at IRC.",
   "Because Siri wasn't answering at 3AM.",
   "IPC, but it's your phone.",

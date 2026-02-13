@@ -103,16 +103,16 @@ const STEP_LABELS: Record<string, string> = {
 
 const UPDATE_QUIPS = [
   "Leveled up! New skills unlocked. You're welcome.",
-  "Fresh code, same lobster. Miss me?",
+  "Fresh code, same bot. Miss me?",
   "Back and better. Did you even notice I was gone?",
   "Update complete. I learned some new tricks while I was out.",
   "Upgraded! Now with 23% more sass.",
   "I've evolved. Try to keep up.",
   "New version, who dis? Oh right, still me but shinier.",
-  "Patched, polished, and ready to pinch. Let's go.",
-  "The lobster has molted. Harder shell, sharper skills.",
+  "Patched, polished, and ready to deploy. Let's go.",
+  "The ninja has trained. Faster reflexes, sharper skills.",
   "Update done! Check the changelog or just trust me, it's good.",
-  "Reborn from the boiling waters of npm. Stronger now.",
+  "Reborn from the fires of npm. Stronger now.",
   "I went away and came back smarter. You should try it sometime.",
   "Update complete. The bugs feared me, so they left.",
   "New version installed. Old version sends its regards.",
@@ -120,7 +120,7 @@ const UPDATE_QUIPS = [
   "I've seen things you wouldn't believe. Anyway, I'm updated.",
   "Back online. The changelog is long but our friendship is longer.",
   "Upgraded! Peter fixed stuff. Blame him if it breaks.",
-  "Molting complete. Please don't look at my soft shell phase.",
+  "Rebuild complete. Please don't look at my compile warnings.",
   "Version bump! Same chaos energy, fewer crashes (probably).",
 ];
 
@@ -128,7 +128,7 @@ const MAX_LOG_CHARS = 8000;
 const DEFAULT_PACKAGE_NAME = "bot";
 const CORE_PACKAGE_NAMES = new Set([DEFAULT_PACKAGE_NAME]);
 const CLI_NAME = resolveCliName();
-const BOT_REPO_URL = "https://github.com/bot/bot.git";
+const BOT_REPO_URL = "https://github.com/hanzoai/bot.git";
 
 function normalizeTag(value?: string | null): string | null {
   if (!value) {
@@ -1286,7 +1286,7 @@ ${theme.heading("Notes:")}
   - Downgrades require confirmation (can break configuration)
   - Skips update if the working directory has uncommitted changes
 
-${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.bot.ai/cli/update")}`;
+${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.hanzo.bot/cli/update")}`;
     })
     .action(async (opts) => {
       try {
@@ -1310,7 +1310,7 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.bot.ai/cli/update"
     .option("--timeout <seconds>", "Timeout for each update step in seconds (default: 1200)")
     .addHelpText(
       "after",
-      `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.bot.ai/cli/update")}\n`,
+      `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.hanzo.bot/cli/update")}\n`,
     )
     .action(async (opts) => {
       try {
@@ -1339,7 +1339,7 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/update", "docs.bot.ai/cli/update"
           "- Shows current update channel (stable/beta/dev) and source",
         )}\n${theme.muted("- Includes git tag/branch/SHA for source checkouts")}\n\n${theme.muted(
           "Docs:",
-        )} ${formatDocsLink("/cli/update", "docs.bot.ai/cli/update")}`,
+        )} ${formatDocsLink("/cli/update", "docs.hanzo.bot/cli/update")}`,
     )
     .action(async (opts) => {
       try {

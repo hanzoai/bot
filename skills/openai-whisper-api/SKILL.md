@@ -39,7 +39,7 @@ Defaults:
 
 ## API key
 
-Set `OPENAI_API_KEY`, or configure it in `~/.bot/bot.json`:
+Set `OPENAI_API_KEY`, or configure it in `~/.hanzo/bot/bot.json`:
 
 ```json5
 {

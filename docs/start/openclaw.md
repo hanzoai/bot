@@ -71,7 +71,7 @@ hanzo-bot channels login
 hanzo-bot gateway --port 18789
 ```
 
-3. Put a minimal config in `~/.bot/bot.json`:
+3. Put a minimal config in `~/.hanzo/bot/bot.json`:
 
 ```json5
 {
@@ -87,7 +87,7 @@ When onboarding finishes, we auto-open the dashboard and print a clean (non-toke
 
 Hanzo Bot reads operating instructions and “memory” from its workspace directory.
 
-By default, Hanzo Bot uses `~/.bot/workspace` as the agent workspace, and will create it (plus starter `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`) automatically on setup/first agent run. `BOOTSTRAP.md` is only created when the workspace is brand new (it should not come back after you delete it). `MEMORY.md` is optional (not auto-created); when present, it is loaded for normal sessions. Subagent sessions only inject `AGENTS.md` and `TOOLS.md`.
+By default, Hanzo Bot uses `~/.hanzo/bot/workspace` as the agent workspace, and will create it (plus starter `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`) automatically on setup/first agent run. `BOOTSTRAP.md` is only created when the workspace is brand new (it should not come back after you delete it). `MEMORY.md` is optional (not auto-created); when present, it is loaded for normal sessions. Subagent sessions only inject `AGENTS.md` and `TOOLS.md`.
 
 Tip: treat this folder like Hanzo Bot’s “memory” and make it a git repo (ideally private) so your `AGENTS.md` + memory files are backed up. If git is installed, brand-new workspaces are auto-initialized.
 
@@ -103,7 +103,7 @@ Optional: choose a different workspace with `agents.defaults.workspace` (support
 ```json5
 {
   agent: {
-    workspace: "~/.bot/workspace",
+    workspace: "~/.hanzo/bot/workspace",
   },
 }
 ```
@@ -133,7 +133,7 @@ Example:
   logging: { level: "info" },
   agent: {
     model: "anthropic/claude-opus-4-6",
-    workspace: "~/.bot/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     thinkingDefault: "high",
     timeoutSeconds: 1800,
     // Start with 0; enable later.
@@ -166,8 +166,8 @@ Example:
 
 ## Sessions and memory
 
-- Session files: `~/.bot/agents/<agentId>/sessions/{{SessionId}}.jsonl`
-- Session metadata (token usage, last route, etc): `~/.bot/agents/<agentId>/sessions/sessions.json` (legacy: `~/.bot/sessions/sessions.json`)
+- Session files: `~/.hanzo/bot/agents/<agentId>/sessions/{{SessionId}}.jsonl`
+- Session metadata (token usage, last route, etc): `~/.hanzo/bot/agents/<agentId>/sessions/sessions.json` (legacy: `~/.hanzo/bot/sessions/sessions.json`)
 - `/new` or `/reset` starts a fresh session for that chat (configurable via `resetTriggers`). If sent alone, the agent replies with a short hello to confirm the reset.
 - `/compact [instructions]` compacts the session context and reports the remaining context budget.
 

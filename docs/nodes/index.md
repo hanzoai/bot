@@ -52,7 +52,7 @@ forwards `exec` calls to the **node host** when `host=node` is selected.
 
 - **Gateway host**: receives messages, runs the model, routes tool calls.
 - **Node host**: executes `system.run`/`system.which` on the node machine.
-- **Approvals**: enforced on the node host via `~/.bot/exec-approvals.json`.
+- **Approvals**: enforced on the node host via `~/.hanzo/bot/exec-approvals.json`.
 
 ### Start a node host (foreground)
 
@@ -81,7 +81,7 @@ hanzo-bot node run --host 127.0.0.1 --port 18790 --display-name "Build Node"
 
 Notes:
 
-- The token is `gateway.auth.token` from the gateway config (`~/.bot/bot.json` on the gateway host).
+- The token is `gateway.auth.token` from the gateway config (`~/.hanzo/bot/bot.json` on the gateway host).
 - `hanzo-bot node run` reads `BOT_GATEWAY_TOKEN` for auth.
 
 ### Start a node host (service)
@@ -103,7 +103,7 @@ hanzo-bot nodes list
 
 Naming options:
 
-- `--display-name` on `hanzo-bot node run` / `hanzo-bot node install` (persists in `~/.bot/node.json` on the node).
+- `--display-name` on `hanzo-bot node run` / `hanzo-bot node install` (persists in `~/.hanzo/bot/node.json` on the node).
 - `hanzo-bot nodes rename --node <id|name|ip> --name "Build Node"` (gateway override).
 
 ### Allowlist the commands
@@ -115,7 +115,7 @@ hanzo-bot approvals allowlist add --node <id|name|ip> "/usr/bin/uname"
 hanzo-bot approvals allowlist add --node <id|name|ip> "/usr/bin/sw_vers"
 ```
 
-Approvals live on the node host at `~/.bot/exec-approvals.json`.
+Approvals live on the node host at `~/.hanzo/bot/exec-approvals.json`.
 
 ### Point exec at the node
 
@@ -282,7 +282,7 @@ Notes:
 - macOS nodes drop `PATH` overrides; headless node hosts only accept `PATH` when it prepends the node host PATH.
 - On macOS node mode, `system.run` is gated by exec approvals in the macOS app (Settings → Exec approvals).
   Ask/allowlist/full behave the same as the headless node host; denied prompts return `SYSTEM_RUN_DENIED`.
-- On headless node host, `system.run` is gated by exec approvals (`~/.bot/exec-approvals.json`).
+- On headless node host, `system.run` is gated by exec approvals (`~/.hanzo/bot/exec-approvals.json`).
 
 ## Exec node binding
 
@@ -328,8 +328,8 @@ hanzo-bot node run --host <gateway-host> --port 18789
 Notes:
 
 - Pairing is still required (the Gateway will show a node approval prompt).
-- The node host stores its node id, token, display name, and gateway connection info in `~/.bot/node.json`.
-- Exec approvals are enforced locally via `~/.bot/exec-approvals.json`
+- The node host stores its node id, token, display name, and gateway connection info in `~/.hanzo/bot/node.json`.
+- Exec approvals are enforced locally via `~/.hanzo/bot/exec-approvals.json`
   (see [Exec approvals](/tools/exec-approvals)).
 - On macOS, the headless node host prefers the companion app exec host when reachable and falls
   back to local execution if the app is unavailable. Set `BOT_NODE_EXEC_HOST=app` to require

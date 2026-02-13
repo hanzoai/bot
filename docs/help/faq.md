@@ -20,7 +20,7 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [It is stuck on "wake up my friend" / onboarding will not hatch. What now?](#it-is-stuck-on-wake-up-my-friend-onboarding-will-not-hatch-what-now)
   - [Can I migrate my setup to a new machine (Mac mini) without redoing onboarding?](#can-i-migrate-my-setup-to-a-new-machine-mac-mini-without-redoing-onboarding)
   - [Where do I see what is new in the latest version?](#where-do-i-see-what-is-new-in-the-latest-version)
-  - [I can't access docs.bot.ai (SSL error). What now?](#i-cant-access-docsbotai-ssl-error-what-now)
+  - [I can't access docs.hanzo.bot (SSL error). What now?](#i-cant-access-docsbotai-ssl-error-what-now)
   - [What's the difference between stable and beta?](#whats-the-difference-between-stable-and-beta)
   - [How do I install the beta version, and what's the difference between beta and dev?](#how-do-i-install-the-beta-version-and-whats-the-difference-between-beta-and-dev)
   - [How do I try the latest bits?](#how-do-i-try-the-latest-bits)
@@ -287,8 +287,8 @@ Tip: ask the agent to **plan and supervise** the fix (step-by-step), then execut
 necessary commands. That keeps changes small and easier to audit.
 
 If you discover a real bug or fix, please file a GitHub issue or send a PR:
-[https://github.com/bot/bot/issues](https://github.com/bot/bot/issues)
-[https://github.com/bot/bot/pulls](https://github.com/bot/bot/pulls)
+[https://github.com/hanzoai/bot/issues](https://github.com/hanzoai/bot/issues)
+[https://github.com/hanzoai/bot/pulls](https://github.com/hanzoai/bot/pulls)
 
 Start with these commands (share outputs when asking for help):
 
@@ -324,7 +324,7 @@ The wizard can also build UI assets automatically. After onboarding, you typical
 From source (contributors/dev):
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 pnpm install
 pnpm build
@@ -417,7 +417,7 @@ state) as long as you copy **both** locations:
 
 1. Install Hanzo Bot on the new machine.
 2. Copy `$BOT_STATE_DIR` (default: `~/.bot`) from the old machine.
-3. Copy your workspace (default: `~/.bot/workspace`).
+3. Copy your workspace (default: `~/.hanzo/bot/workspace`).
 4. Run `hanzo-bot doctor` and restart the Gateway service.
 
 That preserves config, auth profiles, WhatsApp creds, sessions, and memory. If you're in
@@ -425,7 +425,7 @@ remote mode, remember the gateway host owns the session store and workspace.
 
 **Important:** if you only commit/push your workspace to GitHub, you're backing
 up **memory + bootstrap files**, but **not** session history or auth. Those live
-under `~/.bot/` (for example `~/.bot/agents/<agentId>/sessions/`).
+under `~/.hanzo/bot/` (for example `~/.hanzo/bot/agents/<agentId>/sessions/`).
 
 Related: [Migrating](/install/migrating), [Where things live on disk](/help/faq#where-does-bot-store-its-data),
 [Agent workspace](/concepts/agent-workspace), [Doctor](/gateway/doctor),
@@ -434,21 +434,21 @@ Related: [Migrating](/install/migrating), [Where things live on disk](/help/faq#
 ### Where do I see what is new in the latest version
 
 Check the GitHub changelog:
-[https://github.com/bot/bot/blob/main/CHANGELOG.md](https://github.com/bot/bot/blob/main/CHANGELOG.md)
+[https://github.com/hanzoai/bot/blob/main/CHANGELOG.md](https://github.com/hanzoai/bot/blob/main/CHANGELOG.md)
 
 Newest entries are at the top. If the top section is marked **Unreleased**, the next dated
 section is the latest shipped version. Entries are grouped by **Highlights**, **Changes**, and
 **Fixes** (plus docs/other sections when needed).
 
-### I cant access docs.bot.ai SSL error What now
+### I cant access docs.hanzo.bot SSL error What now
 
-Some Comcast/Xfinity connections incorrectly block `docs.bot.ai` via Xfinity
-Advanced Security. Disable it or allowlist `docs.bot.ai`, then retry. More
+Some Comcast/Xfinity connections incorrectly block `docs.hanzo.bot` via Xfinity
+Advanced Security. Disable it or allowlist `docs.hanzo.bot`, then retry. More
 detail: [Troubleshooting](/help/troubleshooting#docsbotai-shows-an-ssl-error-comcastxfinity).
 Please help us unblock it by reporting here: [https://spa.xfinity.com/check_url_status](https://spa.xfinity.com/check_url_status).
 
 If you still can't reach the site, the docs are mirrored on GitHub:
-[https://github.com/bot/bot/tree/main/docs](https://github.com/bot/bot/tree/main/docs)
+[https://github.com/hanzoai/bot/tree/main/docs](https://github.com/hanzoai/bot/tree/main/docs)
 
 ### What's the difference between stable and beta
 
@@ -462,7 +462,7 @@ that same version to `latest`**. That's why beta and stable can point at the
 **same version**.
 
 See what changed:
-[https://github.com/bot/bot/blob/main/CHANGELOG.md](https://github.com/bot/bot/blob/main/CHANGELOG.md)
+[https://github.com/hanzoai/bot/blob/main/CHANGELOG.md](https://github.com/hanzoai/bot/blob/main/CHANGELOG.md)
 
 ### How do I install the beta version and whats the difference between beta and dev
 
@@ -517,7 +517,7 @@ That gives you a local repo you can edit, then update via git.
 If you prefer a clean clone manually, use:
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 pnpm install
 pnpm build
@@ -836,12 +836,12 @@ Docs: [Getting started](/start/getting-started), [Updating](/install/updating).
 
 Yes. Install the other flavor, then run Doctor so the gateway service points at the new entrypoint.
 This **does not delete your data** - it only changes the Hanzo Bot code install. Your state
-(`~/.bot`) and workspace (`~/.bot/workspace`) stay untouched.
+(`~/.bot`) and workspace (`~/.hanzo/bot/workspace`) stay untouched.
 
 From npm → git:
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 pnpm install
 pnpm build
@@ -998,11 +998,11 @@ Showcase: [https://hanzo.bot/showcase](https://hanzo.bot/showcase)
 
 ### How do I customize skills without keeping the repo dirty
 
-Use managed overrides instead of editing the repo copy. Put your changes in `~/.bot/skills/<name>/SKILL.md` (or add a folder via `skills.load.extraDirs` in `~/.bot/bot.json`). Precedence is `<workspace>/skills` > `~/.bot/skills` > bundled, so managed overrides win without touching git. Only upstream-worthy edits should live in the repo and go out as PRs.
+Use managed overrides instead of editing the repo copy. Put your changes in `~/.hanzo/bot/skills/<name>/SKILL.md` (or add a folder via `skills.load.extraDirs` in `~/.hanzo/bot/bot.json`). Precedence is `<workspace>/skills` > `~/.hanzo/bot/skills` > bundled, so managed overrides win without touching git. Only upstream-worthy edits should live in the repo and go out as PRs.
 
 ### Can I load skills from a custom folder
 
-Yes. Add extra directories via `skills.load.extraDirs` in `~/.bot/bot.json` (lowest precedence). Default precedence remains: `<workspace>/skills` → `~/.bot/skills` → bundled → `skills.load.extraDirs`. `hanzo-skills` installs into `./skills` by default, which Hanzo Bot treats as `<workspace>/skills`.
+Yes. Add extra directories via `skills.load.extraDirs` in `~/.hanzo/bot/bot.json` (lowest precedence). Default precedence remains: `<workspace>/skills` → `~/.hanzo/bot/skills` → bundled → `skills.load.extraDirs`. `skills-hub` installs into `./skills` by default, which Hanzo Bot treats as `<workspace>/skills`.
 
 ### How can I use different models for different tasks
 
@@ -1049,17 +1049,17 @@ Docs: [Cron jobs](/automation/cron-jobs), [Cron vs Heartbeat](/automation/cron-v
 
 ### How do I install skills on Linux
 
-Use **Hanzo Skills** (CLI) or drop skills into your workspace. The macOS Skills UI isn't available on Linux.
+Use **Hanzo Skills Hub** (CLI) or drop skills into your workspace. The macOS Skills UI isn't available on Linux.
 Browse skills at [https://skills.hanzo.bot](https://skills.hanzo.bot).
 
-Install the Hanzo Skills CLI (pick one package manager):
+Install the Hanzo Skills Hub CLI (pick one package manager):
 
 ```bash
-npm i -g hanzo-skills
+npm i -g skills-hub
 ```
 
 ```bash
-pnpm add -g hanzo-skills
+pnpm add -g skills-hub
 ```
 
 ### Can Hanzo Bot run tasks on a schedule or continuously in the background
@@ -1097,7 +1097,7 @@ Keep the Gateway on Linux, but make the required CLI binaries resolve to SSH wra
    ```
 
 2. Put the wrapper on `PATH` on the Linux host (for example `~/bin/memo`).
-3. Override the skill metadata (workspace or `~/.bot/skills`) to allow Linux:
+3. Override the skill metadata (workspace or `~/.hanzo/bot/skills`) to allow Linux:
 
    ```markdown
    ---
@@ -1129,11 +1129,11 @@ targeting those APIs.
 Install skills:
 
 ```bash
-hanzo-skills install <skill-slug>
-hanzo-skills update --all
+skills-hub install <skill-slug>
+skills-hub update --all
 ```
 
-Hanzo Skills installs into `./skills` under your current directory (or falls back to your configured Hanzo Bot workspace); Hanzo Bot treats that as `<workspace>/skills` on the next session. For shared skills across agents, place them in `~/.bot/skills/<name>/SKILL.md`. Some skills expect binaries installed via Homebrew; on Linux that means Linuxbrew (see the Homebrew Linux FAQ entry above). See [Skills](/tools/skills) and [Hanzo Skills](/tools/hanzo-skills).
+Hanzo Skills Hub installs into `./skills` under your current directory (or falls back to your configured Hanzo Bot workspace); Hanzo Bot treats that as `<workspace>/skills` on the next session. For shared skills across agents, place them in `~/.hanzo/bot/skills/<name>/SKILL.md`. Some skills expect binaries installed via Homebrew; on Linux that means Linuxbrew (see the Homebrew Linux FAQ entry above). See [Skills](/tools/skills) and [Hanzo Skills Hub](/tools/skills-hub).
 
 ### How do I install the Chrome extension for browser takeover
 
@@ -1267,9 +1267,9 @@ Everything lives under `$BOT_STATE_DIR` (default: `~/.bot`):
 | `$BOT_STATE_DIR/agents/<agentId>/sessions/`                | Conversation history & state (per agent)                     |
 | `$BOT_STATE_DIR/agents/<agentId>/sessions/sessions.json`   | Session metadata (per agent)                                 |
 
-Legacy single-agent path: `~/.bot/agent/*` (migrated by `hanzo-bot doctor`).
+Legacy single-agent path: `~/.hanzo/bot/agent/*` (migrated by `hanzo-bot doctor`).
 
-Your **workspace** (AGENTS.md, memory files, skills, etc.) is separate and configured via `agents.defaults.workspace` (default: `~/.bot/workspace`).
+Your **workspace** (AGENTS.md, memory files, skills, etc.) is separate and configured via `agents.defaults.workspace` (default: `~/.hanzo/bot/workspace`).
 
 ### Where should AGENTSmd SOULmd USERmd MEMORYmd live
 
@@ -1278,13 +1278,13 @@ These files live in the **agent workspace**, not `~/.bot`.
 - **Workspace (per agent)**: `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`,
   `MEMORY.md` (or `memory.md`), `memory/YYYY-MM-DD.md`, optional `HEARTBEAT.md`.
 - **State dir (`~/.bot`)**: config, credentials, auth profiles, sessions, logs,
-  and shared skills (`~/.bot/skills`).
+  and shared skills (`~/.hanzo/bot/skills`).
 
-Default workspace is `~/.bot/workspace`, configurable via:
+Default workspace is `~/.hanzo/bot/workspace`, configurable via:
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
 }
 ```
 
@@ -1343,13 +1343,13 @@ Session state is owned by the **gateway host**. If you're in remote mode, the se
 
 ### What format is the config Where is it
 
-Hanzo Bot reads an optional **JSON5** config from `$BOT_CONFIG_PATH` (default: `~/.bot/bot.json`):
+Hanzo Bot reads an optional **JSON5** config from `$BOT_CONFIG_PATH` (default: `~/.hanzo/bot/bot.json`):
 
 ```
 $BOT_CONFIG_PATH
 ```
 
-If the file is missing, it uses safe-ish defaults (including a default workspace of `~/.bot/workspace`).
+If the file is missing, it uses safe-ish defaults (including a default workspace of `~/.hanzo/bot/workspace`).
 
 ### I set gatewaybind lan or tailnet and now nothing listens the UI says unauthorized
 
@@ -1413,7 +1413,7 @@ Notes:
 
 - If you use allowlists, add `web_search`/`web_fetch` or `group:web`.
 - `web_fetch` is enabled by default (unless explicitly disabled).
-- Daemons read env vars from `~/.bot/.env` (or the service environment).
+- Daemons read env vars from `~/.hanzo/bot/.env` (or the service environment).
 
 Docs: [Web tools](/tools/web).
 
@@ -1591,7 +1591,7 @@ else is removed.
 
 Recover:
 
-- Restore from backup (git or a copied `~/.bot/bot.json`).
+- Restore from backup (git or a copied `~/.hanzo/bot/bot.json`).
 - If you have no backup, re-run `hanzo-bot doctor` and reconfigure channels/models.
 - If this was unexpected, file a bug and include your last known config or any backup.
 - A local coding agent can often reconstruct a working config from logs or history.
@@ -1607,7 +1607,7 @@ Docs: [Config](/cli/config), [Configure](/cli/configure), [Doctor](/gateway/doct
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
@@ -1666,7 +1666,7 @@ Docs: [Gateway protocol](/gateway/protocol), [Discovery](/gateway/discovery), [m
 Hanzo Bot reads env vars from the parent process (shell, launchd/systemd, CI, etc.) and additionally loads:
 
 - `.env` from the current working directory
-- a global fallback `.env` from `~/.bot/.env` (aka `$BOT_STATE_DIR/.env`)
+- a global fallback `.env` from `~/.hanzo/bot/.env` (aka `$BOT_STATE_DIR/.env`)
 
 Neither `.env` file overrides existing env vars.
 
@@ -1687,7 +1687,7 @@ See [/environment](/help/environment) for full precedence and sources.
 
 Two common fixes:
 
-1. Put the missing keys in `~/.bot/.env` so they're picked up even when the service doesn't inherit your shell env.
+1. Put the missing keys in `~/.hanzo/bot/.env` so they're picked up even when the service doesn't inherit your shell env.
 2. Enable shell import (opt-in convenience):
 
 ```json5
@@ -1713,7 +1713,7 @@ your login shell automatically.
 If the Gateway runs as a service (launchd/systemd), it won't inherit your shell
 environment. Fix by doing one of these:
 
-1. Put the token in `~/.bot/.env`:
+1. Put the token in `~/.hanzo/bot/.env`:
 
    ```
    COPILOT_GITHUB_TOKEN=...
@@ -1912,7 +1912,7 @@ Direct chats collapse to the main session by default. Groups/channels have their
 
 No hard limits. Dozens (even hundreds) are fine, but watch for:
 
-- **Disk growth:** sessions + transcripts live under `~/.bot/agents/<agentId>/sessions/`.
+- **Disk growth:** sessions + transcripts live under `~/.hanzo/bot/agents/<agentId>/sessions/`.
 - **Token cost:** more agents means more concurrent model usage.
 - **Ops overhead:** per-agent auth profiles, workspaces, and channel routing.
 
@@ -1995,7 +1995,7 @@ Safe options:
 - `/model` in chat (quick, per-session)
 - `hanzo-bot models set ...` (updates just model config)
 - `hanzo-bot configure --section model` (interactive)
-- edit `agents.defaults.model` in `~/.bot/bot.json`
+- edit `agents.defaults.model` in `~/.hanzo/bot/bot.json`
 
 Avoid `config.apply` with a partial object unless you intend to replace the whole config.
 If you did overwrite config, restore from backup or re-run `hanzo-bot doctor` to repair.
@@ -2203,7 +2203,7 @@ This usually means the **new agent** has an empty auth store. Auth is per-agent 
 stored in:
 
 ```
-~/.bot/agents/<agentId>/agent/auth-profiles.json
+~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json
 ```
 
 Fix options:
@@ -2235,10 +2235,10 @@ It means the system attempted to use the auth profile ID `anthropic:default`, bu
 ### Fix checklist for No credentials found for profile anthropicdefault
 
 - **Confirm where auth profiles live** (new vs legacy paths)
-  - Current: `~/.bot/agents/<agentId>/agent/auth-profiles.json`
-  - Legacy: `~/.bot/agent/*` (migrated by `hanzo-bot doctor`)
+  - Current: `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
+  - Legacy: `~/.hanzo/bot/agent/*` (migrated by `hanzo-bot doctor`)
 - **Confirm your env var is loaded by the Gateway**
-  - If you set `ANTHROPIC_API_KEY` in your shell but run the Gateway via systemd/launchd, it may not inherit it. Put it in `~/.bot/.env` or enable `env.shellEnv`.
+  - If you set `ANTHROPIC_API_KEY` in your shell but run the Gateway via systemd/launchd, it may not inherit it. Put it in `~/.hanzo/bot/.env` or enable `env.shellEnv`.
 - **Make sure you're editing the correct agent**
   - Multi-agent setups mean there can be multiple `auth-profiles.json` files.
 - **Sanity-check model/auth status**
@@ -2253,7 +2253,7 @@ can't find it in its auth store.
   - Run `claude setup-token`, then paste it with `hanzo-bot models auth setup-token --provider anthropic`.
   - If the token was created on another machine, use `hanzo-bot models auth paste-token --provider anthropic`.
 - **If you want to use an API key instead**
-  - Put `ANTHROPIC_API_KEY` in `~/.bot/.env` on the **gateway host**.
+  - Put `ANTHROPIC_API_KEY` in `~/.hanzo/bot/.env` on the **gateway host**.
   - Clear any pinned order that forces a missing profile:
 
     ```bash
@@ -2285,7 +2285,7 @@ Related: [/concepts/oauth](/concepts/oauth) (OAuth flows, token storage, multi-a
 An auth profile is a named credential record (OAuth or API key) tied to a provider. Profiles live in:
 
 ```
-~/.bot/agents/<agentId>/agent/auth-profiles.json
+~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json
 ```
 
 ### What are typical profile IDs
@@ -2489,7 +2489,7 @@ hanzo-bot logs --follow
 
 Service/supervisor logs (when the gateway runs via launchd/systemd):
 
-- macOS: `$BOT_STATE_DIR/logs/gateway.log` and `gateway.err.log` (default: `~/.bot/logs/...`; profiles use `~/.bot-<profile>/logs/...`)
+- macOS: `$BOT_STATE_DIR/logs/gateway.log` and `gateway.err.log` (default: `~/.hanzo/bot/logs/...`; profiles use `~/.bot-<profile>/logs/...`)
 - Linux: `journalctl --user -u bot-gateway[-<profile>].service -n 200 --no-pager`
 - Windows: `schtasks /Query /TN "Hanzo Bot Gateway (<profile>)" /V /FO LIST`
 
@@ -2845,4 +2845,4 @@ You can add options like `debounce:2s cap:25 drop:summarize` for followup modes.
 
 ---
 
-Still stuck? Ask in [Discord](https://discord.com/invite/hanzo) or open a [GitHub discussion](https://github.com/bot/bot/discussions).
+Still stuck? Ask in [Discord](https://discord.gg/XthHQQj) or open a [GitHub discussion](https://github.com/hanzoai/bot/discussions).

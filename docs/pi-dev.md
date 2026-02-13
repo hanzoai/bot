@@ -66,5 +66,5 @@ If you only want to reset sessions, delete `agents/<agentId>/sessions/` and `age
 
 ## References
 
-- [https://docs.bot.ai/testing](https://docs.bot.ai/testing)
-- [https://docs.bot.ai/start/getting-started](https://docs.bot.ai/start/getting-started)
+- [https://docs.hanzo.bot/testing](https://docs.hanzo.bot/testing)
+- [https://docs.hanzo.bot/start/getting-started](https://docs.hanzo.bot/start/getting-started)

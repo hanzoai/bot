@@ -25,11 +25,11 @@ Inspired by Simon Willison's [Running Hanzo Bot in Docker](https://til.simonwill
 **Install:**
 
 ```bash
-mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/hanzoai/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.bot/bot-helpers.sh
+mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/hanzoai/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.hanzo/bot/bot-helpers.sh
 ```
 
 ```bash
-echo 'source ~/.bot/bot-helpers.sh' >> ~/.zshrc && source ~/.zshrc
+echo 'source ~/.hanzo/bot/bot-helpers.sh' >> ~/.zshrc && source ~/.zshrc
 ```
 
 **See what you get:**
@@ -42,7 +42,7 @@ On first command, BotDock auto-detects your Hanzo Bot directory:
 
 - Checks common paths (`~/hanzo-bot`, `~/workspace/hanzo-bot`, etc.)
 - If found, asks you to confirm
-- Saves to `~/.bot/config`
+- Saves to `~/.hanzo/bot/config`
 
 **First time setup:**
 
@@ -216,7 +216,7 @@ docker ps
 **Test with fresh config (mimics first-time install):**
 
 ```bash
-unset BOTDOCK_DIR && rm -f ~/.bot/config && source scripts/shell-helpers/bot-helpers.sh
+unset BOTDOCK_DIR && rm -f ~/.hanzo/bot/config && source scripts/shell-helpers/bot-helpers.sh
 ```
 
 Then run any command to trigger auto-detect:

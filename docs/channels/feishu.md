@@ -173,7 +173,7 @@ Choose **Feishu** and paste your App ID + App Secret.
 
 ### Configure via config file
 
-Edit `~/.bot/bot.json`:
+Edit `~/.hanzo/bot/bot.json`:
 
 ```json5
 {
@@ -474,14 +474,14 @@ Use `bindings` to route Feishu DMs or groups to different agents.
     list: [
       { id: "main" },
       {
-        id: "hanzo-fan",
-        workspace: "/home/user/hanzo-fan",
-        agentDir: "/home/user/.bot/agents/hanzo-fan/agent",
+        id: "bot-fan",
+        workspace: "/home/user/bot-fan",
+        agentDir: "/home/user/.hanzo/bot/agents/bot-fan/agent",
       },
       {
-        id: "hanzo-xi",
-        workspace: "/home/user/hanzo-xi",
-        agentDir: "/home/user/.bot/agents/hanzo-xi/agent",
+        id: "bot-xi",
+        workspace: "/home/user/bot-xi",
+        agentDir: "/home/user/.hanzo/bot/agents/bot-xi/agent",
       },
     ],
   },
@@ -494,14 +494,14 @@ Use `bindings` to route Feishu DMs or groups to different agents.
       },
     },
     {
-      agentId: "hanzo-fan",
+      agentId: "bot-fan",
       match: {
         channel: "feishu",
         peer: { kind: "direct", id: "ou_yyy" },
       },
     },
     {
-      agentId: "hanzo-xi",
+      agentId: "bot-xi",
       match: {
         channel: "feishu",
         peer: { kind: "group", id: "oc_zzz" },

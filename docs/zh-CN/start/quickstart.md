@@ -61,7 +61,7 @@ Hanzo Bot 需要 Node 22 或更新版本。
 ## 从源码安装（开发）
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 pnpm install
 pnpm ui:build # 首次运行时会自动安装 UI 依赖
@@ -74,7 +74,7 @@ hanzo-bot onboard --install-daemon
 ## 多实例快速开始（可选）
 
 ```bash
-BOT_CONFIG_PATH=~/.bot/a.json \
+BOT_CONFIG_PATH=~/.hanzo/bot/a.json \
 BOT_STATE_DIR=~/.bot-a \
 hanzo-bot gateway --port 19001
 ```

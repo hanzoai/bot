@@ -2,7 +2,7 @@
 
 Small persona swap hook for Hanzo Bot.
 
-Docs: https://docs.bot.ai/hooks/soul-evil
+Docs: https://docs.hanzo.bot/hooks/soul-evil
 
 ## Setup
 

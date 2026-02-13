@@ -17,7 +17,7 @@ for the first time.
 ## What bootstrapping does
 
 On the first agent run, Hanzo Bot bootstraps the workspace (default
-`~/.bot/workspace`):
+`~/.hanzo/bot/workspace`):
 
 - Seeds `AGENTS.md`, `BOOTSTRAP.md`, `IDENTITY.md`, `USER.md`.
 - Runs a short Q&A ritual (one question at a time).
@@ -32,7 +32,7 @@ machine.
 
 <Note>
 When the Gateway runs on another machine, edit workspace files on the gateway
-host (for example, `user@gateway-host:~/.bot/workspace`).
+host (for example, `user@gateway-host:~/.hanzo/bot/workspace`).
 </Note>
 
 ## Related docs

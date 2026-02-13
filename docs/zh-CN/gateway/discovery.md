@@ -78,7 +78,7 @@ Bonjour 是尽力而为的，不会跨网络。它仅用于"同一 LAN"的便利
 禁用/覆盖：
 
 - `BOT_DISABLE_BONJOUR=1` 禁用广播。
-- `~/.bot/bot.json` 中的 `gateway.bind` 控制 Gateway 网关绑定模式。
+- `~/.hanzo/bot/bot.json` 中的 `gateway.bind` 控制 Gateway 网关绑定模式。
 - `BOT_SSH_PORT` 覆盖 TXT 中广播的 SSH 端口（默认为 22）。
 - `BOT_TAILNET_DNS` 发布 `tailnetDns` 提示（MagicDNS）。
 - `BOT_CLI_PATH` 覆盖广播的 CLI 路径。

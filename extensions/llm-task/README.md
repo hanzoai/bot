@@ -3,7 +3,7 @@
 Adds an **optional** agent tool `llm-task` for running **JSON-only** LLM tasks
 (drafting, summarizing, classifying) with optional JSON Schema validation.
 
-Designed to be called from workflow engines (for example, Lobster via
+Designed to be called from workflow engines (for example, Flow via
 `bot.invoke --each`) without adding new Hanzo Bot code per workflow.
 
 ## Enable
@@ -85,13 +85,13 @@ Returns `details.json` containing the parsed JSON (and validates against
   (no code fences, no commentary).
 - No tools are exposed to the model for this run.
 - Side effects should be handled outside this tool (for example, approvals in
-  Lobster) before calling tools that send messages/emails.
+  Flow) before calling tools that send messages/emails.
 
 ## Bundled extension note
 
 This extension depends on Hanzo Bot internal modules (the embedded agent runner).
-It is intended to ship as a **bundled** Hanzo Bot extension (like `lobster`) and
+It is intended to ship as a **bundled** Hanzo Bot extension (like `flow`) and
 be enabled via `plugins.entries` + tool allowlists.
 
 It is **not** currently designed to be copied into
-`~/.bot/extensions` as a standalone plugin directory.
+`~/.hanzo/bot/extensions` as a standalone plugin directory.

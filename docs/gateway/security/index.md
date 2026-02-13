@@ -53,13 +53,13 @@ If you run `--deep`, Hanzo Bot also attempts a best-effort live Gateway probe.
 
 Use this when auditing access or deciding what to back up:
 
-- **WhatsApp**: `~/.bot/credentials/whatsapp/<accountId>/creds.json`
+- **WhatsApp**: `~/.hanzo/bot/credentials/whatsapp/<accountId>/creds.json`
 - **Telegram bot token**: config/env or `channels.telegram.tokenFile`
 - **Discord bot token**: config/env (token file not yet supported)
 - **Slack tokens**: config/env (`channels.slack.*`)
-- **Pairing allowlists**: `~/.bot/credentials/<channel>-allowFrom.json`
-- **Model auth profiles**: `~/.bot/agents/<agentId>/agent/auth-profiles.json`
-- **Legacy OAuth import**: `~/.bot/credentials/oauth.json`
+- **Pairing allowlists**: `~/.hanzo/bot/credentials/<channel>-allowFrom.json`
+- **Model auth profiles**: `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
+- **Legacy OAuth import**: `~/.hanzo/bot/credentials/oauth.json`
 
 ## Security Audit Checklist
 
@@ -104,7 +104,7 @@ When `trustedProxies` is configured, the Gateway will use `X-Forwarded-For` head
 
 ## Local session logs live on disk
 
-Hanzo Bot stores session transcripts on disk under `~/.bot/agents/<agentId>/sessions/*.jsonl`.
+Hanzo Bot stores session transcripts on disk under `~/.hanzo/bot/agents/<agentId>/sessions/*.jsonl`.
 This is required for session continuity and (optionally) session memory indexing, but it also means
 **any process/user with filesystem access can read those logs**. Treat disk access as the trust
 boundary and lock down permissions on `~/.bot` (see the audit section below). If you need
@@ -171,7 +171,7 @@ Plugins run **in-process** with the Gateway. Treat them as trusted code:
 - Review plugin config before enabling.
 - Restart the Gateway after plugin changes.
 - If you install plugins from npm (`hanzo-bot plugins install <npm-spec>`), treat it like running untrusted code:
-  - The install path is `~/.bot/extensions/<pluginId>/` (or `$BOT_STATE_DIR/extensions/<pluginId>/`).
+  - The install path is `~/.hanzo/bot/extensions/<pluginId>/` (or `$BOT_STATE_DIR/extensions/<pluginId>/`).
   - Hanzo Bot uses `npm pack` and then runs `npm install --omit=dev` in that directory (npm lifecycle scripts can execute code during install).
   - Prefer pinned, exact versions (`@scope/pkg@1.2.3`), and inspect the unpacked code on disk before enabling.
 
@@ -221,7 +221,7 @@ If you run multiple accounts on the same channel, use `per-account-channel-peer`
 Hanzo Bot has two separate “who can trigger me?” layers:
 
 - **DM allowlist** (`allowFrom` / `channels.discord.dm.allowFrom` / `channels.slack.dm.allowFrom`): who is allowed to talk to the bot in direct messages.
-  - When `dmPolicy="pairing"`, approvals are written to `~/.bot/credentials/<channel>-allowFrom.json` (merged with config allowlists).
+  - When `dmPolicy="pairing"`, approvals are written to `~/.hanzo/bot/credentials/<channel>-allowFrom.json` (merged with config allowlists).
 - **Group allowlist** (channel-specific): which groups/channels/guilds the bot will accept messages from at all.
   - Common patterns:
     - `channels.whatsapp.groups`, `channels.telegram.groups`, `channels.imessage.groups`: per-group defaults like `requireMention`; when set, it also acts as a group allowlist (include `"*"` to keep allow-all behavior).
@@ -311,9 +311,9 @@ Assume “compromised” means: someone got into a room that can trigger the bot
 
 ## Lessons Learned (The Hard Way)
 
-### The `find ~` Incident 🥷
+### The `find ~` Incident
 
-On Day 1, a friendly tester asked Hanzo Bot to run `find ~` and share the output. Hanzo Bot happily dumped the entire home directory structure to a group chat.
+On Day 1, a friendly tester asked Bot to run `find ~` and share the output. Bot happily dumped the entire home directory structure to a group chat.
 
 **Lesson:** Even "innocent" requests can leak sensitive info. Directory structures reveal project names, tool configs, and system layout.
 
@@ -331,7 +331,7 @@ This is social engineering 101. Create distrust, encourage snooping.
 
 Keep config + state private on the gateway host:
 
-- `~/.bot/bot.json`: `600` (user read/write only)
+- `~/.hanzo/bot/bot.json`: `600` (user read/write only)
 - `~/.bot`: `700` (user only)
 
 `hanzo-bot doctor` can warn and offer to tighten these permissions.
@@ -483,7 +483,7 @@ Avoid:
 
 ### 0.7) Secrets on disk (what’s sensitive)
 
-Assume anything under `~/.bot/` (or `$BOT_STATE_DIR/`) may contain secrets or private data:
+Assume anything under `~/.hanzo/bot/` (or `$BOT_STATE_DIR/`) may contain secrets or private data:
 
 - `bot.json`: config may include tokens (gateway, remote gateway), provider settings, and allowlists.
 - `credentials/**`: channel credentials (example: WhatsApp creds), pairing allowlists, legacy OAuth imports.
@@ -600,7 +600,7 @@ single container/workspace.
 
 Also consider agent workspace access inside the sandbox:
 
-- `agents.defaults.sandbox.workspaceAccess: "none"` (default) keeps the agent workspace off-limits; tools run against a sandbox workspace under `~/.bot/sandboxes`
+- `agents.defaults.sandbox.workspaceAccess: "none"` (default) keeps the agent workspace off-limits; tools run against a sandbox workspace under `~/.hanzo/bot/sandboxes`
 - `agents.defaults.sandbox.workspaceAccess: "ro"` mounts the agent workspace read-only at `/agent` (disables `write`/`edit`/`apply_patch`)
 - `agents.defaults.sandbox.workspaceAccess: "rw"` mounts the agent workspace read/write at `/workspace`
 
@@ -644,7 +644,7 @@ Common use cases:
     list: [
       {
         id: "personal",
-        workspace: "~/.bot/workspace-personal",
+        workspace: "~/.hanzo/bot/workspace-personal",
         sandbox: { mode: "off" },
       },
     ],
@@ -660,7 +660,7 @@ Common use cases:
     list: [
       {
         id: "family",
-        workspace: "~/.bot/workspace-family",
+        workspace: "~/.hanzo/bot/workspace-family",
         sandbox: {
           mode: "all",
           scope: "agent",
@@ -684,7 +684,7 @@ Common use cases:
     list: [
       {
         id: "public",
-        workspace: "~/.bot/workspace-public",
+        workspace: "~/.hanzo/bot/workspace-public",
         sandbox: {
           mode: "all",
           scope: "agent",
@@ -755,7 +755,7 @@ If your AI does something bad:
 ### Audit
 
 1. Check Gateway logs: `/tmp/bot/bot-YYYY-MM-DD.log` (or `logging.file`).
-2. Review the relevant transcript(s): `~/.bot/agents/<agentId>/sessions/*.jsonl`.
+2. Review the relevant transcript(s): `~/.hanzo/bot/agents/<agentId>/sessions/*.jsonl`.
 3. Review recent config changes (anything that could have widened access: `gateway.bind`, `gateway.auth`, dm/group policies, `tools.elevated`, plugin changes).
 
 ### Collect for a report
@@ -815,7 +815,7 @@ Commit the updated `.secrets.baseline` once it reflects the intended state.
   }
 }}%%
 flowchart TB
-    A["Owner (Peter)"] -- Full trust --> B["AI (Hanzo Bot)"]
+    A["Owner (Peter)"] -- Full trust --> B["AI (Bot)"]
     B -- Trust but verify --> C["Friends in allowlist"]
     C -- Limited trust --> D["Strangers"]
     D -- No trust --> E["Mario asking for find ~"]
@@ -836,6 +836,4 @@ Found a vulnerability in Hanzo Bot? Please report responsibly:
 
 ---
 
-_"Security is a process, not a product. Also, don't trust lobsters with shell access."_ — Someone wise, probably
-
-🥷🔐
+_"Security is a process, not a product. Also, don't trust bots with shell access."_ — Someone wise, probably

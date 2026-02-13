@@ -1,11 +1,11 @@
-# Lobster (plugin)
+# Flow (plugin)
 
-Adds the `lobster` agent tool as an **optional** plugin tool.
+Adds the `flow` agent tool as an **optional** plugin tool.
 
 ## What this is
 
-- Lobster is a standalone workflow shell (typed JSON-first pipelines + approvals/resume).
-- This plugin integrates Lobster with Hanzo Bot _without core changes_.
+- Flow is a standalone workflow shell (typed JSON-first pipelines + approvals/resume).
+- This plugin integrates Flow with Hanzo Bot _without core changes_.
 
 ## Enable
 
@@ -21,7 +21,7 @@ Enable it in an agent allowlist:
         "id": "main",
         "tools": {
           "allow": [
-            "lobster" // plugin id (enables all tools from this plugin)
+            "flow" // plugin id (enables all tools from this plugin)
           ]
         }
       }
@@ -30,9 +30,9 @@ Enable it in an agent allowlist:
 }
 ```
 
-## Using `bot.invoke` (Lobster → Hanzo Bot tools)
+## Using `bot.invoke` (Flow → Hanzo Bot tools)
 
-Some Lobster pipelines may include a `bot.invoke` step to call back into Hanzo Bot tools/plugins (for example: `gog` for Google Workspace, `gh` for GitHub, `message.send`, etc.).
+Some Flow pipelines may include a `bot.invoke` step to call back into Hanzo Bot tools/plugins (for example: `gog` for Google Workspace, `gh` for GitHub, `message.send`, etc.).
 
 For this to work, the Hanzo Bot Gateway must expose the tool bridge endpoint and the target tool must be allowed by policy:
 
@@ -53,7 +53,7 @@ Example (allow only a small set of tools):
       {
         "id": "main",
         "tools": {
-          "allow": ["lobster", "web_fetch", "web_search", "gog", "gh"],
+          "allow": ["flow", "web_fetch", "web_search", "gog", "gh"],
           "deny": ["gateway"],
         },
       },
@@ -69,7 +69,7 @@ Notes:
 
 ## Security
 
-- Runs the `lobster` executable as a local subprocess.
+- Runs the `flow` executable as a local subprocess.
 - Does not manage OAuth/tokens.
 - Uses timeouts, stdout caps, and strict JSON envelope parsing.
-- Prefer an absolute `lobsterPath` in production to avoid PATH hijack.
+- Prefer an absolute `flowPath` in production to avoid PATH hijack.

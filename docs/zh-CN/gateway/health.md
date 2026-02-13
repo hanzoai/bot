@@ -27,8 +27,8 @@ x-i18n:
 
 ## 深度诊断
 
-- 磁盘上的凭证：`ls -l ~/.bot/credentials/whatsapp/<accountId>/creds.json`（mtime 应该是最近的）。
-- 会话存储：`ls -l ~/.bot/agents/<agentId>/sessions/sessions.json`（路径可在配置中覆盖）。计数和最近收件人通过 `status` 显示。
+- 磁盘上的凭证：`ls -l ~/.hanzo/bot/credentials/whatsapp/<accountId>/creds.json`（mtime 应该是最近的）。
+- 会话存储：`ls -l ~/.hanzo/bot/agents/<agentId>/sessions/sessions.json`（路径可在配置中覆盖）。计数和最近收件人通过 `status` 显示。
 - 重新链接流程：当日志中出现状态码 409–515 或 `loggedOut` 时，执行 `hanzo-bot channels logout && hanzo-bot channels login --verbose`。（注意：配对后状态 515 时 QR 登录流程会自动重启一次。）
 
 ## 当出现故障时

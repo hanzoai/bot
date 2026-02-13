@@ -21,7 +21,7 @@ x-i18n:
 
 - Skills 系统：[Skills](/tools/skills)
 - Skills 配置：[Skills 配置](/tools/skills-config)
-- Hanzo Skills 安装：[Hanzo Skills](/tools/hanzo-skills)
+- Hanzo Skills Hub 安装：[Hanzo Skills Hub](/tools/skills-hub)
 
 ## 命令
 

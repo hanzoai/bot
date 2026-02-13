@@ -60,8 +60,8 @@ After it finishes:
 
 It writes config/workspace on the host:
 
-- `~/.bot/`
-- `~/.bot/workspace`
+- `~/.hanzo/bot/`
+- `~/.hanzo/bot/workspace`
 
 Running on a VPS? See [Hetzner (Docker VPS)](/install/hetzner).
 
@@ -70,18 +70,18 @@ Running on a VPS? See [Hetzner (Docker VPS)](/install/hetzner).
 For easier day-to-day Docker management, install `BotDock`:
 
 ```bash
-mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/bot/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.bot/bot-helpers.sh
+mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/bot/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.hanzo/bot/bot-helpers.sh
 ```
 
 **Add to your shell config (zsh):**
 
 ```bash
-echo 'source ~/.bot/bot-helpers.sh' >> ~/.zshrc && source ~/.zshrc
+echo 'source ~/.hanzo/bot/bot-helpers.sh' >> ~/.zshrc && source ~/.zshrc
 ```
 
 Then use `bot-start`, `bot-stop`, `bot-dashboard`, etc. Run `bot-help` for all commands.
 
-See [`BotDock` Helper README](https://github.com/bot/bot/blob/main/scripts/shell-helpers/README.md) for details.
+See [`BotDock` Helper README](https://github.com/hanzoai/bot/blob/main/scripts/shell-helpers/README.md) for details.
 
 ### Manual flow (compose)
 
@@ -323,7 +323,7 @@ pnpm test:docker:qr
 
 - Gateway bind defaults to `lan` for container use.
 - Dockerfile CMD uses `--allow-unconfigured`; mounted config with `gateway.mode` not `local` will still start. Override CMD to enforce the guard.
-- The gateway container is the source of truth for sessions (`~/.bot/agents/<agentId>/sessions/`).
+- The gateway container is the source of truth for sessions (`~/.hanzo/bot/agents/<agentId>/sessions/`).
 
 ## Agent Sandbox (host gateway + Docker tools)
 
@@ -361,7 +361,7 @@ precedence, and troubleshooting.
 
 - Image: `bot-sandbox:bookworm-slim`
 - One container per agent
-- Agent workspace access: `workspaceAccess: "none"` (default) uses `~/.bot/sandboxes`
+- Agent workspace access: `workspaceAccess: "none"` (default) uses `~/.hanzo/bot/sandboxes`
   - `"ro"` keeps the sandbox workspace at `/workspace` and mounts the agent workspace read-only at `/agent` (disables `write`/`edit`/`apply_patch`)
   - `"rw"` mounts the agent workspace read/write at `/workspace`
 - Auto-prune: idle > 24h OR age > 7d
@@ -388,7 +388,7 @@ If you plan to install packages in `setupCommand`, note:
         mode: "non-main", // off | non-main | all
         scope: "agent", // session | agent | shared (agent is default)
         workspaceAccess: "none", // none | ro | rw
-        workspaceRoot: "~/.bot/sandboxes",
+        workspaceRoot: "~/.hanzo/bot/sandboxes",
         docker: {
           image: "bot-sandbox:bookworm-slim",
           workdir: "/workspace",
@@ -575,7 +575,7 @@ Example:
 
 ## Troubleshooting
 
-- Image missing: build with [`scripts/sandbox-setup.sh`](https://github.com/bot/bot/blob/main/scripts/sandbox-setup.sh) or set `agents.defaults.sandbox.docker.image`.
+- Image missing: build with [`scripts/sandbox-setup.sh`](https://github.com/hanzoai/bot/blob/main/scripts/sandbox-setup.sh) or set `agents.defaults.sandbox.docker.image`.
 - Container not running: it will auto-create per session on demand.
 - Permission errors in sandbox: set `docker.user` to a UID:GID that matches your
   mounted workspace ownership (or chown the workspace folder).

@@ -16,7 +16,7 @@ x-i18n:
 来自社区的真实项目。看看大家正在用 Hanzo Bot 构建什么。
 
 <Info>
-**想要展示你的项目？** 在 [Discord 的 #showcase 频道](https://discord.gg/hanzo) 分享或在 [X 上 @bot](https://x.com/bot)。
+**想要展示你的项目？** 在 [Discord 的 #showcase 频道](https://discord.gg/XthHQQj) 分享或在 [X 上 @bot](https://x.com/bot)。
 </Info>
 
 ## 🎥 Hanzo Bot 实战演示
@@ -146,7 +146,7 @@ OpenCode 完成更改 → 打开 PR → Hanzo Bot 审查差异并在 Telegram �
 
 Homebrew 安装的助手工具，用于列出/检查/监视本地 OpenAI Codex 会话（CLI + VS Code）。
 
-  <img src="/assets/showcase/codexmonitor.png" alt="CodexMonitor on Hanzo Skills" />
+  <img src="/assets/showcase/codexmonitor.png" alt="CodexMonitor on Hanzo Skills Hub" />
 </Card>
 
 <Card title="Bambu 3D 打印机控制" icon="print" href="https://skills.hanzo.bot/tobiasbischoff/bambu-cli">
@@ -154,7 +154,7 @@ Homebrew 安装的助手工具，用于列出/检查/监视本地 OpenAI Codex �
 
 控制和排查 BambuLab 打印机：状态、任务、摄像头、AMS、校准等。
 
-  <img src="/assets/showcase/bambu-cli.png" alt="Bambu CLI skill on Hanzo Skills" />
+  <img src="/assets/showcase/bambu-cli.png" alt="Bambu CLI skill on Hanzo Skills Hub" />
 </Card>
 
 <Card title="维也纳交通 (Wiener Linien)" icon="train" href="https://skills.hanzo.bot/hjanuschka/wienerlinien">
@@ -162,7 +162,7 @@ Homebrew 安装的助手工具，用于列出/检查/监视本地 OpenAI Codex �
 
 维也纳公共交通的实时发车时间、中断信息、电梯状态和路线规划。
 
-  <img src="/assets/showcase/wienerlinien.png" alt="Wiener Linien skill on Hanzo Skills" />
+  <img src="/assets/showcase/wienerlinien.png" alt="Wiener Linien skill on Hanzo Skills Hub" />
 </Card>
 
 <Card title="ParentPay 学校餐食" icon="utensils" href="#">
@@ -195,7 +195,7 @@ Homebrew 安装的助手工具，用于列出/检查/监视本地 OpenAI Codex �
 <Card title="Kev 的梦之队 (14+ 智能体)" icon="robot" href="https://github.com/adam91holt/orchestrated-ai-articles">
   **@adam91holt** • `multi-agent` `orchestration` `architecture` `manifesto`
 
-一个 Gateway 网关下的 14+ 智能体，Opus 4.5 编排器将任务委派给 Codex 工作者。全面的[技术文章](https://github.com/adam91holt/orchestrated-ai-articles)涵盖梦之队阵容、模型选择、沙箱隔离、webhook、心跳和委派流程。用于智能体沙箱隔离的 [Hanzo Space](https://github.com/adam91holt/clawdspace)。[博客文章](https://adams-ai-journey.ghost.io/2026-the-year-of-the-orchestrator/)。
+一个 Gateway 网关下的 14+ 智能体，Opus 4.5 编排器将任务委派给 Codex 工作者。全面的[技术文章](https://github.com/adam91holt/orchestrated-ai-articles)涵盖梦之队阵容、模型选择、沙箱隔离、webhook、心跳和委派流程。用于智能体沙箱隔离的 [Clawdspace](https://github.com/adam91holt/clawdspace)。[博客文章](https://adams-ai-journey.ghost.io/2026-the-year-of-the-orchestrator/)。
 </Card>
 
 <Card title="Linear CLI" icon="terminal" href="https://github.com/Finesssee/linear-cli">
@@ -267,7 +267,7 @@ Claude Code 发现并确认了净化器控制，然后 Hanzo Bot 接管来管理
 <Card title="Jira Skill 构建器" icon="diagram-project" href="https://x.com/jdrhyne/status/2008336434827002232">
   **@jdrhyne** • `automation` `jira` `skill` `devtools`
 
-Hanzo Bot 连接到 Jira，然后即时生成一个新的 skill（在它出现在 Hanzo Skills 之前）。
+Hanzo Bot 连接到 Jira，然后即时生成一个新的 skill（在它出现在 Hanzo Skills Hub 之前）。
 </Card>
 
 <Card title="通过 Telegram 创建 Todoist Skill" icon="list-check" href="https://x.com/iamsubhrajyoti/status/2009949389884920153">
@@ -335,7 +335,7 @@ Hanzo Bot 连接到 Jira，然后即时生成一个新的 skill（在它出现�
 <Card title="OpenRouter 转录" icon="microphone" href="https://skills.hanzo.bot/obviyus/openrouter-transcribe">
   **@obviyus** • `transcription` `multilingual` `skill`
 
-通过 OpenRouter（Gemini 等）进行多语言音频转录。可在 Hanzo Skills 获取。
+通过 OpenRouter（Gemini 等）进行多语言音频转录。可在 Hanzo Skills Hub 获取。
 </Card>
 
 </CardGroup>
@@ -351,7 +351,7 @@ Hanzo Bot 连接到 Jira，然后即时生成一个新的 skill（在它出现�
 </Card>
 
 <Card title="Home Assistant Skill" icon="toggle-on" href="https://skills.hanzo.bot/skills/homeassistant">
-  **Hanzo Skills** • `homeassistant` `skill` `automation`
+  **Hanzo Skills Hub** • `homeassistant` `skill` `automation`
   
   通过自然语言控制和自动化 Home Assistant 设备。
 </Card>
@@ -363,7 +363,7 @@ Hanzo Bot 连接到 Jira，然后即时生成一个新的 skill（在它出现�
 </Card>
 
 <Card title="CalDAV 日历" icon="calendar" href="https://skills.hanzo.bot/skills/caldav-calendar">
-  **Hanzo Skills** • `calendar` `caldav` `skill`
+  **Hanzo Skills Hub** • `calendar` `caldav` `skill`
   
   使用 khal/vdirsyncer 的日历 skill。自托管日历集成。
 </Card>
@@ -412,7 +412,7 @@ Hanzo Bot 连接到 Jira，然后即时生成一个新的 skill（在它出现�
 
 <Steps>
   <Step title="分享它">
-    在 [Discord 的 #showcase 频道](https://discord.gg/hanzo) 发布或在 [Twitter 上 @bot](https://x.com/bot)
+    在 [Discord 的 #showcase 频道](https://discord.gg/XthHQQj) 发布或在 [Twitter 上 @bot](https://x.com/bot)
   </Step>
   <Step title="包含详细信息">
     告诉我们它做什么，链接到仓库/演示，如果有的话分享截图

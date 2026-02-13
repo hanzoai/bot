@@ -27,7 +27,7 @@ x-i18n:
   - [卡在 "wake up my friend" / 新手引导无法启动，怎么办？](#it-is-stuck-on-wake-up-my-friend-onboarding-will-not-hatch-what-now)
   - [能否将我的设置迁移到新机器（Mac mini）而不重新进行新手引导？](#can-i-migrate-my-setup-to-a-new-machine-mac-mini-without-redoing-onboarding)
   - [在哪里查看最新版本的更新内容？](#where-do-i-see-whats-new-in-the-latest-version)
-  - [无法访问 docs.bot.ai（SSL 错误），怎么办？](#i-cant-access-docsbotai-ssl-error-what-now)
+  - [无法访问 docs.hanzo.bot（SSL 错误），怎么办？](#i-cant-access-docsbotai-ssl-error-what-now)
   - [stable 和 beta 有什么区别？](#whats-the-difference-between-stable-and-beta)
 - [如何安装 beta 版本，beta 和 dev 有什么区别？](#how-do-i-install-the-beta-version-and-whats-the-difference-between-beta-and-dev)
   - [如何试用最新代码？](#how-do-i-try-the-latest-bits)
@@ -285,8 +285,8 @@ curl -fsSL https://hanzo.bot/install.sh | bash -s -- --install-method git
 提示：要求智能体**计划并监督**修复（逐步进行），然后只执行必要的命令。这样改动较小，更容易审查。
 
 如果你发现了真正的 bug 或修复方案，请提交 GitHub issue 或发送 PR：
-https://github.com/bot/bot/issues
-https://github.com/bot/bot/pulls
+https://github.com/hanzoai/bot/issues
+https://github.com/hanzoai/bot/pulls
 
 从以下命令开始（在寻求帮助时分享输出）：
 
@@ -322,7 +322,7 @@ hanzo-bot onboard --install-daemon
 从源码安装（贡献者/开发者）：
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 pnpm install
 pnpm build
@@ -407,12 +407,12 @@ hanzo-bot doctor
 
 1. 在新机器上安装 Hanzo Bot。
 2. 从旧机器复制 `$BOT_STATE_DIR`（默认：`~/.bot`）。
-3. 复制你的工作区（默认：`~/.bot/workspace`）。
+3. 复制你的工作区（默认：`~/.hanzo/bot/workspace`）。
 4. 运行 `hanzo-bot doctor` 并重启 Gateway 网关服务。
 
 这会保留配置、认证配置文件、WhatsApp 凭据、会话和记忆。如果你处于远程模式，请记住 Gateway 网关主机拥有会话存储和工作区。
 
-**重要：** 如果你只将工作区提交/推送到 GitHub，你只备份了**记忆 + 引导文件**，但**不包括**会话历史或认证。它们位于 `~/.bot/` 下（例如 `~/.bot/agents/<agentId>/sessions/`）。
+**重要：** 如果你只将工作区提交/推送到 GitHub，你只备份了**记忆 + 引导文件**，但**不包括**会话历史或认证。它们位于 `~/.hanzo/bot/` 下（例如 `~/.hanzo/bot/agents/<agentId>/sessions/`）。
 
 相关：[迁移](/install/migrating)、[磁盘上的文件位置](/help/faq#where-does-bot-store-its-data)、
 [智能体工作区](/concepts/agent-workspace)、[Doctor](/gateway/doctor)、
@@ -421,17 +421,17 @@ hanzo-bot doctor
 ### 在哪里查看最新版本的更新内容
 
 查看 GitHub 变更日志：
-https://github.com/bot/bot/blob/main/CHANGELOG.md
+https://github.com/hanzoai/bot/blob/main/CHANGELOG.md
 
 最新条目在顶部。如果顶部部分标记为 **Unreleased**，则下一个带日期的部分是最新发布版本。条目按**亮点**、**变更**和**修复**分组（需要时还有文档/其他部分）。
 
-### 无法访问 docs.bot.ai（SSL 错误），怎么办
+### 无法访问 docs.hanzo.bot（SSL 错误），怎么办
 
-一些 Comcast/Xfinity 连接通过 Xfinity Advanced Security 错误地拦截了 `docs.bot.ai`。禁用该功能或将 `docs.bot.ai` 加入白名单，然后重试。更多详情：[故障排除](/help/troubleshooting#docsbotai-shows-an-ssl-error-comcastxfinity)。
+一些 Comcast/Xfinity 连接通过 Xfinity Advanced Security 错误地拦截了 `docs.hanzo.bot`。禁用该功能或将 `docs.hanzo.bot` 加入白名单，然后重试。更多详情：[故障排除](/help/troubleshooting#docsbotai-shows-an-ssl-error-comcastxfinity)。
 请帮助我们在此处报告以解除封锁：https://spa.xfinity.com/check_url_status。
 
 如果仍然无法访问该网站，文档在 GitHub 上有镜像：
-https://github.com/bot/bot/tree/main/docs
+https://github.com/hanzoai/bot/tree/main/docs
 
 ### stable 和 beta 有什么区别
 
@@ -443,7 +443,7 @@ https://github.com/bot/bot/tree/main/docs
 我们将构建发布到 **beta**，测试后，一旦构建稳定，就会**将同一版本提升为 `latest`**。这就是为什么 beta 和 stable 可以指向**相同版本**。
 
 查看变更：
-https://github.com/bot/bot/blob/main/CHANGELOG.md
+https://github.com/hanzoai/bot/blob/main/CHANGELOG.md
 
 ### 如何安装 beta 版本，beta 和 dev 有什么区别
 
@@ -497,7 +497,7 @@ curl -fsSL https://hanzo.bot/install.sh | bash -s -- --install-method git
 如果你更喜欢手动克隆，使用：
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 pnpm install
 pnpm build
@@ -790,12 +790,12 @@ brew install <formula>
 
 可以。安装另一种方式，然后运行 Doctor 使 Gateway 网关服务指向新的入口点。
 这**不会删除你的数据**——它只改变 Hanzo Bot 代码的安装位置。你的状态
-（`~/.bot`）和工作区（`~/.bot/workspace`）保持不变。
+（`~/.bot`）和工作区（`~/.hanzo/bot/workspace`）保持不变。
 
 从 npm → git：
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 pnpm install
 pnpm build
@@ -934,11 +934,11 @@ Hanzo Bot 是一个**个人助手**和协调层，不是 IDE 替代品。使用 
 
 ### 如何自定义 Skills 而不弄脏仓库
 
-使用托管覆盖而不是编辑仓库副本。将你的更改放在 `~/.bot/skills/<name>/SKILL.md`（或通过 `~/.bot/bot.json` 中的 `skills.load.extraDirs` 添加文件夹）。优先级是 `<workspace>/skills` > `~/.bot/skills` > 内置，所以托管覆盖优先生效而不会修改 git。只有值得上游合并的编辑才应该放在仓库中并作为 PR 提交。
+使用托管覆盖而不是编辑仓库副本。将你的更改放在 `~/.hanzo/bot/skills/<name>/SKILL.md`（或通过 `~/.hanzo/bot/bot.json` 中的 `skills.load.extraDirs` 添加文件夹）。优先级是 `<workspace>/skills` > `~/.hanzo/bot/skills` > 内置，所以托管覆盖优先生效而不会修改 git。只有值得上游合并的编辑才应该放在仓库中并作为 PR 提交。
 
 ### 可以从自定义文件夹加载 Skills 吗
 
-可以。通过 `~/.bot/bot.json` 中的 `skills.load.extraDirs` 添加额外目录（最低优先级）。默认优先级保持不变：`<workspace>/skills` → `~/.bot/skills` → 内置 → `skills.load.extraDirs`。`hanzo-skills` 默认安装到 `./skills`，Hanzo Bot 将其视为 `<workspace>/skills`。
+可以。通过 `~/.hanzo/bot/bot.json` 中的 `skills.load.extraDirs` 添加额外目录（最低优先级）。默认优先级保持不变：`<workspace>/skills` → `~/.hanzo/bot/skills` → 内置 → `skills.load.extraDirs`。`skills-hub` 默认安装到 `./skills`，Hanzo Bot 将其视为 `<workspace>/skills`。
 
 ### 如何为不同任务使用不同模型
 
@@ -982,17 +982,17 @@ hanzo-bot cron runs --id <jobId> --limit 50
 
 ### 如何在 Linux 上安装 Skills
 
-使用 **Hanzo Skills**（CLI）或将 Skills 放入你的工作区。macOS Skills UI 在 Linux 上不可用。
+使用 **Hanzo Skills Hub**（CLI）或将 Skills 放入你的工作区。macOS Skills UI 在 Linux 上不可用。
 浏览 Skills：https://skills.hanzo.bot。
 
-安装 Hanzo Skills CLI（选择一个包管理器）：
+安装 Hanzo Skills Hub CLI（选择一个包管理器）：
 
 ```bash
-npm i -g hanzo-skills
+npm i -g skills-hub
 ```
 
 ```bash
-pnpm add -g hanzo-skills
+pnpm add -g skills-hub
 ```
 
 ### Hanzo Bot 能否按计划或在后台持续运行任务
@@ -1028,7 +1028,7 @@ pnpm add -g hanzo-skills
    exec ssh -T user@mac-host /opt/homebrew/bin/imsg "$@"
    ```
 2. 将包装器放在 Linux 主机的 `PATH` 上（例如 `~/bin/imsg`）。
-3. 覆盖 Skills 元数据（工作区或 `~/.bot/skills`）以允许 Linux：
+3. 覆盖 Skills 元数据（工作区或 `~/.hanzo/bot/skills`）以允许 Linux：
    ```markdown
    ---
    name: imsg
@@ -1059,11 +1059,11 @@ pnpm add -g hanzo-skills
 安装 Skills：
 
 ```bash
-hanzo-skills install <skill-slug>
-hanzo-skills update --all
+skills-hub install <skill-slug>
+skills-hub update --all
 ```
 
-Hanzo Skills 安装到当前目录下的 `./skills`（或回退到你配置的 Hanzo Bot 工作区）；Hanzo Bot 在下一个会话中将其视为 `<workspace>/skills`。对于跨智能体共享的 Skills，将它们放在 `~/.bot/skills/<name>/SKILL.md`。某些 Skills 期望通过 Homebrew 安装二进制文件；在 Linux 上意味着 Linuxbrew（参阅上面的 Homebrew Linux 常见问题条目）。参阅[Skills](/tools/skills)和 [Hanzo Skills](/tools/hanzo-skills)。
+Hanzo Skills Hub 安装到当前目录下的 `./skills`（或回退到你配置的 Hanzo Bot 工作区）；Hanzo Bot 在下一个会话中将其视为 `<workspace>/skills`。对于跨智能体共享的 Skills，将它们放在 `~/.hanzo/bot/skills/<name>/SKILL.md`。某些 Skills 期望通过 Homebrew 安装二进制文件；在 Linux 上意味着 Linuxbrew（参阅上面的 Homebrew Linux 常见问题条目）。参阅[Skills](/tools/skills)和 [Hanzo Skills Hub](/tools/skills-hub)。
 
 ### 如何安装用于浏览器接管的 Chrome 扩展
 
@@ -1160,9 +1160,9 @@ Hanzo Bot 还会运行**静默的预压缩记忆刷新**，以提醒模型在自
 | `$BOT_STATE_DIR/agents/<agentId>/sessions/`                | 对话历史和状态（按智能体）                           |
 | `$BOT_STATE_DIR/agents/<agentId>/sessions/sessions.json`   | 会话元数据（按智能体）                               |
 
-旧版单智能体路径：`~/.bot/agent/*`（通过 `hanzo-bot doctor` 迁移）。
+旧版单智能体路径：`~/.hanzo/bot/agent/*`（通过 `hanzo-bot doctor` 迁移）。
 
-你的**工作区**（AGENTS.md、记忆文件、Skills 等）是独立的，通过 `agents.defaults.workspace` 配置（默认：`~/.bot/workspace`）。
+你的**工作区**（AGENTS.md、记忆文件、Skills 等）是独立的，通过 `agents.defaults.workspace` 配置（默认：`~/.hanzo/bot/workspace`）。
 
 ### AGENTS.md / SOUL.md / USER.md / MEMORY.md 应该放在哪里
 
@@ -1170,13 +1170,13 @@ Hanzo Bot 还会运行**静默的预压缩记忆刷新**，以提醒模型在自
 
 - **工作区（按智能体）**：`AGENTS.md`、`SOUL.md`、`IDENTITY.md`、`USER.md`、
   `MEMORY.md`（或 `memory.md`）、`memory/YYYY-MM-DD.md`、可选的 `HEARTBEAT.md`。
-- **状态目录（`~/.bot`）**：配置、凭据、认证配置文件、会话、日志和共享 Skills（`~/.bot/skills`）。
+- **状态目录（`~/.bot`）**：配置、凭据、认证配置文件、会话、日志和共享 Skills（`~/.hanzo/bot/skills`）。
 
-默认工作区是 `~/.bot/workspace`，可通过以下方式配置：
+默认工作区是 `~/.hanzo/bot/workspace`，可通过以下方式配置：
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
 }
 ```
 
@@ -1222,13 +1222,13 @@ Hanzo Bot 还会运行**静默的预压缩记忆刷新**，以提醒模型在自
 
 ### 配置文件是什么格式？在哪里
 
-Hanzo Bot 从 `$BOT_CONFIG_PATH`（默认：`~/.bot/bot.json`）读取可选的 **JSON5** 配置：
+Hanzo Bot 从 `$BOT_CONFIG_PATH`（默认：`~/.hanzo/bot/bot.json`）读取可选的 **JSON5** 配置：
 
 ```
 $BOT_CONFIG_PATH
 ```
 
-如果文件不存在，使用安全的默认值（包括默认工作区 `~/.bot/workspace`）。
+如果文件不存在，使用安全的默认值（包括默认工作区 `~/.hanzo/bot/workspace`）。
 
 ### 我设置了 gateway.bind: "lan"（或 "tailnet"），现在什么都监听不了 / UI 显示未授权
 
@@ -1289,7 +1289,7 @@ Gateway 网关监视配置文件并支持热重载：
 
 - 如果你使用允许列表，添加 `web_search`/`web_fetch` 或 `group:web`。
 - `web_fetch` 默认启用（除非明确禁用）。
-- 守护进程从 `~/.bot/.env`（或服务环境）读取环境变量。
+- 守护进程从 `~/.hanzo/bot/.env`（或服务环境）读取环境变量。
 
 文档：[Web 工具](/tools/web)。
 
@@ -1299,7 +1299,7 @@ Gateway 网关监视配置文件并支持热重载：
 
 恢复：
 
-- 从备份恢复（git 或复制的 `~/.bot/bot.json`）。
+- 从备份恢复（git 或复制的 `~/.hanzo/bot/bot.json`）。
 - 如果没有备份，重新运行 `hanzo-bot doctor` 并重新配置渠道/模型。
 - 如果这是意外情况，提交 bug 并附上你最后已知的配置或任何备份。
 - 本地编码智能体通常可以从日志或历史中重建工作配置。
@@ -1457,7 +1457,7 @@ SSH 对临时 shell 访问很好，但节点对于持续的智能体工作流和
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
@@ -1512,7 +1512,7 @@ Serve 暴露 **Gateway 网关控制 UI + WS**。节点通过同一个 Gateway �
 Hanzo Bot 从父进程（shell、launchd/systemd、CI 等）读取环境变量，并额外加载：
 
 - 当前工作目录下的 `.env`
-- `~/.bot/.env`（即 `$BOT_STATE_DIR/.env`）的全局回退 `.env`
+- `~/.hanzo/bot/.env`（即 `$BOT_STATE_DIR/.env`）的全局回退 `.env`
 
 两个 `.env` 文件都不会覆盖已有的环境变量。
 
@@ -1533,7 +1533,7 @@ Hanzo Bot 从父进程（shell、launchd/systemd、CI 等）读取环境变量�
 
 两个常见修复方法：
 
-1. 将缺失的密钥放在 `~/.bot/.env` 中，这样即使服务不继承你的 shell 环境也能被获取。
+1. 将缺失的密钥放在 `~/.hanzo/bot/.env` 中，这样即使服务不继承你的 shell 环境也能被获取。
 2. 启用 shell 导入（可选的便利功能）：
 
 ```json5
@@ -1556,7 +1556,7 @@ Hanzo Bot 从父进程（shell、launchd/systemd、CI 等）读取环境变量�
 
 如果 Gateway 网关作为服务（launchd/systemd）运行，它不会继承你的 shell 环境。通过以下方式之一修复：
 
-1. 将令牌放在 `~/.bot/.env` 中：
+1. 将令牌放在 `~/.hanzo/bot/.env` 中：
    ```
    COPILOT_GITHUB_TOKEN=...
    ```
@@ -1741,7 +1741,7 @@ hanzo-bot directory groups list --channel whatsapp
 
 没有硬性限制。几十个（甚至几百个）都没问题，但请注意：
 
-- **磁盘增长：** 会话 + 记录位于 `~/.bot/agents/<agentId>/sessions/` 下。
+- **磁盘增长：** 会话 + 记录位于 `~/.hanzo/bot/agents/<agentId>/sessions/` 下。
 - **令牌成本：** 更多智能体意味着更多并发模型使用。
 - **运维开销：** 按智能体的认证配置文件、工作区和渠道路由。
 
@@ -1814,7 +1814,7 @@ MiniMax M2.1 有自己的文档：[MiniMax](/providers/minimax) 和
 - 聊天中的 `/model`（快速，按会话）
 - `hanzo-bot models set ...`（只更新模型配置）
 - `hanzo-bot configure --section models`（交互式）
-- 编辑 `~/.bot/bot.json` 中的 `agents.defaults.model`
+- 编辑 `~/.hanzo/bot/bot.json` 中的 `agents.defaults.model`
 
 避免使用部分对象执行 `config.apply`，除非你打算替换整个配置。如果你确实覆盖了配置，从备份恢复或重新运行 `hanzo-bot doctor` 来修复。
 
@@ -2011,7 +2011,7 @@ Z.AI（GLM 模型）：
 这通常意味着**新智能体**的认证存储为空。认证是按智能体的，存储在：
 
 ```
-~/.bot/agents/<agentId>/agent/auth-profiles.json
+~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json
 ```
 
 修复选项：
@@ -2043,10 +2043,10 @@ No credentials found for profile "anthropic:default"
 ### No credentials found for profile "anthropic:default" 的修复清单
 
 - **确认认证配置文件的位置**（新路径 vs 旧路径）
-  - 当前：`~/.bot/agents/<agentId>/agent/auth-profiles.json`
-  - 旧版：`~/.bot/agent/*`（通过 `hanzo-bot doctor` 迁移）
+  - 当前：`~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
+  - 旧版：`~/.hanzo/bot/agent/*`（通过 `hanzo-bot doctor` 迁移）
 - **确认环境变量被 Gateway 网关加载**
-  - 如果你在 shell 中设置了 `ANTHROPIC_API_KEY` 但通过 systemd/launchd 运行 Gateway 网关，它可能不会继承。将其放在 `~/.bot/.env` 中或启用 `env.shellEnv`。
+  - 如果你在 shell 中设置了 `ANTHROPIC_API_KEY` 但通过 systemd/launchd 运行 Gateway 网关，它可能不会继承。将其放在 `~/.hanzo/bot/.env` 中或启用 `env.shellEnv`。
 - **确保你编辑的是正确的智能体**
   - 多智能体设置意味着可能有多个 `auth-profiles.json` 文件。
 - **完整性检查模型/认证状态**
@@ -2060,7 +2060,7 @@ No credentials found for profile "anthropic:default"
   - 运行 `claude setup-token`，然后用 `hanzo-bot models auth setup-token --provider anthropic` 粘贴。
   - 如果令牌在另一台机器上创建，使用 `hanzo-bot models auth paste-token --provider anthropic`。
 - **如果你想使用 API 密钥**
-  - 在 **Gateway 网关主机**上将 `ANTHROPIC_API_KEY` 放入 `~/.bot/.env`。
+  - 在 **Gateway 网关主机**上将 `ANTHROPIC_API_KEY` 放入 `~/.hanzo/bot/.env`。
   - 清除任何强制缺失配置文件的固定顺序：
     ```bash
     hanzo-bot models auth order clear --provider anthropic
@@ -2089,7 +2089,7 @@ No credentials found for profile "anthropic:default"
 认证配置文件是绑定到提供商的命名凭据记录（OAuth 或 API 密钥）。配置文件位于：
 
 ```
-~/.bot/agents/<agentId>/agent/auth-profiles.json
+~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json
 ```
 
 ### 典型的配置文件 ID 有哪些
@@ -2292,7 +2292,7 @@ hanzo-bot logs --follow
 
 服务/supervisor 日志（当 Gateway 网关通过 launchd/systemd 运行时）：
 
-- macOS：`$BOT_STATE_DIR/logs/gateway.log` 和 `gateway.err.log`（默认：`~/.bot/logs/...`；配置文件使用 `~/.bot-<profile>/logs/...`）
+- macOS：`$BOT_STATE_DIR/logs/gateway.log` 和 `gateway.err.log`（默认：`~/.hanzo/bot/logs/...`；配置文件使用 `~/.bot-<profile>/logs/...`）
 - Linux：`journalctl --user -u bot-gateway[-<profile>].service -n 200 --no-pager`
 - Windows：`schtasks /Query /TN "Hanzo Bot Gateway 网关 (<profile>)" /V /FO LIST`
 
@@ -2625,4 +2625,4 @@ Hanzo Bot 默认阻止**跨提供商**消息。如果工具调用绑定到 Teleg
 
 ---
 
-仍然卡住？在 [Discord](https://discord.com/invite/hanzo) 中提问或发起 [GitHub 讨论](https://github.com/bot/bot/discussions)。
+仍然卡住？在 [Discord](https://discord.gg/XthHQQj) 中提问或发起 [GitHub 讨论](https://github.com/hanzoai/bot/discussions)。

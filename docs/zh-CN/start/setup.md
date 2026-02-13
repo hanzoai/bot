@@ -19,7 +19,7 @@ x-i18n:
 
 ## 太长不看
 
-- **个性化设置存放在仓库之外：** `~/.bot/workspace`（工作区）+ `~/.bot/bot.json`（配置）。
+- **个性化设置存放在仓库之外：** `~/.hanzo/bot/workspace`（工作区）+ `~/.hanzo/bot/bot.json`（配置）。
 - **稳定工作流：** 安装 macOS 应用；让它运行内置的 Gateway 网关。
 - **前沿工作流：** 通过 `pnpm gateway:watch` 自己运行 Gateway 网关，然后让 macOS 应用以本地模式连接。
 
@@ -33,8 +33,8 @@ x-i18n:
 
 如果你想要"100% 为我定制"*并且*易于更新，将你的自定义内容保存在：
 
-- **配置：** `~/.bot/bot.json`（JSON/JSON5 格式）
-- **工作区：** `~/.bot/workspace`（Skills、提示、记忆；将其设为私有 git 仓库）
+- **配置：** `~/.hanzo/bot/bot.json`（JSON/JSON5 格式）
+- **工作区：** `~/.hanzo/bot/workspace`（Skills、提示、记忆；将其设为私有 git 仓库）
 
 引导一次：
 
@@ -112,26 +112,26 @@ hanzo-bot health
 
 - **端口错误：** Gateway 网关 WS 默认为 `ws://127.0.0.1:18789`；保持应用 + CLI 在同一端口上。
 - **状态存储位置：**
-  - 凭证：`~/.bot/credentials/`
-  - 会话：`~/.bot/agents/<agentId>/sessions/`
+  - 凭证：`~/.hanzo/bot/credentials/`
+  - 会话：`~/.hanzo/bot/agents/<agentId>/sessions/`
   - 日志：`/tmp/bot/`
 
 ## 凭证存储映射
 
 在调试认证或决定备份什么时使用此映射：
 
-- **WhatsApp**：`~/.bot/credentials/whatsapp/<accountId>/creds.json`
+- **WhatsApp**：`~/.hanzo/bot/credentials/whatsapp/<accountId>/creds.json`
 - **Telegram bot token**：配置/环境变量或 `channels.telegram.tokenFile`
 - **Discord bot token**：配置/环境变量（尚不支持令牌文件）
 - **Slack tokens**：配置/环境变量（`channels.slack.*`）
-- **配对允许列表**：`~/.bot/credentials/<channel>-allowFrom.json`
-- **模型认证配置文件**：`~/.bot/agents/<agentId>/agent/auth-profiles.json`
-- **旧版 OAuth 导入**：`~/.bot/credentials/oauth.json`
+- **配对允许列表**：`~/.hanzo/bot/credentials/<channel>-allowFrom.json`
+- **模型认证配置文件**：`~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
+- **旧版 OAuth 导入**：`~/.hanzo/bot/credentials/oauth.json`
   更多详情：[安全](/gateway/security#credential-storage-map)。
 
 ## 更新（不破坏你的设置）
 
-- 将 `~/.bot/workspace` 和 `~/.bot/` 保持为"你的东西"；不要将个人提示/配置放入 `bot` 仓库。
+- 将 `~/.hanzo/bot/workspace` 和 `~/.hanzo/bot/` 保持为"你的东西"；不要将个人提示/配置放入 `bot` 仓库。
 - 更新源码：`git pull` + `pnpm install`（当锁文件更改时）+ 继续使用 `pnpm gateway:watch`。
 
 ## Linux（systemd 用户服务）

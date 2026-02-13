@@ -20,8 +20,8 @@ Short guide to verify channel connectivity without guessing.
 
 ## Deep diagnostics
 
-- Creds on disk: `ls -l ~/.bot/credentials/whatsapp/<accountId>/creds.json` (mtime should be recent).
-- Session store: `ls -l ~/.bot/agents/<agentId>/sessions/sessions.json` (path can be overridden in config). Count and recent recipients are surfaced via `status`.
+- Creds on disk: `ls -l ~/.hanzo/bot/credentials/whatsapp/<accountId>/creds.json` (mtime should be recent).
+- Session store: `ls -l ~/.hanzo/bot/agents/<agentId>/sessions/sessions.json` (path can be overridden in config). Count and recent recipients are surfaced via `status`.
 - Relink flow: `hanzo-bot channels logout && hanzo-bot channels login --verbose` when status codes 409–515 or `loggedOut` appear in logs. (Note: the QR login flow auto-restarts once for status 515 after pairing.)
 
 ## When something fails

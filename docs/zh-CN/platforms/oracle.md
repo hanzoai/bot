@@ -290,13 +290,13 @@ uname -m  # 应该显示 aarch64
 
 所有状态存储在：
 
-- `~/.bot/` — 配置、凭证、会话数据
-- `~/.bot/workspace/` — 工作区（SOUL.md、记忆、产物）
+- `~/.hanzo/bot/` — 配置、凭证、会话数据
+- `~/.hanzo/bot/workspace/` — 工作区（SOUL.md、记忆、产物）
 
 定期备份：
 
 ```bash
-tar -czvf bot-backup.tar.gz ~/.bot ~/.bot/workspace
+tar -czvf bot-backup.tar.gz ~/.bot ~/.hanzo/bot/workspace
 ```
 
 ---

@@ -119,19 +119,19 @@ pnpm gateway:watch --force --raw-stream
 Optional path override:
 
 ```bash
-pnpm gateway:watch --force --raw-stream --raw-stream-path ~/.bot/logs/raw-stream.jsonl
+pnpm gateway:watch --force --raw-stream --raw-stream-path ~/.hanzo/bot/logs/raw-stream.jsonl
 ```
 
 Equivalent env vars:
 
 ```bash
 BOT_RAW_STREAM=1
-BOT_RAW_STREAM_PATH=~/.bot/logs/raw-stream.jsonl
+BOT_RAW_STREAM_PATH=~/.hanzo/bot/logs/raw-stream.jsonl
 ```
 
 Default file:
 
-`~/.bot/logs/raw-stream.jsonl`
+`~/.hanzo/bot/logs/raw-stream.jsonl`
 
 ## Raw chunk logging (pi-mono)
 

@@ -24,24 +24,24 @@ x-i18n:
 
 ```json5
 {
-  agent: { workspace: "~/.bot/workspace" },
+  agent: { workspace: "~/.hanzo/bot/workspace" },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
 
-保存到 `~/.bot/bot.json`，你就可以从该号码私信机器人了。
+保存到 `~/.hanzo/bot/bot.json`，你就可以从该号码私信机器人了。
 
 ### 推荐的入门配置
 
 ```json5
 {
   identity: {
-    name: "Hanzo",
+    name: "Clawd",
     theme: "helpful assistant",
-    emoji: "🥷",
+    emoji: "🤖",
   },
   agent: {
-    workspace: "~/.bot/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     model: { primary: "anthropic/claude-sonnet-4-5" },
   },
   channels: {
@@ -166,7 +166,7 @@ x-i18n:
       discord: { mode: "idle", idleMinutes: 10080 },
     },
     resetTriggers: ["/new", "/reset"],
-    store: "~/.bot/agents/default/sessions/sessions.json",
+    store: "~/.hanzo/bot/agents/default/sessions/sessions.json",
     typingIntervalSeconds: 5,
     sendPolicy: {
       default: "allow",
@@ -229,7 +229,7 @@ x-i18n:
   // 智能体运行时
   agents: {
     defaults: {
-      workspace: "~/.bot/workspace",
+      workspace: "~/.hanzo/bot/workspace",
       userTimezone: "America/Chicago",
       model: {
         primary: "anthropic/claude-sonnet-4-5",
@@ -282,7 +282,7 @@ x-i18n:
       sandbox: {
         mode: "non-main",
         perSession: true,
-        workspaceRoot: "~/.bot/sandboxes",
+        workspaceRoot: "~/.hanzo/bot/sandboxes",
         docker: {
           image: "bot-sandbox:bookworm-slim",
           workdir: "/workspace",
@@ -349,7 +349,7 @@ x-i18n:
   // Cron 作业
   cron: {
     enabled: true,
-    store: "~/.bot/cron/cron.json",
+    store: "~/.hanzo/bot/cron/cron.json",
     maxConcurrentRuns: 2,
   },
 
@@ -359,7 +359,7 @@ x-i18n:
     path: "/hooks",
     token: "shared-secret",
     presets: ["gmail"],
-    transformsDir: "~/.bot/hooks",
+    transformsDir: "~/.hanzo/bot/hooks",
     mappings: [
       {
         id: "gmail-hook",
@@ -436,7 +436,7 @@ x-i18n:
 
 ```json5
 {
-  agent: { workspace: "~/.bot/workspace" },
+  agent: { workspace: "~/.hanzo/bot/workspace" },
   channels: {
     whatsapp: { allowFrom: ["+15555550123"] },
     telegram: {
@@ -474,7 +474,7 @@ x-i18n:
     },
   },
   agent: {
-    workspace: "~/.bot/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     model: {
       primary: "anthropic/claude-sonnet-4-5",
       fallbacks: ["anthropic/claude-opus-4-5"],
@@ -513,7 +513,7 @@ x-i18n:
     },
   },
   agent: {
-    workspace: "~/.bot/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     model: {
       primary: "anthropic/claude-opus-4-5",
       fallbacks: ["minimax/MiniMax-M2.1"],
@@ -552,7 +552,7 @@ x-i18n:
 ```json5
 {
   agent: {
-    workspace: "~/.bot/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     model: { primary: "lmstudio/minimax-m2.1-gs32" },
   },
   models: {

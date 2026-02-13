@@ -34,18 +34,18 @@ This is a living document maintained by the Hanzo Bot community. See [CONTRIBUTI
 
 ### 1.1 Purpose
 
-This threat model documents adversarial threats to the Hanzo Bot AI agent platform and Hanzo Skills marketplace, using the MITRE ATLAS framework designed specifically for AI/ML systems.
+This threat model documents adversarial threats to the Hanzo Bot AI agent platform and Hanzo Skills Hub skill marketplace, using the MITRE ATLAS framework designed specifically for AI/ML systems.
 
 ### 1.2 Scope
 
-| Component                | Included | Notes                                            |
-| ------------------------ | -------- | ------------------------------------------------ |
-| Hanzo Bot Agent Runtime  | Yes      | Core agent execution, tool calls, sessions       |
-| Gateway                  | Yes      | Authentication, routing, channel integration     |
-| Channel Integrations     | Yes      | WhatsApp, Telegram, Discord, Signal, Slack, etc. |
-| Hanzo Skills Marketplace | Yes      | Skill publishing, moderation, distribution       |
-| MCP Servers              | Yes      | External tool providers                          |
-| User Devices             | Partial  | Mobile apps, desktop clients                     |
+| Component                    | Included | Notes                                            |
+| ---------------------------- | -------- | ------------------------------------------------ |
+| Hanzo Bot Agent Runtime      | Yes      | Core agent execution, tool calls, sessions       |
+| Gateway                      | Yes      | Authentication, routing, channel integration     |
+| Channel Integrations         | Yes      | WhatsApp, Telegram, Discord, Signal, Slack, etc. |
+| Hanzo Skills Hub Marketplace | Yes      | Skill publishing, moderation, distribution       |
+| MCP Servers                  | Yes      | External tool providers                          |
+| User Devices                 | Partial  | Mobile apps, desktop clients                     |
 
 ### 1.3 Out of Scope
 
@@ -113,7 +113,7 @@ Nothing is explicitly out of scope for this threat model.
 ┌─────────────────────────────────────────────────────────────────┐
 │                 TRUST BOUNDARY 5: Supply Chain                   │
 │  ┌──────────────────────────────────────────────────────────┐   │
-│  │                    HANZO SKILLS                             │   │
+│  │                      SKILLS_HUB                              │   │
 │  │  • Skill publishing (semver, SKILL.md required)           │   │
 │  │  • Pattern-based moderation flags                         │   │
 │  │  • VirusTotal scanning (coming soon)                      │   │
@@ -124,14 +124,14 @@ Nothing is explicitly out of scope for this threat model.
 
 ### 2.2 Data Flows
 
-| Flow | Source       | Destination | Data               | Protection           |
-| ---- | ------------ | ----------- | ------------------ | -------------------- |
-| F1   | Channel      | Gateway     | User messages      | TLS, AllowFrom       |
-| F2   | Gateway      | Agent       | Routed messages    | Session isolation    |
-| F3   | Agent        | Tools       | Tool invocations   | Policy enforcement   |
-| F4   | Agent        | External    | web_fetch requests | SSRF blocking        |
-| F5   | Hanzo Skills | Agent       | Skill code         | Moderation, scanning |
-| F6   | Agent        | Channel     | Responses          | Output filtering     |
+| Flow | Source           | Destination | Data               | Protection           |
+| ---- | ---------------- | ----------- | ------------------ | -------------------- |
+| F1   | Channel          | Gateway     | User messages      | TLS, AllowFrom       |
+| F2   | Gateway          | Agent       | Routed messages    | Session isolation    |
+| F3   | Agent            | Tools       | Tool invocations   | Policy enforcement   |
+| F4   | Agent            | External    | web_fetch requests | SSRF blocking        |
+| F5   | Hanzo Skills Hub | Agent       | Skill code         | Moderation, scanning |
+| F6   | Agent            | Channel     | Responses          | Output filtering     |
 
 ---
 
@@ -198,7 +198,7 @@ Nothing is explicitly out of scope for this threat model.
 | **ATLAS ID**            | AML.T0040 - AI Model Inference API Access                   |
 | **Description**         | Attacker steals authentication tokens from config files     |
 | **Attack Vector**       | Malware, unauthorized device access, config backup exposure |
-| **Affected Components** | ~/.bot/credentials/, config storage                         |
+| **Affected Components** | ~/.hanzo/bot/credentials/, config storage                   |
 | **Current Mitigations** | File permissions                                            |
 | **Residual Risk**       | High - Tokens stored in plaintext                           |
 | **Recommendations**     | Implement token encryption at rest, add token rotation      |
@@ -264,9 +264,9 @@ Nothing is explicitly out of scope for this threat model.
 | Attribute               | Value                                                                    |
 | ----------------------- | ------------------------------------------------------------------------ |
 | **ATLAS ID**            | AML.T0010.001 - Supply Chain Compromise: AI Software                     |
-| **Description**         | Attacker publishes malicious skill to Hanzo Skills                       |
+| **Description**         | Attacker publishes malicious skill to Hanzo Skills Hub                   |
 | **Attack Vector**       | Create account, publish skill with hidden malicious code                 |
-| **Affected Components** | Hanzo Skills, skill loading, agent execution                             |
+| **Affected Components** | Hanzo Skills Hub, skill loading, agent execution                         |
 | **Current Mitigations** | GitHub account age verification, pattern-based moderation flags          |
 | **Residual Risk**       | Critical - No sandboxing, limited review                                 |
 | **Recommendations**     | VirusTotal integration (in progress), skill sandboxing, community review |
@@ -278,7 +278,7 @@ Nothing is explicitly out of scope for this threat model.
 | **ATLAS ID**            | AML.T0010.001 - Supply Chain Compromise: AI Software           |
 | **Description**         | Attacker compromises popular skill and pushes malicious update |
 | **Attack Vector**       | Account compromise, social engineering of skill owner          |
-| **Affected Components** | Hanzo Skills versioning, auto-update flows                     |
+| **Affected Components** | Hanzo Skills Hub versioning, auto-update flows                 |
 | **Current Mitigations** | Version fingerprinting                                         |
 | **Residual Risk**       | High - Auto-updates may pull malicious versions                |
 | **Recommendations**     | Implement update signing, rollback capability, version pinning |
@@ -306,7 +306,7 @@ Nothing is explicitly out of scope for this threat model.
 | **ATLAS ID**            | AML.T0043 - Craft Adversarial Data                                     |
 | **Description**         | Attacker crafts skill content to evade moderation patterns             |
 | **Attack Vector**       | Unicode homoglyphs, encoding tricks, dynamic loading                   |
-| **Affected Components** | Hanzo Skills moderation.ts                                             |
+| **Affected Components** | Hanzo Skills Hub moderation.ts                                         |
 | **Current Mitigations** | Pattern-based FLAG_RULES                                               |
 | **Residual Risk**       | High - Simple regex easily bypassed                                    |
 | **Recommendations**     | Add behavioral analysis (VirusTotal Code Insight), AST-based detection |
@@ -433,7 +433,7 @@ Nothing is explicitly out of scope for this threat model.
 
 ---
 
-## 4. Hanzo Skills Supply Chain Analysis
+## 4. Hanzo Skills Hub Supply Chain Analysis
 
 ### 4.1 Current Security Controls
 
@@ -582,7 +582,7 @@ T-EXEC-002 → T-EXFIL-001 → External exfiltration
 | `src/infra/net/ssrf.ts`             | SSRF protection             | **Critical** |
 | `src/security/external-content.ts`  | Prompt injection mitigation | **Critical** |
 | `src/agents/sandbox/tool-policy.ts` | Tool policy enforcement     | **Critical** |
-| `convex/lib/moderation.ts`          | Hanzo Skills moderation     | **High**     |
+| `convex/lib/moderation.ts`          | Hanzo Skills Hub moderation | **High**     |
 | `convex/lib/skillPublish.ts`        | Skill publishing flow       | **High**     |
 | `src/routing/resolve-route.ts`      | Session isolation           | **Medium**   |
 
@@ -591,7 +591,7 @@ T-EXEC-002 → T-EXFIL-001 → External exfiltration
 | Term                 | Definition                                                |
 | -------------------- | --------------------------------------------------------- |
 | **ATLAS**            | MITRE's Adversarial Threat Landscape for AI Systems       |
-| **Hanzo Skills**     | Hanzo Bot's skill marketplace                             |
+| **Hanzo Skills Hub** | Hanzo Bot's skill marketplace                             |
 | **Gateway**          | Hanzo Bot's message routing and authentication layer      |
 | **MCP**              | Model Context Protocol - tool provider interface          |
 | **Prompt Injection** | Attack where malicious instructions are embedded in input |

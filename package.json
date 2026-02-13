@@ -60,7 +60,7 @@
     "ios:build": "bash -lc 'cd apps/ios && xcodegen generate && xcodebuild -project Hanzo Bot.xcodeproj -scheme Hanzo Bot -destination \"${IOS_DEST:-platform=iOS Simulator,name=iPhone 17}\" -configuration Debug build'",
     "ios:gen": "cd apps/ios && xcodegen generate",
     "ios:open": "cd apps/ios && xcodegen generate && open Hanzo Bot.xcodeproj",
-    "ios:run": "bash -lc 'cd apps/ios && xcodegen generate && xcodebuild -project Hanzo Bot.xcodeproj -scheme Hanzo Bot -destination \"${IOS_DEST:-platform=iOS Simulator,name=iPhone 17}\" -configuration Debug build && xcrun simctl boot \"${IOS_SIM:-iPhone 17}\" || true && xcrun simctl launch booted ai.hanzo.ios'",
+    "ios:run": "bash -lc 'cd apps/ios && xcodegen generate && xcodebuild -project Hanzo Bot.xcodeproj -scheme Hanzo Bot -destination \"${IOS_DEST:-platform=iOS Simulator,name=iPhone 17}\" -configuration Debug build && xcrun simctl boot \"${IOS_SIM:-iPhone 17}\" || true && xcrun simctl launch booted ai.hanzo.ais'",
     "lint": "oxlint --type-aware",
     "lint:all": "pnpm lint && pnpm lint:swift",
     "lint:docs": "pnpm dlx markdownlint-cli2",

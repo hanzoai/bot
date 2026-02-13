@@ -176,7 +176,7 @@ describe("loadBotPlugins", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@bot/memory-core",
+        name: "@hanzo/bot-memory-core",
         version: "1.2.3",
         description: "Memory plugin package",
         bot: { extensions: ["./index.ts"] },
