@@ -279,7 +279,7 @@ describe("browser server-context tab selection state", () => {
     const { createBrowserRouteContext } = await import("./server-context.js");
     const state = makeState("bot");
     const ctx = createBrowserRouteContext({ getState: () => state });
-    const hanzo-bot = ctx.forProfile("bot");
+    const bot = ctx.forProfile("bot");
 
     const opened = await bot.openTab("https://created.example");
     expect(opened.targetId).toBe("CREATED");
