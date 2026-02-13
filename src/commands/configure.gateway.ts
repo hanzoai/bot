@@ -144,7 +144,7 @@ export async function promptGatewayConfig(
   let tailscaleResetOnExit = false;
   if (tailscaleMode !== "off") {
     note(
-      ["Docs:", "https://docs.bot.ai/gateway/tailscale", "https://docs.bot.ai/web"].join(
+      ["Docs:", "https://docs.hanzo.bot/gateway/tailscale", "https://docs.hanzo.bot/web"].join(
         "\n",
       ),
       "Tailscale",

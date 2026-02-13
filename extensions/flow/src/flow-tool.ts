@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { BotPluginApi } from "../../../src/plugins/types.js";
 
-type LobsterEnvelope =
+type FlowEnvelope =
   | {
       ok: true;
       status: "ok" | "needs_approval" | "cancelled";
@@ -21,41 +21,40 @@ type LobsterEnvelope =
       error: { type?: string; message: string };
     };
 
-function resolveExecutablePath(lobsterPathRaw: string | undefined) {
-  const lobsterPath = lobsterPathRaw?.trim() || "lobster";
+function resolveExecutablePath(flowPathRaw: string | undefined) {
+  const flowPath = flowPathRaw?.trim() || "flow";
 
   // SECURITY:
   // Never allow arbitrary executables (e.g. /bin/bash). If the caller overrides
-  // the path, it must still be the lobster binary (by name) and be absolute.
-  if (lobsterPath !== "lobster") {
-    if (!path.isAbsolute(lobsterPath)) {
-      throw new Error("lobsterPath must be an absolute path (or omit to use PATH)");
+  // the path, it must still be the flow binary (by name) and be absolute.
+  if (flowPath !== "flow") {
+    if (!path.isAbsolute(flowPath)) {
+      throw new Error("flowPath must be an absolute path (or omit to use PATH)");
     }
-    const base = path.basename(lobsterPath).toLowerCase();
-    const allowed =
-      process.platform === "win32" ? ["lobster.exe", "lobster.cmd", "lobster.bat"] : ["lobster"];
+    const base = path.basename(flowPath).toLowerCase();
+    const allowed = process.platform === "win32" ? ["flow.exe", "flow.cmd", "flow.bat"] : ["flow"];
     if (!allowed.includes(base)) {
-      throw new Error("lobsterPath must point to the lobster executable");
+      throw new Error("flowPath must point to the flow executable");
     }
     let stat: fs.Stats;
     try {
-      stat = fs.statSync(lobsterPath);
+      stat = fs.statSync(flowPath);
     } catch {
-      throw new Error("lobsterPath must exist");
+      throw new Error("flowPath must exist");
     }
     if (!stat.isFile()) {
-      throw new Error("lobsterPath must point to a file");
+      throw new Error("flowPath must point to a file");
     }
     if (process.platform !== "win32") {
       try {
-        fs.accessSync(lobsterPath, fs.constants.X_OK);
+        fs.accessSync(flowPath, fs.constants.X_OK);
       } catch {
-        throw new Error("lobsterPath must be executable");
+        throw new Error("flowPath must be executable");
       }
     }
   }
 
-  return lobsterPath;
+  return flowPath;
 }
 
 function normalizeForCwdSandbox(p: string): string {
@@ -90,13 +89,13 @@ function isWindowsSpawnErrorThatCanUseShell(err: unknown) {
   }
   const code = (err as { code?: unknown }).code;
 
-  // On Windows, spawning scripts discovered on PATH (e.g. lobster.cmd) can fail
+  // On Windows, spawning scripts discovered on PATH (e.g. flow.cmd) can fail
   // with EINVAL, and PATH discovery itself can fail with ENOENT when the binary
   // is only available via PATHEXT/script wrappers.
   return code === "EINVAL" || code === "ENOENT";
 }
 
-async function runLobsterSubprocessOnce(
+async function runFlowSubprocessOnce(
   params: {
     execPath: string;
     argv: string[];
@@ -110,7 +109,7 @@ async function runLobsterSubprocessOnce(
   const timeoutMs = Math.max(200, params.timeoutMs);
   const maxStdoutBytes = Math.max(1024, params.maxStdoutBytes);
 
-  const env = { ...process.env, LOBSTER_MODE: "tool" } as Record<string, string | undefined>;
+  const env = { ...process.env, BOT_FLOW_MODE: "tool" } as Record<string, string | undefined>;
   const nodeOptions = env.NODE_OPTIONS ?? "";
   if (nodeOptions.includes("--inspect")) {
     delete env.NODE_OPTIONS;
@@ -139,7 +138,7 @@ async function runLobsterSubprocessOnce(
         try {
           child.kill("SIGKILL");
         } finally {
-          reject(new Error("lobster output exceeded maxStdoutBytes"));
+          reject(new Error("flow output exceeded maxStdoutBytes"));
         }
         return;
       }
@@ -154,7 +153,7 @@ async function runLobsterSubprocessOnce(
       try {
         child.kill("SIGKILL");
       } finally {
-        reject(new Error("lobster subprocess timed out"));
+        reject(new Error("flow subprocess timed out"));
       }
     }, timeoutMs);
 
@@ -166,7 +165,7 @@ async function runLobsterSubprocessOnce(
     child.once("exit", (code) => {
       clearTimeout(timer);
       if (code !== 0) {
-        reject(new Error(`lobster failed (${code ?? "?"}): ${stderr.trim() || stdout.trim()}`));
+        reject(new Error(`flow failed (${code ?? "?"}): ${stderr.trim() || stdout.trim()}`));
         return;
       }
       resolve({ stdout });
@@ -174,7 +173,7 @@ async function runLobsterSubprocessOnce(
   });
 }
 
-async function runLobsterSubprocess(params: {
+async function runFlowSubprocess(params: {
   execPath: string;
   argv: string[];
   cwd: string;
@@ -182,16 +181,16 @@ async function runLobsterSubprocess(params: {
   maxStdoutBytes: number;
 }) {
   try {
-    return await runLobsterSubprocessOnce(params, false);
+    return await runFlowSubprocessOnce(params, false);
   } catch (err) {
     if (process.platform === "win32" && isWindowsSpawnErrorThatCanUseShell(err)) {
-      return await runLobsterSubprocessOnce(params, true);
+      return await runFlowSubprocessOnce(params, true);
     }
     throw err;
   }
 }
 
-function parseEnvelope(stdout: string): LobsterEnvelope {
+function parseEnvelope(stdout: string): FlowEnvelope {
   const trimmed = stdout.trim();
 
   const tryParse = (input: string) => {
@@ -214,27 +213,27 @@ function parseEnvelope(stdout: string): LobsterEnvelope {
   }
 
   if (parsed === undefined) {
-    throw new Error("lobster returned invalid JSON");
+    throw new Error("flow returned invalid JSON");
   }
 
   if (!parsed || typeof parsed !== "object") {
-    throw new Error("lobster returned invalid JSON envelope");
+    throw new Error("flow returned invalid JSON envelope");
   }
 
   const ok = (parsed as { ok?: unknown }).ok;
   if (ok === true || ok === false) {
-    return parsed as LobsterEnvelope;
+    return parsed as FlowEnvelope;
   }
 
-  throw new Error("lobster returned invalid JSON envelope");
+  throw new Error("flow returned invalid JSON envelope");
 }
 
-export function createLobsterTool(api: BotPluginApi) {
+export function createFlowTool(api: BotPluginApi) {
   return {
-    name: "lobster",
-    label: "Lobster Workflow",
+    name: "flow",
+    label: "Flow Workflow",
     description:
-      "Run Lobster pipelines as a local-first workflow runtime (typed JSON envelope + resumable approvals).",
+      "Run Flow pipelines as a local-first workflow runtime (typed JSON envelope + resumable approvals).",
     parameters: Type.Object({
       // NOTE: Prefer string enums in tool schemas; some providers reject unions/anyOf.
       action: Type.Unsafe<"run" | "resume">({ type: "string", enum: ["run", "resume"] }),
@@ -243,8 +242,8 @@ export function createLobsterTool(api: BotPluginApi) {
       token: Type.Optional(Type.String()),
       approve: Type.Optional(Type.Boolean()),
       // SECURITY: Do not allow the agent to choose an executable path.
-      // Host can configure the lobster binary via plugin config.
-      lobsterPath: Type.Optional(
+      // Host can configure the flow binary via plugin config.
+      flowPath: Type.Optional(
         Type.String({ description: "(deprecated) Use plugin config instead." }),
       ),
       cwd: Type.Optional(
@@ -265,14 +264,12 @@ export function createLobsterTool(api: BotPluginApi) {
       // SECURITY: never allow tool callers (agent/user) to select executables.
       // If a host needs to override the binary, it must do so via plugin config.
       // We still validate the parameter shape to prevent reintroducing an RCE footgun.
-      if (typeof params.lobsterPath === "string" && params.lobsterPath.trim()) {
-        resolveExecutablePath(params.lobsterPath);
+      if (typeof params.flowPath === "string" && params.flowPath.trim()) {
+        resolveExecutablePath(params.flowPath);
       }
 
       const execPath = resolveExecutablePath(
-        typeof api.pluginConfig?.lobsterPath === "string"
-          ? api.pluginConfig.lobsterPath
-          : undefined,
+        typeof api.pluginConfig?.flowPath === "string" ? api.pluginConfig.flowPath : undefined,
       );
       const cwd = resolveCwd(params.cwd);
       const timeoutMs = typeof params.timeoutMs === "number" ? params.timeoutMs : 20_000;
@@ -307,10 +304,10 @@ export function createLobsterTool(api: BotPluginApi) {
       })();
 
       if (api.runtime?.version && api.logger?.debug) {
-        api.logger.debug(`lobster plugin runtime=${api.runtime.version}`);
+        api.logger.debug(`flow plugin runtime=${api.runtime.version}`);
       }
 
-      const { stdout } = await runLobsterSubprocess({
+      const { stdout } = await runFlowSubprocess({
         execPath,
         argv,
         cwd,

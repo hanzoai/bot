@@ -115,7 +115,7 @@ sessions, and auth profiles. Running without `--workspace` launches the wizard.
 
 ```bash
 hanzo-bot agents add work \
-  --workspace ~/.bot/workspace-work \
+  --workspace ~/.hanzo/bot/workspace-work \
   --model openai/gpt-5.2 \
   --bind whatsapp:biz \
   --non-interactive \
@@ -130,7 +130,7 @@ What it sets:
 
 Notes:
 
-- Default workspaces follow `~/.bot/workspace-<agentId>`.
+- Default workspaces follow `~/.hanzo/bot/workspace-<agentId>`.
 - Add `bindings` to route inbound messages (the wizard can do this).
 - Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
 

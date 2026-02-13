@@ -96,13 +96,13 @@ Hanzo Bot scans, in order:
 
 2. Workspace extensions
 
-- `<workspace>/.bot/extensions/*.ts`
-- `<workspace>/.bot/extensions/*/index.ts`
+- `<workspace>/.hanzo/bot/extensions/*.ts`
+- `<workspace>/.hanzo/bot/extensions/*/index.ts`
 
 3. Global extensions
 
-- `~/.bot/extensions/*.ts`
-- `~/.bot/extensions/*/index.ts`
+- `~/.hanzo/bot/extensions/*.ts`
+- `~/.hanzo/bot/extensions/*/index.ts`
 
 4. Bundled extensions (shipped with Hanzo Bot, **disabled by default**)
 
@@ -172,9 +172,9 @@ Example:
 Hanzo Bot can also merge **external channel catalogs** (for example, an MPM
 registry export). Drop a JSON file at one of:
 
-- `~/.bot/mpm/plugins.json`
-- `~/.bot/mpm/catalog.json`
-- `~/.bot/plugins/catalog.json`
+- `~/.hanzo/bot/mpm/plugins.json`
+- `~/.hanzo/bot/mpm/catalog.json`
+- `~/.hanzo/bot/plugins/catalog.json`
 
 Or point `BOT_PLUGIN_CATALOG_PATHS` (or `BOT_MPM_CATALOG_PATHS`) at
 one or more JSON files (comma/semicolon/`PATH`-delimited). Each file should
@@ -281,7 +281,7 @@ Example:
 ```bash
 hanzo-bot plugins list
 hanzo-bot plugins info <id>
-hanzo-bot plugins install <path>                 # copy a local file/dir into ~/.bot/extensions/<id>
+hanzo-bot plugins install <path>                 # copy a local file/dir into ~/.hanzo/bot/extensions/<id>
 hanzo-bot plugins install ./extensions/voice-call # relative path ok
 hanzo-bot plugins install ./plugin.tgz           # install from a local tarball
 hanzo-bot plugins install ./plugin.zip           # install from a local zip
@@ -631,7 +631,7 @@ Publishing contract:
 
 - Plugin `package.json` must include `bot.extensions` with one or more entry files.
 - Entry files can be `.js` or `.ts` (jiti loads TS at runtime).
-- `hanzo-bot plugins install <npm-spec>` uses `npm pack`, extracts into `~/.bot/extensions/<id>/`, and enables it in config.
+- `hanzo-bot plugins install <npm-spec>` uses `npm pack`, extracts into `~/.hanzo/bot/extensions/<id>/`, and enables it in config.
 - Config key stability: scoped packages are normalized to the **unscoped** id for `plugins.entries.*`.
 
 ## Example plugin: Voice Call

@@ -39,8 +39,8 @@ export function formatCliBannerLine(version: string, options: BannerOptions = {}
   const commitLabel = commit ?? "unknown";
   const tagline = pickTagline(options);
   const rich = options.richTty ?? isRich();
-  const title = "🥷 Hanzo Bot";
-  const prefix = "🥷 ";
+  const title = "🤖 Hanzo Bot";
+  const prefix = "🤖 ";
   const columns = options.columns ?? process.stdout.columns ?? 120;
   const plainFullLine = `${title} ${version} (${commitLabel}) — ${tagline}`;
   const fitsOnOneLine = visibleWidth(plainFullLine) <= columns;
@@ -64,20 +64,20 @@ export function formatCliBannerLine(version: string, options: BannerOptions = {}
   return `${line1}\n${line2}`;
 }
 
-const BANNER_ASCII = [
+const BOT_ASCII = [
   "▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄",
   "██░▄▄▄░██░▄▄░██░▄▄▄██░▀██░██░▄▄▀██░████░▄▄▀██░███░██",
   "██░███░██░▀▀░██░▄▄▄██░█░█░██░█████░████░▀▀░██░█░█░██",
   "██░▀▀▀░██░█████░▀▀▀██░██▄░██░▀▀▄██░▀▀░█░██░██▄▀▄▀▄██",
   "▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀",
-  "                  🥷 HANZO BOT 🥷                    ",
+  "                  🤖 HANZO BOT 🤖                    ",
   " ",
 ];
 
 export function formatCliBannerArt(options: BannerOptions = {}): string {
   const rich = options.richTty ?? isRich();
   if (!rich) {
-    return BANNER_ASCII.join("\n");
+    return BOT_ASCII.join("\n");
   }
 
   const colorChar = (ch: string) => {
@@ -93,13 +93,13 @@ export function formatCliBannerArt(options: BannerOptions = {}): string {
     return theme.muted(ch);
   };
 
-  const colored = BANNER_ASCII.map((line) => {
+  const colored = BOT_ASCII.map((line) => {
     if (line.includes("HANZO BOT")) {
       return (
         theme.muted("              ") +
-        theme.accent("🥷") +
+        theme.accent("🤖") +
         theme.info(" HANZO BOT ") +
-        theme.accent("🥷")
+        theme.accent("🤖")
       );
     }
     return splitGraphemes(line).map(colorChar).join("");
