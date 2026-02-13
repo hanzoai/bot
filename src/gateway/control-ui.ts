@@ -316,6 +316,16 @@ export function handleControlUiHttpRequest(
 
   const uiPath =
     basePath && pathname.startsWith(`${basePath}/`) ? pathname.slice(basePath.length) : pathname;
+
+  // Serve landing page at root path if site.html exists.
+  if (uiPath === ROOT_PREFIX) {
+    const sitePath = path.join(root, "site.html");
+    if (fs.existsSync(sitePath) && fs.statSync(sitePath).isFile()) {
+      serveFile(res, sitePath);
+      return true;
+    }
+  }
+
   const rel = (() => {
     if (uiPath === ROOT_PREFIX) {
       return "";
