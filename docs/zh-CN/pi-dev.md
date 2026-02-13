@@ -73,5 +73,5 @@ scripts/pi/run-tests.sh --live
 
 ## 参考资料
 
-- https://docs.bot.ai/testing
-- https://docs.bot.ai/start/getting-started
+- https://docs.hanzo.bot/testing
+- https://docs.hanzo.bot/start/getting-started
