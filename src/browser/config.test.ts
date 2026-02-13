@@ -16,7 +16,7 @@ describe("browser config", () => {
     expect(profile?.cdpPort).toBe(18792);
     expect(profile?.cdpUrl).toBe("http://127.0.0.1:18792");
 
-    const hanzo-bot = resolveProfile(resolved, "bot");
+    const bot = resolveProfile(resolved, "bot");
     expect(bot?.driver).toBe("bot");
     expect(bot?.cdpPort).toBe(18800);
     expect(bot?.cdpUrl).toBe("http://127.0.0.1:18800");
@@ -35,7 +35,7 @@ describe("browser config", () => {
       expect(chrome?.cdpPort).toBe(19004);
       expect(chrome?.cdpUrl).toBe("http://127.0.0.1:19004");
 
-      const hanzo-bot = resolveProfile(resolved, "bot");
+      const bot = resolveProfile(resolved, "bot");
       expect(bot?.cdpPort).toBe(19012);
       expect(bot?.cdpUrl).toBe("http://127.0.0.1:19012");
     } finally {
@@ -58,7 +58,7 @@ describe("browser config", () => {
       expect(chrome?.cdpPort).toBe(19014);
       expect(chrome?.cdpUrl).toBe("http://127.0.0.1:19014");
 
-      const hanzo-bot = resolveProfile(resolved, "bot");
+      const bot = resolveProfile(resolved, "bot");
       expect(bot?.cdpPort).toBe(19022);
       expect(bot?.cdpUrl).toBe("http://127.0.0.1:19022");
     } finally {
