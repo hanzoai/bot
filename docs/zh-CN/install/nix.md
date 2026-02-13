@@ -71,7 +71,7 @@ defaults write bot.molt.mac bot.nixMode -bool true
 
 Hanzo Bot 从 `BOT_CONFIG_PATH` 读取 JSON5 配置，并将可变数据存储在 `BOT_STATE_DIR` 中。
 
-- `BOT_STATE_DIR`（默认：`~/.bot`）
+- `BOT_STATE_DIR`（默认：`~/.hanzo/bot`）
 - `BOT_CONFIG_PATH`（默认：`$BOT_STATE_DIR/bot.json`）
 
 在 Nix 下运行时，将这些显式设置为 Nix 管理的位置，以便运行时状态和配置不会进入不可变存储。

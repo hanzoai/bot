@@ -369,7 +369,7 @@ describe("monitorIMessageProvider", () => {
           is_from_me: false,
           text: "@hanzo-bot ping",
           is_group: true,
-          chat_name: "Lobster Squad",
+          chat_name: "Bot Squad",
           participants: ["+1555", "+1556"],
         },
       },
