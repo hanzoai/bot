@@ -11,10 +11,10 @@ title: "Installer Internals"
 
 Hanzo Bot ships three installer scripts, served from `hanzo.bot`.
 
-| Script                             | Platform             | What it does                                                                                 |
-| ---------------------------------- | -------------------- | -------------------------------------------------------------------------------------------- |
+| Script                             | Platform             | What it does                                                                                  |
+| ---------------------------------- | -------------------- | --------------------------------------------------------------------------------------------- |
 | [`install.sh`](#installsh)         | macOS / Linux / WSL  | Installs Node if needed, installs Hanzo Bot via npm (default) or git, and can run onboarding. |
-| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL  | Installs Node + Hanzo Bot into a local prefix (`~/.bot`). No root required.              |
+| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL  | Installs Node + Hanzo Bot into a local prefix (`~/.hanzo/bot`). No root required.             |
 | [`install.ps1`](#installps1)       | Windows (PowerShell) | Installs Node if needed, installs Hanzo Bot via npm (default) or git, and can run onboarding. |
 
 ## Quick commands
@@ -126,28 +126,28 @@ The script exits with code `2` for invalid method selection or invalid `--instal
 <AccordionGroup>
   <Accordion title="Flags reference">
 
-| Flag                            | Description                                                |
-| ------------------------------- | ---------------------------------------------------------- |
-| `--install-method npm\|git`     | Choose install method (default: `npm`). Alias: `--method`  |
-| `--npm`                         | Shortcut for npm method                                    |
-| `--git`                         | Shortcut for git method. Alias: `--github`                 |
-| `--version <version\|dist-tag>` | npm version or dist-tag (default: `latest`)                |
-| `--beta`                        | Use beta dist-tag if available, else fallback to `latest`  |
-| `--git-dir <path>`              | Checkout directory (default: `~/bot`). Alias: `--dir` |
-| `--no-git-update`               | Skip `git pull` for existing checkout                      |
-| `--no-prompt`                   | Disable prompts                                            |
-| `--no-onboard`                  | Skip onboarding                                            |
-| `--onboard`                     | Enable onboarding                                          |
-| `--dry-run`                     | Print actions without applying changes                     |
-| `--verbose`                     | Enable debug output (`set -x`, npm notice-level logs)      |
-| `--help`                        | Show usage (`-h`)                                          |
+| Flag                            | Description                                               |
+| ------------------------------- | --------------------------------------------------------- |
+| `--install-method npm\|git`     | Choose install method (default: `npm`). Alias: `--method` |
+| `--npm`                         | Shortcut for npm method                                   |
+| `--git`                         | Shortcut for git method. Alias: `--github`                |
+| `--version <version\|dist-tag>` | npm version or dist-tag (default: `latest`)               |
+| `--beta`                        | Use beta dist-tag if available, else fallback to `latest` |
+| `--git-dir <path>`              | Checkout directory (default: `~/bot`). Alias: `--dir`     |
+| `--no-git-update`               | Skip `git pull` for existing checkout                     |
+| `--no-prompt`                   | Disable prompts                                           |
+| `--no-onboard`                  | Skip onboarding                                           |
+| `--onboard`                     | Enable onboarding                                         |
+| `--dry-run`                     | Print actions without applying changes                    |
+| `--verbose`                     | Enable debug output (`set -x`, npm notice-level logs)     |
+| `--help`                        | Show usage (`-h`)                                         |
 
   </Accordion>
 
   <Accordion title="Environment variables reference">
 
-| Variable                                    | Description                                   |
-| ------------------------------------------- | --------------------------------------------- |
+| Variable                               | Description                                   |
+| -------------------------------------- | --------------------------------------------- |
 | `BOT_INSTALL_METHOD=git\|npm`          | Install method                                |
 | `BOT_VERSION=latest\|next\|<semver>`   | npm version or dist-tag                       |
 | `BOT_BETA=0\|1`                        | Use beta if available                         |
@@ -158,7 +158,7 @@ The script exits with code `2` for invalid method selection or invalid `--instal
 | `BOT_DRY_RUN=1`                        | Dry run mode                                  |
 | `BOT_VERBOSE=1`                        | Debug mode                                    |
 | `BOT_NPM_LOGLEVEL=error\|warn\|notice` | npm log level                                 |
-| `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`          | Control sharp/libvips behavior (default: `1`) |
+| `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`     | Control sharp/libvips behavior (default: `1`) |
 
   </Accordion>
 </AccordionGroup>
@@ -168,7 +168,7 @@ The script exits with code `2` for invalid method selection or invalid `--instal
 ## install-cli.sh
 
 <Info>
-Designed for environments where you want everything under a local prefix (default `~/.bot`) and no system Node dependency.
+Designed for environments where you want everything under a local prefix (default `~/.hanzo/bot`) and no system Node dependency.
 </Info>
 
 ### Flow (install-cli.sh)
@@ -215,11 +215,11 @@ Designed for environments where you want everything under a local prefix (defaul
 
 | Flag                   | Description                                                                     |
 | ---------------------- | ------------------------------------------------------------------------------- |
-| `--prefix <path>`      | Install prefix (default: `~/.bot`)                                         |
-| `--version <ver>`      | Hanzo Bot version or dist-tag (default: `latest`)                                |
+| `--prefix <path>`      | Install prefix (default: `~/.hanzo/bot`)                                        |
+| `--version <ver>`      | Hanzo Bot version or dist-tag (default: `latest`)                               |
 | `--node-version <ver>` | Node version (default: `22.22.0`)                                               |
 | `--json`               | Emit NDJSON events                                                              |
-| `--onboard`            | Run `hanzo-bot onboard` after install                                            |
+| `--onboard`            | Run `hanzo-bot onboard` after install                                           |
 | `--no-onboard`         | Skip onboarding (default)                                                       |
 | `--set-npm-prefix`     | On Linux, force npm prefix to `~/.npm-global` if current prefix is not writable |
 | `--help`               | Show usage (`-h`)                                                               |
@@ -228,15 +228,15 @@ Designed for environments where you want everything under a local prefix (defaul
 
   <Accordion title="Environment variables reference">
 
-| Variable                                    | Description                                                                       |
-| ------------------------------------------- | --------------------------------------------------------------------------------- |
+| Variable                               | Description                                                                       |
+| -------------------------------------- | --------------------------------------------------------------------------------- |
 | `BOT_PREFIX=<path>`                    | Install prefix                                                                    |
-| `BOT_VERSION=<ver>`                    | Hanzo Bot version or dist-tag                                                      |
+| `BOT_VERSION=<ver>`                    | Hanzo Bot version or dist-tag                                                     |
 | `BOT_NODE_VERSION=<ver>`               | Node version                                                                      |
 | `BOT_NO_ONBOARD=1`                     | Skip onboarding                                                                   |
 | `BOT_NPM_LOGLEVEL=error\|warn\|notice` | npm log level                                                                     |
 | `BOT_GIT_DIR=<path>`                   | Legacy cleanup lookup path (used when removing old `Peekaboo` submodule checkout) |
-| `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`          | Control sharp/libvips behavior (default: `1`)                                     |
+| `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`     | Control sharp/libvips behavior (default: `1`)                                     |
 
   </Accordion>
 </AccordionGroup>
@@ -291,21 +291,21 @@ Designed for environments where you want everything under a local prefix (defaul
 <AccordionGroup>
   <Accordion title="Flags reference">
 
-| Flag                      | Description                                            |
-| ------------------------- | ------------------------------------------------------ |
-| `-InstallMethod npm\|git` | Install method (default: `npm`)                        |
-| `-Tag <tag>`              | npm dist-tag (default: `latest`)                       |
+| Flag                      | Description                                       |
+| ------------------------- | ------------------------------------------------- |
+| `-InstallMethod npm\|git` | Install method (default: `npm`)                   |
+| `-Tag <tag>`              | npm dist-tag (default: `latest`)                  |
 | `-GitDir <path>`          | Checkout directory (default: `%USERPROFILE%\bot`) |
-| `-NoOnboard`              | Skip onboarding                                        |
-| `-NoGitUpdate`            | Skip `git pull`                                        |
-| `-DryRun`                 | Print actions only                                     |
+| `-NoOnboard`              | Skip onboarding                                   |
+| `-NoGitUpdate`            | Skip `git pull`                                   |
+| `-DryRun`                 | Print actions only                                |
 
   </Accordion>
 
   <Accordion title="Environment variables reference">
 
-| Variable                           | Description        |
-| ---------------------------------- | ------------------ |
+| Variable                      | Description        |
+| ----------------------------- | ------------------ |
 | `BOT_INSTALL_METHOD=git\|npm` | Install method     |
 | `BOT_GIT_DIR=<path>`          | Checkout directory |
 | `BOT_NO_ONBOARD=1`            | Skip onboarding    |

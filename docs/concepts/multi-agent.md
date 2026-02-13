@@ -40,7 +40,7 @@ reach other host locations unless sandboxing is enabled. See
 ## Paths (quick map)
 
 - Config: `~/.hanzo/bot/bot.json` (or `BOT_CONFIG_PATH`)
-- State dir: `~/.bot` (or `BOT_STATE_DIR`)
+- State dir: `~/.hanzo/bot` (or `BOT_STATE_DIR`)
 - Workspace: `~/.hanzo/bot/workspace` (or `~/.hanzo/bot/workspace-<agentId>`)
 - Agent dir: `~/.hanzo/bot/agents/<agentId>/agent` (or `agents.list[].agentDir`)
 - Sessions: `~/.hanzo/bot/agents/<agentId>/sessions`
