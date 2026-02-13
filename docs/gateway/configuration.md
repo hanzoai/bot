@@ -3146,8 +3146,8 @@ To run multiple gateways on one host (for redundancy or a rescue bot), isolate p
 
 Convenience flags (CLI):
 
-- `hanzo-bot --dev …` → uses `~/.bot-dev` + shifts ports from base `19001`
-- `hanzo-bot --profile <name> …` → uses `~/.bot-<name>` (port via config/env/flags)
+- `hanzo-bot --dev …` → uses `~/.hanzo/bot-dev` + shifts ports from base `19001`
+- `hanzo-bot --profile <name> …` → uses `~/.hanzo/bot-<name>` (port via config/env/flags)
 
 See [Gateway runbook](/gateway) for the derived port mapping (gateway/browser/canvas).
 See [Multiple gateways](/gateway/multiple-gateways) for browser/CDP port isolation details.
@@ -3156,7 +3156,7 @@ Example:
 
 ```bash
 BOT_CONFIG_PATH=~/.hanzo/bot/a.json \
-BOT_STATE_DIR=~/.bot-a \
+BOT_STATE_DIR=~/.hanzo/bot-a \
 hanzo-bot gateway --port 19001
 ```
 
