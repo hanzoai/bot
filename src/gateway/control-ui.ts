@@ -326,6 +326,15 @@ export function handleControlUiHttpRequest(
     }
   }
 
+  // Serve static HTML pages (e.g. /book → book.html) if they exist.
+  if (uiPath.startsWith("/") && !uiPath.includes(".") && uiPath !== ROOT_PREFIX) {
+    const pagePath = path.join(root, `${uiPath.slice(1)}.html`);
+    if (fs.existsSync(pagePath) && fs.statSync(pagePath).isFile()) {
+      serveFile(res, pagePath);
+      return true;
+    }
+  }
+
   const rel = (() => {
     if (uiPath === ROOT_PREFIX) {
       return "";
