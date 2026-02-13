@@ -91,8 +91,8 @@ hanzo-bot --dev health
 
 Defaults (can be overridden via env/flags/config):
 
-- `BOT_STATE_DIR=~/.bot-dev`
-- `BOT_CONFIG_PATH=~/.bot-dev/bot.json`
+- `BOT_STATE_DIR=~/.hanzo/bot-dev`
+- `BOT_CONFIG_PATH=~/.hanzo/bot-dev/bot.json`
 - `BOT_GATEWAY_PORT=19001` (Gateway WS + HTTP)
 - browser control service port = `19003` (derived: `gateway.port+2`, loopback only)
 - `canvasHost.port=19005` (derived: `gateway.port+4`)
@@ -123,8 +123,8 @@ hanzo-bot --profile rescue gateway install
 Example:
 
 ```bash
-BOT_CONFIG_PATH=~/.hanzo/bot/a.json BOT_STATE_DIR=~/.bot-a hanzo-bot gateway --port 19001
-BOT_CONFIG_PATH=~/.hanzo/bot/b.json BOT_STATE_DIR=~/.bot-b hanzo-bot gateway --port 19002
+BOT_CONFIG_PATH=~/.hanzo/bot/a.json BOT_STATE_DIR=~/.hanzo/bot-a hanzo-bot gateway --port 19001
+BOT_CONFIG_PATH=~/.hanzo/bot/b.json BOT_STATE_DIR=~/.hanzo/bot-b hanzo-bot gateway --port 19002
 ```
 
 ## Protocol (operator view)

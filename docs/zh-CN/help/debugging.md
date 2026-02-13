@@ -55,7 +55,7 @@ tsx watch src/entry.ts gateway --force
 
 使用 dev 配置文件来隔离状态，并启动一个安全、可丢弃的调试设置。有**两个** `--dev` 标志：
 
-- **全局 `--dev`（配置文件）：** 将状态隔离到 `~/.bot-dev` 下，并将 Gateway 网关端口默认为 `19001`（派生端口随之移动）。
+- **全局 `--dev`（配置文件）：** 将状态隔离到 `~/.hanzo/bot-dev` 下，并将 Gateway 网关端口默认为 `19001`（派生端口随之移动）。
 - **`gateway --dev`：告诉 Gateway 网关在缺失时自动创建默认配置 + 工作区**（并跳过 BOOTSTRAP.md）。
 
 推荐流程（dev 配置文件 + dev 引导）：
@@ -71,8 +71,8 @@ BOT_PROFILE=dev hanzo-bot tui
 
 1. **配置文件隔离**（全局 `--dev`）
    - `BOT_PROFILE=dev`
-   - `BOT_STATE_DIR=~/.bot-dev`
-   - `BOT_CONFIG_PATH=~/.bot-dev/bot.json`
+   - `BOT_STATE_DIR=~/.hanzo/bot-dev`
+   - `BOT_CONFIG_PATH=~/.hanzo/bot-dev/bot.json`
    - `BOT_GATEWAY_PORT=19001`（浏览器/画布相应移动）
 
 2. **Dev 引导**（`gateway --dev`）

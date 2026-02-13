@@ -29,7 +29,7 @@ Hetzner 定价会变化；选择最小的 Debian/Ubuntu VPS，如果遇到 OOM �
 - 租用一台小型 Linux 服务器（Hetzner VPS）
 - 安装 Docker（隔离的应用运行时）
 - 在 Docker 中启动 Hanzo Bot Gateway 网关
-- 在主机上持久化 `~/.bot` + `~/.hanzo/bot/workspace`（重启/重建后保留）
+- 在主机上持久化 `~/.hanzo/bot` + `~/.hanzo/bot/workspace`（重启/重建后保留）
 - 通过 SSH 隧道从你的笔记本电脑访问控制 UI
 
 Gateway 网关可以通过以下方式访问：

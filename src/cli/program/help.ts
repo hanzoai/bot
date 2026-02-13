@@ -37,11 +37,11 @@ export function configureProgramHelp(program: Command, ctx: ProgramContext) {
     .version(ctx.programVersion)
     .option(
       "--dev",
-      "Dev profile: isolate state under ~/.bot-dev, default gateway port 19001, and shift derived ports (browser/canvas)",
+      "Dev profile: isolate state under ~/.hanzo/bot-dev, default gateway port 19001, and shift derived ports (browser/canvas)",
     )
     .option(
       "--profile <name>",
-      "Use a named profile (isolates BOT_STATE_DIR/BOT_CONFIG_PATH under ~/.bot-<name>)",
+      "Use a named profile (isolates BOT_STATE_DIR/BOT_CONFIG_PATH under ~/.hanzo/bot-<name>)",
     );
 
   program.option("--no-color", "Disable ANSI colors", false);
