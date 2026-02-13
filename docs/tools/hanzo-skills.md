@@ -1,19 +1,19 @@
 ---
-summary: "Hanzo Skills guide: public skills registry + CLI workflows"
+summary: "Hanzo Skills Hub guide: public skills registry + CLI workflows"
 read_when:
-  - Introducing Hanzo Skills to new users
+  - Introducing Hanzo Skills Hub to new users
   - Installing, searching, or publishing skills
-  - Explaining Hanzo Skills CLI flags and sync behavior
-title: "Hanzo Skills"
+  - Explaining Hanzo Skills Hub CLI flags and sync behavior
+title: "Hanzo Skills Hub"
 ---
 
-# Hanzo Skills
+# Hanzo Skills Hub
 
-Hanzo Skills is the **public skill registry for Hanzo Bot**. It is a free service: all skills are public, open, and visible to everyone for sharing and reuse. A skill is just a folder with a `SKILL.md` file (plus supporting text files). You can browse skills in the web app or use the CLI to search, install, update, and publish skills.
+Hanzo Skills Hub is the **public skill registry for Hanzo Bot**. It is a free service: all skills are public, open, and visible to everyone for sharing and reuse. A skill is just a folder with a `SKILL.md` file (plus supporting text files). You can browse skills in the web app or use the CLI to search, install, update, and publish skills.
 
-Site: [skills.hanzo.bot](https://skills.hanzo.bot)
+Site: [skills-hub.ai](https://skills-hub.ai)
 
-## What Hanzo Skills is
+## What Hanzo Skills Hub is
 
 - A public registry for Hanzo Bot skills.
 - A versioned store of skill bundles and metadata.
@@ -22,7 +22,7 @@ Site: [skills.hanzo.bot](https://skills.hanzo.bot)
 ## How it works
 
 1. A user publishes a skill bundle (files + metadata).
-2. Hanzo Skills stores the bundle, parses metadata, and assigns a version.
+2. Hanzo Skills Hub stores the bundle, parses metadata, and assigns a version.
 3. The registry indexes the skill for search and discovery.
 4. Users browse, download, and install skills in Hanzo Bot.
 
@@ -36,7 +36,7 @@ Site: [skills.hanzo.bot](https://skills.hanzo.bot)
 
 ## Who this is for (beginner-friendly)
 
-If you want to add new capabilities to your Hanzo Bot agent, Hanzo Skills is the easiest way to find and install skills. You do not need to know how the backend works. You can:
+If you want to add new capabilities to your Hanzo Bot agent, Hanzo Skills Hub is the easiest way to find and install skills. You do not need to know how the backend works. You can:
 
 - Search for skills by plain language.
 - Install a skill into your workspace.
@@ -47,9 +47,9 @@ If you want to add new capabilities to your Hanzo Bot agent, Hanzo Skills is the
 
 1. Install the CLI (see next section).
 2. Search for something you need:
-   - `hanzo-skills search "calendar"`
+   - `skills-hub search "calendar"`
 3. Install a skill:
-   - `hanzo-skills install <skill-slug>`
+   - `skills-hub install <skill-slug>`
 4. Start a new Hanzo Bot session so it picks up the new skill.
 
 ## Install the CLI
@@ -57,16 +57,16 @@ If you want to add new capabilities to your Hanzo Bot agent, Hanzo Skills is the
 Pick one:
 
 ```bash
-npm i -g hanzo-skills
+npm i -g skills-hub
 ```
 
 ```bash
-pnpm add -g hanzo-skills
+pnpm add -g skills-hub
 ```
 
 ## How it fits into Hanzo Bot
 
-By default, the CLI installs skills into `./skills` under your current working directory. If a Hanzo Bot workspace is configured, `hanzo-skills` falls back to that workspace unless you override `--workdir` (or `HANZO_SKILLS_WORKDIR`). Hanzo Bot loads workspace skills from `<workspace>/skills` and will pick them up in the **next** session. If you already use `~/.bot/skills` or bundled skills, workspace skills take precedence.
+By default, the CLI installs skills into `./skills` under your current working directory. If a Hanzo Bot workspace is configured, `skills-hub` falls back to that workspace unless you override `--workdir` (or `SKILLS_HUB_WORKDIR`). Hanzo Bot loads workspace skills from `<workspace>/skills` and will pick them up in the **next** session. If you already use `~/.hanzo/bot/skills` or bundled skills, workspace skills take precedence.
 
 For more detail on how skills are loaded, shared, and gated, see
 [Skills](/tools/skills).
@@ -83,7 +83,7 @@ A typical skill includes:
 - Optional configs, scripts, or supporting files used by the skill.
 - Metadata such as tags, summary, and install requirements.
 
-Hanzo Skills uses metadata to power discovery and safely expose skill capabilities.
+Hanzo Skills Hub uses metadata to power discovery and safely expose skill capabilities.
 The registry also tracks usage signals (such as stars and downloads) to improve
 ranking and visibility.
 
@@ -99,7 +99,7 @@ ranking and visibility.
 
 ## Security and moderation
 
-Hanzo Skills is open by default. Anyone can upload skills, but a GitHub account must
+Hanzo Skills Hub is open by default. Anyone can upload skills, but a GitHub account must
 be at least one week old to publish. This helps slow down abuse without blocking
 legitimate contributors.
 
@@ -128,9 +128,9 @@ Global options (apply to all commands):
 
 Auth:
 
-- `hanzo-skills login` (browser flow) or `hanzo-skills login --token <token>`
-- `hanzo-skills logout`
-- `hanzo-skills whoami`
+- `skills-hub login` (browser flow) or `skills-hub login --token <token>`
+- `skills-hub logout`
+- `skills-hub whoami`
 
 Options:
 
@@ -140,29 +140,29 @@ Options:
 
 Search:
 
-- `hanzo-skills search "query"`
+- `skills-hub search "query"`
 - `--limit <n>`: Max results.
 
 Install:
 
-- `hanzo-skills install <slug>`
+- `skills-hub install <slug>`
 - `--version <version>`: Install a specific version.
 - `--force`: Overwrite if the folder already exists.
 
 Update:
 
-- `hanzo-skills update <slug>`
-- `hanzo-skills update --all`
+- `skills-hub update <slug>`
+- `skills-hub update --all`
 - `--version <version>`: Update to a specific version (single slug only).
 - `--force`: Overwrite when local files do not match any published version.
 
 List:
 
-- `hanzo-skills list` (reads `.hanzo-skills/lock.json`)
+- `skills-hub list` (reads `.skills-hub/lock.json`)
 
 Publish:
 
-- `hanzo-skills publish <path>`
+- `skills-hub publish <path>`
 - `--slug <slug>`: Skill slug.
 - `--name <name>`: Display name.
 - `--version <version>`: Semver version.
@@ -171,12 +171,12 @@ Publish:
 
 Delete/undelete (owner/admin only):
 
-- `hanzo-skills delete <slug> --yes`
-- `hanzo-skills undelete <slug> --yes`
+- `skills-hub delete <slug> --yes`
+- `skills-hub undelete <slug> --yes`
 
 Sync (scan local skills + publish new/updated):
 
-- `hanzo-skills sync`
+- `skills-hub sync`
 - `--root <dir...>`: Extra scan roots.
 - `--all`: Upload everything without prompts.
 - `--dry-run`: Show what would be uploaded.
@@ -190,19 +190,19 @@ Sync (scan local skills + publish new/updated):
 ### Search for skills
 
 ```bash
-hanzo-skills search "postgres backups"
+skills-hub search "postgres backups"
 ```
 
 ### Download new skills
 
 ```bash
-hanzo-skills install my-skill-pack
+skills-hub install my-skill-pack
 ```
 
 ### Update installed skills
 
 ```bash
-hanzo-skills update --all
+skills-hub update --all
 ```
 
 ### Back up your skills (publish or sync)
@@ -210,13 +210,13 @@ hanzo-skills update --all
 For a single skill folder:
 
 ```bash
-hanzo-skills publish ./my-skill --slug my-skill --name "My Skill" --version 1.0.0 --tags latest
+skills-hub publish ./my-skill --slug my-skill --name "My Skill" --version 1.0.0 --tags latest
 ```
 
 To scan and back up many skills at once:
 
 ```bash
-hanzo-skills sync --all
+skills-hub sync --all
 ```
 
 ## Advanced details (technical)
@@ -233,25 +233,25 @@ Updates compare the local skill contents to registry versions using a content ha
 
 ### Sync scanning and fallback roots
 
-`hanzo-skills sync` scans your current workdir first. If no skills are found, it falls back to known legacy locations (for example `~/bot/skills` and `~/.bot/skills`). This is designed to find older skill installs without extra flags.
+`skills-hub sync` scans your current workdir first. If no skills are found, it falls back to known legacy locations (for example `~/bot/skills` and `~/.hanzo/bot/skills`). This is designed to find older skill installs without extra flags.
 
 ### Storage and lockfile
 
-- Installed skills are recorded in `.hanzo-skills/lock.json` under your workdir.
-- Auth tokens are stored in the Hanzo Skills CLI config file (override via `HANZO_SKILLS_CONFIG_PATH`).
+- Installed skills are recorded in `.skills-hub/lock.json` under your workdir.
+- Auth tokens are stored in the Hanzo Skills Hub CLI config file (override via `SKILLS_HUB_CONFIG_PATH`).
 
 ### Telemetry (install counts)
 
-When you run `hanzo-skills sync` while logged in, the CLI sends a minimal snapshot to compute install counts. You can disable this entirely:
+When you run `skills-hub sync` while logged in, the CLI sends a minimal snapshot to compute install counts. You can disable this entirely:
 
 ```bash
-export HANZO_SKILLS_DISABLE_TELEMETRY=1
+export SKILLS_HUB_DISABLE_TELEMETRY=1
 ```
 
 ## Environment variables
 
-- `HANZO_SKILLS_SITE`: Override the site URL.
-- `HANZO_SKILLS_REGISTRY`: Override the registry API URL.
-- `HANZO_SKILLS_CONFIG_PATH`: Override where the CLI stores the token/config.
-- `HANZO_SKILLS_WORKDIR`: Override the default workdir.
-- `HANZO_SKILLS_DISABLE_TELEMETRY=1`: Disable telemetry on `sync`.
+- `SKILLS_HUB_SITE`: Override the site URL.
+- `SKILLS_HUB_REGISTRY`: Override the registry API URL.
+- `SKILLS_HUB_CONFIG_PATH`: Override where the CLI stores the token/config.
+- `SKILLS_HUB_WORKDIR`: Override the default workdir.
+- `SKILLS_HUB_DISABLE_TELEMETRY=1`: Disable telemetry on `sync`.

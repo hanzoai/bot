@@ -17,23 +17,23 @@ x-i18n:
 
 工作区是智能体的家。它是文件工具和工作区上下文使用的唯一工作目录。请保持其私密性并将其视为记忆。
 
-这与 `~/.bot/` 是分开的，后者存储配置、凭证和会话。
+这与 `~/.hanzo/bot/` 是分开的，后者存储配置、凭证和会话。
 
 **重要：** 工作区是**默认 cwd**，而不是硬性沙箱。工具会根据工作区解析相对路径，但绝对路径仍然可以访问主机上的其他位置，除非启用了沙箱隔离。如果你需要隔离，请使用
 [`agents.defaults.sandbox`](/gateway/sandboxing)（和/或每智能体沙箱配置）。
-当启用沙箱隔离且 `workspaceAccess` 不是 `"rw"` 时，工具在 `~/.bot/sandboxes` 下的沙箱工作区内操作，而不是你的主机工作区。
+当启用沙箱隔离且 `workspaceAccess` 不是 `"rw"` 时，工具在 `~/.hanzo/bot/sandboxes` 下的沙箱工作区内操作，而不是你的主机工作区。
 
 ## 默认位置
 
-- 默认：`~/.bot/workspace`
+- 默认：`~/.hanzo/bot/workspace`
 - 如果设置了 `BOT_PROFILE` 且不是 `"default"`，默认值变为
-  `~/.bot/workspace-<profile>`。
-- 在 `~/.bot/bot.json` 中覆盖：
+  `~/.hanzo/bot/workspace-<profile>`。
+- 在 `~/.hanzo/bot/bot.json` 中覆盖：
 
 ```json5
 {
   agent: {
-    workspace: "~/.bot/workspace",
+    workspace: "~/.hanzo/bot/workspace",
   },
 }
 ```
@@ -115,12 +115,12 @@ x-i18n:
 
 ## 工作区中不包含的内容
 
-这些位于 `~/.bot/` 下，不应提交到工作区仓库：
+这些位于 `~/.hanzo/bot/` 下，不应提交到工作区仓库：
 
-- `~/.bot/bot.json`（配置）
-- `~/.bot/credentials/`（OAuth token、API 密钥）
-- `~/.bot/agents/<agentId>/sessions/`（会话记录 + 元数据）
-- `~/.bot/skills/`（托管的 Skills）
+- `~/.hanzo/bot/bot.json`（配置）
+- `~/.hanzo/bot/credentials/`（OAuth token、API 密钥）
+- `~/.hanzo/bot/agents/<agentId>/sessions/`（会话记录 + 元数据）
+- `~/.hanzo/bot/skills/`（托管的 Skills）
 
 如果你需要迁移会话或配置，请单独复制它们并将它们排除在版本控制之外。
 
@@ -135,7 +135,7 @@ x-i18n:
 如果安装了 git，全新工作区会自动初始化。如果此工作区还不是仓库，请运行：
 
 ```bash
-cd ~/.bot/workspace
+cd ~/.hanzo/bot/workspace
 git init
 git add AGENTS.md SOUL.md TOOLS.md IDENTITY.md USER.md HEARTBEAT.md memory/
 git commit -m "Add agent workspace"
@@ -190,10 +190,10 @@ git push
 即使在私有仓库中，也要避免在工作区中存储密钥：
 
 - API 密钥、OAuth token、密码或私有凭证。
-- `~/.bot/` 下的任何内容。
+- `~/.hanzo/bot/` 下的任何内容。
 - 聊天的原始转储或敏感附件。
 
-如果你必须存储敏感引用，请使用占位符并将真正的密钥保存在其他地方（密码管理器、环境变量或 `~/.bot/`）。
+如果你必须存储敏感引用，请使用占位符并将真正的密钥保存在其他地方（密码管理器、环境变量或 `~/.hanzo/bot/`）。
 
 建议的 `.gitignore` 起始配置：
 
@@ -207,10 +207,10 @@ git push
 
 ## 将工作区迁移到新机器
 
-1. 将仓库克隆到所需路径（默认 `~/.bot/workspace`）。
-2. 在 `~/.bot/bot.json` 中将 `agents.defaults.workspace` 设置为该路径。
+1. 将仓库克隆到所需路径（默认 `~/.hanzo/bot/workspace`）。
+2. 在 `~/.hanzo/bot/bot.json` 中将 `agents.defaults.workspace` 设置为该路径。
 3. 运行 `hanzo-bot setup --workspace <path>` 来填充任何缺失的文件。
-4. 如果你需要会话，请单独从旧机器复制 `~/.bot/agents/<agentId>/sessions/`。
+4. 如果你需要会话，请单独从旧机器复制 `~/.hanzo/bot/agents/<agentId>/sessions/`。
 
 ## 高级注意事项
 

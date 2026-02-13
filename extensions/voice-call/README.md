@@ -9,8 +9,8 @@ Providers:
 - **Plivo** (Voice API + XML transfer + GetInput speech)
 - **Mock** (dev/no network)
 
-Docs: `https://docs.bot.ai/plugins/voice-call`
-Plugin system: `https://docs.bot.ai/plugin`
+Docs: `https://docs.hanzo.bot/plugins/voice-call`
+Plugin system: `https://docs.hanzo.bot/plugin`
 
 ## Install (local dev)
 
@@ -25,9 +25,9 @@ Restart the Gateway afterwards.
 ### Option B: copy into your global extensions folder (dev)
 
 ```bash
-mkdir -p ~/.bot/extensions
-cp -R extensions/voice-call ~/.bot/extensions/voice-call
-cd ~/.bot/extensions/voice-call && pnpm install
+mkdir -p ~/.hanzo/bot/extensions
+cp -R extensions/voice-call ~/.hanzo/bot/extensions/voice-call
+cd ~/.hanzo/bot/extensions/voice-call && pnpm install
 ```
 
 ## Config
