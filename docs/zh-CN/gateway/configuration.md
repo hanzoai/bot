@@ -1,7 +1,7 @@
 ---
 read_when:
   - 添加或修改配置字段时
-summary: ~/.bot/bot.json 的所有配置选项及示例
+summary: ~/.hanzo/bot/bot.json 的所有配置选项及示例
 title: 配置
 x-i18n:
   generated_at: "2026-02-01T21:29:41Z"
@@ -14,9 +14,9 @@ x-i18n:
 
 # 配置 🔧
 
-Hanzo Bot 从 `~/.bot/bot.json` 读取可选的 **JSON5** 配置（支持注释和尾逗号）。
+Hanzo Bot 从 `~/.hanzo/bot/bot.json` 读取可选的 **JSON5** 配置（支持注释和尾逗号）。
 
-如果文件不存在，Hanzo Bot 使用安全的默认值（内置 Pi 智能体 + 按发送者分会话 + 工作区 `~/.bot/workspace`）。通常只在以下情况需要配置：
+如果文件不存在，Hanzo Bot 使用安全的默认值（内置 Pi 智能体 + 按发送者分会话 + 工作区 `~/.hanzo/bot/workspace`）。通常只在以下情况需要配置：
 
 - 限制谁可以触发机器人（`channels.whatsapp.allowFrom`、`channels.telegram.allowFrom` 等）
 - 控制群组白名单 + 提及行为（`channels.whatsapp.groups`、`channels.telegram.groups`、`channels.discord.guilds`、`agents.list[].groupChat`）
@@ -57,7 +57,7 @@ Gateway 网关通过 `config.schema` 暴露配置的 JSON Schema 表示，供 UI
 它会写入重启哨兵文件，并在 Gateway 网关恢复后 ping 最后活跃的会话。
 
 警告：`config.apply` 会替换**整个配置**。如果你只想更改部分键，
-请使用 `config.patch` 或 `hanzo-bot config set`。请备份 `~/.bot/bot.json`。
+请使用 `config.patch` 或 `hanzo-bot config set`。请备份 `~/.hanzo/bot/bot.json`。
 
 参数：
 
@@ -72,7 +72,7 @@ Gateway 网关通过 `config.schema` 暴露配置的 JSON Schema 表示，供 UI
 ```bash
 hanzo-bot gateway call config.get --params '{}' # capture payload.hash
 hanzo-bot gateway call config.apply --params '{
-  "raw": "{\\n  agents: { defaults: { workspace: \\"~/.bot/workspace\\" } }\\n}\\n",
+  "raw": "{\\n  agents: { defaults: { workspace: \\"~/.hanzo/bot/workspace\\" } }\\n}\\n",
   "baseHash": "<hash-from-config.get>",
   "sessionKey": "agent:main:whatsapp:dm:+15555550123",
   "restartDelayMs": 1000
@@ -114,7 +114,7 @@ hanzo-bot gateway call config.patch --params '{
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
@@ -132,7 +132,7 @@ scripts/sandbox-setup.sh
 ```json5
 {
   agents: {
-    defaults: { workspace: "~/.bot/workspace" },
+    defaults: { workspace: "~/.hanzo/bot/workspace" },
     list: [
       {
         id: "main",
@@ -161,7 +161,7 @@ scripts/sandbox-setup.sh
 ### 基本用法
 
 ```json5
-// ~/.bot/bot.json
+// ~/.hanzo/bot/bot.json
 {
   gateway: { port: 18789 },
 
@@ -176,10 +176,10 @@ scripts/sandbox-setup.sh
 ```
 
 ```json5
-// ~/.bot/agents.json5
+// ~/.hanzo/bot/agents.json5
 {
   defaults: { sandbox: { mode: "all", scope: "session" } },
-  list: [{ id: "main", workspace: "~/.bot/workspace" }],
+  list: [{ id: "main", workspace: "~/.hanzo/bot/workspace" }],
 }
 ```
 
@@ -231,7 +231,7 @@ scripts/sandbox-setup.sh
 ### 示例：多客户法律事务设置
 
 ```json5
-// ~/.bot/bot.json
+// ~/.hanzo/bot/bot.json
 {
   gateway: { port: 18789, auth: { token: "secret" } },
 
@@ -254,7 +254,7 @@ scripts/sandbox-setup.sh
 ```
 
 ```json5
-// ~/.bot/clients/mueller/agents.json5
+// ~/.hanzo/bot/clients/mueller/agents.json5
 [
   { id: "mueller-transcribe", workspace: "~/clients/mueller/transcribe" },
   { id: "mueller-docs", workspace: "~/clients/mueller/docs" },
@@ -262,7 +262,7 @@ scripts/sandbox-setup.sh
 ```
 
 ```json5
-// ~/.bot/clients/mueller/broadcast.json5
+// ~/.hanzo/bot/clients/mueller/broadcast.json5
 {
   "120363403215116621@g.us": ["mueller-transcribe", "mueller-docs"],
 }
@@ -277,7 +277,7 @@ Hanzo Bot 从父进程（shell、launchd/systemd、CI 等）读取环境变量�
 此外，它还会加载：
 
 - 当前工作目录中的 `.env`（如果存在）
-- `~/.bot/.env`（即 `$BOT_STATE_DIR/.env`）作为全局回退 `.env`
+- `~/.hanzo/bot/.env`（即 `$BOT_STATE_DIR/.env`）作为全局回退 `.env`
 
 两个 `.env` 文件都不会覆盖已有的环境变量。
 
@@ -363,13 +363,13 @@ Hanzo Bot 从父进程（shell、launchd/systemd、CI 等）读取环境变量�
 
 Hanzo Bot 在以下位置存储**每个智能体的**认证配置文件（OAuth + API 密钥）：
 
-- `<agentDir>/auth-profiles.json`（默认：`~/.bot/agents/<agentId>/agent/auth-profiles.json`）
+- `<agentDir>/auth-profiles.json`（默认：`~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`）
 
 另请参阅：[/concepts/oauth](/concepts/oauth)
 
 旧版 OAuth 导入：
 
-- `~/.bot/credentials/oauth.json`（或 `$BOT_STATE_DIR/credentials/oauth.json`）
+- `~/.hanzo/bot/credentials/oauth.json`（或 `$BOT_STATE_DIR/credentials/oauth.json`）
 
 内置 Pi 智能体在以下位置维护运行时缓存：
 
@@ -377,7 +377,7 @@ Hanzo Bot 在以下位置存储**每个智能体的**认证配置文件（OAuth 
 
 旧版智能体目录（多智能体之前）：
 
-- `~/.bot/agent/*`（由 `hanzo-bot doctor` 迁移到 `~/.bot/agents/<defaultAgentId>/agent/*`）
+- `~/.hanzo/bot/agent/*`（由 `hanzo-bot doctor` 迁移到 `~/.hanzo/bot/agents/<defaultAgentId>/agent/*`）
 
 覆盖：
 
@@ -546,8 +546,8 @@ Hanzo Bot 在以下位置存储**每个智能体的**认证配置文件（OAuth 
         default: {}, // 可选；保持默认 id 稳定
         personal: {},
         biz: {
-          // 可选覆盖。默认：~/.bot/credentials/whatsapp/biz
-          // authDir: "~/.bot/credentials/whatsapp/biz",
+          // 可选覆盖。默认：~/.hanzo/bot/credentials/whatsapp/biz
+          // authDir: "~/.hanzo/bot/credentials/whatsapp/biz",
         },
       },
     },
@@ -742,8 +742,8 @@ Hanzo Bot 在以下位置存储**每个智能体的**认证配置文件（OAuth 
   - `default`：可选；当设置多个时，第一个获胜并记录警告。
     如果未设置，列表中的**第一个条目**为默认智能体。
   - `name`：智能体的显示名称。
-  - `workspace`：默认 `~/.bot/workspace-<agentId>`（对于 `main`，回退到 `agents.defaults.workspace`）。
-  - `agentDir`：默认 `~/.bot/agents/<agentId>/agent`。
+  - `workspace`：默认 `~/.hanzo/bot/workspace-<agentId>`（对于 `main`，回退到 `agents.defaults.workspace`）。
+  - `agentDir`：默认 `~/.hanzo/bot/agents/<agentId>/agent`。
   - `model`：每智能体默认模型，覆盖该智能体的 `agents.defaults.model`。
     - 字符串形式：`"provider/model"`，仅覆盖 `agents.defaults.model.primary`
     - 对象形式：`{ primary, fallbacks }`（fallbacks 覆盖 `agents.defaults.model.fallbacks`；`[]` 为该智能体禁用全局回退）
@@ -799,7 +799,7 @@ Hanzo Bot 在以下位置存储**每个智能体的**认证配置文件（OAuth 
     list: [
       {
         id: "personal",
-        workspace: "~/.bot/workspace-personal",
+        workspace: "~/.hanzo/bot/workspace-personal",
         sandbox: { mode: "off" },
       },
     ],
@@ -815,7 +815,7 @@ Hanzo Bot 在以下位置存储**每个智能体的**认证配置文件（OAuth 
     list: [
       {
         id: "family",
-        workspace: "~/.bot/workspace-family",
+        workspace: "~/.hanzo/bot/workspace-family",
         sandbox: {
           mode: "all",
           scope: "agent",
@@ -846,7 +846,7 @@ Hanzo Bot 在以下位置存储**每个智能体的**认证配置文件（OAuth 
     list: [
       {
         id: "public",
-        workspace: "~/.bot/workspace-public",
+        workspace: "~/.hanzo/bot/workspace-public",
         sandbox: {
           mode: "all",
           scope: "agent",
@@ -892,8 +892,8 @@ Hanzo Bot 在以下位置存储**每个智能体的**认证配置文件（OAuth 
 {
   agents: {
     list: [
-      { id: "home", default: true, workspace: "~/.bot/workspace-home" },
-      { id: "work", workspace: "~/.bot/workspace-work" },
+      { id: "home", default: true, workspace: "~/.hanzo/bot/workspace-home" },
+      { id: "work", workspace: "~/.hanzo/bot/workspace-work" },
     ],
   },
   bindings: [
@@ -1424,11 +1424,11 @@ exec ssh -T gateway-host imsg "$@"
 
 设置智能体用于文件操作的**单一全局工作区目录**。
 
-默认：`~/.bot/workspace`。
+默认：`~/.hanzo/bot/workspace`。
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
 }
 ```
 
@@ -1497,7 +1497,7 @@ exec ssh -T gateway-host imsg "$@"
 ```json5
 {
   messages: {
-    responsePrefix: "🥷", // 或 "auto"
+    responsePrefix: "🤖", // 或 "auto"
     ackReaction: "👀",
     ackReactionScope: "group-mentions",
     removeAckAfterReply: false,
@@ -1565,7 +1565,7 @@ WhatsApp 入站前缀通过 `channels.whatsapp.messagePrefix` 配置（已弃用
       },
       maxTextLength: 4000,
       timeoutMs: 30000,
-      prefsPath: "~/.bot/settings/tts.json",
+      prefsPath: "~/.hanzo/bot/settings/tts.json",
       elevenlabs: {
         apiKey: "elevenlabs_api_key",
         baseUrl: "https://api.elevenlabs.io",
@@ -1612,14 +1612,14 @@ WhatsApp 入站前缀通过 `channels.whatsapp.messagePrefix` 配置（已弃用
 
 Talk 模式（macOS/iOS/Android）的默认值。语音 ID 在未设置时回退到 `ELEVENLABS_VOICE_ID` 或 `SAG_VOICE_ID`。
 `apiKey` 在未设置时回退到 `ELEVENLABS_API_KEY`（或 Gateway 网关的 shell 配置文件）。
-`voiceAliases` 允许 Talk 指令使用友好名称（例如 `"voice":"Hanzo"`）。
+`voiceAliases` 允许 Talk 指令使用友好名称（例如 `"voice":"Clawd"`）。
 
 ```json5
 {
   talk: {
     voiceId: "elevenlabs_voice_id",
     voiceAliases: {
-      Hanzo: "EXAVITQu4vr4xnSDxMaL",
+      Clawd: "EXAVITQu4vr4xnSDxMaL",
       Roger: "CwhRBWXzGAHq8TQ4Fs17",
     },
     modelId: "eleven_v3",
@@ -2234,7 +2234,7 @@ Z.AI 模型可通过 `zai/<model>` 使用（例如 `zai/glm-4.7`），需要环�
 - scope：`"agent"`（每个智能体一个容器 + 工作区）
 - 基于 Debian bookworm-slim 的镜像
 - 智能体工作区访问：`workspaceAccess: "none"`（默认）
-  - `"none"`：在 `~/.bot/sandboxes` 下使用每范围的沙箱工作区
+  - `"none"`：在 `~/.hanzo/bot/sandboxes` 下使用每范围的沙箱工作区
 - `"ro"`：将沙箱工作区保持在 `/workspace`，智能体工作区以只读方式挂载到 `/agent`（禁用 `write`/`edit`/`apply_patch`）
   - `"rw"`：将智能体工作区以读写方式挂载到 `/workspace`
 - 自动清理：空闲超过 24h 或存在超过 7d
@@ -2259,7 +2259,7 @@ Z.AI 模型可通过 `zai/<model>` 使用（例如 `zai/glm-4.7`），需要环�
         mode: "non-main", // off | non-main | all
         scope: "agent", // session | agent | shared（agent 为默认）
         workspaceAccess: "none", // none | ro | rw
-        workspaceRoot: "~/.bot/sandboxes",
+        workspaceRoot: "~/.hanzo/bot/sandboxes",
         docker: {
           image: "bot-sandbox:bookworm-slim",
           containerPrefix: "bot-sbx-",
@@ -2369,11 +2369,11 @@ noVNC URL 会注入系统提示中，以便智能体可以引用它。
 ### `models`（自定义提供商 + 基础 URL）
 
 Hanzo Bot 使用 **pi-coding-agent** 模型目录。你可以通过编写
-`~/.bot/agents/<agentId>/agent/models.json` 或在 Hanzo Bot 配置中的 `models.providers` 下定义相同的 schema 来添加自定义提供商（LiteLLM、本地 OpenAI 兼容服务器、Anthropic 代理等）。
+`~/.hanzo/bot/agents/<agentId>/agent/models.json` 或在 Hanzo Bot 配置中的 `models.providers` 下定义相同的 schema 来添加自定义提供商（LiteLLM、本地 OpenAI 兼容服务器、Anthropic 代理等）。
 按提供商的概述 + 示例：[/concepts/model-providers](/concepts/model-providers)。
 
 当存在 `models.providers` 时，Hanzo Bot 在启动时将 `models.json` 写入/合并到
-`~/.bot/agents/<agentId>/agent/`：
+`~/.hanzo/bot/agents/<agentId>/agent/`：
 
 - 默认行为：**合并**（保留现有提供商，按名称覆盖）
 - 设为 `models.mode: "replace"` 覆盖文件内容
@@ -2668,7 +2668,7 @@ Z.AI 模型通过内置的 `zai` 提供商提供。在环境中设置 `ZAI_API_K
 - 支持的 API：`openai-completions`、`openai-responses`、`anthropic-messages`、
   `google-generative-ai`
 - 对于自定义认证需求使用 `authHeader: true` + `headers`。
-- 如果你希望 `models.json` 存储在其他位置，请使用 `BOT_AGENT_DIR`（或 `PI_CODING_AGENT_DIR`）覆盖智能体配置根目录（默认：`~/.bot/agents/main/agent`）。
+- 如果你希望 `models.json` 存储在其他位置，请使用 `BOT_AGENT_DIR`（或 `PI_CODING_AGENT_DIR`）覆盖智能体配置根目录（默认：`~/.hanzo/bot/agents/main/agent`）。
 
 ### `session`
 
@@ -2693,9 +2693,9 @@ Z.AI 模型通过内置的 `zai` 提供商提供。在环境中设置 `ZAI_API_K
       group: { mode: "idle", idleMinutes: 120 },
     },
     resetTriggers: ["/new", "/reset"],
-    // 默认已按智能体存储在 ~/.bot/agents/<agentId>/sessions/sessions.json
+    // 默认已按智能体存储在 ~/.hanzo/bot/agents/<agentId>/sessions/sessions.json
     // 你可以使用 {agentId} 模板进行覆盖：
-    store: "~/.bot/agents/{agentId}/sessions/sessions.json",
+    store: "~/.hanzo/bot/agents/{agentId}/sessions/sessions.json",
     // 私聊折叠到 agent:<agentId>:<mainKey>（默认："main"）。
     mainKey: "main",
     agentToAgent: {
@@ -2734,7 +2734,7 @@ Z.AI 模型通过内置的 `zai` 提供商提供。在环境中设置 `ZAI_API_K
 
 ### `skills`（Skills 配置）
 
-控制内置白名单、安装偏好、额外 Skills 文件夹和每 Skills 覆盖。适用于**内置**Skills 和 `~/.bot/skills`（工作区 Skills 在名称冲突时仍然优先）。
+控制内置白名单、安装偏好、额外 Skills 文件夹和每 Skills 覆盖。适用于**内置**Skills 和 `~/.hanzo/bot/skills`（工作区 Skills 在名称冲突时仍然优先）。
 
 字段：
 
@@ -2779,7 +2779,7 @@ Z.AI 模型通过内置的 `zai` 提供商提供。在环境中设置 `ZAI_API_K
 
 ### `plugins`（扩展）
 
-控制插件发现、允许/拒绝和每插件配置。插件从 `~/.bot/extensions`、`<workspace>/.bot/extensions` 以及任何 `plugins.load.paths` 条目加载。**配置更改需要重启 Gateway 网关。**
+控制插件发现、允许/拒绝和每插件配置。插件从 `~/.hanzo/bot/extensions`、`<workspace>/.hanzo/bot/extensions` 以及任何 `plugins.load.paths` 条目加载。**配置更改需要重启 Gateway 网关。**
 参见 [/plugin](/tools/plugin) 了解详情。
 
 字段：
@@ -2953,7 +2953,7 @@ Hanzo Bot 可以为 Hanzo Bot 启动一个**专用、隔离的** Chrome/Brave/Ed
 
 macOS 应用行为：
 
-- Hanzo Bot.app 监视 `~/.bot/bot.json`，当 `gateway.mode` 或 `gateway.remote.url` 变更时实时切换模式。
+- Hanzo Bot.app 监视 `~/.hanzo/bot/bot.json`，当 `gateway.mode` 或 `gateway.remote.url` 变更时实时切换模式。
 - 如果 `gateway.mode` 未设置但 `gateway.remote.url` 已设置，macOS 应用将其视为远程模式。
 - 当你在 macOS 应用中更改连接模式时，它会将 `gateway.mode`（以及远程模式下的 `gateway.remote.url` + `gateway.remote.transport`）写回配置文件。
 
@@ -2987,7 +2987,7 @@ macOS 应用行为：
 
 ### `gateway.reload`（配置热重载）
 
-Gateway 网关监视 `~/.bot/bot.json`（或 `BOT_CONFIG_PATH`）并自动应用更改。
+Gateway 网关监视 `~/.hanzo/bot/bot.json`（或 `BOT_CONFIG_PATH`）并自动应用更改。
 
 模式：
 
@@ -3011,7 +3011,7 @@ Gateway 网关监视 `~/.bot/bot.json`（或 `BOT_CONFIG_PATH`）并自动应用
 
 监视的文件：
 
-- `~/.bot/bot.json`（或 `BOT_CONFIG_PATH`）
+- `~/.hanzo/bot/bot.json`（或 `BOT_CONFIG_PATH`）
 
 热应用（无需完全重启 Gateway 网关）：
 
@@ -3052,7 +3052,7 @@ Gateway 网关监视 `~/.bot/bot.json`（或 `BOT_CONFIG_PATH`）并自动应用
 示例：
 
 ```bash
-BOT_CONFIG_PATH=~/.bot/a.json \
+BOT_CONFIG_PATH=~/.hanzo/bot/a.json \
 BOT_STATE_DIR=~/.bot-a \
 hanzo-bot gateway --port 19001
 ```
@@ -3074,7 +3074,7 @@ hanzo-bot gateway --port 19001
     token: "shared-secret",
     path: "/hooks",
     presets: ["gmail"],
-    transformsDir: "~/.bot/hooks",
+    transformsDir: "~/.hanzo/bot/hooks",
     mappings: [
       {
         match: { path: "gmail" },
@@ -3169,7 +3169,7 @@ Tailscale 可以正确代理 `/gmail-pubsub`（它会去除设置的路径前缀
 
 Gateway 网关通过 HTTP 提供 HTML/CSS/JS 目录服务，以便 iOS/Android 节点可以简单地 `canvas.navigate` 到它。
 
-默认根目录：`~/.bot/workspace/canvas`
+默认根目录：`~/.hanzo/bot/workspace/canvas`
 默认端口：`18793`（选择此端口以避免 Hanzo Bot 浏览器 CDP 端口 `18792`）
 服务器监听 **Gateway 网关绑定主机**（LAN 或 Tailnet），以便节点可以访问。
 
@@ -3189,7 +3189,7 @@ Gateway 网关通过 HTTP 提供 HTML/CSS/JS 目录服务，以便 iOS/Android �
 ```json5
 {
   canvasHost: {
-    root: "~/.bot/workspace/canvas",
+    root: "~/.hanzo/bot/workspace/canvas",
     port: 18793,
     liveReload: true,
   },
@@ -3243,9 +3243,9 @@ TLS：
     bind: "tailnet",
     tls: {
       enabled: true,
-      // 省略时使用 ~/.bot/bridge/tls/bridge-{cert,key}.pem。
-      // certPath: "~/.bot/bridge/tls/bridge-cert.pem",
-      // keyPath: "~/.bot/bridge/tls/bridge-key.pem"
+      // 省略时使用 ~/.hanzo/bot/bridge/tls/bridge-{cert,key}.pem。
+      // certPath: "~/.hanzo/bot/bridge/tls/bridge-cert.pem",
+      // keyPath: "~/.hanzo/bot/bridge/tls/bridge-key.pem"
     },
   },
 }
@@ -3268,7 +3268,7 @@ TLS：
 
 ### `discovery.wideArea`（广域 Bonjour / 单播 DNS‑SD）
 
-启用后，Gateway 网关在 `~/.bot/dns/` 下使用配置的发现域（示例：`bot.internal.`）为 `_bot-gw._tcp` 写入单播 DNS-SD 区域。
+启用后，Gateway 网关在 `~/.hanzo/bot/dns/` 下使用配置的发现域（示例：`bot.internal.`）为 `_bot-gw._tcp` 写入单播 DNS-SD 区域。
 
 要使 iOS/Android 跨网络发现（跨地域访问），请配合以下使用：
 
@@ -3329,4 +3329,4 @@ Cron 是 Gateway 网关自有的唤醒和定时任务调度器。参见 [Cron �
 
 ---
 
-_下一步：[智能体运行时](/concepts/agent)_ 🥷
+_下一步：[智能体运行时](/concepts/agent)_ 🤖

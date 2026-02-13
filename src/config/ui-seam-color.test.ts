@@ -8,7 +8,7 @@ describe("ui.seamColor", () => {
   });
 
   it("rejects non-hex colors", () => {
-    const res = validateConfigObject({ ui: { seamColor: "lobster" } });
+    const res = validateConfigObject({ ui: { seamColor: "orange" } });
     expect(res.ok).toBe(false);
   });
 

@@ -54,7 +54,7 @@ hanzo-bot dns setup --apply
 这会安装 CoreDNS 并配置它：
 
 - 仅在 Gateway 网关的 Tailscale 接口上监听 53 端口
-- 从 `~/.bot/dns/<domain>.db` 提供你选择的域名服务（示例：`bot.internal.`）
+- 从 `~/.hanzo/bot/dns/<domain>.db` 提供你选择的域名服务（示例：`bot.internal.`）
 
 从 Tailnet 连接的机器上验证：
 
@@ -80,7 +80,7 @@ Gateway 网关 WS 端口（默认 `18789`）默认绑定到 loopback。对于局
 
 对于仅 Tailnet 的设置：
 
-- 在 `~/.bot/bot.json` 中设置 `gateway.bind: "tailnet"`。
+- 在 `~/.hanzo/bot/bot.json` 中设置 `gateway.bind: "tailnet"`。
 - 重启 Gateway 网关（或重启 macOS 菜单栏应用）。
 
 ## 什么在广播
@@ -163,7 +163,7 @@ Bonjour/DNS‑SD 经常将服务实例名称中的字节转义为十进制 `\DDD
 ## 禁用 / 配置
 
 - `BOT_DISABLE_BONJOUR=1` 禁用广播（旧版：`BOT_DISABLE_BONJOUR`）。
-- `~/.bot/bot.json` 中的 `gateway.bind` 控制 Gateway 网关绑定模式。
+- `~/.hanzo/bot/bot.json` 中的 `gateway.bind` 控制 Gateway 网关绑定模式。
 - `BOT_SSH_PORT` 覆盖 TXT 中广播的 SSH 端口（旧版：`BOT_SSH_PORT`）。
 - `BOT_TAILNET_DNS` 在 TXT 中发布 MagicDNS 提示（旧版：`BOT_TAILNET_DNS`）。
 - `BOT_CLI_PATH` 覆盖广播的 CLI 路径（旧版：`BOT_CLI_PATH`）。
