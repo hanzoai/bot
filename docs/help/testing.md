@@ -321,7 +321,7 @@ These run `pnpm test:live` inside the repo Docker image, mounting your local con
 
 Useful env vars:
 
-- `BOT_CONFIG_DIR=...` (default: `~/.bot`) mounted to `/home/node/.bot`
+- `BOT_CONFIG_DIR=...` (default: `~/.hanzo/bot`) mounted to `/home/node/.bot`
 - `BOT_WORKSPACE_DIR=...` (default: `~/.hanzo/bot/workspace`) mounted to `/home/node/.hanzo/bot/workspace`
 - `BOT_PROFILE_FILE=...` (default: `~/.profile`) mounted to `/home/node/.profile` and sourced before running tests
 - `BOT_LIVE_GATEWAY_MODELS=...` / `BOT_LIVE_MODELS=...` to narrow the run
