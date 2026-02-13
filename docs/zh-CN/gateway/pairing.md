@@ -80,7 +80,7 @@ hanzo-bot nodes rename --node <id|name|ip> --name "Living Room iPad"
 
 ## 存储（本地，私有）
 
-配对状态存储在 Gateway 网关状态目录下（默认 `~/.bot`）：
+配对状态存储在 Gateway 网关状态目录下（默认 `~/.hanzo/bot`）：
 
 - `~/.hanzo/bot/nodes/paired.json`
 - `~/.hanzo/bot/nodes/pending.json`
