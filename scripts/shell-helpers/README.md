@@ -1,4 +1,4 @@
-# ClawDock <!-- omit in toc -->
+# BotDock <!-- omit in toc -->
 
 Stop typing `docker-compose` commands. Just type `bot-start`.
 
@@ -38,7 +38,7 @@ echo 'source ~/.bot/bot-helpers.sh' >> ~/.zshrc && source ~/.zshrc
 bot-help
 ```
 
-On first command, ClawDock auto-detects your Hanzo Bot directory:
+On first command, BotDock auto-detects your Hanzo Bot directory:
 
 - Checks common paths (`~/hanzo-bot`, `~/workspace/hanzo-bot`, etc.)
 - If found, asks you to confirm
@@ -74,8 +74,8 @@ bot-approve <request-id>
 
 ### Basic Operations
 
-| Command            | Description                     |
-| ------------------ | ------------------------------- |
+| Command       | Description                     |
+| ------------- | ------------------------------- |
 | `bot-start`   | Start the gateway               |
 | `bot-stop`    | Stop the gateway                |
 | `bot-restart` | Restart the gateway             |
@@ -84,41 +84,41 @@ bot-approve <request-id>
 
 ### Container Access
 
-| Command                   | Description                                    |
-| ------------------------- | ---------------------------------------------- |
+| Command              | Description                                    |
+| -------------------- | ---------------------------------------------- |
 | `bot-shell`          | Interactive shell inside the gateway container |
-| `bot-cli <command>`  | Run Hanzo Bot CLI commands                      |
+| `bot-cli <command>`  | Run Hanzo Bot CLI commands                     |
 | `bot-exec <command>` | Execute arbitrary commands in the container    |
 
 ### Web UI & Devices
 
-| Command                 | Description                                |
-| ----------------------- | ------------------------------------------ |
+| Command            | Description                                |
+| ------------------ | ------------------------------------------ |
 | `bot-dashboard`    | Open web UI in browser with authentication |
 | `bot-devices`      | List device pairing requests               |
 | `bot-approve <id>` | Approve a device pairing request           |
 
 ### Setup & Configuration
 
-| Command              | Description                                       |
-| -------------------- | ------------------------------------------------- |
+| Command         | Description                                       |
+| --------------- | ------------------------------------------------- |
 | `bot-fix-token` | Configure gateway authentication token (run once) |
 
 ### Maintenance
 
-| Command            | Description                                      |
-| ------------------ | ------------------------------------------------ |
+| Command       | Description                                      |
+| ------------- | ------------------------------------------------ |
 | `bot-rebuild` | Rebuild the Docker image                         |
 | `bot-clean`   | Remove all containers and volumes (destructive!) |
 
 ### Utilities
 
-| Command              | Description                               |
-| -------------------- | ----------------------------------------- |
+| Command         | Description                               |
+| --------------- | ----------------------------------------- |
 | `bot-health`    | Run gateway health check                  |
 | `bot-token`     | Display the gateway authentication token  |
-| `bot-cd`        | Jump to the Hanzo Bot project directory    |
-| `bot-config`    | Open the Hanzo Bot config directory        |
+| `bot-cd`        | Jump to the Hanzo Bot project directory   |
+| `bot-config`    | Open the Hanzo Bot config directory       |
 | `bot-workspace` | Open the workspace directory              |
 | `bot-help`      | Show all available commands with examples |
 
@@ -216,7 +216,7 @@ docker ps
 **Test with fresh config (mimics first-time install):**
 
 ```bash
-unset CLAWDOCK_DIR && rm -f ~/.bot/config && source scripts/shell-helpers/bot-helpers.sh
+unset BOTDOCK_DIR && rm -f ~/.bot/config && source scripts/shell-helpers/bot-helpers.sh
 ```
 
 Then run any command to trigger auto-detect:
