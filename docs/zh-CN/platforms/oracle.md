@@ -200,7 +200,7 @@ https://bot.<tailnet-name>.ts.net/
 
 ### 仍然推荐
 
-- **凭证权限：** `chmod 700 ~/.bot`
+- **凭证权限：** `chmod 700 ~/.hanzo/bot`
 - **安全审计：** `hanzo-bot security audit`
 - **系统更新：** 定期 `sudo apt update && sudo apt upgrade`
 - **监控 Tailscale：** 在 [Tailscale 管理控制台](https://login.tailscale.com/admin) 中查看设备

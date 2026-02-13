@@ -41,7 +41,7 @@ Gateway 网关可以托管**一个智能体**（默认）或**多个智能体**�
 ## 路径（快速映射）
 
 - 配置：`~/.hanzo/bot/bot.json`（或 `BOT_CONFIG_PATH`）
-- 状态目录：`~/.bot`（或 `BOT_STATE_DIR`）
+- 状态目录：`~/.hanzo/bot`（或 `BOT_STATE_DIR`）
 - 工作区：`~/.hanzo/bot/workspace`（或 `~/.hanzo/bot/workspace-<agentId>`）
 - 智能体目录：`~/.hanzo/bot/agents/<agentId>/agent`（或 `agents.list[].agentDir`）
 - 会话：`~/.hanzo/bot/agents/<agentId>/sessions`
