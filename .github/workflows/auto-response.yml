@@ -31,13 +31,13 @@ jobs:
                 label: "r: skill",
                 close: true,
                 message:
-                  "Thanks for the contribution! New skills should be published to [Clawhub](https://clawhub.ai) for everyone to use. We’re keeping the core lean on skills, so I’m closing this out.",
+                  "Thanks for the contribution! New skills should be published to [Hanzo Skills](https://skills.hanzo.bot) for everyone to use. We're keeping the core lean on skills, so I'm closing this out.",
               },
               {
                 label: "r: support",
                 close: true,
                 message:
-                  "Please use [our support server](https://discord.gg/clawd) and ask in #help or #users-helping-users to resolve this, or follow the stuck FAQ at https://github.com/hanzoai/bot/help/faq#im-stuck-whats-the-fastest-way-to-get-unstuck.",
+                  "Please use [our support server](https://discord.gg/hanzo) and ask in #help or #users-helping-users to resolve this, or follow the stuck FAQ at https://github.com/hanzoai/bot/help/faq#im-stuck-whats-the-fastest-way-to-get-unstuck.",
               },
               {
                 label: "r: testflight",

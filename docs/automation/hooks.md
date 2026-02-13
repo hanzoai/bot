@@ -129,8 +129,7 @@ The `HOOK.md` file contains metadata in YAML frontmatter plus Markdown documenta
 name: my-hook
 description: "Short description of what this hook does"
 homepage: https://docs.bot.ai/hooks#my-hook
-metadata:
-  { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
+metadata: { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
 ---
 
 # My Hook
@@ -696,7 +695,7 @@ Monitor gateway logs to see hook execution:
 
 ```bash
 # macOS
-./scripts/clawlog.sh -f
+./scripts/botlog.sh -f
 
 # Other platforms
 tail -f ~/.bot/gateway.log
@@ -821,7 +820,7 @@ Look for missing:
 3. Check gateway logs for errors:
 
    ```bash
-   ./scripts/clawlog.sh | grep hook
+   ./scripts/botlog.sh | grep hook
    ```
 
 ### Handler Errors

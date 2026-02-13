@@ -29,7 +29,7 @@ Save to `~/.bot/bot.json` and you can DM the bot from that number.
 ```json5
 {
   identity: {
-    name: "Clawd",
+    name: "Hanzo",
     theme: "helpful assistant",
     emoji: "🥷",
   },

@@ -135,8 +135,7 @@ Hook 包可以附带依赖；它们将安装在 `~/.bot/hooks/<id>` 下。
 name: my-hook
 description: "Short description of what this hook does"
 homepage: https://docs.bot.ai/hooks#my-hook
-metadata:
-  { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
+metadata: { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
 ---
 
 # My Hook
@@ -702,7 +701,7 @@ hanzo-bot hooks info my-hook
 
 ```bash
 # macOS
-./scripts/clawlog.sh -f
+./scripts/botlog.sh -f
 
 # Other platforms
 tail -f ~/.bot/gateway.log
@@ -825,7 +824,7 @@ hanzo-bot hooks info my-hook
 
 3. 检查 Gateway 网关日志中的错误：
    ```bash
-   ./scripts/clawlog.sh | grep hook
+   ./scripts/botlog.sh | grep hook
    ```
 
 ### 处理程序错误

@@ -45,20 +45,20 @@ Skills 从**三个**位置加载：
 
 插件可以通过在 `bot.plugin.json` 中列出 `skills` 目录（相对于插件根目录的路径）来发布自己的 Skills。插件 Skills 在插件启用时加载，并参与正常的 Skills 优先级规则。你可以通过插件配置条目上的 `metadata.bot.requires.config` 对它们进行门控。参见[插件](/tools/plugin)了解发现/配置，以及[工具](/tools)了解这些 Skills 所教授的工具接口。
 
-## ClawHub（安装 + 同步）
+## Hanzo Skills（安装 + 同步）
 
-ClawHub 是 Hanzo Bot 的公共 Skills 注册表。浏览 https://clawhub.com。使用它来发现、安装、更新和备份 Skills。完整指南：[ClawHub](/tools/clawhub)。
+Hanzo Skills 是 Hanzo Bot 的公共 Skills 注册表。浏览 https://skills.hanzo.bot。使用它来发现、安装、更新和备份 Skills。完整指南：[Hanzo Skills](/tools/hanzo-skills)。
 
 常见流程：
 
 - 将 Skills 安装到你的工作区：
-  - `clawhub install <skill-slug>`
+  - `hanzo-skills install <skill-slug>`
 - 更新所有已安装的 Skills：
-  - `clawhub update --all`
+  - `hanzo-skills update --all`
 - 同步（扫描 + 发布更新）：
-  - `clawhub sync --all`
+  - `hanzo-skills sync --all`
 
-默认情况下，`clawhub` 安装到当前工作目录下的 `./skills`（或回退到配置的 Hanzo Bot 工作区）。Hanzo Bot 在下一个会话中将其识别为 `<workspace>/skills`。
+默认情况下，`hanzo-skills` 安装到当前工作目录下的 `./skills`（或回退到配置的 Hanzo Bot 工作区）。Hanzo Bot 在下一个会话中将其识别为 `<workspace>/skills`。
 
 ## 安全注意事项
 
@@ -274,6 +274,6 @@ Hanzo Bot 作为安装的一部分（npm 包或 Hanzo Bot.app）发布一组基�
 
 ## 寻找更多 Skills？
 
-浏览 https://clawhub.com。
+浏览 https://skills.hanzo.bot。
 
 ---

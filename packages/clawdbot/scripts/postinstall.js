@@ -1,1 +1,1 @@
-console.warn("clawdbot renamed -> hanzo-bot");
+console.warn("hanzo-bot-compat: this package is a compatibility shim for hanzo-bot");
