@@ -1,4 +1,4 @@
-# 🦞 Hanzo Bot — Personal AI Assistant
+# 🥷 Hanzo Bot — Personal AI Assistant
 
 <p align="center">
     <picture>
@@ -477,7 +477,7 @@ Use these when you’re past the onboarding flow and want the deeper reference.
 
 ## Molty
 
-Hanzo Bot was built for **Molty**, a space lobster AI assistant. 🦞
+Hanzo Bot was built for **Molty**, a space lobster AI assistant. 🥷
 by Peter Steinberger and the community.
 
 - [hanzo.bot](https://hanzo.bot)

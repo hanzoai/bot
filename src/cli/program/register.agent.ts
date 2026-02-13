@@ -155,7 +155,10 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/agent", "docs.bot.ai/cli/agent")}
         `
 ${theme.heading("Examples:")}
 ${formatHelpExamples([
-  ['hanzo-bot agents set-identity --agent main --name "Hanzo Bot" --emoji "🦞"', "Set name + emoji."],
+  [
+    'hanzo-bot agents set-identity --agent main --name "Hanzo Bot" --emoji "🥷"',
+    "Set name + emoji.",
+  ],
   ["hanzo-bot agents set-identity --agent main --avatar avatars/bot.png", "Set avatar path."],
   [
     "hanzo-bot agents set-identity --workspace ~/.bot/workspace --from-identity",
