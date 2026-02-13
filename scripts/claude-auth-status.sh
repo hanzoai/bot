@@ -228,7 +228,7 @@ else
 fi
 
 echo ""
-echo "Hanzo Bot Auth (~/.bot/agents/main/agent/auth-profiles.json):"
+echo "Hanzo Bot Auth (~/.hanzo/bot/agents/main/agent/auth-profiles.json):"
 if [ "$USE_JSON" -eq 1 ]; then
     best_profile=$(json_best_anthropic_profile)
     expires=$(json_expires_for_anthropic_any)

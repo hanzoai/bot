@@ -317,5 +317,5 @@ export function printDaemonStatus(status: DaemonStatus, opts: { json: boolean })
   }
 
   defaultRuntime.log(`${label("Troubles:")} run ${formatCliCommand("hanzo-bot status")}`);
-  defaultRuntime.log(`${label("Troubleshooting:")} https://docs.bot.ai/troubleshooting`);
+  defaultRuntime.log(`${label("Troubleshooting:")} https://docs.hanzo.bot/troubleshooting`);
 }
