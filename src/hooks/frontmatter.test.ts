@@ -253,7 +253,7 @@ metadata:
     expect(frontmatter.name).toBe("session-memory");
     expect(frontmatter.metadata).toBeDefined();
 
-    const hanzo-bot = resolveBotMetadata(frontmatter);
+    const bot = resolveBotMetadata(frontmatter);
     expect(bot).toBeDefined();
     expect(bot?.emoji).toBe("💾");
     expect(bot?.events).toEqual(["command:new"]);
@@ -272,7 +272,7 @@ metadata:
 ---
 `;
     const frontmatter = parseFrontmatter(content);
-    const hanzo-bot = resolveBotMetadata(frontmatter);
+    const bot = resolveBotMetadata(frontmatter);
     expect(bot?.emoji).toBe("disk");
     expect(bot?.events).toEqual(["command:new"]);
   });
