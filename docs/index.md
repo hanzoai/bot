@@ -5,7 +5,7 @@ read_when:
 title: "Hanzo Bot"
 ---
 
-# Hanzo Bot 🦞
+# Hanzo Bot 🥷
 
 <p align="center">
     <img
