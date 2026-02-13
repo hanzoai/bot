@@ -201,13 +201,13 @@ htop
 
 所有状态存储在：
 
-- `~/.bot/` — 配置、凭证、会话数据
-- `~/.bot/workspace/` — 工作区（SOUL.md、记忆等）
+- `~/.hanzo/bot/` — 配置、凭证、会话数据
+- `~/.hanzo/bot/workspace/` — 工作区（SOUL.md、记忆等）
 
 这些在重启后保留。定期备份：
 
 ```bash
-tar -czvf bot-backup.tar.gz ~/.bot ~/.bot/workspace
+tar -czvf bot-backup.tar.gz ~/.bot ~/.hanzo/bot/workspace
 ```
 
 ---

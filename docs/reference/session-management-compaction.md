@@ -57,8 +57,8 @@ Hanzo Bot persists sessions in two layers:
 
 Per agent, on the Gateway host:
 
-- Store: `~/.bot/agents/<agentId>/sessions/sessions.json`
-- Transcripts: `~/.bot/agents/<agentId>/sessions/<sessionId>.jsonl`
+- Store: `~/.hanzo/bot/agents/<agentId>/sessions/sessions.json`
+- Transcripts: `~/.hanzo/bot/agents/<agentId>/sessions/<sessionId>.jsonl`
   - Telegram topic sessions: `.../<sessionId>-topic-<threadId>.jsonl`
 
 Hanzo Bot resolves these via `src/config/sessions.ts`.

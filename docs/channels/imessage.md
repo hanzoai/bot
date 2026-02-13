@@ -210,7 +210,7 @@ Concrete config example (Tailscale hostname):
   channels: {
     imessage: {
       enabled: true,
-      cliPath: "~/.bot/scripts/imsg-ssh",
+      cliPath: "~/.hanzo/bot/scripts/imsg-ssh",
       remoteHost: "bot@mac-mini.tailnet-1234.ts.net",
       includeAttachments: true,
       dbPath: "/Users/bot/Library/Messages/chat.db",
@@ -219,7 +219,7 @@ Concrete config example (Tailscale hostname):
 }
 ```
 
-Example wrapper (`~/.bot/scripts/imsg-ssh`):
+Example wrapper (`~/.hanzo/bot/scripts/imsg-ssh`):
 
 ```bash
 #!/usr/bin/env bash
@@ -232,7 +232,7 @@ Notes:
 - Use SSH keys so `ssh bot@mac-mini.tailnet-1234.ts.net` works without prompts.
 - `remoteHost` should match the SSH target so SCP can fetch attachments.
 
-Multi-account support: use `channels.imessage.accounts` with per-account config and optional `name`. See [`gateway/configuration`](/gateway/configuration#telegramaccounts--discordaccounts--slackaccounts--signalaccounts--imessageaccounts) for the shared pattern. Don't commit `~/.bot/bot.json` (it often contains tokens).
+Multi-account support: use `channels.imessage.accounts` with per-account config and optional `name`. See [`gateway/configuration`](/gateway/configuration#telegramaccounts--discordaccounts--slackaccounts--signalaccounts--imessageaccounts) for the shared pattern. Don't commit `~/.hanzo/bot/bot.json` (it often contains tokens).
 
 ## Access control (DMs + groups)
 
