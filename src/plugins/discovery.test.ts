@@ -111,7 +111,7 @@ describe("discoverBotPlugins", () => {
     fs.writeFileSync(
       path.join(globalExt, "package.json"),
       JSON.stringify({
-        name: "@bot/voice-call",
+        name: "@hanzo/bot-voice-call",
         bot: { extensions: ["./src/index.ts"] },
       }),
       "utf-8",
@@ -139,7 +139,7 @@ describe("discoverBotPlugins", () => {
     fs.writeFileSync(
       path.join(packDir, "package.json"),
       JSON.stringify({
-        name: "@bot/demo-plugin-dir",
+        name: "@hanzo/bot-demo-plugin-dir",
         bot: { extensions: ["./index.js"] },
       }),
       "utf-8",
