@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ClawDock - Docker helpers for Hanzo Bot
+# BotDock - Docker helpers for Hanzo Bot
 # Inspired by Simon Willison's "Running Hanzo Bot in Docker"
 # https://til.simonwillison.net/llms/hanzo-bot-docker
 #
@@ -36,10 +36,10 @@ _cmd() {
 # =============================================================================
 # Config
 # =============================================================================
-CLAWDOCK_CONFIG="${HOME}/.bot/config"
+BOTDOCK_CONFIG="${HOME}/.bot/config"
 
 # Common paths to check for Hanzo Bot
-CLAWDOCK_COMMON_PATHS=(
+BOTDOCK_COMMON_PATHS=(
   "${HOME}/hanzo-bot"
   "${HOME}/workspace/hanzo-bot"
   "${HOME}/projects/hanzo-bot"
@@ -60,21 +60,21 @@ _bot_trim_quotes() {
 }
 
 _bot_read_config_dir() {
-  if [[ ! -f "$CLAWDOCK_CONFIG" ]]; then
+  if [[ ! -f "$BOTDOCK_CONFIG" ]]; then
     return 1
   fi
   local raw
-  raw=$(sed -n 's/^CLAWDOCK_DIR=//p' "$CLAWDOCK_CONFIG" | head -n 1)
+  raw=$(sed -n 's/^BOTDOCK_DIR=//p' "$BOTDOCK_CONFIG" | head -n 1)
   if [[ -z "$raw" ]]; then
     return 1
   fi
   _bot_trim_quotes "$raw"
 }
 
-# Ensure CLAWDOCK_DIR is set and valid
+# Ensure BOTDOCK_DIR is set and valid
 _bot_ensure_dir() {
   # Already set and valid?
-  if [[ -n "$CLAWDOCK_DIR" && -f "${CLAWDOCK_DIR}/docker-compose.yml" ]]; then
+  if [[ -n "$BOTDOCK_DIR" && -f "${BOTDOCK_DIR}/docker-compose.yml" ]]; then
     return 0
   fi
 
@@ -82,13 +82,13 @@ _bot_ensure_dir() {
   local config_dir
   config_dir=$(_bot_read_config_dir)
   if [[ -n "$config_dir" && -f "${config_dir}/docker-compose.yml" ]]; then
-    CLAWDOCK_DIR="$config_dir"
+    BOTDOCK_DIR="$config_dir"
     return 0
   fi
 
   # Auto-detect from common paths
   local found_path=""
-  for path in "${CLAWDOCK_COMMON_PATHS[@]}"; do
+  for path in "${BOTDOCK_COMMON_PATHS[@]}"; do
     if [[ -f "${path}/docker-compose.yml" ]]; then
       found_path="$path"
       break
@@ -102,11 +102,11 @@ _bot_ensure_dir() {
     read -r response
     if [[ "$response" =~ ^[Nn] ]]; then
       echo ""
-      echo "Set CLAWDOCK_DIR manually:"
-      echo "  export CLAWDOCK_DIR=/path/to/hanzo-bot"
+      echo "Set BOTDOCK_DIR manually:"
+      echo "  export BOTDOCK_DIR=/path/to/hanzo-bot"
       return 1
     fi
-    CLAWDOCK_DIR="$found_path"
+    BOTDOCK_DIR="$found_path"
   else
     echo ""
     echo "❌ Hanzo Bot not found in common locations."
@@ -116,9 +116,9 @@ _bot_ensure_dir() {
     echo "  git clone https://github.com/hanzoai/bot.git ~/hanzo-bot"
     echo "  cd ~/hanzo-bot && ./docker-setup.sh"
     echo ""
-    echo "Or set CLAWDOCK_DIR if it's elsewhere:"
+    echo "Or set BOTDOCK_DIR if it's elsewhere:"
     echo ""
-    echo "  export CLAWDOCK_DIR=/path/to/hanzo-bot"
+    echo "  export BOTDOCK_DIR=/path/to/hanzo-bot"
     echo ""
     return 1
   fi
@@ -127,8 +127,8 @@ _bot_ensure_dir() {
   if [[ ! -d "${HOME}/.bot" ]]; then
     /bin/mkdir -p "${HOME}/.bot"
   fi
-  echo "CLAWDOCK_DIR=\"$CLAWDOCK_DIR\"" > "$CLAWDOCK_CONFIG"
-  echo "✅ Saved to $CLAWDOCK_CONFIG"
+  echo "BOTDOCK_DIR=\"$BOTDOCK_DIR\"" > "$BOTDOCK_CONFIG"
+  echo "✅ Saved to $BOTDOCK_CONFIG"
   echo ""
   return 0
 }
@@ -136,16 +136,16 @@ _bot_ensure_dir() {
 # Wrapper to run docker compose commands
 _bot_compose() {
   _bot_ensure_dir || return 1
-  command docker compose -f "${CLAWDOCK_DIR}/docker-compose.yml" "$@"
+  command docker compose -f "${BOTDOCK_DIR}/docker-compose.yml" "$@"
 }
 
 _bot_read_env_token() {
   _bot_ensure_dir || return 1
-  if [[ ! -f "${CLAWDOCK_DIR}/.env" ]]; then
+  if [[ ! -f "${BOTDOCK_DIR}/.env" ]]; then
     return 1
   fi
   local raw
-  raw=$(sed -n 's/^BOT_GATEWAY_TOKEN=//p' "${CLAWDOCK_DIR}/.env" | head -n 1)
+  raw=$(sed -n 's/^BOT_GATEWAY_TOKEN=//p' "${BOTDOCK_DIR}/.env" | head -n 1)
   if [[ -z "$raw" ]]; then
     return 1
   fi
@@ -176,7 +176,7 @@ bot-status() {
 # Navigation
 bot-cd() {
   _bot_ensure_dir || return 1
-  cd "${CLAWDOCK_DIR}"
+  cd "${BOTDOCK_DIR}"
 }
 
 bot-config() {
@@ -217,7 +217,7 @@ bot-health() {
   token=$(_bot_read_env_token)
   if [[ -z "$token" ]]; then
     echo "❌ Error: Could not find gateway token"
-    echo "   Check: ${CLAWDOCK_DIR}/.env"
+    echo "   Check: ${BOTDOCK_DIR}/.env"
     return 1
   fi
   _bot_compose exec -e "BOT_GATEWAY_TOKEN=$token" hanzo-bot-gateway \
@@ -238,7 +238,7 @@ bot-fix-token() {
   token=$(bot-token)
   if [[ -z "$token" ]]; then
     echo "❌ Error: Could not find gateway token"
-    echo "   Check: ${CLAWDOCK_DIR}/.env"
+    echo "   Check: ${BOTDOCK_DIR}/.env"
     return 1
   fi
 
@@ -350,7 +350,7 @@ bot-approve() {
 
 # Show all available bot helper commands
 bot-help() {
-  echo -e "\n${_CLR_BOLD}${_CLR_CYAN}🥷 ClawDock - Docker Helpers for Hanzo Bot${_CLR_RESET}\n"
+  echo -e "\n${_CLR_BOLD}${_CLR_CYAN}🥷 BotDock - Docker Helpers for Hanzo Bot${_CLR_RESET}\n"
 
   echo -e "${_CLR_BOLD}${_CLR_MAGENTA}⚡ Basic Operations${_CLR_RESET}"
   echo -e "  $(_cmd bot-start)       ${_CLR_DIM}Start the gateway${_CLR_RESET}"
