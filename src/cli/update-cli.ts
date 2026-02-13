@@ -16,8 +16,8 @@ import {
 } from "../commands/status.update.js";
 import { readConfigFileSnapshot, writeConfigFile } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
-import { formatDurationPrecise } from "../infra/format-time/format-duration.ts";
 import { resolveBotPackageRoot } from "../infra/bot-root.js";
+import { formatDurationPrecise } from "../infra/format-time/format-duration.ts";
 import { trimLogTail } from "../infra/restart-sentinel.js";
 import { parseSemver } from "../infra/runtime-guard.js";
 import {
@@ -110,7 +110,7 @@ const UPDATE_QUIPS = [
   "I've evolved. Try to keep up.",
   "New version, who dis? Oh right, still me but shinier.",
   "Patched, polished, and ready to pinch. Let's go.",
-  "The lobster has molted. Harder shell, sharper claws.",
+  "The lobster has molted. Harder shell, sharper skills.",
   "Update done! Check the changelog or just trust me, it's good.",
   "Reborn from the boiling waters of npm. Stronger now.",
   "I went away and came back smarter. You should try it sometime.",

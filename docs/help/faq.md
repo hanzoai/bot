@@ -1002,7 +1002,7 @@ Use managed overrides instead of editing the repo copy. Put your changes in `~/.
 
 ### Can I load skills from a custom folder
 
-Yes. Add extra directories via `skills.load.extraDirs` in `~/.bot/bot.json` (lowest precedence). Default precedence remains: `<workspace>/skills` → `~/.bot/skills` → bundled → `skills.load.extraDirs`. `clawhub` installs into `./skills` by default, which Hanzo Bot treats as `<workspace>/skills`.
+Yes. Add extra directories via `skills.load.extraDirs` in `~/.bot/bot.json` (lowest precedence). Default precedence remains: `<workspace>/skills` → `~/.bot/skills` → bundled → `skills.load.extraDirs`. `hanzo-skills` installs into `./skills` by default, which Hanzo Bot treats as `<workspace>/skills`.
 
 ### How can I use different models for different tasks
 
@@ -1049,17 +1049,17 @@ Docs: [Cron jobs](/automation/cron-jobs), [Cron vs Heartbeat](/automation/cron-v
 
 ### How do I install skills on Linux
 
-Use **ClawHub** (CLI) or drop skills into your workspace. The macOS Skills UI isn't available on Linux.
-Browse skills at [https://clawhub.com](https://clawhub.com).
+Use **Hanzo Skills** (CLI) or drop skills into your workspace. The macOS Skills UI isn't available on Linux.
+Browse skills at [https://skills.hanzo.bot](https://skills.hanzo.bot).
 
-Install the ClawHub CLI (pick one package manager):
+Install the Hanzo Skills CLI (pick one package manager):
 
 ```bash
-npm i -g clawhub
+npm i -g hanzo-skills
 ```
 
 ```bash
-pnpm add -g clawhub
+pnpm add -g hanzo-skills
 ```
 
 ### Can Hanzo Bot run tasks on a schedule or continuously in the background
@@ -1129,11 +1129,11 @@ targeting those APIs.
 Install skills:
 
 ```bash
-clawhub install <skill-slug>
-clawhub update --all
+hanzo-skills install <skill-slug>
+hanzo-skills update --all
 ```
 
-ClawHub installs into `./skills` under your current directory (or falls back to your configured Hanzo Bot workspace); Hanzo Bot treats that as `<workspace>/skills` on the next session. For shared skills across agents, place them in `~/.bot/skills/<name>/SKILL.md`. Some skills expect binaries installed via Homebrew; on Linux that means Linuxbrew (see the Homebrew Linux FAQ entry above). See [Skills](/tools/skills) and [ClawHub](/tools/clawhub).
+Hanzo Skills installs into `./skills` under your current directory (or falls back to your configured Hanzo Bot workspace); Hanzo Bot treats that as `<workspace>/skills` on the next session. For shared skills across agents, place them in `~/.bot/skills/<name>/SKILL.md`. Some skills expect binaries installed via Homebrew; on Linux that means Linuxbrew (see the Homebrew Linux FAQ entry above). See [Skills](/tools/skills) and [Hanzo Skills](/tools/hanzo-skills).
 
 ### How do I install the Chrome extension for browser takeover
 
@@ -1256,9 +1256,9 @@ Related: [Agent workspace](/concepts/agent-workspace), [Memory](/concepts/memory
 
 Everything lives under `$BOT_STATE_DIR` (default: `~/.bot`):
 
-| Path                                                            | Purpose                                                      |
-| --------------------------------------------------------------- | ------------------------------------------------------------ |
-| `$BOT_STATE_DIR/bot.json`                             | Main config (JSON5)                                          |
+| Path                                                       | Purpose                                                      |
+| ---------------------------------------------------------- | ------------------------------------------------------------ |
+| `$BOT_STATE_DIR/bot.json`                                  | Main config (JSON5)                                          |
 | `$BOT_STATE_DIR/credentials/oauth.json`                    | Legacy OAuth import (copied into auth profiles on first use) |
 | `$BOT_STATE_DIR/agents/<agentId>/agent/auth-profiles.json` | Auth profiles (OAuth + API keys)                             |
 | `$BOT_STATE_DIR/agents/<agentId>/agent/auth.json`          | Runtime auth cache (managed automatically)                   |
@@ -2845,4 +2845,4 @@ You can add options like `debounce:2s cap:25 drop:summarize` for followup modes.
 
 ---
 
-Still stuck? Ask in [Discord](https://discord.com/invite/clawd) or open a [GitHub discussion](https://github.com/bot/bot/discussions).
+Still stuck? Ask in [Discord](https://discord.com/invite/hanzo) or open a [GitHub discussion](https://github.com/bot/bot/discussions).

@@ -1,77 +1,77 @@
 ---
-name: clawhub
-description: Use the ClawHub CLI to search, install, update, and publish agent skills from clawhub.com. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed clawhub CLI.
+name: hanzo-skills
+description: Use the Hanzo Skills CLI to search, install, update, and publish agent skills from skills.hanzo.bot. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed hanzo-skills CLI.
 metadata:
   {
     "bot":
       {
-        "requires": { "bins": ["clawhub"] },
+        "requires": { "bins": ["hanzo-skills"] },
         "install":
           [
             {
               "id": "node",
               "kind": "node",
-              "package": "clawhub",
-              "bins": ["clawhub"],
-              "label": "Install ClawHub CLI (npm)",
+              "package": "hanzo-skills",
+              "bins": ["hanzo-skills"],
+              "label": "Install Hanzo Skills CLI (npm)",
             },
           ],
       },
   }
 ---
 
-# ClawHub CLI
+# Hanzo Skills CLI
 
 Install
 
 ```bash
-npm i -g clawhub
+npm i -g hanzo-skills
 ```
 
 Auth (publish)
 
 ```bash
-clawhub login
-clawhub whoami
+hanzo-skills login
+hanzo-skills whoami
 ```
 
 Search
 
 ```bash
-clawhub search "postgres backups"
+hanzo-skills search "postgres backups"
 ```
 
 Install
 
 ```bash
-clawhub install my-skill
-clawhub install my-skill --version 1.2.3
+hanzo-skills install my-skill
+hanzo-skills install my-skill --version 1.2.3
 ```
 
 Update (hash-based match + upgrade)
 
 ```bash
-clawhub update my-skill
-clawhub update my-skill --version 1.2.3
-clawhub update --all
-clawhub update my-skill --force
-clawhub update --all --no-input --force
+hanzo-skills update my-skill
+hanzo-skills update my-skill --version 1.2.3
+hanzo-skills update --all
+hanzo-skills update my-skill --force
+hanzo-skills update --all --no-input --force
 ```
 
 List
 
 ```bash
-clawhub list
+hanzo-skills list
 ```
 
 Publish
 
 ```bash
-clawhub publish ./my-skill --slug my-skill --name "My Skill" --version 1.2.0 --changelog "Fixes + docs"
+hanzo-skills publish ./my-skill --slug my-skill --name "My Skill" --version 1.2.0 --changelog "Fixes + docs"
 ```
 
 Notes
 
-- Default registry: https://clawhub.com (override with CLAWHUB_REGISTRY or --registry)
-- Default workdir: cwd (falls back to Hanzo Bot workspace); install dir: ./skills (override with --workdir / --dir / CLAWHUB_WORKDIR)
+- Default registry: https://skills.hanzo.bot (override with HANZO_SKILLS_REGISTRY or --registry)
+- Default workdir: cwd (falls back to Hanzo Bot workspace); install dir: ./skills (override with --workdir / --dir / HANZO_SKILLS_WORKDIR)
 - Update command hashes local files, resolves matching version, and upgrades to latest unless --version is set

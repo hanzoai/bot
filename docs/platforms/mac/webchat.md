@@ -24,7 +24,7 @@ agent (with a session switcher for other sessions).
   dist/Hanzo Bot.app/Contents/MacOS/Hanzo Bot --webchat
   ```
 
-- Logs: `./scripts/clawlog.sh` (subsystem `bot.molt`, category `WebChatSwiftUI`).
+- Logs: `./scripts/botlog.sh` (subsystem `bot.molt`, category `WebChatSwiftUI`).
 
 ## How it’s wired
 
