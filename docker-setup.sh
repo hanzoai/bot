@@ -22,7 +22,7 @@ if ! docker compose version >/dev/null 2>&1; then
 fi
 
 BOT_CONFIG_DIR="${BOT_CONFIG_DIR:-$HOME/.bot}"
-BOT_WORKSPACE_DIR="${BOT_WORKSPACE_DIR:-$HOME/.bot/workspace}"
+BOT_WORKSPACE_DIR="${BOT_WORKSPACE_DIR:-$HOME/.hanzo/bot/workspace}"
 
 mkdir -p "$BOT_CONFIG_DIR"
 mkdir -p "$BOT_WORKSPACE_DIR"
@@ -67,7 +67,7 @@ YAML
   if [[ -n "$home_volume" ]]; then
     printf '      - %s:/home/node\n' "$home_volume" >>"$EXTRA_COMPOSE_FILE"
     printf '      - %s:/home/node/.bot\n' "$BOT_CONFIG_DIR" >>"$EXTRA_COMPOSE_FILE"
-    printf '      - %s:/home/node/.bot/workspace\n' "$BOT_WORKSPACE_DIR" >>"$EXTRA_COMPOSE_FILE"
+    printf '      - %s:/home/node/.hanzo/bot/workspace\n' "$BOT_WORKSPACE_DIR" >>"$EXTRA_COMPOSE_FILE"
   fi
 
   for mount in "$@"; do
@@ -82,7 +82,7 @@ YAML
   if [[ -n "$home_volume" ]]; then
     printf '      - %s:/home/node\n' "$home_volume" >>"$EXTRA_COMPOSE_FILE"
     printf '      - %s:/home/node/.bot\n' "$BOT_CONFIG_DIR" >>"$EXTRA_COMPOSE_FILE"
-    printf '      - %s:/home/node/.bot/workspace\n' "$BOT_WORKSPACE_DIR" >>"$EXTRA_COMPOSE_FILE"
+    printf '      - %s:/home/node/.hanzo/bot/workspace\n' "$BOT_WORKSPACE_DIR" >>"$EXTRA_COMPOSE_FILE"
   fi
 
   for mount in "$@"; do
@@ -202,7 +202,7 @@ echo "Telegram (bot token):"
 echo "  ${COMPOSE_HINT} run --rm bot-cli channels add --channel telegram --token <token>"
 echo "Discord (bot token):"
 echo "  ${COMPOSE_HINT} run --rm bot-cli channels add --channel discord --token <token>"
-echo "Docs: https://docs.bot.ai/channels"
+echo "Docs: https://docs.hanzo.bot/channels"
 
 echo ""
 echo "==> Starting gateway"

@@ -100,7 +100,7 @@ for arg in "$@"; do
       log "  node bot.mjs daemon restart"
       log ""
       log "Reset unsigned overrides:"
-      log "  rm ~/.bot/disable-launchagent"
+      log "  rm ~/.hanzo/bot/disable-launchagent"
       log ""
       log "Default behavior: Auto-detect signing keys, fallback to --no-sign if none found"
       exit 0

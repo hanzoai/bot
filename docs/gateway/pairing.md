@@ -82,8 +82,8 @@ If silent approval fails, it falls back to the normal “Approve/Reject” promp
 
 Pairing state is stored under the Gateway state directory (default `~/.bot`):
 
-- `~/.bot/nodes/paired.json`
-- `~/.bot/nodes/pending.json`
+- `~/.hanzo/bot/nodes/paired.json`
+- `~/.hanzo/bot/nodes/pending.json`
 
 If you override `BOT_STATE_DIR`, the `nodes/` folder moves with it.
 
