@@ -51,4 +51,4 @@ Ask your agent to "refresh skills" or restart the gateway. Hanzo Bot will discov
 
 ## Shared Skills
 
-You can also browse and contribute skills to [ClawHub](https://clawhub.com).
+You can also browse and contribute skills to [Hanzo Skills](https://skills.hanzo.bot).
