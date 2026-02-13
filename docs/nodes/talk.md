@@ -47,7 +47,7 @@ Supported keys:
 - `seed`, `normalize`, `lang`, `output_format`, `latency_tier`
 - `once`
 
-## Config (`~/.bot/bot.json`)
+## Config (`~/.hanzo/bot/bot.json`)
 
 ```json5
 {

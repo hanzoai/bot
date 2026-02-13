@@ -97,7 +97,7 @@ Details:
   Source: bot-bundled
   Path: /path/to/bot/hooks/bundled/session-memory/HOOK.md
   Handler: /path/to/bot/hooks/bundled/session-memory/handler.ts
-  Homepage: https://docs.bot.ai/hooks#session-memory
+  Homepage: https://docs.hanzo.bot/hooks#session-memory
   Events: command:new
 
 Requirements:
@@ -132,7 +132,7 @@ Not ready: 0
 hanzo-bot hooks enable <name>
 ```
 
-通过将特定钩子添加到配置（`~/.bot/config.json`）来启用它。
+通过将特定钩子添加到配置（`~/.hanzo/bot/config.json`）来启用它。
 
 **注意：** 由插件管理的钩子在 `hanzo-bot hooks list` 中显示 `plugin:<id>`，
 无法在此处启用/禁用。请改为启用/禁用该插件。
@@ -201,7 +201,7 @@ hanzo-bot hooks install <path-or-spec>
 
 **执行操作：**
 
-- 将钩子包复制到 `~/.bot/hooks/<id>`
+- 将钩子包复制到 `~/.hanzo/bot/hooks/<id>`
 - 在 `hooks.internal.entries.*` 中启用已安装的钩子
 - 在 `hooks.internal.installs` 下记录安装信息
 
@@ -253,7 +253,7 @@ hanzo-bot hooks update --all
 hanzo-bot hooks enable session-memory
 ```
 
-**输出：** `~/.bot/workspace/memory/YYYY-MM-DD-slug.md`
+**输出：** `~/.hanzo/bot/workspace/memory/YYYY-MM-DD-slug.md`
 
 **参见：** [session-memory 文档](/automation/hooks#session-memory)
 
@@ -267,19 +267,19 @@ hanzo-bot hooks enable session-memory
 hanzo-bot hooks enable command-logger
 ```
 
-**输出：** `~/.bot/logs/commands.log`
+**输出：** `~/.hanzo/bot/logs/commands.log`
 
 **查看日志：**
 
 ```bash
 # 最近的命令
-tail -n 20 ~/.bot/logs/commands.log
+tail -n 20 ~/.hanzo/bot/logs/commands.log
 
 # 格式化输出
-cat ~/.bot/logs/commands.log | jq .
+cat ~/.hanzo/bot/logs/commands.log | jq .
 
 # 按操作过滤
-grep '"action":"new"' ~/.bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.hanzo/bot/logs/commands.log | jq .
 ```
 
 **参见：** [command-logger 文档](/automation/hooks#command-logger)

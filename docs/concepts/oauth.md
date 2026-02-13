@@ -40,12 +40,12 @@ To reduce that, Hanzo Bot treats `auth-profiles.json` as a **token sink**:
 
 Secrets are stored **per-agent**:
 
-- Auth profiles (OAuth + API keys): `~/.bot/agents/<agentId>/agent/auth-profiles.json`
-- Runtime cache (managed automatically; don’t edit): `~/.bot/agents/<agentId>/agent/auth.json`
+- Auth profiles (OAuth + API keys): `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
+- Runtime cache (managed automatically; don’t edit): `~/.hanzo/bot/agents/<agentId>/agent/auth.json`
 
 Legacy import-only file (still supported, but not the main store):
 
-- `~/.bot/credentials/oauth.json` (imported into `auth-profiles.json` on first use)
+- `~/.hanzo/bot/credentials/oauth.json` (imported into `auth-profiles.json` on first use)
 
 All of the above also respect `$BOT_STATE_DIR` (state dir override). Full reference: [/gateway/configuration](/gateway/configuration#auth-storage-oauth--api-keys)
 

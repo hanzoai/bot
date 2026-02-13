@@ -118,7 +118,7 @@ curl -fsSL https://hanzo.bot/install.sh | bash
 ### Option B: Hackable Install (For tinkering)
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 npm install
 npm run build

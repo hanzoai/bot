@@ -43,8 +43,8 @@ The hooks system allows you to:
 
 Hanzo Bot ships with four bundled hooks that are automatically discovered:
 
-- **💾 session-memory**: Saves session context to your agent workspace (default `~/.bot/workspace/memory/`) when you issue `/new`
-- **📝 command-logger**: Logs all command events to `~/.bot/logs/commands.log`
+- **💾 session-memory**: Saves session context to your agent workspace (default `~/.hanzo/bot/workspace/memory/`) when you issue `/new`
+- **📝 command-logger**: Logs all command events to `~/.hanzo/bot/logs/commands.log`
 - **🚀 boot-md**: Runs `BOOT.md` when the gateway starts (requires internal hooks enabled)
 - **😈 soul-evil**: Swaps injected `SOUL.md` content with `SOUL_EVIL.md` during a purge window or by random chance
 
@@ -81,7 +81,7 @@ During onboarding (`hanzo-bot onboard`), you'll be prompted to enable recommende
 Hooks are automatically discovered from three directories (in order of precedence):
 
 1. **Workspace hooks**: `<workspace>/hooks/` (per-agent, highest precedence)
-2. **Managed hooks**: `~/.bot/hooks/` (user-installed, shared across workspaces)
+2. **Managed hooks**: `~/.hanzo/bot/hooks/` (user-installed, shared across workspaces)
 3. **Bundled hooks**: `<bot>/dist/hooks/bundled/` (shipped with Hanzo Bot)
 
 Managed hook directories can be either a **single hook** or a **hook pack** (package directory).
@@ -116,7 +116,7 @@ Example `package.json`:
 ```
 
 Each entry points to a hook directory containing `HOOK.md` and `handler.ts` (or `index.ts`).
-Hook packs can ship dependencies; they will be installed under `~/.bot/hooks/<id>`.
+Hook packs can ship dependencies; they will be installed under `~/.hanzo/bot/hooks/<id>`.
 
 ## Hook Structure
 
@@ -128,7 +128,7 @@ The `HOOK.md` file contains metadata in YAML frontmatter plus Markdown documenta
 ---
 name: my-hook
 description: "Short description of what this hook does"
-homepage: https://docs.bot.ai/hooks#my-hook
+homepage: https://docs.hanzo.bot/hooks#my-hook
 metadata: { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
 ---
 
@@ -260,13 +260,13 @@ Planned event types:
 ### 1. Choose Location
 
 - **Workspace hooks** (`<workspace>/hooks/`): Per-agent, highest precedence
-- **Managed hooks** (`~/.bot/hooks/`): Shared across workspaces
+- **Managed hooks** (`~/.hanzo/bot/hooks/`): Shared across workspaces
 
 ### 2. Create Directory Structure
 
 ```bash
-mkdir -p ~/.bot/hooks/my-hook
-cd ~/.bot/hooks/my-hook
+mkdir -p ~/.hanzo/bot/hooks/my-hook
+cd ~/.hanzo/bot/hooks/my-hook
 ```
 
 ### 3. Create HOOK.md
@@ -453,7 +453,7 @@ Saves session context to memory when you issue `/new`.
 
 **Requirements**: `workspace.dir` must be configured
 
-**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.bot/workspace`)
+**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.hanzo/bot/workspace`)
 
 **What it does**:
 
@@ -492,7 +492,7 @@ Logs all command events to a centralized audit file.
 
 **Requirements**: None
 
-**Output**: `~/.bot/logs/commands.log`
+**Output**: `~/.hanzo/bot/logs/commands.log`
 
 **What it does**:
 
@@ -511,13 +511,13 @@ Logs all command events to a centralized audit file.
 
 ```bash
 # View recent commands
-tail -n 20 ~/.bot/logs/commands.log
+tail -n 20 ~/.hanzo/bot/logs/commands.log
 
 # Pretty-print with jq
-cat ~/.bot/logs/commands.log | jq .
+cat ~/.hanzo/bot/logs/commands.log | jq .
 
 # Filter by action
-grep '"action":"new"' ~/.bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.hanzo/bot/logs/commands.log | jq .
 ```
 
 **Enable**:
@@ -695,10 +695,10 @@ Monitor gateway logs to see hook execution:
 
 ```bash
 # macOS
-./scripts/botlog.sh -f
+./scripts/clawlog.sh -f
 
 # Other platforms
-tail -f ~/.bot/gateway.log
+tail -f ~/.hanzo/bot/gateway.log
 ```
 
 ### Test Hooks Directly
@@ -774,14 +774,14 @@ Session reset
 1. Check directory structure:
 
    ```bash
-   ls -la ~/.bot/hooks/my-hook/
+   ls -la ~/.hanzo/bot/hooks/my-hook/
    # Should show: HOOK.md, handler.ts
    ```
 
 2. Verify HOOK.md format:
 
    ```bash
-   cat ~/.bot/hooks/my-hook/HOOK.md
+   cat ~/.hanzo/bot/hooks/my-hook/HOOK.md
    # Should have YAML frontmatter with name and metadata
    ```
 
@@ -820,7 +820,7 @@ Look for missing:
 3. Check gateway logs for errors:
 
    ```bash
-   ./scripts/botlog.sh | grep hook
+   ./scripts/clawlog.sh | grep hook
    ```
 
 ### Handler Errors
@@ -859,8 +859,8 @@ node -e "import('./path/to/handler.ts').then(console.log)"
 1. Create hook directory:
 
    ```bash
-   mkdir -p ~/.bot/hooks/my-hook
-   mv ./hooks/handlers/my-handler.ts ~/.bot/hooks/my-hook/handler.ts
+   mkdir -p ~/.hanzo/bot/hooks/my-hook
+   mv ./hooks/handlers/my-handler.ts ~/.hanzo/bot/hooks/my-hook/handler.ts
    ```
 
 2. Create HOOK.md:
@@ -910,6 +910,6 @@ node -e "import('./path/to/handler.ts').then(console.log)"
 ## See Also
 
 - [CLI Reference: hooks](/cli/hooks)
-- [Bundled Hooks README](https://github.com/bot/bot/tree/main/src/hooks/bundled)
+- [Bundled Hooks README](https://github.com/hanzoai/bot/tree/main/src/hooks/bundled)
 - [Webhook Hooks](/automation/webhook)
 - [Configuration](/gateway/configuration#hooks)

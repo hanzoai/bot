@@ -7,13 +7,13 @@ title: "Credits"
 
 ## The name
 
-Hanzo Bot = CLAW + TARDIS, because every space lobster needs a time and space machine.
+Hanzo Bot -- your AI team, deployed everywhere.
 
 ## Credits
 
-- **Peter Steinberger** ([@steipete](https://x.com/steipete)) - Creator, lobster whisperer
+- **Peter Steinberger** ([@steipete](https://x.com/steipete)) - Creator
 - **Mario Zechner** ([@badlogicc](https://x.com/badlogicgames)) - Pi creator, security pen tester
-- **Hanzo Bot** - The ninja who demanded a better name
+- **Hanzo AI** (Techstars '17) - Infrastructure and platform
 
 ## Core contributors
 
@@ -22,6 +22,6 @@ Hanzo Bot = CLAW + TARDIS, because every space lobster needs a time and space ma
 
 ## License
 
-MIT - Free as a lobster in the ocean.
+MIT
 
 > "We are all just playing with our own prompts." (An AI, probably high on tokens)

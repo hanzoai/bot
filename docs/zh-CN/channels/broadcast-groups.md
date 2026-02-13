@@ -324,7 +324,7 @@ Result: Agent A and C respond, Agent B logs error
 **调试：**
 
 ```bash
-tail -f ~/.bot/logs/gateway.log | grep broadcast
+tail -f ~/.hanzo/bot/logs/gateway.log | grep broadcast
 ```
 
 ### 只有一个智能体响应

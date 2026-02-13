@@ -151,9 +151,9 @@ function buildDocsSection(params: { docsPath?: string; isMinimal: boolean; readT
   return [
     "## Documentation",
     `Hanzo Bot docs: ${docsPath}`,
-    "Mirror: https://docs.bot.ai",
-    "Source: https://github.com/bot/bot",
-    "Community: https://discord.com/invite/hanzo",
+    "Mirror: https://docs.hanzo.bot",
+    "Source: https://github.com/hanzoai/bot",
+    "Community: https://discord.gg/XthHQQj",
     "Find new skills: https://skills.hanzo.bot",
     "For Hanzo Bot behavior, commands, config, or architecture: consult local docs first.",
     "When diagnosing issues, run `hanzo-bot status` yourself when possible; only ask the user if you lack access (e.g., sandboxed).",

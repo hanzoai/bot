@@ -161,7 +161,7 @@ Full schema is in [Gateway configuration](/gateway/configuration).
       auto: "always",
       maxTextLength: 4000,
       timeoutMs: 30000,
-      prefsPath: "~/.bot/settings/tts.json",
+      prefsPath: "~/.hanzo/bot/settings/tts.json",
     },
   },
 }
@@ -294,7 +294,7 @@ Optional allowlist (disable specific overrides while keeping tags enabled):
 ## Per-user preferences
 
 Slash commands write local overrides to `prefsPath` (default:
-`~/.bot/settings/tts.json`, override with `BOT_TTS_PREFS` or
+`~/.hanzo/bot/settings/tts.json`, override with `BOT_TTS_PREFS` or
 `messages.tts.prefsPath`).
 
 Stored fields:

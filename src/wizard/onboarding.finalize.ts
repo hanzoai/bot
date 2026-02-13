@@ -308,7 +308,7 @@ export async function finalizeOnboardingWizard(
     await prompter.note(
       [
         "Gateway token: shared auth for the Gateway + Control UI.",
-        "Stored in: ~/.bot/bot.json (gateway.auth.token) or BOT_GATEWAY_TOKEN.",
+        "Stored in: ~/.hanzo/bot/bot.json (gateway.auth.token) or BOT_GATEWAY_TOKEN.",
         `View token: ${formatCliCommand("hanzo-bot config get gateway.auth.token")}`,
         `Generate token: ${formatCliCommand("hanzo-bot doctor --generate-gateway-token")}`,
         "Web UI stores a copy in this browser's localStorage (bot.control.settings.v1).",

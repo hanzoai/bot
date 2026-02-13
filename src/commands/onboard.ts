@@ -44,7 +44,7 @@ export async function onboardCommand(opts: OnboardOptions, runtime: RuntimeEnv =
     runtime.error(
       [
         "Non-interactive onboarding requires explicit risk acknowledgement.",
-        "Read: https://docs.bot.ai/security",
+        "Read: https://docs.hanzo.bot/security",
         `Re-run with: ${formatCliCommand("hanzo-bot onboard --non-interactive --accept-risk ...")}`,
       ].join("\n"),
     );
@@ -66,7 +66,7 @@ export async function onboardCommand(opts: OnboardOptions, runtime: RuntimeEnv =
         "Windows detected — Hanzo Bot runs great on WSL2!",
         "Native Windows might be trickier.",
         "Quick setup: wsl --install (one command, one reboot)",
-        "Guide: https://docs.bot.ai/windows",
+        "Guide: https://docs.hanzo.bot/windows",
       ].join("\n"),
     );
   }

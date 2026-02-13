@@ -45,7 +45,7 @@ npm install -g bot@latest
 从源代码（开发）：
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 pnpm install
 pnpm ui:build # 首次运行时自动安装 UI 依赖
@@ -88,7 +88,7 @@ hanzo-bot channels login
 hanzo-bot gateway --port 18789
 ```
 
-3. 在 `~/.bot/bot.json` 中放置最小配置：
+3. 在 `~/.hanzo/bot/bot.json` 中放置最小配置：
 
 ```json5
 {
@@ -104,7 +104,7 @@ hanzo-bot gateway --port 18789
 
 Hanzo Bot 从其工作区目录读取操作指令和"记忆"。
 
-默认情况下，Hanzo Bot 使用 `~/.bot/workspace` 作为智能体工作区，并会在设置/首次智能体运行时自动创建它（加上起始的 `AGENTS.md`、`SOUL.md`、`TOOLS.md`、`IDENTITY.md`、`USER.md`）。`BOOTSTRAP.md` 仅在工作区是全新的时候创建（删除后不应再出现）。
+默认情况下，Hanzo Bot 使用 `~/.hanzo/bot/workspace` 作为智能体工作区，并会在设置/首次智能体运行时自动创建它（加上起始的 `AGENTS.md`、`SOUL.md`、`TOOLS.md`、`IDENTITY.md`、`USER.md`）。`BOOTSTRAP.md` 仅在工作区是全新的时候创建（删除后不应再出现）。
 
 提示：将此文件夹视为 Hanzo Bot 的"记忆"，并将其设为 git 仓库（最好是私有的），这样你的 `AGENTS.md` + 记忆文件就有了备份。如果安装了 git，全新的工作区会自动初始化。
 
@@ -120,7 +120,7 @@ hanzo-bot setup
 ```json5
 {
   agent: {
-    workspace: "~/.bot/workspace",
+    workspace: "~/.hanzo/bot/workspace",
   },
 }
 ```
@@ -150,7 +150,7 @@ Hanzo Bot 默认为良好的助手设置，但你通常需要调整：
   logging: { level: "info" },
   agent: {
     model: "anthropic/claude-opus-4-5",
-    workspace: "~/.bot/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     thinkingDefault: "high",
     timeoutSeconds: 1800,
     // 从 0 开始；稍后启用。
@@ -183,8 +183,8 @@ Hanzo Bot 默认为良好的助手设置，但你通常需要调整：
 
 ## 会话和记忆
 
-- 会话文件：`~/.bot/agents/<agentId>/sessions/{{SessionId}}.jsonl`
-- 会话元数据（token 使用量、最后路由等）：`~/.bot/agents/<agentId>/sessions/sessions.json`（旧版：`~/.bot/sessions/sessions.json`）
+- 会话文件：`~/.hanzo/bot/agents/<agentId>/sessions/{{SessionId}}.jsonl`
+- 会话元数据（token 使用量、最后路由等）：`~/.hanzo/bot/agents/<agentId>/sessions/sessions.json`（旧版：`~/.hanzo/bot/sessions/sessions.json`）
 - `/new` 或 `/reset` 为该聊天启动新会话（可通过 `resetTriggers` 配置）。如果单独发送，智能体会回复一个简短的问候来确认重置。
 - `/compact [instructions]` 压缩会话上下文并报告剩余的上下文预算。
 

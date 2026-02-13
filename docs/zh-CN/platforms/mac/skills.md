@@ -32,7 +32,7 @@ macOS 应用通过 Gateway 网关展示 Hanzo Bot Skills；它不会在本地解
 
 ## 环境变量/API 密钥
 
-- 应用将密钥存储在 `~/.bot/bot.json` 的 `skills.entries.<skillKey>` 下。
+- 应用将密钥存储在 `~/.hanzo/bot/bot.json` 的 `skills.entries.<skillKey>` 下。
 - `skills.update` 更新 `enabled`、`apiKey` 和 `env`。
 
 ## 远程模式

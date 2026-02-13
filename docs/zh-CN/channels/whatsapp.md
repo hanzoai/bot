@@ -19,7 +19,7 @@ x-i18n:
 ## 快速设置（新手）
 
 1. 如果可能，使用**单独的手机号码**（推荐）。
-2. 在 `~/.bot/bot.json` 中配置 WhatsApp。
+2. 在 `~/.hanzo/bot/bot.json` 中配置 WhatsApp。
 3. 运行 `hanzo-bot channels login` 扫描二维码（关联设备）。
 4. 启动 Gateway 网关。
 
@@ -132,9 +132,9 @@ WhatsApp 需要真实手机号码进行验证。VoIP 和虚拟号码通常会被
 - 登录命令：`hanzo-bot channels login`（通过关联设备扫描二维码）。
 - 多账户登录：`hanzo-bot channels login --account <id>`（`<id>` = `accountId`）。
 - 默认账户（省略 `--account` 时）：如果存在则为 `default`，否则为第一个配置的账户 id（排序后）。
-- 凭证存储在 `~/.bot/credentials/whatsapp/<accountId>/creds.json`。
+- 凭证存储在 `~/.hanzo/bot/credentials/whatsapp/<accountId>/creds.json`。
 - 备份副本在 `creds.json.bak`（损坏时恢复）。
-- 旧版兼容性：较旧的安装将 Baileys 文件直接存储在 `~/.bot/credentials/` 中。
+- 旧版兼容性：较旧的安装将 Baileys 文件直接存储在 `~/.hanzo/bot/credentials/` 中。
 - 登出：`hanzo-bot channels logout`（或 `--account <id>`）删除 WhatsApp 认证状态（但保留共享的 `oauth.json`）。
 - 已登出的 socket => 错误提示重新关联。
 

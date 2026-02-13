@@ -2,4 +2,4 @@
 
 Tlon/Urbit channel plugin for Hanzo Bot. Supports DMs, group mentions, and thread replies.
 
-Docs: https://docs.bot.ai/channels/tlon
+Docs: https://docs.hanzo.bot/channels/tlon

@@ -8,6 +8,7 @@ export type AuthChoiceOption = {
 };
 
 export type AuthChoiceGroupId =
+  | "hanzo"
   | "openai"
   | "anthropic"
   | "google"
@@ -41,6 +42,12 @@ const AUTH_CHOICE_GROUP_DEFS: {
   hint?: string;
   choices: AuthChoice[];
 }[] = [
+  {
+    value: "hanzo",
+    label: "Hanzo Cloud",
+    hint: "All models, one login (recommended)",
+    choices: ["hanzo-cloud"],
+  },
   {
     value: "openai",
     label: "OpenAI",
@@ -163,6 +170,12 @@ export function buildAuthChoiceOptions(params: {
 }): AuthChoiceOption[] {
   void params.store;
   const options: AuthChoiceOption[] = [];
+
+  options.push({
+    value: "hanzo-cloud",
+    label: "Hanzo Cloud (recommended)",
+    hint: "Login with Hanzo — access Claude, GPT, Gemini, and 100+ models",
+  });
 
   options.push({
     value: "token",

@@ -101,11 +101,11 @@ hanzo-bot --profile rescue gateway install
 ## 手动环境变量示例
 
 ```bash
-BOT_CONFIG_PATH=~/.bot/main.json \
+BOT_CONFIG_PATH=~/.hanzo/bot/main.json \
 BOT_STATE_DIR=~/.bot-main \
 hanzo-bot gateway --port 18789
 
-BOT_CONFIG_PATH=~/.bot/rescue.json \
+BOT_CONFIG_PATH=~/.hanzo/bot/rescue.json \
 BOT_STATE_DIR=~/.bot-rescue \
 hanzo-bot gateway --port 19001
 ```

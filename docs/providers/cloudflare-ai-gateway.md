@@ -68,4 +68,4 @@ If you enabled Gateway authentication in Cloudflare, add the `cf-aig-authorizati
 
 ## Environment note
 
-If the Gateway runs as a daemon (launchd/systemd), make sure `CLOUDFLARE_AI_GATEWAY_API_KEY` is available to that process (for example, in `~/.bot/.env` or via `env.shellEnv`).
+If the Gateway runs as a daemon (launchd/systemd), make sure `CLOUDFLARE_AI_GATEWAY_API_KEY` is available to that process (for example, in `~/.hanzo/bot/.env` or via `env.shellEnv`).

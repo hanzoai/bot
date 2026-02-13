@@ -143,7 +143,7 @@ export type ToolPolicyConfig = {
   /**
    * Additional allowlist entries merged into the effective allowlist.
    *
-   * Intended for additive configuration (e.g., "also allow lobster") without forcing
+   * Intended for additive configuration (e.g., "also allow my-plugin") without forcing
    * users to replace/duplicate an existing allowlist or profile.
    */
   alsoAllow?: string[];

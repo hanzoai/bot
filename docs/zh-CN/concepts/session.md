@@ -34,8 +34,8 @@ Hanzo Bot 将**每个智能体的一个直接聊天会话**视为主会话。直
 ## 状态存储位置
 
 - 在 **Gateway 网关主机**上：
-  - 存储文件：`~/.bot/agents/<agentId>/sessions/sessions.json`（每个智能体）。
-- 对话记录：`~/.bot/agents/<agentId>/sessions/<SessionId>.jsonl`（Telegram 话题会话使用 `.../<SessionId>-topic-<threadId>.jsonl`）。
+  - 存储文件：`~/.hanzo/bot/agents/<agentId>/sessions/sessions.json`（每个智能体）。
+- 对话记录：`~/.hanzo/bot/agents/<agentId>/sessions/<SessionId>.jsonl`（Telegram 话题会话使用 `.../<SessionId>-topic-<threadId>.jsonl`）。
 - 存储是一个映射 `sessionKey -> { sessionId, updatedAt, ... }`。删除条目是安全的；它们会按需重新创建。
 - 群组条目可能包含 `displayName`、`channel`、`subject`、`room` 和 `space` 以在 UI 中标记会话。
 - 会话条目包含 `origin` 元数据（标签 + 路由提示），以便 UI 可以解释会话的来源。
@@ -108,7 +108,7 @@ Hanzo Bot 将**每个智能体的一个直接聊天会话**视为主会话。直
 ## 配置（可选重命名示例）
 
 ```json5
-// ~/.bot/bot.json
+// ~/.hanzo/bot/bot.json
 {
   session: {
     scope: "per-sender", // keep group keys separate
@@ -132,7 +132,7 @@ Hanzo Bot 将**每个智能体的一个直接聊天会话**视为主会话。直
       discord: { mode: "idle", idleMinutes: 10080 },
     },
     resetTriggers: ["/new", "/reset"],
-    store: "~/.bot/agents/{agentId}/sessions/sessions.json",
+    store: "~/.hanzo/bot/agents/{agentId}/sessions/sessions.json",
     mainKey: "main",
   },
 }

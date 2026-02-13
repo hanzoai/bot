@@ -64,7 +64,7 @@ The wizard starts with **QuickStart** (defaults) vs **Advanced** (full control).
 
 1. **Model/Auth** — Anthropic API key (recommended), OpenAI, or Custom Provider
    (OpenAI-compatible, Anthropic-compatible, or Unknown auto-detect). Pick a default model.
-2. **Workspace** — Location for agent files (default `~/.bot/workspace`). Seeds bootstrap files.
+2. **Workspace** — Location for agent files (default `~/.hanzo/bot/workspace`). Seeds bootstrap files.
 3. **Gateway** — Port, bind address, auth mode, Tailscale exposure.
 4. **Channels** — WhatsApp, Telegram, Discord, Google Chat, Mattermost, Signal, BlueBubbles, or iMessage.
 5. **Daemon** — Installs a LaunchAgent (macOS) or systemd user unit (Linux/WSL2).
@@ -92,7 +92,7 @@ What it sets:
 
 Notes:
 
-- Default workspaces follow `~/.bot/workspace-<agentId>`.
+- Default workspaces follow `~/.hanzo/bot/workspace-<agentId>`.
 - Add `bindings` to route inbound messages (the wizard can do this).
 - Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
 

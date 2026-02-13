@@ -19,6 +19,7 @@ import {
 } from "../canvas-host/a2ui.js";
 import { loadConfig } from "../config/config.js";
 import { handleSlackHttpRequest } from "../slack/http/index.js";
+import { handleAdminHttpRequest } from "./admin-http.js";
 import { authorizeGatewayConnect, isLocalDirectRequest, type ResolvedGatewayAuth } from "./auth.js";
 import {
   handleControlUiAvatarRequest,
@@ -333,6 +334,14 @@ export function createGatewayHttpServer(opts: {
     try {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
+      // Admin API for hub-managed agent CRUD
+      if (
+        await handleAdminHttpRequest(req, res, {
+          adminToken: resolvedAuth.token ?? "",
+        })
+      ) {
+        return;
+      }
       if (await handleHooksRequest(req, res)) {
         return;
       }

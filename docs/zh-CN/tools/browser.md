@@ -55,7 +55,7 @@ hanzo-bot browser --browser-profile hanzo-bot snapshot
 
 ## 配置
 
-浏览器设置位于 `~/.bot/bot.json`。
+浏览器设置位于 `~/.hanzo/bot/bot.json`。
 
 ```json5
 {

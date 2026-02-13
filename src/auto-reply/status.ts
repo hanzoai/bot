@@ -174,7 +174,7 @@ const readUsageFromSessionLog = (
       model?: string;
     }
   | undefined => {
-  // Transcripts are stored at the session file path (fallback: ~/.bot/sessions/<SessionId>.jsonl)
+  // Transcripts are stored at the session file path (fallback: ~/.hanzo/bot/sessions/<SessionId>.jsonl)
   if (!sessionId) {
     return undefined;
   }
@@ -438,7 +438,7 @@ export function buildStatusMessage(args: StatusArgs): string {
   const authLabel = authLabelValue ? ` · 🔑 ${authLabelValue}` : "";
   const modelLine = `🧠 Model: ${modelLabel}${authLabel}`;
   const commit = resolveCommitHash();
-  const versionLine = `🥷 Hanzo Bot ${VERSION}${commit ? ` (${commit})` : ""}`;
+  const versionLine = `🤖 Hanzo Bot ${VERSION}${commit ? ` (${commit})` : ""}`;
   const usagePair = formatUsagePair(inputTokens, outputTokens);
   const costLine = costLabel ? `💵 Cost: ${costLabel}` : null;
   const usageCostLine =

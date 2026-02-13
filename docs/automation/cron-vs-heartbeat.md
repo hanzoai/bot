@@ -183,12 +183,12 @@ hanzo-bot cron add --name "Weekly review" --cron "0 9 * * 1" --session isolated 
 hanzo-bot cron add --name "Call back" --at "2h" --session main --system-event "Call back the client" --wake now
 ```
 
-## Lobster: Deterministic workflows with approvals
+## Flow: Deterministic workflows with approvals
 
-Lobster is the workflow runtime for **multi-step tool pipelines** that need deterministic execution and explicit approvals.
+Flow is the workflow runtime for **multi-step tool pipelines** that need deterministic execution and explicit approvals.
 Use it when the task is more than a single agent turn, and you want a resumable workflow with human checkpoints.
 
-### When Lobster fits
+### When Flow fits
 
 - **Multi-step automation**: You need a fixed pipeline of tool calls, not a one-off prompt.
 - **Approval gates**: Side effects should pause until you approve, then resume.
@@ -197,19 +197,19 @@ Use it when the task is more than a single agent turn, and you want a resumable 
 ### How it pairs with heartbeat and cron
 
 - **Heartbeat/cron** decide _when_ a run happens.
-- **Lobster** defines _what steps_ happen once the run starts.
+- **Flow** defines _what steps_ happen once the run starts.
 
-For scheduled workflows, use cron or heartbeat to trigger an agent turn that calls Lobster.
-For ad-hoc workflows, call Lobster directly.
+For scheduled workflows, use cron or heartbeat to trigger an agent turn that calls Flow.
+For ad-hoc workflows, call Flow directly.
 
 ### Operational notes (from the code)
 
-- Lobster runs as a **local subprocess** (`lobster` CLI) in tool mode and returns a **JSON envelope**.
+- Flow runs as a **local subprocess** (`flow` CLI) in tool mode and returns a **JSON envelope**.
 - If the tool returns `needs_approval`, you resume with a `resumeToken` and `approve` flag.
-- The tool is an **optional plugin**; enable it additively via `tools.alsoAllow: ["lobster"]` (recommended).
-- If you pass `lobsterPath`, it must be an **absolute path**.
+- The tool is an **optional plugin**; enable it additively via `tools.alsoAllow: ["flow"]` (recommended).
+- If you pass `flowPath`, it must be an **absolute path**.
 
-See [Lobster](/tools/lobster) for full usage and examples.
+See [Flow](/tools/flow) for full usage and examples.
 
 ## Main Session vs Isolated Session
 

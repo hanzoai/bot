@@ -16,7 +16,7 @@ const report: HookStatusReport = {
       handlerPath: "/tmp/hooks/session-memory/handler.js",
       hookKey: "session-memory",
       emoji: "💾",
-      homepage: "https://docs.bot.ai/hooks#session-memory",
+      homepage: "https://docs.hanzo.bot/hooks#session-memory",
       events: ["command:new"],
       always: false,
       disabled: false,

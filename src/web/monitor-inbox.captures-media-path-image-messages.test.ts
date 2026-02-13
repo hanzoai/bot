@@ -287,7 +287,7 @@ describe("web monitor inbox", () => {
             ephemeralMessage: {
               message: {
                 extendedTextMessage: {
-                  text: "oh hey @Hanzo UK !",
+                  text: "oh hey @Bot UK !",
                   contextInfo: { mentionedJid: ["123@s.whatsapp.net"] },
                 },
               },
@@ -305,7 +305,7 @@ describe("web monitor inbox", () => {
       expect.objectContaining({
         chatType: "group",
         conversationId: "424242@g.us",
-        body: "oh hey @Hanzo UK !",
+        body: "oh hey @Bot UK !",
         mentionedJids: ["123@s.whatsapp.net"],
         senderE164: "+888",
       }),

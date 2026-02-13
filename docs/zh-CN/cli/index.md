@@ -88,7 +88,7 @@ Hanzo Bot 在 CLI 输出中使用龙虾调色板。
 - `error`（#E23D2D）：错误、失败。
 - `muted`（#8B7F77）：弱化、元数据。
 
-调色板权威来源：`src/terminal/palette.ts`（又名"lobster seam"）。
+调色板权威来源：`src/terminal/palette.ts`（又名"flow seam"）。
 
 ## 命令树
 
@@ -290,7 +290,7 @@ hanzo-bot [--dev] [--profile <name>] <command>
 
 选项：
 
-- `--workspace <dir>`：智能体工作区路径（默认 `~/.bot/workspace`）。
+- `--workspace <dir>`：智能体工作区路径（默认 `~/.hanzo/bot/workspace`）。
 - `--wizard`：运行新手引导向导。
 - `--non-interactive`：无提示运行向导。
 - `--mode <local|remote>`：向导模式。
@@ -442,7 +442,7 @@ hanzo-bot status --deep
 - `--json`：输出 JSON（无样式）。
 - `-v`、`--verbose`：包含缺失需求详情。
 
-提示：使用 `npx hanzo-skills` 搜索、安装和同步 Skills。
+提示：使用 `npx skills-hub` 搜索、安装和同步 Skills。
 
 ### `pairing`
 

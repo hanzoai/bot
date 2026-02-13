@@ -1,20 +1,20 @@
-# 🥷 Hanzo Bot — Personal AI Assistant
+# Hanzo Bot — Personal AI Assistant
 
 <p align="center">
     <picture>
-        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/bot/bot/main/docs/assets/bot-logo-text-dark.png">
-        <img src="https://raw.githubusercontent.com/bot/bot/main/docs/assets/bot-logo-text.png" alt="Hanzo Bot" width="500">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/hanzoai/bot/main/docs/assets/bot-logo-text-dark.png">
+        <img src="https://raw.githubusercontent.com/hanzoai/bot/main/docs/assets/bot-logo-text.png" alt="Hanzo Bot" width="500">
     </picture>
 </p>
 
 <p align="center">
-  <strong>EXFOLIATE! EXFOLIATE!</strong>
+  <strong>Your AI team, deployed everywhere.</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/bot/bot/actions/workflows/ci.yml?branch=main"><img src="https://img.shields.io/github/actions/workflow/status/bot/bot/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
-  <a href="https://github.com/bot/bot/releases"><img src="https://img.shields.io/github/v/release/bot/bot?include_prereleases&style=for-the-badge" alt="GitHub release"></a>
-  <a href="https://discord.gg/hanzo"><img src="https://img.shields.io/discord/1456350064065904867?label=Discord&logo=discord&logoColor=white&color=5865F2&style=for-the-badge" alt="Discord"></a>
+  <a href="https://github.com/hanzoai/bot/actions/workflows/ci.yml?branch=main"><img src="https://img.shields.io/github/actions/workflow/status/hanzoai/bot/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
+  <a href="https://github.com/hanzoai/bot/releases"><img src="https://img.shields.io/github/v/release/hanzoai/bot?include_prereleases&style=for-the-badge" alt="GitHub release"></a>
+  <a href="https://discord.gg/XthHQQj"><img src="https://img.shields.io/discord/1456350064065904867?label=Discord&logo=discord&logoColor=white&color=5865F2&style=for-the-badge" alt="Discord"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="MIT License"></a>
 </p>
 
@@ -23,32 +23,32 @@ It answers you on the channels you already use (WhatsApp, Telegram, Slack, Disco
 
 If you want a personal, single-user assistant that feels local, fast, and always-on, this is it.
 
-[Website](https://hanzo.bot) · [Docs](https://docs.bot.ai) · [DeepWiki](https://deepwiki.com/bot/bot) · [Getting Started](https://docs.bot.ai/start/getting-started) · [Updating](https://docs.bot.ai/install/updating) · [Showcase](https://docs.bot.ai/start/showcase) · [FAQ](https://docs.bot.ai/start/faq) · [Wizard](https://docs.bot.ai/start/wizard) · [Nix](https://github.com/bot/nix-bot) · [Docker](https://docs.bot.ai/install/docker) · [Discord](https://discord.gg/hanzo)
+[Website](https://hanzo.bot) · [Docs](https://docs.hanzo.bot) · [Getting Started](https://docs.hanzo.bot/start/getting-started) · [Updating](https://docs.hanzo.bot/install/updating) · [Showcase](https://docs.hanzo.bot/start/showcase) · [FAQ](https://docs.hanzo.bot/start/faq) · [Wizard](https://docs.hanzo.bot/start/wizard) · [Nix](https://github.com/hanzoai/nix-bot) · [Docker](https://docs.hanzo.bot/install/docker) · [Discord](https://discord.gg/XthHQQj)
 
 Preferred setup: run the onboarding wizard (`hanzo-bot onboard`) in your terminal.
 The wizard guides you step by step through setting up the gateway, workspace, channels, and skills. The CLI wizard is the recommended path and works on **macOS, Linux, and Windows (via WSL2; strongly recommended)**.
 Works with npm, pnpm, or bun.
-New install? Start here: [Getting started](https://docs.bot.ai/start/getting-started)
+New install? Start here: [Getting started](https://docs.hanzo.bot/start/getting-started)
 
 **Subscriptions (OAuth):**
 
 - **[Anthropic](https://www.anthropic.com/)** (Claude Pro/Max)
 - **[OpenAI](https://openai.com/)** (ChatGPT/Codex)
 
-Model note: while any model is supported, I strongly recommend **Anthropic Pro/Max (100/200) + Opus 4.6** for long‑context strength and better prompt‑injection resistance. See [Onboarding](https://docs.bot.ai/start/onboarding).
+Model note: while any model is supported, I strongly recommend **Anthropic Pro/Max (100/200) + Opus 4.6** for long‑context strength and better prompt‑injection resistance. See [Onboarding](https://docs.hanzo.bot/start/onboarding).
 
 ## Models (selection + auth)
 
-- Models config + CLI: [Models](https://docs.bot.ai/concepts/models)
-- Auth profile rotation (OAuth vs API keys) + fallbacks: [Model failover](https://docs.bot.ai/concepts/model-failover)
+- Models config + CLI: [Models](https://docs.hanzo.bot/concepts/models)
+- Auth profile rotation (OAuth vs API keys) + fallbacks: [Model failover](https://docs.hanzo.bot/concepts/model-failover)
 
 ## Install (recommended)
 
 Runtime: **Node ≥22**.
 
 ```bash
-npm install -g bot@latest
-# or: pnpm add -g bot@latest
+npm install -g @hanzo/bot@latest
+# or: pnpm add -g @hanzo/bot@latest
 
 hanzo-bot onboard --install-daemon
 ```
@@ -59,7 +59,7 @@ The wizard installs the Gateway daemon (launchd/systemd user service) so it stay
 
 Runtime: **Node ≥22**.
 
-Full beginner guide (auth, pairing, channels): [Getting started](https://docs.bot.ai/start/getting-started)
+Full beginner guide (auth, pairing, channels): [Getting started](https://docs.hanzo.bot/start/getting-started)
 
 ```bash
 hanzo-bot onboard --install-daemon
@@ -73,7 +73,7 @@ hanzo-bot message send --to +1234567890 --message "Hello from Hanzo Bot"
 hanzo-bot agent --message "Ship checklist" --thinking high
 ```
 
-Upgrading? [Updating guide](https://docs.bot.ai/install/updating) (and run `hanzo-bot doctor`).
+Upgrading? [Updating guide](https://docs.hanzo.bot/install/updating) (and run `hanzo-bot doctor`).
 
 ## Development channels
 
@@ -82,14 +82,14 @@ Upgrading? [Updating guide](https://docs.bot.ai/install/updating) (and run `hanz
 - **dev**: moving head of `main`, npm dist-tag `dev` (when published).
 
 Switch channels (git + npm): `hanzo-bot update --channel stable|beta|dev`.
-Details: [Development channels](https://docs.bot.ai/install/development-channels).
+Details: [Development channels](https://docs.hanzo.bot/install/development-channels).
 
 ## From source (development)
 
 Prefer `pnpm` for builds from source. Bun is optional for running TypeScript directly.
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 
 pnpm install
@@ -108,7 +108,7 @@ Note: `pnpm hanzo-bot ...` runs TypeScript directly (via `tsx`). `pnpm build` pr
 
 Hanzo Bot connects to real messaging surfaces. Treat inbound DMs as **untrusted input**.
 
-Full security guide: [Security](https://docs.bot.ai/gateway/security)
+Full security guide: [Security](https://docs.hanzo.bot/gateway/security)
 
 Default behavior on Telegram/WhatsApp/Signal/iMessage/Microsoft Teams/Discord/Google Chat/Slack:
 
@@ -120,14 +120,14 @@ Run `hanzo-bot doctor` to surface risky/misconfigured DM policies.
 
 ## Highlights
 
-- **[Local-first Gateway](https://docs.bot.ai/gateway)** — single control plane for sessions, channels, tools, and events.
-- **[Multi-channel inbox](https://docs.bot.ai/channels)** — WhatsApp, Telegram, Slack, Discord, Google Chat, Signal, BlueBubbles (iMessage), iMessage (legacy), Microsoft Teams, Matrix, Zalo, Zalo Personal, WebChat, macOS, iOS/Android.
-- **[Multi-agent routing](https://docs.bot.ai/gateway/configuration)** — route inbound channels/accounts/peers to isolated agents (workspaces + per-agent sessions).
-- **[Voice Wake](https://docs.bot.ai/nodes/voicewake) + [Talk Mode](https://docs.bot.ai/nodes/talk)** — always-on speech for macOS/iOS/Android with ElevenLabs.
-- **[Live Canvas](https://docs.bot.ai/platforms/mac/canvas)** — agent-driven visual workspace with [A2UI](https://docs.bot.ai/platforms/mac/canvas#canvas-a2ui).
-- **[First-class tools](https://docs.bot.ai/tools)** — browser, canvas, nodes, cron, sessions, and Discord/Slack actions.
-- **[Companion apps](https://docs.bot.ai/platforms/macos)** — macOS menu bar app + iOS/Android [nodes](https://docs.bot.ai/nodes).
-- **[Onboarding](https://docs.bot.ai/start/wizard) + [skills](https://docs.bot.ai/tools/skills)** — wizard-driven setup with bundled/managed/workspace skills.
+- **[Local-first Gateway](https://docs.hanzo.bot/gateway)** — single control plane for sessions, channels, tools, and events.
+- **[Multi-channel inbox](https://docs.hanzo.bot/channels)** — WhatsApp, Telegram, Slack, Discord, Google Chat, Signal, BlueBubbles (iMessage), iMessage (legacy), Microsoft Teams, Matrix, Zalo, Zalo Personal, WebChat, macOS, iOS/Android.
+- **[Multi-agent routing](https://docs.hanzo.bot/gateway/configuration)** — route inbound channels/accounts/peers to isolated agents (workspaces + per-agent sessions).
+- **[Voice Wake](https://docs.hanzo.bot/nodes/voicewake) + [Talk Mode](https://docs.hanzo.bot/nodes/talk)** — always-on speech for macOS/iOS/Android with ElevenLabs.
+- **[Live Canvas](https://docs.hanzo.bot/platforms/mac/canvas)** — agent-driven visual workspace with [A2UI](https://docs.hanzo.bot/platforms/mac/canvas#canvas-a2ui).
+- **[First-class tools](https://docs.hanzo.bot/tools)** — browser, canvas, nodes, cron, sessions, and Discord/Slack actions.
+- **[Companion apps](https://docs.hanzo.bot/platforms/macos)** — macOS menu bar app + iOS/Android [nodes](https://docs.hanzo.bot/nodes).
+- **[Onboarding](https://docs.hanzo.bot/start/wizard) + [skills](https://docs.hanzo.bot/tools/skills)** — wizard-driven setup with bundled/managed/workspace skills.
 
 ## Star History
 
@@ -137,45 +137,45 @@ Run `hanzo-bot doctor` to surface risky/misconfigured DM policies.
 
 ### Core platform
 
-- [Gateway WS control plane](https://docs.bot.ai/gateway) with sessions, presence, config, cron, webhooks, [Control UI](https://docs.bot.ai/web), and [Canvas host](https://docs.bot.ai/platforms/mac/canvas#canvas-a2ui).
-- [CLI surface](https://docs.bot.ai/tools/agent-send): gateway, agent, send, [wizard](https://docs.bot.ai/start/wizard), and [doctor](https://docs.bot.ai/gateway/doctor).
-- [Pi agent runtime](https://docs.bot.ai/concepts/agent) in RPC mode with tool streaming and block streaming.
-- [Session model](https://docs.bot.ai/concepts/session): `main` for direct chats, group isolation, activation modes, queue modes, reply-back. Group rules: [Groups](https://docs.bot.ai/concepts/groups).
-- [Media pipeline](https://docs.bot.ai/nodes/images): images/audio/video, transcription hooks, size caps, temp file lifecycle. Audio details: [Audio](https://docs.bot.ai/nodes/audio).
+- [Gateway WS control plane](https://docs.hanzo.bot/gateway) with sessions, presence, config, cron, webhooks, [Control UI](https://docs.hanzo.bot/web), and [Canvas host](https://docs.hanzo.bot/platforms/mac/canvas#canvas-a2ui).
+- [CLI surface](https://docs.hanzo.bot/tools/agent-send): gateway, agent, send, [wizard](https://docs.hanzo.bot/start/wizard), and [doctor](https://docs.hanzo.bot/gateway/doctor).
+- [Pi agent runtime](https://docs.hanzo.bot/concepts/agent) in RPC mode with tool streaming and block streaming.
+- [Session model](https://docs.hanzo.bot/concepts/session): `main` for direct chats, group isolation, activation modes, queue modes, reply-back. Group rules: [Groups](https://docs.hanzo.bot/concepts/groups).
+- [Media pipeline](https://docs.hanzo.bot/nodes/images): images/audio/video, transcription hooks, size caps, temp file lifecycle. Audio details: [Audio](https://docs.hanzo.bot/nodes/audio).
 
 ### Channels
 
-- [Channels](https://docs.bot.ai/channels): [WhatsApp](https://docs.bot.ai/channels/whatsapp) (Baileys), [Telegram](https://docs.bot.ai/channels/telegram) (grammY), [Slack](https://docs.bot.ai/channels/slack) (Bolt), [Discord](https://docs.bot.ai/channels/discord) (discord.js), [Google Chat](https://docs.bot.ai/channels/googlechat) (Chat API), [Signal](https://docs.bot.ai/channels/signal) (signal-cli), [BlueBubbles](https://docs.bot.ai/channels/bluebubbles) (iMessage, recommended), [iMessage](https://docs.bot.ai/channels/imessage) (legacy imsg), [Microsoft Teams](https://docs.bot.ai/channels/msteams) (extension), [Matrix](https://docs.bot.ai/channels/matrix) (extension), [Zalo](https://docs.bot.ai/channels/zalo) (extension), [Zalo Personal](https://docs.bot.ai/channels/zalouser) (extension), [WebChat](https://docs.bot.ai/web/webchat).
-- [Group routing](https://docs.bot.ai/concepts/group-messages): mention gating, reply tags, per-channel chunking and routing. Channel rules: [Channels](https://docs.bot.ai/channels).
+- [Channels](https://docs.hanzo.bot/channels): [WhatsApp](https://docs.hanzo.bot/channels/whatsapp) (Baileys), [Telegram](https://docs.hanzo.bot/channels/telegram) (grammY), [Slack](https://docs.hanzo.bot/channels/slack) (Bolt), [Discord](https://docs.hanzo.bot/channels/discord) (discord.js), [Google Chat](https://docs.hanzo.bot/channels/googlechat) (Chat API), [Signal](https://docs.hanzo.bot/channels/signal) (signal-cli), [BlueBubbles](https://docs.hanzo.bot/channels/bluebubbles) (iMessage, recommended), [iMessage](https://docs.hanzo.bot/channels/imessage) (legacy imsg), [Microsoft Teams](https://docs.hanzo.bot/channels/msteams) (extension), [Matrix](https://docs.hanzo.bot/channels/matrix) (extension), [Zalo](https://docs.hanzo.bot/channels/zalo) (extension), [Zalo Personal](https://docs.hanzo.bot/channels/zalouser) (extension), [WebChat](https://docs.hanzo.bot/web/webchat).
+- [Group routing](https://docs.hanzo.bot/concepts/group-messages): mention gating, reply tags, per-channel chunking and routing. Channel rules: [Channels](https://docs.hanzo.bot/channels).
 
 ### Apps + nodes
 
-- [macOS app](https://docs.bot.ai/platforms/macos): menu bar control plane, [Voice Wake](https://docs.bot.ai/nodes/voicewake)/PTT, [Talk Mode](https://docs.bot.ai/nodes/talk) overlay, [WebChat](https://docs.bot.ai/web/webchat), debug tools, [remote gateway](https://docs.bot.ai/gateway/remote) control.
-- [iOS node](https://docs.bot.ai/platforms/ios): [Canvas](https://docs.bot.ai/platforms/mac/canvas), [Voice Wake](https://docs.bot.ai/nodes/voicewake), [Talk Mode](https://docs.bot.ai/nodes/talk), camera, screen recording, Bonjour pairing.
-- [Android node](https://docs.bot.ai/platforms/android): [Canvas](https://docs.bot.ai/platforms/mac/canvas), [Talk Mode](https://docs.bot.ai/nodes/talk), camera, screen recording, optional SMS.
-- [macOS node mode](https://docs.bot.ai/nodes): system.run/notify + canvas/camera exposure.
+- [macOS app](https://docs.hanzo.bot/platforms/macos): menu bar control plane, [Voice Wake](https://docs.hanzo.bot/nodes/voicewake)/PTT, [Talk Mode](https://docs.hanzo.bot/nodes/talk) overlay, [WebChat](https://docs.hanzo.bot/web/webchat), debug tools, [remote gateway](https://docs.hanzo.bot/gateway/remote) control.
+- [iOS node](https://docs.hanzo.bot/platforms/ios): [Canvas](https://docs.hanzo.bot/platforms/mac/canvas), [Voice Wake](https://docs.hanzo.bot/nodes/voicewake), [Talk Mode](https://docs.hanzo.bot/nodes/talk), camera, screen recording, Bonjour pairing.
+- [Android node](https://docs.hanzo.bot/platforms/android): [Canvas](https://docs.hanzo.bot/platforms/mac/canvas), [Talk Mode](https://docs.hanzo.bot/nodes/talk), camera, screen recording, optional SMS.
+- [macOS node mode](https://docs.hanzo.bot/nodes): system.run/notify + canvas/camera exposure.
 
 ### Tools + automation
 
-- [Browser control](https://docs.bot.ai/tools/browser): dedicated hanzo-bot Chrome/Chromium, snapshots, actions, uploads, profiles.
-- [Canvas](https://docs.bot.ai/platforms/mac/canvas): [A2UI](https://docs.bot.ai/platforms/mac/canvas#canvas-a2ui) push/reset, eval, snapshot.
-- [Nodes](https://docs.bot.ai/nodes): camera snap/clip, screen record, [location.get](https://docs.bot.ai/nodes/location-command), notifications.
-- [Cron + wakeups](https://docs.bot.ai/automation/cron-jobs); [webhooks](https://docs.bot.ai/automation/webhook); [Gmail Pub/Sub](https://docs.bot.ai/automation/gmail-pubsub).
-- [Skills platform](https://docs.bot.ai/tools/skills): bundled, managed, and workspace skills with install gating + UI.
+- [Browser control](https://docs.hanzo.bot/tools/browser): dedicated hanzo-bot Chrome/Chromium, snapshots, actions, uploads, profiles.
+- [Canvas](https://docs.hanzo.bot/platforms/mac/canvas): [A2UI](https://docs.hanzo.bot/platforms/mac/canvas#canvas-a2ui) push/reset, eval, snapshot.
+- [Nodes](https://docs.hanzo.bot/nodes): camera snap/clip, screen record, [location.get](https://docs.hanzo.bot/nodes/location-command), notifications.
+- [Cron + wakeups](https://docs.hanzo.bot/automation/cron-jobs); [webhooks](https://docs.hanzo.bot/automation/webhook); [Gmail Pub/Sub](https://docs.hanzo.bot/automation/gmail-pubsub).
+- [Skills platform](https://docs.hanzo.bot/tools/skills): bundled, managed, and workspace skills with install gating + UI.
 
 ### Runtime + safety
 
-- [Channel routing](https://docs.bot.ai/concepts/channel-routing), [retry policy](https://docs.bot.ai/concepts/retry), and [streaming/chunking](https://docs.bot.ai/concepts/streaming).
-- [Presence](https://docs.bot.ai/concepts/presence), [typing indicators](https://docs.bot.ai/concepts/typing-indicators), and [usage tracking](https://docs.bot.ai/concepts/usage-tracking).
-- [Models](https://docs.bot.ai/concepts/models), [model failover](https://docs.bot.ai/concepts/model-failover), and [session pruning](https://docs.bot.ai/concepts/session-pruning).
-- [Security](https://docs.bot.ai/gateway/security) and [troubleshooting](https://docs.bot.ai/channels/troubleshooting).
+- [Channel routing](https://docs.hanzo.bot/concepts/channel-routing), [retry policy](https://docs.hanzo.bot/concepts/retry), and [streaming/chunking](https://docs.hanzo.bot/concepts/streaming).
+- [Presence](https://docs.hanzo.bot/concepts/presence), [typing indicators](https://docs.hanzo.bot/concepts/typing-indicators), and [usage tracking](https://docs.hanzo.bot/concepts/usage-tracking).
+- [Models](https://docs.hanzo.bot/concepts/models), [model failover](https://docs.hanzo.bot/concepts/model-failover), and [session pruning](https://docs.hanzo.bot/concepts/session-pruning).
+- [Security](https://docs.hanzo.bot/gateway/security) and [troubleshooting](https://docs.hanzo.bot/channels/troubleshooting).
 
 ### Ops + packaging
 
-- [Control UI](https://docs.bot.ai/web) + [WebChat](https://docs.bot.ai/web/webchat) served directly from the Gateway.
-- [Tailscale Serve/Funnel](https://docs.bot.ai/gateway/tailscale) or [SSH tunnels](https://docs.bot.ai/gateway/remote) with token/password auth.
-- [Nix mode](https://docs.bot.ai/install/nix) for declarative config; [Docker](https://docs.bot.ai/install/docker)-based installs.
-- [Doctor](https://docs.bot.ai/gateway/doctor) migrations, [logging](https://docs.bot.ai/logging).
+- [Control UI](https://docs.hanzo.bot/web) + [WebChat](https://docs.hanzo.bot/web/webchat) served directly from the Gateway.
+- [Tailscale Serve/Funnel](https://docs.hanzo.bot/gateway/tailscale) or [SSH tunnels](https://docs.hanzo.bot/gateway/remote) with token/password auth.
+- [Nix mode](https://docs.hanzo.bot/install/nix) for declarative config; [Docker](https://docs.hanzo.bot/install/docker)-based installs.
+- [Doctor](https://docs.hanzo.bot/gateway/doctor) migrations, [logging](https://docs.hanzo.bot/logging).
 
 ## How it works (short)
 
@@ -198,12 +198,12 @@ WhatsApp / Telegram / Slack / Discord / Google Chat / Signal / iMessage / BlueBu
 
 ## Key subsystems
 
-- **[Gateway WebSocket network](https://docs.bot.ai/concepts/architecture)** — single WS control plane for clients, tools, and events (plus ops: [Gateway runbook](https://docs.bot.ai/gateway)).
-- **[Tailscale exposure](https://docs.bot.ai/gateway/tailscale)** — Serve/Funnel for the Gateway dashboard + WS (remote access: [Remote](https://docs.bot.ai/gateway/remote)).
-- **[Browser control](https://docs.bot.ai/tools/browser)** — bot‑managed Chrome/Chromium with CDP control.
-- **[Canvas + A2UI](https://docs.bot.ai/platforms/mac/canvas)** — agent‑driven visual workspace (A2UI host: [Canvas/A2UI](https://docs.bot.ai/platforms/mac/canvas#canvas-a2ui)).
-- **[Voice Wake](https://docs.bot.ai/nodes/voicewake) + [Talk Mode](https://docs.bot.ai/nodes/talk)** — always‑on speech and continuous conversation.
-- **[Nodes](https://docs.bot.ai/nodes)** — Canvas, camera snap/clip, screen record, `location.get`, notifications, plus macOS‑only `system.run`/`system.notify`.
+- **[Gateway WebSocket network](https://docs.hanzo.bot/concepts/architecture)** — single WS control plane for clients, tools, and events (plus ops: [Gateway runbook](https://docs.hanzo.bot/gateway)).
+- **[Tailscale exposure](https://docs.hanzo.bot/gateway/tailscale)** — Serve/Funnel for the Gateway dashboard + WS (remote access: [Remote](https://docs.hanzo.bot/gateway/remote)).
+- **[Browser control](https://docs.hanzo.bot/tools/browser)** — bot‑managed Chrome/Chromium with CDP control.
+- **[Canvas + A2UI](https://docs.hanzo.bot/platforms/mac/canvas)** — agent‑driven visual workspace (A2UI host: [Canvas/A2UI](https://docs.hanzo.bot/platforms/mac/canvas#canvas-a2ui)).
+- **[Voice Wake](https://docs.hanzo.bot/nodes/voicewake) + [Talk Mode](https://docs.hanzo.bot/nodes/talk)** — always‑on speech and continuous conversation.
+- **[Nodes](https://docs.hanzo.bot/nodes)** — Canvas, camera snap/clip, screen record, `location.get`, notifications, plus macOS‑only `system.run`/`system.notify`.
 
 ## Tailscale access (Gateway dashboard)
 
@@ -220,7 +220,7 @@ Notes:
 - Funnel refuses to start unless `gateway.auth.mode: "password"` is set.
 - Optional: `gateway.tailscale.resetOnExit` to undo Serve/Funnel on shutdown.
 
-Details: [Tailscale guide](https://docs.bot.ai/gateway/tailscale) · [Web surfaces](https://docs.bot.ai/web)
+Details: [Tailscale guide](https://docs.hanzo.bot/gateway/tailscale) · [Web surfaces](https://docs.hanzo.bot/web)
 
 ## Remote Gateway (Linux is great)
 
@@ -230,7 +230,7 @@ It’s perfectly fine to run the Gateway on a small Linux instance. Clients (mac
 - **Device nodes** run device‑local actions (`system.run`, camera, screen recording, notifications) via `node.invoke`.
   In short: exec runs where the Gateway lives; device actions run where the device lives.
 
-Details: [Remote access](https://docs.bot.ai/gateway/remote) · [Nodes](https://docs.bot.ai/nodes) · [Security](https://docs.bot.ai/gateway/security)
+Details: [Remote access](https://docs.hanzo.bot/gateway/remote) · [Nodes](https://docs.hanzo.bot/nodes) · [Security](https://docs.hanzo.bot/gateway/security)
 
 ## macOS permissions via the Gateway protocol
 
@@ -245,7 +245,7 @@ Elevated bash (host permissions) is separate from macOS TCC:
 - Use `/elevated on|off` to toggle per‑session elevated access when enabled + allowlisted.
 - Gateway persists the per‑session toggle via `sessions.patch` (WS method) alongside `thinkingLevel`, `verboseLevel`, `model`, `sendPolicy`, and `groupActivation`.
 
-Details: [Nodes](https://docs.bot.ai/nodes) · [macOS app](https://docs.bot.ai/platforms/macos) · [Gateway protocol](https://docs.bot.ai/concepts/architecture)
+Details: [Nodes](https://docs.hanzo.bot/nodes) · [macOS app](https://docs.hanzo.bot/platforms/macos) · [Gateway protocol](https://docs.hanzo.bot/concepts/architecture)
 
 ## Agent to Agent (sessions\_\* tools)
 
@@ -254,13 +254,13 @@ Details: [Nodes](https://docs.bot.ai/nodes) · [macOS app](https://docs.bot.ai/p
 - `sessions_history` — fetch transcript logs for a session.
 - `sessions_send` — message another session; optional reply‑back ping‑pong + announce step (`REPLY_SKIP`, `ANNOUNCE_SKIP`).
 
-Details: [Session tools](https://docs.bot.ai/concepts/session-tool)
+Details: [Session tools](https://docs.hanzo.bot/concepts/session-tool)
 
-## Skills registry (Hanzo Skills)
+## Skills registry (Hanzo Skills Hub)
 
-Hanzo Skills is a minimal skill registry. With Hanzo Skills enabled, the agent can search for skills automatically and pull in new ones as needed.
+Hanzo Skills Hub is a minimal skill registry. With Hanzo Skills Hub enabled, the agent can search for skills automatically and pull in new ones as needed.
 
-[Hanzo Skills](https://skills.hanzo.bot)
+[Hanzo Skills Hub](https://skills.hanzo.bot)
 
 ## Chat commands
 
@@ -296,23 +296,23 @@ Note: signed builds required for macOS permissions to stick across rebuilds (see
 - Voice trigger forwarding + Canvas surface.
 - Controlled via `hanzo-bot nodes …`.
 
-Runbook: [iOS connect](https://docs.bot.ai/platforms/ios).
+Runbook: [iOS connect](https://docs.hanzo.bot/platforms/ios).
 
 ### Android node (optional)
 
 - Pairs via the same Bridge + pairing flow as iOS.
 - Exposes Canvas, Camera, and Screen capture commands.
-- Runbook: [Android connect](https://docs.bot.ai/platforms/android).
+- Runbook: [Android connect](https://docs.hanzo.bot/platforms/android).
 
 ## Agent workspace + skills
 
-- Workspace root: `~/.bot/workspace` (configurable via `agents.defaults.workspace`).
+- Workspace root: `~/.hanzo/bot/workspace` (configurable via `agents.defaults.workspace`).
 - Injected prompt files: `AGENTS.md`, `SOUL.md`, `TOOLS.md`.
-- Skills: `~/.bot/workspace/skills/<skill>/SKILL.md`.
+- Skills: `~/.hanzo/bot/workspace/skills/<skill>/SKILL.md`.
 
 ## Configuration
 
-Minimal `~/.bot/bot.json` (model + defaults):
+Minimal `~/.hanzo/bot/bot.json` (model + defaults):
 
 ```json5
 {
@@ -322,7 +322,7 @@ Minimal `~/.bot/bot.json` (model + defaults):
 }
 ```
 
-[Full configuration reference (all keys + examples).](https://docs.bot.ai/gateway/configuration)
+[Full configuration reference (all keys + examples).](https://docs.hanzo.bot/gateway/configuration)
 
 ## Security model (important)
 
@@ -330,15 +330,15 @@ Minimal `~/.bot/bot.json` (model + defaults):
 - **Group/channel safety:** set `agents.defaults.sandbox.mode: "non-main"` to run **non‑main sessions** (groups/channels) inside per‑session Docker sandboxes; bash then runs in Docker for those sessions.
 - **Sandbox defaults:** allowlist `bash`, `process`, `read`, `write`, `edit`, `sessions_list`, `sessions_history`, `sessions_send`, `sessions_spawn`; denylist `browser`, `canvas`, `nodes`, `cron`, `discord`, `gateway`.
 
-Details: [Security guide](https://docs.bot.ai/gateway/security) · [Docker + sandboxing](https://docs.bot.ai/install/docker) · [Sandbox config](https://docs.bot.ai/gateway/configuration)
+Details: [Security guide](https://docs.hanzo.bot/gateway/security) · [Docker + sandboxing](https://docs.hanzo.bot/install/docker) · [Sandbox config](https://docs.hanzo.bot/gateway/configuration)
 
-### [WhatsApp](https://docs.bot.ai/channels/whatsapp)
+### [WhatsApp](https://docs.hanzo.bot/channels/whatsapp)
 
-- Link the device: `pnpm hanzo-bot channels login` (stores creds in `~/.bot/credentials`).
+- Link the device: `pnpm hanzo-bot channels login` (stores creds in `~/.hanzo/bot/credentials`).
 - Allowlist who can talk to the assistant via `channels.whatsapp.allowFrom`.
 - If `channels.whatsapp.groups` is set, it becomes a group allowlist; include `"*"` to allow all.
 
-### [Telegram](https://docs.bot.ai/channels/telegram)
+### [Telegram](https://docs.hanzo.bot/channels/telegram)
 
 - Set `TELEGRAM_BOT_TOKEN` or `channels.telegram.botToken` (env wins).
 - Optional: set `channels.telegram.groups` (with `channels.telegram.groups."*".requireMention`); when set, it is a group allowlist (include `"*"` to allow all). Also `channels.telegram.allowFrom` or `channels.telegram.webhookUrl` + `channels.telegram.webhookSecret` as needed.
@@ -353,11 +353,11 @@ Details: [Security guide](https://docs.bot.ai/gateway/security) · [Docker + san
 }
 ```
 
-### [Slack](https://docs.bot.ai/channels/slack)
+### [Slack](https://docs.hanzo.bot/channels/slack)
 
 - Set `SLACK_BOT_TOKEN` + `SLACK_APP_TOKEN` (or `channels.slack.botToken` + `channels.slack.appToken`).
 
-### [Discord](https://docs.bot.ai/channels/discord)
+### [Discord](https://docs.hanzo.bot/channels/discord)
 
 - Set `DISCORD_BOT_TOKEN` or `channels.discord.token` (env wins).
 - Optional: set `commands.native`, `commands.text`, or `commands.useAccessGroups`, plus `channels.discord.dm.allowFrom`, `channels.discord.guilds`, or `channels.discord.mediaMaxMb` as needed.
@@ -372,27 +372,27 @@ Details: [Security guide](https://docs.bot.ai/gateway/security) · [Docker + san
 }
 ```
 
-### [Signal](https://docs.bot.ai/channels/signal)
+### [Signal](https://docs.hanzo.bot/channels/signal)
 
 - Requires `signal-cli` and a `channels.signal` config section.
 
-### [BlueBubbles (iMessage)](https://docs.bot.ai/channels/bluebubbles)
+### [BlueBubbles (iMessage)](https://docs.hanzo.bot/channels/bluebubbles)
 
 - **Recommended** iMessage integration.
 - Configure `channels.bluebubbles.serverUrl` + `channels.bluebubbles.password` and a webhook (`channels.bluebubbles.webhookPath`).
 - The BlueBubbles server runs on macOS; the Gateway can run on macOS or elsewhere.
 
-### [iMessage (legacy)](https://docs.bot.ai/channels/imessage)
+### [iMessage (legacy)](https://docs.hanzo.bot/channels/imessage)
 
 - Legacy macOS-only integration via `imsg` (Messages must be signed in).
 - If `channels.imessage.groups` is set, it becomes a group allowlist; include `"*"` to allow all.
 
-### [Microsoft Teams](https://docs.bot.ai/channels/msteams)
+### [Microsoft Teams](https://docs.hanzo.bot/channels/msteams)
 
 - Configure a Teams app + Bot Framework, then add a `msteams` config section.
 - Allowlist who can talk via `msteams.allowFrom`; group access via `msteams.groupAllowFrom` or `msteams.groupPolicy: "open"`.
 
-### [WebChat](https://docs.bot.ai/web/webchat)
+### [WebChat](https://docs.hanzo.bot/web/webchat)
 
 - Uses the Gateway WebSocket; no separate WebChat port/config.
 
@@ -411,74 +411,73 @@ Browser control (optional):
 
 Use these when you’re past the onboarding flow and want the deeper reference.
 
-- [Start with the docs index for navigation and “what’s where.”](https://docs.bot.ai)
-- [Read the architecture overview for the gateway + protocol model.](https://docs.bot.ai/concepts/architecture)
-- [Use the full configuration reference when you need every key and example.](https://docs.bot.ai/gateway/configuration)
-- [Run the Gateway by the book with the operational runbook.](https://docs.bot.ai/gateway)
-- [Learn how the Control UI/Web surfaces work and how to expose them safely.](https://docs.bot.ai/web)
-- [Understand remote access over SSH tunnels or tailnets.](https://docs.bot.ai/gateway/remote)
-- [Follow the onboarding wizard flow for a guided setup.](https://docs.bot.ai/start/wizard)
-- [Wire external triggers via the webhook surface.](https://docs.bot.ai/automation/webhook)
-- [Set up Gmail Pub/Sub triggers.](https://docs.bot.ai/automation/gmail-pubsub)
-- [Learn the macOS menu bar companion details.](https://docs.bot.ai/platforms/mac/menu-bar)
-- [Platform guides: Windows (WSL2)](https://docs.bot.ai/platforms/windows), [Linux](https://docs.bot.ai/platforms/linux), [macOS](https://docs.bot.ai/platforms/macos), [iOS](https://docs.bot.ai/platforms/ios), [Android](https://docs.bot.ai/platforms/android)
-- [Debug common failures with the troubleshooting guide.](https://docs.bot.ai/channels/troubleshooting)
-- [Review security guidance before exposing anything.](https://docs.bot.ai/gateway/security)
+- [Start with the docs index for navigation and “what’s where.”](https://docs.hanzo.bot)
+- [Read the architecture overview for the gateway + protocol model.](https://docs.hanzo.bot/concepts/architecture)
+- [Use the full configuration reference when you need every key and example.](https://docs.hanzo.bot/gateway/configuration)
+- [Run the Gateway by the book with the operational runbook.](https://docs.hanzo.bot/gateway)
+- [Learn how the Control UI/Web surfaces work and how to expose them safely.](https://docs.hanzo.bot/web)
+- [Understand remote access over SSH tunnels or tailnets.](https://docs.hanzo.bot/gateway/remote)
+- [Follow the onboarding wizard flow for a guided setup.](https://docs.hanzo.bot/start/wizard)
+- [Wire external triggers via the webhook surface.](https://docs.hanzo.bot/automation/webhook)
+- [Set up Gmail Pub/Sub triggers.](https://docs.hanzo.bot/automation/gmail-pubsub)
+- [Learn the macOS menu bar companion details.](https://docs.hanzo.bot/platforms/mac/menu-bar)
+- [Platform guides: Windows (WSL2)](https://docs.hanzo.bot/platforms/windows), [Linux](https://docs.hanzo.bot/platforms/linux), [macOS](https://docs.hanzo.bot/platforms/macos), [iOS](https://docs.hanzo.bot/platforms/ios), [Android](https://docs.hanzo.bot/platforms/android)
+- [Debug common failures with the troubleshooting guide.](https://docs.hanzo.bot/channels/troubleshooting)
+- [Review security guidance before exposing anything.](https://docs.hanzo.bot/gateway/security)
 
 ## Advanced docs (discovery + control)
 
-- [Discovery + transports](https://docs.bot.ai/gateway/discovery)
-- [Bonjour/mDNS](https://docs.bot.ai/gateway/bonjour)
-- [Gateway pairing](https://docs.bot.ai/gateway/pairing)
-- [Remote gateway README](https://docs.bot.ai/gateway/remote-gateway-readme)
-- [Control UI](https://docs.bot.ai/web/control-ui)
-- [Dashboard](https://docs.bot.ai/web/dashboard)
+- [Discovery + transports](https://docs.hanzo.bot/gateway/discovery)
+- [Bonjour/mDNS](https://docs.hanzo.bot/gateway/bonjour)
+- [Gateway pairing](https://docs.hanzo.bot/gateway/pairing)
+- [Remote gateway README](https://docs.hanzo.bot/gateway/remote-gateway-readme)
+- [Control UI](https://docs.hanzo.bot/web/control-ui)
+- [Dashboard](https://docs.hanzo.bot/web/dashboard)
 
 ## Operations & troubleshooting
 
-- [Health checks](https://docs.bot.ai/gateway/health)
-- [Gateway lock](https://docs.bot.ai/gateway/gateway-lock)
-- [Background process](https://docs.bot.ai/gateway/background-process)
-- [Browser troubleshooting (Linux)](https://docs.bot.ai/tools/browser-linux-troubleshooting)
-- [Logging](https://docs.bot.ai/logging)
+- [Health checks](https://docs.hanzo.bot/gateway/health)
+- [Gateway lock](https://docs.hanzo.bot/gateway/gateway-lock)
+- [Background process](https://docs.hanzo.bot/gateway/background-process)
+- [Browser troubleshooting (Linux)](https://docs.hanzo.bot/tools/browser-linux-troubleshooting)
+- [Logging](https://docs.hanzo.bot/logging)
 
 ## Deep dives
 
-- [Agent loop](https://docs.bot.ai/concepts/agent-loop)
-- [Presence](https://docs.bot.ai/concepts/presence)
-- [TypeBox schemas](https://docs.bot.ai/concepts/typebox)
-- [RPC adapters](https://docs.bot.ai/reference/rpc)
-- [Queue](https://docs.bot.ai/concepts/queue)
+- [Agent loop](https://docs.hanzo.bot/concepts/agent-loop)
+- [Presence](https://docs.hanzo.bot/concepts/presence)
+- [TypeBox schemas](https://docs.hanzo.bot/concepts/typebox)
+- [RPC adapters](https://docs.hanzo.bot/reference/rpc)
+- [Queue](https://docs.hanzo.bot/concepts/queue)
 
 ## Workspace & skills
 
-- [Skills config](https://docs.bot.ai/tools/skills-config)
-- [Default AGENTS](https://docs.bot.ai/reference/AGENTS.default)
-- [Templates: AGENTS](https://docs.bot.ai/reference/templates/AGENTS)
-- [Templates: BOOTSTRAP](https://docs.bot.ai/reference/templates/BOOTSTRAP)
-- [Templates: IDENTITY](https://docs.bot.ai/reference/templates/IDENTITY)
-- [Templates: SOUL](https://docs.bot.ai/reference/templates/SOUL)
-- [Templates: TOOLS](https://docs.bot.ai/reference/templates/TOOLS)
-- [Templates: USER](https://docs.bot.ai/reference/templates/USER)
+- [Skills config](https://docs.hanzo.bot/tools/skills-config)
+- [Default AGENTS](https://docs.hanzo.bot/reference/AGENTS.default)
+- [Templates: AGENTS](https://docs.hanzo.bot/reference/templates/AGENTS)
+- [Templates: BOOTSTRAP](https://docs.hanzo.bot/reference/templates/BOOTSTRAP)
+- [Templates: IDENTITY](https://docs.hanzo.bot/reference/templates/IDENTITY)
+- [Templates: SOUL](https://docs.hanzo.bot/reference/templates/SOUL)
+- [Templates: TOOLS](https://docs.hanzo.bot/reference/templates/TOOLS)
+- [Templates: USER](https://docs.hanzo.bot/reference/templates/USER)
 
 ## Platform internals
 
-- [macOS dev setup](https://docs.bot.ai/platforms/mac/dev-setup)
-- [macOS menu bar](https://docs.bot.ai/platforms/mac/menu-bar)
-- [macOS voice wake](https://docs.bot.ai/platforms/mac/voicewake)
-- [iOS node](https://docs.bot.ai/platforms/ios)
-- [Android node](https://docs.bot.ai/platforms/android)
-- [Windows (WSL2)](https://docs.bot.ai/platforms/windows)
-- [Linux app](https://docs.bot.ai/platforms/linux)
+- [macOS dev setup](https://docs.hanzo.bot/platforms/mac/dev-setup)
+- [macOS menu bar](https://docs.hanzo.bot/platforms/mac/menu-bar)
+- [macOS voice wake](https://docs.hanzo.bot/platforms/mac/voicewake)
+- [iOS node](https://docs.hanzo.bot/platforms/ios)
+- [Android node](https://docs.hanzo.bot/platforms/android)
+- [Windows (WSL2)](https://docs.hanzo.bot/platforms/windows)
+- [Linux app](https://docs.hanzo.bot/platforms/linux)
 
 ## Email hooks (Gmail)
 
-- [docs.bot.ai/gmail-pubsub](https://docs.bot.ai/automation/gmail-pubsub)
+- [docs.hanzo.bot/gmail-pubsub](https://docs.hanzo.bot/automation/gmail-pubsub)
 
-## Molty
+## Origin
 
-Hanzo Bot was built for **Molty**, a space lobster AI assistant. 🥷
-by Peter Steinberger and the community.
+Hanzo Bot was built by Peter Steinberger and the Hanzo AI community.
 
 - [hanzo.bot](https://hanzo.bot)
 - [soul.md](https://soul.md)
@@ -492,9 +491,9 @@ AI/vibe-coded PRs welcome! 🤖
 
 Special thanks to [Mario Zechner](https://mariozechner.at/) for his support and for
 [pi-mono](https://github.com/badlogic/pi-mono).
-Special thanks to Adam Doppelt for lobster.bot.
+Special thanks to Adam Doppelt for flow.bot.
 
-Thanks to all contributors:
+Thanks to all clawtributors:
 
 <p align="left">
   <a href="https://github.com/steipete"><img src="https://avatars.githubusercontent.com/u/58493?v=4&s=48" width="48" height="48" alt="steipete" title="steipete"/></a> <a href="https://github.com/joshp123"><img src="https://avatars.githubusercontent.com/u/1497361?v=4&s=48" width="48" height="48" alt="joshp123" title="joshp123"/></a> <a href="https://github.com/cpojer"><img src="https://avatars.githubusercontent.com/u/13352?v=4&s=48" width="48" height="48" alt="cpojer" title="cpojer"/></a> <a href="https://github.com/mbelinky"><img src="https://avatars.githubusercontent.com/u/132747814?v=4&s=48" width="48" height="48" alt="Mariano Belinky" title="Mariano Belinky"/></a> <a href="https://github.com/sebslight"><img src="https://avatars.githubusercontent.com/u/19554889?v=4&s=48" width="48" height="48" alt="sebslight" title="sebslight"/></a> <a href="https://github.com/Takhoffman"><img src="https://avatars.githubusercontent.com/u/781889?v=4&s=48" width="48" height="48" alt="Takhoffman" title="Takhoffman"/></a> <a href="https://github.com/quotentiroler"><img src="https://avatars.githubusercontent.com/u/40643627?v=4&s=48" width="48" height="48" alt="quotentiroler" title="quotentiroler"/></a> <a href="https://github.com/bohdanpodvirnyi"><img src="https://avatars.githubusercontent.com/u/31819391?v=4&s=48" width="48" height="48" alt="bohdanpodvirnyi" title="bohdanpodvirnyi"/></a> <a href="https://github.com/tyler6204"><img src="https://avatars.githubusercontent.com/u/64381258?v=4&s=48" width="48" height="48" alt="tyler6204" title="tyler6204"/></a> <a href="https://github.com/iHildy"><img src="https://avatars.githubusercontent.com/u/25069719?v=4&s=48" width="48" height="48" alt="iHildy" title="iHildy"/></a>

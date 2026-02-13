@@ -46,7 +46,7 @@ export function registerDirectoryCli(program: Command) {
       () =>
         `\n${theme.muted("Docs:")} ${formatDocsLink(
           "/cli/directory",
-          "docs.bot.ai/cli/directory",
+          "docs.hanzo.bot/cli/directory",
         )}\n`,
     )
     .action(() => {

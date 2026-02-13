@@ -47,7 +47,7 @@ hanzo-bot dns setup --apply
 This installs CoreDNS and configures it to:
 
 - listen on port 53 only on the gateway’s Tailscale interfaces
-- serve your chosen domain (example: `bot.internal.`) from `~/.bot/dns/<domain>.db`
+- serve your chosen domain (example: `bot.internal.`) from `~/.hanzo/bot/dns/<domain>.db`
 
 Validate from a tailnet‑connected machine:
 
@@ -73,7 +73,7 @@ access, bind explicitly and keep auth enabled.
 
 For tailnet‑only setups:
 
-- Set `gateway.bind: "tailnet"` in `~/.bot/bot.json`.
+- Set `gateway.bind: "tailnet"` in `~/.hanzo/bot/bot.json`.
 - Restart the Gateway (or restart the macOS menubar app).
 
 ## What advertises
@@ -159,7 +159,7 @@ sequences (e.g. spaces become `\032`).
 ## Disabling / configuration
 
 - `BOT_DISABLE_BONJOUR=1` disables advertising (legacy: `BOT_DISABLE_BONJOUR`).
-- `gateway.bind` in `~/.bot/bot.json` controls the Gateway bind mode.
+- `gateway.bind` in `~/.hanzo/bot/bot.json` controls the Gateway bind mode.
 - `BOT_SSH_PORT` overrides the SSH port advertised in TXT (legacy: `BOT_SSH_PORT`).
 - `BOT_TAILNET_DNS` publishes a MagicDNS hint in TXT (legacy: `BOT_TAILNET_DNS`).
 - `BOT_CLI_PATH` overrides the advertised CLI path (legacy: `BOT_CLI_PATH`).

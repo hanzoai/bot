@@ -56,7 +56,7 @@ hanzo-bot browser --browser-profile work tabs
 
 ```bash
 hanzo-bot browser tabs
-hanzo-bot browser open https://docs.bot.ai
+hanzo-bot browser open https://docs.hanzo.bot
 hanzo-bot browser focus <targetId>
 hanzo-bot browser close <targetId>
 ```

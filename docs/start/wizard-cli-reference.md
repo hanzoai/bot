@@ -31,7 +31,7 @@ It does not install or modify anything on the remote host.
 
 <Steps>
   <Step title="Existing config detection">
-    - If `~/.bot/bot.json` exists, choose Keep, Modify, or Reset.
+    - If `~/.hanzo/bot/bot.json` exists, choose Keep, Modify, or Reset.
     - Re-running the wizard does not wipe anything unless you explicitly choose Reset (or pass `--reset`).
     - If config is invalid or contains legacy keys, the wizard stops and asks you to run `hanzo-bot doctor` before continuing.
     - Reset uses `trash` and offers scopes:
@@ -43,7 +43,7 @@ It does not install or modify anything on the remote host.
     - Full option matrix is in [Auth and model options](#auth-and-model-options).
   </Step>
   <Step title="Workspace">
-    - Default `~/.bot/workspace` (configurable).
+    - Default `~/.hanzo/bot/workspace` (configurable).
     - Seeds workspace files needed for first-run bootstrap ritual.
     - Workspace layout: [Agent workspace](/concepts/agent-workspace).
   </Step>
@@ -140,7 +140,7 @@ What you set:
   </Accordion>
   <Accordion title="OpenAI API key">
     Uses `OPENAI_API_KEY` if present or prompts for a key, then saves it to
-    `~/.bot/.env` so launchd can read it.
+    `~/.hanzo/bot/.env` so launchd can read it.
 
     Sets `agents.defaults.model` to `openai/gpt-5.1-codex` when model is unset, `openai/*`, or `openai-codex/*`.
 
@@ -187,18 +187,18 @@ Model behavior:
 
 Credential and profile paths:
 
-- OAuth credentials: `~/.bot/credentials/oauth.json`
-- Auth profiles (API keys + OAuth): `~/.bot/agents/<agentId>/agent/auth-profiles.json`
+- OAuth credentials: `~/.hanzo/bot/credentials/oauth.json`
+- Auth profiles (API keys + OAuth): `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
 
 <Note>
 Headless and server tip: complete OAuth on a machine with a browser, then copy
-`~/.bot/credentials/oauth.json` (or `$BOT_STATE_DIR/credentials/oauth.json`)
+`~/.hanzo/bot/credentials/oauth.json` (or `$BOT_STATE_DIR/credentials/oauth.json`)
 to the gateway host.
 </Note>
 
 ## Outputs and internals
 
-Typical fields in `~/.bot/bot.json`:
+Typical fields in `~/.hanzo/bot/bot.json`:
 
 - `agents.defaults.workspace`
 - `agents.defaults.model` / `models.providers` (if Minimax chosen)
@@ -214,8 +214,8 @@ Typical fields in `~/.bot/bot.json`:
 
 `hanzo-bot agents add` writes `agents.list[]` and optional `bindings`.
 
-WhatsApp credentials go under `~/.bot/credentials/whatsapp/<accountId>/`.
-Sessions are stored under `~/.bot/agents/<agentId>/sessions/`.
+WhatsApp credentials go under `~/.hanzo/bot/credentials/whatsapp/<accountId>/`.
+Sessions are stored under `~/.hanzo/bot/agents/<agentId>/sessions/`.
 
 <Note>
 Some channels are delivered as plugins. When selected during onboarding, the wizard
@@ -234,7 +234,7 @@ Clients (macOS app and Control UI) can render steps without re-implementing onbo
 Signal setup behavior:
 
 - Downloads the appropriate release asset
-- Stores it under `~/.bot/tools/signal-cli/<version>/`
+- Stores it under `~/.hanzo/bot/tools/signal-cli/<version>/`
 - Writes `channels.signal.cliPath` in config
 - JVM builds require Java 21
 - Native builds are used when available

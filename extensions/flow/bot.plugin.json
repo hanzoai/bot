@@ -1,6 +1,6 @@
 {
-  "id": "lobster",
-  "name": "Lobster",
+  "id": "flow",
+  "name": "Flow",
   "description": "Typed workflow tool with resumable approvals.",
   "configSchema": {
     "type": "object",

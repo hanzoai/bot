@@ -1,7 +1,7 @@
 ---
 name: soul-evil
 description: "Swap SOUL.md with SOUL_EVIL.md during a purge window or by random chance"
-homepage: https://docs.bot.ai/hooks/soul-evil
+homepage: https://docs.hanzo.bot/hooks/soul-evil
 metadata:
   {
     "bot":
@@ -31,7 +31,7 @@ You can change the filename via hook config.
 
 ## Configuration
 
-Add this to your config (`~/.bot/bot.json`):
+Add this to your config (`~/.hanzo/bot/bot.json`):
 
 ```json
 {

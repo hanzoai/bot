@@ -37,7 +37,7 @@ x-i18n:
 Shelley，[exe.dev](https://exe.dev) 的智能体，可以使用我们的提示立即安装 Hanzo Bot。使用的提示如下：
 
 ```
-Set up Hanzo Bot (https://docs.bot.ai/install) on this VM. Use the non-interactive and accept-risk flags for hanzo-bot onboarding. Add the supplied auth or token as needed. Configure nginx to forward from the default port 18789 to the root location on the default enabled site config, making sure to enable Websocket support. Pairing is done by "hanzo-bot devices list" and "hanzo-bot device approve <request id>". Make sure the dashboard shows that Hanzo Bot's health is OK. exe.dev handles forwarding from port 8000 to port 80/443 and HTTPS for us, so the final "reachable" should be <vm-name>.exe.xyz, without port specification.
+Set up Hanzo Bot (https://docs.hanzo.bot/install) on this VM. Use the non-interactive and accept-risk flags for hanzo-bot onboarding. Add the supplied auth or token as needed. Configure nginx to forward from the default port 18789 to the root location on the default enabled site config, making sure to enable Websocket support. Pairing is done by "hanzo-bot devices list" and "hanzo-bot device approve <request id>". Make sure the dashboard shows that Hanzo Bot's health is OK. exe.dev handles forwarding from port 8000 to port 80/443 and HTTPS for us, so the final "reachable" should be <vm-name>.exe.xyz, without port specification.
 ```
 
 ## 手动安装
@@ -56,7 +56,7 @@ ssh exe.dev new
 ssh <vm-name>.exe.xyz
 ```
 
-提示：保持此 VM **有状态**。Hanzo Bot 在 `~/.bot/` 和 `~/.bot/workspace/` 下存储状态。
+提示：保持此 VM **有状态**。Hanzo Bot 在 `~/.hanzo/bot/` 和 `~/.hanzo/bot/workspace/` 下存储状态。
 
 ## 2) 安装先决条件（在 VM 上）
 

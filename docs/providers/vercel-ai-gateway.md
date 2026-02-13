@@ -46,5 +46,5 @@ hanzo-bot onboard --non-interactive \
 ## Environment note
 
 If the Gateway runs as a daemon (launchd/systemd), make sure `AI_GATEWAY_API_KEY`
-is available to that process (for example, in `~/.bot/.env` or via
+is available to that process (for example, in `~/.hanzo/bot/.env` or via
 `env.shellEnv`).

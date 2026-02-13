@@ -35,7 +35,7 @@ describe("installHooksFromArchive", () => {
     zip.file(
       "package/package.json",
       JSON.stringify({
-        name: "@bot/zip-hooks",
+        name: "@hanzo/bot-zip-hooks",
         version: "0.0.1",
         bot: { hooks: ["./hooks/zip-hook"] },
       }),
@@ -80,7 +80,7 @@ describe("installHooksFromArchive", () => {
     fs.writeFileSync(
       path.join(pkgDir, "package.json"),
       JSON.stringify({
-        name: "@bot/tar-hooks",
+        name: "@hanzo/bot-tar-hooks",
         version: "0.0.1",
         bot: { hooks: ["./hooks/tar-hook"] },
       }),

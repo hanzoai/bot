@@ -283,13 +283,13 @@ Most npm packages work fine. For binaries, look for `linux-arm64` or `aarch64` r
 
 All state lives in:
 
-- `~/.bot/` — config, credentials, session data
-- `~/.bot/workspace/` — workspace (SOUL.md, memory, artifacts)
+- `~/.hanzo/bot/` — config, credentials, session data
+- `~/.hanzo/bot/workspace/` — workspace (SOUL.md, memory, artifacts)
 
 Back up periodically:
 
 ```bash
-tar -czvf bot-backup.tar.gz ~/.bot ~/.bot/workspace
+tar -czvf bot-backup.tar.gz ~/.bot ~/.hanzo/bot/workspace
 ```
 
 ---

@@ -31,7 +31,7 @@ Hanzo Bot 在两个地方记录日志：
 
 日期使用 Gateway 网关主机的本地时区。
 
-你可以在 `~/.bot/bot.json` 中覆盖此设置：
+你可以在 `~/.hanzo/bot/bot.json` 中覆盖此设置：
 
 ```json
 {
@@ -103,7 +103,7 @@ hanzo-bot channels logs --channel whatsapp
 
 ## 配置日志
 
-所有日志配置都在 `~/.bot/bot.json` 的 `logging` 下。
+所有日志配置都在 `~/.hanzo/bot/bot.json` 的 `logging` 下。
 
 ```json
 {

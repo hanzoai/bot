@@ -317,7 +317,7 @@ Broadcast groups work alongside existing routing:
 **Debug:**
 
 ```bash
-tail -f ~/.bot/logs/gateway.log | grep broadcast
+tail -f ~/.hanzo/bot/logs/gateway.log | grep broadcast
 ```
 
 ### Only One Agent Responding

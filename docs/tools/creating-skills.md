@@ -14,10 +14,10 @@ A skill is a directory containing a `SKILL.md` file (which provides instructions
 
 ### 1. Create the Directory
 
-Skills live in your workspace, usually `~/.bot/workspace/skills/`. Create a new folder for your skill:
+Skills live in your workspace, usually `~/.hanzo/bot/workspace/skills/`. Create a new folder for your skill:
 
 ```bash
-mkdir -p ~/.bot/workspace/skills/hello-world
+mkdir -p ~/.hanzo/bot/workspace/skills/hello-world
 ```
 
 ### 2. Define the `SKILL.md`
@@ -51,4 +51,4 @@ Ask your agent to "refresh skills" or restart the gateway. Hanzo Bot will discov
 
 ## Shared Skills
 
-You can also browse and contribute skills to [Hanzo Skills](https://skills.hanzo.bot).
+You can also browse and contribute skills to [Hanzo Skills Hub](https://skills.hanzo.bot).

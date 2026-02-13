@@ -1,9 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import {
-  DEFAULT_BOT_BROWSER_COLOR,
-  DEFAULT_BOT_BROWSER_PROFILE_NAME,
-} from "./constants.js";
+import { DEFAULT_BOT_BROWSER_COLOR, DEFAULT_BOT_BROWSER_PROFILE_NAME } from "./constants.js";
 
 function decoratedMarkerPath(userDataDir: string) {
   return path.join(userDataDir, ".bot-profile-decorated");
@@ -123,13 +120,10 @@ export function isProfileDecorated(
 }
 
 /**
- * Best-effort profile decoration (name + lobster-orange). Chrome preference keys
+ * Best-effort profile decoration (name + bot-orange). Chrome preference keys
  * vary by version; we keep this conservative and idempotent.
  */
-export function decorateBotProfile(
-  userDataDir: string,
-  opts?: { name?: string; color?: string },
-) {
+export function decorateBotProfile(userDataDir: string, opts?: { name?: string; color?: string }) {
   const desiredName = opts?.name ?? DEFAULT_BOT_BROWSER_PROFILE_NAME;
   const desiredColor = (opts?.color ?? DEFAULT_BOT_BROWSER_COLOR).toUpperCase();
   const desiredColorInt = parseHexRgbToSignedArgbInt(desiredColor);

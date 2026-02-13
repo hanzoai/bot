@@ -67,8 +67,8 @@ Docker 是**可选的**。仅当你想要容器化的 Gateway 网关或验证 Do
 
 它在主机上写入配置/工作区：
 
-- `~/.bot/`
-- `~/.bot/workspace`
+- `~/.hanzo/bot/`
+- `~/.hanzo/bot/workspace`
 
 在 VPS 上运行？参阅 [Hetzner（Docker VPS）](/install/hetzner)。
 
@@ -287,7 +287,7 @@ pnpm test:docker:qr
 
 - Gateway 网关绑定默认为 `lan` 用于容器使用。
 - Dockerfile CMD 使用 `--allow-unconfigured`；挂载的配置如果 `gateway.mode` 不是 `local` 仍会启动。覆盖 CMD 以强制执行检查。
-- Gateway 网关容器是会话的真实来源（`~/.bot/agents/<agentId>/sessions/`）。
+- Gateway 网关容器是会话的真实来源（`~/.hanzo/bot/agents/<agentId>/sessions/`）。
 
 ## 智能体沙箱（主机 Gateway 网关 + Docker 工具）
 
@@ -320,7 +320,7 @@ pnpm test:docker:qr
 
 - 镜像：`bot-sandbox:bookworm-slim`
 - 每个智能体一个容器
-- 智能体工作区访问：`workspaceAccess: "none"`（默认）使用 `~/.bot/sandboxes`
+- 智能体工作区访问：`workspaceAccess: "none"`（默认）使用 `~/.hanzo/bot/sandboxes`
   - `"ro"` 保持沙箱工作区在 `/workspace` 并将智能体工作区只读挂载在 `/agent`（禁用 `write`/`edit`/`apply_patch`）
   - `"rw"` 将智能体工作区读写挂载在 `/workspace`
 - 自动清理：空闲 > 24h 或 年龄 > 7d
@@ -345,7 +345,7 @@ pnpm test:docker:qr
         mode: "non-main", // off | non-main | all
         scope: "agent", // session | agent | shared（默认为 agent）
         workspaceAccess: "none", // none | ro | rw
-        workspaceRoot: "~/.bot/sandboxes",
+        workspaceRoot: "~/.hanzo/bot/sandboxes",
         docker: {
           image: "bot-sandbox:bookworm-slim",
           workdir: "/workspace",
@@ -526,7 +526,7 @@ docker build -t my-bot-sbx -f Dockerfile.sandbox .
 
 ## 故障排除
 
-- 镜像缺失：使用 [`scripts/sandbox-setup.sh`](https://github.com/bot/bot/blob/main/scripts/sandbox-setup.sh) 构建或设置 `agents.defaults.sandbox.docker.image`。
+- 镜像缺失：使用 [`scripts/sandbox-setup.sh`](https://github.com/hanzoai/bot/blob/main/scripts/sandbox-setup.sh) 构建或设置 `agents.defaults.sandbox.docker.image`。
 - 容器未运行：它会按需为每个会话自动创建。
 - 沙箱中的权限错误：将 `docker.user` 设置为与你挂载的工作区所有权匹配的 UID:GID（或 chown 工作区文件夹）。
 - 找不到自定义工具：Hanzo Bot 使用 `sh -lc`（登录 shell）运行命令，这会 source `/etc/profile` 并可能重置 PATH。设置 `docker.env.PATH` 以在前面添加你的自定义工具路径（例如 `/custom/bin:/usr/local/share/npm-global/bin`），或在你的 Dockerfile 中在 `/etc/profile.d/` 下添加脚本。

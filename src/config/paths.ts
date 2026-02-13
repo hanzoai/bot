@@ -18,9 +18,14 @@ export function resolveIsNixMode(env: NodeJS.ProcessEnv = process.env): boolean 
 export const isNixMode = resolveIsNixMode();
 
 const LEGACY_STATE_DIRNAMES = [".bot", ".hanzo-bot", ".moltbot", ".moldbot"] as const;
-const NEW_STATE_DIRNAME = ".bot";
+const NEW_STATE_DIRNAME = path.join(".hanzo", "bot");
 const CONFIG_FILENAME = "bot.json";
-const LEGACY_CONFIG_FILENAMES = ["bot.json", "hanzo-bot.json", "moltbot.json", "moldbot.json"] as const;
+const LEGACY_CONFIG_FILENAMES = [
+  "bot.json",
+  "hanzo-bot.json",
+  "moltbot.json",
+  "moldbot.json",
+] as const;
 
 function resolveDefaultHomeDir(): string {
   return resolveRequiredHomeDir(process.env, os.homedir);
@@ -54,7 +59,7 @@ export function resolveNewStateDir(homedir: () => string = resolveDefaultHomeDir
 /**
  * State directory for mutable data (sessions, logs, caches).
  * Can be overridden via BOT_STATE_DIR.
- * Default: ~/.bot
+ * Default: ~/.hanzo/bot
  */
 export function resolveStateDir(
   env: NodeJS.ProcessEnv = process.env,
@@ -109,7 +114,7 @@ export const STATE_DIR = resolveStateDir();
 /**
  * Config file path (JSON5).
  * Can be overridden via BOT_CONFIG_PATH.
- * Default: ~/.bot/bot.json (or $BOT_STATE_DIR/bot.json)
+ * Default: ~/.hanzo/bot/bot.json (or $BOT_STATE_DIR/bot.json)
  */
 export function resolveCanonicalConfigPath(
   env: NodeJS.ProcessEnv = process.env,
@@ -253,10 +258,7 @@ export function resolveOAuthPath(
   return path.join(resolveOAuthDir(env, stateDir), OAUTH_FILENAME);
 }
 
-export function resolveGatewayPort(
-  cfg?: BotConfig,
-  env: NodeJS.ProcessEnv = process.env,
-): number {
+export function resolveGatewayPort(cfg?: BotConfig, env: NodeJS.ProcessEnv = process.env): number {
   const envRaw = env.BOT_GATEWAY_PORT?.trim();
   if (envRaw) {
     const parsed = Number.parseInt(envRaw, 10);

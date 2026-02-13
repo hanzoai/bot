@@ -126,7 +126,7 @@ OpenProse 支持多种状态后端：
 
 OpenProse 程序映射到 Hanzo Bot 原语：
 
-| OpenProse 概念       | Hanzo Bot 工具    |
+| OpenProse 概念       | Hanzo Bot 工具   |
 | -------------------- | ---------------- |
 | 生成会话 / Task 工具 | `sessions_spawn` |
 | 文件读/写            | `read` / `write` |
@@ -138,4 +138,4 @@ OpenProse 程序映射到 Hanzo Bot 原语：
 
 将 `.prose` 文件视为代码。运行前请审查。使用 Hanzo Bot 工具白名单和批准门控来控制副作用。
 
-对于确定性的、批准门控的工作流，可与 [Lobster](/tools/lobster) 比较。
+对于确定性的、批准门控的工作流，可与 [Flow](/tools/flow) 比较。

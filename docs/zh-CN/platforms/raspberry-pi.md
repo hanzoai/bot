@@ -125,7 +125,7 @@ curl -fsSL https://hanzo.bot/install.sh | bash
 ### 选项 B：可修改安装（用于调试）
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 npm install
 npm run build

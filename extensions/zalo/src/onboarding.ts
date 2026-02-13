@@ -16,10 +16,7 @@ const channel = "zalo" as const;
 
 type UpdateMode = "polling" | "webhook";
 
-function setZaloDmPolicy(
-  cfg: BotConfig,
-  dmPolicy: "pairing" | "allowlist" | "open" | "disabled",
-) {
+function setZaloDmPolicy(cfg: BotConfig, dmPolicy: "pairing" | "allowlist" | "open" | "disabled") {
   const allowFrom =
     dmPolicy === "open" ? addWildcardAllowFrom(cfg.channels?.zalo?.allowFrom) : undefined;
   return {
@@ -117,7 +114,7 @@ async function noteZaloTokenHelp(prompter: WizardPrompter): Promise<void> {
       "2) Create a bot and get the token",
       "3) Token looks like 12345689:abc-xyz",
       "Tip: you can also set ZALO_BOT_TOKEN in your env.",
-      "Docs: https://docs.bot.ai/channels/zalo",
+      "Docs: https://docs.hanzo.bot/channels/zalo",
     ].join("\n"),
     "Zalo bot token",
   );

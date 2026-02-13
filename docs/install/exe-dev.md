@@ -31,7 +31,7 @@ Shelley, [exe.dev](https://exe.dev)'s agent, can install Hanzo Bot instantly wit
 prompt. The prompt used is as below:
 
 ```
-Set up Hanzo Bot (https://docs.bot.ai/install) on this VM. Use the non-interactive and accept-risk flags for hanzo-bot onboarding. Add the supplied auth or token as needed. Configure nginx to forward from the default port 18789 to the root location on the default enabled site config, making sure to enable Websocket support. Pairing is done by "hanzo-bot devices list" and "hanzo-bot device approve <request id>". Make sure the dashboard shows that Hanzo Bot's health is OK. exe.dev handles forwarding from port 8000 to port 80/443 and HTTPS for us, so the final "reachable" should be <vm-name>.exe.xyz, without port specification.
+Set up Hanzo Bot (https://docs.hanzo.bot/install) on this VM. Use the non-interactive and accept-risk flags for hanzo-bot onboarding. Add the supplied auth or token as needed. Configure nginx to forward from the default port 18789 to the root location on the default enabled site config, making sure to enable Websocket support. Pairing is done by "hanzo-bot devices list" and "hanzo-bot device approve <request id>". Make sure the dashboard shows that Hanzo Bot's health is OK. exe.dev handles forwarding from port 8000 to port 80/443 and HTTPS for us, so the final "reachable" should be <vm-name>.exe.xyz, without port specification.
 ```
 
 ## Manual installation
@@ -50,7 +50,7 @@ Then connect:
 ssh <vm-name>.exe.xyz
 ```
 
-Tip: keep this VM **stateful**. Hanzo Bot stores state under `~/.bot/` and `~/.bot/workspace/`.
+Tip: keep this VM **stateful**. Hanzo Bot stores state under `~/.hanzo/bot/` and `~/.hanzo/bot/workspace/`.
 
 ## 2) Install prerequisites (on the VM)
 

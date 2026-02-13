@@ -7,7 +7,7 @@ import { getChannelPluginCatalogEntry, listChannelPluginCatalogEntries } from ".
 describe("channel plugin catalog", () => {
   it("includes Microsoft Teams", () => {
     const entry = getChannelPluginCatalogEntry("msteams");
-    expect(entry?.install.npmSpec).toBe("@bot/msteams");
+    expect(entry?.install.npmSpec).toBe("@hanzo/bot-msteams");
     expect(entry?.meta.aliases).toContain("teams");
   });
 
@@ -24,7 +24,7 @@ describe("channel plugin catalog", () => {
       JSON.stringify({
         entries: [
           {
-            name: "@bot/demo-channel",
+            name: "@hanzo/bot-demo-channel",
             bot: {
               channel: {
                 id: "demo-channel",
@@ -35,7 +35,7 @@ describe("channel plugin catalog", () => {
                 order: 999,
               },
               install: {
-                npmSpec: "@bot/demo-channel",
+                npmSpec: "@hanzo/bot-demo-channel",
               },
             },
           },

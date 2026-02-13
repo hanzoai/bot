@@ -12,8 +12,8 @@ This guide migrates a Hanzo Bot Gateway from one machine to another **without re
 
 The migration is simple conceptually:
 
-- Copy the **state directory** (`$BOT_STATE_DIR`, default: `~/.bot/`) — this includes config, auth, sessions, and channel state.
-- Copy your **workspace** (`~/.bot/workspace/` by default) — this includes your agent files (memory, prompts, etc.).
+- Copy the **state directory** (`$BOT_STATE_DIR`, default: `~/.hanzo/bot/`) — this includes config, auth, sessions, and channel state.
+- Copy your **workspace** (`~/.hanzo/bot/workspace/` by default) — this includes your agent files (memory, prompts, etc.).
 
 But there are common footguns around **profiles**, **permissions**, and **partial copies**.
 
@@ -23,7 +23,7 @@ But there are common footguns around **profiles**, **permissions**, and **partia
 
 Most installs use the default:
 
-- **State dir:** `~/.bot/`
+- **State dir:** `~/.hanzo/bot/`
 
 But it may be different if you use:
 
@@ -42,7 +42,7 @@ Look for mentions of `BOT_STATE_DIR` / profile in the output. If you run multipl
 
 Common defaults:
 
-- `~/.bot/workspace/` (recommended workspace)
+- `~/.hanzo/bot/workspace/` (recommended workspace)
 - a custom folder you created
 
 Your workspace is where files like `MEMORY.md`, `USER.md`, and `memory/*.md` live.
@@ -93,14 +93,14 @@ On the **new** machine, install the CLI (and Node if needed):
 
 - See: [Install](/install)
 
-At this stage, it’s OK if onboarding creates a fresh `~/.bot/` — you will overwrite it in the next step.
+At this stage, it’s OK if onboarding creates a fresh `~/.hanzo/bot/` — you will overwrite it in the next step.
 
 ### Step 2 — Copy the state dir + workspace to the new machine
 
 Copy **both**:
 
-- `$BOT_STATE_DIR` (default `~/.bot/`)
-- your workspace (default `~/.bot/workspace/`)
+- `$BOT_STATE_DIR` (default `~/.hanzo/bot/`)
+- your workspace (default `~/.hanzo/bot/workspace/`)
 
 Common approaches:
 

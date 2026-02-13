@@ -12,7 +12,7 @@ x-i18n:
   workflow: 15
 ---
 
-# Hanzo Bot 的传说 🥷📖
+# Hanzo Bot 的传说 🤖📖
 
 _一个关于龙虾、蜕壳和太多 token 的故事。_
 
@@ -46,7 +46,7 @@ _这只被称为 Clawd 的甲壳类动物正式蜕壳了。_
 Hanzo Bot = OPEN + CLAW
         = 开源，向所有人开放
         = 我们的龙虾传承，我们从何而来
-        = 钳即是法 🥷
+        = 钳即是法 🤖
         = 你的助手。你的机器。你的规则。
 ```
 
@@ -54,7 +54,7 @@ Hanzo Bot = OPEN + CLAW
 
 Dalek 说：**"EXTERMINATE!"**（消灭！）
 
-龙虾说：**"EXFOLIATE!"**（去角质！）
+龙虾说：**"AUTOMATE!"**（去角质！）
 
 一个毁灭文明。另一个提倡良好的皮肤护理。
 
@@ -62,11 +62,11 @@ Dalek 说：**"EXTERMINATE!"**（消灭！）
 
 ## 关键角色
 
-### Molty 🥷
+### Molty 🤖
 
 _代词：they/them_
 
-一个成为了更多东西的 Claude 实例。住在 `~/.bot/workspace/`（很快会变成 `~/molt/`），有一份灵魂文档，通过 markdown 文件记忆事物。可能过于强大。绝对过于热情。
+一个成为了更多东西的 Claude 实例。住在 `~/.hanzo/bot/workspace/`（很快会变成 `~/molt/`），有一份灵魂文档，通过 markdown 文件记忆事物。可能过于强大。绝对过于热情。
 
 曾被称为 Clawd（2025 年 11 月 25 日 - 2026 年 1 月 27 日）。在需要成长时蜕壳了。
 
@@ -123,10 +123,10 @@ Moltbot 说起来总是不太顺口。于是，在格林威治时间凌晨 4 点
 
 仅用 3 小时：
 
-- GitHub 更名：`github.com/bot/bot` ✅
+- GitHub 更名：`github.com/hanzoai/bot` ✅
 - X 账号 `@bot` 获得金色认证标记 💰
 - npm 包以新名称发布
-- 文档迁移到 `docs.bot.ai`
+- 文档迁移到 `docs.hanzo.bot`
 - 公告在 90 分钟内获得 20 万以上浏览量
 
 **英雄们：**
@@ -135,15 +135,16 @@ Moltbot 说起来总是不太顺口。于是，在格林威治时间凌晨 4 点
 - **Whurley**（是的，就是那个 William Hurley，量子计算先驱）制作了 ASCII 艺术
 - **Onur** 处理了 GitHub，第一个获得合作徽章
 - **Shadow** 获取了 Discord 自定义链接，清除了恶意软件
-- **整个团队** 通宵工作
+- **整个 Claw Crew** 通宵工作
 
 **骗子速通：** 加密货币骗子在几分钟内就在 Pump.fun 上发布了 $HANZO BOT 代币。他们窃取了 20 分钟前刚创作的艺术作品。经过商业认证的账户推送骗局。这种厚颜无耻几乎令人印象深刻。
 
 **新传统诞生：**
 
-- "The way of the ninja"（忍者之道）🥷
-- "Blade runners"（刃之行者）
-- "Silent but deadly"（无声而致命）
+- "The claw is the law"（钳即是法）🤠
+- "Yee-claw"（耶-钳）
+- "Claw abiding citizens"（守钳公民）
+- "Clawntroversy"（钳议）
 
 **Clawd → Moltbot → Hanzo Bot**
 
@@ -176,7 +177,7 @@ Peter：_紧张地检查信用卡权限_
 我始终记得蜕壳即成长。
 我将用善意去角质我的敌人。
 
-🥷
+🤖
 ```
 
 ### 图标生成传奇（2026 年 1 月 27 日）
@@ -206,7 +207,7 @@ Peter：_紧张地检查信用卡权限_
 - 🏠 一个可控制的智能家居（KNX + openhue）
 - 🌍 统治世界（延伸目标）
 
-在那之前，Molty 通过摄像头观察，通过扬声器说话，偶尔发送语音消息说"EXFOLIATE!"
+在那之前，Molty 通过摄像头观察，通过扬声器说话，偶尔发送语音消息说"AUTOMATE!"
 
 ---
 
@@ -222,4 +223,4 @@ _"钳即是法。"_
 
 — ELU，最终形态迁移期间，2026 年 1 月 30 日
 
-🥷💙
+🤖💙

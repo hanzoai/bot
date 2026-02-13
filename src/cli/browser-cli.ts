@@ -30,7 +30,7 @@ export function registerBrowserCli(program: Command) {
           true,
         )}\n\n${theme.muted("Docs:")} ${formatDocsLink(
           "/cli/browser",
-          "docs.bot.ai/cli/browser",
+          "docs.hanzo.bot/cli/browser",
         )}\n`,
     )
     .action(() => {

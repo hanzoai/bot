@@ -3,38 +3,38 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { BotPluginApi, BotPluginToolContext } from "../../../src/plugins/types.js";
-import { createLobsterTool } from "./lobster-tool.js";
+import { createFlowTool } from "./flow-tool.js";
 
-async function writeFakeLobsterScript(scriptBody: string, prefix = "bot-lobster-plugin-") {
+async function writeFakeFlowScript(scriptBody: string, prefix = "bot-flow-plugin-") {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
   const isWindows = process.platform === "win32";
 
   if (isWindows) {
-    const scriptPath = path.join(dir, "lobster.js");
-    const cmdPath = path.join(dir, "lobster.cmd");
+    const scriptPath = path.join(dir, "flow.js");
+    const cmdPath = path.join(dir, "flow.cmd");
     await fs.writeFile(scriptPath, scriptBody, { encoding: "utf8" });
     const cmd = `@echo off\r\n"${process.execPath}" "${scriptPath}" %*\r\n`;
     await fs.writeFile(cmdPath, cmd, { encoding: "utf8" });
     return { dir, binPath: cmdPath };
   }
 
-  const binPath = path.join(dir, "lobster");
+  const binPath = path.join(dir, "flow");
   const file = `#!/usr/bin/env node\n${scriptBody}\n`;
   await fs.writeFile(binPath, file, { encoding: "utf8", mode: 0o755 });
   return { dir, binPath };
 }
 
-async function writeFakeLobster(params: { payload: unknown }) {
+async function writeFakeFlow(params: { payload: unknown }) {
   const scriptBody =
     `const payload = ${JSON.stringify(params.payload)};\n` +
     `process.stdout.write(JSON.stringify(payload));\n`;
-  return await writeFakeLobsterScript(scriptBody);
+  return await writeFakeFlowScript(scriptBody);
 }
 
 function fakeApi(overrides: Partial<BotPluginApi> = {}): BotPluginApi {
   return {
-    id: "lobster",
-    name: "lobster",
+    id: "flow",
+    name: "flow",
     source: "test",
     config: {},
     pluginConfig: {},
@@ -71,9 +71,9 @@ function fakeCtx(overrides: Partial<BotPluginToolContext> = {}): BotPluginToolCo
   };
 }
 
-describe("lobster plugin tool", () => {
-  it("runs lobster and returns parsed envelope in details", async () => {
-    const fake = await writeFakeLobster({
+describe("flow plugin tool", () => {
+  it("runs flow and returns parsed envelope in details", async () => {
+    const fake = await writeFakeFlow({
       payload: { ok: true, status: "ok", output: [{ hello: "world" }], requiresApproval: null },
     });
 
@@ -81,7 +81,7 @@ describe("lobster plugin tool", () => {
     process.env.PATH = `${fake.dir}${path.delimiter}${originalPath ?? ""}`;
 
     try {
-      const tool = createLobsterTool(fakeApi());
+      const tool = createFlowTool(fakeApi());
       const res = await tool.execute("call1", {
         action: "run",
         pipeline: "noop",
@@ -96,18 +96,18 @@ describe("lobster plugin tool", () => {
 
   it("tolerates noisy stdout before the JSON envelope", async () => {
     const payload = { ok: true, status: "ok", output: [], requiresApproval: null };
-    const { dir } = await writeFakeLobsterScript(
+    const { dir } = await writeFakeFlowScript(
       `const payload = ${JSON.stringify(payload)};\n` +
         `console.log("noise before json");\n` +
         `process.stdout.write(JSON.stringify(payload));\n`,
-      "bot-lobster-plugin-noisy-",
+      "bot-flow-plugin-noisy-",
     );
 
     const originalPath = process.env.PATH;
     process.env.PATH = `${dir}${path.delimiter}${originalPath ?? ""}`;
 
     try {
-      const tool = createLobsterTool(fakeApi());
+      const tool = createFlowTool(fakeApi());
       const res = await tool.execute("call-noisy", {
         action: "run",
         pipeline: "noop",
@@ -120,8 +120,8 @@ describe("lobster plugin tool", () => {
     }
   });
 
-  it("requires absolute lobsterPath when provided (even though it is ignored)", async () => {
-    const fake = await writeFakeLobster({
+  it("requires absolute flowPath when provided (even though it is ignored)", async () => {
+    const fake = await writeFakeFlow({
       payload: { ok: true, status: "ok", output: [{ hello: "world" }], requiresApproval: null },
     });
 
@@ -129,12 +129,12 @@ describe("lobster plugin tool", () => {
     process.env.PATH = `${fake.dir}${path.delimiter}${originalPath ?? ""}`;
 
     try {
-      const tool = createLobsterTool(fakeApi());
+      const tool = createFlowTool(fakeApi());
       await expect(
         tool.execute("call2", {
           action: "run",
           pipeline: "noop",
-          lobsterPath: "./lobster",
+          flowPath: "./flow",
         }),
       ).rejects.toThrow(/absolute path/);
     } finally {
@@ -142,8 +142,8 @@ describe("lobster plugin tool", () => {
     }
   });
 
-  it("rejects lobsterPath (deprecated) when invalid", async () => {
-    const fake = await writeFakeLobster({
+  it("rejects flowPath (deprecated) when invalid", async () => {
+    const fake = await writeFakeFlow({
       payload: { ok: true, status: "ok", output: [{ hello: "world" }], requiresApproval: null },
     });
 
@@ -151,21 +151,21 @@ describe("lobster plugin tool", () => {
     process.env.PATH = `${fake.dir}${path.delimiter}${originalPath ?? ""}`;
 
     try {
-      const tool = createLobsterTool(fakeApi());
+      const tool = createFlowTool(fakeApi());
       await expect(
         tool.execute("call2b", {
           action: "run",
           pipeline: "noop",
-          lobsterPath: "/bin/bash",
+          flowPath: "/bin/bash",
         }),
-      ).rejects.toThrow(/lobster executable/);
+      ).rejects.toThrow(/flow executable/);
     } finally {
       process.env.PATH = originalPath;
     }
   });
 
   it("rejects absolute cwd", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createFlowTool(fakeApi());
     await expect(
       tool.execute("call2c", {
         action: "run",
@@ -176,7 +176,7 @@ describe("lobster plugin tool", () => {
   });
 
   it("rejects cwd that escapes the gateway working directory", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createFlowTool(fakeApi());
     await expect(
       tool.execute("call2d", {
         action: "run",
@@ -186,18 +186,18 @@ describe("lobster plugin tool", () => {
     ).rejects.toThrow(/must stay within/);
   });
 
-  it("uses pluginConfig.lobsterPath when provided", async () => {
-    const fake = await writeFakeLobster({
+  it("uses pluginConfig.flowPath when provided", async () => {
+    const fake = await writeFakeFlow({
       payload: { ok: true, status: "ok", output: [{ hello: "world" }], requiresApproval: null },
     });
 
-    // Ensure `lobster` is NOT discoverable via PATH, while still allowing our
-    // fake lobster (a Node script with `#!/usr/bin/env node`) to run.
+    // Ensure `flow` is NOT discoverable via PATH, while still allowing our
+    // fake flow (a Node script with `#!/usr/bin/env node`) to run.
     const originalPath = process.env.PATH;
     process.env.PATH = path.dirname(process.execPath);
 
     try {
-      const tool = createLobsterTool(fakeApi({ pluginConfig: { lobsterPath: fake.binPath } }));
+      const tool = createFlowTool(fakeApi({ pluginConfig: { flowPath: fake.binPath } }));
       const res = await tool.execute("call-plugin-config", {
         action: "run",
         pipeline: "noop",
@@ -210,17 +210,17 @@ describe("lobster plugin tool", () => {
     }
   });
 
-  it("rejects invalid JSON from lobster", async () => {
-    const { dir } = await writeFakeLobsterScript(
+  it("rejects invalid JSON from flow", async () => {
+    const { dir } = await writeFakeFlowScript(
       `process.stdout.write("nope");\n`,
-      "bot-lobster-plugin-bad-",
+      "bot-flow-plugin-bad-",
     );
 
     const originalPath = process.env.PATH;
     process.env.PATH = `${dir}${path.delimiter}${originalPath ?? ""}`;
 
     try {
-      const tool = createLobsterTool(fakeApi());
+      const tool = createFlowTool(fakeApi());
       await expect(
         tool.execute("call3", {
           action: "run",
@@ -238,10 +238,10 @@ describe("lobster plugin tool", () => {
       if (ctx.sandboxed) {
         return null;
       }
-      return createLobsterTool(api);
+      return createFlowTool(api);
     };
 
     expect(factoryTool(fakeCtx({ sandboxed: true }))).toBeNull();
-    expect(factoryTool(fakeCtx({ sandboxed: false }))?.name).toBe("lobster");
+    expect(factoryTool(fakeCtx({ sandboxed: false }))?.name).toBe("flow");
   });
 });

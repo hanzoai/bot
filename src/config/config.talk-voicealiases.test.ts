@@ -7,7 +7,7 @@ describe("talk.voiceAliases", () => {
     const res = validateConfigObject({
       talk: {
         voiceAliases: {
-          Hanzo: "EXAVITQu4vr4xnSDxMaL",
+          Bot: "EXAVITQu4vr4xnSDxMaL",
           Roger: "CwhRBWXzGAHq8TQ4Fs17",
         },
       },
@@ -21,7 +21,7 @@ describe("talk.voiceAliases", () => {
     const res = validateConfigObject({
       talk: {
         voiceAliases: {
-          Hanzo: 123,
+          Bot: 123,
         },
       },
     });

@@ -77,7 +77,7 @@ ditto -c -k --keepParent apps/macos/.build/release/Hanzo Bot.app.dSYM dist/Hanzo
 SPARKLE_PRIVATE_KEY_FILE=/path/to/ed25519-private-key scripts/make_appcast.sh dist/Hanzo Bot-2026.1.27-beta.1.zip https://raw.githubusercontent.com/bot/bot/main/appcast.xml
 ```
 
-从 `CHANGELOG.md`（通过 [`scripts/changelog-to-html.sh`](https://github.com/bot/bot/blob/main/scripts/changelog-to-html.sh)）生成 HTML 发布说明，并将其嵌入 appcast 条目。
+从 `CHANGELOG.md`（通过 [`scripts/changelog-to-html.sh`](https://github.com/hanzoai/bot/blob/main/scripts/changelog-to-html.sh)）生成 HTML 发布说明，并将其嵌入 appcast 条目。
 发布时，将更新后的 `appcast.xml` 与发布资源（zip + dSYM）一起提交。
 
 ## 发布与验证
