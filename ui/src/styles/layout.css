@@ -114,29 +114,65 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  overflow: hidden;
 }
 
 .brand-logo {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
+  color: var(--text-strong);
+  animation: brand-h-enter 0.6s 0.2s var(--ease-out) both;
 }
 
+.brand-logo svg,
 .brand-logo img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  display: block;
+}
+
+.brand-h path {
+  animation: brand-path-enter 0.4s var(--ease-out) both;
+}
+
+.brand-h path:nth-child(1) {
+  animation-delay: 0.3s;
+}
+.brand-h path:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.brand-h path:nth-child(3) {
+  animation-delay: 0.5s;
+}
+.brand-h path:nth-child(4) {
+  animation-delay: 0.35s;
+}
+.brand-h path:nth-child(5) {
+  animation-delay: 0.45s;
+}
+.brand-h path:nth-child(6) {
+  animation-delay: 0.55s;
+}
+.brand-h path:nth-child(7) {
+  animation-delay: 0.6s;
 }
 
 .brand-text {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  animation: brand-text-slide 0.6s 2.5s var(--ease-out) both;
+  white-space: nowrap;
+}
+
+.brand:hover .brand-text {
+  animation: brand-text-show 0.3s var(--ease-out) both;
 }
 
 .brand-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.1;
   color: var(--text-strong);
@@ -149,6 +185,55 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   line-height: 1;
+}
+
+@keyframes brand-h-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-180deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes brand-path-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes brand-text-slide {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    max-width: 200px;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-12px);
+    max-width: 0;
+    overflow: hidden;
+  }
+}
+
+@keyframes brand-text-show {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+    max-width: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    max-width: 200px;
+  }
 }
 
 /* Topbar status */

@@ -18,10 +18,7 @@ import {
   ensureProfileCleanExit,
   isProfileDecorated,
 } from "./chrome.profile-decoration.js";
-import {
-  DEFAULT_BOT_BROWSER_COLOR,
-  DEFAULT_BOT_BROWSER_PROFILE_NAME,
-} from "./constants.js";
+import { DEFAULT_BOT_BROWSER_COLOR, DEFAULT_BOT_BROWSER_PROFILE_NAME } from "./constants.js";
 
 const log = createSubsystemLogger("browser").child("chrome");
 
@@ -264,7 +261,7 @@ export async function launchBotChrome(
         name: profile.name,
         color: profile.color,
       });
-      log.info(`🦞 hanzo-bot browser profile decorated (${profile.color})`);
+      log.info(`🥷 hanzo-bot browser profile decorated (${profile.color})`);
     } catch (err) {
       log.warn(`hanzo-bot browser profile decoration failed: ${String(err)}`);
     }
@@ -299,7 +296,7 @@ export async function launchBotChrome(
 
   const pid = proc.pid ?? -1;
   log.info(
-    `🦞 hanzo-bot browser started (${exe.kind}) profile "${profile.name}" on 127.0.0.1:${profile.cdpPort} (pid ${pid})`,
+    `🥷 hanzo-bot browser started (${exe.kind}) profile "${profile.name}" on 127.0.0.1:${profile.cdpPort} (pid ${pid})`,
   );
 
   return {
