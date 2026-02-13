@@ -29,7 +29,7 @@ x-i18n:
 - 创建 Compute Engine VM
 - 安装 Docker（隔离的应用运行时）
 - 在 Docker 中启动 Hanzo Bot Gateway 网关
-- 在主机上持久化 `~/.bot` + `~/.hanzo/bot/workspace`（重启/重建后仍保留）
+- 在主机上持久化 `~/.hanzo/bot` + `~/.hanzo/bot/workspace`（重启/重建后仍保留）
 - 通过 SSH 隧道从你的笔记本电脑访问控制 UI
 
 Gateway 网关可以通过以下方式访问：
