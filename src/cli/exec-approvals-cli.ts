@@ -228,7 +228,7 @@ export function registerExecApprovalsCli(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/approvals", "docs.bot.ai/cli/approvals")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/approvals", "docs.hanzo.bot/cli/approvals")}\n`,
     );
 
   const getCmd = approvals
@@ -332,7 +332,7 @@ export function registerExecApprovalsCli(program: Command) {
         )}\n${formatExample(
           'hanzo-bot approvals allowlist remove "~/Projects/**/bin/rg"',
           "Remove an allowlist pattern.",
-        )}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/approvals", "docs.bot.ai/cli/approvals")}\n`,
+        )}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/approvals", "docs.hanzo.bot/cli/approvals")}\n`,
     );
 
   const allowlistAdd = allowlist

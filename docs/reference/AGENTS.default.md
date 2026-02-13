@@ -10,33 +10,33 @@ read_when:
 
 ## First run (recommended)
 
-Hanzo Bot uses a dedicated workspace directory for the agent. Default: `~/.bot/workspace` (configurable via `agents.defaults.workspace`).
+Hanzo Bot uses a dedicated workspace directory for the agent. Default: `~/.hanzo/bot/workspace` (configurable via `agents.defaults.workspace`).
 
 1. Create the workspace (if it doesn’t already exist):
 
 ```bash
-mkdir -p ~/.bot/workspace
+mkdir -p ~/.hanzo/bot/workspace
 ```
 
 2. Copy the default workspace templates into the workspace:
 
 ```bash
-cp docs/reference/templates/AGENTS.md ~/.bot/workspace/AGENTS.md
-cp docs/reference/templates/SOUL.md ~/.bot/workspace/SOUL.md
-cp docs/reference/templates/TOOLS.md ~/.bot/workspace/TOOLS.md
+cp docs/reference/templates/AGENTS.md ~/.hanzo/bot/workspace/AGENTS.md
+cp docs/reference/templates/SOUL.md ~/.hanzo/bot/workspace/SOUL.md
+cp docs/reference/templates/TOOLS.md ~/.hanzo/bot/workspace/TOOLS.md
 ```
 
 3. Optional: if you want the personal assistant skill roster, replace AGENTS.md with this file:
 
 ```bash
-cp docs/reference/AGENTS.default.md ~/.bot/workspace/AGENTS.md
+cp docs/reference/AGENTS.default.md ~/.hanzo/bot/workspace/AGENTS.md
 ```
 
 4. Optional: choose a different workspace by setting `agents.defaults.workspace` (supports `~`):
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
 }
 ```
 
@@ -77,13 +77,13 @@ cp docs/reference/AGENTS.default.md ~/.bot/workspace/AGENTS.md
 
 ## Backup tip (recommended)
 
-If you treat this workspace as Hanzo Bot's "memory", make it a git repo (ideally private) so `AGENTS.md` and your memory files are backed up.
+If you treat this workspace as Bot's memory, make it a git repo (ideally private) so `AGENTS.md` and your memory files are backed up.
 
 ```bash
-cd ~/.bot/workspace
+cd ~/.hanzo/bot/workspace
 git init
 git add AGENTS.md
-git commit -m "Add Hanzo Bot workspace"
+git commit -m "Add Bot workspace"
 # Optional: add a private remote + push
 ```
 

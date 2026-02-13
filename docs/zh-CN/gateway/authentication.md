@@ -31,10 +31,10 @@ export ANTHROPIC_API_KEY="..."
 hanzo-bot models status
 ```
 
-3. 如果 Gateway 网关在 systemd/launchd 下运行，最好将密钥放在 `~/.bot/.env` 中以便守护进程可以读取：
+3. 如果 Gateway 网关在 systemd/launchd 下运行，最好将密钥放在 `~/.hanzo/bot/.env` 中以便守护进程可以读取：
 
 ```bash
-cat >> ~/.bot/.env <<'EOF'
+cat >> ~/.hanzo/bot/.env <<'EOF'
 ANTHROPIC_API_KEY=...
 EOF
 ```
@@ -48,7 +48,7 @@ hanzo-bot doctor
 
 如果你不想自己管理环境变量，新手引导向导可以为守护进程使用存储 API 密钥：`hanzo-bot onboard`。
 
-参阅[帮助](/help)了解环境变量继承的详情（`env.shellEnv`、`~/.bot/.env`、systemd/launchd）。
+参阅[帮助](/help)了解环境变量继承的详情（`env.shellEnv`、`~/.hanzo/bot/.env`、systemd/launchd）。
 
 ## Anthropic：setup-token（订阅认证）
 

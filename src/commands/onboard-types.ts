@@ -8,6 +8,7 @@ export type AuthChoice =
   | "setup-token"
   | "claude-cli"
   | "token"
+  | "hanzo-cloud"
   | "chutes"
   | "openai-codex"
   | "openai-api-key"
@@ -41,6 +42,7 @@ export type AuthChoice =
   | "custom-api-key"
   | "skip";
 export type AuthChoiceGroupId =
+  | "hanzo"
   | "openai"
   | "anthropic"
   | "google"
