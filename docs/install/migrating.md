@@ -27,7 +27,7 @@ Most installs use the default:
 
 But it may be different if you use:
 
-- `--profile <name>` (often becomes `~/.bot-<profile>/`)
+- `--profile <name>` (often becomes `~/.hanzo/bot-<profile>/`)
 - `BOT_STATE_DIR=/some/path`
 
 If you’re not sure, run on the **old** machine:
@@ -85,7 +85,7 @@ tar -czf bot-state.tgz .bot
 tar -czf bot-workspace.tgz .bot/workspace
 ```
 
-If you have multiple profiles/state dirs (e.g. `~/.bot-main`, `~/.bot-work`), archive each.
+If you have multiple profiles/state dirs (e.g. `~/.hanzo/bot-main`, `~/.hanzo/bot-work`), archive each.
 
 ### Step 1 — Install Hanzo Bot on the new machine
 
