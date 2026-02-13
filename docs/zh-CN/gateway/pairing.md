@@ -82,8 +82,8 @@ hanzo-bot nodes rename --node <id|name|ip> --name "Living Room iPad"
 
 配对状态存储在 Gateway 网关状态目录下（默认 `~/.bot`）：
 
-- `~/.bot/nodes/paired.json`
-- `~/.bot/nodes/pending.json`
+- `~/.hanzo/bot/nodes/paired.json`
+- `~/.hanzo/bot/nodes/pending.json`
 
 如果你覆盖了 `BOT_STATE_DIR`，`nodes/` 文件夹会随之移动。
 
