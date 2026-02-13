@@ -10,7 +10,7 @@ Report vulnerabilities directly to the repository where the issue lives:
 - **macOS desktop app** — [bot/bot](https://github.com/bot/bot) (apps/macos)
 - **iOS app** — [bot/bot](https://github.com/bot/bot) (apps/ios)
 - **Android app** — [bot/bot](https://github.com/bot/bot) (apps/android)
-- **ClawHub** — [bot/clawhub](https://github.com/bot/clawhub)
+- **Hanzo Skills** — [bot/hanzo-skills](https://github.com/bot/hanzo-skills)
 - **Trust and threat model** — [bot/trust](https://github.com/bot/trust)
 
 For issues that don't fit a specific repo, or if you're unsure, email **security@hanzo.bot** and we'll route it.
