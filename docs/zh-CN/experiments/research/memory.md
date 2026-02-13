@@ -3,7 +3,7 @@ read_when:
   - 设计超越每日 Markdown 日志的工作区记忆（~/.bot/workspace）
   - Deciding: standalone CLI vs deep Hanzo Bot integration
   - 添加离线回忆 + 反思（retain/recall/reflect）
-summary: 研究笔记：Clawd 工作区的离线记忆系统（Markdown 作为数据源 + 派生索引）
+summary: 研究笔记：Hanzo Bot 工作区的离线记忆系统（Markdown 作为数据源 + 派生索引）
 title: 工作区记忆研究
 x-i18n:
   generated_at: "2026-02-03T10:06:14Z"
@@ -16,7 +16,7 @@ x-i18n:
 
 # 工作区记忆 v2（离线）：研究笔记
 
-目标：Clawd 风格的工作区（`agents.defaults.workspace`，默认 `~/.bot/workspace`），其中"记忆"以每天一个 Markdown 文件（`memory/YYYY-MM-DD.md`）加上一小组稳定文件（例如 `memory.md`、`SOUL.md`）的形式存储。
+目标：Hanzo Bot 风格的工作区（`agents.defaults.workspace`，默认 `~/.bot/workspace`），其中"记忆"以每天一个 Markdown 文件（`memory/YYYY-MM-DD.md`）加上一小组稳定文件（例如 `memory.md`、`SOUL.md`）的形式存储。
 
 本文档提出一种**离线优先**的记忆架构，保持 Markdown 作为规范的、可审查的数据源，但通过派生索引添加**结构化回忆**（搜索、实体摘要、置信度更新）。
 
@@ -89,7 +89,7 @@ x-i18n:
 
 - **每日日志保持为每日日志**。无需将其转换为 JSON。
 - `bank/` 文件是**经过整理的**，由反思任务生成，仍可手动编辑。
-- `memory.md` 保持"小型 + 类似核心"：你希望 Clawd 每次会话都能看到的内容。
+- `memory.md` 保持"小型 + 类似核心"：你希望 Hanzo Bot 每次会话都能看到的内容。
 
 ### 派生存储（机器回忆）
 
