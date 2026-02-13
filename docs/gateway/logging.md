@@ -19,7 +19,7 @@ Hanzo Bot has two log “surfaces”:
 
 - Default rolling log file is under `/tmp/bot/` (one file per day): `bot-YYYY-MM-DD.log`
   - Date uses the gateway host's local timezone.
-- The log file path and level can be configured via `~/.bot/bot.json`:
+- The log file path and level can be configured via `~/.hanzo/bot/bot.json`:
   - `logging.file`
   - `logging.level`
 

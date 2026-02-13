@@ -29,7 +29,10 @@ const SANDBOX_EXAMPLES = {
   recreate: [
     ["hanzo-bot sandbox recreate --all", "Recreate all containers."],
     ["hanzo-bot sandbox recreate --session main", "Recreate a specific session."],
-    ["hanzo-bot sandbox recreate --agent mybot", "Recreate a specific agent (includes sub-agents)."],
+    [
+      "hanzo-bot sandbox recreate --agent mybot",
+      "Recreate a specific agent (includes sub-agents).",
+    ],
     ["hanzo-bot sandbox recreate --browser --all", "Recreate only browser containers."],
     ["hanzo-bot sandbox recreate --all --force", "Skip confirmation."],
   ],
@@ -67,7 +70,7 @@ export function registerSandboxCli(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/sandbox", "docs.bot.ai/cli/sandbox")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/sandbox", "docs.hanzo.bot/cli/sandbox")}\n`,
     )
     .action(() => {
       sandbox.help({ error: true });
