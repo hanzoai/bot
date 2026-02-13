@@ -79,7 +79,7 @@ We are currently prioritizing:
 
 - **Stability**: Fixing edge cases in channel connections (WhatsApp/Telegram).
 - **UX**: Improving the onboarding wizard and error messages.
-- **Skills**: For skill contributions, head to [ClawHub](https://clawhub.ai/) — the community hub for Hanzo Bot skills.
+- **Skills**: For skill contributions, head to [Hanzo Skills](https://skills.hanzo.bot/) — the community hub for Hanzo Bot skills.
 - **Performance**: Optimizing token usage and compaction logic.
 
 Check the [GitHub Issues](https://github.com/bot/bot/issues) for "good first issue" labels!
@@ -92,7 +92,7 @@ We take security reports seriously. Report vulnerabilities directly to the repos
 - **macOS desktop app** — [bot/bot](https://github.com/bot/bot) (apps/macos)
 - **iOS app** — [bot/bot](https://github.com/bot/bot) (apps/ios)
 - **Android app** — [bot/bot](https://github.com/bot/bot) (apps/android)
-- **ClawHub** — [bot/clawhub](https://github.com/bot/clawhub)
+- **Hanzo Skills** — [bot/hanzo-skills](https://github.com/bot/hanzo-skills)
 - **Trust and threat model** — [bot/trust](https://github.com/bot/trust)
 
 For issues that don't fit a specific repo, or if you're unsure, email **security@hanzo.bot** and we'll route it.
