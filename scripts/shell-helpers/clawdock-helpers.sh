@@ -385,7 +385,7 @@ bot-help() {
   echo -e "  $(_cmd bot-health)      ${_CLR_DIM}Run health check${_CLR_RESET}"
   echo -e "  $(_cmd bot-token)       ${_CLR_DIM}Show gateway auth token${_CLR_RESET}"
   echo -e "  $(_cmd bot-cd)          ${_CLR_DIM}Jump to hanzo-bot project directory${_CLR_RESET}"
-  echo -e "  $(_cmd bot-config)      ${_CLR_DIM}Open config directory (~/.bot)${_CLR_RESET}"
+  echo -e "  $(_cmd bot-config)      ${_CLR_DIM}Open config directory (~/.hanzo/bot)${_CLR_RESET}"
   echo -e "  $(_cmd bot-workspace)   ${_CLR_DIM}Open workspace directory${_CLR_RESET}"
   echo ""
 

@@ -3043,8 +3043,8 @@ Gateway 网关监视 `~/.hanzo/bot/bot.json`（或 `BOT_CONFIG_PATH`）并自动
 
 便利标志（CLI）：
 
-- `hanzo-bot --dev …` → 使用 `~/.bot-dev` + 端口从基础 `19001` 偏移
-- `hanzo-bot --profile <name> …` → 使用 `~/.bot-<name>`（端口通过配置/环境变量/标志）
+- `hanzo-bot --dev …` → 使用 `~/.hanzo/bot-dev` + 端口从基础 `19001` 偏移
+- `hanzo-bot --profile <name> …` → 使用 `~/.hanzo/bot-<name>`（端口通过配置/环境变量/标志）
 
 参见 [Gateway 网关运维手册](/gateway) 了解派生的端口映射（gateway/browser/canvas）。
 参见[多 Gateway 网关](/gateway/multiple-gateways) 了解浏览器/CDP 端口隔离细节。
@@ -3053,7 +3053,7 @@ Gateway 网关监视 `~/.hanzo/bot/bot.json`（或 `BOT_CONFIG_PATH`）并自动
 
 ```bash
 BOT_CONFIG_PATH=~/.hanzo/bot/a.json \
-BOT_STATE_DIR=~/.bot-a \
+BOT_STATE_DIR=~/.hanzo/bot-a \
 hanzo-bot gateway --port 19001
 ```
 

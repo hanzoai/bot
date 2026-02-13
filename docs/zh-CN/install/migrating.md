@@ -34,7 +34,7 @@ x-i18n:
 
 但如果你使用以下方式，可能会不同：
 
-- `--profile <name>`（通常变成 `~/.bot-<profile>/`）
+- `--profile <name>`（通常变成 `~/.hanzo/bot-<profile>/`）
 - `BOT_STATE_DIR=/some/path`
 
 如果你不确定，在**旧**机器上运行：
@@ -92,7 +92,7 @@ tar -czf bot-state.tgz .bot
 tar -czf bot-workspace.tgz .bot/workspace
 ```
 
-如果你有多个配置文件/状态目录（例如 `~/.bot-main`、`~/.bot-work`），分别归档每个。
+如果你有多个配置文件/状态目录（例如 `~/.hanzo/bot-main`、`~/.hanzo/bot-work`），分别归档每个。
 
 ### 步骤 1 — 在新机器上安装 Hanzo Bot
 

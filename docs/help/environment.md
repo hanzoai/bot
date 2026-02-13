@@ -79,7 +79,7 @@ See [Configuration: Env var substitution](/gateway/configuration#env-var-substit
 | Variable          | Purpose                                                                                                                                                                            |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `BOT_HOME`        | Override the home directory used for all internal path resolution (`~/.hanzo/bot/`, agent dirs, sessions, credentials). Useful when running Hanzo Bot as a dedicated service user. |
-| `BOT_STATE_DIR`   | Override the state directory (default `~/.bot`).                                                                                                                                   |
+| `BOT_STATE_DIR`   | Override the state directory (default `~/.hanzo/bot`).                                                                                                                             |
 | `BOT_CONFIG_PATH` | Override the config file path (default `~/.hanzo/bot/bot.json`).                                                                                                                   |
 
 ### `BOT_HOME`

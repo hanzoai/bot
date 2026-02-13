@@ -91,7 +91,7 @@ Example:
 
 ## Session storage
 
-Session stores live under the state directory (default `~/.bot`):
+Session stores live under the state directory (default `~/.hanzo/bot`):
 
 - `~/.hanzo/bot/agents/<agentId>/sessions/sessions.json`
 - JSONL transcripts live alongside the store

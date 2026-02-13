@@ -58,7 +58,7 @@ scripts/pi/run-tests.sh --live
 
 ## 完全重置
 
-状态存储在 Hanzo Bot 状态目录下。默认为 `~/.bot`。如果设置了 `BOT_STATE_DIR`，则使用该目录。
+状态存储在 Hanzo Bot 状态目录下。默认为 `~/.hanzo/bot`。如果设置了 `BOT_STATE_DIR`，则使用该目录。
 
 要重置所有内容：
 

@@ -75,7 +75,7 @@ hanzo-bot onboard --install-daemon
 
 ```bash
 BOT_CONFIG_PATH=~/.hanzo/bot/a.json \
-BOT_STATE_DIR=~/.bot-a \
+BOT_STATE_DIR=~/.hanzo/bot-a \
 hanzo-bot gateway --port 19001
 ```
 

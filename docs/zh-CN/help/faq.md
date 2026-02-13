@@ -406,7 +406,7 @@ hanzo-bot doctor
 可以。复制**状态目录**和**工作区**，然后运行一次 Doctor。只要你同时复制**两个**位置，就能保持你的机器人“完全一样”（记忆、会话历史、认证和渠道状态）：
 
 1. 在新机器上安装 Hanzo Bot。
-2. 从旧机器复制 `$BOT_STATE_DIR`（默认：`~/.bot`）。
+2. 从旧机器复制 `$BOT_STATE_DIR`（默认：`~/.hanzo/bot`）。
 3. 复制你的工作区（默认：`~/.hanzo/bot/workspace`）。
 4. 运行 `hanzo-bot doctor` 并重启 Gateway 网关服务。
 
@@ -790,7 +790,7 @@ brew install <formula>
 
 可以。安装另一种方式，然后运行 Doctor 使 Gateway 网关服务指向新的入口点。
 这**不会删除你的数据**——它只改变 Hanzo Bot 代码的安装位置。你的状态
-（`~/.bot`）和工作区（`~/.hanzo/bot/workspace`）保持不变。
+（`~/.hanzo/bot`）和工作区（`~/.hanzo/bot/workspace`）保持不变。
 
 从 npm → git：
 
@@ -1139,7 +1139,7 @@ Hanzo Bot 还会运行**静默的预压缩记忆刷新**，以提醒模型在自
 
 不是——**Hanzo Bot 的状态是本地的**，但**外部服务仍然会看到你发送给它们的内容**。
 
-- **默认本地：** 会话、记忆文件、配置和工作区位于 Gateway 网关主机上（`~/.bot` + 你的工作区目录）。
+- **默认本地：** 会话、记忆文件、配置和工作区位于 Gateway 网关主机上（`~/.hanzo/bot` + 你的工作区目录）。
 - **必然远程：** 你发送给模型提供商（Anthropic/OpenAI/等）的消息会发送到它们的 API，聊天平台（WhatsApp/Telegram/Slack/等）在它们的服务器上存储消息数据。
 - **你控制范围：** 使用本地模型可以将提示保留在你的机器上，但渠道流量仍然通过渠道的服务器。
 
@@ -1147,7 +1147,7 @@ Hanzo Bot 还会运行**静默的预压缩记忆刷新**，以提醒模型在自
 
 ### Hanzo Bot 将数据存储在哪里
 
-所有内容位于 `$BOT_STATE_DIR`（默认：`~/.bot`）下：
+所有内容位于 `$BOT_STATE_DIR`（默认：`~/.hanzo/bot`）下：
 
 | 路径                                                       | 用途                                                 |
 | ---------------------------------------------------------- | ---------------------------------------------------- |
@@ -1166,11 +1166,11 @@ Hanzo Bot 还会运行**静默的预压缩记忆刷新**，以提醒模型在自
 
 ### AGENTS.md / SOUL.md / USER.md / MEMORY.md 应该放在哪里
 
-这些文件位于**智能体工作区**中，而不是 `~/.bot`。
+这些文件位于**智能体工作区**中，而不是 `~/.hanzo/bot`。
 
 - **工作区（按智能体）**：`AGENTS.md`、`SOUL.md`、`IDENTITY.md`、`USER.md`、
   `MEMORY.md`（或 `memory.md`）、`memory/YYYY-MM-DD.md`、可选的 `HEARTBEAT.md`。
-- **状态目录（`~/.bot`）**：配置、凭据、认证配置文件、会话、日志和共享 Skills（`~/.hanzo/bot/skills`）。
+- **状态目录（`~/.hanzo/bot`）**：配置、凭据、认证配置文件、会话、日志和共享 Skills（`~/.hanzo/bot/skills`）。
 
 默认工作区是 `~/.hanzo/bot/workspace`，可通过以下方式配置：
 
@@ -1190,7 +1190,7 @@ Hanzo Bot 还会运行**静默的预压缩记忆刷新**，以提醒模型在自
 
 将你的**智能体工作区**放入一个**私有** git 仓库，并备份到某个私有位置（例如 GitHub 私有仓库）。这会捕获记忆 + AGENTS/SOUL/USER 文件，让你以后可以恢复助手的“思维”。
 
-**不要**提交 `~/.bot` 下的任何内容（凭据、会话、令牌）。如果你需要完整恢复，将工作区和状态目录分别备份（参阅上面的迁移问题）。
+**不要**提交 `~/.hanzo/bot` 下的任何内容（凭据、会话、令牌）。如果你需要完整恢复，将工作区和状态目录分别备份（参阅上面的迁移问题）。
 
 文档：[智能体工作区](/concepts/agent-workspace)。
 
@@ -1633,7 +1633,7 @@ hanzo-bot onboard --install-daemon
 注意：
 
 - 新手引导向导在看到现有配置时也提供**重置**选项。参阅[向导](/start/wizard)。
-- 如果你使用了配置文件（`--profile` / `BOT_PROFILE`），重置每个状态目录（默认为 `~/.bot-<profile>`）。
+- 如果你使用了配置文件（`--profile` / `BOT_PROFILE`），重置每个状态目录（默认为 `~/.hanzo/bot-<profile>`）。
 - 开发重置：`hanzo-bot gateway --dev --reset`（仅限开发；清除开发配置 + 凭据 + 会话 + 工作区）。
 
 ### 我遇到了 context too large 错误——如何重置或压缩
@@ -2241,7 +2241,7 @@ Hanzo Bot 通过在启动时立即绑定 WebSocket 监听器来强制运行时�
 
 快速设置（推荐）：
 
-- 每实例使用 `hanzo-bot --profile <name> …`（自动创建 `~/.bot-<name>`）。
+- 每实例使用 `hanzo-bot --profile <name> …`（自动创建 `~/.hanzo/bot-<name>`）。
 - 在每个配置文件配置中设置唯一的 `gateway.port`（或手动运行时传 `--port`）。
 - 安装每配置文件的服务：`hanzo-bot --profile <name> gateway install`。
 
@@ -2292,7 +2292,7 @@ hanzo-bot logs --follow
 
 服务/supervisor 日志（当 Gateway 网关通过 launchd/systemd 运行时）：
 
-- macOS：`$BOT_STATE_DIR/logs/gateway.log` 和 `gateway.err.log`（默认：`~/.hanzo/bot/logs/...`；配置文件使用 `~/.bot-<profile>/logs/...`）
+- macOS：`$BOT_STATE_DIR/logs/gateway.log` 和 `gateway.err.log`（默认：`~/.hanzo/bot/logs/...`；配置文件使用 `~/.hanzo/bot-<profile>/logs/...`）
 - Linux：`journalctl --user -u bot-gateway[-<profile>].service -n 200 --no-pager`
 - Windows：`schtasks /Query /TN "Hanzo Bot Gateway 网关 (<profile>)" /V /FO LIST`
 

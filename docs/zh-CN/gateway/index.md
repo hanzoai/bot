@@ -96,8 +96,8 @@ hanzo-bot --dev health
 
 默认值（可通过 env/flags/config 覆盖）：
 
-- `BOT_STATE_DIR=~/.bot-dev`
-- `BOT_CONFIG_PATH=~/.bot-dev/bot.json`
+- `BOT_STATE_DIR=~/.hanzo/bot-dev`
+- `BOT_CONFIG_PATH=~/.hanzo/bot-dev/bot.json`
 - `BOT_GATEWAY_PORT=19001`（Gateway 网关 WS + HTTP）
 - 浏览器控制服务端口 = `19003`（派生：`gateway.port+2`，仅 loopback）
 - `canvasHost.port=19005`（派生：`gateway.port+4`）
@@ -128,8 +128,8 @@ hanzo-bot --profile rescue gateway install
 示例：
 
 ```bash
-BOT_CONFIG_PATH=~/.hanzo/bot/a.json BOT_STATE_DIR=~/.bot-a hanzo-bot gateway --port 19001
-BOT_CONFIG_PATH=~/.hanzo/bot/b.json BOT_STATE_DIR=~/.bot-b hanzo-bot gateway --port 19002
+BOT_CONFIG_PATH=~/.hanzo/bot/a.json BOT_STATE_DIR=~/.hanzo/bot-a hanzo-bot gateway --port 19001
+BOT_CONFIG_PATH=~/.hanzo/bot/b.json BOT_STATE_DIR=~/.hanzo/bot-b hanzo-bot gateway --port 19002
 ```
 
 ## 协议（运维视角）

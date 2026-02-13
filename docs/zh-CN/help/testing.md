@@ -328,7 +328,7 @@ BOT_LIVE_CLI_BACKEND=1 \
 
 有用的环境变量：
 
-- `BOT_CONFIG_DIR=...`（默认：`~/.bot`）挂载到 `/home/node/.bot`
+- `BOT_CONFIG_DIR=...`（默认：`~/.hanzo/bot`）挂载到 `/home/node/.bot`
 - `BOT_WORKSPACE_DIR=...`（默认：`~/.hanzo/bot/workspace`）挂载到 `/home/node/.hanzo/bot/workspace`
 - `BOT_PROFILE_FILE=...`（默认：`~/.profile`）挂载到 `/home/node/.profile` 并在运行测试前加载
 - `BOT_LIVE_GATEWAY_MODELS=...` / `BOT_LIVE_MODELS=...` 用于缩小运行范围

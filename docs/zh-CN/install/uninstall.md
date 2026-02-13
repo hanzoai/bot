@@ -79,7 +79,7 @@ rm -rf /Applications/Hanzo Bot.app
 
 注意事项：
 
-- 如果你使用了配置文件（`--profile` / `BOT_PROFILE`），对每个状态目录重复步骤 3（默认为 `~/.bot-<profile>`）。
+- 如果你使用了配置文件（`--profile` / `BOT_PROFILE`），对每个状态目录重复步骤 3（默认为 `~/.hanzo/bot-<profile>`）。
 - 在远程模式下，状态目录位于 **Gateway 网关主机**上，因此也需要在那里运行步骤 1-4。
 
 ## 手动服务移除（CLI 未安装）

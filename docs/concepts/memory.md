@@ -151,7 +151,7 @@ out to QMD for retrieval. Key points:
   - If you want to pre-download models manually (and warm the same index Hanzo Bot
     uses), run a one-off query with the agent’s XDG dirs.
 
-    Hanzo Bot’s QMD state lives under your **state dir** (defaults to `~/.bot`).
+    Hanzo Bot’s QMD state lives under your **state dir** (defaults to `~/.hanzo/bot`).
     You can point `qmd` at the exact same index by exporting the same XDG vars
     Hanzo Bot uses:
 
