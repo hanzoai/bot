@@ -100,7 +100,7 @@ hanzo-bot onboard --install-daemon
 ### 3）从源代码（贡献者/开发）
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 pnpm install
 pnpm ui:build # 首次运行时自动安装 UI 依赖

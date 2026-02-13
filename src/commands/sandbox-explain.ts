@@ -30,7 +30,7 @@ type SandboxExplainOptions = {
   json: boolean;
 };
 
-const SANDBOX_DOCS_URL = "https://docs.bot.ai/sandbox";
+const SANDBOX_DOCS_URL = "https://docs.hanzo.bot/sandbox";
 
 function normalizeExplainSessionKey(params: {
   cfg: BotConfig;
@@ -331,7 +331,7 @@ export async function sandboxExplainCommand(
     lines.push(`  - ${key}`);
   }
   lines.push("");
-  lines.push(`${key("Docs:")} ${formatDocsLink("/sandbox", "docs.bot.ai/sandbox")}`);
+  lines.push(`${key("Docs:")} ${formatDocsLink("/sandbox", "docs.hanzo.bot/sandbox")}`);
 
   runtime.log(`${lines.join("\n")}\n`);
 }

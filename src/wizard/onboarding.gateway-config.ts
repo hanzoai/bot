@@ -161,7 +161,7 @@ export async function configureGatewayForOnboarding(
   let tailscaleResetOnExit = flow === "quickstart" ? quickstartGateway.tailscaleResetOnExit : false;
   if (tailscaleMode !== "off" && flow !== "quickstart") {
     await prompter.note(
-      ["Docs:", "https://docs.bot.ai/gateway/tailscale", "https://docs.bot.ai/web"].join(
+      ["Docs:", "https://docs.hanzo.bot/gateway/tailscale", "https://docs.hanzo.bot/web"].join(
         "\n",
       ),
       "Tailscale",

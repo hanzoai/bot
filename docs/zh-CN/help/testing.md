@@ -306,8 +306,8 @@ BOT_LIVE_CLI_BACKEND=1 \
 - 如果 CLI 能工作，实时测试应该能找到相同的密钥。
 - 如果实时测试说"无凭证"，用调试 `hanzo-bot models list`/模型选择相同的方式调试。
 
-- 配置文件存储：`~/.bot/credentials/`（首选；测试中"配置文件密钥"的含义）
-- 配置：`~/.bot/bot.json`（或 `BOT_CONFIG_PATH`）
+- 配置文件存储：`~/.hanzo/bot/credentials/`（首选；测试中"配置文件密钥"的含义）
+- 配置：`~/.hanzo/bot/bot.json`（或 `BOT_CONFIG_PATH`）
 
 如果你想依赖环境变量密钥（例如在 `~/.profile` 中导出的），在 `source ~/.profile` 后运行本地测试，或使用下面的 Docker 运行器（它们可以将 `~/.profile` 挂载到容器中）。
 
@@ -329,7 +329,7 @@ BOT_LIVE_CLI_BACKEND=1 \
 有用的环境变量：
 
 - `BOT_CONFIG_DIR=...`（默认：`~/.bot`）挂载到 `/home/node/.bot`
-- `BOT_WORKSPACE_DIR=...`（默认：`~/.bot/workspace`）挂载到 `/home/node/.bot/workspace`
+- `BOT_WORKSPACE_DIR=...`（默认：`~/.hanzo/bot/workspace`）挂载到 `/home/node/.hanzo/bot/workspace`
 - `BOT_PROFILE_FILE=...`（默认：`~/.profile`）挂载到 `/home/node/.profile` 并在运行测试前加载
 - `BOT_LIVE_GATEWAY_MODELS=...` / `BOT_LIVE_MODELS=...` 用于缩小运行范围
 - `BOT_LIVE_REQUIRE_PROFILE_KEYS=1` 确保凭证来自配置文件存储（而非环境变量）

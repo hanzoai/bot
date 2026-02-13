@@ -41,9 +41,9 @@ curl -fsSL https://hanzo.bot/install.sh | bash
 - 了解你的安装方式：**全局**（npm/pnpm）还是**源码**（git clone）。
 - 了解你的 Gateway 网关运行方式：**前台终端**还是**受管理服务**（launchd/systemd）。
 - 快照你的定制内容：
-  - 配置：`~/.bot/bot.json`
-  - 凭证：`~/.bot/credentials/`
-  - 工作区：`~/.bot/workspace`
+  - 配置：`~/.hanzo/bot/bot.json`
+  - 凭证：`~/.hanzo/bot/credentials/`
+  - 工作区：`~/.hanzo/bot/workspace`
 
 ## 更新（全局安装）
 
@@ -137,7 +137,7 @@ hanzo-bot health
 
 说明：
 
-- 当你运行打包的 `bot` 二进制文件（[`bot.mjs`](https://github.com/bot/bot/blob/main/bot.mjs)）或使用 Node 运行 `dist/` 时，`pnpm build` 很重要。
+- 当你运行打包的 `bot` 二进制文件（[`bot.mjs`](https://github.com/hanzoai/bot/blob/main/bot.mjs)）或使用 Node 运行 `dist/` 时，`pnpm build` 很重要。
 - 如果你从仓库 checkout 运行而没有全局安装，CLI 命令使用 `pnpm hanzo-bot ...`。
 - 如果你直接从 TypeScript 运行（`pnpm hanzo-bot ...`），通常不需要重新构建，但**配置迁移仍然适用** → 运行 doctor。
 - 在全局和 git 安装之间切换很容易：安装另一种方式，然后运行 `hanzo-bot doctor` 以便将 Gateway 网关服务入口点重写为当前安装。
@@ -230,4 +230,4 @@ git pull
 
 - 再次运行 `hanzo-bot doctor` 并仔细阅读输出（它通常会告诉你修复方法）。
 - 查看：[故障排除](/gateway/troubleshooting)
-- 在 Discord 上提问：https://discord.gg/hanzo
+- 在 Discord 上提问：https://discord.gg/XthHQQj

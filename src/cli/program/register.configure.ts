@@ -16,7 +16,7 @@ export function registerConfigureCommand(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/configure", "docs.bot.ai/cli/configure")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/configure", "docs.hanzo.bot/cli/configure")}\n`,
     )
     .option(
       "--section <section>",

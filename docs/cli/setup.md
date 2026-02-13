@@ -8,7 +8,7 @@ title: "setup"
 
 # `hanzo-bot setup`
 
-Initialize `~/.bot/bot.json` and the agent workspace.
+Initialize `~/.hanzo/bot/bot.json` and the agent workspace.
 
 Related:
 
@@ -19,7 +19,7 @@ Related:
 
 ```bash
 hanzo-bot setup
-hanzo-bot setup --workspace ~/.bot/workspace
+hanzo-bot setup --workspace ~/.hanzo/bot/workspace
 ```
 
 To run the wizard via setup:
