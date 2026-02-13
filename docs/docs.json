@@ -265,15 +265,19 @@
     },
     {
       "source": "/clawhub",
-      "destination": "/tools/clawhub"
+      "destination": "/tools/hanzo-skills"
     },
     {
       "source": "/clawdhub",
-      "destination": "/tools/clawhub"
+      "destination": "/tools/hanzo-skills"
     },
     {
       "source": "/tools/clawdhub",
-      "destination": "/tools/clawhub"
+      "destination": "/tools/hanzo-skills"
+    },
+    {
+      "source": "/tools/clawhub",
+      "destination": "/tools/hanzo-skills"
     },
     {
       "source": "/configuration",
@@ -975,7 +979,7 @@
                   "tools/slash-commands",
                   "tools/skills",
                   "tools/skills-config",
-                  "tools/clawhub",
+                  "tools/hanzo-skills",
                   "tools/plugin"
                 ]
               },
@@ -1494,7 +1498,7 @@
                   "zh-CN/tools/slash-commands",
                   "zh-CN/tools/skills",
                   "zh-CN/tools/skills-config",
-                  "zh-CN/tools/clawhub",
+                  "zh-CN/tools/hanzo-skills",
                   "zh-CN/tools/plugin"
                 ]
               },
