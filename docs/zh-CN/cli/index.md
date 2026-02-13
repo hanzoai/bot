@@ -61,8 +61,8 @@ x-i18n:
 
 ## 全局标志
 
-- `--dev`：将状态隔离到 `~/.bot-dev` 下并调整默认端口。
-- `--profile <name>`：将状态隔离到 `~/.bot-<name>` 下。
+- `--dev`：将状态隔离到 `~/.hanzo/bot-dev` 下并调整默认端口。
+- `--profile <name>`：将状态隔离到 `~/.hanzo/bot-<name>` 下。
 - `--no-color`：禁用 ANSI 颜色。
 - `--update`：`hanzo-bot update` 的简写（仅限源码安装）。
 - `-V`、`--version`、`-v`：打印版本并退出。

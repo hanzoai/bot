@@ -22,7 +22,7 @@ Hetzner pricing changes; pick the smallest Debian/Ubuntu VPS and scale up if you
 - Rent a small Linux server (Hetzner VPS)
 - Install Docker (isolated app runtime)
 - Start the Hanzo Bot Gateway in Docker
-- Persist `~/.bot` + `~/.hanzo/bot/workspace` on the host (survives restarts/rebuilds)
+- Persist `~/.hanzo/bot` + `~/.hanzo/bot/workspace` on the host (survives restarts/rebuilds)
 - Access the Control UI from your laptop via an SSH tunnel
 
 The Gateway can be accessed via:
