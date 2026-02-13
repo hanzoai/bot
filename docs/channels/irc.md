@@ -8,7 +8,7 @@ IRC ships as an extension plugin, but it is configured in the main config under 
 
 ## Quick start
 
-1. Enable IRC config in `~/.bot/bot.json`.
+1. Enable IRC config in `~/.hanzo/bot/bot.json`.
 2. Set at least:
 
 ```json

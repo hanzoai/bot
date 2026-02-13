@@ -68,7 +68,7 @@ ${formatHelpExamples([
   ],
 ])}
 
-${theme.muted("Docs:")} ${formatDocsLink("/cli/agent", "docs.bot.ai/cli/agent")}`,
+${theme.muted("Docs:")} ${formatDocsLink("/cli/agent", "docs.hanzo.bot/cli/agent")}`,
     )
     .action(async (opts) => {
       const verboseLevel = typeof opts.verbose === "string" ? opts.verbose.toLowerCase() : "";
@@ -86,7 +86,7 @@ ${theme.muted("Docs:")} ${formatDocsLink("/cli/agent", "docs.bot.ai/cli/agent")}
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/agents", "docs.bot.ai/cli/agents")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/agents", "docs.hanzo.bot/cli/agents")}\n`,
     );
 
   agents
@@ -161,11 +161,11 @@ ${formatHelpExamples([
   ],
   ["hanzo-bot agents set-identity --agent main --avatar avatars/bot.png", "Set avatar path."],
   [
-    "hanzo-bot agents set-identity --workspace ~/.bot/workspace --from-identity",
+    "hanzo-bot agents set-identity --workspace ~/.hanzo/bot/workspace --from-identity",
     "Load from IDENTITY.md.",
   ],
   [
-    "hanzo-bot agents set-identity --identity-file ~/.bot/workspace/IDENTITY.md --agent main",
+    "hanzo-bot agents set-identity --identity-file ~/.hanzo/bot/workspace/IDENTITY.md --agent main",
     "Use a specific IDENTITY.md.",
   ],
 ])}

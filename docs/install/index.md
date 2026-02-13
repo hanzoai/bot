@@ -105,10 +105,10 @@ The **installer script** is the recommended way to install Hanzo Bot. It handles
 
     <Steps>
       <Step title="Clone and build">
-        Clone the [Hanzo Bot repo](https://github.com/bot/bot) and build:
+        Clone the [Hanzo Bot repo](https://github.com/hanzoai/bot) and build:
 
         ```bash
-        git clone https://github.com/bot/bot.git
+        git clone https://github.com/hanzoai/bot.git
         cd bot
         pnpm install
         pnpm ui:build
