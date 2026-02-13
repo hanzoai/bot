@@ -211,7 +211,7 @@ function resolveBrowserBaseUrl(params: {
   }
   if (!resolved.enabled) {
     throw new Error(
-      "Browser control is disabled. Set browser.enabled=true in ~/.bot/bot.json.",
+      "Browser control is disabled. Set browser.enabled=true in ~/.hanzo/bot/bot.json.",
     );
   }
   return undefined;

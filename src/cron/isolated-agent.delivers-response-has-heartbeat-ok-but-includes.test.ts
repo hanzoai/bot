@@ -53,11 +53,7 @@ async function writeSessionStore(home: string) {
   return storePath;
 }
 
-function makeCfg(
-  home: string,
-  storePath: string,
-  overrides: Partial<BotConfig> = {},
-): BotConfig {
+function makeCfg(home: string, storePath: string, overrides: Partial<BotConfig> = {}): BotConfig {
   const base: BotConfig = {
     agents: {
       defaults: {
@@ -159,7 +155,7 @@ describe("runCronIsolatedAgentTurn", () => {
         sendMessageIMessage: vi.fn(),
       };
       vi.mocked(runEmbeddedPiAgent).mockResolvedValue({
-        payloads: [{ text: "HEARTBEAT_OK 🦞" }],
+        payloads: [{ text: "HEARTBEAT_OK 🤖" }],
         meta: {
           durationMs: 5,
           agentMeta: { sessionId: "s", provider: "p", model: "m" },

@@ -5,7 +5,7 @@ read_when:
 title: "Hanzo Bot"
 ---
 
-# Hanzo Bot 🥷
+# Hanzo Bot
 
 <p align="center">
     <img
@@ -22,7 +22,7 @@ title: "Hanzo Bot"
     />
 </p>
 
-> _"EXFOLIATE! EXFOLIATE!"_ — A space lobster, probably
+> _Your AI team, deployed everywhere._
 
 <p align="center">
   <strong>Any OS gateway for AI agents across WhatsApp, Telegram, Discord, iMessage, and more.</strong><br />
@@ -129,7 +129,7 @@ Open the browser Control UI after the Gateway starts.
 
 ## Configuration (optional)
 
-Config lives at `~/.bot/bot.json`.
+Config lives at `~/.hanzo/bot/bot.json`.
 
 - If you **do nothing**, Hanzo Bot uses the bundled Pi binary in RPC mode with per-sender sessions.
 - If you want to lock it down, start with `channels.whatsapp.allowFrom` and (for groups) mention rules.

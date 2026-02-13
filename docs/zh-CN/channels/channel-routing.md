@@ -85,7 +85,7 @@ Hanzo Bot 将回复**路由回消息来源的渠道**。模型不会选择渠道
 ```json5
 {
   agents: {
-    list: [{ id: "support", name: "Support", workspace: "~/.bot/workspace-support" }],
+    list: [{ id: "support", name: "Support", workspace: "~/.hanzo/bot/workspace-support" }],
   },
   bindings: [
     { match: { channel: "slack", teamId: "T123" }, agentId: "support" },
@@ -98,7 +98,7 @@ Hanzo Bot 将回复**路由回消息来源的渠道**。模型不会选择渠道
 
 会话存储位于状态目录下（默认 `~/.bot`）：
 
-- `~/.bot/agents/<agentId>/sessions/sessions.json`
+- `~/.hanzo/bot/agents/<agentId>/sessions/sessions.json`
 - JSONL 记录文件与存储位于同一目录
 
 你可以通过 `session.store` 和 `{agentId}` 模板来覆盖存储路径。

@@ -22,7 +22,7 @@ Hetzner pricing changes; pick the smallest Debian/Ubuntu VPS and scale up if you
 - Rent a small Linux server (Hetzner VPS)
 - Install Docker (isolated app runtime)
 - Start the Hanzo Bot Gateway in Docker
-- Persist `~/.bot` + `~/.bot/workspace` on the host (survives restarts/rebuilds)
+- Persist `~/.bot` + `~/.hanzo/bot/workspace` on the host (survives restarts/rebuilds)
 - Access the Control UI from your laptop via an SSH tunnel
 
 The Gateway can be accessed via:
@@ -99,7 +99,7 @@ docker compose version
 ## 3) Clone the Hanzo Bot repository
 
 ```bash
-git clone https://github.com/bot/bot.git
+git clone https://github.com/hanzoai/bot.git
 cd bot
 ```
 
@@ -113,7 +113,7 @@ Docker containers are ephemeral.
 All long-lived state must live on the host.
 
 ```bash
-mkdir -p /root/.bot/workspace
+mkdir -p /root/.hanzo/bot/workspace
 
 # Set ownership to the container user (uid 1000):
 chown -R 1000:1000 /root/.bot
@@ -132,7 +132,7 @@ BOT_GATEWAY_BIND=lan
 BOT_GATEWAY_PORT=18789
 
 BOT_CONFIG_DIR=/root/.bot
-BOT_WORKSPACE_DIR=/root/.bot/workspace
+BOT_WORKSPACE_DIR=/root/.hanzo/bot/workspace
 
 GOG_KEYRING_PASSWORD=change-me-now
 XDG_CONFIG_HOME=/home/node/.bot
@@ -172,7 +172,7 @@ services:
       - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     volumes:
       - ${BOT_CONFIG_DIR}:/home/node/.bot
-      - ${BOT_WORKSPACE_DIR}:/home/node/.bot/workspace
+      - ${BOT_WORKSPACE_DIR}:/home/node/.hanzo/bot/workspace
     ports:
       # Recommended: keep the Gateway loopback-only on the VPS; access via SSH tunnel.
       # To expose it publicly, remove the `127.0.0.1:` prefix and firewall accordingly.
@@ -317,15 +317,15 @@ Paste your gateway token.
 Hanzo Bot runs in Docker, but Docker is not the source of truth.
 All long-lived state must survive restarts, rebuilds, and reboots.
 
-| Component           | Location                          | Persistence mechanism  | Notes                            |
-| ------------------- | --------------------------------- | ---------------------- | -------------------------------- |
-| Gateway config      | `/home/node/.bot/`           | Host volume mount      | Includes `bot.json`, tokens |
-| Model auth profiles | `/home/node/.bot/`           | Host volume mount      | OAuth tokens, API keys           |
-| Skill configs       | `/home/node/.bot/skills/`    | Host volume mount      | Skill-level state                |
-| Agent workspace     | `/home/node/.bot/workspace/` | Host volume mount      | Code and agent artifacts         |
-| WhatsApp session    | `/home/node/.bot/`           | Host volume mount      | Preserves QR login               |
-| Gmail keyring       | `/home/node/.bot/`           | Host volume + password | Requires `GOG_KEYRING_PASSWORD`  |
-| External binaries   | `/usr/local/bin/`                 | Docker image           | Must be baked at build time      |
-| Node runtime        | Container filesystem              | Docker image           | Rebuilt every image build        |
-| OS packages         | Container filesystem              | Docker image           | Do not install at runtime        |
-| Docker container    | Ephemeral                         | Restartable            | Safe to destroy                  |
+| Component           | Location                           | Persistence mechanism  | Notes                           |
+| ------------------- | ---------------------------------- | ---------------------- | ------------------------------- |
+| Gateway config      | `/home/node/.hanzo/bot/`           | Host volume mount      | Includes `bot.json`, tokens     |
+| Model auth profiles | `/home/node/.hanzo/bot/`           | Host volume mount      | OAuth tokens, API keys          |
+| Skill configs       | `/home/node/.hanzo/bot/skills/`    | Host volume mount      | Skill-level state               |
+| Agent workspace     | `/home/node/.hanzo/bot/workspace/` | Host volume mount      | Code and agent artifacts        |
+| WhatsApp session    | `/home/node/.hanzo/bot/`           | Host volume mount      | Preserves QR login              |
+| Gmail keyring       | `/home/node/.hanzo/bot/`           | Host volume + password | Requires `GOG_KEYRING_PASSWORD` |
+| External binaries   | `/usr/local/bin/`                  | Docker image           | Must be baked at build time     |
+| Node runtime        | Container filesystem               | Docker image           | Rebuilt every image build       |
+| OS packages         | Container filesystem               | Docker image           | Do not install at runtime       |
+| Docker container    | Ephemeral                          | Restartable            | Safe to destroy                 |
