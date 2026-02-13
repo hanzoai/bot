@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Hanzo Book — Build Your AI Workforce</title>
+    <meta
+      name="description"
+      content="The complete guide to building and deploying autonomous AI agents. $49 includes 1 month of Hanzo Bot usage."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --bg: #000;
+        --bg-card: #111;
+        --bg-hover: #1a1a1a;
+        --border: #222;
+        --border-hover: #333;
+        --text: #fff;
+        --muted: #888;
+        --subtle: #555;
+        --max-w: 800px;
+        --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --font:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+      }
+
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .header-inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 24px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo svg {
+        width: 24px;
+        height: 24px;
+      }
+      .logo span {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+      .btn-ghost {
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-radius: 8px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        background: var(--bg-hover);
+      }
+      .btn-primary {
+        display: inline-block;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #000;
+        background: #fff;
+        border-radius: 8px;
+        transition: opacity 0.15s;
+        text-align: center;
+      }
+      .btn-primary:hover {
+        opacity: 0.85;
+      }
+      .btn-lg {
+        padding: 14px 32px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+
+      .book-hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 120px 24px 80px;
+      }
+      .book-cover-lg {
+        width: 220px;
+        height: 300px;
+        background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+        border: 1px solid var(--border-hover);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 40px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+        position: relative;
+        overflow: hidden;
+      }
+      .book-cover-lg::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #333, #555, #333);
+      }
+      .book-cover-lg svg {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+      }
+      .book-cover-lg .title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .book-cover-lg .subtitle {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .book-hero h1 {
+        font-size: clamp(36px, 6vw, 64px);
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+        max-width: 600px;
+        margin-bottom: 16px;
+      }
+      .book-hero .subtitle {
+        font-size: 18px;
+        color: var(--muted);
+        max-width: 500px;
+        margin-bottom: 32px;
+      }
+      .book-hero .price-tag {
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .book-hero .price-tag small {
+        font-size: 18px;
+        font-weight: 400;
+        color: var(--muted);
+      }
+      .book-hero .price-note {
+        font-size: 14px;
+        color: var(--subtle);
+        margin-bottom: 32px;
+      }
+
+      .book-content {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 24px 100px;
+      }
+      .book-section {
+        margin-bottom: 64px;
+      }
+      .book-section h2 {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        margin-bottom: 24px;
+      }
+      .book-section p {
+        font-size: 16px;
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 16px;
+      }
+
+      .toc {
+        list-style: none;
+        counter-reset: toc;
+      }
+      .toc li {
+        counter-increment: toc;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 16px;
+        align-items: baseline;
+      }
+      .toc li::before {
+        content: counter(toc, decimal-leading-zero);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--subtle);
+        min-width: 28px;
+      }
+      .toc-title {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .toc-desc {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .includes-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      .include-card {
+        padding: 24px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .include-card h3 {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      .include-card p {
+        font-size: 13px;
+        color: var(--muted);
+        margin: 0;
+      }
+
+      .book-cta {
+        text-align: center;
+        padding: 80px 24px;
+        border-top: 1px solid var(--border);
+      }
+      .book-cta h2 {
+        font-size: clamp(28px, 4vw, 44px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        margin-bottom: 16px;
+      }
+      .book-cta p {
+        font-size: 16px;
+        color: var(--muted);
+        margin-bottom: 32px;
+      }
+      .or-divider {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 32px 0;
+        color: var(--subtle);
+        font-size: 13px;
+      }
+      .or-divider::before,
+      .or-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      .footer {
+        border-top: 1px solid var(--border);
+        padding: 32px 24px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--subtle);
+      }
+
+      @media (max-width: 600px) {
+        .includes-grid {
+          grid-template-columns: 1fr;
+        }
+        .book-cover-lg {
+          width: 160px;
+          height: 220px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-inner">
+        <a href="/" class="logo">
+          <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+            <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+            <path
+              d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+              fill="#fff"
+            />
+            <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+            <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+            <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+            <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" />
+          </svg>
+          <span>Hanzo</span>
+        </a>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <a href="/" class="btn-ghost">Home</a>
+          <a href="/#pricing" class="btn-ghost">Pricing</a>
+          <a href="/chat" class="btn-primary">Sign In</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="book-hero">
+      <div class="book-cover-lg">
+        <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+          <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+          <path
+            d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+            fill="#fff"
+          />
+          <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+          <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+          <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+          <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" />
+        </svg>
+        <div class="title">The Hanzo Book</div>
+        <div class="subtitle">AI Workforce Guide</div>
+      </div>
+      <h1>Build Your Autonomous AI Workforce</h1>
+      <p class="subtitle">
+        The definitive guide to deploying AI agents that work 24/7. From setup to scale — everything
+        you need to know.
+      </p>
+      <div class="price-tag">$49 <small>one-time</small></div>
+      <p class="price-note">
+        Includes 1 full month of Hanzo Bot usage (cloud compute, all personas, all skills)
+      </p>
+      <a href="/chat?onboarding=1&plan=book" class="btn-primary btn-lg">Get the Book →</a>
+    </section>
+
+    <div class="book-content">
+      <div class="book-section">
+        <h2>What You'll Learn</h2>
+        <p>
+          The Hanzo Book is the complete guide to building, deploying, and managing autonomous AI
+          agents at any scale. Whether you're a solo founder or an enterprise team, this book covers
+          everything from your first bot to a full AI-powered workforce.
+        </p>
+      </div>
+
+      <div class="book-section">
+        <h2>Table of Contents</h2>
+        <ol class="toc">
+          <li>
+            <div>
+              <div class="toc-title">The AI Workforce Revolution</div>
+              <div class="toc-desc">Why autonomous agents are the next computing paradigm</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">Getting Started</div>
+              <div class="toc-desc">Account setup, your first bot, understanding the dashboard</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">Agent Personas</div>
+              <div class="toc-desc">
+                Deep dive into the 15 built-in specialists and how to customize them
+              </div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">Skills & Recipes</div>
+              <div class="toc-desc">
+                The 52+ skills library, installing skills, and creating workflows
+              </div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">Multi-Channel Deployment</div>
+              <div class="toc-desc">
+                Discord, Slack, Telegram, WhatsApp, X, iMessage — one agent, every platform
+              </div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">608+ Integrations</div>
+              <div class="toc-desc">Connecting your bots to every tool your business uses</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">Memory & Knowledge</div>
+              <div class="toc-desc">RAG systems, document ingestion, persistent context</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">Cloud Infrastructure</div>
+              <div class="toc-desc">
+                Cloud deployment, dedicated environments, Mac/Windows/Linux instances
+              </div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">Multi-Agent Orchestration</div>
+              <div class="toc-desc">
+                Running teams of agents in parallel, delegation, and coordination
+              </div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">Enterprise Deployment</div>
+              <div class="toc-desc">
+                Security, compliance, SLAs, and scaling to thousands of agents
+              </div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">Case Studies</div>
+              <div class="toc-desc">Real results: 500x ROI, $34.9M launches, 5M viewer events</div>
+            </div>
+          </li>
+          <li>
+            <div>
+              <div class="toc-title">The Future</div>
+              <div class="toc-desc">What's next for autonomous AI and how to stay ahead</div>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="book-section">
+        <h2>What's Included</h2>
+        <div class="includes-grid">
+          <div class="include-card">
+            <h3>The Complete Book</h3>
+            <p>12 chapters covering every aspect of building an AI workforce with Hanzo Bot.</p>
+          </div>
+          <div class="include-card">
+            <h3>1 Month of Usage</h3>
+            <p>
+              Full access to Hanzo Bot cloud — all 15 personas, 52+ skills, all channels, compute
+              included.
+            </p>
+          </div>
+          <div class="include-card">
+            <h3>Starter Templates</h3>
+            <p>Pre-built agent configurations for support, marketing, dev ops, and more.</p>
+          </div>
+          <div class="include-card">
+            <h3>Community Access</h3>
+            <p>Join the Hanzo Discord for help, tips, and connecting with other builders.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="book-cta">
+      <h2>Ready to Build?</h2>
+      <p>Get the book and start deploying your AI workforce today.</p>
+      <a href="/chat?onboarding=1&plan=book" class="btn-primary btn-lg">Get the Book — $49 →</a>
+      <div class="or-divider">or</div>
+      <p style="font-size: 14px; color: var(--muted); margin-bottom: 16px">
+        Start with the Starter plan at $20/mo for limited usage.
+      </p>
+      <a
+        href="/chat?onboarding=1"
+        class="btn-ghost"
+        style="border: 1px solid var(--border); border-radius: 8px; padding: 10px 24px"
+        >Get Started Free →</a
+      >
+    </section>
+
+    <footer class="footer">
+      <p>
+        © 2016–2026 Hanzo Industries. All rights reserved.
+        <a href="https://hanzo.ai" style="color: var(--muted)">hanzo.ai</a>
+      </p>
+    </footer>
+  </body>
+</html>
