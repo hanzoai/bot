@@ -168,7 +168,7 @@ Doctor checks:
   transcript files.
 - **Main session “1-line JSONL”**: flags when the main transcript has only one
   line (history is not accumulating).
-- **Multiple state dirs**: warns when multiple `~/.bot` folders exist across
+- **Multiple state dirs**: warns when multiple `~/.hanzo/bot` folders exist across
   home directories or when `BOT_STATE_DIR` points elsewhere (history can
   split between installs).
 - **Remote mode reminder**: if `gateway.mode=remote`, doctor reminds you to run

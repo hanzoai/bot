@@ -51,7 +51,7 @@ on each restart.
 Use the dev profile to isolate state and spin up a safe, disposable setup for
 debugging. There are **two** `--dev` flags:
 
-- **Global `--dev` (profile):** isolates state under `~/.bot-dev` and
+- **Global `--dev` (profile):** isolates state under `~/.hanzo/bot-dev` and
   defaults the gateway port to `19001` (derived ports shift with it).
 - **`gateway --dev`: tells the Gateway to auto-create a default config +
   workspace** when missing (and skip BOOTSTRAP.md).
@@ -69,8 +69,8 @@ What this does:
 
 1. **Profile isolation** (global `--dev`)
    - `BOT_PROFILE=dev`
-   - `BOT_STATE_DIR=~/.bot-dev`
-   - `BOT_CONFIG_PATH=~/.bot-dev/bot.json`
+   - `BOT_STATE_DIR=~/.hanzo/bot-dev`
+   - `BOT_CONFIG_PATH=~/.hanzo/bot-dev/bot.json`
    - `BOT_GATEWAY_PORT=19001` (browser/canvas shift accordingly)
 
 2. **Dev bootstrap** (`gateway --dev`)

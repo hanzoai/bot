@@ -416,7 +416,7 @@ keeps your bot "exactly the same" (memory, session history, auth, and channel
 state) as long as you copy **both** locations:
 
 1. Install Hanzo Bot on the new machine.
-2. Copy `$BOT_STATE_DIR` (default: `~/.bot`) from the old machine.
+2. Copy `$BOT_STATE_DIR` (default: `~/.hanzo/bot`) from the old machine.
 3. Copy your workspace (default: `~/.hanzo/bot/workspace`).
 4. Run `hanzo-bot doctor` and restart the Gateway service.
 
@@ -836,7 +836,7 @@ Docs: [Getting started](/start/getting-started), [Updating](/install/updating).
 
 Yes. Install the other flavor, then run Doctor so the gateway service points at the new entrypoint.
 This **does not delete your data** - it only changes the Hanzo Bot code install. Your state
-(`~/.bot`) and workspace (`~/.hanzo/bot/workspace`) stay untouched.
+(`~/.hanzo/bot`) and workspace (`~/.hanzo/bot/workspace`) stay untouched.
 
 From npm → git:
 
@@ -1243,7 +1243,7 @@ Docs: [Memory](/concepts/memory), [Context](/concepts/context).
 No - **Hanzo Bot's state is local**, but **external services still see what you send them**.
 
 - **Local by default:** sessions, memory files, config, and workspace live on the Gateway host
-  (`~/.bot` + your workspace directory).
+  (`~/.hanzo/bot` + your workspace directory).
 - **Remote by necessity:** messages you send to model providers (Anthropic/OpenAI/etc.) go to
   their APIs, and chat platforms (WhatsApp/Telegram/Slack/etc.) store message data on their
   servers.
@@ -1254,7 +1254,7 @@ Related: [Agent workspace](/concepts/agent-workspace), [Memory](/concepts/memory
 
 ### Where does Hanzo Bot store its data
 
-Everything lives under `$BOT_STATE_DIR` (default: `~/.bot`):
+Everything lives under `$BOT_STATE_DIR` (default: `~/.hanzo/bot`):
 
 | Path                                                       | Purpose                                                      |
 | ---------------------------------------------------------- | ------------------------------------------------------------ |
@@ -1273,11 +1273,11 @@ Your **workspace** (AGENTS.md, memory files, skills, etc.) is separate and confi
 
 ### Where should AGENTSmd SOULmd USERmd MEMORYmd live
 
-These files live in the **agent workspace**, not `~/.bot`.
+These files live in the **agent workspace**, not `~/.hanzo/bot`.
 
 - **Workspace (per agent)**: `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`,
   `MEMORY.md` (or `memory.md`), `memory/YYYY-MM-DD.md`, optional `HEARTBEAT.md`.
-- **State dir (`~/.bot`)**: config, credentials, auth profiles, sessions, logs,
+- **State dir (`~/.hanzo/bot`)**: config, credentials, auth profiles, sessions, logs,
   and shared skills (`~/.hanzo/bot/skills`).
 
 Default workspace is `~/.hanzo/bot/workspace`, configurable via:
@@ -1303,7 +1303,7 @@ Put your **agent workspace** in a **private** git repo and back it up somewhere
 private (for example GitHub private). This captures memory + AGENTS/SOUL/USER
 files, and lets you restore the assistant's "mind" later.
 
-Do **not** commit anything under `~/.bot` (credentials, sessions, tokens).
+Do **not** commit anything under `~/.hanzo/bot` (credentials, sessions, tokens).
 If you need a full restore, back up both the workspace and the state directory
 separately (see the migration question above).
 
@@ -1799,7 +1799,7 @@ hanzo-bot onboard --install-daemon
 Notes:
 
 - The onboarding wizard also offers **Reset** if it sees an existing config. See [Wizard](/start/wizard).
-- If you used profiles (`--profile` / `BOT_PROFILE`), reset each state dir (defaults are `~/.bot-<profile>`).
+- If you used profiles (`--profile` / `BOT_PROFILE`), reset each state dir (defaults are `~/.hanzo/bot-<profile>`).
 - Dev reset: `hanzo-bot gateway --dev --reset` (dev-only; wipes dev config + credentials + sessions + workspace).
 
 ### Im getting context too large errors how do I reset or compact
@@ -2436,7 +2436,7 @@ Yes, but you must isolate:
 
 Quick setup (recommended):
 
-- Use `hanzo-bot --profile <name> …` per instance (auto-creates `~/.bot-<name>`).
+- Use `hanzo-bot --profile <name> …` per instance (auto-creates `~/.hanzo/bot-<name>`).
 - Set a unique `gateway.port` in each profile config (or pass `--port` for manual runs).
 - Install a per-profile service: `hanzo-bot --profile <name> gateway install`.
 
@@ -2489,7 +2489,7 @@ hanzo-bot logs --follow
 
 Service/supervisor logs (when the gateway runs via launchd/systemd):
 
-- macOS: `$BOT_STATE_DIR/logs/gateway.log` and `gateway.err.log` (default: `~/.hanzo/bot/logs/...`; profiles use `~/.bot-<profile>/logs/...`)
+- macOS: `$BOT_STATE_DIR/logs/gateway.log` and `gateway.err.log` (default: `~/.hanzo/bot/logs/...`; profiles use `~/.hanzo/bot-<profile>/logs/...`)
 - Linux: `journalctl --user -u bot-gateway[-<profile>].service -n 200 --no-pager`
 - Windows: `schtasks /Query /TN "Hanzo Bot Gateway (<profile>)" /V /FO LIST`
 
