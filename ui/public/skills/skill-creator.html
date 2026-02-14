@@ -1,0 +1,1454 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>skill-creator — Hanzo Bot Skills</title>
+    <meta
+      name="description"
+      content="Create or update AgentSkills. Use when designing, structuring, or packaging skills with scripts, references, and assets."
+    />
+    <meta
+      name="keywords"
+      content="skill-creator, Hanzo Bot, AI skill, Development, autonomous agent"
+    />
+    <link rel="canonical" href="https://hanzo.bot/skills/skill-creator" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="skill-creator — Hanzo Bot Skills" />
+    <meta
+      property="og:description"
+      content="Create or update AgentSkills. Use when designing, structuring, or packaging skills with scripts, references, and assets."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://hanzo.bot/skills/skill-creator" />
+    <meta property="og:site_name" content="Hanzo Bot" />
+    <meta property="og:image" content="https://hanzo.bot/og-skills.png" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@hanaborteam" />
+    <meta name="twitter:title" content="skill-creator — Hanzo Bot Skills" />
+    <meta
+      name="twitter:description"
+      content="Create or update AgentSkills. Use when designing, structuring, or packaging skills with scripts, references, and assets."
+    />
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "skill-creator — Hanzo Bot Skill",
+        "description": "Create or update AgentSkills. Use when designing, structuring, or packaging skills with scripts, references, and assets.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "Hanzo AI",
+          "url": "https://hanzo.ai"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --brand: #fd4444;
+        --brand-secondary: #ff6b6b;
+        --bg: #000;
+        --bg-card: rgba(255, 255, 255, 0.04);
+        --bg-hover: #1a1a1a;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-hover: rgba(255, 255, 255, 0.16);
+        --text: #fff;
+        --muted: #888;
+        --subtle: #555;
+        --max-w: 1200px;
+        --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --font:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          sans-serif;
+        --font-mono: "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 64px 64px;
+        pointer-events: none;
+        z-index: 0;
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        opacity: 0.035;
+        pointer-events: none;
+        z-index: 0;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      body > * {
+        position: relative;
+        z-index: 1;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+      }
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .header-inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 24px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo-mark {
+        width: 24px;
+        height: 24px;
+      }
+      .logo-mark svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .logo-text {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+      .nav-links {
+        display: flex;
+        gap: 4px;
+      }
+      .nav-link {
+        position: relative;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-radius: 6px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .nav-link:hover {
+        color: var(--text);
+        background: var(--bg-hover);
+      }
+      .nav-link.active {
+        color: var(--brand);
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-ghost {
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-radius: 8px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        background: var(--bg-hover);
+      }
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--brand);
+        border-radius: 9999px;
+        transition:
+          opacity 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn-primary:hover {
+        opacity: 0.9;
+        box-shadow: 0 0 24px rgba(253, 68, 68, 0.3);
+      }
+      .btn-outline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 9999px;
+        transition:
+          border-color 0.15s,
+          background 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn-outline:hover {
+        border-color: rgba(253, 68, 68, 0.3);
+        background: rgba(253, 68, 68, 0.06);
+      }
+      .btn-lg {
+        padding: 14px 32px;
+        font-size: 15px;
+        border-radius: 9999px;
+      }
+      .footer {
+        border-top: 1px solid var(--border);
+        padding: 64px 24px 32px;
+      }
+      .footer-inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 240px repeat(4, 1fr);
+        gap: 40px;
+        margin-bottom: 48px;
+      }
+      .footer-brand .footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .footer-brand .footer-logo svg {
+        width: 20px;
+        height: 20px;
+      }
+      .footer-brand .footer-logo span {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .footer-brand p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+      .footer-social {
+        display: flex;
+        gap: 12px;
+      }
+      .footer-social a {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--muted);
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .footer-social a:hover {
+        color: var(--text);
+        border-color: var(--border-hover);
+      }
+      .footer-social svg {
+        width: 14px;
+        height: 14px;
+      }
+      .footer-col h4 {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--subtle);
+        margin-bottom: 16px;
+      }
+      .footer-col a {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        padding: 3px 0;
+        transition: color 0.15s;
+      }
+      .footer-col a:hover {
+        color: var(--text);
+      }
+      .footer-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--subtle);
+      }
+      @media (max-width: 1024px) {
+        .footer-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .footer-brand {
+          grid-column: 1/-1;
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+      @media (max-width: 768px) {
+        .footer-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 480px) {
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Detail layout ── */
+      .detail-wrap {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 24px;
+        transition: color 0.15s;
+      }
+      .back-link:hover {
+        color: var(--text);
+      }
+      .skill-hero {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      .skill-emoji {
+        font-size: 48px;
+        line-height: 1;
+      }
+      .skill-hero h1 {
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      .skill-desc {
+        font-size: 15px;
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 40px;
+        max-width: 720px;
+      }
+      .detail-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 48px;
+        align-items: start;
+      }
+      .detail-main {
+        min-width: 0;
+      }
+      .detail-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: sticky;
+        top: 80px;
+      }
+      .sidebar-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        backdrop-filter: blur(16px);
+      }
+      .sidebar-card h3 {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--subtle);
+        margin-bottom: 16px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 6px 0;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border);
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-row .label {
+        color: var(--muted);
+      }
+      .info-row .value {
+        color: var(--text);
+        text-align: right;
+      }
+      .info-row .value code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .info-row .value a {
+        color: var(--brand);
+        transition: opacity 0.15s;
+      }
+      .info-row .value a:hover {
+        opacity: 0.8;
+      }
+      .install-row {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .install-row:last-child {
+        border-bottom: none;
+      }
+      .install-label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .install-cmd {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--brand-secondary);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 6px 10px;
+        border-radius: 6px;
+        word-break: break-all;
+      }
+      .sidebar-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .sidebar-actions a {
+        text-align: center;
+      }
+      .web3-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #818cf8;
+        margin-bottom: 4px;
+      }
+      .web3-features {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      .web3-feat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .web3-feat::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #818cf8;
+        flex-shrink: 0;
+      }
+      .category-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 500;
+        background: rgba(253, 68, 68, 0.08);
+        color: var(--brand-secondary);
+        border: 1px solid rgba(253, 68, 68, 0.15);
+      }
+      /* ── README styles ── */
+      .skill-readme {
+        line-height: 1.7;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .skill-readme h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 32px 0 16px;
+        letter-spacing: -0.02em;
+      }
+      .skill-readme h2 {
+        font-size: 22px;
+        font-weight: 600;
+        margin: 28px 0 12px;
+        letter-spacing: -0.01em;
+        color: var(--text);
+      }
+      .skill-readme h3 {
+        font-size: 17px;
+        font-weight: 600;
+        margin: 24px 0 8px;
+      }
+      .skill-readme h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 20px 0 8px;
+      }
+      .skill-readme p {
+        margin: 0 0 16px;
+      }
+      .skill-readme ul,
+      .skill-readme ol {
+        margin: 0 0 16px;
+        padding-left: 24px;
+      }
+      .skill-readme li {
+        margin-bottom: 6px;
+      }
+      .skill-readme code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .skill-readme pre {
+        margin: 0 0 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+      }
+      .skill-readme pre code {
+        display: block;
+        padding: 16px;
+        background: none;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .skill-readme table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 0 16px;
+        font-size: 13px;
+      }
+      .skill-readme th,
+      .skill-readme td {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        text-align: left;
+      }
+      .skill-readme th {
+        background: rgba(255, 255, 255, 0.04);
+        font-weight: 600;
+      }
+      .skill-readme blockquote {
+        border-left: 3px solid var(--brand);
+        padding: 8px 16px;
+        margin: 0 0 16px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 0 8px 8px 0;
+      }
+      .skill-readme a {
+        color: var(--brand-secondary);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .skill-readme a:hover {
+        color: var(--brand);
+      }
+      .skill-readme hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 24px 0;
+      }
+      .skill-readme strong {
+        color: var(--text);
+      }
+      @media (max-width: 1024px) {
+        .detail-layout {
+          grid-template-columns: 1fr;
+        }
+        .detail-sidebar {
+          position: static;
+          order: 2;
+        }
+      }
+      @media (max-width: 768px) {
+        .detail-wrap {
+          padding: 72px 16px 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-inner">
+        <div class="header-left">
+          <a href="/" class="logo">
+            <div class="logo-mark">
+              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+                <path
+                  d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+                  fill="#fff"
+                />
+                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" />
+              </svg>
+            </div>
+            <span class="logo-text">Bot</span>
+          </a>
+          <nav class="nav-links">
+            <a href="https://hanzo.ai" class="nav-link">AI</a>
+            <a href="/" class="nav-link">Home</a>
+            <a href="/skills" class="nav-link active">Skills</a>
+            <a href="/book" class="nav-link">Book</a>
+            <a href="https://docs.hanzo.bot" class="nav-link">Docs</a>
+            <a href="https://github.com/hanzoai/bot" class="nav-link">GitHub</a>
+          </nav>
+        </div>
+        <div class="header-right">
+          <a href="https://hanzo.ai/contact" class="btn-ghost">Contact Sales</a>
+          <a href="/chat" class="btn-primary">Sign In</a>
+        </div>
+      </div>
+    </header>
+    <main class="detail-wrap">
+      <a href="/skills" class="back-link">&larr; Back to all skills</a>
+      <div class="skill-hero">
+        <span class="skill-emoji">🔧</span>
+        <div>
+          <h1>skill-creator</h1>
+        </div>
+      </div>
+      <p class="skill-desc">
+        Create or update AgentSkills. Use when designing, structuring, or packaging skills with
+        scripts, references, and assets.
+      </p>
+      <div class="detail-layout">
+        <div class="detail-main">
+          <div class="skill-readme">
+            <h1>Skill Creator</h1>
+            <p>This skill provides guidance for creating effective skills.</p>
+            <h2>About Skills</h2>
+            <p>
+              Skills are modular, self-contained packages that extend Codex’s capabilities by
+              providing specialized knowledge, workflows, and tools. Think of them as “onboarding
+              guides” for specific domains or tasks—they transform Codex from a general-purpose
+              agent into a specialized agent equipped with procedural knowledge that no model can
+              fully possess.
+            </p>
+            <h3>What Skills Provide</h3>
+            <ol>
+              <li>Specialized workflows - Multi-step procedures for specific domains</li>
+              <li>
+                Tool integrations - Instructions for working with specific file formats or APIs
+              </li>
+              <li>Domain expertise - Company-specific knowledge, schemas, business logic</li>
+              <li>
+                Bundled resources - Scripts, references, and assets for complex and repetitive tasks
+              </li>
+            </ol>
+            <h2>Core Principles</h2>
+            <h3>Concise is Key</h3>
+            <p>
+              The context window is a public good. Skills share the context window with everything
+              else Codex needs: system prompt, conversation history, other Skills’ metadata, and the
+              actual user request.
+            </p>
+            <p>
+              <strong>Default assumption: Codex is already very smart.</strong> Only add context
+              Codex doesn’t already have. Challenge each piece of information: “Does Codex really
+              need this explanation?” and “Does this paragraph justify its token cost?”
+            </p>
+            <p>Prefer concise examples over verbose explanations.</p>
+            <h3>Set Appropriate Degrees of Freedom</h3>
+            <p>Match the level of specificity to the task’s fragility and variability:</p>
+            <p>
+              <strong>High freedom (text-based instructions)</strong>: Use when multiple approaches
+              are valid, decisions depend on context, or heuristics guide the approach.
+            </p>
+            <p>
+              <strong>Medium freedom (pseudocode or scripts with parameters)</strong>: Use when a
+              preferred pattern exists, some variation is acceptable, or configuration affects
+              behavior.
+            </p>
+            <p>
+              <strong>Low freedom (specific scripts, few parameters)</strong>: Use when operations
+              are fragile and error-prone, consistency is critical, or a specific sequence must be
+              followed.
+            </p>
+            <p>
+              Think of Codex as exploring a path: a narrow bridge with cliffs needs specific
+              guardrails (low freedom), while an open field allows many routes (high freedom).
+            </p>
+            <h3>Anatomy of a Skill</h3>
+            <p>
+              Every skill consists of a required <a href="http://SKILL.md">SKILL.md</a> file and
+              optional bundled resources:
+            </p>
+            <pre><code>skill-name/
+├── SKILL.md (required)
+│   ├── YAML frontmatter metadata (required)
+│   │   ├── name: (required)
+│   │   └── description: (required)
+│   └── Markdown instructions (required)
+└── Bundled Resources (optional)
+    ├── scripts/          - Executable code (Python/Bash/etc.)
+    ├── references/       - Documentation intended to be loaded into context as needed
+    └── assets/           - Files used in output (templates, icons, fonts, etc.)
+</code></pre>
+            <h4><a href="http://SKILL.md">SKILL.md</a> (required)</h4>
+            <p>Every <a href="http://SKILL.md">SKILL.md</a> consists of:</p>
+            <ul>
+              <li>
+                <strong>Frontmatter</strong> (YAML): Contains <code>name</code> and
+                <code>description</code> fields. These are the only fields that Codex reads to
+                determine when the skill gets used, thus it is very important to be clear and
+                comprehensive in describing what the skill is, and when it should be used.
+              </li>
+              <li>
+                <strong>Body</strong> (Markdown): Instructions and guidance for using the skill.
+                Only loaded AFTER the skill triggers (if at all).
+              </li>
+            </ul>
+            <h4>Bundled Resources (optional)</h4>
+            <h5>Scripts (<code>scripts/</code>)</h5>
+            <p>
+              Executable code (Python/Bash/etc.) for tasks that require deterministic reliability or
+              are repeatedly rewritten.
+            </p>
+            <ul>
+              <li>
+                <strong>When to include</strong>: When the same code is being rewritten repeatedly
+                or deterministic reliability is needed
+              </li>
+              <li>
+                <strong>Example</strong>: <code>scripts/rotate_pdf.py</code> for PDF rotation tasks
+              </li>
+              <li>
+                <strong>Benefits</strong>: Token efficient, deterministic, may be executed without
+                loading into context
+              </li>
+              <li>
+                <strong>Note</strong>: Scripts may still need to be read by Codex for patching or
+                environment-specific adjustments
+              </li>
+            </ul>
+            <h5>References (<code>references/</code>)</h5>
+            <p>
+              Documentation and reference material intended to be loaded as needed into context to
+              inform Codex’s process and thinking.
+            </p>
+            <ul>
+              <li>
+                <strong>When to include</strong>: For documentation that Codex should reference
+                while working
+              </li>
+              <li>
+                <strong>Examples</strong>: <code>references/finance.md</code> for financial schemas,
+                <code>references/mnda.md</code> for company NDA template,
+                <code>references/policies.md</code> for company policies,
+                <code>references/api_docs.md</code> for API specifications
+              </li>
+              <li>
+                <strong>Use cases</strong>: Database schemas, API documentation, domain knowledge,
+                company policies, detailed workflow guides
+              </li>
+              <li>
+                <strong>Benefits</strong>: Keeps <a href="http://SKILL.md">SKILL.md</a> lean, loaded
+                only when Codex determines it’s needed
+              </li>
+              <li>
+                <strong>Best practice</strong>: If files are large (&gt;10k words), include grep
+                search patterns in <a href="http://SKILL.md">SKILL.md</a>
+              </li>
+              <li>
+                <strong>Avoid duplication</strong>: Information should live in either
+                <a href="http://SKILL.md">SKILL.md</a> or references files, not both. Prefer
+                references files for detailed information unless it’s truly core to the skill—this
+                keeps <a href="http://SKILL.md">SKILL.md</a> lean while making information
+                discoverable without hogging the context window. Keep only essential procedural
+                instructions and workflow guidance in <a href="http://SKILL.md">SKILL.md</a>; move
+                detailed reference material, schemas, and examples to references files.
+              </li>
+            </ul>
+            <h5>Assets (<code>assets/</code>)</h5>
+            <p>
+              Files not intended to be loaded into context, but rather used within the output Codex
+              produces.
+            </p>
+            <ul>
+              <li>
+                <strong>When to include</strong>: When the skill needs files that will be used in
+                the final output
+              </li>
+              <li>
+                <strong>Examples</strong>: <code>assets/logo.png</code> for brand assets,
+                <code>assets/slides.pptx</code> for PowerPoint templates,
+                <code>assets/frontend-template/</code> for HTML/React boilerplate,
+                <code>assets/font.ttf</code> for typography
+              </li>
+              <li>
+                <strong>Use cases</strong>: Templates, images, icons, boilerplate code, fonts,
+                sample documents that get copied or modified
+              </li>
+              <li>
+                <strong>Benefits</strong>: Separates output resources from documentation, enables
+                Codex to use files without loading them into context
+              </li>
+            </ul>
+            <h4>What to Not Include in a Skill</h4>
+            <p>
+              A skill should only contain essential files that directly support its functionality.
+              Do NOT create extraneous documentation or auxiliary files, including:
+            </p>
+            <ul>
+              <li><a href="http://README.md">README.md</a></li>
+              <li>INSTALLATION_GUIDE.md</li>
+              <li>QUICK_REFERENCE.md</li>
+              <li><a href="http://CHANGELOG.md">CHANGELOG.md</a></li>
+              <li>etc.</li>
+            </ul>
+            <p>
+              The skill should only contain the information needed for an AI agent to do the job at
+              hand. It should not contain auxiliary context about the process that went into
+              creating it, setup and testing procedures, user-facing documentation, etc. Creating
+              additional documentation files just adds clutter and confusion.
+            </p>
+            <h3>Progressive Disclosure Design Principle</h3>
+            <p>Skills use a three-level loading system to manage context efficiently:</p>
+            <ol>
+              <li>
+                <strong>Metadata (name + description)</strong> - Always in context (~100 words)
+              </li>
+              <li>
+                <strong><a href="http://SKILL.md">SKILL.md</a> body</strong> - When skill triggers
+                (&lt;5k words)
+              </li>
+              <li>
+                <strong>Bundled resources</strong> - As needed by Codex (Unlimited because scripts
+                can be executed without reading into context window)
+              </li>
+            </ol>
+            <h4>Progressive Disclosure Patterns</h4>
+            <p>
+              Keep <a href="http://SKILL.md">SKILL.md</a> body to the essentials and under 500 lines
+              to minimize context bloat. Split content into separate files when approaching this
+              limit. When splitting out content into other files, it is very important to reference
+              them from <a href="http://SKILL.md">SKILL.md</a> and describe clearly when to read
+              them, to ensure the reader of the skill knows they exist and when to use them.
+            </p>
+            <p>
+              <strong>Key principle:</strong> When a skill supports multiple variations, frameworks,
+              or options, keep only the core workflow and selection guidance in
+              <a href="http://SKILL.md">SKILL.md</a>. Move variant-specific details (patterns,
+              examples, configuration) into separate reference files.
+            </p>
+            <p><strong>Pattern 1: High-level guide with references</strong></p>
+            <pre><code class="language-markdown"># PDF Processing
+
+## Quick start
+
+Extract text with pdfplumber:
+[code example]
+
+## Advanced features
+
+- **Form filling**: See [FORMS.md](FORMS.md) for complete guide
+- **API reference**: See [REFERENCE.md](REFERENCE.md) for all methods
+- **Examples**: See [EXAMPLES.md](EXAMPLES.md) for common patterns
+</code></pre>
+            <p>
+              Codex loads <a href="http://FORMS.md">FORMS.md</a>,
+              <a href="http://REFERENCE.md">REFERENCE.md</a>, or
+              <a href="http://EXAMPLES.md">EXAMPLES.md</a> only when needed.
+            </p>
+            <p><strong>Pattern 2: Domain-specific organization</strong></p>
+            <p>
+              For Skills with multiple domains, organize content by domain to avoid loading
+              irrelevant context:
+            </p>
+            <pre><code>bigquery-skill/
+├── SKILL.md (overview and navigation)
+└── reference/
+    ├── finance.md (revenue, billing metrics)
+    ├── sales.md (opportunities, pipeline)
+    ├── product.md (API usage, features)
+    └── marketing.md (campaigns, attribution)
+</code></pre>
+            <p>
+              When a user asks about sales metrics, Codex only reads
+              <a href="http://sales.md">sales.md</a>.
+            </p>
+            <p>
+              Similarly, for skills supporting multiple frameworks or variants, organize by variant:
+            </p>
+            <pre><code>cloud-deploy/
+├── SKILL.md (workflow + provider selection)
+└── references/
+    ├── aws.md (AWS deployment patterns)
+    ├── gcp.md (GCP deployment patterns)
+    └── azure.md (Azure deployment patterns)
+</code></pre>
+            <p>When the user chooses AWS, Codex only reads <a href="http://aws.md">aws.md</a>.</p>
+            <p><strong>Pattern 3: Conditional details</strong></p>
+            <p>Show basic content, link to advanced content:</p>
+            <pre><code class="language-markdown"># DOCX Processing
+
+## Creating documents
+
+Use docx-js for new documents. See [DOCX-JS.md](DOCX-JS.md).
+
+## Editing documents
+
+For simple edits, modify the XML directly.
+
+**For tracked changes**: See [REDLINING.md](REDLINING.md)
+**For OOXML details**: See [OOXML.md](OOXML.md)
+</code></pre>
+            <p>
+              Codex reads <a href="http://REDLINING.md">REDLINING.md</a> or
+              <a href="http://OOXML.md">OOXML.md</a> only when the user needs those features.
+            </p>
+            <p><strong>Important guidelines:</strong></p>
+            <ul>
+              <li>
+                <strong>Avoid deeply nested references</strong> - Keep references one level deep
+                from <a href="http://SKILL.md">SKILL.md</a>. All reference files should link
+                directly from <a href="http://SKILL.md">SKILL.md</a>.
+              </li>
+              <li>
+                <strong>Structure longer reference files</strong> - For files longer than 100 lines,
+                include a table of contents at the top so Codex can see the full scope when
+                previewing.
+              </li>
+            </ul>
+            <h2>Skill Creation Process</h2>
+            <p>Skill creation involves these steps:</p>
+            <ol>
+              <li>Understand the skill with concrete examples</li>
+              <li>Plan reusable skill contents (scripts, references, assets)</li>
+              <li>Initialize the skill (run init_skill.py)</li>
+              <li>
+                Edit the skill (implement resources and write
+                <a href="http://SKILL.md">SKILL.md</a>)
+              </li>
+              <li>Package the skill (run package_skill.py)</li>
+              <li>Iterate based on real usage</li>
+            </ol>
+            <p>
+              Follow these steps in order, skipping only if there is a clear reason why they are not
+              applicable.
+            </p>
+            <h3>Skill Naming</h3>
+            <ul>
+              <li>
+                Use lowercase letters, digits, and hyphens only; normalize user-provided titles to
+                hyphen-case (e.g., “Plan Mode” -&gt; <code>plan-mode</code>).
+              </li>
+              <li>
+                When generating names, generate a name under 64 characters (letters, digits,
+                hyphens).
+              </li>
+              <li>Prefer short, verb-led phrases that describe the action.</li>
+              <li>
+                Namespace by tool when it improves clarity or triggering (e.g.,
+                <code>gh-address-comments</code>, <code>linear-address-issue</code>).
+              </li>
+              <li>Name the skill folder exactly after the skill name.</li>
+            </ul>
+            <h3>Step 1: Understanding the Skill with Concrete Examples</h3>
+            <p>
+              Skip this step only when the skill’s usage patterns are already clearly understood. It
+              remains valuable even when working with an existing skill.
+            </p>
+            <p>
+              To create an effective skill, clearly understand concrete examples of how the skill
+              will be used. This understanding can come from either direct user examples or
+              generated examples that are validated with user feedback.
+            </p>
+            <p>For example, when building an image-editor skill, relevant questions include:</p>
+            <ul>
+              <li>
+                “What functionality should the image-editor skill support? Editing, rotating,
+                anything else?”
+              </li>
+              <li>“Can you give some examples of how this skill would be used?”</li>
+              <li>
+                “I can imagine users asking for things like ‘Remove the red-eye from this image’ or
+                ‘Rotate this image’. Are there other ways you imagine this skill being used?”
+              </li>
+              <li>“What would a user say that should trigger this skill?”</li>
+            </ul>
+            <p>
+              To avoid overwhelming users, avoid asking too many questions in a single message.
+              Start with the most important questions and follow up as needed for better
+              effectiveness.
+            </p>
+            <p>
+              Conclude this step when there is a clear sense of the functionality the skill should
+              support.
+            </p>
+            <h3>Step 2: Planning the Reusable Skill Contents</h3>
+            <p>To turn concrete examples into an effective skill, analyze each example by:</p>
+            <ol>
+              <li>Considering how to execute on the example from scratch</li>
+              <li>
+                Identifying what scripts, references, and assets would be helpful when executing
+                these workflows repeatedly
+              </li>
+            </ol>
+            <p>
+              Example: When building a <code>pdf-editor</code> skill to handle queries like “Help me
+              rotate this PDF,” the analysis shows:
+            </p>
+            <ol>
+              <li>Rotating a PDF requires re-writing the same code each time</li>
+              <li>
+                A <code>scripts/rotate_pdf.py</code> script would be helpful to store in the skill
+              </li>
+            </ol>
+            <p>
+              Example: When designing a <code>frontend-webapp-builder</code> skill for queries like
+              “Build me a todo app” or “Build me a dashboard to track my steps,” the analysis shows:
+            </p>
+            <ol>
+              <li>Writing a frontend webapp requires the same boilerplate HTML/React each time</li>
+              <li>
+                An <code>assets/hello-world/</code> template containing the boilerplate HTML/React
+                project files would be helpful to store in the skill
+              </li>
+            </ol>
+            <p>
+              Example: When building a <code>big-query</code> skill to handle queries like “How many
+              users have logged in today?” the analysis shows:
+            </p>
+            <ol>
+              <li>
+                Querying BigQuery requires re-discovering the table schemas and relationships each
+                time
+              </li>
+              <li>
+                A <code>references/schema.md</code> file documenting the table schemas would be
+                helpful to store in the skill
+              </li>
+            </ol>
+            <p>
+              To establish the skill’s contents, analyze each concrete example to create a list of
+              the reusable resources to include: scripts, references, and assets.
+            </p>
+            <h3>Step 3: Initializing the Skill</h3>
+            <p>At this point, it is time to actually create the skill.</p>
+            <p>
+              Skip this step only if the skill being developed already exists, and iteration or
+              packaging is needed. In this case, continue to the next step.
+            </p>
+            <p>
+              When creating a new skill from scratch, always run the
+              <code>init_skill.py</code> script. The script conveniently generates a new template
+              skill directory that automatically includes everything a skill requires, making the
+              skill creation process much more efficient and reliable.
+            </p>
+            <p>Usage:</p>
+            <pre><code class="language-bash">scripts/init_skill.py &lt;skill-name&gt; --path &lt;output-directory&gt; [--resources scripts,references,assets] [--examples]
+</code></pre>
+            <p>Examples:</p>
+            <pre><code class="language-bash">scripts/init_skill.py my-skill --path skills/public
+scripts/init_skill.py my-skill --path skills/public --resources scripts,references
+scripts/init_skill.py my-skill --path skills/public --resources scripts --examples
+</code></pre>
+            <p>The script:</p>
+            <ul>
+              <li>Creates the skill directory at the specified path</li>
+              <li>
+                Generates a <a href="http://SKILL.md">SKILL.md</a> template with proper frontmatter
+                and TODO placeholders
+              </li>
+              <li>Optionally creates resource directories based on <code>--resources</code></li>
+              <li>Optionally adds example files when <code>--examples</code> is set</li>
+            </ul>
+            <p>
+              After initialization, customize the <a href="http://SKILL.md">SKILL.md</a> and add
+              resources as needed. If you used <code>--examples</code>, replace or delete
+              placeholder files.
+            </p>
+            <h3>Step 4: Edit the Skill</h3>
+            <p>
+              When editing the (newly-generated or existing) skill, remember that the skill is being
+              created for another instance of Codex to use. Include information that would be
+              beneficial and non-obvious to Codex. Consider what procedural knowledge,
+              domain-specific details, or reusable assets would help another Codex instance execute
+              these tasks more effectively.
+            </p>
+            <h4>Learn Proven Design Patterns</h4>
+            <p>Consult these helpful guides based on your skill’s needs:</p>
+            <ul>
+              <li>
+                <strong>Multi-step processes</strong>: See references/workflows.md for sequential
+                workflows and conditional logic
+              </li>
+              <li>
+                <strong>Specific output formats or quality standards</strong>: See
+                references/output-patterns.md for template and example patterns
+              </li>
+            </ul>
+            <p>These files contain established best practices for effective skill design.</p>
+            <h4>Start with Reusable Skill Contents</h4>
+            <p>
+              To begin implementation, start with the reusable resources identified above:
+              <code>scripts/</code>, <code>references/</code>, and <code>assets/</code> files. Note
+              that this step may require user input. For example, when implementing a
+              <code>brand-guidelines</code> skill, the user may need to provide brand assets or
+              templates to store in <code>assets/</code>, or documentation to store in
+              <code>references/</code>.
+            </p>
+            <p>
+              Added scripts must be tested by actually running them to ensure there are no bugs and
+              that the output matches what is expected. If there are many similar scripts, only a
+              representative sample needs to be tested to ensure confidence that they all work while
+              balancing time to completion.
+            </p>
+            <p>
+              If you used <code>--examples</code>, delete any placeholder files that are not needed
+              for the skill. Only create resource directories that are actually required.
+            </p>
+            <h4>Update <a href="http://SKILL.md">SKILL.md</a></h4>
+            <p><strong>Writing Guidelines:</strong> Always use imperative/infinitive form.</p>
+            <h5>Frontmatter</h5>
+            <p>Write the YAML frontmatter with <code>name</code> and <code>description</code>:</p>
+            <ul>
+              <li><code>name</code>: The skill name</li>
+              <li>
+                <code>description</code>: This is the primary triggering mechanism for your skill,
+                and helps Codex understand when to use the skill.
+                <ul>
+                  <li>
+                    Include both what the Skill does and specific triggers/contexts for when to use
+                    it.
+                  </li>
+                  <li>
+                    Include all “when to use” information here - Not in the body. The body is only
+                    loaded after triggering, so “When to Use This Skill” sections in the body are
+                    not helpful to Codex.
+                  </li>
+                  <li>
+                    Example description for a <code>docx</code> skill: “Comprehensive document
+                    creation, editing, and analysis with support for tracked changes, comments,
+                    formatting preservation, and text extraction. Use when Codex needs to work with
+                    professional documents (.docx files) for: (1) Creating new documents, (2)
+                    Modifying or editing content, (3) Working with tracked changes, (4) Adding
+                    comments, or any other document tasks”
+                  </li>
+                </ul>
+              </li>
+            </ul>
+            <p>Do not include any other fields in YAML frontmatter.</p>
+            <h5>Body</h5>
+            <p>Write instructions for using the skill and its bundled resources.</p>
+            <h3>Step 5: Packaging a Skill</h3>
+            <p>
+              Once development of the skill is complete, it must be packaged into a distributable
+              .skill file that gets shared with the user. The packaging process automatically
+              validates the skill first to ensure it meets all requirements:
+            </p>
+            <pre><code class="language-bash">scripts/package_skill.py &lt;path/to/skill-folder&gt;
+</code></pre>
+            <p>Optional output directory specification:</p>
+            <pre><code class="language-bash">scripts/package_skill.py &lt;path/to/skill-folder&gt; ./dist
+</code></pre>
+            <p>The packaging script will:</p>
+            <ol>
+              <li>
+                <p><strong>Validate</strong> the skill automatically, checking:</p>
+                <ul>
+                  <li>YAML frontmatter format and required fields</li>
+                  <li>Skill naming conventions and directory structure</li>
+                  <li>Description completeness and quality</li>
+                  <li>File organization and resource references</li>
+                </ul>
+              </li>
+              <li>
+                <p>
+                  <strong>Package</strong> the skill if validation passes, creating a .skill file
+                  named after the skill (e.g., <code>my-skill.skill</code>) that includes all files
+                  and maintains the proper directory structure for distribution. The .skill file is
+                  a zip file with a .skill extension.
+                </p>
+              </li>
+            </ol>
+            <p>
+              If validation fails, the script will report the errors and exit without creating a
+              package. Fix any validation errors and run the packaging command again.
+            </p>
+            <h3>Step 6: Iterate</h3>
+            <p>
+              After testing the skill, users may request improvements. Often this happens right
+              after using the skill, with fresh context of how the skill performed.
+            </p>
+            <p><strong>Iteration workflow:</strong></p>
+            <ol>
+              <li>Use the skill on real tasks</li>
+              <li>Notice struggles or inefficiencies</li>
+              <li>
+                Identify how <a href="http://SKILL.md">SKILL.md</a> or bundled resources should be
+                updated
+              </li>
+              <li>Implement changes and test again</li>
+            </ol>
+          </div>
+        </div>
+        <aside class="detail-sidebar">
+          <div class="sidebar-card">
+            <h3>Info</h3>
+            <div class="info-row">
+              <span class="label">Category</span
+              ><span class="value"><span class="category-badge">Development</span></span>
+            </div>
+            <div class="info-row">
+              <span class="label">Requires</span><span class="value">None</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Size</span><span class="value">17.9 KB</span>
+            </div>
+
+            <div class="info-row">
+              <span class="label">Source</span
+              ><span class="value"
+                ><a
+                  href="https://github.com/hanzoai/bot/blob/main/skills/skill-creator/SKILL.md"
+                  target="_blank"
+                  rel="noopener"
+                  >GitHub</a
+                ></span
+              >
+            </div>
+            <div class="info-row" id="lastUpdated">
+              <span class="label">Updated</span><span class="value">—</span>
+            </div>
+          </div>
+
+          <div class="sidebar-card sidebar-actions">
+            <a
+              href="https://github.com/hanzoai/bot/blob/main/skills/skill-creator/SKILL.md"
+              class="btn-outline"
+              target="_blank"
+              rel="noopener"
+              >View on GitHub</a
+            >
+            <a href="/chat" class="btn-primary">Open in Hanzo Bot</a>
+          </div>
+          <div class="sidebar-card">
+            <h3>Web3 Native</h3>
+            <div class="web3-badge">&#9670; On-Chain Ready</div>
+            <div class="web3-features">
+              <div class="web3-feat">DID identity for every bot</div>
+              <div class="web3-feat">Integrated wallet &amp; payments</div>
+              <div class="web3-feat">Prefund balance, draw on credits</div>
+              <div class="web3-feat">On-chain &amp; fiat payment rails</div>
+              <div class="web3-feat">Send funds to bots directly</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+                <path
+                  d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+                  fill="#fff"
+                />
+                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" /></svg
+              ><span>Hanzo</span>
+            </div>
+            <p>Build, deploy, and manage autonomous AI agents across every platform.</p>
+            <div class="footer-social">
+              <a href="https://x.com/hanaborteam" aria-label="X"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                  /></svg
+              ></a>
+              <a href="https://linkedin.com/company/hanzo-ai" aria-label="LinkedIn"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  /></svg
+              ></a>
+              <a href="https://discord.gg/XthHQQj" aria-label="Discord"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"
+                  /></svg
+              ></a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h4>Products</h4>
+            <a href="https://hanzo.ai">Hanzo AI</a><a href="https://hanzo.app">Hanzo App</a
+            ><a href="https://hanzo.bot">Hanzo Bot</a><a href="https://hanzo.ai/dev">Hanzo Dev</a
+            ><a href="https://hanzo.ai/cloud">Hanzo Cloud</a
+            ><a href="https://hanzo.app/download">Desktop App</a><a href="/book">The Hanzo Book</a>
+          </div>
+          <div class="footer-col">
+            <h4>Developers</h4>
+            <a href="https://docs.hanzo.bot">Documentation</a
+            ><a href="https://github.com/hanzoai/bot">GitHub</a
+            ><a href="https://docs.hanzo.bot/api">API Reference</a><a href="/skills">Skills Hub</a
+            ><a href="https://docs.hanzo.bot/cli">CLI Reference</a>
+          </div>
+          <div class="footer-col">
+            <h4>Solutions</h4>
+            <a href="#">Customer Support</a><a href="#">Developer Operations</a
+            ><a href="#">Marketing</a><a href="#">Finance</a><a href="#">Security</a
+            ><a href="#">Enterprise</a>
+          </div>
+          <div class="footer-col">
+            <h4>Company</h4>
+            <a href="https://hanzo.ai/about">About</a><a href="https://hanzo.ai/blog">Blog</a
+            ><a href="https://hanzo.ai/careers">Careers</a
+            ><a href="https://hanzo.ai/contact">Contact</a
+            ><a href="https://hanzo.ai/privacy">Privacy</a><a href="https://hanzo.ai/terms">Terms</a
+            ><a href="https://status.hanzo.ai">Status</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; 2016–2026 Hanzo Industries. All rights reserved.</span>
+          <span>hanzo.ai</span>
+        </div>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var slug = "skill-creator";
+        var el = document.getElementById("lastUpdated");
+        if (!el) return;
+        var key = "gh-commits-" + slug;
+        var cached = sessionStorage.getItem(key);
+        function show(data) {
+          if (!Array.isArray(data) || !data[0] || !data[0].commit) return;
+          var d = new Date(data[0].commit.author.date);
+          var days = Math.floor((Date.now() - d.getTime()) / 86400000);
+          var txt = days === 0 ? "today" : days === 1 ? "yesterday" : days + " days ago";
+          el.querySelector(".value").textContent = txt;
+        }
+        if (cached) {
+          try {
+            show(JSON.parse(cached));
+          } catch (e) {}
+        } else {
+          fetch(
+            "https://api.github.com/repos/hanzoai/bot/commits?path=skills/" +
+              slug +
+              "/SKILL.md&per_page=1",
+          )
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (d) {
+              try {
+                sessionStorage.setItem(key, JSON.stringify(d));
+              } catch (e) {}
+              show(d);
+            })
+            .catch(function () {});
+        }
+      })();
+    </script>
+  </body>
+</html>

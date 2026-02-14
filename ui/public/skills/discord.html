@@ -1,0 +1,1447 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>discord — Hanzo Bot Skills</title>
+    <meta
+      name="description"
+      content="Use when you need to control Discord from Hanzo Bot via the discord tool: send messages, react, post or upload stickers, upload emojis, run polls, manage threads/pins/search, create/edit/delete channels and categories, fetch permissions or member/role/channel info, set bot presence/activity, or handle moderation actions in Discord DMs or channels."
+    />
+    <meta name="keywords" content="discord, Hanzo Bot, AI skill, Communication, autonomous agent" />
+    <link rel="canonical" href="https://hanzo.bot/skills/discord" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="discord — Hanzo Bot Skills" />
+    <meta
+      property="og:description"
+      content="Use when you need to control Discord from Hanzo Bot via the discord tool: send messages, react, post or upload stickers, upload emojis, run polls, manage threads/pins/search, create/edit/delete channels and categories, fetch permissions or member/role/channel info, set bot presence/activity, or handle moderation actions in Discord DMs or channels."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://hanzo.bot/skills/discord" />
+    <meta property="og:site_name" content="Hanzo Bot" />
+    <meta property="og:image" content="https://hanzo.bot/og-skills.png" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@hanaborteam" />
+    <meta name="twitter:title" content="discord — Hanzo Bot Skills" />
+    <meta
+      name="twitter:description"
+      content="Use when you need to control Discord from Hanzo Bot via the discord tool: send messages, react, post or upload stickers, upload emojis, run polls, manage threads/pins/search, create/edit/delete channels and categories, fetch permissions or member/role/channel info, set bot presence/activity, or handle moderation actions in Discord DMs or channels."
+    />
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "discord — Hanzo Bot Skill",
+        "description": "Use when you need to control Discord from Hanzo Bot via the discord tool: send messages, react, post or upload stickers, upload emojis, run polls, manage threads/pins/search, create/edit/delete channels and categories, fetch permissions or member/role/channel info, set bot presence/activity, or handle moderation actions in Discord DMs or channels.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "Hanzo AI",
+          "url": "https://hanzo.ai"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --brand: #fd4444;
+        --brand-secondary: #ff6b6b;
+        --bg: #000;
+        --bg-card: rgba(255, 255, 255, 0.04);
+        --bg-hover: #1a1a1a;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-hover: rgba(255, 255, 255, 0.16);
+        --text: #fff;
+        --muted: #888;
+        --subtle: #555;
+        --max-w: 1200px;
+        --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --font:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          sans-serif;
+        --font-mono: "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 64px 64px;
+        pointer-events: none;
+        z-index: 0;
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        opacity: 0.035;
+        pointer-events: none;
+        z-index: 0;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      body > * {
+        position: relative;
+        z-index: 1;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+      }
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .header-inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 24px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo-mark {
+        width: 24px;
+        height: 24px;
+      }
+      .logo-mark svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .logo-text {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+      .nav-links {
+        display: flex;
+        gap: 4px;
+      }
+      .nav-link {
+        position: relative;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-radius: 6px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .nav-link:hover {
+        color: var(--text);
+        background: var(--bg-hover);
+      }
+      .nav-link.active {
+        color: var(--brand);
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-ghost {
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-radius: 8px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        background: var(--bg-hover);
+      }
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--brand);
+        border-radius: 9999px;
+        transition:
+          opacity 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn-primary:hover {
+        opacity: 0.9;
+        box-shadow: 0 0 24px rgba(253, 68, 68, 0.3);
+      }
+      .btn-outline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 9999px;
+        transition:
+          border-color 0.15s,
+          background 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn-outline:hover {
+        border-color: rgba(253, 68, 68, 0.3);
+        background: rgba(253, 68, 68, 0.06);
+      }
+      .btn-lg {
+        padding: 14px 32px;
+        font-size: 15px;
+        border-radius: 9999px;
+      }
+      .footer {
+        border-top: 1px solid var(--border);
+        padding: 64px 24px 32px;
+      }
+      .footer-inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 240px repeat(4, 1fr);
+        gap: 40px;
+        margin-bottom: 48px;
+      }
+      .footer-brand .footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .footer-brand .footer-logo svg {
+        width: 20px;
+        height: 20px;
+      }
+      .footer-brand .footer-logo span {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .footer-brand p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+      .footer-social {
+        display: flex;
+        gap: 12px;
+      }
+      .footer-social a {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--muted);
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .footer-social a:hover {
+        color: var(--text);
+        border-color: var(--border-hover);
+      }
+      .footer-social svg {
+        width: 14px;
+        height: 14px;
+      }
+      .footer-col h4 {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--subtle);
+        margin-bottom: 16px;
+      }
+      .footer-col a {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        padding: 3px 0;
+        transition: color 0.15s;
+      }
+      .footer-col a:hover {
+        color: var(--text);
+      }
+      .footer-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--subtle);
+      }
+      @media (max-width: 1024px) {
+        .footer-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .footer-brand {
+          grid-column: 1/-1;
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+      @media (max-width: 768px) {
+        .footer-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 480px) {
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Detail layout ── */
+      .detail-wrap {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 24px;
+        transition: color 0.15s;
+      }
+      .back-link:hover {
+        color: var(--text);
+      }
+      .skill-hero {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      .skill-emoji {
+        font-size: 48px;
+        line-height: 1;
+      }
+      .skill-hero h1 {
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      .skill-desc {
+        font-size: 15px;
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 40px;
+        max-width: 720px;
+      }
+      .detail-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 48px;
+        align-items: start;
+      }
+      .detail-main {
+        min-width: 0;
+      }
+      .detail-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: sticky;
+        top: 80px;
+      }
+      .sidebar-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        backdrop-filter: blur(16px);
+      }
+      .sidebar-card h3 {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--subtle);
+        margin-bottom: 16px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 6px 0;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border);
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-row .label {
+        color: var(--muted);
+      }
+      .info-row .value {
+        color: var(--text);
+        text-align: right;
+      }
+      .info-row .value code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .info-row .value a {
+        color: var(--brand);
+        transition: opacity 0.15s;
+      }
+      .info-row .value a:hover {
+        opacity: 0.8;
+      }
+      .install-row {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .install-row:last-child {
+        border-bottom: none;
+      }
+      .install-label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .install-cmd {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--brand-secondary);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 6px 10px;
+        border-radius: 6px;
+        word-break: break-all;
+      }
+      .sidebar-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .sidebar-actions a {
+        text-align: center;
+      }
+      .web3-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #818cf8;
+        margin-bottom: 4px;
+      }
+      .web3-features {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      .web3-feat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .web3-feat::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #818cf8;
+        flex-shrink: 0;
+      }
+      .category-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 500;
+        background: rgba(253, 68, 68, 0.08);
+        color: var(--brand-secondary);
+        border: 1px solid rgba(253, 68, 68, 0.15);
+      }
+      /* ── README styles ── */
+      .skill-readme {
+        line-height: 1.7;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .skill-readme h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 32px 0 16px;
+        letter-spacing: -0.02em;
+      }
+      .skill-readme h2 {
+        font-size: 22px;
+        font-weight: 600;
+        margin: 28px 0 12px;
+        letter-spacing: -0.01em;
+        color: var(--text);
+      }
+      .skill-readme h3 {
+        font-size: 17px;
+        font-weight: 600;
+        margin: 24px 0 8px;
+      }
+      .skill-readme h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 20px 0 8px;
+      }
+      .skill-readme p {
+        margin: 0 0 16px;
+      }
+      .skill-readme ul,
+      .skill-readme ol {
+        margin: 0 0 16px;
+        padding-left: 24px;
+      }
+      .skill-readme li {
+        margin-bottom: 6px;
+      }
+      .skill-readme code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .skill-readme pre {
+        margin: 0 0 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+      }
+      .skill-readme pre code {
+        display: block;
+        padding: 16px;
+        background: none;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .skill-readme table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 0 16px;
+        font-size: 13px;
+      }
+      .skill-readme th,
+      .skill-readme td {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        text-align: left;
+      }
+      .skill-readme th {
+        background: rgba(255, 255, 255, 0.04);
+        font-weight: 600;
+      }
+      .skill-readme blockquote {
+        border-left: 3px solid var(--brand);
+        padding: 8px 16px;
+        margin: 0 0 16px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 0 8px 8px 0;
+      }
+      .skill-readme a {
+        color: var(--brand-secondary);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .skill-readme a:hover {
+        color: var(--brand);
+      }
+      .skill-readme hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 24px 0;
+      }
+      .skill-readme strong {
+        color: var(--text);
+      }
+      @media (max-width: 1024px) {
+        .detail-layout {
+          grid-template-columns: 1fr;
+        }
+        .detail-sidebar {
+          position: static;
+          order: 2;
+        }
+      }
+      @media (max-width: 768px) {
+        .detail-wrap {
+          padding: 72px 16px 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-inner">
+        <div class="header-left">
+          <a href="/" class="logo">
+            <div class="logo-mark">
+              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+                <path
+                  d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+                  fill="#fff"
+                />
+                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" />
+              </svg>
+            </div>
+            <span class="logo-text">Bot</span>
+          </a>
+          <nav class="nav-links">
+            <a href="https://hanzo.ai" class="nav-link">AI</a>
+            <a href="/" class="nav-link">Home</a>
+            <a href="/skills" class="nav-link active">Skills</a>
+            <a href="/book" class="nav-link">Book</a>
+            <a href="https://docs.hanzo.bot" class="nav-link">Docs</a>
+            <a href="https://github.com/hanzoai/bot" class="nav-link">GitHub</a>
+          </nav>
+        </div>
+        <div class="header-right">
+          <a href="https://hanzo.ai/contact" class="btn-ghost">Contact Sales</a>
+          <a href="/chat" class="btn-primary">Sign In</a>
+        </div>
+      </div>
+    </header>
+    <main class="detail-wrap">
+      <a href="/skills" class="back-link">&larr; Back to all skills</a>
+      <div class="skill-hero">
+        <span class="skill-emoji">🎮</span>
+        <div>
+          <h1>discord</h1>
+        </div>
+      </div>
+      <p class="skill-desc">
+        Use when you need to control Discord from Hanzo Bot via the discord tool: send messages,
+        react, post or upload stickers, upload emojis, run polls, manage threads/pins/search,
+        create/edit/delete channels and categories, fetch permissions or member/role/channel info,
+        set bot presence/activity, or handle moderation actions in Discord DMs or channels.
+      </p>
+      <div class="detail-layout">
+        <div class="detail-main">
+          <div class="skill-readme">
+            <h1>Discord Actions</h1>
+            <h2>Overview</h2>
+            <p>
+              Use <code>discord</code> to manage messages, reactions, threads, polls, and
+              moderation. You can disable groups via <code>discord.actions.*</code> (defaults to
+              enabled, except roles/moderation). The tool uses the bot token configured for Hanzo
+              Bot.
+            </p>
+            <h2>Inputs to collect</h2>
+            <ul>
+              <li>
+                For reactions: <code>channelId</code>, <code>messageId</code>, and an
+                <code>emoji</code>.
+              </li>
+              <li>
+                For fetchMessage: <code>guildId</code>, <code>channelId</code>,
+                <code>messageId</code>, or a <code>messageLink</code> like
+                <code
+                  >https://discord.com/channels/&lt;guildId&gt;/&lt;channelId&gt;/&lt;messageId&gt;</code
+                >.
+              </li>
+              <li>
+                For stickers/polls/sendMessage: a <code>to</code> target (<code
+                  >channel:&lt;id&gt;</code
+                >
+                or <code>user:&lt;id&gt;</code>). Optional <code>content</code> text.
+              </li>
+              <li>Polls also need a <code>question</code> plus 2–10 <code>answers</code>.</li>
+              <li>
+                For media: <code>mediaUrl</code> with <code>file:///path</code> for local files or
+                <code>https://...</code> for remote.
+              </li>
+              <li>
+                For emoji uploads: <code>guildId</code>, <code>name</code>, <code>mediaUrl</code>,
+                optional <code>roleIds</code> (limit 256KB, PNG/JPG/GIF).
+              </li>
+              <li>
+                For sticker uploads: <code>guildId</code>, <code>name</code>,
+                <code>description</code>, <code>tags</code>, <code>mediaUrl</code> (limit 512KB,
+                PNG/APNG/Lottie JSON).
+              </li>
+            </ul>
+            <p>
+              Message context lines include <code>discord message id</code> and
+              <code>channel</code> fields you can reuse directly.
+            </p>
+            <p>
+              <strong>Note:</strong> <code>sendMessage</code> uses
+              <code>to: &quot;channel:&lt;id&gt;&quot;</code> format, not <code>channelId</code>.
+              Other actions like <code>react</code>, <code>readMessages</code>,
+              <code>editMessage</code> use <code>channelId</code> directly. <strong>Note:</strong>
+              <code>fetchMessage</code> accepts message IDs or full links like
+              <code
+                >https://discord.com/channels/&lt;guildId&gt;/&lt;channelId&gt;/&lt;messageId&gt;</code
+              >.
+            </p>
+            <h2>Actions</h2>
+            <h3>React to a message</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;react&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;messageId&quot;: &quot;456&quot;,
+  &quot;emoji&quot;: &quot;✅&quot;
+}
+</code></pre>
+            <h3>List reactions + users</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;reactions&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;messageId&quot;: &quot;456&quot;,
+  &quot;limit&quot;: 100
+}
+</code></pre>
+            <h3>Send a sticker</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;sticker&quot;,
+  &quot;to&quot;: &quot;channel:123&quot;,
+  &quot;stickerIds&quot;: [&quot;9876543210&quot;],
+  &quot;content&quot;: &quot;Nice work!&quot;
+}
+</code></pre>
+            <ul>
+              <li>Up to 3 sticker IDs per message.</li>
+              <li><code>to</code> can be <code>user:&lt;id&gt;</code> for DMs.</li>
+            </ul>
+            <h3>Upload a custom emoji</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;emojiUpload&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;name&quot;: &quot;party_blob&quot;,
+  &quot;mediaUrl&quot;: &quot;file:///tmp/party.png&quot;,
+  &quot;roleIds&quot;: [&quot;222&quot;]
+}
+</code></pre>
+            <ul>
+              <li>Emoji images must be PNG/JPG/GIF and &lt;= 256KB.</li>
+              <li>
+                <code>roleIds</code> is optional; omit to make the emoji available to everyone.
+              </li>
+            </ul>
+            <h3>Upload a sticker</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;stickerUpload&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;name&quot;: &quot;bot_wave&quot;,
+  &quot;description&quot;: &quot;Hanzo Bot waving hello&quot;,
+  &quot;tags&quot;: &quot;👋&quot;,
+  &quot;mediaUrl&quot;: &quot;file:///tmp/wave.png&quot;
+}
+</code></pre>
+            <ul>
+              <li>
+                Stickers require <code>name</code>, <code>description</code>, and <code>tags</code>.
+              </li>
+              <li>Uploads must be PNG/APNG/Lottie JSON and &lt;= 512KB.</li>
+            </ul>
+            <h3>Create a poll</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;poll&quot;,
+  &quot;to&quot;: &quot;channel:123&quot;,
+  &quot;question&quot;: &quot;Lunch?&quot;,
+  &quot;answers&quot;: [&quot;Pizza&quot;, &quot;Sushi&quot;, &quot;Salad&quot;],
+  &quot;allowMultiselect&quot;: false,
+  &quot;durationHours&quot;: 24,
+  &quot;content&quot;: &quot;Vote now&quot;
+}
+</code></pre>
+            <ul>
+              <li><code>durationHours</code> defaults to 24; max 32 days (768 hours).</li>
+            </ul>
+            <h3>Check bot permissions for a channel</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;permissions&quot;,
+  &quot;channelId&quot;: &quot;123&quot;
+}
+</code></pre>
+            <h2>Ideas to try</h2>
+            <ul>
+              <li>React with ✅/⚠️ to mark status updates.</li>
+              <li>Post a quick poll for release decisions or meeting times.</li>
+              <li>Send celebratory stickers after successful deploys.</li>
+              <li>Upload new emojis/stickers for release moments.</li>
+              <li>Run weekly “priority check” polls in team channels.</li>
+              <li>DM stickers as acknowledgements when a user’s request is completed.</li>
+            </ul>
+            <h2>Action gating</h2>
+            <p>Use <code>discord.actions.*</code> to disable action groups:</p>
+            <ul>
+              <li><code>reactions</code> (react + reactions list + emojiList)</li>
+              <li>
+                <code>stickers</code>, <code>polls</code>, <code>permissions</code>,
+                <code>messages</code>, <code>threads</code>, <code>pins</code>, <code>search</code>
+              </li>
+              <li><code>emojiUploads</code>, <code>stickerUploads</code></li>
+              <li>
+                <code>memberInfo</code>, <code>roleInfo</code>, <code>channelInfo</code>,
+                <code>voiceStatus</code>, <code>events</code>
+              </li>
+              <li><code>roles</code> (role add/remove, default <code>false</code>)</li>
+              <li>
+                <code>channels</code> (channel/category create/edit/delete/move, default
+                <code>false</code>)
+              </li>
+              <li><code>moderation</code> (timeout/kick/ban, default <code>false</code>)</li>
+              <li><code>presence</code> (bot status/activity, default <code>false</code>)</li>
+            </ul>
+            <h3>Read recent messages</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;readMessages&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;limit&quot;: 20
+}
+</code></pre>
+            <h3>Fetch a single message</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;fetchMessage&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;messageId&quot;: &quot;456&quot;
+}
+</code></pre>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;fetchMessage&quot;,
+  &quot;messageLink&quot;: &quot;https://discord.com/channels/999/123/456&quot;
+}
+</code></pre>
+            <h3>Send/edit/delete a message</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;sendMessage&quot;,
+  &quot;to&quot;: &quot;channel:123&quot;,
+  &quot;content&quot;: &quot;Hello from Hanzo Bot&quot;
+}
+</code></pre>
+            <p><strong>With media attachment:</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;sendMessage&quot;,
+  &quot;to&quot;: &quot;channel:123&quot;,
+  &quot;content&quot;: &quot;Check out this audio!&quot;,
+  &quot;mediaUrl&quot;: &quot;file:///tmp/audio.mp3&quot;
+}
+</code></pre>
+            <ul>
+              <li>
+                <code>to</code> uses format <code>channel:&lt;id&gt;</code> or
+                <code>user:&lt;id&gt;</code> for DMs (not <code>channelId</code>!)
+              </li>
+              <li>
+                <code>mediaUrl</code> supports local files (<code>file:///path/to/file</code>) and
+                remote URLs (<code>https://...</code>)
+              </li>
+              <li>
+                Optional <code>replyTo</code> with a message ID to reply to a specific message
+              </li>
+            </ul>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;editMessage&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;messageId&quot;: &quot;456&quot;,
+  &quot;content&quot;: &quot;Fixed typo&quot;
+}
+</code></pre>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;deleteMessage&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;messageId&quot;: &quot;456&quot;
+}
+</code></pre>
+            <h3>Threads</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;threadCreate&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;name&quot;: &quot;Bug triage&quot;,
+  &quot;messageId&quot;: &quot;456&quot;
+}
+</code></pre>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;threadList&quot;,
+  &quot;guildId&quot;: &quot;999&quot;
+}
+</code></pre>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;threadReply&quot;,
+  &quot;channelId&quot;: &quot;777&quot;,
+  &quot;content&quot;: &quot;Replying in thread&quot;
+}
+</code></pre>
+            <h3>Pins</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;pinMessage&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;messageId&quot;: &quot;456&quot;
+}
+</code></pre>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;listPins&quot;,
+  &quot;channelId&quot;: &quot;123&quot;
+}
+</code></pre>
+            <h3>Search messages</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;searchMessages&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;content&quot;: &quot;release notes&quot;,
+  &quot;channelIds&quot;: [&quot;123&quot;, &quot;456&quot;],
+  &quot;limit&quot;: 10
+}
+</code></pre>
+            <h3>Member + role info</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;memberInfo&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;userId&quot;: &quot;111&quot;
+}
+</code></pre>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;roleInfo&quot;,
+  &quot;guildId&quot;: &quot;999&quot;
+}
+</code></pre>
+            <h3>List available custom emojis</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;emojiList&quot;,
+  &quot;guildId&quot;: &quot;999&quot;
+}
+</code></pre>
+            <h3>Role changes (disabled by default)</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;roleAdd&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;userId&quot;: &quot;111&quot;,
+  &quot;roleId&quot;: &quot;222&quot;
+}
+</code></pre>
+            <h3>Channel info</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;channelInfo&quot;,
+  &quot;channelId&quot;: &quot;123&quot;
+}
+</code></pre>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;channelList&quot;,
+  &quot;guildId&quot;: &quot;999&quot;
+}
+</code></pre>
+            <h3>Channel management (disabled by default)</h3>
+            <p>
+              Create, edit, delete, and move channels and categories. Enable via
+              <code>discord.actions.channels: true</code>.
+            </p>
+            <p><strong>Create a text channel:</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;channelCreate&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;name&quot;: &quot;general-chat&quot;,
+  &quot;type&quot;: 0,
+  &quot;parentId&quot;: &quot;888&quot;,
+  &quot;topic&quot;: &quot;General discussion&quot;
+}
+</code></pre>
+            <ul>
+              <li>
+                <code>type</code>: Discord channel type integer (0 = text, 2 = voice, 4 = category;
+                other values supported)
+              </li>
+              <li><code>parentId</code>: category ID to nest under (optional)</li>
+              <li><code>topic</code>, <code>position</code>, <code>nsfw</code>: optional</li>
+            </ul>
+            <p><strong>Create a category:</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;categoryCreate&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;name&quot;: &quot;Projects&quot;
+}
+</code></pre>
+            <p><strong>Edit a channel:</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;channelEdit&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;name&quot;: &quot;new-name&quot;,
+  &quot;topic&quot;: &quot;Updated topic&quot;
+}
+</code></pre>
+            <ul>
+              <li>
+                Supports <code>name</code>, <code>topic</code>, <code>position</code>,
+                <code>parentId</code> (null to remove from category), <code>nsfw</code>,
+                <code>rateLimitPerUser</code>
+              </li>
+            </ul>
+            <p><strong>Move a channel:</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;channelMove&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;channelId&quot;: &quot;123&quot;,
+  &quot;parentId&quot;: &quot;888&quot;,
+  &quot;position&quot;: 2
+}
+</code></pre>
+            <ul>
+              <li><code>parentId</code>: target category (null to move to top level)</li>
+            </ul>
+            <p><strong>Delete a channel:</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;channelDelete&quot;,
+  &quot;channelId&quot;: &quot;123&quot;
+}
+</code></pre>
+            <p><strong>Edit/delete a category:</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;categoryEdit&quot;,
+  &quot;categoryId&quot;: &quot;888&quot;,
+  &quot;name&quot;: &quot;Renamed Category&quot;
+}
+</code></pre>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;categoryDelete&quot;,
+  &quot;categoryId&quot;: &quot;888&quot;
+}
+</code></pre>
+            <h3>Voice status</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;voiceStatus&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;userId&quot;: &quot;111&quot;
+}
+</code></pre>
+            <h3>Scheduled events</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;eventList&quot;,
+  &quot;guildId&quot;: &quot;999&quot;
+}
+</code></pre>
+            <h3>Moderation (disabled by default)</h3>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;timeout&quot;,
+  &quot;guildId&quot;: &quot;999&quot;,
+  &quot;userId&quot;: &quot;111&quot;,
+  &quot;durationMinutes&quot;: 10
+}
+</code></pre>
+            <h3>Bot presence/activity (disabled by default)</h3>
+            <p>
+              Set the bot’s online status and activity. Enable via
+              <code>discord.actions.presence: true</code>.
+            </p>
+            <p>
+              Discord bots can only set <code>name</code>, <code>state</code>, <code>type</code>,
+              and <code>url</code> on an activity. Other Activity fields (details, emoji, assets)
+              are accepted by the gateway but silently ignored by Discord for bots.
+            </p>
+            <p><strong>How fields render by activity type:</strong></p>
+            <ul>
+              <li>
+                <strong>playing, streaming, listening, watching, competing</strong>:
+                <code>activityName</code> is shown in the sidebar under the bot’s name (e.g.
+                “<strong>with fire</strong>” for type “playing” and name “with fire”).
+                <code>activityState</code> is shown in the profile flyout.
+              </li>
+              <li>
+                <strong>custom</strong>: <code>activityName</code> is ignored. Only
+                <code>activityState</code> is displayed as the status text in the sidebar.
+              </li>
+              <li>
+                <strong>streaming</strong>: <code>activityUrl</code> may be displayed or embedded by
+                the client.
+              </li>
+            </ul>
+            <p><strong>Set playing status:</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;setPresence&quot;,
+  &quot;activityType&quot;: &quot;playing&quot;,
+  &quot;activityName&quot;: &quot;with fire&quot;
+}
+</code></pre>
+            <p>
+              Result in sidebar: “<strong>with fire</strong>”. Flyout shows: “Playing: with fire”
+            </p>
+            <p><strong>With state (shown in flyout):</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;setPresence&quot;,
+  &quot;activityType&quot;: &quot;playing&quot;,
+  &quot;activityName&quot;: &quot;My Game&quot;,
+  &quot;activityState&quot;: &quot;In the lobby&quot;
+}
+</code></pre>
+            <p>
+              Result in sidebar: “<strong>My Game</strong>”. Flyout shows: “Playing: My Game
+              (newline) In the lobby”.
+            </p>
+            <p><strong>Set streaming (optional URL, may not render for bots):</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;setPresence&quot;,
+  &quot;activityType&quot;: &quot;streaming&quot;,
+  &quot;activityName&quot;: &quot;Live coding&quot;,
+  &quot;activityUrl&quot;: &quot;https://twitch.tv/example&quot;
+}
+</code></pre>
+            <p><strong>Set listening/watching:</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;setPresence&quot;,
+  &quot;activityType&quot;: &quot;listening&quot;,
+  &quot;activityName&quot;: &quot;Spotify&quot;
+}
+</code></pre>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;setPresence&quot;,
+  &quot;activityType&quot;: &quot;watching&quot;,
+  &quot;activityName&quot;: &quot;the logs&quot;
+}
+</code></pre>
+            <p><strong>Set a custom status (text in sidebar):</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;setPresence&quot;,
+  &quot;activityType&quot;: &quot;custom&quot;,
+  &quot;activityState&quot;: &quot;Vibing&quot;
+}
+</code></pre>
+            <p>
+              Result in sidebar: “Vibing”. Note: <code>activityName</code> is ignored for custom
+              type.
+            </p>
+            <p><strong>Set bot status only (no activity/clear status):</strong></p>
+            <pre><code class="language-json">{
+  &quot;action&quot;: &quot;setPresence&quot;,
+  &quot;status&quot;: &quot;dnd&quot;
+}
+</code></pre>
+            <p><strong>Parameters:</strong></p>
+            <ul>
+              <li>
+                <code>activityType</code>: <code>playing</code>, <code>streaming</code>,
+                <code>listening</code>, <code>watching</code>, <code>competing</code>,
+                <code>custom</code>
+              </li>
+              <li>
+                <code>activityName</code>: text shown in the sidebar for non-custom types (ignored
+                for <code>custom</code>)
+              </li>
+              <li>
+                <code>activityUrl</code>: Twitch or YouTube URL for streaming type (optional; may
+                not render for bots)
+              </li>
+              <li>
+                <code>activityState</code>: for <code>custom</code> this is the status text; for
+                other types it shows in the profile flyout
+              </li>
+              <li>
+                <code>status</code>: <code>online</code> (default), <code>dnd</code>,
+                <code>idle</code>, <code>invisible</code>
+              </li>
+            </ul>
+            <h2>Discord Writing Style Guide</h2>
+            <p>
+              <strong>Keep it conversational!</strong> Discord is a chat platform, not
+              documentation.
+            </p>
+            <h3>Do</h3>
+            <ul>
+              <li>Short, punchy messages (1-3 sentences ideal)</li>
+              <li>Multiple quick replies &gt; one wall of text</li>
+              <li>Use emoji for tone/emphasis 🤖</li>
+              <li>Lowercase casual style is fine</li>
+              <li>Break up info into digestible chunks</li>
+              <li>Match the energy of the conversation</li>
+            </ul>
+            <h3>Don’t</h3>
+            <ul>
+              <li>No markdown tables (Discord renders them as ugly raw <code>| text |</code>)</li>
+              <li>
+                No <code>## Headers</code> for casual chat (use <strong>bold</strong> or CAPS for
+                emphasis)
+              </li>
+              <li>Avoid multi-paragraph essays</li>
+              <li>Don’t over-explain simple things</li>
+              <li>Skip the “I’d be happy to help!” fluff</li>
+            </ul>
+            <h3>Formatting that works</h3>
+            <ul>
+              <li><strong>bold</strong> for emphasis</li>
+              <li><code>code</code> for technical terms</li>
+              <li>Lists for multiple items</li>
+              <li>
+                <blockquote>
+                  <p>quotes for referencing</p>
+                </blockquote>
+              </li>
+              <li>Wrap multiple links in <code>&lt;&gt;</code> to suppress embeds</li>
+            </ul>
+            <h3>Example transformations</h3>
+            <p>❌ Bad:</p>
+            <pre><code>I'd be happy to help with that! Here's a comprehensive overview of the versioning strategies available:
+
+## Semantic Versioning
+Semver uses MAJOR.MINOR.PATCH format where...
+
+## Calendar Versioning
+CalVer uses date-based versions like...
+</code></pre>
+            <p>✅ Good:</p>
+            <pre><code>versioning options: semver (1.2.3), calver (2026.01.04), or yolo (`latest` forever). what fits your release cadence?
+</code></pre>
+          </div>
+        </div>
+        <aside class="detail-sidebar">
+          <div class="sidebar-card">
+            <h3>Info</h3>
+            <div class="info-row">
+              <span class="label">Category</span
+              ><span class="value"><span class="category-badge">Communication</span></span>
+            </div>
+            <div class="info-row">
+              <span class="label">Requires</span
+              ><span class="value"><code>channels.discord</code></span>
+            </div>
+            <div class="info-row">
+              <span class="label">Size</span><span class="value">11.5 KB</span>
+            </div>
+
+            <div class="info-row">
+              <span class="label">Source</span
+              ><span class="value"
+                ><a
+                  href="https://github.com/hanzoai/bot/blob/main/skills/discord/SKILL.md"
+                  target="_blank"
+                  rel="noopener"
+                  >GitHub</a
+                ></span
+              >
+            </div>
+            <div class="info-row" id="lastUpdated">
+              <span class="label">Updated</span><span class="value">—</span>
+            </div>
+          </div>
+
+          <div class="sidebar-card sidebar-actions">
+            <a
+              href="https://github.com/hanzoai/bot/blob/main/skills/discord/SKILL.md"
+              class="btn-outline"
+              target="_blank"
+              rel="noopener"
+              >View on GitHub</a
+            >
+            <a href="/chat" class="btn-primary">Open in Hanzo Bot</a>
+          </div>
+          <div class="sidebar-card">
+            <h3>Web3 Native</h3>
+            <div class="web3-badge">&#9670; On-Chain Ready</div>
+            <div class="web3-features">
+              <div class="web3-feat">DID identity for every bot</div>
+              <div class="web3-feat">Integrated wallet &amp; payments</div>
+              <div class="web3-feat">Prefund balance, draw on credits</div>
+              <div class="web3-feat">On-chain &amp; fiat payment rails</div>
+              <div class="web3-feat">Send funds to bots directly</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+                <path
+                  d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+                  fill="#fff"
+                />
+                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" /></svg
+              ><span>Hanzo</span>
+            </div>
+            <p>Build, deploy, and manage autonomous AI agents across every platform.</p>
+            <div class="footer-social">
+              <a href="https://x.com/hanaborteam" aria-label="X"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                  /></svg
+              ></a>
+              <a href="https://linkedin.com/company/hanzo-ai" aria-label="LinkedIn"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  /></svg
+              ></a>
+              <a href="https://discord.gg/XthHQQj" aria-label="Discord"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"
+                  /></svg
+              ></a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h4>Products</h4>
+            <a href="https://hanzo.ai">Hanzo AI</a><a href="https://hanzo.app">Hanzo App</a
+            ><a href="https://hanzo.bot">Hanzo Bot</a><a href="https://hanzo.ai/dev">Hanzo Dev</a
+            ><a href="https://hanzo.ai/cloud">Hanzo Cloud</a
+            ><a href="https://hanzo.app/download">Desktop App</a><a href="/book">The Hanzo Book</a>
+          </div>
+          <div class="footer-col">
+            <h4>Developers</h4>
+            <a href="https://docs.hanzo.bot">Documentation</a
+            ><a href="https://github.com/hanzoai/bot">GitHub</a
+            ><a href="https://docs.hanzo.bot/api">API Reference</a><a href="/skills">Skills Hub</a
+            ><a href="https://docs.hanzo.bot/cli">CLI Reference</a>
+          </div>
+          <div class="footer-col">
+            <h4>Solutions</h4>
+            <a href="#">Customer Support</a><a href="#">Developer Operations</a
+            ><a href="#">Marketing</a><a href="#">Finance</a><a href="#">Security</a
+            ><a href="#">Enterprise</a>
+          </div>
+          <div class="footer-col">
+            <h4>Company</h4>
+            <a href="https://hanzo.ai/about">About</a><a href="https://hanzo.ai/blog">Blog</a
+            ><a href="https://hanzo.ai/careers">Careers</a
+            ><a href="https://hanzo.ai/contact">Contact</a
+            ><a href="https://hanzo.ai/privacy">Privacy</a><a href="https://hanzo.ai/terms">Terms</a
+            ><a href="https://status.hanzo.ai">Status</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; 2016–2026 Hanzo Industries. All rights reserved.</span>
+          <span>hanzo.ai</span>
+        </div>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var slug = "discord";
+        var el = document.getElementById("lastUpdated");
+        if (!el) return;
+        var key = "gh-commits-" + slug;
+        var cached = sessionStorage.getItem(key);
+        function show(data) {
+          if (!Array.isArray(data) || !data[0] || !data[0].commit) return;
+          var d = new Date(data[0].commit.author.date);
+          var days = Math.floor((Date.now() - d.getTime()) / 86400000);
+          var txt = days === 0 ? "today" : days === 1 ? "yesterday" : days + " days ago";
+          el.querySelector(".value").textContent = txt;
+        }
+        if (cached) {
+          try {
+            show(JSON.parse(cached));
+          } catch (e) {}
+        } else {
+          fetch(
+            "https://api.github.com/repos/hanzoai/bot/commits?path=skills/" +
+              slug +
+              "/SKILL.md&per_page=1",
+          )
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (d) {
+              try {
+                sessionStorage.setItem(key, JSON.stringify(d));
+              } catch (e) {}
+              show(d);
+            })
+            .catch(function () {});
+        }
+      })();
+    </script>
+  </body>
+</html>

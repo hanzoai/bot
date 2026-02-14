@@ -170,7 +170,7 @@ export function titleForTab(tab: Tab) {
     case "usage":
       return "Usage";
     case "cron":
-      return "Jobs";
+      return "Cron Jobs";
     case "skills":
       return "Skills";
     case "nodes":
