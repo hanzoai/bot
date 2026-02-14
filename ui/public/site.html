@@ -12,6 +12,12 @@
       rel="icon"
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       *,
       *::before,
@@ -21,18 +27,23 @@
         box-sizing: border-box;
       }
       :root {
-        --bg: #000;
-        --bg-card: #111;
+        --brand: #fd4444;
+        --brand-secondary: #ff6b6b;
+        --bg: #000000;
+        --bg-card: rgba(255, 255, 255, 0.04);
         --bg-hover: #1a1a1a;
-        --border: #222;
-        --border-hover: #333;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-hover: rgba(255, 255, 255, 0.16);
         --text: #fff;
         --muted: #888;
         --subtle: #555;
         --max-w: 1200px;
         --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
         --font:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          sans-serif;
+        --font-mono: "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
       }
       html {
         scroll-behavior: smooth;
@@ -43,6 +54,31 @@
         color: var(--text);
         line-height: 1.6;
         -webkit-font-smoothing: antialiased;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 64px 64px;
+        pointer-events: none;
+        z-index: 0;
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        opacity: 0.035;
+        pointer-events: none;
+        z-index: 0;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      body > * {
+        position: relative;
+        z-index: 1;
       }
       a {
         color: inherit;
@@ -263,13 +299,16 @@
         padding: 8px 20px;
         font-size: 13px;
         font-weight: 600;
-        color: #000;
-        background: #fff;
-        border-radius: 8px;
-        transition: opacity 0.15s;
+        color: #fff;
+        background: var(--brand);
+        border-radius: 9999px;
+        transition:
+          opacity 0.15s,
+          box-shadow 0.15s;
       }
       .btn-primary:hover {
-        opacity: 0.85;
+        opacity: 0.9;
+        box-shadow: 0 0 24px rgba(253, 68, 68, 0.3);
       }
       .btn-outline {
         padding: 8px 20px;
@@ -277,19 +316,20 @@
         font-weight: 500;
         color: var(--text);
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: 9999px;
         transition:
           border-color 0.15s,
-          background 0.15s;
+          background 0.15s,
+          box-shadow 0.15s;
       }
       .btn-outline:hover {
-        border-color: var(--border-hover);
-        background: var(--bg-hover);
+        border-color: rgba(253, 68, 68, 0.3);
+        background: rgba(253, 68, 68, 0.06);
       }
       .btn-lg {
         padding: 14px 32px;
         font-size: 15px;
-        border-radius: 10px;
+        border-radius: 9999px;
       }
       .btn-icon {
         display: inline-flex;
@@ -300,11 +340,12 @@
       /* ===== HERO ===== */
       .hero {
         min-height: 100vh;
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         align-items: center;
-        justify-content: center;
-        text-align: center;
+        gap: 48px;
+        max-width: var(--max-w);
+        margin: 0 auto;
         padding: 120px 24px 80px;
         position: relative;
         overflow: hidden;
@@ -313,20 +354,22 @@
         content: "";
         position: absolute;
         top: -200px;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 20%;
         width: 600px;
         height: 600px;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(253, 68, 68, 0.06) 0%, transparent 70%);
         pointer-events: none;
+      }
+      .hero-text {
+        text-align: left;
       }
       .hero-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
         padding: 6px 16px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(253, 68, 68, 0.2);
         border-radius: 100px;
         font-size: 12px;
         color: var(--muted);
@@ -334,20 +377,26 @@
         animation: fade-up 0.6s 0.1s var(--ease) both;
       }
       .hero-badge strong {
-        color: var(--text);
+        color: var(--brand);
       }
       .hero h1 {
-        font-size: clamp(40px, 8vw, 80px);
+        font-size: clamp(36px, 5vw, 64px);
         font-weight: 700;
         letter-spacing: -0.04em;
         line-height: 1.05;
-        max-width: 800px;
+        max-width: 600px;
         animation: fade-up 0.6s 0.2s var(--ease) both;
+      }
+      .hero h1 .gradient-text {
+        background: linear-gradient(135deg, var(--brand) 0%, var(--brand-secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
       .hero p {
         font-size: clamp(16px, 2vw, 20px);
         color: var(--muted);
-        max-width: 600px;
+        max-width: 500px;
         margin-top: 24px;
         animation: fade-up 0.6s 0.3s var(--ease) both;
       }
@@ -357,7 +406,6 @@
         margin-top: 40px;
         animation: fade-up 0.6s 0.4s var(--ease) both;
         flex-wrap: wrap;
-        justify-content: center;
       }
       .hero-note {
         font-size: 13px;
@@ -369,12 +417,640 @@
       @keyframes fade-up {
         from {
           opacity: 0;
-          transform: translateY(20px);
+          transform: translateY(16px);
         }
         to {
           opacity: 1;
           transform: translateY(0);
         }
+      }
+
+      /* ===== HERO MOCKUP ===== */
+      .hero-mockup {
+        animation: fade-up 0.8s 0.3s var(--ease) both;
+      }
+      .mockup-browser {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+      }
+      .mockup-titlebar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .traffic-light {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .traffic-light.red {
+        background: #ff5f57;
+      }
+      .traffic-light.yellow {
+        background: #febc2e;
+      }
+      .traffic-light.green {
+        background: #28c840;
+      }
+      .mockup-url {
+        flex: 1;
+        margin-left: 8px;
+        padding: 4px 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        font-size: 11px;
+        color: var(--subtle);
+        font-family: var(--font-mono);
+      }
+      .mockup-viewport {
+        position: relative;
+        height: 320px;
+        overflow: hidden;
+      }
+      .mockup-scene {
+        position: absolute;
+        inset: 0;
+        padding: 24px;
+        opacity: 0;
+        will-change: opacity, transform;
+        animation: scene-cycle 20s infinite;
+      }
+      .mockup-scene:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .mockup-scene:nth-child(2) {
+        animation-delay: 5s;
+      }
+      .mockup-scene:nth-child(3) {
+        animation-delay: 10s;
+      }
+      .mockup-scene:nth-child(4) {
+        animation-delay: 15s;
+      }
+      @keyframes scene-cycle {
+        0%,
+        2% {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        5%,
+        22% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        25%,
+        100% {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+      }
+
+      /* Scene 1: Form Auto-Fill */
+      .scene-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .form-field {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .form-label {
+        width: 80px;
+        font-size: 11px;
+        color: var(--subtle);
+        font-family: var(--font-mono);
+        text-align: right;
+      }
+      .form-bar {
+        flex: 1;
+        height: 32px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        position: relative;
+      }
+      .form-bar-fill {
+        height: 100%;
+        border-radius: 6px;
+        animation: fill-grow 5s infinite;
+      }
+      .form-bar-fill.c1 {
+        background: rgba(253, 68, 68, 0.25);
+        animation-delay: 0.5s;
+      }
+      .form-bar-fill.c2 {
+        background: rgba(99, 179, 237, 0.25);
+        animation-delay: 1s;
+      }
+      .form-bar-fill.c3 {
+        background: rgba(72, 187, 120, 0.25);
+        animation-delay: 1.5s;
+      }
+      .form-bar-fill.c4 {
+        background: rgba(237, 137, 54, 0.25);
+        animation-delay: 2s;
+      }
+      .form-bar-fill.c5 {
+        background: rgba(159, 122, 234, 0.25);
+        animation-delay: 2.5s;
+      }
+      @keyframes fill-grow {
+        0%,
+        10% {
+          width: 0;
+        }
+        40%,
+        100% {
+          width: 85%;
+        }
+      }
+      .form-cursor {
+        position: absolute;
+        width: 2px;
+        height: 16px;
+        background: var(--brand);
+        border-radius: 1px;
+        top: 8px;
+        left: 0;
+        animation: cursor-move 5s infinite;
+      }
+      @keyframes cursor-move {
+        0% {
+          left: 4px;
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        40% {
+          left: 80%;
+        }
+        100% {
+          left: 80%;
+          opacity: 0;
+        }
+      }
+
+      /* Scene 2: Data Analysis */
+      .scene-data {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .data-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+      }
+      .data-cell {
+        height: 28px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        animation: cell-glow 5s infinite;
+      }
+      .data-cell:nth-child(3n) {
+        animation-delay: 0.3s;
+      }
+      .data-cell:nth-child(5n) {
+        animation-delay: 0.6s;
+      }
+      .data-cell:nth-child(7n) {
+        animation-delay: 0.9s;
+      }
+      .data-cell.highlight {
+        background: rgba(253, 68, 68, 0.1);
+        border-color: rgba(253, 68, 68, 0.2);
+      }
+      @keyframes cell-glow {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      .data-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 6px;
+        height: 100px;
+        margin-top: 8px;
+      }
+      .chart-bar {
+        flex: 1;
+        border-radius: 4px 4px 0 0;
+        background: linear-gradient(to top, rgba(253, 68, 68, 0.3), rgba(253, 68, 68, 0.1));
+        animation: bar-grow 5s infinite;
+      }
+      @keyframes bar-grow {
+        0%,
+        10% {
+          height: 10%;
+        }
+        50% {
+          height: var(--h, 60%);
+        }
+        90%,
+        100% {
+          height: var(--h, 60%);
+        }
+      }
+
+      /* Scene 3: AI Chat */
+      .scene-chat {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 8px;
+      }
+      .chat-bubble {
+        max-width: 75%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 12px;
+        line-height: 1.5;
+        font-family: var(--font);
+        opacity: 0;
+        animation: bubble-in 5s infinite;
+      }
+      .chat-bubble.from-user {
+        align-self: flex-end;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
+      .chat-bubble.from-bot {
+        align-self: flex-start;
+        background: rgba(253, 68, 68, 0.08);
+        border: 1px solid rgba(253, 68, 68, 0.15);
+        color: var(--muted);
+      }
+      .chat-bubble:nth-child(1) {
+        animation-delay: 0.3s;
+      }
+      .chat-bubble:nth-child(2) {
+        animation-delay: 1.2s;
+      }
+      .chat-bubble:nth-child(3) {
+        animation-delay: 2.4s;
+      }
+      .chat-bubble:nth-child(4) {
+        animation-delay: 3.4s;
+      }
+      @keyframes bubble-in {
+        0%,
+        5% {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        10%,
+        90% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        95%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      /* Scene 4: Design Canvas */
+      .scene-design {
+        position: relative;
+        height: 100%;
+      }
+      .design-el {
+        position: absolute;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        animation: design-shift 5s infinite;
+      }
+      .design-el.el1 {
+        width: 120px;
+        height: 80px;
+        top: 20px;
+        left: 20px;
+        background: rgba(99, 179, 237, 0.1);
+        border-color: rgba(99, 179, 237, 0.3);
+        animation-delay: 0s;
+      }
+      .design-el.el2 {
+        width: 160px;
+        height: 60px;
+        top: 40px;
+        right: 40px;
+        background: rgba(253, 68, 68, 0.08);
+        border-color: rgba(253, 68, 68, 0.2);
+        animation-delay: 0.5s;
+      }
+      .design-el.el3 {
+        width: 100px;
+        height: 100px;
+        bottom: 40px;
+        left: 60px;
+        background: rgba(72, 187, 120, 0.08);
+        border-color: rgba(72, 187, 120, 0.2);
+        border-radius: 50%;
+        animation-delay: 1s;
+      }
+      .design-el.el4 {
+        width: 140px;
+        height: 40px;
+        bottom: 60px;
+        right: 20px;
+        background: rgba(237, 137, 54, 0.08);
+        border-color: rgba(237, 137, 54, 0.2);
+        animation-delay: 1.5s;
+      }
+      .design-handle {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: var(--brand);
+        border-radius: 2px;
+      }
+      .design-handle.tl {
+        top: -4px;
+        left: -4px;
+      }
+      .design-handle.tr {
+        top: -4px;
+        right: -4px;
+      }
+      .design-handle.bl {
+        bottom: -4px;
+        left: -4px;
+      }
+      .design-handle.br {
+        bottom: -4px;
+        right: -4px;
+      }
+      @keyframes design-shift {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        25% {
+          transform: translate(4px, -4px) scale(1.02);
+        }
+        50% {
+          transform: translate(-2px, 2px) scale(0.98);
+        }
+        75% {
+          transform: translate(2px, 4px) scale(1.01);
+        }
+      }
+
+      /* ===== HOW IT WORKS ===== */
+      .how-it-works {
+        border-top: 1px solid var(--border);
+      }
+      .hiw-flow {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        gap: 0;
+        align-items: center;
+      }
+      .hiw-step {
+        padding: 32px 24px;
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        text-align: center;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .hiw-step:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 0 40px rgba(253, 68, 68, 0.06);
+      }
+      .hiw-num {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--brand);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 16px;
+      }
+      .hiw-step h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .hiw-step p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .hiw-connector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 8px;
+      }
+      .hiw-connector svg {
+        width: 40px;
+        height: 2px;
+      }
+
+      /* ===== TERMINAL FRAME ===== */
+      .terminal-frame {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        max-width: 640px;
+      }
+      .terminal-titlebar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .terminal-title {
+        flex: 1;
+        text-align: center;
+        font-size: 12px;
+        color: var(--subtle);
+        font-family: var(--font-mono);
+        margin-right: 38px;
+      }
+      .terminal-body {
+        padding: 24px;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        line-height: 1.8;
+      }
+      .terminal-body .prompt {
+        color: var(--subtle);
+      }
+      .terminal-body .cmd {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .terminal-body .output {
+        color: var(--muted);
+      }
+      .terminal-body .success {
+        color: #28c840;
+      }
+
+      /* ===== LIVE DEMO ===== */
+      .demo-terminal .demo-line {
+        display: block;
+        padding: 3px 0;
+        opacity: 0;
+        animation: demo-line-in 12s infinite;
+      }
+      .demo-terminal .demo-line:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .demo-terminal .demo-line:nth-child(2) {
+        animation-delay: 1s;
+      }
+      .demo-terminal .demo-line:nth-child(3) {
+        animation-delay: 2s;
+      }
+      .demo-terminal .demo-line:nth-child(4) {
+        animation-delay: 3s;
+      }
+      .demo-terminal .demo-line:nth-child(5) {
+        animation-delay: 4s;
+      }
+      .demo-terminal .demo-line:nth-child(6) {
+        animation-delay: 5s;
+      }
+      @keyframes demo-line-in {
+        0%,
+        5% {
+          opacity: 0;
+          transform: translateX(-4px);
+        }
+        10%,
+        85% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        90%,
+        100% {
+          opacity: 0;
+        }
+      }
+      .demo-user {
+        color: #63b3ed;
+      }
+      .demo-bot {
+        color: var(--muted);
+      }
+      .demo-check {
+        color: #28c840;
+      }
+
+      /* ===== SECURITY ===== */
+      .security-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .security-badge {
+        padding: 24px;
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        text-align: center;
+        transition: box-shadow 0.2s;
+      }
+      .security-badge:hover {
+        box-shadow: 0 0 40px rgba(253, 68, 68, 0.06);
+      }
+      .security-badge .badge-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      .security-badge h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .security-badge p {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      /* ===== FAQ ===== */
+      .faq-list {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      .faq-item {
+        border-bottom: 1px solid var(--border);
+      }
+      .faq-item summary {
+        padding: 20px 0;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: color 0.15s;
+      }
+      .faq-item summary::-webkit-details-marker {
+        display: none;
+      }
+      .faq-item summary::after {
+        content: "+";
+        font-size: 20px;
+        color: var(--subtle);
+        transition: transform 0.2s;
+      }
+      .faq-item[open] summary::after {
+        content: "−";
+        color: var(--brand);
+      }
+      .faq-item summary:hover {
+        color: var(--brand);
+      }
+      .faq-item .faq-answer {
+        padding: 0 0 20px;
+        font-size: 14px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      /* ===== STAGGER ===== */
+      .stagger-child {
+        opacity: 0;
+        transform: translateY(16px);
+        transition:
+          opacity 0.5s var(--ease),
+          transform 0.5s var(--ease);
+      }
+      .stagger-child.visible {
+        opacity: 1;
+        transform: translateY(0);
       }
 
       /* ===== SECTIONS ===== */
@@ -408,10 +1084,10 @@
       }
       .reveal {
         opacity: 0;
-        transform: translateY(24px);
+        transform: translateY(16px);
         transition:
-          opacity 0.6s var(--ease),
-          transform 0.6s var(--ease);
+          opacity 0.5s var(--ease),
+          transform 0.5s var(--ease);
       }
       .reveal.visible {
         opacity: 1;
@@ -426,16 +1102,20 @@
       }
       .persona {
         padding: 20px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
         transition:
           border-color 0.2s,
-          transform 0.2s;
+          transform 0.2s,
+          box-shadow 0.2s;
       }
       .persona:hover {
         border-color: var(--border-hover);
         transform: translateY(-2px);
+        box-shadow: 0 0 40px rgba(253, 68, 68, 0.06);
       }
       .persona-emoji {
         font-size: 24px;
@@ -465,13 +1145,18 @@
       }
       .feature {
         padding: 24px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
-        transition: border-color 0.2s;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
       }
       .feature:hover {
         border-color: var(--border-hover);
+        box-shadow: 0 0 40px rgba(253, 68, 68, 0.06);
       }
       .feature-icon {
         font-size: 28px;
@@ -534,13 +1219,18 @@
       }
       .eco-card {
         padding: 32px 24px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
-        transition: border-color 0.2s;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
       }
       .eco-card:hover {
         border-color: var(--border-hover);
+        box-shadow: 0 0 40px rgba(253, 68, 68, 0.06);
       }
       .eco-card h3 {
         font-size: 18px;
@@ -568,9 +1258,15 @@
       .cloud-stat {
         text-align: center;
         padding: 24px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
+        transition: box-shadow 0.2s;
+      }
+      .cloud-stat:hover {
+        box-shadow: 0 0 40px rgba(253, 68, 68, 0.06);
       }
       .cloud-stat .num {
         font-size: 32px;
@@ -636,13 +1332,19 @@
       }
       .pricing-card {
         padding: 24px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
         text-align: left;
+        transition: box-shadow 0.2s;
+      }
+      .pricing-card:hover {
+        box-shadow: 0 0 40px rgba(253, 68, 68, 0.06);
       }
       .pricing-card.featured {
-        border-color: #444;
+        border-color: var(--brand);
       }
       .pricing-card h3 {
         font-size: 16px;
@@ -951,16 +1653,20 @@
       }
       .case-card {
         padding: 28px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 12px;
         transition:
           border-color 0.2s,
-          transform 0.2s;
+          transform 0.2s,
+          box-shadow 0.2s;
       }
       .case-card:hover {
         border-color: var(--border-hover);
         transform: translateY(-2px);
+        box-shadow: 0 0 40px rgba(253, 68, 68, 0.06);
       }
       .case-client {
         font-size: 11px;
@@ -1069,6 +1775,24 @@
 
       /* ===== RESPONSIVE ===== */
       @media (max-width: 1024px) {
+        .hero {
+          grid-template-columns: 1fr;
+          text-align: center;
+          padding-top: 100px;
+        }
+        .hero-text {
+          text-align: center;
+          order: 1;
+        }
+        .hero-mockup {
+          order: 2;
+          max-width: 500px;
+          margin: 0 auto;
+          width: 100%;
+        }
+        .hero-actions {
+          justify-content: center;
+        }
         .features-grid {
           grid-template-columns: repeat(2, 1fr);
         }
@@ -1076,6 +1800,17 @@
           grid-template-columns: repeat(3, 1fr);
         }
         .cloud-stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .hiw-flow {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        .hiw-connector {
+          transform: rotate(90deg);
+          padding: 0;
+        }
+        .security-grid {
           grid-template-columns: repeat(2, 1fr);
         }
         .footer-grid {
@@ -1107,6 +1842,9 @@
         .pricing-cards {
           grid-template-columns: repeat(2, 1fr) !important;
         }
+        .security-grid {
+          grid-template-columns: 1fr;
+        }
         .footer-grid {
           grid-template-columns: repeat(2, 1fr);
         }
@@ -1114,6 +1852,9 @@
           width: calc(100vw - 32px);
           right: 16px;
           bottom: 76px;
+        }
+        .mockup-viewport {
+          height: 260px;
         }
       }
       @media (max-width: 480px) {
@@ -1124,7 +1865,10 @@
           grid-template-columns: 1fr;
         }
         .hero h1 {
-          font-size: 36px;
+          font-size: 32px;
+        }
+        .mockup-viewport {
+          height: 220px;
         }
       }
     </style>
@@ -1270,46 +2014,215 @@
 
     <!-- HERO -->
     <section class="hero">
-      <div class="hero-badge">
-        🥷 <strong>$5 free credit</strong> · Launch your first bot in minutes
+      <div class="hero-text">
+        <div class="hero-badge">
+          🥷 <strong>$5 free credit</strong> · Launch your first bot in minutes
+        </div>
+        <h1>Your <span class="gradient-text">Autonomous</span> AI Workforce</h1>
+        <p>
+          Deploy specialized AI agents across every platform. 15 built-in personas. 52+ skills.
+          Running 24/7 in the cloud at $1/hr.
+        </p>
+        <div class="hero-actions">
+          <a href="/chat?onboarding=1" class="btn-primary btn-lg">Get Started Free</a>
+          <a href="/chat?onboarding=1&method=google" class="btn-outline btn-lg btn-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                fill="#fff"
+                fill-opacity=".6"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#fff"
+                fill-opacity=".5"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#fff"
+                fill-opacity=".4"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#fff"
+                fill-opacity=".5"
+              />
+            </svg>
+            Sign Up with Google
+          </a>
+        </div>
+        <p class="hero-note">
+          $5 free credit on signup · $1/hr cloud compute · BYO keys or use ours ·
+          <a href="https://hanzo.ai/contact" style="text-decoration: underline">Contact Sales</a>
+        </p>
       </div>
-      <h1>Your Autonomous AI Workforce</h1>
-      <p>
-        Deploy specialized AI agents across every platform. 15 built-in personas. 52+ skills.
-        Running 24/7 in the cloud at $1/hr.
-      </p>
-      <div class="hero-actions">
-        <a href="/chat?onboarding=1" class="btn-primary btn-lg">Get Started Free</a>
-        <a href="/chat?onboarding=1&method=google" class="btn-outline btn-lg btn-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24">
-            <path
-              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-              fill="#fff"
-              fill-opacity=".6"
-            />
-            <path
-              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              fill="#fff"
-              fill-opacity=".5"
-            />
-            <path
-              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              fill="#fff"
-              fill-opacity=".4"
-            />
-            <path
-              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              fill="#fff"
-              fill-opacity=".5"
-            />
-          </svg>
-          Sign Up with Google
-        </a>
+      <div class="hero-mockup">
+        <div class="mockup-browser">
+          <div class="mockup-titlebar">
+            <div class="traffic-light red"></div>
+            <div class="traffic-light yellow"></div>
+            <div class="traffic-light green"></div>
+            <div class="mockup-url">hanzo.bot/my-agent</div>
+          </div>
+          <div class="mockup-viewport">
+            <!-- Scene 1: Form Auto-Fill -->
+            <div class="mockup-scene">
+              <div class="scene-form">
+                <div class="form-field">
+                  <span class="form-label">Name</span>
+                  <div class="form-bar">
+                    <div class="form-bar-fill c1"></div>
+                    <div class="form-cursor"></div>
+                  </div>
+                </div>
+                <div class="form-field">
+                  <span class="form-label">Email</span>
+                  <div class="form-bar"><div class="form-bar-fill c2"></div></div>
+                </div>
+                <div class="form-field">
+                  <span class="form-label">Company</span>
+                  <div class="form-bar"><div class="form-bar-fill c3"></div></div>
+                </div>
+                <div class="form-field">
+                  <span class="form-label">Role</span>
+                  <div class="form-bar"><div class="form-bar-fill c4"></div></div>
+                </div>
+                <div class="form-field">
+                  <span class="form-label">Message</span>
+                  <div class="form-bar"><div class="form-bar-fill c5"></div></div>
+                </div>
+              </div>
+            </div>
+            <!-- Scene 2: Data Analysis -->
+            <div class="mockup-scene">
+              <div class="scene-data">
+                <div class="data-grid">
+                  <div class="data-cell"></div>
+                  <div class="data-cell highlight"></div>
+                  <div class="data-cell"></div>
+                  <div class="data-cell"></div>
+                  <div class="data-cell highlight"></div>
+                  <div class="data-cell highlight"></div>
+                  <div class="data-cell"></div>
+                  <div class="data-cell highlight"></div>
+                  <div class="data-cell"></div>
+                  <div class="data-cell"></div>
+                  <div class="data-cell"></div>
+                  <div class="data-cell"></div>
+                  <div class="data-cell highlight"></div>
+                  <div class="data-cell highlight"></div>
+                  <div class="data-cell"></div>
+                </div>
+                <div class="data-chart">
+                  <div class="chart-bar" style="--h: 40%"></div>
+                  <div class="chart-bar" style="--h: 70%"></div>
+                  <div class="chart-bar" style="--h: 55%"></div>
+                  <div class="chart-bar" style="--h: 85%"></div>
+                  <div class="chart-bar" style="--h: 45%"></div>
+                  <div class="chart-bar" style="--h: 65%"></div>
+                  <div class="chart-bar" style="--h: 90%"></div>
+                  <div class="chart-bar" style="--h: 50%"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Scene 3: AI Chat -->
+            <div class="mockup-scene">
+              <div class="scene-chat">
+                <div class="chat-bubble from-user">Deploy my-agent to production</div>
+                <div class="chat-bubble from-bot">
+                  Running pre-deploy checks... 52 skills loaded ✓
+                </div>
+                <div class="chat-bubble from-user">Connect Discord and Slack channels</div>
+                <div class="chat-bubble from-bot">
+                  Connected to 2 channels. Agent live at hanzo.bot/my-agent ✓
+                </div>
+              </div>
+            </div>
+            <!-- Scene 4: Design Canvas -->
+            <div class="mockup-scene">
+              <div class="scene-design">
+                <div class="design-el el1">
+                  <div class="design-handle tl"></div>
+                  <div class="design-handle tr"></div>
+                  <div class="design-handle bl"></div>
+                  <div class="design-handle br"></div>
+                </div>
+                <div class="design-el el2">
+                  <div class="design-handle tl"></div>
+                  <div class="design-handle tr"></div>
+                  <div class="design-handle bl"></div>
+                  <div class="design-handle br"></div>
+                </div>
+                <div class="design-el el3"></div>
+                <div class="design-el el4"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <p class="hero-note">
-        $5 free credit on signup · $1/hr cloud compute · BYO keys or use ours ·
-        <a href="https://hanzo.ai/contact" style="text-decoration: underline">Contact Sales</a>
-      </p>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-it-works" id="how-it-works">
+      <div class="section-inner reveal">
+        <div class="section-label" style="text-align: center">How It Works</div>
+        <h2 class="section-title" style="text-align: center">Three Steps to Launch</h2>
+        <p class="section-desc" style="text-align: center; margin: 0 auto 48px">
+          From idea to deployed AI agent in minutes, not months.
+        </p>
+        <div class="hiw-flow">
+          <div class="hiw-step stagger-child">
+            <div class="hiw-num">1</div>
+            <h3>Connect</h3>
+            <p>
+              Link your platforms — Discord, Slack, Telegram, or any of 608+ integrations. One click
+              to authorize.
+            </p>
+          </div>
+          <div class="hiw-connector">
+            <svg viewBox="0 0 40 2" fill="none">
+              <line
+                x1="0"
+                y1="1"
+                x2="40"
+                y2="1"
+                stroke="var(--subtle)"
+                stroke-width="2"
+                stroke-dasharray="4 4"
+              />
+            </svg>
+          </div>
+          <div class="hiw-step stagger-child">
+            <div class="hiw-num">2</div>
+            <h3>Configure</h3>
+            <p>
+              Choose a persona, assign skills, set behavior rules. Use the visual builder or write
+              YAML config.
+            </p>
+          </div>
+          <div class="hiw-connector">
+            <svg viewBox="0 0 40 2" fill="none">
+              <line
+                x1="0"
+                y1="1"
+                x2="40"
+                y2="1"
+                stroke="var(--subtle)"
+                stroke-width="2"
+                stroke-dasharray="4 4"
+              />
+            </svg>
+          </div>
+          <div class="hiw-step stagger-child">
+            <div class="hiw-num">3</div>
+            <h3>Deploy</h3>
+            <p>
+              Push to Hanzo Cloud with one command. Your agent goes live 24/7 with auto-scaling and
+              monitoring.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- PERSONAS -->
@@ -2207,6 +3120,48 @@
       </div>
     </section>
 
+    <!-- LIVE DEMO -->
+    <section id="demo" style="border-top: 1px solid var(--border)">
+      <div class="section-inner reveal">
+        <div class="section-label">See It in Action</div>
+        <h2 class="section-title">Live Demo</h2>
+        <p class="section-desc">
+          Watch a real bot deployment conversation — from command to live agent.
+        </p>
+        <div class="terminal-frame demo-terminal">
+          <div class="terminal-titlebar">
+            <div class="traffic-light red"></div>
+            <div class="traffic-light yellow"></div>
+            <div class="traffic-light green"></div>
+            <div class="terminal-title">hanzo-bot — terminal</div>
+          </div>
+          <div class="terminal-body">
+            <span class="demo-line"
+              ><span class="demo-user">user:</span> @bot deploy my-agent to production</span
+            >
+            <span class="demo-line"
+              ><span class="demo-bot">bot:</span> Running pre-deploy checks...</span
+            >
+            <span class="demo-line"
+              ><span class="demo-bot">bot:</span> <span class="demo-check">✓</span> 52 skills
+              loaded</span
+            >
+            <span class="demo-line"
+              ><span class="demo-bot">bot:</span> <span class="demo-check">✓</span> Discord, Slack
+              channels connected</span
+            >
+            <span class="demo-line"
+              ><span class="demo-bot">bot:</span> Deployed to hanzo.bot/my-agent
+              <span class="demo-check">✓</span></span
+            >
+            <span class="demo-line"
+              ><span class="demo-bot">bot:</span> Agent is live and monitoring all channels.</span
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- CLI / DEV TOOLS -->
     <section id="cli" style="border-top: 1px solid var(--border)">
       <div class="section-inner reveal">
@@ -2216,8 +3171,14 @@
           Full TypeScript. Open source. Develop and test agents on your machine, then deploy to the
           cloud.
         </p>
-        <div class="cli-block">
-          <code>
+        <div class="terminal-frame">
+          <div class="terminal-titlebar">
+            <div class="traffic-light red"></div>
+            <div class="traffic-light yellow"></div>
+            <div class="traffic-light green"></div>
+            <div class="terminal-title">hanzo-bot — terminal</div>
+          </div>
+          <div class="terminal-body">
             <span class="cli-line"
               ><span class="prompt">$</span>
               <span class="cmd">npx hanzo-bot init my-agent</span></span
@@ -2228,25 +3189,70 @@
             <span class="cli-line"
               ><span class="prompt">$</span> <span class="cmd">npx hanzo-bot dev</span></span
             >
-            <span class="cli-line" style="color: var(--subtle)">
-              ↳ Gateway running on http://localhost:18789</span
+            <span class="cli-line"
+              ><span class="output"> ↳ Gateway running on http://localhost:18789</span></span
             >
-            <span class="cli-line" style="color: var(--subtle)">
-              ↳ Agent "main" ready (claude-opus-4-6)</span
+            <span class="cli-line"
+              ><span class="output"> ↳ Agent "main" ready (claude-opus-4-6)</span></span
             >
-            <span class="cli-line" style="color: var(--subtle)"> ↳ 52 skills loaded</span>
+            <span class="cli-line"><span class="output"> ↳ 52 skills loaded</span></span>
             <span class="cli-line">&nbsp;</span>
             <span class="cli-line"
               ><span class="prompt">$</span> <span class="cmd">npx hanzo-bot deploy</span></span
             >
-            <span class="cli-line" style="color: var(--subtle)">
-              ↳ Deployed to hanzo.bot/my-agent ✓</span
+            <span class="cli-line"
+              ><span class="output"> ↳ Deployed to hanzo.bot/my-agent </span
+              ><span class="success">✓</span></span
             >
-          </code>
+          </div>
         </div>
         <div style="margin-top: 24px; display: flex; gap: 12px">
           <a href="https://docs.hanzo.bot/quickstart" class="btn-outline">Quickstart Guide →</a>
           <a href="https://github.com/hanzoai/bot" class="btn-ghost">View on GitHub →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECURITY & TRUST -->
+    <section id="security" style="border-top: 1px solid var(--border)">
+      <div class="section-inner reveal">
+        <div class="section-label" style="text-align: center">Security & Trust</div>
+        <h2 class="section-title" style="text-align: center">Enterprise-Grade Security</h2>
+        <p class="section-desc" style="text-align: center; margin: 0 auto 48px">
+          Your data is protected by industry-leading security standards and compliance
+          certifications.
+        </p>
+        <div class="security-grid">
+          <div class="security-badge stagger-child">
+            <div class="badge-icon">🛡️</div>
+            <h3>SOC 2 Type II</h3>
+            <p>Independently audited security controls</p>
+          </div>
+          <div class="security-badge stagger-child">
+            <div class="badge-icon">🇪🇺</div>
+            <h3>GDPR Compliant</h3>
+            <p>Full EU data protection compliance</p>
+          </div>
+          <div class="security-badge stagger-child">
+            <div class="badge-icon">🔐</div>
+            <h3>AES-256 Encryption</h3>
+            <p>Data encrypted at rest and in transit</p>
+          </div>
+          <div class="security-badge stagger-child">
+            <div class="badge-icon">⏱️</div>
+            <h3>99.9% SLA</h3>
+            <p>Guaranteed uptime with financial backing</p>
+          </div>
+          <div class="security-badge stagger-child">
+            <div class="badge-icon">🌍</div>
+            <h3>Data Residency</h3>
+            <p>Choose where your data is stored</p>
+          </div>
+          <div class="security-badge stagger-child">
+            <div class="badge-icon">📋</div>
+            <h3>Audit Logs</h3>
+            <p>Complete activity tracking and reporting</p>
+          </div>
         </div>
       </div>
     </section>
@@ -2546,6 +3552,71 @@
       </div>
     </section>
 
+    <!-- FAQ -->
+    <section id="faq" style="border-top: 1px solid var(--border)">
+      <div class="section-inner reveal">
+        <div class="section-label" style="text-align: center">FAQ</div>
+        <h2 class="section-title" style="text-align: center">Frequently Asked Questions</h2>
+        <p class="section-desc" style="text-align: center; margin: 0 auto 48px">
+          Everything you need to know about getting started.
+        </p>
+        <div class="faq-list">
+          <details class="faq-item">
+            <summary>How does the $5 free credit work?</summary>
+            <div class="faq-answer">
+              Every new account receives $5 in free credit upon signup. This covers cloud compute,
+              AI model usage, and all platform features. No credit card required. The credit is
+              enough to run a bot for several hours or experiment with all 15 personas and 52+
+              skills.
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>Can I bring my own API keys?</summary>
+            <div class="faq-answer">
+              Yes! You can use your own API keys from OpenAI, Anthropic, Google, and other
+              providers. When using BYO keys, we charge a 1% cloud management fee instead of
+              per-token pricing. This gives you full control over your AI costs while still
+              benefiting from Hanzo's infrastructure.
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>Which platforms are supported?</summary>
+            <div class="faq-answer">
+              Hanzo Bot deploys natively to Discord, Slack, Telegram, WhatsApp, X/Twitter, iMessage,
+              and the web. It also integrates with 608+ business tools including Google Sheets,
+              GitHub, Salesforce, HubSpot, Notion, and many more via the automation engine.
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>Is Hanzo Bot open source?</summary>
+            <div class="faq-answer">
+              Yes. The core bot framework is fully open source on GitHub at github.com/hanzoai/bot.
+              You can self-host, modify, and contribute. The managed cloud service adds hosting,
+              scaling, monitoring, and enterprise features on top of the open source core.
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>What's the difference between Cloud and Always-On?</summary>
+            <div class="faq-answer">
+              Cloud ($1/hr per bot) runs your agents on shared infrastructure with auto-scaling —
+              you pay only when active. Always-On ($499/mo) gives you a dedicated Mac instance
+              running 24/7 with full desktop access, native apps, and the ability to log into your
+              own services.
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>How do I deploy a bot?</summary>
+            <div class="faq-answer">
+              Three ways: (1) Use the web dashboard at hanzo.bot to configure and launch visually,
+              (2) Use the CLI with <code>npx hanzo-bot deploy</code> for developer workflows, or (3)
+              Use the Hanzo App desktop client for a native experience. All methods support
+              one-click deployment to Hanzo Cloud.
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="cta-section reveal">
       <h2>Launch Your Dashboard</h2>
@@ -2683,6 +3754,26 @@
       );
       document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
 
+      // Staggered children reveal
+      const staggerObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              const children = e.target.querySelectorAll(".stagger-child");
+              children.forEach((child, i) => {
+                child.style.transitionDelay = `${i * 0.1}s`;
+                child.classList.add("visible");
+              });
+              staggerObserver.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.1 },
+      );
+      document
+        .querySelectorAll(".hiw-flow, .security-grid")
+        .forEach((el) => staggerObserver.observe(el));
+
       // Chat widget
       const fab = document.getElementById("chatFab");
       const win = document.getElementById("chatWindow");
@@ -2723,7 +3814,7 @@
                 {
                   role: "system",
                   content:
-                    "You are Hanzo Bot, an AI assistant on the Hanzo Bot landing page. Help users understand how to deploy AI agents, available skills (52+), personas (15 specialist agents: dev, des, opera, mark, su, art, mu, data, core, fin, sec, algo, db, cal, chat), pricing ($5 free credit, Pro at $5/mo), and the Hanzo ecosystem (hanzo.ai, hanzo.app, hanzo.bot). Keep responses concise and helpful.",
+                    "You are Hanzo Bot, an AI assistant on the Hanzo Bot landing page. Help users understand how to deploy AI agents, available skills (52+), personas (15 specialist agents: dev, des, opera, mark, su, art, mu, data, core, fin, sec, algo, db, cal, chat), pricing ($5 free credit, Starter $20/mo, Cloud $1/hr per bot, Always-On $499/mo), prefunded account credits, Web3 features (DID identities via hanzo.id, integrated wallets, on-chain payments, crypto rails), and the Hanzo ecosystem (hanzo.ai, hanzo.app, hanzo.bot, hanzo.id). Keep responses concise and helpful.",
                 },
                 { role: "user", content: text },
               ],
