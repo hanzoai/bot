@@ -12,6 +12,7 @@ import { getCustomProviderApiKey, resolveEnvApiKey } from "../agents/model-auth.
 import { normalizeProviderId } from "../agents/model-selection.js";
 import { loadConfig } from "../config/config.js";
 import { normalizeSecretInput } from "../utils/normalize-secret-input.js";
+import { resolveSecretReferenceValue } from "./secrets/kms.js";
 
 export type ProviderAuth = {
   provider: UsageProviderId;
@@ -34,7 +35,7 @@ function parseGoogleToken(apiKey: string): { token: string } | null {
   return null;
 }
 
-function resolveZaiApiKey(): string | undefined {
+async function resolveZaiApiKey(): Promise<string | undefined> {
   const envDirect =
     normalizeSecretInput(process.env.ZAI_API_KEY) || normalizeSecretInput(process.env.Z_AI_API_KEY);
   if (envDirect) {
@@ -47,7 +48,15 @@ function resolveZaiApiKey(): string | undefined {
   }
 
   const cfg = loadConfig();
-  const key = getCustomProviderApiKey(cfg, "zai") || getCustomProviderApiKey(cfg, "z-ai");
+  const key =
+    (await resolveSecretReferenceValue({
+      value: getCustomProviderApiKey(cfg, "zai"),
+      cfg,
+    })) ??
+    (await resolveSecretReferenceValue({
+      value: getCustomProviderApiKey(cfg, "z-ai"),
+      cfg,
+    }));
   if (key) {
     return key;
   }
@@ -58,9 +67,13 @@ function resolveZaiApiKey(): string | undefined {
     ...listProfilesForProvider(store, "z-ai"),
   ].find((id) => store.profiles[id]?.type === "api_key");
   if (apiProfile) {
-    const cred = store.profiles[apiProfile];
-    if (cred?.type === "api_key" && normalizeSecretInput(cred.key)) {
-      return normalizeSecretInput(cred.key);
+    const resolved = await resolveApiKeyForProfile({
+      cfg: undefined,
+      store,
+      profileId: apiProfile,
+    });
+    if (resolved?.apiKey) {
+      return resolved.apiKey;
     }
   }
 
@@ -79,7 +92,7 @@ function resolveZaiApiKey(): string | undefined {
   }
 }
 
-function resolveMinimaxApiKey(): string | undefined {
+async function resolveMinimaxApiKey(): Promise<string | undefined> {
   const envDirect =
     normalizeSecretInput(process.env.MINIMAX_CODE_PLAN_KEY) ||
     normalizeSecretInput(process.env.MINIMAX_API_KEY);
@@ -93,7 +106,10 @@ function resolveMinimaxApiKey(): string | undefined {
   }
 
   const cfg = loadConfig();
-  const key = getCustomProviderApiKey(cfg, "minimax");
+  const key = await resolveSecretReferenceValue({
+    value: getCustomProviderApiKey(cfg, "minimax"),
+    cfg,
+  });
   if (key) {
     return key;
   }
@@ -106,17 +122,18 @@ function resolveMinimaxApiKey(): string | undefined {
   if (!apiProfile) {
     return undefined;
   }
-  const cred = store.profiles[apiProfile];
-  if (cred?.type === "api_key" && normalizeSecretInput(cred.key)) {
-    return normalizeSecretInput(cred.key);
-  }
-  if (cred?.type === "token" && normalizeSecretInput(cred.token)) {
-    return normalizeSecretInput(cred.token);
+  const resolved = await resolveApiKeyForProfile({
+    cfg: undefined,
+    store,
+    profileId: apiProfile,
+  });
+  if (resolved?.apiKey) {
+    return resolved.apiKey;
   }
   return undefined;
 }
 
-function resolveXiaomiApiKey(): string | undefined {
+async function resolveXiaomiApiKey(): Promise<string | undefined> {
   const envDirect = normalizeSecretInput(process.env.XIAOMI_API_KEY);
   if (envDirect) {
     return envDirect;
@@ -128,7 +145,10 @@ function resolveXiaomiApiKey(): string | undefined {
   }
 
   const cfg = loadConfig();
-  const key = getCustomProviderApiKey(cfg, "xiaomi");
+  const key = await resolveSecretReferenceValue({
+    value: getCustomProviderApiKey(cfg, "xiaomi"),
+    cfg,
+  });
   if (key) {
     return key;
   }
@@ -141,12 +161,13 @@ function resolveXiaomiApiKey(): string | undefined {
   if (!apiProfile) {
     return undefined;
   }
-  const cred = store.profiles[apiProfile];
-  if (cred?.type === "api_key" && normalizeSecretInput(cred.key)) {
-    return normalizeSecretInput(cred.key);
-  }
-  if (cred?.type === "token" && normalizeSecretInput(cred.token)) {
-    return normalizeSecretInput(cred.token);
+  const resolved = await resolveApiKeyForProfile({
+    cfg: undefined,
+    store,
+    profileId: apiProfile,
+  });
+  if (resolved?.apiKey) {
+    return resolved.apiKey;
   }
   return undefined;
 }
@@ -255,21 +276,21 @@ export async function resolveProviderAuths(params: {
 
   for (const provider of params.providers) {
     if (provider === "zai") {
-      const apiKey = resolveZaiApiKey();
+      const apiKey = await resolveZaiApiKey();
       if (apiKey) {
         auths.push({ provider, token: apiKey });
       }
       continue;
     }
     if (provider === "minimax") {
-      const apiKey = resolveMinimaxApiKey();
+      const apiKey = await resolveMinimaxApiKey();
       if (apiKey) {
         auths.push({ provider, token: apiKey });
       }
       continue;
     }
     if (provider === "xiaomi") {
-      const apiKey = resolveXiaomiApiKey();
+      const apiKey = await resolveXiaomiApiKey();
       if (apiKey) {
         auths.push({ provider, token: apiKey });
       }

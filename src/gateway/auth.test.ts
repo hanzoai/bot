@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { authorizeGatewayConnect } from "./auth.js";
+import { describe, expect, it, vi } from "vitest";
+import { authorizeGatewayConnect, resolveGatewayAuthAsync } from "./auth.js";
 
 describe("gateway auth", () => {
   it("does not throw when req is missing socket", async () => {
@@ -97,5 +97,63 @@ describe("gateway auth", () => {
     expect(res.ok).toBe(true);
     expect(res.method).toBe("tailscale");
     expect(res.user).toBe("peter");
+  });
+
+  it("resolves gateway token/password from KMS references", async () => {
+    const fetchSpy = vi.fn(async (input: string | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.endsWith("/api/v1/auth/universal-auth/login")) {
+        return new Response(
+          JSON.stringify({
+            accessToken: "kms-access-token",
+            expiresIn: 3600,
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      if (url.includes("/api/v3/secrets/raw/GATEWAY_TOKEN")) {
+        return new Response(
+          JSON.stringify({
+            secret: { secretValue: "resolved-gateway-token" },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      if (url.includes("/api/v3/secrets/raw/GATEWAY_PASSWORD")) {
+        return new Response(
+          JSON.stringify({
+            secret: { secretValue: "resolved-gateway-password" },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      return new Response("not found", { status: 404 });
+    });
+
+    const auth = await resolveGatewayAuthAsync({
+      authConfig: {
+        mode: "token",
+        token: "kms://GATEWAY_TOKEN",
+        password: "kms://GATEWAY_PASSWORD",
+      },
+      cfg: {
+        secrets: {
+          backend: "kms",
+          kms: {
+            projectId: "proj_123",
+            environment: "dev",
+            machineIdentity: {
+              clientId: "machine-client-id",
+              clientSecret: "machine-client-secret",
+            },
+          },
+        },
+      },
+      fetchFn: fetchSpy,
+    });
+
+    expect(auth.token).toBe("resolved-gateway-token");
+    expect(auth.password).toBe("resolved-gateway-password");
+    expect(fetchSpy).toHaveBeenCalledTimes(3);
   });
 });

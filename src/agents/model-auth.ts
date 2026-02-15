@@ -3,6 +3,7 @@ import path from "node:path";
 import type { BotConfig } from "../config/config.js";
 import type { ModelProviderAuthMode, ModelProviderConfig } from "../config/types.js";
 import { formatCliCommand } from "../cli/command-format.js";
+import { resolveSecretReferenceValue } from "../infra/secrets/kms.js";
 import { getShellEnvAppliedKeys } from "../infra/shell-env.js";
 import {
   normalizeOptionalSecretInput,
@@ -53,6 +54,17 @@ export function getCustomProviderApiKey(
 ): string | undefined {
   const entry = resolveProviderConfig(cfg, provider);
   return normalizeOptionalSecretInput(entry?.apiKey);
+}
+
+async function resolveCustomProviderApiKey(
+  cfg: BotConfig | undefined,
+  provider: string,
+): Promise<string | undefined> {
+  const entry = resolveProviderConfig(cfg, provider);
+  return await resolveSecretReferenceValue({
+    value: entry?.apiKey,
+    cfg,
+  });
 }
 
 function resolveProviderAuthOverride(
@@ -202,7 +214,7 @@ export async function resolveApiKeyForProvider(params: {
     };
   }
 
-  const customKey = getCustomProviderApiKey(cfg, provider);
+  const customKey = await resolveCustomProviderApiKey(cfg, provider);
   if (customKey) {
     return { apiKey: customKey, source: "models.json", mode: "api-key" };
   }

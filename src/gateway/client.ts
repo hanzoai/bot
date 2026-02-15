@@ -54,6 +54,13 @@ export type GatewayClientOptions = {
   commands?: string[];
   permissions?: Record<string, boolean>;
   pathEnv?: string;
+  tenant?: {
+    orgId?: string;
+    projectId?: string;
+    tenantId?: string;
+    actorId?: string;
+    env?: string;
+  };
   deviceIdentity?: DeviceIdentity;
   minProtocol?: number;
   maxProtocol?: number;
@@ -241,6 +248,16 @@ export class GatewayClient {
           ? this.opts.permissions
           : undefined,
       pathEnv: this.opts.pathEnv,
+      tenant:
+        this.opts.tenant && typeof this.opts.tenant === "object"
+          ? {
+              orgId: this.opts.tenant.orgId,
+              projectId: this.opts.tenant.projectId,
+              tenantId: this.opts.tenant.tenantId,
+              actorId: this.opts.tenant.actorId,
+              env: this.opts.tenant.env,
+            }
+          : undefined,
       auth,
       role,
       scopes,

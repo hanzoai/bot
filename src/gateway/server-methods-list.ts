@@ -84,6 +84,17 @@ const BASE_METHODS = [
   "agent.identity.get",
   "agent.wait",
   "browser.request",
+  // Team presets
+  "team.presets.list",
+  "team.presets.get",
+  "team.provision",
+  "team.provision.all",
+  // Agent identity (DID + wallet)
+  "agent.did.get",
+  "agent.did.create",
+  "agent.wallet.get",
+  "agent.wallet.create",
+  "agent.identity.full",
   // WebChat WebSocket-native chat methods
   "chat.history",
   "chat.abort",

@@ -7,6 +7,7 @@ import {
 import lockfile from "proper-lockfile";
 import type { BotConfig } from "../../config/config.js";
 import type { AuthProfileStore } from "./types.js";
+import { resolveSecretReferenceValue } from "../../infra/secrets/kms.js";
 import { refreshQwenPortalCredentials } from "../../providers/qwen-portal-oauth.js";
 import { refreshChutesTokens } from "../chutes-oauth.js";
 import { AUTH_STORE_LOCK_OPTIONS, log } from "./constants.js";
@@ -169,14 +170,20 @@ export async function resolveApiKeyForProfile(params: {
   }
 
   if (cred.type === "api_key") {
-    const key = cred.key?.trim();
+    const key = await resolveSecretReferenceValue({
+      value: cred.key,
+      cfg,
+    });
     if (!key) {
       return null;
     }
     return { apiKey: key, provider: cred.provider, email: cred.email };
   }
   if (cred.type === "token") {
-    const token = cred.token?.trim();
+    const token = await resolveSecretReferenceValue({
+      value: cred.token,
+      cfg,
+    });
     if (!token) {
       return null;
     }
