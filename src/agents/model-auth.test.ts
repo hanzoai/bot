@@ -532,4 +532,65 @@ describe("getApiKeyForModel", () => {
       }
     }
   });
+
+  it("resolves API keys from KMS secret references in auth profiles", async () => {
+    const fetchSpy = vi.fn(async (input: string | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.endsWith("/api/v1/auth/universal-auth/login")) {
+        return new Response(
+          JSON.stringify({
+            accessToken: "kms-access-token",
+            expiresIn: 3600,
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      if (url.includes("/api/v3/secrets/raw/OPENAI_API_KEY")) {
+        return new Response(
+          JSON.stringify({
+            secret: {
+              secretValue: "sk-openai-from-kms",
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      return new Response("not found", { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    vi.resetModules();
+    const { resolveApiKeyForProvider } = await import("./model-auth.js");
+
+    const resolved = await resolveApiKeyForProvider({
+      provider: "openai",
+      cfg: {
+        secrets: {
+          backend: "kms",
+          kms: {
+            projectId: "proj_123",
+            environment: "dev",
+            machineIdentity: {
+              clientId: "machine-id",
+              clientSecret: "machine-secret",
+            },
+          },
+        },
+      } as never,
+      store: {
+        version: 1,
+        profiles: {
+          "openai:default": {
+            type: "api_key",
+            provider: "openai",
+            key: "kms://OPENAI_API_KEY",
+          },
+        },
+      },
+    });
+
+    expect(resolved.apiKey).toBe("sk-openai-from-kms");
+    expect(resolved.source).toBe("profile:openai:default");
+    expect(fetchSpy).toHaveBeenCalled();
+  });
 });

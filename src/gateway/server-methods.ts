@@ -11,6 +11,7 @@ import { cronHandlers } from "./server-methods/cron.js";
 import { deviceHandlers } from "./server-methods/devices.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
 import { healthHandlers } from "./server-methods/health.js";
+import { identityHandlers } from "./server-methods/identity.js";
 import { logsHandlers } from "./server-methods/logs.js";
 import { modelsHandlers } from "./server-methods/models.js";
 import { nodeHandlers } from "./server-methods/nodes.js";
@@ -19,6 +20,7 @@ import { sessionsHandlers } from "./server-methods/sessions.js";
 import { skillsHandlers } from "./server-methods/skills.js";
 import { systemHandlers } from "./server-methods/system.js";
 import { talkHandlers } from "./server-methods/talk.js";
+import { teamHandlers } from "./server-methods/team.js";
 import { ttsHandlers } from "./server-methods/tts.js";
 import { updateHandlers } from "./server-methods/update.js";
 import { usageHandlers } from "./server-methods/usage.js";
@@ -72,6 +74,11 @@ const READ_METHODS = new Set([
   "node.list",
   "node.describe",
   "chat.history",
+  "team.presets.list",
+  "team.presets.get",
+  "agent.did.get",
+  "agent.wallet.get",
+  "agent.identity.full",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -155,7 +162,11 @@ function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["c
     method === "sessions.patch" ||
     method === "sessions.reset" ||
     method === "sessions.delete" ||
-    method === "sessions.compact"
+    method === "sessions.compact" ||
+    method === "team.provision" ||
+    method === "team.provision.all" ||
+    method === "agent.did.create" ||
+    method === "agent.wallet.create"
   ) {
     return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.admin");
   }
@@ -188,6 +199,8 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...agentHandlers,
   ...agentsHandlers,
   ...browserHandlers,
+  ...teamHandlers,
+  ...identityHandlers,
 };
 
 export async function handleGatewayRequest(
