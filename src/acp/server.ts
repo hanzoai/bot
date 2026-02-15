@@ -4,14 +4,15 @@ import { Readable, Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import type { AcpServerOptions } from "./types.js";
 import { loadConfig } from "../config/config.js";
-import { resolveGatewayAuth } from "../gateway/auth.js";
+import { resolveGatewayAuthAsync } from "../gateway/auth.js";
 import { buildGatewayConnectionDetails } from "../gateway/call.js";
 import { GatewayClient } from "../gateway/client.js";
 import { isMainModule } from "../infra/is-main.js";
+import { resolveSecretReferenceValue } from "../infra/secrets/kms.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 import { AcpGatewayAgent } from "./translator.js";
 
-export function serveAcpGateway(opts: AcpServerOptions = {}): void {
+export async function serveAcpGateway(opts: AcpServerOptions = {}): Promise<void> {
   const cfg = loadConfig();
   const connection = buildGatewayConnectionDetails({
     config: cfg,
@@ -20,18 +21,30 @@ export function serveAcpGateway(opts: AcpServerOptions = {}): void {
 
   const isRemoteMode = cfg.gateway?.mode === "remote";
   const remote = isRemoteMode ? cfg.gateway?.remote : undefined;
-  const auth = resolveGatewayAuth({ authConfig: cfg.gateway?.auth, env: process.env });
-
-  const token =
-    opts.gatewayToken ??
-    (isRemoteMode ? remote?.token?.trim() : undefined) ??
-    process.env.BOT_GATEWAY_TOKEN ??
-    auth.token;
-  const password =
-    opts.gatewayPassword ??
-    (isRemoteMode ? remote?.password?.trim() : undefined) ??
-    process.env.BOT_GATEWAY_PASSWORD ??
-    auth.password;
+  const auth = await resolveGatewayAuthAsync({
+    authConfig: cfg.gateway?.auth,
+    env: process.env,
+    tailscaleMode: cfg.gateway?.tailscale?.mode ?? "off",
+    cfg,
+  });
+  const token = await resolveSecretReferenceValue({
+    value:
+      opts.gatewayToken ??
+      (isRemoteMode ? remote?.token : undefined) ??
+      process.env.BOT_GATEWAY_TOKEN ??
+      auth.token,
+    cfg,
+    env: process.env,
+  });
+  const password = await resolveSecretReferenceValue({
+    value:
+      opts.gatewayPassword ??
+      (isRemoteMode ? remote?.password : undefined) ??
+      process.env.BOT_GATEWAY_PASSWORD ??
+      auth.password,
+    cfg,
+    env: process.env,
+  });
 
   let agent: AcpGatewayAgent | null = null;
   const gateway = new GatewayClient({
@@ -140,5 +153,8 @@ Options:
 
 if (isMainModule({ currentFile: fileURLToPath(import.meta.url) })) {
   const opts = parseArgs(process.argv.slice(2));
-  serveAcpGateway(opts);
+  void serveAcpGateway(opts).catch((err) => {
+    console.error(String(err));
+    process.exit(1);
+  });
 }
