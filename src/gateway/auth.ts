@@ -1,6 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import { timingSafeEqual } from "node:crypto";
-import type { GatewayAuthConfig, GatewayTailscaleMode } from "../config/config.js";
+import type { BotConfig, GatewayAuthConfig, GatewayTailscaleMode } from "../config/config.js";
+import { resolveSecretReferenceValue } from "../infra/secrets/kms.js";
 import { readTailscaleWhoisIdentity, type TailscaleWhoisIdentity } from "../infra/tailscale.js";
 import {
   isLoopbackAddress,
@@ -14,12 +15,13 @@ export type ResolvedGatewayAuth = {
   mode: ResolvedGatewayAuthMode;
   token?: string;
   password?: string;
+  apiKeys?: string[];
   allowTailscale: boolean;
 };
 
 export type GatewayAuthResult = {
   ok: boolean;
-  method?: "token" | "password" | "tailscale" | "device-token";
+  method?: "token" | "password" | "tailscale" | "device-token" | "api-key";
   user?: string;
   reason?: string;
 };
@@ -189,13 +191,18 @@ export function resolveGatewayAuth(params: {
 }): ResolvedGatewayAuth {
   const authConfig = params.authConfig ?? {};
   const env = params.env ?? process.env;
-  const token =
-    authConfig.token ?? env.BOT_GATEWAY_TOKEN ?? env.BOT_GATEWAY_TOKEN ?? undefined;
+  const token = authConfig.token ?? env.BOT_GATEWAY_TOKEN ?? env.BOT_GATEWAY_TOKEN ?? undefined;
   const password =
-    authConfig.password ??
-    env.BOT_GATEWAY_PASSWORD ??
-    env.BOT_GATEWAY_PASSWORD ??
-    undefined;
+    authConfig.password ?? env.BOT_GATEWAY_PASSWORD ?? env.BOT_GATEWAY_PASSWORD ?? undefined;
+  const apiKeysRaw = (authConfig as any).apiKeys ?? env.BOT_API_KEYS ?? undefined;
+  const apiKeys = apiKeysRaw
+    ? (Array.isArray(apiKeysRaw)
+        ? apiKeysRaw
+        : String(apiKeysRaw)
+            .split(",")
+            .map((k: string) => k.trim())
+      ).filter(Boolean)
+    : undefined;
   const mode: ResolvedGatewayAuth["mode"] = authConfig.mode ?? (password ? "password" : "token");
   const allowTailscale =
     authConfig.allowTailscale ?? (params.tailscaleMode === "serve" && mode !== "password");
@@ -203,8 +210,37 @@ export function resolveGatewayAuth(params: {
     mode,
     token,
     password,
+    apiKeys: apiKeys?.length ? apiKeys : undefined,
     allowTailscale,
   };
+}
+
+export async function resolveGatewayAuthAsync(params: {
+  authConfig?: GatewayAuthConfig | null;
+  env?: NodeJS.ProcessEnv;
+  tailscaleMode?: GatewayTailscaleMode;
+  cfg?: BotConfig;
+  fetchFn?: typeof fetch;
+}): Promise<ResolvedGatewayAuth> {
+  const env = params.env ?? process.env;
+  const base = resolveGatewayAuth({
+    authConfig: params.authConfig,
+    env,
+    tailscaleMode: params.tailscaleMode,
+  });
+  const token = await resolveSecretReferenceValue({
+    value: base.token,
+    cfg: params.cfg,
+    env,
+    fetchFn: params.fetchFn,
+  });
+  const password = await resolveSecretReferenceValue({
+    value: base.password,
+    cfg: params.cfg,
+    env,
+    fetchFn: params.fetchFn,
+  });
+  return { ...base, token, password };
 }
 
 export function assertGatewayAuthConfigured(auth: ResolvedGatewayAuth): void {
@@ -243,6 +279,15 @@ export async function authorizeGatewayConnect(params: {
         method: "tailscale",
         user: tailscaleCheck.user.login,
       };
+    }
+  }
+
+  // Try API key auth first (works with any mode)
+  if (auth.apiKeys?.length && connectAuth?.token) {
+    for (const key of auth.apiKeys) {
+      if (safeEqual(connectAuth.token, key)) {
+        return { ok: true, method: "api-key" };
+      }
     }
   }
 
