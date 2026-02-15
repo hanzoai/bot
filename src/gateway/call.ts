@@ -7,6 +7,7 @@ import {
   resolveStateDir,
 } from "../config/config.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
+import { resolveSecretReferenceValue } from "../infra/secrets/kms.js";
 import { pickPrimaryTailnetIPv4 } from "../infra/tailnet.js";
 import { loadGatewayTlsRuntime } from "../infra/tls/gateway.js";
 import {
@@ -184,8 +185,46 @@ export async function callGateway<T = Record<string, unknown>>(
       ].join("\n"),
     );
   }
-  const authToken = config.gateway?.auth?.token;
-  const authPassword = config.gateway?.auth?.password;
+  const authToken = await resolveSecretReferenceValue({
+    value: config.gateway?.auth?.token,
+    cfg: config,
+    env: process.env,
+  });
+  const authPassword = await resolveSecretReferenceValue({
+    value: config.gateway?.auth?.password,
+    cfg: config,
+    env: process.env,
+  });
+  const remoteToken = await resolveSecretReferenceValue({
+    value: typeof remote?.token === "string" ? remote.token : undefined,
+    cfg: config,
+    env: process.env,
+  });
+  const remotePassword = await resolveSecretReferenceValue({
+    value: typeof remote?.password === "string" ? remote.password : undefined,
+    cfg: config,
+    env: process.env,
+  });
+  const envToken = await resolveSecretReferenceValue({
+    value: process.env.BOT_GATEWAY_TOKEN,
+    cfg: config,
+    env: process.env,
+  });
+  const envPassword = await resolveSecretReferenceValue({
+    value: process.env.BOT_GATEWAY_PASSWORD,
+    cfg: config,
+    env: process.env,
+  });
+  const explicitToken = await resolveSecretReferenceValue({
+    value: explicitAuth.token,
+    cfg: config,
+    env: process.env,
+  });
+  const explicitPassword = await resolveSecretReferenceValue({
+    value: explicitAuth.password,
+    cfg: config,
+    env: process.env,
+  });
   const connectionDetails = buildGatewayConnectionDetails({
     config,
     url: urlOverride,
@@ -206,31 +245,11 @@ export async function callGateway<T = Record<string, unknown>>(
     remoteTlsFingerprint ||
     (tlsRuntime?.enabled ? tlsRuntime.fingerprintSha256 : undefined);
   const token =
-    explicitAuth.token ||
-    (!urlOverride
-      ? isRemoteMode
-        ? typeof remote?.token === "string" && remote.token.trim().length > 0
-          ? remote.token.trim()
-          : undefined
-        : process.env.BOT_GATEWAY_TOKEN?.trim() ||
-          process.env.BOT_GATEWAY_TOKEN?.trim() ||
-          (typeof authToken === "string" && authToken.trim().length > 0
-            ? authToken.trim()
-            : undefined)
-      : undefined);
+    explicitToken ||
+    (!urlOverride ? (isRemoteMode ? remoteToken : envToken || authToken) : undefined);
   const password =
-    explicitAuth.password ||
-    (!urlOverride
-      ? process.env.BOT_GATEWAY_PASSWORD?.trim() ||
-        process.env.BOT_GATEWAY_PASSWORD?.trim() ||
-        (isRemoteMode
-          ? typeof remote?.password === "string" && remote.password.trim().length > 0
-            ? remote.password.trim()
-            : undefined
-          : typeof authPassword === "string" && authPassword.trim().length > 0
-            ? authPassword.trim()
-            : undefined)
-      : undefined);
+    explicitPassword ||
+    (!urlOverride ? envPassword || (isRemoteMode ? remotePassword : authPassword) : undefined);
 
   const formatCloseError = (code: number, reason: string) => {
     const reasonText = reason?.trim() || "no close reason";
