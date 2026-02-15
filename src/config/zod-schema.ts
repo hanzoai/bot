@@ -113,6 +113,33 @@ export const BotSchema = z
       })
       .catchall(z.string())
       .optional(),
+    secrets: z
+      .object({
+        backend: z.union([z.literal("local"), z.literal("kms")]).optional(),
+        kms: z
+          .object({
+            siteUrl: z.string().optional(),
+            orgSlug: z.string().optional(),
+            projectId: z.string().optional(),
+            projectSlug: z.string().optional(),
+            environment: z.string().optional(),
+            secretPath: z.string().optional(),
+            accessToken: z.string().optional(),
+            machineIdentity: z
+              .object({
+                clientId: z.string().optional(),
+                clientSecret: z.string().optional(),
+              })
+              .strict()
+              .optional(),
+            cacheTtlMs: z.number().int().nonnegative().optional(),
+            requestTimeoutMs: z.number().int().positive().optional(),
+          })
+          .strict()
+          .optional(),
+      })
+      .strict()
+      .optional(),
     wizard: z
       .object({
         lastRunAt: z.string().optional(),
