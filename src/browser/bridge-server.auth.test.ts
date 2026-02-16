@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { startBrowserBridgeServer, stopBrowserBridgeServer } from "./bridge-server.js";
 import {
-  DEFAULT_OPENCLAW_BROWSER_COLOR,
-  DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+  DEFAULT_BOT_BROWSER_COLOR,
+  DEFAULT_BOT_BROWSER_PROFILE_NAME,
 } from "./constants.js";
 
 function buildResolvedConfig() {
@@ -15,16 +15,16 @@ function buildResolvedConfig() {
     cdpIsLoopback: true,
     remoteCdpTimeoutMs: 1500,
     remoteCdpHandshakeTimeoutMs: 3000,
-    color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+    color: DEFAULT_BOT_BROWSER_COLOR,
     executablePath: undefined,
     headless: true,
     noSandbox: false,
     attachOnly: true,
-    defaultProfile: DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+    defaultProfile: DEFAULT_BOT_BROWSER_PROFILE_NAME,
     profiles: {
-      [DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME]: {
+      [DEFAULT_BOT_BROWSER_PROFILE_NAME]: {
         cdpPort: 1,
-        color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+        color: DEFAULT_BOT_BROWSER_COLOR,
       },
     },
   } as const;

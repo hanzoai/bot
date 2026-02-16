@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.js";
+import type { ConfigFileSnapshot, BotConfig } from "../config/types.js";
 
 /**
  * Test for issue #6070:
@@ -9,11 +9,11 @@ import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.js";
  */
 
 const mockReadConfigFileSnapshot = vi.fn<[], Promise<ConfigFileSnapshot>>();
-const mockWriteConfigFile = vi.fn<[OpenClawConfig], Promise<void>>(async () => {});
+const mockWriteConfigFile = vi.fn<[BotConfig], Promise<void>>(async () => {});
 
 vi.mock("../config/config.js", () => ({
   readConfigFileSnapshot: () => mockReadConfigFileSnapshot(),
-  writeConfigFile: (cfg: OpenClawConfig) => mockWriteConfigFile(cfg),
+  writeConfigFile: (cfg: BotConfig) => mockWriteConfigFile(cfg),
 }));
 
 const mockLog = vi.fn();
@@ -32,8 +32,8 @@ vi.mock("../runtime.js", () => ({
 }));
 
 function buildSnapshot(params: {
-  resolved: OpenClawConfig;
-  config: OpenClawConfig;
+  resolved: BotConfig;
+  config: BotConfig;
 }): ConfigFileSnapshot {
   return {
     path: "/tmp/openclaw.json",
@@ -49,7 +49,7 @@ function buildSnapshot(params: {
   };
 }
 
-function setSnapshot(resolved: OpenClawConfig, config: OpenClawConfig) {
+function setSnapshot(resolved: BotConfig, config: BotConfig) {
   mockReadConfigFileSnapshot.mockResolvedValueOnce(buildSnapshot({ resolved, config }));
 }
 
@@ -72,7 +72,7 @@ describe("config cli", () => {
 
   describe("config set - issue #6070", () => {
     it("preserves existing config keys when setting a new value", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: BotConfig = {
         agents: {
           list: [{ id: "main" }, { id: "oracle", workspace: "~/oracle-workspace" }],
         },
@@ -80,7 +80,7 @@ describe("config cli", () => {
         tools: { allow: ["group:fs"] },
         logging: { level: "debug" },
       };
-      const runtimeMerged: OpenClawConfig = {
+      const runtimeMerged: BotConfig = {
         ...resolved,
         agents: {
           ...resolved.agents,
@@ -104,10 +104,10 @@ describe("config cli", () => {
     });
 
     it("does not inject runtime defaults into the written config", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: BotConfig = {
         gateway: { port: 18789 },
       };
-      const runtimeMerged: OpenClawConfig = {
+      const runtimeMerged: BotConfig = {
         ...resolved,
         agents: {
           defaults: {
@@ -137,7 +137,7 @@ describe("config cli", () => {
 
   describe("config unset - issue #6070", () => {
     it("preserves existing config keys when unsetting a value", async () => {
-      const resolved: OpenClawConfig = {
+      const resolved: BotConfig = {
         agents: { list: [{ id: "main" }] },
         gateway: { port: 18789 },
         tools: {
@@ -146,7 +146,7 @@ describe("config cli", () => {
         },
         logging: { level: "debug" },
       };
-      const runtimeMerged: OpenClawConfig = {
+      const runtimeMerged: BotConfig = {
         ...resolved,
         agents: {
           ...resolved.agents,
