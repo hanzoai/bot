@@ -329,7 +329,7 @@ export async function collectPluginsTrustFindings(params: {
         sandboxMode,
         agentId: context.agentId,
       });
-      const broadPolicy = isToolAllowedByPolicies("__openclaw_plugin_probe__", policies);
+      const broadPolicy = isToolAllowedByPolicies("__bot_plugin_probe__", policies);
       const explicitPluginAllow =
         !restrictiveProfile &&
         (hasExplicitPluginAllow({
@@ -632,7 +632,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
       title: "Plugin extensions directory scan failed",
       detail: `Static code scan could not list extensions directory: ${String(err)}`,
       remediation:
-        "Check file permissions and plugin layout, then rerun `openclaw security audit --deep`.",
+        "Check file permissions and plugin layout, then rerun `bot security audit --deep`.",
     });
     return [];
   });
@@ -669,7 +669,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: `Plugin "${pluginName}" has extension entry path traversal`,
         detail: `Found extension entries that escape the plugin directory:\n${escapedEntries.map((entry) => `  - ${entry}`).join("\n")}`,
         remediation:
-          "Update the plugin manifest so all openclaw.extensions entries stay inside the plugin directory.",
+          "Update the plugin manifest so all bot.extensions entries stay inside the plugin directory.",
       });
     }
 
@@ -684,7 +684,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
           title: `Plugin "${pluginName}" code scan failed`,
           detail: `Static code scan could not complete: ${String(err)}`,
           remediation:
-            "Check file permissions and plugin layout, then rerun `openclaw security audit --deep`.",
+            "Check file permissions and plugin layout, then rerun `bot security audit --deep`.",
         });
         return null;
       });
@@ -702,7 +702,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: `Plugin "${pluginName}" contains dangerous code patterns`,
         detail: `Found ${summary.critical} critical issue(s) in ${summary.scannedFiles} scanned file(s):\n${details}`,
         remediation:
-          "Review the plugin source code carefully before use. If untrusted, remove the plugin from your OpenClaw extensions state directory.",
+          "Review the plugin source code carefully before use. If untrusted, remove the plugin from your Bot extensions state directory.",
       });
     } else if (summary.warn > 0) {
       const warnFindings = summary.findings.filter((f) => f.severity === "warn");
@@ -733,7 +733,7 @@ export async function collectInstalledSkillsCodeSafetyFindings(params: {
   for (const workspaceDir of workspaceDirs) {
     const entries = loadWorkspaceSkillEntries(workspaceDir, { config: params.cfg });
     for (const entry of entries) {
-      if (entry.skill.source === "openclaw-bundled") {
+      if (entry.skill.source === "bot-bundled") {
         continue;
       }
 
@@ -755,7 +755,7 @@ export async function collectInstalledSkillsCodeSafetyFindings(params: {
           title: `Skill "${skillName}" code scan failed`,
           detail: `Static code scan could not complete for ${skillDir}: ${String(err)}`,
           remediation:
-            "Check file permissions and skill layout, then rerun `openclaw security audit --deep`.",
+            "Check file permissions and skill layout, then rerun `bot security audit --deep`.",
         });
         return null;
       });

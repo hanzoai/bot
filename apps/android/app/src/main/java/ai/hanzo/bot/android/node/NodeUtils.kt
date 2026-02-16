@@ -1,4 +1,4 @@
-package ai.openclaw.android.node
+package ai.bot.android.node
 
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull

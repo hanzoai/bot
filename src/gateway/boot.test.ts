@@ -94,7 +94,7 @@ describe("runBootOnce", () => {
   });
 
   it("generates new session ID when no existing session exists", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-boot-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-boot-"));
     const content = "Say hello when you wake up.";
     await fs.writeFile(path.join(workspaceDir, "BOOT.md"), content, "utf-8");
 
@@ -114,7 +114,7 @@ describe("runBootOnce", () => {
   });
 
   it("uses a fresh boot session ID even when main session mapping already exists", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-boot-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-boot-"));
     const content = "Say hello when you wake up.";
     await fs.writeFile(path.join(workspaceDir, "BOOT.md"), content, "utf-8");
 
@@ -145,7 +145,7 @@ describe("runBootOnce", () => {
   });
 
   it("restores the original main session mapping after the boot run", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-boot-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-boot-"));
     const content = "Check if the system is healthy.";
     await fs.writeFile(path.join(workspaceDir, "BOOT.md"), content, "utf-8");
 
@@ -172,7 +172,7 @@ describe("runBootOnce", () => {
   });
 
   it("removes a boot-created main-session mapping when none existed before", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-boot-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-boot-"));
     await fs.writeFile(path.join(workspaceDir, "BOOT.md"), "health check", "utf-8");
 
     const cfg = {};

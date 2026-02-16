@@ -52,8 +52,8 @@ jobs:
         env:
           BOT_INSTALL_URL: https://hanzo.bot/install.sh
           BOT_INSTALL_CLI_URL: https://hanzo.bot/install-cli.sh
-          CLAWDBOT_NO_ONBOARD: "1"
-          CLAWDBOT_INSTALL_SMOKE_SKIP_CLI: "1"
-          CLAWDBOT_INSTALL_SMOKE_SKIP_NONROOT: ${{ github.event_name == 'pull_request' && '1' || '0' }}
-          CLAWDBOT_INSTALL_SMOKE_SKIP_PREVIOUS: "1"
+          BOT_NO_ONBOARD: "1"
+          BOT_INSTALL_SMOKE_SKIP_CLI: "1"
+          BOT_INSTALL_SMOKE_SKIP_NONROOT: ${{ github.event_name == 'pull_request' && '1' || '0' }}
+          BOT_INSTALL_SMOKE_SKIP_PREVIOUS: "1"
         run: pnpm test:install:smoke

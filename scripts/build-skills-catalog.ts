@@ -24,7 +24,7 @@ const CATEGORY_MAP: Record<string, string> = {
   "skill-creator": "Development",
   sag: "Development",
   canvas: "Development",
-  clawhub: "Development",
+  bothub: "Development",
   discord: "Communication",
   slack: "Communication",
   imsg: "Communication",
@@ -531,7 +531,7 @@ function main(): void {
   console.log(`\n  Parsed ${skills.length} skills\n`);
 
   // Write JSON catalog (without readmeBody to keep it small for the list page)
-  const catalog = skills.map(({ readmeBody, ...rest }) => rest);
+  const catalog = skills.map(({ readmeBody: _readmeBody, ...rest }) => rest);
   fs.mkdirSync(path.dirname(OUTPUT_JSON), { recursive: true });
   fs.writeFileSync(OUTPUT_JSON, JSON.stringify(catalog, null, 2));
   console.log(`  ✓ Wrote ${OUTPUT_JSON}`);

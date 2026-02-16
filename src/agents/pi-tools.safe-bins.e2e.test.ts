@@ -6,13 +6,10 @@ import type { BotConfig } from "../config/config.js";
 import type { ExecApprovalsResolved } from "../infra/exec-approvals.js";
 import { captureEnv } from "../test-utils/env.js";
 
-const bundledPluginsDirSnapshot = captureEnv(["OPENCLAW_BUNDLED_PLUGINS_DIR"]);
+const bundledPluginsDirSnapshot = captureEnv(["BOT_BUNDLED_PLUGINS_DIR"]);
 
 beforeAll(() => {
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = path.join(
-    os.tmpdir(),
-    "openclaw-test-no-bundled-extensions",
-  );
+  process.env.BOT_BUNDLED_PLUGINS_DIR = path.join(os.tmpdir(), "bot-test-no-bundled-extensions");
 });
 
 afterAll(() => {
@@ -74,7 +71,7 @@ describe("createBotCodingTools safeBins", () => {
     }
 
     const { createBotCodingTools } = await import("./pi-tools.js");
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-safe-bins-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-safe-bins-"));
     const cfg: BotConfig = {
       tools: {
         exec: {
@@ -96,10 +93,10 @@ describe("createBotCodingTools safeBins", () => {
     expect(execTool).toBeDefined();
 
     const marker = `safe-bins-${Date.now()}`;
-    const envSnapshot = captureEnv(["OPENCLAW_SHELL_ENV_TIMEOUT_MS"]);
+    const envSnapshot = captureEnv(["BOT_SHELL_ENV_TIMEOUT_MS"]);
     const result = await (async () => {
       try {
-        process.env.OPENCLAW_SHELL_ENV_TIMEOUT_MS = "1000";
+        process.env.BOT_SHELL_ENV_TIMEOUT_MS = "1000";
         return await execTool!.execute("call1", {
           command: `echo ${marker}`,
           workdir: tmpDir,
@@ -120,7 +117,7 @@ describe("createBotCodingTools safeBins", () => {
     }
 
     const { createBotCodingTools } = await import("./pi-tools.js");
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-safe-bins-expand-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-safe-bins-expand-"));
 
     const secret = `TOP_SECRET_${Date.now()}`;
     fs.writeFileSync(path.join(tmpDir, "secret.txt"), `${secret}\n`, "utf8");
