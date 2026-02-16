@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { telegramPlugin } from "../../extensions/telegram/src/channel.js";
 import { setTelegramRuntime } from "../../extensions/telegram/src/runtime.js";
 import * as replyModule from "../auto-reply/reply.js";
@@ -33,9 +33,9 @@ afterEach(() => {
 describe("Ghost reminder bug (issue #13317)", () => {
   const createConfig = async (
     tmpDir: string,
-  ): Promise<{ cfg: OpenClawConfig; sessionKey: string }> => {
+  ): Promise<{ cfg: BotConfig; sessionKey: string }> => {
     const storePath = path.join(tmpDir, "sessions.json");
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           workspace: tmpDir,
