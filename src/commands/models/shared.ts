@@ -7,11 +7,7 @@ import {
   resolveModelRefFromString,
 } from "../../agents/model-selection.js";
 import { formatCliCommand } from "../../cli/command-format.js";
-import {
-  type BotConfig,
-  readConfigFileSnapshot,
-  writeConfigFile,
-} from "../../config/config.js";
+import { type BotConfig, readConfigFileSnapshot, writeConfigFile } from "../../config/config.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 
 export const ensureFlagCompatibility = (opts: { json?: boolean; plain?: boolean }) => {
@@ -59,9 +55,7 @@ export const isLocalBaseUrl = (baseUrl: string) => {
   }
 };
 
-export async function updateConfig(
-  mutator: (cfg: BotConfig) => BotConfig,
-): Promise<BotConfig> {
+export async function updateConfig(mutator: (cfg: BotConfig) => BotConfig): Promise<BotConfig> {
   const snapshot = await readConfigFileSnapshot();
   if (!snapshot.valid) {
     const issues = snapshot.issues.map((issue) => `- ${issue.path}: ${issue.message}`).join("\n");
@@ -147,7 +141,7 @@ export function resolveKnownAgentId(params: {
   const knownAgents = listAgentIds(params.cfg);
   if (!knownAgents.includes(agentId)) {
     throw new Error(
-      `Unknown agent id "${raw}". Use "${formatCliCommand("openclaw agents list")}" to see configured agents.`,
+      `Unknown agent id "${raw}". Use "${formatCliCommand("bot agents list")}" to see configured agents.`,
     );
   }
   return agentId;

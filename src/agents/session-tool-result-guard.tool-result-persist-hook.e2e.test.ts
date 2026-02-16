@@ -19,7 +19,7 @@ function writeTempPlugin(params: { dir: string; id: string; body: string }): str
   const file = path.join(pluginDir, `${params.id}.mjs`);
   fs.writeFileSync(file, params.body, "utf-8");
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "bot.plugin.json"),
     JSON.stringify(
       {
         id: params.id,
@@ -76,8 +76,8 @@ describe("tool_result_persist hook", () => {
   });
 
   it("loads tool_result_persist hooks without breaking persistence", () => {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-toolpersist-"));
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = "/nonexistent/bundled/plugins";
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "bot-toolpersist-"));
+    process.env.BOT_BUNDLED_PLUGINS_DIR = "/nonexistent/bundled/plugins";
 
     const pluginA = writeTempPlugin({
       dir: tmp,

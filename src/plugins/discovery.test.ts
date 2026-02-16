@@ -8,29 +8,29 @@ import { discoverBotPlugins } from "./discovery.js";
 const tempDirs: string[] = [];
 
 function makeTempDir() {
-  const dir = path.join(os.tmpdir(), `openclaw-plugins-${randomUUID()}`);
+  const dir = path.join(os.tmpdir(), `bot-plugins-${randomUUID()}`);
   fs.mkdirSync(dir, { recursive: true });
   tempDirs.push(dir);
   return dir;
 }
 
 async function withStateDir<T>(stateDir: string, fn: () => Promise<T>) {
-  const prev = process.env.OPENCLAW_STATE_DIR;
-  const prevBundled = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = "/nonexistent/bundled/plugins";
+  const prev = process.env.BOT_STATE_DIR;
+  const prevBundled = process.env.BOT_BUNDLED_PLUGINS_DIR;
+  process.env.BOT_STATE_DIR = stateDir;
+  process.env.BOT_BUNDLED_PLUGINS_DIR = "/nonexistent/bundled/plugins";
   try {
     return await fn();
   } finally {
     if (prev === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = prev;
+      process.env.BOT_STATE_DIR = prev;
     }
     if (prevBundled === undefined) {
-      delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+      delete process.env.BOT_BUNDLED_PLUGINS_DIR;
     } else {
-      process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = prevBundled;
+      process.env.BOT_BUNDLED_PLUGINS_DIR = prevBundled;
     }
   }
 }
@@ -54,7 +54,7 @@ describe("discoverBotPlugins", () => {
     fs.mkdirSync(globalExt, { recursive: true });
     fs.writeFileSync(path.join(globalExt, "alpha.ts"), "export default function () {}", "utf-8");
 
-    const workspaceExt = path.join(workspaceDir, ".openclaw", "extensions");
+    const workspaceExt = path.join(workspaceDir, ".bot", "extensions");
     fs.mkdirSync(workspaceExt, { recursive: true });
     fs.writeFileSync(path.join(workspaceExt, "beta.ts"), "export default function () {}", "utf-8");
 
@@ -76,7 +76,7 @@ describe("discoverBotPlugins", () => {
       path.join(globalExt, "package.json"),
       JSON.stringify({
         name: "pack",
-        openclaw: { extensions: ["./src/one.ts", "./src/two.ts"] },
+        bot: { extensions: ["./src/one.ts", "./src/two.ts"] },
       }),
       "utf-8",
     );
@@ -108,8 +108,8 @@ describe("discoverBotPlugins", () => {
     fs.writeFileSync(
       path.join(globalExt, "package.json"),
       JSON.stringify({
-        name: "@openclaw/voice-call",
-        openclaw: { extensions: ["./src/index.ts"] },
+        name: "@bot/voice-call",
+        bot: { extensions: ["./src/index.ts"] },
       }),
       "utf-8",
     );
@@ -135,8 +135,8 @@ describe("discoverBotPlugins", () => {
     fs.writeFileSync(
       path.join(packDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/demo-plugin-dir",
-        openclaw: { extensions: ["./index.js"] },
+        name: "@bot/demo-plugin-dir",
+        bot: { extensions: ["./index.js"] },
       }),
       "utf-8",
     );

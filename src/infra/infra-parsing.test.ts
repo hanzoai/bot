@@ -12,7 +12,7 @@ describe("infra parsing", () => {
         diagnostics: { flags: ["telegram.http", "cache.*"] },
       } as BotConfig;
       const env = {
-        OPENCLAW_DIAGNOSTICS: "foo,bar",
+        BOT_DIAGNOSTICS: "foo,bar",
       } as NodeJS.ProcessEnv;
 
       const flags = resolveDiagnosticFlags(cfg, env);
@@ -23,12 +23,12 @@ describe("infra parsing", () => {
     });
 
     it("treats env true as wildcard", () => {
-      const env = { OPENCLAW_DIAGNOSTICS: "1" } as NodeJS.ProcessEnv;
+      const env = { BOT_DIAGNOSTICS: "1" } as NodeJS.ProcessEnv;
       expect(isDiagnosticFlagEnabled("anything.here", undefined, env)).toBe(true);
     });
 
     it("treats env false as disabled", () => {
-      const env = { OPENCLAW_DIAGNOSTICS: "0" } as NodeJS.ProcessEnv;
+      const env = { BOT_DIAGNOSTICS: "0" } as NodeJS.ProcessEnv;
       expect(isDiagnosticFlagEnabled("telegram.http", undefined, env)).toBe(false);
     });
   });
@@ -59,7 +59,7 @@ describe("infra parsing", () => {
     it("returns false when running under PM2 but this module is imported", () => {
       expect(
         isMainModule({
-          currentFile: "/repo/node_modules/openclaw/dist/index.js",
+          currentFile: "/repo/node_modules/bot/dist/index.js",
           argv: ["node", "/repo/app.js"],
           cwd: "/repo",
           env: { pm_exec_path: "/repo/app.js", pm_id: "0" },

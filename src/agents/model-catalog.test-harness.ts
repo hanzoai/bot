@@ -8,7 +8,7 @@ vi.mock("./models-config.js", () => ({
 }));
 
 vi.mock("./agent-paths.js", () => ({
-  resolveBotAgentDir: () => "/tmp/openclaw",
+  resolveBotAgentDir: () => "/tmp/bot",
 }));
 
 export function installModelCatalogTestHooks() {

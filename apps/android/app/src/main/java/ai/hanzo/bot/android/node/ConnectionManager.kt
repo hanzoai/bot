@@ -1,21 +1,21 @@
-package ai.openclaw.android.node
+package ai.bot.android.node
 
 import android.os.Build
-import ai.openclaw.android.BuildConfig
-import ai.openclaw.android.SecurePrefs
-import ai.openclaw.android.gateway.GatewayClientInfo
-import ai.openclaw.android.gateway.GatewayConnectOptions
-import ai.openclaw.android.gateway.GatewayEndpoint
-import ai.openclaw.android.gateway.GatewayTlsParams
-import ai.openclaw.android.protocol.OpenClawCanvasA2UICommand
-import ai.openclaw.android.protocol.OpenClawCanvasCommand
-import ai.openclaw.android.protocol.OpenClawCameraCommand
-import ai.openclaw.android.protocol.OpenClawLocationCommand
-import ai.openclaw.android.protocol.OpenClawScreenCommand
-import ai.openclaw.android.protocol.OpenClawSmsCommand
-import ai.openclaw.android.protocol.OpenClawCapability
-import ai.openclaw.android.LocationMode
-import ai.openclaw.android.VoiceWakeMode
+import ai.bot.android.BuildConfig
+import ai.bot.android.SecurePrefs
+import ai.bot.android.gateway.GatewayClientInfo
+import ai.bot.android.gateway.GatewayConnectOptions
+import ai.bot.android.gateway.GatewayEndpoint
+import ai.bot.android.gateway.GatewayTlsParams
+import ai.bot.android.protocol.BotCanvasA2UICommand
+import ai.bot.android.protocol.BotCanvasCommand
+import ai.bot.android.protocol.BotCameraCommand
+import ai.bot.android.protocol.BotLocationCommand
+import ai.bot.android.protocol.BotScreenCommand
+import ai.bot.android.protocol.BotSmsCommand
+import ai.bot.android.protocol.BotCapability
+import ai.bot.android.LocationMode
+import ai.bot.android.VoiceWakeMode
 
 class ConnectionManager(
   private val prefs: SecurePrefs,
@@ -81,24 +81,24 @@ class ConnectionManager(
 
   fun buildInvokeCommands(): List<String> =
     buildList {
-      add(OpenClawCanvasCommand.Present.rawValue)
-      add(OpenClawCanvasCommand.Hide.rawValue)
-      add(OpenClawCanvasCommand.Navigate.rawValue)
-      add(OpenClawCanvasCommand.Eval.rawValue)
-      add(OpenClawCanvasCommand.Snapshot.rawValue)
-      add(OpenClawCanvasA2UICommand.Push.rawValue)
-      add(OpenClawCanvasA2UICommand.PushJSONL.rawValue)
-      add(OpenClawCanvasA2UICommand.Reset.rawValue)
-      add(OpenClawScreenCommand.Record.rawValue)
+      add(BotCanvasCommand.Present.rawValue)
+      add(BotCanvasCommand.Hide.rawValue)
+      add(BotCanvasCommand.Navigate.rawValue)
+      add(BotCanvasCommand.Eval.rawValue)
+      add(BotCanvasCommand.Snapshot.rawValue)
+      add(BotCanvasA2UICommand.Push.rawValue)
+      add(BotCanvasA2UICommand.PushJSONL.rawValue)
+      add(BotCanvasA2UICommand.Reset.rawValue)
+      add(BotScreenCommand.Record.rawValue)
       if (cameraEnabled()) {
-        add(OpenClawCameraCommand.Snap.rawValue)
-        add(OpenClawCameraCommand.Clip.rawValue)
+        add(BotCameraCommand.Snap.rawValue)
+        add(BotCameraCommand.Clip.rawValue)
       }
       if (locationMode() != LocationMode.Off) {
-        add(OpenClawLocationCommand.Get.rawValue)
+        add(BotLocationCommand.Get.rawValue)
       }
       if (smsAvailable()) {
-        add(OpenClawSmsCommand.Send.rawValue)
+        add(BotSmsCommand.Send.rawValue)
       }
       if (BuildConfig.DEBUG) {
         add("debug.logs")
@@ -109,15 +109,15 @@ class ConnectionManager(
 
   fun buildCapabilities(): List<String> =
     buildList {
-      add(OpenClawCapability.Canvas.rawValue)
-      add(OpenClawCapability.Screen.rawValue)
-      if (cameraEnabled()) add(OpenClawCapability.Camera.rawValue)
-      if (smsAvailable()) add(OpenClawCapability.Sms.rawValue)
+      add(BotCapability.Canvas.rawValue)
+      add(BotCapability.Screen.rawValue)
+      if (cameraEnabled()) add(BotCapability.Camera.rawValue)
+      if (smsAvailable()) add(BotCapability.Sms.rawValue)
       if (voiceWakeMode() != VoiceWakeMode.Off && hasRecordAudioPermission()) {
-        add(OpenClawCapability.VoiceWake.rawValue)
+        add(BotCapability.VoiceWake.rawValue)
       }
       if (locationMode() != LocationMode.Off) {
-        add(OpenClawCapability.Location.rawValue)
+        add(BotCapability.Location.rawValue)
       }
     }
 
@@ -141,7 +141,7 @@ class ConnectionManager(
     val version = resolvedVersionName()
     val release = Build.VERSION.RELEASE?.trim().orEmpty()
     val releaseLabel = if (release.isEmpty()) "unknown" else release
-    return "OpenClawAndroid/$version (Android $releaseLabel; SDK ${Build.VERSION.SDK_INT})"
+    return "BotAndroid/$version (Android $releaseLabel; SDK ${Build.VERSION.SDK_INT})"
   }
 
   fun buildClientInfo(clientId: String, clientMode: String): GatewayClientInfo {
@@ -164,7 +164,7 @@ class ConnectionManager(
       caps = buildCapabilities(),
       commands = buildInvokeCommands(),
       permissions = emptyMap(),
-      client = buildClientInfo(clientId = "openclaw-android", clientMode = "node"),
+      client = buildClientInfo(clientId = "bot-android", clientMode = "node"),
       userAgent = buildUserAgent(),
     )
   }
@@ -176,7 +176,7 @@ class ConnectionManager(
       caps = emptyList(),
       commands = emptyList(),
       permissions = emptyMap(),
-      client = buildClientInfo(clientId = "openclaw-control-ui", clientMode = "ui"),
+      client = buildClientInfo(clientId = "bot-control-ui", clientMode = "ui"),
       userAgent = buildUserAgent(),
     )
   }
