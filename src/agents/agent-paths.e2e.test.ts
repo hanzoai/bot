@@ -3,9 +3,9 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { captureEnv } from "../test-utils/env.js";
-import { resolveOpenClawAgentDir } from "./agent-paths.js";
+import { resolveBotAgentDir } from "./agent-paths.js";
 
-describe("resolveOpenClawAgentDir", () => {
+describe("resolveBotAgentDir", () => {
   const env = captureEnv(["OPENCLAW_STATE_DIR", "OPENCLAW_AGENT_DIR", "PI_CODING_AGENT_DIR"]);
   let tempStateDir: string | null = null;
 
@@ -23,7 +23,7 @@ describe("resolveOpenClawAgentDir", () => {
     delete process.env.OPENCLAW_AGENT_DIR;
     delete process.env.PI_CODING_AGENT_DIR;
 
-    const resolved = resolveOpenClawAgentDir();
+    const resolved = resolveBotAgentDir();
 
     expect(resolved).toBe(path.join(tempStateDir, "agents", "main", "agent"));
   });
@@ -34,7 +34,7 @@ describe("resolveOpenClawAgentDir", () => {
     process.env.OPENCLAW_AGENT_DIR = override;
     delete process.env.PI_CODING_AGENT_DIR;
 
-    const resolved = resolveOpenClawAgentDir();
+    const resolved = resolveBotAgentDir();
 
     expect(resolved).toBe(path.resolve(override));
   });

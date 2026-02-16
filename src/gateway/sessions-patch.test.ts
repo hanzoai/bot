@@ -131,7 +131,7 @@ describe("gateway sessions patch", () => {
   test("sets spawnDepth for subagent sessions", async () => {
     const store: Record<string, SessionEntry> = {};
     const res = await applySessionsPatchToStore({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       store,
       storeKey: "agent:main:subagent:child",
       patch: { spawnDepth: 2 },
@@ -146,7 +146,7 @@ describe("gateway sessions patch", () => {
   test("rejects spawnDepth on non-subagent sessions", async () => {
     const store: Record<string, SessionEntry> = {};
     const res = await applySessionsPatchToStore({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       store,
       storeKey: "agent:main:main",
       patch: { spawnDepth: 1 },
