@@ -64,7 +64,7 @@ function buildPeerId(source: EventSource): string {
 
 function resolveLineInboundRoute(params: {
   source: EventSource;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   account: ResolvedLineAccount;
 }): {
   userId?: string;
@@ -209,7 +209,7 @@ function resolveLineAddresses(params: {
 }
 
 async function finalizeLineInboundContext(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   account: ResolvedLineAccount;
   event: MessageEvent | PostbackEvent;
   route: LineRouteInfo;
