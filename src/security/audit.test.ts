@@ -83,7 +83,7 @@ describe("security audit", () => {
   };
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-security-audit-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-security-audit-"));
   });
 
   afterAll(async () => {
@@ -116,10 +116,10 @@ describe("security audit", () => {
 
   it("flags non-loopback bind without auth as critical", async () => {
     // Clear env tokens so resolveGatewayAuth defaults to mode=none
-    const prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    const prevPassword = process.env.OPENCLAW_GATEWAY_PASSWORD;
-    delete process.env.OPENCLAW_GATEWAY_TOKEN;
-    delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+    const prevToken = process.env.BOT_GATEWAY_TOKEN;
+    const prevPassword = process.env.BOT_GATEWAY_PASSWORD;
+    delete process.env.BOT_GATEWAY_TOKEN;
+    delete process.env.BOT_GATEWAY_PASSWORD;
 
     try {
       const cfg: BotConfig = {
@@ -141,14 +141,14 @@ describe("security audit", () => {
     } finally {
       // Restore env
       if (prevToken === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.BOT_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = prevToken;
+        process.env.BOT_GATEWAY_TOKEN = prevToken;
       }
       if (prevPassword === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+        delete process.env.BOT_GATEWAY_PASSWORD;
       } else {
-        process.env.OPENCLAW_GATEWAY_PASSWORD = prevPassword;
+        process.env.BOT_GATEWAY_PASSWORD = prevPassword;
       }
     }
   });
@@ -313,7 +313,7 @@ describe("security audit", () => {
     const tmp = await makeTmpDir("win");
     const stateDir = path.join(tmp, "state");
     await fs.mkdir(stateDir, { recursive: true });
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "bot.json");
     await fs.writeFile(configPath, "{}\n", "utf-8");
 
     const user = "DESKTOP-TEST\\Tester";
@@ -350,7 +350,7 @@ describe("security audit", () => {
     const tmp = await makeTmpDir("win-open");
     const stateDir = path.join(tmp, "state");
     await fs.mkdir(stateDir, { recursive: true });
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "bot.json");
     await fs.writeFile(configPath, "{}\n", "utf-8");
 
     const user = "DESKTOP-TEST\\Tester";
@@ -892,9 +892,9 @@ describe("security audit", () => {
   });
 
   it("flags Discord native commands without a guild user allowlist", async () => {
-    const prevStateDir = process.env.OPENCLAW_STATE_DIR;
+    const prevStateDir = process.env.BOT_STATE_DIR;
     const tmp = await makeTmpDir("discord");
-    process.env.OPENCLAW_STATE_DIR = tmp;
+    process.env.BOT_STATE_DIR = tmp;
     await fs.mkdir(path.join(tmp, "credentials"), { recursive: true, mode: 0o700 });
     try {
       const cfg: BotConfig = {
@@ -931,17 +931,17 @@ describe("security audit", () => {
       );
     } finally {
       if (prevStateDir == null) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = prevStateDir;
+        process.env.BOT_STATE_DIR = prevStateDir;
       }
     }
   });
 
   it("does not flag Discord slash commands when dm.allowFrom includes a Discord snowflake id", async () => {
-    const prevStateDir = process.env.OPENCLAW_STATE_DIR;
+    const prevStateDir = process.env.BOT_STATE_DIR;
     const tmp = await makeTmpDir("discord-allowfrom-snowflake");
-    process.env.OPENCLAW_STATE_DIR = tmp;
+    process.env.BOT_STATE_DIR = tmp;
     await fs.mkdir(path.join(tmp, "credentials"), { recursive: true, mode: 0o700 });
     try {
       const cfg: BotConfig = {
@@ -978,17 +978,17 @@ describe("security audit", () => {
       );
     } finally {
       if (prevStateDir == null) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = prevStateDir;
+        process.env.BOT_STATE_DIR = prevStateDir;
       }
     }
   });
 
   it("flags Discord slash commands when access-group enforcement is disabled and no users allowlist exists", async () => {
-    const prevStateDir = process.env.OPENCLAW_STATE_DIR;
+    const prevStateDir = process.env.BOT_STATE_DIR;
     const tmp = await makeTmpDir("discord-open");
-    process.env.OPENCLAW_STATE_DIR = tmp;
+    process.env.BOT_STATE_DIR = tmp;
     await fs.mkdir(path.join(tmp, "credentials"), { recursive: true, mode: 0o700 });
     try {
       const cfg: BotConfig = {
@@ -1026,17 +1026,17 @@ describe("security audit", () => {
       );
     } finally {
       if (prevStateDir == null) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = prevStateDir;
+        process.env.BOT_STATE_DIR = prevStateDir;
       }
     }
   });
 
   it("flags Slack slash commands without a channel users allowlist", async () => {
-    const prevStateDir = process.env.OPENCLAW_STATE_DIR;
+    const prevStateDir = process.env.BOT_STATE_DIR;
     const tmp = await makeTmpDir("slack");
-    process.env.OPENCLAW_STATE_DIR = tmp;
+    process.env.BOT_STATE_DIR = tmp;
     await fs.mkdir(path.join(tmp, "credentials"), { recursive: true, mode: 0o700 });
     try {
       const cfg: BotConfig = {
@@ -1068,17 +1068,17 @@ describe("security audit", () => {
       );
     } finally {
       if (prevStateDir == null) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = prevStateDir;
+        process.env.BOT_STATE_DIR = prevStateDir;
       }
     }
   });
 
   it("flags Slack slash commands when access-group enforcement is disabled", async () => {
-    const prevStateDir = process.env.OPENCLAW_STATE_DIR;
+    const prevStateDir = process.env.BOT_STATE_DIR;
     const tmp = await makeTmpDir("slack-open");
-    process.env.OPENCLAW_STATE_DIR = tmp;
+    process.env.BOT_STATE_DIR = tmp;
     await fs.mkdir(path.join(tmp, "credentials"), { recursive: true, mode: 0o700 });
     try {
       const cfg: BotConfig = {
@@ -1111,17 +1111,17 @@ describe("security audit", () => {
       );
     } finally {
       if (prevStateDir == null) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = prevStateDir;
+        process.env.BOT_STATE_DIR = prevStateDir;
       }
     }
   });
 
   it("flags Telegram group commands without a sender allowlist", async () => {
-    const prevStateDir = process.env.OPENCLAW_STATE_DIR;
+    const prevStateDir = process.env.BOT_STATE_DIR;
     const tmp = await makeTmpDir("telegram");
-    process.env.OPENCLAW_STATE_DIR = tmp;
+    process.env.BOT_STATE_DIR = tmp;
     await fs.mkdir(path.join(tmp, "credentials"), { recursive: true, mode: 0o700 });
     try {
       const cfg: BotConfig = {
@@ -1152,17 +1152,17 @@ describe("security audit", () => {
       );
     } finally {
       if (prevStateDir == null) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = prevStateDir;
+        process.env.BOT_STATE_DIR = prevStateDir;
       }
     }
   });
 
   it("warns when Telegram allowFrom entries are non-numeric (legacy @username configs)", async () => {
-    const prevStateDir = process.env.OPENCLAW_STATE_DIR;
+    const prevStateDir = process.env.BOT_STATE_DIR;
     const tmp = await makeTmpDir("telegram-invalid-allowfrom");
-    process.env.OPENCLAW_STATE_DIR = tmp;
+    process.env.BOT_STATE_DIR = tmp;
     await fs.mkdir(path.join(tmp, "credentials"), { recursive: true, mode: 0o700 });
     try {
       const cfg: BotConfig = {
@@ -1194,9 +1194,9 @@ describe("security audit", () => {
       );
     } finally {
       if (prevStateDir == null) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = prevStateDir;
+        process.env.BOT_STATE_DIR = prevStateDir;
       }
     }
   });
@@ -1325,8 +1325,8 @@ describe("security audit", () => {
   });
 
   it("warns when hooks token reuses the gateway env token", async () => {
-    const prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "shared-gateway-token-1234567890";
+    const prevToken = process.env.BOT_GATEWAY_TOKEN;
+    process.env.BOT_GATEWAY_TOKEN = "shared-gateway-token-1234567890";
     const cfg: BotConfig = {
       hooks: { enabled: true, token: "shared-gateway-token-1234567890" },
     };
@@ -1345,9 +1345,9 @@ describe("security audit", () => {
       );
     } finally {
       if (prevToken === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.BOT_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = prevToken;
+        process.env.BOT_GATEWAY_TOKEN = prevToken;
       }
     }
   });
@@ -1459,8 +1459,8 @@ describe("security audit", () => {
       config: cfg,
       includeFilesystem: false,
       includeChannelSecurity: false,
-      stateDir: "/Users/test/Dropbox/.openclaw",
-      configPath: "/Users/test/Dropbox/.openclaw/openclaw.json",
+      stateDir: "/Users/test/Dropbox/.bot",
+      configPath: "/Users/test/Dropbox/.bot/bot.json",
     });
 
     expect(res.findings).toEqual(
@@ -1485,7 +1485,7 @@ describe("security audit", () => {
       await fs.chmod(includePath, 0o644);
     }
 
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "bot.json");
     await fs.writeFile(configPath, `{ "$include": "./extra.json5" }\n`, "utf-8");
     await fs.chmod(configPath, 0o600);
 
@@ -1558,7 +1558,7 @@ describe("security audit", () => {
         includeFilesystem: true,
         includeChannelSecurity: false,
         stateDir,
-        configPath: path.join(stateDir, "openclaw.json"),
+        configPath: path.join(stateDir, "bot.json"),
       });
 
       expect(res.findings).toEqual(
@@ -1606,7 +1606,7 @@ describe("security audit", () => {
       includeFilesystem: true,
       includeChannelSecurity: false,
       stateDir,
-      configPath: path.join(stateDir, "openclaw.json"),
+      configPath: path.join(stateDir, "bot.json"),
     });
 
     expect(res.findings).toEqual(
@@ -1636,7 +1636,7 @@ describe("security audit", () => {
       includeFilesystem: true,
       includeChannelSecurity: false,
       stateDir,
-      configPath: path.join(stateDir, "openclaw.json"),
+      configPath: path.join(stateDir, "bot.json"),
     });
 
     expect(
@@ -1665,7 +1665,7 @@ describe("security audit", () => {
         includeFilesystem: true,
         includeChannelSecurity: false,
         stateDir,
-        configPath: path.join(stateDir, "openclaw.json"),
+        configPath: path.join(stateDir, "bot.json"),
       });
 
       expect(res.findings).toEqual(
@@ -1693,7 +1693,7 @@ describe("security audit", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify({
         name: "evil-plugin",
-        openclaw: { extensions: [".hidden/index.js"] },
+        bot: { extensions: [".hidden/index.js"] },
       }),
     );
     await fs.writeFile(
@@ -1738,7 +1738,7 @@ describe("security audit", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify({
         name: "evil-plugin",
-        openclaw: { extensions: [".hidden/index.js"] },
+        bot: { extensions: [".hidden/index.js"] },
       }),
     );
     await fs.writeFile(
@@ -1796,7 +1796,7 @@ description: test skill
       path.join(pluginDir, "package.json"),
       JSON.stringify({
         name: "escape-plugin",
-        openclaw: { extensions: ["../outside.js"] },
+        bot: { extensions: ["../outside.js"] },
       }),
     );
     await fs.writeFile(path.join(pluginDir, "index.js"), "export {};");
@@ -1818,7 +1818,7 @@ description: test skill
         path.join(pluginDir, "package.json"),
         JSON.stringify({
           name: "scanfail-plugin",
-          openclaw: { extensions: ["index.js"] },
+          bot: { extensions: ["index.js"] },
         }),
       );
       await fs.writeFile(path.join(pluginDir, "index.js"), "export {};");
@@ -1853,24 +1853,24 @@ description: test skill
   });
 
   describe("maybeProbeGateway auth selection", () => {
-    const originalEnvToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    const originalEnvPassword = process.env.OPENCLAW_GATEWAY_PASSWORD;
+    const originalEnvToken = process.env.BOT_GATEWAY_TOKEN;
+    const originalEnvPassword = process.env.BOT_GATEWAY_PASSWORD;
 
     beforeEach(() => {
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
-      delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+      delete process.env.BOT_GATEWAY_TOKEN;
+      delete process.env.BOT_GATEWAY_PASSWORD;
     });
 
     afterEach(() => {
       if (originalEnvToken == null) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.BOT_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = originalEnvToken;
+        process.env.BOT_GATEWAY_TOKEN = originalEnvToken;
       }
       if (originalEnvPassword == null) {
-        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+        delete process.env.BOT_GATEWAY_PASSWORD;
       } else {
-        process.env.OPENCLAW_GATEWAY_PASSWORD = originalEnvPassword;
+        process.env.BOT_GATEWAY_PASSWORD = originalEnvPassword;
       }
     });
 
@@ -1909,7 +1909,7 @@ description: test skill
     });
 
     it("prefers env token over local config token", async () => {
-      process.env.OPENCLAW_GATEWAY_TOKEN = "env-token";
+      process.env.BOT_GATEWAY_TOKEN = "env-token";
       let capturedAuth: { token?: string; password?: string } | undefined;
       const cfg: BotConfig = {
         gateway: {
@@ -2015,7 +2015,7 @@ description: test skill
     });
 
     it("ignores env token when gateway.mode is remote", async () => {
-      process.env.OPENCLAW_GATEWAY_TOKEN = "env-token";
+      process.env.BOT_GATEWAY_TOKEN = "env-token";
       let capturedAuth: { token?: string; password?: string } | undefined;
       const cfg: BotConfig = {
         gateway: {
@@ -2091,7 +2091,7 @@ description: test skill
     });
 
     it("prefers env password over remote password", async () => {
-      process.env.OPENCLAW_GATEWAY_PASSWORD = "env-pass";
+      process.env.BOT_GATEWAY_PASSWORD = "env-pass";
       let capturedAuth: { token?: string; password?: string } | undefined;
       const cfg: BotConfig = {
         gateway: {

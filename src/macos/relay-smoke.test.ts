@@ -31,9 +31,9 @@ describe("parseRelaySmokeTest", () => {
     expect(parseRelaySmokeTest(["send"], { BOT_SMOKE_QR: "1" })).toBe(null);
   });
 
-  it("supports OPENCLAW_SMOKE=qr only when no args", () => {
-    expect(parseRelaySmokeTest([], { OPENCLAW_SMOKE: "qr" })).toBe("qr");
-    expect(parseRelaySmokeTest(["send"], { OPENCLAW_SMOKE: "qr" })).toBe(null);
+  it("supports BOT_SMOKE=qr only when no args", () => {
+    expect(parseRelaySmokeTest([], { BOT_SMOKE: "qr" })).toBe("qr");
+    expect(parseRelaySmokeTest(["send"], { BOT_SMOKE: "qr" })).toBe(null);
   });
 
   it("rejects unknown smoke values", () => {
@@ -41,7 +41,7 @@ describe("parseRelaySmokeTest", () => {
   });
 
   it("prefers explicit --smoke over env vars", () => {
-    expect(parseRelaySmokeTest(["--smoke", "qr"], { OPENCLAW_SMOKE: "nope" })).toBe("qr");
+    expect(parseRelaySmokeTest(["--smoke", "qr"], { BOT_SMOKE: "nope" })).toBe("qr");
   });
 });
 

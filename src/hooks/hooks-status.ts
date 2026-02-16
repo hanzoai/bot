@@ -62,7 +62,7 @@ function normalizeInstallOptions(entry: HookEntry): HookInstallOption[] {
 
     if (!label) {
       if (spec.kind === "bundled") {
-        label = "Bundled with OpenClaw";
+        label = "Bundled with Bot";
       } else if (spec.kind === "npm" && spec.package) {
         label = `Install ${spec.package} (npm)`;
       } else if (spec.kind === "git" && spec.repository) {
@@ -83,7 +83,7 @@ function buildHookStatus(
 ): HookStatusEntry {
   const hookKey = resolveHookKey(entry);
   const hookConfig = resolveHookConfig(config, hookKey);
-  const managedByPlugin = entry.hook.source === "openclaw-plugin";
+  const managedByPlugin = entry.hook.source === "bot-plugin";
   const disabled = managedByPlugin ? false : hookConfig?.enabled === false;
   const always = entry.metadata?.always === true;
   const events = entry.metadata?.events ?? [];

@@ -18,7 +18,7 @@ export async function noteMacLaunchAgentOverrides() {
     return;
   }
   const home = resolveHomeDir();
-  const markerCandidates = [path.join(home, ".openclaw", "disable-launchagent")];
+  const markerCandidates = [path.join(home, ".bot", "disable-launchagent")];
   const markerPath = markerCandidates.find((candidate) => fs.existsSync(candidate));
   if (!markerPath) {
     return;
@@ -73,26 +73,21 @@ export async function noteMacLaunchctlGatewayEnvOverrides(
 
   const getenv = deps?.getenv ?? launchctlGetenv;
   const deprecatedLaunchctlEntries = [
-    ["CLAWDBOT_GATEWAY_TOKEN", await getenv("CLAWDBOT_GATEWAY_TOKEN")],
-    ["CLAWDBOT_GATEWAY_PASSWORD", await getenv("CLAWDBOT_GATEWAY_PASSWORD")],
+    ["BOT_GATEWAY_TOKEN", await getenv("BOT_GATEWAY_TOKEN")],
+    ["BOT_GATEWAY_PASSWORD", await getenv("BOT_GATEWAY_PASSWORD")],
   ].filter((entry): entry is [string, string] => Boolean(entry[1]?.trim()));
   if (deprecatedLaunchctlEntries.length > 0) {
     const lines = [
       "- Deprecated launchctl environment variables detected (ignored).",
       ...deprecatedLaunchctlEntries.map(
-        ([key]) =>
-          `- \`${key}\` is set; use \`OPENCLAW_${key.slice(key.indexOf("_") + 1)}\` instead.`,
+        ([key]) => `- \`${key}\` is set; use \`BOT_${key.slice(key.indexOf("_") + 1)}\` instead.`,
       ),
     ];
     (deps?.noteFn ?? note)(lines.join("\n"), "Gateway (macOS)");
   }
 
-  const tokenEntries = [
-    ["OPENCLAW_GATEWAY_TOKEN", await getenv("OPENCLAW_GATEWAY_TOKEN")],
-  ] as const;
-  const passwordEntries = [
-    ["OPENCLAW_GATEWAY_PASSWORD", await getenv("OPENCLAW_GATEWAY_PASSWORD")],
-  ] as const;
+  const tokenEntries = [["BOT_GATEWAY_TOKEN", await getenv("BOT_GATEWAY_TOKEN")]] as const;
+  const passwordEntries = [["BOT_GATEWAY_PASSWORD", await getenv("BOT_GATEWAY_PASSWORD")]] as const;
   const tokenEntry = tokenEntries.find(([, value]) => value?.trim());
   const passwordEntry = passwordEntries.find(([, value]) => value?.trim());
   const envToken = tokenEntry?.[1]?.trim() ?? "";
@@ -109,7 +104,7 @@ export async function noteMacLaunchctlGatewayEnvOverrides(
       ? `- \`${envTokenKey}\` is set; it overrides config tokens.`
       : undefined,
     envPassword
-      ? `- \`${envPasswordKey ?? "OPENCLAW_GATEWAY_PASSWORD"}\` is set; it overrides config passwords.`
+      ? `- \`${envPasswordKey ?? "BOT_GATEWAY_PASSWORD"}\` is set; it overrides config passwords.`
       : undefined,
     "- Clear overrides and restart the app/gateway:",
     envTokenKey ? `  launchctl unsetenv ${envTokenKey}` : undefined,
@@ -124,7 +119,7 @@ export function noteDeprecatedLegacyEnvVars(
   deps?: { noteFn?: typeof note },
 ) {
   const entries = Object.entries(env)
-    .filter(([key, value]) => key.startsWith("CLAWDBOT_") && value?.trim())
+    .filter(([key, value]) => key.startsWith("BOT_") && value?.trim())
     .map(([key]) => key);
   if (entries.length === 0) {
     return;
@@ -132,10 +127,10 @@ export function noteDeprecatedLegacyEnvVars(
 
   const lines = [
     "- Deprecated legacy environment variables detected (ignored).",
-    "- Use OPENCLAW_* equivalents instead:",
+    "- Use BOT_* equivalents instead:",
     ...entries.map((key) => {
       const suffix = key.slice(key.indexOf("_") + 1);
-      return `  ${key} -> OPENCLAW_${suffix}`;
+      return `  ${key} -> BOT_${suffix}`;
     }),
   ];
   (deps?.noteFn ?? note)(lines.join("\n"), "Environment");

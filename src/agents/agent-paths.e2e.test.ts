@@ -6,7 +6,7 @@ import { captureEnv } from "../test-utils/env.js";
 import { resolveBotAgentDir } from "./agent-paths.js";
 
 describe("resolveBotAgentDir", () => {
-  const env = captureEnv(["OPENCLAW_STATE_DIR", "OPENCLAW_AGENT_DIR", "PI_CODING_AGENT_DIR"]);
+  const env = captureEnv(["BOT_STATE_DIR", "BOT_AGENT_DIR", "PI_CODING_AGENT_DIR"]);
   let tempStateDir: string | null = null;
 
   afterEach(async () => {
@@ -18,9 +18,9 @@ describe("resolveBotAgentDir", () => {
   });
 
   it("defaults to the multi-agent path when no overrides are set", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
-    process.env.OPENCLAW_STATE_DIR = tempStateDir;
-    delete process.env.OPENCLAW_AGENT_DIR;
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-agent-"));
+    process.env.BOT_STATE_DIR = tempStateDir;
+    delete process.env.BOT_AGENT_DIR;
     delete process.env.PI_CODING_AGENT_DIR;
 
     const resolved = resolveBotAgentDir();
@@ -28,10 +28,10 @@ describe("resolveBotAgentDir", () => {
     expect(resolved).toBe(path.join(tempStateDir, "agents", "main", "agent"));
   });
 
-  it("honors OPENCLAW_AGENT_DIR overrides", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
+  it("honors BOT_AGENT_DIR overrides", async () => {
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-agent-"));
     const override = path.join(tempStateDir, "agent");
-    process.env.OPENCLAW_AGENT_DIR = override;
+    process.env.BOT_AGENT_DIR = override;
     delete process.env.PI_CODING_AGENT_DIR;
 
     const resolved = resolveBotAgentDir();

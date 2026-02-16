@@ -69,12 +69,12 @@ function createSandbox(params: {
     workspaceDir: params.sandboxRoot,
     agentWorkspaceDir: params.agentRoot,
     workspaceAccess: "rw",
-    containerName: "openclaw-sbx-test",
+    containerName: "bot-sbx-test",
     containerWorkdir: "/workspace",
     fsBridge: params.fsBridge,
     docker: {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "bot-sandbox:bookworm-slim",
+      containerPrefix: "bot-sbx-",
       workdir: "/workspace",
       readOnlyRoot: true,
       tmpfs: [],
@@ -91,7 +91,7 @@ function createSandbox(params: {
 async function withUnsafeMountedSandboxHarness(
   run: (ctx: { sandboxRoot: string; agentRoot: string; sandbox: SandboxContext }) => Promise<void>,
 ) {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sbx-mounts-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-sbx-mounts-"));
   const sandboxRoot = path.join(stateDir, "sandbox");
   const agentRoot = path.join(stateDir, "agent");
   await fs.mkdir(sandboxRoot, { recursive: true });

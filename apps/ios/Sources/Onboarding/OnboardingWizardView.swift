@@ -1,5 +1,5 @@
 import CoreImage
-import OpenClawKit
+import BotKit
 import PhotosUI
 import SwiftUI
 import UIKit
@@ -292,7 +292,7 @@ struct OnboardingWizardView: View {
                 .font(.largeTitle.weight(.bold))
                 .padding(.bottom, 8)
 
-            Text("Connect to your OpenClaw gateway")
+            Text("Connect to your Bot gateway")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -517,17 +517,17 @@ struct OnboardingWizardView: View {
 
             if self.issue.needsPairing {
                 Section {
-                    Button("Copy: openclaw devices list") {
-                        UIPasteboard.general.string = "openclaw devices list"
+                    Button("Copy: bot devices list") {
+                        UIPasteboard.general.string = "bot devices list"
                     }
 
                     if let id = self.issue.requestId {
-                        Button("Copy: openclaw devices approve \(id)") {
-                            UIPasteboard.general.string = "openclaw devices approve \(id)"
+                        Button("Copy: bot devices approve \(id)") {
+                            UIPasteboard.general.string = "bot devices approve \(id)"
                         }
                     } else {
-                        Button("Copy: openclaw devices approve <requestId>") {
-                            UIPasteboard.general.string = "openclaw devices approve <requestId>"
+                        Button("Copy: bot devices approve <requestId>") {
+                            UIPasteboard.general.string = "bot devices approve <requestId>"
                         }
                     }
                 } header: {
@@ -597,7 +597,7 @@ struct OnboardingWizardView: View {
             Button {
                 self.onClose()
             } label: {
-                Text("Open OpenClaw")
+                Text("Open Bot")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -711,12 +711,12 @@ struct OnboardingWizardView: View {
                     self.manualPort = port
                     self.manualTLS = useTLS
                 case .discovered:
-                    self.manualHost = "openclaw.local"
+                    self.manualHost = "bot.local"
                     self.manualPort = 18789
                     self.manualTLS = true
                 }
             } else {
-                self.manualHost = "openclaw.local"
+                self.manualHost = "bot.local"
                 self.manualPort = 18789
                 self.manualTLS = true
             }
@@ -725,7 +725,7 @@ struct OnboardingWizardView: View {
         if self.selectedMode == nil {
             self.selectedMode = OnboardingStateStore.lastMode()
         }
-        if self.selectedMode == .developerLocal && self.manualHost == "openclaw.local" {
+        if self.selectedMode == .developerLocal && self.manualHost == "bot.local" {
             self.manualHost = "localhost"
             self.manualTLS = false
         }
@@ -780,15 +780,15 @@ struct OnboardingWizardView: View {
 
     private func applyModeDefaults(_ mode: OnboardingConnectionMode) {
         let host = self.manualHost.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        let hostIsDefaultLike = host.isEmpty || host == "openclaw.local" || host == "localhost"
+        let hostIsDefaultLike = host.isEmpty || host == "bot.local" || host == "localhost"
 
         switch mode {
         case .homeNetwork:
-            if hostIsDefaultLike { self.manualHost = "openclaw.local" }
+            if hostIsDefaultLike { self.manualHost = "bot.local" }
             self.manualTLS = true
             if self.manualPort <= 0 || self.manualPort > 65535 { self.manualPort = 18789 }
         case .remoteDomain:
-            if host == "openclaw.local" || host == "localhost" { self.manualHost = "" }
+            if host == "bot.local" || host == "localhost" { self.manualHost = "" }
             self.manualTLS = true
             if self.manualPort <= 0 || self.manualPort > 65535 { self.manualPort = 18789 }
         case .developerLocal:

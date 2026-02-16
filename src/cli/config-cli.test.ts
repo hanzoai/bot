@@ -4,7 +4,7 @@ import type { ConfigFileSnapshot, BotConfig } from "../config/types.js";
 
 /**
  * Test for issue #6070:
- * `openclaw config set/unset` must update snapshot.resolved (user config after $include/${ENV},
+ * `bot config set/unset` must update snapshot.resolved (user config after $include/${ENV},
  * but before runtime defaults), so runtime defaults don't leak into the written config.
  */
 
@@ -31,12 +31,9 @@ vi.mock("../runtime.js", () => ({
   },
 }));
 
-function buildSnapshot(params: {
-  resolved: BotConfig;
-  config: BotConfig;
-}): ConfigFileSnapshot {
+function buildSnapshot(params: { resolved: BotConfig; config: BotConfig }): ConfigFileSnapshot {
   return {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     exists: true,
     raw: JSON.stringify(params.resolved),
     parsed: params.resolved,
