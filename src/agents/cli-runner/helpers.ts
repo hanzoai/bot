@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import type { ThinkLevel } from "../../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { CliBackendConfig } from "../../config/types.js";
 import type { EmbeddedContextFile } from "../pi-embedded-helpers.js";
 import { buildTtsSystemPromptHint } from "../../tts/tts.js";
@@ -49,7 +49,7 @@ export type CliOutput = {
 
 export function buildSystemPrompt(params: {
   workspaceDir: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   defaultThinkLevel?: ThinkLevel;
   extraSystemPrompt?: string;
   ownerNumbers?: string[];

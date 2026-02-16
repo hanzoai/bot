@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import { randomUUID } from "node:crypto";
 import type { ChannelId } from "../channels/plugins/types.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { listAgentIds, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { listChannelPlugins } from "../channels/plugins/index.js";
 import { readJsonBodyWithLimit, requestBodyErrorToText } from "../infra/http-body.js";
@@ -33,7 +33,7 @@ export type HookSessionPolicyResolved = {
   allowedSessionKeyPrefixes?: string[];
 };
 
-export function resolveHooksConfig(cfg: OpenClawConfig): HooksConfigResolved | null {
+export function resolveHooksConfig(cfg: BotConfig): HooksConfigResolved | null {
   if (cfg.hooks?.enabled !== true) {
     return null;
   }
@@ -93,7 +93,7 @@ export function resolveHooksConfig(cfg: OpenClawConfig): HooksConfigResolved | n
   };
 }
 
-function resolveKnownAgentIds(cfg: OpenClawConfig, defaultAgentId: string): Set<string> {
+function resolveKnownAgentIds(cfg: BotConfig, defaultAgentId: string): Set<string> {
   const known = new Set(listAgentIds(cfg));
   known.add(defaultAgentId);
   return known;

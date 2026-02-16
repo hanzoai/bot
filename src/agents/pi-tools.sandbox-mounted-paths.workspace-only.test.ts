@@ -2,10 +2,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { SandboxContext } from "./sandbox.js";
 import type { SandboxFsBridge, SandboxResolvedPath } from "./sandbox/fs-bridge.js";
-import { createOpenClawCodingTools } from "./pi-tools.js";
+import { createBotCodingTools } from "./pi-tools.js";
 import { createSandboxFsBridgeFromResolver } from "./test-helpers/host-sandbox-fs-bridge.js";
 
 vi.mock("../infra/shell-env.js", async (importOriginal) => {
@@ -110,7 +110,7 @@ describe("tools.fs.workspaceOnly", () => {
     await withUnsafeMountedSandboxHarness(async ({ sandboxRoot, agentRoot, sandbox }) => {
       await fs.writeFile(path.join(agentRoot, "secret.txt"), "shh", "utf8");
 
-      const tools = createOpenClawCodingTools({ sandbox, workspaceDir: sandboxRoot });
+      const tools = createBotCodingTools({ sandbox, workspaceDir: sandboxRoot });
       const readTool = tools.find((tool) => tool.name === "read");
       const writeTool = tools.find((tool) => tool.name === "write");
       expect(readTool).toBeDefined();
@@ -128,8 +128,8 @@ describe("tools.fs.workspaceOnly", () => {
     await withUnsafeMountedSandboxHarness(async ({ sandboxRoot, agentRoot, sandbox }) => {
       await fs.writeFile(path.join(agentRoot, "secret.txt"), "shh", "utf8");
 
-      const cfg = { tools: { fs: { workspaceOnly: true } } } as unknown as OpenClawConfig;
-      const tools = createOpenClawCodingTools({ sandbox, workspaceDir: sandboxRoot, config: cfg });
+      const cfg = { tools: { fs: { workspaceOnly: true } } } as unknown as BotConfig;
+      const tools = createBotCodingTools({ sandbox, workspaceDir: sandboxRoot, config: cfg });
       const readTool = tools.find((tool) => tool.name === "read");
       const writeTool = tools.find((tool) => tool.name === "write");
       const editTool = tools.find((tool) => tool.name === "edit");

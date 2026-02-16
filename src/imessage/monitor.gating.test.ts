@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { IMessagePayload } from "./monitor/types.js";
 import {
   buildIMessageInboundContext,
@@ -7,7 +7,7 @@ import {
 } from "./monitor/inbound-processing.js";
 import { parseIMessageNotification } from "./monitor/parse-notification.js";
 
-function baseCfg(): OpenClawConfig {
+function baseCfg(): BotConfig {
   return {
     channels: {
       imessage: {
@@ -21,11 +21,11 @@ function baseCfg(): OpenClawConfig {
     messages: {
       groupChat: { mentionPatterns: ["@openclaw"] },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as BotConfig;
 }
 
 function resolve(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   message: IMessagePayload;
   storeAllowFrom?: string[];
 }) {
@@ -48,7 +48,7 @@ function resolve(params: {
   });
 }
 
-function buildDispatchContextPayload(params: { cfg: OpenClawConfig; message: IMessagePayload }) {
+function buildDispatchContextPayload(params: { cfg: BotConfig; message: IMessagePayload }) {
   const { cfg, message } = params;
   const groupHistories = new Map();
   const decision = resolveIMessageInboundDecision({

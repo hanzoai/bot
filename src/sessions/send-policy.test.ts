@@ -64,7 +64,7 @@ describe("resolveSendPolicy", () => {
           rules: [{ action: "deny", match: { rawKeyPrefix: "agent:main:discord:" } }],
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     expect(resolveSendPolicy({ cfg, sessionKey: "agent:main:discord:group:dev" })).toBe("deny");
     expect(resolveSendPolicy({ cfg, sessionKey: "agent:main:slack:group:dev" })).toBe("allow");
   });

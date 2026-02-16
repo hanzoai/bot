@@ -13,12 +13,12 @@ vi.mock("../../plugins/install.js", () => ({
 }));
 
 vi.mock("../../plugins/loader.js", () => ({
-  loadOpenClawPlugins: vi.fn(),
+  loadBotPlugins: vi.fn(),
 }));
 
 import fs from "node:fs";
 import type { ChannelPluginCatalogEntry } from "../../channels/plugins/catalog.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
 import { makePrompter, makeRuntime } from "./__tests__/test-utils.js";
 import { ensureOnboardingPluginInstalled } from "./plugin-install.js";
@@ -54,7 +54,7 @@ async function runInitialValueForChannel(channel: "dev" | "beta") {
   const runtime = makeRuntime();
   const select = vi.fn(async () => "skip") as WizardPrompter["select"];
   const prompter = makePrompter({ select });
-  const cfg: OpenClawConfig = { update: { channel } };
+  const cfg: BotConfig = { update: { channel } };
   mockRepoLocalPathExists();
 
   await ensureOnboardingPluginInstalled({
@@ -81,7 +81,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     const prompter = makePrompter({
       select: vi.fn(async () => "npm") as WizardPrompter["select"],
     });
-    const cfg: OpenClawConfig = { plugins: { allow: ["other"] } };
+    const cfg: BotConfig = { plugins: { allow: ["other"] } };
     vi.mocked(fs.existsSync).mockReturnValue(false);
     installPluginFromNpmSpec.mockResolvedValue({
       ok: true,
@@ -113,7 +113,7 @@ describe("ensureOnboardingPluginInstalled", () => {
     const prompter = makePrompter({
       select: vi.fn(async () => "local") as WizardPrompter["select"],
     });
-    const cfg: OpenClawConfig = {};
+    const cfg: BotConfig = {};
     mockRepoLocalPathExists();
 
     const result = await ensureOnboardingPluginInstalled({
@@ -144,7 +144,7 @@ describe("ensureOnboardingPluginInstalled", () => {
       note,
       confirm,
     });
-    const cfg: OpenClawConfig = {};
+    const cfg: BotConfig = {};
     mockRepoLocalPathExists();
     installPluginFromNpmSpec.mockResolvedValue({
       ok: false,

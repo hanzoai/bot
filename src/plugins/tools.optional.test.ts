@@ -11,7 +11,7 @@ type MockRegistryToolEntry = {
 const loadOpenClawPluginsMock = vi.fn();
 
 vi.mock("./loader.js", () => ({
-  loadOpenClawPlugins: (params: unknown) => loadOpenClawPluginsMock(params),
+  loadBotPlugins: (params: unknown) => loadOpenClawPluginsMock(params),
 }));
 
 function makeTool(name: string) {

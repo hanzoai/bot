@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import type { UpdateStepProgress, UpdateStepResult } from "../../infra/update-runner.js";
 import { resolveStateDir } from "../../config/paths.js";
-import { resolveOpenClawPackageRoot } from "../../infra/openclaw-root.js";
+import { resolveBotPackageRoot } from "../../infra/bot-root.js";
 import { readPackageName, readPackageVersion } from "../../infra/package-json.js";
 import { trimLogTail } from "../../infra/restart-sentinel.js";
 import { parseSemver } from "../../infra/runtime-guard.js";
@@ -128,7 +128,7 @@ export function resolveNodeRunner(): string {
 
 export async function resolveUpdateRoot(): Promise<string> {
   return (
-    (await resolveOpenClawPackageRoot({
+    (await resolveBotPackageRoot({
       moduleUrl: import.meta.url,
       argv1: process.argv[1],
       cwd: process.cwd(),

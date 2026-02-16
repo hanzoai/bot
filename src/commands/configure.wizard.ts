@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type {
   ChannelsWizardMode,
@@ -46,7 +46,7 @@ import { setupSkills } from "./onboard-skills.js";
 type ConfigureSectionChoice = WizardSection | "__continue";
 
 async function runGatewayHealthCheck(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime: RuntimeEnv;
   port: number;
 }): Promise<void> {
@@ -127,9 +127,9 @@ async function promptChannelMode(runtime: RuntimeEnv): Promise<ChannelsWizardMod
 }
 
 async function promptWebToolsConfig(
-  nextConfig: OpenClawConfig,
+  nextConfig: BotConfig,
   runtime: RuntimeEnv,
-): Promise<OpenClawConfig> {
+): Promise<BotConfig> {
   const existingSearch = nextConfig.tools?.web?.search;
   const existingFetch = nextConfig.tools?.web?.fetch;
   const hasSearchKey = Boolean(existingSearch?.apiKey);
@@ -217,7 +217,7 @@ export async function runConfigureWizard(
     const prompter = createClackPrompter();
 
     const snapshot = await readConfigFileSnapshot();
-    const baseConfig: OpenClawConfig = snapshot.valid ? snapshot.config : {};
+    const baseConfig: BotConfig = snapshot.valid ? snapshot.config : {};
 
     if (snapshot.exists) {
       const title = snapshot.valid ? "Existing config detected" : "Invalid config";

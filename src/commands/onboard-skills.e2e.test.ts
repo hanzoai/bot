@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 
@@ -150,7 +150,7 @@ describe("setupSkills", () => {
     ]);
 
     const { prompter, notes } = createPrompter({ multiselect: ["__skip__"] });
-    await setupSkills({} as OpenClawConfig, "/tmp/ws", runtime, prompter);
+    await setupSkills({} as BotConfig, "/tmp/ws", runtime, prompter);
 
     // OS-mismatched skill should be counted as unsupported, not installable/missing.
     const status = notes.find((n) => n.title === "Skills status")?.message ?? "";
@@ -175,7 +175,7 @@ describe("setupSkills", () => {
     ]);
 
     const { prompter, notes } = createPrompter({ multiselect: ["video-frames"] });
-    await setupSkills({} as OpenClawConfig, "/tmp/ws", runtime, prompter);
+    await setupSkills({} as BotConfig, "/tmp/ws", runtime, prompter);
 
     const brewNote = notes.find((n) => n.title === "Homebrew recommended");
     expect(brewNote).toBeDefined();

@@ -6,7 +6,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { SandboxToolPolicy } from "../agents/sandbox/types.js";
-import type { OpenClawConfig, ConfigFileSnapshot } from "../config/config.js";
+import type { BotConfig, ConfigFileSnapshot } from "../config/config.js";
 import type { AgentToolsConfig } from "../config/types.tools.js";
 import type { SkillScanFinding } from "./skill-scanner.js";
 import type { ExecFn } from "./windows-acl.js";
@@ -97,7 +97,7 @@ function formatCodeSafetyDetails(findings: SkillScanFinding[], rootDir: string):
 }
 
 function resolveToolPolicies(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentTools?: AgentToolsConfig;
   sandboxMode?: "off" | "non-main" | "all";
   agentId?: string | null;
@@ -120,7 +120,7 @@ function normalizePluginIdSet(entries: string[]): Set<string> {
 }
 
 function resolveEnabledExtensionPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   pluginDirs: string[];
 }): string[] {
   const normalized = normalizePluginsConfig(params.cfg.plugins);
@@ -200,7 +200,7 @@ function hasProviderPluginAllow(params: {
 // --------------------------------------------------------------------------
 
 export async function collectPluginsTrustFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   stateDir: string;
 }): Promise<SecurityAuditFinding[]> {
   const findings: SecurityAuditFinding[] = [];
@@ -450,7 +450,7 @@ export async function collectIncludeFilePermFindings(params: {
 }
 
 export async function collectStateDeepFilesystemFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
   platform?: NodeJS.Platform;
@@ -722,7 +722,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
 }
 
 export async function collectInstalledSkillsCodeSafetyFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   stateDir: string;
 }): Promise<SecurityAuditFinding[]> {
   const findings: SecurityAuditFinding[] = [];

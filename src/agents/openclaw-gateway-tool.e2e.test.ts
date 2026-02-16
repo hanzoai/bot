@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { captureEnv } from "../test-utils/env.js";
 import "./test-helpers/fast-core-tools.js";
-import { createOpenClawTools } from "./openclaw-tools.js";
+import { createBotTools } from "./openclaw-tools.js";
 
 vi.mock("./tools/gateway.js", () => ({
   callGatewayTool: vi.fn(async (method: string) => {
@@ -25,7 +25,7 @@ describe("gateway tool", () => {
     process.env.OPENCLAW_PROFILE = "isolated";
 
     try {
-      const tool = createOpenClawTools({
+      const tool = createBotTools({
         config: { commands: { restart: true } },
       }).find((candidate) => candidate.name === "gateway");
       expect(tool).toBeDefined();
@@ -67,7 +67,7 @@ describe("gateway tool", () => {
 
   it("passes config.apply through gateway call", async () => {
     const { callGatewayTool } = await import("./tools/gateway.js");
-    const tool = createOpenClawTools({
+    const tool = createBotTools({
       agentSessionKey: "agent:main:whatsapp:dm:+15555550123",
     }).find((candidate) => candidate.name === "gateway");
     expect(tool).toBeDefined();
@@ -95,7 +95,7 @@ describe("gateway tool", () => {
 
   it("passes config.patch through gateway call", async () => {
     const { callGatewayTool } = await import("./tools/gateway.js");
-    const tool = createOpenClawTools({
+    const tool = createBotTools({
       agentSessionKey: "agent:main:whatsapp:dm:+15555550123",
     }).find((candidate) => candidate.name === "gateway");
     expect(tool).toBeDefined();
@@ -123,7 +123,7 @@ describe("gateway tool", () => {
 
   it("passes update.run through gateway call", async () => {
     const { callGatewayTool } = await import("./tools/gateway.js");
-    const tool = createOpenClawTools({
+    const tool = createBotTools({
       agentSessionKey: "agent:main:whatsapp:dm:+15555550123",
     }).find((candidate) => candidate.name === "gateway");
     expect(tool).toBeDefined();

@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { MsgContext, TemplateContext } from "./templating.js";
 import { withTempHome as withTempHomeBase } from "../../test/helpers/temp-home.js";
 
@@ -27,7 +27,7 @@ export function createSandboxMediaContexts(mediaPath: string): {
   return { ctx, sessionCtx: { ...ctx } };
 }
 
-export function createSandboxMediaStageConfig(home: string): OpenClawConfig {
+export function createSandboxMediaStageConfig(home: string): BotConfig {
   return {
     agents: {
       defaults: {
@@ -41,5 +41,5 @@ export function createSandboxMediaStageConfig(home: string): OpenClawConfig {
     },
     channels: { whatsapp: { allowFrom: ["*"] } },
     session: { store: join(home, "sessions.json") },
-  } as OpenClawConfig;
+  } as BotConfig;
 }

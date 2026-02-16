@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { telegramPlugin } from "../../extensions/telegram/src/channel.js";
 import { setTelegramRuntime } from "../../extensions/telegram/src/runtime.js";
 import { whatsappPlugin } from "../../extensions/whatsapp/src/channel.js";
@@ -77,7 +77,7 @@ afterEach(() => {
 describe("runHeartbeatOnce – heartbeat model override", () => {
   async function runDefaultsHeartbeat(params: { model?: string }) {
     return withHeartbeatFixture(async ({ tmpDir, storePath, seedSession }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -122,7 +122,7 @@ describe("runHeartbeatOnce – heartbeat model override", () => {
 
   it("passes per-agent heartbeat model override (merged with defaults)", async () => {
     await withHeartbeatFixture(async ({ storePath, seedSession }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             heartbeat: {
