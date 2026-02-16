@@ -260,23 +260,23 @@
       "destination": "/nodes/camera"
     },
     {
-      "source": "/clawd",
+      "source": "/botd",
       "destination": "/start/bot"
     },
     {
-      "source": "/start/clawd",
+      "source": "/start/botd",
       "destination": "/start/bot"
     },
     {
-      "source": "/start/clawd/",
+      "source": "/start/botd/",
       "destination": "/start/bot"
     },
     {
-      "source": "/clawdhub",
+      "source": "/botdhub",
       "destination": "/tools/skills"
     },
     {
-      "source": "/tools/clawdhub",
+      "source": "/tools/botdhub",
       "destination": "/tools/skills"
     },
     {

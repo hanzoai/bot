@@ -70,7 +70,7 @@ Running on a VPS? See [Hetzner (Docker VPS)](/install/hetzner).
 For easier day-to-day Docker management, install `BotDock`:
 
 ```bash
-mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/bot/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.hanzo/bot/bot-helpers.sh
+mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/hanzoai/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.hanzo/bot/bot-helpers.sh
 ```
 
 **Add to your shell config (zsh):**

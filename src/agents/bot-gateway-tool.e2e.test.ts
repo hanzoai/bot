@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { captureEnv } from "../test-utils/env.js";
 import "./test-helpers/fast-core-tools.js";
-import { createBotTools } from "./openclaw-tools.js";
+import { createBotTools } from "./bot-tools.js";
 
 vi.mock("./tools/gateway.js", () => ({
   callGatewayTool: vi.fn(async (method: string) => {
@@ -19,10 +19,10 @@ describe("gateway tool", () => {
   it("schedules SIGUSR1 restart", async () => {
     vi.useFakeTimers();
     const kill = vi.spyOn(process, "kill").mockImplementation(() => true);
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR", "OPENCLAW_PROFILE"]);
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-test-"));
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    process.env.OPENCLAW_PROFILE = "isolated";
+    const envSnapshot = captureEnv(["BOT_STATE_DIR", "BOT_PROFILE"]);
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-test-"));
+    process.env.BOT_STATE_DIR = stateDir;
+    process.env.BOT_PROFILE = "isolated";
 
     try {
       const tool = createBotTools({
@@ -51,7 +51,7 @@ describe("gateway tool", () => {
       };
       expect(parsed.payload?.kind).toBe("restart");
       expect(parsed.payload?.doctorHint).toBe(
-        "Run: openclaw --profile isolated doctor --non-interactive",
+        "Run: bot --profile isolated doctor --non-interactive",
       );
 
       expect(kill).not.toHaveBeenCalled();
@@ -75,7 +75,7 @@ describe("gateway tool", () => {
       throw new Error("missing gateway tool");
     }
 
-    const raw = '{\n  agents: { defaults: { workspace: "~/openclaw" } }\n}\n';
+    const raw = '{\n  agents: { defaults: { workspace: "~/bot" } }\n}\n';
     await tool.execute("call2", {
       action: "config.apply",
       raw,

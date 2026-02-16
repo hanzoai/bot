@@ -1,10 +1,10 @@
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import {
   type RuntimeEnv,
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   requestBodyErrorToText,
-} from "openclaw/plugin-sdk";
+} from "bot/plugin-sdk";
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type {
   CoreConfig,
   NextcloudTalkInboundMessage,

@@ -234,9 +234,9 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
       ...(pluginSdkAlias || pluginSdkAccountIdAlias
         ? {
             alias: {
-              ...(pluginSdkAlias ? { "openclaw/plugin-sdk": pluginSdkAlias } : {}),
+              ...(pluginSdkAlias ? { "bot/plugin-sdk": pluginSdkAlias } : {}),
               ...(pluginSdkAccountIdAlias
-                ? { "openclaw/plugin-sdk/account-id": pluginSdkAccountIdAlias }
+                ? { "bot/plugin-sdk/account-id": pluginSdkAccountIdAlias }
                 : {}),
             },
           }

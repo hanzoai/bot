@@ -9,7 +9,7 @@ import {
 } from "./agent-limits.js";
 import { loadConfig } from "./config.js";
 import { withTempHome } from "./test-helpers.js";
-import { OpenClawSchema } from "./zod-schema.js";
+import { BotSchema } from "./zod-schema.js";
 
 describe("agent concurrency defaults", () => {
   it("resolves defaults when unset", () => {
@@ -31,7 +31,7 @@ describe("agent concurrency defaults", () => {
   });
 
   it("accepts subagent spawn depth and per-agent child limits", () => {
-    const parsed = OpenClawSchema.parse({
+    const parsed = BotSchema.parse({
       agents: {
         defaults: {
           subagents: {
@@ -50,11 +50,7 @@ describe("agent concurrency defaults", () => {
     await withTempHome(async (home) => {
       const configDir = path.join(home, ".bot");
       await fs.mkdir(configDir, { recursive: true });
-      await fs.writeFile(
-        path.join(configDir, "bot.json"),
-        JSON.stringify({}, null, 2),
-        "utf-8",
-      );
+      await fs.writeFile(path.join(configDir, "bot.json"), JSON.stringify({}, null, 2), "utf-8");
 
       const cfg = loadConfig();
 

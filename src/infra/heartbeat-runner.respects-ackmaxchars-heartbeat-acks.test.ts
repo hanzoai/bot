@@ -114,7 +114,7 @@ describe("resolveHeartbeatIntervalMs", () => {
       replySpy: ReturnType<typeof vi.spyOn>;
     }) => Promise<T>,
   ) {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hb-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-hb-"));
     const storePath = path.join(tmpDir, "sessions.json");
     const replySpy = vi.spyOn(replyModule, "getReplyFromConfig");
     try {
@@ -164,7 +164,7 @@ describe("resolveHeartbeatIntervalMs", () => {
         lastTo: "+1555",
       });
 
-      replySpy.mockResolvedValue({ text: "HEARTBEAT_OK 🦞" });
+      replySpy.mockResolvedValue({ text: "HEARTBEAT_OK B" });
       const sendWhatsApp = vi.fn().mockResolvedValue({
         messageId: "m1",
         toJid: "jid",

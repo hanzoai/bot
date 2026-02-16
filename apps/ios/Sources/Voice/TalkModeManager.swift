@@ -16,7 +16,7 @@ import Speech
 final class TalkModeManager: NSObject {
     private typealias SpeechRequest = SFSpeechAudioBufferRecognitionRequest
     private static let defaultModelIdFallback = "eleven_v3"
-    private static let redactedConfigSentinel = "__OPENCLAW_REDACTED__"
+    private static let redactedConfigSentinel = "__BOT_REDACTED__"
     var isEnabled: Bool = false
     var isListening: Bool = false
     var isSpeaking: Bool = false

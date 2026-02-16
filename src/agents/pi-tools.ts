@@ -21,8 +21,8 @@ import {
   type ExecToolDefaults,
   type ProcessToolDefaults,
 } from "./bash-tools.js";
-import { listChannelAgentTools } from "./channel-tools.js";
 import { createBotTools } from "./bot-tools.js";
+import { listChannelAgentTools } from "./channel-tools.js";
 import { wrapToolWithAbortSignal } from "./pi-tools.abort.js";
 import { wrapToolWithBeforeToolCallHook } from "./pi-tools.before-tool-call.js";
 import {
@@ -34,7 +34,7 @@ import {
 import {
   assertRequiredParams,
   CLAUDE_PARAM_GROUPS,
-  createOpenClawReadTool,
+  createBotReadTool,
   createSandboxedEditTool,
   createSandboxedReadTool,
   createSandboxedWriteTool,
@@ -281,7 +281,7 @@ export function createBotCodingTools(options?: {
         return [workspaceOnly ? wrapToolWorkspaceRootGuard(sandboxed, sandboxRoot) : sandboxed];
       }
       const freshReadTool = createReadTool(workspaceRoot);
-      const wrapped = createOpenClawReadTool(freshReadTool);
+      const wrapped = createBotReadTool(freshReadTool);
       return [workspaceOnly ? wrapToolWorkspaceRootGuard(wrapped, workspaceRoot) : wrapped];
     }
     if (tool.name === "bash" || tool.name === execToolName) {
