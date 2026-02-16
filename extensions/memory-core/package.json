@@ -5,10 +5,10 @@
   "description": "HanzoBot core memory search plugin",
   "type": "module",
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "hanzo-bot": ">=2026.1.26"
+    "@hanzo/bot": ">=2026.1.26"
   },
   "hanzo-bot": {
     "extensions": [
