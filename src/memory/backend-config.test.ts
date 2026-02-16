@@ -93,7 +93,7 @@ describe("resolveMemoryBackendConfig", () => {
           paths: [{ path: "notes", name: "workspace", pattern: "**/*.md" }],
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const mainResolved = resolveMemoryBackendConfig({ cfg, agentId: "main" });
     const devResolved = resolveMemoryBackendConfig({ cfg, agentId: "dev" });
     const mainNames = new Set(
@@ -139,7 +139,7 @@ describe("resolveMemoryBackendConfig", () => {
           searchMode: "vsearch",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const resolved = resolveMemoryBackendConfig({ cfg, agentId: "main" });
     expect(resolved.qmd?.searchMode).toBe("vsearch");
   });
