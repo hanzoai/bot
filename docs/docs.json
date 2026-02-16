@@ -1,14 +1,14 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "OpenClaw",
+  "name": "Hanzo Bot",
   "description": "Self-hosted gateway that connects WhatsApp, Telegram, Discord, iMessage, and more to AI coding agents. Run a single Gateway process on your own machine and message your AI assistant from anywhere.",
   "theme": "mint",
   "icons": {
     "library": "lucide"
   },
   "logo": {
-    "light": "/assets/pixel-lobster.svg",
-    "dark": "/assets/pixel-lobster.svg"
+    "light": "/assets/hanzo-logo.svg",
+    "dark": "/assets/hanzo-logo.svg"
   },
   "fonts": {
     "body": {
@@ -18,7 +18,7 @@
       "family": "DM Sans"
     }
   },
-  "favicon": "/assets/pixel-lobster.svg",
+  "favicon": "/assets/hanzo-logo.svg",
   "colors": {
     "primary": "#FF5A36",
     "dark": "#FF5A36",
@@ -36,12 +36,12 @@
     "links": [
       {
         "label": "GitHub",
-        "href": "https://github.com/openclaw/openclaw",
+        "href": "https://github.com/hanzo-bot/hanzo-bot",
         "icon": "github"
       },
       {
         "label": "Releases",
-        "href": "https://github.com/openclaw/openclaw/releases",
+        "href": "https://github.com/hanzo-bot/hanzo-bot/releases",
         "icon": "package"
       }
     ]
@@ -261,27 +261,23 @@
     },
     {
       "source": "/clawd",
-      "destination": "/start/openclaw"
+      "destination": "/start/bot"
     },
     {
       "source": "/start/clawd",
-      "destination": "/start/openclaw"
+      "destination": "/start/bot"
     },
     {
       "source": "/start/clawd/",
-      "destination": "/start/openclaw"
-    },
-    {
-      "source": "/clawhub",
-      "destination": "/tools/clawhub"
+      "destination": "/start/bot"
     },
     {
       "source": "/clawdhub",
-      "destination": "/tools/clawhub"
+      "destination": "/tools/skills"
     },
     {
       "source": "/tools/clawdhub",
-      "destination": "/tools/clawhub"
+      "destination": "/tools/skills"
     },
     {
       "source": "/configuration",
@@ -827,7 +823,7 @@
               },
               {
                 "group": "Guides",
-                "pages": ["start/openclaw"]
+                "pages": ["start/hanzo-bot"]
               }
             ]
           },
@@ -967,7 +963,7 @@
               {
                 "group": "Built-in tools",
                 "pages": [
-                  "tools/lobster",
+                  "tools/flow",
                   "tools/llm-task",
                   "tools/exec",
                   "tools/web",
@@ -996,7 +992,7 @@
                   "tools/slash-commands",
                   "tools/skills",
                   "tools/skills-config",
-                  "tools/clawhub",
+                  "tools/skills-hub",
                   "tools/plugin"
                 ]
               },
@@ -1338,7 +1334,7 @@
               },
               {
                 "group": "指南",
-                "pages": ["zh-CN/start/openclaw"]
+                "pages": ["zh-CN/start/hanzo-bot"]
               }
             ]
           },
@@ -1480,7 +1476,7 @@
               {
                 "group": "内置工具",
                 "pages": [
-                  "zh-CN/tools/lobster",
+                  "zh-CN/tools/flow",
                   "zh-CN/tools/llm-task",
                   "zh-CN/tools/exec",
                   "zh-CN/tools/web",
@@ -1513,7 +1509,7 @@
                   "zh-CN/tools/slash-commands",
                   "zh-CN/tools/skills",
                   "zh-CN/tools/skills-config",
-                  "zh-CN/tools/clawhub",
+                  "zh-CN/tools/skills-hub",
                   "zh-CN/tools/plugin"
                 ]
               },
