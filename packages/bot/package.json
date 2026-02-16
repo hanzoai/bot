@@ -1,14 +1,14 @@
 {
-  "name": "clawdbot",
+  "name": "bot",
   "version": "2026.2.12",
   "description": "Compatibility shim that forwards to @hanzo/bot",
   "bin": {
-    "clawdbot": "./bin/clawdbot.js"
+    "bot": "./bin/bot.js"
   },
   "type": "module",
   "exports": {
     ".": "./index.js",
-    "./cli-entry": "./bin/clawdbot.js"
+    "./cli-entry": "./bin/bot.js"
   },
   "dependencies": {
     "@hanzo/bot": "workspace:*"

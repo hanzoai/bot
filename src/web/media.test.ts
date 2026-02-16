@@ -44,7 +44,7 @@ async function createLargeTestJpeg(): Promise<{ buffer: Buffer; file: string }> 
 }
 
 beforeAll(async () => {
-  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-media-test-"));
+  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-media-test-"));
   largeJpegBuffer = await sharp({
     create: {
       width: 800,
@@ -100,14 +100,14 @@ afterEach(() => {
 
 describe("web media loading", () => {
   beforeAll(() => {
-    // Ensure state dir is stable and not influenced by other tests that stub OPENCLAW_STATE_DIR.
+    // Ensure state dir is stable and not influenced by other tests that stub BOT_STATE_DIR.
     // Also keep it outside os.tmpdir() so tmpdir localRoots doesn't accidentally make all state readable.
-    stateDirSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    process.env.OPENCLAW_STATE_DIR = path.join(
+    stateDirSnapshot = captureEnv(["BOT_STATE_DIR"]);
+    process.env.BOT_STATE_DIR = path.join(
       path.parse(os.tmpdir()).root,
       "var",
       "lib",
-      "openclaw-media-state-test",
+      "bot-media-state-test",
     );
   });
 
@@ -354,7 +354,7 @@ describe("local media root guard", () => {
     ).rejects.toThrow(/refuses filesystem root/i);
   });
 
-  it("allows default OpenClaw state workspace and sandbox roots", async () => {
+  it("allows default Bot state workspace and sandbox roots", async () => {
     const { resolveStateDir } = await import("../config/paths.js");
     const stateDir = resolveStateDir();
     const readFile = vi.fn(async () => Buffer.from("generated-media"));
@@ -382,13 +382,13 @@ describe("local media root guard", () => {
     );
   });
 
-  it("rejects default OpenClaw state per-agent workspace-* roots without explicit local roots", async () => {
+  it("rejects default Bot state per-agent workspace-* roots without explicit local roots", async () => {
     const { resolveStateDir } = await import("../config/paths.js");
     const stateDir = resolveStateDir();
     const readFile = vi.fn(async () => Buffer.from("generated-media"));
 
     await expect(
-      loadWebMedia(path.join(stateDir, "workspace-clawdy", "tmp", "render.bin"), {
+      loadWebMedia(path.join(stateDir, "workspace-botdy", "tmp", "render.bin"), {
         maxBytes: 1024 * 1024,
         readFile,
       }),
@@ -399,7 +399,7 @@ describe("local media root guard", () => {
     const { resolveStateDir } = await import("../config/paths.js");
     const stateDir = resolveStateDir();
     const readFile = vi.fn(async () => Buffer.from("generated-media"));
-    const agentWorkspaceDir = path.join(stateDir, "workspace-clawdy");
+    const agentWorkspaceDir = path.join(stateDir, "workspace-botdy");
 
     await expect(
       loadWebMedia(path.join(agentWorkspaceDir, "tmp", "render.bin"), {

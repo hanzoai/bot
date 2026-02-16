@@ -53,9 +53,9 @@ Think of the suites as “increasing realism” (and increasing flakiness/cost):
   - No real keys required
   - Should be fast and stable
 - Pool note:
-  - OpenClaw uses Vitest `vmForks` on Node 22/23 for faster unit shards.
-  - On Node 24+, OpenClaw automatically falls back to regular `forks` to avoid Node VM linking errors (`ERR_VM_MODULE_LINK_FAILURE` / `module is already linked`).
-  - Override manually with `OPENCLAW_TEST_VM_FORKS=0` (force `forks`) or `OPENCLAW_TEST_VM_FORKS=1` (force `vmForks`).
+  - Bot uses Vitest `vmForks` on Node 22/23 for faster unit shards.
+  - On Node 24+, Bot automatically falls back to regular `forks` to avoid Node VM linking errors (`ERR_VM_MODULE_LINK_FAILURE` / `module is already linked`).
+  - Override manually with `BOT_TEST_VM_FORKS=0` (force `forks`) or `BOT_TEST_VM_FORKS=1` (force `vmForks`).
 
 ### E2E (gateway smoke)
 
@@ -67,8 +67,8 @@ Think of the suites as “increasing realism” (and increasing flakiness/cost):
   - Uses adaptive workers (CI: 2-4, local: 4-8).
   - Runs in silent mode by default to reduce console I/O overhead.
 - Useful overrides:
-  - `OPENCLAW_E2E_WORKERS=<n>` to force worker count (capped at 16).
-  - `OPENCLAW_E2E_VERBOSE=1` to re-enable verbose console output.
+  - `BOT_E2E_WORKERS=<n>` to force worker count (capped at 16).
+  - `BOT_E2E_VERBOSE=1` to re-enable verbose console output.
 - Scope:
   - Multi-instance gateway end-to-end behavior
   - WebSocket/HTTP surfaces, node pairing, and heavier networking
