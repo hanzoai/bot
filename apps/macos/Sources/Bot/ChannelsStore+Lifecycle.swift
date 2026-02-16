@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawProtocol
+import BotProtocol
 
 extension ChannelsStore {
     func start() {

@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
-import OpenClawDiscovery
-import OpenClawIPC
+import BotDiscovery
+import BotIPC
 import SwiftUI
 
 extension OnboardingView {
@@ -35,7 +35,7 @@ extension OnboardingView {
                 user: user,
                 host: host,
                 port: gateway.sshPort)
-            OpenClawConfigFile.setRemoteGatewayUrl(
+            BotConfigFile.setRemoteGatewayUrl(
                 host: gateway.serviceHost ?? host,
                 port: gateway.servicePort ?? gateway.gatewayPort)
         }
@@ -49,7 +49,7 @@ extension OnboardingView {
         SettingsTabRouter.request(tab)
         self.openSettings()
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .openclawSelectSettingsTab, object: tab)
+            NotificationCenter.default.post(name: .botSelectSettingsTab, object: tab)
         }
     }
 
@@ -69,7 +69,7 @@ extension OnboardingView {
     }
 
     func finish() {
-        UserDefaults.standard.set(true, forKey: "openclaw.onboardingSeen")
+        UserDefaults.standard.set(true, forKey: "bot.onboardingSeen")
         UserDefaults.standard.set(currentOnboardingVersion, forKey: onboardingVersionKey)
         OnboardingController.shared.close()
     }
@@ -115,9 +115,9 @@ extension OnboardingView {
                 code: parsed.code,
                 state: parsed.state,
                 verifier: pkce.verifier)
-            try OpenClawOAuthStore.saveAnthropicOAuth(creds)
+            try BotOAuthStore.saveAnthropicOAuth(creds)
             self.refreshAnthropicOAuthStatus()
-            self.anthropicAuthStatus = "Connected. OpenClaw can now use Claude."
+            self.anthropicAuthStatus = "Connected. Bot can now use Claude."
         } catch {
             self.anthropicAuthStatus = "OAuth failed: \(error.localizedDescription)"
         }

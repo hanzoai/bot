@@ -73,7 +73,7 @@ describe("nodes camera helpers", () => {
       "fetch",
       vi.fn(async () => new Response("url-content", { status: 200 })),
     );
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-test-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-test-"));
     const out = path.join(dir, "x.bin");
     try {
       await writeUrlToFile(out, "https://example.com/clip.mp4");
@@ -151,6 +151,6 @@ describe("nodes screen helpers", () => {
       tmpDir: "/tmp",
       id: "id1",
     });
-    expect(p).toBe(path.join("/tmp", "openclaw-screen-record-id1.mp4"));
+    expect(p).toBe(path.join("/tmp", "bot-screen-record-id1.mp4"));
   });
 });

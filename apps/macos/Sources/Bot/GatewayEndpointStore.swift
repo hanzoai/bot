@@ -628,7 +628,7 @@ extension GatewayEndpointStore {
     }
 
     private static func localControlUiBasePath() -> String {
-        let root = OpenClawConfigFile.loadDict()
+        let root = BotConfigFile.loadDict()
         guard let gateway = root["gateway"] as? [String: Any],
               let controlUi = gateway["controlUi"] as? [String: Any]
         else {

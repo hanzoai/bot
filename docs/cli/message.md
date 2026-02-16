@@ -204,7 +204,7 @@ hanzo-bot message poll --channel discord \
 Create a Telegram poll (auto-close in 2 minutes):
 
 ```
-openclaw message poll --channel telegram \
+bot message poll --channel telegram \
   --target @mychat \
   --poll-question "Lunch?" \
   --poll-option Pizza --poll-option Sushi \

@@ -15,7 +15,7 @@ export async function setupInternalHooks(
       "Hooks let you automate actions when agent commands are issued.",
       "Example: Save session context to memory when you issue /new.",
       "",
-      "Learn more: https://docs.openclaw.ai/automation/hooks",
+      "Learn more: https://docs.hanzo.bot/automation/hooks",
     ].join("\n"),
     "Hooks",
   );
@@ -74,9 +74,9 @@ export async function setupInternalHooks(
       `Enabled ${selected.length} hook${selected.length > 1 ? "s" : ""}: ${selected.join(", ")}`,
       "",
       "You can manage hooks later with:",
-      `  ${formatCliCommand("openclaw hooks list")}`,
-      `  ${formatCliCommand("openclaw hooks enable <name>")}`,
-      `  ${formatCliCommand("openclaw hooks disable <name>")}`,
+      `  ${formatCliCommand("bot hooks list")}`,
+      `  ${formatCliCommand("bot hooks enable <name>")}`,
+      `  ${formatCliCommand("bot hooks disable <name>")}`,
     ].join("\n"),
     "Hooks Configured",
   );
