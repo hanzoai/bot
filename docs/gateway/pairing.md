@@ -37,11 +37,11 @@ Pending requests expire automatically after **5 minutes**.
 ## CLI workflow (headless friendly)
 
 ```bash
-openclaw nodes pending
-openclaw nodes approve <requestId>
-openclaw nodes reject <requestId>
-openclaw nodes status
-openclaw nodes rename --node <id|name|ip> --name "Living Room iPad"
+hanzo-bot nodes pending
+hanzo-bot nodes approve <requestId>
+hanzo-bot nodes reject <requestId>
+hanzo-bot nodes status
+hanzo-bot nodes rename --node <id|name|ip> --name "Living Room iPad"
 ```
 
 `nodes status` shows paired/connected nodes and their capabilities.
@@ -80,12 +80,12 @@ If silent approval fails, it falls back to the normal “Approve/Reject” promp
 
 ## Storage (local, private)
 
-Pairing state is stored under the Gateway state directory (default `~/.openclaw`):
+Pairing state is stored under the Gateway state directory (default `~/.hanzo/bot`):
 
-- `~/.openclaw/nodes/paired.json`
-- `~/.openclaw/nodes/pending.json`
+- `~/.hanzo/bot/nodes/paired.json`
+- `~/.hanzo/bot/nodes/pending.json`
 
-If you override `OPENCLAW_STATE_DIR`, the `nodes/` folder moves with it.
+If you override `BOT_STATE_DIR`, the `nodes/` folder moves with it.
 
 Security notes:
 
