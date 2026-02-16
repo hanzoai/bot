@@ -1,19 +1,19 @@
 ---
-summary: "CLI reference for `openclaw configure` (interactive configuration prompts)"
+summary: "CLI reference for `hanzo-bot configure` (interactive configuration prompts)"
 read_when:
   - You want to tweak credentials, devices, or agent defaults interactively
 title: "configure"
 ---
 
-# `openclaw configure`
+# `hanzo-bot configure`
 
 Interactive prompt to set up credentials, devices, and agent defaults.
 
 Note: The **Model** section now includes a multi-select for the
 `agents.defaults.models` allowlist (what shows up in `/model` and the model picker).
 
-Tip: `openclaw config` without a subcommand opens the same wizard. Use
-`openclaw config get|set|unset` for non-interactive edits.
+Tip: `hanzo-bot config` without a subcommand opens the same wizard. Use
+`hanzo-bot config get|set|unset` for non-interactive edits.
 
 Related:
 
@@ -28,6 +28,6 @@ Notes:
 ## Examples
 
 ```bash
-openclaw configure
-openclaw configure --section models --section channels
+hanzo-bot configure
+hanzo-bot configure --section models --section channels
 ```
