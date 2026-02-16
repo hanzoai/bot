@@ -9,7 +9,7 @@ title: "Nix"
 
 # Nix Installation
 
-The recommended way to run Hanzo Bot with Nix is via **[nix-bot](https://github.com/bot/nix-bot)** — a batteries-included Home Manager module.
+The recommended way to run Hanzo Bot with Nix is via **[nix-bot](https://github.com/hanzoai/nix-bot)** — a batteries-included Home Manager module.
 
 ## Quick Start
 
@@ -30,7 +30,7 @@ What I need you to do:
 Reference the nix-hanzo-bot README for module options.
 ```
 
-> **📦 Full guide: [github.com/bot/nix-bot](https://github.com/bot/nix-bot)**
+> **📦 Full guide: [github.com/hanzoai/nix-bot](https://github.com/hanzoai/nix-bot)**
 >
 > The nix-hanzo-bot repo is the source of truth for Nix installation. This page is just a quick overview.
 
@@ -93,6 +93,6 @@ packaging and Nix builds (which do not rely on a full Xcode toolchain).
 
 ## Related
 
-- [nix-bot](https://github.com/bot/nix-bot) — full setup guide
+- [nix-bot](https://github.com/hanzoai/nix-bot) — full setup guide
 - [Wizard](/start/wizard) — non-Nix CLI setup
 - [Docker](/install/docker) — containerized setup

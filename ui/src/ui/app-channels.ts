@@ -66,7 +66,7 @@ function buildNostrProfileUrl(accountId: string, suffix = ""): string {
   return `/api/channels/nostr/${encodeURIComponent(accountId)}/profile${suffix}`;
 }
 
-function resolveGatewayHttpAuthHeader(host: OpenClawApp): string | null {
+function resolveGatewayHttpAuthHeader(host: BotApp): string | null {
   const deviceToken = host.hello?.auth?.deviceToken?.trim();
   if (deviceToken) {
     return `Bearer ${deviceToken}`;
@@ -82,7 +82,7 @@ function resolveGatewayHttpAuthHeader(host: OpenClawApp): string | null {
   return null;
 }
 
-function buildGatewayHttpHeaders(host: OpenClawApp): Record<string, string> {
+function buildGatewayHttpHeaders(host: BotApp): Record<string, string> {
   const authorization = resolveGatewayHttpAuthHeader(host);
   return authorization ? { Authorization: authorization } : {};
 }
