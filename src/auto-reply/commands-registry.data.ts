@@ -390,7 +390,7 @@ function buildChatCommands(): ChatCommandDefinition[] {
     defineChatCommand({
       key: "restart",
       nativeName: "restart",
-      description: "Restart OpenClaw.",
+      description: "Restart Hanzo Bot.",
       textAlias: "/restart",
       category: "tools",
     }),
