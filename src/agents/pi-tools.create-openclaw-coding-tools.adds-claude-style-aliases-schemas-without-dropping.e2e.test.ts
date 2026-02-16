@@ -4,15 +4,14 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import "./test-helpers/fast-coding-tools.js";
-import { createBotTools } from "./bot-tools.js";
-import { __testing, createBotCodingTools } from "./pi-tools.js";
+import { createOpenClawTools } from "./openclaw-tools.js";
+import { __testing, createOpenClawCodingTools } from "./pi-tools.js";
 import { createSandboxedReadTool } from "./pi-tools.read.js";
 import { createHostSandboxFsBridge } from "./test-helpers/host-sandbox-fs-bridge.js";
 import { createBrowserTool } from "./tools/browser-tool.js";
 
-const defaultTools = createBotCodingTools();
+const defaultTools = createOpenClawCodingTools();
 
-<<<<<<<< HEAD:src/agents/pi-tools.create-openclaw-coding-tools.adds-claude-style-aliases-schemas-without-dropping.e2e.test.ts
 function findUnionKeywordOffenders(
   tools: Array<{ name: string; parameters: unknown }>,
   opts?: { onlyNames?: Set<string> },
@@ -59,9 +58,6 @@ function findUnionKeywordOffenders(
 }
 
 describe("createOpenClawCodingTools", () => {
-========
-describe("createBotCodingTools", () => {
->>>>>>>> hanzo/main:src/agents/pi-tools.create-bot-coding-tools.adds-claude-style-aliases-schemas-without-dropping.test.ts
   describe("Claude/Gemini alias support", () => {
     it("adds Claude-style aliases to schemas without dropping metadata", () => {
       const base: AgentTool = {
@@ -280,7 +276,7 @@ describe("createBotCodingTools", () => {
     expect(findUnionKeywordOffenders(defaultTools)).toEqual([]);
   });
   it("keeps raw core tool schemas union-free", () => {
-    const tools = createBotTools();
+    const tools = createOpenClawTools();
     const coreTools = new Set([
       "browser",
       "canvas",
@@ -300,7 +296,7 @@ describe("createBotCodingTools", () => {
     expect(findUnionKeywordOffenders(tools, { onlyNames: coreTools })).toEqual([]);
   });
   it("does not expose provider-specific message tools", () => {
-    const tools = createBotCodingTools({ messageProvider: "discord" });
+    const tools = createOpenClawCodingTools({ messageProvider: "discord" });
     const names = new Set(tools.map((tool) => tool.name));
     expect(names.has("discord")).toBe(false);
     expect(names.has("slack")).toBe(false);
@@ -308,7 +304,7 @@ describe("createBotCodingTools", () => {
     expect(names.has("whatsapp")).toBe(false);
   });
   it("filters session tools for sub-agent sessions by default", () => {
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       sessionKey: "agent:main:subagent:test",
     });
     const names = new Set(tools.map((tool) => tool.name));
@@ -367,7 +363,7 @@ describe("createBotCodingTools", () => {
     expect(names.has("subagents")).toBe(true);
   });
   it("supports allow-only sub-agent tool policy", () => {
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       sessionKey: "agent:main:subagent:test",
       // Intentionally partial config; only fields used by pi-tools are provided.
       config: {
@@ -385,7 +381,7 @@ describe("createBotCodingTools", () => {
   });
 
   it("applies tool profiles before allow/deny policies", () => {
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: { tools: { profile: "messaging" } },
     });
     const names = new Set(tools.map((tool) => tool.name));
@@ -396,7 +392,7 @@ describe("createBotCodingTools", () => {
     expect(names.has("browser")).toBe(false);
   });
   it("expands group shorthands in global tool policy", () => {
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: { tools: { allow: ["group:fs"] } },
     });
     const names = new Set(tools.map((tool) => tool.name));
@@ -407,7 +403,7 @@ describe("createBotCodingTools", () => {
     expect(names.has("browser")).toBe(false);
   });
   it("expands group shorthands in global tool deny policy", () => {
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: { tools: { deny: ["group:fs"] } },
     });
     const names = new Set(tools.map((tool) => tool.name));
@@ -417,7 +413,7 @@ describe("createBotCodingTools", () => {
     expect(names.has("exec")).toBe(true);
   });
   it("lets agent profiles override global profiles", () => {
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       sessionKey: "agent:work:main",
       config: {
         tools: { profile: "coding" },
@@ -501,8 +497,8 @@ describe("createBotCodingTools", () => {
     }
   });
   it("applies sandbox path guards to file_path alias", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-sbx-"));
-    const outsidePath = path.join(os.tmpdir(), "bot-outside.txt");
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sbx-"));
+    const outsidePath = path.join(os.tmpdir(), "openclaw-outside.txt");
     await fs.writeFile(outsidePath, "outside", "utf8");
     try {
       const readTool = createSandboxedReadTool({
