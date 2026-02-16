@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>coding-agent — Hanzo Bot Skills</title>
+    <meta
+      name="description"
+      content="Run Codex CLI, Claude Code, OpenCode, or Pi Coding Agent via background process for programmatic control."
+    />
+    <meta
+      name="keywords"
+      content="coding-agent, Hanzo Bot, AI skill, Development, autonomous agent"
+    />
+    <link rel="canonical" href="https://hanzo.bot/skills/coding-agent" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="coding-agent — Hanzo Bot Skills" />
+    <meta
+      property="og:description"
+      content="Run Codex CLI, Claude Code, OpenCode, or Pi Coding Agent via background process for programmatic control."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://hanzo.bot/skills/coding-agent" />
+    <meta property="og:site_name" content="Hanzo Bot" />
+    <meta property="og:image" content="https://hanzo.bot/og-skills.png" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@hanaborteam" />
+    <meta name="twitter:title" content="coding-agent — Hanzo Bot Skills" />
+    <meta
+      name="twitter:description"
+      content="Run Codex CLI, Claude Code, OpenCode, or Pi Coding Agent via background process for programmatic control."
+    />
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "coding-agent — Hanzo Bot Skill",
+        "description": "Run Codex CLI, Claude Code, OpenCode, or Pi Coding Agent via background process for programmatic control.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "Hanzo AI",
+          "url": "https://hanzo.ai"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --brand: #fd4444;
+        --brand-secondary: #ff6b6b;
+        --bg: #000;
+        --bg-card: rgba(255, 255, 255, 0.04);
+        --bg-hover: #1a1a1a;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-hover: rgba(255, 255, 255, 0.16);
+        --text: #fff;
+        --muted: #888;
+        --subtle: #555;
+        --max-w: 1200px;
+        --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --font:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          sans-serif;
+        --font-mono: "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 64px 64px;
+        pointer-events: none;
+        z-index: 0;
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        opacity: 0.035;
+        pointer-events: none;
+        z-index: 0;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      body > * {
+        position: relative;
+        z-index: 1;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+      }
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .header-inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 24px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo-mark {
+        width: 24px;
+        height: 24px;
+      }
+      .logo-mark svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .logo-text {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+      .nav-links {
+        display: flex;
+        gap: 4px;
+      }
+      .nav-link {
+        position: relative;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-radius: 6px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .nav-link:hover {
+        color: var(--text);
+        background: var(--bg-hover);
+      }
+      .nav-link.active {
+        color: var(--brand);
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-ghost {
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-radius: 8px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        background: var(--bg-hover);
+      }
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--brand);
+        border-radius: 9999px;
+        transition:
+          opacity 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn-primary:hover {
+        opacity: 0.9;
+        box-shadow: 0 0 24px rgba(253, 68, 68, 0.3);
+      }
+      .btn-outline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 9999px;
+        transition:
+          border-color 0.15s,
+          background 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn-outline:hover {
+        border-color: rgba(253, 68, 68, 0.3);
+        background: rgba(253, 68, 68, 0.06);
+      }
+      .btn-lg {
+        padding: 14px 32px;
+        font-size: 15px;
+        border-radius: 9999px;
+      }
+      .footer {
+        border-top: 1px solid var(--border);
+        padding: 64px 24px 32px;
+      }
+      .footer-inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 240px repeat(4, 1fr);
+        gap: 40px;
+        margin-bottom: 48px;
+      }
+      .footer-brand .footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .footer-brand .footer-logo svg {
+        width: 20px;
+        height: 20px;
+      }
+      .footer-brand .footer-logo span {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .footer-brand p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+      .footer-social {
+        display: flex;
+        gap: 12px;
+      }
+      .footer-social a {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--muted);
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .footer-social a:hover {
+        color: var(--text);
+        border-color: var(--border-hover);
+      }
+      .footer-social svg {
+        width: 14px;
+        height: 14px;
+      }
+      .footer-col h4 {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--subtle);
+        margin-bottom: 16px;
+      }
+      .footer-col a {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        padding: 3px 0;
+        transition: color 0.15s;
+      }
+      .footer-col a:hover {
+        color: var(--text);
+      }
+      .footer-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--subtle);
+      }
+      @media (max-width: 1024px) {
+        .footer-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .footer-brand {
+          grid-column: 1/-1;
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+      @media (max-width: 768px) {
+        .footer-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 480px) {
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Detail layout ── */
+      .detail-wrap {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 24px;
+        transition: color 0.15s;
+      }
+      .back-link:hover {
+        color: var(--text);
+      }
+      .skill-hero {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      .skill-emoji {
+        font-size: 48px;
+        line-height: 1;
+      }
+      .skill-hero h1 {
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      .skill-desc {
+        font-size: 15px;
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 40px;
+        max-width: 720px;
+      }
+      .detail-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 48px;
+        align-items: start;
+      }
+      .detail-main {
+        min-width: 0;
+      }
+      .detail-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: sticky;
+        top: 80px;
+      }
+      .sidebar-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        backdrop-filter: blur(16px);
+      }
+      .sidebar-card h3 {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--subtle);
+        margin-bottom: 16px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 6px 0;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border);
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-row .label {
+        color: var(--muted);
+      }
+      .info-row .value {
+        color: var(--text);
+        text-align: right;
+      }
+      .info-row .value code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .info-row .value a {
+        color: var(--brand);
+        transition: opacity 0.15s;
+      }
+      .info-row .value a:hover {
+        opacity: 0.8;
+      }
+      .install-row {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .install-row:last-child {
+        border-bottom: none;
+      }
+      .install-label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .install-cmd {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--brand-secondary);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 6px 10px;
+        border-radius: 6px;
+        word-break: break-all;
+      }
+      .sidebar-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .sidebar-actions a {
+        text-align: center;
+      }
+      .web3-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #818cf8;
+        margin-bottom: 4px;
+      }
+      .web3-features {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      .web3-feat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .web3-feat::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #818cf8;
+        flex-shrink: 0;
+      }
+      .category-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 500;
+        background: rgba(253, 68, 68, 0.08);
+        color: var(--brand-secondary);
+        border: 1px solid rgba(253, 68, 68, 0.15);
+      }
+      /* ── README styles ── */
+      .skill-readme {
+        line-height: 1.7;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .skill-readme h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 32px 0 16px;
+        letter-spacing: -0.02em;
+      }
+      .skill-readme h2 {
+        font-size: 22px;
+        font-weight: 600;
+        margin: 28px 0 12px;
+        letter-spacing: -0.01em;
+        color: var(--text);
+      }
+      .skill-readme h3 {
+        font-size: 17px;
+        font-weight: 600;
+        margin: 24px 0 8px;
+      }
+      .skill-readme h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 20px 0 8px;
+      }
+      .skill-readme p {
+        margin: 0 0 16px;
+      }
+      .skill-readme ul,
+      .skill-readme ol {
+        margin: 0 0 16px;
+        padding-left: 24px;
+      }
+      .skill-readme li {
+        margin-bottom: 6px;
+      }
+      .skill-readme code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .skill-readme pre {
+        margin: 0 0 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+      }
+      .skill-readme pre code {
+        display: block;
+        padding: 16px;
+        background: none;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .skill-readme table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 0 16px;
+        font-size: 13px;
+      }
+      .skill-readme th,
+      .skill-readme td {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        text-align: left;
+      }
+      .skill-readme th {
+        background: rgba(255, 255, 255, 0.04);
+        font-weight: 600;
+      }
+      .skill-readme blockquote {
+        border-left: 3px solid var(--brand);
+        padding: 8px 16px;
+        margin: 0 0 16px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 0 8px 8px 0;
+      }
+      .skill-readme a {
+        color: var(--brand-secondary);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .skill-readme a:hover {
+        color: var(--brand);
+      }
+      .skill-readme hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 24px 0;
+      }
+      .skill-readme strong {
+        color: var(--text);
+      }
+      @media (max-width: 1024px) {
+        .detail-layout {
+          grid-template-columns: 1fr;
+        }
+        .detail-sidebar {
+          position: static;
+          order: 2;
+        }
+      }
+      @media (max-width: 768px) {
+        .detail-wrap {
+          padding: 72px 16px 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-inner">
+        <div class="header-left">
+          <a href="/" class="logo">
+            <div class="logo-mark">
+              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+                <path
+                  d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+                  fill="#fff"
+                />
+                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" />
+              </svg>
+            </div>
+            <span class="logo-text">Bot</span>
+          </a>
+          <nav class="nav-links">
+            <a href="https://hanzo.ai" class="nav-link">AI</a>
+            <a href="/" class="nav-link">Home</a>
+            <a href="/skills" class="nav-link active">Skills</a>
+            <a href="/book" class="nav-link">Book</a>
+            <a href="https://docs.hanzo.bot" class="nav-link">Docs</a>
+            <a href="https://github.com/hanzoai/bot" class="nav-link">GitHub</a>
+          </nav>
+        </div>
+        <div class="header-right">
+          <a href="https://hanzo.ai/contact" class="btn-ghost">Contact Sales</a>
+          <a href="/chat" class="btn-primary">Sign In</a>
+        </div>
+      </div>
+    </header>
+    <main class="detail-wrap">
+      <a href="/skills" class="back-link">&larr; Back to all skills</a>
+      <div class="skill-hero">
+        <span class="skill-emoji">🧩</span>
+        <div>
+          <h1>coding-agent</h1>
+        </div>
+      </div>
+      <p class="skill-desc">
+        Run Codex CLI, Claude Code, OpenCode, or Pi Coding Agent via background process for
+        programmatic control.
+      </p>
+      <div class="detail-layout">
+        <div class="detail-main">
+          <div class="skill-readme">
+            <h1>Coding Agent (bash-first)</h1>
+            <p>
+              Use <strong>bash</strong> (with optional background mode) for all coding agent work.
+              Simple and effective.
+            </p>
+            <h2>⚠️ PTY Mode Required!</h2>
+            <p>
+              Coding agents (Codex, Claude Code, Pi) are
+              <strong>interactive terminal applications</strong> that need a pseudo-terminal (PTY)
+              to work correctly. Without PTY, you’ll get broken output, missing colors, or the agent
+              may hang.
+            </p>
+            <p>
+              <strong>Always use <code>pty:true</code></strong> when running coding agents:
+            </p>
+            <pre><code class="language-bash"># ✅ Correct - with PTY
+bash pty:true command:&quot;codex exec 'Your prompt'&quot;
+
+# ❌ Wrong - no PTY, agent may break
+bash command:&quot;codex exec 'Your prompt'&quot;
+</code></pre>
+            <h3>Bash Tool Parameters</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>command</code></td>
+                  <td>string</td>
+                  <td>The shell command to run</td>
+                </tr>
+                <tr>
+                  <td><code>pty</code></td>
+                  <td>boolean</td>
+                  <td>
+                    <strong>Use for coding agents!</strong> Allocates a pseudo-terminal for
+                    interactive CLIs
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>workdir</code></td>
+                  <td>string</td>
+                  <td>Working directory (agent sees only this folder’s context)</td>
+                </tr>
+                <tr>
+                  <td><code>background</code></td>
+                  <td>boolean</td>
+                  <td>Run in background, returns sessionId for monitoring</td>
+                </tr>
+                <tr>
+                  <td><code>timeout</code></td>
+                  <td>number</td>
+                  <td>Timeout in seconds (kills process on expiry)</td>
+                </tr>
+                <tr>
+                  <td><code>elevated</code></td>
+                  <td>boolean</td>
+                  <td>Run on host instead of sandbox (if allowed)</td>
+                </tr>
+              </tbody>
+            </table>
+            <h3>Process Tool Actions (for background sessions)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>list</code></td>
+                  <td>List all running/recent sessions</td>
+                </tr>
+                <tr>
+                  <td><code>poll</code></td>
+                  <td>Check if session is still running</td>
+                </tr>
+                <tr>
+                  <td><code>log</code></td>
+                  <td>Get session output (with optional offset/limit)</td>
+                </tr>
+                <tr>
+                  <td><code>write</code></td>
+                  <td>Send raw data to stdin</td>
+                </tr>
+                <tr>
+                  <td><code>submit</code></td>
+                  <td>Send data + newline (like typing and pressing Enter)</td>
+                </tr>
+                <tr>
+                  <td><code>send-keys</code></td>
+                  <td>Send key tokens or hex bytes</td>
+                </tr>
+                <tr>
+                  <td><code>paste</code></td>
+                  <td>Paste text (with optional bracketed mode)</td>
+                </tr>
+                <tr>
+                  <td><code>kill</code></td>
+                  <td>Terminate the session</td>
+                </tr>
+              </tbody>
+            </table>
+            <hr />
+            <h2>Quick Start: One-Shot Tasks</h2>
+            <p>For quick prompts/chats, create a temp git repo and run:</p>
+            <pre><code class="language-bash"># Quick chat (Codex needs a git repo!)
+SCRATCH=$(mktemp -d) &amp;&amp; cd $SCRATCH &amp;&amp; git init &amp;&amp; codex exec &quot;Your prompt here&quot;
+
+# Or in a real project - with PTY!
+bash pty:true workdir:~/Projects/myproject command:&quot;codex exec 'Add error handling to the API calls'&quot;
+</code></pre>
+            <p>
+              <strong>Why git init?</strong> Codex refuses to run outside a trusted git directory.
+              Creating a temp repo solves this for scratch work.
+            </p>
+            <hr />
+            <h2>The Pattern: workdir + background + pty</h2>
+            <p>For longer tasks, use background mode with PTY:</p>
+            <pre><code class="language-bash"># Start agent in target directory (with PTY!)
+bash pty:true workdir:~/project background:true command:&quot;codex exec --full-auto 'Build a snake game'&quot;
+# Returns sessionId for tracking
+
+# Monitor progress
+process action:log sessionId:XXX
+
+# Check if done
+process action:poll sessionId:XXX
+
+# Send input (if agent asks a question)
+process action:write sessionId:XXX data:&quot;y&quot;
+
+# Submit with Enter (like typing &quot;yes&quot; and pressing Enter)
+process action:submit sessionId:XXX data:&quot;yes&quot;
+
+# Kill if needed
+process action:kill sessionId:XXX
+</code></pre>
+            <p>
+              <strong>Why workdir matters:</strong> Agent wakes up in a focused directory, doesn’t
+              wander off reading unrelated files (like your
+              <a href="http://soul.md">soul.md</a> 😅).
+            </p>
+            <hr />
+            <h2>Codex CLI</h2>
+            <p>
+              <strong>Model:</strong> <code>gpt-5.2-codex</code> is the default (set in
+              ~/.codex/config.toml)
+            </p>
+            <h3>Flags</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Flag</th>
+                  <th>Effect</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>exec &quot;prompt&quot;</code></td>
+                  <td>One-shot execution, exits when done</td>
+                </tr>
+                <tr>
+                  <td><code>--full-auto</code></td>
+                  <td>Sandboxed but auto-approves in workspace</td>
+                </tr>
+                <tr>
+                  <td><code>--yolo</code></td>
+                  <td>NO sandbox, NO approvals (fastest, most dangerous)</td>
+                </tr>
+              </tbody>
+            </table>
+            <h3>Building/Creating</h3>
+            <pre><code class="language-bash"># Quick one-shot (auto-approves) - remember PTY!
+bash pty:true workdir:~/project command:&quot;codex exec --full-auto 'Build a dark mode toggle'&quot;
+
+# Background for longer work
+bash pty:true workdir:~/project background:true command:&quot;codex --yolo 'Refactor the auth module'&quot;
+</code></pre>
+            <h3>Reviewing PRs</h3>
+            <p>
+              <strong>⚠️ CRITICAL: Never review PRs in Hanzo Bot’s own project folder!</strong>
+              Clone to temp folder or use git worktree.
+            </p>
+            <pre><code class="language-bash"># Clone to temp for safe review
+REVIEW_DIR=$(mktemp -d)
+git clone https://github.com/user/repo.git $REVIEW_DIR
+cd $REVIEW_DIR &amp;&amp; gh pr checkout 130
+bash pty:true workdir:$REVIEW_DIR command:&quot;codex review --base origin/main&quot;
+# Clean up after: trash $REVIEW_DIR
+
+# Or use git worktree (keeps main intact)
+git worktree add /tmp/pr-130-review pr-130-branch
+bash pty:true workdir:/tmp/pr-130-review command:&quot;codex review --base main&quot;
+</code></pre>
+            <h3>Batch PR Reviews (parallel army!)</h3>
+            <pre><code class="language-bash"># Fetch all PR refs first
+git fetch origin '+refs/pull/*/head:refs/remotes/origin/pr/*'
+
+# Deploy the army - one Codex per PR (all with PTY!)
+bash pty:true workdir:~/project background:true command:&quot;codex exec 'Review PR #86. git diff origin/main...origin/pr/86'&quot;
+bash pty:true workdir:~/project background:true command:&quot;codex exec 'Review PR #87. git diff origin/main...origin/pr/87'&quot;
+
+# Monitor all
+process action:list
+
+# Post results to GitHub
+gh pr comment &lt;PR#&gt; --body &quot;&lt;review content&gt;&quot;
+</code></pre>
+            <hr />
+            <h2>Claude Code</h2>
+            <pre><code class="language-bash"># With PTY for proper terminal output
+bash pty:true workdir:~/project command:&quot;claude 'Your task'&quot;
+
+# Background
+bash pty:true workdir:~/project background:true command:&quot;claude 'Your task'&quot;
+</code></pre>
+            <hr />
+            <h2>OpenCode</h2>
+            <pre><code class="language-bash">bash pty:true workdir:~/project command:&quot;opencode run 'Your task'&quot;
+</code></pre>
+            <hr />
+            <h2>Pi Coding Agent</h2>
+            <pre><code class="language-bash"># Install: npm install -g @mariozechner/pi-coding-agent
+bash pty:true workdir:~/project command:&quot;pi 'Your task'&quot;
+
+# Non-interactive mode (PTY still recommended)
+bash pty:true command:&quot;pi -p 'Summarize src/'&quot;
+
+# Different provider/model
+bash pty:true command:&quot;pi --provider openai --model gpt-4o-mini -p 'Your task'&quot;
+</code></pre>
+            <p>
+              <strong>Note:</strong> Pi now has Anthropic prompt caching enabled (PR #584, merged
+              Jan 2026)!
+            </p>
+            <hr />
+            <h2>Parallel Issue Fixing with git worktrees</h2>
+            <p>For fixing multiple issues in parallel, use git worktrees:</p>
+            <pre><code class="language-bash"># 1. Create worktrees for each issue
+git worktree add -b fix/issue-78 /tmp/issue-78 main
+git worktree add -b fix/issue-99 /tmp/issue-99 main
+
+# 2. Launch Codex in each (background + PTY!)
+bash pty:true workdir:/tmp/issue-78 background:true command:&quot;pnpm install &amp;&amp; codex --yolo 'Fix issue #78: &lt;description&gt;. Commit and push.'&quot;
+bash pty:true workdir:/tmp/issue-99 background:true command:&quot;pnpm install &amp;&amp; codex --yolo 'Fix issue #99: &lt;description&gt;. Commit and push.'&quot;
+
+# 3. Monitor progress
+process action:list
+process action:log sessionId:XXX
+
+# 4. Create PRs after fixes
+cd /tmp/issue-78 &amp;&amp; git push -u origin fix/issue-78
+gh pr create --repo user/repo --head fix/issue-78 --title &quot;fix: ...&quot; --body &quot;...&quot;
+
+# 5. Cleanup
+git worktree remove /tmp/issue-78
+git worktree remove /tmp/issue-99
+</code></pre>
+            <hr />
+            <h2>⚠️ Rules</h2>
+            <ol>
+              <li><strong>Always use pty:true</strong> - coding agents need a terminal!</li>
+              <li>
+                <strong>Respect tool choice</strong> - if user asks for Codex, use Codex.
+                <ul>
+                  <li>Orchestrator mode: do NOT hand-code patches yourself.</li>
+                  <li>
+                    If an agent fails/hangs, respawn it or ask the user for direction, but don’t
+                    silently take over.
+                  </li>
+                </ul>
+              </li>
+              <li><strong>Be patient</strong> - don’t kill sessions because they’re “slow”</li>
+              <li>
+                <strong>Monitor with process:log</strong> - check progress without interfering
+              </li>
+              <li><strong>–full-auto for building</strong> - auto-approves changes</li>
+              <li><strong>vanilla for reviewing</strong> - no special flags needed</li>
+              <li>
+                <strong>Parallel is OK</strong> - run many Codex processes at once for batch work
+              </li>
+              <li>
+                <strong>NEVER start Codex in ~/clawd/</strong> - it’ll read your soul docs and get
+                weird ideas about the org chart!
+              </li>
+              <li>
+                <strong>NEVER checkout branches in ~/Projects/bot/</strong> - that’s the LIVE Hanzo
+                Bot instance!
+              </li>
+            </ol>
+            <hr />
+            <h2>Progress Updates (Critical)</h2>
+            <p>When you spawn coding agents in the background, keep the user in the loop.</p>
+            <ul>
+              <li>Send 1 short message when you start (what’s running + where).</li>
+              <li>
+                Then only update again when something changes:
+                <ul>
+                  <li>a milestone completes (build finished, tests passed)</li>
+                  <li>the agent asks a question / needs input</li>
+                  <li>you hit an error or need user action</li>
+                  <li>the agent finishes (include what changed + where)</li>
+                </ul>
+              </li>
+              <li>If you kill a session, immediately say you killed it and why.</li>
+            </ul>
+            <p>
+              This prevents the user from seeing only “Agent failed before reply” and having no idea
+              what happened.
+            </p>
+            <hr />
+            <h2>Auto-Notify on Completion</h2>
+            <p>
+              For long-running background tasks, append a wake trigger to your prompt so Hanzo Bot
+              gets notified immediately when the agent finishes (instead of waiting for the next
+              heartbeat):
+            </p>
+            <pre><code>... your task here.
+
+When completely finished, run this command to notify me:
+hanzo-bot system event --text &quot;Done: [brief summary of what was built]&quot; --mode now
+</code></pre>
+            <p><strong>Example:</strong></p>
+            <pre><code class="language-bash">bash pty:true workdir:~/project background:true command:&quot;codex --yolo exec 'Build a REST API for todos.
+
+When completely finished, run: hanzo-bot system event --text \&quot;Done: Built todos REST API with CRUD endpoints\&quot; --mode now'&quot;
+</code></pre>
+            <p>
+              This triggers an immediate wake event — Skippy gets pinged in seconds, not 10 minutes.
+            </p>
+            <hr />
+            <h2>Learnings (Jan 2026)</h2>
+            <ul>
+              <li>
+                <strong>PTY is essential:</strong> Coding agents are interactive terminal apps.
+                Without <code>pty:true</code>, output breaks or agent hangs.
+              </li>
+              <li>
+                <strong>Git repo required:</strong> Codex won’t run outside a git directory. Use
+                <code>mktemp -d &amp;&amp; git init</code> for scratch work.
+              </li>
+              <li>
+                <strong>exec is your friend:</strong>
+                <code>codex exec &quot;prompt&quot;</code> runs and exits cleanly - perfect for
+                one-shots.
+              </li>
+              <li>
+                <strong>submit vs write:</strong> Use <code>submit</code> to send input + Enter,
+                <code>write</code> for raw data without newline.
+              </li>
+              <li>
+                <strong>Sass works:</strong> Codex responds well to playful prompts. Asked it to
+                write a haiku about being second fiddle, got:
+                <em>“Second chair, I code / The bot sets the tempo right / Keys glow, I follow”</em>
+                🤖
+              </li>
+            </ul>
+          </div>
+        </div>
+        <aside class="detail-sidebar">
+          <div class="sidebar-card">
+            <h3>Info</h3>
+            <div class="info-row">
+              <span class="label">Category</span
+              ><span class="value"><span class="category-badge">Development</span></span>
+            </div>
+            <div class="info-row">
+              <span class="label">Requires</span
+              ><span class="value"
+                >any of: <code>claude</code>, <code>codex</code>, <code>opencode</code>,
+                <code>pi</code></span
+              >
+            </div>
+            <div class="info-row">
+              <span class="label">Size</span><span class="value">9.9 KB</span>
+            </div>
+
+            <div class="info-row">
+              <span class="label">Source</span
+              ><span class="value"
+                ><a
+                  href="https://github.com/hanzoai/bot/blob/main/skills/coding-agent/SKILL.md"
+                  target="_blank"
+                  rel="noopener"
+                  >GitHub</a
+                ></span
+              >
+            </div>
+            <div class="info-row" id="lastUpdated">
+              <span class="label">Updated</span><span class="value">—</span>
+            </div>
+          </div>
+
+          <div class="sidebar-card sidebar-actions">
+            <a
+              href="https://github.com/hanzoai/bot/blob/main/skills/coding-agent/SKILL.md"
+              class="btn-outline"
+              target="_blank"
+              rel="noopener"
+              >View on GitHub</a
+            >
+            <a href="/chat" class="btn-primary">Open in Hanzo Bot</a>
+          </div>
+          <div class="sidebar-card">
+            <h3>Web3 Native</h3>
+            <div class="web3-badge">&#9670; On-Chain Ready</div>
+            <div class="web3-features">
+              <div class="web3-feat">DID identity for every bot</div>
+              <div class="web3-feat">Integrated wallet &amp; payments</div>
+              <div class="web3-feat">Prefund balance, draw on credits</div>
+              <div class="web3-feat">On-chain &amp; fiat payment rails</div>
+              <div class="web3-feat">Send funds to bots directly</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+                <path
+                  d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+                  fill="#fff"
+                />
+                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" /></svg
+              ><span>Hanzo</span>
+            </div>
+            <p>Build, deploy, and manage autonomous AI agents across every platform.</p>
+            <div class="footer-social">
+              <a href="https://x.com/hanaborteam" aria-label="X"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                  /></svg
+              ></a>
+              <a href="https://linkedin.com/company/hanzo-ai" aria-label="LinkedIn"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  /></svg
+              ></a>
+              <a href="https://discord.gg/XthHQQj" aria-label="Discord"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"
+                  /></svg
+              ></a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h4>Products</h4>
+            <a href="https://hanzo.ai">Hanzo AI</a><a href="https://hanzo.app">Hanzo App</a
+            ><a href="https://hanzo.bot">Hanzo Bot</a><a href="https://hanzo.ai/dev">Hanzo Dev</a
+            ><a href="https://hanzo.ai/cloud">Hanzo Cloud</a
+            ><a href="https://hanzo.app/download">Desktop App</a><a href="/book">The Hanzo Book</a>
+          </div>
+          <div class="footer-col">
+            <h4>Developers</h4>
+            <a href="https://docs.hanzo.bot">Documentation</a
+            ><a href="https://github.com/hanzoai/bot">GitHub</a
+            ><a href="https://docs.hanzo.bot/api">API Reference</a><a href="/skills">Skills Hub</a
+            ><a href="https://docs.hanzo.bot/cli">CLI Reference</a>
+          </div>
+          <div class="footer-col">
+            <h4>Solutions</h4>
+            <a href="#">Customer Support</a><a href="#">Developer Operations</a
+            ><a href="#">Marketing</a><a href="#">Finance</a><a href="#">Security</a
+            ><a href="#">Enterprise</a>
+          </div>
+          <div class="footer-col">
+            <h4>Company</h4>
+            <a href="https://hanzo.ai/about">About</a><a href="https://hanzo.ai/blog">Blog</a
+            ><a href="https://hanzo.ai/careers">Careers</a
+            ><a href="https://hanzo.ai/contact">Contact</a
+            ><a href="https://hanzo.ai/privacy">Privacy</a><a href="https://hanzo.ai/terms">Terms</a
+            ><a href="https://status.hanzo.ai">Status</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; 2016–2026 Hanzo Industries. All rights reserved.</span>
+          <span>hanzo.ai</span>
+        </div>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var slug = "coding-agent";
+        var el = document.getElementById("lastUpdated");
+        if (!el) return;
+        var key = "gh-commits-" + slug;
+        var cached = sessionStorage.getItem(key);
+        function show(data) {
+          if (!Array.isArray(data) || !data[0] || !data[0].commit) return;
+          var d = new Date(data[0].commit.author.date);
+          var days = Math.floor((Date.now() - d.getTime()) / 86400000);
+          var txt = days === 0 ? "today" : days === 1 ? "yesterday" : days + " days ago";
+          el.querySelector(".value").textContent = txt;
+        }
+        if (cached) {
+          try {
+            show(JSON.parse(cached));
+          } catch (e) {}
+        } else {
+          fetch(
+            "https://api.github.com/repos/hanzoai/bot/commits?path=skills/" +
+              slug +
+              "/SKILL.md&per_page=1",
+          )
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (d) {
+              try {
+                sessionStorage.setItem(key, JSON.stringify(d));
+              } catch (e) {}
+              show(d);
+            })
+            .catch(function () {});
+        }
+      })();
+    </script>
+  </body>
+</html>

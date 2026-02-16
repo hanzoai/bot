@@ -8,7 +8,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { BotConfig } from "../../../config/config.js";
 import type { HookHandler } from "../../hooks.js";
 import { resolveAgentWorkspaceDir } from "../../../agents/agent-scope.js";
 import { resolveStateDir } from "../../../config/paths.js";
@@ -80,7 +80,7 @@ const saveSessionToMemory: HookHandler = async (event) => {
     log.debug("Hook triggered for /new command");
 
     const context = event.context || {};
-    const cfg = context.cfg as OpenClawConfig | undefined;
+    const cfg = context.cfg as BotConfig | undefined;
     const agentId = resolveAgentIdFromSessionKey(event.sessionKey);
     const workspaceDir = cfg
       ? resolveAgentWorkspaceDir(cfg, agentId)

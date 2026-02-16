@@ -7,13 +7,13 @@ title: "Credits"
 
 ## The name
 
-OpenClaw = CLAW + TARDIS, because every space lobster needs a time and space machine.
+Hanzo Bot -- your AI team, deployed everywhere.
 
 ## Credits
 
-- **Peter Steinberger** ([@steipete](https://x.com/steipete)) - Creator, lobster whisperer
+- **Peter Steinberger** ([@steipete](https://x.com/steipete)) - Creator
 - **Mario Zechner** ([@badlogicc](https://x.com/badlogicgames)) - Pi creator, security pen tester
-- **Clawd** - The space lobster who demanded a better name
+- **Hanzo AI** (Techstars '17) - Infrastructure and platform
 
 ## Core contributors
 
@@ -22,6 +22,6 @@ OpenClaw = CLAW + TARDIS, because every space lobster needs a time and space mac
 
 ## License
 
-MIT - Free as a lobster in the ocean.
+MIT
 
 > "We are all just playing with our own prompts." (An AI, probably high on tokens)

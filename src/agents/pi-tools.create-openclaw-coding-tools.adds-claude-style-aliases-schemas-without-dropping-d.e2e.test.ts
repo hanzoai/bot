@@ -4,17 +4,21 @@ import path from "node:path";
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import "./test-helpers/fast-coding-tools.js";
+<<<<<<<< HEAD:src/agents/pi-tools.create-openclaw-coding-tools.adds-claude-style-aliases-schemas-without-dropping-d.e2e.test.ts
 import { createOpenClawCodingTools } from "./pi-tools.js";
 import { createHostSandboxFsBridge } from "./test-helpers/host-sandbox-fs-bridge.js";
+========
+import { createBotCodingTools } from "./pi-tools.js";
+>>>>>>>> hanzo/main:src/agents/pi-tools.create-bot-coding-tools.adds-claude-style-aliases-schemas-without-dropping-d.test.ts
 
-const defaultTools = createOpenClawCodingTools();
+const defaultTools = createBotCodingTools();
 
-describe("createOpenClawCodingTools", () => {
+describe("createBotCodingTools", () => {
   it("keeps read tool image metadata intact", async () => {
     const readTool = defaultTools.find((tool) => tool.name === "read");
     expect(readTool).toBeDefined();
 
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-read-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-read-"));
     try {
       const imagePath = path.join(tmpDir, "sample.png");
       const png = await sharp({
@@ -47,14 +51,14 @@ describe("createOpenClawCodingTools", () => {
     }
   });
   it("returns text content without image blocks for text files", async () => {
-    const tools = createOpenClawCodingTools();
+    const tools = createBotCodingTools();
     const readTool = tools.find((tool) => tool.name === "read");
     expect(readTool).toBeDefined();
 
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-read-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-read-"));
     try {
       const textPath = path.join(tmpDir, "sample.txt");
-      const contents = "Hello from openclaw read tool.";
+      const contents = "Hello from hanzo-bot read tool.";
       await fs.writeFile(textPath, contents, "utf8");
 
       const result = await readTool?.execute("tool-2", {
@@ -77,15 +81,20 @@ describe("createOpenClawCodingTools", () => {
     const sandbox = {
       enabled: true,
       sessionKey: "sandbox:test",
+<<<<<<<< HEAD:src/agents/pi-tools.create-openclaw-coding-tools.adds-claude-style-aliases-schemas-without-dropping-d.e2e.test.ts
       workspaceDir: sandboxDir,
       agentWorkspaceDir: path.join(os.tmpdir(), "moltbot-workspace"),
+========
+      workspaceDir: path.join(os.tmpdir(), "bot-sandbox"),
+      agentWorkspaceDir: path.join(os.tmpdir(), "bot-workspace"),
+>>>>>>>> hanzo/main:src/agents/pi-tools.create-bot-coding-tools.adds-claude-style-aliases-schemas-without-dropping-d.test.ts
       workspaceAccess: "none",
-      containerName: "openclaw-sbx-test",
+      containerName: "bot-sbx-test",
       containerWorkdir: "/workspace",
       fsBridge: createHostSandboxFsBridge(sandboxDir),
       docker: {
-        image: "openclaw-sandbox:bookworm-slim",
-        containerPrefix: "openclaw-sbx-",
+        image: "bot-sandbox:bookworm-slim",
+        containerPrefix: "bot-sbx-",
         workdir: "/workspace",
         readOnlyRoot: true,
         tmpfs: [],
@@ -100,7 +109,7 @@ describe("createOpenClawCodingTools", () => {
       },
       browserAllowHostControl: false,
     };
-    const tools = createOpenClawCodingTools({ sandbox });
+    const tools = createBotCodingTools({ sandbox });
     expect(tools.some((tool) => tool.name === "exec")).toBe(true);
     expect(tools.some((tool) => tool.name === "read")).toBe(false);
     expect(tools.some((tool) => tool.name === "browser")).toBe(false);
@@ -110,15 +119,20 @@ describe("createOpenClawCodingTools", () => {
     const sandbox = {
       enabled: true,
       sessionKey: "sandbox:test",
+<<<<<<<< HEAD:src/agents/pi-tools.create-openclaw-coding-tools.adds-claude-style-aliases-schemas-without-dropping-d.e2e.test.ts
       workspaceDir: sandboxDir,
       agentWorkspaceDir: path.join(os.tmpdir(), "moltbot-workspace"),
+========
+      workspaceDir: path.join(os.tmpdir(), "bot-sandbox"),
+      agentWorkspaceDir: path.join(os.tmpdir(), "bot-workspace"),
+>>>>>>>> hanzo/main:src/agents/pi-tools.create-bot-coding-tools.adds-claude-style-aliases-schemas-without-dropping-d.test.ts
       workspaceAccess: "ro",
-      containerName: "openclaw-sbx-test",
+      containerName: "bot-sbx-test",
       containerWorkdir: "/workspace",
       fsBridge: createHostSandboxFsBridge(sandboxDir),
       docker: {
-        image: "openclaw-sandbox:bookworm-slim",
-        containerPrefix: "openclaw-sbx-",
+        image: "bot-sandbox:bookworm-slim",
+        containerPrefix: "bot-sbx-",
         workdir: "/workspace",
         readOnlyRoot: true,
         tmpfs: [],
@@ -133,13 +147,13 @@ describe("createOpenClawCodingTools", () => {
       },
       browserAllowHostControl: false,
     };
-    const tools = createOpenClawCodingTools({ sandbox });
+    const tools = createBotCodingTools({ sandbox });
     expect(tools.some((tool) => tool.name === "read")).toBe(true);
     expect(tools.some((tool) => tool.name === "write")).toBe(false);
     expect(tools.some((tool) => tool.name === "edit")).toBe(false);
   });
   it("filters tools by agent tool policy even without sandbox", () => {
-    const tools = createOpenClawCodingTools({
+    const tools = createBotCodingTools({
       config: { tools: { deny: ["browser"] } },
     });
     expect(tools.some((tool) => tool.name === "exec")).toBe(true);
