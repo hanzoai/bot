@@ -20,8 +20,8 @@ Last updated: 2026-01-22
   declare `role: node` with explicit caps/commands.
 - One Gateway per host; it is the only place that opens a WhatsApp session.
 - The **canvas host** is served by the Gateway HTTP server under:
-  - `/__openclaw__/canvas/` (agent-editable HTML/CSS/JS)
-  - `/__openclaw__/a2ui/` (A2UI host)
+  - `/__bot__/canvas/` (agent-editable HTML/CSS/JS)
+  - `/__bot__/a2ui/` (A2UI host)
     It uses the same port as the Gateway (default `18789`).
 
 ## Components and flows

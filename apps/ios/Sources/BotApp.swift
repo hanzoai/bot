@@ -32,9 +32,9 @@ struct BotApp: App {
     }
 }
 
-extension OpenClawApp {
+extension BotApp {
     private static func installUncaughtExceptionLogger() {
-        NSLog("OpenClaw: installing uncaught exception handler")
+        NSLog("Bot: installing uncaught exception handler")
         NSSetUncaughtExceptionHandler { exception in
             // Useful when the app hits NSExceptions from SwiftUI/WebKit internals; these do not
             // produce a normal Swift error backtrace.

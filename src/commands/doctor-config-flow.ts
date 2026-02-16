@@ -9,7 +9,7 @@ import {
 } from "../channels/telegram/allow-from.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import {
-  OpenClawSchema,
+  BotSchema,
   CONFIG_PATH,
   migrateLegacyConfig,
   readConfigFileSnapshot,
@@ -78,7 +78,7 @@ function stripUnknownConfigKeys(config: BotConfig): {
   config: BotConfig;
   removed: string[];
 } {
-  const parsed = OpenClawSchema.safeParse(config);
+  const parsed = BotSchema.safeParse(config);
   if (parsed.success) {
     return { config, removed: [] };
   }
@@ -560,8 +560,8 @@ async function maybeMigrateLegacyConfig(): Promise<string[]> {
     return changes;
   }
 
-  const targetDir = path.join(home, ".openclaw");
-  const targetPath = path.join(targetDir, "openclaw.json");
+  const targetDir = path.join(home, ".bot");
+  const targetPath = path.join(targetDir, "bot.json");
   try {
     await fs.access(targetPath);
     return changes;
@@ -570,7 +570,7 @@ async function maybeMigrateLegacyConfig(): Promise<string[]> {
   }
 
   const legacyCandidates = [
-    path.join(home, ".clawdbot", "clawdbot.json"),
+    path.join(home, ".bot", "bot.json"),
     path.join(home, ".moldbot", "moldbot.json"),
     path.join(home, ".moltbot", "moltbot.json"),
   ];
@@ -653,9 +653,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
         cfg = migrated;
       }
     } else {
-      fixHints.push(
-        `Run "${formatCliCommand("openclaw doctor --fix")}" to apply legacy migrations.`,
-      );
+      fixHints.push(`Run "${formatCliCommand("bot doctor --fix")}" to apply legacy migrations.`);
     }
   }
 
@@ -667,7 +665,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
     if (shouldRepair) {
       cfg = normalized.config;
     } else {
-      fixHints.push(`Run "${formatCliCommand("openclaw doctor --fix")}" to apply these changes.`);
+      fixHints.push(`Run "${formatCliCommand("bot doctor --fix")}" to apply these changes.`);
     }
   }
 
@@ -679,7 +677,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
     if (shouldRepair) {
       cfg = autoEnable.config;
     } else {
-      fixHints.push(`Run "${formatCliCommand("openclaw doctor --fix")}" to apply these changes.`);
+      fixHints.push(`Run "${formatCliCommand("bot doctor --fix")}" to apply these changes.`);
     }
   }
 
@@ -705,7 +703,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
       note(
         [
           `- Telegram allowFrom contains ${hits.length} non-numeric entries (e.g. ${hits[0]?.entry ?? "@"}); Telegram authorization requires numeric sender IDs.`,
-          `- Run "${formatCliCommand("openclaw doctor --fix")}" to auto-resolve @username entries to numeric IDs (requires a Telegram bot token).`,
+          `- Run "${formatCliCommand("bot doctor --fix")}" to auto-resolve @username entries to numeric IDs (requires a Telegram bot token).`,
         ].join("\n"),
         "Doctor warnings",
       );
@@ -716,7 +714,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
       note(
         [
           `- Discord allowlists contain ${discordHits.length} numeric entries (e.g. ${discordHits[0]?.path}=${discordHits[0]?.entry}).`,
-          `- Discord IDs must be strings; run "${formatCliCommand("openclaw doctor --fix")}" to convert numeric IDs to quoted strings.`,
+          `- Discord IDs must be strings; run "${formatCliCommand("bot doctor --fix")}" to convert numeric IDs to quoted strings.`,
         ].join("\n"),
         "Doctor warnings",
       );
@@ -733,7 +731,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
       note(lines, "Doctor changes");
     } else {
       note(lines, "Unknown config keys");
-      fixHints.push('Run "openclaw doctor --fix" to remove these keys.');
+      fixHints.push('Run "bot doctor --fix" to remove these keys.');
     }
   }
 

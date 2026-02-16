@@ -244,7 +244,7 @@ describe("session cost usage", () => {
   });
 
   it("resolves non-main absolute sessionFile using explicit agentId for cost summary", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cost-agent-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-cost-agent-"));
     const workerSessionsDir = path.join(root, "agents", "worker1", "sessions");
     await fs.mkdir(workerSessionsDir, { recursive: true });
     const workerSessionFile = path.join(workerSessionsDir, "sess-worker-1.jsonl");
@@ -270,8 +270,8 @@ describe("session cost usage", () => {
       "utf-8",
     );
 
-    const originalState = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = root;
+    const originalState = process.env.BOT_STATE_DIR;
+    process.env.BOT_STATE_DIR = root;
     try {
       const summary = await loadSessionCostSummary({
         sessionId: "sess-worker-1",
@@ -282,15 +282,15 @@ describe("session cost usage", () => {
       expect(summary?.totalCost).toBeCloseTo(0.01, 5);
     } finally {
       if (originalState === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = originalState;
+        process.env.BOT_STATE_DIR = originalState;
       }
     }
   });
 
   it("resolves non-main absolute sessionFile using explicit agentId for timeseries", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-timeseries-agent-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-timeseries-agent-"));
     const workerSessionsDir = path.join(root, "agents", "worker2", "sessions");
     await fs.mkdir(workerSessionsDir, { recursive: true });
     const workerSessionFile = path.join(workerSessionsDir, "sess-worker-2.jsonl");
@@ -312,8 +312,8 @@ describe("session cost usage", () => {
       "utf-8",
     );
 
-    const originalState = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = root;
+    const originalState = process.env.BOT_STATE_DIR;
+    process.env.BOT_STATE_DIR = root;
     try {
       const timeseries = await loadSessionUsageTimeSeries({
         sessionId: "sess-worker-2",
@@ -324,15 +324,15 @@ describe("session cost usage", () => {
       expect(timeseries?.points[0]?.totalTokens).toBe(8);
     } finally {
       if (originalState === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = originalState;
+        process.env.BOT_STATE_DIR = originalState;
       }
     }
   });
 
   it("resolves non-main absolute sessionFile using explicit agentId for logs", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-logs-agent-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-logs-agent-"));
     const workerSessionsDir = path.join(root, "agents", "worker3", "sessions");
     await fs.mkdir(workerSessionsDir, { recursive: true });
     const workerSessionFile = path.join(workerSessionsDir, "sess-worker-3.jsonl");
@@ -352,8 +352,8 @@ describe("session cost usage", () => {
       "utf-8",
     );
 
-    const originalState = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = root;
+    const originalState = process.env.BOT_STATE_DIR;
+    process.env.BOT_STATE_DIR = root;
     try {
       const logs = await loadSessionLogs({
         sessionId: "sess-worker-3",
@@ -365,9 +365,9 @@ describe("session cost usage", () => {
       expect(logs?.[0]?.role).toBe("user");
     } finally {
       if (originalState === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = originalState;
+        process.env.BOT_STATE_DIR = originalState;
       }
     }
   });

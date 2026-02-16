@@ -16,7 +16,7 @@ describe("resolveSandboxContext", () => {
     const result = await resolveSandboxContext({
       config: cfg,
       sessionKey: "agent:main:main",
-      workspaceDir: "/tmp/openclaw-test",
+      workspaceDir: "/tmp/bot-test",
     });
 
     expect(result).toBeNull();
@@ -35,7 +35,7 @@ describe("resolveSandboxContext", () => {
     const result = await ensureSandboxWorkspaceForSession({
       config: cfg,
       sessionKey: "agent:main:main",
-      workspaceDir: "/tmp/openclaw-test",
+      workspaceDir: "/tmp/bot-test",
     });
 
     expect(result).toBeNull();
@@ -56,7 +56,7 @@ describe("resolveSandboxContext", () => {
       await resolveSandboxContext({
         config: cfg,
         sessionKey: "main",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/bot-test",
       }),
     ).toBeNull();
 
@@ -64,7 +64,7 @@ describe("resolveSandboxContext", () => {
       await resolveSandboxContext({
         config: cfg,
         sessionKey: "agent:main:main",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/bot-test",
       }),
     ).toBeNull();
 
@@ -72,7 +72,7 @@ describe("resolveSandboxContext", () => {
       await ensureSandboxWorkspaceForSession({
         config: cfg,
         sessionKey: "work",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/bot-test",
       }),
     ).toBeNull();
 
@@ -80,7 +80,7 @@ describe("resolveSandboxContext", () => {
       await ensureSandboxWorkspaceForSession({
         config: cfg,
         sessionKey: "agent:main:main",
-        workspaceDir: "/tmp/openclaw-test",
+        workspaceDir: "/tmp/bot-test",
       }),
     ).toBeNull();
   }, 15_000);

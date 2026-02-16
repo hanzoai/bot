@@ -9,7 +9,7 @@ const { createWaSocket, formatError, logWebSelfId, waitForWaConnection } =
   await import("./session.js");
 
 function mockCredsJsonSpies(readContents: string) {
-  const credsSuffix = path.join(".openclaw", "credentials", "whatsapp", "default", "creds.json");
+  const credsSuffix = path.join(".bot", "credentials", "whatsapp", "default", "creds.json");
   const copySpy = vi.spyOn(fsSync, "copyFileSync").mockImplementation(() => {});
   const existsSpy = vi.spyOn(fsSync, "existsSync").mockImplementation((p) => {
     if (typeof p !== "string") {
@@ -197,13 +197,7 @@ describe("web session", () => {
 
   it("rotates creds backup when creds.json is valid JSON", async () => {
     const creds = mockCredsJsonSpies("{}");
-    const backupSuffix = path.join(
-      ".openclaw",
-      "credentials",
-      "whatsapp",
-      "default",
-      "creds.json.bak",
-    );
+    const backupSuffix = path.join(".bot", "credentials", "whatsapp", "default", "creds.json.bak");
 
     await createWaSocket(false, false);
     const sock = getLastSocket();
