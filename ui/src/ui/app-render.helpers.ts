@@ -35,10 +35,10 @@ function resetChatStateForSessionSwitch(state: AppViewState, sessionKey: string)
   state.sessionKey = sessionKey;
   state.chatMessage = "";
   state.chatStream = null;
-  (state as unknown as OpenClawApp).chatStreamStartedAt = null;
+  (state as unknown as BotApp).chatStreamStartedAt = null;
   state.chatRunId = null;
-  (state as unknown as OpenClawApp).resetToolStream();
-  (state as unknown as OpenClawApp).resetChatScroll();
+  (state as unknown as BotApp).resetToolStream();
+  (state as unknown as BotApp).resetChatScroll();
   state.applySettings({
     ...state.settings,
     sessionKey,
