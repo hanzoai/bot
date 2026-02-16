@@ -29,7 +29,7 @@ hanzo-bot onboard --mode remote --remote-url ws://gateway-host:18789
 Non-interactive custom provider:
 
 ```bash
-openclaw onboard --non-interactive \
+bot onboard --non-interactive \
   --auth-choice custom-api-key \
   --custom-base-url "https://llm.example.com/v1" \
   --custom-model-id "foo-large" \
@@ -46,7 +46,7 @@ If you specifically want the GLM Coding Plan endpoints, pick `zai-coding-global`
 
 ```bash
 # Promptless endpoint selection
-openclaw onboard --non-interactive \
+bot onboard --non-interactive \
   --auth-choice zai-coding-global \
   --zai-api-key "$ZAI_API_KEY"
 
