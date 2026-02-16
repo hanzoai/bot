@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>obsidian — Hanzo Bot Skills</title>
+    <meta
+      name="description"
+      content="Work with Obsidian vaults (plain Markdown notes) and automate via obsidian-cli."
+    />
+    <meta name="keywords" content="obsidian, Hanzo Bot, AI skill, Productivity, autonomous agent" />
+    <link rel="canonical" href="https://hanzo.bot/skills/obsidian" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="obsidian — Hanzo Bot Skills" />
+    <meta
+      property="og:description"
+      content="Work with Obsidian vaults (plain Markdown notes) and automate via obsidian-cli."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://hanzo.bot/skills/obsidian" />
+    <meta property="og:site_name" content="Hanzo Bot" />
+    <meta property="og:image" content="https://hanzo.bot/og-skills.png" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@hanaborteam" />
+    <meta name="twitter:title" content="obsidian — Hanzo Bot Skills" />
+    <meta
+      name="twitter:description"
+      content="Work with Obsidian vaults (plain Markdown notes) and automate via obsidian-cli."
+    />
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "obsidian — Hanzo Bot Skill",
+        "description": "Work with Obsidian vaults (plain Markdown notes) and automate via obsidian-cli.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "Hanzo AI",
+          "url": "https://hanzo.ai"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --brand: #fd4444;
+        --brand-secondary: #ff6b6b;
+        --bg: #000;
+        --bg-card: rgba(255, 255, 255, 0.04);
+        --bg-hover: #1a1a1a;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-hover: rgba(255, 255, 255, 0.16);
+        --text: #fff;
+        --muted: #888;
+        --subtle: #555;
+        --max-w: 1200px;
+        --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --font:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          sans-serif;
+        --font-mono: "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        position: relative;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 64px 64px;
+        pointer-events: none;
+        z-index: 0;
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        opacity: 0.035;
+        pointer-events: none;
+        z-index: 0;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      body > * {
+        position: relative;
+        z-index: 1;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+      }
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .header-inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 0 24px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo-mark {
+        width: 24px;
+        height: 24px;
+      }
+      .logo-mark svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .logo-text {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+      .nav-links {
+        display: flex;
+        gap: 4px;
+      }
+      .nav-link {
+        position: relative;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-radius: 6px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .nav-link:hover {
+        color: var(--text);
+        background: var(--bg-hover);
+      }
+      .nav-link.active {
+        color: var(--brand);
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-ghost {
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted);
+        border-radius: 8px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        background: var(--bg-hover);
+      }
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--brand);
+        border-radius: 9999px;
+        transition:
+          opacity 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn-primary:hover {
+        opacity: 0.9;
+        box-shadow: 0 0 24px rgba(253, 68, 68, 0.3);
+      }
+      .btn-outline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 9999px;
+        transition:
+          border-color 0.15s,
+          background 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn-outline:hover {
+        border-color: rgba(253, 68, 68, 0.3);
+        background: rgba(253, 68, 68, 0.06);
+      }
+      .btn-lg {
+        padding: 14px 32px;
+        font-size: 15px;
+        border-radius: 9999px;
+      }
+      .footer {
+        border-top: 1px solid var(--border);
+        padding: 64px 24px 32px;
+      }
+      .footer-inner {
+        max-width: var(--max-w);
+        margin: 0 auto;
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 240px repeat(4, 1fr);
+        gap: 40px;
+        margin-bottom: 48px;
+      }
+      .footer-brand .footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .footer-brand .footer-logo svg {
+        width: 20px;
+        height: 20px;
+      }
+      .footer-brand .footer-logo span {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .footer-brand p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+      .footer-social {
+        display: flex;
+        gap: 12px;
+      }
+      .footer-social a {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--muted);
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .footer-social a:hover {
+        color: var(--text);
+        border-color: var(--border-hover);
+      }
+      .footer-social svg {
+        width: 14px;
+        height: 14px;
+      }
+      .footer-col h4 {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--subtle);
+        margin-bottom: 16px;
+      }
+      .footer-col a {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        padding: 3px 0;
+        transition: color 0.15s;
+      }
+      .footer-col a:hover {
+        color: var(--text);
+      }
+      .footer-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--subtle);
+      }
+      @media (max-width: 1024px) {
+        .footer-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .footer-brand {
+          grid-column: 1/-1;
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+      @media (max-width: 768px) {
+        .footer-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 480px) {
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── Detail layout ── */
+      .detail-wrap {
+        max-width: var(--max-w);
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 24px;
+        transition: color 0.15s;
+      }
+      .back-link:hover {
+        color: var(--text);
+      }
+      .skill-hero {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      .skill-emoji {
+        font-size: 48px;
+        line-height: 1;
+      }
+      .skill-hero h1 {
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      .skill-desc {
+        font-size: 15px;
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 40px;
+        max-width: 720px;
+      }
+      .detail-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 48px;
+        align-items: start;
+      }
+      .detail-main {
+        min-width: 0;
+      }
+      .detail-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: sticky;
+        top: 80px;
+      }
+      .sidebar-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        backdrop-filter: blur(16px);
+      }
+      .sidebar-card h3 {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--subtle);
+        margin-bottom: 16px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 6px 0;
+        font-size: 13px;
+        border-bottom: 1px solid var(--border);
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-row .label {
+        color: var(--muted);
+      }
+      .info-row .value {
+        color: var(--text);
+        text-align: right;
+      }
+      .info-row .value code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .info-row .value a {
+        color: var(--brand);
+        transition: opacity 0.15s;
+      }
+      .info-row .value a:hover {
+        opacity: 0.8;
+      }
+      .install-row {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .install-row:last-child {
+        border-bottom: none;
+      }
+      .install-label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .install-cmd {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--brand-secondary);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 6px 10px;
+        border-radius: 6px;
+        word-break: break-all;
+      }
+      .sidebar-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .sidebar-actions a {
+        text-align: center;
+      }
+      .web3-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #818cf8;
+        margin-bottom: 4px;
+      }
+      .web3-features {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      .web3-feat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .web3-feat::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #818cf8;
+        flex-shrink: 0;
+      }
+      .category-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 500;
+        background: rgba(253, 68, 68, 0.08);
+        color: var(--brand-secondary);
+        border: 1px solid rgba(253, 68, 68, 0.15);
+      }
+      /* ── README styles ── */
+      .skill-readme {
+        line-height: 1.7;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .skill-readme h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 32px 0 16px;
+        letter-spacing: -0.02em;
+      }
+      .skill-readme h2 {
+        font-size: 22px;
+        font-weight: 600;
+        margin: 28px 0 12px;
+        letter-spacing: -0.01em;
+        color: var(--text);
+      }
+      .skill-readme h3 {
+        font-size: 17px;
+        font-weight: 600;
+        margin: 24px 0 8px;
+      }
+      .skill-readme h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 20px 0 8px;
+      }
+      .skill-readme p {
+        margin: 0 0 16px;
+      }
+      .skill-readme ul,
+      .skill-readme ol {
+        margin: 0 0 16px;
+        padding-left: 24px;
+      }
+      .skill-readme li {
+        margin-bottom: 6px;
+      }
+      .skill-readme code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .skill-readme pre {
+        margin: 0 0 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+      }
+      .skill-readme pre code {
+        display: block;
+        padding: 16px;
+        background: none;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .skill-readme table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 0 16px;
+        font-size: 13px;
+      }
+      .skill-readme th,
+      .skill-readme td {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        text-align: left;
+      }
+      .skill-readme th {
+        background: rgba(255, 255, 255, 0.04);
+        font-weight: 600;
+      }
+      .skill-readme blockquote {
+        border-left: 3px solid var(--brand);
+        padding: 8px 16px;
+        margin: 0 0 16px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 0 8px 8px 0;
+      }
+      .skill-readme a {
+        color: var(--brand-secondary);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .skill-readme a:hover {
+        color: var(--brand);
+      }
+      .skill-readme hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 24px 0;
+      }
+      .skill-readme strong {
+        color: var(--text);
+      }
+      @media (max-width: 1024px) {
+        .detail-layout {
+          grid-template-columns: 1fr;
+        }
+        .detail-sidebar {
+          position: static;
+          order: 2;
+        }
+      }
+      @media (max-width: 768px) {
+        .detail-wrap {
+          padding: 72px 16px 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-inner">
+        <div class="header-left">
+          <a href="/" class="logo">
+            <div class="logo-mark">
+              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+                <path
+                  d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+                  fill="#fff"
+                />
+                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" />
+              </svg>
+            </div>
+            <span class="logo-text">Bot</span>
+          </a>
+          <nav class="nav-links">
+            <a href="https://hanzo.ai" class="nav-link">AI</a>
+            <a href="/" class="nav-link">Home</a>
+            <a href="/skills" class="nav-link active">Skills</a>
+            <a href="/book" class="nav-link">Book</a>
+            <a href="https://docs.hanzo.bot" class="nav-link">Docs</a>
+            <a href="https://github.com/hanzoai/bot" class="nav-link">GitHub</a>
+          </nav>
+        </div>
+        <div class="header-right">
+          <a href="https://hanzo.ai/contact" class="btn-ghost">Contact Sales</a>
+          <a href="/chat" class="btn-primary">Sign In</a>
+        </div>
+      </div>
+    </header>
+    <main class="detail-wrap">
+      <a href="/skills" class="back-link">&larr; Back to all skills</a>
+      <div class="skill-hero">
+        <span class="skill-emoji">💎</span>
+        <div>
+          <h1>obsidian</h1>
+        </div>
+      </div>
+      <p class="skill-desc">
+        Work with Obsidian vaults (plain Markdown notes) and automate via obsidian-cli.
+      </p>
+      <div class="detail-layout">
+        <div class="detail-main">
+          <div class="skill-readme">
+            <h1>Obsidian</h1>
+            <p>Obsidian vault = a normal folder on disk.</p>
+            <p>Vault structure (typical)</p>
+            <ul>
+              <li>Notes: <code>*.md</code> (plain text Markdown; edit with any editor)</li>
+              <li>
+                Config: <code>.obsidian/</code> (workspace + plugin settings; usually don’t touch
+                from scripts)
+              </li>
+              <li>Canvases: <code>*.canvas</code> (JSON)</li>
+              <li>
+                Attachments: whatever folder you chose in Obsidian settings (images/PDFs/etc.)
+              </li>
+            </ul>
+            <h2>Find the active vault(s)</h2>
+            <p>Obsidian desktop tracks vaults here (source of truth):</p>
+            <ul>
+              <li><code>~/Library/Application Support/obsidian/obsidian.json</code></li>
+            </ul>
+            <p>
+              <code>obsidian-cli</code> resolves vaults from that file; vault name is typically the
+              <strong>folder name</strong> (path suffix).
+            </p>
+            <p>Fast “what vault is active / where are the notes?”</p>
+            <ul>
+              <li>
+                If you’ve already set a default: <code>obsidian-cli print-default --path-only</code>
+              </li>
+              <li>
+                Otherwise, read
+                <code>~/Library/Application Support/obsidian/obsidian.json</code> and use the vault
+                entry with <code>&quot;open&quot;: true</code>.
+              </li>
+            </ul>
+            <p>Notes</p>
+            <ul>
+              <li>
+                Multiple vaults common (iCloud vs <code>~/Documents</code>, work/personal, etc.).
+                Don’t guess; read config.
+              </li>
+              <li>
+                Avoid writing hardcoded vault paths into scripts; prefer reading the config or using
+                <code>print-default</code>.
+              </li>
+            </ul>
+            <h2>obsidian-cli quick start</h2>
+            <p>Pick a default vault (once):</p>
+            <ul>
+              <li><code>obsidian-cli set-default &quot;&lt;vault-folder-name&gt;&quot;</code></li>
+              <li>
+                <code>obsidian-cli print-default</code> /
+                <code>obsidian-cli print-default --path-only</code>
+              </li>
+            </ul>
+            <p>Search</p>
+            <ul>
+              <li><code>obsidian-cli search &quot;query&quot;</code> (note names)</li>
+              <li>
+                <code>obsidian-cli search-content &quot;query&quot;</code> (inside notes; shows
+                snippets + lines)
+              </li>
+            </ul>
+            <p>Create</p>
+            <ul>
+              <li>
+                <code
+                  >obsidian-cli create &quot;Folder/New note&quot; --content &quot;...&quot;
+                  --open</code
+                >
+              </li>
+              <li>
+                Requires Obsidian URI handler (<code>obsidian://…</code>) working (Obsidian
+                installed).
+              </li>
+              <li>
+                Avoid creating notes under “hidden” dot-folders (e.g. <code>.something/...</code>)
+                via URI; Obsidian may refuse.
+              </li>
+            </ul>
+            <p>Move/rename (safe refactor)</p>
+            <ul>
+              <li>
+                <code>obsidian-cli move &quot;old/path/note&quot; &quot;new/path/note&quot;</code>
+              </li>
+              <li>
+                Updates <code>[[wikilinks]]</code> and common Markdown links across the vault (this
+                is the main win vs <code>mv</code>).
+              </li>
+            </ul>
+            <p>Delete</p>
+            <ul>
+              <li><code>obsidian-cli delete &quot;path/note&quot;</code></li>
+            </ul>
+            <p>
+              Prefer direct edits when appropriate: open the <code>.md</code> file and change it;
+              Obsidian will pick it up.
+            </p>
+          </div>
+        </div>
+        <aside class="detail-sidebar">
+          <div class="sidebar-card">
+            <h3>Info</h3>
+            <div class="info-row">
+              <span class="label">Category</span
+              ><span class="value"><span class="category-badge">Productivity</span></span>
+            </div>
+            <div class="info-row">
+              <span class="label">Requires</span
+              ><span class="value"><code>obsidian-cli</code></span>
+            </div>
+            <div class="info-row">
+              <span class="label">Size</span><span class="value">2.5 KB</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Homepage</span
+              ><span class="value"
+                ><a href="https://help.obsidian.md" target="_blank" rel="noopener"
+                  >help.obsidian.md</a
+                ></span
+              >
+            </div>
+            <div class="info-row">
+              <span class="label">Source</span
+              ><span class="value"
+                ><a
+                  href="https://github.com/hanzoai/bot/blob/main/skills/obsidian/SKILL.md"
+                  target="_blank"
+                  rel="noopener"
+                  >GitHub</a
+                ></span
+              >
+            </div>
+            <div class="info-row" id="lastUpdated">
+              <span class="label">Updated</span><span class="value">—</span>
+            </div>
+          </div>
+          <div class="sidebar-card">
+            <h3>Install</h3>
+            <div class="install-row">
+              <span class="install-label">Install obsidian-cli (brew)</span
+              ><code class="install-cmd">brew install yakitrak/yakitrak/obsidian-cli</code>
+            </div>
+          </div>
+          <div class="sidebar-card sidebar-actions">
+            <a
+              href="https://github.com/hanzoai/bot/blob/main/skills/obsidian/SKILL.md"
+              class="btn-outline"
+              target="_blank"
+              rel="noopener"
+              >View on GitHub</a
+            >
+            <a href="/chat" class="btn-primary">Open in Hanzo Bot</a>
+          </div>
+          <div class="sidebar-card">
+            <h3>Web3 Native</h3>
+            <div class="web3-badge">&#9670; On-Chain Ready</div>
+            <div class="web3-features">
+              <div class="web3-feat">DID identity for every bot</div>
+              <div class="web3-feat">Integrated wallet &amp; payments</div>
+              <div class="web3-feat">Prefund balance, draw on credits</div>
+              <div class="web3-feat">On-chain &amp; fiat payment rails</div>
+              <div class="web3-feat">Send funds to bots directly</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#fff" />
+                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#fff" />
+                <path
+                  d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z"
+                  fill="#fff"
+                />
+                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#fff" />
+                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#fff" />
+                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#fff" />
+                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#fff" /></svg
+              ><span>Hanzo</span>
+            </div>
+            <p>Build, deploy, and manage autonomous AI agents across every platform.</p>
+            <div class="footer-social">
+              <a href="https://x.com/hanaborteam" aria-label="X"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                  /></svg
+              ></a>
+              <a href="https://linkedin.com/company/hanzo-ai" aria-label="LinkedIn"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  /></svg
+              ></a>
+              <a href="https://discord.gg/XthHQQj" aria-label="Discord"
+                ><svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"
+                  /></svg
+              ></a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h4>Products</h4>
+            <a href="https://hanzo.ai">Hanzo AI</a><a href="https://hanzo.app">Hanzo App</a
+            ><a href="https://hanzo.bot">Hanzo Bot</a><a href="https://hanzo.ai/dev">Hanzo Dev</a
+            ><a href="https://hanzo.ai/cloud">Hanzo Cloud</a
+            ><a href="https://hanzo.app/download">Desktop App</a><a href="/book">The Hanzo Book</a>
+          </div>
+          <div class="footer-col">
+            <h4>Developers</h4>
+            <a href="https://docs.hanzo.bot">Documentation</a
+            ><a href="https://github.com/hanzoai/bot">GitHub</a
+            ><a href="https://docs.hanzo.bot/api">API Reference</a><a href="/skills">Skills Hub</a
+            ><a href="https://docs.hanzo.bot/cli">CLI Reference</a>
+          </div>
+          <div class="footer-col">
+            <h4>Solutions</h4>
+            <a href="#">Customer Support</a><a href="#">Developer Operations</a
+            ><a href="#">Marketing</a><a href="#">Finance</a><a href="#">Security</a
+            ><a href="#">Enterprise</a>
+          </div>
+          <div class="footer-col">
+            <h4>Company</h4>
+            <a href="https://hanzo.ai/about">About</a><a href="https://hanzo.ai/blog">Blog</a
+            ><a href="https://hanzo.ai/careers">Careers</a
+            ><a href="https://hanzo.ai/contact">Contact</a
+            ><a href="https://hanzo.ai/privacy">Privacy</a><a href="https://hanzo.ai/terms">Terms</a
+            ><a href="https://status.hanzo.ai">Status</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; 2016–2026 Hanzo Industries. All rights reserved.</span>
+          <span>hanzo.ai</span>
+        </div>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        var slug = "obsidian";
+        var el = document.getElementById("lastUpdated");
+        if (!el) return;
+        var key = "gh-commits-" + slug;
+        var cached = sessionStorage.getItem(key);
+        function show(data) {
+          if (!Array.isArray(data) || !data[0] || !data[0].commit) return;
+          var d = new Date(data[0].commit.author.date);
+          var days = Math.floor((Date.now() - d.getTime()) / 86400000);
+          var txt = days === 0 ? "today" : days === 1 ? "yesterday" : days + " days ago";
+          el.querySelector(".value").textContent = txt;
+        }
+        if (cached) {
+          try {
+            show(JSON.parse(cached));
+          } catch (e) {}
+        } else {
+          fetch(
+            "https://api.github.com/repos/hanzoai/bot/commits?path=skills/" +
+              slug +
+              "/SKILL.md&per_page=1",
+          )
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (d) {
+              try {
+                sessionStorage.setItem(key, JSON.stringify(d));
+              } catch (e) {}
+              show(d);
+            })
+            .catch(function () {});
+        }
+      })();
+    </script>
+  </body>
+</html>

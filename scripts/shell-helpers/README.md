@@ -1,8 +1,8 @@
-# ClawDock <!-- omit in toc -->
+# BotDock <!-- omit in toc -->
 
-Stop typing `docker-compose` commands. Just type `clawdock-start`.
+Stop typing `docker-compose` commands. Just type `bot-start`.
 
-Inspired by Simon Willison's [Running OpenClaw in Docker](https://til.simonwillison.net/llms/openclaw-docker).
+Inspired by Simon Willison's [Running Hanzo Bot in Docker](https://til.simonwillison.net/llms/hanzo-bot-docker).
 
 - [Quickstart](#quickstart)
 - [Available Commands](#available-commands)
@@ -25,102 +25,102 @@ Inspired by Simon Willison's [Running OpenClaw in Docker](https://til.simonwilli
 **Install:**
 
 ```bash
-mkdir -p ~/.clawdock && curl -sL https://raw.githubusercontent.com/openclaw/openclaw/main/scripts/shell-helpers/clawdock-helpers.sh -o ~/.clawdock/clawdock-helpers.sh
+mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/hanzoai/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.hanzo/bot/bot-helpers.sh
 ```
 
 ```bash
-echo 'source ~/.clawdock/clawdock-helpers.sh' >> ~/.zshrc && source ~/.zshrc
+echo 'source ~/.hanzo/bot/bot-helpers.sh' >> ~/.zshrc && source ~/.zshrc
 ```
 
 **See what you get:**
 
 ```bash
-clawdock-help
+bot-help
 ```
 
-On first command, ClawDock auto-detects your OpenClaw directory:
+On first command, BotDock auto-detects your Hanzo Bot directory:
 
-- Checks common paths (`~/openclaw`, `~/workspace/openclaw`, etc.)
+- Checks common paths (`~/hanzo-bot`, `~/workspace/hanzo-bot`, etc.)
 - If found, asks you to confirm
-- Saves to `~/.clawdock/config`
+- Saves to `~/.hanzo/bot/config`
 
 **First time setup:**
 
 ```bash
-clawdock-start
+bot-start
 ```
 
 ```bash
-clawdock-fix-token
+bot-fix-token
 ```
 
 ```bash
-clawdock-dashboard
+bot-dashboard
 ```
 
 If you see "pairing required":
 
 ```bash
-clawdock-devices
+bot-devices
 ```
 
 And approve the request for the specific device:
 
 ```bash
-clawdock-approve <request-id>
+bot-approve <request-id>
 ```
 
 ## Available Commands
 
 ### Basic Operations
 
-| Command            | Description                     |
-| ------------------ | ------------------------------- |
-| `clawdock-start`   | Start the gateway               |
-| `clawdock-stop`    | Stop the gateway                |
-| `clawdock-restart` | Restart the gateway             |
-| `clawdock-status`  | Check container status          |
-| `clawdock-logs`    | View live logs (follows output) |
+| Command       | Description                     |
+| ------------- | ------------------------------- |
+| `bot-start`   | Start the gateway               |
+| `bot-stop`    | Stop the gateway                |
+| `bot-restart` | Restart the gateway             |
+| `bot-status`  | Check container status          |
+| `bot-logs`    | View live logs (follows output) |
 
 ### Container Access
 
-| Command                   | Description                                    |
-| ------------------------- | ---------------------------------------------- |
-| `clawdock-shell`          | Interactive shell inside the gateway container |
-| `clawdock-cli <command>`  | Run OpenClaw CLI commands                      |
-| `clawdock-exec <command>` | Execute arbitrary commands in the container    |
+| Command              | Description                                    |
+| -------------------- | ---------------------------------------------- |
+| `bot-shell`          | Interactive shell inside the gateway container |
+| `bot-cli <command>`  | Run Hanzo Bot CLI commands                     |
+| `bot-exec <command>` | Execute arbitrary commands in the container    |
 
 ### Web UI & Devices
 
-| Command                 | Description                                |
-| ----------------------- | ------------------------------------------ |
-| `clawdock-dashboard`    | Open web UI in browser with authentication |
-| `clawdock-devices`      | List device pairing requests               |
-| `clawdock-approve <id>` | Approve a device pairing request           |
+| Command            | Description                                |
+| ------------------ | ------------------------------------------ |
+| `bot-dashboard`    | Open web UI in browser with authentication |
+| `bot-devices`      | List device pairing requests               |
+| `bot-approve <id>` | Approve a device pairing request           |
 
 ### Setup & Configuration
 
-| Command              | Description                                       |
-| -------------------- | ------------------------------------------------- |
-| `clawdock-fix-token` | Configure gateway authentication token (run once) |
+| Command         | Description                                       |
+| --------------- | ------------------------------------------------- |
+| `bot-fix-token` | Configure gateway authentication token (run once) |
 
 ### Maintenance
 
-| Command            | Description                                      |
-| ------------------ | ------------------------------------------------ |
-| `clawdock-rebuild` | Rebuild the Docker image                         |
-| `clawdock-clean`   | Remove all containers and volumes (destructive!) |
+| Command       | Description                                      |
+| ------------- | ------------------------------------------------ |
+| `bot-rebuild` | Rebuild the Docker image                         |
+| `bot-clean`   | Remove all containers and volumes (destructive!) |
 
 ### Utilities
 
-| Command              | Description                               |
-| -------------------- | ----------------------------------------- |
-| `clawdock-health`    | Run gateway health check                  |
-| `clawdock-token`     | Display the gateway authentication token  |
-| `clawdock-cd`        | Jump to the OpenClaw project directory    |
-| `clawdock-config`    | Open the OpenClaw config directory        |
-| `clawdock-workspace` | Open the workspace directory              |
-| `clawdock-help`      | Show all available commands with examples |
+| Command         | Description                               |
+| --------------- | ----------------------------------------- |
+| `bot-health`    | Run gateway health check                  |
+| `bot-token`     | Display the gateway authentication token  |
+| `bot-cd`        | Jump to the Hanzo Bot project directory   |
+| `bot-config`    | Open the Hanzo Bot config directory       |
+| `bot-workspace` | Open the workspace directory              |
+| `bot-help`      | Show all available commands with examples |
 
 ## Common Workflows
 
@@ -129,19 +129,19 @@ clawdock-approve <request-id>
 **Restart the gateway:**
 
 ```bash
-clawdock-restart
+bot-restart
 ```
 
 **Check container status:**
 
 ```bash
-clawdock-status
+bot-status
 ```
 
 **View live logs:**
 
 ```bash
-clawdock-logs
+bot-logs
 ```
 
 ### Set Up WhatsApp Bot
@@ -149,13 +149,13 @@ clawdock-logs
 **Shell into the container:**
 
 ```bash
-clawdock-shell
+bot-shell
 ```
 
 **Inside the container, login to WhatsApp:**
 
 ```bash
-openclaw channels login --channel whatsapp --verbose
+hanzo-bot channels login --channel whatsapp --verbose
 ```
 
 Scan the QR code with WhatsApp on your phone.
@@ -163,7 +163,7 @@ Scan the QR code with WhatsApp on your phone.
 **Verify connection:**
 
 ```bash
-openclaw status
+hanzo-bot status
 ```
 
 ### Troubleshooting Device Pairing
@@ -171,13 +171,13 @@ openclaw status
 **Check for pending pairing requests:**
 
 ```bash
-clawdock-devices
+bot-devices
 ```
 
 **Copy the Request ID from the "Pending" table, then approve:**
 
 ```bash
-clawdock-approve <request-id>
+bot-approve <request-id>
 ```
 
 Then refresh your browser.
@@ -187,13 +187,13 @@ Then refresh your browser.
 If you see "gateway token mismatch" errors:
 
 ```bash
-clawdock-fix-token
+bot-fix-token
 ```
 
 This will:
 
 1. Read the token from your `.env` file
-2. Configure it in the OpenClaw config
+2. Configure it in the Hanzo Bot config
 3. Restart the gateway
 4. Verify the configuration
 
@@ -209,18 +209,18 @@ docker ps
 
 - Docker and Docker Compose installed
 - Bash or Zsh shell
-- OpenClaw project (from `docker-setup.sh`)
+- Hanzo Bot project (from `docker-setup.sh`)
 
 ## Development
 
 **Test with fresh config (mimics first-time install):**
 
 ```bash
-unset CLAWDOCK_DIR && rm -f ~/.clawdock/config && source scripts/shell-helpers/clawdock-helpers.sh
+unset BOTDOCK_DIR && rm -f ~/.hanzo/bot/config && source scripts/shell-helpers/bot-helpers.sh
 ```
 
 Then run any command to trigger auto-detect:
 
 ```bash
-clawdock-start
+bot-start
 ```
