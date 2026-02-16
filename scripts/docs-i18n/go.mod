@@ -1,4 +1,4 @@
-module github.com/bot/bot/scripts/docs-i18n
+module github.com/hanzoai/bot/scripts/docs-i18n
 
 go 1.24.0
 
