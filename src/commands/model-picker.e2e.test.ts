@@ -102,7 +102,7 @@ describe("promptDefaultModel", () => {
       .mockResolvedValueOnce("sk-vllm-test")
       .mockResolvedValueOnce("meta-llama/Meta-Llama-3-8B-Instruct");
     const prompter = makePrompter({ select, text: text as never });
-    const config = { agents: { defaults: {} } } as OpenClawConfig;
+    const config = { agents: { defaults: {} } } as BotConfig;
 
     const result = await promptDefaultModel({
       config,

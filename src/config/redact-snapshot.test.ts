@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ConfigUiHints } from "./schema.js";
-import type { ConfigFileSnapshot } from "./types.openclaw.js";
+import type { ConfigFileSnapshot } from "./types.bot.js";
 import {
   REDACTED_SENTINEL,
   redactConfigSnapshot,
@@ -880,7 +880,7 @@ describe("realredactConfigSnapshot_real", () => {
       target: "draft-07",
       unrepresentable: "any",
     });
-    schema.title = "OpenClawConfig";
+    schema.title = "BotConfig";
     const hints = mapSensitivePaths(OpenClawSchema, "", {});
 
     const snapshot = makeSnapshot({

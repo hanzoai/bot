@@ -97,7 +97,7 @@ export function parseExecApprovalData(
 }
 
 type ExecApprovalContainerParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   title: string;
   description?: string;
@@ -181,7 +181,7 @@ class ExecApprovalActionRow extends Row<Button> {
 }
 
 function resolveExecApprovalAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   request: ExecApprovalRequest;
 }): string | null {
   const sessionKey = params.request.request.sessionKey?.trim();
@@ -225,7 +225,7 @@ function buildExecApprovalPayload(container: DiscordUiContainer): MessagePayload
 
 function createExecApprovalRequestContainer(params: {
   request: ExecApprovalRequest;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   actionRow?: Row<Button>;
 }): ExecApprovalContainer {
@@ -251,7 +251,7 @@ function createResolvedContainer(params: {
   request: ExecApprovalRequest;
   decision: ExecApprovalDecision;
   resolvedBy?: string | null;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
 }): ExecApprovalContainer {
   const commandText = params.request.request.command;
@@ -284,7 +284,7 @@ function createResolvedContainer(params: {
 
 function createExpiredContainer(params: {
   request: ExecApprovalRequest;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
 }): ExecApprovalContainer {
   const commandText = params.request.request.command;

@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { resolveApiKeyForProvider } from "../agents/model-auth.js";
 import { fetchRemoteMedia } from "../media/fetch.js";
 
@@ -33,7 +33,7 @@ async function loadApply() {
   return await import("./apply.js");
 }
 
-function createGroqAudioConfig(): OpenClawConfig {
+function createGroqAudioConfig(): BotConfig {
   return {
     tools: {
       media: {
@@ -69,7 +69,7 @@ function expectTranscriptApplied(params: {
   expect(params.ctx.BodyForCommands).toBe(params.commandBody);
 }
 
-function createMediaDisabledConfig(): OpenClawConfig {
+function createMediaDisabledConfig(): BotConfig {
   return {
     tools: {
       media: {
@@ -109,7 +109,7 @@ async function applyWithDisabledMedia(params: {
   body: string;
   mediaPath: string;
   mediaType?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }) {
   const { applyMediaUnderstanding } = await loadApply();
   const ctx: MsgContext = {
@@ -204,7 +204,7 @@ describe("applyMediaUnderstanding", () => {
       MediaType: "audio/ogg",
       ChatType: "direct",
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           audio: {
@@ -244,7 +244,7 @@ describe("applyMediaUnderstanding", () => {
       content: Buffer.from([0, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
     });
     const transcribeAudio = vi.fn(async () => ({ text: "should-not-run" }));
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           audio: {
@@ -270,7 +270,7 @@ describe("applyMediaUnderstanding", () => {
   it("falls back to CLI model when provider fails", async () => {
     const { applyMediaUnderstanding } = await loadApply();
     const ctx = await createAudioCtx();
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           audio: {
@@ -323,7 +323,7 @@ describe("applyMediaUnderstanding", () => {
       MediaPath: imagePath,
       MediaType: "image/jpeg",
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           image: {
@@ -370,7 +370,7 @@ describe("applyMediaUnderstanding", () => {
       MediaPath: imagePath,
       MediaType: "image/jpeg",
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -411,7 +411,7 @@ describe("applyMediaUnderstanding", () => {
       MediaPath: audioPath,
       MediaType: "audio/ogg",
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           audio: {
@@ -450,7 +450,7 @@ describe("applyMediaUnderstanding", () => {
       MediaPaths: [audioPathA, audioPathB],
       MediaTypes: ["audio/ogg", "audio/ogg"],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           audio: {
@@ -495,7 +495,7 @@ describe("applyMediaUnderstanding", () => {
       MediaPaths: [imagePath, audioPath, videoPath],
       MediaTypes: ["image/jpeg", "audio/ogg", "video/mp4"],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           image: { enabled: true, models: [{ provider: "openai", model: "gpt-5.2" }] },
@@ -611,7 +611,7 @@ describe("applyMediaUnderstanding", () => {
     const tsvText = "a\tb\tc\n1\t2\t3";
     await fs.writeFile(tsvPath, tsvText);
 
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       ...createMediaDisabledConfig(),
       gateway: {
         http: {

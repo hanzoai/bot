@@ -10,7 +10,7 @@ import {
   resolveStateDir,
   resolveGatewayPort,
 } from "../../config/config.js";
-import { resolveGatewayAuthAsync } from "../../gateway/auth.js";
+import { resolveGatewayAuth } from "../../gateway/auth.js";
 import { startGatewayServer } from "../../gateway/server.js";
 import { setGatewayWsLogStyle } from "../../gateway/ws-logging.js";
 import { setVerbose } from "../../globals.js";
@@ -200,7 +200,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     ...(passwordRaw ? { password: passwordRaw } : {}),
     ...(tokenRaw ? { token: tokenRaw } : {}),
   };
-  const resolvedAuth = await resolveGatewayAuthAsync({
+  const resolvedAuth = resolveGatewayAuth({
     authConfig,
     env: process.env,
     tailscaleMode: tailscaleMode ?? cfg.gateway?.tailscale?.mode ?? "off",

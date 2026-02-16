@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
-import { createOpenClawCodingTools } from "../pi-tools.js";
+import type { BotConfig } from "../../config/config.js";
+import { createBotCodingTools } from "../pi-tools.js";
 import { createHostSandboxFsBridge } from "../test-helpers/host-sandbox-fs-bridge.js";
 import { __testing, createImageTool, resolveImageModelConfigForTool } from "./image-tool.js";
 
@@ -51,7 +51,7 @@ function stubMinimaxOkFetch() {
   return fetch;
 }
 
-function createMinimaxImageConfig(): OpenClawConfig {
+function createMinimaxImageConfig(): BotConfig {
   return {
     agents: {
       defaults: {
@@ -102,7 +102,7 @@ describe("image tool implicit imageModel config", () => {
 
   it("stays disabled without auth when no pairing is possible", async () => {
     const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-image-"));
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-5.2" } } },
     };
     expect(resolveImageModelConfigForTool({ cfg, agentDir })).toBeNull();
@@ -114,7 +114,7 @@ describe("image tool implicit imageModel config", () => {
     vi.stubEnv("MINIMAX_API_KEY", "minimax-test");
     vi.stubEnv("OPENAI_API_KEY", "openai-test");
     vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-test");
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { defaults: { model: { primary: "minimax/MiniMax-M2.1" } } },
     };
     expect(resolveImageModelConfigForTool({ cfg, agentDir })).toEqual({
@@ -129,7 +129,7 @@ describe("image tool implicit imageModel config", () => {
     vi.stubEnv("ZAI_API_KEY", "zai-test");
     vi.stubEnv("OPENAI_API_KEY", "openai-test");
     vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-test");
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { defaults: { model: { primary: "zai/glm-4.7" } } },
     };
     expect(resolveImageModelConfigForTool({ cfg, agentDir })).toEqual({
@@ -147,7 +147,7 @@ describe("image tool implicit imageModel config", () => {
         "acme:default": { type: "api_key", provider: "acme", key: "sk-test" },
       },
     });
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { defaults: { model: { primary: "acme/text-1" } } },
       models: {
         providers: {
@@ -168,7 +168,7 @@ describe("image tool implicit imageModel config", () => {
 
   it("prefers explicit agents.defaults.imageModel", async () => {
     const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-image-"));
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           model: { primary: "minimax/MiniMax-M2.1" },
@@ -187,7 +187,7 @@ describe("image tool implicit imageModel config", () => {
     // adjusted via modelHasVision to discourage redundant usage.
     vi.stubEnv("OPENAI_API_KEY", "test-key");
     const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-image-"));
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           model: { primary: "acme/vision-1" },
@@ -245,14 +245,14 @@ describe("image tool implicit imageModel config", () => {
     });
   });
 
-  it("allows workspace images via createOpenClawCodingTools default workspace root", async () => {
+  it("allows workspace images via createBotCodingTools default workspace root", async () => {
     await withTempWorkspacePng(async ({ imagePath }) => {
       const fetch = stubMinimaxOkFetch();
       const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-image-"));
       try {
         const cfg = createMinimaxImageConfig();
 
-        const tools = createOpenClawCodingTools({ config: cfg, agentDir });
+        const tools = createBotCodingTools({ config: cfg, agentDir });
         const tool = tools.find((candidate) => candidate.name === "image");
         expect(tool).not.toBeNull();
         if (!tool) {
@@ -278,7 +278,7 @@ describe("image tool implicit imageModel config", () => {
     const sandbox = { root: sandboxRoot, bridge: createHostSandboxFsBridge(sandboxRoot) };
 
     vi.stubEnv("OPENAI_API_KEY", "openai-test");
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { defaults: { model: { primary: "minimax/MiniMax-M2.1" } } },
     };
     const tool = createImageTool({ config: cfg, agentDir, sandbox });
@@ -325,7 +325,7 @@ describe("image tool implicit imageModel config", () => {
     global.fetch = fetch;
     vi.stubEnv("MINIMAX_API_KEY", "minimax-test");
 
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           model: { primary: "minimax/MiniMax-M2.1" },
@@ -401,7 +401,7 @@ describe("image tool MiniMax VLM routing", () => {
 
     const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-minimax-vlm-"));
     vi.stubEnv("MINIMAX_API_KEY", "minimax-test");
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { defaults: { model: { primary: "minimax/MiniMax-M2.1" } } },
     };
     const tool = createImageTool({ config: cfg, agentDir });

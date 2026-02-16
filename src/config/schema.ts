@@ -326,7 +326,7 @@ function buildBaseConfigSchema(): ConfigSchemaResponse {
     target: "draft-07",
     unrepresentable: "any",
   });
-  schema.title = "OpenClawConfig";
+  schema.title = "BotConfig";
   const hints = mapSensitivePaths(OpenClawSchema, "", buildBaseHints());
   const next = {
     schema: stripChannelSchema(schema),

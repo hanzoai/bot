@@ -7,7 +7,7 @@ import type {
 import {
   assertGatewayAuthConfigured,
   type ResolvedGatewayAuth,
-  resolveGatewayAuthAsync,
+  resolveGatewayAuth,
 } from "./auth.js";
 import { normalizeControlUiBasePath } from "./control-ui-shared.js";
 import { resolveHooksConfig } from "./hooks.js";
@@ -70,7 +70,7 @@ export async function resolveGatewayRuntimeConfig(params: {
     ...tailscaleOverrides,
   };
   const tailscaleMode = tailscaleConfig.mode ?? "off";
-  const resolvedAuth = await resolveGatewayAuthAsync({
+  const resolvedAuth = resolveGatewayAuth({
     authConfig,
     env: process.env,
     tailscaleMode,

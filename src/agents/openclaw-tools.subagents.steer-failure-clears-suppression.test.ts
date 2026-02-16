@@ -8,7 +8,7 @@ import {
 } from "./openclaw-tools.subagents.test-harness.js";
 import "./test-helpers/fast-core-tools.js";
 
-let createOpenClawTools: (typeof import("./openclaw-tools.js"))["createOpenClawTools"];
+let createBotTools: (typeof import("./openclaw-tools.js"))["createBotTools"];
 let addSubagentRunForTests: (typeof import("./subagent-registry.js"))["addSubagentRunForTests"];
 let listSubagentRunsForRequester: (typeof import("./subagent-registry.js"))["listSubagentRunsForRequester"];
 let resetSubagentRegistryForTests: (typeof import("./subagent-registry.js"))["resetSubagentRegistryForTests"];
@@ -16,7 +16,7 @@ let resetSubagentRegistryForTests: (typeof import("./subagent-registry.js"))["re
 describe("openclaw-tools: subagents steer failure", () => {
   beforeEach(async () => {
     vi.resetModules();
-    ({ createOpenClawTools } = await import("./openclaw-tools.js"));
+    ({ createBotTools } = await import("./openclaw-tools.js"));
     ({ addSubagentRunForTests, listSubagentRunsForRequester, resetSubagentRegistryForTests } =
       await import("./subagent-registry.js"));
     resetSubagentRegistryForTests();
@@ -58,7 +58,7 @@ describe("openclaw-tools: subagents steer failure", () => {
       return {};
     });
 
-    const tool = createOpenClawTools({
+    const tool = createBotTools({
       agentSessionKey: "agent:main:main",
       agentChannel: "discord",
     }).find((candidate) => candidate.name === "subagents");

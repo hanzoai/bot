@@ -31,7 +31,7 @@ export function collectConfigEnvVars(cfg?: BotConfig): Record<string, string> {
 }
 
 export function applyConfigEnvVars(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): void {
   const entries = collectConfigEnvVars(cfg);

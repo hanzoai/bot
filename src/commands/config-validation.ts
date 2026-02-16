@@ -1,10 +1,10 @@
 import type { RuntimeEnv } from "../runtime.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import { type OpenClawConfig, readConfigFileSnapshot } from "../config/config.js";
+import { type BotConfig, readConfigFileSnapshot } from "../config/config.js";
 
 export async function requireValidConfigSnapshot(
   runtime: RuntimeEnv,
-): Promise<OpenClawConfig | null> {
+): Promise<BotConfig | null> {
   const snapshot = await readConfigFileSnapshot();
   if (snapshot.exists && !snapshot.valid) {
     const issues =

@@ -48,7 +48,7 @@ describe("registerTelegramNativeCommands (plugin auth)", () => {
 
     registerTelegramNativeCommands({
       bot: bot as unknown as Parameters<typeof registerTelegramNativeCommands>[0]["bot"],
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       runtime: { log } as RuntimeEnv,
       accountId: "default",
       telegramCfg: {} as TelegramAccountConfig,

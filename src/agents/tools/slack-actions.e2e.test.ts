@@ -434,7 +434,7 @@ describe("handleSlackAction", () => {
   });
 
   it("returns all emojis when no limit is provided", async () => {
-    const cfg = { channels: { slack: { botToken: "tok" } } } as OpenClawConfig;
+    const cfg = { channels: { slack: { botToken: "tok" } } } as BotConfig;
     const emojiMap = { wave: "url1", smile: "url2", heart: "url3" };
     listSlackEmojis.mockResolvedValueOnce({ ok: true, emoji: emojiMap });
     const result = await handleSlackAction({ action: "emojiList" }, cfg);
@@ -444,7 +444,7 @@ describe("handleSlackAction", () => {
   });
 
   it("applies limit to emoji-list results", async () => {
-    const cfg = { channels: { slack: { botToken: "tok" } } } as OpenClawConfig;
+    const cfg = { channels: { slack: { botToken: "tok" } } } as BotConfig;
     const emojiMap = { wave: "url1", smile: "url2", heart: "url3", fire: "url4", star: "url5" };
     listSlackEmojis.mockResolvedValueOnce({ ok: true, emoji: emojiMap });
     const result = await handleSlackAction({ action: "emojiList", limit: 2 }, cfg);
