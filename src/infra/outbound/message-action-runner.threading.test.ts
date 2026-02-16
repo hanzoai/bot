@@ -50,7 +50,7 @@ const telegramConfig = {
 } as BotConfig;
 
 async function runThreadingAction(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   actionParams: Record<string, unknown>;
   toolContext?: Record<string, unknown>;
 }) {

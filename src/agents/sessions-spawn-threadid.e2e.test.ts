@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { createOpenClawTools } from "./openclaw-tools.js";
+import { createBotTools } from "./openclaw-tools.js";
 import "./test-helpers/fast-core-tools.js";
 import {
   callGatewayMock,
@@ -35,7 +35,7 @@ describe("sessions_spawn requesterOrigin threading", () => {
   });
 
   it("captures threadId in requesterOrigin", async () => {
-    const tool = createOpenClawTools({
+    const tool = createBotTools({
       agentSessionKey: "main",
       agentChannel: "telegram",
       agentTo: "telegram:123",
@@ -60,7 +60,7 @@ describe("sessions_spawn requesterOrigin threading", () => {
   });
 
   it("stores requesterOrigin without threadId when none is provided", async () => {
-    const tool = createOpenClawTools({
+    const tool = createBotTools({
       agentSessionKey: "main",
       agentChannel: "telegram",
       agentTo: "telegram:123",

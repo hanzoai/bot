@@ -30,7 +30,7 @@ export function collectWorkspaceDirs(cfg: BotConfig | undefined): string[] {
 }
 
 export function buildCleanupPlan(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   stateDir: string;
   configPath: string;
   oauthDir: string;
