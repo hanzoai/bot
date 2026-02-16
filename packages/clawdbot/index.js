@@ -1,1 +1,1 @@
-export * from "hanzo-bot";
+export * from "@hanzo/bot";
