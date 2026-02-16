@@ -27,8 +27,8 @@ apps/android/.cxx/
 *.bun-build
 apps/macos/.build/
 apps/shared/MoltbotKit/.build/
-apps/shared/OpenClawKit/.build/
-apps/shared/OpenClawKit/Package.resolved
+apps/shared/BotKit/.build/
+apps/shared/BotKit/Package.resolved
 **/ModuleCache/
 bin/
 bin/hanzo-bot-mac

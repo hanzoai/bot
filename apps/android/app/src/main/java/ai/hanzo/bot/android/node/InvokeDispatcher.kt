@@ -1,12 +1,12 @@
-package ai.openclaw.android.node
+package ai.bot.android.node
 
-import ai.openclaw.android.gateway.GatewaySession
-import ai.openclaw.android.protocol.OpenClawCanvasA2UICommand
-import ai.openclaw.android.protocol.OpenClawCanvasCommand
-import ai.openclaw.android.protocol.OpenClawCameraCommand
-import ai.openclaw.android.protocol.OpenClawLocationCommand
-import ai.openclaw.android.protocol.OpenClawScreenCommand
-import ai.openclaw.android.protocol.OpenClawSmsCommand
+import ai.bot.android.gateway.GatewaySession
+import ai.bot.android.protocol.BotCanvasA2UICommand
+import ai.bot.android.protocol.BotCanvasCommand
+import ai.bot.android.protocol.BotCameraCommand
+import ai.bot.android.protocol.BotLocationCommand
+import ai.bot.android.protocol.BotScreenCommand
+import ai.bot.android.protocol.BotSmsCommand
 
 class InvokeDispatcher(
   private val canvas: CanvasController,
@@ -24,10 +24,10 @@ class InvokeDispatcher(
   suspend fun handleInvoke(command: String, paramsJson: String?): GatewaySession.InvokeResult {
     // Check foreground requirement for canvas/camera/screen commands
     if (
-      command.startsWith(OpenClawCanvasCommand.NamespacePrefix) ||
-        command.startsWith(OpenClawCanvasA2UICommand.NamespacePrefix) ||
-        command.startsWith(OpenClawCameraCommand.NamespacePrefix) ||
-        command.startsWith(OpenClawScreenCommand.NamespacePrefix)
+      command.startsWith(BotCanvasCommand.NamespacePrefix) ||
+        command.startsWith(BotCanvasA2UICommand.NamespacePrefix) ||
+        command.startsWith(BotCameraCommand.NamespacePrefix) ||
+        command.startsWith(BotScreenCommand.NamespacePrefix)
     ) {
       if (!isForeground()) {
         return GatewaySession.InvokeResult.error(
@@ -38,7 +38,7 @@ class InvokeDispatcher(
     }
 
     // Check camera enabled
-    if (command.startsWith(OpenClawCameraCommand.NamespacePrefix) && !cameraEnabled()) {
+    if (command.startsWith(BotCameraCommand.NamespacePrefix) && !cameraEnabled()) {
       return GatewaySession.InvokeResult.error(
         code = "CAMERA_DISABLED",
         message = "CAMERA_DISABLED: enable Camera in Settings",
@@ -46,7 +46,7 @@ class InvokeDispatcher(
     }
 
     // Check location enabled
-    if (command.startsWith(OpenClawLocationCommand.NamespacePrefix) && !locationEnabled()) {
+    if (command.startsWith(BotLocationCommand.NamespacePrefix) && !locationEnabled()) {
       return GatewaySession.InvokeResult.error(
         code = "LOCATION_DISABLED",
         message = "LOCATION_DISABLED: enable Location in Settings",
@@ -55,18 +55,18 @@ class InvokeDispatcher(
 
     return when (command) {
       // Canvas commands
-      OpenClawCanvasCommand.Present.rawValue -> {
+      BotCanvasCommand.Present.rawValue -> {
         val url = CanvasController.parseNavigateUrl(paramsJson)
         canvas.navigate(url)
         GatewaySession.InvokeResult.ok(null)
       }
-      OpenClawCanvasCommand.Hide.rawValue -> GatewaySession.InvokeResult.ok(null)
-      OpenClawCanvasCommand.Navigate.rawValue -> {
+      BotCanvasCommand.Hide.rawValue -> GatewaySession.InvokeResult.ok(null)
+      BotCanvasCommand.Navigate.rawValue -> {
         val url = CanvasController.parseNavigateUrl(paramsJson)
         canvas.navigate(url)
         GatewaySession.InvokeResult.ok(null)
       }
-      OpenClawCanvasCommand.Eval.rawValue -> {
+      BotCanvasCommand.Eval.rawValue -> {
         val js =
           CanvasController.parseEvalJs(paramsJson)
             ?: return GatewaySession.InvokeResult.error(
@@ -84,7 +84,7 @@ class InvokeDispatcher(
           }
         GatewaySession.InvokeResult.ok("""{"result":${result.toJsonString()}}""")
       }
-      OpenClawCanvasCommand.Snapshot.rawValue -> {
+      BotCanvasCommand.Snapshot.rawValue -> {
         val snapshotParams = CanvasController.parseSnapshotParams(paramsJson)
         val base64 =
           try {
@@ -103,7 +103,7 @@ class InvokeDispatcher(
       }
 
       // A2UI commands
-      OpenClawCanvasA2UICommand.Reset.rawValue -> {
+      BotCanvasA2UICommand.Reset.rawValue -> {
         val a2uiUrl = a2uiHandler.resolveA2uiHostUrl()
           ?: return GatewaySession.InvokeResult.error(
             code = "A2UI_HOST_NOT_CONFIGURED",
@@ -119,7 +119,7 @@ class InvokeDispatcher(
         val res = canvas.eval(A2UIHandler.a2uiResetJS)
         GatewaySession.InvokeResult.ok(res)
       }
-      OpenClawCanvasA2UICommand.Push.rawValue, OpenClawCanvasA2UICommand.PushJSONL.rawValue -> {
+      BotCanvasA2UICommand.Push.rawValue, BotCanvasA2UICommand.PushJSONL.rawValue -> {
         val messages =
           try {
             a2uiHandler.decodeA2uiMessages(command, paramsJson)
@@ -147,17 +147,17 @@ class InvokeDispatcher(
       }
 
       // Camera commands
-      OpenClawCameraCommand.Snap.rawValue -> cameraHandler.handleSnap(paramsJson)
-      OpenClawCameraCommand.Clip.rawValue -> cameraHandler.handleClip(paramsJson)
+      BotCameraCommand.Snap.rawValue -> cameraHandler.handleSnap(paramsJson)
+      BotCameraCommand.Clip.rawValue -> cameraHandler.handleClip(paramsJson)
 
       // Location command
-      OpenClawLocationCommand.Get.rawValue -> locationHandler.handleLocationGet(paramsJson)
+      BotLocationCommand.Get.rawValue -> locationHandler.handleLocationGet(paramsJson)
 
       // Screen command
-      OpenClawScreenCommand.Record.rawValue -> screenHandler.handleScreenRecord(paramsJson)
+      BotScreenCommand.Record.rawValue -> screenHandler.handleScreenRecord(paramsJson)
 
       // SMS command
-      OpenClawSmsCommand.Send.rawValue -> smsHandler.handleSmsSend(paramsJson)
+      BotSmsCommand.Send.rawValue -> smsHandler.handleSmsSend(paramsJson)
 
       // Debug commands
       "debug.ed25519" -> debugHandler.handleEd25519()

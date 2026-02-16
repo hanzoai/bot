@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
 import Observation
-import OpenClawDiscovery
+import BotDiscovery
 import os
 
 /// Manages Tailscale integration and status checking.
