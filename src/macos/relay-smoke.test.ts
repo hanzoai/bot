@@ -27,8 +27,8 @@ describe("parseRelaySmokeTest", () => {
   });
 
   it("parses env var smoke mode only when no args", () => {
-    expect(parseRelaySmokeTest([], { OPENCLAW_SMOKE_QR: "1" })).toBe("qr");
-    expect(parseRelaySmokeTest(["send"], { OPENCLAW_SMOKE_QR: "1" })).toBe(null);
+    expect(parseRelaySmokeTest([], { BOT_SMOKE_QR: "1" })).toBe("qr");
+    expect(parseRelaySmokeTest(["send"], { BOT_SMOKE_QR: "1" })).toBe(null);
   });
 
   it("supports OPENCLAW_SMOKE=qr only when no args", () => {

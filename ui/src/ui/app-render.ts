@@ -124,11 +124,18 @@ export function renderApp(state: AppViewState) {
           </button>
           <div class="brand">
             <div class="brand-logo">
-              <img src=${basePath ? `${basePath}/favicon.svg` : "/favicon.svg"} alt="OpenClaw" />
+              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg" class="brand-h">
+                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#ffffff"/>
+                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#ffffff"/>
+                <path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z" fill="#ffffff"/>
+                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#ffffff"/>
+                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#ffffff"/>
+                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#ffffff"/>
+                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#ffffff"/>
+              </svg>
             </div>
             <div class="brand-text">
-              <div class="brand-title">OPENCLAW</div>
-              <div class="brand-sub">Gateway Dashboard</div>
+              <div class="brand-title">Hanzo Bot</div>
             </div>
           </div>
         </div>
@@ -175,7 +182,7 @@ export function renderApp(state: AppViewState) {
           <div class="nav-group__items">
             <a
               class="nav-item nav-item--external"
-              href="https://docs.openclaw.ai"
+              href="https://docs.hanzo.bot"
               target="_blank"
               rel="noreferrer"
               title="Docs (opens in new tab)"

@@ -31,7 +31,7 @@ apps/shared/OpenClawKit/.build/
 apps/shared/OpenClawKit/Package.resolved
 **/ModuleCache/
 bin/
-bin/clawdbot-mac
+bin/hanzo-bot-mac
 bin/docs-list
 apps/macos/.build-local/
 apps/macos/.swiftpm/
@@ -41,8 +41,8 @@ apps/ios/*.xcodeproj/
 apps/ios/*.xcworkspace/
 apps/ios/.swiftpm/
 vendor/
-apps/ios/Clawdbot.xcodeproj/
-apps/ios/Clawdbot.xcodeproj/**
+apps/ios/HanzoBot.xcodeproj/
+apps/ios/HanzoBot.xcodeproj/**
 apps/macos/.build/**
 **/*.bun-build
 apps/ios/*.xcfilelist
