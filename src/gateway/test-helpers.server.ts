@@ -89,34 +89,34 @@ export async function writeSessionStore(params: {
 async function setupGatewayTestHome() {
   previousHome = process.env.HOME;
   previousUserProfile = process.env.USERPROFILE;
-  previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
-  previousSkipBrowserControl = process.env.OPENCLAW_SKIP_BROWSER_CONTROL_SERVER;
-  previousSkipGmailWatcher = process.env.OPENCLAW_SKIP_GMAIL_WATCHER;
-  previousSkipCanvasHost = process.env.OPENCLAW_SKIP_CANVAS_HOST;
-  previousBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-  previousSkipChannels = process.env.OPENCLAW_SKIP_CHANNELS;
-  previousSkipProviders = process.env.OPENCLAW_SKIP_PROVIDERS;
-  previousSkipCron = process.env.OPENCLAW_SKIP_CRON;
-  previousMinimalGateway = process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
-  tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gateway-home-"));
+  previousStateDir = process.env.BOT_STATE_DIR;
+  previousConfigPath = process.env.BOT_CONFIG_PATH;
+  previousSkipBrowserControl = process.env.BOT_SKIP_BROWSER_CONTROL_SERVER;
+  previousSkipGmailWatcher = process.env.BOT_SKIP_GMAIL_WATCHER;
+  previousSkipCanvasHost = process.env.BOT_SKIP_CANVAS_HOST;
+  previousBundledPluginsDir = process.env.BOT_BUNDLED_PLUGINS_DIR;
+  previousSkipChannels = process.env.BOT_SKIP_CHANNELS;
+  previousSkipProviders = process.env.BOT_SKIP_PROVIDERS;
+  previousSkipCron = process.env.BOT_SKIP_CRON;
+  previousMinimalGateway = process.env.BOT_TEST_MINIMAL_GATEWAY;
+  tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gateway-home-"));
   process.env.HOME = tempHome;
   process.env.USERPROFILE = tempHome;
-  process.env.OPENCLAW_STATE_DIR = path.join(tempHome, ".openclaw");
-  delete process.env.OPENCLAW_CONFIG_PATH;
+  process.env.BOT_STATE_DIR = path.join(tempHome, ".bot");
+  delete process.env.BOT_CONFIG_PATH;
 }
 
 function applyGatewaySkipEnv() {
-  process.env.OPENCLAW_SKIP_BROWSER_CONTROL_SERVER = "1";
-  process.env.OPENCLAW_SKIP_GMAIL_WATCHER = "1";
-  process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
-  process.env.OPENCLAW_SKIP_CHANNELS = "1";
-  process.env.OPENCLAW_SKIP_PROVIDERS = "1";
-  process.env.OPENCLAW_SKIP_CRON = "1";
-  process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = "1";
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = tempHome
-    ? path.join(tempHome, "openclaw-test-no-bundled-extensions")
-    : "openclaw-test-no-bundled-extensions";
+  process.env.BOT_SKIP_BROWSER_CONTROL_SERVER = "1";
+  process.env.BOT_SKIP_GMAIL_WATCHER = "1";
+  process.env.BOT_SKIP_CANVAS_HOST = "1";
+  process.env.BOT_SKIP_CHANNELS = "1";
+  process.env.BOT_SKIP_PROVIDERS = "1";
+  process.env.BOT_SKIP_CRON = "1";
+  process.env.BOT_TEST_MINIMAL_GATEWAY = "1";
+  process.env.BOT_BUNDLED_PLUGINS_DIR = tempHome
+    ? path.join(tempHome, "bot-test-no-bundled-extensions")
+    : "bot-test-no-bundled-extensions";
 }
 
 async function resetGatewayTestState(options: { uniqueConfigRoot: boolean }) {
@@ -128,9 +128,9 @@ async function resetGatewayTestState(options: { uniqueConfigRoot: boolean }) {
   }
   applyGatewaySkipEnv();
   if (options.uniqueConfigRoot) {
-    tempConfigRoot = await fs.mkdtemp(path.join(tempHome, "openclaw-test-"));
+    tempConfigRoot = await fs.mkdtemp(path.join(tempHome, "bot-test-"));
   } else {
-    tempConfigRoot = path.join(tempHome, ".openclaw-test");
+    tempConfigRoot = path.join(tempHome, ".bot-test");
     await fs.rm(tempConfigRoot, { recursive: true, force: true });
     await fs.mkdir(tempConfigRoot, { recursive: true });
   }
@@ -187,54 +187,54 @@ async function cleanupGatewayTestHome(options: { restoreEnv: boolean }) {
       process.env.USERPROFILE = previousUserProfile;
     }
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.BOT_STATE_DIR = previousStateDir;
     }
     if (previousConfigPath === undefined) {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_CONFIG_PATH;
     } else {
-      process.env.OPENCLAW_CONFIG_PATH = previousConfigPath;
+      process.env.BOT_CONFIG_PATH = previousConfigPath;
     }
     if (previousSkipBrowserControl === undefined) {
-      delete process.env.OPENCLAW_SKIP_BROWSER_CONTROL_SERVER;
+      delete process.env.BOT_SKIP_BROWSER_CONTROL_SERVER;
     } else {
-      process.env.OPENCLAW_SKIP_BROWSER_CONTROL_SERVER = previousSkipBrowserControl;
+      process.env.BOT_SKIP_BROWSER_CONTROL_SERVER = previousSkipBrowserControl;
     }
     if (previousSkipGmailWatcher === undefined) {
-      delete process.env.OPENCLAW_SKIP_GMAIL_WATCHER;
+      delete process.env.BOT_SKIP_GMAIL_WATCHER;
     } else {
-      process.env.OPENCLAW_SKIP_GMAIL_WATCHER = previousSkipGmailWatcher;
+      process.env.BOT_SKIP_GMAIL_WATCHER = previousSkipGmailWatcher;
     }
     if (previousSkipCanvasHost === undefined) {
-      delete process.env.OPENCLAW_SKIP_CANVAS_HOST;
+      delete process.env.BOT_SKIP_CANVAS_HOST;
     } else {
-      process.env.OPENCLAW_SKIP_CANVAS_HOST = previousSkipCanvasHost;
+      process.env.BOT_SKIP_CANVAS_HOST = previousSkipCanvasHost;
     }
     if (previousBundledPluginsDir === undefined) {
-      delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+      delete process.env.BOT_BUNDLED_PLUGINS_DIR;
     } else {
-      process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = previousBundledPluginsDir;
+      process.env.BOT_BUNDLED_PLUGINS_DIR = previousBundledPluginsDir;
     }
     if (previousSkipChannels === undefined) {
-      delete process.env.OPENCLAW_SKIP_CHANNELS;
+      delete process.env.BOT_SKIP_CHANNELS;
     } else {
-      process.env.OPENCLAW_SKIP_CHANNELS = previousSkipChannels;
+      process.env.BOT_SKIP_CHANNELS = previousSkipChannels;
     }
     if (previousSkipProviders === undefined) {
-      delete process.env.OPENCLAW_SKIP_PROVIDERS;
+      delete process.env.BOT_SKIP_PROVIDERS;
     } else {
-      process.env.OPENCLAW_SKIP_PROVIDERS = previousSkipProviders;
+      process.env.BOT_SKIP_PROVIDERS = previousSkipProviders;
     }
     if (previousSkipCron === undefined) {
-      delete process.env.OPENCLAW_SKIP_CRON;
+      delete process.env.BOT_SKIP_CRON;
     } else {
-      process.env.OPENCLAW_SKIP_CRON = previousSkipCron;
+      process.env.BOT_SKIP_CRON = previousSkipCron;
     }
     if (previousMinimalGateway === undefined) {
-      delete process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
+      delete process.env.BOT_TEST_MINIMAL_GATEWAY;
     } else {
-      process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = previousMinimalGateway;
+      process.env.BOT_TEST_MINIMAL_GATEWAY = previousMinimalGateway;
     }
   }
   if (options.restoreEnv && tempHome) {
@@ -375,8 +375,8 @@ export async function startServerWithClient(
 ) {
   const { wsHeaders, ...gatewayOpts } = opts ?? {};
   let port = await getFreePort();
-  const envSnapshot = captureEnv(["OPENCLAW_GATEWAY_TOKEN"]);
-  const prev = process.env.OPENCLAW_GATEWAY_TOKEN;
+  const envSnapshot = captureEnv(["BOT_GATEWAY_TOKEN"]);
+  const prev = process.env.BOT_GATEWAY_TOKEN;
   if (typeof token === "string") {
     testState.gatewayAuth = { mode: "token", token };
   }
@@ -386,9 +386,9 @@ export async function startServerWithClient(
       ? (testState.gatewayAuth as { token?: string }).token
       : undefined);
   if (fallbackToken === undefined) {
-    delete process.env.OPENCLAW_GATEWAY_TOKEN;
+    delete process.env.BOT_GATEWAY_TOKEN;
   } else {
-    process.env.OPENCLAW_GATEWAY_TOKEN = fallbackToken;
+    process.env.BOT_GATEWAY_TOKEN = fallbackToken;
   }
 
   const started = await startGatewayServerWithRetries({ port, opts: gatewayOpts });
@@ -480,13 +480,13 @@ export async function connectReq(
       ? undefined
       : typeof (testState.gatewayAuth as { token?: unknown } | undefined)?.token === "string"
         ? ((testState.gatewayAuth as { token?: string }).token ?? undefined)
-        : process.env.OPENCLAW_GATEWAY_TOKEN;
+        : process.env.BOT_GATEWAY_TOKEN;
   const defaultPassword =
     opts?.skipDefaultAuth === true
       ? undefined
       : typeof (testState.gatewayAuth as { password?: unknown } | undefined)?.password === "string"
         ? ((testState.gatewayAuth as { password?: string }).password ?? undefined)
-        : process.env.OPENCLAW_GATEWAY_PASSWORD;
+        : process.env.BOT_GATEWAY_PASSWORD;
   const token = opts?.token ?? defaultToken;
   const password = opts?.password ?? defaultPassword;
   const requestedScopes = Array.isArray(opts?.scopes)

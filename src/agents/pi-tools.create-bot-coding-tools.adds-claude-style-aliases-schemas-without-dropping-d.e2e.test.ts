@@ -14,7 +14,7 @@ describe("createBotCodingTools", () => {
     const readTool = defaultTools.find((tool) => tool.name === "read");
     expect(readTool).toBeDefined();
 
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-read-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-read-"));
     try {
       const imagePath = path.join(tmpDir, "sample.png");
       const png = await sharp({
@@ -51,10 +51,10 @@ describe("createBotCodingTools", () => {
     const readTool = tools.find((tool) => tool.name === "read");
     expect(readTool).toBeDefined();
 
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-read-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-read-"));
     try {
       const textPath = path.join(tmpDir, "sample.txt");
-      const contents = "Hello from openclaw read tool.";
+      const contents = "Hello from bot read tool.";
       await fs.writeFile(textPath, contents, "utf8");
 
       const result = await readTool?.execute("tool-2", {
@@ -80,12 +80,12 @@ describe("createBotCodingTools", () => {
       workspaceDir: sandboxDir,
       agentWorkspaceDir: path.join(os.tmpdir(), "moltbot-workspace"),
       workspaceAccess: "none",
-      containerName: "openclaw-sbx-test",
+      containerName: "bot-sbx-test",
       containerWorkdir: "/workspace",
       fsBridge: createHostSandboxFsBridge(sandboxDir),
       docker: {
-        image: "openclaw-sandbox:bookworm-slim",
-        containerPrefix: "openclaw-sbx-",
+        image: "bot-sandbox:bookworm-slim",
+        containerPrefix: "bot-sbx-",
         workdir: "/workspace",
         readOnlyRoot: true,
         tmpfs: [],
@@ -113,12 +113,12 @@ describe("createBotCodingTools", () => {
       workspaceDir: sandboxDir,
       agentWorkspaceDir: path.join(os.tmpdir(), "moltbot-workspace"),
       workspaceAccess: "ro",
-      containerName: "openclaw-sbx-test",
+      containerName: "bot-sbx-test",
       containerWorkdir: "/workspace",
       fsBridge: createHostSandboxFsBridge(sandboxDir),
       docker: {
-        image: "openclaw-sandbox:bookworm-slim",
-        containerPrefix: "openclaw-sbx-",
+        image: "bot-sandbox:bookworm-slim",
+        containerPrefix: "bot-sbx-",
         workdir: "/workspace",
         readOnlyRoot: true,
         tmpfs: [],

@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { createBotTools } from "./openclaw-tools.js";
+import { createBotTools } from "./bot-tools.js";
 import "./test-helpers/fast-core-tools.js";
-import {
-  callGatewayMock,
-  setSubagentsConfigOverride,
-} from "./openclaw-tools.subagents.test-harness.js";
+import { callGatewayMock, setSubagentsConfigOverride } from "./bot-tools.subagents.test-harness.js";
 import {
   listSubagentRunsForRequester,
   resetSubagentRegistryForTests,

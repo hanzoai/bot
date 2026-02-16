@@ -66,7 +66,7 @@ describe("runCronIsolatedAgentTurn", () => {
       vi.mocked(runSubagentAnnounceFlow).mockClear();
       vi.mocked(deps.sendMessageTelegram).mockClear();
       vi.mocked(runEmbeddedPiAgent).mockResolvedValue({
-        payloads: [{ text: "HEARTBEAT_OK 🦞" }],
+        payloads: [{ text: "HEARTBEAT_OK B" }],
         meta: {
           durationMs: 5,
           agentMeta: { sessionId: "s", provider: "p", model: "m" },

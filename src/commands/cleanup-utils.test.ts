@@ -9,24 +9,21 @@ describe("buildCleanupPlan", () => {
     const tmpRoot = path.join(path.parse(process.cwd()).root, "tmp");
     const cfg = {
       agents: {
-        defaults: { workspace: path.join(tmpRoot, "openclaw-workspace-1") },
-        list: [{ workspace: path.join(tmpRoot, "openclaw-workspace-2") }],
+        defaults: { workspace: path.join(tmpRoot, "bot-workspace-1") },
+        list: [{ workspace: path.join(tmpRoot, "bot-workspace-2") }],
       },
     };
     const plan = buildCleanupPlan({
       cfg: cfg as unknown as BotConfig,
-      stateDir: path.join(tmpRoot, "openclaw-state"),
-      configPath: path.join(tmpRoot, "openclaw-state", "openclaw.json"),
-      oauthDir: path.join(tmpRoot, "openclaw-oauth"),
+      stateDir: path.join(tmpRoot, "bot-state"),
+      configPath: path.join(tmpRoot, "bot-state", "bot.json"),
+      oauthDir: path.join(tmpRoot, "bot-oauth"),
     });
 
     expect(plan.configInsideState).toBe(true);
     expect(plan.oauthInsideState).toBe(false);
     expect(new Set(plan.workspaceDirs)).toEqual(
-      new Set([
-        path.join(tmpRoot, "openclaw-workspace-1"),
-        path.join(tmpRoot, "openclaw-workspace-2"),
-      ]),
+      new Set([path.join(tmpRoot, "bot-workspace-1"), path.join(tmpRoot, "bot-workspace-2")]),
     );
   });
 });

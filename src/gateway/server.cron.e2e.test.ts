@@ -424,9 +424,9 @@ describe("gateway server cron", () => {
   }, 45_000);
 
   test("posts webhooks for delivery mode and legacy notify fallback only when summary exists", async () => {
-    const prevSkipCron = process.env.OPENCLAW_SKIP_CRON;
-    process.env.OPENCLAW_SKIP_CRON = "0";
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-cron-webhook-"));
+    const prevSkipCron = process.env.BOT_SKIP_CRON;
+    process.env.BOT_SKIP_CRON = "0";
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gw-cron-webhook-"));
     testState.cronStorePath = path.join(dir, "cron", "jobs.json");
     testState.cronEnabled = false;
     await fs.mkdir(path.dirname(testState.cronStorePath), { recursive: true });
@@ -449,7 +449,7 @@ describe("gateway server cron", () => {
       JSON.stringify({ version: 1, jobs: [legacyNotifyJob] }),
     );
 
-    const configPath = process.env.OPENCLAW_CONFIG_PATH;
+    const configPath = process.env.BOT_CONFIG_PATH;
     expect(typeof configPath).toBe("string");
     await fs.mkdir(path.dirname(configPath as string), { recursive: true });
     await fs.writeFile(
@@ -594,9 +594,9 @@ describe("gateway server cron", () => {
       testState.cronStorePath = undefined;
       testState.cronEnabled = undefined;
       if (prevSkipCron === undefined) {
-        delete process.env.OPENCLAW_SKIP_CRON;
+        delete process.env.BOT_SKIP_CRON;
       } else {
-        process.env.OPENCLAW_SKIP_CRON = prevSkipCron;
+        process.env.BOT_SKIP_CRON = prevSkipCron;
       }
     }
   }, 60_000);

@@ -216,12 +216,12 @@ extension TestChatTransportState {
     }
 
     @Test func acceptsCanonicalSessionKeyEventsForOwnPendingRun() async throws {
-        let history1 = OpenClawChatHistoryPayload(
+        let history1 = BotChatHistoryPayload(
             sessionKey: "main",
             sessionId: "sess-main",
             messages: [],
             thinkingLevel: "off")
-        let history2 = OpenClawChatHistoryPayload(
+        let history2 = BotChatHistoryPayload(
             sessionKey: "main",
             sessionId: "sess-main",
             messages: [
@@ -234,7 +234,7 @@ extension TestChatTransportState {
             thinkingLevel: "off")
 
         let transport = TestChatTransport(historyResponses: [history1, history2])
-        let vm = await MainActor.run { OpenClawChatViewModel(sessionKey: "main", transport: transport) }
+        let vm = await MainActor.run { BotChatViewModel(sessionKey: "main", transport: transport) }
 
         await MainActor.run { vm.load() }
         try await waitUntil("bootstrap") { await MainActor.run { vm.healthOK } }
@@ -248,7 +248,7 @@ extension TestChatTransportState {
         let runId = try #require(await transport.lastSentRunId())
         transport.emit(
             .chat(
-                OpenClawChatEventPayload(
+                BotChatEventPayload(
                     runId: runId,
                     sessionKey: "agent:main:main",
                     state: "final",
@@ -263,7 +263,7 @@ extension TestChatTransportState {
 
     @Test func preservesMessageIDsAcrossHistoryRefreshes() async throws {
         let now = Date().timeIntervalSince1970 * 1000
-        let history1 = OpenClawChatHistoryPayload(
+        let history1 = BotChatHistoryPayload(
             sessionKey: "main",
             sessionId: "sess-main",
             messages: [
@@ -274,7 +274,7 @@ extension TestChatTransportState {
                 ]),
             ],
             thinkingLevel: "off")
-        let history2 = OpenClawChatHistoryPayload(
+        let history2 = BotChatHistoryPayload(
             sessionKey: "main",
             sessionId: "sess-main",
             messages: [
@@ -292,7 +292,7 @@ extension TestChatTransportState {
             thinkingLevel: "off")
 
         let transport = TestChatTransport(historyResponses: [history1, history2])
-        let vm = await MainActor.run { OpenClawChatViewModel(sessionKey: "main", transport: transport) }
+        let vm = await MainActor.run { BotChatViewModel(sessionKey: "main", transport: transport) }
 
         await MainActor.run { vm.load() }
         try await waitUntil("bootstrap") { await MainActor.run { vm.messages.count == 1 } }
@@ -300,7 +300,7 @@ extension TestChatTransportState {
 
         transport.emit(
             .chat(
-                OpenClawChatEventPayload(
+                BotChatEventPayload(
                     runId: "other-run",
                     sessionKey: "main",
                     state: "final",

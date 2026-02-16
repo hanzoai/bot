@@ -54,7 +54,7 @@ export const ensureAuthProfileStore = vi
   .mockReturnValue({ version: 1, profiles: {} }) as unknown as MockFn;
 
 export const legacyReadConfigFileSnapshot = vi.fn().mockResolvedValue({
-  path: "/tmp/openclaw.json",
+  path: "/tmp/bot.json",
   exists: false,
   raw: null,
   parsed: {},
@@ -130,7 +130,7 @@ export const runLegacyStateMigrations = vi.fn().mockResolvedValue({
 }) as unknown as MockFn;
 
 const DEFAULT_CONFIG_SNAPSHOT = {
-  path: "/tmp/openclaw.json",
+  path: "/tmp/bot.json",
   exists: true,
   raw: "{}",
   parsed: {},
@@ -160,7 +160,7 @@ vi.mock("../config/config.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../config/config.js")>();
   return {
     ...actual,
-    CONFIG_PATH: "/tmp/openclaw.json",
+    CONFIG_PATH: "/tmp/bot.json",
     createConfigIO,
     readConfigFileSnapshot,
     writeConfigFile,
@@ -373,7 +373,7 @@ beforeEach(() => {
     durationMs: 0,
   });
   legacyReadConfigFileSnapshot.mockReset().mockResolvedValue({
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     exists: false,
     raw: null,
     parsed: {},
@@ -414,11 +414,11 @@ beforeEach(() => {
 
   originalIsTTY = process.stdin.isTTY;
   setStdinTty(true);
-  originalStateDir = process.env.OPENCLAW_STATE_DIR;
-  originalUpdateInProgress = process.env.OPENCLAW_UPDATE_IN_PROGRESS;
-  process.env.OPENCLAW_UPDATE_IN_PROGRESS = "1";
-  tempStateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-state-"));
-  process.env.OPENCLAW_STATE_DIR = tempStateDir;
+  originalStateDir = process.env.BOT_STATE_DIR;
+  originalUpdateInProgress = process.env.BOT_UPDATE_IN_PROGRESS;
+  process.env.BOT_UPDATE_IN_PROGRESS = "1";
+  tempStateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-doctor-state-"));
+  process.env.BOT_STATE_DIR = tempStateDir;
   fs.mkdirSync(path.join(tempStateDir, "agents", "main", "sessions"), {
     recursive: true,
   });
@@ -428,14 +428,14 @@ beforeEach(() => {
 afterEach(() => {
   setStdinTty(originalIsTTY);
   if (originalStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = originalStateDir;
+    process.env.BOT_STATE_DIR = originalStateDir;
   }
   if (originalUpdateInProgress === undefined) {
-    delete process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+    delete process.env.BOT_UPDATE_IN_PROGRESS;
   } else {
-    process.env.OPENCLAW_UPDATE_IN_PROGRESS = originalUpdateInProgress;
+    process.env.BOT_UPDATE_IN_PROGRESS = originalUpdateInProgress;
   }
   if (tempStateDir) {
     fs.rmSync(tempStateDir, { recursive: true, force: true });

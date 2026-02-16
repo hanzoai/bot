@@ -18,13 +18,13 @@ function createLimiterSpy(): AuthRateLimiter & {
 }
 
 describe("gateway auth", () => {
-  it("resolves token/password from OPENCLAW gateway env vars", () => {
+  it("resolves token/password from BOT gateway env vars", () => {
     expect(
       resolveGatewayAuth({
         authConfig: {},
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "env-token",
-          OPENCLAW_GATEWAY_PASSWORD: "env-password",
+          BOT_GATEWAY_TOKEN: "env-token",
+          BOT_GATEWAY_PASSWORD: "env-password",
         } as NodeJS.ProcessEnv,
       }),
     ).toMatchObject({
@@ -34,13 +34,13 @@ describe("gateway auth", () => {
     });
   });
 
-  it("does not resolve legacy CLAWDBOT gateway env vars", () => {
+  it("does not resolve legacy BOT gateway env vars", () => {
     expect(
       resolveGatewayAuth({
         authConfig: {},
         env: {
-          CLAWDBOT_GATEWAY_TOKEN: "legacy-token",
-          CLAWDBOT_GATEWAY_PASSWORD: "legacy-password",
+          BOT_GATEWAY_TOKEN: "legacy-token",
+          BOT_GATEWAY_PASSWORD: "legacy-password",
         } as NodeJS.ProcessEnv,
       }),
     ).toMatchObject({
