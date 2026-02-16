@@ -9,7 +9,7 @@
     "@urbit/http-api": "^3.0.0"
   },
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "hanzo-bot": {
     "extensions": [

@@ -17,7 +17,7 @@
     "@opentelemetry/semantic-conventions": "^1.39.0"
   },
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "hanzo-bot": {
     "extensions": [

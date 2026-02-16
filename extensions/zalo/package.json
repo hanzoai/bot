@@ -7,7 +7,7 @@
     "undici": "7.21.0"
   },
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "hanzo-bot": {
     "extensions": [

@@ -8,10 +8,10 @@
     "google-auth-library": "^10.5.0"
   },
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "hanzo-bot": ">=2026.1.26"
+    "@hanzo/bot": ">=2026.1.26"
   },
   "hanzo-bot": {
     "extensions": [

@@ -5,7 +5,7 @@
   "description": "HanzoBot Signal channel plugin",
   "type": "module",
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "hanzo-bot": {
     "extensions": [
