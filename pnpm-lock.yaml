@@ -242,13 +242,13 @@ importers:
 
   extensions/bluebubbles:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/copilot-proxy:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -288,13 +288,13 @@ importers:
         specifier: ^1.39.0
         version: 1.39.0
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/discord:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -310,19 +310,25 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
+
+  extensions/flow:
+    devDependencies:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/google-antigravity-auth:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/google-gemini-cli-auth:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -332,37 +338,31 @@ importers:
         specifier: ^10.5.0
         version: 10.5.0
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/imessage:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/irc:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/line:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/llm-task:
     devDependencies:
-      hanzo-bot:
-        specifier: workspace:*
-        version: link:../..
-
-  extensions/lobster:
-    devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -384,19 +384,19 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/mattermost:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/memory-core:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -412,13 +412,13 @@ importers:
         specifier: ^6.19.0
         version: 6.19.0(ws@8.19.0)(zod@4.3.6)
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/minimax-portal-auth:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -440,13 +440,13 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/nextcloud-talk:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -459,31 +459,31 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/open-prose:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/signal:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/slack:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/telegram:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -496,7 +496,7 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -515,7 +515,7 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -531,13 +531,13 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   extensions/whatsapp:
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -547,7 +547,7 @@ importers:
         specifier: 7.21.0
         version: 7.21.0
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -557,19 +557,19 @@ importers:
         specifier: 0.34.48
         version: 0.34.48
     devDependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   packages/clawdbot:
     dependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   packages/moltbot:
     dependencies:
-      hanzo-bot:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
