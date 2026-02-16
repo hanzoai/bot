@@ -1,5 +1,5 @@
+import type { BotConfig, PluginRuntime } from "bot/plugin-sdk";
 import type { IncomingMessage } from "node:http";
-import type { OpenClawConfig, PluginRuntime } from "openclaw/plugin-sdk";
 import { EventEmitter } from "node:events";
 import { describe, expect, it, vi } from "vitest";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
@@ -50,7 +50,7 @@ function registerTwoTargets() {
   const sinkA = vi.fn();
   const sinkB = vi.fn();
   const core = {} as PluginRuntime;
-  const config = {} as OpenClawConfig;
+  const config = {} as BotConfig;
 
   const unregisterA = registerGoogleChatWebhookTarget({
     account: baseAccount("A"),

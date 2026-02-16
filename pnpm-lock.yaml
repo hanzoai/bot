@@ -564,7 +564,7 @@ importers:
         specifier: workspace:*
         version: link:../..
 
-  packages/clawdbot:
+  packages/bot:
     dependencies:
       '@hanzo/bot':
         specifier: workspace:*

@@ -122,7 +122,7 @@ describe("createBotCodingTools", () => {
   });
 
   it("coerces structured content blocks for write", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-structured-write-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-structured-write-"));
     try {
       const tools = createBotCodingTools({ workspaceDir: tmpDir });
       const writeTool = tools.find((tool) => tool.name === "write");
@@ -132,13 +132,13 @@ describe("createBotCodingTools", () => {
         path: "structured-write.js",
         content: [
           { type: "text", text: "const path = require('path');\n" },
-          { type: "input_text", text: "const root = path.join(process.env.HOME, 'clawd');\n" },
+          { type: "input_text", text: "const root = path.join(process.env.HOME, 'botd');\n" },
         ],
       });
 
       const written = await fs.readFile(path.join(tmpDir, "structured-write.js"), "utf8");
       expect(written).toBe(
-        "const path = require('path');\nconst root = path.join(process.env.HOME, 'clawd');\n",
+        "const path = require('path');\nconst root = path.join(process.env.HOME, 'botd');\n",
       );
     } finally {
       await fs.rm(tmpDir, { recursive: true, force: true });
@@ -146,7 +146,7 @@ describe("createBotCodingTools", () => {
   });
 
   it("coerces structured old/new text blocks for edit", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-structured-edit-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-structured-edit-"));
     try {
       const filePath = path.join(tmpDir, "structured-edit.js");
       await fs.writeFile(filePath, "const value = 'old';\n", "utf8");

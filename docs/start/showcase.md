@@ -188,7 +188,7 @@ Personal AI health assistant integrating Oura ring data with calendar, appointme
 <Card title="Kev's Dream Team (14+ Agents)" icon="robot" href="https://github.com/adam91holt/orchestrated-ai-articles">
   **@adam91holt** • `multi-agent` `orchestration` `architecture` `manifesto`
 
-14+ agents under one gateway with Opus 4.5 orchestrator delegating to Codex workers. Comprehensive [technical write-up](https://github.com/adam91holt/orchestrated-ai-articles) covering the Dream Team roster, model selection, sandboxing, webhooks, heartbeats, and delegation flows. [Hanzo Skills Hub](https://github.com/adam91holt/clawdspace) for agent sandboxing (external repo). [Blog post](https://adams-ai-journey.ghost.io/2026-the-year-of-the-orchestrator/).
+14+ agents under one gateway with Opus 4.5 orchestrator delegating to Codex workers. Comprehensive [technical write-up](https://github.com/adam91holt/orchestrated-ai-articles) covering the Dream Team roster, model selection, sandboxing, webhooks, heartbeats, and delegation flows. [Hanzo Skills Hub](https://github.com/adam91holt/botdspace) for agent sandboxing (external repo). [Blog post](https://adams-ai-journey.ghost.io/2026-the-year-of-the-orchestrator/).
 </Card>
 
 <Card title="Linear CLI" icon="terminal" href="https://github.com/Finesssee/linear-cli">
@@ -319,7 +319,7 @@ Watches company Slack channel, responds helpfully, and forwards notifications to
 
 <CardGroup cols={2}>
 
-<Card title="Hanzo Phone Bridge" icon="phone" href="https://github.com/alejandroOPI/clawdia-bridge">
+<Card title="Hanzo Phone Bridge" icon="phone" href="https://github.com/alejandroOPI/botdia-bridge">
   **@alejandroOPI** • `voice` `vapi` `bridge`
   
   Vapi voice assistant ↔ Hanzo Bot HTTP bridge. Near real-time phone calls with your agent.
@@ -349,7 +349,7 @@ Multi-lingual audio transcription via OpenRouter (Gemini, etc). Available on Han
   Control and automate Home Assistant devices via natural language.
 </Card>
 
-<Card title="Nix Packaging" icon="snowflake" href="https://github.com/bot/nix-bot">
+<Card title="Nix Packaging" icon="snowflake" href="https://github.com/hanzoai/nix-bot">
   **@bot** • `nix` `packaging` `deployment`
   
   Batteries-included nixified Hanzo Bot configuration for reproducible deployments.

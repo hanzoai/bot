@@ -147,7 +147,7 @@ describe("DiscordMessageListener", () => {
 
 describe("discord allowlist helpers", () => {
   it("normalizes slugs", () => {
-    expect(normalizeDiscordSlug("Friends of Hanzo Bot")).toBe("friends-of-bot");
+    expect(normalizeDiscordSlug("Friends of Hanzo Bot")).toBe("friends-of-hanzo-bot");
     expect(normalizeDiscordSlug("#General")).toBe("general");
     expect(normalizeDiscordSlug("Dev__Chat")).toBe("dev-chat");
   });
@@ -163,7 +163,7 @@ describe("discord allowlist helpers", () => {
     }
     expect(allowListMatches(allow, { id: "123" })).toBe(true);
     expect(allowListMatches(allow, { name: "steipete" })).toBe(true);
-    expect(allowListMatches(allow, { name: "friends-of-bot" })).toBe(true);
+    expect(allowListMatches(allow, { name: "friends-of-hanzo-bot" })).toBe(true);
     expect(allowListMatches(allow, { name: "other" })).toBe(false);
   });
 
@@ -181,26 +181,26 @@ describe("discord allowlist helpers", () => {
 describe("discord guild/channel resolution", () => {
   it("resolves guild entry by id", () => {
     const guildEntries = makeEntries({
-      "123": { slug: "friends-of-bot" },
+      "123": { slug: "friends-of-hanzo-bot" },
     });
     const resolved = resolveDiscordGuildEntry({
       guild: fakeGuild("123", "Friends of Hanzo Bot"),
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
-    expect(resolved?.slug).toBe("friends-of-bot");
+    expect(resolved?.slug).toBe("friends-of-hanzo-bot");
   });
 
   it("resolves guild entry by slug key", () => {
     const guildEntries = makeEntries({
-      "friends-of-bot": { slug: "friends-of-bot" },
+      "friends-of-hanzo-bot": { slug: "friends-of-hanzo-bot" },
     });
     const resolved = resolveDiscordGuildEntry({
       guild: fakeGuild("123", "Friends of Hanzo Bot"),
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
-    expect(resolved?.slug).toBe("friends-of-bot");
+    expect(resolved?.slug).toBe("friends-of-hanzo-bot");
   });
 
   it("falls back to wildcard guild entry", () => {
