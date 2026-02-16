@@ -1,16 +1,16 @@
 {
-  "name": "@openclaw/tlon",
+  "name": "@hanzo/bot-tlon",
   "version": "2026.2.16",
   "private": true,
-  "description": "OpenClaw Tlon/Urbit channel plugin",
+  "description": "Hanzo Bot Tlon/Urbit channel plugin",
   "type": "module",
   "dependencies": {
     "@urbit/aura": "^3.0.0"
   },
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -25,7 +25,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/tlon",
+      "npmSpec": "@hanzo/bot-tlon",
       "localPath": "extensions/tlon",
       "defaultChoice": "npm"
     }
