@@ -1547,10 +1547,10 @@
 }
 
 .chat-compose__field textarea {
-  min-height: 72px;
+  min-height: 40px;
   padding: 10px 14px;
   border-radius: var(--radius-lg);
-  resize: vertical;
+  resize: none;
   white-space: pre-wrap;
   font-family: var(--font-body);
   line-height: 1.5;
@@ -1563,8 +1563,9 @@
 }
 
 .chat-compose__field textarea:focus {
-  border-color: var(--ring);
-  box-shadow: var(--focus-ring);
+  border-color: var(--border-strong);
+  box-shadow: none;
+  outline: none;
 }
 
 .chat-compose__field textarea:disabled {
@@ -1840,9 +1841,9 @@
 }
 
 .agent-tab.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
+  background: var(--text-strong);
+  border-color: var(--text-strong);
+  color: var(--bg);
 }
 
 .agents-overview-grid {

@@ -1,8 +1,8 @@
 ---
 read_when:
-  - 新規ユーザーにOpenClawを紹介するとき
-summary: OpenClawは、あらゆるOSで動作するAIエージェント向けのマルチチャネルgatewayです。
-title: OpenClaw
+  - 新規ユーザーにHanzo Botを紹介するとき
+summary: Hanzo Botは、あらゆるOSで動作するAIエージェント向けのマルチチャネルgatewayです。
+title: Hanzo Bot
 x-i18n:
   generated_at: "2026-02-08T17:15:47Z"
   model: claude-opus-4-5
@@ -12,24 +12,24 @@ x-i18n:
   workflow: 15
 ---
 
-# OpenClaw 🦞
+# Hanzo Bot
 
 <p align="center">
     <img
-        src="/assets/openclaw-logo-text-dark.png"
-        alt="OpenClaw"
+        src="/assets/bot-logo-text-dark.png"
+        alt="Hanzo Bot"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/openclaw-logo-text.png"
-        alt="OpenClaw"
+        src="/assets/bot-logo-text.png"
+        alt="Hanzo Bot"
         width="500"
         class="hidden dark:block"
     />
 </p>
 
-> _「EXFOLIATE! EXFOLIATE!」_ — たぶん宇宙ロブスター
+> _「Your personal AI assistant.」_
 
 <p align="center">
   <strong>WhatsApp、Telegram、Discord、iMessageなどに対応した、あらゆるOS向けのAIエージェントgateway。</strong><br />
@@ -38,17 +38,17 @@ x-i18n:
 
 <Columns>
   <Card title="はじめに" href="/start/getting-started" icon="rocket">
-    OpenClawをインストールし、数分でGatewayを起動できます。
+    Hanzo Botをインストールし、数分でGatewayを起動できます。
   </Card>
   <Card title="ウィザードを実行" href="/start/wizard" icon="sparkles">
-    `openclaw onboard`とペアリングフローによるガイド付きセットアップ。
+    `hanzo-bot onboard`とペアリングフローによるガイド付きセットアップ。
   </Card>
   <Card title="Control UIを開く" href="/web/control-ui" icon="layout-dashboard">
     チャット、設定、セッション用のブラウザダッシュボードを起動します。
   </Card>
 </Columns>
 
-OpenClawは、単一のGatewayプロセスを通じてチャットアプリをPiのようなコーディングエージェントに接続します。OpenClawアシスタントを駆動し、ローカルまたはリモートのセットアップをサポートします。
+Hanzo Botは、単一のGatewayプロセスを通じてチャットアプリをPiのようなコーディングエージェントに接続します。Hanzo Botアシスタントを駆動し、ローカルまたはリモートのセットアップをサポートします。
 
 ## 仕組み
 
@@ -90,20 +90,20 @@ Gatewayは、セッション、ルーティング、チャネル接続の信頼�
 ## クイックスタート
 
 <Steps>
-  <Step title="OpenClawをインストール">
+  <Step title="Hanzo Botをインストール">
     ```bash
-    npm install -g openclaw@latest
+    npm install -g bot@latest
     ```
   </Step>
   <Step title="オンボーディングとサービスのインストール">
     ```bash
-    openclaw onboard --install-daemon
+    hanzo-bot onboard --install-daemon
     ```
   </Step>
   <Step title="WhatsAppをペアリングしてGatewayを起動">
     ```bash
-    openclaw channels login
-    openclaw gateway --port 18789
+    hanzo-bot channels login
+    hanzo-bot gateway --port 18789
     ```
   </Step>
 </Steps>
@@ -118,14 +118,14 @@ Gatewayの起動後、ブラウザでControl UIを開きます。
 - リモートアクセス: [Webサーフェス](/web)および[Tailscale](/gateway/tailscale)
 
 <p align="center">
-  <img src="whatsapp-openclaw.jpg" alt="OpenClaw" width="420" />
+  <img src="whatsapp-bot.jpg" alt="Hanzo Bot" width="420" />
 </p>
 
 ## 設定（オプション）
 
-設定は`~/.openclaw/openclaw.json`にあります。
+設定は`~/.hanzo/bot/bot.json`にあります。
 
-- **何もしなければ**、OpenClawはバンドルされたPiバイナリをRPCモードで使用し、送信者ごとのセッションを作成します。
+- **何もしなければ**、Hanzo BotはバンドルされたPiバイナリをRPCモードで使用し、送信者ごとのセッションを作成します。
 - 制限を設けたい場合は、`channels.whatsapp.allowFrom`と（グループの場合）メンションルールから始めてください。
 
 例：
@@ -138,7 +138,7 @@ Gatewayの起動後、ブラウザでControl UIを開きます。
       groups: { "*": { requireMention: true } },
     },
   },
-  messages: { groupChat: { mentionPatterns: ["@openclaw"] } },
+  messages: { groupChat: { mentionPatterns: ["@bot"] } },
 }
 ```
 
