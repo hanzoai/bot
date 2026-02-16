@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
 type SessionsSpawnTestConfig = ReturnType<(typeof import("../config/config.js"))["loadConfig"]>;
-type CreateOpenClawTools = (typeof import("./openclaw-tools.js"))["createOpenClawTools"];
+type CreateOpenClawTools = (typeof import("./bot-tools.js"))["createBotTools"];
 export type CreateOpenClawToolsOpts = Parameters<CreateOpenClawTools>[0];
 
 // Avoid exporting vitest mock types (TS2742 under pnpm + d.ts emit).
@@ -34,8 +34,8 @@ export function setSessionsSpawnConfigOverride(next: SessionsSpawnTestConfig): v
 
 export async function getSessionsSpawnTool(opts: CreateOpenClawToolsOpts) {
   // Dynamic import: ensure harness mocks are installed before tool modules load.
-  const { createOpenClawTools } = await import("./openclaw-tools.js");
-  const tool = createOpenClawTools(opts).find((candidate) => candidate.name === "sessions_spawn");
+  const { createBotTools } = await import("./bot-tools.js");
+  const tool = createBotTools(opts).find((candidate) => candidate.name === "sessions_spawn");
   if (!tool) {
     throw new Error("missing sessions_spawn tool");
   }
