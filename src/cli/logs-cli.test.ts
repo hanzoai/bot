@@ -59,7 +59,7 @@ describe("logs cli", () => {
 
   it("wires --local-time through CLI parsing and emits local timestamps", async () => {
     callGatewayFromCli.mockResolvedValueOnce({
-      file: "/tmp/openclaw.log",
+      file: "/tmp/bot.log",
       lines: [
         JSON.stringify({
           time: "2025-01-01T12:00:00.000Z",

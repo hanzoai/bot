@@ -17,7 +17,7 @@ describe("buildInboundUserContextPrefix", () => {
   it("omits conversation label block for direct chats", () => {
     const text = buildInboundUserContextPrefix({
       ChatType: "direct",
-      ConversationLabel: "openclaw-tui",
+      ConversationLabel: "bot-tui",
     } as TemplateContext);
 
     expect(text).toBe("");

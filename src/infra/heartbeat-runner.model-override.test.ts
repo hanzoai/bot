@@ -30,7 +30,7 @@ async function withHeartbeatFixture(
     seedSession: (sessionKey: string, input: SeedSessionInput) => Promise<void>;
   }) => Promise<unknown>,
 ): Promise<unknown> {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hb-model-"));
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-hb-model-"));
   const storePath = path.join(tmpDir, "sessions.json");
 
   const seedSession = async (sessionKey: string, input: SeedSessionInput) => {

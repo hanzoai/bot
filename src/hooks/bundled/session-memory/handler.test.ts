@@ -44,7 +44,7 @@ async function runNewWithPreviousSession(params: {
   sessionContent: string;
   cfg?: (tempDir: string) => BotConfig;
 }): Promise<{ tempDir: string; files: string[]; memoryContent: string }> {
-  const tempDir = await makeTempWorkspace("openclaw-session-memory-");
+  const tempDir = await makeTempWorkspace("bot-session-memory-");
   const sessionsDir = path.join(tempDir, "sessions");
   await fs.mkdir(sessionsDir, { recursive: true });
 
@@ -80,7 +80,7 @@ async function runNewWithPreviousSession(params: {
 
 describe("session-memory hook", () => {
   it("skips non-command events", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-session-memory-");
+    const tempDir = await makeTempWorkspace("bot-session-memory-");
 
     const event = createHookEvent("agent", "bootstrap", "agent:main:main", {
       workspaceDir: tempDir,
@@ -94,7 +94,7 @@ describe("session-memory hook", () => {
   });
 
   it("skips commands other than new", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-session-memory-");
+    const tempDir = await makeTempWorkspace("bot-session-memory-");
 
     const event = createHookEvent("command", "help", "agent:main:main", {
       workspaceDir: tempDir,

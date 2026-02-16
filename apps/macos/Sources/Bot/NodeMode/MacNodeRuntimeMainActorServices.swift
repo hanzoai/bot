@@ -1,6 +1,6 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import BotKit
 
 @MainActor
 protocol MacNodeRuntimeMainActorServices: Sendable {
@@ -14,7 +14,7 @@ protocol MacNodeRuntimeMainActorServices: Sendable {
     func locationAuthorizationStatus() -> CLAuthorizationStatus
     func locationAccuracyAuthorization() -> CLAccuracyAuthorization
     func currentLocation(
-        desiredAccuracy: OpenClawLocationAccuracy,
+        desiredAccuracy: BotLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
 }
@@ -48,7 +48,7 @@ final class LiveMacNodeRuntimeMainActorServices: MacNodeRuntimeMainActorServices
     }
 
     func currentLocation(
-        desiredAccuracy: OpenClawLocationAccuracy,
+        desiredAccuracy: BotLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     {
