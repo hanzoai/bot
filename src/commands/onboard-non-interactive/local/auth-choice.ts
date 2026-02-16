@@ -454,8 +454,8 @@ export async function applyNonInteractiveAuthChoice(params: {
   }
 
   const applyMoonshotApiKeyChoice = async (
-    applyConfig: (cfg: OpenClawConfig) => OpenClawConfig,
-  ): Promise<OpenClawConfig | null> => {
+    applyConfig: (cfg: BotConfig) => BotConfig,
+  ): Promise<BotConfig | null> => {
     const resolved = await resolveNonInteractiveApiKey({
       provider: "moonshot",
       cfg: baseConfig,
