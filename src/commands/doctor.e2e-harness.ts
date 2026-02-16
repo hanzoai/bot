@@ -25,7 +25,7 @@ export const confirm = vi.fn().mockResolvedValue(true) as unknown as MockFn;
 export const select = vi.fn().mockResolvedValue("node") as unknown as MockFn;
 export const note = vi.fn() as unknown as MockFn;
 export const writeConfigFile = vi.fn().mockResolvedValue(undefined) as unknown as MockFn;
-export const resolveOpenClawPackageRoot = vi.fn().mockResolvedValue(null) as unknown as MockFn;
+export const resolveBotPackageRoot = vi.fn().mockResolvedValue(null) as unknown as MockFn;
 export const runGatewayUpdate = vi.fn().mockResolvedValue({
   status: "skipped",
   mode: "unknown",
@@ -153,7 +153,7 @@ vi.mock("../agents/skills-status.js", () => ({
 }));
 
 vi.mock("../plugins/loader.js", () => ({
-  loadOpenClawPlugins: () => ({ plugins: [], diagnostics: [] }),
+  loadBotPlugins: () => ({ plugins: [], diagnostics: [] }),
 }));
 
 vi.mock("../config/config.js", async (importOriginal) => {
@@ -195,8 +195,8 @@ vi.mock("../process/exec.js", () => ({
   runCommandWithTimeout,
 }));
 
-vi.mock("../infra/openclaw-root.js", () => ({
-  resolveOpenClawPackageRoot,
+vi.mock("../infra/bot-root.js", () => ({
+  resolveBotPackageRoot,
 }));
 
 vi.mock("../infra/update-runner.js", () => ({
@@ -365,7 +365,7 @@ beforeEach(() => {
 
   readConfigFileSnapshot.mockReset();
   writeConfigFile.mockReset().mockResolvedValue(undefined);
-  resolveOpenClawPackageRoot.mockReset().mockResolvedValue(null);
+  resolveBotPackageRoot.mockReset().mockResolvedValue(null);
   runGatewayUpdate.mockReset().mockResolvedValue({
     status: "skipped",
     mode: "unknown",

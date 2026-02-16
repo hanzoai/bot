@@ -169,15 +169,15 @@ type BindingScope = {
 };
 
 type EvaluatedBindingsCache = {
-  bindingsRef: OpenClawConfig["bindings"];
+  bindingsRef: BotConfig["bindings"];
   byChannelAccount: Map<string, EvaluatedBinding[]>;
 };
 
-const evaluatedBindingsCacheByCfg = new WeakMap<OpenClawConfig, EvaluatedBindingsCache>();
+const evaluatedBindingsCacheByCfg = new WeakMap<BotConfig, EvaluatedBindingsCache>();
 const MAX_EVALUATED_BINDINGS_CACHE_KEYS = 2000;
 
 function getEvaluatedBindingsForChannelAccount(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   channel: string,
   accountId: string,
 ): EvaluatedBinding[] {
