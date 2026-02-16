@@ -1,6 +1,7 @@
 import type { AgentToolResult } from "@mariozechner/pi-agent-core";
 import type { BotConfig } from "../../config/config.js";
 import type { TelegramButtonStyle, TelegramInlineButtons } from "../../telegram/button-types.js";
+import { resolveTelegramAccount } from "../../telegram/accounts.js";
 import {
   resolveTelegramInlineButtonsScope,
   resolveTelegramTargetChatType,
@@ -87,7 +88,8 @@ export async function handleTelegramAction(
 ): Promise<AgentToolResult<unknown>> {
   const action = readStringParam(params, "action", { required: true });
   const accountId = readStringParam(params, "accountId");
-  const isActionEnabled = createActionGate(cfg.channels?.telegram?.actions);
+  const account = resolveTelegramAccount({ cfg, accountId });
+  const isActionEnabled = createActionGate(account.config.actions);
 
   if (action === "react") {
     // Check reaction level first

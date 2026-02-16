@@ -1,6 +1,6 @@
 import type { BotConfig } from "bot/plugin-sdk";
-import crypto from "node:crypto";
 import { stripMarkdown } from "bot/plugin-sdk";
+import crypto from "node:crypto";
 import { resolveBlueBubblesAccount } from "./accounts.js";
 import { getCachedBlueBubblesPrivateApiStatus } from "./probe.js";
 import { extractBlueBubblesMessageId, resolveBlueBubblesSendTarget } from "./send-helpers.js";
@@ -322,7 +322,7 @@ export async function sendMessageBlueBubbles(
   text: string,
   opts: BlueBubblesSendOpts = {},
 ): Promise<BlueBubblesSendResult> {
-  const trimmedText = text ?? "";
+  const trimmedText = (text ?? "").trimStart();
   if (!trimmedText.trim()) {
     throw new Error("BlueBubbles send requires text");
   }

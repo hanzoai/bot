@@ -26,6 +26,12 @@ cp docs/reference/templates/SOUL.md ~/.hanzo/bot/workspace/SOUL.md
 cp docs/reference/templates/TOOLS.md ~/.hanzo/bot/workspace/TOOLS.md
 ```
 
+Optional: if you want a CEO-style multi-agent software delivery persona, start from the Architect soul template instead:
+
+```bash
+cp docs/reference/templates/SOUL.architect.md ~/.bot/workspace/SOUL.md
+```
+
 3. Optional: if you want the personal assistant skill roster, replace AGENTS.md with this file:
 
 ```bash

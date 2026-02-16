@@ -13,6 +13,7 @@ import { colorize, isRich, theme } from "../../terminal/theme.js";
 import { formatTokenCount, formatUsd } from "../../utils/usage-format.js";
 import { runCommandWithRuntime } from "../cli-utils.js";
 import { addGatewayServiceCommands } from "../daemon-cli.js";
+import { formatHelpExamples } from "../help-format.js";
 import { withProgress } from "../progress.js";
 import { callGatewayCli, gatewayCallOpts } from "./call.js";
 import {
@@ -75,11 +76,16 @@ export function registerGatewayCli(program: Command) {
   const gateway = addGatewayRunCommand(
     program
       .command("gateway")
-      .description("Run the WebSocket Gateway")
+      .description("Run, inspect, and query the WebSocket Gateway")
       .addHelpText(
         "after",
         () =>
-          `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/gateway", "docs.hanzo.bot/cli/gateway")}\n`,
+          `\n${theme.heading("Examples:")}\n${formatHelpExamples([
+            ["bot gateway run", "Run the gateway in the foreground."],
+            ["bot gateway status", "Show service status and probe reachability."],
+            ["bot gateway discover", "Find local and wide-area gateway beacons."],
+            ["bot gateway call health", "Call a gateway RPC method directly."],
+          ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/gateway", "docs.hanzo.bot/cli/gateway")}\n`,
       ),
   );
 

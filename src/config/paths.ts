@@ -182,7 +182,20 @@ export function resolveConfigPath(
   return path.join(stateDir, CONFIG_FILENAME);
 }
 
+/**
+ * @deprecated Use resolveConfigPathCandidate() instead. This constant is evaluated
+ * at module load time and does not respect BOT_HOME set after import.
+ * Kept for backwards compatibility but should be avoided in new code.
+ */
 export const CONFIG_PATH = resolveConfigPathCandidate();
+
+/**
+ * Runtime-evaluated config path that respects BOT_HOME.
+ * Use this instead of CONFIG_PATH when BOT_HOME may be set dynamically.
+ */
+export function getConfigPath(env: NodeJS.ProcessEnv = process.env): string {
+  return resolveConfigPathCandidate(env, envHomedir(env));
+}
 
 /**
  * Resolve default config path candidates across default locations.
@@ -255,6 +268,22 @@ export function resolveOAuthPath(
 }
 
 export function resolveGatewayPort(cfg?: BotConfig, env: NodeJS.ProcessEnv = process.env): number {
+  // When BOT_HOME is set (isolated instance), prefer config over inherited env vars.
+  // This prevents a parent gateway's BOT_GATEWAY_PORT from bleeding through.
+  const isIsolatedInstance = Boolean(env.BOT_HOME?.trim());
+
+  // Config port takes precedence for isolated instances
+  const configPort = cfg?.gateway?.port;
+  if (
+    isIsolatedInstance &&
+    typeof configPort === "number" &&
+    Number.isFinite(configPort) &&
+    configPort > 0
+  ) {
+    return configPort;
+  }
+
+  // Check env vars (for non-isolated or when config doesn't specify port)
   const envRaw = env.BOT_GATEWAY_PORT?.trim() || env.BOT_GATEWAY_PORT?.trim();
   if (envRaw) {
     const parsed = Number.parseInt(envRaw, 10);
@@ -262,11 +291,11 @@ export function resolveGatewayPort(cfg?: BotConfig, env: NodeJS.ProcessEnv = pro
       return parsed;
     }
   }
-  const configPort = cfg?.gateway?.port;
-  if (typeof configPort === "number" && Number.isFinite(configPort)) {
-    if (configPort > 0) {
-      return configPort;
-    }
+
+  // Fall back to config for non-isolated instances
+  if (typeof configPort === "number" && Number.isFinite(configPort) && configPort > 0) {
+    return configPort;
   }
+
   return DEFAULT_GATEWAY_PORT;
 }
