@@ -194,7 +194,7 @@ async function main() {
                 `gateway: full process restart failed (${respawn.detail ?? "unknown error"}); falling back to in-process restart`,
               );
             } else {
-              defaultRuntime.log("gateway: restart mode in-process restart (OPENCLAW_NO_RESPAWN)");
+              defaultRuntime.log("gateway: restart mode in-process restart (BOT_NO_RESPAWN)");
             }
             shuttingDown = false;
             restartResolver?.();

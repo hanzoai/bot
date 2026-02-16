@@ -177,11 +177,11 @@ const entries: SubCliEntry[] = [
     },
   },
   {
-    name: "clawbot",
-    description: "Legacy clawbot command aliases",
+    name: "bot",
+    description: "Legacy bot command aliases",
     register: async (program) => {
-      const mod = await import("../clawbot-cli.js");
-      mod.registerClawbotCli(program);
+      const mod = await import("../bot-cli.js");
+      mod.registerBotCli(program);
     },
   },
   {

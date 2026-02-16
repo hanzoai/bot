@@ -25,8 +25,8 @@ function getTextContent(result?: { content?: Array<{ type: string; text?: string
 
 describe("workspace path resolution", () => {
   it("reads relative paths against workspaceDir even after cwd changes", async () => {
-    await withTempDir("openclaw-ws-", async (workspaceDir) => {
-      await withTempDir("openclaw-cwd-", async (otherDir) => {
+    await withTempDir("bot-ws-", async (workspaceDir) => {
+      await withTempDir("bot-cwd-", async (otherDir) => {
         const testFile = "read.txt";
         const contents = "workspace read ok";
         await fs.writeFile(path.join(workspaceDir, testFile), contents, "utf8");
@@ -47,8 +47,8 @@ describe("workspace path resolution", () => {
   });
 
   it("writes relative paths against workspaceDir even after cwd changes", async () => {
-    await withTempDir("openclaw-ws-", async (workspaceDir) => {
-      await withTempDir("openclaw-cwd-", async (otherDir) => {
+    await withTempDir("bot-ws-", async (workspaceDir) => {
+      await withTempDir("bot-cwd-", async (otherDir) => {
         const testFile = "write.txt";
         const contents = "workspace write ok";
 
@@ -73,8 +73,8 @@ describe("workspace path resolution", () => {
   });
 
   it("edits relative paths against workspaceDir even after cwd changes", async () => {
-    await withTempDir("openclaw-ws-", async (workspaceDir) => {
-      await withTempDir("openclaw-cwd-", async (otherDir) => {
+    await withTempDir("bot-ws-", async (workspaceDir) => {
+      await withTempDir("bot-cwd-", async (otherDir) => {
         const testFile = "edit.txt";
         await fs.writeFile(path.join(workspaceDir, testFile), "hello world", "utf8");
 
@@ -87,11 +87,11 @@ describe("workspace path resolution", () => {
           await editTool?.execute("ws-edit", {
             path: testFile,
             oldText: "world",
-            newText: "openclaw",
+            newText: "bot",
           });
 
           const updated = await fs.readFile(path.join(workspaceDir, testFile), "utf8");
-          expect(updated).toBe("hello openclaw");
+          expect(updated).toBe("hello bot");
         } finally {
           cwdSpy.mockRestore();
         }
@@ -100,7 +100,7 @@ describe("workspace path resolution", () => {
   });
 
   it("defaults exec cwd to workspaceDir when workdir is omitted", async () => {
-    await withTempDir("openclaw-ws-", async (workspaceDir) => {
+    await withTempDir("bot-ws-", async (workspaceDir) => {
       const tools = createBotCodingTools({
         workspaceDir,
         exec: { host: "gateway", ask: "off", security: "full" },
@@ -125,8 +125,8 @@ describe("workspace path resolution", () => {
   });
 
   it("lets exec workdir override the workspace default", async () => {
-    await withTempDir("openclaw-ws-", async (workspaceDir) => {
-      await withTempDir("openclaw-override-", async (overrideDir) => {
+    await withTempDir("bot-ws-", async (workspaceDir) => {
+      await withTempDir("bot-override-", async (overrideDir) => {
         const tools = createBotCodingTools({
           workspaceDir,
           exec: { host: "gateway", ask: "off", security: "full" },
@@ -155,20 +155,20 @@ describe("workspace path resolution", () => {
 
 describe("sandboxed workspace paths", () => {
   it("uses sandbox workspace for relative read/write/edit", async () => {
-    await withTempDir("openclaw-sandbox-", async (sandboxDir) => {
-      await withTempDir("openclaw-workspace-", async (workspaceDir) => {
+    await withTempDir("bot-sandbox-", async (sandboxDir) => {
+      await withTempDir("bot-workspace-", async (workspaceDir) => {
         const sandbox = {
           enabled: true,
           sessionKey: "sandbox:test",
           workspaceDir: sandboxDir,
           agentWorkspaceDir: workspaceDir,
           workspaceAccess: "rw",
-          containerName: "openclaw-sbx-test",
+          containerName: "bot-sbx-test",
           containerWorkdir: "/workspace",
           fsBridge: createHostSandboxFsBridge(sandboxDir),
           docker: {
-            image: "openclaw-sandbox:bookworm-slim",
-            containerPrefix: "openclaw-sbx-",
+            image: "bot-sandbox:bookworm-slim",
+            containerPrefix: "bot-sbx-",
             workdir: "/workspace",
             readOnlyRoot: true,
             tmpfs: [],

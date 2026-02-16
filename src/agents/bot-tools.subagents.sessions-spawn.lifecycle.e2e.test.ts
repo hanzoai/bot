@@ -5,7 +5,7 @@ import { sleep } from "../utils.js";
 import {
   getCallGatewayMock,
   resetSessionsSpawnConfigOverride,
-} from "./openclaw-tools.subagents.sessions-spawn.test-harness.js";
+} from "./bot-tools.subagents.sessions-spawn.test-harness.js";
 import { resetSubagentRegistryForTests } from "./subagent-registry.js";
 
 vi.mock("./pi-embedded.js", () => ({
@@ -17,12 +17,12 @@ vi.mock("./pi-embedded.js", () => ({
 
 const callGatewayMock = getCallGatewayMock();
 
-type CreateOpenClawTools = (typeof import("./openclaw-tools.js"))["createBotTools"];
-type CreateOpenClawToolsOpts = Parameters<CreateOpenClawTools>[0];
+type CreateBotTools = (typeof import("./bot-tools.js"))["createBotTools"];
+type CreateBotToolsOpts = Parameters<CreateBotTools>[0];
 
-async function getSessionsSpawnTool(opts: CreateOpenClawToolsOpts) {
+async function getSessionsSpawnTool(opts: CreateBotToolsOpts) {
   // Dynamic import: ensure harness mocks are installed before tool modules load.
-  const { createBotTools } = await import("./openclaw-tools.js");
+  const { createBotTools } = await import("./bot-tools.js");
   const tool = createBotTools(opts).find((candidate) => candidate.name === "sessions_spawn");
   if (!tool) {
     throw new Error("missing sessions_spawn tool");
@@ -135,7 +135,7 @@ const waitFor = async (predicate: () => boolean, timeoutMs = 2000) => {
   }
 };
 
-describe("openclaw-tools: subagents (sessions_spawn lifecycle)", () => {
+describe("bot-tools: subagents (sessions_spawn lifecycle)", () => {
   beforeEach(() => {
     resetSessionsSpawnConfigOverride();
   });

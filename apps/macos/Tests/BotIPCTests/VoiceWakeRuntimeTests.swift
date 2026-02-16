@@ -36,13 +36,13 @@ import Testing
     }
 
     @Test func trimsAfterChineseTriggerKeepsPostSpeech() {
-        let triggers = ["小爪", "openclaw"]
+        let triggers = ["小爪", "bot"]
         let text = "嘿 小爪 帮我打开设置"
         #expect(VoiceWakeRuntime._testTrimmedAfterTrigger(text, triggers: triggers) == "帮我打开设置")
     }
 
     @Test func trimsAfterTriggerHandlesWidthInsensitiveForms() {
-        let triggers = ["openclaw"]
+        let triggers = ["bot"]
         let text = "ＯｐｅｎＣｌａｗ 请帮我"
         #expect(VoiceWakeRuntime._testTrimmedAfterTrigger(text, triggers: triggers) == "请帮我")
     }
