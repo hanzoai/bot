@@ -14,7 +14,7 @@ const requiredPathGroups = [
   "dist/plugin-sdk/index.d.ts",
   "dist/build-info.json",
 ];
-const forbiddenPrefixes = ["dist/OpenClaw.app/"];
+const forbiddenPrefixes = ["dist/Hanzo Bot.app/"];
 
 type PackageJson = {
   name?: string;

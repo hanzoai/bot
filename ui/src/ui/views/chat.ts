@@ -374,6 +374,7 @@ export function renderChat(props: ChatProps) {
           <label class="field chat-compose__field">
             <span>Message</span>
             <textarea
+              rows="1"
               ${ref((el) => el && adjustTextareaHeight(el as HTMLTextAreaElement))}
               .value=${props.draft}
               dir=${detectTextDirection(props.draft)}
@@ -490,7 +491,7 @@ function buildChatItems(props: ChatProps): Array<ChatItem | MessageGroup> {
     const msg = history[i];
     const normalized = normalizeMessage(msg);
     const raw = msg as Record<string, unknown>;
-    const marker = raw.__openclaw as Record<string, unknown> | undefined;
+    const marker = raw["__hanzo-bot"] as Record<string, unknown> | undefined;
     if (marker && marker.kind === "compaction") {
       items.push({
         kind: "divider",
