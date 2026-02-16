@@ -40,6 +40,7 @@ import { getQueueSize } from "../process/command-queue.js";
 import { CommandLane } from "../process/lanes.js";
 import { normalizeAgentId, toAgentStoreSessionKey } from "../routing/session-key.js";
 import { defaultRuntime, type RuntimeEnv } from "../runtime.js";
+import { escapeRegExp } from "../utils.js";
 import { formatErrorMessage } from "./errors.js";
 import { isWithinActiveHours } from "./heartbeat-active-hours.js";
 import {
@@ -62,7 +63,7 @@ import {
 } from "./outbound/targets.js";
 import { peekSystemEventEntries } from "./system-events.js";
 
-type HeartbeatDeps = OutboundSendDeps &
+export type HeartbeatDeps = OutboundSendDeps &
   ChannelHeartbeatDeps & {
     runtime?: RuntimeEnv;
     getQueueSize?: (lane?: string) => number;
@@ -133,10 +134,7 @@ export function isHeartbeatEnabledForAgent(cfg: BotConfig, agentId?: string): bo
   return resolvedAgentId === resolveDefaultAgentId(cfg);
 }
 
-function resolveHeartbeatConfig(
-  cfg: BotConfig,
-  agentId?: string,
-): HeartbeatConfig | undefined {
+function resolveHeartbeatConfig(cfg: BotConfig, agentId?: string): HeartbeatConfig | undefined {
   const defaults = cfg.agents?.defaults?.heartbeat;
   if (!agentId) {
     return defaults;
@@ -253,11 +251,7 @@ function resolveHeartbeatAckMaxChars(cfg: BotConfig, heartbeat?: HeartbeatConfig
   );
 }
 
-function resolveHeartbeatSession(
-  cfg: BotConfig,
-  agentId?: string,
-  heartbeat?: HeartbeatConfig,
-) {
+function resolveHeartbeatSession(cfg: BotConfig, agentId?: string, heartbeat?: HeartbeatConfig) {
   const sessionCfg = cfg.session;
   const scope = sessionCfg?.scope ?? "per-sender";
   const resolvedAgentId = normalizeAgentId(agentId ?? resolveDefaultAgentId(cfg));
@@ -355,7 +349,13 @@ function normalizeHeartbeatReply(
   responsePrefix: string | undefined,
   ackMaxChars: number,
 ) {
-  const stripped = stripHeartbeatToken(payload.text, {
+  const rawText = typeof payload.text === "string" ? payload.text : "";
+
+  const prefixPattern = responsePrefix?.trim()
+    ? new RegExp(`^${escapeRegExp(responsePrefix.trim())}\\s*`, "i")
+    : null;
+  const textForStrip = prefixPattern ? rawText.replace(prefixPattern, "") : rawText;
+  const stripped = stripHeartbeatToken(textForStrip, {
     mode: "heartbeat",
     maxAckChars: ackMaxChars,
   });

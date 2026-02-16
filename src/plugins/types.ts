@@ -237,9 +237,7 @@ export type BotPluginDefinition = {
   activate?: (api: BotPluginApi) => void | Promise<void>;
 };
 
-export type BotPluginModule =
-  | BotPluginDefinition
-  | ((api: BotPluginApi) => void | Promise<void>);
+export type BotPluginModule = BotPluginDefinition | ((api: BotPluginApi) => void | Promise<void>);
 
 export type BotPluginApi = {
   id: string;
@@ -251,10 +249,7 @@ export type BotPluginApi = {
   pluginConfig?: Record<string, unknown>;
   runtime: PluginRuntime;
   logger: PluginLogger;
-  registerTool: (
-    tool: AnyAgentTool | BotPluginToolFactory,
-    opts?: BotPluginToolOptions,
-  ) => void;
+  registerTool: (tool: AnyAgentTool | BotPluginToolFactory, opts?: BotPluginToolOptions) => void;
   registerHook: (
     events: string | string[],
     handler: InternalHookHandler,
@@ -332,6 +327,10 @@ export type PluginHookBeforeAgentStartEvent = {
 export type PluginHookBeforeAgentStartResult = {
   systemPrompt?: string;
   prependContext?: string;
+  /** Override the model for this agent run. E.g. "llama3.3:8b" */
+  modelOverride?: string;
+  /** Override the provider for this agent run. E.g. "ollama" */
+  providerOverride?: string;
 };
 
 // llm_input hook

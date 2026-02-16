@@ -4,6 +4,7 @@ import { runNodeHost } from "../../node-host/runner.js";
 import { formatDocsLink } from "../../terminal/links.js";
 import { theme } from "../../terminal/theme.js";
 import { parsePort } from "../daemon-cli/shared.js";
+import { formatHelpExamples } from "../help-format.js";
 import {
   runNodeDaemonInstall,
   runNodeDaemonRestart,
@@ -20,10 +21,16 @@ function parsePortWithFallback(value: unknown, fallback: number): number {
 export function registerNodeCli(program: Command) {
   const node = program
     .command("node")
-    .description("Run a headless node host (system.run/system.which)")
+    .description("Run and manage the headless node host service")
     .addHelpText(
       "after",
-      () => `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/node", "docs.hanzo.bot/cli/node")}\n`,
+      () =>
+        `\n${theme.heading("Examples:")}\n${formatHelpExamples([
+          ["bot node run --host 127.0.0.1 --port 18789", "Run the node host in the foreground."],
+          ["bot node status", "Check node host service status."],
+          ["bot node install", "Install the node host service."],
+          ["bot node restart", "Restart the installed node host service."],
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/node", "docs.hanzo.bot/cli/node")}\n`,
     );
 
   node
