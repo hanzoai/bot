@@ -104,7 +104,7 @@ describe("bluebubblesMessageActions", () => {
 
     it("hides private-api actions when private API is disabled", () => {
       vi.mocked(getCachedBlueBubblesPrivateApiStatus).mockReturnValueOnce(false);
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           bluebubbles: {
             enabled: true,
@@ -223,7 +223,7 @@ describe("bluebubblesMessageActions", () => {
 
     it("throws a private-api error for private-only actions when disabled", async () => {
       vi.mocked(getCachedBlueBubblesPrivateApiStatus).mockReturnValueOnce(false);
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           bluebubbles: {
             serverUrl: "http://localhost:1234",

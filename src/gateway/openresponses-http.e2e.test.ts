@@ -36,9 +36,9 @@ async function startServer(port: number, opts?: { openResponsesEnabled?: boolean
 }
 
 async function writeGatewayConfig(config: Record<string, unknown>) {
-  const configPath = process.env.OPENCLAW_CONFIG_PATH;
+  const configPath = process.env.BOT_CONFIG_PATH;
   if (!configPath) {
-    throw new Error("OPENCLAW_CONFIG_PATH is required for gateway config tests");
+    throw new Error("BOT_CONFIG_PATH is required for gateway config tests");
   }
   await fs.mkdir(path.dirname(configPath), { recursive: true });
   await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
@@ -517,7 +517,7 @@ describe("OpenResponses HTTP API (e2e)", () => {
     agentCommand.mockReset();
 
     const blockedPrivate = await postResponses(port, {
-      model: "openclaw",
+      model: "bot",
       input: [
         {
           type: "message",
@@ -542,7 +542,7 @@ describe("OpenResponses HTTP API (e2e)", () => {
     );
 
     const blockedMetadata = await postResponses(port, {
-      model: "openclaw",
+      model: "bot",
       input: [
         {
           type: "message",
@@ -567,7 +567,7 @@ describe("OpenResponses HTTP API (e2e)", () => {
     );
 
     const blockedScheme = await postResponses(port, {
-      model: "openclaw",
+      model: "bot",
       input: [
         {
           type: "message",
@@ -620,7 +620,7 @@ describe("OpenResponses HTTP API (e2e)", () => {
       agentCommand.mockReset();
 
       const allowlistBlocked = await postResponses(allowlistPort, {
-        model: "openclaw",
+        model: "bot",
         input: [
           {
             type: "message",
@@ -674,7 +674,7 @@ describe("OpenResponses HTTP API (e2e)", () => {
     try {
       agentCommand.mockReset();
       const maxUrlBlocked = await postResponses(capPort, {
-        model: "openclaw",
+        model: "bot",
         input: [
           {
             type: "message",

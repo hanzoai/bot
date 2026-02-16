@@ -114,7 +114,7 @@ export async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise
       piEmbeddedMocks.compactEmbeddedPiSession.mockClear();
       return await fn(home);
     },
-    { prefix: "openclaw-triggers-" },
+    { prefix: "bot-triggers-" },
   );
 }
 
@@ -123,7 +123,7 @@ export function makeCfg(home: string): BotConfig {
     agents: {
       defaults: {
         model: { primary: "anthropic/claude-opus-4-5" },
-        workspace: join(home, "openclaw"),
+        workspace: join(home, "bot"),
       },
     },
     channels: {

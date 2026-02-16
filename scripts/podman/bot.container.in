@@ -1,0 +1,26 @@
+# Bot gateway — Podman Quadlet (rootless)
+# Installed by setup-podman.sh into bot's ~/.config/containers/systemd/
+# {{BOT_HOME}} is replaced at install time.
+
+[Unit]
+Description=Bot gateway (rootless Podman)
+
+[Container]
+Image=bot:local
+ContainerName=bot
+UserNS=keep-id
+Volume={{BOT_HOME}}/.bot:/home/node/.bot
+EnvironmentFile={{BOT_HOME}}/.bot/.env
+Environment=HOME=/home/node
+Environment=TERM=xterm-256color
+PublishPort=18789:18789
+PublishPort=18790:18790
+Pull=never
+Exec=node dist/index.js gateway --bind lan --port 18789
+
+[Service]
+TimeoutStartSec=300
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

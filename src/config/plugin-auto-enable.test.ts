@@ -34,7 +34,7 @@ describe("applyPluginAutoEnable", () => {
       config: {},
       env: {
         IRC_HOST: "irc.libera.chat",
-        IRC_NICK: "bot-bot",
+        IRC_NICK: "bot",
       },
     });
 

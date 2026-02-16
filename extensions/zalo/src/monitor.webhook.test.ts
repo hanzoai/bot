@@ -1,5 +1,5 @@
-import type { AddressInfo } from "node:net";
 import type { BotConfig, PluginRuntime } from "bot/plugin-sdk";
+import type { AddressInfo } from "node:net";
 import { createServer } from "node:http";
 import { describe, expect, it, vi } from "vitest";
 import type { ResolvedZaloAccount } from "./types.js";
@@ -85,7 +85,7 @@ describe("handleZaloWebhookRequest", () => {
     const unregisterA = registerZaloWebhookTarget({
       token: "tok",
       account,
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       runtime: {},
       core,
       secret: "secret",
@@ -96,7 +96,7 @@ describe("handleZaloWebhookRequest", () => {
     const unregisterB = registerZaloWebhookTarget({
       token: "tok",
       account,
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       runtime: {},
       core,
       secret: "secret",

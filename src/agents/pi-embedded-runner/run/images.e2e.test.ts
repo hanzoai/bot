@@ -207,7 +207,7 @@ describe("modelSupportsImages", () => {
 
 describe("loadImageFromRef", () => {
   it("allows sandbox-validated host paths outside default media roots", async () => {
-    const sandboxParent = await fs.mkdtemp(path.join(os.homedir(), "openclaw-sandbox-image-"));
+    const sandboxParent = await fs.mkdtemp(path.join(os.homedir(), "bot-sandbox-image-"));
     try {
       const sandboxRoot = path.join(sandboxParent, "sandbox");
       await fs.mkdir(sandboxRoot, { recursive: true });

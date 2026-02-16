@@ -8,11 +8,11 @@ import { withTempHome } from "./test-helpers.js";
 describe("config backup rotation", () => {
   it("keeps a 5-deep backup ring for config writes", async () => {
     await withTempHome(async () => {
-      const stateDir = process.env.OPENCLAW_STATE_DIR?.trim();
+      const stateDir = process.env.BOT_STATE_DIR?.trim();
       if (!stateDir) {
-        throw new Error("Expected OPENCLAW_STATE_DIR to be set by withTempHome");
+        throw new Error("Expected BOT_STATE_DIR to be set by withTempHome");
       }
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "bot.json");
       const buildConfig = (version: number): BotConfig =>
         ({
           agents: { list: [{ id: `v${version}` }] },

@@ -160,7 +160,7 @@
     "githubPath": "skills/camsnap/SKILL.md"
   },
   {
-    "slug": "clawhub",
+    "slug": "bothub",
     "name": "skills-hub",
     "description": "Use the Hanzo Skills Hub CLI to search, install, update, and publish agent skills from skills.hanzo.bot. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed skills-hub CLI.",
     "emoji": "🔧",
@@ -177,7 +177,7 @@
       }
     ],
     "fileSize": 1706,
-    "githubPath": "skills/clawhub/SKILL.md"
+    "githubPath": "skills/bothub/SKILL.md"
   },
   {
     "slug": "coding-agent",

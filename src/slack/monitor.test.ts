@@ -165,9 +165,9 @@ describe("buildSlackSlashCommandMatcher", () => {
   });
 
   it("does not match similar names", () => {
-    const matcher = buildSlackSlashCommandMatcher("bot");
+    const matcher = buildSlackSlashCommandMatcher("hanzo-bot");
 
-    expect(matcher.test("/bot-bot")).toBe(false);
-    expect(matcher.test("bot-bot")).toBe(false);
+    expect(matcher.test("/hanzo-bot-prod")).toBe(false);
+    expect(matcher.test("hanzo-bot-prod")).toBe(false);
   });
 });

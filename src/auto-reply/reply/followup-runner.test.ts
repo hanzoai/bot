@@ -134,7 +134,7 @@ describe("createFollowupRunner compaction", () => {
 
   it("updates totalTokens after auto-compaction using lastCallUsage", async () => {
     const storePath = path.join(
-      await fs.mkdtemp(path.join(tmpdir(), "openclaw-followup-compaction-")),
+      await fs.mkdtemp(path.join(tmpdir(), "bot-followup-compaction-")),
       "sessions.json",
     );
     const sessionKey = "main";

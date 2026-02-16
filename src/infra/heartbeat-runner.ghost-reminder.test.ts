@@ -31,9 +31,7 @@ afterEach(() => {
 });
 
 describe("Ghost reminder bug (issue #13317)", () => {
-  const createConfig = async (
-    tmpDir: string,
-  ): Promise<{ cfg: BotConfig; sessionKey: string }> => {
+  const createConfig = async (tmpDir: string): Promise<{ cfg: BotConfig; sessionKey: string }> => {
     const storePath = path.join(tmpDir, "sessions.json");
     const cfg: BotConfig = {
       agents: {
@@ -121,7 +119,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
   };
 
   it("does not use CRON_EVENT_PROMPT when only a HEARTBEAT_OK event is present", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ghost-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ghost-"));
     const sendTelegram = vi.fn().mockResolvedValue({
       messageId: "m1",
       chatId: "155462274",
@@ -157,7 +155,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("uses CRON_EVENT_PROMPT when an actionable cron event exists", async () => {
     const { result, sendTelegram, getReplySpy } = await runCronReminderCase(
-      "openclaw-cron-",
+      "bot-cron-",
       (sessionKey) => {
         enqueueSystemEvent("Reminder: Check Base Scout results", { sessionKey });
       },
@@ -169,7 +167,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("uses CRON_EVENT_PROMPT when cron events are mixed with heartbeat noise", async () => {
     const { result, sendTelegram, getReplySpy } = await runCronReminderCase(
-      "openclaw-cron-mixed-",
+      "bot-cron-mixed-",
       (sessionKey) => {
         enqueueSystemEvent("HEARTBEAT_OK", { sessionKey });
         enqueueSystemEvent("Reminder: Check Base Scout results", { sessionKey });
@@ -181,7 +179,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
   });
 
   it("uses CRON_EVENT_PROMPT for tagged cron events on interval wake", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-interval-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-cron-interval-"));
     const sendTelegram = vi.fn().mockResolvedValue({
       messageId: "m1",
       chatId: "155462274",

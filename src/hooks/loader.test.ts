@@ -18,7 +18,7 @@ describe("loader", () => {
   let originalBundledDir: string | undefined;
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hooks-loader-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-hooks-loader-"));
   });
 
   beforeEach(async () => {
@@ -28,17 +28,17 @@ describe("loader", () => {
     await fs.mkdir(tmpDir, { recursive: true });
 
     // Disable bundled hooks during tests by setting env var to non-existent directory
-    originalBundledDir = process.env.OPENCLAW_BUNDLED_HOOKS_DIR;
-    process.env.OPENCLAW_BUNDLED_HOOKS_DIR = "/nonexistent/bundled/hooks";
+    originalBundledDir = process.env.BOT_BUNDLED_HOOKS_DIR;
+    process.env.BOT_BUNDLED_HOOKS_DIR = "/nonexistent/bundled/hooks";
   });
 
   afterEach(async () => {
     clearInternalHooks();
     // Restore original env var
     if (originalBundledDir === undefined) {
-      delete process.env.OPENCLAW_BUNDLED_HOOKS_DIR;
+      delete process.env.BOT_BUNDLED_HOOKS_DIR;
     } else {
-      process.env.OPENCLAW_BUNDLED_HOOKS_DIR = originalBundledDir;
+      process.env.BOT_BUNDLED_HOOKS_DIR = originalBundledDir;
     }
   });
 

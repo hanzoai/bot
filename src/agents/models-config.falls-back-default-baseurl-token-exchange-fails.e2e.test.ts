@@ -28,7 +28,7 @@ describe("models-config", () => {
       try {
         await ensureBotModelsJson({ models: { providers: {} } });
 
-        const agentDir = path.join(process.env.HOME ?? "", ".openclaw", "agents", "main", "agent");
+        const agentDir = path.join(process.env.HOME ?? "", ".bot", "agents", "main", "agent");
         const raw = await fs.readFile(path.join(agentDir, "models.json"), "utf8");
         const parsed = JSON.parse(raw) as {
           providers: Record<string, { baseUrl?: string }>;

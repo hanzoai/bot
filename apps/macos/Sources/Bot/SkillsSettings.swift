@@ -1,5 +1,5 @@
 import Observation
-import OpenClawProtocol
+import BotProtocol
 import SwiftUI
 
 struct SkillsSettings: View {
@@ -225,15 +225,15 @@ private struct SkillRow: View {
 
     private var sourceLabel: String {
         switch self.skill.source {
-        case "openclaw-bundled":
+        case "bot-bundled":
             "Bundled"
-        case "openclaw-managed":
+        case "bot-managed":
             "Managed"
-        case "openclaw-workspace":
+        case "bot-workspace":
             "Workspace"
-        case "openclaw-extra":
+        case "bot-extra":
             "Extra"
-        case "openclaw-plugin":
+        case "bot-plugin":
             "Plugin"
         default:
             self.skill.source
@@ -573,7 +573,7 @@ extension SkillsSettings {
         let skill = SkillStatus(
             name: "Test Skill",
             description: "Test description",
-            source: "openclaw-bundled",
+            source: "bot-bundled",
             filePath: "/tmp/skills/test",
             baseDir: "/tmp/skills",
             skillKey: "test",

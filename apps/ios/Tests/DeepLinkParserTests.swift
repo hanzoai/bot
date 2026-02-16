@@ -79,10 +79,10 @@ import Testing
 
     @Test func parseGatewayLinkParsesCommonFields() {
         let url = URL(
-            string: "openclaw://gateway?host=openclaw.local&port=18789&tls=1&token=abc&password=def")!
+            string: "bot://gateway?host=bot.local&port=18789&tls=1&token=abc&password=def")!
         #expect(
             DeepLinkParser.parse(url) == .gateway(
-                .init(host: "openclaw.local", port: 18789, tls: true, token: "abc", password: "def")))
+                .init(host: "bot.local", port: 18789, tls: true, token: "abc", password: "def")))
     }
 
     @Test func parseGatewaySetupCodeParsesBase64UrlPayload() {

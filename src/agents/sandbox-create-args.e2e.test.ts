@@ -129,8 +129,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("throws on dangerous bind mounts (Docker socket)", () => {
     const cfg: SandboxDockerConfig = {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "bot-sandbox:bookworm-slim",
+      containerPrefix: "bot-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -141,7 +141,7 @@ describe("buildSandboxCreateArgs", () => {
 
     expect(() =>
       buildSandboxCreateArgs({
-        name: "openclaw-sbx-dangerous",
+        name: "bot-sbx-dangerous",
         cfg,
         scopeKey: "main",
         createdAtMs: 1700000000000,
@@ -151,8 +151,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("throws on dangerous bind mounts (parent path)", () => {
     const cfg: SandboxDockerConfig = {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "bot-sandbox:bookworm-slim",
+      containerPrefix: "bot-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -163,7 +163,7 @@ describe("buildSandboxCreateArgs", () => {
 
     expect(() =>
       buildSandboxCreateArgs({
-        name: "openclaw-sbx-dangerous-parent",
+        name: "bot-sbx-dangerous-parent",
         cfg,
         scopeKey: "main",
         createdAtMs: 1700000000000,
@@ -173,8 +173,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("throws on network host mode", () => {
     const cfg: SandboxDockerConfig = {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "bot-sandbox:bookworm-slim",
+      containerPrefix: "bot-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -184,7 +184,7 @@ describe("buildSandboxCreateArgs", () => {
 
     expect(() =>
       buildSandboxCreateArgs({
-        name: "openclaw-sbx-host",
+        name: "bot-sbx-host",
         cfg,
         scopeKey: "main",
         createdAtMs: 1700000000000,
@@ -194,8 +194,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("throws on seccomp unconfined", () => {
     const cfg: SandboxDockerConfig = {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "bot-sandbox:bookworm-slim",
+      containerPrefix: "bot-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -206,7 +206,7 @@ describe("buildSandboxCreateArgs", () => {
 
     expect(() =>
       buildSandboxCreateArgs({
-        name: "openclaw-sbx-seccomp",
+        name: "bot-sbx-seccomp",
         cfg,
         scopeKey: "main",
         createdAtMs: 1700000000000,
@@ -216,8 +216,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("throws on apparmor unconfined", () => {
     const cfg: SandboxDockerConfig = {
-      image: "openclaw-sandbox:bookworm-slim",
-      containerPrefix: "openclaw-sbx-",
+      image: "bot-sandbox:bookworm-slim",
+      containerPrefix: "bot-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -228,7 +228,7 @@ describe("buildSandboxCreateArgs", () => {
 
     expect(() =>
       buildSandboxCreateArgs({
-        name: "openclaw-sbx-apparmor",
+        name: "bot-sbx-apparmor",
         cfg,
         scopeKey: "main",
         createdAtMs: 1700000000000,

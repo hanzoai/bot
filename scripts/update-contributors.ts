@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { ApiContributor, Entry, MapConfig, User } from "./update-contributors.types.js";
 
-const REPO = "hanzoai/bot-bot";
+const REPO = "hanzoai/bot";
 const PER_LINE = 10;
 
 const mapPath = resolve("scripts/contributors-map.json");

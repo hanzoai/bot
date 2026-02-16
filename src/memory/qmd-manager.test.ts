@@ -128,7 +128,7 @@ describe("QmdMemoryManager", () => {
     await fs.mkdir(workspaceDir);
     stateDir = path.join(tmpRoot, "state");
     await fs.mkdir(stateDir);
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.BOT_STATE_DIR = stateDir;
     cfg = {
       agents: {
         list: [{ id: agentId, default: true, workspace: workspaceDir }],
@@ -146,7 +146,7 @@ describe("QmdMemoryManager", () => {
 
   afterEach(async () => {
     vi.useRealTimers();
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   });
 
   it("debounces back-to-back sync calls", async () => {

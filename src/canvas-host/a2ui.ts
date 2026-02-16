@@ -92,9 +92,9 @@ export function injectCanvasLiveReload(html: string): string {
     const action = { ...userAction, id };
     return postToNode({ userAction: action });
   }
-  globalThis.Hanzo Bot = globalThis.Hanzo Bot ?? {};
-  globalThis.Hanzo Bot.postMessage = postToNode;
-  globalThis.Hanzo Bot.sendUserAction = sendUserAction;
+  globalThis.HanzoBot = globalThis.HanzoBot ?? {};
+  globalThis.HanzoBot.postMessage = postToNode;
+  globalThis.HanzoBot.sendUserAction = sendUserAction;
   globalThis.botPostMessage = postToNode;
   globalThis.botSendUserAction = sendUserAction;
 

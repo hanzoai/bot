@@ -16,7 +16,7 @@ The recommended way to deploy Hanzo Bot to production servers is via **[bot-ansi
 One-command install:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/bot/bot-ansible/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/hanzoai/bot-ansible/main/install.sh | bash
 ```
 
 > **📦 Full guide: [github.com/hanzoai/bot-ansible](https://github.com/hanzoai/bot-ansible)**
