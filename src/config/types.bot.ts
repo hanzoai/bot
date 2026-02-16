@@ -121,7 +121,7 @@ export type ConfigFileSnapshot = {
    * defaults are applied. Use this for config set/unset operations to avoid
    * leaking runtime defaults into the written config file.
    */
-  resolved: OpenClawConfig;
+  resolved: BotConfig;
   valid: boolean;
   config: BotConfig;
   hash?: string;
