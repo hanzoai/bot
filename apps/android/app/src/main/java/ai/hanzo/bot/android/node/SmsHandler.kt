@@ -1,6 +1,6 @@
-package ai.openclaw.android.node
+package ai.bot.android.node
 
-import ai.openclaw.android.gateway.GatewaySession
+import ai.bot.android.gateway.GatewaySession
 
 class SmsHandler(
   private val sms: SmsManager,

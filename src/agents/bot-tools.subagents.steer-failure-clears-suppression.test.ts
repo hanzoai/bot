@@ -2,28 +2,25 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  callGatewayMock,
-  setSubagentsConfigOverride,
-} from "./openclaw-tools.subagents.test-harness.js";
+import { callGatewayMock, setSubagentsConfigOverride } from "./bot-tools.subagents.test-harness.js";
 import "./test-helpers/fast-core-tools.js";
 
-let createBotTools: (typeof import("./openclaw-tools.js"))["createBotTools"];
+let createBotTools: (typeof import("./bot-tools.js"))["createBotTools"];
 let addSubagentRunForTests: (typeof import("./subagent-registry.js"))["addSubagentRunForTests"];
 let listSubagentRunsForRequester: (typeof import("./subagent-registry.js"))["listSubagentRunsForRequester"];
 let resetSubagentRegistryForTests: (typeof import("./subagent-registry.js"))["resetSubagentRegistryForTests"];
 
-describe("openclaw-tools: subagents steer failure", () => {
+describe("bot-tools: subagents steer failure", () => {
   beforeEach(async () => {
     vi.resetModules();
-    ({ createBotTools } = await import("./openclaw-tools.js"));
+    ({ createBotTools } = await import("./bot-tools.js"));
     ({ addSubagentRunForTests, listSubagentRunsForRequester, resetSubagentRegistryForTests } =
       await import("./subagent-registry.js"));
     resetSubagentRegistryForTests();
     callGatewayMock.mockReset();
     const storePath = path.join(
       os.tmpdir(),
-      `openclaw-subagents-steer-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
+      `bot-subagents-steer-${Date.now()}-${Math.random().toString(16).slice(2)}.json`,
     );
     setSubagentsConfigOverride({
       session: {

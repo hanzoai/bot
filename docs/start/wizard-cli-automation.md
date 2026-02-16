@@ -108,7 +108,7 @@ Add `--json` for a machine-readable summary.
   </Accordion>
   <Accordion title="Custom provider example">
     ```bash
-    openclaw onboard --non-interactive \
+    bot onboard --non-interactive \
       --mode local \
       --auth-choice custom-api-key \
       --custom-base-url "https://llm.example.com/v1" \

@@ -8,7 +8,7 @@
     "url": "https://github.com/hanzoai/bot/issues"
   },
   "license": "MIT",
-  "author": "",
+  "author": "Hanzo AI Inc",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hanzoai/bot.git"
@@ -46,6 +46,9 @@
     },
     "./cli-entry": "./hanzo-bot.mjs"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "android:assemble": "cd apps/android && ./gradlew :app:assembleDebug",
     "android:install": "cd apps/android && ./gradlew :app:installDebug",
@@ -71,6 +74,8 @@
     "gateway:dev": "BOT_SKIP_CHANNELS=1 node scripts/run-node.mjs --dev gateway",
     "gateway:dev:reset": "BOT_SKIP_CHANNELS=1 node scripts/run-node.mjs --dev gateway --reset",
     "gateway:watch": "node scripts/watch-node.mjs gateway --force",
+    "hanzo-bot": "node scripts/run-node.mjs",
+    "hanzo-bot:rpc": "node scripts/run-node.mjs agent --mode rpc --json",
     "ios:build": "bash -lc 'cd apps/ios && xcodegen generate && xcodebuild -project Hanzo Bot.xcodeproj -scheme Hanzo Bot -destination \"${IOS_DEST:-platform=iOS Simulator,name=iPhone 17}\" -configuration Debug build'",
     "ios:gen": "cd apps/ios && xcodegen generate",
     "ios:open": "cd apps/ios && xcodegen generate && open Hanzo Bot.xcodeproj",
@@ -121,9 +126,7 @@
     "tui:dev": "BOT_PROFILE=dev node scripts/run-node.mjs --dev tui",
     "ui:build": "node scripts/ui.js build",
     "ui:dev": "node scripts/ui.js dev",
-    "ui:install": "node scripts/ui.js install",
-    "hanzo-bot": "node scripts/run-node.mjs",
-    "hanzo-bot:rpc": "node scripts/run-node.mjs agent --mode rpc --json"
+    "ui:install": "node scripts/ui.js install"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "0.14.1",
@@ -231,8 +234,5 @@
       "protobufjs",
       "sharp"
     ]
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
