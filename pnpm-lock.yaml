@@ -369,6 +369,12 @@ importers:
         specifier: workspace:*
         version: link:../..
 
+  extensions/lobster:
+    devDependencies:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
+
   extensions/matrix:
     dependencies:
       '@matrix-org/matrix-sdk-crypto-nodejs':
