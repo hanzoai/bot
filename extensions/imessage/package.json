@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/imessage",
+  "name": "@hanzo/bot-imessage",
   "version": "2026.2.16",
   "private": true,
-  "description": "OpenClaw iMessage channel plugin",
+  "description": "Hanzo Bot iMessage channel plugin",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]
