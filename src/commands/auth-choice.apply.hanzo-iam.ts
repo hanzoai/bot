@@ -221,10 +221,10 @@ export async function applyAuthChoiceHanzoIam(
     spin.stop("Hanzo login complete");
 
     const creds = {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token ?? "",
+      access: tokens.access_token,
+      refresh: tokens.refresh_token ?? "",
+      expires: tokens.expires_in ? Date.now() + tokens.expires_in * 1000 : 0,
       tokenType: tokens.token_type,
-      expiresIn: tokens.expires_in,
       createdAt: Date.now(),
     };
 
