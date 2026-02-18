@@ -1,5 +1,5 @@
 /**
- * Usage reporter — asynchronously reports LLM usage to IAM
+ * Usage reporter — asynchronously reports LLM usage to Commerce API
  * after each completion, batching when possible.
  *
  * When IAM is not configured, this is a no-op.
@@ -94,54 +94,43 @@ export async function flushUsageQueue(): Promise<void> {
   const batch = queue.splice(0, MAX_BATCH_SIZE);
 
   try {
-    const baseUrl = currentIamConfig.serverUrl.replace(/\/+$/, "");
+    // Resolve Commerce API URL
+    const baseUrl = (
+      process.env.COMMERCE_API_URL ?? "http://commerce.hanzo.svc.cluster.local:8001"
+    ).replace(/\/+$/, "");
+
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       Accept: "application/json",
     };
 
-    // Use client credentials for server-to-server auth
-    if (currentIamConfig.clientSecret) {
+    // Auth: prefer service token, fall back to client credentials
+    if (process.env.COMMERCE_SERVICE_TOKEN) {
+      headers.Authorization = `Bearer ${process.env.COMMERCE_SERVICE_TOKEN}`;
+    } else if (currentIamConfig.clientSecret) {
       const basic = Buffer.from(
         `${currentIamConfig.clientId}:${currentIamConfig.clientSecret}`,
       ).toString("base64");
       headers.Authorization = `Basic ${basic}`;
     }
 
-    // Aggregate by org for batched reporting
-    const byOrg = new Map<string, UsageRecord[]>();
+    // Send each record individually to Commerce /api/v1/billing/usage
     for (const record of batch) {
-      const orgId = record.tenant.orgId;
-      const existing = byOrg.get(orgId);
-      if (existing) {
-        existing.push(record);
-      } else {
-        byOrg.set(orgId, [record]);
-      }
-    }
-
-    for (const [orgId, records] of byOrg) {
       const payload = {
-        owner: orgId,
-        records: records.map((r) => ({
-          model: r.model,
-          provider: r.provider,
-          inputTokens: r.inputTokens,
-          outputTokens: r.outputTokens,
-          cacheReadTokens: r.cacheReadTokens ?? 0,
-          cacheWriteTokens: r.cacheWriteTokens ?? 0,
-          totalTokens: r.totalTokens,
-          durationMs: r.durationMs,
-          userId: r.tenant.userId,
-          projectId: r.tenant.projectId,
-          timestamp: new Date(r.timestamp).toISOString(),
-        })),
+        user: record.tenant.userId || record.tenant.orgId,
+        currency: "usd",
+        amount: 0, // Commerce calculates cost from token counts + model
+        model: record.model,
+        provider: record.provider,
+        tokens: record.totalTokens,
+        promptTokens: record.inputTokens,
+        completionTokens: record.outputTokens,
       };
 
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 10_000);
       try {
-        await fetch(`${baseUrl}/api/add-usage-record`, {
+        await fetch(`${baseUrl}/api/v1/billing/usage`, {
           method: "POST",
           headers,
           body: JSON.stringify(payload),
