@@ -50,6 +50,7 @@ import {
 import { MAX_BUFFERED_BYTES, MAX_PAYLOAD_BYTES, TICK_INTERVAL_MS } from "../../server-constants.js";
 import { handleGatewayRequest } from "../../server-methods.js";
 import { formatError } from "../../server-utils.js";
+import { resolveTenantContext, validateTenantAccess } from "../../tenant-context.js";
 import { formatForLog, logWs } from "../../ws-log.js";
 import { truncateCloseReason } from "../close-reason.js";
 import {
@@ -858,6 +859,29 @@ export function attachGatewayWsMessageHandler(params: {
           presenceKey,
           clientIp: reportedClientIp,
         };
+
+        // Enrich client with IAM tenant context when auth mode is "iam"
+        if (authResult.iamResult && authResult.iamResult.ok) {
+          nextClient.iamResult = authResult.iamResult;
+          const tenant = resolveTenantContext({
+            iamResult: authResult.iamResult,
+            requestedTenant: connectParams.tenant,
+          });
+          if (tenant) {
+            const accessError = validateTenantAccess({
+              iamResult: authResult.iamResult,
+              tenant,
+            });
+            if (accessError) {
+              setHandshakeState("failed");
+              send(errorShape(ErrorCodes.INVALID_REQUEST, `Tenant access denied: ${accessError}`));
+              close(4003, accessError);
+              return;
+            }
+            nextClient.tenant = tenant;
+          }
+        }
+
         setClient(nextClient);
         setHandshakeState("connected");
         if (role === "node") {
