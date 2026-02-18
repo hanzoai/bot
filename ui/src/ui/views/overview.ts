@@ -123,6 +123,8 @@ export function renderOverview(props: OverviewProps) {
   })();
 
   const currentLocale = i18n.getLocale();
+  const authMode = (snapshot as { authMode?: string } | undefined)?.authMode;
+  const isTrustedProxy = authMode === "trusted-proxy";
 
   return html`
     <section class="grid grid-cols-2">
