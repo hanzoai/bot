@@ -9,6 +9,7 @@ import {
   type ResolvedGatewayAuth,
   resolveGatewayAuth,
 } from "./auth.js";
+import { configureUsageReporter } from "./billing/usage-reporter.js";
 import { normalizeControlUiBasePath } from "./control-ui-shared.js";
 import { resolveHooksConfig } from "./hooks.js";
 import { isLoopbackHost, resolveGatewayBindHost } from "./net.js";
@@ -89,6 +90,12 @@ export async function resolveGatewayRuntimeConfig(params: {
   const trustedProxies = params.cfg.gateway?.trustedProxies ?? [];
 
   assertGatewayAuthConfigured(resolvedAuth);
+
+  // Initialize usage reporter for IAM billing
+  if (resolvedAuth.mode === "iam" && resolvedAuth.iam) {
+    configureUsageReporter(resolvedAuth.iam);
+  }
+
   if (tailscaleMode === "funnel" && authMode !== "password") {
     throw new Error(
       "tailscale funnel requires gateway auth mode=password (set gateway.auth.password or BOT_GATEWAY_PASSWORD)",
