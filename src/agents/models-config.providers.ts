@@ -656,6 +656,101 @@ export function buildNvidiaProvider(): ProviderConfig {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Hanzo Cloud — routes through api.hanzo.ai with IAM JWT auth
+// ---------------------------------------------------------------------------
+
+const HANZO_API_BASE_URL = "https://api.hanzo.ai/v1";
+
+/** Build the Hanzo Cloud provider with Zen + family of models via api.hanzo.ai gateway. */
+export function buildHanzoCloudProvider(): ProviderConfig {
+  return {
+    baseUrl: HANZO_API_BASE_URL,
+    api: "anthropic-messages",
+    models: [
+      // Zen — Hanzo's native model family
+      {
+        id: "zen-1",
+        name: "Zen 1",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
+        contextWindow: 200000,
+        maxTokens: 16384,
+      },
+      {
+        id: "zen-1-mini",
+        name: "Zen 1 Mini",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 1, output: 5, cacheRead: 0.1, cacheWrite: 1.25 },
+        contextWindow: 200000,
+        maxTokens: 16384,
+      },
+      // Anthropic Claude (via Hanzo gateway)
+      {
+        id: "claude-opus-4-6",
+        name: "Claude Opus 4.6",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 15, output: 75, cacheRead: 1.5, cacheWrite: 18.75 },
+        contextWindow: 200000,
+        maxTokens: 32000,
+      },
+      {
+        id: "claude-sonnet-4-5-20250929",
+        name: "Claude Sonnet 4.5",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 },
+        contextWindow: 200000,
+        maxTokens: 16384,
+      },
+      {
+        id: "claude-haiku-4-5-20251001",
+        name: "Claude Haiku 4.5",
+        reasoning: false,
+        input: ["text", "image"],
+        cost: { input: 0.8, output: 4, cacheRead: 0.08, cacheWrite: 1 },
+        contextWindow: 200000,
+        maxTokens: 8192,
+      },
+      // OpenAI (via Hanzo gateway — OpenAI-compatible)
+      {
+        id: "gpt-5.2",
+        name: "GPT 5.2",
+        api: "openai-completions" as const,
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 5, output: 15, cacheRead: 0.5, cacheWrite: 5 },
+        contextWindow: 128000,
+        maxTokens: 16384,
+      },
+      {
+        id: "gpt-5.1",
+        name: "GPT 5.1",
+        api: "openai-completions" as const,
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 2.5, output: 10, cacheRead: 0.25, cacheWrite: 2.5 },
+        contextWindow: 128000,
+        maxTokens: 16384,
+      },
+      // Google Gemini (via Hanzo gateway)
+      {
+        id: "gemini-3-pro",
+        name: "Gemini 3 Pro",
+        api: "openai-completions" as const,
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 1.25, output: 5, cacheRead: 0.125, cacheWrite: 1.25 },
+        contextWindow: 2000000,
+        maxTokens: 65536,
+      },
+    ],
+  };
+}
+
 export async function resolveImplicitProviders(params: {
   agentDir: string;
   explicitProviders?: Record<string, ProviderConfig> | null;
@@ -805,6 +900,15 @@ export async function resolveImplicitProviders(params: {
     resolveApiKeyFromProfiles({ provider: "nvidia", store: authStore });
   if (nvidiaKey) {
     providers.nvidia = { ...buildNvidiaProvider(), apiKey: nvidiaKey };
+  }
+
+  // Hanzo Cloud provider — routes through api.hanzo.ai with IAM JWT auth.
+  // Auto-registers when HANZO_API_KEY is set (via IAM OAuth) or hanzo-iam profile exists.
+  const hanzoKey =
+    resolveEnvApiKeyVarName("hanzo") ??
+    resolveApiKeyFromProfiles({ provider: "hanzo-iam", store: authStore });
+  if (hanzoKey) {
+    providers.hanzo = { ...buildHanzoCloudProvider(), apiKey: hanzoKey };
   }
 
   return providers;
