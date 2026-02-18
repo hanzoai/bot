@@ -76,7 +76,25 @@ export type GatewayControlUiConfig = {
   dangerouslyDisableDeviceAuth?: boolean;
 };
 
-export type GatewayAuthMode = "token" | "password" | "trusted-proxy";
+export type GatewayAuthMode = "token" | "password" | "trusted-proxy" | "iam";
+
+/**
+ * Configuration for IAM (OIDC) authentication.
+ * Used when Bot connects to an IAM server (e.g. iam.hanzo.ai) for
+ * organization-based auth with JWT tokens.
+ */
+export type GatewayIamConfig = {
+  /** IAM server URL (e.g. "https://iam.hanzo.ai"). */
+  serverUrl: string;
+  /** OAuth2 client ID registered with the IAM server. */
+  clientId: string;
+  /** OAuth2 client secret (optional; required for confidential clients). */
+  clientSecret?: string;
+  /** Default org name/slug for login redirects. */
+  orgName?: string;
+  /** OAuth2 scopes to request (defaults to ["openid", "profile", "email"]). */
+  scopes?: string[];
+};
 
 /**
  * Configuration for trusted reverse proxy authentication.
@@ -119,6 +137,11 @@ export type GatewayAuthConfig = {
    * Required when mode is "trusted-proxy".
    */
   trustedProxy?: GatewayTrustedProxyConfig;
+  /**
+   * Configuration for IAM (OIDC) auth mode.
+   * Required when mode is "iam".
+   */
+  iam?: GatewayIamConfig;
 };
 
 export type GatewayAuthRateLimitConfig = {
