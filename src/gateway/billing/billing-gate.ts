@@ -1,6 +1,6 @@
 /**
  * Billing gate — checks whether a request is allowed to proceed
- * based on the tenant's subscription status.
+ * based on the tenant's subscription status AND prepaid balance.
  *
  * When billing is not applicable (non-IAM mode, no tenant), the gate
  * always allows the request.
@@ -8,7 +8,11 @@
 
 import type { GatewayIamConfig } from "../../config/config.js";
 import type { TenantContext } from "../tenant-context.js";
-import { getSubscriptionStatus, type SubscriptionStatus } from "./iam-billing-client.js";
+import {
+  getSubscriptionStatus,
+  getBalance,
+  type SubscriptionStatus,
+} from "./iam-billing-client.js";
 
 export type BillingGateResult =
   | { allowed: true }
@@ -20,10 +24,10 @@ export type BillingGateResult =
  * Returns `{ allowed: true }` when:
  * - No IAM config (personal / self-hosted mode)
  * - No tenant context (personal / self-hosted mode)
- * - Tenant has an active subscription
+ * - Tenant has prepaid credit balance > 0
  *
- * Returns `{ allowed: false, reason }` when the subscription is
- * missing, expired, or otherwise inactive.
+ * Returns `{ allowed: false, reason }` when balance is zero
+ * or billing service is unreachable (fail-closed for billing).
  */
 export async function checkBillingAllowance(params: {
   iamConfig?: GatewayIamConfig | null;
@@ -37,26 +41,34 @@ export async function checkBillingAllowance(params: {
   }
 
   try {
-    const status = await getSubscriptionStatus(params.iamConfig, params.tenant, params.token);
+    // Check prepaid balance — primary billing gate
+    const userId = params.tenant.userId || params.tenant.orgId;
+    const available = await getBalance(params.iamConfig, userId, params.token);
 
+    if (available > 0) {
+      return { allowed: true };
+    }
+
+    // No balance — check subscription as fallback (some plans may not require prepaid)
+    const status = await getSubscriptionStatus(params.iamConfig, params.tenant, params.token);
     if (status.active) {
       return { allowed: true };
     }
 
     return {
       allowed: false,
-      reason: status.subscription
-        ? `Subscription "${status.subscription.displayName ?? status.subscription.name}" is not active (state: ${status.subscription.state ?? "unknown"})`
-        : `No active subscription found for organization "${params.tenant.orgId}"`,
+      reason: `Insufficient funds — add credits to continue. Balance: $${(available / 100).toFixed(2)}`,
       status,
     };
   } catch (err) {
-    // If the billing service is unreachable, fail open to avoid
-    // blocking legitimate requests when IAM is temporarily down.
-    // Log the error and allow.
-    console.warn(
-      `[billing-gate] Failed to check subscription for org "${params.tenant.orgId}": ${err instanceof Error ? err.message : String(err)}`,
+    // Billing service unreachable — fail closed. Do not allow usage without billing.
+    console.error(
+      `[billing-gate] Failed to check billing for "${params.tenant.orgId}": ${err instanceof Error ? err.message : String(err)}`,
     );
-    return { allowed: true };
+    return {
+      allowed: false,
+      reason: "Billing service unavailable — please try again",
+      status: { active: false, subscription: null, plan: null },
+    };
   }
 }
