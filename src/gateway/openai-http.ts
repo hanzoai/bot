@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
+import type { GatewayIamConfig } from "../config/config.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import type { ResolvedGatewayAuth } from "./auth.js";
 import { createDefaultDeps } from "../cli/deps.js";
@@ -12,15 +13,19 @@ import {
   buildAgentMessageFromConversationEntries,
   type ConversationEntry,
 } from "./agent-prompt.js";
+import { checkBillingAllowance } from "./billing/billing-gate.js";
+import { reportUsage } from "./billing/usage-reporter.js";
 import { sendJson, setSseHeaders, writeDone } from "./http-common.js";
 import { handleGatewayPostJsonEndpoint } from "./http-endpoint-helpers.js";
 import { resolveAgentIdForRequest, resolveSessionKey } from "./http-utils.js";
+import { resolveTenantContext, type TenantContext } from "./tenant-context.js";
 
 type OpenAiHttpOptions = {
   auth: ResolvedGatewayAuth;
   maxBodyBytes?: number;
   trustedProxies?: string[];
   rateLimiter?: AuthRateLimiter;
+  iamConfig?: GatewayIamConfig;
 };
 
 type OpenAiChatMessage = {
@@ -165,6 +170,27 @@ export async function handleOpenAiHttpRequest(
   const model = typeof payload.model === "string" ? payload.model : "bot";
   const user = typeof payload.user === "string" ? payload.user : undefined;
 
+  // Resolve tenant context from IAM auth result (for billing & scoping)
+  let tenant: TenantContext | undefined;
+  if (handled.authResult?.iamResult && handled.authResult.iamResult.ok) {
+    tenant = resolveTenantContext({ iamResult: handled.authResult.iamResult }) ?? undefined;
+  }
+
+  // Billing gate: check subscription before dispatching LLM call
+  const billing = await checkBillingAllowance({
+    iamConfig: opts.iamConfig,
+    tenant,
+  });
+  if (!billing.allowed) {
+    sendJson(res, 402, {
+      error: {
+        message: billing.reason,
+        type: "billing_error",
+      },
+    });
+    return true;
+  }
+
   const agentId = resolveAgentIdForRequest({ req, model });
   const sessionKey = resolveOpenAiSessionKey({ req, agentId, user });
   const prompt = buildAgentPrompt(payload.messages);
@@ -180,6 +206,7 @@ export async function handleOpenAiHttpRequest(
 
   const runId = `chatcmpl_${randomUUID()}`;
   const deps = createDefaultDeps();
+  const requestStartMs = Date.now();
 
   if (!stream) {
     try {
@@ -206,6 +233,29 @@ export async function handleOpenAiHttpRequest(
               .join("\n\n")
           : "No response from Hanzo Bot.";
 
+      // Extract usage from agent result metadata
+      const meta = (result as { meta?: Record<string, unknown> } | null)?.meta;
+      const agentUsage = (meta?.agentMeta as { usage?: Record<string, number> } | undefined)?.usage;
+      const inputTokens = agentUsage?.input ?? 0;
+      const outputTokens = agentUsage?.output ?? 0;
+      const totalTokens = agentUsage?.total ?? inputTokens + outputTokens;
+
+      // Report usage to IAM billing (async, non-blocking)
+      if (tenant && (inputTokens > 0 || outputTokens > 0)) {
+        reportUsage({
+          tenant,
+          model,
+          provider: (meta?.agentMeta as { provider?: string } | undefined)?.provider ?? "unknown",
+          inputTokens,
+          outputTokens,
+          cacheReadTokens: agentUsage?.cacheRead,
+          cacheWriteTokens: agentUsage?.cacheWrite,
+          totalTokens,
+          durationMs: Date.now() - requestStartMs,
+          timestamp: Date.now(),
+        });
+      }
+
       sendJson(res, 200, {
         id: runId,
         object: "chat.completion",
@@ -218,7 +268,11 @@ export async function handleOpenAiHttpRequest(
             finish_reason: "stop",
           },
         ],
-        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        usage: {
+          prompt_tokens: inputTokens,
+          completion_tokens: outputTokens,
+          total_tokens: totalTokens,
+        },
       });
     } catch (err) {
       logWarn(`openai-compat: chat completion failed: ${String(err)}`);
@@ -311,6 +365,29 @@ export async function handleOpenAiHttpRequest(
 
       if (closed) {
         return;
+      }
+
+      // Report usage to IAM billing (streaming path)
+      const sMeta = (result as { meta?: Record<string, unknown> } | null)?.meta;
+      const sAgentUsage = (sMeta?.agentMeta as { usage?: Record<string, number> } | undefined)
+        ?.usage;
+      if (
+        tenant &&
+        sAgentUsage &&
+        ((sAgentUsage.input ?? 0) > 0 || (sAgentUsage.output ?? 0) > 0)
+      ) {
+        reportUsage({
+          tenant,
+          model,
+          provider: (sMeta?.agentMeta as { provider?: string } | undefined)?.provider ?? "unknown",
+          inputTokens: sAgentUsage.input ?? 0,
+          outputTokens: sAgentUsage.output ?? 0,
+          cacheReadTokens: sAgentUsage.cacheRead,
+          cacheWriteTokens: sAgentUsage.cacheWrite,
+          totalTokens: sAgentUsage.total ?? (sAgentUsage.input ?? 0) + (sAgentUsage.output ?? 0),
+          durationMs: Date.now() - requestStartMs,
+          timestamp: Date.now(),
+        });
       }
 
       if (!sawAssistantDelta) {
