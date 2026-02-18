@@ -51,6 +51,7 @@ import {
 } from "./hooks.js";
 import { sendGatewayAuthFailure } from "./http-common.js";
 import { getBearerToken, getHeader } from "./http-utils.js";
+import { handleIamOAuthHttpRequest } from "./iam-oauth-http.js";
 import { isPrivateOrLoopbackAddress, resolveGatewayClientIp } from "./net.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
@@ -483,6 +484,14 @@ export function createGatewayHttpServer(opts: {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
       const requestPath = new URL(req.url ?? "/", "http://localhost").pathname;
+
+      // IAM OAuth proxy endpoints (/auth/*) — unauthenticated, handles its own auth
+      if (resolvedAuth.mode === "iam" && resolvedAuth.iam) {
+        if (await handleIamOAuthHttpRequest(req, res, resolvedAuth.iam)) {
+          return;
+        }
+      }
+
       if (await handleHooksRequest(req, res)) {
         return;
       }
@@ -527,6 +536,7 @@ export function createGatewayHttpServer(opts: {
             config: openResponsesConfig,
             trustedProxies,
             rateLimiter,
+            iamConfig: resolvedAuth.iam,
           })
         ) {
           return;
@@ -538,6 +548,7 @@ export function createGatewayHttpServer(opts: {
             auth: resolvedAuth,
             trustedProxies,
             rateLimiter,
+            iamConfig: resolvedAuth.iam,
           })
         ) {
           return;

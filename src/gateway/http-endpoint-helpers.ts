@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
-import type { ResolvedGatewayAuth } from "./auth.js";
-import { authorizeGatewayBearerRequestOrReply } from "./http-auth-helpers.js";
+import type { GatewayAuthResult, ResolvedGatewayAuth } from "./auth.js";
+import { authorizeGatewayBearerRequest } from "./http-auth-helpers.js";
 import { readJsonBodyOrError, sendMethodNotAllowed } from "./http-common.js";
 
 export async function handleGatewayPostJsonEndpoint(
@@ -14,7 +14,7 @@ export async function handleGatewayPostJsonEndpoint(
     trustedProxies?: string[];
     rateLimiter?: AuthRateLimiter;
   },
-): Promise<false | { body: unknown } | undefined> {
+): Promise<false | { body: unknown; authResult?: GatewayAuthResult } | undefined> {
   const url = new URL(req.url ?? "/", `http://${req.headers.host || "localhost"}`);
   if (url.pathname !== opts.pathname) {
     return false;
@@ -25,14 +25,14 @@ export async function handleGatewayPostJsonEndpoint(
     return undefined;
   }
 
-  const authorized = await authorizeGatewayBearerRequestOrReply({
+  const authResult = await authorizeGatewayBearerRequest({
     req,
     res,
     auth: opts.auth,
     trustedProxies: opts.trustedProxies,
     rateLimiter: opts.rateLimiter,
   });
-  if (!authorized) {
+  if (!authResult) {
     return undefined;
   }
 
@@ -41,5 +41,5 @@ export async function handleGatewayPostJsonEndpoint(
     return undefined;
   }
 
-  return { body };
+  return { body, authResult };
 }
