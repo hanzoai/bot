@@ -240,8 +240,9 @@ export const nodeHandlers: GatewayRequestHandlers = {
             },
           ]),
       );
-      const connected = context.nodeRegistry.listConnected();
-      const connectedById = new Map(connected.map((n) => [n.nodeId, n]));
+      // listAll() includes nodes from all pods via KV sync (falls back to local-only).
+      const allNodes = await context.nodeRegistry.listAll();
+      const connectedById = new Map(allNodes.map((n) => [n.nodeId, n]));
       const nodeIds = new Set<string>([...pairedById.keys(), ...connectedById.keys()]);
 
       const nodes = [...nodeIds].map((nodeId) => {
@@ -307,8 +308,8 @@ export const nodeHandlers: GatewayRequestHandlers = {
     await respondUnavailableOnThrow(respond, async () => {
       const list = await listDevicePairing();
       const paired = list.paired.find((n) => n.deviceId === id && isNodeEntry(n));
-      const connected = context.nodeRegistry.listConnected();
-      const live = connected.find((n) => n.nodeId === id);
+      const allNodes = await context.nodeRegistry.listAll();
+      const live = allNodes.find((n) => n.nodeId === id);
 
       if (!paired && !live) {
         respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "unknown nodeId"));
