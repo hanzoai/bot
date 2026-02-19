@@ -31,6 +31,12 @@ export default defineConfig([
     platform: "node",
   },
   {
+    entry: "src/gateway/tunnel-adapter.ts",
+    env,
+    fixedExtension: false,
+    platform: "node",
+  },
+  {
     entry: "src/plugin-sdk/index.ts",
     outDir: "dist/plugin-sdk",
     env,
