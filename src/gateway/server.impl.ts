@@ -50,6 +50,7 @@ import { runOnboardingWizard } from "../wizard/onboarding.js";
 import { createAuthRateLimiter, type AuthRateLimiter } from "./auth-rate-limit.js";
 import { startGatewayConfigReloader } from "./config-reload.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
+import { KVNodeSync } from "./kv-node-sync.js";
 import { NodeRegistry } from "./node-registry.js";
 import { createChannelManager } from "./server-channels.js";
 import { createAgentEventHandler } from "./server-chat.js";
@@ -375,6 +376,18 @@ export async function startGatewayServer(
   });
   let bonjourStop: (() => Promise<void>) | null = null;
   const nodeRegistry = new NodeRegistry();
+
+  // --- KV sync: cross-pod node state sharing via Hanzo KV ---
+  const kvUrl = process.env.KV_URL;
+  if (kvUrl) {
+    try {
+      const sync = new KVNodeSync(kvUrl);
+      nodeRegistry.setSync(sync);
+      log.info(`KV node sync enabled (pod=${sync.podId})`);
+    } catch (err) {
+      log.warn("KV node sync failed to init:", (err as Error).message);
+    }
+  }
 
   // --- Tunnel adapter: accept hanzo-tunnel protocol connections at /v1/tunnel ---
   {
