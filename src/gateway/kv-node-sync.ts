@@ -1,4 +1,4 @@
-import KV from "@hanzo/kv-client";
+import KV from "iovalkey";
 import { randomUUID } from "node:crypto";
 
 // ---------------------------------------------------------------------------
