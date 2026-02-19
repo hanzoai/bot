@@ -384,8 +384,11 @@ export const nodeHandlers: GatewayRequestHandlers = {
     }
 
     await respondUnavailableOnThrow(respond, async () => {
+      // Check both local and remote nodes. Local session is authoritative
+      // when available; remote node info from KV is used for cross-pod routing.
       const nodeSession = context.nodeRegistry.get(nodeId);
-      if (!nodeSession) {
+      const remoteNode = !nodeSession ? await context.nodeRegistry.getRemoteNode(nodeId) : null;
+      if (!nodeSession && !remoteNode) {
         respond(
           false,
           undefined,
@@ -395,11 +398,17 @@ export const nodeHandlers: GatewayRequestHandlers = {
         );
         return;
       }
+      const declaredCommands = nodeSession?.commands ?? remoteNode?.commands ?? [];
       const cfg = loadConfig();
-      const allowlist = resolveNodeCommandAllowlist(cfg, nodeSession);
+      const allowlist = resolveNodeCommandAllowlist(
+        cfg,
+        nodeSession ?? {
+          platform: remoteNode?.platform,
+        },
+      );
       const allowed = isNodeCommandAllowed({
         command,
-        declaredCommands: nodeSession.commands,
+        declaredCommands,
         allowlist,
       });
       if (!allowed.ok) {
