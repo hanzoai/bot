@@ -1,4 +1,4 @@
-import KV from "iovalkey";
+import { Redis as KV } from "iovalkey";
 import { randomUUID } from "node:crypto";
 
 // ---------------------------------------------------------------------------
