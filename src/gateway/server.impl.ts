@@ -375,6 +375,40 @@ export async function startGatewayServer(
   });
   let bonjourStop: (() => Promise<void>) | null = null;
   const nodeRegistry = new NodeRegistry();
+
+  // --- Tunnel adapter: accept hanzo-tunnel protocol connections at /v1/tunnel ---
+  {
+    const { WebSocketServer: TunnelWSS } = await import("ws");
+    const { handleTunnelConnection } = await import("./tunnel-adapter.js");
+    const tunnelWss = new TunnelWSS({ noServer: true, maxPayload: 10 * 1024 * 1024 });
+    tunnelWss.on(
+      "connection",
+      (ws: import("ws").WebSocket, req: import("node:http").IncomingMessage) => {
+        const remoteIp = req.socket.remoteAddress ?? undefined;
+        handleTunnelConnection({ ws, nodeRegistry, remoteIp });
+      },
+    );
+    // Intercept upgrade events: replace existing listeners with a wrapper that
+    // routes /v1/tunnel to the tunnel WSS and everything else to the originals.
+    for (const server of httpServers) {
+      const origListeners = server.listeners("upgrade").slice() as ((...args: unknown[]) => void)[];
+      server.removeAllListeners("upgrade");
+      server.on("upgrade", (req, socket, head) => {
+        const url = new URL(req.url ?? "/", "http://localhost");
+        if (url.pathname === "/v1/tunnel") {
+          tunnelWss.handleUpgrade(req, socket, head, (ws) => {
+            tunnelWss.emit("connection", ws, req);
+          });
+          return;
+        }
+        for (const fn of origListeners) {
+          fn(req, socket, head);
+        }
+      });
+    }
+    log.info("tunnel adapter listening at /v1/tunnel");
+  }
+
   const nodePresenceTimers = new Map<string, ReturnType<typeof setInterval>>();
   const nodeSubscriptions = createNodeSubscriptionManager();
   const nodeSendEvent = (opts: { nodeId: string; event: string; payloadJSON?: string | null }) => {
