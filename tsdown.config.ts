@@ -37,6 +37,12 @@ export default defineConfig([
     platform: "node",
   },
   {
+    entry: "src/gateway/kv-node-sync.ts",
+    env,
+    fixedExtension: false,
+    platform: "node",
+  },
+  {
     entry: "src/plugin-sdk/index.ts",
     outDir: "dist/plugin-sdk",
     env,
