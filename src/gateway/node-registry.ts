@@ -257,6 +257,14 @@ export class NodeRegistry {
     return this.nodesById.get(nodeId);
   }
 
+  /** Look up a node on another pod via KV. Returns null if not found or no sync layer. */
+  async getRemoteNode(nodeId: string): Promise<RemoteNodeInfo | null> {
+    if (!this.sync) {
+      return null;
+    }
+    return this.sync.getNode(nodeId);
+  }
+
   async invoke(params: {
     nodeId: string;
     command: string;
