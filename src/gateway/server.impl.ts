@@ -73,6 +73,7 @@ import { resolveSessionKeyForRun } from "./server-session-key.js";
 import { logGatewayStartup } from "./server-startup-log.js";
 import { startGatewaySidecars } from "./server-startup.js";
 import { startGatewayTailscaleExposure } from "./server-tailscale.js";
+import { startGatewayTunnel, type TunnelResult } from "./server-tunnel.js";
 import { createWizardSessionTracker } from "./server-wizard-sessions.js";
 import { attachGatewayWsHandlers } from "./server-ws-runtime.js";
 import {
@@ -92,6 +93,7 @@ const log = createSubsystemLogger("gateway");
 const logCanvas = log.child("canvas");
 const logDiscovery = log.child("discovery");
 const logTailscale = log.child("tailscale");
+const logTunnel = log.child("tunnel");
 const logChannels = log.child("channels");
 const logBrowser = log.child("browser");
 const logHealth = log.child("health");
@@ -610,6 +612,26 @@ export async function startGatewayServer(
         logTailscale,
       });
 
+  // Start tunnel if configured (cloudflared, ngrok, localxpose, zrok)
+  let tunnelResult: TunnelResult | null = null;
+  const tunnelConfig = cfgAtStart.gateway?.tunnel;
+  if (!minimalTestGateway && tunnelConfig?.provider && tunnelConfig.provider !== "none") {
+    const { addRuntimeAllowedOrigin } = await import("./origin-check.js");
+    tunnelResult = await startGatewayTunnel({
+      config: tunnelConfig,
+      port,
+      log: logTunnel,
+    });
+    if (tunnelResult) {
+      // Allow the tunnel's own origin + the Hanzo cloud playground
+      addRuntimeAllowedOrigin(tunnelResult.publicOrigin);
+      addRuntimeAllowedOrigin("https://app.hanzo.bot");
+      logTunnel.info(
+        `gateway tunnel active: ${tunnelResult.publicUrl} (provider: ${tunnelResult.provider})`,
+      );
+    }
+  }
+
   let browserControl: Awaited<ReturnType<typeof startBrowserControlServerIfEnabled>> = null;
   if (!minimalTestGateway) {
     ({ browserControl, pluginServices } = await startGatewaySidecars({
@@ -720,6 +742,13 @@ export async function startGatewayServer(
       }
       skillsChangeUnsub();
       authRateLimiter?.dispose();
+      if (tunnelResult) {
+        await tunnelResult.stop().catch((err) => {
+          logTunnel.warn(
+            `tunnel cleanup failed: ${err instanceof Error ? err.message : String(err)}`,
+          );
+        });
+      }
       await close(opts);
     },
   };
