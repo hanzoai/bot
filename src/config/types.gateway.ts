@@ -299,6 +299,24 @@ export type GatewayToolsConfig = {
   allow?: string[];
 };
 
+export type GatewayTunnelProvider = "cloudflared" | "ngrok" | "localxpose" | "zrok" | "none";
+
+export type GatewayTunnelConfig = {
+  /**
+   * Tunnel provider to expose the gateway to the internet.
+   * - cloudflared: Cloudflare Tunnel (free, no auth token required for quick tunnels)
+   * - ngrok: ngrok tunnel (free tier available, auth token recommended)
+   * - localxpose: LocalXpose tunnel (requires auth token)
+   * - zrok: zrok tunnel (requires auth token)
+   * - none: Disable tunneling (default)
+   */
+  provider?: GatewayTunnelProvider;
+  /** Provider API key / auth token (required for ngrok, localxpose, zrok). */
+  authToken?: string;
+  /** Custom domain for the tunnel (paid feature on most providers). */
+  domain?: string;
+};
+
 export type GatewayConfig = {
   /** Single multiplexed port for Gateway WS + HTTP (default: 18789). */
   port?: number;
@@ -322,6 +340,7 @@ export type GatewayConfig = {
   controlUi?: GatewayControlUiConfig;
   auth?: GatewayAuthConfig;
   tailscale?: GatewayTailscaleConfig;
+  tunnel?: GatewayTunnelConfig;
   remote?: GatewayRemoteConfig;
   reload?: GatewayReloadConfig;
   tls?: GatewayTlsConfig;
