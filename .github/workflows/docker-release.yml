@@ -168,7 +168,9 @@ jobs:
       KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
     steps:
       - name: Install Hanzo CLI
-        run: pip install hanzo-cli
+        run: |
+          pip install "hanzo-kms @ git+https://github.com/hanzoai/python-sdk.git#subdirectory=pkg/hanzo-kms"
+          pip install "hanzo-cli @ git+https://github.com/hanzoai/python-sdk.git#subdirectory=pkg/hanzo-cli"
 
       - name: Fetch secrets from KMS and deploy
         run: |
