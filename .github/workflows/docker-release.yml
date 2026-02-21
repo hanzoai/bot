@@ -154,3 +154,47 @@ jobs:
             ${{ needs.build-arm64.outputs.image-digest }}
         env:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
+
+  # Deploy to Hanzo PaaS
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [create-manifest]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Install Hanzo CLI
+        run: pip install hanzo-cli
+
+      - name: Authenticate with IAM
+        run: |
+          python3 -c "
+          import httpx, json, os
+          r = httpx.post('${{ vars.HANZO_IAM_URL || 'https://hanzo.id' }}/api/login/oauth/access_token', data={
+              'grant_type': 'password',
+              'client_id': '${{ secrets.HANZO_IAM_CLIENT_ID }}',
+              'client_secret': '${{ secrets.HANZO_IAM_CLIENT_SECRET }}',
+              'username': '${{ secrets.HANZO_DEPLOY_USER }}',
+              'password': '${{ secrets.HANZO_DEPLOY_PASSWORD }}',
+              'scope': 'openid profile email',
+          })
+          r.raise_for_status()
+          iam_token = r.json()['access_token']
+          r2 = httpx.post('${{ vars.HANZO_PAAS_URL || 'https://platform.hanzo.ai' }}/v1/auth/login', json={
+              'provider': 'hanzo',
+              'accessToken': iam_token,
+          })
+          r2.raise_for_status()
+          session = r2.json()
+          os.makedirs(os.path.expanduser('~/.hanzo/paas'), exist_ok=True)
+          with open(os.path.expanduser('~/.hanzo/paas/session.json'), 'w') as f:
+              json.dump({'at': session['at'], 'rt': session['rt']}, f)
+          "
+
+      - name: Set PaaS context
+        run: |
+          hanzo paas use \
+            --org "${{ secrets.HANZO_PAAS_ORG_ID }}" \
+            --project "${{ secrets.HANZO_PAAS_PROJECT_ID }}" \
+            --env "${{ secrets.HANZO_PAAS_ENV_ID }}"
+
+      - name: Redeploy bot-gateway
+        run: hanzo paas deploy redeploy bot-gateway
