@@ -50,8 +50,8 @@ jobs:
 
       - name: Run installer docker tests
         env:
-          BOT_INSTALL_URL: https://hanzo.bot/install.sh
-          BOT_INSTALL_CLI_URL: https://hanzo.bot/install-cli.sh
+          BOT_INSTALL_URL: https://raw.githubusercontent.com/hanzoai/bot/${{ github.sha }}/scripts/install.sh
+          BOT_INSTALL_CLI_URL: https://raw.githubusercontent.com/hanzoai/bot/${{ github.sha }}/scripts/install.sh
           BOT_NO_ONBOARD: "1"
           BOT_INSTALL_SMOKE_SKIP_CLI: "1"
           BOT_INSTALL_SMOKE_SKIP_NONROOT: ${{ github.event_name == 'pull_request' && '1' || '0' }}
