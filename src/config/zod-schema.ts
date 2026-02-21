@@ -449,6 +449,22 @@ export const BotSchema = z
           })
           .strict()
           .optional(),
+        tunnel: z
+          .object({
+            provider: z
+              .union([
+                z.literal("cloudflared"),
+                z.literal("ngrok"),
+                z.literal("localxpose"),
+                z.literal("zrok"),
+                z.literal("none"),
+              ])
+              .optional(),
+            authToken: z.string().optional().register(sensitive),
+            domain: z.string().optional(),
+          })
+          .strict()
+          .optional(),
         remote: z
           .object({
             url: z.string().optional(),
