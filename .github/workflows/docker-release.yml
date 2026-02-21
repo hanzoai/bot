@@ -167,10 +167,10 @@ jobs:
       KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
       KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
     steps:
-      - name: Install Hanzo CLI
-        run: pip install hanzo-cli>=0.2.0
+      - name: Install httpx
+        run: pip install httpx
 
-      - name: Fetch secrets from KMS and deploy
+      - name: Authenticate and redeploy
         run: |
           python3 -c "
           import httpx, json, os
@@ -179,14 +179,21 @@ jobs:
           kms_cid = os.environ['KMS_CLIENT_ID']
           kms_csec = os.environ['KMS_CLIENT_SECRET']
 
+          PAAS_URL = 'https://platform.hanzo.ai/v1'
+          ORG = '698cda6739f65183b3009313'
+          PROJECT = '698cda6739f65183b3009318'
+          ENV = '698cda6739f65183b300931c'
+          CONTAINER = 'bot-gateway'
+
           # 1. Authenticate with KMS
           r = httpx.post(f'{kms_url}/api/v1/auth/universal-auth/login', json={
               'clientId': kms_cid, 'clientSecret': kms_csec,
           })
           r.raise_for_status()
           kms_token = r.json()['accessToken']
+          print('KMS authenticated')
 
-          # 2. Fetch all secrets from KMS
+          # 2. Fetch deploy secrets from KMS
           r = httpx.get(f'{kms_url}/api/v3/secrets/raw', params={
               'workspaceId': '2928fb55-6b08-454a-a338-a48d99a699a4',
               'environment': 'prod',
@@ -196,8 +203,9 @@ jobs:
           }, headers={'Authorization': f'Bearer {kms_token}'})
           r.raise_for_status()
           secrets = {s['secretKey']: s['secretValue'] for s in r.json().get('secrets', [])}
+          print(f'Fetched {len(secrets)} secrets from KMS')
 
-          # 3. Authenticate with IAM using KMS-stored credentials
+          # 3. Authenticate with IAM
           r = httpx.post('https://hanzo.id/api/login/oauth/access_token', data={
               'grant_type': 'password',
               'client_id': secrets['CLOUD__CLIENT_ID'],
@@ -208,23 +216,32 @@ jobs:
           })
           r.raise_for_status()
           iam_token = r.json()['access_token']
+          print('IAM authenticated')
 
           # 4. Exchange IAM token for PaaS session
-          r = httpx.post('https://platform.hanzo.ai/v1/auth/login', json={
+          r = httpx.post(f'{PAAS_URL}/auth/login', json={
               'provider': 'hanzo', 'accessToken': iam_token,
           })
           r.raise_for_status()
-          session = r.json()
-          os.makedirs(os.path.expanduser('~/.hanzo/paas'), exist_ok=True)
-          with open(os.path.expanduser('~/.hanzo/paas/session.json'), 'w') as f:
-              json.dump({'at': session['at'], 'rt': session['rt']}, f)
-          print('Authenticated: KMS -> IAM -> PaaS')
-          "
+          at = r.json()['at']
+          print('PaaS session established')
 
-      - name: Set PaaS context and redeploy
-        run: |
-          hanzo paas use \
-            --org 698cda6739f65183b3009313 \
-            --project 698cda6739f65183b3009318 \
-            --env 698cda6739f65183b300931c
-          hanzo paas deploy redeploy bot-gateway
+          # 5. Find container by name
+          base = f'{PAAS_URL}/org/{ORG}/project/{PROJECT}/env/{ENV}/container'
+          r = httpx.get(base, headers={'Authorization': at})
+          r.raise_for_status()
+          containers = r.json()
+          match = [c for c in containers if c.get('iid') == CONTAINER or c.get('name') == CONTAINER]
+          if not match:
+              raise SystemExit(f'Container \"{CONTAINER}\" not found')
+          cid = str(match[0]['_id'])
+          print(f'Found container: {CONTAINER} ({cid})')
+
+          # 6. Redeploy: GET current config then PUT it back to trigger rolling restart
+          r = httpx.get(f'{base}/{cid}', headers={'Authorization': at})
+          r.raise_for_status()
+          config = r.json()
+          r = httpx.put(f'{base}/{cid}', json=config, headers={'Authorization': at})
+          r.raise_for_status()
+          print(f'Redeployment triggered for {CONTAINER}')
+          "
