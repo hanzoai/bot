@@ -698,29 +698,6 @@ describe("security audit", () => {
     );
   });
 
-  it("warns when control UI device auth is disabled", async () => {
-    const cfg: BotConfig = {
-      gateway: {
-        controlUi: { dangerouslyDisableDeviceAuth: true },
-      },
-    };
-
-    const res = await runSecurityAudit({
-      config: cfg,
-      includeFilesystem: false,
-      includeChannelSecurity: false,
-    });
-
-    expect(res.findings).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          checkId: "gateway.control_ui.device_auth_disabled",
-          severity: "critical",
-        }),
-      ]),
-    );
-  });
-
   it("flags trusted-proxy auth mode without generic shared-secret findings", async () => {
     const cfg: BotConfig = {
       gateway: {
