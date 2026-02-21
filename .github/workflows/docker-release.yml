@@ -156,16 +156,15 @@ jobs:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
 
   # Deploy to Hanzo PaaS
-  # Only KMS credentials are stored in GitHub — all other secrets
-  # (IAM creds, PaaS org/project/env IDs) are fetched from Hanzo KMS.
+  # IAM is the root of trust — a single API key pair authenticates
+  # via the api_key grant type, then the IAM token is used for PaaS.
   deploy:
     runs-on: ubuntu-latest
     needs: [create-manifest]
     if: github.ref == 'refs/heads/main'
     env:
-      KMS_URL: https://kms.hanzo.ai
-      KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
-      KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+      HANZO_ACCESS_KEY: ${{ secrets.HANZO_ACCESS_KEY }}
+      HANZO_ACCESS_SECRET: ${{ secrets.HANZO_ACCESS_SECRET }}
     steps:
       - name: Install httpx
         run: pip install httpx
@@ -173,11 +172,10 @@ jobs:
       - name: Authenticate and redeploy
         run: |
           python3 -c "
-          import httpx, json, os
+          import httpx, os
 
-          kms_url = os.environ['KMS_URL']
-          kms_cid = os.environ['KMS_CLIENT_ID']
-          kms_csec = os.environ['KMS_CLIENT_SECRET']
+          access_key = os.environ['HANZO_ACCESS_KEY']
+          access_secret = os.environ['HANZO_ACCESS_SECRET']
 
           PAAS_URL = 'https://platform.hanzo.ai/v1'
           ORG = '698cda6739f65183b3009313'
@@ -185,40 +183,19 @@ jobs:
           ENV = '698cda6739f65183b300931c'
           CONTAINER = 'bot-gateway'
 
-          # 1. Authenticate with KMS
-          r = httpx.post(f'{kms_url}/api/v1/auth/universal-auth/login', json={
-              'clientId': kms_cid, 'clientSecret': kms_csec,
-          })
-          r.raise_for_status()
-          kms_token = r.json()['accessToken']
-          print('KMS authenticated')
-
-          # 2. Fetch deploy secrets from KMS
-          r = httpx.get(f'{kms_url}/api/v3/secrets/raw', params={
-              'workspaceId': '2928fb55-6b08-454a-a338-a48d99a699a4',
-              'environment': 'prod',
-              'secretPath': '/',
-              'include_imports': 'true',
-              'expandSecretReferences': 'true',
-          }, headers={'Authorization': f'Bearer {kms_token}'})
-          r.raise_for_status()
-          secrets = {s['secretKey']: s['secretValue'] for s in r.json().get('secrets', [])}
-          print(f'Fetched {len(secrets)} secrets from KMS')
-
-          # 3. Authenticate with IAM (ROPC with CI service account)
+          # 1. Exchange API key for IAM token
           r = httpx.post('https://hanzo.id/api/login/oauth/access_token', data={
-              'grant_type': 'password',
-              'client_id': secrets['CI__IAM_CLIENT_ID'],
-              'client_secret': secrets['CI__IAM_CLIENT_SECRET'],
-              'username': secrets['CI__DEPLOY_USER'],
-              'password': secrets['CI__DEPLOY_PASSWORD'],
+              'grant_type': 'api_key',
+              'client_id': 'hanzo-platform-client-id',
+              'access_key': access_key,
+              'access_secret': access_secret,
               'scope': 'openid profile email',
           })
           r.raise_for_status()
           iam_token = r.json()['access_token']
-          print('IAM authenticated')
+          print('IAM authenticated via API key')
 
-          # 4. Exchange IAM token for PaaS session
+          # 2. Exchange IAM token for PaaS session
           r = httpx.post(f'{PAAS_URL}/auth/login', json={
               'provider': 'hanzo', 'accessToken': iam_token,
           })
@@ -226,22 +203,17 @@ jobs:
           at = r.json()['at']
           print('PaaS session established')
 
-          # 5. Find container by name
+          # 3. Find container and redeploy
           base = f'{PAAS_URL}/org/{ORG}/project/{PROJECT}/env/{ENV}/container'
           r = httpx.get(base, headers={'Authorization': at})
           r.raise_for_status()
-          containers = r.json()
-          match = [c for c in containers if c.get('iid') == CONTAINER or c.get('name') == CONTAINER]
+          match = [c for c in r.json() if c.get('iid') == CONTAINER or c.get('name') == CONTAINER]
           if not match:
               raise SystemExit(f'Container \"{CONTAINER}\" not found')
           cid = str(match[0]['_id'])
           print(f'Found container: {CONTAINER} ({cid})')
 
-          # 6. Redeploy: GET current config then PUT it back to trigger rolling restart
-          r = httpx.get(f'{base}/{cid}', headers={'Authorization': at})
-          r.raise_for_status()
-          config = r.json()
-          r = httpx.put(f'{base}/{cid}', json=config, headers={'Authorization': at})
-          r.raise_for_status()
+          config = httpx.get(f'{base}/{cid}', headers={'Authorization': at}).json()
+          httpx.put(f'{base}/{cid}', json=config, headers={'Authorization': at}).raise_for_status()
           print(f'Redeployment triggered for {CONTAINER}')
           "
