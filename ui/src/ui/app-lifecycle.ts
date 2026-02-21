@@ -10,6 +10,7 @@ import {
 } from "./app-polling.ts";
 import { observeTopbar, scheduleChatScroll, scheduleLogsScroll } from "./app-scroll.ts";
 import {
+  applySettings,
   applySettingsFromUrl,
   attachThemeListener,
   detachThemeListener,
@@ -35,8 +36,16 @@ type LifecycleHost = {
   logsAtBottom: boolean;
   logsEntries: unknown[];
   popStateHandler: () => void;
+  postMessageHandler: ((event: MessageEvent) => void) | null;
   topbarObserver: ResizeObserver | null;
 };
+
+/** Trusted origins allowed to inject IAM tokens via postMessage. */
+const TRUSTED_PARENT_ORIGINS = new Set([
+  "https://app.hanzo.bot",
+  "https://bot.hanzo.ai",
+  "https://hanzo.app",
+]);
 
 export function handleConnected(host: LifecycleHost) {
   host.basePath = inferBasePath();
@@ -46,6 +55,26 @@ export function handleConnected(host: LifecycleHost) {
   syncThemeWithSettings(host as unknown as Parameters<typeof syncThemeWithSettings>[0]);
   attachThemeListener(host as unknown as Parameters<typeof attachThemeListener>[0]);
   window.addEventListener("popstate", host.popStateHandler);
+
+  // Listen for IAM token injection from parent frame (Playground embed)
+  host.postMessageHandler = (event: MessageEvent) => {
+    if (!TRUSTED_PARENT_ORIGINS.has(event.origin)) {
+      return;
+    }
+    if (event.data?.type !== "hanzo:iam-token") {
+      return;
+    }
+    const token = String(event.data.token ?? "").trim();
+    if (!token) {
+      return;
+    }
+    const settingsHost = host as unknown as Parameters<typeof applySettings>[0];
+    if (token !== settingsHost.settings.token) {
+      applySettings(settingsHost, { ...settingsHost.settings, token });
+    }
+  };
+  window.addEventListener("message", host.postMessageHandler);
+
   connectGateway(host as unknown as Parameters<typeof connectGateway>[0]);
   startNodesPolling(host as unknown as Parameters<typeof startNodesPolling>[0]);
   if (host.tab === "logs") {
@@ -62,6 +91,10 @@ export function handleFirstUpdated(host: LifecycleHost) {
 
 export function handleDisconnected(host: LifecycleHost) {
   window.removeEventListener("popstate", host.popStateHandler);
+  if (host.postMessageHandler) {
+    window.removeEventListener("message", host.postMessageHandler);
+    host.postMessageHandler = null;
+  }
   stopNodesPolling(host as unknown as Parameters<typeof stopNodesPolling>[0]);
   stopLogsPolling(host as unknown as Parameters<typeof stopLogsPolling>[0]);
   stopDebugPolling(host as unknown as Parameters<typeof stopDebugPolling>[0]);
