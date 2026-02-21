@@ -433,7 +433,7 @@ export function attachGatewayWsMessageHandler(params: {
             scopes = [];
             connectParams.scopes = scopes;
           }
-          const canSkipDevice = sharedAuthOk || allowControlUiBypass;
+          const canSkipDevice = sharedAuthOk;
 
           if (isControlUi && !allowControlUiBypass) {
             const errorMessage = "control ui requires HTTPS or localhost (secure context)";
@@ -646,12 +646,12 @@ export function attachGatewayWsMessageHandler(params: {
             }
           }
         }
-        if (!authOk && !allowControlUiBypass) {
+        if (!authOk) {
           rejectUnauthorized(authResult);
           return;
         }
 
-        const skipPairing = allowControlUiBypass || (sharedAuthOk && isNodeHost);
+        const skipPairing = allowControlUiBypass && sharedAuthOk;
         if (device && devicePublicKey && !skipPairing) {
           const requirePairing = async (reason: string, _paired?: { deviceId: string }) => {
             const pairing = await requestDevicePairing({
