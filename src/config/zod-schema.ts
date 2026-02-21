@@ -402,14 +402,18 @@ export const BotSchema = z
             root: z.string().optional(),
             allowedOrigins: z.array(z.string()).optional(),
             allowInsecureAuth: z.boolean().optional(),
-            dangerouslyDisableDeviceAuth: z.boolean().optional(),
           })
           .strict()
           .optional(),
         auth: z
           .object({
             mode: z
-              .union([z.literal("token"), z.literal("password"), z.literal("trusted-proxy")])
+              .union([
+                z.literal("token"),
+                z.literal("password"),
+                z.literal("trusted-proxy"),
+                z.literal("iam"),
+              ])
               .optional(),
             token: z.string().optional().register(sensitive),
             password: z.string().optional().register(sensitive),
@@ -428,6 +432,16 @@ export const BotSchema = z
                 userHeader: z.string().min(1, "userHeader is required for trusted-proxy mode"),
                 requiredHeaders: z.array(z.string()).optional(),
                 allowUsers: z.array(z.string()).optional(),
+              })
+              .strict()
+              .optional(),
+            iam: z
+              .object({
+                serverUrl: z.string(),
+                clientId: z.string(),
+                clientSecret: z.string().optional().register(sensitive),
+                orgName: z.string().optional(),
+                scopes: z.array(z.string()).optional(),
               })
               .strict()
               .optional(),
