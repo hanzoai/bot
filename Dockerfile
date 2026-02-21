@@ -62,9 +62,6 @@ USER node
 ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]
 
 # Start gateway server with default config.
-# Binds to loopback (127.0.0.1) by default for security.
-#
-# For container platforms requiring external health checks:
-#   1. Set BOT_GATEWAY_TOKEN or BOT_GATEWAY_PASSWORD env var
-#   2. Override CMD: ["node","hanzo-bot.mjs","gateway","--allow-unconfigured","--bind","lan"]
-CMD ["node", "hanzo-bot.mjs", "gateway", "--allow-unconfigured"]
+# Binds to LAN (0.0.0.0) for container platforms with health checks and ingress.
+# Set BOT_GATEWAY_TOKEN or BOT_GATEWAY_PASSWORD env var for auth.
+CMD ["node", "hanzo-bot.mjs", "gateway", "--allow-unconfigured", "--bind", "lan"]
