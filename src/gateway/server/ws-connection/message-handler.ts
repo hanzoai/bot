@@ -303,7 +303,6 @@ export function attachGatewayWsMessageHandler(params: {
         connectParams.scopes = scopes;
 
         const isControlUi = connectParams.client.id === GATEWAY_CLIENT_IDS.CONTROL_UI;
-        const isNodeHost = connectParams.client.id === GATEWAY_CLIENT_IDS.NODE_HOST;
         const isWebchat = isWebchatConnect(connectParams);
         if (isControlUi || isWebchat) {
           const originCheck = checkBrowserOrigin({
@@ -664,7 +663,7 @@ export function attachGatewayWsMessageHandler(params: {
               role,
               scopes,
               remoteIp: reportedClientIp,
-              silent: isLocalClient || (isNodeHost && sharedAuthOk),
+              silent: isLocalClient,
             });
             const context = buildRequestContext();
             if (pairing.request.silent === true) {
