@@ -200,15 +200,11 @@ describeLive("gateway live (cli backend)", () => {
 
     const cliCommand = process.env.BOT_LIVE_CLI_BACKEND_COMMAND ?? providerDefaults?.command;
     if (!cliCommand) {
-      throw new Error(
-        `BOT_LIVE_CLI_BACKEND_COMMAND is required for provider "${providerId}".`,
-      );
+      throw new Error(`BOT_LIVE_CLI_BACKEND_COMMAND is required for provider "${providerId}".`);
     }
     const baseCliArgs =
-      parseJsonStringArray(
-        "BOT_LIVE_CLI_BACKEND_ARGS",
-        process.env.BOT_LIVE_CLI_BACKEND_ARGS,
-      ) ?? providerDefaults?.args;
+      parseJsonStringArray("BOT_LIVE_CLI_BACKEND_ARGS", process.env.BOT_LIVE_CLI_BACKEND_ARGS) ??
+      providerDefaults?.args;
     if (!baseCliArgs || baseCliArgs.length === 0) {
       throw new Error(`BOT_LIVE_CLI_BACKEND_ARGS is required for provider "${providerId}".`);
     }
@@ -221,9 +217,7 @@ describeLive("gateway live (cli backend)", () => {
     const cliImageMode = parseImageMode(process.env.BOT_LIVE_CLI_BACKEND_IMAGE_MODE);
 
     if (cliImageMode && !cliImageArg) {
-      throw new Error(
-        "BOT_LIVE_CLI_BACKEND_IMAGE_MODE requires BOT_LIVE_CLI_BACKEND_IMAGE_ARG.",
-      );
+      throw new Error("BOT_LIVE_CLI_BACKEND_IMAGE_MODE requires BOT_LIVE_CLI_BACKEND_IMAGE_ARG.");
     }
 
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-live-cli-"));
