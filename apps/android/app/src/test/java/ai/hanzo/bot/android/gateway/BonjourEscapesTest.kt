@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.gateway
+package ai.hanzo.bot.android.gateway
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

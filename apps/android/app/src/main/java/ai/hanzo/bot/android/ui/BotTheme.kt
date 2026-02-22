@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui
+package ai.hanzo.bot.android.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

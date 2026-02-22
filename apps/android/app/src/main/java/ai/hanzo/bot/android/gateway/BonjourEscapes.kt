@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.gateway
+package ai.hanzo.bot.android.gateway
 
 object BonjourEscapes {
   fun decode(input: String): String {

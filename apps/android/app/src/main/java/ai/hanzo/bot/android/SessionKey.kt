@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android
+package ai.hanzo.bot.android
 
 internal fun normalizeMainKey(raw: String?): String {
   val trimmed = raw?.trim()

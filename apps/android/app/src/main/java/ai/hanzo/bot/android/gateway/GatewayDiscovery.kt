@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.gateway
+package ai.hanzo.bot.android.gateway
 
 import android.content.Context
 import android.net.ConnectivityManager

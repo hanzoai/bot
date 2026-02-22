@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui.chat
+package ai.hanzo.bot.android.ui.chat
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,7 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ai.hanzo-bot.android.chat.ChatSessionEntry
+import ai.hanzo.bot.android.chat.ChatSessionEntry
 
 @Composable
 fun ChatComposer(

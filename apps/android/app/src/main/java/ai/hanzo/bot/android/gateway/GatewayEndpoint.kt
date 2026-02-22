@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.gateway
+package ai.hanzo.bot.android.gateway
 
 data class GatewayEndpoint(
   val stableId: String,

@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android
+package ai.hanzo.bot.android
 
 object WakeWords {
   const val maxWords: Int = 32

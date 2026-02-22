@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui.chat
+package ai.hanzo.bot.android.ui.chat
 
 import android.content.ContentResolver
 import android.net.Uri
@@ -19,8 +19,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import ai.hanzo-bot.android.MainViewModel
-import ai.hanzo-bot.android.chat.OutgoingAttachment
+import ai.hanzo.bot.android.MainViewModel
+import ai.hanzo.bot.android.chat.OutgoingAttachment
 import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

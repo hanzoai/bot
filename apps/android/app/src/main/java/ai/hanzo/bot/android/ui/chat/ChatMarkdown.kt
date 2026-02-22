@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui.chat
+package ai.hanzo.bot.android.ui.chat
 
 import android.graphics.BitmapFactory
 import android.util.Base64

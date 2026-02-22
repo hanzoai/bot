@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.protocol
+package ai.hanzo.bot.android.protocol
 
 enum class HanzoBotCapability(val rawValue: String) {
   Canvas("canvas"),

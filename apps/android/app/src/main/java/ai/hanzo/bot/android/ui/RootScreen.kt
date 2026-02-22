@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui
+package ai.hanzo.bot.android.ui
 
 import android.annotation.SuppressLint
 import android.Manifest
@@ -65,8 +65,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
-import ai.hanzo-bot.android.CameraHudKind
-import ai.hanzo-bot.android.MainViewModel
+import ai.hanzo.bot.android.CameraHudKind
+import ai.hanzo.bot.android.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

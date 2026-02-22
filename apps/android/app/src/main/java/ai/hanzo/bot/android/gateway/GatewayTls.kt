@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.gateway
+package ai.hanzo.bot.android.gateway
 
 import android.annotation.SuppressLint
 import kotlinx.coroutines.Dispatchers

@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui.chat
+package ai.hanzo.bot.android.ui.chat
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
-import ai.hanzo-bot.android.chat.ChatMessage
-import ai.hanzo-bot.android.chat.ChatPendingToolCall
+import ai.hanzo.bot.android.chat.ChatMessage
+import ai.hanzo.bot.android.chat.ChatPendingToolCall
 
 @Composable
 fun ChatMessageListCard(

@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.protocol
+package ai.hanzo.bot.android.protocol
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

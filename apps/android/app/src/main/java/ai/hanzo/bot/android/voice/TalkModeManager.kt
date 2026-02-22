@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.voice
+package ai.hanzo.bot.android.voice
 
 import android.Manifest
 import android.content.Context
@@ -20,9 +20,9 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import androidx.core.content.ContextCompat
-import ai.hanzo-bot.android.gateway.GatewaySession
-import ai.hanzo-bot.android.isCanonicalMainSessionKey
-import ai.hanzo-bot.android.normalizeMainKey
+import ai.hanzo.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.isCanonicalMainSessionKey
+import ai.hanzo.bot.android.normalizeMainKey
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.UUID
