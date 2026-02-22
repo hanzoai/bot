@@ -107,8 +107,6 @@ async function main() {
     ...process.env,
     BOT_CONFIG_PATH: configPath,
     BOT_STATE_DIR: stateDir,
-    BOT_CONFIG_PATH: configPath,
-    BOT_STATE_DIR: stateDir,
     ZAI_API_KEY: zaiKey,
     Z_AI_API_KEY: "",
   };
