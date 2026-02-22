@@ -1,9 +1,4 @@
-import type {
-  BlockStreamingCoalesceConfig,
-  DmConfig,
-  DmPolicy,
-  GroupPolicy,
-} from "bot/plugin-sdk";
+import type { BlockStreamingCoalesceConfig, DmConfig, DmPolicy, GroupPolicy } from "bot/plugin-sdk";
 
 export type { DmPolicy, GroupPolicy };
 
