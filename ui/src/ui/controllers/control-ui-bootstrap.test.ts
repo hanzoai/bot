@@ -22,6 +22,8 @@ describe("loadControlUiBootstrapConfig", () => {
       assistantName: "Assistant",
       assistantAvatar: null,
       assistantAgentId: null,
+      authMode: null,
+      iamConfig: null,
     };
 
     await loadControlUiBootstrapConfig(state);
@@ -46,6 +48,8 @@ describe("loadControlUiBootstrapConfig", () => {
       assistantName: "Assistant",
       assistantAvatar: null,
       assistantAgentId: null,
+      authMode: null,
+      iamConfig: null,
     };
 
     await loadControlUiBootstrapConfig(state);
@@ -68,6 +72,8 @@ describe("loadControlUiBootstrapConfig", () => {
       assistantName: "Assistant",
       assistantAvatar: null,
       assistantAgentId: null,
+      authMode: null,
+      iamConfig: null,
     };
 
     await loadControlUiBootstrapConfig(state);
