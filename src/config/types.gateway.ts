@@ -90,6 +90,8 @@ export type GatewayIamConfig = {
   clientSecret?: string;
   /** Default org name/slug for login redirects. */
   orgName?: string;
+  /** Casdoor application name (used for signup URL). */
+  appName?: string;
   /** OAuth2 scopes to request (defaults to ["openid", "profile", "email"]). */
   scopes?: string[];
 };

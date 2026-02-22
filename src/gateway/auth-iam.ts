@@ -50,6 +50,7 @@ function toIamConfig(config: GatewayIamConfig): IamConfig {
     clientId: config.clientId,
     clientSecret: config.clientSecret,
     orgName: config.orgName,
+    appName: config.appName,
   };
 }
 

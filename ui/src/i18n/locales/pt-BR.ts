@@ -100,6 +100,13 @@ export const pt_BR: TranslationMap = {
       hint: "Esta página é HTTP, então o navegador bloqueia a identidade do dispositivo. Use HTTPS (Tailscale Serve) ou abra {url} no host do gateway.",
       stayHttp: "Se você precisar permanecer em HTTP, defina {config} (apenas token).",
     },
+    iam: {
+      subtitle: "Entre com sua conta Hanzo para acessar este gateway.",
+      signIn: "Entrar com Hanzo",
+      signingIn: "Entrando\u2026",
+      createAccount: "Criar Conta",
+      signOut: "Sair",
+    },
   },
   chat: {
     disconnected: "Desconectado do gateway.",

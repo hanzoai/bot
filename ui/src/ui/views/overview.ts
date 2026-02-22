@@ -16,11 +16,17 @@ export type OverviewProps = {
   cronEnabled: boolean | null;
   cronNext: number | null;
   lastChannelsRefresh: number | null;
+  authMode: string | null;
+  iamUser: { email?: string; name?: string; avatar?: string } | null;
+  iamLoggingIn: boolean;
   onSettingsChange: (next: UiSettings) => void;
   onPasswordChange: (next: string) => void;
   onSessionKeyChange: (next: string) => void;
   onConnect: () => void;
   onRefresh: () => void;
+  onIamLogin: () => void;
+  onIamSignup: () => void;
+  onIamLogout: () => void;
 };
 
 export function renderOverview(props: OverviewProps) {
@@ -123,8 +129,9 @@ export function renderOverview(props: OverviewProps) {
   })();
 
   const currentLocale = i18n.getLocale();
-  const authMode = (snapshot as { authMode?: string } | undefined)?.authMode;
+  const authMode = props.authMode ?? (snapshot as { authMode?: string } | undefined)?.authMode;
   const isTrustedProxy = authMode === "trusted-proxy";
+  const isIam = authMode === "iam";
 
   return html`
     <section class="grid grid-cols-2">
@@ -132,44 +139,50 @@ export function renderOverview(props: OverviewProps) {
         <div class="card-title">${t("overview.access.title")}</div>
         <div class="card-sub">${t("overview.access.subtitle")}</div>
         <div class="form-grid" style="margin-top: 16px;">
-          <label class="field">
-            <span>${t("overview.access.wsUrl")}</span>
-            <input
-              .value=${props.settings.gatewayUrl}
-              @input=${(e: Event) => {
-                const v = (e.target as HTMLInputElement).value;
-                props.onSettingsChange({ ...props.settings, gatewayUrl: v });
-              }}
-              placeholder="ws://100.x.y.z:18789"
-            />
-          </label>
           ${
-            isTrustedProxy
-              ? ""
+            isIam
+              ? renderIamAccessCard(props)
               : html`
                 <label class="field">
-                  <span>${t("overview.access.token")}</span>
+                  <span>${t("overview.access.wsUrl")}</span>
                   <input
-                    .value=${props.settings.token}
+                    .value=${props.settings.gatewayUrl}
                     @input=${(e: Event) => {
                       const v = (e.target as HTMLInputElement).value;
-                      props.onSettingsChange({ ...props.settings, token: v });
+                      props.onSettingsChange({ ...props.settings, gatewayUrl: v });
                     }}
-                    placeholder="BOT_GATEWAY_TOKEN"
+                    placeholder="ws://100.x.y.z:18789"
                   />
                 </label>
-                <label class="field">
-                  <span>${t("overview.access.password")}</span>
-                  <input
-                    type="password"
-                    .value=${props.password}
-                    @input=${(e: Event) => {
-                      const v = (e.target as HTMLInputElement).value;
-                      props.onPasswordChange(v);
-                    }}
-                    placeholder="system or shared password"
-                  />
-                </label>
+                ${
+                  isTrustedProxy
+                    ? ""
+                    : html`
+                      <label class="field">
+                        <span>${t("overview.access.token")}</span>
+                        <input
+                          .value=${props.settings.token}
+                          @input=${(e: Event) => {
+                            const v = (e.target as HTMLInputElement).value;
+                            props.onSettingsChange({ ...props.settings, token: v });
+                          }}
+                          placeholder="BOT_GATEWAY_TOKEN"
+                        />
+                      </label>
+                      <label class="field">
+                        <span>${t("overview.access.password")}</span>
+                        <input
+                          type="password"
+                          .value=${props.password}
+                          @input=${(e: Event) => {
+                            const v = (e.target as HTMLInputElement).value;
+                            props.onPasswordChange(v);
+                          }}
+                          placeholder="system or shared password"
+                        />
+                      </label>
+                    `
+                }
               `
           }
           <label class="field">
@@ -199,11 +212,17 @@ export function renderOverview(props: OverviewProps) {
             </select>
           </label>
         </div>
-        <div class="row" style="margin-top: 14px;">
-          <button class="btn" @click=${() => props.onConnect()}>${t("common.connect")}</button>
-          <button class="btn" @click=${() => props.onRefresh()}>${t("common.refresh")}</button>
-          <span class="muted">${t("overview.access.connectHint")}</span>
-        </div>
+        ${
+          isIam
+            ? ""
+            : html`
+              <div class="row" style="margin-top: 14px;">
+                <button class="btn" @click=${() => props.onConnect()}>${t("common.connect")}</button>
+                <button class="btn" @click=${() => props.onRefresh()}>${t("common.refresh")}</button>
+                <span class="muted">${t("overview.access.connectHint")}</span>
+              </div>
+            `
+        }
       </div>
 
       <div class="card">
@@ -287,5 +306,55 @@ export function renderOverview(props: OverviewProps) {
         </div>
       </div>
     </section>
+  `;
+}
+
+function renderIamAccessCard(props: OverviewProps) {
+  if (props.iamUser) {
+    const displayName = props.iamUser.name || props.iamUser.email || "Authenticated";
+    return html`
+      <div class="field" style="display: flex; align-items: center; gap: 12px; padding: 8px 0;">
+        ${
+          props.iamUser.avatar
+            ? html`<img
+              src=${props.iamUser.avatar}
+              alt=""
+              style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;"
+            />`
+            : html`<div
+              style="width: 36px; height: 36px; border-radius: 50%; background: var(--accent, #6366f1); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px;"
+            >${displayName.charAt(0).toUpperCase()}</div>`
+        }
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-weight: 500;">${displayName}</div>
+          ${
+            props.iamUser.email && props.iamUser.name
+              ? html`<div class="muted" style="font-size: 12px;">${props.iamUser.email}</div>`
+              : ""
+          }
+        </div>
+        <button
+          class="btn btn--outline"
+          @click=${() => props.onIamLogout()}
+        >${t("overview.iam.signOut")}</button>
+      </div>
+    `;
+  }
+
+  return html`
+    <div class="field" style="padding: 8px 0;">
+      <div style="margin-bottom: 12px;" class="muted">${t("overview.iam.subtitle")}</div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button
+          class="btn btn--primary"
+          ?disabled=${props.iamLoggingIn}
+          @click=${() => props.onIamLogin()}
+        >${props.iamLoggingIn ? t("overview.iam.signingIn") : t("overview.iam.signIn")}</button>
+        <button
+          class="btn btn--outline"
+          @click=${() => props.onIamSignup()}
+        >${t("overview.iam.createAccount")}</button>
+      </div>
+    </div>
   `;
 }
