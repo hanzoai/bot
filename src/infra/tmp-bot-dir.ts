@@ -28,9 +28,7 @@ function isNodeErrorWithCode(err: unknown, code: string): err is MaybeNodeError 
   );
 }
 
-export function resolvePreferredBotTmpDir(
-  options: ResolvePreferredBotTmpDirOptions = {},
-): string {
+export function resolvePreferredBotTmpDir(options: ResolvePreferredBotTmpDirOptions = {}): string {
   const accessSync = options.accessSync ?? fs.accessSync;
   const lstatSync = options.lstatSync ?? fs.lstatSync;
   const mkdirSync = options.mkdirSync ?? fs.mkdirSync;
