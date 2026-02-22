@@ -15,12 +15,12 @@ vi.mock("node:child_process", () => ({
   spawn: (...args: unknown[]) => spawnState.spawn(...args),
 }));
 
-let createLobsterTool: typeof import("./lobster-tool.js").createLobsterTool;
+let createFlowTool: typeof import("./flow-tool.js").createFlowTool;
 
 function fakeApi(overrides: Partial<BotPluginApi> = {}): BotPluginApi {
   return {
-    id: "lobster",
-    name: "lobster",
+    id: "flow",
+    name: "flow",
     source: "test",
     config: {},
     pluginConfig: {},
@@ -57,16 +57,16 @@ function fakeCtx(overrides: Partial<BotPluginToolContext> = {}): BotPluginToolCo
   };
 }
 
-describe("lobster plugin tool", () => {
+describe("flow plugin tool", () => {
   let tempDir = "";
-  let lobsterBinPath = "";
+  let flowBinPath = "";
 
   beforeAll(async () => {
-    ({ createLobsterTool } = await import("./lobster-tool.js"));
+    ({ createFlowTool } = await import("./flow-tool.js"));
 
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lobster-plugin-"));
-    lobsterBinPath = path.join(tempDir, process.platform === "win32" ? "lobster.cmd" : "lobster");
-    await fs.writeFile(lobsterBinPath, "", { encoding: "utf8", mode: 0o755 });
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-flow-plugin-"));
+    flowBinPath = path.join(tempDir, process.platform === "win32" ? "flow.cmd" : "flow");
+    await fs.writeFile(flowBinPath, "", { encoding: "utf8", mode: 0o755 });
   });
 
   afterAll(async () => {
@@ -110,7 +110,7 @@ describe("lobster plugin tool", () => {
     });
   });
 
-  it("runs lobster and returns parsed envelope in details", async () => {
+  it("runs flow and returns parsed envelope in details", async () => {
     spawnState.queue.push({
       stdout: JSON.stringify({
         ok: true,
@@ -120,7 +120,7 @@ describe("lobster plugin tool", () => {
       }),
     });
 
-    const tool = createLobsterTool(fakeApi());
+    const tool = createFlowTool(fakeApi());
     const res = await tool.execute("call1", {
       action: "run",
       pipeline: "noop",
@@ -137,7 +137,7 @@ describe("lobster plugin tool", () => {
       stdout: `noise before json\n${JSON.stringify(payload)}`,
     });
 
-    const tool = createLobsterTool(fakeApi());
+    const tool = createFlowTool(fakeApi());
     const res = await tool.execute("call-noisy", {
       action: "run",
       pipeline: "noop",
@@ -147,30 +147,30 @@ describe("lobster plugin tool", () => {
     expect(res.details).toMatchObject({ ok: true, status: "ok" });
   });
 
-  it("requires absolute lobsterPath when provided (even though it is ignored)", async () => {
-    const tool = createLobsterTool(fakeApi());
+  it("requires absolute flowPath when provided (even though it is ignored)", async () => {
+    const tool = createFlowTool(fakeApi());
     await expect(
       tool.execute("call2", {
         action: "run",
         pipeline: "noop",
-        lobsterPath: "./lobster",
+        flowPath: "./flow",
       }),
     ).rejects.toThrow(/absolute path/);
   });
 
-  it("rejects lobsterPath (deprecated) when invalid", async () => {
-    const tool = createLobsterTool(fakeApi());
+  it("rejects flowPath (deprecated) when invalid", async () => {
+    const tool = createFlowTool(fakeApi());
     await expect(
       tool.execute("call2b", {
         action: "run",
         pipeline: "noop",
-        lobsterPath: "/bin/bash",
+        flowPath: "/bin/bash",
       }),
-    ).rejects.toThrow(/lobster executable/);
+    ).rejects.toThrow(/flow executable/);
   });
 
   it("rejects absolute cwd", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createFlowTool(fakeApi());
     await expect(
       tool.execute("call2c", {
         action: "run",
@@ -181,7 +181,7 @@ describe("lobster plugin tool", () => {
   });
 
   it("rejects cwd that escapes the gateway working directory", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createFlowTool(fakeApi());
     await expect(
       tool.execute("call2d", {
         action: "run",
@@ -191,7 +191,7 @@ describe("lobster plugin tool", () => {
     ).rejects.toThrow(/must stay within/);
   });
 
-  it("uses pluginConfig.lobsterPath when provided", async () => {
+  it("uses pluginConfig.flowPath when provided", async () => {
     spawnState.queue.push({
       stdout: JSON.stringify({
         ok: true,
@@ -201,7 +201,7 @@ describe("lobster plugin tool", () => {
       }),
     });
 
-    const tool = createLobsterTool(fakeApi({ pluginConfig: { lobsterPath: lobsterBinPath } }));
+    const tool = createFlowTool(fakeApi({ pluginConfig: { flowPath: flowBinPath } }));
     const res = await tool.execute("call-plugin-config", {
       action: "run",
       pipeline: "noop",
@@ -210,14 +210,14 @@ describe("lobster plugin tool", () => {
 
     expect(spawnState.spawn).toHaveBeenCalled();
     const [execPath] = spawnState.spawn.mock.calls[0] ?? [];
-    expect(execPath).toBe(lobsterBinPath);
+    expect(execPath).toBe(flowBinPath);
     expect(res.details).toMatchObject({ ok: true, status: "ok" });
   });
 
-  it("rejects invalid JSON from lobster", async () => {
+  it("rejects invalid JSON from flow", async () => {
     spawnState.queue.push({ stdout: "nope" });
 
-    const tool = createLobsterTool(fakeApi());
+    const tool = createFlowTool(fakeApi());
     await expect(
       tool.execute("call3", {
         action: "run",
@@ -232,10 +232,10 @@ describe("lobster plugin tool", () => {
       if (ctx.sandboxed) {
         return null;
       }
-      return createLobsterTool(api);
+      return createFlowTool(api);
     };
 
     expect(factoryTool(fakeCtx({ sandboxed: true }))).toBeNull();
-    expect(factoryTool(fakeCtx({ sandboxed: false }))?.name).toBe("lobster");
+    expect(factoryTool(fakeCtx({ sandboxed: false }))?.name).toBe("flow");
   });
 });
