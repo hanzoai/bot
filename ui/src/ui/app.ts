@@ -1,5 +1,6 @@
 import { LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import type { ControlUiBootstrapIamConfig } from "../../../src/gateway/control-ui-contract.js";
 import type { EventLogEntry } from "./app-events.ts";
 import type { AppViewState } from "./app-view-state.ts";
 import type { DevicePairingList } from "./controllers/devices.ts";
@@ -79,6 +80,7 @@ import {
 } from "./app-tool-stream.ts";
 import { normalizeAssistantIdentity } from "./assistant-identity.ts";
 import { loadAssistantIdentity as loadAssistantIdentityInternal } from "./controllers/assistant-identity.ts";
+import { startIamLogin, getIamSignupUrl, iamLogout } from "./controllers/iam-auth.ts";
 import { loadSettings, type UiSettings } from "./storage.ts";
 import { type ChatAttachment, type ChatQueueItem, type CronFormState } from "./ui-types.ts";
 
@@ -132,6 +134,11 @@ export class BotApp extends LitElement {
   @state() assistantName = bootAssistantIdentity.name;
   @state() assistantAvatar = bootAssistantIdentity.avatar;
   @state() assistantAgentId = bootAssistantIdentity.agentId ?? null;
+
+  @state() authMode: string | null = null;
+  @state() iamConfig: ControlUiBootstrapIamConfig | null = null;
+  @state() iamUser: { email?: string; name?: string; avatar?: string } | null = null;
+  @state() iamLoggingIn = false;
 
   @state() sessionKey = this.settings.sessionKey;
   @state() chatLoading = false;
@@ -380,6 +387,25 @@ export class BotApp extends LitElement {
 
   connect() {
     connectGatewayInternal(this as unknown as Parameters<typeof connectGatewayInternal>[0]);
+  }
+
+  connectGateway() {
+    connectGatewayInternal(this as unknown as Parameters<typeof connectGatewayInternal>[0]);
+  }
+
+  handleIamLogin() {
+    void startIamLogin(this as unknown as Parameters<typeof startIamLogin>[0]);
+  }
+
+  handleIamSignup() {
+    const url = getIamSignupUrl(this as unknown as Parameters<typeof getIamSignupUrl>[0]);
+    if (url) {
+      window.open(url, "_blank", "noopener");
+    }
+  }
+
+  handleIamLogout() {
+    iamLogout(this as unknown as Parameters<typeof iamLogout>[0]);
   }
 
   handleChatScroll(event: Event) {
