@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.gateway
+package ai.hanzo.bot.android.gateway
 
 import android.util.Log
 import java.util.Locale
