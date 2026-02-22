@@ -19,10 +19,7 @@ const channel = "twitch" as const;
 /**
  * Set Twitch account configuration
  */
-function setTwitchAccount(
-  cfg: BotConfig,
-  account: Partial<TwitchAccountConfig>,
-): BotConfig {
+function setTwitchAccount(cfg: BotConfig, account: Partial<TwitchAccountConfig>): BotConfig {
   const existing = getAccountConfig(cfg, DEFAULT_ACCOUNT_ID);
   const merged: TwitchAccountConfig = {
     username: account.username ?? existing?.username ?? "",

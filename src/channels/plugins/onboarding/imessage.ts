@@ -31,11 +31,7 @@ function setIMessageDmPolicy(cfg: BotConfig, dmPolicy: DmPolicy) {
   };
 }
 
-function setIMessageAllowFrom(
-  cfg: BotConfig,
-  accountId: string,
-  allowFrom: string[],
-): BotConfig {
+function setIMessageAllowFrom(cfg: BotConfig, accountId: string, allowFrom: string[]): BotConfig {
   if (accountId === DEFAULT_ACCOUNT_ID) {
     return {
       ...cfg,

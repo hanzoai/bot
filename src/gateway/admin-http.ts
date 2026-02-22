@@ -117,7 +117,7 @@ export async function handleAdminHttpRequest(
   if (pathname === "/v1/admin/agents" && method === "POST") {
     try {
       const body = JSON.parse(await readBody(req)) as Record<string, unknown>;
-      const agentId = String(body.id ?? "");
+      const agentId = String((body.id as string) ?? "");
       if (!agentId) {
         sendJson(res, 400, { error: "Missing agent id" });
         return true;
@@ -125,15 +125,15 @@ export async function handleAdminHttpRequest(
 
       const newAgent: AgentConfig = {
         id: agentId,
-        name: body.name ? String(body.name) : undefined,
-        model: body.model ? String(body.model) : undefined,
-        workspace: body.workspace ? String(body.workspace) : undefined,
+        name: body.name ? String(body.name as string) : undefined,
+        model: body.model ? String(body.model as string) : undefined,
+        workspace: body.workspace ? String(body.workspace as string) : undefined,
         skills: Array.isArray(body.skills) ? body.skills.map(String) : undefined,
         auth:
           body.auth && typeof body.auth === "object"
             ? {
                 token: (body.auth as Record<string, unknown>).token
-                  ? String((body.auth as Record<string, unknown>).token)
+                  ? String((body.auth as Record<string, unknown>).token as string)
                   : undefined,
               }
             : undefined,
@@ -142,7 +142,7 @@ export async function handleAdminHttpRequest(
       if (body.identity && typeof body.identity === "object") {
         const ident = body.identity as Record<string, unknown>;
         newAgent.identity = {
-          name: ident.name ? String(ident.name) : undefined,
+          name: ident.name ? String(ident.name as string) : undefined,
         };
       }
 

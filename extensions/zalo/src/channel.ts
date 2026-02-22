@@ -1,9 +1,4 @@
-import type {
-  ChannelAccountSnapshot,
-  ChannelDock,
-  ChannelPlugin,
-  BotConfig,
-} from "bot/plugin-sdk";
+import type { ChannelAccountSnapshot, ChannelDock, ChannelPlugin, BotConfig } from "bot/plugin-sdk";
 import {
   applyAccountNameToChannelSection,
   buildChannelConfigSchema,

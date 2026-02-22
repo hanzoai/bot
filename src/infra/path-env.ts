@@ -72,8 +72,7 @@ function candidateBinDirs(opts: EnsureBotPathOpts): { prepend: string[]; append:
   // Project-local installs are a common repo-based attack vector (bin hijacking). Keep this
   // disabled by default; if an operator explicitly enables it, only append (never prepend).
   const allowProjectLocalBin =
-    opts.allowProjectLocalBin === true ||
-    isTruthyEnvValue(process.env.BOT_ALLOW_PROJECT_LOCAL_BIN);
+    opts.allowProjectLocalBin === true || isTruthyEnvValue(process.env.BOT_ALLOW_PROJECT_LOCAL_BIN);
   if (allowProjectLocalBin) {
     const localBinDir = path.join(cwd, "node_modules", ".bin");
     if (isExecutable(path.join(localBinDir, "hanzo-bot"))) {

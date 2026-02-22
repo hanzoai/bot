@@ -75,8 +75,7 @@ vi.mock("../media/store.js", () => ({
 
 vi.mock("@whiskeysockets/baileys", () => {
   const created = createMockBaileys();
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot:lastSocket")] =
-    created.lastSocket;
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot:lastSocket")] = created.lastSocket;
   return created.mod;
 });
 
@@ -89,8 +88,7 @@ export const baileys = await import("@whiskeysockets/baileys");
 
 export function resetBaileysMocks() {
   const recreated = createMockBaileys();
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot:lastSocket")] =
-    recreated.lastSocket;
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot:lastSocket")] = recreated.lastSocket;
   // @ts-expect-error
   baileys.makeWASocket = vi.fn(recreated.mod.makeWASocket);
   // @ts-expect-error

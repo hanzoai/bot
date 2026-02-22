@@ -15,10 +15,7 @@ export type TlonResolvedAccount = {
   showModelSignature: boolean | null;
 };
 
-export function resolveTlonAccount(
-  cfg: BotConfig,
-  accountId?: string | null,
-): TlonResolvedAccount {
+export function resolveTlonAccount(cfg: BotConfig, accountId?: string | null): TlonResolvedAccount {
   const base = cfg.channels?.tlon as
     | {
         name?: string;

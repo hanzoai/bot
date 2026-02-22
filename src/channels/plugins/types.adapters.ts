@@ -22,11 +22,7 @@ import type {
 
 export type ChannelSetupAdapter = {
   resolveAccountId?: (params: { cfg: BotConfig; accountId?: string }) => string;
-  applyAccountName?: (params: {
-    cfg: BotConfig;
-    accountId: string;
-    name?: string;
-  }) => BotConfig;
+  applyAccountName?: (params: { cfg: BotConfig; accountId: string; name?: string }) => BotConfig;
   applyAccountConfig: (params: {
     cfg: BotConfig;
     accountId: string;
@@ -188,11 +184,7 @@ export type ChannelLogoutContext<ResolvedAccount = unknown> = {
 export type ChannelPairingAdapter = {
   idLabel: string;
   normalizeAllowEntry?: (entry: string) => string;
-  notifyApproval?: (params: {
-    cfg: BotConfig;
-    id: string;
-    runtime?: RuntimeEnv;
-  }) => Promise<void>;
+  notifyApproval?: (params: { cfg: BotConfig; id: string; runtime?: RuntimeEnv }) => Promise<void>;
 };
 
 export type ChannelGatewayAdapter<ResolvedAccount = unknown> = {
