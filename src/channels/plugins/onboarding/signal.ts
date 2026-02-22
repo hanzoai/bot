@@ -54,11 +54,7 @@ function setSignalDmPolicy(cfg: BotConfig, dmPolicy: DmPolicy) {
   };
 }
 
-function setSignalAllowFrom(
-  cfg: BotConfig,
-  accountId: string,
-  allowFrom: string[],
-): BotConfig {
+function setSignalAllowFrom(cfg: BotConfig, accountId: string, allowFrom: string[]): BotConfig {
   if (accountId === DEFAULT_ACCOUNT_ID) {
     return {
       ...cfg,
