@@ -1,11 +1,11 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
 import android.content.Context
-import ai.bot.android.CameraHudKind
-import ai.bot.android.BuildConfig
-import ai.bot.android.SecurePrefs
-import ai.bot.android.gateway.GatewayEndpoint
-import ai.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.CameraHudKind
+import ai.hanzo.bot.android.BuildConfig
+import ai.hanzo.bot.android.SecurePrefs
+import ai.hanzo.bot.android.gateway.GatewayEndpoint
+import ai.hanzo.bot.android.gateway.GatewaySession
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext

@@ -1,12 +1,12 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
-import ai.bot.android.LocationMode
-import ai.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.LocationMode
+import ai.hanzo.bot.android.gateway.GatewaySession
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject

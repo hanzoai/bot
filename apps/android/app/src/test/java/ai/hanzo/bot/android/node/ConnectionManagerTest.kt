@@ -1,6 +1,6 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
-import ai.bot.android.gateway.GatewayEndpoint
+import ai.hanzo.bot.android.gateway.GatewayEndpoint
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

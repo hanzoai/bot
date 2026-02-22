@@ -1,21 +1,21 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
 import android.os.Build
-import ai.bot.android.BuildConfig
-import ai.bot.android.SecurePrefs
-import ai.bot.android.gateway.GatewayClientInfo
-import ai.bot.android.gateway.GatewayConnectOptions
-import ai.bot.android.gateway.GatewayEndpoint
-import ai.bot.android.gateway.GatewayTlsParams
-import ai.bot.android.protocol.BotCanvasA2UICommand
-import ai.bot.android.protocol.BotCanvasCommand
-import ai.bot.android.protocol.BotCameraCommand
-import ai.bot.android.protocol.BotLocationCommand
-import ai.bot.android.protocol.BotScreenCommand
-import ai.bot.android.protocol.BotSmsCommand
-import ai.bot.android.protocol.BotCapability
-import ai.bot.android.LocationMode
-import ai.bot.android.VoiceWakeMode
+import ai.hanzo.bot.android.BuildConfig
+import ai.hanzo.bot.android.SecurePrefs
+import ai.hanzo.bot.android.gateway.GatewayClientInfo
+import ai.hanzo.bot.android.gateway.GatewayConnectOptions
+import ai.hanzo.bot.android.gateway.GatewayEndpoint
+import ai.hanzo.bot.android.gateway.GatewayTlsParams
+import ai.hanzo.bot.android.protocol.BotCanvasA2UICommand
+import ai.hanzo.bot.android.protocol.BotCanvasCommand
+import ai.hanzo.bot.android.protocol.BotCameraCommand
+import ai.hanzo.bot.android.protocol.BotLocationCommand
+import ai.hanzo.bot.android.protocol.BotScreenCommand
+import ai.hanzo.bot.android.protocol.BotSmsCommand
+import ai.hanzo.bot.android.protocol.BotCapability
+import ai.hanzo.bot.android.LocationMode
+import ai.hanzo.bot.android.VoiceWakeMode
 
 class ConnectionManager(
   private val prefs: SecurePrefs,
