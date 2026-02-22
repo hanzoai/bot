@@ -7,6 +7,7 @@ import { DEFAULT_ASSISTANT_IDENTITY, resolveAssistantIdentity } from "./assistan
 import {
   CONTROL_UI_BOOTSTRAP_CONFIG_PATH,
   type ControlUiBootstrapConfig,
+  type ControlUiBootstrapIamConfig,
 } from "./control-ui-contract.js";
 import { buildControlUiCspHeader } from "./control-ui-csp.js";
 import {
@@ -71,9 +72,9 @@ type ControlUiAvatarMeta = {
   avatarUrl: string | null;
 };
 
-function applyControlUiSecurityHeaders(res: ServerResponse) {
+function applyControlUiSecurityHeaders(res: ServerResponse, iamServerUrl?: string) {
   res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("Content-Security-Policy", buildControlUiCspHeader());
+  res.setHeader("Content-Security-Policy", buildControlUiCspHeader(iamServerUrl));
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer");
 }
@@ -227,7 +228,8 @@ export function handleControlUiHttpRequest(
     }
   }
 
-  applyControlUiSecurityHeaders(res);
+  const iamServerUrl = opts?.config?.gateway?.auth?.iam?.serverUrl;
+  applyControlUiSecurityHeaders(res, iamServerUrl);
 
   const bootstrapConfigPath = basePath
     ? `${basePath}${CONTROL_UI_BOOTSTRAP_CONFIG_PATH}`
@@ -249,11 +251,26 @@ export function handleControlUiHttpRequest(
       res.end();
       return true;
     }
+    const authMode = config?.gateway?.auth?.mode ?? "none";
+    const iamCfg = config?.gateway?.auth?.iam;
+    const iamBootstrap: ControlUiBootstrapIamConfig | undefined =
+      authMode === "iam" && iamCfg
+        ? {
+            serverUrl: iamCfg.serverUrl,
+            clientId: iamCfg.clientId,
+            appName: iamCfg.appName,
+            orgName: iamCfg.orgName,
+            scopes: iamCfg.scopes,
+          }
+        : undefined;
+
     sendJson(res, 200, {
       basePath,
       assistantName: identity.name,
       assistantAvatar: avatarValue ?? identity.avatar,
       assistantAgentId: identity.agentId,
+      authMode,
+      iam: iamBootstrap,
     } satisfies ControlUiBootstrapConfig);
     return true;
   }
