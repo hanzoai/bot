@@ -1,13 +1,13 @@
-package ai.hanzo-bot.android
+package ai.hanzo.bot.android
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import ai.hanzo-bot.android.gateway.GatewayEndpoint
-import ai.hanzo-bot.android.chat.OutgoingAttachment
-import ai.hanzo-bot.android.node.CameraCaptureManager
-import ai.hanzo-bot.android.node.CanvasController
-import ai.hanzo-bot.android.node.ScreenRecordManager
-import ai.hanzo-bot.android.node.SmsManager
+import ai.hanzo.bot.android.gateway.GatewayEndpoint
+import ai.hanzo.bot.android.chat.OutgoingAttachment
+import ai.hanzo.bot.android.node.CameraCaptureManager
+import ai.hanzo.bot.android.node.CanvasController
+import ai.hanzo.bot.android.node.ScreenRecordManager
+import ai.hanzo.bot.android.node.SmsManager
 import kotlinx.coroutines.flow.StateFlow
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
