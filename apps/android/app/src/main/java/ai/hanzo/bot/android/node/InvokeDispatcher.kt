@@ -1,12 +1,12 @@
 package ai.hanzo.bot.android.node
 
 import ai.hanzo.bot.android.gateway.GatewaySession
-import ai.hanzo.bot.android.protocol.BotCanvasA2UICommand
-import ai.hanzo.bot.android.protocol.BotCanvasCommand
-import ai.hanzo.bot.android.protocol.BotCameraCommand
-import ai.hanzo.bot.android.protocol.BotLocationCommand
-import ai.hanzo.bot.android.protocol.BotScreenCommand
-import ai.hanzo.bot.android.protocol.BotSmsCommand
+import ai.hanzo.bot.android.protocol.HanzoBotCanvasA2UICommand
+import ai.hanzo.bot.android.protocol.HanzoBotCanvasCommand
+import ai.hanzo.bot.android.protocol.HanzoBotCameraCommand
+import ai.hanzo.bot.android.protocol.HanzoBotLocationCommand
+import ai.hanzo.bot.android.protocol.HanzoBotScreenCommand
+import ai.hanzo.bot.android.protocol.HanzoBotSmsCommand
 
 class InvokeDispatcher(
   private val canvas: CanvasController,
@@ -24,10 +24,10 @@ class InvokeDispatcher(
   suspend fun handleInvoke(command: String, paramsJson: String?): GatewaySession.InvokeResult {
     // Check foreground requirement for canvas/camera/screen commands
     if (
-      command.startsWith(BotCanvasCommand.NamespacePrefix) ||
-        command.startsWith(BotCanvasA2UICommand.NamespacePrefix) ||
-        command.startsWith(BotCameraCommand.NamespacePrefix) ||
-        command.startsWith(BotScreenCommand.NamespacePrefix)
+      command.startsWith(HanzoBotCanvasCommand.NamespacePrefix) ||
+        command.startsWith(HanzoBotCanvasA2UICommand.NamespacePrefix) ||
+        command.startsWith(HanzoBotCameraCommand.NamespacePrefix) ||
+        command.startsWith(HanzoBotScreenCommand.NamespacePrefix)
     ) {
       if (!isForeground()) {
         return GatewaySession.InvokeResult.error(
@@ -38,7 +38,7 @@ class InvokeDispatcher(
     }
 
     // Check camera enabled
-    if (command.startsWith(BotCameraCommand.NamespacePrefix) && !cameraEnabled()) {
+    if (command.startsWith(HanzoBotCameraCommand.NamespacePrefix) && !cameraEnabled()) {
       return GatewaySession.InvokeResult.error(
         code = "CAMERA_DISABLED",
         message = "CAMERA_DISABLED: enable Camera in Settings",
@@ -46,7 +46,7 @@ class InvokeDispatcher(
     }
 
     // Check location enabled
-    if (command.startsWith(BotLocationCommand.NamespacePrefix) && !locationEnabled()) {
+    if (command.startsWith(HanzoBotLocationCommand.NamespacePrefix) && !locationEnabled()) {
       return GatewaySession.InvokeResult.error(
         code = "LOCATION_DISABLED",
         message = "LOCATION_DISABLED: enable Location in Settings",
@@ -55,18 +55,18 @@ class InvokeDispatcher(
 
     return when (command) {
       // Canvas commands
-      BotCanvasCommand.Present.rawValue -> {
+      HanzoBotCanvasCommand.Present.rawValue -> {
         val url = CanvasController.parseNavigateUrl(paramsJson)
         canvas.navigate(url)
         GatewaySession.InvokeResult.ok(null)
       }
-      BotCanvasCommand.Hide.rawValue -> GatewaySession.InvokeResult.ok(null)
-      BotCanvasCommand.Navigate.rawValue -> {
+      HanzoBotCanvasCommand.Hide.rawValue -> GatewaySession.InvokeResult.ok(null)
+      HanzoBotCanvasCommand.Navigate.rawValue -> {
         val url = CanvasController.parseNavigateUrl(paramsJson)
         canvas.navigate(url)
         GatewaySession.InvokeResult.ok(null)
       }
-      BotCanvasCommand.Eval.rawValue -> {
+      HanzoBotCanvasCommand.Eval.rawValue -> {
         val js =
           CanvasController.parseEvalJs(paramsJson)
             ?: return GatewaySession.InvokeResult.error(
@@ -84,7 +84,7 @@ class InvokeDispatcher(
           }
         GatewaySession.InvokeResult.ok("""{"result":${result.toJsonString()}}""")
       }
-      BotCanvasCommand.Snapshot.rawValue -> {
+      HanzoBotCanvasCommand.Snapshot.rawValue -> {
         val snapshotParams = CanvasController.parseSnapshotParams(paramsJson)
         val base64 =
           try {
@@ -103,7 +103,7 @@ class InvokeDispatcher(
       }
 
       // A2UI commands
-      BotCanvasA2UICommand.Reset.rawValue -> {
+      HanzoBotCanvasA2UICommand.Reset.rawValue -> {
         val a2uiUrl = a2uiHandler.resolveA2uiHostUrl()
           ?: return GatewaySession.InvokeResult.error(
             code = "A2UI_HOST_NOT_CONFIGURED",
@@ -119,7 +119,7 @@ class InvokeDispatcher(
         val res = canvas.eval(A2UIHandler.a2uiResetJS)
         GatewaySession.InvokeResult.ok(res)
       }
-      BotCanvasA2UICommand.Push.rawValue, BotCanvasA2UICommand.PushJSONL.rawValue -> {
+      HanzoBotCanvasA2UICommand.Push.rawValue, HanzoBotCanvasA2UICommand.PushJSONL.rawValue -> {
         val messages =
           try {
             a2uiHandler.decodeA2uiMessages(command, paramsJson)
@@ -147,17 +147,17 @@ class InvokeDispatcher(
       }
 
       // Camera commands
-      BotCameraCommand.Snap.rawValue -> cameraHandler.handleSnap(paramsJson)
-      BotCameraCommand.Clip.rawValue -> cameraHandler.handleClip(paramsJson)
+      HanzoBotCameraCommand.Snap.rawValue -> cameraHandler.handleSnap(paramsJson)
+      HanzoBotCameraCommand.Clip.rawValue -> cameraHandler.handleClip(paramsJson)
 
       // Location command
-      BotLocationCommand.Get.rawValue -> locationHandler.handleLocationGet(paramsJson)
+      HanzoBotLocationCommand.Get.rawValue -> locationHandler.handleLocationGet(paramsJson)
 
       // Screen command
-      BotScreenCommand.Record.rawValue -> screenHandler.handleScreenRecord(paramsJson)
+      HanzoBotScreenCommand.Record.rawValue -> screenHandler.handleScreenRecord(paramsJson)
 
       // SMS command
-      BotSmsCommand.Send.rawValue -> smsHandler.handleSmsSend(paramsJson)
+      HanzoBotSmsCommand.Send.rawValue -> smsHandler.handleSmsSend(paramsJson)
 
       // Debug commands
       "debug.ed25519" -> debugHandler.handleEd25519()
