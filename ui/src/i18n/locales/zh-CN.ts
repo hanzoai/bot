@@ -97,6 +97,13 @@ export const zh_CN: TranslationMap = {
       hint: "此页面为 HTTP，因此浏览器阻止设备标识。请使用 HTTPS (Tailscale Serve) 或在网关主机上打开 {url}。",
       stayHttp: "如果您必须保持 HTTP，请设置 {config} (仅限令牌)。",
     },
+    iam: {
+      subtitle: "使用您的 Hanzo 账户登录以访问此网关。",
+      signIn: "使用 Hanzo 登录",
+      signingIn: "登录中\u2026",
+      createAccount: "创建账户",
+      signOut: "退出登录",
+    },
   },
   chat: {
     disconnected: "已断开与网关的连接。",

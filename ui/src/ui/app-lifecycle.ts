@@ -1,4 +1,6 @@
+import type { ControlUiBootstrapIamConfig } from "../../../src/gateway/control-ui-contract.js";
 import type { Tab } from "./navigation.ts";
+import type { UiSettings } from "./storage.ts";
 import { connectGateway } from "./app-gateway.ts";
 import {
   startLogsPolling,
@@ -19,6 +21,7 @@ import {
   syncThemeWithSettings,
 } from "./app-settings.ts";
 import { loadControlUiBootstrapConfig } from "./controllers/control-ui-bootstrap.ts";
+import { handleIamCallback, tryIamAutoLogin } from "./controllers/iam-auth.ts";
 
 type LifecycleHost = {
   basePath: string;
@@ -26,6 +29,11 @@ type LifecycleHost = {
   assistantName: string;
   assistantAvatar: string | null;
   assistantAgentId: string | null;
+  authMode: string | null;
+  iamConfig: ControlUiBootstrapIamConfig | null;
+  iamUser: { email?: string; name?: string; avatar?: string } | null;
+  iamLoggingIn: boolean;
+  settings: UiSettings;
   chatHasAutoScrolled: boolean;
   chatManualRefreshInFlight: boolean;
   chatLoading: boolean;
@@ -49,7 +57,6 @@ const TRUSTED_PARENT_ORIGINS = new Set([
 
 export function handleConnected(host: LifecycleHost) {
   host.basePath = inferBasePath();
-  void loadControlUiBootstrapConfig(host);
   applySettingsFromUrl(host as unknown as Parameters<typeof applySettingsFromUrl>[0]);
   syncTabWithLocation(host as unknown as Parameters<typeof syncTabWithLocation>[0], true);
   syncThemeWithSettings(host as unknown as Parameters<typeof syncThemeWithSettings>[0]);
@@ -75,7 +82,7 @@ export function handleConnected(host: LifecycleHost) {
   };
   window.addEventListener("message", host.postMessageHandler);
 
-  connectGateway(host as unknown as Parameters<typeof connectGateway>[0]);
+  void bootstrapAndConnect(host);
   startNodesPolling(host as unknown as Parameters<typeof startNodesPolling>[0]);
   if (host.tab === "logs") {
     startLogsPolling(host as unknown as Parameters<typeof startLogsPolling>[0]);
@@ -83,6 +90,36 @@ export function handleConnected(host: LifecycleHost) {
   if (host.tab === "debug") {
     startDebugPolling(host as unknown as Parameters<typeof startDebugPolling>[0]);
   }
+}
+
+/**
+ * Load bootstrap config, then either handle IAM auth flow or connect directly.
+ * When authMode is "iam", we check for an OAuth callback or try to restore
+ * a session from stored tokens before calling connectGateway.
+ */
+async function bootstrapAndConnect(host: LifecycleHost): Promise<void> {
+  await loadControlUiBootstrapConfig(host);
+
+  if (host.authMode !== "iam") {
+    connectGateway(host as unknown as Parameters<typeof connectGateway>[0]);
+    return;
+  }
+
+  // IAM mode: check for OAuth callback first
+  const iamHost = host as unknown as Parameters<typeof handleIamCallback>[0];
+  const handled = await handleIamCallback(iamHost);
+  if (handled) {
+    return; // handleIamCallback already called connectGateway
+  }
+
+  // Try to restore session from stored tokens
+  const restored = await tryIamAutoLogin(iamHost);
+  if (restored) {
+    connectGateway(host as unknown as Parameters<typeof connectGateway>[0]);
+    return;
+  }
+
+  // No session — user needs to click "Sign in with Hanzo"
 }
 
 export function handleFirstUpdated(host: LifecycleHost) {

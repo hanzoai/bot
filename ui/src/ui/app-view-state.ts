@@ -1,3 +1,4 @@
+import type { ControlUiBootstrapIamConfig } from "../../../src/gateway/control-ui-contract.js";
 import type { EventLogEntry } from "./app-events.ts";
 import type { CompactionStatus } from "./app-tool-stream.ts";
 import type { DevicePairingList } from "./controllers/devices.ts";
@@ -221,7 +222,12 @@ export type AppViewState = {
   logsAtBottom: boolean;
   client: GatewayBrowserClient | null;
   refreshSessionsAfterChat: Set<string>;
+  authMode: string | null;
+  iamConfig: ControlUiBootstrapIamConfig | null;
+  iamUser: { email?: string; name?: string; avatar?: string } | null;
+  iamLoggingIn: boolean;
   connect: () => void;
+  connectGateway: () => void;
   setTab: (tab: Tab) => void;
   setTheme: (theme: ThemeMode, context?: ThemeTransitionContext) => void;
   applySettings: (next: UiSettings) => void;
@@ -282,4 +288,7 @@ export type AppViewState = {
   handleOpenSidebar: (content: string) => void;
   handleCloseSidebar: () => void;
   handleSplitRatioChange: (ratio: number) => void;
+  handleIamLogin: () => void;
+  handleIamSignup: () => void;
+  handleIamLogout: () => void;
 };

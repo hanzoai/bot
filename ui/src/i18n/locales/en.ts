@@ -98,6 +98,13 @@ export const en: TranslationMap = {
       hint: "This page is HTTP, so the browser blocks device identity. Use HTTPS (Tailscale Serve) or open {url} on the gateway host.",
       stayHttp: "If you must stay on HTTP, set {config} (token-only).",
     },
+    iam: {
+      subtitle: "Sign in with your Hanzo account to access this gateway.",
+      signIn: "Sign in with Hanzo",
+      signingIn: "Signing in\u2026",
+      createAccount: "Create Account",
+      signOut: "Sign Out",
+    },
   },
   chat: {
     disconnected: "Disconnected from gateway.",
