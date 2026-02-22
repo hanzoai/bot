@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -208,9 +209,9 @@ jobs:
         if: matrix.task == 'test' && matrix.runtime == 'node'
         run: |
           # `pnpm test` runs `scripts/test-parallel.mjs`, which spawns multiple Node processes.
-          # Default heap limits have been too low on Linux CI (V8 OOM near 4GB).
-          echo "BOT_TEST_WORKERS=2" >> "$GITHUB_ENV"
-          echo "BOT_TEST_MAX_OLD_SPACE_SIZE_MB=6144" >> "$GITHUB_ENV"
+          # ubuntu-latest has 7 GB RAM; keep total footprint within limits.
+          echo "BOT_TEST_WORKERS=1" >> "$GITHUB_ENV"
+          echo "BOT_TEST_MAX_OLD_SPACE_SIZE_MB=4096" >> "$GITHUB_ENV"
 
       - name: Run ${{ matrix.task }} (${{ matrix.runtime }})
         run: ${{ matrix.command }}
