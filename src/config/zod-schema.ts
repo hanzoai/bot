@@ -441,6 +441,7 @@ export const BotSchema = z
                 clientId: z.string(),
                 clientSecret: z.string().optional().register(sensitive),
                 orgName: z.string().optional(),
+                appName: z.string().optional(),
                 scopes: z.array(z.string()).optional(),
               })
               .strict()
