@@ -2,8 +2,11 @@ package ai.hanzo.bot.android
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import ai.hanzo.bot.android.gateway.GatewayEndpoint
+import ai.hanzo.bot.android.chat.ChatMessage
+import ai.hanzo.bot.android.chat.ChatPendingToolCall
+import ai.hanzo.bot.android.chat.ChatSessionEntry
 import ai.hanzo.bot.android.chat.OutgoingAttachment
+import ai.hanzo.bot.android.gateway.GatewayEndpoint
 import ai.hanzo.bot.android.node.CameraCaptureManager
 import ai.hanzo.bot.android.node.CanvasController
 import ai.hanzo.bot.android.node.ScreenRecordManager
@@ -57,13 +60,13 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
   val chatSessionKey: StateFlow<String> = runtime.chatSessionKey
   val chatSessionId: StateFlow<String?> = runtime.chatSessionId
-  val chatMessages = runtime.chatMessages
+  val chatMessages: StateFlow<List<ChatMessage>> = runtime.chatMessages
   val chatError: StateFlow<String?> = runtime.chatError
   val chatHealthOk: StateFlow<Boolean> = runtime.chatHealthOk
   val chatThinkingLevel: StateFlow<String> = runtime.chatThinkingLevel
   val chatStreamingAssistantText: StateFlow<String?> = runtime.chatStreamingAssistantText
-  val chatPendingToolCalls = runtime.chatPendingToolCalls
-  val chatSessions = runtime.chatSessions
+  val chatPendingToolCalls: StateFlow<List<ChatPendingToolCall>> = runtime.chatPendingToolCalls
+  val chatSessions: StateFlow<List<ChatSessionEntry>> = runtime.chatSessions
   val pendingRunCount: StateFlow<Int> = runtime.pendingRunCount
 
   fun setForeground(value: Boolean) {

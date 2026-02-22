@@ -1,4 +1,4 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
