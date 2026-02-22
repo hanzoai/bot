@@ -1,6 +1,7 @@
 import {
   CONTROL_UI_BOOTSTRAP_CONFIG_PATH,
   type ControlUiBootstrapConfig,
+  type ControlUiBootstrapIamConfig,
 } from "../../../../src/gateway/control-ui-contract.js";
 import { normalizeAssistantIdentity } from "../assistant-identity.ts";
 import { normalizeBasePath } from "../navigation.ts";
@@ -10,6 +11,8 @@ export type ControlUiBootstrapState = {
   assistantName: string;
   assistantAvatar: string | null;
   assistantAgentId: string | null;
+  authMode: string | null;
+  iamConfig: ControlUiBootstrapIamConfig | null;
 };
 
 export async function loadControlUiBootstrapConfig(state: ControlUiBootstrapState) {
@@ -43,6 +46,8 @@ export async function loadControlUiBootstrapConfig(state: ControlUiBootstrapStat
     state.assistantName = normalized.name;
     state.assistantAvatar = normalized.avatar;
     state.assistantAgentId = normalized.agentId ?? null;
+    state.authMode = parsed.authMode ?? null;
+    state.iamConfig = parsed.iam ?? null;
   } catch {
     // Ignore bootstrap failures; UI will update identity after connecting.
   }
