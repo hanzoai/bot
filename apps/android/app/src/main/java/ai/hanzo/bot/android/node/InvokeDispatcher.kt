@@ -1,12 +1,12 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
-import ai.bot.android.gateway.GatewaySession
-import ai.bot.android.protocol.BotCanvasA2UICommand
-import ai.bot.android.protocol.BotCanvasCommand
-import ai.bot.android.protocol.BotCameraCommand
-import ai.bot.android.protocol.BotLocationCommand
-import ai.bot.android.protocol.BotScreenCommand
-import ai.bot.android.protocol.BotSmsCommand
+import ai.hanzo.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.protocol.BotCanvasA2UICommand
+import ai.hanzo.bot.android.protocol.BotCanvasCommand
+import ai.hanzo.bot.android.protocol.BotCameraCommand
+import ai.hanzo.bot.android.protocol.BotLocationCommand
+import ai.hanzo.bot.android.protocol.BotScreenCommand
+import ai.hanzo.bot.android.protocol.BotSmsCommand
 
 class InvokeDispatcher(
   private val canvas: CanvasController,
