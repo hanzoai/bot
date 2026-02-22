@@ -1876,7 +1876,7 @@ private extension NodeAppModel {
         guard message.contains("invalid connect params"), message.contains("/client/id") else {
             return nil
         }
-        return "moltbot-ios"
+        return "hanzo-bot-ios"
     }
 
     func isOperatorConnected() async -> Bool {

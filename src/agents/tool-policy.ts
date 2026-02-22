@@ -61,10 +61,8 @@ export const TOOL_GROUPS: Record<string, string[]> = {
   "group:nodes": ["nodes"],
   // All Hanzo Bot native tools (excludes provider plugins).
   "group:bot": BOT_NATIVE_TOOLS,
-  // Legacy aliases for formal-model conformance (clawdbot -> moltbot -> openclaw -> bot).
-  "group:clawdbot": BOT_NATIVE_TOOLS,
-  "group:openclaw": BOT_NATIVE_TOOLS,
-  "group:moltbot": BOT_NATIVE_TOOLS,
+  // Legacy alias for formal-model conformance.
+  "group:hanzo-bot": BOT_NATIVE_TOOLS,
 };
 
 const OWNER_ONLY_TOOL_NAMES = new Set<string>(["whatsapp_login"]);
