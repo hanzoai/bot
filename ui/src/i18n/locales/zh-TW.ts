@@ -97,6 +97,13 @@ export const zh_TW: TranslationMap = {
       hint: "此頁面為 HTTP，因此瀏覽器阻止設備標識。請使用 HTTPS (Tailscale Serve) 或在網關主機上打開 {url}。",
       stayHttp: "如果您必須保持 HTTP，請設置 {config} (僅限令牌)。",
     },
+    iam: {
+      subtitle: "使用您的 Hanzo 帳戶登入以存取此閘道。",
+      signIn: "使用 Hanzo 登入",
+      signingIn: "登入中\u2026",
+      createAccount: "建立帳戶",
+      signOut: "登出",
+    },
   },
   chat: {
     disconnected: "已斷開與網關的連接。",
