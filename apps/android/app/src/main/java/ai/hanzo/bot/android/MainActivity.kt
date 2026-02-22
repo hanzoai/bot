@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android
+package ai.hanzo.bot.android
 
 import android.Manifest
 import android.content.pm.ApplicationInfo
@@ -18,8 +18,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import ai.hanzo-bot.android.ui.RootScreen
-import ai.hanzo-bot.android.ui.HanzoBotTheme
+import ai.hanzo.bot.android.ui.RootScreen
+import ai.hanzo.bot.android.ui.HanzoBotTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
