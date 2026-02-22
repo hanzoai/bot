@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui
+package ai.hanzo.bot.android.ui
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
