@@ -125,10 +125,7 @@ function resolveAbortTargetKey(ctx: MsgContext): string | undefined {
   return sessionKey || undefined;
 }
 
-function normalizeRequesterSessionKey(
-  cfg: BotConfig,
-  key: string | undefined,
-): string | undefined {
+function normalizeRequesterSessionKey(cfg: BotConfig, key: string | undefined): string | undefined {
   const cleaned = key?.trim();
   if (!cleaned) {
     return undefined;

@@ -306,7 +306,7 @@ async function resolveAccessToken(params: {
 
   const token = normalizeSecretInput(
     String(
-      payload.accessToken ??
+      (payload.accessToken as string | undefined) ??
         (payload.token as string | undefined) ??
         ((payload.data as Record<string, unknown> | undefined)?.accessToken as
           | string

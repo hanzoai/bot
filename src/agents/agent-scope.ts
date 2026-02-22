@@ -84,10 +84,7 @@ export function resolveSessionAgentIds(params: { sessionKey?: string; config?: B
   return { defaultAgentId, sessionAgentId };
 }
 
-export function resolveSessionAgentId(params: {
-  sessionKey?: string;
-  config?: BotConfig;
-}): string {
+export function resolveSessionAgentId(params: { sessionKey?: string; config?: BotConfig }): string {
   return resolveSessionAgentIds(params).sessionAgentId;
 }
 
@@ -125,10 +122,7 @@ export function resolveAgentConfig(
   };
 }
 
-export function resolveAgentSkillsFilter(
-  cfg: BotConfig,
-  agentId: string,
-): string[] | undefined {
+export function resolveAgentSkillsFilter(cfg: BotConfig, agentId: string): string[] | undefined {
   return normalizeSkillFilter(resolveAgentConfig(cfg, agentId)?.skills);
 }
 

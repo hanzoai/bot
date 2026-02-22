@@ -19,10 +19,7 @@ export function getDefaultMediaLocalRoots(): readonly string[] {
   return buildMediaLocalRoots(resolveStateDir());
 }
 
-export function getAgentScopedMediaLocalRoots(
-  cfg: BotConfig,
-  agentId?: string,
-): readonly string[] {
+export function getAgentScopedMediaLocalRoots(cfg: BotConfig, agentId?: string): readonly string[] {
   const roots = buildMediaLocalRoots(resolveStateDir());
   if (!agentId?.trim()) {
     return roots;

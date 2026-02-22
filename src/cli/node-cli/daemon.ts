@@ -50,7 +50,10 @@ type NodeDaemonStatusOptions = {
 };
 
 function renderNodeServiceStartHints(): string[] {
-  const base = [formatCliCommand("hanzo-bot node install"), formatCliCommand("hanzo-bot node start")];
+  const base = [
+    formatCliCommand("hanzo-bot node install"),
+    formatCliCommand("hanzo-bot node start"),
+  ];
   switch (process.platform) {
     case "darwin":
       return [

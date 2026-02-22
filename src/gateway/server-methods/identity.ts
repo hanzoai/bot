@@ -7,7 +7,7 @@ import {
   listAgentEntries,
 } from "../../commands/agents.config.js";
 import { loadConfig, writeConfigFile } from "../../config/config.js";
-import { normalizeAgentId, DEFAULT_AGENT_ID } from "../../routing/session-key.js";
+import { normalizeAgentId } from "../../routing/session-key.js";
 import { ErrorCodes, errorShape } from "../protocol/index.js";
 
 /**
@@ -32,7 +32,7 @@ export const identityHandlers: GatewayRequestHandlers = {
    * Get the DID configuration for an agent.
    */
   "agent.did.get": ({ params, respond }) => {
-    const agentId = normalizeAgentId(String(params.agentId ?? "").trim());
+    const agentId = normalizeAgentId(String((params.agentId as string) ?? "").trim());
     if (!agentId) {
       respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "agentId is required"));
       return;
@@ -64,13 +64,15 @@ export const identityHandlers: GatewayRequestHandlers = {
    * Creates a did:<method>:<agentId> URI and persists it in agent config.
    */
   "agent.did.create": async ({ params, respond }) => {
-    const agentId = normalizeAgentId(String(params.agentId ?? "").trim());
+    const agentId = normalizeAgentId(String((params.agentId as string) ?? "").trim());
     if (!agentId) {
       respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "agentId is required"));
       return;
     }
 
-    const method = String(params.method ?? "hanzo").toLowerCase() as DIDConfig["method"];
+    const method = String(
+      (params.method as string) ?? "hanzo",
+    ).toLowerCase() as DIDConfig["method"];
     const validMethods = ["hanzo", "lux", "pars", "zoo", "ai"];
     if (!validMethods.includes(method!)) {
       respond(
@@ -124,7 +126,7 @@ export const identityHandlers: GatewayRequestHandlers = {
    * Get the wallet configuration for an agent.
    */
   "agent.wallet.get": ({ params, respond }) => {
-    const agentId = normalizeAgentId(String(params.agentId ?? "").trim());
+    const agentId = normalizeAgentId(String((params.agentId as string) ?? "").trim());
     if (!agentId) {
       respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "agentId is required"));
       return;
@@ -161,13 +163,15 @@ export const identityHandlers: GatewayRequestHandlers = {
    * For now, records the wallet chain config stub for the agent.
    */
   "agent.wallet.create": async ({ params, respond }) => {
-    const agentId = normalizeAgentId(String(params.agentId ?? "").trim());
+    const agentId = normalizeAgentId(String((params.agentId as string) ?? "").trim());
     if (!agentId) {
       respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "agentId is required"));
       return;
     }
 
-    const chain = String(params.chain ?? "hanzo").toLowerCase() as WalletConfig["chain"];
+    const chain = String(
+      (params.chain as string) ?? "hanzo",
+    ).toLowerCase() as WalletConfig["chain"];
     const validChains = ["lux", "hanzo", "zoo", "pars"];
     if (!validChains.includes(chain!)) {
       respond(
@@ -227,7 +231,7 @@ export const identityHandlers: GatewayRequestHandlers = {
    * Get full identity (DID + wallet + profile) for an agent.
    */
   "agent.identity.full": ({ params, respond }) => {
-    const agentId = normalizeAgentId(String(params.agentId ?? "").trim());
+    const agentId = normalizeAgentId(String((params.agentId as string) ?? "").trim());
     if (!agentId) {
       respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "agentId is required"));
       return;
