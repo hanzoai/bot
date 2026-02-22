@@ -156,15 +156,17 @@ jobs:
           DOCKER_METADATA_OUTPUT_JSON: ${{ steps.meta.outputs.json }}
 
   # Deploy to Hanzo PaaS
-  # IAM is the root of trust — client_credentials grant authenticates
-  # a service application, then the IAM token is used for PaaS.
+  # Auth chain: KMS → fetch IAM creds → ROPC → PaaS session → redeploy.
+  # Only KMS credentials are stored in GitHub — all other secrets
+  # (IAM client, deploy user) are fetched from Hanzo KMS at runtime.
   deploy:
     runs-on: ubuntu-latest
     needs: [create-manifest]
     if: github.ref == 'refs/heads/main'
     env:
-      HANZO_ACCESS_KEY: ${{ secrets.HANZO_ACCESS_KEY }}
-      HANZO_ACCESS_SECRET: ${{ secrets.HANZO_ACCESS_SECRET }}
+      KMS_URL: https://kms.hanzo.ai
+      KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+      KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
     steps:
       - name: Install httpx
         run: pip install httpx
@@ -174,8 +176,9 @@ jobs:
           python3 -c "
           import httpx, os, sys
 
-          client_id = os.environ['HANZO_ACCESS_KEY']
-          client_secret = os.environ['HANZO_ACCESS_SECRET']
+          kms_url = os.environ['KMS_URL']
+          kms_cid = os.environ['KMS_CLIENT_ID']
+          kms_csec = os.environ['KMS_CLIENT_SECRET']
 
           PAAS_URL = 'https://platform.hanzo.ai/v1'
           ORG = '698cda6739f65183b3009313'
@@ -183,20 +186,54 @@ jobs:
           ENV = '698cda6739f65183b300931c'
           CONTAINER = 'bot-gateway'
 
-          # 1. Authenticate service via client_credentials grant
+          # 1. Authenticate with KMS
+          r = httpx.post(f'{kms_url}/api/v1/auth/universal-auth/login', json={
+              'clientId': kms_cid, 'clientSecret': kms_csec,
+          })
+          if r.status_code != 200:
+              print(f'KMS auth failed ({r.status_code}): {r.text}', file=sys.stderr)
+              r.raise_for_status()
+          kms_token = r.json()['accessToken']
+          print('KMS authenticated')
+
+          # 2. Fetch deploy secrets from KMS
+          r = httpx.get(f'{kms_url}/api/v3/secrets/raw', params={
+              'workspaceId': '2928fb55-6b08-454a-a338-a48d99a699a4',
+              'environment': 'prod',
+              'secretPath': '/',
+              'include_imports': 'true',
+              'expandSecretReferences': 'true',
+          }, headers={'Authorization': f'Bearer {kms_token}'})
+          if r.status_code != 200:
+              print(f'KMS secrets fetch failed ({r.status_code}): {r.text}', file=sys.stderr)
+              r.raise_for_status()
+          secrets = {s['secretKey']: s['secretValue'] for s in r.json().get('secrets', [])}
+          print(f'Fetched {len(secrets)} secrets from KMS')
+
+          # Verify required secrets exist
+          required = ['CI__IAM_CLIENT_ID', 'CI__IAM_CLIENT_SECRET', 'CI__DEPLOY_USER', 'CI__DEPLOY_PASSWORD']
+          missing = [k for k in required if k not in secrets]
+          if missing:
+              print(f'Missing KMS secrets: {missing}', file=sys.stderr)
+              print(f'Available keys: {sorted(secrets.keys())}', file=sys.stderr)
+              raise SystemExit(f'Missing required KMS secrets: {missing}')
+
+          # 3. Authenticate with IAM (ROPC with CI service account)
           r = httpx.post('https://hanzo.id/api/login/oauth/access_token', data={
-              'grant_type': 'client_credentials',
-              'client_id': client_id,
-              'client_secret': client_secret,
+              'grant_type': 'password',
+              'client_id': secrets['CI__IAM_CLIENT_ID'],
+              'client_secret': secrets['CI__IAM_CLIENT_SECRET'],
+              'username': secrets['CI__DEPLOY_USER'],
+              'password': secrets['CI__DEPLOY_PASSWORD'],
               'scope': 'openid profile email',
           })
           if r.status_code != 200:
               print(f'IAM auth failed ({r.status_code}): {r.text}', file=sys.stderr)
               r.raise_for_status()
           iam_token = r.json()['access_token']
-          print('IAM authenticated via client_credentials')
+          print('IAM authenticated via ROPC')
 
-          # 2. Exchange IAM token for PaaS session
+          # 4. Exchange IAM token for PaaS session
           r = httpx.post(f'{PAAS_URL}/auth/login', json={
               'provider': 'hanzo', 'accessToken': iam_token,
           })
@@ -206,7 +243,7 @@ jobs:
           at = r.json()['at']
           print('PaaS session established')
 
-          # 3. Find container and redeploy
+          # 5. Find container and redeploy
           base = f'{PAAS_URL}/org/{ORG}/project/{PROJECT}/env/{ENV}/container'
           r = httpx.get(base, headers={'Authorization': at})
           r.raise_for_status()
