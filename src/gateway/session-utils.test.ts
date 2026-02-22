@@ -118,12 +118,7 @@ describe("gateway session utils", () => {
   });
 
   test("resolveGatewaySessionStoreTarget uses canonical key for main alias", () => {
-    const storeTemplate = path.join(
-      os.tmpdir(),
-      "bot-session-utils",
-      "{agentId}",
-      "sessions.json",
-    );
+    const storeTemplate = path.join(os.tmpdir(), "bot-session-utils", "{agentId}", "sessions.json");
     const cfg = {
       session: { mainKey: "main", store: storeTemplate },
       agents: { list: [{ id: "ops", default: true }] },
