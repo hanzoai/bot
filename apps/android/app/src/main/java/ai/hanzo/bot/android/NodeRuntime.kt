@@ -17,7 +17,7 @@ import ai.hanzo.bot.android.gateway.GatewayEndpoint
 import ai.hanzo.bot.android.gateway.GatewaySession
 import ai.hanzo.bot.android.gateway.probeGatewayTlsFingerprint
 import ai.hanzo.bot.android.node.*
-import ai.hanzo.bot.android.protocol.BotCanvasA2UIAction
+import ai.hanzo.bot.android.protocol.HanzoBotCanvasA2UIAction
 import ai.hanzo.bot.android.voice.TalkModeManager
 import ai.hanzo.bot.android.voice.VoiceWakeManager
 import kotlinx.coroutines.CoroutineScope
@@ -619,7 +619,7 @@ class NodeRuntime(context: Context) {
       val actionId = (userActionObj["id"] as? JsonPrimitive)?.content?.trim().orEmpty().ifEmpty {
         java.util.UUID.randomUUID().toString()
       }
-      val name = BotCanvasA2UIAction.extractActionName(userActionObj) ?: return@launch
+      val name = HanzoBotCanvasA2UIAction.extractActionName(userActionObj) ?: return@launch
 
       val surfaceId =
         (userActionObj["surfaceId"] as? JsonPrimitive)?.content?.trim().orEmpty().ifEmpty { "main" }
@@ -629,7 +629,7 @@ class NodeRuntime(context: Context) {
 
       val sessionKey = resolveMainSessionKey()
       val message =
-        BotCanvasA2UIAction.formatAgentMessage(
+        HanzoBotCanvasA2UIAction.formatAgentMessage(
           actionName = name,
           sessionKey = sessionKey,
           surfaceId = surfaceId,
@@ -663,7 +663,7 @@ class NodeRuntime(context: Context) {
 
       try {
         canvas.eval(
-          BotCanvasA2UIAction.jsDispatchA2UIActionStatus(
+          HanzoBotCanvasA2UIAction.jsDispatchA2UIActionStatus(
             actionId = actionId,
             ok = connected && error == null,
             error = error,
