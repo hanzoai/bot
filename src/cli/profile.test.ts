@@ -5,13 +5,7 @@ import { applyCliProfileEnv, parseCliProfileArgs } from "./profile.js";
 
 describe("parseCliProfileArgs", () => {
   it("leaves gateway --dev for subcommands", () => {
-    const res = parseCliProfileArgs([
-      "node",
-      "bot",
-      "gateway",
-      "--dev",
-      "--allow-unconfigured",
-    ]);
+    const res = parseCliProfileArgs(["node", "bot", "gateway", "--dev", "--allow-unconfigured"]);
     if (!res.ok) {
       throw new Error(res.error);
     }
@@ -96,9 +90,7 @@ describe("applyCliProfileEnv", () => {
 
     const resolvedHome = path.resolve("/srv/bot-home");
     expect(env.BOT_STATE_DIR).toBe(path.join(resolvedHome, ".bot-work"));
-    expect(env.BOT_CONFIG_PATH).toBe(
-      path.join(resolvedHome, ".bot-work", "bot.json"),
-    );
+    expect(env.BOT_CONFIG_PATH).toBe(path.join(resolvedHome, ".bot-work", "bot.json"));
   });
 });
 
@@ -126,9 +118,9 @@ describe("formatCliCommand", () => {
   });
 
   it("returns command unchanged when --profile is already present", () => {
-    expect(
-      formatCliCommand("hanzo-bot --profile work doctor --fix", { BOT_PROFILE: "work" }),
-    ).toBe("hanzo-bot --profile work doctor --fix");
+    expect(formatCliCommand("hanzo-bot --profile work doctor --fix", { BOT_PROFILE: "work" })).toBe(
+      "hanzo-bot --profile work doctor --fix",
+    );
   });
 
   it("returns command unchanged when --dev is already present", () => {
@@ -150,9 +142,7 @@ describe("formatCliCommand", () => {
   });
 
   it("handles command with no args after bot", () => {
-    expect(formatCliCommand("bot", { BOT_PROFILE: "test" })).toBe(
-      "hanzo-bot --profile test",
-    );
+    expect(formatCliCommand("bot", { BOT_PROFILE: "test" })).toBe("hanzo-bot --profile test");
   });
 
   it("handles pnpm wrapper", () => {
