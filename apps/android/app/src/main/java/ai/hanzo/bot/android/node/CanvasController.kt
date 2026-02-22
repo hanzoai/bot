@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.node
+package ai.hanzo.bot.android.node
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import ai.hanzo-bot.android.BuildConfig
+import ai.hanzo.bot.android.BuildConfig
 import kotlin.coroutines.resume
 
 class CanvasController {
@@ -106,7 +106,7 @@ class CanvasController {
       val js = """
         (() => {
           try {
-            const api = globalThis.__hanzo-bot;
+            const api = globalThis.__bot;
             if (!api) return;
             if (typeof api.setDebugStatusEnabled === 'function') {
               api.setDebugStatusEnabled(${if (enabled) "true" else "false"});
