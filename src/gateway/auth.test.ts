@@ -34,13 +34,13 @@ describe("gateway auth", () => {
     });
   });
 
-  it("does not resolve legacy BOT gateway env vars", () => {
+  it("does not resolve legacy OPENCLAW gateway env vars", () => {
     expect(
       resolveGatewayAuth({
         authConfig: {},
         env: {
-          BOT_GATEWAY_TOKEN: "legacy-token",
-          BOT_GATEWAY_PASSWORD: "legacy-password",
+          OPENCLAW_GATEWAY_TOKEN: "legacy-token",
+          OPENCLAW_GATEWAY_PASSWORD: "legacy-password",
         } as NodeJS.ProcessEnv,
       }),
     ).toMatchObject({
