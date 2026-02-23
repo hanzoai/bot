@@ -1,5 +1,5 @@
-import HanzoBotProtocol
 import Observation
+import BotProtocol
 import SwiftUI
 
 extension OnboardingView {

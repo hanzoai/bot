@@ -124,9 +124,7 @@ export async function startGatewaySidecars(params: {
       params.logChannels.error(`channel startup failed: ${String(err)}`);
     }
   } else {
-    params.logChannels.info(
-      "skipping channel start (BOT_SKIP_CHANNELS=1 or BOT_SKIP_PROVIDERS=1)",
-    );
+    params.logChannels.info("skipping channel start (BOT_SKIP_CHANNELS=1 or BOT_SKIP_PROVIDERS=1)");
   }
 
   if (params.cfg.hooks?.internal?.enabled) {

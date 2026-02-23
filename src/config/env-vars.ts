@@ -29,3 +29,13 @@ export function collectConfigEnvVars(cfg?: BotConfig): Record<string, string> {
 
   return entries;
 }
+
+export function applyConfigEnvVars(cfg: BotConfig, env: NodeJS.ProcessEnv = process.env): void {
+  const entries = collectConfigEnvVars(cfg);
+  for (const [key, value] of Object.entries(entries)) {
+    if (env[key]?.trim()) {
+      continue;
+    }
+    env[key] = value;
+  }
+}

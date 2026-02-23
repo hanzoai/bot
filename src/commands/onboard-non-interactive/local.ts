@@ -6,6 +6,7 @@ import { resolveGatewayPort, writeConfigFile } from "../../config/config.js";
 import { logConfigUpdated } from "../../config/logging.js";
 import { DEFAULT_GATEWAY_DAEMON_RUNTIME } from "../daemon-runtime.js";
 import { healthCommand } from "../health.js";
+import { applyOnboardingLocalWorkspaceConfig } from "../onboard-config.js";
 import {
   applyWizardMetadata,
   DEFAULT_WORKSPACE,
@@ -35,20 +36,7 @@ export async function runNonInteractiveOnboardingLocal(params: {
     defaultWorkspaceDir: DEFAULT_WORKSPACE,
   });
 
-  let nextConfig: BotConfig = {
-    ...baseConfig,
-    agents: {
-      ...baseConfig.agents,
-      defaults: {
-        ...baseConfig.agents?.defaults,
-        workspace: workspaceDir,
-      },
-    },
-    gateway: {
-      ...baseConfig.gateway,
-      mode: "local",
-    },
-  };
+  let nextConfig: BotConfig = applyOnboardingLocalWorkspaceConfig(baseConfig, workspaceDir);
 
   const inferredAuthChoice = inferAuthChoiceFromFlags(opts);
   if (!opts.authChoice && inferredAuthChoice.matches.length > 1) {
@@ -141,7 +129,7 @@ export async function runNonInteractiveOnboardingLocal(params: {
 
   if (!opts.json) {
     runtime.log(
-      `Tip: run \`${formatCliCommand("hanzo-bot configure --section web")}\` to store your Brave API key for web_search. Docs: https://docs.hanzo.bot/tools/web`,
+      `Tip: run \`${formatCliCommand("bot configure --section web")}\` to store your Brave API key for web_search. Docs: https://docs.hanzo.bot/tools/web`,
     );
   }
 }

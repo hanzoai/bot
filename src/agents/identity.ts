@@ -3,26 +3,46 @@ import { resolveAgentConfig } from "./agent-scope.js";
 
 const DEFAULT_ACK_REACTION = "👀";
 
-export function resolveAgentIdentity(
-  cfg: BotConfig,
-  agentId: string,
-): IdentityConfig | undefined {
+export function resolveAgentIdentity(cfg: BotConfig, agentId: string): IdentityConfig | undefined {
   return resolveAgentConfig(cfg, agentId)?.identity;
 }
 
-export function resolveAckReaction(cfg: BotConfig, agentId: string): string {
+export function resolveAckReaction(
+  cfg: BotConfig,
+  agentId: string,
+  opts?: { channel?: string; accountId?: string },
+): string {
+  // L1: Channel account level
+  if (opts?.channel && opts?.accountId) {
+    const channelCfg = getChannelConfig(cfg, opts.channel);
+    const accounts = channelCfg?.accounts as Record<string, Record<string, unknown>> | undefined;
+    const accountReaction = accounts?.[opts.accountId]?.ackReaction as string | undefined;
+    if (accountReaction !== undefined) {
+      return accountReaction.trim();
+    }
+  }
+
+  // L2: Channel level
+  if (opts?.channel) {
+    const channelCfg = getChannelConfig(cfg, opts.channel);
+    const channelReaction = channelCfg?.ackReaction as string | undefined;
+    if (channelReaction !== undefined) {
+      return channelReaction.trim();
+    }
+  }
+
+  // L3: Global messages level
   const configured = cfg.messages?.ackReaction;
   if (configured !== undefined) {
     return configured.trim();
   }
+
+  // L4: Agent identity emoji fallback
   const emoji = resolveAgentIdentity(cfg, agentId)?.emoji?.trim();
   return emoji || DEFAULT_ACK_REACTION;
 }
 
-export function resolveIdentityNamePrefix(
-  cfg: BotConfig,
-  agentId: string,
-): string | undefined {
+export function resolveIdentityNamePrefix(cfg: BotConfig, agentId: string): string | undefined {
   const name = resolveAgentIdentity(cfg, agentId)?.name?.trim();
   if (!name) {
     return undefined;
@@ -54,10 +74,7 @@ export function resolveMessagePrefix(
 }
 
 /** Helper to extract a channel config value by dynamic key. */
-function getChannelConfig(
-  cfg: BotConfig,
-  channel: string,
-): Record<string, unknown> | undefined {
+function getChannelConfig(cfg: BotConfig, channel: string): Record<string, unknown> | undefined {
   const channels = cfg.channels as Record<string, unknown> | undefined;
   const value = channels?.[channel];
   return typeof value === "object" && value !== null

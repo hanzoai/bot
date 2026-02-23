@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui.chat
+package ai.hanzo.bot.android.ui.chat
 
 import android.graphics.BitmapFactory
 import android.util.Base64
@@ -31,10 +31,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Image
-import ai.hanzo-bot.android.chat.ChatMessage
-import ai.hanzo-bot.android.chat.ChatMessageContent
-import ai.hanzo-bot.android.chat.ChatPendingToolCall
-import ai.hanzo-bot.android.tools.ToolDisplayRegistry
+import ai.hanzo.bot.android.chat.ChatMessage
+import ai.hanzo.bot.android.chat.ChatMessageContent
+import ai.hanzo.bot.android.chat.ChatPendingToolCall
+import ai.hanzo.bot.android.tools.ToolDisplayRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +42,17 @@ import androidx.compose.ui.platform.LocalContext
 @Composable
 fun ChatMessageBubble(message: ChatMessage) {
   val isUser = message.role.lowercase() == "user"
+
+  // Filter to only displayable content parts (text with content, or base64 images)
+  val displayableContent = message.content.filter { part ->
+    when (part.type) {
+      "text" -> !part.text.isNullOrBlank()
+      else -> part.base64 != null
+    }
+  }
+
+  // Skip rendering entirely if no displayable content
+  if (displayableContent.isEmpty()) return
 
   Row(
     modifier = Modifier.fillMaxWidth(),
@@ -61,7 +72,7 @@ fun ChatMessageBubble(message: ChatMessage) {
             .padding(horizontal = 12.dp, vertical = 10.dp),
       ) {
         val textColor = textColorOverBubble(isUser)
-        ChatMessageBody(content = message.content, textColor = textColor)
+        ChatMessageBody(content = displayableContent, textColor = textColor)
       }
     }
   }

@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android
+package ai.hanzo.bot.android
 
 enum class CameraHudKind {
   Photo,

@@ -60,6 +60,10 @@ describe("sleep", () => {
 });
 
 describe("assertWebChannel", () => {
+  it("accepts valid channel", () => {
+    expect(() => assertWebChannel("web")).not.toThrow();
+  });
+
   it("throws for invalid channel", () => {
     expect(() => assertWebChannel("bad" as string)).toThrow();
   });
@@ -166,9 +170,9 @@ describe("shortenHomeInString", () => {
     vi.stubEnv("BOT_HOME", "/srv/bot-home");
     vi.stubEnv("HOME", "/home/other");
 
-    expect(
-      shortenHomeInString(`config: ${path.resolve("/srv/bot-home")}/.bot/bot.json`),
-    ).toBe("config: $BOT_HOME/.bot/bot.json");
+    expect(shortenHomeInString(`config: ${path.resolve("/srv/bot-home")}/.bot/bot.json`)).toBe(
+      "config: $BOT_HOME/.bot/bot.json",
+    );
 
     vi.unstubAllEnvs();
   });

@@ -195,7 +195,7 @@ Homebrew 安装的助手工具，用于列出/检查/监视本地 OpenAI Codex �
 <Card title="Kev 的梦之队 (14+ 智能体)" icon="robot" href="https://github.com/adam91holt/orchestrated-ai-articles">
   **@adam91holt** • `multi-agent` `orchestration` `architecture` `manifesto`
 
-一个 Gateway 网关下的 14+ 智能体，Opus 4.5 编排器将任务委派给 Codex 工作者。全面的[技术文章](https://github.com/adam91holt/orchestrated-ai-articles)涵盖梦之队阵容、模型选择、沙箱隔离、webhook、心跳和委派流程。用于智能体沙箱隔离的 [Clawdspace](https://github.com/adam91holt/clawdspace)。[博客文章](https://adams-ai-journey.ghost.io/2026-the-year-of-the-orchestrator/)。
+一个 Gateway 网关下的 14+ 智能体，Opus 4.5 编排器将任务委派给 Codex 工作者。全面的[技术文章](https://github.com/adam91holt/orchestrated-ai-articles)涵盖梦之队阵容、模型选择、沙箱隔离、webhook、心跳和委派流程。用于智能体沙箱隔离的 [Botdspace](https://github.com/adam91holt/botdspace)。[博客文章](https://adams-ai-journey.ghost.io/2026-the-year-of-the-orchestrator/)。
 </Card>
 
 <Card title="Linear CLI" icon="terminal" href="https://github.com/Finesssee/linear-cli">
@@ -326,7 +326,7 @@ Hanzo Bot 连接到 Jira，然后即时生成一个新的 skill（在它出现�
 
 <CardGroup cols={2}>
 
-<Card title="Clawdia 电话桥接" icon="phone" href="https://github.com/alejandroOPI/clawdia-bridge">
+<Card title="Botdia 电话桥接" icon="phone" href="https://github.com/alejandroOPI/botdia-bridge">
   **@alejandroOPI** • `voice` `vapi` `bridge`
   
   Vapi 语音助手 ↔ Hanzo Bot HTTP 桥接。与你的智能体进行近实时电话通话。
@@ -356,7 +356,7 @@ Hanzo Bot 连接到 Jira，然后即时生成一个新的 skill（在它出现�
   通过自然语言控制和自动化 Home Assistant 设备。
 </Card>
 
-<Card title="Nix 打包" icon="snowflake" href="https://github.com/bot/nix-bot">
+<Card title="Nix 打包" icon="snowflake" href="https://github.com/hanzoai/nix-bot">
   **@bot** • `nix` `packaging` `deployment`
   
   开箱即用的 nixified Hanzo Bot 配置，用于可复现的部署。

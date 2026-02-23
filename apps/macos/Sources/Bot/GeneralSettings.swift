@@ -1,8 +1,8 @@
 import AppKit
+import Observation
 import BotDiscovery
 import BotIPC
 import BotKit
-import Observation
 import SwiftUI
 
 struct GeneralSettings: View {
@@ -16,16 +16,21 @@ struct GeneralSettings: View {
     @State private var remoteStatus: RemoteStatus = .idle
     @State private var showRemoteAdvanced = false
     private let isPreview = ProcessInfo.processInfo.isPreview
-    private var isNixMode: Bool { ProcessInfo.processInfo.isNixMode }
-    private var remoteLabelWidth: CGFloat { 88 }
+    private var isNixMode: Bool {
+        ProcessInfo.processInfo.isNixMode
+    }
+
+    private var remoteLabelWidth: CGFloat {
+        88
+    }
 
     var body: some View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 18) {
                 VStack(alignment: .leading, spacing: 12) {
                     SettingsToggleRow(
-                        title: "HanzoBot active",
-                        subtitle: "Pause to stop the HanzoBot gateway; no messages will be processed.",
+                        title: "Bot active",
+                        subtitle: "Pause to stop the Bot gateway; no messages will be processed.",
                         binding: self.activeBinding)
 
                     self.connectionSection
@@ -34,12 +39,12 @@ struct GeneralSettings: View {
 
                     SettingsToggleRow(
                         title: "Launch at login",
-                        subtitle: "Automatically start HanzoBot after you sign in.",
+                        subtitle: "Automatically start Bot after you sign in.",
                         binding: self.$state.launchAtLogin)
 
                     SettingsToggleRow(
                         title: "Show Dock icon",
-                        subtitle: "Keep HanzoBot visible in the Dock instead of menu-bar-only mode.",
+                        subtitle: "Keep Bot visible in the Dock instead of menu-bar-only mode.",
                         binding: self.$state.showDockIcon)
 
                     SettingsToggleRow(
@@ -71,7 +76,7 @@ struct GeneralSettings: View {
                 Spacer(minLength: 12)
                 HStack {
                     Spacer()
-                    Button("Quit HanzoBot") { NSApp.terminate(nil) }
+                    Button("Quit Bot") { NSApp.terminate(nil) }
                         .buttonStyle(.borderedProminent)
                 }
             }
@@ -98,7 +103,7 @@ struct GeneralSettings: View {
 
     private var connectionSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("HanzoBot runs")
+            Text("Bot runs")
                 .font(.title3.weight(.semibold))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -167,12 +172,12 @@ struct GeneralSettings: View {
                                 .frame(width: 280)
                         }
                         LabeledContent("Project root") {
-                            TextField("/home/you/Projects/hanzo-bot", text: self.$state.remoteProjectRoot)
+                            TextField("/home/you/Projects/bot", text: self.$state.remoteProjectRoot)
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 280)
                         }
                         LabeledContent("CLI path") {
-                            TextField("/Applications/HanzoBot.app/.../hanzo-bot", text: self.$state.remoteCliPath)
+                            TextField("/Applications/Bot.app/.../bot", text: self.$state.remoteCliPath)
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 280)
                         }
@@ -659,7 +664,7 @@ extension GeneralSettings {
         let alert = NSAlert()
         alert.messageText = "Log file not found"
         alert.informativeText = """
-        Looked for hanzo-bot logs in /tmp/hanzo-bot/.
+        Looked for bot logs in /tmp/bot/.
         Run a health check or send a message to generate activity, then try again.
         """
         alert.alertStyle = .informational
@@ -683,7 +688,9 @@ extension GeneralSettings {
                 host: host,
                 port: gateway.sshPort)
             self.state.remoteCliPath = gateway.cliPath ?? ""
-            BotConfigFile.setRemoteGatewayUrl(host: host, port: gateway.gatewayPort)
+            BotConfigFile.setRemoteGatewayUrl(
+                host: gateway.serviceHost ?? host,
+                port: gateway.servicePort ?? gateway.gatewayPort)
         }
     }
 }
@@ -711,8 +718,8 @@ extension GeneralSettings {
         state.remoteTarget = "user@host:2222"
         state.remoteUrl = "wss://gateway.example.ts.net"
         state.remoteIdentity = "/tmp/id_ed25519"
-        state.remoteProjectRoot = "/tmp/hanzo-bot"
-        state.remoteCliPath = "/tmp/hanzo-bot"
+        state.remoteProjectRoot = "/tmp/bot"
+        state.remoteCliPath = "/tmp/bot"
 
         let view = GeneralSettings(state: state)
         view.gatewayStatus = GatewayEnvironmentStatus(

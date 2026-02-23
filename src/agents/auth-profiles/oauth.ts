@@ -4,10 +4,9 @@ import {
   type OAuthCredentials,
   type OAuthProvider,
 } from "@mariozechner/pi-ai";
-import lockfile from "proper-lockfile";
 import type { BotConfig } from "../../config/config.js";
 import type { AuthProfileStore } from "./types.js";
-import { resolveSecretReferenceValue } from "../../infra/secrets/kms.js";
+import { withFileLock } from "../../infra/file-lock.js";
 import { refreshQwenPortalCredentials } from "../../providers/qwen-portal-oauth.js";
 import { refreshChutesTokens } from "../chutes-oauth.js";
 import { AUTH_STORE_LOCK_OPTIONS, log } from "./constants.js";
@@ -41,12 +40,7 @@ async function refreshOAuthTokenWithLock(params: {
   const authPath = resolveAuthStorePath(params.agentDir);
   ensureAuthStoreFile(authPath);
 
-  let release: (() => Promise<void>) | undefined;
-  try {
-    release = await lockfile.lock(authPath, {
-      ...AUTH_STORE_LOCK_OPTIONS,
-    });
-
+  return await withFileLock(authPath, AUTH_STORE_LOCK_OPTIONS, async () => {
     const store = ensureAuthProfileStore(params.agentDir);
     const cred = store.profiles[params.profileId];
     if (!cred || cred.type !== "oauth") {
@@ -95,15 +89,7 @@ async function refreshOAuthTokenWithLock(params: {
     saveAuthProfileStore(store, params.agentDir);
 
     return result;
-  } finally {
-    if (release) {
-      try {
-        await release();
-      } catch {
-        // ignore unlock errors
-      }
-    }
-  }
+  });
 }
 
 async function tryResolveOAuthProfile(params: {
@@ -170,20 +156,14 @@ export async function resolveApiKeyForProfile(params: {
   }
 
   if (cred.type === "api_key") {
-    const key = await resolveSecretReferenceValue({
-      value: cred.key,
-      cfg,
-    });
+    const key = cred.key?.trim();
     if (!key) {
       return null;
     }
     return { apiKey: key, provider: cred.provider, email: cred.email };
   }
   if (cred.type === "token") {
-    const token = await resolveSecretReferenceValue({
-      value: cred.token,
-      cfg,
-    });
+    const token = cred.token?.trim();
     if (!token) {
       return null;
     }

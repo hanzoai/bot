@@ -73,7 +73,7 @@ public enum CanvasShowStatus: String, Codable, Sendable {
 }
 
 public struct CanvasShowResult: Codable, Sendable {
-    /// Session directory on disk (e.g. `~/Library/Application Support/HanzoBot/canvas/<session>/`).
+    /// Session directory on disk (e.g. `~/Library/Application Support/Bot/canvas/<session>/`).
     public var directory: String
     /// Target as provided by the caller (may be nil/empty).
     public var target: String?
@@ -407,11 +407,10 @@ extension Request: Codable {
     }
 }
 
-// Shared transport settings
+/// Shared transport settings
 public let controlSocketPath: String = {
     let home = FileManager().homeDirectoryForCurrentUser
-    let preferred = home
-        .appendingPathComponent("Library/Application Support/HanzoBot/control.sock")
+    return home
+        .appendingPathComponent("Library/Application Support/Bot/control.sock")
         .path
-    return preferred
 }()

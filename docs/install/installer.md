@@ -9,13 +9,13 @@ title: "Installer Internals"
 
 # Installer internals
 
-Hanzo Bot ships three installer scripts, served from `hanzo.bot`.
+Bot ships three installer scripts, served from `hanzo.bot`.
 
-| Script                             | Platform             | What it does                                                                                  |
-| ---------------------------------- | -------------------- | --------------------------------------------------------------------------------------------- |
-| [`install.sh`](#installsh)         | macOS / Linux / WSL  | Installs Node if needed, installs Hanzo Bot via npm (default) or git, and can run onboarding. |
-| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL  | Installs Node + Hanzo Bot into a local prefix (`~/.hanzo/bot`). No root required.             |
-| [`install.ps1`](#installps1)       | Windows (PowerShell) | Installs Node if needed, installs Hanzo Bot via npm (default) or git, and can run onboarding. |
+| Script                             | Platform             | What it does                                                                            |
+| ---------------------------------- | -------------------- | --------------------------------------------------------------------------------------- |
+| [`install.sh`](#installsh)         | macOS / Linux / WSL  | Installs Node if needed, installs Bot via npm (default) or git, and can run onboarding. |
+| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL  | Installs Node + Bot into a local prefix (`~/.bot`). No root required.                   |
+| [`install.ps1`](#installps1)       | Windows (PowerShell) | Installs Node if needed, installs Bot via npm (default) or git, and can run onboarding. |
 
 ## Quick commands
 
@@ -76,12 +76,12 @@ Recommended for most interactive installs on macOS/Linux/WSL.
   <Step title="Ensure Git">
     Installs Git if missing.
   </Step>
-  <Step title="Install Hanzo Bot">
+  <Step title="Install Bot">
     - `npm` method (default): global npm install
     - `git` method: clone/update repo, install deps with pnpm, build, then install wrapper at `~/.local/bin/bot`
   </Step>
   <Step title="Post-install tasks">
-    - Runs `hanzo-bot doctor --non-interactive` on upgrades and git installs (best effort)
+    - Runs `bot doctor --non-interactive` on upgrades and git installs (best effort)
     - Attempts onboarding when appropriate (TTY available, onboarding not disabled, and bootstrap/config checks pass)
     - Defaults `SHARP_IGNORE_GLOBAL_LIBVIPS=1`
   </Step>
@@ -89,7 +89,7 @@ Recommended for most interactive installs on macOS/Linux/WSL.
 
 ### Source checkout detection
 
-If run inside an Hanzo Bot checkout (`package.json` + `pnpm-workspace.yaml`), the script offers:
+If run inside an Bot checkout (`package.json` + `pnpm-workspace.yaml`), the script offers:
 
 - use checkout (`git`), or
 - use global install (`npm`)
@@ -168,7 +168,7 @@ The script exits with code `2` for invalid method selection or invalid `--instal
 ## install-cli.sh
 
 <Info>
-Designed for environments where you want everything under a local prefix (default `~/.hanzo/bot`) and no system Node dependency.
+Designed for environments where you want everything under a local prefix (default `~/.bot`) and no system Node dependency.
 </Info>
 
 ### Flow (install-cli.sh)
@@ -180,7 +180,7 @@ Designed for environments where you want everything under a local prefix (defaul
   <Step title="Ensure Git">
     If Git is missing, attempts install via apt/dnf/yum on Linux or Homebrew on macOS.
   </Step>
-  <Step title="Install Hanzo Bot under prefix">
+  <Step title="Install Bot under prefix">
     Installs with npm using `--prefix <prefix>`, then writes wrapper to `<prefix>/bin/bot`.
   </Step>
 </Steps>
@@ -195,7 +195,7 @@ Designed for environments where you want everything under a local prefix (defaul
   </Tab>
   <Tab title="Custom prefix + version">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install-cli.sh | bash -s -- --prefix /opt/hanzo-bot --version latest
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install-cli.sh | bash -s -- --prefix /opt/bot --version latest
     ```
   </Tab>
   <Tab title="Automation JSON output">
@@ -215,11 +215,11 @@ Designed for environments where you want everything under a local prefix (defaul
 
 | Flag                   | Description                                                                     |
 | ---------------------- | ------------------------------------------------------------------------------- |
-| `--prefix <path>`      | Install prefix (default: `~/.hanzo/bot`)                                        |
-| `--version <ver>`      | Hanzo Bot version or dist-tag (default: `latest`)                               |
+| `--prefix <path>`      | Install prefix (default: `~/.bot`)                                              |
+| `--version <ver>`      | Bot version or dist-tag (default: `latest`)                                     |
 | `--node-version <ver>` | Node version (default: `22.22.0`)                                               |
 | `--json`               | Emit NDJSON events                                                              |
-| `--onboard`            | Run `hanzo-bot onboard` after install                                           |
+| `--onboard`            | Run `bot onboard` after install                                                 |
 | `--no-onboard`         | Skip onboarding (default)                                                       |
 | `--set-npm-prefix`     | On Linux, force npm prefix to `~/.npm-global` if current prefix is not writable |
 | `--help`               | Show usage (`-h`)                                                               |
@@ -231,7 +231,7 @@ Designed for environments where you want everything under a local prefix (defaul
 | Variable                               | Description                                                                       |
 | -------------------------------------- | --------------------------------------------------------------------------------- |
 | `BOT_PREFIX=<path>`                    | Install prefix                                                                    |
-| `BOT_VERSION=<ver>`                    | Hanzo Bot version or dist-tag                                                     |
+| `BOT_VERSION=<ver>`                    | Bot version or dist-tag                                                           |
 | `BOT_NODE_VERSION=<ver>`               | Node version                                                                      |
 | `BOT_NO_ONBOARD=1`                     | Skip onboarding                                                                   |
 | `BOT_NPM_LOGLEVEL=error\|warn\|notice` | npm log level                                                                     |
@@ -254,12 +254,12 @@ Designed for environments where you want everything under a local prefix (defaul
   <Step title="Ensure Node.js 22+">
     If missing, attempts install via winget, then Chocolatey, then Scoop.
   </Step>
-  <Step title="Install Hanzo Bot">
+  <Step title="Install Bot">
     - `npm` method (default): global npm install using selected `-Tag`
     - `git` method: clone/update repo, install/build with pnpm, and install wrapper at `%USERPROFILE%\.local\bin\bot.cmd`
   </Step>
   <Step title="Post-install tasks">
-    Adds needed bin directory to user PATH when possible, then runs `hanzo-bot doctor --non-interactive` on upgrades and git installs (best effort).
+    Adds needed bin directory to user PATH when possible, then runs `bot doctor --non-interactive` on upgrades and git installs (best effort).
   </Step>
 </Steps>
 
@@ -284,6 +284,14 @@ Designed for environments where you want everything under a local prefix (defaul
   <Tab title="Dry run">
     ```powershell
     & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -DryRun
+    ```
+  </Tab>
+  <Tab title="Debug trace">
+    ```powershell
+    # install.ps1 has no dedicated -Verbose flag yet.
+    Set-PSDebug -Trace 1
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -NoOnboard
+    Set-PSDebug -Trace 0
     ```
   </Tab>
 </Tabs>
@@ -375,11 +383,23 @@ Use non-interactive flags/env vars for predictable runs.
     Install Git for Windows, reopen PowerShell, rerun installer.
   </Accordion>
 
-  <Accordion title='Windows: "hanzo-bot is not recognized"'>
+  <Accordion title='Windows: "bot is not recognized"'>
     Run `npm config get prefix`, append `\bin`, add that directory to user PATH, then reopen PowerShell.
   </Accordion>
 
-  <Accordion title="hanzo-bot not found after install">
+  <Accordion title="Windows: how to get verbose installer output">
+    `install.ps1` does not currently expose a `-Verbose` switch.
+    Use PowerShell tracing for script-level diagnostics:
+
+    ```powershell
+    Set-PSDebug -Trace 1
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -NoOnboard
+    Set-PSDebug -Trace 0
+    ```
+
+  </Accordion>
+
+  <Accordion title="bot not found after install">
     Usually a PATH issue. See [Node.js troubleshooting](/install/node#troubleshooting).
   </Accordion>
 </AccordionGroup>

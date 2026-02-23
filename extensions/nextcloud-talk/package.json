@@ -1,12 +1,12 @@
 {
   "name": "@hanzo/bot-nextcloud-talk",
-  "version": "2026.2.10",
-  "description": "HanzoBot Nextcloud Talk channel plugin",
+  "version": "2026.2.23",
+  "description": "Hanzo Bot Nextcloud Talk channel plugin",
   "type": "module",
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],

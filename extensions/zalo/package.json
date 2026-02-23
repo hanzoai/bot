@@ -1,15 +1,15 @@
 {
   "name": "@hanzo/bot-zalo",
-  "version": "2026.2.10",
-  "description": "HanzoBot Zalo channel plugin",
+  "version": "2026.2.23",
+  "description": "Hanzo Bot Zalo channel plugin",
   "type": "module",
   "dependencies": {
-    "undici": "7.21.0"
+    "undici": "7.22.0"
   },
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],

@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.voice
+package ai.hanzo.bot.android.voice
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement

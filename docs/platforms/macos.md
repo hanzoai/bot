@@ -34,15 +34,15 @@ capabilities to the agent as a node.
 
 ## Launchd control
 
-The app manages a per‑user LaunchAgent labeled `bot.molt.gateway`
-(or `bot.molt.<profile>` when using `--profile`/`BOT_PROFILE`; legacy `com.bot.*` still unloads).
+The app manages a per‑user LaunchAgent labeled `ai.hanzo.bot.gateway`
+(or `ai.hanzo.bot.<profile>` when using `--profile`/`BOT_PROFILE`; legacy `com.bot.*` still unloads).
 
 ```bash
-launchctl kickstart -k gui/$UID/bot.molt.gateway
-launchctl bootout gui/$UID/bot.molt.gateway
+launchctl kickstart -k gui/$UID/ai.hanzo.bot.gateway
+launchctl bootout gui/$UID/ai.hanzo.bot.gateway
 ```
 
-Replace the label with `bot.molt.<profile>` when running a named profile.
+Replace the label with `ai.hanzo.bot.<profile>` when running a named profile.
 
 If the LaunchAgent isn’t installed, enable it from the app or run
 `hanzo-bot gateway install`.
@@ -130,6 +130,7 @@ Query parameters:
 Safety:
 
 - Without `key`, the app prompts for confirmation.
+- Without `key`, the app enforces a short message limit for the confirmation prompt and ignores `deliver` / `to` / `channel`.
 - With a valid `key`, the run is unattended (intended for personal automations).
 
 ## Onboarding flow (typical)

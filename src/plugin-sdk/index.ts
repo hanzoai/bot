@@ -56,6 +56,8 @@ export type {
   ChannelThreadingContext,
   ChannelThreadingToolContext,
   ChannelToolSend,
+  BaseProbeResult,
+  BaseTokenResolution,
 } from "../channels/plugins/types.js";
 export type { ChannelConfigSchema, ChannelPlugin } from "../channels/plugins/types.plugin.js";
 export type {
@@ -76,8 +78,23 @@ export { normalizePluginHttpPath } from "../plugins/http-path.js";
 export { registerPluginHttpRoute } from "../plugins/http-registry.js";
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 export type { BotConfig } from "../config/config.js";
-/** @deprecated Use BotConfig instead */
-export type { BotConfig as HanzoBotConfig } from "../config/config.js";
+
+export type { FileLockHandle, FileLockOptions } from "./file-lock.js";
+export { acquireFileLock, withFileLock } from "./file-lock.js";
+export { normalizeWebhookPath, resolveWebhookPath } from "./webhook-path.js";
+export {
+  registerWebhookTarget,
+  rejectNonPostWebhookRequest,
+  resolveWebhookTargets,
+} from "./webhook-targets.js";
+export type { AgentMediaPayload } from "./agent-media-payload.js";
+export { buildAgentMediaPayload } from "./agent-media-payload.js";
+export {
+  buildBaseChannelStatusSummary,
+  collectStatusIssuesFromLastError,
+  createDefaultChannelRuntimeState,
+} from "./status-helpers.js";
+export { buildOauthProviderAuthResult } from "./provider-auth-result.js";
 export type { ChannelDock } from "../channels/dock.js";
 export { getChatChannelMeta } from "../channels/registry.js";
 export type {
@@ -118,11 +135,22 @@ export {
   MarkdownTableModeSchema,
   normalizeAllowFrom,
   requireOpenAllowFrom,
+  TtsAutoSchema,
+  TtsConfigSchema,
+  TtsModeSchema,
+  TtsProviderSchema,
 } from "../config/zod-schema.core.js";
 export { ToolPolicySchema } from "../config/zod-schema.agent-runtime.js";
 export type { RuntimeEnv } from "../runtime.js";
 export type { WizardPrompter } from "../wizard/prompts.js";
 export { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../routing/session-key.js";
+export { formatAllowFromLowercase, isAllowedParsedChatSender } from "./allow-from.js";
+export { resolveSenderCommandAuthorization } from "./command-auth.js";
+export { handleSlackMessageAction } from "./slack-message-actions.js";
+export { extractToolSend } from "./tool-send.js";
+export { resolveChannelAccountConfigBasePath } from "./config-paths.js";
+export { chunkTextForOutbound } from "./text-chunking.js";
+export { readJsonFileWithFallback, writeJsonFileAtomically } from "./json-store.js";
 export type { ChatType } from "../channels/chat-type.js";
 /** @deprecated Use ChatType instead */
 export type { RoutePeerKind } from "../routing/resolve-route.js";
@@ -135,7 +163,24 @@ export {
   listDevicePairing,
   rejectDevicePairing,
 } from "../infra/device-pairing.js";
+export { createDedupeCache } from "../infra/dedupe.js";
+export type { DedupeCache } from "../infra/dedupe.js";
 export { formatErrorMessage } from "../infra/errors.js";
+export {
+  DEFAULT_WEBHOOK_BODY_TIMEOUT_MS,
+  DEFAULT_WEBHOOK_MAX_BODY_BYTES,
+  RequestBodyLimitError,
+  installRequestBodyLimitGuard,
+  isRequestBodyLimitError,
+  readJsonBodyWithLimit,
+  readRequestBodyWithLimit,
+  requestBodyErrorToText,
+} from "../infra/http-body.js";
+
+export { fetchWithSsrFGuard } from "../infra/net/fetch-guard.js";
+export { SsrFBlockedError, isBlockedHostname, isPrivateIpAddress } from "../infra/net/ssrf.js";
+export type { LookupFn, SsrFPolicy } from "../infra/net/ssrf.js";
+export { rawDataToString } from "../infra/ws.js";
 export { isWSLSync, isWSL2Sync, isWSLEnv } from "../infra/wsl.js";
 export { isTruthyEnvValue } from "../infra/env.js";
 export { resolveToolsBySender } from "../config/group-policy.js";
@@ -205,7 +250,10 @@ export {
   listWhatsAppDirectoryPeersFromConfig,
 } from "../channels/plugins/directory-config.js";
 export type { AllowlistMatch } from "../channels/plugins/allowlist-match.js";
-export { formatAllowlistMatchMeta } from "../channels/plugins/allowlist-match.js";
+export {
+  formatAllowlistMatchMeta,
+  resolveAllowlistMatchSimple,
+} from "../channels/plugins/allowlist-match.js";
 export { optionalStringEnum, stringEnum } from "../agents/schema/typebox.js";
 export type { PollInput } from "../polls.js";
 
@@ -278,6 +326,7 @@ export { discordOnboardingAdapter } from "../channels/plugins/onboarding/discord
 export {
   looksLikeDiscordTargetId,
   normalizeDiscordMessagingTarget,
+  normalizeDiscordOutboundTarget,
 } from "../channels/plugins/normalize/discord.js";
 export { collectDiscordStatusIssues } from "../channels/plugins/status-issues/discord.js";
 
@@ -293,6 +342,12 @@ export {
   looksLikeIMessageTargetId,
   normalizeIMessageMessagingTarget,
 } from "../channels/plugins/normalize/imessage.js";
+export {
+  parseChatAllowTargetPrefixes,
+  parseChatTargetPrefixesOrThrow,
+  resolveServicePrefixedAllowTarget,
+  resolveServicePrefixedTarget,
+} from "../imessage/target-parsing-helpers.js";
 
 // Channel: Slack
 export {
@@ -303,6 +358,7 @@ export {
   resolveSlackReplyToMode,
   type ResolvedSlackAccount,
 } from "../slack/accounts.js";
+export { extractSlackToolSend, listSlackMessageActions } from "../slack/message-actions.js";
 export { slackOnboardingAdapter } from "../channels/plugins/onboarding/slack.js";
 export {
   looksLikeSlackTargetId,
@@ -323,6 +379,10 @@ export {
   normalizeTelegramMessagingTarget,
 } from "../channels/plugins/normalize/telegram.js";
 export { collectTelegramStatusIssues } from "../channels/plugins/status-issues/telegram.js";
+export {
+  parseTelegramReplyToMessageId,
+  parseTelegramThreadId,
+} from "../telegram/outbound-params.js";
 export { type TelegramProbe } from "../telegram/probe.js";
 
 // Channel: Signal
@@ -346,6 +406,7 @@ export {
   type ResolvedWhatsAppAccount,
 } from "../web/accounts.js";
 export { isWhatsAppGroupJid, normalizeWhatsAppTarget } from "../whatsapp/normalize.js";
+export { resolveWhatsAppOutboundTarget } from "../whatsapp/resolve-outbound-target.js";
 export { whatsappOnboardingAdapter } from "../channels/plugins/onboarding/whatsapp.js";
 export { resolveWhatsAppHeartbeatRecipients } from "../channels/plugins/whatsapp-heartbeat.js";
 export {

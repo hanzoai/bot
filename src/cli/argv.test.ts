@@ -36,32 +36,22 @@ describe("argv helpers", () => {
   });
 
   it("extracts flag values with equals and missing values", () => {
-    expect(getFlagValue(["node", "bot", "status", "--timeout", "5000"], "--timeout")).toBe(
-      "5000",
-    );
-    expect(getFlagValue(["node", "bot", "status", "--timeout=2500"], "--timeout")).toBe(
-      "2500",
-    );
+    expect(getFlagValue(["node", "bot", "status", "--timeout", "5000"], "--timeout")).toBe("5000");
+    expect(getFlagValue(["node", "bot", "status", "--timeout=2500"], "--timeout")).toBe("2500");
     expect(getFlagValue(["node", "bot", "status", "--timeout"], "--timeout")).toBeNull();
-    expect(getFlagValue(["node", "bot", "status", "--timeout", "--json"], "--timeout")).toBe(
-      null,
-    );
+    expect(getFlagValue(["node", "bot", "status", "--timeout", "--json"], "--timeout")).toBe(null);
     expect(getFlagValue(["node", "bot", "--", "--timeout=99"], "--timeout")).toBeUndefined();
   });
 
   it("parses verbose flags", () => {
     expect(getVerboseFlag(["node", "bot", "status", "--verbose"])).toBe(true);
     expect(getVerboseFlag(["node", "bot", "status", "--debug"])).toBe(false);
-    expect(getVerboseFlag(["node", "bot", "status", "--debug"], { includeDebug: true })).toBe(
-      true,
-    );
+    expect(getVerboseFlag(["node", "bot", "status", "--debug"], { includeDebug: true })).toBe(true);
   });
 
   it("parses positive integer flag values", () => {
     expect(getPositiveIntFlagValue(["node", "bot", "status"], "--timeout")).toBeUndefined();
-    expect(
-      getPositiveIntFlagValue(["node", "bot", "status", "--timeout"], "--timeout"),
-    ).toBeNull();
+    expect(getPositiveIntFlagValue(["node", "bot", "status", "--timeout"], "--timeout")).toBeNull();
     expect(
       getPositiveIntFlagValue(["node", "bot", "status", "--timeout", "5000"], "--timeout"),
     ).toBe(5000);
@@ -144,6 +134,10 @@ describe("argv helpers", () => {
     expect(shouldMigrateState(["node", "bot", "status"])).toBe(false);
     expect(shouldMigrateState(["node", "bot", "health"])).toBe(false);
     expect(shouldMigrateState(["node", "bot", "sessions"])).toBe(false);
+    expect(shouldMigrateState(["node", "bot", "config", "get", "update"])).toBe(false);
+    expect(shouldMigrateState(["node", "bot", "config", "unset", "update"])).toBe(false);
+    expect(shouldMigrateState(["node", "bot", "models", "list"])).toBe(false);
+    expect(shouldMigrateState(["node", "bot", "models", "status"])).toBe(false);
     expect(shouldMigrateState(["node", "bot", "memory", "status"])).toBe(false);
     expect(shouldMigrateState(["node", "bot", "agent", "--message", "hi"])).toBe(false);
     expect(shouldMigrateState(["node", "bot", "agents", "list"])).toBe(true);
@@ -152,6 +146,8 @@ describe("argv helpers", () => {
 
   it("reuses command path for migrate state decisions", () => {
     expect(shouldMigrateStateFromPath(["status"])).toBe(false);
+    expect(shouldMigrateStateFromPath(["config", "get"])).toBe(false);
+    expect(shouldMigrateStateFromPath(["models", "status"])).toBe(false);
     expect(shouldMigrateStateFromPath(["agents", "list"])).toBe(true);
   });
 });

@@ -44,7 +44,7 @@ export const teamHandlers: GatewayRequestHandlers = {
    * Get a single team preset by ID.
    */
   "team.presets.get": ({ params, respond }) => {
-    const presetId = String(params.presetId ?? "")
+    const presetId = String((params.presetId as string) ?? "")
       .trim()
       .toLowerCase();
     if (!presetId) {
@@ -70,7 +70,7 @@ export const teamHandlers: GatewayRequestHandlers = {
    * Creates workspace, writes identity/soul files, and updates config.
    */
   "team.provision": async ({ params, respond }) => {
-    const presetId = String(params.presetId ?? "")
+    const presetId = String((params.presetId as string) ?? "")
       .trim()
       .toLowerCase();
     if (!presetId) {
@@ -152,7 +152,7 @@ export const teamHandlers: GatewayRequestHandlers = {
    * Provision all team presets at once.
    * Skips any that already exist.
    */
-  "team.provision.all": async ({ params, respond }) => {
+  "team.provision.all": async ({ params: _params, respond }) => {
     const cfg = loadConfig();
     const existingEntries = listAgentEntries(cfg);
     const results: Array<{

@@ -1,5 +1,5 @@
-import HanzoBotProtocol
 import Observation
+import BotProtocol
 import SwiftUI
 
 struct CronJobEditor: View {
@@ -12,11 +12,11 @@ struct CronJobEditor: View {
 
     let labelColumnWidth: CGFloat = 160
     static let introText =
-        "Create a schedule that wakes HanzoBot via the Gateway. "
+        "Create a schedule that wakes Bot via the Gateway. "
             + "Use an isolated session for agent turns so your main chat stays clean."
     static let sessionTargetNote =
         "Main jobs post a system event into the current main session. "
-            + "Isolated jobs run HanzoBot in a dedicated session and can announce results to a channel."
+            + "Isolated jobs run Bot in a dedicated session and can announce results to a channel."
     static let scheduleKindNote =
         "“At” runs once, “Every” repeats with a duration, “Cron” uses a 5-field Unix expression."
     static let isolatedPayloadNote =
@@ -32,18 +32,24 @@ struct CronJobEditor: View {
     @State var wakeMode: CronWakeMode = .now
     @State var deleteAfterRun: Bool = false
 
-    enum ScheduleKind: String, CaseIterable, Identifiable { case at, every, cron; var id: String { rawValue } }
+    enum ScheduleKind: String, CaseIterable, Identifiable { case at, every, cron; var id: String {
+        rawValue
+    } }
     @State var scheduleKind: ScheduleKind = .every
     @State var atDate: Date = .init().addingTimeInterval(60 * 5)
     @State var everyText: String = "1h"
     @State var cronExpr: String = "0 9 * * 3"
     @State var cronTz: String = ""
 
-    enum PayloadKind: String, CaseIterable, Identifiable { case systemEvent, agentTurn; var id: String { rawValue } }
+    enum PayloadKind: String, CaseIterable, Identifiable { case systemEvent, agentTurn; var id: String {
+        rawValue
+    } }
     @State var payloadKind: PayloadKind = .systemEvent
     @State var systemEventText: String = ""
     @State var agentMessage: String = ""
-    enum DeliveryChoice: String, CaseIterable, Identifiable { case announce, none; var id: String { rawValue } }
+    enum DeliveryChoice: String, CaseIterable, Identifiable { case announce, none; var id: String {
+        rawValue
+    } }
     @State var deliveryMode: DeliveryChoice = .announce
     @State var channel: String = "last"
     @State var to: String = ""
@@ -244,7 +250,6 @@ struct CronJobEditor: View {
                             }
                         }
                     }
-
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.vertical, 2)
@@ -298,7 +303,7 @@ struct CronJobEditor: View {
             Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 14, verticalSpacing: 10) {
                 GridRow {
                     self.gridLabel("Message")
-                    TextField("What should HanzoBot do?", text: self.$agentMessage, axis: .vertical)
+                    TextField("What should Bot do?", text: self.$agentMessage, axis: .vertical)
                         .textFieldStyle(.roundedBorder)
                         .lineLimit(3...7)
                         .frame(maxWidth: .infinity)

@@ -1,13 +1,13 @@
 {
   "name": "@hanzo/bot-minimax-portal-auth",
-  "version": "2026.2.10",
+  "version": "2026.2.23",
   "private": true,
-  "description": "HanzoBot MiniMax Portal OAuth provider plugin",
+  "description": "Hanzo Bot MiniMax Portal OAuth provider plugin",
   "type": "module",
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

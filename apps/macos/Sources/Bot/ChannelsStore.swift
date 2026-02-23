@@ -1,6 +1,6 @@
-import HanzoBotProtocol
 import Foundation
 import Observation
+import BotProtocol
 
 struct ChannelsStatusSnapshot: Codable {
     struct WhatsAppSelf: Codable {

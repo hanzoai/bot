@@ -5,6 +5,12 @@ import type { BotConfig } from "../config/config.js";
 import { resolveControlUiRootSync } from "../infra/control-ui-assets.js";
 import { DEFAULT_ASSISTANT_IDENTITY, resolveAssistantIdentity } from "./assistant-identity.js";
 import {
+  CONTROL_UI_BOOTSTRAP_CONFIG_PATH,
+  type ControlUiBootstrapConfig,
+  type ControlUiBootstrapIamConfig,
+} from "./control-ui-contract.js";
+import { buildControlUiCspHeader } from "./control-ui-csp.js";
+import {
   buildControlUiAvatarUrl,
   CONTROL_UI_AVATAR_PREFIX,
   normalizeControlUiBasePath,
@@ -66,10 +72,11 @@ type ControlUiAvatarMeta = {
   avatarUrl: string | null;
 };
 
-function applyControlUiSecurityHeaders(res: ServerResponse) {
+function applyControlUiSecurityHeaders(res: ServerResponse, iamServerUrl?: string) {
   res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("Content-Security-Policy", "frame-ancestors 'none'");
+  res.setHeader("Content-Security-Policy", buildControlUiCspHeader(iamServerUrl));
   res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "no-referrer");
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown) {
@@ -160,66 +167,10 @@ function serveFile(res: ServerResponse, filePath: string) {
   res.end(fs.readFileSync(filePath));
 }
 
-interface ControlUiInjectionOpts {
-  basePath: string;
-  assistantName?: string;
-  assistantAvatar?: string;
-}
-
-function injectControlUiConfig(html: string, opts: ControlUiInjectionOpts): string {
-  const { basePath, assistantName, assistantAvatar } = opts;
-  const script =
-    `<script>` +
-    `window.__BOT_CONTROL_UI_BASE_PATH__=${JSON.stringify(basePath)};` +
-    `window.__BOT_ASSISTANT_NAME__=${JSON.stringify(
-      assistantName ?? DEFAULT_ASSISTANT_IDENTITY.name,
-    )};` +
-    `window.__BOT_ASSISTANT_AVATAR__=${JSON.stringify(
-      assistantAvatar ?? DEFAULT_ASSISTANT_IDENTITY.avatar,
-    )};` +
-    `</script>`;
-  // Check if already injected
-  if (html.includes("__BOT_ASSISTANT_NAME__")) {
-    return html;
-  }
-  const headClose = html.indexOf("</head>");
-  if (headClose !== -1) {
-    return `${html.slice(0, headClose)}${script}${html.slice(headClose)}`;
-  }
-  return `${script}${html}`;
-}
-
-interface ServeIndexHtmlOpts {
-  basePath: string;
-  config?: BotConfig;
-  agentId?: string;
-}
-
-function serveIndexHtml(res: ServerResponse, indexPath: string, opts: ServeIndexHtmlOpts) {
-  const { basePath, config, agentId } = opts;
-  const identity = config
-    ? resolveAssistantIdentity({ cfg: config, agentId })
-    : DEFAULT_ASSISTANT_IDENTITY;
-  const resolvedAgentId =
-    typeof (identity as { agentId?: string }).agentId === "string"
-      ? (identity as { agentId?: string }).agentId
-      : agentId;
-  const avatarValue =
-    resolveAssistantAvatarUrl({
-      avatar: identity.avatar,
-      agentId: resolvedAgentId,
-      basePath,
-    }) ?? identity.avatar;
+function serveIndexHtml(res: ServerResponse, indexPath: string) {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("Cache-Control", "no-cache");
-  const raw = fs.readFileSync(indexPath, "utf8");
-  res.end(
-    injectControlUiConfig(raw, {
-      basePath,
-      assistantName: identity.name,
-      assistantAvatar: avatarValue,
-    }),
-  );
+  res.end(fs.readFileSync(indexPath, "utf8"));
 }
 
 function isSafeRelativePath(relPath: string) {
@@ -277,7 +228,52 @@ export function handleControlUiHttpRequest(
     }
   }
 
-  applyControlUiSecurityHeaders(res);
+  const iamServerUrl = opts?.config?.gateway?.auth?.iam?.serverUrl;
+  applyControlUiSecurityHeaders(res, iamServerUrl);
+
+  const bootstrapConfigPath = basePath
+    ? `${basePath}${CONTROL_UI_BOOTSTRAP_CONFIG_PATH}`
+    : CONTROL_UI_BOOTSTRAP_CONFIG_PATH;
+  if (pathname === bootstrapConfigPath) {
+    const config = opts?.config;
+    const identity = config
+      ? resolveAssistantIdentity({ cfg: config, agentId: opts?.agentId })
+      : DEFAULT_ASSISTANT_IDENTITY;
+    const avatarValue = resolveAssistantAvatarUrl({
+      avatar: identity.avatar,
+      agentId: identity.agentId,
+      basePath,
+    });
+    if (req.method === "HEAD") {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Cache-Control", "no-cache");
+      res.end();
+      return true;
+    }
+    const authMode = config?.gateway?.auth?.mode ?? "none";
+    const iamCfg = config?.gateway?.auth?.iam;
+    const iamBootstrap: ControlUiBootstrapIamConfig | undefined =
+      authMode === "iam" && iamCfg
+        ? {
+            serverUrl: iamCfg.serverUrl,
+            clientId: iamCfg.clientId,
+            appName: iamCfg.appName,
+            orgName: iamCfg.orgName,
+            scopes: iamCfg.scopes,
+          }
+        : undefined;
+
+    sendJson(res, 200, {
+      basePath,
+      assistantName: identity.name,
+      assistantAvatar: avatarValue ?? identity.avatar,
+      assistantAgentId: identity.agentId,
+      authMode,
+      iam: iamBootstrap,
+    } satisfies ControlUiBootstrapConfig);
+    return true;
+  }
 
   const rootState = opts?.root;
   if (rootState?.kind === "invalid") {
@@ -316,25 +312,6 @@ export function handleControlUiHttpRequest(
 
   const uiPath =
     basePath && pathname.startsWith(`${basePath}/`) ? pathname.slice(basePath.length) : pathname;
-
-  // Serve landing page at root path if site.html exists.
-  if (uiPath === ROOT_PREFIX) {
-    const sitePath = path.join(root, "site.html");
-    if (fs.existsSync(sitePath) && fs.statSync(sitePath).isFile()) {
-      serveFile(res, sitePath);
-      return true;
-    }
-  }
-
-  // Serve static HTML pages (e.g. /book → book.html) if they exist.
-  if (uiPath.startsWith("/") && !uiPath.includes(".") && uiPath !== ROOT_PREFIX) {
-    const pagePath = path.join(root, `${uiPath.slice(1)}.html`);
-    if (fs.existsSync(pagePath) && fs.statSync(pagePath).isFile()) {
-      serveFile(res, pagePath);
-      return true;
-    }
-  }
-
   const rel = (() => {
     if (uiPath === ROOT_PREFIX) {
       return "";
@@ -360,11 +337,7 @@ export function handleControlUiHttpRequest(
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
     if (path.basename(filePath) === "index.html") {
-      serveIndexHtml(res, filePath, {
-        basePath,
-        config: opts?.config,
-        agentId: opts?.agentId,
-      });
+      serveIndexHtml(res, filePath);
       return true;
     }
     serveFile(res, filePath);
@@ -374,11 +347,7 @@ export function handleControlUiHttpRequest(
   // SPA fallback (client-side router): serve index.html for unknown paths.
   const indexPath = path.join(root, "index.html");
   if (fs.existsSync(indexPath)) {
-    serveIndexHtml(res, indexPath, {
-      basePath,
-      config: opts?.config,
-      agentId: opts?.agentId,
-    });
+    serveIndexHtml(res, indexPath);
     return true;
   }
 

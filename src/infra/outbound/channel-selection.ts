@@ -49,9 +49,7 @@ async function isPluginConfigured(plugin: ChannelPlugin, cfg: BotConfig): Promis
   return false;
 }
 
-export async function listConfiguredMessageChannels(
-  cfg: BotConfig,
-): Promise<MessageChannelId[]> {
+export async function listConfiguredMessageChannels(cfg: BotConfig): Promise<MessageChannelId[]> {
   const channels: MessageChannelId[] = [];
   for (const plugin of listChannelPlugins()) {
     if (!isKnownChannel(plugin.id)) {

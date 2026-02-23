@@ -1,0 +1,1 @@
+/Users/z/work/hanzobot/bot/package.json

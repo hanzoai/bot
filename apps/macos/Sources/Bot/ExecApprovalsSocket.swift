@@ -1,8 +1,8 @@
 import AppKit
-import BotKit
 import CryptoKit
 import Darwin
 import Foundation
+import BotKit
 import OSLog
 
 struct ExecApprovalPromptRequest: Codable, Sendable {
@@ -76,7 +76,9 @@ private struct ExecHostResponse: Codable {
 enum ExecApprovalsSocketClient {
     private struct TimeoutError: LocalizedError {
         var message: String
-        var errorDescription: String? { self.message }
+        var errorDescription: String? {
+            self.message
+        }
     }
 
     static func requestDecision(
@@ -242,6 +244,8 @@ enum ExecApprovalsPromptPresenter {
         stack.orientation = .vertical
         stack.spacing = 8
         stack.alignment = .leading
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.widthAnchor.constraint(greaterThanOrEqualToConstant: 380).isActive = true
 
         let commandTitle = NSTextField(labelWithString: "Command")
         commandTitle.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
@@ -258,16 +262,19 @@ enum ExecApprovalsPromptPresenter {
         commandText.textContainer?.lineFragmentPadding = 0
         commandText.textContainer?.widthTracksTextView = true
         commandText.isHorizontallyResizable = false
-        commandText.isVerticallyResizable = false
+        commandText.isVerticallyResizable = true
 
         let commandScroll = NSScrollView()
         commandScroll.borderType = .lineBorder
-        commandScroll.hasVerticalScroller = false
+        commandScroll.hasVerticalScroller = true
         commandScroll.hasHorizontalScroller = false
+        commandScroll.autohidesScrollers = true
         commandScroll.documentView = commandText
         commandScroll.translatesAutoresizingMaskIntoConstraints = false
+        commandScroll.widthAnchor.constraint(greaterThanOrEqualToConstant: 380).isActive = true
         commandScroll.widthAnchor.constraint(lessThanOrEqualToConstant: 440).isActive = true
         commandScroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 56).isActive = true
+        commandScroll.heightAnchor.constraint(lessThanOrEqualToConstant: 120).isActive = true
         stack.addArrangedSubview(commandScroll)
 
         let contextTitle = NSTextField(labelWithString: "Context")
@@ -589,7 +596,7 @@ private enum ExecHostExecutor {
 }
 
 private final class ExecApprovalsSocketServer: @unchecked Sendable {
-    private let logger = Logger(subsystem: "ai.hanzo.bot", category: "exec-approvals.socket")
+    private let logger = Logger(subsystem: "ai.bot", category: "exec-approvals.socket")
     private let socketPath: String
     private let token: String
     private let onPrompt: @Sendable (ExecApprovalPromptRequest) async -> ExecApprovalDecision

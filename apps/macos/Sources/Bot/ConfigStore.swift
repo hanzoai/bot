@@ -1,5 +1,5 @@
-import HanzoBotProtocol
 import Foundation
+import BotProtocol
 
 enum ConfigStore {
     struct Overrides: Sendable {

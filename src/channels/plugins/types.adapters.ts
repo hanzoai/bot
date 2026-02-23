@@ -2,6 +2,7 @@ import type { ReplyPayload } from "../../auto-reply/types.js";
 import type { BotConfig } from "../../config/config.js";
 import type { GroupToolPolicyConfig } from "../../config/types.tools.js";
 import type { OutboundDeliveryResult, OutboundSendDeps } from "../../infra/outbound/deliver.js";
+import type { OutboundIdentity } from "../../infra/outbound/identity.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import type {
   ChannelAccountSnapshot,
@@ -21,11 +22,7 @@ import type {
 
 export type ChannelSetupAdapter = {
   resolveAccountId?: (params: { cfg: BotConfig; accountId?: string }) => string;
-  applyAccountName?: (params: {
-    cfg: BotConfig;
-    accountId: string;
-    name?: string;
-  }) => BotConfig;
+  applyAccountName?: (params: { cfg: BotConfig; accountId: string; name?: string }) => BotConfig;
   applyAccountConfig: (params: {
     cfg: BotConfig;
     accountId: string;
@@ -75,11 +72,14 @@ export type ChannelOutboundContext = {
   to: string;
   text: string;
   mediaUrl?: string;
+  mediaLocalRoots?: readonly string[];
   gifPlayback?: boolean;
   replyToId?: string | null;
   threadId?: string | number | null;
   accountId?: string | null;
+  identity?: OutboundIdentity;
   deps?: OutboundSendDeps;
+  silent?: boolean;
 };
 
 export type ChannelOutboundPayloadContext = ChannelOutboundContext & {
@@ -184,11 +184,7 @@ export type ChannelLogoutContext<ResolvedAccount = unknown> = {
 export type ChannelPairingAdapter = {
   idLabel: string;
   normalizeAllowEntry?: (entry: string) => string;
-  notifyApproval?: (params: {
-    cfg: BotConfig;
-    id: string;
-    runtime?: RuntimeEnv;
-  }) => Promise<void>;
+  notifyApproval?: (params: { cfg: BotConfig; id: string; runtime?: RuntimeEnv }) => Promise<void>;
 };
 
 export type ChannelGatewayAdapter<ResolvedAccount = unknown> = {

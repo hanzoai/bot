@@ -5,6 +5,7 @@ import { ApprovalsSchema } from "./zod-schema.approvals.js";
 import { HexColorSchema, ModelsConfigSchema } from "./zod-schema.core.js";
 import { HookMappingSchema, HooksGmailSchema, InternalHooksSchema } from "./zod-schema.hooks.js";
 import { ChannelsSchema } from "./zod-schema.providers.js";
+import { sensitive } from "./zod-schema.sensitive.js";
 import {
   CommandsSchema,
   MessagesSchema,
@@ -73,6 +74,7 @@ const MemoryQmdLimitsSchema = z
 const MemoryQmdSchema = z
   .object({
     command: z.string().optional(),
+    searchMode: z.union([z.literal("query"), z.literal("search"), z.literal("vsearch")]).optional(),
     includeDefaultMemory: z.boolean().optional(),
     paths: z.array(MemoryQmdPathSchema).optional(),
     sessions: MemoryQmdSessionSchema.optional(),
@@ -91,8 +93,17 @@ const MemorySchema = z
   .strict()
   .optional();
 
+const HttpUrlSchema = z
+  .string()
+  .url()
+  .refine((value) => {
+    const protocol = new URL(value).protocol;
+    return protocol === "http:" || protocol === "https:";
+  }, "Expected http:// or https:// URL");
+
 export const BotSchema = z
   .object({
+    $schema: z.string().optional(),
     meta: z
       .object({
         lastTouchedVersion: z.string().optional(),
@@ -112,33 +123,6 @@ export const BotSchema = z
         vars: z.record(z.string(), z.string()).optional(),
       })
       .catchall(z.string())
-      .optional(),
-    secrets: z
-      .object({
-        backend: z.union([z.literal("local"), z.literal("kms")]).optional(),
-        kms: z
-          .object({
-            siteUrl: z.string().optional(),
-            orgSlug: z.string().optional(),
-            projectId: z.string().optional(),
-            projectSlug: z.string().optional(),
-            environment: z.string().optional(),
-            secretPath: z.string().optional(),
-            accessToken: z.string().optional(),
-            machineIdentity: z
-              .object({
-                clientId: z.string().optional(),
-                clientSecret: z.string().optional(),
-              })
-              .strict()
-              .optional(),
-            cacheTtlMs: z.number().int().nonnegative().optional(),
-            requestTimeoutMs: z.number().int().positive().optional(),
-          })
-          .strict()
-          .optional(),
-      })
-      .strict()
       .optional(),
     wizard: z
       .object({
@@ -245,7 +229,7 @@ export const BotSchema = z
               .object({
                 cdpPort: z.number().int().min(1).max(65535).optional(),
                 cdpUrl: z.string().optional(),
-                driver: z.union([z.literal("bot"), z.literal("extension")]).optional(),
+                driver: z.union([z.literal("botd"), z.literal("extension")]).optional(),
                 color: HexColorSchema,
               })
               .strict()
@@ -319,6 +303,8 @@ export const BotSchema = z
         enabled: z.boolean().optional(),
         store: z.string().optional(),
         maxConcurrentRuns: z.number().int().positive().optional(),
+        webhook: HttpUrlSchema.optional(),
+        webhookToken: z.string().optional().register(sensitive),
         sessionRetention: z.union([z.string(), z.literal(false)]).optional(),
       })
       .strict()
@@ -327,7 +313,10 @@ export const BotSchema = z
       .object({
         enabled: z.boolean().optional(),
         path: z.string().optional(),
-        token: z.string().optional(),
+        token: z.string().optional().register(sensitive),
+        defaultSessionKey: z.string().optional(),
+        allowRequestSessionKey: z.boolean().optional(),
+        allowedSessionKeyPrefixes: z.array(z.string()).optional(),
         allowedAgentIds: z.array(z.string()).optional(),
         maxBodyBytes: z.number().int().positive().optional(),
         presets: z.array(z.string()).optional(),
@@ -388,7 +377,7 @@ export const BotSchema = z
         voiceAliases: z.record(z.string(), z.string()).optional(),
         modelId: z.string().optional(),
         outputFormat: z.string().optional(),
-        apiKey: z.string().optional(),
+        apiKey: z.string().optional().register(sensitive),
         interruptOnSpeech: z.boolean().optional(),
       })
       .strict()
@@ -413,20 +402,61 @@ export const BotSchema = z
             root: z.string().optional(),
             allowedOrigins: z.array(z.string()).optional(),
             allowInsecureAuth: z.boolean().optional(),
-            dangerouslyDisableDeviceAuth: z.boolean().optional(),
           })
           .strict()
           .optional(),
         auth: z
           .object({
-            mode: z.union([z.literal("token"), z.literal("password")]).optional(),
-            token: z.string().optional(),
-            password: z.string().optional(),
+            mode: z
+              .union([
+                z.literal("token"),
+                z.literal("password"),
+                z.literal("trusted-proxy"),
+                z.literal("iam"),
+              ])
+              .optional(),
+            token: z.string().optional().register(sensitive),
+            password: z.string().optional().register(sensitive),
             allowTailscale: z.boolean().optional(),
+            rateLimit: z
+              .object({
+                maxAttempts: z.number().optional(),
+                windowMs: z.number().optional(),
+                lockoutMs: z.number().optional(),
+                exemptLoopback: z.boolean().optional(),
+              })
+              .strict()
+              .optional(),
+            trustedProxy: z
+              .object({
+                userHeader: z.string().min(1, "userHeader is required for trusted-proxy mode"),
+                requiredHeaders: z.array(z.string()).optional(),
+                allowUsers: z.array(z.string()).optional(),
+              })
+              .strict()
+              .optional(),
+            iam: z
+              .object({
+                serverUrl: z.string(),
+                clientId: z.string(),
+                clientSecret: z.string().optional().register(sensitive),
+                orgName: z.string().optional(),
+                appName: z.string().optional(),
+                scopes: z.array(z.string()).optional(),
+              })
+              .strict()
+              .optional(),
           })
           .strict()
           .optional(),
         trustedProxies: z.array(z.string()).optional(),
+        tools: z
+          .object({
+            deny: z.array(z.string()).optional(),
+            allow: z.array(z.string()).optional(),
+          })
+          .strict()
+          .optional(),
         tailscale: z
           .object({
             mode: z.union([z.literal("off"), z.literal("serve"), z.literal("funnel")]).optional(),
@@ -434,12 +464,28 @@ export const BotSchema = z
           })
           .strict()
           .optional(),
+        tunnel: z
+          .object({
+            provider: z
+              .union([
+                z.literal("cloudflared"),
+                z.literal("ngrok"),
+                z.literal("localxpose"),
+                z.literal("zrok"),
+                z.literal("none"),
+              ])
+              .optional(),
+            authToken: z.string().optional().register(sensitive),
+            domain: z.string().optional(),
+          })
+          .strict()
+          .optional(),
         remote: z
           .object({
             url: z.string().optional(),
             transport: z.union([z.literal("ssh"), z.literal("direct")]).optional(),
-            token: z.string().optional(),
-            password: z.string().optional(),
+            token: z.string().optional().register(sensitive),
+            password: z.string().optional().register(sensitive),
             tlsFingerprint: z.string().optional(),
             sshTarget: z.string().optional(),
             sshIdentity: z.string().optional(),
@@ -483,9 +529,11 @@ export const BotSchema = z
                   .object({
                     enabled: z.boolean().optional(),
                     maxBodyBytes: z.number().int().positive().optional(),
+                    maxUrlParts: z.number().int().nonnegative().optional(),
                     files: z
                       .object({
                         allowUrl: z.boolean().optional(),
+                        urlAllowlist: z.array(z.string()).optional(),
                         allowedMimes: z.array(z.string()).optional(),
                         maxBytes: z.number().int().positive().optional(),
                         maxChars: z.number().int().positive().optional(),
@@ -505,6 +553,7 @@ export const BotSchema = z
                     images: z
                       .object({
                         allowUrl: z.boolean().optional(),
+                        urlAllowlist: z.array(z.string()).optional(),
                         allowedMimes: z.array(z.string()).optional(),
                         maxBytes: z.number().int().positive().optional(),
                         maxRedirects: z.number().int().nonnegative().optional(),
@@ -567,7 +616,7 @@ export const BotSchema = z
             z
               .object({
                 enabled: z.boolean().optional(),
-                apiKey: z.string().optional(),
+                apiKey: z.string().optional().register(sensitive),
                 env: z.record(z.string(), z.string()).optional(),
                 config: z.record(z.string(), z.unknown()).optional(),
               })

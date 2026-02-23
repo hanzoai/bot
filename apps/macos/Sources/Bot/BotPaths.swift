@@ -1,6 +1,6 @@
 import Foundation
 
-enum HanzoBotEnv {
+enum BotEnv {
     static func path(_ key: String) -> String? {
         // Normalize env overrides once so UI + file IO stay consistent.
         guard let raw = getenv(key) else { return nil }
@@ -19,13 +19,12 @@ enum BotPaths {
 
     static var stateDirURL: URL {
         for key in self.stateDirEnv {
-            if let override = HanzoBotEnv.path(key) {
+            if let override = BotEnv.path(key) {
                 return URL(fileURLWithPath: override, isDirectory: true)
             }
         }
         let home = FileManager().homeDirectoryForCurrentUser
-        let preferred = home.appendingPathComponent(".hanzo-bot", isDirectory: true)
-        return preferred
+        return home.appendingPathComponent(".bot", isDirectory: true)
     }
 
     private static func resolveConfigCandidate(in dir: URL) -> URL? {
@@ -37,7 +36,7 @@ enum BotPaths {
 
     static var configURL: URL {
         for key in self.configPathEnv {
-            if let override = HanzoBotEnv.path(key) {
+            if let override = BotEnv.path(key) {
                 return URL(fileURLWithPath: override)
             }
         }
