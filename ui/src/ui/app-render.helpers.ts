@@ -1,4 +1,4 @@
-import { html } from "lit";
+import { html, nothing } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 import type { AppViewState } from "./app-view-state.ts";
 import type { ThemeTransitionContext } from "./theme-transition.ts";
@@ -470,4 +470,66 @@ function renderMonitorIcon() {
       <line x1="12" x2="12" y1="17" y2="21"></line>
     </svg>
   `;
+}
+
+// ── Topbar user / auth button ────────────────────────────────────────
+
+export function renderTopbarUser(state: AppViewState) {
+  const isIam = state.authMode === "iam";
+
+  // Show user avatar + name when logged in via IAM
+  if (isIam && state.iamUser) {
+    const displayName = state.iamUser.name || state.iamUser.email || "User";
+    const initial = displayName.charAt(0).toUpperCase();
+    return html`
+      <div class="topbar-user">
+        ${
+          state.iamUser.avatar
+            ? html`<img
+                class="topbar-user__avatar"
+                src=${state.iamUser.avatar}
+                alt=${displayName}
+              />`
+            : html`<span class="topbar-user__initial">${initial}</span>`
+        }
+        <span class="topbar-user__name">${displayName}</span>
+        <button
+          class="btn btn--sm btn--ghost"
+          @click=${() => state.handleIamLogout()}
+          title="Sign out"
+          aria-label="Sign out"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" x2="9" y1="12" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+    `;
+  }
+
+  // Show sign-in button when IAM is configured but not logged in
+  if (isIam) {
+    return html`
+      <div class="topbar-user">
+        <button
+          class="btn btn--sm"
+          ?disabled=${state.iamLoggingIn}
+          @click=${() => state.handleIamLogin()}
+        >
+          ${state.iamLoggingIn ? "Signing in…" : "Sign in"}
+        </button>
+        <button
+          class="btn btn--sm btn--outline"
+          @click=${() => state.handleIamSignup()}
+        >
+          Sign up
+        </button>
+      </div>
+    `;
+  }
+
+  // Non-IAM mode — no topbar auth buttons
+  return nothing;
 }
