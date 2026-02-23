@@ -46,12 +46,12 @@ jobs:
                   "This would be better made as a third-party extension with our SDK that you maintain yourself. Docs: https://github.com/hanzoai/bot/plugin.",
               },
               {
-                label: "r: moltbook",
+                label: "r: off-topic",
                 close: true,
                 lock: true,
                 lockReason: "off-topic",
                 message:
-                  "HanzoBot is not affiliated with Moltbook, and issues related to Moltbook should not be submitted here.",
+                  "This issue is not related to Hanzo Bot. Please file it in the appropriate repository.",
               },
             ];
 
@@ -94,7 +94,7 @@ jobs:
               const title = issue.title ?? "";
               const body = issue.body ?? "";
               const haystack = `${title}\n${body}`.toLowerCase();
-              const hasMoltbookLabel = labelSet.has("r: moltbook");
+              const hasOffTopicLabel = labelSet.has("r: off-topic");
               const hasTestflightLabel = labelSet.has("r: testflight");
               const hasSecurityLabel = labelSet.has("security");
               if (title.toLowerCase().includes("security") && !hasSecurityLabel) {
@@ -115,14 +115,14 @@ jobs:
                 });
                 labelSet.add("r: testflight");
               }
-              if (haystack.includes("moltbook") && !hasMoltbookLabel) {
+              if (haystack.includes("off-topic") && !hasOffTopicLabel) {
                 await github.rest.issues.addLabels({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issue.number,
-                  labels: ["r: moltbook"],
+                  labels: ["r: off-topic"],
                 });
-                labelSet.add("r: moltbook");
+                labelSet.add("r: off-topic");
               }
             }
 
