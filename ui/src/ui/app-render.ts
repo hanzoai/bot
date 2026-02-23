@@ -66,6 +66,7 @@ import { renderInstances } from "./views/instances.ts";
 import { renderLogs } from "./views/logs.ts";
 import { renderNodes } from "./views/nodes.ts";
 import { renderOverview } from "./views/overview.ts";
+import { renderScreen } from "./views/screen.ts";
 import { renderSessions } from "./views/sessions.ts";
 import { renderSkills } from "./views/skills.ts";
 
@@ -795,6 +796,15 @@ export function renderApp(state: AppViewState) {
                       : { kind: "gateway" as const };
                   return saveExecApprovals(state, target);
                 },
+              })
+            : nothing
+        }
+
+        ${
+          state.tab === "screen"
+            ? renderScreen({
+                connected: state.connected,
+                gatewayUrl: state.settings.gatewayUrl,
               })
             : nothing
         }
