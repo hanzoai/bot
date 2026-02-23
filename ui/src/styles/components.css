@@ -2105,3 +2105,173 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===========================================
+   Channel Tile Grid
+   =========================================== */
+
+.channel-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.channel-section-title:not(:first-child) {
+  margin-top: 24px;
+}
+
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.channel-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+  box-shadow: inset 0 1px 0 var(--card-highlight);
+  text-align: center;
+  user-select: none;
+}
+
+.channel-tile:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 1px 0 var(--card-highlight);
+}
+
+.channel-tile--selected {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.channel-tile--selected:hover {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.channel-tile--ok {
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.channel-tile--setup {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.channel-tile--disabled {
+  opacity: 0.55;
+}
+
+.channel-tile--coming {
+  border-style: dashed;
+  opacity: 0.45;
+}
+
+.channel-tile--coming:hover {
+  opacity: 0.65;
+}
+
+.channel-tile__icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+}
+
+.channel-tile__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.channel-tile--ok .channel-tile__icon {
+  color: var(--ok);
+}
+
+.channel-tile--setup .channel-tile__icon {
+  color: var(--warn);
+}
+
+.channel-tile--disabled .channel-tile__icon,
+.channel-tile--coming .channel-tile__icon {
+  color: var(--muted);
+}
+
+.channel-tile__name {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-strong);
+  line-height: 1.2;
+}
+
+.channel-tile--coming .channel-tile__name {
+  font-style: italic;
+  color: var(--muted);
+}
+
+.channel-tile__status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.channel-tile__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.channel-tile__dot--ok {
+  background: var(--ok);
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.channel-tile__dot--setup {
+  background: var(--warn);
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+}
+
+.channel-tile__dot--error {
+  background: var(--danger);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+.channel-tile__dot--disabled {
+  background: var(--muted);
+  opacity: 0.5;
+}
+
+/* Expanded detail panel */
+.channel-expanded {
+  margin-top: 12px;
+  animation: rise 0.2s var(--ease-out) backwards;
+}
+
+.channel-expanded__close {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
