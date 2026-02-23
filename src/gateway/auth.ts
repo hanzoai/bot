@@ -201,10 +201,16 @@ export function resolveGatewayAuth(params: {
   const trustedProxy = authConfig.trustedProxy;
   const iam = authConfig.iam;
 
+  // Cloud playground agents run inside the K8s cluster behind the playground
+  // service mesh — resolve to IAM mode so the gateway starts without requiring
+  // a shared secret.
+  const isPlaygroundCloud =
+    env.HANZO_PLAYGROUND_CLOUD_NODE === "true" || env.BOT_GATEWAY_AUTH_MODE === "iam";
+
   let mode: ResolvedGatewayAuth["mode"];
   if (authConfig.mode) {
     mode = authConfig.mode;
-  } else if (iam?.serverUrl) {
+  } else if (isPlaygroundCloud || iam?.serverUrl) {
     mode = "iam";
   } else if (password) {
     mode = "password";
