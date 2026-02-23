@@ -33,6 +33,7 @@ import {
 } from "../routing/session-key.js";
 import { isCronRunSessionKey } from "../sessions/session-key-utils.js";
 import { normalizeSessionDeliveryFields } from "../utils/delivery-context.js";
+import { resolveAssistantIdentity } from "./assistant-identity.js";
 import { readSessionTitleFieldsFromTranscript } from "./session-utils.fs.js";
 
 export {
@@ -397,10 +398,24 @@ export function listAgentsForGateway(cfg: BotConfig): {
   }
   const agents = agentIds.map((id) => {
     const meta = configuredById.get(id);
+    const hasName = Boolean(meta?.name || meta?.identity?.name);
+    if (hasName) {
+      return {
+        id,
+        name: meta?.name,
+        identity: meta?.identity,
+      };
+    }
+    // Resolve display identity for agents without an explicit name so the
+    // frontend never falls back to the raw id (e.g. "main").
+    const resolved = resolveAssistantIdentity({ cfg, agentId: id });
     return {
       id,
-      name: meta?.name,
-      identity: meta?.identity,
+      name: meta?.name ?? resolved.name,
+      identity: meta?.identity ?? {
+        name: resolved.name,
+        emoji: resolved.emoji,
+      },
     };
   });
   return { defaultId, mainKey, scope, agents };
