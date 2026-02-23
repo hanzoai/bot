@@ -88,14 +88,14 @@ rm -rf /Applications/Hanzo Bot.app
 
 ### macOS（launchd）
 
-默认标签是 `bot.molt.gateway`（或 `bot.molt.<profile>`；旧版 `com.bot.*` 可能仍然存在）：
+默认标签是 `ai.hanzo.bot.gateway`（或 `ai.hanzo.bot.<profile>`；旧版 `com.bot.*` 可能仍然存在）：
 
 ```bash
-launchctl bootout gui/$UID/bot.molt.gateway
-rm -f ~/Library/LaunchAgents/bot.molt.gateway.plist
+launchctl bootout gui/$UID/ai.hanzo.bot.gateway
+rm -f ~/Library/LaunchAgents/ai.hanzo.bot.gateway.plist
 ```
 
-如果你使用了配置文件，请将标签和 plist 名称替换为 `bot.molt.<profile>`。如果存在任何旧版 `com.bot.*` plist，请将其移除。
+如果你使用了配置文件，请将标签和 plist 名称替换为 `ai.hanzo.bot.<profile>`。如果存在任何旧版 `com.bot.*` plist，请将其移除。
 
 ### Linux（systemd 用户单元）
 

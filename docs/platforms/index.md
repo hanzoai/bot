@@ -49,5 +49,5 @@ Use one of these (all supported):
 
 The service target depends on OS:
 
-- macOS: LaunchAgent (`bot.molt.gateway` or `bot.molt.<profile>`; legacy `com.bot.*`)
+- macOS: LaunchAgent (`ai.hanzo.bot.gateway` or `ai.hanzo.bot.<profile>`; legacy `com.bot.*`)
 - Linux/WSL2: systemd user service (`bot-gateway[-<profile>].service`)
