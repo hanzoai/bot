@@ -8,7 +8,8 @@ import { openUrl } from "./onboard-helpers.js";
 
 const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/login/oauth/authorize";
 const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/api/login/oauth/access_token";
-const HANZO_CLIENT_ID = "hanzo-bot-client-id";
+const HANZO_CLIENT_ID = "hanzobot-client-id";
+const HANZO_CLIENT_SECRET = "";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 const HANZO_API_BASE_URL = "https://api.hanzo.ai/v1";
@@ -114,11 +115,13 @@ async function exchangeCodeForTokens(code: string): Promise<{
   expires_in?: number;
 }> {
   const clientId = process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID;
+  const clientSecret = process.env.HANZO_CLIENT_SECRET?.trim() || HANZO_CLIENT_SECRET;
   const redirectUri = process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI;
 
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     client_id: clientId,
+    client_secret: clientSecret,
     code,
     redirect_uri: redirectUri,
   });
