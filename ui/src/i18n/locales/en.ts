@@ -31,6 +31,7 @@ export const en: TranslationMap = {
     cron: "Cron Jobs",
     skills: "Skills",
     nodes: "Nodes",
+    screen: "Screen",
     chat: "Chat",
     config: "Config",
     debug: "Debug",
@@ -46,6 +47,7 @@ export const en: TranslationMap = {
     cron: "Schedule wakeups and recurring agent runs.",
     skills: "Manage skill availability and API key injection.",
     nodes: "Paired devices, capabilities, and command exposure.",
+    screen: "Remote desktop access via VNC screen sharing.",
     chat: "Direct gateway chat session for quick interventions.",
     config: "Edit ~/.bot/bot.json safely.",
     debug: "Gateway snapshots, events, and manual RPC calls.",
@@ -105,6 +107,11 @@ export const en: TranslationMap = {
       createAccount: "Create Account",
       signOut: "Sign Out",
     },
+  },
+  screen: {
+    disconnected: "Connect to the gateway to access remote desktop.",
+    openNewTab: "Open in new tab",
+    hint: "Requires macOS Screen Sharing or a VNC server on port 5900.",
   },
   chat: {
     disconnected: "Disconnected from gateway.",
