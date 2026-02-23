@@ -31,6 +31,7 @@ export const zh_TW: TranslationMap = {
     cron: "定時任務",
     skills: "技能",
     nodes: "節點",
+    screen: "遠端桌面",
     chat: "聊天",
     config: "配置",
     debug: "調試",
@@ -46,6 +47,7 @@ export const zh_TW: TranslationMap = {
     cron: "安排喚醒和重複的代理運行。",
     skills: "管理技能可用性和 API 密鑰注入。",
     nodes: "配對設備、功能和命令公開。",
+    screen: "通過 VNC 螢幕共享進行遠端桌面存取。",
     chat: "用於快速干預的直接網關聊天會話。",
     config: "安全地編輯 ~/.bot/bot.json。",
     debug: "網關快照、事件和手動 RPC 調用。",
@@ -104,6 +106,11 @@ export const zh_TW: TranslationMap = {
       createAccount: "建立帳戶",
       signOut: "登出",
     },
+  },
+  screen: {
+    disconnected: "連接到網關以存取遠端桌面。",
+    openNewTab: "在新分頁中開啟",
+    hint: "需要 macOS 螢幕共享或連接埠 5900 上的 VNC 伺服器。",
   },
   chat: {
     disconnected: "已斷開與網關的連接。",
