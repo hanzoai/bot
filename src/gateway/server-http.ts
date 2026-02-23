@@ -487,7 +487,8 @@ export function createGatewayHttpServer(opts: {
     try {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
-      const requestPath = new URL(req.url ?? "/", "http://localhost").pathname;
+      const requestUrl = new URL(req.url ?? "/", "http://localhost");
+      const requestPath = requestUrl.pathname;
 
       // Health check endpoint — unauthenticated, used by K8s probes and load balancers.
       if (requestPath === "/health" || requestPath === "/healthz") {
@@ -496,8 +497,11 @@ export function createGatewayHttpServer(opts: {
       }
 
       // VNC viewer — serves self-contained noVNC HTML page (gateway-auth protected).
+      // Supports both Bearer header and ?token= query param (for iframe embedding).
       if (requestPath === "/vnc-viewer" && opts.vncEnabled) {
-        const token = getBearerToken(req);
+        const headerToken = getBearerToken(req);
+        const queryToken = requestUrl.searchParams.get("token") ?? undefined;
+        const token = headerToken ?? queryToken;
         const authResult = await authorizeGatewayConnect({
           auth: resolvedAuth,
           connectAuth: token ? { token, password: token } : null,
