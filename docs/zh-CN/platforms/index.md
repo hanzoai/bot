@@ -56,5 +56,5 @@ Windows 原生配套应用也在计划中；推荐通过 WSL2 使用 Gateway 网
 
 服务目标取决于操作系统：
 
-- macOS：LaunchAgent（`bot.molt.gateway` 或 `bot.molt.<profile>`；旧版 `com.bot.*`）
+- macOS：LaunchAgent（`ai.hanzo.bot.gateway` 或 `ai.hanzo.bot.<profile>`；旧版 `com.bot.*`）
 - Linux/WSL2：systemd 用户服务（`bot-gateway[-<profile>].service`）
