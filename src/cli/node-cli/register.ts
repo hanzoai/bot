@@ -22,10 +22,17 @@ async function startNodeHost(opts: Record<string, unknown>) {
   const existing = await loadNodeHostConfig();
   const host = (opts.host as string | undefined)?.trim() || existing?.gateway?.host || "127.0.0.1";
   const port = parsePortWithFallback(opts.port, existing?.gateway?.port ?? 18789);
+
+  // Only override TLS if --tls or --tls-fingerprint was explicitly passed.
+  // Otherwise let the saved config or remote URL scheme decide.
+  const explicitTls = opts.tls === true || Boolean(opts.tlsFingerprint);
+  const savedTls = existing?.gateway?.tls ?? false;
+  const useTls = explicitTls || savedTls || port === 443;
+
   await runNodeHost({
     gatewayHost: host,
     gatewayPort: port,
-    gatewayTls: Boolean(opts.tls) || Boolean(opts.tlsFingerprint),
+    gatewayTls: useTls,
     gatewayTlsFingerprint: opts.tlsFingerprint as string | undefined,
     nodeId: opts.nodeId as string | undefined,
     displayName: (opts.displayName || opts.name) as string | undefined,
