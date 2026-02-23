@@ -280,6 +280,10 @@ export function renderApp(state: AppViewState) {
                 onNostrProfileSave: () => state.handleNostrProfileSave(),
                 onNostrProfileImport: () => state.handleNostrProfileImport(),
                 onNostrProfileToggleAdvanced: () => state.handleNostrProfileToggleAdvanced(),
+                expandedChannel: state.expandedChannel,
+                onChannelSelect: (key) => {
+                  state.expandedChannel = key;
+                },
               })
             : nothing
         }
