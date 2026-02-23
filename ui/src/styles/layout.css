@@ -12,10 +12,11 @@
   height: 100vh;
   display: grid;
   grid-template-columns: var(--shell-nav-width) minmax(0, 1fr);
-  grid-template-rows: var(--shell-topbar-height) 1fr;
+  grid-template-rows: var(--shell-topbar-height) 1fr auto;
   grid-template-areas:
     "topbar topbar"
-    "nav content";
+    "nav content"
+    "footer footer";
   gap: 0;
   animation: dashboard-enter 0.4s var(--ease-out);
   transition: grid-template-columns var(--shell-focus-duration) var(--shell-focus-ease);
@@ -53,6 +54,11 @@
 }
 
 .shell--onboarding .topbar {
+  display: none;
+}
+
+.shell--chat-focus .app-footer,
+.shell--onboarding .app-footer {
   display: none;
 }
 
@@ -655,11 +661,12 @@
     --shell-pad: 12px;
     --shell-gap: 12px;
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto auto 1fr auto;
     grid-template-areas:
       "topbar"
       "nav"
-      "content";
+      "content"
+      "footer";
   }
 
   .nav {
