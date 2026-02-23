@@ -1,13 +1,13 @@
 {
   "name": "@hanzo/bot-line",
-  "version": "2026.2.10",
+  "version": "2026.2.23",
   "private": true,
-  "description": "HanzoBot LINE channel plugin",
+  "description": "Hanzo Bot LINE channel plugin",
   "type": "module",
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],

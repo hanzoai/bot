@@ -6,14 +6,14 @@ extension ProcessInfo {
         return String(cString: raw) == "1"
     }
 
-    /// Nix deployments may write defaults into a stable suite (`ai.hanzo.bot.mac`) even if the shipped
+    /// Nix deployments may write defaults into a stable suite (`ai.bot.mac`) even if the shipped
     /// app bundle identifier changes (and therefore `UserDefaults.standard` domain changes).
     static func resolveNixMode(
         environment: [String: String],
         standard: UserDefaults,
         stableSuite: UserDefaults?,
-        isAppBundle: Bool
-    ) -> Bool {
+        isAppBundle: Bool) -> Bool
+    {
         if environment["BOT_NIX_MODE"] == "1" { return true }
         if standard.bool(forKey: "bot.nixMode") { return true }
 

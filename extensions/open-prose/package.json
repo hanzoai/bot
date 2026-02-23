@@ -1,13 +1,13 @@
 {
   "name": "@hanzo/bot-open-prose",
-  "version": "2026.2.10",
+  "version": "2026.2.23",
   "private": true,
   "description": "OpenProse VM skill pack plugin (slash command + telemetry).",
   "type": "module",
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

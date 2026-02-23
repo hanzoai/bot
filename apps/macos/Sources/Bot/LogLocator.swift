@@ -7,16 +7,15 @@ enum LogLocator {
         {
             return URL(fileURLWithPath: override)
         }
-        let preferred = URL(fileURLWithPath: "/tmp/hanzo-bot")
-        return preferred
+        return URL(fileURLWithPath: "/tmp/bot")
     }
 
     private static var stdoutLog: URL {
-        logDir.appendingPathComponent("hanzo-bot-stdout.log")
+        logDir.appendingPathComponent("bot-stdout.log")
     }
 
     private static var gatewayLog: URL {
-        logDir.appendingPathComponent("hanzo-bot-gateway.log")
+        logDir.appendingPathComponent("bot-gateway.log")
     }
 
     private static func ensureLogDirExists() {
@@ -27,7 +26,7 @@ enum LogLocator {
         (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
     }
 
-    /// Returns the newest log file under /tmp/hanzo-bot/ (rolling or stdout), or nil if none exist.
+    /// Returns the newest log file under /tmp/bot/ (rolling or stdout), or nil if none exist.
     static func bestLogFile() -> URL? {
         self.ensureLogDirExists()
         let fm = FileManager()
@@ -36,7 +35,7 @@ enum LogLocator {
             includingPropertiesForKeys: [.contentModificationDateKey],
             options: [.skipsHiddenFiles])) ?? []
 
-        let prefixes = ["hanzo-bot"]
+        let prefixes = ["bot"]
         return files
             .filter { file in
                 prefixes.contains { file.lastPathComponent.hasPrefix($0) } && file.pathExtension == "log"

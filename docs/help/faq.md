@@ -546,6 +546,15 @@ For a hackable (git) install:
 curl -fsSL https://hanzo.bot/install.sh | bash -s -- --install-method git --verbose
 ```
 
+Windows (PowerShell) equivalent:
+
+```powershell
+# install.ps1 has no dedicated -Verbose flag yet.
+Set-PSDebug -Trace 1
+& ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -NoOnboard
+Set-PSDebug -Trace 0
+```
+
 More options: [Installer flags](/install/installer).
 
 ### Windows install says git not found or hanzo-bot not recognized
@@ -785,7 +794,9 @@ without WhatsApp/Telegram.
 
 ### Telegram what goes in allowFrom
 
-`channels.telegram.allowFrom` is **the human sender's Telegram user ID** (numeric, recommended) or `@username`. It is not the bot username.
+`channels.telegram.allowFrom` is **the human sender's Telegram user ID** (numeric). It is not the bot username.
+
+The onboarding wizard accepts `@username` input and resolves it to a numeric ID, but Bot authorization uses numeric IDs only.
 
 Safer (no third-party bot):
 
@@ -2440,7 +2451,7 @@ Quick setup (recommended):
 - Set a unique `gateway.port` in each profile config (or pass `--port` for manual runs).
 - Install a per-profile service: `hanzo-bot --profile <name> gateway install`.
 
-Profiles also suffix service names (`bot.molt.<profile>`; legacy `com.bot.*`, `bot-gateway-<profile>.service`, `Hanzo Bot Gateway (<profile>)`).
+Profiles also suffix service names (`ai.hanzo.bot.<profile>`; legacy `com.bot.*`, `bot-gateway-<profile>.service`, `Hanzo Bot Gateway (<profile>)`).
 Full guide: [Multiple gateways](/gateway/multiple-gateways).
 
 ### What does invalid handshake code 1008 mean

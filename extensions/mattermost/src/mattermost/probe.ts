@@ -1,9 +1,8 @@
+import type { BaseProbeResult } from "bot/plugin-sdk";
 import { normalizeMattermostBaseUrl, type MattermostUser } from "./client.js";
 
-export type MattermostProbe = {
-  ok: boolean;
+export type MattermostProbe = BaseProbeResult & {
   status?: number | null;
-  error?: string | null;
   elapsedMs?: number | null;
   bot?: MattermostUser;
 };

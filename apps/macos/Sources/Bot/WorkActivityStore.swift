@@ -1,7 +1,7 @@
-import BotKit
-import HanzoBotProtocol
 import Foundation
 import Observation
+import BotKit
+import BotProtocol
 import SwiftUI
 
 @MainActor
@@ -31,7 +31,9 @@ final class WorkActivityStore {
     private var mainSessionKeyStorage = "main"
     private let toolResultGrace: TimeInterval = 2.0
 
-    var mainSessionKey: String { self.mainSessionKeyStorage }
+    var mainSessionKey: String {
+        self.mainSessionKeyStorage
+    }
 
     func handleJob(sessionKey: String, state: String) {
         let isStart = state.lowercased() == "started" || state.lowercased() == "streaming"
@@ -56,7 +58,7 @@ final class WorkActivityStore {
         phase: String,
         name: String?,
         meta: String?,
-        args: [String: HanzoBotProtocol.AnyCodable]?)
+        args: [String: BotProtocol.AnyCodable]?)
     {
         let toolKind = Self.mapToolKind(name)
         let label = Self.buildLabel(name: name, meta: meta, args: args)
@@ -225,7 +227,7 @@ final class WorkActivityStore {
     private static func buildLabel(
         name: String?,
         meta: String?,
-        args: [String: HanzoBotProtocol.AnyCodable]?) -> String
+        args: [String: BotProtocol.AnyCodable]?) -> String
     {
         let wrappedArgs = self.wrapToolArgs(args)
         let display = ToolDisplayRegistry.resolve(name: name ?? "tool", args: wrappedArgs, meta: meta)
@@ -236,17 +238,17 @@ final class WorkActivityStore {
         return display.label
     }
 
-    private static func wrapToolArgs(_ args: [String: HanzoBotProtocol.AnyCodable]?) -> BotKit.AnyCodable? {
+    private static func wrapToolArgs(_ args: [String: BotProtocol.AnyCodable]?) -> BotKit.AnyCodable? {
         guard let args else { return nil }
         let converted: [String: Any] = args.mapValues { self.unwrapJSONValue($0.value) }
         return BotKit.AnyCodable(converted)
     }
 
     private static func unwrapJSONValue(_ value: Any) -> Any {
-        if let dict = value as? [String: HanzoBotProtocol.AnyCodable] {
+        if let dict = value as? [String: BotProtocol.AnyCodable] {
             return dict.mapValues { self.unwrapJSONValue($0.value) }
         }
-        if let array = value as? [HanzoBotProtocol.AnyCodable] {
+        if let array = value as? [BotProtocol.AnyCodable] {
             return array.map { self.unwrapJSONValue($0.value) }
         }
         if let dict = value as? [String: Any] {

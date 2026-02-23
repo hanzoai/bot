@@ -1,20 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { captureEnv } from "../test-utils/env.js";
 import { buildPairingReply } from "./pairing-messages.js";
 
 describe("buildPairingReply", () => {
-  let previousProfile: string | undefined;
+  let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
-    previousProfile = process.env.BOT_PROFILE;
+    envSnapshot = captureEnv(["BOT_PROFILE"]);
     process.env.BOT_PROFILE = "isolated";
   });
 
   afterEach(() => {
-    if (previousProfile === undefined) {
-      delete process.env.BOT_PROFILE;
-      return;
-    }
-    process.env.BOT_PROFILE = previousProfile;
+    envSnapshot.restore();
   });
 
   const cases = [
@@ -57,7 +54,7 @@ describe("buildPairingReply", () => {
       expect(text).toContain(`Pairing code: ${testCase.code}`);
       // CLI commands should respect BOT_PROFILE when set (most tests run with isolated profile)
       const commandRe = new RegExp(
-        `(?:bot|bot) --profile isolated pairing approve ${testCase.channel} ${testCase.code}`,
+        `hanzo-bot --profile isolated pairing approve ${testCase.channel} ${testCase.code}`,
       );
       expect(text).toMatch(commandRe);
     });

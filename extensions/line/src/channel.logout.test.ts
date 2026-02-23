@@ -12,27 +12,25 @@ type LineRuntimeMocks = {
 
 function createRuntime(): { runtime: PluginRuntime; mocks: LineRuntimeMocks } {
   const writeConfigFile = vi.fn(async () => {});
-  const resolveLineAccount = vi.fn(
-    ({ cfg, accountId }: { cfg: BotConfig; accountId?: string }) => {
-      const lineConfig = (cfg.channels?.line ?? {}) as {
-        tokenFile?: string;
-        secretFile?: string;
-        channelAccessToken?: string;
-        channelSecret?: string;
-        accounts?: Record<string, Record<string, unknown>>;
-      };
-      const entry =
-        accountId && accountId !== DEFAULT_ACCOUNT_ID
-          ? (lineConfig.accounts?.[accountId] ?? {})
-          : lineConfig;
-      const hasToken =
-        // oxlint-disable-next-line typescript/no-explicit-any
-        Boolean((entry as any).channelAccessToken) || Boolean((entry as any).tokenFile);
+  const resolveLineAccount = vi.fn(({ cfg, accountId }: { cfg: BotConfig; accountId?: string }) => {
+    const lineConfig = (cfg.channels?.line ?? {}) as {
+      tokenFile?: string;
+      secretFile?: string;
+      channelAccessToken?: string;
+      channelSecret?: string;
+      accounts?: Record<string, Record<string, unknown>>;
+    };
+    const entry =
+      accountId && accountId !== DEFAULT_ACCOUNT_ID
+        ? (lineConfig.accounts?.[accountId] ?? {})
+        : lineConfig;
+    const hasToken =
       // oxlint-disable-next-line typescript/no-explicit-any
-      const hasSecret = Boolean((entry as any).channelSecret) || Boolean((entry as any).secretFile);
-      return { tokenSource: hasToken && hasSecret ? "config" : "none" };
-    },
-  );
+      Boolean((entry as any).channelAccessToken) || Boolean((entry as any).tokenFile);
+    // oxlint-disable-next-line typescript/no-explicit-any
+    const hasSecret = Boolean((entry as any).channelSecret) || Boolean((entry as any).secretFile);
+    return { tokenSource: hasToken && hasSecret ? "config" : "none" };
+  });
 
   const runtime = {
     config: { writeConfigFile },

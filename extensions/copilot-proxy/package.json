@@ -1,13 +1,13 @@
 {
   "name": "@hanzo/bot-copilot-proxy",
-  "version": "2026.2.10",
+  "version": "2026.2.23",
   "private": true,
-  "description": "HanzoBot Copilot Proxy provider plugin",
+  "description": "Hanzo Bot Copilot Proxy provider plugin",
   "type": "module",
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

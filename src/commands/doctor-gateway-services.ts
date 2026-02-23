@@ -118,6 +118,7 @@ export async function maybeRepairGatewayServiceConfig(
   const audit = await auditGatewayServiceConfig({
     env: process.env,
     command,
+    expectedGatewayToken: cfg.gateway?.auth?.token,
   });
   const needsNodeRuntime = needsNodeRuntimeMigration(audit.issues);
   const systemNodeInfo = needsNodeRuntime
@@ -229,7 +230,7 @@ export async function maybeScanExtraGatewayServices(
   const legacyServices = extraServices.filter((svc) => svc.legacy === true);
   if (legacyServices.length > 0) {
     const shouldRemove = await prompter.confirmSkipInNonInteractive({
-      message: "Remove legacy gateway services (hanzo-bot/moltbot) now?",
+      message: "Remove legacy gateway services now?",
       initialValue: true,
     });
     if (shouldRemove) {

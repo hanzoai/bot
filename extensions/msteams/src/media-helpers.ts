@@ -2,13 +2,13 @@
  * MIME type detection and filename extraction for MSTeams media attachments.
  */
 
-import path from "node:path";
 import {
   detectMime,
   extensionForMime,
   extractOriginalFilename,
   getFileExtension,
 } from "bot/plugin-sdk";
+import path from "node:path";
 
 /**
  * Detect MIME type from URL extension or data URL.
@@ -65,7 +65,21 @@ export async function extractFilename(url: string): Promise<string> {
  * Check if a URL refers to a local file path.
  */
 export function isLocalPath(url: string): boolean {
-  return url.startsWith("file://") || url.startsWith("/") || url.startsWith("~");
+  if (url.startsWith("file://") || url.startsWith("/") || url.startsWith("~")) {
+    return true;
+  }
+
+  // Windows drive-letter absolute path (e.g. C:\foo\bar.txt or C:/foo/bar.txt)
+  if (/^[a-zA-Z]:[\\/]/.test(url)) {
+    return true;
+  }
+
+  // Windows UNC path (e.g. \\server\share\file.txt)
+  if (url.startsWith("\\\\")) {
+    return true;
+  }
+
+  return false;
 }
 
 /**

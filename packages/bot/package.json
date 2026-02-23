@@ -1,0 +1,16 @@
+{
+  "name": "bot",
+  "version": "2026.2.12",
+  "description": "Compatibility shim that forwards to @hanzo/bot",
+  "bin": {
+    "bot": "./bin/bot.js"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./cli-entry": "./bin/bot.js"
+  },
+  "dependencies": {
+    "@hanzo/bot": "workspace:*"
+  }
+}

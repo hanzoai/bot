@@ -1,13 +1,13 @@
 {
   "name": "@hanzo/bot-mattermost",
-  "version": "2026.2.10",
+  "version": "2026.2.23",
   "private": true,
-  "description": "HanzoBot Mattermost channel plugin",
+  "description": "Hanzo Bot Mattermost channel plugin",
   "type": "module",
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],

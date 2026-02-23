@@ -1,5 +1,5 @@
-import BotKit
 import Foundation
+import BotKit
 
 struct WideAreaGatewayBeacon: Sendable, Equatable {
     var instanceName: String
@@ -50,7 +50,7 @@ enum WideAreaGatewayDiscovery {
             return []
         }
 
-        guard let domain = HanzoBotBonjour.wideAreaGatewayServiceDomain else { return [] }
+        guard let domain = BotBonjour.wideAreaGatewayServiceDomain else { return [] }
         let domainTrimmed = domain.trimmingCharacters(in: CharacterSet(charactersIn: "."))
         let probeName = "_bot-gw._tcp.\(domainTrimmed)"
         guard let ptrLines = context.dig(
@@ -117,13 +117,12 @@ enum WideAreaGatewayDiscovery {
         }
 
         var seen = Set<String>()
-        let ordered = ips.filter { value in
+        return ips.filter { value in
             guard self.isTailnetIPv4(value) else { return false }
             if seen.contains(value) { return false }
             seen.insert(value)
             return true
         }
-        return ordered
     }
 
     private static func readTailscaleStatus() -> String? {
@@ -154,7 +153,7 @@ enum WideAreaGatewayDiscovery {
         remaining: () -> TimeInterval,
         dig: @escaping @Sendable (_ args: [String], _ timeout: TimeInterval) -> String?) -> String?
     {
-        guard let domain = HanzoBotBonjour.wideAreaGatewayServiceDomain else { return nil }
+        guard let domain = BotBonjour.wideAreaGatewayServiceDomain else { return nil }
         let domainTrimmed = domain.trimmingCharacters(in: CharacterSet(charactersIn: "."))
         let probeName = "_bot-gw._tcp.\(domainTrimmed)"
 
@@ -370,5 +369,7 @@ private struct TailscaleStatus: Decodable {
 }
 
 extension Collection {
-    fileprivate var nonEmpty: Self? { isEmpty ? nil : self }
+    fileprivate var nonEmpty: Self? {
+        isEmpty ? nil : self
+    }
 }

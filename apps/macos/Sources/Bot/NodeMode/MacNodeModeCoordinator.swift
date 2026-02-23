@@ -1,12 +1,12 @@
-import BotKit
 import Foundation
+import BotKit
 import OSLog
 
 @MainActor
 final class MacNodeModeCoordinator {
     static let shared = MacNodeModeCoordinator()
 
-    private let logger = Logger(subsystem: "ai.hanzo.bot", category: "mac-node")
+    private let logger = Logger(subsystem: "ai.bot", category: "mac-node")
     private var task: Task<Void, Never>?
     private let runtime = MacNodeRuntime()
     private let session = GatewayNodeSession()
@@ -60,7 +60,7 @@ final class MacNodeModeCoordinator {
                     caps: caps,
                     commands: commands,
                     permissions: permissions,
-                    clientId: "hanzo-bot-macos",
+                    clientId: "bot-macos",
                     clientMode: "node",
                     clientDisplayName: InstanceIdentity.displayName)
                 let sessionBox = self.buildSessionBox(url: config.url)
@@ -91,7 +91,7 @@ final class MacNodeModeCoordinator {
                             return BridgeInvokeResponse(
                                 id: req.id,
                                 ok: false,
-                                error: HanzoBotNodeError(code: .unavailable, message: "UNAVAILABLE: node not ready"))
+                                error: BotNodeError(code: .unavailable, message: "UNAVAILABLE: node not ready"))
                         }
                         return await self.runtime.handleInvoke(req)
                     })
@@ -107,13 +107,13 @@ final class MacNodeModeCoordinator {
     }
 
     private func currentCaps() -> [String] {
-        var caps: [String] = [HanzoBotCapability.canvas.rawValue, HanzoBotCapability.screen.rawValue]
+        var caps: [String] = [BotCapability.canvas.rawValue, BotCapability.screen.rawValue]
         if UserDefaults.standard.object(forKey: cameraEnabledKey) as? Bool ?? false {
-            caps.append(HanzoBotCapability.camera.rawValue)
+            caps.append(BotCapability.camera.rawValue)
         }
         let rawLocationMode = UserDefaults.standard.string(forKey: locationModeKey) ?? "off"
-        if HanzoBotLocationMode(rawValue: rawLocationMode) != .off {
-            caps.append(HanzoBotCapability.location.rawValue)
+        if BotLocationMode(rawValue: rawLocationMode) != .off {
+            caps.append(BotCapability.location.rawValue)
         }
         return caps
     }
@@ -125,30 +125,30 @@ final class MacNodeModeCoordinator {
 
     private func currentCommands(caps: [String]) -> [String] {
         var commands: [String] = [
-            HanzoBotCanvasCommand.present.rawValue,
-            HanzoBotCanvasCommand.hide.rawValue,
-            HanzoBotCanvasCommand.navigate.rawValue,
-            HanzoBotCanvasCommand.evalJS.rawValue,
-            HanzoBotCanvasCommand.snapshot.rawValue,
-            HanzoBotCanvasA2UICommand.push.rawValue,
-            HanzoBotCanvasA2UICommand.pushJSONL.rawValue,
-            HanzoBotCanvasA2UICommand.reset.rawValue,
+            BotCanvasCommand.present.rawValue,
+            BotCanvasCommand.hide.rawValue,
+            BotCanvasCommand.navigate.rawValue,
+            BotCanvasCommand.evalJS.rawValue,
+            BotCanvasCommand.snapshot.rawValue,
+            BotCanvasA2UICommand.push.rawValue,
+            BotCanvasA2UICommand.pushJSONL.rawValue,
+            BotCanvasA2UICommand.reset.rawValue,
             MacNodeScreenCommand.record.rawValue,
-            HanzoBotSystemCommand.notify.rawValue,
-            HanzoBotSystemCommand.which.rawValue,
-            HanzoBotSystemCommand.run.rawValue,
-            HanzoBotSystemCommand.execApprovalsGet.rawValue,
-            HanzoBotSystemCommand.execApprovalsSet.rawValue,
+            BotSystemCommand.notify.rawValue,
+            BotSystemCommand.which.rawValue,
+            BotSystemCommand.run.rawValue,
+            BotSystemCommand.execApprovalsGet.rawValue,
+            BotSystemCommand.execApprovalsSet.rawValue,
         ]
 
         let capsSet = Set(caps)
-        if capsSet.contains(HanzoBotCapability.camera.rawValue) {
-            commands.append(HanzoBotCameraCommand.list.rawValue)
-            commands.append(HanzoBotCameraCommand.snap.rawValue)
-            commands.append(HanzoBotCameraCommand.clip.rawValue)
+        if capsSet.contains(BotCapability.camera.rawValue) {
+            commands.append(BotCameraCommand.list.rawValue)
+            commands.append(BotCameraCommand.snap.rawValue)
+            commands.append(BotCameraCommand.clip.rawValue)
         }
-        if capsSet.contains(HanzoBotCapability.location.rawValue) {
-            commands.append(HanzoBotLocationCommand.get.rawValue)
+        if capsSet.contains(BotCapability.location.rawValue) {
+            commands.append(BotLocationCommand.get.rawValue)
         }
 
         return commands

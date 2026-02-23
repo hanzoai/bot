@@ -2,14 +2,14 @@
 summary: "Integrated browser control service + action commands"
 read_when:
   - Adding agent-controlled browser automation
-  - Debugging why hanzo-bot is interfering with your own Chrome
+  - Debugging why bot is interfering with your own Chrome
   - Implementing browser settings + lifecycle in the macOS app
-title: "Browser (Hanzo Bot-managed)"
+title: "Browser (Bot-managed)"
 ---
 
 # Browser (bot-managed)
 
-Hanzo Bot can run a **dedicated Chrome/Brave/Edge/Chromium profile** that the agent controls.
+Bot can run a **dedicated Chrome/Brave/Edge/Chromium profile** that the agent controls.
 It is isolated from your personal browser and is managed through a small local
 control service inside the Gateway (loopback only).
 
@@ -34,10 +34,10 @@ agent automation and verification.
 ## Quick start
 
 ```bash
-hanzo-bot browser --browser-profile hanzo-bot status
-hanzo-bot browser --browser-profile hanzo-bot start
-hanzo-bot browser --browser-profile hanzo-bot open https://example.com
-hanzo-bot browser --browser-profile hanzo-bot snapshot
+bot browser --browser-profile bot status
+bot browser --browser-profile bot start
+bot browser --browser-profile bot open https://example.com
+bot browser --browser-profile bot snapshot
 ```
 
 If you get “Browser disabled”, enable it in config (see below) and restart the
@@ -46,14 +46,14 @@ Gateway.
 ## Profiles: `bot` vs `chrome`
 
 - `bot`: managed, isolated browser (no extension required).
-- `chrome`: extension relay to your **system browser** (requires the Hanzo Bot
+- `chrome`: extension relay to your **system browser** (requires the Bot
   extension to be attached to a tab).
 
 Set `browser.defaultProfile: "bot"` if you want managed mode by default.
 
 ## Configuration
 
-Browser settings live in `~/.hanzo/bot/bot.json`.
+Browser settings live in `~/.bot/bot.json`.
 
 ```json5
 {
@@ -95,13 +95,13 @@ Notes:
 ## Use Brave (or another Chromium-based browser)
 
 If your **system default** browser is Chromium-based (Chrome/Brave/Edge/etc),
-Hanzo Bot uses it automatically. Set `browser.executablePath` to override
+Bot uses it automatically. Set `browser.executablePath` to override
 auto-detection:
 
 CLI example:
 
 ```bash
-hanzo-bot config set browser.executablePath "/usr/bin/google-chrome"
+bot config set browser.executablePath "/usr/bin/google-chrome"
 ```
 
 ```json5
@@ -132,20 +132,20 @@ hanzo-bot config set browser.executablePath "/usr/bin/google-chrome"
 - **Local control (default):** the Gateway starts the loopback control service and can launch a local browser.
 - **Remote control (node host):** run a node host on the machine that has the browser; the Gateway proxies browser actions to it.
 - **Remote CDP:** set `browser.profiles.<name>.cdpUrl` (or `browser.cdpUrl`) to
-  attach to a remote Chromium-based browser. In this case, Hanzo Bot will not launch a local browser.
+  attach to a remote Chromium-based browser. In this case, Bot will not launch a local browser.
 
 Remote CDP URLs can include auth:
 
 - Query tokens (e.g., `https://provider.example?token=<token>`)
 - HTTP Basic auth (e.g., `https://user:pass@provider.example`)
 
-Hanzo Bot preserves the auth when calling `/json/*` endpoints and when connecting
+Bot preserves the auth when calling `/json/*` endpoints and when connecting
 to the CDP WebSocket. Prefer environment variables or secrets managers for
 tokens instead of committing them to config files.
 
 ## Node browser proxy (zero-config default)
 
-If you run a **node host** on the machine that has your browser, Hanzo Bot can
+If you run a **node host** on the machine that has your browser, Bot can
 auto-route browser tool calls to that node without any extra browser config.
 This is the default path for remote gateways.
 
@@ -160,7 +160,7 @@ Notes:
 ## Browserless (hosted remote CDP)
 
 [Browserless](https://browserless.io) is a hosted Chromium service that exposes
-CDP endpoints over HTTPS. You can point a Hanzo Bot browser profile at a
+CDP endpoints over HTTPS. You can point a Bot browser profile at a
 Browserless region endpoint and authenticate with your API key.
 
 Example:
@@ -192,6 +192,7 @@ Notes:
 Key ideas:
 
 - Browser control is loopback-only; access flows through the Gateway’s auth or node pairing.
+- If browser control is enabled and no auth is configured, Bot auto-generates `gateway.auth.token` on startup and persists it to config.
 - Keep the Gateway and any node hosts on a private network (Tailscale); avoid public exposure.
 - Treat remote CDP URLs/tokens as secrets; prefer env vars or a secrets manager.
 
@@ -202,7 +203,7 @@ Remote CDP tips:
 
 ## Profiles (multi-browser)
 
-Hanzo Bot supports multiple named profiles (routing configs). Profiles can be:
+Bot supports multiple named profiles (routing configs). Profiles can be:
 
 - **bot-managed**: a dedicated Chromium-based browser instance with its own user data directory + CDP port
 - **remote**: an explicit CDP URL (Chromium-based browser running elsewhere)
@@ -219,7 +220,7 @@ All control endpoints accept `?profile=<name>`; the CLI uses `--browser-profile`
 
 ## Chrome extension relay (use your existing Chrome)
 
-Hanzo Bot can also drive **your existing Chrome tabs** (no separate “bot” Chrome instance) via a local CDP relay + a Chrome extension.
+Bot can also drive **your existing Chrome tabs** (no separate “bot” Chrome instance) via a local CDP relay + a Chrome extension.
 
 Full guide: [Chrome extension](/tools/chrome-extension)
 
@@ -227,7 +228,7 @@ Flow:
 
 - The Gateway runs locally (same machine) or a node host runs on the browser machine.
 - A local **relay server** listens at a loopback `cdpUrl` (default: `http://127.0.0.1:18792`).
-- You click the **Hanzo Bot Browser Relay** extension icon on a tab to attach (it does not auto-attach).
+- You click the **Bot Browser Relay** extension icon on a tab to attach (it does not auto-attach).
 - The agent controls that tab via the normal `browser` tool, by selecting the right profile.
 
 If the Gateway runs elsewhere, run a node host on the browser machine so the Gateway can proxy browser actions.
@@ -245,22 +246,22 @@ Chrome extension relay takeover requires host browser control, so either:
 1. Load the extension (dev/unpacked):
 
 ```bash
-hanzo-bot browser extension install
+bot browser extension install
 ```
 
 - Chrome → `chrome://extensions` → enable “Developer mode”
-- “Load unpacked” → select the directory printed by `hanzo-bot browser extension path`
+- “Load unpacked” → select the directory printed by `bot browser extension path`
 - Pin the extension, then click it on the tab you want to control (badge shows `ON`).
 
 2. Use it:
 
-- CLI: `hanzo-bot browser --browser-profile chrome tabs`
+- CLI: `bot browser --browser-profile chrome tabs`
 - Agent tool: `browser` with `profile="chrome"`
 
 Optional: if you want a different name or relay port, create your own profile:
 
 ```bash
-hanzo-bot browser create-profile \
+bot browser create-profile \
   --name my-chrome \
   --driver extension \
   --cdp-url http://127.0.0.1:18792 \
@@ -280,7 +281,7 @@ Notes:
 
 ## Browser selection
 
-When launching locally, Hanzo Bot picks the first available:
+When launching locally, Bot picks the first available:
 
 1. Chrome
 2. Brave
@@ -315,6 +316,11 @@ For local integrations only, the Gateway exposes a small loopback HTTP API:
 
 All endpoints accept `?profile=<name>`.
 
+If gateway auth is configured, browser HTTP routes require auth too:
+
+- `Authorization: Bearer <gateway token>`
+- `x-bot-password: <gateway password>` or HTTP Basic auth with that password
+
 ### Playwright requirement
 
 Some features (navigate/act/AI snapshot/role snapshot, element screenshots, PDF) require
@@ -324,7 +330,7 @@ For the Chrome extension relay driver, ARIA snapshots and screenshots require Pl
 
 If you see `Playwright is not available in this gateway build`, install the full
 Playwright package (not `playwright-core`) and restart the gateway, or reinstall
-Hanzo Bot with browser support.
+Bot with browser support.
 
 #### Docker Playwright install
 
@@ -360,84 +366,89 @@ All commands also accept `--json` for machine-readable output (stable payloads).
 
 Basics:
 
-- `hanzo-bot browser status`
-- `hanzo-bot browser start`
-- `hanzo-bot browser stop`
-- `hanzo-bot browser tabs`
-- `hanzo-bot browser tab`
-- `hanzo-bot browser tab new`
-- `hanzo-bot browser tab select 2`
-- `hanzo-bot browser tab close 2`
-- `hanzo-bot browser open https://example.com`
-- `hanzo-bot browser focus abcd1234`
-- `hanzo-bot browser close abcd1234`
+- `bot browser status`
+- `bot browser start`
+- `bot browser stop`
+- `bot browser tabs`
+- `bot browser tab`
+- `bot browser tab new`
+- `bot browser tab select 2`
+- `bot browser tab close 2`
+- `bot browser open https://example.com`
+- `bot browser focus abcd1234`
+- `bot browser close abcd1234`
 
 Inspection:
 
-- `hanzo-bot browser screenshot`
-- `hanzo-bot browser screenshot --full-page`
-- `hanzo-bot browser screenshot --ref 12`
-- `hanzo-bot browser screenshot --ref e12`
-- `hanzo-bot browser snapshot`
-- `hanzo-bot browser snapshot --format aria --limit 200`
-- `hanzo-bot browser snapshot --interactive --compact --depth 6`
-- `hanzo-bot browser snapshot --efficient`
-- `hanzo-bot browser snapshot --labels`
-- `hanzo-bot browser snapshot --selector "#main" --interactive`
-- `hanzo-bot browser snapshot --frame "iframe#main" --interactive`
-- `hanzo-bot browser console --level error`
-- `hanzo-bot browser errors --clear`
-- `hanzo-bot browser requests --filter api --clear`
-- `hanzo-bot browser pdf`
-- `hanzo-bot browser responsebody "**/api" --max-chars 5000`
+- `bot browser screenshot`
+- `bot browser screenshot --full-page`
+- `bot browser screenshot --ref 12`
+- `bot browser screenshot --ref e12`
+- `bot browser snapshot`
+- `bot browser snapshot --format aria --limit 200`
+- `bot browser snapshot --interactive --compact --depth 6`
+- `bot browser snapshot --efficient`
+- `bot browser snapshot --labels`
+- `bot browser snapshot --selector "#main" --interactive`
+- `bot browser snapshot --frame "iframe#main" --interactive`
+- `bot browser console --level error`
+- `bot browser errors --clear`
+- `bot browser requests --filter api --clear`
+- `bot browser pdf`
+- `bot browser responsebody "**/api" --max-chars 5000`
 
 Actions:
 
-- `hanzo-bot browser navigate https://example.com`
-- `hanzo-bot browser resize 1280 720`
-- `hanzo-bot browser click 12 --double`
-- `hanzo-bot browser click e12 --double`
-- `hanzo-bot browser type 23 "hello" --submit`
-- `hanzo-bot browser press Enter`
-- `hanzo-bot browser hover 44`
-- `hanzo-bot browser scrollintoview e12`
-- `hanzo-bot browser drag 10 11`
-- `hanzo-bot browser select 9 OptionA OptionB`
-- `hanzo-bot browser download e12 /tmp/report.pdf`
-- `hanzo-bot browser waitfordownload /tmp/report.pdf`
-- `hanzo-bot browser upload /tmp/file.pdf`
-- `hanzo-bot browser fill --fields '[{"ref":"1","type":"text","value":"Ada"}]'`
-- `hanzo-bot browser dialog --accept`
-- `hanzo-bot browser wait --text "Done"`
-- `hanzo-bot browser wait "#main" --url "**/dash" --load networkidle --fn "window.ready===true"`
-- `hanzo-bot browser evaluate --fn '(el) => el.textContent' --ref 7`
-- `hanzo-bot browser highlight e12`
-- `hanzo-bot browser trace start`
-- `hanzo-bot browser trace stop`
+- `bot browser navigate https://example.com`
+- `bot browser resize 1280 720`
+- `bot browser click 12 --double`
+- `bot browser click e12 --double`
+- `bot browser type 23 "hello" --submit`
+- `bot browser press Enter`
+- `bot browser hover 44`
+- `bot browser scrollintoview e12`
+- `bot browser drag 10 11`
+- `bot browser select 9 OptionA OptionB`
+- `bot browser download e12 report.pdf`
+- `bot browser waitfordownload report.pdf`
+- `bot browser upload /tmp/bot/uploads/file.pdf`
+- `bot browser fill --fields '[{"ref":"1","type":"text","value":"Ada"}]'`
+- `bot browser dialog --accept`
+- `bot browser wait --text "Done"`
+- `bot browser wait "#main" --url "**/dash" --load networkidle --fn "window.ready===true"`
+- `bot browser evaluate --fn '(el) => el.textContent' --ref 7`
+- `bot browser highlight e12`
+- `bot browser trace start`
+- `bot browser trace stop`
 
 State:
 
-- `hanzo-bot browser cookies`
-- `hanzo-bot browser cookies set session abc123 --url "https://example.com"`
-- `hanzo-bot browser cookies clear`
-- `hanzo-bot browser storage local get`
-- `hanzo-bot browser storage local set theme dark`
-- `hanzo-bot browser storage session clear`
-- `hanzo-bot browser set offline on`
-- `hanzo-bot browser set headers --json '{"X-Debug":"1"}'`
-- `hanzo-bot browser set credentials user pass`
-- `hanzo-bot browser set credentials --clear`
-- `hanzo-bot browser set geo 37.7749 -122.4194 --origin "https://example.com"`
-- `hanzo-bot browser set geo --clear`
-- `hanzo-bot browser set media dark`
-- `hanzo-bot browser set timezone America/New_York`
-- `hanzo-bot browser set locale en-US`
-- `hanzo-bot browser set device "iPhone 14"`
+- `bot browser cookies`
+- `bot browser cookies set session abc123 --url "https://example.com"`
+- `bot browser cookies clear`
+- `bot browser storage local get`
+- `bot browser storage local set theme dark`
+- `bot browser storage session clear`
+- `bot browser set offline on`
+- `bot browser set headers --json '{"X-Debug":"1"}'`
+- `bot browser set credentials user pass`
+- `bot browser set credentials --clear`
+- `bot browser set geo 37.7749 -122.4194 --origin "https://example.com"`
+- `bot browser set geo --clear`
+- `bot browser set media dark`
+- `bot browser set timezone America/New_York`
+- `bot browser set locale en-US`
+- `bot browser set device "iPhone 14"`
 
 Notes:
 
 - `upload` and `dialog` are **arming** calls; run them before the click/press
   that triggers the chooser/dialog.
+- Download and trace output paths are constrained to Bot temp roots:
+  - traces: `/tmp/bot` (fallback: `${os.tmpdir()}/bot`)
+  - downloads: `/tmp/bot/downloads` (fallback: `${os.tmpdir()}/bot/downloads`)
+- Upload paths are constrained to an Bot temp uploads root:
+  - uploads: `/tmp/bot/uploads` (fallback: `${os.tmpdir()}/bot/uploads`)
 - `upload` can also set file inputs directly via `--input-ref` or `--element`.
 - `snapshot`:
   - `--format ai` (default when Playwright is installed): returns an AI snapshot with numeric refs (`aria-ref="<n>"`).
@@ -453,16 +464,16 @@ Notes:
 
 ## Snapshots and refs
 
-Hanzo Bot supports two “snapshot” styles:
+Bot supports two “snapshot” styles:
 
-- **AI snapshot (numeric refs)**: `hanzo-bot browser snapshot` (default; `--format ai`)
+- **AI snapshot (numeric refs)**: `bot browser snapshot` (default; `--format ai`)
   - Output: a text snapshot that includes numeric refs.
-  - Actions: `hanzo-bot browser click 12`, `hanzo-bot browser type 23 "hello"`.
+  - Actions: `bot browser click 12`, `bot browser type 23 "hello"`.
   - Internally, the ref is resolved via Playwright’s `aria-ref`.
 
-- **Role snapshot (role refs like `e12`)**: `hanzo-bot browser snapshot --interactive` (or `--compact`, `--depth`, `--selector`, `--frame`)
+- **Role snapshot (role refs like `e12`)**: `bot browser snapshot --interactive` (or `--compact`, `--depth`, `--selector`, `--frame`)
   - Output: a role-based list/tree with `[ref=e12]` (and optional `[nth=1]`).
-  - Actions: `hanzo-bot browser click e12`, `hanzo-bot browser highlight e12`.
+  - Actions: `bot browser click e12`, `bot browser highlight e12`.
   - Internally, the ref is resolved via `getByRole(...)` (plus `nth()` for duplicates).
   - Add `--labels` to include a viewport screenshot with overlayed `e12` labels.
 
@@ -476,18 +487,18 @@ Ref behavior:
 You can wait on more than just time/text:
 
 - Wait for URL (globs supported by Playwright):
-  - `hanzo-bot browser wait --url "**/dash"`
+  - `bot browser wait --url "**/dash"`
 - Wait for load state:
-  - `hanzo-bot browser wait --load networkidle`
+  - `bot browser wait --load networkidle`
 - Wait for a JS predicate:
-  - `hanzo-bot browser wait --fn "window.ready===true"`
+  - `bot browser wait --fn "window.ready===true"`
 - Wait for a selector to become visible:
-  - `hanzo-bot browser wait "#main"`
+  - `bot browser wait "#main"`
 
 These can be combined:
 
 ```bash
-hanzo-bot browser wait "#main" \
+bot browser wait "#main" \
   --url "**/dash" \
   --load networkidle \
   --fn "window.ready===true" \
@@ -498,16 +509,16 @@ hanzo-bot browser wait "#main" \
 
 When an action fails (e.g. “not visible”, “strict mode violation”, “covered”):
 
-1. `hanzo-bot browser snapshot --interactive`
+1. `bot browser snapshot --interactive`
 2. Use `click <ref>` / `type <ref>` (prefer role refs in interactive mode)
-3. If it still fails: `hanzo-bot browser highlight <ref>` to see what Playwright is targeting
+3. If it still fails: `bot browser highlight <ref>` to see what Playwright is targeting
 4. If the page behaves oddly:
-   - `hanzo-bot browser errors --clear`
-   - `hanzo-bot browser requests --filter api --clear`
+   - `bot browser errors --clear`
+   - `bot browser requests --filter api --clear`
 5. For deep debugging: record a trace:
-   - `hanzo-bot browser trace start`
+   - `bot browser trace start`
    - reproduce the issue
-   - `hanzo-bot browser trace stop` (prints `TRACE:<path>`)
+   - `bot browser trace stop` (prints `TRACE:<path>`)
 
 ## JSON output
 
@@ -516,10 +527,10 @@ When an action fails (e.g. “not visible”, “strict mode violation”, “co
 Examples:
 
 ```bash
-hanzo-bot browser status --json
-hanzo-bot browser snapshot --interactive --json
-hanzo-bot browser requests --filter api --json
-hanzo-bot browser cookies --json
+bot browser status --json
+bot browser snapshot --interactive --json
+bot browser requests --filter api --json
+bot browser cookies --json
 ```
 
 Role snapshots in JSON include `refs` plus a small `stats` block (lines/chars/refs/interactive) so tools can reason about payload size and density.
@@ -542,8 +553,8 @@ These are useful for “make the site behave like X” workflows:
 
 ## Security & privacy
 
-- The hanzo-bot browser profile may contain logged-in sessions; treat it as sensitive.
-- `browser act kind=evaluate` / `hanzo-bot browser evaluate` and `wait --fn`
+- The bot browser profile may contain logged-in sessions; treat it as sensitive.
+- `browser act kind=evaluate` / `bot browser evaluate` and `wait --fn`
   execute arbitrary JavaScript in the page context. Prompt injection can steer
   this. Disable it with `browser.evaluateEnabled=false` if you do not need it.
 - For logins and anti-bot notes (X/Twitter, etc.), see [Browser login + X/Twitter posting](/tools/browser-login).

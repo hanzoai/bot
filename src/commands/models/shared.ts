@@ -7,11 +7,7 @@ import {
   resolveModelRefFromString,
 } from "../../agents/model-selection.js";
 import { formatCliCommand } from "../../cli/command-format.js";
-import {
-  type BotConfig,
-  readConfigFileSnapshot,
-  writeConfigFile,
-} from "../../config/config.js";
+import { type BotConfig, readConfigFileSnapshot, writeConfigFile } from "../../config/config.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 
 export const ensureFlagCompatibility = (opts: { json?: boolean; plain?: boolean }) => {
@@ -43,9 +39,23 @@ export const formatMs = (value?: number | null) => {
   return `${Math.round(value / 100) / 10}s`;
 };
 
-export async function updateConfig(
-  mutator: (cfg: BotConfig) => BotConfig,
-): Promise<BotConfig> {
+export const isLocalBaseUrl = (baseUrl: string) => {
+  try {
+    const url = new URL(baseUrl);
+    const host = url.hostname.toLowerCase();
+    return (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "0.0.0.0" ||
+      host === "::1" ||
+      host.endsWith(".local")
+    );
+  } catch {
+    return false;
+  }
+};
+
+export async function updateConfig(mutator: (cfg: BotConfig) => BotConfig): Promise<BotConfig> {
   const snapshot = await readConfigFileSnapshot();
   if (!snapshot.valid) {
     const issues = snapshot.issues.map((issue) => `- ${issue.path}: ${issue.message}`).join("\n");
@@ -73,6 +83,26 @@ export function resolveModelTarget(params: { raw: string; cfg: BotConfig }): {
     throw new Error(`Invalid model reference: ${params.raw}`);
   }
   return resolved.ref;
+}
+
+export function resolveModelKeysFromEntries(params: {
+  cfg: BotConfig;
+  entries: readonly string[];
+}): string[] {
+  const aliasIndex = buildModelAliasIndex({
+    cfg: params.cfg,
+    defaultProvider: DEFAULT_PROVIDER,
+  });
+  return params.entries
+    .map((entry) =>
+      resolveModelRefFromString({
+        raw: entry,
+        defaultProvider: DEFAULT_PROVIDER,
+        aliasIndex,
+      }),
+    )
+    .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+    .map((entry) => modelKey(entry.ref.provider, entry.ref.model));
 }
 
 export function buildAllowlistSet(cfg: BotConfig): Set<string> {
@@ -111,10 +141,57 @@ export function resolveKnownAgentId(params: {
   const knownAgents = listAgentIds(params.cfg);
   if (!knownAgents.includes(agentId)) {
     throw new Error(
-      `Unknown agent id "${raw}". Use "${formatCliCommand("hanzo-bot agents list")}" to see configured agents.`,
+      `Unknown agent id "${raw}". Use "${formatCliCommand("bot agents list")}" to see configured agents.`,
     );
   }
   return agentId;
+}
+
+export type PrimaryFallbackConfig = { primary?: string; fallbacks?: string[] };
+
+export function mergePrimaryFallbackConfig(
+  existing: PrimaryFallbackConfig | undefined,
+  patch: { primary?: string; fallbacks?: string[] },
+): PrimaryFallbackConfig {
+  const next: PrimaryFallbackConfig = { ...existing };
+  if (patch.primary !== undefined) {
+    next.primary = patch.primary;
+  }
+  if (patch.fallbacks !== undefined) {
+    next.fallbacks = patch.fallbacks;
+  }
+  return next;
+}
+
+export function applyDefaultModelPrimaryUpdate(params: {
+  cfg: BotConfig;
+  modelRaw: string;
+  field: "model" | "imageModel";
+}): BotConfig {
+  const resolved = resolveModelTarget({ raw: params.modelRaw, cfg: params.cfg });
+  const key = `${resolved.provider}/${resolved.model}`;
+
+  const nextModels = { ...params.cfg.agents?.defaults?.models };
+  if (!nextModels[key]) {
+    nextModels[key] = {};
+  }
+
+  const defaults = params.cfg.agents?.defaults ?? {};
+  const existing = (defaults as Record<string, unknown>)[params.field] as
+    | PrimaryFallbackConfig
+    | undefined;
+
+  return {
+    ...params.cfg,
+    agents: {
+      ...params.cfg.agents,
+      defaults: {
+        ...defaults,
+        [params.field]: mergePrimaryFallbackConfig(existing, { primary: key }),
+        models: nextModels,
+      },
+    },
+  };
 }
 
 export { modelKey };

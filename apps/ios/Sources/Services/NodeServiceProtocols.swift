@@ -28,6 +28,12 @@ protocol LocationServicing: Sendable {
         desiredAccuracy: HanzoBotLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
+    func startLocationUpdates(
+        desiredAccuracy: BotLocationAccuracy,
+        significantChangesOnly: Bool) -> AsyncStream<CLLocation>
+    func stopLocationUpdates()
+    func startMonitoringSignificantLocationChanges(onUpdate: @escaping @Sendable (CLLocation) -> Void)
+    func stopMonitoringSignificantLocationChanges()
 }
 
 protocol DeviceStatusServicing: Sendable {

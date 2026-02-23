@@ -44,6 +44,26 @@ vi.mock("../config/config.js", async (importOriginal) => {
   };
 });
 
+// Some web modules live under `src/web/auto-reply/*` and import config via a different
+// relative path (`../../config/config.js`). Mock both specifiers so tests stay stable
+// across refactors that move files between folders.
+vi.mock("../../config/config.js", async (importOriginal) => {
+  // `../../config/config.js` is correct for modules under `src/web/auto-reply/*`.
+  // For typing in this file (which lives in `src/web/*`), refer to the same module
+  // via the local relative path.
+  const actual = await importOriginal<typeof import("../config/config.js")>();
+  return {
+    ...actual,
+    loadConfig: () => {
+      const getter = (globalThis as Record<symbol, unknown>)[CONFIG_KEY];
+      if (typeof getter === "function") {
+        return getter();
+      }
+      return DEFAULT_CONFIG;
+    },
+  };
+});
+
 vi.mock("../media/store.js", () => ({
   saveMediaBuffer: vi.fn().mockImplementation(async (_buf: Buffer, contentType?: string) => ({
     id: "mid",
@@ -55,8 +75,7 @@ vi.mock("../media/store.js", () => ({
 
 vi.mock("@whiskeysockets/baileys", () => {
   const created = createMockBaileys();
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot:lastSocket")] =
-    created.lastSocket;
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot:lastSocket")] = created.lastSocket;
   return created.mod;
 });
 
@@ -69,8 +88,7 @@ export const baileys = await import("@whiskeysockets/baileys");
 
 export function resetBaileysMocks() {
   const recreated = createMockBaileys();
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot:lastSocket")] =
-    recreated.lastSocket;
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot:lastSocket")] = recreated.lastSocket;
   // @ts-expect-error
   baileys.makeWASocket = vi.fn(recreated.mod.makeWASocket);
   // @ts-expect-error

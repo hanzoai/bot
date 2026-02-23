@@ -1,18 +1,18 @@
-import BotKit
-import HanzoBotProtocol
 import Foundation
 import Observation
+import BotKit
+import BotProtocol
 import OSLog
 import SwiftUI
 
-private let onboardingWizardLogger = Logger(subsystem: "ai.hanzo.bot", category: "onboarding.wizard")
+private let onboardingWizardLogger = Logger(subsystem: "ai.bot", category: "onboarding.wizard")
 
 // MARK: - Swift 6 AnyCodable Bridging Helpers
 
-// Bridge between HanzoBotProtocol.AnyCodable and the local module to avoid
+// Bridge between BotProtocol.AnyCodable and the local module to avoid
 // Swift 6 strict concurrency type conflicts.
 
-private typealias ProtocolAnyCodable = HanzoBotProtocol.AnyCodable
+private typealias ProtocolAnyCodable = BotProtocol.AnyCodable
 
 private func bridgeToLocal(_ value: ProtocolAnyCodable) -> AnyCodable {
     if let data = try? JSONEncoder().encode(value),
@@ -41,8 +41,13 @@ final class OnboardingWizardModel {
     private var restartAttempts = 0
     private let maxRestartAttempts = 1
 
-    var isComplete: Bool { self.status == "done" }
-    var isRunning: Bool { self.status == "running" }
+    var isComplete: Bool {
+        self.status == "done"
+    }
+
+    var isRunning: Bool {
+        self.status == "running"
+    }
 
     func reset() {
         self.sessionId = nil
@@ -408,5 +413,7 @@ private struct WizardOptionItem: Identifiable {
     let index: Int
     let option: WizardOption
 
-    var id: Int { self.index }
+    var id: Int {
+        self.index
+    }
 }

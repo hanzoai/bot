@@ -19,7 +19,7 @@ describe("irc onboarding", () => {
           return "6697";
         }
         if (message === "IRC nick") {
-          return "bot-bot";
+          return "bot";
         }
         if (message === "IRC username") {
           return "bot";
@@ -66,7 +66,7 @@ describe("irc onboarding", () => {
     expect(result.accountId).toBe("default");
     expect(result.cfg.channels?.irc?.enabled).toBe(true);
     expect(result.cfg.channels?.irc?.host).toBe("irc.libera.chat");
-    expect(result.cfg.channels?.irc?.nick).toBe("bot-bot");
+    expect(result.cfg.channels?.irc?.nick).toBe("bot");
     expect(result.cfg.channels?.irc?.tls).toBe(true);
     expect(result.cfg.channels?.irc?.channels).toEqual(["#bot", "#ops"]);
     expect(result.cfg.channels?.irc?.groupPolicy).toBe("allowlist");

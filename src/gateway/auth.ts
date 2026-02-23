@@ -1,29 +1,54 @@
 import type { IncomingMessage } from "node:http";
-import { timingSafeEqual } from "node:crypto";
-import type { BotConfig, GatewayAuthConfig, GatewayTailscaleMode } from "../config/config.js";
-import { resolveSecretReferenceValue } from "../infra/secrets/kms.js";
+import type {
+  GatewayAuthConfig,
+  GatewayIamConfig,
+  GatewayTailscaleMode,
+  GatewayTrustedProxyConfig,
+} from "../config/config.js";
 import { readTailscaleWhoisIdentity, type TailscaleWhoisIdentity } from "../infra/tailscale.js";
+import { safeEqualSecret } from "../security/secret-equal.js";
+import { validateIamToken, type GatewayIamAuthResult } from "./auth-iam.js";
+import {
+  AUTH_RATE_LIMIT_SCOPE_SHARED_SECRET,
+  type AuthRateLimiter,
+  type RateLimitCheckResult,
+} from "./auth-rate-limit.js";
 import {
   isLoopbackAddress,
   isTrustedProxyAddress,
+  resolveHostName,
   parseForwardedForClientIp,
   resolveGatewayClientIp,
 } from "./net.js";
-export type ResolvedGatewayAuthMode = "token" | "password";
+
+export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
 
 export type ResolvedGatewayAuth = {
   mode: ResolvedGatewayAuthMode;
   token?: string;
   password?: string;
-  apiKeys?: string[];
   allowTailscale: boolean;
+  trustedProxy?: GatewayTrustedProxyConfig;
+  iam?: GatewayIamConfig;
 };
 
 export type GatewayAuthResult = {
   ok: boolean;
-  method?: "token" | "password" | "tailscale" | "device-token" | "api-key";
+  method?: "none" | "token" | "password" | "tailscale" | "device-token" | "trusted-proxy" | "iam";
   user?: string;
   reason?: string;
+  /** IAM-specific: user ID from JWT sub claim. */
+  userId?: string;
+  /** IAM-specific: user email from JWT claims. */
+  email?: string;
+  /** IAM-specific: org IDs the user belongs to. */
+  orgIds?: string[];
+  /** IAM-specific: full IAM auth result for downstream use. */
+  iamResult?: GatewayIamAuthResult;
+  /** Present when the request was blocked by the rate limiter. */
+  rateLimited?: boolean;
+  /** Milliseconds the client should wait before retrying (when rate-limited). */
+  retryAfterMs?: number;
 };
 
 type ConnectAuth = {
@@ -39,30 +64,8 @@ type TailscaleUser = {
 
 type TailscaleWhoisLookup = (ip: string) => Promise<TailscaleWhoisIdentity | null>;
 
-function safeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
-  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
-}
-
 function normalizeLogin(login: string): string {
   return login.trim().toLowerCase();
-}
-
-function getHostName(hostHeader?: string): string {
-  const host = (hostHeader ?? "").trim().toLowerCase();
-  if (!host) {
-    return "";
-  }
-  if (host.startsWith("[")) {
-    const end = host.indexOf("]");
-    if (end !== -1) {
-      return host.slice(1, end);
-    }
-  }
-  const [name] = host.split(":");
-  return name ?? "";
 }
 
 function headerValue(value: string | string[] | undefined): string | undefined {
@@ -101,7 +104,7 @@ export function isLocalDirectRequest(req?: IncomingMessage, trustedProxies?: str
     return false;
   }
 
-  const host = getHostName(req.headers?.host);
+  const host = resolveHostName(req.headers?.host);
   const hostIsLocal = host === "localhost" || host === "127.0.0.1" || host === "::1";
   const hostIsTailscaleServe = host.endsWith(".ts.net");
 
@@ -188,59 +191,50 @@ export function resolveGatewayAuth(params: {
   authConfig?: GatewayAuthConfig | null;
   env?: NodeJS.ProcessEnv;
   tailscaleMode?: GatewayTailscaleMode;
+  /** Accepted for caller convenience; not used internally. */
+  cfg?: unknown;
 }): ResolvedGatewayAuth {
   const authConfig = params.authConfig ?? {};
   const env = params.env ?? process.env;
-  const token = authConfig.token ?? env.BOT_GATEWAY_TOKEN ?? env.BOT_GATEWAY_TOKEN ?? undefined;
-  const password =
-    authConfig.password ?? env.BOT_GATEWAY_PASSWORD ?? env.BOT_GATEWAY_PASSWORD ?? undefined;
-  const apiKeysRaw = (authConfig as any).apiKeys ?? env.BOT_API_KEYS ?? undefined;
-  const apiKeys = apiKeysRaw
-    ? (Array.isArray(apiKeysRaw)
-        ? apiKeysRaw
-        : String(apiKeysRaw)
-            .split(",")
-            .map((k: string) => k.trim())
-      ).filter(Boolean)
-    : undefined;
-  const mode: ResolvedGatewayAuth["mode"] = authConfig.mode ?? (password ? "password" : "token");
+  const token = authConfig.token ?? env.BOT_GATEWAY_TOKEN ?? undefined;
+  const password = authConfig.password ?? env.BOT_GATEWAY_PASSWORD ?? undefined;
+  const trustedProxy = authConfig.trustedProxy;
+  const iam = authConfig.iam;
+
+  // Cloud playground agents run inside the K8s cluster behind the playground
+  // service mesh — resolve to IAM mode so the gateway starts without requiring
+  // a shared secret.
+  const isPlaygroundCloud =
+    env.HANZO_PLAYGROUND_CLOUD_NODE === "true" || env.BOT_GATEWAY_AUTH_MODE === "iam";
+
+  let mode: ResolvedGatewayAuth["mode"];
+  if (authConfig.mode) {
+    mode = authConfig.mode;
+  } else if (isPlaygroundCloud || iam?.serverUrl) {
+    mode = "iam";
+  } else if (password) {
+    mode = "password";
+  } else if (token) {
+    mode = "token";
+  } else {
+    mode = "none";
+  }
+
   const allowTailscale =
-    authConfig.allowTailscale ?? (params.tailscaleMode === "serve" && mode !== "password");
+    authConfig.allowTailscale ??
+    (params.tailscaleMode === "serve" &&
+      mode !== "password" &&
+      mode !== "trusted-proxy" &&
+      mode !== "iam");
+
   return {
     mode,
     token,
     password,
-    apiKeys: apiKeys?.length ? apiKeys : undefined,
     allowTailscale,
+    trustedProxy,
+    iam,
   };
-}
-
-export async function resolveGatewayAuthAsync(params: {
-  authConfig?: GatewayAuthConfig | null;
-  env?: NodeJS.ProcessEnv;
-  tailscaleMode?: GatewayTailscaleMode;
-  cfg?: BotConfig;
-  fetchFn?: typeof fetch;
-}): Promise<ResolvedGatewayAuth> {
-  const env = params.env ?? process.env;
-  const base = resolveGatewayAuth({
-    authConfig: params.authConfig,
-    env,
-    tailscaleMode: params.tailscaleMode,
-  });
-  const token = await resolveSecretReferenceValue({
-    value: base.token,
-    cfg: params.cfg,
-    env,
-    fetchFn: params.fetchFn,
-  });
-  const password = await resolveSecretReferenceValue({
-    value: base.password,
-    cfg: params.cfg,
-    env,
-    fetchFn: params.fetchFn,
-  });
-  return { ...base, token, password };
 }
 
 export function assertGatewayAuthConfigured(auth: ResolvedGatewayAuth): void {
@@ -255,6 +249,78 @@ export function assertGatewayAuthConfigured(auth: ResolvedGatewayAuth): void {
   if (auth.mode === "password" && !auth.password) {
     throw new Error("gateway auth mode is password, but no password was configured");
   }
+  if (auth.mode === "trusted-proxy") {
+    if (!auth.trustedProxy) {
+      throw new Error(
+        "gateway auth mode is trusted-proxy, but no trustedProxy config was provided (set gateway.auth.trustedProxy)",
+      );
+    }
+    if (!auth.trustedProxy.userHeader || auth.trustedProxy.userHeader.trim() === "") {
+      throw new Error(
+        "gateway auth mode is trusted-proxy, but trustedProxy.userHeader is empty (set gateway.auth.trustedProxy.userHeader)",
+      );
+    }
+  }
+  if (auth.mode === "iam") {
+    if (!auth.iam) {
+      throw new Error(
+        "gateway auth mode is iam, but no IAM config was provided (set gateway.auth.iam)",
+      );
+    }
+    if (!auth.iam.serverUrl) {
+      throw new Error(
+        "gateway auth mode is iam, but iam.serverUrl is missing (set gateway.auth.iam.serverUrl)",
+      );
+    }
+    if (!auth.iam.clientId) {
+      throw new Error(
+        "gateway auth mode is iam, but iam.clientId is missing (set gateway.auth.iam.clientId)",
+      );
+    }
+  }
+}
+
+/**
+ * Check if the request came from a trusted proxy and extract user identity.
+ * Returns the user identity if valid, or null with a reason if not.
+ */
+function authorizeTrustedProxy(params: {
+  req?: IncomingMessage;
+  trustedProxies?: string[];
+  trustedProxyConfig: GatewayTrustedProxyConfig;
+}): { user: string } | { reason: string } {
+  const { req, trustedProxies, trustedProxyConfig } = params;
+
+  if (!req) {
+    return { reason: "trusted_proxy_no_request" };
+  }
+
+  const remoteAddr = req.socket?.remoteAddress;
+  if (!remoteAddr || !isTrustedProxyAddress(remoteAddr, trustedProxies)) {
+    return { reason: "trusted_proxy_untrusted_source" };
+  }
+
+  const requiredHeaders = trustedProxyConfig.requiredHeaders ?? [];
+  for (const header of requiredHeaders) {
+    const value = headerValue(req.headers[header.toLowerCase()]);
+    if (!value || value.trim() === "") {
+      return { reason: `trusted_proxy_missing_header_${header}` };
+    }
+  }
+
+  const userHeaderValue = headerValue(req.headers[trustedProxyConfig.userHeader.toLowerCase()]);
+  if (!userHeaderValue || userHeaderValue.trim() === "") {
+    return { reason: "trusted_proxy_user_missing" };
+  }
+
+  const user = userHeaderValue.trim();
+
+  const allowUsers = trustedProxyConfig.allowUsers ?? [];
+  if (allowUsers.length > 0 && !allowUsers.includes(user)) {
+    return { reason: "trusted_proxy_user_not_allowed" };
+  }
+
+  return { user };
 }
 
 export async function authorizeGatewayConnect(params: {
@@ -263,10 +329,76 @@ export async function authorizeGatewayConnect(params: {
   req?: IncomingMessage;
   trustedProxies?: string[];
   tailscaleWhois?: TailscaleWhoisLookup;
+  /** Optional rate limiter instance; when provided, failed attempts are tracked per IP. */
+  rateLimiter?: AuthRateLimiter;
+  /** Client IP used for rate-limit tracking. Falls back to proxy-aware request IP resolution. */
+  clientIp?: string;
+  /** Optional limiter scope; defaults to shared-secret auth scope. */
+  rateLimitScope?: string;
 }): Promise<GatewayAuthResult> {
   const { auth, connectAuth, req, trustedProxies } = params;
   const tailscaleWhois = params.tailscaleWhois ?? readTailscaleWhoisIdentity;
   const localDirect = isLocalDirectRequest(req, trustedProxies);
+
+  if (auth.mode === "trusted-proxy") {
+    if (!auth.trustedProxy) {
+      return { ok: false, reason: "trusted_proxy_config_missing" };
+    }
+    if (!trustedProxies || trustedProxies.length === 0) {
+      return { ok: false, reason: "trusted_proxy_no_proxies_configured" };
+    }
+
+    const result = authorizeTrustedProxy({
+      req,
+      trustedProxies,
+      trustedProxyConfig: auth.trustedProxy,
+    });
+
+    if ("user" in result) {
+      return { ok: true, method: "trusted-proxy", user: result.user };
+    }
+    return { ok: false, reason: result.reason };
+  }
+
+  // IAM (OIDC/JWT) auth — validate token from connect params against IAM JWKS
+  if (auth.mode === "iam") {
+    if (!auth.iam) {
+      return { ok: false, reason: "iam_config_missing" };
+    }
+    const jwtToken = connectAuth?.token;
+    if (!jwtToken) {
+      return { ok: false, reason: "iam_token_missing" };
+    }
+    const iamResult = await validateIamToken(jwtToken, auth.iam);
+    if (!iamResult.ok) {
+      return { ok: false, reason: iamResult.reason };
+    }
+    return {
+      ok: true,
+      method: "iam",
+      user: iamResult.name ?? iamResult.email ?? iamResult.userId,
+      userId: iamResult.userId,
+      email: iamResult.email,
+      orgIds: iamResult.orgIds,
+      iamResult,
+    };
+  }
+
+  const limiter = params.rateLimiter;
+  const ip =
+    params.clientIp ?? resolveRequestClientIp(req, trustedProxies) ?? req?.socket?.remoteAddress;
+  const rateLimitScope = params.rateLimitScope ?? AUTH_RATE_LIMIT_SCOPE_SHARED_SECRET;
+  if (limiter) {
+    const rlCheck: RateLimitCheckResult = limiter.check(ip, rateLimitScope);
+    if (!rlCheck.allowed) {
+      return {
+        ok: false,
+        reason: "rate_limited",
+        rateLimited: true,
+        retryAfterMs: rlCheck.retryAfterMs,
+      };
+    }
+  }
 
   if (auth.allowTailscale && !localDirect) {
     const tailscaleCheck = await resolveVerifiedTailscaleUser({
@@ -274,6 +406,7 @@ export async function authorizeGatewayConnect(params: {
       tailscaleWhois,
     });
     if (tailscaleCheck.ok) {
+      limiter?.reset(ip, rateLimitScope);
       return {
         ok: true,
         method: "tailscale",
@@ -282,25 +415,19 @@ export async function authorizeGatewayConnect(params: {
     }
   }
 
-  // Try API key auth first (works with any mode)
-  if (auth.apiKeys?.length && connectAuth?.token) {
-    for (const key of auth.apiKeys) {
-      if (safeEqual(connectAuth.token, key)) {
-        return { ok: true, method: "api-key" };
-      }
-    }
-  }
-
   if (auth.mode === "token") {
     if (!auth.token) {
       return { ok: false, reason: "token_missing_config" };
     }
     if (!connectAuth?.token) {
+      limiter?.recordFailure(ip, rateLimitScope);
       return { ok: false, reason: "token_missing" };
     }
-    if (!safeEqual(connectAuth.token, auth.token)) {
+    if (!safeEqualSecret(connectAuth.token, auth.token)) {
+      limiter?.recordFailure(ip, rateLimitScope);
       return { ok: false, reason: "token_mismatch" };
     }
+    limiter?.reset(ip, rateLimitScope);
     return { ok: true, method: "token" };
   }
 
@@ -310,13 +437,17 @@ export async function authorizeGatewayConnect(params: {
       return { ok: false, reason: "password_missing_config" };
     }
     if (!password) {
+      limiter?.recordFailure(ip, rateLimitScope);
       return { ok: false, reason: "password_missing" };
     }
-    if (!safeEqual(password, auth.password)) {
+    if (!safeEqualSecret(password, auth.password)) {
+      limiter?.recordFailure(ip, rateLimitScope);
       return { ok: false, reason: "password_mismatch" };
     }
+    limiter?.reset(ip, rateLimitScope);
     return { ok: true, method: "password" };
   }
 
+  limiter?.recordFailure(ip, rateLimitScope);
   return { ok: false, reason: "unauthorized" };
 }

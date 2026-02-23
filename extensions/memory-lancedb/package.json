@@ -1,18 +1,18 @@
 {
   "name": "@hanzo/bot-memory-lancedb",
-  "version": "2026.2.10",
+  "version": "2026.2.23",
   "private": true,
-  "description": "HanzoBot LanceDB-backed long-term memory plugin with auto-recall/capture",
+  "description": "Hanzo Bot LanceDB-backed long-term memory plugin with auto-recall/capture",
   "type": "module",
   "dependencies": {
     "@lancedb/lancedb": "^0.26.2",
     "@sinclair/typebox": "0.34.48",
-    "openai": "^6.19.0"
+    "openai": "^6.22.0"
   },
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

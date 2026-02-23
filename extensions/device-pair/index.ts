@@ -1,6 +1,15 @@
 import type { BotPluginApi } from "bot/plugin-sdk";
-import os from "node:os";
 import { approveDevicePairing, listDevicePairing } from "bot/plugin-sdk";
+import os from "node:os";
+import qrcode from "qrcode-terminal";
+
+function renderQrAscii(data: string): Promise<string> {
+  return new Promise((resolve) => {
+    qrcode.generate(data, { small: true }, (output: string) => {
+      resolve(output);
+    });
+  });
+}
 
 const DEFAULT_GATEWAY_PORT = 18789;
 
@@ -60,8 +69,7 @@ function normalizeUrl(raw: string, schemeFallback: "ws" | "wss"): string | null 
 }
 
 function resolveGatewayPort(cfg: BotPluginApi["config"]): number {
-  const envRaw =
-    process.env.BOT_GATEWAY_PORT?.trim() || process.env.BOT_GATEWAY_PORT?.trim();
+  const envRaw = process.env.BOT_GATEWAY_PORT?.trim() || process.env.BOT_GATEWAY_PORT?.trim();
   if (envRaw) {
     const parsed = Number.parseInt(envRaw, 10);
     if (Number.isFinite(parsed) && parsed > 0) {
@@ -120,7 +128,7 @@ function isTailnetIPv4(address: string): boolean {
   return a === 100 && b >= 64 && b <= 127;
 }
 
-function pickLanIPv4(): string | null {
+function pickMatchingIPv4(predicate: (address: string) => boolean): string | null {
   const nets = os.networkInterfaces();
   for (const entries of Object.values(nets)) {
     if (!entries) {
@@ -137,7 +145,7 @@ function pickLanIPv4(): string | null {
       if (!address) {
         continue;
       }
-      if (isPrivateIPv4(address)) {
+      if (predicate(address)) {
         return address;
       }
     }
@@ -145,29 +153,12 @@ function pickLanIPv4(): string | null {
   return null;
 }
 
+function pickLanIPv4(): string | null {
+  return pickMatchingIPv4(isPrivateIPv4);
+}
+
 function pickTailnetIPv4(): string | null {
-  const nets = os.networkInterfaces();
-  for (const entries of Object.values(nets)) {
-    if (!entries) {
-      continue;
-    }
-    for (const entry of entries) {
-      const family = entry?.family;
-      // Check for IPv4 (string "IPv4" on Node 18+, number 4 on older)
-      const isIpv4 = family === "IPv4" || String(family) === "4";
-      if (!entry || entry.internal || !isIpv4) {
-        continue;
-      }
-      const address = entry.address?.trim() ?? "";
-      if (!address) {
-        continue;
-      }
-      if (isTailnetIPv4(address)) {
-        return address;
-      }
-    }
-  }
-  return null;
+  return pickMatchingIPv4(isTailnetIPv4);
 }
 
 async function resolveTailnetHost(api: BotPluginApi): Promise<string | null> {
@@ -450,6 +441,67 @@ export default function register(api: BotPluginApi) {
         token: auth.token,
         password: auth.password,
       };
+
+      if (action === "qr") {
+        const setupCode = encodeSetupCode(payload);
+        const qrAscii = await renderQrAscii(setupCode);
+        const authLabel = auth.label ?? "auth";
+
+        const channel = ctx.channel;
+        const target = ctx.senderId?.trim() || ctx.from?.trim() || ctx.to?.trim() || "";
+
+        if (channel === "telegram" && target) {
+          try {
+            const send = api.runtime?.channel?.telegram?.sendMessageTelegram;
+            if (send) {
+              await send(
+                target,
+                ["Scan this QR code with the Bot iOS app:", "", "```", qrAscii, "```"].join("\n"),
+                {
+                  ...(ctx.messageThreadId != null ? { messageThreadId: ctx.messageThreadId } : {}),
+                  ...(ctx.accountId ? { accountId: ctx.accountId } : {}),
+                },
+              );
+              return {
+                text: [
+                  `Gateway: ${payload.url}`,
+                  `Auth: ${authLabel}`,
+                  "",
+                  "After scanning, come back here and run `/pair approve` to complete pairing.",
+                ].join("\n"),
+              };
+            }
+          } catch (err) {
+            api.logger.warn?.(
+              `device-pair: telegram QR send failed, falling back (${String(
+                (err as Error)?.message ?? err,
+              )})`,
+            );
+          }
+        }
+
+        // Render based on channel capability
+        api.logger.info?.(`device-pair: QR fallback channel=${channel} target=${target}`);
+        const infoLines = [
+          `Gateway: ${payload.url}`,
+          `Auth: ${authLabel}`,
+          "",
+          "After scanning, run `/pair approve` to complete pairing.",
+        ];
+
+        // WebUI + CLI/TUI: ASCII QR
+        return {
+          text: [
+            "Scan this QR code with the Bot iOS app:",
+            "",
+            "```",
+            qrAscii,
+            "```",
+            "",
+            ...infoLines,
+          ].join("\n"),
+        };
+      }
 
       const channel = ctx.channel;
       const target = ctx.senderId?.trim() || ctx.from?.trim() || ctx.to?.trim() || "";

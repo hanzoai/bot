@@ -1,5 +1,5 @@
-import BotIPC
 import Foundation
+import BotIPC
 
 extension OnboardingView {
     @MainActor
@@ -115,7 +115,7 @@ extension OnboardingView {
                 return
             }
             let command = desc.command.trimmingCharacters(in: .whitespacesAndNewlines)
-            let expectedTokens = ["node", "hanzo-bot", "tsx", "pnpm", "bun"]
+            let expectedTokens = ["node", "bot", "tsx", "pnpm", "bun"]
             let lower = command.lowercased()
             let expected = expectedTokens.contains { lower.contains($0) }
             self.localGatewayProbe = LocalGatewayProbe(

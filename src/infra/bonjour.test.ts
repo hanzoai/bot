@@ -14,6 +14,29 @@ const { createService, shutdown, registerUnhandledRejectionHandler, logWarn, log
 const asString = (value: unknown, fallback: string) =>
   typeof value === "string" && value.trim() ? value : fallback;
 
+function mockCiaoService(params?: {
+  advertise?: ReturnType<typeof vi.fn>;
+  destroy?: ReturnType<typeof vi.fn>;
+  serviceState?: string;
+  on?: ReturnType<typeof vi.fn>;
+}) {
+  const advertise = params?.advertise ?? vi.fn().mockResolvedValue(undefined);
+  const destroy = params?.destroy ?? vi.fn().mockResolvedValue(undefined);
+  const on = params?.on ?? vi.fn();
+  createService.mockImplementation((options: Record<string, unknown>) => {
+    return {
+      advertise,
+      destroy,
+      serviceState: params?.serviceState ?? "announced",
+      on,
+      getFQDN: () => `${asString(options.type, "service")}.${asString(options.domain, "local")}.`,
+      getHostname: () => asString(options.hostname, "unknown"),
+      getPort: () => Number(options.port ?? -1),
+    };
+  });
+  return { advertise, destroy, on };
+}
+
 vi.mock("../logger.js", async () => {
   const actual = await vi.importActual<typeof import("../logger.js")>("../logger.js");
   return {
@@ -96,18 +119,7 @@ describe("gateway bonjour advertiser", () => {
           setTimeout(resolve, 250);
         }),
     );
-
-    createService.mockImplementation((options: Record<string, unknown>) => {
-      return {
-        advertise,
-        destroy,
-        serviceState: "announced",
-        on: vi.fn(),
-        getFQDN: () => `${asString(options.type, "service")}.${asString(options.domain, "local")}.`,
-        getHostname: () => asString(options.hostname, "unknown"),
-        getPort: () => Number(options.port ?? -1),
-      };
-    });
+    mockCiaoService({ advertise, destroy });
 
     const started = await startGatewayBonjourAdvertiser({
       gatewayPort: 18789,
@@ -118,7 +130,7 @@ describe("gateway bonjour advertiser", () => {
 
     expect(createService).toHaveBeenCalledTimes(1);
     const [gatewayCall] = createService.mock.calls as Array<[Record<string, unknown>]>;
-    expect(gatewayCall?.[0]?.type).toBe("bot-gw");
+    expect(gatewayCall?.[0]?.type).toBe("hanzo-bot-gw");
     const gatewayType = asString(gatewayCall?.[0]?.type, "");
     expect(gatewayType.length).toBeLessThanOrEqual(15);
     expect(gatewayCall?.[0]?.port).toBe(18789);
@@ -149,18 +161,7 @@ describe("gateway bonjour advertiser", () => {
 
     const destroy = vi.fn().mockResolvedValue(undefined);
     const advertise = vi.fn().mockResolvedValue(undefined);
-
-    createService.mockImplementation((options: Record<string, unknown>) => {
-      return {
-        advertise,
-        destroy,
-        serviceState: "announced",
-        on: vi.fn(),
-        getFQDN: () => `${asString(options.type, "service")}.${asString(options.domain, "local")}.`,
-        getHostname: () => asString(options.hostname, "unknown"),
-        getPort: () => Number(options.port ?? -1),
-      };
-    });
+    mockCiaoService({ advertise, destroy });
 
     const started = await startGatewayBonjourAdvertiser({
       gatewayPort: 18789,
@@ -188,20 +189,10 @@ describe("gateway bonjour advertiser", () => {
     const advertise = vi.fn().mockResolvedValue(undefined);
     const onCalls: Array<{ event: string }> = [];
 
-    createService.mockImplementation((options: Record<string, unknown>) => {
-      const on = vi.fn((event: string) => {
-        onCalls.push({ event });
-      });
-      return {
-        advertise,
-        destroy,
-        serviceState: "announced",
-        on,
-        getFQDN: () => `${asString(options.type, "service")}.${asString(options.domain, "local")}.`,
-        getHostname: () => asString(options.hostname, "unknown"),
-        getPort: () => Number(options.port ?? -1),
-      };
+    const on = vi.fn((event: string) => {
+      onCalls.push({ event });
     });
+    mockCiaoService({ advertise, destroy, on });
 
     const started = await startGatewayBonjourAdvertiser({
       gatewayPort: 18789,
@@ -228,18 +219,7 @@ describe("gateway bonjour advertiser", () => {
     shutdown.mockImplementation(async () => {
       order.push("shutdown");
     });
-
-    createService.mockImplementation((options: Record<string, unknown>) => {
-      return {
-        advertise,
-        destroy,
-        serviceState: "announced",
-        on: vi.fn(),
-        getFQDN: () => `${asString(options.type, "service")}.${asString(options.domain, "local")}.`,
-        getHostname: () => asString(options.hostname, "unknown"),
-        getPort: () => Number(options.port ?? -1),
-      };
-    });
+    mockCiaoService({ advertise, destroy });
 
     const cleanup = vi.fn(() => {
       order.push("cleanup");
@@ -272,18 +252,7 @@ describe("gateway bonjour advertiser", () => {
       .fn()
       .mockRejectedValueOnce(new Error("boom")) // initial advertise fails
       .mockResolvedValue(undefined); // watchdog retry succeeds
-
-    createService.mockImplementation((options: Record<string, unknown>) => {
-      return {
-        advertise,
-        destroy,
-        serviceState: "unannounced",
-        on: vi.fn(),
-        getFQDN: () => `${asString(options.type, "service")}.${asString(options.domain, "local")}.`,
-        getHostname: () => asString(options.hostname, "unknown"),
-        getPort: () => Number(options.port ?? -1),
-      };
-    });
+    mockCiaoService({ advertise, destroy, serviceState: "unannounced" });
 
     const started = await startGatewayBonjourAdvertiser({
       gatewayPort: 18789,
@@ -319,18 +288,7 @@ describe("gateway bonjour advertiser", () => {
     const advertise = vi.fn(() => {
       throw new Error("sync-fail");
     });
-
-    createService.mockImplementation((options: Record<string, unknown>) => {
-      return {
-        advertise,
-        destroy,
-        serviceState: "unannounced",
-        on: vi.fn(),
-        getFQDN: () => `${asString(options.type, "service")}.${asString(options.domain, "local")}.`,
-        getHostname: () => asString(options.hostname, "unknown"),
-        getPort: () => Number(options.port ?? -1),
-      };
-    });
+    mockCiaoService({ advertise, destroy, serviceState: "unannounced" });
 
     const started = await startGatewayBonjourAdvertiser({
       gatewayPort: 18789,
@@ -352,17 +310,7 @@ describe("gateway bonjour advertiser", () => {
 
     const destroy = vi.fn().mockResolvedValue(undefined);
     const advertise = vi.fn().mockResolvedValue(undefined);
-    createService.mockImplementation((options: Record<string, unknown>) => {
-      return {
-        advertise,
-        destroy,
-        serviceState: "announced",
-        on: vi.fn(),
-        getFQDN: () => `${asString(options.type, "service")}.${asString(options.domain, "local")}.`,
-        getHostname: () => asString(options.hostname, "unknown"),
-        getPort: () => Number(options.port ?? -1),
-      };
-    });
+    mockCiaoService({ advertise, destroy });
 
     const started = await startGatewayBonjourAdvertiser({
       gatewayPort: 18789,
@@ -372,8 +320,8 @@ describe("gateway bonjour advertiser", () => {
     const [gatewayCall] = createService.mock.calls as Array<[ServiceCall]>;
     expect(gatewayCall?.[0]?.name).toBe("hanzo-bot (Hanzo Bot)");
     expect(gatewayCall?.[0]?.domain).toBe("local");
-    expect(gatewayCall?.[0]?.hostname).toBe("bot");
-    expect((gatewayCall?.[0]?.txt as Record<string, string>)?.lanHost).toBe("bot.local");
+    expect(gatewayCall?.[0]?.hostname).toBe("hanzo-bot");
+    expect((gatewayCall?.[0]?.txt as Record<string, string>)?.lanHost).toBe("hanzo-bot.local");
 
     await started.stop();
   });

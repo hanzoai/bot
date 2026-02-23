@@ -1,14 +1,16 @@
-import BotIPC
 import Foundation
+import BotIPC
 import OSLog
 
-// Lightweight SemVer helper (major.minor.patch only) for gateway compatibility checks.
+/// Lightweight SemVer helper (major.minor.patch only) for gateway compatibility checks.
 struct Semver: Comparable, CustomStringConvertible, Sendable {
     let major: Int
     let minor: Int
     let patch: Int
 
-    var description: String { "\(self.major).\(self.minor).\(self.patch)" }
+    var description: String {
+        "\(self.major).\(self.minor).\(self.patch)"
+    }
 
     static func < (lhs: Semver, rhs: Semver) -> Bool {
         if lhs.major != rhs.major { return lhs.major < rhs.major }
@@ -68,7 +70,7 @@ struct GatewayCommandResolution {
 }
 
 enum GatewayEnvironment {
-    private static let logger = Logger(subsystem: "ai.hanzo.bot", category: "gateway.env")
+    private static let logger = Logger(subsystem: "ai.bot", category: "gateway.env")
     private static let supportedBindModes: Set<String> = ["loopback", "tailnet", "lan", "auto"]
 
     static func gatewayPort() -> Int {
@@ -93,7 +95,7 @@ enum GatewayEnvironment {
         return (trimmed?.isEmpty == false) ? trimmed : nil
     }
 
-    // Exposed for tests so we can inject fake version checks without rewriting bundle metadata.
+    /// Exposed for tests so we can inject fake version checks without rewriting bundle metadata.
     static func expectedGatewayVersion(from versionString: String?) -> Semver? {
         Semver.parse(versionString)
     }
@@ -123,7 +125,7 @@ enum GatewayEnvironment {
                 requiredGateway: expectedString,
                 message: RuntimeLocator.describeFailure(err))
         case let .success(runtime):
-            let gatewayBin = CommandResolver.hanzo-botExecutable()
+            let gatewayBin = CommandResolver.botExecutable()
 
             if gatewayBin == nil, projectEntrypoint == nil {
                 return GatewayEnvironmentStatus(
@@ -131,7 +133,7 @@ enum GatewayEnvironment {
                     nodeVersion: runtime.version.description,
                     gatewayVersion: nil,
                     requiredGateway: expectedString,
-                    message: "hanzo-bot CLI not found in PATH; install the CLI.")
+                    message: "bot CLI not found in PATH; install the CLI.")
             }
 
             let installed = gatewayBin.flatMap { self.readGatewayVersion(binary: $0) }
@@ -181,7 +183,7 @@ enum GatewayEnvironment {
         let projectRoot = CommandResolver.projectRoot()
         let projectEntrypoint = CommandResolver.gatewayEntrypoint(in: projectRoot)
         let status = self.check()
-        let gatewayBin = CommandResolver.hanzo-botExecutable()
+        let gatewayBin = CommandResolver.botExecutable()
         let runtime = RuntimeLocator.resolve(searchPaths: CommandResolver.preferredPaths())
 
         guard case .ok = status.kind else {
@@ -247,16 +249,16 @@ enum GatewayEnvironment {
         let bun = CommandResolver.findExecutable(named: "bun")
         let (label, cmd): (String, [String]) =
             if let npm {
-                ("npm", [npm, "install", "-g", "hanzo-bot@\(target)"])
+                ("npm", [npm, "install", "-g", "bot@\(target)"])
             } else if let pnpm {
-                ("pnpm", [pnpm, "add", "-g", "hanzo-bot@\(target)"])
+                ("pnpm", [pnpm, "add", "-g", "bot@\(target)"])
             } else if let bun {
-                ("bun", [bun, "add", "-g", "hanzo-bot@\(target)"])
+                ("bun", [bun, "add", "-g", "bot@\(target)"])
             } else {
-                ("npm", ["npm", "install", "-g", "hanzo-bot@\(target)"])
+                ("npm", ["npm", "install", "-g", "bot@\(target)"])
             }
 
-        statusHandler("Installing hanzo-bot@\(target) via \(label)…")
+        statusHandler("Installing bot@\(target) via \(label)…")
 
         func summarize(_ text: String) -> String? {
             let lines = text
@@ -270,7 +272,7 @@ enum GatewayEnvironment {
 
         let response = await ShellExecutor.runDetailed(command: cmd, cwd: nil, env: ["PATH": preferred], timeout: 300)
         if response.success {
-            statusHandler("Installed hanzo-bot@\(target)")
+            statusHandler("Installed bot@\(target)")
         } else {
             if response.timedOut {
                 statusHandler("Install failed: timed out. Check your internet connection and try again.")

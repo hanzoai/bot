@@ -2,6 +2,7 @@ import { Type } from "@sinclair/typebox";
 import type { BotConfig } from "../../config/config.js";
 import type { AnyAgentTool } from "./common.js";
 import { formatCliCommand } from "../../cli/command-format.js";
+import { matchesHostnameAllowlist, normalizeHostnameAllowlist } from "../../infra/net/ssrf.js";
 import { wrapWebContent } from "../../security/external-content.js";
 import { normalizeSecretInput } from "../../utils/normalize-secret-input.js";
 import { jsonResult, readNumberParam, readStringParam } from "./common.js";
@@ -64,7 +65,7 @@ const WebSearchSchema = Type.Object({
   freshness: Type.Optional(
     Type.String({
       description:
-        "Filter results by discovery time (Brave only). Values: 'pd' (past 24h), 'pw' (past week), 'pm' (past month), 'py' (past year), or date range 'YYYY-MM-DDtoYYYY-MM-DD'.",
+        "Filter results by discovery time. Brave supports 'pd', 'pw', 'pm', 'py', and date range 'YYYY-MM-DDtoYYYY-MM-DD'. Perplexity supports 'pd', 'pw', 'pm', and 'py'.",
     }),
   ),
 });
@@ -74,6 +75,43 @@ type WebSearchConfig = NonNullable<BotConfig["tools"]>["web"] extends infer Web
     ? Search
     : undefined
   : undefined;
+
+type WebConfig = NonNullable<BotConfig["tools"]>["web"];
+
+export function resolveUrlAllowlist(web?: WebConfig): string[] | undefined {
+  if (!web || typeof web !== "object") {
+    return undefined;
+  }
+  if (!("urlAllowlist" in web)) {
+    return undefined;
+  }
+  const allowlist = web.urlAllowlist;
+  if (!Array.isArray(allowlist)) {
+    return undefined;
+  }
+  return allowlist.length > 0 ? allowlist : undefined;
+}
+
+export function filterResultsByAllowlist(
+  results: Array<{ url?: string; siteName?: string }>,
+  allowlist: string[],
+): Array<{ url?: string; siteName?: string }> {
+  if (allowlist.length === 0) {
+    return results;
+  }
+  const normalizedAllowlist = normalizeHostnameAllowlist(allowlist);
+  return results.filter((result) => {
+    if (!result.url) {
+      return true; // Keep entries without URL
+    }
+    try {
+      const hostname = new URL(result.url).hostname;
+      return matchesHostnameAllowlist(hostname, normalizedAllowlist);
+    } catch {
+      return true; // Keep entries with invalid URLs (let them pass through)
+    }
+  });
+}
 
 type BraveSearchResult = {
   title?: string;
@@ -109,6 +147,12 @@ type GrokSearchResponse = {
     content?: Array<{
       type?: string;
       text?: string;
+      annotations?: Array<{
+        type?: string;
+        url?: string;
+        start_index?: number;
+        end_index?: number;
+      }>;
     }>;
   }>;
   output_text?: string; // deprecated field - kept for backwards compatibility
@@ -131,13 +175,28 @@ type PerplexitySearchResponse = {
 
 type PerplexityBaseUrlHint = "direct" | "openrouter";
 
-function extractGrokContent(data: GrokSearchResponse): string | undefined {
-  // xAI Responses API format: output[0].content[0].text
-  const fromResponses = data.output?.[0]?.content?.[0]?.text;
-  if (typeof fromResponses === "string" && fromResponses) {
-    return fromResponses;
+function extractGrokContent(data: GrokSearchResponse): {
+  text: string | undefined;
+  annotationCitations: string[];
+} {
+  // xAI Responses API format: find the message output with text content
+  for (const output of data.output ?? []) {
+    if (output.type !== "message") {
+      continue;
+    }
+    for (const block of output.content ?? []) {
+      if (block.type === "output_text" && typeof block.text === "string" && block.text) {
+        // Extract url_citation annotations from this content block
+        const urls = (block.annotations ?? [])
+          .filter((a) => a.type === "url_citation" && typeof a.url === "string")
+          .map((a) => a.url as string);
+        return { text: block.text, annotationCitations: [...new Set(urls)] };
+      }
+    }
   }
-  return typeof data.output_text === "string" ? data.output_text : undefined;
+  // Fallback: deprecated output_text field
+  const text = typeof data.output_text === "string" ? data.output_text : undefined;
+  return { text, annotationCitations: [] };
 }
 
 function resolveSearchConfig(cfg?: BotConfig): WebSearchConfig {
@@ -186,7 +245,7 @@ function missingSearchKeyPayload(provider: (typeof SEARCH_PROVIDERS)[number]) {
   }
   return {
     error: "missing_brave_api_key",
-    message: `web_search needs a Brave Search API key. Run \`${formatCliCommand("hanzo-bot configure --section web")}\` to store it, or set BRAVE_API_KEY in the Gateway environment.`,
+    message: `web_search needs a Brave Search API key. Run \`${formatCliCommand("bot configure --section web")}\` to store it, or set BRAVE_API_KEY in the Gateway environment.`,
     docs: "https://docs.hanzo.bot/tools/web",
   };
 }
@@ -382,6 +441,23 @@ function normalizeFreshness(value: string | undefined): string | undefined {
   return `${start}to${end}`;
 }
 
+/**
+ * Map normalized freshness values (pd/pw/pm/py) to Perplexity's
+ * search_recency_filter values (day/week/month/year).
+ */
+function freshnessToPerplexityRecency(freshness: string | undefined): string | undefined {
+  if (!freshness) {
+    return undefined;
+  }
+  const map: Record<string, string> = {
+    pd: "day",
+    pw: "week",
+    pm: "month",
+    py: "year",
+  };
+  return map[freshness] ?? undefined;
+}
+
 function isValidIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return false;
@@ -414,10 +490,26 @@ async function runPerplexitySearch(params: {
   baseUrl: string;
   model: string;
   timeoutSeconds: number;
+  freshness?: string;
 }): Promise<{ content: string; citations: string[] }> {
   const baseUrl = params.baseUrl.trim().replace(/\/$/, "");
   const endpoint = `${baseUrl}/chat/completions`;
   const model = resolvePerplexityRequestModel(baseUrl, params.model);
+
+  const body: Record<string, unknown> = {
+    model,
+    messages: [
+      {
+        role: "user",
+        content: params.query,
+      },
+    ],
+  };
+
+  const recencyFilter = freshnessToPerplexityRecency(params.freshness);
+  if (recencyFilter) {
+    body.search_recency_filter = recencyFilter;
+  }
 
   const res = await fetch(endpoint, {
     method: "POST",
@@ -425,22 +517,15 @@ async function runPerplexitySearch(params: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${params.apiKey}`,
       "HTTP-Referer": "https://hanzo.bot",
-      "X-Title": "Hanzo Bot Web Search",
+      "X-Title": "Bot Web Search",
     },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: "user",
-          content: params.query,
-        },
-      ],
-    }),
+    body: JSON.stringify(body),
     signal: withTimeout(undefined, params.timeoutSeconds * 1000),
   });
 
   if (!res.ok) {
-    const detail = await readResponseText(res);
+    const detailResult = await readResponseText(res, { maxBytes: 64_000 });
+    const detail = detailResult.text;
     throw new Error(`Perplexity API error (${res.status}): ${detail || res.statusText}`);
   }
 
@@ -489,13 +574,16 @@ async function runGrokSearch(params: {
   });
 
   if (!res.ok) {
-    const detail = await readResponseText(res);
+    const detailResult = await readResponseText(res, { maxBytes: 64_000 });
+    const detail = detailResult.text;
     throw new Error(`xAI API error (${res.status}): ${detail || res.statusText}`);
   }
 
   const data = (await res.json()) as GrokSearchResponse;
-  const content = extractGrokContent(data) ?? "No response";
-  const citations = data.citations ?? [];
+  const { text: extractedText, annotationCitations } = extractGrokContent(data);
+  const content = extractedText ?? "No response";
+  // Prefer top-level citations; fall back to annotation-derived ones
+  const citations = (data.citations ?? []).length > 0 ? data.citations! : annotationCitations;
   const inlineCitations = data.inline_citations;
 
   return { content, citations, inlineCitations };
@@ -516,12 +604,13 @@ async function runWebSearch(params: {
   perplexityModel?: string;
   grokModel?: string;
   grokInlineCitations?: boolean;
+  urlAllowlist?: string[];
 }): Promise<Record<string, unknown>> {
   const cacheKey = normalizeCacheKey(
     params.provider === "brave"
       ? `${params.provider}:${params.query}:${params.count}:${params.country || "default"}:${params.search_lang || "default"}:${params.ui_lang || "default"}:${params.freshness || "default"}`
       : params.provider === "perplexity"
-        ? `${params.provider}:${params.query}:${params.perplexityBaseUrl ?? DEFAULT_PERPLEXITY_BASE_URL}:${params.perplexityModel ?? DEFAULT_PERPLEXITY_MODEL}`
+        ? `${params.provider}:${params.query}:${params.perplexityBaseUrl ?? DEFAULT_PERPLEXITY_BASE_URL}:${params.perplexityModel ?? DEFAULT_PERPLEXITY_MODEL}:${params.freshness || "default"}`
         : `${params.provider}:${params.query}:${params.grokModel ?? DEFAULT_GROK_MODEL}:${String(params.grokInlineCitations ?? false)}`,
   );
   const cached = readCache(SEARCH_CACHE, cacheKey);
@@ -538,6 +627,7 @@ async function runWebSearch(params: {
       baseUrl: params.perplexityBaseUrl ?? DEFAULT_PERPLEXITY_BASE_URL,
       model: params.perplexityModel ?? DEFAULT_PERPLEXITY_MODEL,
       timeoutSeconds: params.timeoutSeconds,
+      freshness: params.freshness,
     });
 
     const payload = {
@@ -545,6 +635,12 @@ async function runWebSearch(params: {
       provider: params.provider,
       model: params.perplexityModel ?? DEFAULT_PERPLEXITY_MODEL,
       tookMs: Date.now() - start,
+      externalContent: {
+        untrusted: true,
+        source: "web_search",
+        provider: params.provider,
+        wrapped: true,
+      },
       content: wrapWebContent(content),
       citations,
     };
@@ -566,6 +662,12 @@ async function runWebSearch(params: {
       provider: params.provider,
       model: params.grokModel ?? DEFAULT_GROK_MODEL,
       tookMs: Date.now() - start,
+      externalContent: {
+        untrusted: true,
+        source: "web_search",
+        provider: params.provider,
+        wrapped: true,
+      },
       content: wrapWebContent(content),
       citations,
       inlineCitations,
@@ -604,7 +706,8 @@ async function runWebSearch(params: {
   });
 
   if (!res.ok) {
-    const detail = await readResponseText(res);
+    const detailResult = await readResponseText(res, { maxBytes: 64_000 });
+    const detail = detailResult.text;
     throw new Error(`Brave Search API error (${res.status}): ${detail || res.statusText}`);
   }
 
@@ -624,12 +727,23 @@ async function runWebSearch(params: {
     };
   });
 
+  // Filter results by urlAllowlist if configured
+  const filteredResults = params.urlAllowlist
+    ? filterResultsByAllowlist(mapped, params.urlAllowlist)
+    : mapped;
+
   const payload = {
     query: params.query,
     provider: params.provider,
-    count: mapped.length,
+    count: filteredResults.length,
     tookMs: Date.now() - start,
-    results: mapped,
+    externalContent: {
+      untrusted: true,
+      source: "web_search",
+      provider: params.provider,
+      wrapped: true,
+    },
+    results: filteredResults,
   };
   writeCache(SEARCH_CACHE, cacheKey, payload, params.cacheTtlMs);
   return payload;
@@ -647,6 +761,7 @@ export function createWebSearchTool(options?: {
   const provider = resolveSearchProvider(search);
   const perplexityConfig = resolvePerplexityConfig(search);
   const grokConfig = resolveGrokConfig(search);
+  const urlAllowlist = resolveUrlAllowlist(options?.config?.tools?.web);
 
   const description =
     provider === "perplexity"
@@ -681,10 +796,10 @@ export function createWebSearchTool(options?: {
       const search_lang = readStringParam(params, "search_lang");
       const ui_lang = readStringParam(params, "ui_lang");
       const rawFreshness = readStringParam(params, "freshness");
-      if (rawFreshness && provider !== "brave") {
+      if (rawFreshness && provider !== "brave" && provider !== "perplexity") {
         return jsonResult({
           error: "unsupported_freshness",
-          message: "freshness is only supported by the Brave web_search provider.",
+          message: "freshness is only supported by the Brave and Perplexity web_search providers.",
           docs: "https://docs.hanzo.bot/tools/web",
         });
       }
@@ -716,6 +831,7 @@ export function createWebSearchTool(options?: {
         perplexityModel: resolvePerplexityModel(perplexityConfig),
         grokModel: resolveGrokModel(grokConfig),
         grokInlineCitations: resolveGrokInlineCitations(grokConfig),
+        urlAllowlist,
       });
       return jsonResult(result);
     },
@@ -728,8 +844,11 @@ export const __testing = {
   isDirectPerplexityBaseUrl,
   resolvePerplexityRequestModel,
   normalizeFreshness,
+  freshnessToPerplexityRecency,
   resolveGrokApiKey,
   resolveGrokModel,
   resolveGrokInlineCitations,
   extractGrokContent,
+  resolveUrlAllowlist,
+  filterResultsByAllowlist,
 } as const;

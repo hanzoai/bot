@@ -1,6 +1,6 @@
+import CoreLocation
 import BotIPC
 import BotKit
-import CoreLocation
 import SwiftUI
 
 struct PermissionsSettings: View {
@@ -12,7 +12,7 @@ struct PermissionsSettings: View {
         VStack(alignment: .leading, spacing: 14) {
             SystemRunSettingsView()
 
-            Text("Allow these so HanzoBot can notify and capture when needed.")
+            Text("Allow these so Bot can notify and capture when needed.")
                 .padding(.top, 4)
 
             PermissionStatusList(status: self.status, refresh: self.refresh)
@@ -31,9 +31,9 @@ struct PermissionsSettings: View {
 }
 
 private struct LocationAccessSettings: View {
-    @AppStorage(locationModeKey) private var locationModeRaw: String = HanzoBotLocationMode.off.rawValue
+    @AppStorage(locationModeKey) private var locationModeRaw: String = BotLocationMode.off.rawValue
     @AppStorage(locationPreciseKey) private var locationPreciseEnabled: Bool = true
-    @State private var lastLocationModeRaw: String = HanzoBotLocationMode.off.rawValue
+    @State private var lastLocationModeRaw: String = BotLocationMode.off.rawValue
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -41,9 +41,9 @@ private struct LocationAccessSettings: View {
                 .font(.body)
 
             Picker("", selection: self.$locationModeRaw) {
-                Text("Off").tag(HanzoBotLocationMode.off.rawValue)
-                Text("While Using").tag(HanzoBotLocationMode.whileUsing.rawValue)
-                Text("Always").tag(HanzoBotLocationMode.always.rawValue)
+                Text("Off").tag(BotLocationMode.off.rawValue)
+                Text("While Using").tag(BotLocationMode.whileUsing.rawValue)
+                Text("Always").tag(BotLocationMode.always.rawValue)
             }
             .labelsHidden()
             .pickerStyle(.menu)
@@ -62,7 +62,7 @@ private struct LocationAccessSettings: View {
         .onChange(of: self.locationModeRaw) { _, newValue in
             let previous = self.lastLocationModeRaw
             self.lastLocationModeRaw = newValue
-            guard let mode = HanzoBotLocationMode(rawValue: newValue) else { return }
+            guard let mode = BotLocationMode(rawValue: newValue) else { return }
             Task {
                 let granted = await self.requestLocationAuthorization(mode: mode)
                 if !granted {
@@ -75,11 +75,11 @@ private struct LocationAccessSettings: View {
         }
     }
 
-    private var locationMode: HanzoBotLocationMode {
-        HanzoBotLocationMode(rawValue: self.locationModeRaw) ?? .off
+    private var locationMode: BotLocationMode {
+        BotLocationMode(rawValue: self.locationModeRaw) ?? .off
     }
 
-    private func requestLocationAuthorization(mode: HanzoBotLocationMode) async -> Bool {
+    private func requestLocationAuthorization(mode: BotLocationMode) async -> Bool {
         guard mode != .off else { return true }
         guard CLLocationManager.locationServicesEnabled() else {
             await MainActor.run { LocationPermissionHelper.openSettings() }
@@ -164,7 +164,9 @@ struct PermissionRow: View {
         .padding(.vertical, self.compact ? 4 : 6)
     }
 
-    private var iconSize: CGFloat { self.compact ? 28 : 32 }
+    private var iconSize: CGFloat {
+        self.compact ? 28 : 32
+    }
 
     private var title: String {
         switch self.capability {

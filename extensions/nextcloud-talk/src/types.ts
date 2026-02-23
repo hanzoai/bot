@@ -1,9 +1,4 @@
-import type {
-  BlockStreamingCoalesceConfig,
-  DmConfig,
-  DmPolicy,
-  GroupPolicy,
-} from "bot/plugin-sdk";
+import type { BlockStreamingCoalesceConfig, DmConfig, DmPolicy, GroupPolicy } from "bot/plugin-sdk";
 
 export type { DmPolicy, GroupPolicy };
 
@@ -168,6 +163,7 @@ export type NextcloudTalkWebhookServerOptions = {
   host: string;
   path: string;
   secret: string;
+  maxBodyBytes?: number;
   onMessage: (message: NextcloudTalkInboundMessage) => void | Promise<void>;
   onError?: (error: Error) => void;
   abortSignal?: AbortSignal;

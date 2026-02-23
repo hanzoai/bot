@@ -1,8 +1,8 @@
 import AVFoundation
-import BotIPC
-import BotKit
 import CoreGraphics
 import Foundation
+import BotIPC
+import BotKit
 import OSLog
 
 actor CameraCaptureService {
@@ -36,7 +36,7 @@ actor CameraCaptureService {
         }
     }
 
-    private let logger = Logger(subsystem: "ai.hanzo.bot", category: "camera")
+    private let logger = Logger(subsystem: "ai.bot", category: "camera")
 
     func listDevices() -> [CameraDeviceInfo] {
         Self.availableCameras().map { device in
@@ -106,14 +106,16 @@ actor CameraCaptureService {
         }
         withExtendedLifetime(delegate) {}
 
-        let maxPayloadBytes = 5 * 1024 * 1024
-        // Base64 inflates payloads by ~4/3; cap encoded bytes so the payload stays under 5MB (API limit).
-        let maxEncodedBytes = (maxPayloadBytes / 4) * 3
-        let res = try JPEGTranscoder.transcodeToJPEG(
-            imageData: rawData,
-            maxWidthPx: maxWidth,
-            quality: quality,
-            maxBytes: maxEncodedBytes)
+        let res: (data: Data, widthPx: Int, heightPx: Int)
+        do {
+            res = try PhotoCapture.transcodeJPEGForGateway(
+                rawData: rawData,
+                maxWidthPx: maxWidth,
+                quality: quality)
+        } catch {
+            throw CameraError.captureFailed(error.localizedDescription)
+        }
+
         return (data: res.data, size: CGSize(width: res.widthPx, height: res.heightPx))
     }
 
@@ -168,7 +170,7 @@ actor CameraCaptureService {
         await Self.warmUpCaptureSession()
 
         let tmpMovURL = FileManager().temporaryDirectory
-            .appendingPathComponent("hanzo-bot-camera-\(UUID().uuidString).mov")
+            .appendingPathComponent("bot-camera-\(UUID().uuidString).mov")
         defer { try? FileManager().removeItem(at: tmpMovURL) }
 
         let outputURL: URL = {
@@ -176,7 +178,7 @@ actor CameraCaptureService {
                 return URL(fileURLWithPath: outPath)
             }
             return FileManager().temporaryDirectory
-                .appendingPathComponent("hanzo-bot-camera-\(UUID().uuidString).mp4")
+                .appendingPathComponent("bot-camera-\(UUID().uuidString).mp4")
         }()
 
         // Ensure we don't fail exporting due to an existing file.
@@ -355,8 +357,8 @@ private final class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegat
     func photoOutput(
         _ output: AVCapturePhotoOutput,
         didFinishProcessingPhoto photo: AVCapturePhoto,
-        error: Error?)
-    {
+        error: Error?
+    ) {
         guard !self.didResume, let cont else { return }
         self.didResume = true
         self.cont = nil
@@ -378,8 +380,8 @@ private final class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegat
     func photoOutput(
         _ output: AVCapturePhotoOutput,
         didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings,
-        error: Error?)
-    {
+        error: Error?
+    ) {
         guard let error else { return }
         guard !self.didResume, let cont else { return }
         self.didResume = true

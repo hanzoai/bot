@@ -37,6 +37,69 @@ async function detectWhatsAppLinked(cfg: BotConfig, accountId: string): Promise<
   return await pathExists(credsPath);
 }
 
+async function promptWhatsAppOwnerAllowFrom(params: {
+  prompter: WizardPrompter;
+  existingAllowFrom: string[];
+}): Promise<{ normalized: string; allowFrom: string[] }> {
+  const { prompter, existingAllowFrom } = params;
+
+  await prompter.note(
+    "We need the sender/owner number so Bot can allowlist you.",
+    "WhatsApp number",
+  );
+  const entry = await prompter.text({
+    message: "Your personal WhatsApp number (the phone you will message from)",
+    placeholder: "+15555550123",
+    initialValue: existingAllowFrom[0],
+    validate: (value) => {
+      const raw = String(value ?? "").trim();
+      if (!raw) {
+        return "Required";
+      }
+      const normalized = normalizeE164(raw);
+      if (!normalized) {
+        return `Invalid number: ${raw}`;
+      }
+      return undefined;
+    },
+  });
+
+  const normalized = normalizeE164(String(entry).trim());
+  if (!normalized) {
+    throw new Error("Invalid WhatsApp owner number (expected E.164 after validation).");
+  }
+  const merged = [
+    ...existingAllowFrom
+      .filter((item) => item !== "*")
+      .map((item) => normalizeE164(item))
+      .filter(Boolean),
+    normalized,
+  ];
+  const allowFrom = [...new Set(merged.filter(Boolean))];
+  return { normalized, allowFrom };
+}
+
+async function applyWhatsAppOwnerAllowlist(params: {
+  cfg: BotConfig;
+  prompter: WizardPrompter;
+  existingAllowFrom: string[];
+  title: string;
+  messageLines: string[];
+}): Promise<BotConfig> {
+  const { normalized, allowFrom } = await promptWhatsAppOwnerAllowFrom({
+    prompter: params.prompter,
+    existingAllowFrom: params.existingAllowFrom,
+  });
+  let next = setWhatsAppSelfChatMode(params.cfg, true);
+  next = setWhatsAppDmPolicy(next, "allowlist");
+  next = setWhatsAppAllowFrom(next, allowFrom);
+  await params.prompter.note(
+    [...params.messageLines, `- allowFrom includes ${normalized}`].join("\n"),
+    params.title,
+  );
+  return next;
+}
+
 async function promptWhatsAppAllowFrom(
   cfg: BotConfig,
   _runtime: RuntimeEnv,
@@ -48,43 +111,13 @@ async function promptWhatsAppAllowFrom(
   const existingLabel = existingAllowFrom.length > 0 ? existingAllowFrom.join(", ") : "unset";
 
   if (options?.forceAllowlist) {
-    await prompter.note(
-      "We need the sender/owner number so Hanzo Bot can allowlist you.",
-      "WhatsApp number",
-    );
-    const entry = await prompter.text({
-      message: "Your personal WhatsApp number (the phone you will message from)",
-      placeholder: "+15555550123",
-      initialValue: existingAllowFrom[0],
-      validate: (value) => {
-        const raw = String(value ?? "").trim();
-        if (!raw) {
-          return "Required";
-        }
-        const normalized = normalizeE164(raw);
-        if (!normalized) {
-          return `Invalid number: ${raw}`;
-        }
-        return undefined;
-      },
+    return await applyWhatsAppOwnerAllowlist({
+      cfg,
+      prompter,
+      existingAllowFrom,
+      title: "WhatsApp allowlist",
+      messageLines: ["Allowlist mode enabled."],
     });
-    const normalized = normalizeE164(String(entry).trim());
-    const merged = [
-      ...existingAllowFrom
-        .filter((item) => item !== "*")
-        .map((item) => normalizeE164(item))
-        .filter(Boolean),
-      normalized,
-    ];
-    const unique = [...new Set(merged.filter(Boolean))];
-    let next = setWhatsAppSelfChatMode(cfg, true);
-    next = setWhatsAppDmPolicy(next, "allowlist");
-    next = setWhatsAppAllowFrom(next, unique);
-    await prompter.note(
-      ["Allowlist mode enabled.", `- allowFrom includes ${normalized}`].join("\n"),
-      "WhatsApp allowlist",
-    );
-    return next;
   }
 
   await prompter.note(
@@ -105,52 +138,21 @@ async function promptWhatsAppAllowFrom(
     message: "WhatsApp phone setup",
     options: [
       { value: "personal", label: "This is my personal phone number" },
-      { value: "separate", label: "Separate phone just for Hanzo Bot" },
+      { value: "separate", label: "Separate phone just for Bot" },
     ],
   });
 
   if (phoneMode === "personal") {
-    await prompter.note(
-      "We need the sender/owner number so Hanzo Bot can allowlist you.",
-      "WhatsApp number",
-    );
-    const entry = await prompter.text({
-      message: "Your personal WhatsApp number (the phone you will message from)",
-      placeholder: "+15555550123",
-      initialValue: existingAllowFrom[0],
-      validate: (value) => {
-        const raw = String(value ?? "").trim();
-        if (!raw) {
-          return "Required";
-        }
-        const normalized = normalizeE164(raw);
-        if (!normalized) {
-          return `Invalid number: ${raw}`;
-        }
-        return undefined;
-      },
-    });
-    const normalized = normalizeE164(String(entry).trim());
-    const merged = [
-      ...existingAllowFrom
-        .filter((item) => item !== "*")
-        .map((item) => normalizeE164(item))
-        .filter(Boolean),
-      normalized,
-    ];
-    const unique = [...new Set(merged.filter(Boolean))];
-    let next = setWhatsAppSelfChatMode(cfg, true);
-    next = setWhatsAppDmPolicy(next, "allowlist");
-    next = setWhatsAppAllowFrom(next, unique);
-    await prompter.note(
-      [
+    return await applyWhatsAppOwnerAllowlist({
+      cfg,
+      prompter,
+      existingAllowFrom,
+      title: "WhatsApp personal phone",
+      messageLines: [
         "Personal phone mode enabled.",
         "- dmPolicy set to allowlist (pairing skipped)",
-        `- allowFrom includes ${normalized}`,
-      ].join("\n"),
-      "WhatsApp personal phone",
-    );
-    return next;
+      ],
+    });
   }
 
   const policy = (await prompter.select({
@@ -331,7 +333,7 @@ export const whatsappOnboardingAdapter: ChannelOnboardingAdapter = {
       }
     } else if (!linked) {
       await prompter.note(
-        `Run \`${formatCliCommand("hanzo-bot channels login")}\` later to link WhatsApp.`,
+        `Run \`${formatCliCommand("bot channels login")}\` later to link WhatsApp.`,
         "WhatsApp",
       );
     }

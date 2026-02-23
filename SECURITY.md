@@ -1,6 +1,6 @@
 # Security Policy
 
-If you believe you've found a security issue in Hanzo Bot, please report it privately.
+If you believe you've found a security issue in Bot, please report it privately.
 
 ## Reporting
 
@@ -10,12 +10,12 @@ Report vulnerabilities directly to the repository where the issue lives:
 - **macOS desktop app** — [bot/bot](https://github.com/hanzoai/bot) (apps/macos)
 - **iOS app** — [bot/bot](https://github.com/hanzoai/bot) (apps/ios)
 - **Android app** — [bot/bot](https://github.com/hanzoai/bot) (apps/android)
-- **Hanzo Skills Hub** — [bot/skills-hub](https://github.com/bot/skills-hub)
+- **BotHub** — [bot/bothub](https://github.com/hanzoai/bothub)
 - **Trust and threat model** — [bot/trust](https://github.com/bot/trust)
 
 For issues that don't fit a specific repo, or if you're unsure, email **security@hanzo.bot** and we'll route it.
 
-For full reporting instructions see our [Trust page](https://trust.bot.ai).
+For full reporting instructions see our [Trust page](https://trust.hanzo.bot).
 
 ### Required in Reports
 
@@ -32,34 +32,51 @@ Reports without reproduction steps, demonstrated impact, and remediation advice 
 
 ## Security & Trust
 
-**Jamieson O'Reilly** ([@theonejvo](https://twitter.com/theonejvo)) is Security & Trust at Hanzo Bot. Jamieson is the founder of [Dvuln](https://dvuln.com) and brings extensive experience in offensive security, penetration testing, and security program development.
+**Jamieson O'Reilly** ([@theonejvo](https://twitter.com/theonejvo)) is Security & Trust at Bot. Jamieson is the founder of [Dvuln](https://dvuln.com) and brings extensive experience in offensive security, penetration testing, and security program development.
 
 ## Bug Bounties
 
-Hanzo Bot is a labor of love. There is no bug bounty program and no budget for paid reports. Please still disclose responsibly so we can fix issues quickly.
+Bot is a labor of love. There is no bug bounty program and no budget for paid reports. Please still disclose responsibly so we can fix issues quickly.
 The best way to help the project right now is by sending PRs.
+
+## Maintainers: GHSA Updates via CLI
+
+When patching a GHSA via `gh api`, include `X-GitHub-Api-Version: 2022-11-28` (or newer). Without it, some fields (notably CVSS) may not persist even if the request returns 200.
 
 ## Out of Scope
 
 - Public Internet Exposure
-- Using Hanzo Bot in ways that the docs recommend not to
+- Using Bot in ways that the docs recommend not to
 - Prompt injection attacks
 
 ## Operational Guidance
 
-For threat model + hardening guidance (including `hanzo-bot security audit --deep` and `--fix`), see:
+For threat model + hardening guidance (including `bot security audit --deep` and `--fix`), see:
 
 - `https://docs.hanzo.bot/gateway/security`
 
+### Tool filesystem hardening
+
+- `tools.exec.applyPatch.workspaceOnly: true` (recommended): keeps `apply_patch` writes/deletes within the configured workspace directory.
+- `tools.fs.workspaceOnly: true` (optional): restricts `read`/`write`/`edit`/`apply_patch` paths to the workspace directory.
+- Avoid setting `tools.exec.applyPatch.workspaceOnly: false` unless you fully trust who can trigger tool execution.
+
 ### Web Interface Safety
 
-Hanzo Bot's web interface is intended for local use only. Do **not** bind it to the public internet; it is not hardened for public exposure.
+Bot's web interface (Gateway Control UI + HTTP endpoints) is intended for **local use only**.
+
+- Recommended: keep the Gateway **loopback-only** (`127.0.0.1` / `::1`).
+  - Config: `gateway.bind="loopback"` (default).
+  - CLI: `bot gateway run --bind loopback`.
+- Do **not** expose it to the public internet (no direct bind to `0.0.0.0`, no public reverse proxy). It is not hardened for public exposure.
+- If you need remote access, prefer an SSH tunnel or Tailscale serve/funnel (so the Gateway still binds to loopback), plus strong Gateway auth.
+- The Gateway HTTP surface includes the canvas host (`/__bot__/canvas/`, `/__bot__/a2ui/`). Treat canvas content as sensitive/untrusted and avoid exposing it beyond loopback unless you understand the risk.
 
 ## Runtime Requirements
 
 ### Node.js Version
 
-Hanzo Bot requires **Node.js 22.12.0 or later** (LTS). This version includes important security patches:
+Bot requires **Node.js 22.12.0 or later** (LTS). This version includes important security patches:
 
 - CVE-2025-59466: async_hooks DoS vulnerability
 - CVE-2026-21636: Permission model bypass vulnerability
@@ -72,7 +89,7 @@ node --version  # Should be v22.12.0 or later
 
 ### Docker Security
 
-When running Hanzo Bot in Docker:
+When running Bot in Docker:
 
 1. The official image runs as a non-root user (`node`) for reduced attack surface
 2. Use `--read-only` flag when possible for additional filesystem protection

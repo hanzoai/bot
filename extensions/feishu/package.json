@@ -1,17 +1,17 @@
 {
   "name": "@hanzo/bot-feishu",
-  "version": "2026.2.10",
-  "description": "HanzoBot Feishu/Lark channel plugin (community maintained by @m1heng)",
+  "version": "2026.2.23",
+  "description": "Hanzo Bot Feishu/Lark channel plugin (community maintained by @m1heng)",
   "type": "module",
   "dependencies": {
-    "@larksuiteoapi/node-sdk": "^1.58.0",
+    "@larksuiteoapi/node-sdk": "^1.59.0",
     "@sinclair/typebox": "0.34.48",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],

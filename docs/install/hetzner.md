@@ -1,28 +1,28 @@
 ---
-summary: "Run Hanzo Bot Gateway 24/7 on a cheap Hetzner VPS (Docker) with durable state and baked-in binaries"
+summary: "Run Bot Gateway 24/7 on a cheap Hetzner VPS (Docker) with durable state and baked-in binaries"
 read_when:
-  - You want Hanzo Bot running 24/7 on a cloud VPS (not your laptop)
+  - You want Bot running 24/7 on a cloud VPS (not your laptop)
   - You want a production-grade, always-on Gateway on your own VPS
   - You want full control over persistence, binaries, and restart behavior
-  - You are running Hanzo Bot in Docker on Hetzner or a similar provider
+  - You are running Bot in Docker on Hetzner or a similar provider
 title: "Hetzner"
 ---
 
-# Hanzo Bot on Hetzner (Docker, Production VPS Guide)
+# Bot on Hetzner (Docker, Production VPS Guide)
 
 ## Goal
 
-Run a persistent Hanzo Bot Gateway on a Hetzner VPS using Docker, with durable state, baked-in binaries, and safe restart behavior.
+Run a persistent Bot Gateway on a Hetzner VPS using Docker, with durable state, baked-in binaries, and safe restart behavior.
 
-If you want “Hanzo Bot 24/7 for ~$5”, this is the simplest reliable setup.
+If you want “Bot 24/7 for ~$5”, this is the simplest reliable setup.
 Hetzner pricing changes; pick the smallest Debian/Ubuntu VPS and scale up if you hit OOMs.
 
 ## What are we doing (simple terms)?
 
 - Rent a small Linux server (Hetzner VPS)
 - Install Docker (isolated app runtime)
-- Start the Hanzo Bot Gateway in Docker
-- Persist `~/.hanzo/bot` + `~/.hanzo/bot/workspace` on the host (survives restarts/rebuilds)
+- Start the Bot Gateway in Docker
+- Persist `~/.bot` + `~/.bot/workspace` on the host (survives restarts/rebuilds)
 - Access the Control UI from your laptop via an SSH tunnel
 
 The Gateway can be accessed via:
@@ -40,7 +40,7 @@ For the generic Docker flow, see [Docker](/install/docker).
 
 1. Provision Hetzner VPS
 2. Install Docker
-3. Clone Hanzo Bot repository
+3. Clone Bot repository
 4. Create persistent host directories
 5. Configure `.env` and `docker-compose.yml`
 6. Bake required binaries into the image
@@ -96,7 +96,7 @@ docker compose version
 
 ---
 
-## 3) Clone the Hanzo Bot repository
+## 3) Clone the Bot repository
 
 ```bash
 git clone https://github.com/hanzoai/bot.git
@@ -113,7 +113,7 @@ Docker containers are ephemeral.
 All long-lived state must live on the host.
 
 ```bash
-mkdir -p /root/.hanzo/bot/workspace
+mkdir -p /root/.bot/workspace
 
 # Set ownership to the container user (uid 1000):
 chown -R 1000:1000 /root/.bot
@@ -132,7 +132,7 @@ BOT_GATEWAY_BIND=lan
 BOT_GATEWAY_PORT=18789
 
 BOT_CONFIG_DIR=/root/.bot
-BOT_WORKSPACE_DIR=/root/.hanzo/bot/workspace
+BOT_WORKSPACE_DIR=/root/.bot/workspace
 
 GOG_KEYRING_PASSWORD=change-me-now
 XDG_CONFIG_HOME=/home/node/.bot
@@ -172,15 +172,11 @@ services:
       - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     volumes:
       - ${BOT_CONFIG_DIR}:/home/node/.bot
-      - ${BOT_WORKSPACE_DIR}:/home/node/.hanzo/bot/workspace
+      - ${BOT_WORKSPACE_DIR}:/home/node/.bot/workspace
     ports:
       # Recommended: keep the Gateway loopback-only on the VPS; access via SSH tunnel.
       # To expose it publicly, remove the `127.0.0.1:` prefix and firewall accordingly.
       - "127.0.0.1:${BOT_GATEWAY_PORT}:18789"
-
-      # Optional: only if you run iOS/Android nodes against this VPS and need Canvas host.
-      # If you expose this publicly, read /gateway/security and firewall accordingly.
-      # - "18793:18793"
     command:
       [
         "node",
@@ -314,18 +310,39 @@ Paste your gateway token.
 
 ## What persists where (source of truth)
 
-Hanzo Bot runs in Docker, but Docker is not the source of truth.
+Bot runs in Docker, but Docker is not the source of truth.
 All long-lived state must survive restarts, rebuilds, and reboots.
 
-| Component           | Location                           | Persistence mechanism  | Notes                           |
-| ------------------- | ---------------------------------- | ---------------------- | ------------------------------- |
-| Gateway config      | `/home/node/.hanzo/bot/`           | Host volume mount      | Includes `bot.json`, tokens     |
-| Model auth profiles | `/home/node/.hanzo/bot/`           | Host volume mount      | OAuth tokens, API keys          |
-| Skill configs       | `/home/node/.hanzo/bot/skills/`    | Host volume mount      | Skill-level state               |
-| Agent workspace     | `/home/node/.hanzo/bot/workspace/` | Host volume mount      | Code and agent artifacts        |
-| WhatsApp session    | `/home/node/.hanzo/bot/`           | Host volume mount      | Preserves QR login              |
-| Gmail keyring       | `/home/node/.hanzo/bot/`           | Host volume + password | Requires `GOG_KEYRING_PASSWORD` |
-| External binaries   | `/usr/local/bin/`                  | Docker image           | Must be baked at build time     |
-| Node runtime        | Container filesystem               | Docker image           | Rebuilt every image build       |
-| OS packages         | Container filesystem               | Docker image           | Do not install at runtime       |
-| Docker container    | Ephemeral                          | Restartable            | Safe to destroy                 |
+| Component           | Location                     | Persistence mechanism  | Notes                           |
+| ------------------- | ---------------------------- | ---------------------- | ------------------------------- |
+| Gateway config      | `/home/node/.bot/`           | Host volume mount      | Includes `bot.json`, tokens     |
+| Model auth profiles | `/home/node/.bot/`           | Host volume mount      | OAuth tokens, API keys          |
+| Skill configs       | `/home/node/.bot/skills/`    | Host volume mount      | Skill-level state               |
+| Agent workspace     | `/home/node/.bot/workspace/` | Host volume mount      | Code and agent artifacts        |
+| WhatsApp session    | `/home/node/.bot/`           | Host volume mount      | Preserves QR login              |
+| Gmail keyring       | `/home/node/.bot/`           | Host volume + password | Requires `GOG_KEYRING_PASSWORD` |
+| External binaries   | `/usr/local/bin/`            | Docker image           | Must be baked at build time     |
+| Node runtime        | Container filesystem         | Docker image           | Rebuilt every image build       |
+| OS packages         | Container filesystem         | Docker image           | Do not install at runtime       |
+| Docker container    | Ephemeral                    | Restartable            | Safe to destroy                 |
+
+---
+
+## Infrastructure as Code (Terraform)
+
+For teams preferring infrastructure-as-code workflows, a community-maintained Terraform setup provides:
+
+- Modular Terraform configuration with remote state management
+- Automated provisioning via cloud-init
+- Deployment scripts (bootstrap, deploy, backup/restore)
+- Security hardening (firewall, UFW, SSH-only access)
+- SSH tunnel configuration for gateway access
+
+**Repositories:**
+
+- Infrastructure: [bot-terraform-hetzner](https://github.com/andreesg/bot-terraform-hetzner)
+- Docker config: [bot-docker-config](https://github.com/andreesg/bot-docker-config)
+
+This approach complements the Docker setup above with reproducible deployments, version-controlled infrastructure, and automated disaster recovery.
+
+> **Note:** Community-maintained. For issues or contributions, see the repository links above.

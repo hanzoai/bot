@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { discoverBotPlugins } from "./discovery.js";
 
 const tempDirs: string[] = [];
 
@@ -18,7 +19,6 @@ async function withStateDir<T>(stateDir: string, fn: () => Promise<T>) {
   const prevBundled = process.env.BOT_BUNDLED_PLUGINS_DIR;
   process.env.BOT_STATE_DIR = stateDir;
   process.env.BOT_BUNDLED_PLUGINS_DIR = "/nonexistent/bundled/plugins";
-  vi.resetModules();
   try {
     return await fn();
   } finally {
@@ -32,7 +32,6 @@ async function withStateDir<T>(stateDir: string, fn: () => Promise<T>) {
     } else {
       process.env.BOT_BUNDLED_PLUGINS_DIR = prevBundled;
     }
-    vi.resetModules();
   }
 }
 
@@ -60,7 +59,6 @@ describe("discoverBotPlugins", () => {
     fs.writeFileSync(path.join(workspaceExt, "beta.ts"), "export default function () {}", "utf-8");
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      const { discoverBotPlugins } = await import("./discovery.js");
       return discoverBotPlugins({ workspaceDir });
     });
 
@@ -94,7 +92,6 @@ describe("discoverBotPlugins", () => {
     );
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      const { discoverBotPlugins } = await import("./discovery.js");
       return discoverBotPlugins({});
     });
 
@@ -111,7 +108,7 @@ describe("discoverBotPlugins", () => {
     fs.writeFileSync(
       path.join(globalExt, "package.json"),
       JSON.stringify({
-        name: "@hanzo/bot-voice-call",
+        name: "@bot/voice-call",
         bot: { extensions: ["./src/index.ts"] },
       }),
       "utf-8",
@@ -123,7 +120,6 @@ describe("discoverBotPlugins", () => {
     );
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      const { discoverBotPlugins } = await import("./discovery.js");
       return discoverBotPlugins({});
     });
 
@@ -139,7 +135,7 @@ describe("discoverBotPlugins", () => {
     fs.writeFileSync(
       path.join(packDir, "package.json"),
       JSON.stringify({
-        name: "@hanzo/bot-demo-plugin-dir",
+        name: "@bot/demo-plugin-dir",
         bot: { extensions: ["./index.js"] },
       }),
       "utf-8",
@@ -147,7 +143,6 @@ describe("discoverBotPlugins", () => {
     fs.writeFileSync(path.join(packDir, "index.js"), "module.exports = {}", "utf-8");
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      const { discoverBotPlugins } = await import("./discovery.js");
       return discoverBotPlugins({ extraPaths: [packDir] });
     });
 

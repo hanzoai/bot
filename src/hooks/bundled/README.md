@@ -1,6 +1,6 @@
 # Bundled Hooks
 
-This directory contains hooks that ship with Hanzo Bot. These hooks are automatically discovered and can be enabled/disabled via CLI or configuration.
+This directory contains hooks that ship with Bot. These hooks are automatically discovered and can be enabled/disabled via CLI or configuration.
 
 ## Available Hooks
 
@@ -10,12 +10,26 @@ Automatically saves session context to memory when you issue `/new`.
 
 **Events**: `command:new`
 **What it does**: Creates a dated memory file with LLM-generated slug based on conversation content.
-**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.hanzo/bot/workspace`)
+**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.bot/workspace`)
 
 **Enable**:
 
 ```bash
-hanzo-bot hooks enable session-memory
+bot hooks enable session-memory
+```
+
+### 📎 bootstrap-extra-files
+
+Injects extra bootstrap files (for example monorepo `AGENTS.md`/`TOOLS.md`) during prompt assembly.
+
+**Events**: `agent:bootstrap`
+**What it does**: Expands configured workspace glob/path patterns and appends matching bootstrap files to injected context.
+**Output**: No files written; context is modified in-memory only.
+
+**Enable**:
+
+```bash
+bot hooks enable bootstrap-extra-files
 ```
 
 ### 📝 command-logger
@@ -24,27 +38,12 @@ Logs all command events to a centralized audit file.
 
 **Events**: `command` (all commands)
 **What it does**: Appends JSONL entries to command log file.
-**Output**: `~/.hanzo/bot/logs/commands.log`
+**Output**: `~/.bot/logs/commands.log`
 
 **Enable**:
 
 ```bash
-hanzo-bot hooks enable command-logger
-```
-
-### 😈 soul-evil
-
-Swaps injected `SOUL.md` content with `SOUL_EVIL.md` during a purge window or by random chance.
-
-**Events**: `agent:bootstrap`
-**What it does**: Overrides the injected SOUL content before the system prompt is built.
-**Output**: No files written; swaps happen in-memory only.
-**Docs**: https://docs.hanzo.bot/hooks/soul-evil
-
-**Enable**:
-
-```bash
-hanzo-bot hooks enable soul-evil
+bot hooks enable command-logger
 ```
 
 ### 🚀 boot-md
@@ -58,7 +57,7 @@ Runs `BOOT.md` whenever the gateway starts (after channels start).
 **Enable**:
 
 ```bash
-hanzo-bot hooks enable boot-md
+bot hooks enable boot-md
 ```
 
 ## Hook Structure
@@ -82,7 +81,7 @@ session-memory/
 ---
 name: my-hook
 description: "Short description"
-homepage: https://docs.hanzo.bot/hooks#my-hook
+homepage: https://docs.hanzo.bot/automation/hooks#my-hook
 metadata: { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
 ---
 # Hook Title
@@ -107,7 +106,7 @@ Documentation goes here...
 To create your own hooks, place them in:
 
 - **Workspace hooks**: `<workspace>/hooks/` (highest precedence)
-- **Managed hooks**: `~/.hanzo/bot/hooks/` (shared across workspaces)
+- **Managed hooks**: `~/.bot/hooks/` (shared across workspaces)
 
 Custom hooks follow the same structure as bundled hooks.
 
@@ -116,31 +115,31 @@ Custom hooks follow the same structure as bundled hooks.
 List all hooks:
 
 ```bash
-hanzo-bot hooks list
+bot hooks list
 ```
 
 Show hook details:
 
 ```bash
-hanzo-bot hooks info session-memory
+bot hooks info session-memory
 ```
 
 Check hook status:
 
 ```bash
-hanzo-bot hooks check
+bot hooks check
 ```
 
 Enable/disable:
 
 ```bash
-hanzo-bot hooks enable session-memory
-hanzo-bot hooks disable command-logger
+bot hooks enable session-memory
+bot hooks disable command-logger
 ```
 
 ## Configuration
 
-Hooks can be configured in `~/.hanzo/bot/bot.json`:
+Hooks can be configured in `~/.bot/bot.json`:
 
 ```json
 {
@@ -213,11 +212,11 @@ export default myHandler;
 Test your hooks by:
 
 1. Place hook in workspace hooks directory
-2. Restart gateway: `pkill -9 -f 'bot.*gateway' && pnpm hanzo-bot gateway`
-3. Enable the hook: `hanzo-bot hooks enable my-hook`
+2. Restart gateway: `pkill -9 -f 'bot.*gateway' && pnpm bot gateway`
+3. Enable the hook: `bot hooks enable my-hook`
 4. Trigger the event (e.g., send `/new` command)
 5. Check gateway logs for hook execution
 
 ## Documentation
 
-Full documentation: https://docs.hanzo.bot/hooks
+Full documentation: https://docs.hanzo.bot/automation/hooks

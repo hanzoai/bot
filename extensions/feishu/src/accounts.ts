@@ -1,5 +1,5 @@
 import type { BotConfig } from "bot/plugin-sdk";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
 import type {
   FeishuConfig,
   FeishuAccountConfig,
@@ -45,10 +45,7 @@ export function resolveDefaultFeishuAccountId(cfg: BotConfig): string {
 /**
  * Get the raw account-specific config.
  */
-function resolveAccountConfig(
-  cfg: BotConfig,
-  accountId: string,
-): FeishuAccountConfig | undefined {
+function resolveAccountConfig(cfg: BotConfig, accountId: string): FeishuAccountConfig | undefined {
   const accounts = (cfg.channels?.feishu as FeishuConfig)?.accounts;
   if (!accounts || typeof accounts !== "object") {
     return undefined;

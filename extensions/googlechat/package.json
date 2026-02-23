@@ -1,19 +1,19 @@
 {
   "name": "@hanzo/bot-googlechat",
-  "version": "2026.2.10",
+  "version": "2026.2.23",
   "private": true,
-  "description": "HanzoBot Google Chat channel plugin",
+  "description": "Hanzo Bot Google Chat channel plugin",
   "type": "module",
   "dependencies": {
     "google-auth-library": "^10.5.0"
   },
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "hanzo-bot": ">=2026.1.26"
+    "@hanzo/bot": ">=2026.1.26"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],

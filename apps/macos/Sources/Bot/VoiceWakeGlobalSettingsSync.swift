@@ -1,12 +1,12 @@
-import BotKit
 import Foundation
+import BotKit
 import OSLog
 
 @MainActor
 final class VoiceWakeGlobalSettingsSync {
     static let shared = VoiceWakeGlobalSettingsSync()
 
-    private let logger = Logger(subsystem: "ai.hanzo.bot", category: "voicewake.sync")
+    private let logger = Logger(subsystem: "ai.bot", category: "voicewake.sync")
     private var task: Task<Void, Never>?
 
     private struct VoiceWakePayload: Codable, Equatable {

@@ -16,7 +16,7 @@ x-i18n:
 
 # Nix 安装
 
-使用 Nix 运行 Hanzo Bot 的推荐方式是通过 **[nix-bot](https://github.com/bot/nix-bot)** — 一个开箱即用的 Home Manager 模块。
+使用 Nix 运行 Hanzo Bot 的推荐方式是通过 **[nix-bot](https://github.com/hanzoai/nix-bot)** — 一个开箱即用的 Home Manager 模块。
 
 ## 快速开始
 
@@ -37,7 +37,7 @@ What I need you to do:
 Reference the nix-hanzo-bot README for module options.
 ```
 
-> **📦 完整指南：[github.com/bot/nix-bot](https://github.com/bot/nix-bot)**
+> **📦 完整指南：[github.com/hanzoai/nix-bot](https://github.com/hanzoai/nix-bot)**
 >
 > nix-hanzo-bot 仓库是 Nix 安装的权威来源。本页只是一个快速概述。
 
@@ -64,7 +64,7 @@ BOT_NIX_MODE=1
 在 macOS 上，GUI 应用不会自动继承 shell 环境变量。你也可以通过 defaults 启用 Nix 模式：
 
 ```bash
-defaults write bot.molt.mac bot.nixMode -bool true
+defaults write ai.hanzo.bot.mac bot.nixMode -bool true
 ```
 
 ### 配置 + 状态路径
@@ -94,6 +94,6 @@ apps/macos/Sources/Hanzo Bot/Resources/Info.plist
 
 ## 相关内容
 
-- [nix-bot](https://github.com/bot/nix-bot) — 完整设置指南
+- [nix-bot](https://github.com/hanzoai/nix-bot) — 完整设置指南
 - [向导](/start/wizard) — 非 Nix CLI 设置
 - [Docker](/install/docker) — 容器化设置

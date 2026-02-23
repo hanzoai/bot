@@ -1,7 +1,7 @@
 ---
 name: session-memory
 description: "Save session context to memory when /new command is issued"
-homepage: https://docs.hanzo.bot/hooks#session-memory
+homepage: https://docs.hanzo.bot/automation/hooks#session-memory
 metadata:
   {
     "bot":
@@ -9,7 +9,7 @@ metadata:
         "emoji": "💾",
         "events": ["command:new"],
         "requires": { "config": ["workspace.dir"] },
-        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with Hanzo Bot" }],
+        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with Bot" }],
       },
   }
 ---
@@ -82,7 +82,7 @@ Example configuration:
 
 The hook automatically:
 
-- Uses your workspace directory (`~/.hanzo/bot/workspace` by default)
+- Uses your workspace directory (`~/.bot/workspace` by default)
 - Uses your configured LLM for slug generation
 - Falls back to timestamp slugs if LLM is unavailable
 
@@ -91,7 +91,7 @@ The hook automatically:
 To disable this hook:
 
 ```bash
-hanzo-bot hooks disable session-memory
+bot hooks disable session-memory
 ```
 
 Or remove it from your config:

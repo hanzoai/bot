@@ -1,4 +1,5 @@
 import type { GatewayRequestHandlers, GatewayRequestOptions } from "./server-methods/types.js";
+import { checkBillingAllowance } from "./billing/billing-gate.js";
 import { ErrorCodes, errorShape } from "./protocol/index.js";
 import { agentHandlers } from "./server-methods/agent.js";
 import { agentsHandlers } from "./server-methods/agents.js";
@@ -11,7 +12,6 @@ import { cronHandlers } from "./server-methods/cron.js";
 import { deviceHandlers } from "./server-methods/devices.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
 import { healthHandlers } from "./server-methods/health.js";
-import { identityHandlers } from "./server-methods/identity.js";
 import { logsHandlers } from "./server-methods/logs.js";
 import { modelsHandlers } from "./server-methods/models.js";
 import { nodeHandlers } from "./server-methods/nodes.js";
@@ -20,10 +20,10 @@ import { sessionsHandlers } from "./server-methods/sessions.js";
 import { skillsHandlers } from "./server-methods/skills.js";
 import { systemHandlers } from "./server-methods/system.js";
 import { talkHandlers } from "./server-methods/talk.js";
-import { teamHandlers } from "./server-methods/team.js";
 import { ttsHandlers } from "./server-methods/tts.js";
 import { updateHandlers } from "./server-methods/update.js";
 import { usageHandlers } from "./server-methods/usage.js";
+import { vncHandlers } from "./server-methods/vnc.js";
 import { voicewakeHandlers } from "./server-methods/voicewake.js";
 import { webHandlers } from "./server-methods/web.js";
 import { wizardHandlers } from "./server-methods/wizard.js";
@@ -34,7 +34,11 @@ const WRITE_SCOPE = "operator.write";
 const APPROVALS_SCOPE = "operator.approvals";
 const PAIRING_SCOPE = "operator.pairing";
 
-const APPROVAL_METHODS = new Set(["exec.approval.request", "exec.approval.resolve"]);
+const APPROVAL_METHODS = new Set([
+  "exec.approval.request",
+  "exec.approval.waitDecision",
+  "exec.approval.resolve",
+]);
 const NODE_ROLE_METHODS = new Set(["node.invoke.result", "node.event", "skills.bins"]);
 const PAIRING_METHODS = new Set([
   "node.pair.request",
@@ -49,6 +53,7 @@ const PAIRING_METHODS = new Set([
   "device.token.revoke",
   "node.rename",
 ]);
+const BILLABLE_METHODS = new Set(["agent", "agent.wait", "chat.send"]);
 const ADMIN_METHOD_PREFIXES = ["exec.approvals."];
 const READ_METHODS = new Set([
   "health",
@@ -74,11 +79,9 @@ const READ_METHODS = new Set([
   "node.list",
   "node.describe",
   "chat.history",
-  "team.presets.list",
-  "team.presets.get",
-  "agent.did.get",
-  "agent.wallet.get",
-  "agent.identity.full",
+  "config.get",
+  "talk.config",
+  "screen.vnc",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -162,11 +165,7 @@ function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["c
     method === "sessions.patch" ||
     method === "sessions.reset" ||
     method === "sessions.delete" ||
-    method === "sessions.compact" ||
-    method === "team.provision" ||
-    method === "team.provision.all" ||
-    method === "agent.did.create" ||
-    method === "agent.wallet.create"
+    method === "sessions.compact"
   ) {
     return errorShape(ErrorCodes.INVALID_REQUEST, "missing scope: operator.admin");
   }
@@ -199,8 +198,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...agentHandlers,
   ...agentsHandlers,
   ...browserHandlers,
-  ...teamHandlers,
-  ...identityHandlers,
+  ...vncHandlers,
 };
 
 export async function handleGatewayRequest(
@@ -212,6 +210,19 @@ export async function handleGatewayRequest(
     respond(false, undefined, authError);
     return;
   }
+
+  // Billing gate: block LLM-triggering methods when tenant has no credits
+  if (BILLABLE_METHODS.has(req.method) && context.iamConfig) {
+    const billing = await checkBillingAllowance({
+      iamConfig: context.iamConfig,
+      tenant: client?.tenant ?? null,
+    });
+    if (!billing.allowed) {
+      respond(false, undefined, errorShape(ErrorCodes.BILLING_ERROR, billing.reason));
+      return;
+    }
+  }
+
   const handler = opts.extraHandlers?.[req.method] ?? coreGatewayHandlers[req.method];
   if (!handler) {
     respond(

@@ -1,5 +1,6 @@
 import { LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import type { ControlUiBootstrapIamConfig } from "../../../src/gateway/control-ui-contract.js";
 import type { EventLogEntry } from "./app-events.ts";
 import type { AppViewState } from "./app-view-state.ts";
 import type { DevicePairingList } from "./controllers/devices.ts";
@@ -29,6 +30,7 @@ import type {
   NostrProfile,
 } from "./types.ts";
 import type { NostrProfileFormState } from "./views/channels.nostr-profile-form.ts";
+import { i18n, I18nController, type Locale } from "../i18n/index.ts";
 import {
   handleChannelConfigReload as handleChannelConfigReloadInternal,
   handleChannelConfigSave as handleChannelConfigSaveInternal,
@@ -76,8 +78,9 @@ import {
   type ToolStreamEntry,
   type CompactionStatus,
 } from "./app-tool-stream.ts";
-import { resolveInjectedAssistantIdentity } from "./assistant-identity.ts";
+import { normalizeAssistantIdentity } from "./assistant-identity.ts";
 import { loadAssistantIdentity as loadAssistantIdentityInternal } from "./controllers/assistant-identity.ts";
+import { startIamLogin, getIamSignupUrl, iamLogout } from "./controllers/iam-auth.ts";
 import { loadSettings, type UiSettings } from "./storage.ts";
 import { type ChatAttachment, type ChatQueueItem, type CronFormState } from "./ui-types.ts";
 
@@ -87,7 +90,7 @@ declare global {
   }
 }
 
-const injectedAssistantIdentity = resolveInjectedAssistantIdentity();
+const bootAssistantIdentity = normalizeAssistantIdentity({});
 
 function resolveOnboardingMode(): boolean {
   if (!window.location.search) {
@@ -104,7 +107,17 @@ function resolveOnboardingMode(): boolean {
 
 @customElement("bot-app")
 export class BotApp extends LitElement {
+  private i18nController = new I18nController(this);
   @state() settings: UiSettings = loadSettings();
+  constructor() {
+    super();
+    if (this.settings.locale) {
+      const supportedLocales: Locale[] = ["en", "zh-CN", "zh-TW", "pt-BR"];
+      if (supportedLocales.includes(this.settings.locale as Locale)) {
+        void i18n.setLocale(this.settings.locale as Locale);
+      }
+    }
+  }
   @state() password = "";
   @state() tab: Tab = "chat";
   @state() onboarding = resolveOnboardingMode();
@@ -118,9 +131,14 @@ export class BotApp extends LitElement {
   private toolStreamSyncTimer: number | null = null;
   private sidebarCloseTimer: number | null = null;
 
-  @state() assistantName = injectedAssistantIdentity.name;
-  @state() assistantAvatar = injectedAssistantIdentity.avatar;
-  @state() assistantAgentId = injectedAssistantIdentity.agentId ?? null;
+  @state() assistantName = bootAssistantIdentity.name;
+  @state() assistantAvatar = bootAssistantIdentity.avatar;
+  @state() assistantAgentId = bootAssistantIdentity.agentId ?? null;
+
+  @state() authMode: string | null = null;
+  @state() iamConfig: ControlUiBootstrapIamConfig | null = null;
+  @state() iamUser: { email?: string; name?: string; avatar?: string } | null = null;
+  @state() iamLoggingIn = false;
 
   @state() sessionKey = this.settings.sessionKey;
   @state() chatLoading = false;
@@ -340,6 +358,7 @@ export class BotApp extends LitElement {
   basePath = "";
   private popStateHandler = () =>
     onPopStateInternal(this as unknown as Parameters<typeof onPopStateInternal>[0]);
+  postMessageHandler: ((event: MessageEvent) => void) | null = null;
   private themeMedia: MediaQueryList | null = null;
   private themeMediaHandler: ((event: MediaQueryListEvent) => void) | null = null;
   private topbarObserver: ResizeObserver | null = null;
@@ -368,6 +387,25 @@ export class BotApp extends LitElement {
 
   connect() {
     connectGatewayInternal(this as unknown as Parameters<typeof connectGatewayInternal>[0]);
+  }
+
+  connectGateway() {
+    connectGatewayInternal(this as unknown as Parameters<typeof connectGatewayInternal>[0]);
+  }
+
+  handleIamLogin() {
+    void startIamLogin(this as unknown as Parameters<typeof startIamLogin>[0]);
+  }
+
+  handleIamSignup() {
+    const url = getIamSignupUrl(this as unknown as Parameters<typeof getIamSignupUrl>[0]);
+    if (url) {
+      window.open(url, "_blank", "noopener");
+    }
+  }
+
+  handleIamLogout() {
+    iamLogout(this as unknown as Parameters<typeof iamLogout>[0]);
   }
 
   handleChatScroll(event: Event) {

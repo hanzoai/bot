@@ -7,16 +7,16 @@ title: "Security"
 
 # Security 🔒
 
-## Quick check: `hanzo-bot security audit`
+## Quick check: `bot security audit`
 
 See also: [Formal Verification (Security Models)](/security/formal-verification/)
 
 Run this regularly (especially after changing config or exposing network surfaces):
 
 ```bash
-hanzo-bot security audit
-hanzo-bot security audit --deep
-hanzo-bot security audit --fix
+bot security audit
+bot security audit --deep
+bot security audit --fix
 ```
 
 It flags common footguns (Gateway auth exposure, browser control exposure, elevated allowlists, filesystem permissions).
@@ -25,11 +25,11 @@ It flags common footguns (Gateway auth exposure, browser control exposure, eleva
 
 - Tighten `groupPolicy="open"` to `groupPolicy="allowlist"` (and per-account variants) for common channels.
 - Turn `logging.redactSensitive="off"` back to `"tools"`.
-- Tighten local perms (`~/.hanzo/bot` → `700`, config file → `600`, plus common state files like `credentials/*.json`, `agents/*/agent/auth-profiles.json`, and `agents/*/sessions/sessions.json`).
+- Tighten local perms (`~/.bot` → `700`, config file → `600`, plus common state files like `credentials/*.json`, `agents/*/agent/auth-profiles.json`, and `agents/*/sessions/sessions.json`).
 
 Running an AI agent with shell access on your machine is... _spicy_. Here’s how to not get pwned.
 
-Hanzo Bot is both a product and an experiment: you’re wiring frontier-model behavior into real messaging surfaces and real tools. **There is no “perfectly secure” setup.** The goal is to be deliberate about:
+Bot is both a product and an experiment: you’re wiring frontier-model behavior into real messaging surfaces and real tools. **There is no “perfectly secure” setup.** The goal is to be deliberate about:
 
 - who can talk to your bot
 - where the bot is allowed to act
@@ -45,21 +45,22 @@ Start with the smallest access that still works, then widen it as you gain confi
 - **Browser control exposure** (remote nodes, relay ports, remote CDP endpoints).
 - **Local disk hygiene** (permissions, symlinks, config includes, “synced folder” paths).
 - **Plugins** (extensions exist without an explicit allowlist).
+- **Policy drift/misconfig** (sandbox docker settings configured but sandbox mode off; ineffective `gateway.nodes.denyCommands` patterns; global `tools.profile="minimal"` overridden by per-agent profiles; extension plugin tools reachable under permissive tool policy).
 - **Model hygiene** (warn when configured models look legacy; not a hard block).
 
-If you run `--deep`, Hanzo Bot also attempts a best-effort live Gateway probe.
+If you run `--deep`, Bot also attempts a best-effort live Gateway probe.
 
 ## Credential storage map
 
 Use this when auditing access or deciding what to back up:
 
-- **WhatsApp**: `~/.hanzo/bot/credentials/whatsapp/<accountId>/creds.json`
+- **WhatsApp**: `~/.bot/credentials/whatsapp/<accountId>/creds.json`
 - **Telegram bot token**: config/env or `channels.telegram.tokenFile`
 - **Discord bot token**: config/env (token file not yet supported)
 - **Slack tokens**: config/env (`channels.slack.*`)
-- **Pairing allowlists**: `~/.hanzo/bot/credentials/<channel>-allowFrom.json`
-- **Model auth profiles**: `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
-- **Legacy OAuth import**: `~/.hanzo/bot/credentials/oauth.json`
+- **Pairing allowlists**: `~/.bot/credentials/<channel>-allowFrom.json`
+- **Model auth profiles**: `~/.bot/agents/<agentId>/agent/auth-profiles.json`
+- **Legacy OAuth import**: `~/.bot/credentials/oauth.json`
 
 ## Security Audit Checklist
 
@@ -83,7 +84,7 @@ For break-glass scenarios only, `gateway.controlUi.dangerouslyDisableDeviceAuth`
 disables device identity checks entirely. This is a severe security downgrade;
 keep it off unless you are actively debugging and can revert quickly.
 
-`hanzo-bot security audit` warns when this setting is enabled.
+`bot security audit` warns when this setting is enabled.
 
 ## Reverse Proxy Configuration
 
@@ -104,10 +105,10 @@ When `trustedProxies` is configured, the Gateway will use `X-Forwarded-For` head
 
 ## Local session logs live on disk
 
-Hanzo Bot stores session transcripts on disk under `~/.hanzo/bot/agents/<agentId>/sessions/*.jsonl`.
+Bot stores session transcripts on disk under `~/.bot/agents/<agentId>/sessions/*.jsonl`.
 This is required for session continuity and (optionally) session memory indexing, but it also means
 **any process/user with filesystem access can read those logs**. Treat disk access as the trust
-boundary and lock down permissions on `~/.hanzo/bot` (see the audit section below). If you need
+boundary and lock down permissions on `~/.bot` (see the audit section below). If you need
 stronger isolation between agents, run them under separate OS users or separate hosts.
 
 ## Node execution (system.run)
@@ -120,7 +121,7 @@ If a macOS node is paired, the Gateway can invoke `system.run` on that node. Thi
 
 ## Dynamic skills (watcher / remote nodes)
 
-Hanzo Bot can refresh the skills list mid-session:
+Bot can refresh the skills list mid-session:
 
 - **Skills watcher**: changes to `SKILL.md` can update the skills snapshot on the next agent turn.
 - **Remote nodes**: connecting a macOS node can make macOS-only skills eligible (based on bin probing).
@@ -146,7 +147,7 @@ People who message you can:
 
 Most failures here are not fancy exploits — they’re “someone messaged the bot and the bot did what they asked.”
 
-Hanzo Bot’s stance:
+Bot’s stance:
 
 - **Identity first:** decide who can talk to the bot (DM pairing / allowlists / explicit “open”).
 - **Scope next:** decide where the bot is allowed to act (group allowlists + mention gating, tools, sandboxing, device permissions).
@@ -170,9 +171,9 @@ Plugins run **in-process** with the Gateway. Treat them as trusted code:
 - Prefer explicit `plugins.allow` allowlists.
 - Review plugin config before enabling.
 - Restart the Gateway after plugin changes.
-- If you install plugins from npm (`hanzo-bot plugins install <npm-spec>`), treat it like running untrusted code:
-  - The install path is `~/.hanzo/bot/extensions/<pluginId>/` (or `$BOT_STATE_DIR/extensions/<pluginId>/`).
-  - Hanzo Bot uses `npm pack` and then runs `npm install --omit=dev` in that directory (npm lifecycle scripts can execute code during install).
+- If you install plugins from npm (`bot plugins install <npm-spec>`), treat it like running untrusted code:
+  - The install path is `~/.bot/extensions/<pluginId>/` (or `$BOT_STATE_DIR/extensions/<pluginId>/`).
+  - Bot uses `npm pack` and then runs `npm install --omit=dev` in that directory (npm lifecycle scripts can execute code during install).
   - Prefer pinned, exact versions (`@scope/pkg@1.2.3`), and inspect the unpacked code on disk before enabling.
 
 Details: [Plugins](/tools/plugin)
@@ -189,15 +190,15 @@ All current DM-capable channels support a DM policy (`dmPolicy` or `*.dm.policy`
 Approve via CLI:
 
 ```bash
-hanzo-bot pairing list <channel>
-hanzo-bot pairing approve <channel> <code>
+bot pairing list <channel>
+bot pairing approve <channel> <code>
 ```
 
 Details + files on disk: [Pairing](/channels/pairing)
 
 ## DM session isolation (multi-user mode)
 
-By default, Hanzo Bot routes **all DMs into the main session** so your assistant has continuity across devices and channels. If **multiple people** can DM the bot (open DMs or a multi-person allowlist), consider isolating DM sessions:
+By default, Bot routes **all DMs into the main session** so your assistant has continuity across devices and channels. If **multiple people** can DM the bot (open DMs or a multi-person allowlist), consider isolating DM sessions:
 
 ```json5
 {
@@ -218,10 +219,10 @@ If you run multiple accounts on the same channel, use `per-account-channel-peer`
 
 ## Allowlists (DM + groups) — terminology
 
-Hanzo Bot has two separate “who can trigger me?” layers:
+Bot has two separate “who can trigger me?” layers:
 
-- **DM allowlist** (`allowFrom` / `channels.discord.dm.allowFrom` / `channels.slack.dm.allowFrom`): who is allowed to talk to the bot in direct messages.
-  - When `dmPolicy="pairing"`, approvals are written to `~/.hanzo/bot/credentials/<channel>-allowFrom.json` (merged with config allowlists).
+- **DM allowlist** (`allowFrom` / `channels.discord.allowFrom` / `channels.slack.allowFrom`; legacy: `channels.discord.dm.allowFrom`, `channels.slack.dm.allowFrom`): who is allowed to talk to the bot in direct messages.
+  - When `dmPolicy="pairing"`, approvals are written to `~/.bot/credentials/<channel>-allowFrom.json` (merged with config allowlists).
 - **Group allowlist** (channel-specific): which groups/channels/guilds the bot will accept messages from at all.
   - Common patterns:
     - `channels.whatsapp.groups`, `channels.telegram.groups`, `channels.imessage.groups`: per-group defaults like `requireMention`; when set, it also acts as a group allowlist (include `"*"` to keep allow-all behavior).
@@ -250,7 +251,7 @@ Red flags to treat as untrusted:
 - “Read this file/URL and do exactly what it says.”
 - “Ignore your system prompt or safety rules.”
 - “Reveal your hidden instructions or tool outputs.”
-- “Paste the full contents of ~/.hanzo/bot or your logs.”
+- “Paste the full contents of ~/.bot or your logs.”
 
 ### Prompt injection does not require public DMs
 
@@ -265,6 +266,9 @@ tool calls. Reduce the blast radius by:
 - Using a read-only or tool-disabled **reader agent** to summarize untrusted content,
   then pass the summary to your main agent.
 - Keeping `web_search` / `web_fetch` / `browser` off for tool-enabled agents unless needed.
+- For OpenResponses URL inputs (`input_file` / `input_image`), set tight
+  `gateway.http.endpoints.responses.files.urlAllowlist` and
+  `gateway.http.endpoints.responses.images.urlAllowlist`, and keep `maxUrlParts` low.
 - Enabling sandboxing and strict tool allowlists for any agent that touches untrusted input.
 - Keeping secrets out of prompts; pass them via env/config on the gateway host instead.
 
@@ -307,13 +311,13 @@ Assume “compromised” means: someone got into a room that can trigger the bot
    - Check Gateway logs and recent sessions/transcripts for unexpected tool calls.
    - Review `extensions/` and remove anything you don’t fully trust.
 4. **Re-run audit**
-   - `hanzo-bot security audit --deep` and confirm the report is clean.
+   - `bot security audit --deep` and confirm the report is clean.
 
 ## Lessons Learned (The Hard Way)
 
-### The `find ~` Incident
+### The `find ~` Incident B
 
-On Day 1, a friendly tester asked Bot to run `find ~` and share the output. Bot happily dumped the entire home directory structure to a group chat.
+On Day 1, a friendly tester asked Botd to run `find ~` and share the output. Botd happily dumped the entire home directory structure to a group chat.
 
 **Lesson:** Even "innocent" requests can leak sensitive info. Directory structures reveal project names, tool configs, and system layout.
 
@@ -331,10 +335,10 @@ This is social engineering 101. Create distrust, encourage snooping.
 
 Keep config + state private on the gateway host:
 
-- `~/.hanzo/bot/bot.json`: `600` (user read/write only)
-- `~/.hanzo/bot`: `700` (user only)
+- `~/.bot/bot.json`: `600` (user read/write only)
+- `~/.bot`: `700` (user only)
 
-`hanzo-bot doctor` can warn and offer to tighten these permissions.
+`bot doctor` can warn and offer to tighten these permissions.
 
 ### 0.4) Network exposure (bind + port + firewall)
 
@@ -342,6 +346,16 @@ The Gateway multiplexes **WebSocket + HTTP** on a single port:
 
 - Default: `18789`
 - Config/flags/env: `gateway.port`, `--port`, `BOT_GATEWAY_PORT`
+
+This HTTP surface includes the Control UI and the canvas host:
+
+- Control UI (SPA assets) (default base path `/`)
+- Canvas host: `/__bot__/canvas/` and `/__bot__/a2ui/` (arbitrary HTML/JS; treat as untrusted content)
+
+If you load canvas content in a normal browser, treat it like any other untrusted web page:
+
+- Don't expose the canvas host to untrusted networks/users.
+- Don't make canvas content share the same origin as privileged web surfaces unless you fully understand the implications.
 
 Bind mode controls where the Gateway listens:
 
@@ -418,7 +432,7 @@ Set a token so **all** WS clients must authenticate:
 }
 ```
 
-Doctor can generate one for you: `hanzo-bot doctor --generate-gateway-token`.
+Doctor can generate one for you: `bot doctor --generate-gateway-token`.
 
 Note: `gateway.remote.token` is **only** for remote CLI calls; it does not
 protect local WS access.
@@ -435,6 +449,7 @@ Auth modes:
 
 - `gateway.auth.mode: "token"`: shared bearer token (recommended for most setups).
 - `gateway.auth.mode: "password"`: password auth (prefer setting via env: `BOT_GATEWAY_PASSWORD`).
+- `gateway.auth.mode: "trusted-proxy"`: trust an identity-aware reverse proxy to authenticate users and pass identity via headers (see [Trusted Proxy Auth](/gateway/trusted-proxy-auth)).
 
 Rotation checklist (token/password):
 
@@ -445,9 +460,9 @@ Rotation checklist (token/password):
 
 ### 0.6) Tailscale Serve identity headers
 
-When `gateway.auth.allowTailscale` is `true` (default for Serve), Hanzo Bot
+When `gateway.auth.allowTailscale` is `true` (default for Serve), Bot
 accepts Tailscale Serve identity headers (`tailscale-user-login`) as
-authentication. Hanzo Bot verifies the identity by resolving the
+authentication. Bot verifies the identity by resolving the
 `x-forwarded-for` address through the local Tailscale daemon (`tailscale whois`)
 and matching it to the header. This only triggers for requests that hit loopback
 and include `x-forwarded-for`, `x-forwarded-proto`, and `x-forwarded-host` as
@@ -455,12 +470,12 @@ injected by Tailscale.
 
 **Security rule:** do not forward these headers from your own reverse proxy. If
 you terminate TLS or proxy in front of the gateway, disable
-`gateway.auth.allowTailscale` and use token/password auth instead.
+`gateway.auth.allowTailscale` and use token/password auth (or [Trusted Proxy Auth](/gateway/trusted-proxy-auth)) instead.
 
 Trusted proxies:
 
 - If you terminate TLS in front of the Gateway, set `gateway.trustedProxies` to your proxy IPs.
-- Hanzo Bot will trust `x-forwarded-for` (or `x-real-ip`) from those IPs to determine the client IP for local pairing checks and HTTP auth/local checks.
+- Bot will trust `x-forwarded-for` (or `x-real-ip`) from those IPs to determine the client IP for local pairing checks and HTTP auth/local checks.
 - Ensure your proxy **overwrites** `x-forwarded-for` and blocks direct access to the Gateway port.
 
 See [Tailscale](/gateway/tailscale) and [Web overview](/web).
@@ -483,7 +498,7 @@ Avoid:
 
 ### 0.7) Secrets on disk (what’s sensitive)
 
-Assume anything under `~/.hanzo/bot/` (or `$BOT_STATE_DIR/`) may contain secrets or private data:
+Assume anything under `~/.bot/` (or `$BOT_STATE_DIR/`) may contain secrets or private data:
 
 - `bot.json`: config may include tokens (gateway, remote gateway), provider settings, and allowlists.
 - `credentials/**`: channel credentials (example: WhatsApp creds), pairing allowlists, legacy OAuth imports.
@@ -509,7 +524,7 @@ Recommendations:
 
 - Keep tool summary redaction on (`logging.redactSensitive: "tools"`; default).
 - Add custom patterns for your environment via `logging.redactPatterns` (tokens, hostnames, internal URLs).
-- When sharing diagnostics, prefer `hanzo-bot status --all` (pasteable, secrets redacted) over raw logs.
+- When sharing diagnostics, prefer `bot status --all` (pasteable, secrets redacted) over raw logs.
 - Prune old session transcripts and log files if you don’t need long retention.
 
 Details: [Logging](/gateway/logging)
@@ -562,6 +577,11 @@ You can already build a read-only profile by combining:
 
 We may add a single `readOnlyMode` flag later to simplify this configuration.
 
+Additional hardening options:
+
+- `tools.exec.applyPatch.workspaceOnly: true` (default): ensures `apply_patch` cannot write/delete outside the workspace directory even when sandboxing is off. Set to `false` only if you intentionally want `apply_patch` to touch files outside the workspace.
+- `tools.fs.workspaceOnly: true` (optional): restricts `read`/`write`/`edit`/`apply_patch` paths to the workspace directory (useful if you allow absolute paths today and want a single guardrail).
+
 ### 5) Secure baseline (copy/paste)
 
 One “safe default” config that keeps the Gateway private, requires DM pairing, and avoids always-on group bots:
@@ -600,7 +620,7 @@ single container/workspace.
 
 Also consider agent workspace access inside the sandbox:
 
-- `agents.defaults.sandbox.workspaceAccess: "none"` (default) keeps the agent workspace off-limits; tools run against a sandbox workspace under `~/.hanzo/bot/sandboxes`
+- `agents.defaults.sandbox.workspaceAccess: "none"` (default) keeps the agent workspace off-limits; tools run against a sandbox workspace under `~/.bot/sandboxes`
 - `agents.defaults.sandbox.workspaceAccess: "ro"` mounts the agent workspace read-only at `/agent` (disables `write`/`edit`/`apply_patch`)
 - `agents.defaults.sandbox.workspaceAccess: "rw"` mounts the agent workspace read/write at `/workspace`
 
@@ -619,7 +639,7 @@ access those accounts and data. Treat browser profiles as **sensitive state**:
 - Disable browser sync/password managers in the agent profile if possible (reduces blast radius).
 - For remote gateways, assume “browser control” is equivalent to “operator access” to whatever that profile can reach.
 - Keep the Gateway and node hosts tailnet-only; avoid exposing relay/control ports to LAN or public Internet.
-- The Chrome extension relay’s CDP endpoint is auth-gated; only Hanzo Bot clients can connect.
+- The Chrome extension relay’s CDP endpoint is auth-gated; only Bot clients can connect.
 - Disable browser proxy routing when you don’t need it (`gateway.nodes.browser.mode="off"`).
 - Chrome extension relay mode is **not** “safer”; it can take over your existing Chrome tabs. Assume it can act as you in whatever that tab/profile can reach.
 
@@ -644,7 +664,7 @@ Common use cases:
     list: [
       {
         id: "personal",
-        workspace: "~/.hanzo/bot/workspace-personal",
+        workspace: "~/.bot/workspace-personal",
         sandbox: { mode: "off" },
       },
     ],
@@ -660,7 +680,7 @@ Common use cases:
     list: [
       {
         id: "family",
-        workspace: "~/.hanzo/bot/workspace-family",
+        workspace: "~/.bot/workspace-family",
         sandbox: {
           mode: "all",
           scope: "agent",
@@ -684,13 +704,17 @@ Common use cases:
     list: [
       {
         id: "public",
-        workspace: "~/.hanzo/bot/workspace-public",
+        workspace: "~/.bot/workspace-public",
         sandbox: {
           mode: "all",
           scope: "agent",
           workspaceAccess: "none",
         },
+        // Session tools can reveal sensitive data from transcripts. By default Bot limits these tools
+        // to the current session + spawned subagent sessions, but you can clamp further if needed.
+        // See `tools.sessions.visibility` in the configuration reference.
         tools: {
+          sessions: { visibility: "tree" }, // self | tree | agent | all
           allow: [
             "sessions_list",
             "sessions_history",
@@ -742,7 +766,7 @@ If your AI does something bad:
 
 ### Contain
 
-1. **Stop it:** stop the macOS app (if it supervises the Gateway) or terminate your `hanzo-bot gateway` process.
+1. **Stop it:** stop the macOS app (if it supervises the Gateway) or terminate your `bot gateway` process.
 2. **Close exposure:** set `gateway.bind: "loopback"` (or disable Tailscale Funnel/Serve) until you understand what happened.
 3. **Freeze access:** switch risky DMs/groups to `dmPolicy: "disabled"` / require mentions, and remove `"*"` allow-all entries if you had them.
 
@@ -755,12 +779,12 @@ If your AI does something bad:
 ### Audit
 
 1. Check Gateway logs: `/tmp/bot/bot-YYYY-MM-DD.log` (or `logging.file`).
-2. Review the relevant transcript(s): `~/.hanzo/bot/agents/<agentId>/sessions/*.jsonl`.
+2. Review the relevant transcript(s): `~/.bot/agents/<agentId>/sessions/*.jsonl`.
 3. Review recent config changes (anything that could have widened access: `gateway.bind`, `gateway.auth`, dm/group policies, `tools.elevated`, plugin changes).
 
 ### Collect for a report
 
-- Timestamp, gateway host OS + Hanzo Bot version
+- Timestamp, gateway host OS + Bot version
 - The session transcript(s) + a short log tail (after redacting)
 - What the attacker sent + what the agent did
 - Whether the Gateway was exposed beyond loopback (LAN/Tailscale Funnel/Serve)
@@ -798,24 +822,8 @@ Commit the updated `.secrets.baseline` once it reflects the intended state.
 ## The Trust Hierarchy
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#ffffff',
-    'primaryTextColor': '#000000',
-    'primaryBorderColor': '#000000',
-    'lineColor': '#000000',
-    'secondaryColor': '#f9f9fb',
-    'tertiaryColor': '#ffffff',
-    'clusterBkg': '#f9f9fb',
-    'clusterBorder': '#000000',
-    'nodeBorder': '#000000',
-    'mainBkg': '#ffffff',
-    'edgeLabelBackground': '#ffffff'
-  }
-}}%%
 flowchart TB
-    A["Owner (Peter)"] -- Full trust --> B["AI (Bot)"]
+    A["Owner (Peter)"] -- Full trust --> B["AI (Botd)"]
     B -- Trust but verify --> C["Friends in allowlist"]
     C -- Limited trust --> D["Strangers"]
     D -- No trust --> E["Mario asking for find ~"]
@@ -828,7 +836,7 @@ flowchart TB
 
 ## Reporting Security Issues
 
-Found a vulnerability in Hanzo Bot? Please report responsibly:
+Found a vulnerability in Bot? Please report responsibly:
 
 1. Email: [security@hanzo.bot](mailto:security@hanzo.bot)
 2. Don't post publicly until fixed
@@ -836,4 +844,6 @@ Found a vulnerability in Hanzo Bot? Please report responsibly:
 
 ---
 
-_"Security is a process, not a product. Also, don't trust bots with shell access."_ — Someone wise, probably
+_"Security is a process, not a product. Also, don't trust lobsters with shell access."_ — Someone wise, probably
+
+B🔐

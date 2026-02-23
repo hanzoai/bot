@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.chat
+package ai.hanzo.bot.android.chat
 
 data class ChatMessage(
   val id: String,

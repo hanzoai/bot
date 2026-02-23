@@ -627,7 +627,7 @@ curl -fsSL https://hanzo.bot/install.sh | bash
 **修复 1：重置 TCC 缓存**
 
 ```bash
-tccutil reset All bot.molt.mac.debug
+tccutil reset All ai.hanzo.bot.mac.debug
 ```
 
 **修复 2：强制使用新的 Bundle ID**
@@ -643,7 +643,7 @@ tccutil reset All bot.molt.mac.debug
 ```bash
 hanzo-bot gateway status
 hanzo-bot gateway stop
-# 或：launchctl bootout gui/$UID/bot.molt.gateway（用 bot.molt.<profile> 替换；旧版 com.bot.* 仍然有效）
+# 或：launchctl bootout gui/$UID/ai.hanzo.bot.gateway（用 ai.hanzo.bot.<profile> 替换；旧版 com.bot.* 仍然有效）
 ```
 
 **修复 2：端口被占用（查找监听器）**

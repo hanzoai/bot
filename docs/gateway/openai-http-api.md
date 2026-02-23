@@ -7,14 +7,14 @@ title: "OpenAI Chat Completions"
 
 # OpenAI Chat Completions (HTTP)
 
-Hanzo Bot’s Gateway can serve a small OpenAI-compatible Chat Completions endpoint.
+Bot’s Gateway can serve a small OpenAI-compatible Chat Completions endpoint.
 
 This endpoint is **disabled by default**. Enable it in config first.
 
 - `POST /v1/chat/completions`
 - Same port as the Gateway (WS + HTTP multiplex): `http://<gateway-host>:<port>/v1/chat/completions`
 
-Under the hood, requests are executed as a normal Gateway agent run (same codepath as `hanzo-bot agent`), so routing/permissions/config match your Gateway.
+Under the hood, requests are executed as a normal Gateway agent run (same codepath as `bot agent`), so routing/permissions/config match your Gateway.
 
 ## Authentication
 
@@ -26,6 +26,7 @@ Notes:
 
 - When `gateway.auth.mode="token"`, use `gateway.auth.token` (or `BOT_GATEWAY_TOKEN`).
 - When `gateway.auth.mode="password"`, use `gateway.auth.password` (or `BOT_GATEWAY_PASSWORD`).
+- If `gateway.auth.rateLimit` is configured and too many auth failures occur, the endpoint returns `429` with `Retry-After`.
 
 ## Choosing an agent
 
@@ -34,7 +35,7 @@ No custom headers required: encode the agent id in the OpenAI `model` field:
 - `model: "bot:<agentId>"` (example: `"bot:main"`, `"bot:beta"`)
 - `model: "agent:<agentId>"` (alias)
 
-Or target a specific Hanzo Bot agent by header:
+Or target a specific Bot agent by header:
 
 - `x-bot-agent-id: <agentId>` (default: `main`)
 

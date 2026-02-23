@@ -1,11 +1,11 @@
-# Contributing to Hanzo Bot
+# Contributing to Bot
 
-Welcome! 🤖
+Welcome to the contributor community. B
 
 ## Quick Links
 
 - **GitHub:** https://github.com/hanzoai/bot
-- **Discord:** https://discord.gg/XthHQQj
+- **Discord:** https://discord.gg/qkhbAGHRBT
 - **X/Twitter:** [@steipete](https://x.com/steipete) / [@bot](https://x.com/bot)
 
 ## Maintainers
@@ -13,23 +13,32 @@ Welcome! 🤖
 - **Peter Steinberger** - Benevolent Dictator
   - GitHub: [@steipete](https://github.com/steipete) · X: [@steipete](https://x.com/steipete)
 
-- **Shadow** - Discord + Slack subsystem
+- **Shadow** - Discord subsystem, Discord admin
   - GitHub: [@thewilloftheshadow](https://github.com/thewilloftheshadow) · X: [@4shad0wed](https://x.com/4shad0wed)
 
-- **Vignesh** - Memory (QMD), formal modeling, TUI, and Flow
+- **Vignesh** - Memory (QMD), formal modeling, TUI, IRC, and Lobster
   - GitHub: [@vignesh07](https://github.com/vignesh07) · X: [@\_vgnsh](https://x.com/_vgnsh)
 
 - **Jos** - Telegram, API, Nix mode
   - GitHub: [@joshp123](https://github.com/joshp123) · X: [@jjpcodes](https://x.com/jjpcodes)
+
+- **Ayaan Zaidi** - Telegram subsystem, iOS app
+  - GitHub: [@obviyus](https://github.com/obviyus) · X: [@0bviyus](https://x.com/0bviyus)
+
+- **Tyler Yust** - Agents/subagents, cron, BlueBubbles, macOS app
+  - GitHub: [@tyler6204](https://github.com/tyler6204) · X: [@tyleryust](https://x.com/tyleryust)
+
+- **Mariano Belinky** - iOS app, Security
+  - GitHub: [@mbelinky](https://github.com/mbelinky) · X: [@belimad](https://x.com/belimad)
+
+- **Seb Slight** - Docs, Agent Reliability, Runtime Hardening
+  - GitHub: [@sebslight](https://github.com/sebslight) · X: [@sebslig](https://x.com/sebslig)
 
 - **Christoph Nakazawa** - JS Infra
   - GitHub: [@cpojer](https://github.com/cpojer) · X: [@cnakazawa](https://x.com/cnakazawa)
 
 - **Gustavo Madeira Santana** - Multi-agents, CLI, web UI
   - GitHub: [@gumadeiras](https://github.com/gumadeiras) · X: [@gumadeiras](https://x.com/gumadeiras)
-
-- **Maximilian Nussbaumer** - DevOps, CI, Code Sanity
-  - GitHub: [@quotentiroler](https://github.com/quotentiroler) · X: [@quotentiroler](https://x.com/quotentiroler)
 
 ## How to Contribute
 
@@ -39,7 +48,7 @@ Welcome! 🤖
 
 ## Before You PR
 
-- Test locally with your Hanzo Bot instance
+- Test locally with your Bot instance
 - Run tests: `pnpm build && pnpm check && pnpm test`
 - Ensure CI checks pass
 - Keep PRs focused (one thing per PR)
@@ -79,7 +88,7 @@ We are currently prioritizing:
 
 - **Stability**: Fixing edge cases in channel connections (WhatsApp/Telegram).
 - **UX**: Improving the onboarding wizard and error messages.
-- **Skills**: For skill contributions, head to [Hanzo Skills Hub](https://skills-hub.ai/) — the community hub for Hanzo Bot skills.
+- **Skills**: For skill contributions, head to [BotHub](https://bothub.ai/) — the community hub for Bot skills.
 - **Performance**: Optimizing token usage and compaction logic.
 
 Check the [GitHub Issues](https://github.com/hanzoai/bot/issues) for "good first issue" labels!
@@ -92,7 +101,7 @@ We take security reports seriously. Report vulnerabilities directly to the repos
 - **macOS desktop app** — [bot/bot](https://github.com/hanzoai/bot) (apps/macos)
 - **iOS app** — [bot/bot](https://github.com/hanzoai/bot) (apps/ios)
 - **Android app** — [bot/bot](https://github.com/hanzoai/bot) (apps/android)
-- **Hanzo Skills Hub** — [bot/skills-hub](https://github.com/bot/skills-hub)
+- **BotHub** — [bot/bothub](https://github.com/hanzoai/bothub)
 - **Trust and threat model** — [bot/trust](https://github.com/bot/trust)
 
 For issues that don't fit a specific repo, or if you're unsure, email **security@hanzo.bot** and we'll route it.

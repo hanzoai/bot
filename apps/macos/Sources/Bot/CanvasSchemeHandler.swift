@@ -1,9 +1,9 @@
-import BotKit
 import Foundation
+import BotKit
 import OSLog
 import WebKit
 
-private let canvasLogger = Logger(subsystem: "ai.hanzo.bot", category: "Canvas")
+private let canvasLogger = Logger(subsystem: "ai.bot", category: "Canvas")
 
 final class CanvasSchemeHandler: NSObject, WKURLSchemeHandler {
     private let root: URL

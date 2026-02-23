@@ -16,9 +16,7 @@ export type DiscordMessageEvent = import("./listeners.js").DiscordMessageEvent;
 
 export type DiscordMessagePreflightContext = {
   cfg: LoadedConfig;
-  discordConfig: NonNullable<
-    import("../../config/config.js").BotConfig["channels"]
-  >["discord"];
+  discordConfig: NonNullable<import("../../config/config.js").BotConfig["channels"]>["discord"];
   accountId: string;
   token: string;
   runtime: RuntimeEnv;
@@ -34,6 +32,7 @@ export type DiscordMessagePreflightContext = {
   data: DiscordMessageEvent;
   client: Client;
   message: DiscordMessageEvent["message"];
+  messageChannelId: string;
   author: User;
   sender: DiscordSenderIdentity;
 
@@ -94,8 +93,8 @@ export type DiscordMessagePreflightParams = {
   replyToMode: ReplyToMode;
   dmEnabled: boolean;
   groupDmEnabled: boolean;
-  groupDmChannels?: Array<string | number>;
-  allowFrom?: Array<string | number>;
+  groupDmChannels?: string[];
+  allowFrom?: string[];
   guildEntries?: Record<string, DiscordGuildEntryResolved>;
   ackReactionScope: DiscordMessagePreflightContext["ackReactionScope"];
   groupPolicy: DiscordMessagePreflightContext["groupPolicy"];

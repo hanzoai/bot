@@ -1,15 +1,15 @@
 import AVFoundation
+import Foundation
 import BotChatUI
 import BotKit
-import Foundation
 import OSLog
 import Speech
 
 actor TalkModeRuntime {
     static let shared = TalkModeRuntime()
 
-    private let logger = Logger(subsystem: "ai.hanzo.bot", category: "talk.runtime")
-    private let ttsLogger = Logger(subsystem: "ai.hanzo.bot", category: "talk.tts")
+    private let logger = Logger(subsystem: "ai.bot", category: "talk.runtime")
+    private let ttsLogger = Logger(subsystem: "ai.bot", category: "talk.tts")
     private static let defaultModelIdFallback = "eleven_v3"
 
     private final class RMSMeter: @unchecked Sendable {
@@ -416,9 +416,9 @@ actor TalkModeRuntime {
         do {
             let history = try await GatewayConnection.shared.chatHistory(sessionKey: sessionKey)
             let messages = history.messages ?? []
-            let decoded: [HanzoBotChatMessage] = messages.compactMap { item in
+            let decoded: [BotChatMessage] = messages.compactMap { item in
                 guard let data = try? JSONEncoder().encode(item) else { return nil }
-                return try? JSONDecoder().decode(HanzoBotChatMessage.self, from: data)
+                return try? JSONDecoder().decode(BotChatMessage.self, from: data)
             }
             let assistant = decoded.last { message in
                 guard message.role == "assistant" else { return false }
@@ -800,8 +800,8 @@ extension TalkModeRuntime {
 
         do {
             let snap: ConfigSnapshot = try await GatewayConnection.shared.requestDecoded(
-                method: .configGet,
-                params: nil,
+                method: .talkConfig,
+                params: ["includeSecrets": AnyCodable(true)],
                 timeoutMs: 8000)
             let talk = snap.config?["talk"]?.dictionaryValue
             let ui = snap.config?["ui"]?.dictionaryValue

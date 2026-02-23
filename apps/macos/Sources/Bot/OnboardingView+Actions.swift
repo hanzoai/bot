@@ -1,7 +1,7 @@
 import AppKit
+import Foundation
 import BotDiscovery
 import BotIPC
-import Foundation
 import SwiftUI
 
 extension OnboardingView {
@@ -35,7 +35,9 @@ extension OnboardingView {
                 user: user,
                 host: host,
                 port: gateway.sshPort)
-            BotConfigFile.setRemoteGatewayUrl(host: host, port: gateway.gatewayPort)
+            BotConfigFile.setRemoteGatewayUrl(
+                host: gateway.serviceHost ?? host,
+                port: gateway.servicePort ?? gateway.gatewayPort)
         }
         self.state.remoteCliPath = gateway.cliPath ?? ""
 
@@ -47,7 +49,7 @@ extension OnboardingView {
         SettingsTabRouter.request(tab)
         self.openSettings()
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .hanzo-botSelectSettingsTab, object: tab)
+            NotificationCenter.default.post(name: .botSelectSettingsTab, object: tab)
         }
     }
 
@@ -115,7 +117,7 @@ extension OnboardingView {
                 verifier: pkce.verifier)
             try BotOAuthStore.saveAnthropicOAuth(creds)
             self.refreshAnthropicOAuthStatus()
-            self.anthropicAuthStatus = "Connected. HanzoBot can now use Claude."
+            self.anthropicAuthStatus = "Connected. Bot can now use Claude."
         } catch {
             self.anthropicAuthStatus = "OAuth failed: \(error.localizedDescription)"
         }

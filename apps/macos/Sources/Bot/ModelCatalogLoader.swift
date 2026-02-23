@@ -2,11 +2,14 @@ import Foundation
 import JavaScriptCore
 
 enum ModelCatalogLoader {
-    static var defaultPath: String { self.resolveDefaultPath() }
-    private static let logger = Logger(subsystem: "ai.hanzo.bot", category: "models")
+    static var defaultPath: String {
+        self.resolveDefaultPath()
+    }
+
+    private static let logger = Logger(subsystem: "ai.bot", category: "models")
     private nonisolated static let appSupportDir: URL = {
         let base = FileManager().urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        return base.appendingPathComponent("HanzoBot", isDirectory: true)
+        return base.appendingPathComponent("Bot", isDirectory: true)
     }()
 
     private static var cachePath: URL {

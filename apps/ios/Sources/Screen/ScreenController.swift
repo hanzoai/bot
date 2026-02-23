@@ -115,7 +115,7 @@ final class ScreenController {
         let js = """
         (() => {
           try {
-            const api = globalThis.__hanzo-bot;
+            const api = globalThis.__bot;
             if (!api) return;
             if (typeof api.setDebugStatusEnabled === 'function') {
               api.setDebugStatusEnabled(\(enabled ? "true" : "false"));

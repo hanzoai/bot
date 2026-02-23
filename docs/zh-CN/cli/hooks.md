@@ -2,7 +2,7 @@
 read_when:
   - 你想管理智能体钩子
   - 你想安装或更新钩子
-summary: CLI 参考：`hanzo-bot hooks`（智能体钩子）
+summary: CLI 参考：`bot hooks`（智能体钩子）
 title: hooks
 x-i18n:
   generated_at: "2026-02-03T10:04:32Z"
@@ -13,7 +13,7 @@ x-i18n:
   workflow: 15
 ---
 
-# `hanzo-bot hooks`
+# `bot hooks`
 
 管理智能体钩子（针对 `/new`、`/reset` 等命令以及 Gateway 网关启动的事件驱动自动化）。
 
@@ -25,7 +25,7 @@ x-i18n:
 ## 列出所有钩子
 
 ```bash
-hanzo-bot hooks list
+bot hooks list
 ```
 
 列出从工作区、托管目录和内置目录中发现的所有钩子。
@@ -39,19 +39,18 @@ hanzo-bot hooks list
 **示例输出：**
 
 ```
-Hooks (4/4 ready)
+Hooks (3/3 ready)
 
 Ready:
   🚀 boot-md ✓ - Run BOOT.md on gateway startup
   📝 command-logger ✓ - Log all command events to a centralized audit file
   💾 session-memory ✓ - Save session context to memory when /new command is issued
-  😈 soul-evil ✓ - Swap injected SOUL content during a purge window or by random chance
 ```
 
 **示例（详细模式）：**
 
 ```bash
-hanzo-bot hooks list --verbose
+bot hooks list --verbose
 ```
 
 显示不符合条件的钩子缺失的要求。
@@ -59,7 +58,7 @@ hanzo-bot hooks list --verbose
 **示例（JSON）：**
 
 ```bash
-hanzo-bot hooks list --json
+bot hooks list --json
 ```
 
 返回结构化 JSON，供程序化使用。
@@ -67,7 +66,7 @@ hanzo-bot hooks list --json
 ## 获取钩子信息
 
 ```bash
-hanzo-bot hooks info <name>
+bot hooks info <name>
 ```
 
 显示特定钩子的详细信息。
@@ -83,7 +82,7 @@ hanzo-bot hooks info <name>
 **示例：**
 
 ```bash
-hanzo-bot hooks info session-memory
+bot hooks info session-memory
 ```
 
 **输出：**
@@ -97,7 +96,7 @@ Details:
   Source: bot-bundled
   Path: /path/to/bot/hooks/bundled/session-memory/HOOK.md
   Handler: /path/to/bot/hooks/bundled/session-memory/handler.ts
-  Homepage: https://docs.hanzo.bot/hooks#session-memory
+  Homepage: https://docs.hanzo.bot/automation/hooks#session-memory
   Events: command:new
 
 Requirements:
@@ -107,7 +106,7 @@ Requirements:
 ## 检查钩子资格
 
 ```bash
-hanzo-bot hooks check
+bot hooks check
 ```
 
 显示钩子资格状态摘要（有多少已就绪，有多少未就绪）。
@@ -129,12 +128,12 @@ Not ready: 0
 ## 启用钩子
 
 ```bash
-hanzo-bot hooks enable <name>
+bot hooks enable <name>
 ```
 
-通过将特定钩子添加到配置（`~/.hanzo/bot/config.json`）来启用它。
+通过将特定钩子添加到配置（`~/.bot/config.json`）来启用它。
 
-**注意：** 由插件管理的钩子在 `hanzo-bot hooks list` 中显示 `plugin:<id>`，
+**注意：** 由插件管理的钩子在 `bot hooks list` 中显示 `plugin:<id>`，
 无法在此处启用/禁用。请改为启用/禁用该插件。
 
 **参数：**
@@ -144,7 +143,7 @@ hanzo-bot hooks enable <name>
 **示例：**
 
 ```bash
-hanzo-bot hooks enable session-memory
+bot hooks enable session-memory
 ```
 
 **输出：**
@@ -166,7 +165,7 @@ hanzo-bot hooks enable session-memory
 ## 禁用钩子
 
 ```bash
-hanzo-bot hooks disable <name>
+bot hooks disable <name>
 ```
 
 通过更新配置来禁用特定钩子。
@@ -178,7 +177,7 @@ hanzo-bot hooks disable <name>
 **示例：**
 
 ```bash
-hanzo-bot hooks disable command-logger
+bot hooks disable command-logger
 ```
 
 **输出：**
@@ -194,14 +193,14 @@ hanzo-bot hooks disable command-logger
 ## 安装钩子
 
 ```bash
-hanzo-bot hooks install <path-or-spec>
+bot hooks install <path-or-spec>
 ```
 
 从本地文件夹/压缩包或 npm 安装钩子包。
 
 **执行操作：**
 
-- 将钩子包复制到 `~/.hanzo/bot/hooks/<id>`
+- 将钩子包复制到 `~/.bot/hooks/<id>`
 - 在 `hooks.internal.entries.*` 中启用已安装的钩子
 - 在 `hooks.internal.installs` 下记录安装信息
 
@@ -215,23 +214,23 @@ hanzo-bot hooks install <path-or-spec>
 
 ```bash
 # 本地目录
-hanzo-bot hooks install ./my-hook-pack
+bot hooks install ./my-hook-pack
 
 # 本地压缩包
-hanzo-bot hooks install ./my-hook-pack.zip
+bot hooks install ./my-hook-pack.zip
 
 # NPM 包
-hanzo-bot hooks install @bot/my-hook-pack
+bot hooks install @bot/my-hook-pack
 
 # 链接本地目录而不复制
-hanzo-bot hooks install -l ./my-hook-pack
+bot hooks install -l ./my-hook-pack
 ```
 
 ## 更新钩子
 
 ```bash
-hanzo-bot hooks update <id>
-hanzo-bot hooks update --all
+bot hooks update <id>
+bot hooks update --all
 ```
 
 更新已安装的钩子包（仅限 npm 安装）。
@@ -250,10 +249,10 @@ hanzo-bot hooks update --all
 **启用：**
 
 ```bash
-hanzo-bot hooks enable session-memory
+bot hooks enable session-memory
 ```
 
-**输出：** `~/.hanzo/bot/workspace/memory/YYYY-MM-DD-slug.md`
+**输出：** `~/.bot/workspace/memory/YYYY-MM-DD-slug.md`
 
 **参见：** [session-memory 文档](/automation/hooks#session-memory)
 
@@ -264,37 +263,25 @@ hanzo-bot hooks enable session-memory
 **启用：**
 
 ```bash
-hanzo-bot hooks enable command-logger
+bot hooks enable command-logger
 ```
 
-**输出：** `~/.hanzo/bot/logs/commands.log`
+**输出：** `~/.bot/logs/commands.log`
 
 **查看日志：**
 
 ```bash
 # 最近的命令
-tail -n 20 ~/.hanzo/bot/logs/commands.log
+tail -n 20 ~/.bot/logs/commands.log
 
 # 格式化输出
-cat ~/.hanzo/bot/logs/commands.log | jq .
+cat ~/.bot/logs/commands.log | jq .
 
 # 按操作过滤
-grep '"action":"new"' ~/.hanzo/bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.bot/logs/commands.log | jq .
 ```
 
 **参见：** [command-logger 文档](/automation/hooks#command-logger)
-
-### soul-evil
-
-在清除窗口期间或随机情况下，将注入的 `SOUL.md` 内容替换为 `SOUL_EVIL.md`。
-
-**启用：**
-
-```bash
-hanzo-bot hooks enable soul-evil
-```
-
-**参见：** [SOUL Evil 钩子](/hooks/soul-evil)
 
 ### boot-md
 
@@ -305,7 +292,7 @@ hanzo-bot hooks enable soul-evil
 **启用**：
 
 ```bash
-hanzo-bot hooks enable boot-md
+bot hooks enable boot-md
 ```
 
 **参见：** [boot-md 文档](/automation/hooks#boot-md)

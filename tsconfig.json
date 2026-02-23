@@ -19,7 +19,9 @@
     "useDefineForClassFields": false,
     "paths": {
       "*": ["./*"],
-      "bot/plugin-sdk": ["./src/plugin-sdk/index.ts"]
+      "bot/plugin-sdk": ["./src/plugin-sdk/index.ts"],
+      "bot/plugin-sdk/*": ["./src/plugin-sdk/*.ts"],
+      "bot/plugin-sdk/account-id": ["./src/plugin-sdk/account-id.ts"]
     }
   },
   "include": ["src/**/*", "ui/**/*", "extensions/**/*"],

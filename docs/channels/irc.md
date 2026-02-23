@@ -19,7 +19,7 @@ IRC ships as an extension plugin, but it is configured in the main config under 
       "host": "irc.libera.chat",
       "port": 6697,
       "tls": true,
-      "nick": "bot-bot",
+      "nick": "bot",
       "channels": ["#bot"]
     }
   }

@@ -4,15 +4,14 @@ import { Readable, Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import type { AcpServerOptions } from "./types.js";
 import { loadConfig } from "../config/config.js";
-import { resolveGatewayAuthAsync } from "../gateway/auth.js";
+import { resolveGatewayAuth } from "../gateway/auth.js";
 import { buildGatewayConnectionDetails } from "../gateway/call.js";
 import { GatewayClient } from "../gateway/client.js";
 import { isMainModule } from "../infra/is-main.js";
-import { resolveSecretReferenceValue } from "../infra/secrets/kms.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 import { AcpGatewayAgent } from "./translator.js";
 
-export async function serveAcpGateway(opts: AcpServerOptions = {}): Promise<void> {
+export function serveAcpGateway(opts: AcpServerOptions = {}): Promise<void> {
   const cfg = loadConfig();
   const connection = buildGatewayConnectionDetails({
     config: cfg,
@@ -21,32 +20,26 @@ export async function serveAcpGateway(opts: AcpServerOptions = {}): Promise<void
 
   const isRemoteMode = cfg.gateway?.mode === "remote";
   const remote = isRemoteMode ? cfg.gateway?.remote : undefined;
-  const auth = await resolveGatewayAuthAsync({
-    authConfig: cfg.gateway?.auth,
-    env: process.env,
-    tailscaleMode: cfg.gateway?.tailscale?.mode ?? "off",
-    cfg,
-  });
-  const token = await resolveSecretReferenceValue({
-    value:
-      opts.gatewayToken ??
-      (isRemoteMode ? remote?.token : undefined) ??
-      process.env.BOT_GATEWAY_TOKEN ??
-      auth.token,
-    cfg,
-    env: process.env,
-  });
-  const password = await resolveSecretReferenceValue({
-    value:
-      opts.gatewayPassword ??
-      (isRemoteMode ? remote?.password : undefined) ??
-      process.env.BOT_GATEWAY_PASSWORD ??
-      auth.password,
-    cfg,
-    env: process.env,
-  });
+  const auth = resolveGatewayAuth({ authConfig: cfg.gateway?.auth, env: process.env });
+
+  const token =
+    opts.gatewayToken ??
+    (isRemoteMode ? remote?.token?.trim() : undefined) ??
+    process.env.BOT_GATEWAY_TOKEN ??
+    auth.token;
+  const password =
+    opts.gatewayPassword ??
+    (isRemoteMode ? remote?.password?.trim() : undefined) ??
+    process.env.BOT_GATEWAY_PASSWORD ??
+    auth.password;
 
   let agent: AcpGatewayAgent | null = null;
+  let onClosed!: () => void;
+  const closed = new Promise<void>((resolve) => {
+    onClosed = resolve;
+  });
+  let stopped = false;
+
   const gateway = new GatewayClient({
     url: connection.url,
     token: token || undefined,
@@ -63,8 +56,28 @@ export async function serveAcpGateway(opts: AcpServerOptions = {}): Promise<void
     },
     onClose: (code, reason) => {
       agent?.handleGatewayDisconnect(`${code}: ${reason}`);
+      // Resolve only on intentional shutdown (gateway.stop() sets closed
+      // which skips scheduleReconnect, then fires onClose).  Transient
+      // disconnects are followed by automatic reconnect attempts.
+      if (stopped) {
+        onClosed();
+      }
     },
   });
+
+  const shutdown = () => {
+    if (stopped) {
+      return;
+    }
+    stopped = true;
+    gateway.stop();
+    // If no WebSocket is active (e.g. between reconnect attempts),
+    // gateway.stop() won't trigger onClose, so resolve directly.
+    onClosed();
+  };
+
+  process.once("SIGINT", shutdown);
+  process.once("SIGTERM", shutdown);
 
   const input = Writable.toWeb(process.stdout);
   const output = Readable.toWeb(process.stdin) as unknown as ReadableStream<Uint8Array>;
@@ -77,6 +90,7 @@ export async function serveAcpGateway(opts: AcpServerOptions = {}): Promise<void
   }, stream);
 
   gateway.start();
+  return closed;
 }
 
 function parseArgs(args: string[]): AcpServerOptions {
@@ -133,7 +147,7 @@ function parseArgs(args: string[]): AcpServerOptions {
 }
 
 function printHelp(): void {
-  console.log(`Usage: hanzo-bot acp [options]
+  console.log(`Usage: bot acp [options]
 
 Gateway-backed ACP server for IDE integration.
 
@@ -153,7 +167,7 @@ Options:
 
 if (isMainModule({ currentFile: fileURLToPath(import.meta.url) })) {
   const opts = parseArgs(process.argv.slice(2));
-  void serveAcpGateway(opts).catch((err) => {
+  serveAcpGateway(opts).catch((err) => {
     console.error(String(err));
     process.exit(1);
   });

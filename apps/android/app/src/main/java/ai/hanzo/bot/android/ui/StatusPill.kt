@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui
+package ai.hanzo.bot.android.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

@@ -149,7 +149,7 @@ description: 'single-quoted'
 });
 
 describe("resolveBotMetadata", () => {
-  it("extracts hanzo-bot metadata from parsed frontmatter", () => {
+  it("extracts bot metadata from parsed frontmatter", () => {
     const frontmatter = {
       name: "test-hook",
       metadata: JSON.stringify({
@@ -178,7 +178,7 @@ describe("resolveBotMetadata", () => {
     expect(result).toBeUndefined();
   });
 
-  it("returns undefined when hanzo-bot key is missing", () => {
+  it("returns undefined when bot key is missing", () => {
     const frontmatter = {
       metadata: JSON.stringify({ other: "data" }),
     };
@@ -200,8 +200,8 @@ describe("resolveBotMetadata", () => {
         bot: {
           events: ["command"],
           install: [
-            { id: "bundled", kind: "bundled", label: "Bundled with Hanzo Bot" },
-            { id: "npm", kind: "npm", package: "@hanzo/bot-hook" },
+            { id: "bundled", kind: "bundled", label: "Bundled with Bot" },
+            { id: "npm", kind: "npm", package: "@bot/hook" },
           ],
         },
       }),
@@ -211,7 +211,7 @@ describe("resolveBotMetadata", () => {
     expect(result?.install).toHaveLength(2);
     expect(result?.install?.[0].kind).toBe("bundled");
     expect(result?.install?.[1].kind).toBe("npm");
-    expect(result?.install?.[1].package).toBe("@hanzo/bot-hook");
+    expect(result?.install?.[1].package).toBe("@bot/hook");
   });
 
   it("handles os restrictions", () => {
@@ -233,7 +233,7 @@ describe("resolveBotMetadata", () => {
     const content = `---
 name: session-memory
 description: "Save session context to memory when /new command is issued"
-homepage: https://docs.hanzo.bot/hooks#session-memory
+homepage: https://docs.hanzo.bot/automation/hooks#session-memory
 metadata:
   {
     "bot":
@@ -241,7 +241,7 @@ metadata:
         "emoji": "💾",
         "events": ["command:new"],
         "requires": { "config": ["workspace.dir"] },
-        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with Hanzo Bot" }],
+        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with Bot" }],
       },
   }
 ---
