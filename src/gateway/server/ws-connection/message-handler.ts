@@ -430,7 +430,7 @@ export function attachGatewayWsMessageHandler(params: {
             scopes = [];
             connectParams.scopes = scopes;
           }
-          const canSkipDevice = sharedAuthOk;
+          const canSkipDevice = sharedAuthOk || (authOk && allowControlUiBypass);
 
           if (isControlUi && !allowControlUiBypass) {
             const errorMessage = "control ui requires HTTPS or localhost (secure context)";
