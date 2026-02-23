@@ -170,7 +170,7 @@ hanzo-bot logs --follow
 
 If you’re supervised:
 
-- macOS launchd (app-bundled LaunchAgent): `launchctl kickstart -k gui/$UID/bot.molt.gateway` (use `bot.molt.<profile>`; legacy `com.bot.*` still works)
+- macOS launchd (app-bundled LaunchAgent): `launchctl kickstart -k gui/$UID/ai.hanzo.bot.gateway` (use `ai.hanzo.bot.<profile>`; legacy `com.bot.*` still works)
 - Linux systemd user service: `systemctl --user restart bot-gateway[-<profile>].service`
 - Windows (WSL2): `systemctl --user restart bot-gateway[-<profile>].service`
   - `launchctl`/`systemctl` only work if the service is installed; otherwise run `hanzo-bot gateway install`.
