@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `hanzo-bot logs` (tail gateway logs via RPC)"
+summary: "CLI reference for `bot logs` (tail gateway logs via RPC)"
 read_when:
   - You need to tail Gateway logs remotely (without SSH)
   - You want JSON log lines for tooling
 title: "logs"
 ---
 
-# `hanzo-bot logs`
+# `bot logs`
 
 Tail Gateway file logs over RPC (works in remote mode).
 
@@ -17,8 +17,12 @@ Related:
 ## Examples
 
 ```bash
-hanzo-bot logs
-hanzo-bot logs --follow
-hanzo-bot logs --json
-hanzo-bot logs --limit 500
+bot logs
+bot logs --follow
+bot logs --json
+bot logs --limit 500
+bot logs --local-time
+bot logs --follow --local-time
 ```
+
+Use `--local-time` to render timestamps in your local timezone.

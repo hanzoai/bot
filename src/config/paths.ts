@@ -17,14 +17,15 @@ export function resolveIsNixMode(env: NodeJS.ProcessEnv = process.env): boolean 
 
 export const isNixMode = resolveIsNixMode();
 
-const LEGACY_STATE_DIRNAMES = [".bot", ".hanzo-bot", ".moltbot", ".moldbot"] as const;
-const NEW_STATE_DIRNAME = path.join(".hanzo", "bot");
+// Support historical (and occasionally misspelled) legacy state dirs.
+const LEGACY_STATE_DIRNAMES = [".bot", ".openclaw", ".moldbot", ".moltbot"] as const;
+const NEW_STATE_DIRNAME = ".bot";
 const CONFIG_FILENAME = "bot.json";
 const LEGACY_CONFIG_FILENAMES = [
   "bot.json",
-  "hanzo-bot.json",
-  "moltbot.json",
+  "openclaw.json",
   "moldbot.json",
+  "moltbot.json",
 ] as const;
 
 function resolveDefaultHomeDir(): string {
@@ -59,14 +60,14 @@ export function resolveNewStateDir(homedir: () => string = resolveDefaultHomeDir
 /**
  * State directory for mutable data (sessions, logs, caches).
  * Can be overridden via BOT_STATE_DIR.
- * Default: ~/.hanzo/bot
+ * Default: ~/.bot
  */
 export function resolveStateDir(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = envHomedir(env),
 ): string {
   const effectiveHomedir = () => resolveRequiredHomeDir(env, homedir);
-  const override = env.BOT_STATE_DIR?.trim();
+  const override = env.BOT_STATE_DIR?.trim() || env.BOT_STATE_DIR?.trim();
   if (override) {
     return resolveUserPath(override, env, effectiveHomedir);
   }
@@ -114,13 +115,13 @@ export const STATE_DIR = resolveStateDir();
 /**
  * Config file path (JSON5).
  * Can be overridden via BOT_CONFIG_PATH.
- * Default: ~/.hanzo/bot/bot.json (or $BOT_STATE_DIR/bot.json)
+ * Default: ~/.bot/bot.json (or $BOT_STATE_DIR/bot.json)
  */
 export function resolveCanonicalConfigPath(
   env: NodeJS.ProcessEnv = process.env,
   stateDir: string = resolveStateDir(env, envHomedir(env)),
 ): string {
-  const override = env.BOT_CONFIG_PATH?.trim();
+  const override = env.BOT_CONFIG_PATH?.trim() || env.BOT_CONFIG_PATH?.trim();
   if (override) {
     return resolveUserPath(override, env, envHomedir(env));
   }
@@ -186,7 +187,20 @@ export function resolveConfigPath(
   return path.join(stateDir, CONFIG_FILENAME);
 }
 
+/**
+ * @deprecated Use resolveConfigPathCandidate() instead. This constant is evaluated
+ * at module load time and does not respect BOT_HOME set after import.
+ * Kept for backwards compatibility but should be avoided in new code.
+ */
 export const CONFIG_PATH = resolveConfigPathCandidate();
+
+/**
+ * Runtime-evaluated config path that respects BOT_HOME.
+ * Use this instead of CONFIG_PATH when BOT_HOME may be set dynamically.
+ */
+export function getConfigPath(env: NodeJS.ProcessEnv = process.env): string {
+  return resolveConfigPathCandidate(env, envHomedir(env));
+}
 
 /**
  * Resolve default config path candidates across default locations.
@@ -197,13 +211,13 @@ export function resolveDefaultConfigCandidates(
   homedir: () => string = envHomedir(env),
 ): string[] {
   const effectiveHomedir = () => resolveRequiredHomeDir(env, homedir);
-  const explicit = env.BOT_CONFIG_PATH?.trim();
+  const explicit = env.BOT_CONFIG_PATH?.trim() || env.BOT_CONFIG_PATH?.trim();
   if (explicit) {
     return [resolveUserPath(explicit, env, effectiveHomedir)];
   }
 
   const candidates: string[] = [];
-  const botStateDir = env.BOT_STATE_DIR?.trim();
+  const botStateDir = env.BOT_STATE_DIR?.trim() || env.BOT_STATE_DIR?.trim();
   if (botStateDir) {
     const resolved = resolveUserPath(botStateDir, env, effectiveHomedir);
     candidates.push(path.join(resolved, CONFIG_FILENAME));
@@ -222,12 +236,12 @@ export const DEFAULT_GATEWAY_PORT = 18789;
 
 /**
  * Gateway lock directory (ephemeral).
- * Default: os.tmpdir()/hanzo-bot-<uid> (uid suffix when available).
+ * Default: os.tmpdir()/bot-<uid> (uid suffix when available).
  */
 export function resolveGatewayLockDir(tmpdir: () => string = os.tmpdir): string {
   const base = tmpdir();
   const uid = typeof process.getuid === "function" ? process.getuid() : undefined;
-  const suffix = uid != null ? `hanzo-bot-${uid}` : "hanzo-bot";
+  const suffix = uid != null ? `bot-${uid}` : "bot";
   return path.join(base, suffix);
 }
 
@@ -259,18 +273,34 @@ export function resolveOAuthPath(
 }
 
 export function resolveGatewayPort(cfg?: BotConfig, env: NodeJS.ProcessEnv = process.env): number {
-  const envRaw = env.BOT_GATEWAY_PORT?.trim();
+  // When BOT_HOME is set (isolated instance), prefer config over inherited env vars.
+  // This prevents a parent gateway's BOT_GATEWAY_PORT from bleeding through.
+  const isIsolatedInstance = Boolean(env.BOT_HOME?.trim());
+
+  // Config port takes precedence for isolated instances
+  const configPort = cfg?.gateway?.port;
+  if (
+    isIsolatedInstance &&
+    typeof configPort === "number" &&
+    Number.isFinite(configPort) &&
+    configPort > 0
+  ) {
+    return configPort;
+  }
+
+  // Check env vars (for non-isolated or when config doesn't specify port)
+  const envRaw = env.BOT_GATEWAY_PORT?.trim() || env.BOT_GATEWAY_PORT?.trim();
   if (envRaw) {
     const parsed = Number.parseInt(envRaw, 10);
     if (Number.isFinite(parsed) && parsed > 0) {
       return parsed;
     }
   }
-  const configPort = cfg?.gateway?.port;
-  if (typeof configPort === "number" && Number.isFinite(configPort)) {
-    if (configPort > 0) {
-      return configPort;
-    }
+
+  // Fall back to config for non-isolated instances
+  if (typeof configPort === "number" && Number.isFinite(configPort) && configPort > 0) {
+    return configPort;
   }
+
   return DEFAULT_GATEWAY_PORT;
 }

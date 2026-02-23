@@ -39,7 +39,7 @@ Android connects directly to the Gateway WebSocket (default `ws://<host>:18789`)
 ### 1) Start the Gateway
 
 ```bash
-hanzo-bot gateway --port 18789 --verbose
+bot gateway --port 18789 --verbose
 ```
 
 Confirm in logs you see something like:
@@ -48,7 +48,7 @@ Confirm in logs you see something like:
 
 For tailnet-only setups (recommended for Vienna ⇄ London), bind the gateway to the tailnet IP:
 
-- Set `gateway.bind: "tailnet"` in `~/.hanzo/bot/bot.json` on the gateway host.
+- Set `gateway.bind: "tailnet"` in `~/.bot/bot.json` on the gateway host.
 - Restart the Gateway / macOS menubar app.
 
 ### 2) Verify discovery (optional)
@@ -89,8 +89,8 @@ After the first successful pairing, Android auto-reconnects on launch:
 On the gateway machine:
 
 ```bash
-hanzo-bot nodes pending
-hanzo-bot nodes approve <requestId>
+bot nodes pending
+bot nodes approve <requestId>
 ```
 
 Pairing details: [Gateway pairing](/gateway/pairing).
@@ -100,13 +100,13 @@ Pairing details: [Gateway pairing](/gateway/pairing).
 - Via nodes status:
 
   ```bash
-  hanzo-bot nodes status
+  bot nodes status
   ```
 
 - Via Gateway:
 
   ```bash
-  hanzo-bot gateway call node.list --params "{}"
+  bot gateway call node.list --params "{}"
   ```
 
 ### 6) Chat + history
@@ -123,20 +123,20 @@ The Android node’s Chat sheet uses the gateway’s **primary session key** (`m
 
 If you want the node to show real HTML/CSS/JS that the agent can edit on disk, point the node at the Gateway canvas host.
 
-Note: nodes use the standalone canvas host on `canvasHost.port` (default `18793`).
+Note: nodes load canvas from the Gateway HTTP server (same port as `gateway.port`, default `18789`).
 
-1. Create `~/.hanzo/bot/workspace/canvas/index.html` on the gateway host.
+1. Create `~/.bot/workspace/canvas/index.html` on the gateway host.
 
 2. Navigate the node to it (LAN):
 
 ```bash
-hanzo-bot nodes invoke --node "<Android Node>" --command canvas.navigate --params '{"url":"http://<gateway-hostname>.local:18793/__bot__/canvas/"}'
+bot nodes invoke --node "<Android Node>" --command canvas.navigate --params '{"url":"http://<gateway-hostname>.local:18789/__bot__/canvas/"}'
 ```
 
-Tailnet (optional): if both devices are on Tailscale, use a MagicDNS name or tailnet IP instead of `.local`, e.g. `http://<gateway-magicdns>:18793/__bot__/canvas/`.
+Tailnet (optional): if both devices are on Tailscale, use a MagicDNS name or tailnet IP instead of `.local`, e.g. `http://<gateway-magicdns>:18789/__bot__/canvas/`.
 
 This server injects a live-reload client into HTML and reloads on file changes.
-The A2UI host lives at `http://<gateway-host>:18793/__bot__/a2ui/`.
+The A2UI host lives at `http://<gateway-host>:18789/__bot__/a2ui/`.
 
 Canvas commands (foreground only):
 

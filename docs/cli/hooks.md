@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `hanzo-bot hooks` (agent hooks)"
+summary: "CLI reference for `bot hooks` (agent hooks)"
 read_when:
   - You want to manage agent hooks
   - You want to install or update hooks
 title: "hooks"
 ---
 
-# `hanzo-bot hooks`
+# `bot hooks`
 
 Manage agent hooks (event-driven automations for commands like `/new`, `/reset`, and gateway startup).
 
@@ -18,7 +18,7 @@ Related:
 ## List All Hooks
 
 ```bash
-hanzo-bot hooks list
+bot hooks list
 ```
 
 List all discovered hooks from workspace, managed, and bundled directories.
@@ -36,15 +36,15 @@ Hooks (4/4 ready)
 
 Ready:
   🚀 boot-md ✓ - Run BOOT.md on gateway startup
+  📎 bootstrap-extra-files ✓ - Inject extra workspace bootstrap files during agent bootstrap
   📝 command-logger ✓ - Log all command events to a centralized audit file
   💾 session-memory ✓ - Save session context to memory when /new command is issued
-  😈 soul-evil ✓ - Swap injected SOUL content during a purge window or by random chance
 ```
 
 **Example (verbose):**
 
 ```bash
-hanzo-bot hooks list --verbose
+bot hooks list --verbose
 ```
 
 Shows missing requirements for ineligible hooks.
@@ -52,7 +52,7 @@ Shows missing requirements for ineligible hooks.
 **Example (JSON):**
 
 ```bash
-hanzo-bot hooks list --json
+bot hooks list --json
 ```
 
 Returns structured JSON for programmatic use.
@@ -60,7 +60,7 @@ Returns structured JSON for programmatic use.
 ## Get Hook Information
 
 ```bash
-hanzo-bot hooks info <name>
+bot hooks info <name>
 ```
 
 Show detailed information about a specific hook.
@@ -76,7 +76,7 @@ Show detailed information about a specific hook.
 **Example:**
 
 ```bash
-hanzo-bot hooks info session-memory
+bot hooks info session-memory
 ```
 
 **Output:**
@@ -90,7 +90,7 @@ Details:
   Source: bot-bundled
   Path: /path/to/bot/hooks/bundled/session-memory/HOOK.md
   Handler: /path/to/bot/hooks/bundled/session-memory/handler.ts
-  Homepage: https://docs.hanzo.bot/hooks#session-memory
+  Homepage: https://docs.hanzo.bot/automation/hooks#session-memory
   Events: command:new
 
 Requirements:
@@ -100,7 +100,7 @@ Requirements:
 ## Check Hooks Eligibility
 
 ```bash
-hanzo-bot hooks check
+bot hooks check
 ```
 
 Show summary of hook eligibility status (how many are ready vs. not ready).
@@ -122,12 +122,12 @@ Not ready: 0
 ## Enable a Hook
 
 ```bash
-hanzo-bot hooks enable <name>
+bot hooks enable <name>
 ```
 
-Enable a specific hook by adding it to your config (`~/.hanzo/bot/config.json`).
+Enable a specific hook by adding it to your config (`~/.bot/config.json`).
 
-**Note:** Hooks managed by plugins show `plugin:<id>` in `hanzo-bot hooks list` and
+**Note:** Hooks managed by plugins show `plugin:<id>` in `bot hooks list` and
 can’t be enabled/disabled here. Enable/disable the plugin instead.
 
 **Arguments:**
@@ -137,7 +137,7 @@ can’t be enabled/disabled here. Enable/disable the plugin instead.
 **Example:**
 
 ```bash
-hanzo-bot hooks enable session-memory
+bot hooks enable session-memory
 ```
 
 **Output:**
@@ -159,7 +159,7 @@ hanzo-bot hooks enable session-memory
 ## Disable a Hook
 
 ```bash
-hanzo-bot hooks disable <name>
+bot hooks disable <name>
 ```
 
 Disable a specific hook by updating your config.
@@ -171,7 +171,7 @@ Disable a specific hook by updating your config.
 **Example:**
 
 ```bash
-hanzo-bot hooks disable command-logger
+bot hooks disable command-logger
 ```
 
 **Output:**
@@ -187,14 +187,17 @@ hanzo-bot hooks disable command-logger
 ## Install Hooks
 
 ```bash
-hanzo-bot hooks install <path-or-spec>
+bot hooks install <path-or-spec>
 ```
 
 Install a hook pack from a local folder/archive or npm.
 
+Npm specs are **registry-only** (package name + optional version/tag). Git/URL/file
+specs are rejected. Dependency installs run with `--ignore-scripts` for safety.
+
 **What it does:**
 
-- Copies the hook pack into `~/.hanzo/bot/hooks/<id>`
+- Copies the hook pack into `~/.bot/hooks/<id>`
 - Enables the installed hooks in `hooks.internal.entries.*`
 - Records the install under `hooks.internal.installs`
 
@@ -208,23 +211,23 @@ Install a hook pack from a local folder/archive or npm.
 
 ```bash
 # Local directory
-hanzo-bot hooks install ./my-hook-pack
+bot hooks install ./my-hook-pack
 
 # Local archive
-hanzo-bot hooks install ./my-hook-pack.zip
+bot hooks install ./my-hook-pack.zip
 
 # NPM package
-hanzo-bot hooks install @bot/my-hook-pack
+bot hooks install @bot/my-hook-pack
 
 # Link a local directory without copying
-hanzo-bot hooks install -l ./my-hook-pack
+bot hooks install -l ./my-hook-pack
 ```
 
 ## Update Hooks
 
 ```bash
-hanzo-bot hooks update <id>
-hanzo-bot hooks update --all
+bot hooks update <id>
+bot hooks update --all
 ```
 
 Update installed hook packs (npm installs only).
@@ -243,12 +246,24 @@ Saves session context to memory when you issue `/new`.
 **Enable:**
 
 ```bash
-hanzo-bot hooks enable session-memory
+bot hooks enable session-memory
 ```
 
-**Output:** `~/.hanzo/bot/workspace/memory/YYYY-MM-DD-slug.md`
+**Output:** `~/.bot/workspace/memory/YYYY-MM-DD-slug.md`
 
 **See:** [session-memory documentation](/automation/hooks#session-memory)
+
+### bootstrap-extra-files
+
+Injects additional bootstrap files (for example monorepo-local `AGENTS.md` / `TOOLS.md`) during `agent:bootstrap`.
+
+**Enable:**
+
+```bash
+bot hooks enable bootstrap-extra-files
+```
+
+**See:** [bootstrap-extra-files documentation](/automation/hooks#bootstrap-extra-files)
 
 ### command-logger
 
@@ -257,37 +272,25 @@ Logs all command events to a centralized audit file.
 **Enable:**
 
 ```bash
-hanzo-bot hooks enable command-logger
+bot hooks enable command-logger
 ```
 
-**Output:** `~/.hanzo/bot/logs/commands.log`
+**Output:** `~/.bot/logs/commands.log`
 
 **View logs:**
 
 ```bash
 # Recent commands
-tail -n 20 ~/.hanzo/bot/logs/commands.log
+tail -n 20 ~/.bot/logs/commands.log
 
 # Pretty-print
-cat ~/.hanzo/bot/logs/commands.log | jq .
+cat ~/.bot/logs/commands.log | jq .
 
 # Filter by action
-grep '"action":"new"' ~/.hanzo/bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.bot/logs/commands.log | jq .
 ```
 
 **See:** [command-logger documentation](/automation/hooks#command-logger)
-
-### soul-evil
-
-Swaps injected `SOUL.md` content with `SOUL_EVIL.md` during a purge window or by random chance.
-
-**Enable:**
-
-```bash
-hanzo-bot hooks enable soul-evil
-```
-
-**See:** [SOUL Evil Hook](/hooks/soul-evil)
 
 ### boot-md
 
@@ -298,7 +301,7 @@ Runs `BOOT.md` when the gateway starts (after channels start).
 **Enable**:
 
 ```bash
-hanzo-bot hooks enable boot-md
+bot hooks enable boot-md
 ```
 
 **See:** [boot-md documentation](/automation/hooks#boot-md)

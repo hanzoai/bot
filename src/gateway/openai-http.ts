@@ -1,25 +1,31 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
-import { buildHistoryContextFromEntries, type HistoryEntry } from "../auto-reply/reply/history.js";
+import type { GatewayIamConfig } from "../config/config.js";
+import type { AuthRateLimiter } from "./auth-rate-limit.js";
+import type { ResolvedGatewayAuth } from "./auth.js";
 import { createDefaultDeps } from "../cli/deps.js";
 import { agentCommand } from "../commands/agent.js";
 import { emitAgentEvent, onAgentEvent } from "../infra/agent-events.js";
+import { logWarn } from "../logger.js";
 import { defaultRuntime } from "../runtime.js";
-import { authorizeGatewayConnect, type ResolvedGatewayAuth } from "./auth.js";
+import { resolveAssistantStreamDeltaText } from "./agent-event-assistant-text.js";
 import {
-  readJsonBodyOrError,
-  sendJson,
-  sendMethodNotAllowed,
-  sendUnauthorized,
-  setSseHeaders,
-  writeDone,
-} from "./http-common.js";
-import { getBearerToken, resolveAgentIdForRequest, resolveSessionKey } from "./http-utils.js";
+  buildAgentMessageFromConversationEntries,
+  type ConversationEntry,
+} from "./agent-prompt.js";
+import { checkBillingAllowance } from "./billing/billing-gate.js";
+import { reportUsage } from "./billing/usage-reporter.js";
+import { sendJson, setSseHeaders, writeDone } from "./http-common.js";
+import { handleGatewayPostJsonEndpoint } from "./http-endpoint-helpers.js";
+import { resolveAgentIdForRequest, resolveSessionKey } from "./http-utils.js";
+import { resolveTenantContext, type TenantContext } from "./tenant-context.js";
 
 type OpenAiHttpOptions = {
   auth: ResolvedGatewayAuth;
   maxBodyBytes?: number;
   trustedProxies?: string[];
+  rateLimiter?: AuthRateLimiter;
+  iamConfig?: GatewayIamConfig;
 };
 
 type OpenAiChatMessage = {
@@ -80,8 +86,7 @@ function buildAgentPrompt(messagesUnknown: unknown): {
   const messages = asMessages(messagesUnknown);
 
   const systemParts: string[] = [];
-  const conversationEntries: Array<{ role: "user" | "assistant" | "tool"; entry: HistoryEntry }> =
-    [];
+  const conversationEntries: ConversationEntry[] = [];
 
   for (const msg of messages) {
     if (!msg || typeof msg !== "object") {
@@ -118,34 +123,7 @@ function buildAgentPrompt(messagesUnknown: unknown): {
     });
   }
 
-  let message = "";
-  if (conversationEntries.length > 0) {
-    let currentIndex = -1;
-    for (let i = conversationEntries.length - 1; i >= 0; i -= 1) {
-      const entryRole = conversationEntries[i]?.role;
-      if (entryRole === "user" || entryRole === "tool") {
-        currentIndex = i;
-        break;
-      }
-    }
-    if (currentIndex < 0) {
-      currentIndex = conversationEntries.length - 1;
-    }
-    const currentEntry = conversationEntries[currentIndex]?.entry;
-    if (currentEntry) {
-      const historyEntries = conversationEntries.slice(0, currentIndex).map((entry) => entry.entry);
-      if (historyEntries.length === 0) {
-        message = currentEntry.body;
-      } else {
-        const formatEntry = (entry: HistoryEntry) => `${entry.sender}: ${entry.body}`;
-        message = buildHistoryContextFromEntries({
-          entries: [...historyEntries, currentEntry],
-          currentMessage: formatEntry(currentEntry),
-          formatEntry,
-        });
-      }
-    }
-  }
+  const message = buildAgentMessageFromConversationEntries(conversationEntries);
 
   return {
     message,
@@ -173,37 +151,45 @@ export async function handleOpenAiHttpRequest(
   res: ServerResponse,
   opts: OpenAiHttpOptions,
 ): Promise<boolean> {
-  const url = new URL(req.url ?? "/", `http://${req.headers.host || "localhost"}`);
-  if (url.pathname !== "/v1/chat/completions") {
+  const handled = await handleGatewayPostJsonEndpoint(req, res, {
+    pathname: "/v1/chat/completions",
+    auth: opts.auth,
+    trustedProxies: opts.trustedProxies,
+    rateLimiter: opts.rateLimiter,
+    maxBodyBytes: opts.maxBodyBytes ?? 1024 * 1024,
+  });
+  if (handled === false) {
     return false;
   }
-
-  if (req.method !== "POST") {
-    sendMethodNotAllowed(res);
+  if (!handled) {
     return true;
   }
 
-  const token = getBearerToken(req);
-  const authResult = await authorizeGatewayConnect({
-    auth: opts.auth,
-    connectAuth: { token, password: token },
-    req,
-    trustedProxies: opts.trustedProxies,
-  });
-  if (!authResult.ok) {
-    sendUnauthorized(res);
-    return true;
-  }
-
-  const body = await readJsonBodyOrError(req, res, opts.maxBodyBytes ?? 1024 * 1024);
-  if (body === undefined) {
-    return true;
-  }
-
-  const payload = coerceRequest(body);
+  const payload = coerceRequest(handled.body);
   const stream = Boolean(payload.stream);
   const model = typeof payload.model === "string" ? payload.model : "bot";
   const user = typeof payload.user === "string" ? payload.user : undefined;
+
+  // Resolve tenant context from IAM auth result (for billing & scoping)
+  let tenant: TenantContext | undefined;
+  if (handled.authResult?.iamResult && handled.authResult.iamResult.ok) {
+    tenant = resolveTenantContext({ iamResult: handled.authResult.iamResult }) ?? undefined;
+  }
+
+  // Billing gate: check subscription before dispatching LLM call
+  const billing = await checkBillingAllowance({
+    iamConfig: opts.iamConfig,
+    tenant,
+  });
+  if (!billing.allowed) {
+    sendJson(res, 402, {
+      error: {
+        message: billing.reason,
+        type: "billing_error",
+      },
+    });
+    return true;
+  }
 
   const agentId = resolveAgentIdForRequest({ req, model });
   const sessionKey = resolveOpenAiSessionKey({ req, agentId, user });
@@ -220,6 +206,7 @@ export async function handleOpenAiHttpRequest(
 
   const runId = `chatcmpl_${randomUUID()}`;
   const deps = createDefaultDeps();
+  const requestStartMs = Date.now();
 
   if (!stream) {
     try {
@@ -246,6 +233,29 @@ export async function handleOpenAiHttpRequest(
               .join("\n\n")
           : "No response from Hanzo Bot.";
 
+      // Extract usage from agent result metadata
+      const meta = (result as { meta?: Record<string, unknown> } | null)?.meta;
+      const agentUsage = (meta?.agentMeta as { usage?: Record<string, number> } | undefined)?.usage;
+      const inputTokens = agentUsage?.input ?? 0;
+      const outputTokens = agentUsage?.output ?? 0;
+      const totalTokens = agentUsage?.total ?? inputTokens + outputTokens;
+
+      // Report usage to IAM billing (async, non-blocking)
+      if (tenant && (inputTokens > 0 || outputTokens > 0)) {
+        reportUsage({
+          tenant,
+          model,
+          provider: (meta?.agentMeta as { provider?: string } | undefined)?.provider ?? "unknown",
+          inputTokens,
+          outputTokens,
+          cacheReadTokens: agentUsage?.cacheRead,
+          cacheWriteTokens: agentUsage?.cacheWrite,
+          totalTokens,
+          durationMs: Date.now() - requestStartMs,
+          timestamp: Date.now(),
+        });
+      }
+
       sendJson(res, 200, {
         id: runId,
         object: "chat.completion",
@@ -258,11 +268,16 @@ export async function handleOpenAiHttpRequest(
             finish_reason: "stop",
           },
         ],
-        usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        usage: {
+          prompt_tokens: inputTokens,
+          completion_tokens: outputTokens,
+          total_tokens: totalTokens,
+        },
       });
     } catch (err) {
+      logWarn(`openai-compat: chat completion failed: ${String(err)}`);
       sendJson(res, 500, {
-        error: { message: String(err), type: "api_error" },
+        error: { message: "internal error", type: "api_error" },
       });
     }
     return true;
@@ -283,9 +298,7 @@ export async function handleOpenAiHttpRequest(
     }
 
     if (evt.stream === "assistant") {
-      const delta = evt.data?.delta;
-      const text = evt.data?.text;
-      const content = typeof delta === "string" ? delta : typeof text === "string" ? text : "";
+      const content = resolveAssistantStreamDeltaText(evt);
       if (!content) {
         return;
       }
@@ -354,6 +367,29 @@ export async function handleOpenAiHttpRequest(
         return;
       }
 
+      // Report usage to IAM billing (streaming path)
+      const sMeta = (result as { meta?: Record<string, unknown> } | null)?.meta;
+      const sAgentUsage = (sMeta?.agentMeta as { usage?: Record<string, number> } | undefined)
+        ?.usage;
+      if (
+        tenant &&
+        sAgentUsage &&
+        ((sAgentUsage.input ?? 0) > 0 || (sAgentUsage.output ?? 0) > 0)
+      ) {
+        reportUsage({
+          tenant,
+          model,
+          provider: (sMeta?.agentMeta as { provider?: string } | undefined)?.provider ?? "unknown",
+          inputTokens: sAgentUsage.input ?? 0,
+          outputTokens: sAgentUsage.output ?? 0,
+          cacheReadTokens: sAgentUsage.cacheRead,
+          cacheWriteTokens: sAgentUsage.cacheWrite,
+          totalTokens: sAgentUsage.total ?? (sAgentUsage.input ?? 0) + (sAgentUsage.output ?? 0),
+          durationMs: Date.now() - requestStartMs,
+          timestamp: Date.now(),
+        });
+      }
+
       if (!sawAssistantDelta) {
         if (!wroteRole) {
           wroteRole = true;
@@ -391,6 +427,7 @@ export async function handleOpenAiHttpRequest(
         });
       }
     } catch (err) {
+      logWarn(`openai-compat: streaming chat completion failed: ${String(err)}`);
       if (closed) {
         return;
       }
@@ -402,7 +439,7 @@ export async function handleOpenAiHttpRequest(
         choices: [
           {
             index: 0,
-            delta: { content: `Error: ${String(err)}` },
+            delta: { content: "Error: internal error" },
             finish_reason: "stop",
           },
         ],

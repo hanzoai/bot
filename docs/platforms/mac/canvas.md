@@ -17,7 +17,7 @@ UI surfaces.
 
 Canvas state is stored under Application Support:
 
-- `~/Library/Application Support/Hanzo Bot/canvas/<session>/...`
+- `~/Library/Application Support/Bot/canvas/<session>/...`
 
 The Canvas panel serves those files via a **custom URL scheme**:
 
@@ -53,10 +53,10 @@ Canvas is exposed via the **Gateway WebSocket**, so the agent can:
 CLI examples:
 
 ```bash
-hanzo-bot nodes canvas present --node <id>
-hanzo-bot nodes canvas navigate --node <id> --url "/"
-hanzo-bot nodes canvas eval --node <id> --js "document.title"
-hanzo-bot nodes canvas snapshot --node <id>
+bot nodes canvas present --node <id>
+bot nodes canvas navigate --node <id> --url "/"
+bot nodes canvas eval --node <id> --js "document.title"
+bot nodes canvas snapshot --node <id>
 ```
 
 Notes:
@@ -73,7 +73,7 @@ A2UI host page on first open.
 Default A2UI host URL:
 
 ```
-http://<gateway-host>:18793/__bot__/a2ui/
+http://<gateway-host>:18789/__bot__/a2ui/
 ```
 
 ### A2UI commands (v0.8)
@@ -95,13 +95,13 @@ cat > /tmp/a2ui-v0.8.jsonl <<'EOFA2'
 {"beginRendering":{"surfaceId":"main","root":"root"}}
 EOFA2
 
-hanzo-bot nodes canvas a2ui push --jsonl /tmp/a2ui-v0.8.jsonl --node <id>
+bot nodes canvas a2ui push --jsonl /tmp/a2ui-v0.8.jsonl --node <id>
 ```
 
 Quick smoke:
 
 ```bash
-hanzo-bot nodes canvas a2ui push --node <id> --text "Hello from A2UI"
+bot nodes canvas a2ui push --node <id> --text "Hello from A2UI"
 ```
 
 ## Triggering agent runs from Canvas

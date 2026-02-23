@@ -1,5 +1,5 @@
 import type { ChannelOnboardingAdapter, BotConfig, WizardPrompter } from "bot/plugin-sdk";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
 import {
   listMattermostAccountIds,
   resolveDefaultMattermostAccountId,

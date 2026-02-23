@@ -15,11 +15,11 @@ Use this page when a channel connects but behavior is wrong.
 Run these in order first:
 
 ```bash
-hanzo-bot status
-hanzo-bot gateway status
-hanzo-bot logs --follow
-hanzo-bot doctor
-hanzo-bot channels status --probe
+bot status
+bot gateway status
+bot logs --follow
+bot doctor
+bot channels status --probe
 ```
 
 Healthy baseline:
@@ -34,9 +34,9 @@ Healthy baseline:
 
 | Symptom                         | Fastest check                                       | Fix                                                     |
 | ------------------------------- | --------------------------------------------------- | ------------------------------------------------------- |
-| Connected but no DM replies     | `hanzo-bot pairing list whatsapp`                    | Approve sender or switch DM policy/allowlist.           |
+| Connected but no DM replies     | `bot pairing list whatsapp`                         | Approve sender or switch DM policy/allowlist.           |
 | Group messages ignored          | Check `requireMention` + mention patterns in config | Mention the bot or relax mention policy for that group. |
-| Random disconnect/relogin loops | `hanzo-bot channels status --probe` + logs           | Re-login and verify credentials directory is healthy.   |
+| Random disconnect/relogin loops | `bot channels status --probe` + logs                | Re-login and verify credentials directory is healthy.   |
 
 Full troubleshooting: [/channels/whatsapp#troubleshooting-quick](/channels/whatsapp#troubleshooting-quick)
 
@@ -44,11 +44,12 @@ Full troubleshooting: [/channels/whatsapp#troubleshooting-quick](/channels/whats
 
 ### Telegram failure signatures
 
-| Symptom                           | Fastest check                                   | Fix                                                       |
-| --------------------------------- | ----------------------------------------------- | --------------------------------------------------------- |
-| `/start` but no usable reply flow | `hanzo-bot pairing list telegram`                | Approve pairing or change DM policy.                      |
-| Bot online but group stays silent | Verify mention requirement and bot privacy mode | Disable privacy mode for group visibility or mention bot. |
-| Send failures with network errors | Inspect logs for Telegram API call failures     | Fix DNS/IPv6/proxy routing to `api.telegram.org`.         |
+| Symptom                           | Fastest check                                   | Fix                                                                    |
+| --------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------- |
+| `/start` but no usable reply flow | `bot pairing list telegram`                     | Approve pairing or change DM policy.                                   |
+| Bot online but group stays silent | Verify mention requirement and bot privacy mode | Disable privacy mode for group visibility or mention bot.              |
+| Send failures with network errors | Inspect logs for Telegram API call failures     | Fix DNS/IPv6/proxy routing to `api.telegram.org`.                      |
+| Upgraded and allowlist blocks you | `bot security audit` and config allowlists      | Run `bot doctor --fix` or replace `@username` with numeric sender IDs. |
 
 Full troubleshooting: [/channels/telegram#troubleshooting](/channels/telegram#troubleshooting)
 
@@ -58,9 +59,9 @@ Full troubleshooting: [/channels/telegram#troubleshooting](/channels/telegram#tr
 
 | Symptom                         | Fastest check                       | Fix                                                       |
 | ------------------------------- | ----------------------------------- | --------------------------------------------------------- |
-| Bot online but no guild replies | `hanzo-bot channels status --probe`  | Allow guild/channel and verify message content intent.    |
+| Bot online but no guild replies | `bot channels status --probe`       | Allow guild/channel and verify message content intent.    |
 | Group messages ignored          | Check logs for mention gating drops | Mention bot or set guild/channel `requireMention: false`. |
-| DM replies missing              | `hanzo-bot pairing list discord`     | Approve DM pairing or adjust DM policy.                   |
+| DM replies missing              | `bot pairing list discord`          | Approve DM pairing or adjust DM policy.                   |
 
 Full troubleshooting: [/channels/discord#troubleshooting](/channels/discord#troubleshooting)
 
@@ -70,8 +71,8 @@ Full troubleshooting: [/channels/discord#troubleshooting](/channels/discord#trou
 
 | Symptom                                | Fastest check                             | Fix                                               |
 | -------------------------------------- | ----------------------------------------- | ------------------------------------------------- |
-| Socket mode connected but no responses | `hanzo-bot channels status --probe`        | Verify app token + bot token and required scopes. |
-| DMs blocked                            | `hanzo-bot pairing list slack`             | Approve pairing or relax DM policy.               |
+| Socket mode connected but no responses | `bot channels status --probe`             | Verify app token + bot token and required scopes. |
+| DMs blocked                            | `bot pairing list slack`                  | Approve pairing or relax DM policy.               |
 | Channel message ignored                | Check `groupPolicy` and channel allowlist | Allow the channel or switch policy to `open`.     |
 
 Full troubleshooting: [/channels/slack#troubleshooting](/channels/slack#troubleshooting)
@@ -80,11 +81,11 @@ Full troubleshooting: [/channels/slack#troubleshooting](/channels/slack#troubles
 
 ### iMessage and BlueBubbles failure signatures
 
-| Symptom                          | Fastest check                                                           | Fix                                                   |
-| -------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
-| No inbound events                | Verify webhook/server reachability and app permissions                  | Fix webhook URL or BlueBubbles server state.          |
-| Can send but no receive on macOS | Check macOS privacy permissions for Messages automation                 | Re-grant TCC permissions and restart channel process. |
-| DM sender blocked                | `hanzo-bot pairing list imessage` or `hanzo-bot pairing list bluebubbles` | Approve pairing or update allowlist.                  |
+| Symptom                          | Fastest check                                                 | Fix                                                   |
+| -------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------- |
+| No inbound events                | Verify webhook/server reachability and app permissions        | Fix webhook URL or BlueBubbles server state.          |
+| Can send but no receive on macOS | Check macOS privacy permissions for Messages automation       | Re-grant TCC permissions and restart channel process. |
+| DM sender blocked                | `bot pairing list imessage` or `bot pairing list bluebubbles` | Approve pairing or update allowlist.                  |
 
 Full troubleshooting:
 
@@ -97,8 +98,8 @@ Full troubleshooting:
 
 | Symptom                         | Fastest check                              | Fix                                                      |
 | ------------------------------- | ------------------------------------------ | -------------------------------------------------------- |
-| Daemon reachable but bot silent | `hanzo-bot channels status --probe`         | Verify `signal-cli` daemon URL/account and receive mode. |
-| DM blocked                      | `hanzo-bot pairing list signal`             | Approve sender or adjust DM policy.                      |
+| Daemon reachable but bot silent | `bot channels status --probe`              | Verify `signal-cli` daemon URL/account and receive mode. |
+| DM blocked                      | `bot pairing list signal`                  | Approve sender or adjust DM policy.                      |
 | Group replies do not trigger    | Check group allowlist and mention patterns | Add sender/group or loosen gating.                       |
 
 Full troubleshooting: [/channels/signal#troubleshooting](/channels/signal#troubleshooting)
@@ -109,8 +110,8 @@ Full troubleshooting: [/channels/signal#troubleshooting](/channels/signal#troubl
 
 | Symptom                             | Fastest check                                | Fix                                             |
 | ----------------------------------- | -------------------------------------------- | ----------------------------------------------- |
-| Logged in but ignores room messages | `hanzo-bot channels status --probe`           | Check `groupPolicy` and room allowlist.         |
-| DMs do not process                  | `hanzo-bot pairing list matrix`               | Approve sender or adjust DM policy.             |
+| Logged in but ignores room messages | `bot channels status --probe`                | Check `groupPolicy` and room allowlist.         |
+| DMs do not process                  | `bot pairing list matrix`                    | Approve sender or adjust DM policy.             |
 | Encrypted rooms fail                | Verify crypto module and encryption settings | Enable encryption support and rejoin/sync room. |
 
 Full troubleshooting: [/channels/matrix#troubleshooting](/channels/matrix#troubleshooting)

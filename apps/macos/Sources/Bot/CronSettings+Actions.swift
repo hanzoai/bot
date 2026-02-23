@@ -1,5 +1,5 @@
-import HanzoBotProtocol
 import Foundation
+import BotProtocol
 
 extension CronSettings {
     func save(payload: [String: AnyCodable]) async {

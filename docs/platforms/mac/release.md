@@ -1,12 +1,12 @@
 ---
-summary: "Hanzo Bot macOS release checklist (Sparkle feed, packaging, signing)"
+summary: "Bot macOS release checklist (Sparkle feed, packaging, signing)"
 read_when:
-  - Cutting or validating a Hanzo Bot macOS release
+  - Cutting or validating a Bot macOS release
   - Updating the Sparkle appcast or feed assets
 title: "macOS Release"
 ---
 
-# Hanzo Bot macOS release (Sparkle)
+# Bot macOS release (Sparkle)
 
 This app now ships Sparkle auto-updates. Release builds must be Developer ID–signed, zipped, and published with a signed appcast entry.
 
@@ -33,33 +33,33 @@ Notes:
 ```bash
 # From repo root; set release IDs so Sparkle feed is enabled.
 # APP_BUILD must be numeric + monotonic for Sparkle compare.
-BUNDLE_ID=bot.molt.mac \
-APP_VERSION=2026.2.9 \
+BUNDLE_ID=ai.hanzo.bot.mac \
+APP_VERSION=2026.2.16 \
 APP_BUILD="$(git rev-list --count HEAD)" \
 BUILD_CONFIG=release \
 SIGN_IDENTITY="Developer ID Application: <Developer Name> (<TEAMID>)" \
 scripts/package-mac-app.sh
 
 # Zip for distribution (includes resource forks for Sparkle delta support)
-ditto -c -k --sequesterRsrc --keepParent dist/Hanzo Bot.app dist/Hanzo Bot-2026.2.9.zip
+ditto -c -k --sequesterRsrc --keepParent dist/Bot.app dist/Bot-2026.2.16.zip
 
 # Optional: also build a styled DMG for humans (drag to /Applications)
-scripts/create-dmg.sh dist/Hanzo Bot.app dist/Hanzo Bot-2026.2.9.dmg
+scripts/create-dmg.sh dist/Bot.app dist/Bot-2026.2.16.dmg
 
 # Recommended: build + notarize/staple zip + DMG
 # First, create a keychain profile once:
 #   xcrun notarytool store-credentials "bot-notary" \
 #     --apple-id "<apple-id>" --team-id "<team-id>" --password "<app-specific-password>"
 NOTARIZE=1 NOTARYTOOL_PROFILE=bot-notary \
-BUNDLE_ID=bot.molt.mac \
-APP_VERSION=2026.2.9 \
+BUNDLE_ID=ai.hanzo.bot.mac \
+APP_VERSION=2026.2.16 \
 APP_BUILD="$(git rev-list --count HEAD)" \
 BUILD_CONFIG=release \
 SIGN_IDENTITY="Developer ID Application: <Developer Name> (<TEAMID>)" \
 scripts/package-mac-dist.sh
 
 # Optional: ship dSYM alongside the release
-ditto -c -k --keepParent apps/macos/.build/release/Hanzo Bot.app.dSYM dist/Hanzo Bot-2026.2.9.dSYM.zip
+ditto -c -k --keepParent apps/macos/.build/release/Bot.app.dSYM dist/Bot-2026.2.16.dSYM.zip
 ```
 
 ## Appcast entry
@@ -67,7 +67,7 @@ ditto -c -k --keepParent apps/macos/.build/release/Hanzo Bot.app.dSYM dist/Hanzo
 Use the release note generator so Sparkle renders formatted HTML notes:
 
 ```bash
-SPARKLE_PRIVATE_KEY_FILE=/path/to/ed25519-private-key scripts/make_appcast.sh dist/Hanzo Bot-2026.2.9.zip https://raw.githubusercontent.com/bot/bot/main/appcast.xml
+SPARKLE_PRIVATE_KEY_FILE=/path/to/ed25519-private-key scripts/make_appcast.sh dist/Bot-2026.2.16.zip https://raw.githubusercontent.com/hanzoai/bot/main/appcast.xml
 ```
 
 Generates HTML release notes from `CHANGELOG.md` (via [`scripts/changelog-to-html.sh`](https://github.com/hanzoai/bot/blob/main/scripts/changelog-to-html.sh)) and embeds them in the appcast entry.
@@ -75,10 +75,10 @@ Commit the updated `appcast.xml` alongside the release assets (zip + dSYM) when 
 
 ## Publish & verify
 
-- Upload `Hanzo Bot-2026.2.9.zip` (and `Hanzo Bot-2026.2.9.dSYM.zip`) to the GitHub release for tag `v2026.2.9`.
-- Ensure the raw appcast URL matches the baked feed: `https://raw.githubusercontent.com/bot/bot/main/appcast.xml`.
+- Upload `Bot-2026.2.16.zip` (and `Bot-2026.2.16.dSYM.zip`) to the GitHub release for tag `v2026.2.16`.
+- Ensure the raw appcast URL matches the baked feed: `https://raw.githubusercontent.com/hanzoai/bot/main/appcast.xml`.
 - Sanity checks:
-  - `curl -I https://raw.githubusercontent.com/bot/bot/main/appcast.xml` returns 200.
+  - `curl -I https://raw.githubusercontent.com/hanzoai/bot/main/appcast.xml` returns 200.
   - `curl -I <enclosure url>` returns 200 after assets upload.
   - On a previous public build, run “Check for Updates…” from the About tab and verify Sparkle installs the new build cleanly.
 

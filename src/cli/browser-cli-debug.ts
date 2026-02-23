@@ -179,7 +179,10 @@ export function registerBrowserDebugCommands(
   trace
     .command("stop")
     .description("Stop trace recording and write a .zip")
-    .option("--out <path>", "Output path for the trace zip")
+    .option(
+      "--out <path>",
+      "Output path within bot temp dir (e.g. trace.zip or /tmp/bot/trace.zip)",
+    )
     .option("--target-id <id>", "CDP target id (or unique prefix)")
     .action(async (opts, cmd) => {
       const parent = parentOpts(cmd);

@@ -5,7 +5,7 @@ import { runCommandWithTimeout } from "../process/exec.js";
 import { formatDocsLink } from "../terminal/links.js";
 import { isRich, theme } from "../terminal/theme.js";
 
-const SEARCH_TOOL = "https://docs.hanzo.bot/mcp.SearchHanzo Bot";
+const SEARCH_TOOL = "https://docs.hanzo.bot/mcp.SearchHanzoBot";
 const SEARCH_TIMEOUT_MS = 30_000;
 const DEFAULT_SNIPPET_MAX = 220;
 

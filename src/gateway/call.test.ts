@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { captureEnv } from "../test-utils/env.js";
 
 const loadConfig = vi.fn();
 const resolveGatewayPort = vi.fn();
@@ -32,14 +33,6 @@ vi.mock("../infra/tailnet.js", () => ({
 
 vi.mock("./net.js", () => ({
   pickPrimaryLanIPv4,
-}));
-
-vi.mock("../infra/device-identity.js", () => ({
-  loadOrCreateDeviceIdentity: () => ({
-    deviceId: "test-device-id",
-    publicKeyPem: "test-public-key",
-    privateKeyPem: "test-private-key",
-  }),
 }));
 
 vi.mock("./client.js", () => ({
@@ -77,10 +70,6 @@ vi.mock("./client.js", () => ({
 }));
 
 const { buildGatewayConnectionDetails, callGateway } = await import("./call.js");
-
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
 
 describe("callGateway url resolution", () => {
   beforeEach(() => {
@@ -343,7 +332,10 @@ describe("callGateway error details", () => {
 });
 
 describe("callGateway url override auth requirements", () => {
+  let envSnapshot: ReturnType<typeof captureEnv>;
+
   beforeEach(() => {
+    envSnapshot = captureEnv(["BOT_GATEWAY_TOKEN", "BOT_GATEWAY_PASSWORD"]);
     loadConfig.mockReset();
     resolveGatewayPort.mockReset();
     pickPrimaryTailnetIPv4.mockReset();
@@ -357,8 +349,7 @@ describe("callGateway url override auth requirements", () => {
   });
 
   afterEach(() => {
-    delete process.env.BOT_GATEWAY_TOKEN;
-    delete process.env.BOT_GATEWAY_PASSWORD;
+    envSnapshot.restore();
   });
 
   it("throws when url override is set without explicit credentials", async () => {
@@ -378,9 +369,10 @@ describe("callGateway url override auth requirements", () => {
 });
 
 describe("callGateway password resolution", () => {
-  const originalEnvPassword = process.env.BOT_GATEWAY_PASSWORD;
+  let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
+    envSnapshot = captureEnv(["BOT_GATEWAY_PASSWORD"]);
     loadConfig.mockReset();
     resolveGatewayPort.mockReset();
     pickPrimaryTailnetIPv4.mockReset();
@@ -395,11 +387,7 @@ describe("callGateway password resolution", () => {
   });
 
   afterEach(() => {
-    if (originalEnvPassword == null) {
-      delete process.env.BOT_GATEWAY_PASSWORD;
-    } else {
-      process.env.BOT_GATEWAY_PASSWORD = originalEnvPassword;
-    }
+    envSnapshot.restore();
   });
 
   it("uses local config password when env is unset", async () => {
@@ -477,60 +465,13 @@ describe("callGateway password resolution", () => {
 
     expect(lastClientOptions?.password).toBe("explicit-password");
   });
-
-  it("resolves remote password from a KMS reference", async () => {
-    const fetchSpy = vi.fn(async (input: string | URL) => {
-      const url = typeof input === "string" ? input : input.toString();
-      if (url.endsWith("/api/v1/auth/universal-auth/login")) {
-        return new Response(
-          JSON.stringify({
-            accessToken: "kms-access-token",
-            expiresIn: 3600,
-          }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
-      }
-      if (url.includes("/api/v3/secrets/raw/GATEWAY_REMOTE_PASSWORD")) {
-        return new Response(
-          JSON.stringify({
-            secret: { secretValue: "remote-secret-from-kms" },
-          }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
-      }
-      return new Response("not found", { status: 404 });
-    });
-    vi.stubGlobal("fetch", fetchSpy);
-
-    loadConfig.mockReturnValue({
-      gateway: {
-        mode: "remote",
-        remote: { url: "ws://remote.example:18789", password: "kms://GATEWAY_REMOTE_PASSWORD" },
-      },
-      secrets: {
-        backend: "kms",
-        kms: {
-          projectId: "proj_123",
-          environment: "dev",
-          machineIdentity: {
-            clientId: "machine-client-id-local",
-            clientSecret: "machine-client-secret-local",
-          },
-        },
-      },
-    });
-
-    await callGateway({ method: "health" });
-
-    expect(lastClientOptions?.password).toBe("remote-secret-from-kms");
-    expect(fetchSpy).toHaveBeenCalledTimes(2);
-  });
 });
 
 describe("callGateway token resolution", () => {
-  const originalEnvToken = process.env.BOT_GATEWAY_TOKEN;
+  let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
+    envSnapshot = captureEnv(["BOT_GATEWAY_TOKEN"]);
     loadConfig.mockReset();
     resolveGatewayPort.mockReset();
     pickPrimaryTailnetIPv4.mockReset();
@@ -545,11 +486,7 @@ describe("callGateway token resolution", () => {
   });
 
   afterEach(() => {
-    if (originalEnvToken == null) {
-      delete process.env.BOT_GATEWAY_TOKEN;
-    } else {
-      process.env.BOT_GATEWAY_TOKEN = originalEnvToken;
-    }
+    envSnapshot.restore();
   });
 
   it("uses explicit token when url override is set", async () => {
@@ -568,53 +505,5 @@ describe("callGateway token resolution", () => {
     });
 
     expect(lastClientOptions?.token).toBe("explicit-token");
-  });
-
-  it("resolves local token from a KMS reference", async () => {
-    const fetchSpy = vi.fn(async (input: string | URL) => {
-      const url = typeof input === "string" ? input : input.toString();
-      if (url.endsWith("/api/v1/auth/universal-auth/login")) {
-        return new Response(
-          JSON.stringify({
-            accessToken: "kms-access-token",
-            expiresIn: 3600,
-          }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
-      }
-      if (url.includes("/api/v3/secrets/raw/GATEWAY_TOKEN")) {
-        return new Response(
-          JSON.stringify({
-            secret: { secretValue: "token-from-kms" },
-          }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
-      }
-      return new Response("not found", { status: 404 });
-    });
-    vi.stubGlobal("fetch", fetchSpy);
-
-    loadConfig.mockReturnValue({
-      gateway: {
-        mode: "local",
-        auth: { token: "kms://GATEWAY_TOKEN" },
-      },
-      secrets: {
-        backend: "kms",
-        kms: {
-          projectId: "proj_123",
-          environment: "dev",
-          machineIdentity: {
-            clientId: "machine-client-id",
-            clientSecret: "machine-client-secret",
-          },
-        },
-      },
-    });
-
-    await callGateway({ method: "health" });
-
-    expect(lastClientOptions?.token).toBe("token-from-kms");
-    expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
 });

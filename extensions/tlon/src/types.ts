@@ -8,16 +8,14 @@ export type TlonResolvedAccount = {
   ship: string | null;
   url: string | null;
   code: string | null;
+  allowPrivateNetwork: boolean | null;
   groupChannels: string[];
   dmAllowlist: string[];
   autoDiscoverChannels: boolean | null;
   showModelSignature: boolean | null;
 };
 
-export function resolveTlonAccount(
-  cfg: BotConfig,
-  accountId?: string | null,
-): TlonResolvedAccount {
+export function resolveTlonAccount(cfg: BotConfig, accountId?: string | null): TlonResolvedAccount {
   const base = cfg.channels?.tlon as
     | {
         name?: string;
@@ -25,6 +23,7 @@ export function resolveTlonAccount(
         ship?: string;
         url?: string;
         code?: string;
+        allowPrivateNetwork?: boolean;
         groupChannels?: string[];
         dmAllowlist?: string[];
         autoDiscoverChannels?: boolean;
@@ -42,6 +41,7 @@ export function resolveTlonAccount(
       ship: null,
       url: null,
       code: null,
+      allowPrivateNetwork: null,
       groupChannels: [],
       dmAllowlist: [],
       autoDiscoverChannels: null,
@@ -55,6 +55,9 @@ export function resolveTlonAccount(
   const ship = (account?.ship ?? base.ship ?? null) as string | null;
   const url = (account?.url ?? base.url ?? null) as string | null;
   const code = (account?.code ?? base.code ?? null) as string | null;
+  const allowPrivateNetwork = (account?.allowPrivateNetwork ?? base.allowPrivateNetwork ?? null) as
+    | boolean
+    | null;
   const groupChannels = (account?.groupChannels ?? base.groupChannels ?? []) as string[];
   const dmAllowlist = (account?.dmAllowlist ?? base.dmAllowlist ?? []) as string[];
   const autoDiscoverChannels = (account?.autoDiscoverChannels ??
@@ -73,6 +76,7 @@ export function resolveTlonAccount(
     ship,
     url,
     code,
+    allowPrivateNetwork,
     groupChannels,
     dmAllowlist,
     autoDiscoverChannels,

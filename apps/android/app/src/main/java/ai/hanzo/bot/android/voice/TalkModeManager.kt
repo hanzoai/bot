@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.voice
+package ai.hanzo.bot.android.voice
 
 import android.Manifest
 import android.content.Context
@@ -20,9 +20,9 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import androidx.core.content.ContextCompat
-import ai.hanzo-bot.android.gateway.GatewaySession
-import ai.hanzo-bot.android.isCanonicalMainSessionKey
-import ai.hanzo-bot.android.normalizeMainKey
+import ai.hanzo.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.isCanonicalMainSessionKey
+import ai.hanzo.bot.android.normalizeMainKey
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.UUID
@@ -814,7 +814,7 @@ class TalkModeManager(
     val sagVoice = System.getenv("SAG_VOICE_ID")?.trim()
     val envKey = System.getenv("ELEVENLABS_API_KEY")?.trim()
     try {
-      val res = session.request("config.get", "{}")
+      val res = session.request("talk.config", """{"includeSecrets":true}""")
       val root = json.parseToJsonElement(res).asObjectOrNull()
       val config = root?.get("config").asObjectOrNull()
       val talk = config?.get("talk").asObjectOrNull()

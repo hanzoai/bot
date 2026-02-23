@@ -9,12 +9,12 @@ title: "Discovery and Transports"
 
 # Discovery & transports
 
-Hanzo Bot has two distinct problems that look similar on the surface:
+Bot has two distinct problems that look similar on the surface:
 
 1. **Operator remote control**: the macOS menu bar app controlling a gateway running elsewhere.
 2. **Node pairing**: iOS/Android (and future nodes) finding a gateway and pairing securely.
 
-The design goal is to keep all network discovery/advertising in the **Node Gateway** (`hanzo-bot gateway`) and keep clients (mac app, iOS) as consumers.
+The design goal is to keep all network discovery/advertising in the **Node Gateway** (`bot gateway`) and keep clients (mac app, iOS) as consumers.
 
 ## Terms
 
@@ -64,14 +64,21 @@ Troubleshooting and beacon details: [Bonjour](/gateway/bonjour).
   - `gatewayPort=18789` (Gateway WS + HTTP)
   - `gatewayTls=1` (only when TLS is enabled)
   - `gatewayTlsSha256=<sha256>` (only when TLS is enabled and fingerprint is available)
-  - `canvasPort=18793` (default canvas host port; serves `/__bot__/canvas/`)
+  - `canvasPort=<port>` (canvas host port; currently the same as `gatewayPort` when the canvas host is enabled)
   - `cliPath=<path>` (optional; absolute path to a runnable `bot` entrypoint or binary)
   - `tailnetDns=<magicdns>` (optional hint; auto-detected when Tailscale is available)
+
+Security notes:
+
+- Bonjour/mDNS TXT records are **unauthenticated**. Clients must treat TXT values as UX hints only.
+- Routing (host/port) should prefer the **resolved service endpoint** (SRV + A/AAAA) over TXT-provided `lanHost`, `tailnetDns`, or `gatewayPort`.
+- TLS pinning must never allow an advertised `gatewayTlsSha256` to override a previously stored pin.
+- iOS/Android nodes should treat discovery-based direct connects as **TLS-only** and require an explicit “trust this fingerprint” confirmation before storing a first-time pin (out-of-band verification).
 
 Disable/override:
 
 - `BOT_DISABLE_BONJOUR=1` disables advertising.
-- `gateway.bind` in `~/.hanzo/bot/bot.json` controls the Gateway bind mode.
+- `gateway.bind` in `~/.bot/bot.json` controls the Gateway bind mode.
 - `BOT_SSH_PORT` overrides the SSH port advertised in TXT (defaults to 22).
 - `BOT_TAILNET_DNS` publishes a `tailnetDns` hint (MagicDNS).
 - `BOT_CLI_PATH` overrides the advertised CLI path.

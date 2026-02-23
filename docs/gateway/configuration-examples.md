@@ -1,9 +1,9 @@
 ---
-summary: "Schema-accurate configuration examples for common Hanzo Bot setups"
+summary: "Schema-accurate configuration examples for common Bot setups"
 read_when:
-  - Learning how to configure Hanzo Bot
+  - Learning how to configure Bot
   - Looking for configuration examples
-  - Setting up Hanzo Bot for the first time
+  - Setting up Bot for the first time
 title: "Configuration Examples"
 ---
 
@@ -17,24 +17,24 @@ Examples below are aligned with the current config schema. For the exhaustive re
 
 ```json5
 {
-  agent: { workspace: "~/.hanzo/bot/workspace" },
+  agent: { workspace: "~/.bot/workspace" },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
 
-Save to `~/.hanzo/bot/bot.json` and you can DM the bot from that number.
+Save to `~/.bot/bot.json` and you can DM the bot from that number.
 
 ### Recommended starter
 
 ```json5
 {
   identity: {
-    name: "Bot",
+    name: "Botd",
     theme: "helpful assistant",
-    emoji: "🤖",
+    emoji: "B",
   },
   agent: {
-    workspace: "~/.hanzo/bot/workspace",
+    workspace: "~/.bot/workspace",
     model: { primary: "anthropic/claude-sonnet-4-5" },
   },
   channels: {
@@ -67,7 +67,11 @@ Save to `~/.hanzo/bot/bot.json` and you can DM the bot from that number.
   // Auth profile metadata (secrets live in auth-profiles.json)
   auth: {
     profiles: {
-      "anthropic:me@example.com": { provider: "anthropic", mode: "oauth", email: "me@example.com" },
+      "anthropic:me@example.com": {
+        provider: "anthropic",
+        mode: "oauth",
+        email: "me@example.com",
+      },
       "anthropic:work": { provider: "anthropic", mode: "api_key" },
       "openai:default": { provider: "openai", mode: "api_key" },
       "openai-codex:default": { provider: "openai-codex", mode: "oauth" },
@@ -159,7 +163,7 @@ Save to `~/.hanzo/bot/bot.json` and you can DM the bot from that number.
       discord: { mode: "idle", idleMinutes: 10080 },
     },
     resetTriggers: ["/new", "/reset"],
-    store: "~/.hanzo/bot/agents/default/sessions/sessions.json",
+    store: "~/.bot/agents/default/sessions/sessions.json",
     maintenance: {
       mode: "warn",
       pruneAfter: "30d",
@@ -228,7 +232,7 @@ Save to `~/.hanzo/bot/bot.json` and you can DM the bot from that number.
   // Agent runtime
   agents: {
     defaults: {
-      workspace: "~/.hanzo/bot/workspace",
+      workspace: "~/.bot/workspace",
       userTimezone: "America/Chicago",
       model: {
         primary: "anthropic/claude-sonnet-4-5",
@@ -281,7 +285,7 @@ Save to `~/.hanzo/bot/bot.json` and you can DM the bot from that number.
       sandbox: {
         mode: "non-main",
         perSession: true,
-        workspaceRoot: "~/.hanzo/bot/sandboxes",
+        workspaceRoot: "~/.bot/sandboxes",
         docker: {
           image: "bot-sandbox:bookworm-slim",
           workdir: "/workspace",
@@ -348,7 +352,7 @@ Save to `~/.hanzo/bot/bot.json` and you can DM the bot from that number.
   // Cron jobs
   cron: {
     enabled: true,
-    store: "~/.hanzo/bot/cron/cron.json",
+    store: "~/.bot/cron/cron.json",
     maxConcurrentRuns: 2,
     sessionRetention: "24h",
   },
@@ -359,7 +363,7 @@ Save to `~/.hanzo/bot/bot.json` and you can DM the bot from that number.
     path: "/hooks",
     token: "shared-secret",
     presets: ["gmail"],
-    transformsDir: "~/.hanzo/bot/hooks",
+    transformsDir: "~/.bot/hooks/transforms",
     mappings: [
       {
         id: "gmail-hook",
@@ -375,7 +379,10 @@ Save to `~/.hanzo/bot/bot.json` and you can DM the bot from that number.
         to: "+15555550123",
         thinking: "low",
         timeoutSeconds: 300,
-        transform: { module: "./transforms/gmail.js", export: "transformGmail" },
+        transform: {
+          module: "gmail.js",
+          export: "transformGmail",
+        },
       },
     ],
     gmail: {
@@ -436,7 +443,7 @@ Save to `~/.hanzo/bot/bot.json` and you can DM the bot from that number.
 
 ```json5
 {
-  agent: { workspace: "~/.hanzo/bot/workspace" },
+  agent: { workspace: "~/.bot/workspace" },
   channels: {
     whatsapp: { allowFrom: ["+15555550123"] },
     telegram: {
@@ -500,7 +507,7 @@ If more than one person can DM your bot (multiple entries in `allowFrom`, pairin
     },
   },
   agent: {
-    workspace: "~/.hanzo/bot/workspace",
+    workspace: "~/.bot/workspace",
     model: {
       primary: "anthropic/claude-sonnet-4-5",
       fallbacks: ["anthropic/claude-opus-4-6"],
@@ -539,7 +546,7 @@ If more than one person can DM your bot (multiple entries in `allowFrom`, pairin
     },
   },
   agent: {
-    workspace: "~/.hanzo/bot/workspace",
+    workspace: "~/.bot/workspace",
     model: {
       primary: "anthropic/claude-opus-4-6",
       fallbacks: ["minimax/MiniMax-M2.1"],
@@ -578,7 +585,7 @@ If more than one person can DM your bot (multiple entries in `allowFrom`, pairin
 ```json5
 {
   agent: {
-    workspace: "~/.hanzo/bot/workspace",
+    workspace: "~/.bot/workspace",
     model: { primary: "lmstudio/minimax-m2.1-gs32" },
   },
   models: {

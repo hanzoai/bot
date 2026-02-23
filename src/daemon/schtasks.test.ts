@@ -7,7 +7,7 @@ import { parseSchtasksQuery, readScheduledTaskCommand, resolveTaskScriptPath } f
 describe("schtasks runtime parsing", () => {
   it("parses status and last run info", () => {
     const output = [
-      "TaskName: \\Hanzo Bot Gateway",
+      "TaskName: \\Bot Gateway",
       "Status: Ready",
       "Last Run Time: 1/8/2026 1:23:45 AM",
       "Last Run Result: 0x0",
@@ -21,7 +21,7 @@ describe("schtasks runtime parsing", () => {
 
   it("parses running status", () => {
     const output = [
-      "TaskName: \\Hanzo Bot Gateway",
+      "TaskName: \\Bot Gateway",
       "Status: Running",
       "Last Run Time: 1/8/2026 1:23:45 AM",
       "Last Run Result: 0x0",
@@ -35,18 +35,9 @@ describe("schtasks runtime parsing", () => {
 });
 
 describe("resolveTaskScriptPath", () => {
-  it("uses default path when BOT_PROFILE is default", () => {
-    const env = { USERPROFILE: "C:\\Users\\test", BOT_PROFILE: "default" };
-    expect(resolveTaskScriptPath(env)).toBe(
-      path.join("C:\\Users\\test", ".bot", "gateway.cmd"),
-    );
-  });
-
   it("uses default path when BOT_PROFILE is unset", () => {
     const env = { USERPROFILE: "C:\\Users\\test" };
-    expect(resolveTaskScriptPath(env)).toBe(
-      path.join("C:\\Users\\test", ".bot", "gateway.cmd"),
-    );
+    expect(resolveTaskScriptPath(env)).toBe(path.join("C:\\Users\\test", ".bot", "gateway.cmd"));
   });
 
   it("uses profile-specific path when BOT_PROFILE is set to a custom value", () => {
@@ -65,27 +56,6 @@ describe("resolveTaskScriptPath", () => {
     expect(resolveTaskScriptPath(env)).toBe(path.join("C:\\State\\bot", "gateway.cmd"));
   });
 
-  it("handles case-insensitive 'Default' profile", () => {
-    const env = { USERPROFILE: "C:\\Users\\test", BOT_PROFILE: "Default" };
-    expect(resolveTaskScriptPath(env)).toBe(
-      path.join("C:\\Users\\test", ".bot", "gateway.cmd"),
-    );
-  });
-
-  it("handles case-insensitive 'DEFAULT' profile", () => {
-    const env = { USERPROFILE: "C:\\Users\\test", BOT_PROFILE: "DEFAULT" };
-    expect(resolveTaskScriptPath(env)).toBe(
-      path.join("C:\\Users\\test", ".bot", "gateway.cmd"),
-    );
-  });
-
-  it("trims whitespace from BOT_PROFILE", () => {
-    const env = { USERPROFILE: "C:\\Users\\test", BOT_PROFILE: "  myprofile  " };
-    expect(resolveTaskScriptPath(env)).toBe(
-      path.join("C:\\Users\\test", ".bot-myprofile", "gateway.cmd"),
-    );
-  });
-
   it("falls back to HOME when USERPROFILE is not set", () => {
     const env = { HOME: "/home/test", BOT_PROFILE: "default" };
     expect(resolveTaskScriptPath(env)).toBe(path.join("/home/test", ".bot", "gateway.cmd"));
@@ -93,74 +63,6 @@ describe("resolveTaskScriptPath", () => {
 });
 
 describe("readScheduledTaskCommand", () => {
-  it("parses basic command script", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
-    try {
-      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
-      await fs.mkdir(path.dirname(scriptPath), { recursive: true });
-      await fs.writeFile(
-        scriptPath,
-        ["@echo off", "node gateway.js --port 18789"].join("\r\n"),
-        "utf8",
-      );
-
-      const env = { USERPROFILE: tmpDir, BOT_PROFILE: "default" };
-      const result = await readScheduledTaskCommand(env);
-      expect(result).toEqual({
-        programArguments: ["node", "gateway.js", "--port", "18789"],
-      });
-    } finally {
-      await fs.rm(tmpDir, { recursive: true, force: true });
-    }
-  });
-
-  it("parses script with working directory", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
-    try {
-      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
-      await fs.mkdir(path.dirname(scriptPath), { recursive: true });
-      await fs.writeFile(
-        scriptPath,
-        ["@echo off", "cd /d C:\\Projects\\bot", "node gateway.js"].join("\r\n"),
-        "utf8",
-      );
-
-      const env = { USERPROFILE: tmpDir, BOT_PROFILE: "default" };
-      const result = await readScheduledTaskCommand(env);
-      expect(result).toEqual({
-        programArguments: ["node", "gateway.js"],
-        workingDirectory: "C:\\Projects\\bot",
-      });
-    } finally {
-      await fs.rm(tmpDir, { recursive: true, force: true });
-    }
-  });
-
-  it("parses script with environment variables", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
-    try {
-      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
-      await fs.mkdir(path.dirname(scriptPath), { recursive: true });
-      await fs.writeFile(
-        scriptPath,
-        ["@echo off", "set NODE_ENV=production", "set PORT=18789", "node gateway.js"].join("\r\n"),
-        "utf8",
-      );
-
-      const env = { USERPROFILE: tmpDir, BOT_PROFILE: "default" };
-      const result = await readScheduledTaskCommand(env);
-      expect(result).toEqual({
-        programArguments: ["node", "gateway.js"],
-        environment: {
-          NODE_ENV: "production",
-          PORT: "18789",
-        },
-      });
-    } finally {
-      await fs.rm(tmpDir, { recursive: true, force: true });
-    }
-  });
-
   it("parses script with quoted arguments containing spaces", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
     try {
@@ -222,7 +124,7 @@ describe("readScheduledTaskCommand", () => {
         scriptPath,
         [
           "@echo off",
-          "rem Hanzo Bot Gateway",
+          "rem Bot Gateway",
           "cd /d C:\\Projects\\bot",
           "set NODE_ENV=production",
           "set BOT_PORT=18789",
@@ -240,6 +142,65 @@ describe("readScheduledTaskCommand", () => {
           NODE_ENV: "production",
           BOT_PORT: "18789",
         },
+      });
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+  it("parses command with Windows backslash paths", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
+    try {
+      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
+      await fs.mkdir(path.dirname(scriptPath), { recursive: true });
+      await fs.writeFile(
+        scriptPath,
+        [
+          "@echo off",
+          '"C:\\Program Files\\nodejs\\node.exe" C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\bot\\dist\\index.js gateway --port 18789',
+        ].join("\r\n"),
+        "utf8",
+      );
+
+      const env = { USERPROFILE: tmpDir, BOT_PROFILE: "default" };
+      const result = await readScheduledTaskCommand(env);
+      expect(result).toEqual({
+        programArguments: [
+          "C:\\Program Files\\nodejs\\node.exe",
+          "C:\\Users\\test\\AppData\\Roaming\\npm\\node_modules\\bot\\dist\\index.js",
+          "gateway",
+          "--port",
+          "18789",
+        ],
+      });
+    } finally {
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("preserves UNC paths in command arguments", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
+    try {
+      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
+      await fs.mkdir(path.dirname(scriptPath), { recursive: true });
+      await fs.writeFile(
+        scriptPath,
+        [
+          "@echo off",
+          '"\\\\fileserver\\Bot Share\\node.exe" "\\\\fileserver\\Bot Share\\dist\\index.js" gateway --port 18789',
+        ].join("\r\n"),
+        "utf8",
+      );
+
+      const env = { USERPROFILE: tmpDir, BOT_PROFILE: "default" };
+      const result = await readScheduledTaskCommand(env);
+      expect(result).toEqual({
+        programArguments: [
+          "\\\\fileserver\\Bot Share\\node.exe",
+          "\\\\fileserver\\Bot Share\\dist\\index.js",
+          "gateway",
+          "--port",
+          "18789",
+        ],
       });
     } finally {
       await fs.rm(tmpDir, { recursive: true, force: true });

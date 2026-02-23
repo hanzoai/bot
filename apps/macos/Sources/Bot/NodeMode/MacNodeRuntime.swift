@@ -1,7 +1,7 @@
 import AppKit
+import Foundation
 import BotIPC
 import BotKit
-import Foundation
 
 actor MacNodeRuntime {
     private let cameraCapture = CameraCaptureService()
@@ -34,39 +34,39 @@ actor MacNodeRuntime {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: HanzoBotNodeError(
+                error: BotNodeError(
                     code: .unavailable,
                     message: "CANVAS_DISABLED: enable Canvas in Settings"))
         }
         do {
             switch command {
-            case HanzoBotCanvasCommand.present.rawValue,
-                 HanzoBotCanvasCommand.hide.rawValue,
-                 HanzoBotCanvasCommand.navigate.rawValue,
-                 HanzoBotCanvasCommand.evalJS.rawValue,
-                 HanzoBotCanvasCommand.snapshot.rawValue:
+            case BotCanvasCommand.present.rawValue,
+                 BotCanvasCommand.hide.rawValue,
+                 BotCanvasCommand.navigate.rawValue,
+                 BotCanvasCommand.evalJS.rawValue,
+                 BotCanvasCommand.snapshot.rawValue:
                 return try await self.handleCanvasInvoke(req)
-            case HanzoBotCanvasA2UICommand.reset.rawValue,
-                 HanzoBotCanvasA2UICommand.push.rawValue,
-                 HanzoBotCanvasA2UICommand.pushJSONL.rawValue:
+            case BotCanvasA2UICommand.reset.rawValue,
+                 BotCanvasA2UICommand.push.rawValue,
+                 BotCanvasA2UICommand.pushJSONL.rawValue:
                 return try await self.handleA2UIInvoke(req)
-            case HanzoBotCameraCommand.snap.rawValue,
-                 HanzoBotCameraCommand.clip.rawValue,
-                 HanzoBotCameraCommand.list.rawValue:
+            case BotCameraCommand.snap.rawValue,
+                 BotCameraCommand.clip.rawValue,
+                 BotCameraCommand.list.rawValue:
                 return try await self.handleCameraInvoke(req)
-            case HanzoBotLocationCommand.get.rawValue:
+            case BotLocationCommand.get.rawValue:
                 return try await self.handleLocationInvoke(req)
             case MacNodeScreenCommand.record.rawValue:
                 return try await self.handleScreenRecordInvoke(req)
-            case HanzoBotSystemCommand.run.rawValue:
+            case BotSystemCommand.run.rawValue:
                 return try await self.handleSystemRun(req)
-            case HanzoBotSystemCommand.which.rawValue:
+            case BotSystemCommand.which.rawValue:
                 return try await self.handleSystemWhich(req)
-            case HanzoBotSystemCommand.notify.rawValue:
+            case BotSystemCommand.notify.rawValue:
                 return try await self.handleSystemNotify(req)
-            case HanzoBotSystemCommand.execApprovalsGet.rawValue:
+            case BotSystemCommand.execApprovalsGet.rawValue:
                 return try await self.handleSystemExecApprovalsGet(req)
-            case HanzoBotSystemCommand.execApprovalsSet.rawValue:
+            case BotSystemCommand.execApprovalsSet.rawValue:
                 return try await self.handleSystemExecApprovalsSet(req)
             default:
                 return Self.errorResponse(req, code: .invalidRequest, message: "INVALID_REQUEST: unknown command")
@@ -82,9 +82,9 @@ actor MacNodeRuntime {
 
     private func handleCanvasInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case HanzoBotCanvasCommand.present.rawValue:
-            let params = (try? Self.decodeParams(HanzoBotCanvasPresentParams.self, from: req.paramsJSON)) ??
-                HanzoBotCanvasPresentParams()
+        case BotCanvasCommand.present.rawValue:
+            let params = (try? Self.decodeParams(BotCanvasPresentParams.self, from: req.paramsJSON)) ??
+                BotCanvasPresentParams()
             let urlTrimmed = params.url?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             let url = urlTrimmed.isEmpty ? nil : urlTrimmed
             let placement = params.placement.map {
@@ -98,29 +98,29 @@ actor MacNodeRuntime {
                     placement: placement)
             }
             return BridgeInvokeResponse(id: req.id, ok: true)
-        case HanzoBotCanvasCommand.hide.rawValue:
+        case BotCanvasCommand.hide.rawValue:
             let sessionKey = self.mainSessionKey
             await MainActor.run {
                 CanvasManager.shared.hide(sessionKey: sessionKey)
             }
             return BridgeInvokeResponse(id: req.id, ok: true)
-        case HanzoBotCanvasCommand.navigate.rawValue:
-            let params = try Self.decodeParams(HanzoBotCanvasNavigateParams.self, from: req.paramsJSON)
+        case BotCanvasCommand.navigate.rawValue:
+            let params = try Self.decodeParams(BotCanvasNavigateParams.self, from: req.paramsJSON)
             let sessionKey = self.mainSessionKey
             try await MainActor.run {
                 _ = try CanvasManager.shared.show(sessionKey: sessionKey, path: params.url)
             }
             return BridgeInvokeResponse(id: req.id, ok: true)
-        case HanzoBotCanvasCommand.evalJS.rawValue:
-            let params = try Self.decodeParams(HanzoBotCanvasEvalParams.self, from: req.paramsJSON)
+        case BotCanvasCommand.evalJS.rawValue:
+            let params = try Self.decodeParams(BotCanvasEvalParams.self, from: req.paramsJSON)
             let sessionKey = self.mainSessionKey
             let result = try await CanvasManager.shared.eval(
                 sessionKey: sessionKey,
                 javaScript: params.javaScript)
             let payload = try Self.encodePayload(["result": result] as [String: String])
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: payload)
-        case HanzoBotCanvasCommand.snapshot.rawValue:
-            let params = try? Self.decodeParams(HanzoBotCanvasSnapshotParams.self, from: req.paramsJSON)
+        case BotCanvasCommand.snapshot.rawValue:
+            let params = try? Self.decodeParams(BotCanvasSnapshotParams.self, from: req.paramsJSON)
             let format = params?.format ?? .jpeg
             let maxWidth: Int? = {
                 if let raw = params?.maxWidth, raw > 0 { return raw }
@@ -155,10 +155,10 @@ actor MacNodeRuntime {
 
     private func handleA2UIInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case HanzoBotCanvasA2UICommand.reset.rawValue:
+        case BotCanvasA2UICommand.reset.rawValue:
             try await self.handleA2UIReset(req)
-        case HanzoBotCanvasA2UICommand.push.rawValue,
-             HanzoBotCanvasA2UICommand.pushJSONL.rawValue:
+        case BotCanvasA2UICommand.push.rawValue,
+             BotCanvasA2UICommand.pushJSONL.rawValue:
             try await self.handleA2UIPush(req)
         default:
             Self.errorResponse(req, code: .invalidRequest, message: "INVALID_REQUEST: unknown command")
@@ -170,14 +170,14 @@ actor MacNodeRuntime {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: HanzoBotNodeError(
+                error: BotNodeError(
                     code: .unavailable,
                     message: "CAMERA_DISABLED: enable Camera in Settings"))
         }
         switch req.command {
-        case HanzoBotCameraCommand.snap.rawValue:
-            let params = (try? Self.decodeParams(HanzoBotCameraSnapParams.self, from: req.paramsJSON)) ??
-                HanzoBotCameraSnapParams()
+        case BotCameraCommand.snap.rawValue:
+            let params = (try? Self.decodeParams(BotCameraSnapParams.self, from: req.paramsJSON)) ??
+                BotCameraSnapParams()
             let delayMs = min(10000, max(0, params.delayMs ?? 2000))
             let res = try await self.cameraCapture.snap(
                 facing: CameraFacing(rawValue: params.facing?.rawValue ?? "") ?? .front,
@@ -197,9 +197,9 @@ actor MacNodeRuntime {
                 width: Int(res.size.width),
                 height: Int(res.size.height)))
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: payload)
-        case HanzoBotCameraCommand.clip.rawValue:
-            let params = (try? Self.decodeParams(HanzoBotCameraClipParams.self, from: req.paramsJSON)) ??
-                HanzoBotCameraClipParams()
+        case BotCameraCommand.clip.rawValue:
+            let params = (try? Self.decodeParams(BotCameraClipParams.self, from: req.paramsJSON)) ??
+                BotCameraClipParams()
             let res = try await self.cameraCapture.clip(
                 facing: CameraFacing(rawValue: params.facing?.rawValue ?? "") ?? .front,
                 durationMs: params.durationMs,
@@ -220,7 +220,7 @@ actor MacNodeRuntime {
                 durationMs: res.durationMs,
                 hasAudio: res.hasAudio))
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: payload)
-        case HanzoBotCameraCommand.list.rawValue:
+        case BotCameraCommand.list.rawValue:
             let devices = await self.cameraCapture.listDevices()
             let payload = try Self.encodePayload(["devices": devices])
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: payload)
@@ -235,12 +235,12 @@ actor MacNodeRuntime {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: HanzoBotNodeError(
+                error: BotNodeError(
                     code: .unavailable,
                     message: "LOCATION_DISABLED: enable Location in Settings"))
         }
-        let params = (try? Self.decodeParams(HanzoBotLocationGetParams.self, from: req.paramsJSON)) ??
-            HanzoBotLocationGetParams()
+        let params = (try? Self.decodeParams(BotLocationGetParams.self, from: req.paramsJSON)) ??
+            BotLocationGetParams()
         let desired = params.desiredAccuracy ??
             (Self.locationPreciseEnabled() ? .precise : .balanced)
         let services = await self.mainActorServices()
@@ -257,7 +257,7 @@ actor MacNodeRuntime {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: HanzoBotNodeError(
+                error: BotNodeError(
                     code: .unavailable,
                     message: "LOCATION_PERMISSION_REQUIRED: grant Location permission"))
         }
@@ -267,7 +267,7 @@ actor MacNodeRuntime {
                 maxAgeMs: params.maxAgeMs,
                 timeoutMs: params.timeoutMs)
             let isPrecise = await services.locationAccuracyAuthorization() == .fullAccuracy
-            let payload = HanzoBotLocationPayload(
+            let payload = BotLocationPayload(
                 lat: location.coordinate.latitude,
                 lon: location.coordinate.longitude,
                 accuracyMeters: location.horizontalAccuracy,
@@ -283,14 +283,14 @@ actor MacNodeRuntime {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: HanzoBotNodeError(
+                error: BotNodeError(
                     code: .unavailable,
                     message: "LOCATION_TIMEOUT: no fix in time"))
         } catch {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: HanzoBotNodeError(
+                error: BotNodeError(
                     code: .unavailable,
                     message: "LOCATION_UNAVAILABLE: \(error.localizedDescription)"))
         }
@@ -345,8 +345,8 @@ actor MacNodeRuntime {
         let sessionKey = self.mainSessionKey
         let json = try await CanvasManager.shared.eval(sessionKey: sessionKey, javaScript: """
         (() => {
-          const host = globalThis.hanzo-botA2UI;
-          if (!host) return JSON.stringify({ ok: false, error: "missing hanzo-botA2UI" });
+          const host = globalThis.botA2UI;
+          if (!host) return JSON.stringify({ ok: false, error: "missing botA2UI" });
           return JSON.stringify(host.reset());
         })()
         """)
@@ -356,27 +356,27 @@ actor MacNodeRuntime {
     private func handleA2UIPush(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         let command = req.command
         let messages: [BotKit.AnyCodable]
-        if command == HanzoBotCanvasA2UICommand.pushJSONL.rawValue {
-            let params = try Self.decodeParams(HanzoBotCanvasA2UIPushJSONLParams.self, from: req.paramsJSON)
-            messages = try HanzoBotCanvasA2UIJSONL.decodeMessagesFromJSONL(params.jsonl)
+        if command == BotCanvasA2UICommand.pushJSONL.rawValue {
+            let params = try Self.decodeParams(BotCanvasA2UIPushJSONLParams.self, from: req.paramsJSON)
+            messages = try BotCanvasA2UIJSONL.decodeMessagesFromJSONL(params.jsonl)
         } else {
             do {
-                let params = try Self.decodeParams(HanzoBotCanvasA2UIPushParams.self, from: req.paramsJSON)
+                let params = try Self.decodeParams(BotCanvasA2UIPushParams.self, from: req.paramsJSON)
                 messages = params.messages
             } catch {
-                let params = try Self.decodeParams(HanzoBotCanvasA2UIPushJSONLParams.self, from: req.paramsJSON)
-                messages = try HanzoBotCanvasA2UIJSONL.decodeMessagesFromJSONL(params.jsonl)
+                let params = try Self.decodeParams(BotCanvasA2UIPushJSONLParams.self, from: req.paramsJSON)
+                messages = try BotCanvasA2UIJSONL.decodeMessagesFromJSONL(params.jsonl)
             }
         }
 
         try await self.ensureA2UIHost()
 
-        let messagesJSON = try HanzoBotCanvasA2UIJSONL.encodeMessagesJSONArray(messages)
+        let messagesJSON = try BotCanvasA2UIJSONL.encodeMessagesJSONArray(messages)
         let js = """
         (() => {
           try {
-            const host = globalThis.hanzo-botA2UI;
-            if (!host) return JSON.stringify({ ok: false, error: "missing hanzo-botA2UI" });
+            const host = globalThis.botA2UI;
+            if (!host) return JSON.stringify({ ok: false, error: "missing botA2UI" });
             const messages = \(messagesJSON);
             return JSON.stringify(host.applyMessages(messages));
           } catch (e) {
@@ -410,7 +410,7 @@ actor MacNodeRuntime {
         guard let raw = await GatewayConnection.shared.canvasHostUrl() else { return nil }
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, let baseUrl = URL(string: trimmed) else { return nil }
-        return baseUrl.appendingPathComponent("__hanzo-bot__/a2ui/").absoluteString + "?platform=macos"
+        return baseUrl.appendingPathComponent("__bot__/a2ui/").absoluteString + "?platform=macos"
     }
 
     private func isA2UIReady(poll: Bool = false) async -> Bool {
@@ -420,7 +420,7 @@ actor MacNodeRuntime {
                 let sessionKey = self.mainSessionKey
                 let ready = try await CanvasManager.shared.eval(sessionKey: sessionKey, javaScript: """
                 (() => {
-                  const host = globalThis.hanzo-botA2UI;
+                  const host = globalThis.botA2UI;
                   return String(Boolean(host));
                 })()
                 """)
@@ -436,7 +436,7 @@ actor MacNodeRuntime {
     }
 
     private func handleSystemRun(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = try Self.decodeParams(HanzoBotSystemRunParams.self, from: req.paramsJSON)
+        let params = try Self.decodeParams(BotSystemRunParams.self, from: req.paramsJSON)
         let command = params.command
         guard !command.isEmpty else {
             return Self.errorResponse(req, code: .invalidRequest, message: "INVALID_REQUEST: command required")
@@ -598,7 +598,7 @@ actor MacNodeRuntime {
     }
 
     private func handleSystemWhich(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = try Self.decodeParams(HanzoBotSystemWhichParams.self, from: req.paramsJSON)
+        let params = try Self.decodeParams(BotSystemWhichParams.self, from: req.paramsJSON)
         let bins = params.bins
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
@@ -644,7 +644,7 @@ actor MacNodeRuntime {
 
     private func resolveSystemRunApproval(
         req: BridgeInvokeRequest,
-        params: HanzoBotSystemRunParams,
+        params: BotSystemRunParams,
         context: ExecRunContext) async -> ExecApprovalOutcome
     {
         let requiresAsk = ExecApprovalHelpers.requiresAsk(
@@ -795,7 +795,7 @@ actor MacNodeRuntime {
     }
 
     private func handleSystemNotify(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = try Self.decodeParams(HanzoBotSystemNotifyParams.self, from: req.paramsJSON)
+        let params = try Self.decodeParams(BotSystemNotifyParams.self, from: req.paramsJSON)
         let title = params.title.trimmingCharacters(in: .whitespacesAndNewlines)
         let body = params.body.trimmingCharacters(in: .whitespacesAndNewlines)
         if title.isEmpty, body.isEmpty {
@@ -891,9 +891,9 @@ extension MacNodeRuntime {
         return merged
     }
 
-    private nonisolated static func locationMode() -> HanzoBotLocationMode {
+    private nonisolated static func locationMode() -> BotLocationMode {
         let raw = UserDefaults.standard.string(forKey: locationModeKey) ?? "off"
-        return HanzoBotLocationMode(rawValue: raw) ?? .off
+        return BotLocationMode(rawValue: raw) ?? .off
     }
 
     private nonisolated static func locationPreciseEnabled() -> Bool {
@@ -903,18 +903,18 @@ extension MacNodeRuntime {
 
     private static func errorResponse(
         _ req: BridgeInvokeRequest,
-        code: HanzoBotNodeErrorCode,
+        code: BotNodeErrorCode,
         message: String) -> BridgeInvokeResponse
     {
         BridgeInvokeResponse(
             id: req.id,
             ok: false,
-            error: HanzoBotNodeError(code: code, message: message))
+            error: BotNodeError(code: code, message: message))
     }
 
     private static func encodeCanvasSnapshot(
         image: NSImage,
-        format: HanzoBotCanvasSnapshotFormat,
+        format: BotCanvasSnapshotFormat,
         maxWidth: Int?,
         quality: Double) throws -> Data
     {

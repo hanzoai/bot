@@ -519,14 +519,14 @@ hanzo-bot pairing list feishu
     list: [
       { id: "main" },
       {
-        id: "clawd-fan",
-        workspace: "/home/user/clawd-fan",
-        agentDir: "/home/user/.hanzo/bot/agents/clawd-fan/agent",
+        id: "botd-fan",
+        workspace: "/home/user/botd-fan",
+        agentDir: "/home/user/.hanzo/bot/agents/botd-fan/agent",
       },
       {
-        id: "clawd-xi",
-        workspace: "/home/user/clawd-xi",
-        agentDir: "/home/user/.hanzo/bot/agents/clawd-xi/agent",
+        id: "botd-xi",
+        workspace: "/home/user/botd-xi",
+        agentDir: "/home/user/.hanzo/bot/agents/botd-xi/agent",
       },
     ],
   },
@@ -540,16 +540,16 @@ hanzo-bot pairing list feishu
       },
     },
     {
-      // 用户 B 的私聊 → clawd-fan agent
-      agentId: "clawd-fan",
+      // 用户 B 的私聊 → botd-fan agent
+      agentId: "botd-fan",
       match: {
         channel: "feishu",
         peer: { kind: "dm", id: "ou_0fe6b1c9..." },
       },
     },
     {
-      // 某个群组 → clawd-xi agent
-      agentId: "clawd-xi",
+      // 某个群组 → botd-xi agent
+      agentId: "botd-xi",
       match: {
         channel: "feishu",
         peer: { kind: "group", id: "oc_xxx..." },

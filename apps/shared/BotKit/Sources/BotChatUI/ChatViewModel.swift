@@ -10,28 +10,28 @@ import AppKit
 import UIKit
 #endif
 
-private let chatUILogger = Logger(subsystem: "ai.hanzo.bot", category: "BotChatUI")
+private let chatUILogger = Logger(subsystem: "ai.bot", category: "BotChatUI")
 
 @MainActor
 @Observable
-public final class HanzoBotChatViewModel {
-    public private(set) var messages: [HanzoBotChatMessage] = []
+public final class BotChatViewModel {
+    public private(set) var messages: [BotChatMessage] = []
     public var input: String = ""
     public var thinkingLevel: String = "off"
     public private(set) var isLoading = false
     public private(set) var isSending = false
     public private(set) var isAborting = false
     public var errorText: String?
-    public var attachments: [HanzoBotPendingAttachment] = []
+    public var attachments: [BotPendingAttachment] = []
     public private(set) var healthOK: Bool = false
     public private(set) var pendingRunCount: Int = 0
 
     public private(set) var sessionKey: String
     public private(set) var sessionId: String?
     public private(set) var streamingAssistantText: String?
-    public private(set) var pendingToolCalls: [HanzoBotChatPendingToolCall] = []
-    public private(set) var sessions: [HanzoBotChatSessionEntry] = []
-    private let transport: any HanzoBotChatTransport
+    public private(set) var pendingToolCalls: [BotChatPendingToolCall] = []
+    public private(set) var sessions: [BotChatSessionEntry] = []
+    private let transport: any BotChatTransport
 
     @ObservationIgnored
     private nonisolated(unsafe) var eventTask: Task<Void, Never>?
@@ -43,7 +43,7 @@ public final class HanzoBotChatViewModel {
     private nonisolated(unsafe) var pendingRunTimeoutTasks: [String: Task<Void, Never>] = [:]
     private let pendingRunTimeoutMs: UInt64 = 120_000
 
-    private var pendingToolCallsById: [String: HanzoBotChatPendingToolCall] = [:] {
+    private var pendingToolCallsById: [String: BotChatPendingToolCall] = [:] {
         didSet {
             self.pendingToolCalls = self.pendingToolCallsById.values
                 .sorted { ($0.startedAt ?? 0) < ($1.startedAt ?? 0) }
@@ -52,7 +52,7 @@ public final class HanzoBotChatViewModel {
 
     private var lastHealthPollAt: Date?
 
-    public init(sessionKey: String, transport: any HanzoBotChatTransport) {
+    public init(sessionKey: String, transport: any BotChatTransport) {
         self.sessionKey = sessionKey
         self.transport = transport
 
@@ -99,22 +99,26 @@ public final class HanzoBotChatViewModel {
         Task { await self.performSwitchSession(to: sessionKey) }
     }
 
-    public var sessionChoices: [HanzoBotChatSessionEntry] {
+    public var sessionChoices: [BotChatSessionEntry] {
         let now = Date().timeIntervalSince1970 * 1000
         let cutoff = now - (24 * 60 * 60 * 1000)
         let sorted = self.sessions.sorted { ($0.updatedAt ?? 0) > ($1.updatedAt ?? 0) }
-        var seen = Set<String>()
-        var recent: [HanzoBotChatSessionEntry] = []
-        for entry in sorted {
-            guard !seen.contains(entry.key) else { continue }
-            seen.insert(entry.key)
-            guard (entry.updatedAt ?? 0) >= cutoff else { continue }
-            recent.append(entry)
+
+        var result: [BotChatSessionEntry] = []
+        var included = Set<String>()
+
+        // Always show the main session first, even if it hasn't been updated recently.
+        if let main = sorted.first(where: { $0.key == "main" }) {
+            result.append(main)
+            included.insert(main.key)
+        } else {
+            result.append(self.placeholderSession(key: "main"))
+            included.insert("main")
         }
 
-        var result: [HanzoBotChatSessionEntry] = []
-        var included = Set<String>()
-        for entry in recent where !included.contains(entry.key) {
+        for entry in sorted {
+            guard !included.contains(entry.key) else { continue }
+            guard (entry.updatedAt ?? 0) >= cutoff else { continue }
             result.append(entry)
             included.insert(entry.key)
         }
@@ -138,7 +142,7 @@ public final class HanzoBotChatViewModel {
         Task { await self.addImageAttachment(url: nil, data: data, fileName: fileName, mimeType: mimeType) }
     }
 
-    public func removeAttachment(_ id: HanzoBotPendingAttachment.ID) {
+    public func removeAttachment(_ id: BotPendingAttachment.ID) {
         self.attachments.removeAll { $0.id == id }
     }
 
@@ -166,7 +170,9 @@ public final class HanzoBotChatViewModel {
             }
 
             let payload = try await self.transport.requestHistory(sessionKey: self.sessionKey)
-            self.messages = Self.decodeMessages(payload.messages ?? [])
+            self.messages = Self.reconcileMessageIDs(
+                previous: self.messages,
+                incoming: Self.decodeMessages(payload.messages ?? []))
             self.sessionId = payload.sessionId
             if let level = payload.thinkingLevel, !level.isEmpty {
                 self.thinkingLevel = level
@@ -180,15 +186,79 @@ public final class HanzoBotChatViewModel {
         }
     }
 
-    private static func decodeMessages(_ raw: [AnyCodable]) -> [HanzoBotChatMessage] {
+    private static func decodeMessages(_ raw: [AnyCodable]) -> [BotChatMessage] {
         let decoded = raw.compactMap { item in
-            (try? ChatPayloadDecoding.decode(item, as: HanzoBotChatMessage.self))
+            (try? ChatPayloadDecoding.decode(item, as: BotChatMessage.self))
         }
         return Self.dedupeMessages(decoded)
     }
 
-    private static func dedupeMessages(_ messages: [HanzoBotChatMessage]) -> [HanzoBotChatMessage] {
-        var result: [HanzoBotChatMessage] = []
+    private static func messageIdentityKey(for message: BotChatMessage) -> String? {
+        let role = message.role.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !role.isEmpty else { return nil }
+
+        let timestamp: String = {
+            guard let value = message.timestamp, value.isFinite else { return "" }
+            return String(format: "%.3f", value)
+        }()
+
+        let contentFingerprint = message.content.map { item in
+            let type = (item.type ?? "text").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let text = (item.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            let id = (item.id ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            let name = (item.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            let fileName = (item.fileName ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            return [type, text, id, name, fileName].joined(separator: "\\u{001F}")
+        }.joined(separator: "\\u{001E}")
+
+        let toolCallId = (message.toolCallId ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let toolName = (message.toolName ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if timestamp.isEmpty, contentFingerprint.isEmpty, toolCallId.isEmpty, toolName.isEmpty {
+            return nil
+        }
+        return [role, timestamp, toolCallId, toolName, contentFingerprint].joined(separator: "|")
+    }
+
+    private static func reconcileMessageIDs(
+        previous: [BotChatMessage],
+        incoming: [BotChatMessage]) -> [BotChatMessage]
+    {
+        guard !previous.isEmpty, !incoming.isEmpty else { return incoming }
+
+        var idsByKey: [String: [UUID]] = [:]
+        for message in previous {
+            guard let key = Self.messageIdentityKey(for: message) else { continue }
+            idsByKey[key, default: []].append(message.id)
+        }
+
+        return incoming.map { message in
+            guard let key = Self.messageIdentityKey(for: message),
+                  var ids = idsByKey[key],
+                  let reusedId = ids.first
+            else {
+                return message
+            }
+            ids.removeFirst()
+            if ids.isEmpty {
+                idsByKey.removeValue(forKey: key)
+            } else {
+                idsByKey[key] = ids
+            }
+            guard reusedId != message.id else { return message }
+            return BotChatMessage(
+                id: reusedId,
+                role: message.role,
+                content: message.content,
+                timestamp: message.timestamp,
+                toolCallId: message.toolCallId,
+                toolName: message.toolName,
+                usage: message.usage,
+                stopReason: message.stopReason)
+        }
+    }
+
+    private static func dedupeMessages(_ messages: [BotChatMessage]) -> [BotChatMessage] {
+        var result: [BotChatMessage] = []
         result.reserveCapacity(messages.count)
         var seen = Set<String>()
 
@@ -205,7 +275,7 @@ public final class HanzoBotChatViewModel {
         return result
     }
 
-    private static func dedupeKey(for message: HanzoBotChatMessage) -> String? {
+    private static func dedupeKey(for message: BotChatMessage) -> String? {
         guard let timestamp = message.timestamp else { return nil }
         let text = message.content.compactMap(\.text).joined(separator: "\n")
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -233,8 +303,8 @@ public final class HanzoBotChatViewModel {
         self.streamingAssistantText = nil
 
         // Optimistically append user message to UI.
-        var userContent: [HanzoBotChatMessageContent] = [
-            HanzoBotChatMessageContent(
+        var userContent: [BotChatMessageContent] = [
+            BotChatMessageContent(
                 type: "text",
                 text: messageText,
                 thinking: nil,
@@ -246,8 +316,8 @@ public final class HanzoBotChatViewModel {
                 name: nil,
                 arguments: nil),
         ]
-        let encodedAttachments = self.attachments.map { att -> HanzoBotChatAttachmentPayload in
-            HanzoBotChatAttachmentPayload(
+        let encodedAttachments = self.attachments.map { att -> BotChatAttachmentPayload in
+            BotChatAttachmentPayload(
                 type: att.type,
                 mimeType: att.mimeType,
                 fileName: att.fileName,
@@ -255,7 +325,7 @@ public final class HanzoBotChatViewModel {
         }
         for att in encodedAttachments {
             userContent.append(
-                HanzoBotChatMessageContent(
+                BotChatMessageContent(
                     type: att.type,
                     text: nil,
                     thinking: nil,
@@ -268,7 +338,7 @@ public final class HanzoBotChatViewModel {
                     arguments: nil))
         }
         self.messages.append(
-            HanzoBotChatMessage(
+            BotChatMessage(
                 id: UUID(),
                 role: "user",
                 content: userContent,
@@ -332,8 +402,8 @@ public final class HanzoBotChatViewModel {
         await self.bootstrap()
     }
 
-    private func placeholderSession(key: String) -> HanzoBotChatSessionEntry {
-        HanzoBotChatSessionEntry(
+    private func placeholderSession(key: String) -> BotChatSessionEntry {
+        BotChatSessionEntry(
             key: key,
             kind: nil,
             displayName: nil,
@@ -354,7 +424,7 @@ public final class HanzoBotChatViewModel {
             contextTokens: nil)
     }
 
-    private func handleTransportEvent(_ evt: HanzoBotChatTransportEvent) {
+    private func handleTransportEvent(_ evt: BotChatTransportEvent) {
         switch evt {
         case let .health(ok):
             self.healthOK = ok
@@ -370,12 +440,16 @@ public final class HanzoBotChatViewModel {
         }
     }
 
-    private func handleChatEvent(_ chat: HanzoBotChatEventPayload) {
-        if let sessionKey = chat.sessionKey, sessionKey != self.sessionKey {
+    private func handleChatEvent(_ chat: BotChatEventPayload) {
+        let isOurRun = chat.runId.flatMap { self.pendingRuns.contains($0) } ?? false
+
+        // Gateway may publish canonical session keys (for example "agent:main:main")
+        // even when this view currently uses an alias key (for example "main").
+        // Never drop events for our own pending run on key mismatch, or the UI can stay
+        // stuck at "thinking" until the user reopens and forces a history reload.
+        if let sessionKey = chat.sessionKey, sessionKey != self.sessionKey, !isOurRun {
             return
         }
-
-        let isOurRun = chat.runId.flatMap { self.pendingRuns.contains($0) } ?? false
         if !isOurRun {
             // Keep multiple clients in sync: if another client finishes a run for our session, refresh history.
             switch chat.state {
@@ -407,7 +481,7 @@ public final class HanzoBotChatViewModel {
         }
     }
 
-    private func handleAgentEvent(_ evt: HanzoBotAgentEventPayload) {
+    private func handleAgentEvent(_ evt: BotAgentEventPayload) {
         if let sessionId, evt.runId != sessionId {
             return
         }
@@ -423,7 +497,7 @@ public final class HanzoBotChatViewModel {
             guard let toolCallId = evt.data["toolCallId"]?.value as? String else { return }
             if phase == "start" {
                 let args = evt.data["args"]
-                self.pendingToolCallsById[toolCallId] = HanzoBotChatPendingToolCall(
+                self.pendingToolCallsById[toolCallId] = BotChatPendingToolCall(
                     toolCallId: toolCallId,
                     name: name,
                     args: args,
@@ -440,7 +514,9 @@ public final class HanzoBotChatViewModel {
     private func refreshHistoryAfterRun() async {
         do {
             let payload = try await self.transport.requestHistory(sessionKey: self.sessionKey)
-            self.messages = Self.decodeMessages(payload.messages ?? [])
+            self.messages = Self.reconcileMessageIDs(
+                previous: self.messages,
+                incoming: Self.decodeMessages(payload.messages ?? []))
             self.sessionId = payload.sessionId
             if let level = payload.thinkingLevel, !level.isEmpty {
                 self.thinkingLevel = level
@@ -534,7 +610,7 @@ public final class HanzoBotChatViewModel {
 
         let preview = Self.previewImage(data: data)
         self.attachments.append(
-            HanzoBotPendingAttachment(
+            BotPendingAttachment(
                 url: url,
                 data: data,
                 fileName: fileName,
@@ -542,7 +618,7 @@ public final class HanzoBotChatViewModel {
                 preview: preview))
     }
 
-    private static func previewImage(data: Data) -> HanzoBotPlatformImage? {
+    private static func previewImage(data: Data) -> BotPlatformImage? {
         #if canImport(AppKit)
         NSImage(data: data)
         #elseif canImport(UIKit)

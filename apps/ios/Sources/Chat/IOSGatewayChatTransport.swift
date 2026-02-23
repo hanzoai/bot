@@ -1,9 +1,11 @@
 import BotChatUI
 import BotKit
-import HanzoBotProtocol
+import BotProtocol
 import Foundation
+import OSLog
 
-struct IOSGatewayChatTransport: HanzoBotChatTransport, Sendable {
+struct IOSGatewayChatTransport: BotChatTransport, Sendable {
+    private static let logger = Logger(subsystem: "ai.bot", category: "ios.chat.transport")
     private let gateway: GatewayNodeSession
 
     init(gateway: GatewayNodeSession) {
@@ -20,7 +22,7 @@ struct IOSGatewayChatTransport: HanzoBotChatTransport, Sendable {
         _ = try await self.gateway.request(method: "chat.abort", paramsJSON: json, timeoutSeconds: 10)
     }
 
-    func listSessions(limit: Int?) async throws -> HanzoBotChatSessionsListResponse {
+    func listSessions(limit: Int?) async throws -> BotChatSessionsListResponse {
         struct Params: Codable {
             var includeGlobal: Bool
             var includeUnknown: Bool
@@ -29,22 +31,20 @@ struct IOSGatewayChatTransport: HanzoBotChatTransport, Sendable {
         let data = try JSONEncoder().encode(Params(includeGlobal: true, includeUnknown: false, limit: limit))
         let json = String(data: data, encoding: .utf8)
         let res = try await self.gateway.request(method: "sessions.list", paramsJSON: json, timeoutSeconds: 15)
-        return try JSONDecoder().decode(HanzoBotChatSessionsListResponse.self, from: res)
+        return try JSONDecoder().decode(BotChatSessionsListResponse.self, from: res)
     }
 
     func setActiveSessionKey(_ sessionKey: String) async throws {
-        struct Subscribe: Codable { var sessionKey: String }
-        let data = try JSONEncoder().encode(Subscribe(sessionKey: sessionKey))
-        let json = String(data: data, encoding: .utf8)
-        await self.gateway.sendEvent(event: "chat.subscribe", payloadJSON: json)
+        // Operator clients receive chat events without node-style subscriptions.
+        // (chat.subscribe is a node event, not an operator RPC method.)
     }
 
-    func requestHistory(sessionKey: String) async throws -> HanzoBotChatHistoryPayload {
+    func requestHistory(sessionKey: String) async throws -> BotChatHistoryPayload {
         struct Params: Codable { var sessionKey: String }
         let data = try JSONEncoder().encode(Params(sessionKey: sessionKey))
         let json = String(data: data, encoding: .utf8)
         let res = try await self.gateway.request(method: "chat.history", paramsJSON: json, timeoutSeconds: 15)
-        return try JSONDecoder().decode(HanzoBotChatHistoryPayload.self, from: res)
+        return try JSONDecoder().decode(BotChatHistoryPayload.self, from: res)
     }
 
     func sendMessage(
@@ -52,13 +52,14 @@ struct IOSGatewayChatTransport: HanzoBotChatTransport, Sendable {
         message: String,
         thinking: String,
         idempotencyKey: String,
-        attachments: [HanzoBotChatAttachmentPayload]) async throws -> HanzoBotChatSendResponse
+        attachments: [BotChatAttachmentPayload]) async throws -> BotChatSendResponse
     {
+        Self.logger.info("chat.send start sessionKey=\(sessionKey, privacy: .public) len=\(message.count, privacy: .public) attachments=\(attachments.count, privacy: .public)")
         struct Params: Codable {
             var sessionKey: String
             var message: String
             var thinking: String
-            var attachments: [HanzoBotChatAttachmentPayload]?
+            var attachments: [BotChatAttachmentPayload]?
             var timeoutMs: Int
             var idempotencyKey: String
         }
@@ -72,17 +73,24 @@ struct IOSGatewayChatTransport: HanzoBotChatTransport, Sendable {
             idempotencyKey: idempotencyKey)
         let data = try JSONEncoder().encode(params)
         let json = String(data: data, encoding: .utf8)
-        let res = try await self.gateway.request(method: "chat.send", paramsJSON: json, timeoutSeconds: 35)
-        return try JSONDecoder().decode(HanzoBotChatSendResponse.self, from: res)
+        do {
+            let res = try await self.gateway.request(method: "chat.send", paramsJSON: json, timeoutSeconds: 35)
+            let decoded = try JSONDecoder().decode(BotChatSendResponse.self, from: res)
+            Self.logger.info("chat.send ok runId=\(decoded.runId, privacy: .public)")
+            return decoded
+        } catch {
+            Self.logger.error("chat.send failed \(error.localizedDescription, privacy: .public)")
+            throw error
+        }
     }
 
     func requestHealth(timeoutMs: Int) async throws -> Bool {
         let seconds = max(1, Int(ceil(Double(timeoutMs) / 1000.0)))
         let res = try await self.gateway.request(method: "health", paramsJSON: nil, timeoutSeconds: seconds)
-        return (try? JSONDecoder().decode(HanzoBotGatewayHealthOK.self, from: res))?.ok ?? true
+        return (try? JSONDecoder().decode(BotGatewayHealthOK.self, from: res))?.ok ?? true
     }
 
-    func events() -> AsyncStream<HanzoBotChatTransportEvent> {
+    func events() -> AsyncStream<BotChatTransportEvent> {
         AsyncStream { continuation in
             let task = Task {
                 let stream = await self.gateway.subscribeServerEvents()
@@ -97,13 +105,13 @@ struct IOSGatewayChatTransport: HanzoBotChatTransport, Sendable {
                         guard let payload = evt.payload else { break }
                         let ok = (try? GatewayPayloadDecoding.decode(
                             payload,
-                            as: HanzoBotGatewayHealthOK.self))?.ok ?? true
+                            as: BotGatewayHealthOK.self))?.ok ?? true
                         continuation.yield(.health(ok: ok))
                     case "chat":
                         guard let payload = evt.payload else { break }
                         if let chatPayload = try? GatewayPayloadDecoding.decode(
                             payload,
-                            as: HanzoBotChatEventPayload.self)
+                            as: BotChatEventPayload.self)
                         {
                             continuation.yield(.chat(chatPayload))
                         }
@@ -111,7 +119,7 @@ struct IOSGatewayChatTransport: HanzoBotChatTransport, Sendable {
                         guard let payload = evt.payload else { break }
                         if let agentPayload = try? GatewayPayloadDecoding.decode(
                             payload,
-                            as: HanzoBotAgentEventPayload.self)
+                            as: BotAgentEventPayload.self)
                         {
                             continuation.yield(.agent(agentPayload))
                         }

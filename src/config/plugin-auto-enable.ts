@@ -62,10 +62,7 @@ function accountsHaveKeys(value: unknown, keys: string[]): boolean {
   return false;
 }
 
-function resolveChannelConfig(
-  cfg: BotConfig,
-  channelId: string,
-): Record<string, unknown> | null {
+function resolveChannelConfig(cfg: BotConfig, channelId: string): Record<string, unknown> | null {
   const channels = cfg.channels as Record<string, unknown> | undefined;
   const entry = channels?.[channelId];
   return isRecord(entry) ? entry : null;
@@ -309,10 +306,7 @@ function isProviderConfigured(cfg: BotConfig, providerId: string): boolean {
   return false;
 }
 
-function resolveConfiguredPlugins(
-  cfg: BotConfig,
-  env: NodeJS.ProcessEnv,
-): PluginEnableChange[] {
+function resolveConfiguredPlugins(cfg: BotConfig, env: NodeJS.ProcessEnv): PluginEnableChange[] {
   const changes: PluginEnableChange[] = [];
   const channelIds = new Set(CHANNEL_PLUGIN_IDS);
   const configuredChannels = cfg.channels as Record<string, unknown> | undefined;
@@ -407,7 +401,7 @@ function registerPluginEntry(cfg: BotConfig, pluginId: string): BotConfig {
     ...cfg.plugins?.entries,
     [pluginId]: {
       ...(cfg.plugins?.entries?.[pluginId] as Record<string, unknown> | undefined),
-      enabled: false,
+      enabled: true,
     },
   };
   return {
@@ -426,7 +420,7 @@ function formatAutoEnableChange(entry: PluginEnableChange): string {
     const label = getChatChannelMeta(channelId).label;
     reason = reason.replace(new RegExp(`^${channelId}\\b`, "i"), label);
   }
-  return `${reason}, not enabled yet.`;
+  return `${reason}, enabled automatically.`;
 }
 
 export function applyPluginAutoEnable(params: {
