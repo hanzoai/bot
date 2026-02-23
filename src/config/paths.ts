@@ -18,10 +18,15 @@ export function resolveIsNixMode(env: NodeJS.ProcessEnv = process.env): boolean 
 export const isNixMode = resolveIsNixMode();
 
 // Support historical (and occasionally misspelled) legacy state dirs.
-const LEGACY_STATE_DIRNAMES = [".bot", ".moldbot", ".moltbot"] as const;
+const LEGACY_STATE_DIRNAMES = [".bot", ".openclaw", ".moldbot", ".moltbot"] as const;
 const NEW_STATE_DIRNAME = ".bot";
 const CONFIG_FILENAME = "bot.json";
-const LEGACY_CONFIG_FILENAMES = ["bot.json", "moldbot.json", "moltbot.json"] as const;
+const LEGACY_CONFIG_FILENAMES = [
+  "bot.json",
+  "openclaw.json",
+  "moldbot.json",
+  "moltbot.json",
+] as const;
 
 function resolveDefaultHomeDir(): string {
   return resolveRequiredHomeDir(process.env, os.homedir);
