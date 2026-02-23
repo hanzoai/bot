@@ -31,6 +31,7 @@ export const pt_BR: TranslationMap = {
     cron: "Tarefas Cron",
     skills: "Habilidades",
     nodes: "Nós",
+    screen: "Tela",
     chat: "Chat",
     config: "Config",
     debug: "Debug",
@@ -46,6 +47,7 @@ export const pt_BR: TranslationMap = {
     cron: "Agendar despertares e execuções recorrentes de agentes.",
     skills: "Gerenciar disponibilidade de habilidades e injeção de chaves de API.",
     nodes: "Dispositivos pareados, capacidades e exposição de comandos.",
+    screen: "Acesso remoto à área de trabalho via compartilhamento de tela VNC.",
     chat: "Sessão de chat direta com o gateway para intervenções rápidas.",
     config: "Editar ~/.bot/bot.json com segurança.",
     debug: "Snapshots do gateway, eventos e chamadas RPC manuais.",
@@ -107,6 +109,11 @@ export const pt_BR: TranslationMap = {
       createAccount: "Criar Conta",
       signOut: "Sair",
     },
+  },
+  screen: {
+    disconnected: "Conecte-se ao gateway para acessar a área de trabalho remota.",
+    openNewTab: "Abrir em nova aba",
+    hint: "Requer Compartilhamento de Tela do macOS ou um servidor VNC na porta 5900.",
   },
   chat: {
     disconnected: "Desconectado do gateway.",
