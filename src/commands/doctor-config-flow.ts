@@ -1,13 +1,12 @@
-import type { ZodIssue } from "zod";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { BotConfig } from "../config/config.js";
-import type { DoctorOptions } from "./doctor-prompter.js";
+import type { ZodIssue } from "zod";
 import {
   isNumericTelegramUserId,
   normalizeTelegramAllowFromEntry,
 } from "../channels/telegram/allow-from.js";
 import { formatCliCommand } from "../cli/command-format.js";
+import type { BotConfig } from "../config/config.js";
 import {
   BotSchema,
   CONFIG_PATH,
@@ -19,6 +18,7 @@ import { listTelegramAccountIds, resolveTelegramAccount } from "../telegram/acco
 import { note } from "../terminal/note.js";
 import { isRecord, resolveHomeDir } from "../utils.js";
 import { normalizeLegacyConfigValues } from "./doctor-legacy-config.js";
+import type { DoctorOptions } from "./doctor-prompter.js";
 import { autoMigrateLegacyStateDir } from "./doctor-state-migrations.js";
 
 type UnrecognizedKeysIssue = ZodIssue & {
@@ -647,9 +647,7 @@ async function maybeMigrateLegacyConfig(): Promise<string[]> {
     // missing config
   }
 
-  const legacyCandidates = [
-    path.join(home, ".bot", "bot.json"),
-  ];
+  const legacyCandidates = [path.join(home, ".bot", "bot.json")];
 
   let legacyPath: string | null = null;
   for (const candidate of legacyCandidates) {

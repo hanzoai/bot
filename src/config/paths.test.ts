@@ -74,9 +74,7 @@ describe("state + config path candidates", () => {
     const home = "/home/test";
     const resolvedHome = path.resolve(home);
     const candidates = resolveDefaultConfigCandidates({} as NodeJS.ProcessEnv, () => home);
-    const expected = [
-      path.join(resolvedHome, ".bot", "bot.json"),
-    ];
+    const expected = [path.join(resolvedHome, ".bot", "bot.json")];
     expect(candidates).toEqual(expected);
   });
 
