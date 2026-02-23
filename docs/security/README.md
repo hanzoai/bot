@@ -1,6 +1,6 @@
 # Hanzo Bot Security & Trust
 
-**Live:** [trust.bot.ai](https://trust.bot.ai)
+**Live:** [trust.hanzo.bot](https://trust.hanzo.bot)
 
 ## Documents
 
@@ -9,7 +9,7 @@
 
 ## Reporting Vulnerabilities
 
-See the [Trust page](https://trust.bot.ai) for full reporting instructions covering all repos.
+See the [Trust page](https://trust.hanzo.bot) for full reporting instructions covering all repos.
 
 ## Contact
 

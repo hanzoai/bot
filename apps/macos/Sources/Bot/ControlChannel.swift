@@ -1,7 +1,7 @@
-import BotKit
-import HanzoBotProtocol
 import Foundation
 import Observation
+import BotKit
+import BotProtocol
 import SwiftUI
 
 struct ControlHeartbeatEvent: Codable {
@@ -15,12 +15,15 @@ struct ControlHeartbeatEvent: Codable {
 }
 
 struct ControlAgentEvent: Codable, Sendable, Identifiable {
-    var id: String { "\(self.runId)-\(self.seq)" }
+    var id: String {
+        "\(self.runId)-\(self.seq)"
+    }
+
     let runId: String
     let seq: Int
     let stream: String
     let ts: Double
-    let data: [String: HanzoBotProtocol.AnyCodable]
+    let data: [String: BotProtocol.AnyCodable]
     let summary: String?
 }
 
@@ -76,7 +79,7 @@ final class ControlChannel {
     private(set) var lastPingMs: Double?
     private(set) var authSourceLabel: String?
 
-    private let logger = Logger(subsystem: "ai.hanzo.bot", category: "control")
+    private let logger = Logger(subsystem: "ai.bot", category: "control")
 
     private var eventTask: Task<Void, Never>?
     private var recoveryTask: Task<Void, Never>?
@@ -398,20 +401,20 @@ final class ControlChannel {
     }
 
     private static func bridgeToProtocolArgs(
-        _ value: HanzoBotProtocol.AnyCodable?) -> [String: HanzoBotProtocol.AnyCodable]?
+        _ value: BotProtocol.AnyCodable?) -> [String: BotProtocol.AnyCodable]?
     {
         guard let value else { return nil }
-        if let dict = value.value as? [String: HanzoBotProtocol.AnyCodable] {
+        if let dict = value.value as? [String: BotProtocol.AnyCodable] {
             return dict
         }
         if let dict = value.value as? [String: BotKit.AnyCodable],
            let data = try? JSONEncoder().encode(dict),
-           let decoded = try? JSONDecoder().decode([String: HanzoBotProtocol.AnyCodable].self, from: data)
+           let decoded = try? JSONDecoder().decode([String: BotProtocol.AnyCodable].self, from: data)
         {
             return decoded
         }
         if let data = try? JSONEncoder().encode(value),
-           let decoded = try? JSONDecoder().decode([String: HanzoBotProtocol.AnyCodable].self, from: data)
+           let decoded = try? JSONDecoder().decode([String: BotProtocol.AnyCodable].self, from: data)
         {
             return decoded
         }

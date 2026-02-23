@@ -1,4 +1,4 @@
-name: HanzoBot
+name: Bot
 options:
   bundleIdPrefix: ai.hanzo.bot
   deploymentTarget:
@@ -16,17 +16,17 @@ packages:
     path: ../../Swabble
 
 schemes:
-  HanzoBot:
+  Bot:
     shared: true
     build:
       targets:
-        HanzoBot: all
+        Bot: all
     test:
       targets:
-        - HanzoBotTests
+        - BotTests
 
 targets:
-  HanzoBot:
+  Bot:
     type: application
     platform: iOS
     sources:
@@ -36,7 +36,7 @@ targets:
       - package: BotKit
         product: BotChatUI
       - package: BotKit
-        product: HanzoBotProtocol
+        product: BotProtocol
       - package: Swabble
         product: SwabbleKit
       - sdk: AppIntents.framework
@@ -79,25 +79,25 @@ targets:
     info:
       path: Sources/Info.plist
       properties:
-        CFBundleDisplayName: HanzoBot
+        CFBundleDisplayName: Hanzo Bot
         CFBundleIconName: AppIcon
-        CFBundleShortVersionString: "2026.2.9"
-        CFBundleVersion: "20260202"
+        CFBundleShortVersionString: "2026.2.16"
+        CFBundleVersion: "20260216"
         UILaunchScreen: {}
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         UIBackgroundModes:
           - audio
-        NSLocalNetworkUsageDescription: HanzoBot discovers and connects to your HanzoBot gateway on the local network.
+        NSLocalNetworkUsageDescription: Bot discovers and connects to your Bot gateway on the local network.
         NSAppTransportSecurity:
           NSAllowsArbitraryLoadsInWebContent: true
         NSBonjourServices:
           - _bot-gw._tcp
-        NSCameraUsageDescription: HanzoBot can capture photos or short video clips when requested via the gateway.
-        NSLocationWhenInUseUsageDescription: HanzoBot uses your location when you allow location sharing.
-        NSLocationAlwaysAndWhenInUseUsageDescription: HanzoBot can share your location in the background when you enable Always.
-        NSMicrophoneUsageDescription: HanzoBot needs microphone access for voice wake.
-        NSSpeechRecognitionUsageDescription: HanzoBot uses on-device speech recognition for voice wake.
+        NSCameraUsageDescription: Bot can capture photos or short video clips when requested via the gateway.
+        NSLocationWhenInUseUsageDescription: Bot uses your location when you allow location sharing.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Bot can share your location in the background when you enable Always.
+        NSMicrophoneUsageDescription: Bot needs microphone access for voice wake.
+        NSSpeechRecognitionUsageDescription: Bot uses on-device speech recognition for voice wake.
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationPortraitUpsideDown
@@ -109,26 +109,26 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
 
-  HanzoBotTests:
+  BotTests:
     type: bundle.unit-test
     platform: iOS
     sources:
       - path: Tests
     dependencies:
-      - target: HanzoBot
+      - target: Bot
       - package: Swabble
         product: SwabbleKit
       - sdk: AppIntents.framework
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: ai.hanzo.bot.ios.tests
+        PRODUCT_BUNDLE_IDENTIFIER: ai.bot.ios.tests
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/HanzoBot.app/HanzoBot"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Bot.app/Bot"
         BUNDLE_LOADER: "$(TEST_HOST)"
     info:
       path: Tests/Info.plist
       properties:
-        CFBundleDisplayName: HanzoBotTests
-        CFBundleShortVersionString: "2026.2.9"
-        CFBundleVersion: "20260202"
+        CFBundleDisplayName: Hanzo BotTests
+        CFBundleShortVersionString: "2026.2.16"
+        CFBundleVersion: "20260216"

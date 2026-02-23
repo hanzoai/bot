@@ -1,7 +1,7 @@
 ---
 name: boot-md
 description: "Run BOOT.md on gateway startup"
-homepage: https://docs.hanzo.bot/hooks#boot-md
+homepage: https://docs.hanzo.bot/automation/hooks#boot-md
 metadata:
   {
     "bot":
@@ -9,7 +9,7 @@ metadata:
         "emoji": "🚀",
         "events": ["gateway:startup"],
         "requires": { "config": ["workspace.dir"] },
-        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with Hanzo Bot" }],
+        "install": [{ "id": "bundled", "kind": "bundled", "label": "Bundled with Bot" }],
       },
   }
 ---

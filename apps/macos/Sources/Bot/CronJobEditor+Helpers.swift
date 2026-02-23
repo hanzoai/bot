@@ -1,5 +1,5 @@
-import HanzoBotProtocol
 import Foundation
+import BotProtocol
 import SwiftUI
 
 extension CronJobEditor {

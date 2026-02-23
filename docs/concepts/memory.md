@@ -1,6 +1,6 @@
 ---
 title: "Memory"
-summary: "How Hanzo Bot memory works (workspace files + automatic memory flush)"
+summary: "How Bot memory works (workspace files + automatic memory flush)"
 read_when:
   - You want the memory file layout and workflow
   - You want to tune the automatic pre-compaction memory flush
@@ -8,7 +8,7 @@ read_when:
 
 # Memory
 
-Hanzo Bot memory is **plain Markdown in the agent workspace**. The files are the
+Bot memory is **plain Markdown in the agent workspace**. The files are the
 source of truth; the model only "remembers" what gets written to disk.
 
 Memory search tools are provided by the active memory plugin (default:
@@ -26,7 +26,7 @@ The default workspace layout uses two memory layers:
   - **Only load in the main, private session** (never in group contexts).
 
 These files live under the workspace (`agents.defaults.workspace`, default
-`~/.hanzo/bot/workspace`). See [Agent workspace](/concepts/agent-workspace) for the full layout.
+`~/.bot/workspace`). See [Agent workspace](/concepts/agent-workspace) for the full layout.
 
 ## When to write memory
 
@@ -38,7 +38,7 @@ These files live under the workspace (`agents.defaults.workspace`, default
 
 ## Automatic memory flush (pre-compaction ping)
 
-When a session is **close to auto-compaction**, Hanzo Bot triggers a **silent,
+When a session is **close to auto-compaction**, Bot triggers a **silent,
 agentic turn** that reminds the model to write durable memory **before** the
 context is compacted. The default prompts explicitly say the model _may reply_,
 but usually `NO_REPLY` is the correct response so the user never sees this turn.
@@ -78,7 +78,7 @@ For the full compaction lifecycle, see
 
 ## Vector memory search
 
-Hanzo Bot can build a small vector index over `MEMORY.md` and `memory/*.md` so
+Bot can build a small vector index over `MEMORY.md` and `memory/*.md` so
 semantic queries can find related notes even when wording differs.
 
 Defaults:
@@ -87,7 +87,7 @@ Defaults:
 - Watches memory files for changes (debounced).
 - Configure memory search under `agents.defaults.memorySearch` (not top-level
   `memorySearch`).
-- Uses remote embeddings by default. If `memorySearch.provider` is not set, Hanzo Bot auto-selects:
+- Uses remote embeddings by default. If `memorySearch.provider` is not set, Bot auto-selects:
   1. `local` if a `memorySearch.local.modelPath` is configured and the file exists.
   2. `openai` if an OpenAI key can be resolved.
   3. `gemini` if a Gemini key can be resolved.
@@ -96,7 +96,7 @@ Defaults:
 - Local mode uses node-llama-cpp and may require `pnpm approve-builds`.
 - Uses sqlite-vec (when available) to accelerate vector search inside SQLite.
 
-Remote embeddings **require** an API key for the embedding provider. Hanzo Bot
+Remote embeddings **require** an API key for the embedding provider. Bot
 resolves keys from auth profiles, `models.providers.*.apiKey`, or environment
 variables. Codex OAuth only covers chat/completions and does **not** satisfy
 embeddings for memory search. For Gemini, use `GEMINI_API_KEY` or
@@ -108,7 +108,7 @@ set `memorySearch.remote.apiKey` (and optional `memorySearch.remote.headers`).
 
 Set `memory.backend = "qmd"` to swap the built-in SQLite indexer for
 [QMD](https://github.com/tobi/qmd): a local-first search sidecar that combines
-BM25 + vectors + reranking. Markdown stays the source of truth; Hanzo Bot shells
+BM25 + vectors + reranking. Markdown stays the source of truth; Bot shells
 out to QMD for retrieval. Key points:
 
 **Prereqs**
@@ -121,7 +121,7 @@ out to QMD for retrieval. Key points:
 - QMD runs fully locally via Bun + `node-llama-cpp` and auto-downloads GGUF
   models from HuggingFace on first use (no separate Ollama daemon required).
 - The gateway runs QMD in a self-contained XDG home under
-  `~/.hanzo/bot/agents/<agentId>/qmd/` by setting `XDG_CONFIG_HOME` and
+  `~/.bot/agents/<agentId>/qmd/` by setting `XDG_CONFIG_HOME` and
   `XDG_CACHE_HOME`.
 - OS support: macOS and Linux work out of the box once Bun + SQLite are
   installed. Windows is best supported via WSL2.
@@ -129,7 +129,7 @@ out to QMD for retrieval. Key points:
 **How the sidecar runs**
 
 - The gateway writes a self-contained QMD home under
-  `~/.hanzo/bot/agents/<agentId>/qmd/` (config + cache + sqlite DB).
+  `~/.bot/agents/<agentId>/qmd/` (config + cache + sqlite DB).
 - Collections are created via `qmd collection add` from `memory.qmd.paths`
   (plus default workspace memory files), then `qmd update` + `qmd embed` run
   on boot and on a configurable interval (`memory.qmd.update.interval`,
@@ -139,29 +139,26 @@ out to QMD for retrieval. Key points:
 - Boot refresh now runs in the background by default so chat startup is not
   blocked; set `memory.qmd.update.waitForBootSync = true` to keep the previous
   blocking behavior.
-- Searches run via `qmd query --json`, scoped to Hanzo Bot-managed collections.
-  If QMD fails or the binary is missing,
-  Hanzo Bot automatically falls back to the builtin SQLite manager so memory tools
-  keep working.
-- Hanzo Bot does not expose QMD embed batch-size tuning today; batch behavior is
+- Searches run via `memory.qmd.searchMode` (default `qmd search --json`; also
+  supports `vsearch` and `query`). If the selected mode rejects flags on your
+  QMD build, Bot retries with `qmd query`. If QMD fails or the binary is
+  missing, Bot automatically falls back to the builtin SQLite manager so
+  memory tools keep working.
+- Bot does not expose QMD embed batch-size tuning today; batch behavior is
   controlled by QMD itself.
 - **First search may be slow**: QMD may download local GGUF models (reranker/query
   expansion) on the first `qmd query` run.
-  - Hanzo Bot sets `XDG_CONFIG_HOME`/`XDG_CACHE_HOME` automatically when it runs QMD.
-  - If you want to pre-download models manually (and warm the same index Hanzo Bot
+  - Bot sets `XDG_CONFIG_HOME`/`XDG_CACHE_HOME` automatically when it runs QMD.
+  - If you want to pre-download models manually (and warm the same index Bot
     uses), run a one-off query with the agent’s XDG dirs.
 
-    Hanzo Bot’s QMD state lives under your **state dir** (defaults to `~/.hanzo/bot`).
+    Bot’s QMD state lives under your **state dir** (defaults to `~/.bot`).
     You can point `qmd` at the exact same index by exporting the same XDG vars
-    Hanzo Bot uses:
+    Bot uses:
 
     ```bash
-    # Pick the same state dir Hanzo Bot uses
+    # Pick the same state dir Bot uses
     STATE_DIR="${BOT_STATE_DIR:-$HOME/.bot}"
-    if [ -d "$HOME/.moltbot" ] && [ ! -d "$HOME/.bot" ] \
-      && [ -z "${BOT_STATE_DIR:-}" ]; then
-      STATE_DIR="$HOME/.moltbot"
-    fi
 
     export XDG_CONFIG_HOME="$STATE_DIR/agents/main/qmd/xdg-config"
     export XDG_CACHE_HOME="$STATE_DIR/agents/main/qmd/xdg-cache"
@@ -177,6 +174,8 @@ out to QMD for retrieval. Key points:
 **Config surface (`memory.qmd.*`)**
 
 - `command` (default `qmd`): override the executable path.
+- `searchMode` (default `search`): pick which QMD command backs
+  `memory_search` (`search`, `vsearch`, `query`).
 - `includeDefaultMemory` (default `true`): auto-index `MEMORY.md` + `memory/**/*.md`.
 - `paths[]`: add extra directories/files (`path`, optional `pattern`, optional
   stable `name`).
@@ -190,14 +189,20 @@ out to QMD for retrieval. Key points:
 - `scope`: same schema as [`session.sendPolicy`](/gateway/configuration#session).
   Default is DM-only (`deny` all, `allow` direct chats); loosen it to surface QMD
   hits in groups/channels.
-- When `scope` denies a search, Hanzo Bot logs a warning with the derived
+  - `match.keyPrefix` matches the **normalized** session key (lowercased, with any
+    leading `agent:<id>:` stripped). Example: `discord:channel:`.
+  - `match.rawKeyPrefix` matches the **raw** session key (lowercased), including
+    `agent:<id>:`. Example: `agent:main:discord:`.
+  - Legacy: `match.keyPrefix: "agent:..."` is still treated as a raw-key prefix,
+    but prefer `rawKeyPrefix` for clarity.
+- When `scope` denies a search, Bot logs a warning with the derived
   `channel`/`chatType` so empty results are easier to debug.
 - Snippets sourced outside the workspace show up as
   `qmd/<collection>/<relative-path>` in `memory_search` results; `memory_get`
   understands that prefix and reads from the configured QMD collection root.
-- When `memory.qmd.sessions.enabled = true`, Hanzo Bot exports sanitized session
+- When `memory.qmd.sessions.enabled = true`, Bot exports sanitized session
   transcripts (User/Assistant turns) into a dedicated QMD collection under
-  `~/.hanzo/bot/agents/<id>/qmd/sessions/`, so `memory_search` can recall recent
+  `~/.bot/agents/<id>/qmd/sessions/`, so `memory_search` can recall recent
   conversations without touching the builtin SQLite index.
 - `memory_search` snippets now include a `Source: <path#line>` footer when
   `memory.citations` is `auto`/`on`; set `memory.citations = "off"` to keep
@@ -217,7 +222,13 @@ memory: {
     limits: { maxResults: 6, timeoutMs: 4000 },
     scope: {
       default: "deny",
-      rules: [{ action: "allow", match: { chatType: "direct" } }]
+      rules: [
+        { action: "allow", match: { chatType: "direct" } },
+        // Normalized session-key prefix (strips `agent:<id>:`).
+        { action: "deny", match: { keyPrefix: "discord:channel:" } },
+        // Raw session-key prefix (includes `agent:<id>:`).
+        { action: "deny", match: { rawKeyPrefix: "agent:main:discord:" } },
+      ]
     },
     paths: [
       { name: "docs", path: "~/notes", pattern: "**/*.md" }
@@ -361,18 +372,18 @@ Local mode:
 ### What gets indexed (and when)
 
 - File type: Markdown only (`MEMORY.md`, `memory/**/*.md`).
-- Index storage: per-agent SQLite at `~/.hanzo/bot/memory/<agentId>.sqlite` (configurable via `agents.defaults.memorySearch.store.path`, supports `{agentId}` token).
+- Index storage: per-agent SQLite at `~/.bot/memory/<agentId>.sqlite` (configurable via `agents.defaults.memorySearch.store.path`, supports `{agentId}` token).
 - Freshness: watcher on `MEMORY.md` + `memory/` marks the index dirty (debounce 1.5s). Sync is scheduled on session start, on search, or on an interval and runs asynchronously. Session transcripts use delta thresholds to trigger background sync.
-- Reindex triggers: the index stores the embedding **provider/model + endpoint fingerprint + chunking params**. If any of those change, Hanzo Bot automatically resets and reindexes the entire store.
+- Reindex triggers: the index stores the embedding **provider/model + endpoint fingerprint + chunking params**. If any of those change, Bot automatically resets and reindexes the entire store.
 
 ### Hybrid search (BM25 + vector)
 
-When enabled, Hanzo Bot combines:
+When enabled, Bot combines:
 
 - **Vector similarity** (semantic match, wording can differ)
 - **BM25 keyword relevance** (exact tokens like IDs, env vars, code symbols)
 
-If full-text search is unavailable on your platform, Hanzo Bot falls back to vector-only search.
+If full-text search is unavailable on your platform, Bot falls back to vector-only search.
 
 #### Why hybrid?
 
@@ -439,7 +450,7 @@ agents: {
 
 ### Embedding cache
 
-Hanzo Bot can cache **chunk embeddings** in SQLite so reindexing and frequent updates (especially session transcripts) don't re-embed unchanged text.
+Bot can cache **chunk embeddings** in SQLite so reindexing and frequent updates (especially session transcripts) don't re-embed unchanged text.
 
 Config:
 
@@ -479,7 +490,7 @@ Notes:
 - `memory_search` never blocks on indexing; results can be slightly stale until background sync finishes.
 - Results still include snippets only; `memory_get` remains limited to memory files.
 - Session indexing is isolated per agent (only that agent’s session logs are indexed).
-- Session logs live on disk (`~/.hanzo/bot/agents/<agentId>/sessions/*.jsonl`). Any process/user with filesystem access can read them, so treat disk access as the trust boundary. For stricter isolation, run agents under separate OS users or hosts.
+- Session logs live on disk (`~/.bot/agents/<agentId>/sessions/*.jsonl`). Any process/user with filesystem access can read them, so treat disk access as the trust boundary. For stricter isolation, run agents under separate OS users or hosts.
 
 Delta thresholds (defaults shown):
 
@@ -500,7 +511,7 @@ agents: {
 
 ### SQLite vector acceleration (sqlite-vec)
 
-When the sqlite-vec extension is available, Hanzo Bot stores embeddings in a
+When the sqlite-vec extension is available, Bot stores embeddings in a
 SQLite virtual table (`vec0`) and performs vector distance queries in the
 database. This keeps search fast without loading every embedding into JS.
 
@@ -525,14 +536,14 @@ Notes:
 
 - `enabled` defaults to true; when disabled, search falls back to in-process
   cosine similarity over stored embeddings.
-- If the sqlite-vec extension is missing or fails to load, Hanzo Bot logs the
+- If the sqlite-vec extension is missing or fails to load, Bot logs the
   error and continues with the JS fallback (no vector table).
 - `extensionPath` overrides the bundled sqlite-vec path (useful for custom builds
   or non-standard install locations).
 
 ### Local embedding auto-download
 
-- Default local embedding model: `hf:ggml-org/embeddinggemma-300M-GGUF/embeddinggemma-300M-Q8_0.gguf` (~0.6 GB).
+- Default local embedding model: `hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf` (~0.6 GB).
 - When `memorySearch.provider = "local"`, `node-llama-cpp` resolves `modelPath`; if the GGUF is missing it **auto-downloads** to the cache (or `local.modelCacheDir` if set), then loads it. Downloads resume on retry.
 - Native build requirement: run `pnpm approve-builds`, pick `node-llama-cpp`, then `pnpm rebuild node-llama-cpp`.
 - Fallback: if local setup fails and `memorySearch.fallback = "openai"`, we automatically switch to remote embeddings (`openai/text-embedding-3-small` unless overridden) and record the reason.

@@ -1,13 +1,16 @@
-package ai.hanzo-bot.android
+package ai.hanzo.bot.android
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import ai.hanzo-bot.android.gateway.GatewayEndpoint
-import ai.hanzo-bot.android.chat.OutgoingAttachment
-import ai.hanzo-bot.android.node.CameraCaptureManager
-import ai.hanzo-bot.android.node.CanvasController
-import ai.hanzo-bot.android.node.ScreenRecordManager
-import ai.hanzo-bot.android.node.SmsManager
+import ai.hanzo.bot.android.chat.ChatMessage
+import ai.hanzo.bot.android.chat.ChatPendingToolCall
+import ai.hanzo.bot.android.chat.ChatSessionEntry
+import ai.hanzo.bot.android.chat.OutgoingAttachment
+import ai.hanzo.bot.android.gateway.GatewayEndpoint
+import ai.hanzo.bot.android.node.CameraCaptureManager
+import ai.hanzo.bot.android.node.CanvasController
+import ai.hanzo.bot.android.node.ScreenRecordManager
+import ai.hanzo.bot.android.node.SmsManager
 import kotlinx.coroutines.flow.StateFlow
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
@@ -25,6 +28,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   val statusText: StateFlow<String> = runtime.statusText
   val serverName: StateFlow<String?> = runtime.serverName
   val remoteAddress: StateFlow<String?> = runtime.remoteAddress
+  val pendingGatewayTrust: StateFlow<NodeRuntime.GatewayTrustPrompt?> = runtime.pendingGatewayTrust
   val isForeground: StateFlow<Boolean> = runtime.isForeground
   val seamColorArgb: StateFlow<Long> = runtime.seamColorArgb
   val mainSessionKey: StateFlow<String> = runtime.mainSessionKey
@@ -51,17 +55,18 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   val manualHost: StateFlow<String> = runtime.manualHost
   val manualPort: StateFlow<Int> = runtime.manualPort
   val manualTls: StateFlow<Boolean> = runtime.manualTls
+  val gatewayToken: StateFlow<String> = runtime.gatewayToken
   val canvasDebugStatusEnabled: StateFlow<Boolean> = runtime.canvasDebugStatusEnabled
 
   val chatSessionKey: StateFlow<String> = runtime.chatSessionKey
   val chatSessionId: StateFlow<String?> = runtime.chatSessionId
-  val chatMessages = runtime.chatMessages
+  val chatMessages: StateFlow<List<ChatMessage>> = runtime.chatMessages
   val chatError: StateFlow<String?> = runtime.chatError
   val chatHealthOk: StateFlow<Boolean> = runtime.chatHealthOk
   val chatThinkingLevel: StateFlow<String> = runtime.chatThinkingLevel
   val chatStreamingAssistantText: StateFlow<String?> = runtime.chatStreamingAssistantText
-  val chatPendingToolCalls = runtime.chatPendingToolCalls
-  val chatSessions = runtime.chatSessions
+  val chatPendingToolCalls: StateFlow<List<ChatPendingToolCall>> = runtime.chatPendingToolCalls
+  val chatSessions: StateFlow<List<ChatSessionEntry>> = runtime.chatSessions
   val pendingRunCount: StateFlow<Int> = runtime.pendingRunCount
 
   fun setForeground(value: Boolean) {
@@ -104,6 +109,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     runtime.setManualTls(value)
   }
 
+  fun setGatewayToken(value: String) {
+    runtime.setGatewayToken(value)
+  }
+
   fun setCanvasDebugStatusEnabled(value: Boolean) {
     runtime.setCanvasDebugStatusEnabled(value)
   }
@@ -138,6 +147,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
   fun disconnect() {
     runtime.disconnect()
+  }
+
+  fun acceptGatewayTrustPrompt() {
+    runtime.acceptGatewayTrustPrompt()
+  }
+
+  fun declineGatewayTrustPrompt() {
+    runtime.declineGatewayTrustPrompt()
   }
 
   fun handleCanvasA2UIActionFromWebView(payloadJson: String) {

@@ -1,7 +1,7 @@
 import AppKit
+import Foundation
 import BotIPC
 import BotKit
-import Foundation
 import WebKit
 
 @MainActor
@@ -61,8 +61,8 @@ final class CanvasWindowController: NSWindowController, WKNavigationDelegate, NS
             const allowedSchemes = \(String(describing: CanvasScheme.allSchemes));
             const protocol = location.protocol.replace(':', '');
             if (!allowedSchemes.includes(protocol)) return;
-            if (globalThis.__hanzo-botA2UIBridgeInstalled) return;
-            globalThis.__hanzo-botA2UIBridgeInstalled = true;
+            if (globalThis.__botA2UIBridgeInstalled) return;
+            globalThis.__botA2UIBridgeInstalled = true;
 
             const deepLinkKey = \(Self.jsStringLiteral(deepLinkKey));
             const sessionKey = \(Self.jsStringLiteral(injectedSessionKey));
@@ -89,13 +89,13 @@ final class CanvasWindowController: NSWindowController, WKNavigationDelegate, NS
                   ...(context.length ? { context } : {}),
                 };
 
-                const handler = globalThis.webkit?.messageHandlers?.hanzo-botCanvasA2UIAction;
+                const handler = globalThis.webkit?.messageHandlers?.botCanvasA2UIAction;
 
                 // If the bundled A2UI shell is present, let it forward actions so we keep its richer
                 // context resolution (data model path lookups, surface detection, etc.).
                 const hasBundledA2UIHost =
-                  !!globalThis.hanzo-botA2UI ||
-                  !!document.querySelector('hanzo-bot-a2ui-host');
+                  !!globalThis.botA2UI ||
+                  !!document.querySelector('bot-a2ui-host');
                 if (hasBundledA2UIHost && handler?.postMessage) return;
 
                 // Otherwise, forward directly when possible.
@@ -121,7 +121,7 @@ final class CanvasWindowController: NSWindowController, WKNavigationDelegate, NS
                 params.set('deliver', 'false');
                 params.set('channel', 'last');
                 params.set('key', deepLinkKey);
-                location.href = 'hanzo-bot://agent?' + params.toString();
+                location.href = 'bot://agent?' + params.toString();
               } catch {}
             }, true);
           } catch {}
@@ -183,7 +183,9 @@ final class CanvasWindowController: NSWindowController, WKNavigationDelegate, NS
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) is not supported")
+    }
 
     @MainActor deinit {
         for name in CanvasA2UIActionMessageHandler.allMessageNames {
@@ -278,7 +280,7 @@ final class CanvasWindowController: NSWindowController, WKNavigationDelegate, NS
         let js = """
         (() => {
           try {
-            const api = globalThis.__hanzo-bot;
+            const api = globalThis.__bot;
             if (!api) return;
             if (typeof api.setDebugStatusEnabled === 'function') {
               api.setDebugStatusEnabled(\(enabled ? "true" : "false"));
@@ -346,7 +348,7 @@ final class CanvasWindowController: NSWindowController, WKNavigationDelegate, NS
             path = outPath
         } else {
             let ts = Int(Date().timeIntervalSince1970)
-            path = "/tmp/hanzo-bot-canvas-\(CanvasWindowController.sanitizeSessionKey(self.sessionKey))-\(ts).png"
+            path = "/tmp/bot-canvas-\(CanvasWindowController.sanitizeSessionKey(self.sessionKey))-\(ts).png"
         }
 
         try png.write(to: URL(fileURLWithPath: path), options: [.atomic])

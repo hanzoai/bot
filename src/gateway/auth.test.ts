@@ -1,7 +1,55 @@
 import { describe, expect, it, vi } from "vitest";
-import { authorizeGatewayConnect, resolveGatewayAuthAsync } from "./auth.js";
+import type { AuthRateLimiter } from "./auth-rate-limit.js";
+import { authorizeGatewayConnect, resolveGatewayAuth } from "./auth.js";
+
+function createLimiterSpy(): AuthRateLimiter & {
+  check: ReturnType<typeof vi.fn>;
+  recordFailure: ReturnType<typeof vi.fn>;
+  reset: ReturnType<typeof vi.fn>;
+} {
+  return {
+    check: vi.fn(() => ({ allowed: true, remaining: 10, retryAfterMs: 0 })),
+    recordFailure: vi.fn(),
+    reset: vi.fn(),
+    size: () => 0,
+    prune: () => {},
+    dispose: () => {},
+  };
+}
 
 describe("gateway auth", () => {
+  it("resolves token/password from BOT gateway env vars", () => {
+    expect(
+      resolveGatewayAuth({
+        authConfig: {},
+        env: {
+          BOT_GATEWAY_TOKEN: "env-token",
+          BOT_GATEWAY_PASSWORD: "env-password",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).toMatchObject({
+      mode: "password",
+      token: "env-token",
+      password: "env-password",
+    });
+  });
+
+  it("does not resolve unknown gateway env vars", () => {
+    expect(
+      resolveGatewayAuth({
+        authConfig: {},
+        env: {
+          UNKNOWN_GATEWAY_TOKEN: "legacy-token",
+          UNKNOWN_GATEWAY_PASSWORD: "legacy-password",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).toMatchObject({
+      mode: "none",
+      token: undefined,
+      password: undefined,
+    });
+  });
+
   it("does not throw when req is missing socket", async () => {
     const res = await authorizeGatewayConnect({
       auth: { mode: "token", token: "secret", allowTailscale: false },
@@ -99,61 +147,225 @@ describe("gateway auth", () => {
     expect(res.user).toBe("peter");
   });
 
-  it("resolves gateway token/password from KMS references", async () => {
-    const fetchSpy = vi.fn(async (input: string | URL) => {
-      const url = typeof input === "string" ? input : input.toString();
-      if (url.endsWith("/api/v1/auth/universal-auth/login")) {
-        return new Response(
-          JSON.stringify({
-            accessToken: "kms-access-token",
-            expiresIn: 3600,
-          }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
-      }
-      if (url.includes("/api/v3/secrets/raw/GATEWAY_TOKEN")) {
-        return new Response(
-          JSON.stringify({
-            secret: { secretValue: "resolved-gateway-token" },
-          }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
-      }
-      if (url.includes("/api/v3/secrets/raw/GATEWAY_PASSWORD")) {
-        return new Response(
-          JSON.stringify({
-            secret: { secretValue: "resolved-gateway-password" },
-          }),
-          { status: 200, headers: { "Content-Type": "application/json" } },
-        );
-      }
-      return new Response("not found", { status: 404 });
+  it("uses proxy-aware request client IP by default for rate-limit checks", async () => {
+    const limiter = createLimiterSpy();
+    const res = await authorizeGatewayConnect({
+      auth: { mode: "token", token: "secret", allowTailscale: false },
+      connectAuth: { token: "wrong" },
+      req: {
+        socket: { remoteAddress: "127.0.0.1" },
+        headers: { "x-forwarded-for": "203.0.113.10" },
+      } as never,
+      trustedProxies: ["127.0.0.1"],
+      rateLimiter: limiter,
     });
 
-    const auth = await resolveGatewayAuthAsync({
-      authConfig: {
-        mode: "token",
-        token: "kms://GATEWAY_TOKEN",
-        password: "kms://GATEWAY_PASSWORD",
+    expect(res.ok).toBe(false);
+    expect(res.reason).toBe("token_mismatch");
+    expect(limiter.check).toHaveBeenCalledWith("203.0.113.10", "shared-secret");
+    expect(limiter.recordFailure).toHaveBeenCalledWith("203.0.113.10", "shared-secret");
+  });
+
+  it("passes custom rate-limit scope to limiter operations", async () => {
+    const limiter = createLimiterSpy();
+    const res = await authorizeGatewayConnect({
+      auth: { mode: "password", password: "secret", allowTailscale: false },
+      connectAuth: { password: "wrong" },
+      rateLimiter: limiter,
+      rateLimitScope: "custom-scope",
+    });
+
+    expect(res.ok).toBe(false);
+    expect(res.reason).toBe("password_mismatch");
+    expect(limiter.check).toHaveBeenCalledWith(undefined, "custom-scope");
+    expect(limiter.recordFailure).toHaveBeenCalledWith(undefined, "custom-scope");
+  });
+});
+
+describe("trusted-proxy auth", () => {
+  type GatewayConnectInput = Parameters<typeof authorizeGatewayConnect>[0];
+  const trustedProxyConfig = {
+    userHeader: "x-forwarded-user",
+    requiredHeaders: ["x-forwarded-proto"],
+    allowUsers: [],
+  };
+
+  function authorizeTrustedProxy(options?: {
+    auth?: GatewayConnectInput["auth"];
+    trustedProxies?: string[];
+    remoteAddress?: string;
+    headers?: Record<string, string>;
+  }) {
+    return authorizeGatewayConnect({
+      auth: options?.auth ?? {
+        mode: "trusted-proxy",
+        allowTailscale: false,
+        trustedProxy: trustedProxyConfig,
       },
-      cfg: {
-        secrets: {
-          backend: "kms",
-          kms: {
-            projectId: "proj_123",
-            environment: "dev",
-            machineIdentity: {
-              clientId: "machine-client-id",
-              clientSecret: "machine-client-secret",
-            },
-          },
+      connectAuth: null,
+      trustedProxies: options?.trustedProxies ?? ["10.0.0.1"],
+      req: {
+        socket: { remoteAddress: options?.remoteAddress ?? "10.0.0.1" },
+        headers: {
+          host: "gateway.local",
+          ...options?.headers,
+        },
+      } as never,
+    });
+  }
+
+  it("accepts valid request from trusted proxy", async () => {
+    const res = await authorizeTrustedProxy({
+      headers: {
+        "x-forwarded-user": "nick@example.com",
+        "x-forwarded-proto": "https",
+      },
+    });
+
+    expect(res.ok).toBe(true);
+    expect(res.method).toBe("trusted-proxy");
+    expect(res.user).toBe("nick@example.com");
+  });
+
+  it("rejects request from untrusted source", async () => {
+    const res = await authorizeTrustedProxy({
+      remoteAddress: "192.168.1.100",
+      headers: {
+        "x-forwarded-user": "attacker@evil.com",
+        "x-forwarded-proto": "https",
+      },
+    });
+
+    expect(res.ok).toBe(false);
+    expect(res.reason).toBe("trusted_proxy_untrusted_source");
+  });
+
+  it("rejects request with missing user header", async () => {
+    const res = await authorizeTrustedProxy({
+      headers: {
+        "x-forwarded-proto": "https",
+      },
+    });
+
+    expect(res.ok).toBe(false);
+    expect(res.reason).toBe("trusted_proxy_user_missing");
+  });
+
+  it("rejects request with missing required headers", async () => {
+    const res = await authorizeTrustedProxy({
+      headers: {
+        "x-forwarded-user": "nick@example.com",
+      },
+    });
+
+    expect(res.ok).toBe(false);
+    expect(res.reason).toBe("trusted_proxy_missing_header_x-forwarded-proto");
+  });
+
+  it("rejects user not in allowlist", async () => {
+    const res = await authorizeTrustedProxy({
+      auth: {
+        mode: "trusted-proxy",
+        allowTailscale: false,
+        trustedProxy: {
+          userHeader: "x-forwarded-user",
+          allowUsers: ["admin@example.com", "nick@example.com"],
         },
       },
-      fetchFn: fetchSpy,
+      headers: {
+        "x-forwarded-user": "stranger@other.com",
+      },
     });
 
-    expect(auth.token).toBe("resolved-gateway-token");
-    expect(auth.password).toBe("resolved-gateway-password");
-    expect(fetchSpy).toHaveBeenCalledTimes(3);
+    expect(res.ok).toBe(false);
+    expect(res.reason).toBe("trusted_proxy_user_not_allowed");
+  });
+
+  it("accepts user in allowlist", async () => {
+    const res = await authorizeTrustedProxy({
+      auth: {
+        mode: "trusted-proxy",
+        allowTailscale: false,
+        trustedProxy: {
+          userHeader: "x-forwarded-user",
+          allowUsers: ["admin@example.com", "nick@example.com"],
+        },
+      },
+      headers: {
+        "x-forwarded-user": "nick@example.com",
+      },
+    });
+
+    expect(res.ok).toBe(true);
+    expect(res.method).toBe("trusted-proxy");
+    expect(res.user).toBe("nick@example.com");
+  });
+
+  it("rejects when no trustedProxies configured", async () => {
+    const res = await authorizeTrustedProxy({
+      trustedProxies: [],
+      headers: {
+        "x-forwarded-user": "nick@example.com",
+      },
+    });
+
+    expect(res.ok).toBe(false);
+    expect(res.reason).toBe("trusted_proxy_no_proxies_configured");
+  });
+
+  it("rejects when trustedProxy config missing", async () => {
+    const res = await authorizeTrustedProxy({
+      auth: {
+        mode: "trusted-proxy",
+        allowTailscale: false,
+      },
+      headers: {
+        "x-forwarded-user": "nick@example.com",
+      },
+    });
+
+    expect(res.ok).toBe(false);
+    expect(res.reason).toBe("trusted_proxy_config_missing");
+  });
+
+  it("supports Pomerium-style headers", async () => {
+    const res = await authorizeTrustedProxy({
+      auth: {
+        mode: "trusted-proxy",
+        allowTailscale: false,
+        trustedProxy: {
+          userHeader: "x-pomerium-claim-email",
+          requiredHeaders: ["x-pomerium-jwt-assertion"],
+        },
+      },
+      trustedProxies: ["172.17.0.1"],
+      remoteAddress: "172.17.0.1",
+      headers: {
+        "x-pomerium-claim-email": "nick@example.com",
+        "x-pomerium-jwt-assertion": "eyJ...",
+      },
+    });
+
+    expect(res.ok).toBe(true);
+    expect(res.method).toBe("trusted-proxy");
+    expect(res.user).toBe("nick@example.com");
+  });
+
+  it("trims whitespace from user header value", async () => {
+    const res = await authorizeTrustedProxy({
+      auth: {
+        mode: "trusted-proxy",
+        allowTailscale: false,
+        trustedProxy: {
+          userHeader: "x-forwarded-user",
+        },
+      },
+      headers: {
+        "x-forwarded-user": "  nick@example.com  ",
+      },
+    });
+
+    expect(res.ok).toBe(true);
+    expect(res.user).toBe("nick@example.com");
   });
 });

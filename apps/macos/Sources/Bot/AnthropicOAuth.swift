@@ -18,7 +18,7 @@ enum AnthropicAuthMode: Equatable {
 
     var shortLabel: String {
         switch self {
-        case .oauthFile: "OAuth (HanzoBot token file)"
+        case .oauthFile: "OAuth (Bot token file)"
         case .oauthEnv: "OAuth (env var)"
         case .apiKeyEnv: "API key (env var)"
         case .missing: "Missing credentials"
@@ -58,7 +58,7 @@ enum AnthropicAuthResolver {
 }
 
 enum AnthropicOAuth {
-    private static let logger = Logger(subsystem: "ai.hanzo.bot", category: "anthropic-oauth")
+    private static let logger = Logger(subsystem: "ai.bot", category: "anthropic-oauth")
 
     private static let clientId = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
     private static let authorizeURL = URL(string: "https://claude.ai/oauth/authorize")!
@@ -197,7 +197,7 @@ enum AnthropicOAuth {
 enum BotOAuthStore {
     static let oauthFilename = "oauth.json"
     private static let providerKey = "anthropic"
-    private static let hanzo-botOAuthDirEnv = "BOT_OAUTH_DIR"
+    private static let botOAuthDirEnv = "BOT_OAUTH_DIR"
     private static let legacyPiDirEnv = "PI_CODING_AGENT_DIR"
 
     enum AnthropicOAuthStatus: Equatable {
@@ -215,18 +215,18 @@ enum BotOAuthStore {
 
         var shortDescription: String {
             switch self {
-            case .missingFile: "HanzoBot OAuth token file not found"
-            case .unreadableFile: "HanzoBot OAuth token file not readable"
-            case .invalidJSON: "HanzoBot OAuth token file invalid"
-            case .missingProviderEntry: "No Anthropic entry in HanzoBot OAuth token file"
+            case .missingFile: "Bot OAuth token file not found"
+            case .unreadableFile: "Bot OAuth token file not readable"
+            case .invalidJSON: "Bot OAuth token file invalid"
+            case .missingProviderEntry: "No Anthropic entry in Bot OAuth token file"
             case .missingTokens: "Anthropic entry missing tokens"
-            case .connected: "HanzoBot OAuth credentials found"
+            case .connected: "Bot OAuth credentials found"
             }
         }
     }
 
     static func oauthDir() -> URL {
-        if let override = ProcessInfo.processInfo.environment[self.hanzo-botOAuthDirEnv]?
+        if let override = ProcessInfo.processInfo.environment[self.botOAuthDirEnv]?
             .trimmingCharacters(in: .whitespacesAndNewlines),
             !override.isEmpty
         {
@@ -234,9 +234,8 @@ enum BotOAuthStore {
             return URL(fileURLWithPath: expanded, isDirectory: true)
         }
         let home = FileManager().homeDirectoryForCurrentUser
-        let preferred = home.appendingPathComponent(".hanzo-bot", isDirectory: true)
+        return home.appendingPathComponent(".bot", isDirectory: true)
             .appendingPathComponent("credentials", isDirectory: true)
-        return preferred
     }
 
     static func oauthURL() -> URL {

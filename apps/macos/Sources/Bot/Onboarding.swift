@@ -1,13 +1,13 @@
 import AppKit
+import Combine
+import Observation
 import BotChatUI
 import BotDiscovery
 import BotIPC
-import Combine
-import Observation
 import SwiftUI
 
 enum UIStrings {
-    static let welcomeTitle = "Welcome to HanzoBot"
+    static let welcomeTitle = "Welcome to Bot"
 }
 
 @MainActor
@@ -90,7 +90,7 @@ struct OnboardingView: View {
     @State var showAdvancedConnection = false
     @State var preferredGatewayID: String?
     @State var gatewayDiscovery: GatewayDiscoveryModel
-    @State var onboardingChatModel: HanzoBotChatViewModel
+    @State var onboardingChatModel: BotChatViewModel
     @State var onboardingSkillsModel = SkillsSettingsModel()
     @State var onboardingWizard = OnboardingWizardModel()
     @State var didLoadOnboardingSkills = false
@@ -142,21 +142,33 @@ struct OnboardingView: View {
         Self.pageOrder(for: self.state.connectionMode, showOnboardingChat: self.showOnboardingChat)
     }
 
-    var pageCount: Int { self.pageOrder.count }
+    var pageCount: Int {
+        self.pageOrder.count
+    }
+
     var activePageIndex: Int {
         self.activePageIndex(for: self.currentPage)
     }
 
-    var buttonTitle: String { self.currentPage == self.pageCount - 1 ? "Finish" : "Next" }
-    var wizardPageOrderIndex: Int? { self.pageOrder.firstIndex(of: self.wizardPageIndex) }
+    var buttonTitle: String {
+        self.currentPage == self.pageCount - 1 ? "Finish" : "Next"
+    }
+
+    var wizardPageOrderIndex: Int? {
+        self.pageOrder.firstIndex(of: self.wizardPageIndex)
+    }
+
     var isWizardBlocking: Bool {
         self.activePageIndex == self.wizardPageIndex && !self.onboardingWizard.isComplete
     }
 
-    var canAdvance: Bool { !self.isWizardBlocking }
+    var canAdvance: Bool {
+        !self.isWizardBlocking
+    }
+
     var devLinkCommand: String {
         let version = GatewayEnvironment.expectedGatewayVersionString() ?? "latest"
-        return "npm install -g hanzo-bot@\(version)"
+        return "npm install -g bot@\(version)"
     }
 
     struct LocalGatewayProbe: Equatable {
@@ -177,7 +189,7 @@ struct OnboardingView: View {
         self.permissionMonitor = permissionMonitor
         self._gatewayDiscovery = State(initialValue: discoveryModel)
         self._onboardingChatModel = State(
-            initialValue: HanzoBotChatViewModel(
+            initialValue: BotChatViewModel(
                 sessionKey: "onboarding",
                 transport: MacGatewayChatTransport()))
     }

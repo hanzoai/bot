@@ -1,9 +1,7 @@
-import BotKit
-import HanzoBotProtocol
 import Foundation
-#if canImport(Darwin)
-import Darwin
-#endif
+import BotDiscovery
+import BotKit
+import BotProtocol
 
 struct ConnectOptions {
     var url: String?
@@ -13,7 +11,7 @@ struct ConnectOptions {
     var timeoutMs: Int = 15000
     var json: Bool = false
     var probe: Bool = false
-    var clientId: String = "hanzo-bot-macos"
+    var clientId: String = "bot-macos"
     var clientMode: String = "ui"
     var displayName: String?
     var role: String = "operator"
@@ -101,10 +99,10 @@ func runConnect(_ args: [String]) async {
     let opts = ConnectOptions.parse(args)
     if opts.help {
         print("""
-        hanzo-bot-mac connect
+        bot-mac connect
 
         Usage:
-          hanzo-bot-mac connect [--url <ws://host:port>] [--token <token>] [--password <password>]
+          bot-mac connect [--url <ws://host:port>] [--token <token>] [--password <password>]
                                [--mode <local|remote>] [--timeout <ms>] [--probe] [--json]
                                [--client-id <id>] [--client-mode <mode>] [--display-name <name>]
                                [--role <role>] [--scopes <a,b,c>]
@@ -117,7 +115,7 @@ func runConnect(_ args: [String]) async {
           --timeout <ms>     Request timeout (default: 15000)
           --probe            Force a fresh health probe
           --json             Emit JSON
-          --client-id <id>   Override client id (default: hanzo-bot-macos)
+          --client-id <id>   Override client id (default: bot-macos)
           --client-mode <m>  Override client mode (default: ui)
           --display-name <n> Override display name
           --role <role>      Override role (default: operator)
@@ -130,7 +128,7 @@ func runConnect(_ args: [String]) async {
     let config = loadGatewayConfig()
     do {
         let endpoint = try resolveGatewayEndpoint(opts: opts, config: config)
-        let displayName = opts.displayName ?? Host.current().localizedName ?? "HanzoBot macOS Debug CLI"
+        let displayName = opts.displayName ?? Host.current().localizedName ?? "Bot macOS Debug CLI"
         let connectOptions = GatewayConnectOptions(
             role: opts.role,
             scopes: opts.scopes,
@@ -207,7 +205,7 @@ private func printConnectOutput(_ output: ConnectOutput, json: Bool) {
         return
     }
 
-    print("HanzoBot macOS Gateway Connect")
+    print("Bot macOS Gateway Connect")
     print("Status: \(output.status)")
     print("URL: \(output.url)")
     print("Mode: \(output.mode)")
@@ -301,53 +299,11 @@ private func resolvedPassword(opts: ConnectOptions, mode: String, config: Gatewa
 
 private func resolveLocalHost(bind: String?) -> String {
     let normalized = (bind ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-    let tailnetIP = detectTailnetIPv4()
+    let tailnetIP = TailscaleNetwork.detectTailnetIPv4()
     switch normalized {
     case "tailnet":
         return tailnetIP ?? "127.0.0.1"
     default:
         return "127.0.0.1"
     }
-}
-
-private func detectTailnetIPv4() -> String? {
-    var addrList: UnsafeMutablePointer<ifaddrs>?
-    guard getifaddrs(&addrList) == 0, let first = addrList else { return nil }
-    defer { freeifaddrs(addrList) }
-
-    for ptr in sequence(first: first, next: { $0.pointee.ifa_next }) {
-        let flags = Int32(ptr.pointee.ifa_flags)
-        let isUp = (flags & IFF_UP) != 0
-        let isLoopback = (flags & IFF_LOOPBACK) != 0
-        let family = ptr.pointee.ifa_addr.pointee.sa_family
-        if !isUp || isLoopback || family != UInt8(AF_INET) { continue }
-
-        var addr = ptr.pointee.ifa_addr.pointee
-        var buffer = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-        let result = getnameinfo(
-            &addr,
-            socklen_t(ptr.pointee.ifa_addr.pointee.sa_len),
-            &buffer,
-            socklen_t(buffer.count),
-            nil,
-            0,
-            NI_NUMERICHOST)
-        guard result == 0 else { continue }
-        let len = buffer.prefix { $0 != 0 }
-        let bytes = len.map { UInt8(bitPattern: $0) }
-        guard let ip = String(bytes: bytes, encoding: .utf8) else { continue }
-        if isTailnetIPv4(ip) { return ip }
-    }
-
-    return nil
-}
-
-private func isTailnetIPv4(_ address: String) -> Bool {
-    let parts = address.split(separator: ".")
-    guard parts.count == 4 else { return false }
-    let octets = parts.compactMap { Int($0) }
-    guard octets.count == 4 else { return false }
-    let a = octets[0]
-    let b = octets[1]
-    return a == 100 && b >= 64 && b <= 127
 }

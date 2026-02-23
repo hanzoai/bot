@@ -86,7 +86,7 @@ export async function ensureBotModelsJson(
   const agentDir = agentDirOverride?.trim() ? agentDirOverride.trim() : resolveBotAgentDir();
 
   const explicitProviders = cfg.models?.providers ?? {};
-  const implicitProviders = await resolveImplicitProviders({ agentDir });
+  const implicitProviders = await resolveImplicitProviders({ agentDir, explicitProviders });
   const providers: Record<string, ProviderConfig> = mergeProviders({
     implicit: implicitProviders,
     explicit: explicitProviders,

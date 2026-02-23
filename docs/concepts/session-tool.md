@@ -73,7 +73,7 @@ Behavior:
 
 - `includeTools=false` filters `role: "toolResult"` messages.
 - Returns messages array in the raw transcript format.
-- When given a `sessionId`, Hanzo Bot resolves it to the corresponding session key (missing ids error).
+- When given a `sessionId`, Bot resolves it to the corresponding session key (missing ids error).
 
 ## sessions_send
 
@@ -94,11 +94,12 @@ Behavior:
 - Announce delivery runs after the primary run completes and is best-effort; `status: "ok"` does not guarantee the announce was delivered.
 - Waits via gateway `agent.wait` (server-side) so reconnects don't drop the wait.
 - Agent-to-agent message context is injected for the primary run.
-- After the primary run completes, Hanzo Bot runs a **reply-back loop**:
+- Inter-session messages are persisted with `message.provenance.kind = "inter_session"` so transcript readers can distinguish routed agent instructions from external user input.
+- After the primary run completes, Bot runs a **reply-back loop**:
   - Round 2+ alternates between requester and target agents.
   - Reply exactly `REPLY_SKIP` to stop the ping‑pong.
   - Max turns is `session.agentToAgent.maxPingPongTurns` (0–5, default 5).
-- Once the loop ends, Hanzo Bot runs the **agent‑to‑agent announce step** (target agent only):
+- Once the loop ends, Bot runs the **agent‑to‑agent announce step** (target agent only):
   - Reply exactly `ANNOUNCE_SKIP` to stay silent.
   - Any other reply is sent to the target channel.
   - Announce step includes the original request + round‑1 reply + latest ping‑pong reply.
@@ -167,7 +168,7 @@ Behavior:
 - Sub-agents default to the full tool set **minus session tools** (configurable via `tools.subagents.tools`).
 - Sub-agents are not allowed to call `sessions_spawn` (no sub-agent → sub-agent spawning).
 - Always non-blocking: returns `{ status: "accepted", runId, childSessionKey }` immediately.
-- After completion, Hanzo Bot runs a sub-agent **announce step** and posts the result to the requester chat channel.
+- After completion, Bot runs a sub-agent **announce step** and posts the result to the requester chat channel.
 - Reply exactly `ANNOUNCE_SKIP` during the announce step to stay silent.
 - Announce replies are normalized to `Status`/`Result`/`Notes`; `Status` comes from runtime outcome (not model text).
 - Sub-agent sessions are auto-archived after `agents.defaults.subagents.archiveAfterMinutes` (default: 60).
@@ -175,12 +176,24 @@ Behavior:
 
 ## Sandbox Session Visibility
 
-Sandboxed sessions can use session tools, but by default they only see sessions they spawned via `sessions_spawn`.
+Session tools can be scoped to reduce cross-session access.
+
+Default behavior:
+
+- `tools.sessions.visibility` defaults to `tree` (current session + spawned subagent sessions).
+- For sandboxed sessions, `agents.defaults.sandbox.sessionToolsVisibility` can hard-clamp visibility.
 
 Config:
 
 ```json5
 {
+  tools: {
+    sessions: {
+      // "self" | "tree" | "agent" | "all"
+      // default: "tree"
+      visibility: "tree",
+    },
+  },
   agents: {
     defaults: {
       sandbox: {
@@ -191,3 +204,11 @@ Config:
   },
 }
 ```
+
+Notes:
+
+- `self`: only the current session key.
+- `tree`: current session + sessions spawned by the current session.
+- `agent`: any session belonging to the current agent id.
+- `all`: any session (cross-agent access still requires `tools.agentToAgent`).
+- When a session is sandboxed and `sessionToolsVisibility="spawned"`, Bot clamps visibility to `tree` even if you set `tools.sessions.visibility="all"`.

@@ -1,13 +1,13 @@
 {
   "name": "@hanzo/bot-telegram",
-  "version": "2026.2.10",
+  "version": "2026.2.23",
   "private": true,
-  "description": "HanzoBot Telegram channel plugin",
+  "description": "Hanzo Bot Telegram channel plugin",
   "type": "module",
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

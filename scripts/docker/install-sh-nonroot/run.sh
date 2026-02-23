@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-INSTALL_URL="${BOT_INSTALL_URL:-https://bot.bot/install.sh}"
-DEFAULT_PACKAGE="bot"
+INSTALL_URL="${BOT_INSTALL_URL:-https://raw.githubusercontent.com/hanzoai/bot/main/scripts/install.sh}"
+DEFAULT_PACKAGE="@hanzo/bot"
 PACKAGE_NAME="${BOT_INSTALL_PACKAGE:-$DEFAULT_PACKAGE}"
+CLI_BIN="${BOT_INSTALL_CLI_BIN:-hanzo-bot}"
 
 echo "==> Pre-flight: ensure git absent"
 if command -v git >/dev/null; then
@@ -26,14 +27,13 @@ if [[ -n "$EXPECTED_VERSION" ]]; then
 else
   LATEST_VERSION="$(npm view "$PACKAGE_NAME" version)"
 fi
-CLI_NAME="$PACKAGE_NAME"
+CLI_NAME="$CLI_BIN"
 CMD_PATH="$(command -v "$CLI_NAME" || true)"
-if [[ -z "$CMD_PATH" && -x "$HOME/.npm-global/bin/$PACKAGE_NAME" ]]; then
-  CLI_NAME="$PACKAGE_NAME"
-  CMD_PATH="$HOME/.npm-global/bin/$PACKAGE_NAME"
+if [[ -z "$CMD_PATH" && -x "$HOME/.npm-global/bin/$CLI_BIN" ]]; then
+  CMD_PATH="$HOME/.npm-global/bin/$CLI_BIN"
 fi
 if [[ -z "$CMD_PATH" ]]; then
-  echo "$PACKAGE_NAME is not on PATH" >&2
+  echo "$CLI_NAME is not on PATH" >&2
   exit 1
 fi
 echo "==> Verify CLI installed: $CLI_NAME"

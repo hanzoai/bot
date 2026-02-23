@@ -1,13 +1,13 @@
 import AppKit
+import Foundation
 import BotChatUI
 import BotKit
-import HanzoBotProtocol
-import Foundation
+import BotProtocol
 import OSLog
 import QuartzCore
 import SwiftUI
 
-private let webChatSwiftLogger = Logger(subsystem: "ai.hanzo.bot", category: "WebChatSwiftUI")
+private let webChatSwiftLogger = Logger(subsystem: "ai.bot", category: "WebChatSwiftUI")
 
 private enum WebChatSwiftUILayout {
     static let windowSize = NSSize(width: 500, height: 840)
@@ -16,8 +16,8 @@ private enum WebChatSwiftUILayout {
     static let anchorPadding: CGFloat = 8
 }
 
-struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
-    func requestHistory(sessionKey: String) async throws -> HanzoBotChatHistoryPayload {
+struct MacGatewayChatTransport: BotChatTransport, Sendable {
+    func requestHistory(sessionKey: String) async throws -> BotChatHistoryPayload {
         try await GatewayConnection.shared.chatHistory(sessionKey: sessionKey)
     }
 
@@ -31,7 +31,7 @@ struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
             timeoutMs: 10000)
     }
 
-    func listSessions(limit: Int?) async throws -> HanzoBotChatSessionsListResponse {
+    func listSessions(limit: Int?) async throws -> BotChatSessionsListResponse {
         var params: [String: AnyCodable] = [
             "includeGlobal": AnyCodable(true),
             "includeUnknown": AnyCodable(false),
@@ -43,7 +43,7 @@ struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
             method: "sessions.list",
             params: params,
             timeoutMs: 15000)
-        return try JSONDecoder().decode(HanzoBotChatSessionsListResponse.self, from: data)
+        return try JSONDecoder().decode(BotChatSessionsListResponse.self, from: data)
     }
 
     func sendMessage(
@@ -51,7 +51,7 @@ struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
         message: String,
         thinking: String,
         idempotencyKey: String,
-        attachments: [HanzoBotChatAttachmentPayload]) async throws -> HanzoBotChatSendResponse
+        attachments: [BotChatAttachmentPayload]) async throws -> BotChatSendResponse
     {
         try await GatewayConnection.shared.chatSend(
             sessionKey: sessionKey,
@@ -65,7 +65,7 @@ struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
         try await GatewayConnection.shared.healthOK(timeoutMs: timeoutMs)
     }
 
-    func events() -> AsyncStream<HanzoBotChatTransportEvent> {
+    func events() -> AsyncStream<BotChatTransportEvent> {
         AsyncStream { continuation in
             let task = Task {
                 do {
@@ -89,11 +89,11 @@ struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
         }
     }
 
-    static func mapPushToTransportEvent(_ push: GatewayPush) -> HanzoBotChatTransportEvent? {
+    static func mapPushToTransportEvent(_ push: GatewayPush) -> BotChatTransportEvent? {
         switch push {
         case let .snapshot(hello):
             let ok = (try? JSONDecoder().decode(
-                HanzoBotGatewayHealthOK.self,
+                BotGatewayHealthOK.self,
                 from: JSONEncoder().encode(hello.snapshot.health)))?.ok ?? true
             return .health(ok: ok)
 
@@ -102,7 +102,7 @@ struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
             case "health":
                 guard let payload = evt.payload else { return nil }
                 let ok = (try? JSONDecoder().decode(
-                    HanzoBotGatewayHealthOK.self,
+                    BotGatewayHealthOK.self,
                     from: JSONEncoder().encode(payload)))?.ok ?? true
                 return .health(ok: ok)
             case "tick":
@@ -110,7 +110,7 @@ struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
             case "chat":
                 guard let payload = evt.payload else { return nil }
                 guard let chat = try? JSONDecoder().decode(
-                    HanzoBotChatEventPayload.self,
+                    BotChatEventPayload.self,
                     from: JSONEncoder().encode(payload))
                 else {
                     return nil
@@ -119,7 +119,7 @@ struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
             case "agent":
                 guard let payload = evt.payload else { return nil }
                 guard let agent = try? JSONDecoder().decode(
-                    HanzoBotAgentEventPayload.self,
+                    BotAgentEventPayload.self,
                     from: JSONEncoder().encode(payload))
                 else {
                     return nil
@@ -141,7 +141,7 @@ struct MacGatewayChatTransport: HanzoBotChatTransport, Sendable {
 final class WebChatSwiftUIWindowController {
     private let presentation: WebChatPresentation
     private let sessionKey: String
-    private let hosting: NSHostingController<HanzoBotChatView>
+    private let hosting: NSHostingController<BotChatView>
     private let contentController: NSViewController
     private var window: NSWindow?
     private var dismissMonitor: Any?
@@ -152,12 +152,12 @@ final class WebChatSwiftUIWindowController {
         self.init(sessionKey: sessionKey, presentation: presentation, transport: MacGatewayChatTransport())
     }
 
-    init(sessionKey: String, presentation: WebChatPresentation, transport: any HanzoBotChatTransport) {
+    init(sessionKey: String, presentation: WebChatPresentation, transport: any BotChatTransport) {
         self.sessionKey = sessionKey
         self.presentation = presentation
-        let vm = HanzoBotChatViewModel(sessionKey: sessionKey, transport: transport)
+        let vm = BotChatViewModel(sessionKey: sessionKey, transport: transport)
         let accent = Self.color(fromHex: AppStateStore.shared.seamColorHex)
-        self.hosting = NSHostingController(rootView: HanzoBotChatView(
+        self.hosting = NSHostingController(rootView: BotChatView(
             viewModel: vm,
             showsSessionSwitcher: true,
             userAccent: accent))
@@ -268,7 +268,7 @@ final class WebChatSwiftUIWindowController {
                 styleMask: [.titled, .closable, .resizable, .miniaturizable],
                 backing: .buffered,
                 defer: false)
-            window.title = "HanzoBot Chat"
+            window.title = "Bot Chat"
             window.contentViewController = contentViewController
             window.isReleasedWhenClosed = false
             window.titleVisibility = .visible
@@ -311,7 +311,7 @@ final class WebChatSwiftUIWindowController {
 
     private static func makeContentController(
         for presentation: WebChatPresentation,
-        hosting: NSHostingController<HanzoBotChatView>) -> NSViewController
+        hosting: NSHostingController<BotChatView>) -> NSViewController
     {
         let controller = NSViewController()
         let effectView = NSVisualEffectView()

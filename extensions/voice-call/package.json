@@ -1,7 +1,7 @@
 {
   "name": "@hanzo/bot-voice-call",
-  "version": "2026.2.10",
-  "description": "HanzoBot voice-call plugin",
+  "version": "2026.2.23",
+  "description": "Hanzo Bot voice-call plugin",
   "type": "module",
   "dependencies": {
     "@sinclair/typebox": "0.34.48",
@@ -9,9 +9,9 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "hanzo-bot": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
-  "hanzo-bot": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

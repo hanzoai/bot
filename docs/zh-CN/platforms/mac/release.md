@@ -40,7 +40,7 @@ x-i18n:
 ```bash
 # 从仓库根目录运行；设置发布 ID 以启用 Sparkle 订阅源。
 # APP_BUILD 必须为纯数字且单调递增，以便 Sparkle 正确比较。
-BUNDLE_ID=bot.molt.mac \
+BUNDLE_ID=ai.hanzo.bot.mac \
 APP_VERSION=2026.1.27-beta.1 \
 APP_BUILD="$(git rev-list --count HEAD)" \
 BUILD_CONFIG=release \
@@ -58,7 +58,7 @@ scripts/create-dmg.sh dist/Hanzo Bot.app dist/Hanzo Bot-2026.1.27-beta.1.dmg
 #   xcrun notarytool store-credentials "bot-notary" \
 #     --apple-id "<apple-id>" --team-id "<team-id>" --password "<app-specific-password>"
 NOTARIZE=1 NOTARYTOOL_PROFILE=bot-notary \
-BUNDLE_ID=bot.molt.mac \
+BUNDLE_ID=ai.hanzo.bot.mac \
 APP_VERSION=2026.1.27-beta.1 \
 APP_BUILD="$(git rev-list --count HEAD)" \
 BUILD_CONFIG=release \
@@ -74,7 +74,7 @@ ditto -c -k --keepParent apps/macos/.build/release/Hanzo Bot.app.dSYM dist/Hanzo
 使用发布说明生成器，以便 Sparkle 渲染格式化的 HTML 说明：
 
 ```bash
-SPARKLE_PRIVATE_KEY_FILE=/path/to/ed25519-private-key scripts/make_appcast.sh dist/Hanzo Bot-2026.1.27-beta.1.zip https://raw.githubusercontent.com/bot/bot/main/appcast.xml
+SPARKLE_PRIVATE_KEY_FILE=/path/to/ed25519-private-key scripts/make_appcast.sh dist/Hanzo Bot-2026.1.27-beta.1.zip https://raw.githubusercontent.com/hanzoai/bot/main/appcast.xml
 ```
 
 从 `CHANGELOG.md`（通过 [`scripts/changelog-to-html.sh`](https://github.com/hanzoai/bot/blob/main/scripts/changelog-to-html.sh)）生成 HTML 发布说明，并将其嵌入 appcast 条目。
@@ -83,9 +83,9 @@ SPARKLE_PRIVATE_KEY_FILE=/path/to/ed25519-private-key scripts/make_appcast.sh di
 ## 发布与验证
 
 - 将 `Hanzo Bot-2026.1.27-beta.1.zip`（和 `Hanzo Bot-2026.1.27-beta.1.dSYM.zip`）上传到标签 `v2026.1.27-beta.1` 对应的 GitHub 发布。
-- 确保原始 appcast URL 与内置的订阅源匹配：`https://raw.githubusercontent.com/bot/bot/main/appcast.xml`。
+- 确保原始 appcast URL 与内置的订阅源匹配：`https://raw.githubusercontent.com/hanzoai/bot/main/appcast.xml`。
 - 完整性检查：
-  - `curl -I https://raw.githubusercontent.com/bot/bot/main/appcast.xml` 返回 200。
+  - `curl -I https://raw.githubusercontent.com/hanzoai/bot/main/appcast.xml` 返回 200。
   - `curl -I <enclosure url>` 在资源上传后返回 200。
   - 在之前的公开构建版本上，从 About 选项卡运行"Check for Updates…"，验证 Sparkle 能正常安装新构建。
 

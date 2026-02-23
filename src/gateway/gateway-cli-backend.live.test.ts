@@ -1,12 +1,12 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
-import { createServer } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { parseModelRef } from "../agents/model-selection.js";
 import { loadConfig } from "../config/config.js";
 import { isTruthyEnvValue } from "../infra/env.js";
+import { getFreePortBlockWithPermissionFallback } from "../test-utils/ports.js";
 import { GatewayClient } from "./client.js";
 import { renderCatNoncePngBase64 } from "./live-image-probe.js";
 import { startGatewayServer } from "./server.js";
@@ -119,54 +119,11 @@ function withMcpConfigOverrides(args: string[], mcpConfigPath: string): string[]
   return next;
 }
 
-async function getFreePort(): Promise<number> {
-  return await new Promise((resolve, reject) => {
-    const srv = createServer();
-    srv.on("error", reject);
-    srv.listen(0, "127.0.0.1", () => {
-      const addr = srv.address();
-      if (!addr || typeof addr === "string") {
-        srv.close();
-        reject(new Error("failed to acquire free port"));
-        return;
-      }
-      const port = addr.port;
-      srv.close((err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(port);
-        }
-      });
-    });
-  });
-}
-
-async function isPortFree(port: number): Promise<boolean> {
-  if (!Number.isFinite(port) || port <= 0 || port > 65535) {
-    return false;
-  }
-  return await new Promise((resolve) => {
-    const srv = createServer();
-    srv.once("error", () => resolve(false));
-    srv.listen(port, "127.0.0.1", () => {
-      srv.close(() => resolve(true));
-    });
-  });
-}
-
 async function getFreeGatewayPort(): Promise<number> {
-  for (let attempt = 0; attempt < 25; attempt += 1) {
-    const port = await getFreePort();
-    const candidates = [port, port + 1, port + 2, port + 4];
-    const ok = (await Promise.all(candidates.map((candidate) => isPortFree(candidate)))).every(
-      Boolean,
-    );
-    if (ok) {
-      return port;
-    }
-  }
-  throw new Error("failed to acquire a free gateway port block");
+  return await getFreePortBlockWithPermissionFallback({
+    offsets: [0, 1, 2, 4],
+    fallbackBase: 40_000,
+  });
 }
 
 async function connectClient(params: { url: string; token: string }) {
@@ -243,15 +200,11 @@ describeLive("gateway live (cli backend)", () => {
 
     const cliCommand = process.env.BOT_LIVE_CLI_BACKEND_COMMAND ?? providerDefaults?.command;
     if (!cliCommand) {
-      throw new Error(
-        `BOT_LIVE_CLI_BACKEND_COMMAND is required for provider "${providerId}".`,
-      );
+      throw new Error(`BOT_LIVE_CLI_BACKEND_COMMAND is required for provider "${providerId}".`);
     }
     const baseCliArgs =
-      parseJsonStringArray(
-        "BOT_LIVE_CLI_BACKEND_ARGS",
-        process.env.BOT_LIVE_CLI_BACKEND_ARGS,
-      ) ?? providerDefaults?.args;
+      parseJsonStringArray("BOT_LIVE_CLI_BACKEND_ARGS", process.env.BOT_LIVE_CLI_BACKEND_ARGS) ??
+      providerDefaults?.args;
     if (!baseCliArgs || baseCliArgs.length === 0) {
       throw new Error(`BOT_LIVE_CLI_BACKEND_ARGS is required for provider "${providerId}".`);
     }
@@ -264,9 +217,7 @@ describeLive("gateway live (cli backend)", () => {
     const cliImageMode = parseImageMode(process.env.BOT_LIVE_CLI_BACKEND_IMAGE_MODE);
 
     if (cliImageMode && !cliImageArg) {
-      throw new Error(
-        "BOT_LIVE_CLI_BACKEND_IMAGE_MODE requires BOT_LIVE_CLI_BACKEND_IMAGE_ARG.",
-      );
+      throw new Error("BOT_LIVE_CLI_BACKEND_IMAGE_MODE requires BOT_LIVE_CLI_BACKEND_IMAGE_ARG.");
     }
 
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-live-cli-"));
