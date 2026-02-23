@@ -1,6 +1,6 @@
 name: Bot
 options:
-  bundleIdPrefix: ai.bot
+  bundleIdPrefix: ai.hanzo.bot
   deploymentTarget:
     iOS: "18.0"
   xcodeVersion: "16.0"
@@ -71,15 +71,15 @@ targets:
         CODE_SIGN_IDENTITY: "Apple Development"
         CODE_SIGN_STYLE: Manual
         DEVELOPMENT_TEAM: Y5PE65HELJ
-        PRODUCT_BUNDLE_IDENTIFIER: ai.bot.ios
-        PROVISIONING_PROFILE_SPECIFIER: "ai.bot.ios Development"
+        PRODUCT_BUNDLE_IDENTIFIER: ai.hanzo.bot.ios
+        PROVISIONING_PROFILE_SPECIFIER: "ai.hanzo.bot.ios Development"
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
         ENABLE_APPINTENTS_METADATA: NO
     info:
       path: Sources/Info.plist
       properties:
-        CFBundleDisplayName: Bot
+        CFBundleDisplayName: Hanzo Bot
         CFBundleIconName: AppIcon
         CFBundleShortVersionString: "2026.2.16"
         CFBundleVersion: "20260216"
@@ -129,6 +129,6 @@ targets:
     info:
       path: Tests/Info.plist
       properties:
-        CFBundleDisplayName: BotTests
+        CFBundleDisplayName: Hanzo BotTests
         CFBundleShortVersionString: "2026.2.16"
         CFBundleVersion: "20260216"
