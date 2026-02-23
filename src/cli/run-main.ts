@@ -91,10 +91,16 @@ export async function runCli(argv: string[] = process.argv) {
     process.exit(1);
   });
 
-  const parseArgv = rewriteUpdateFlagArgv(normalizedArgv);
-  // Register the primary command (builtin or subcli) so help and command parsing
-  // are correct even with lazy command registration.
-  const primary = getPrimaryCommand(parseArgv);
+  let parseArgv = rewriteUpdateFlagArgv(normalizedArgv);
+
+  // Default to `node` when no subcommand is given (e.g. `npx @hanzo/bot` or `hanzo-bot`).
+  // This makes bare `hanzo-bot` equivalent to `hanzo-bot node` (foreground connect mode).
+  let primary = getPrimaryCommand(parseArgv);
+  if (!primary && !hasHelpOrVersion(parseArgv)) {
+    // Insert "node" as the subcommand after the binary args (argv[0]=node, argv[1]=script)
+    parseArgv = [...parseArgv.slice(0, 2), "node", ...parseArgv.slice(2)];
+    primary = "node";
+  }
   if (primary) {
     const { getProgramContext } = await import("./program/program-context.js");
     const ctx = getProgramContext(program);
