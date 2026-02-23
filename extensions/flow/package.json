@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-flow",
-  "version": "2026.2.17",
+  "version": "2026.2.23",
   "description": "Flow workflow tool plugin (typed pipelines + resumable approvals)",
   "type": "module",
   "devDependencies": {
