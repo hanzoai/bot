@@ -4,7 +4,12 @@ import { parseAgentSessionKey } from "../../../src/routing/session-key.js";
 import { t } from "../i18n/index.ts";
 import { refreshChatAvatar } from "./app-chat.ts";
 import { renderUsageTab } from "./app-render-usage-tab.ts";
-import { renderChatControls, renderTab, renderThemeToggle } from "./app-render.helpers.ts";
+import {
+  renderChatControls,
+  renderTab,
+  renderThemeToggle,
+  renderTopbarUser,
+} from "./app-render.helpers.ts";
 import { loadAgentFileContent, loadAgentFiles, saveAgentFile } from "./controllers/agent-files.ts";
 import { loadAgentIdentities, loadAgentIdentity } from "./controllers/agent-identity.ts";
 import { loadAgentSkills } from "./controllers/agent-skills.ts";
@@ -147,7 +152,15 @@ export function renderApp(state: AppViewState) {
             <span>${t("common.health")}</span>
             <span class="mono">${state.connected ? t("common.ok") : t("common.offline")}</span>
           </div>
-          ${renderThemeToggle(state)}
+          <a
+            class="btn btn--primary btn--sm topbar-cta"
+            href="https://hanzo.bot/chat"
+            @click=${(e: MouseEvent) => {
+              e.preventDefault();
+              state.setTab("chat");
+            }}
+          >Try Hanzo</a>
+          ${renderTopbarUser(state)}
         </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
@@ -976,6 +989,16 @@ export function renderApp(state: AppViewState) {
             : nothing
         }
       </main>
+      <footer class="app-footer">
+        <div class="app-footer__left">
+          <span class="muted">Hanzo Bot</span>
+          <a class="app-footer__link" href="https://docs.hanzo.bot" target="_blank" rel="noreferrer">Docs</a>
+          <a class="app-footer__link" href="https://hanzo.ai" target="_blank" rel="noreferrer">Hanzo</a>
+        </div>
+        <div class="app-footer__right">
+          ${renderThemeToggle(state)}
+        </div>
+      </footer>
       ${renderExecApprovalPrompt(state)}
       ${renderGatewayUrlConfirmation(state)}
     </div>
