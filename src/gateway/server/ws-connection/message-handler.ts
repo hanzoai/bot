@@ -426,13 +426,17 @@ export function attachGatewayWsMessageHandler(params: {
           close(1008, truncateCloseReason(authMessage));
         };
         if (!device) {
-          if (scopes.length > 0 && !allowControlUiBypass) {
+          // IAM auth is cryptographically verified via JWKS — treat IAM-authenticated
+          // control UI connections as trusted (equivalent to shared-secret for bypass purposes).
+          const iamAuthOk = authOk && authMethod === "iam" && isControlUi;
+
+          if (scopes.length > 0 && !allowControlUiBypass && !iamAuthOk) {
             scopes = [];
             connectParams.scopes = scopes;
           }
-          const canSkipDevice = sharedAuthOk || (authOk && allowControlUiBypass);
+          const canSkipDevice = sharedAuthOk || (authOk && allowControlUiBypass) || iamAuthOk;
 
-          if (isControlUi && !allowControlUiBypass) {
+          if (isControlUi && !allowControlUiBypass && !iamAuthOk) {
             const errorMessage = "control ui requires HTTPS or localhost (secure context)";
             setHandshakeState("failed");
             setCloseCause("control-ui-insecure-auth", {
@@ -451,7 +455,7 @@ export function attachGatewayWsMessageHandler(params: {
             return;
           }
 
-          // Allow shared-secret authenticated connections (e.g., control-ui) to skip device identity
+          // Allow shared-secret or IAM-authenticated connections (e.g., control-ui) to skip device identity
           if (!canSkipDevice) {
             if (!authOk && hasSharedAuth) {
               rejectUnauthorized(authResult);
@@ -648,7 +652,7 @@ export function attachGatewayWsMessageHandler(params: {
           return;
         }
 
-        const skipPairing = allowControlUiBypass && sharedAuthOk;
+        const skipPairing = (allowControlUiBypass && sharedAuthOk) || (isControlUi && authOk && authMethod === "iam");
         if (device && devicePublicKey && !skipPairing) {
           const requirePairing = async (reason: string, _paired?: { deviceId: string }) => {
             const pairing = await requestDevicePairing({
