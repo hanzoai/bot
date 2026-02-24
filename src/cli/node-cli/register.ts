@@ -20,7 +20,7 @@ function parsePortWithFallback(value: unknown, fallback: number): number {
 
 async function startNodeHost(opts: Record<string, unknown>) {
   const existing = await loadNodeHostConfig();
-  const host = (opts.host as string | undefined)?.trim() || existing?.gateway?.host || "127.0.0.1";
+  const host = (opts.host as string | undefined)?.trim() || existing?.gateway?.host;
   const port = parsePortWithFallback(opts.port, existing?.gateway?.port ?? 18789);
 
   // Only override TLS if --tls or --tls-fingerprint was explicitly passed.
