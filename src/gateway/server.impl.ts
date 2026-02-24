@@ -615,6 +615,13 @@ export async function startGatewayServer(
         logTailscale,
       });
 
+  // Always allow the Hanzo cloud playground origin for IAM-mode gateways
+  // (cloud deployments that don't use a tunnel are still accessed from app.hanzo.bot).
+  if (!minimalTestGateway && resolvedAuth.mode === "iam") {
+    const { addRuntimeAllowedOrigin } = await import("./origin-check.js");
+    addRuntimeAllowedOrigin("https://app.hanzo.bot");
+  }
+
   // Start tunnel if configured (cloudflared, ngrok, localxpose, zrok)
   let tunnelResult: TunnelResult | null = null;
   const tunnelConfig = cfgAtStart.gateway?.tunnel;
