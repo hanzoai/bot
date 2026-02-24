@@ -163,6 +163,11 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     return bins;
   });
 
+  // Keep-alive handle: GatewayClient reconnect timers use .unref() and
+  // won't prevent process exit.  A referenced interval ensures the event
+  // loop stays active so the node host can reconnect indefinitely.
+  setInterval(() => {}, 2_147_483_647);
+
   client.start();
   await new Promise(() => {});
 }
