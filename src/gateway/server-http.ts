@@ -625,11 +625,24 @@ export function createGatewayHttpServer(opts: {
         ) {
           return;
         }
+        // Forward a verified Bearer token to the Control UI bootstrap config
+        // so the SPA can use it for WebSocket auth without a separate login step.
+        const controlUiBearerToken = (() => {
+          const bt = getBearerToken(req);
+          if (!bt) {
+            return undefined;
+          }
+          if (resolvedAuth.token && safeEqualSecret(bt, resolvedAuth.token)) {
+            return bt;
+          }
+          return undefined;
+        })();
         if (
           handleControlUiHttpRequest(req, res, {
             basePath: controlUiBasePath,
             config: configSnapshot,
             root: controlUiRoot,
+            bearerToken: controlUiBearerToken,
           })
         ) {
           return;
