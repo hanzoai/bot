@@ -100,7 +100,21 @@ export function handleConnected(host: LifecycleHost) {
 async function bootstrapAndConnect(host: LifecycleHost): Promise<void> {
   await loadControlUiBootstrapConfig(host);
 
+  // Apply pre-authenticated token from HTTP Bearer (forwarded via bootstrap config)
+  const bootstrapToken =
+    (host as unknown as { bootstrapToken?: string | null }).bootstrapToken ?? null;
+  if (bootstrapToken && !host.settings.token.trim()) {
+    const settingsHost = host as unknown as Parameters<typeof applySettings>[0];
+    applySettings(settingsHost, { ...settingsHost.settings, token: bootstrapToken });
+  }
+
   if (host.authMode !== "iam") {
+    connectGateway(host as unknown as Parameters<typeof connectGateway>[0]);
+    return;
+  }
+
+  // If a bootstrap token was provided, skip IAM flow and connect directly
+  if (host.settings.token.trim()) {
     connectGateway(host as unknown as Parameters<typeof connectGateway>[0]);
     return;
   }
