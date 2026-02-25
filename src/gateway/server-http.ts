@@ -1,5 +1,6 @@
 import type { TlsOptions } from "node:tls";
 import type { WebSocketServer } from "ws";
+import { randomBytes } from "node:crypto";
 import {
   createServer as createHttpServer,
   type Server as HttpServer,
@@ -530,6 +531,8 @@ export function createGatewayHttpServer(opts: {
         const proto = getHeader(req, "x-forwarded-proto") ?? (opts.tlsOptions ? "https" : "http");
         const origin = host ? `${proto}://${host}` : (opts.gatewayOrigin ?? "http://localhost");
         const nodeId = requestUrl.searchParams.get("nodeId") ?? undefined;
+        // Generate a per-request CSP nonce for inline script/style.
+        const cspNonce = randomBytes(16).toString("base64");
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         // Security headers: prevent token leaks, clickjacking, MIME sniffing.
@@ -542,13 +545,13 @@ export function createGatewayHttpServer(opts: {
           "Content-Security-Policy",
           [
             "default-src 'none'",
-            "script-src https://esm.sh",
-            `style-src 'unsafe-inline'`,
+            `script-src 'nonce-${cspNonce}' https://esm.sh`,
+            `style-src 'nonce-${cspNonce}'`,
             `connect-src wss://${req.headers.host ?? "*"} ws://localhost:*`,
             "frame-ancestors 'none'",
           ].join("; "),
         );
-        res.end(vncViewerHtml(origin, nodeId, token));
+        res.end(vncViewerHtml(origin, nodeId, token, cspNonce));
         return;
       }
 
