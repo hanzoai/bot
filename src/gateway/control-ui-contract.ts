@@ -15,4 +15,6 @@ export type ControlUiBootstrapConfig = {
   assistantAgentId: string;
   authMode?: "token" | "password" | "trusted-proxy" | "iam" | "none";
   iam?: ControlUiBootstrapIamConfig;
+  /** Pre-authenticated token forwarded from HTTP Bearer auth. */
+  token?: string;
 };
