@@ -121,7 +121,17 @@ async function authorizeCanvasRequest(params: {
   }
 
   let lastAuthFailure: GatewayAuthResult | null = null;
-  const token = getBearerToken(req);
+  // Accept token from Authorization header or ?token= query parameter.
+  // Query param is needed for WebSocket upgrades (browsers can't set WS headers).
+  const queryToken = (() => {
+    try {
+      const url = new URL(req.url ?? "/", "http://localhost");
+      return url.searchParams.get("token") ?? undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+  const token = getBearerToken(req) ?? queryToken;
   if (token) {
     const authResult = await authorizeGatewayConnect({
       auth: { ...auth, allowTailscale: false },
@@ -522,7 +532,7 @@ export function createGatewayHttpServer(opts: {
         const nodeId = requestUrl.searchParams.get("nodeId") ?? undefined;
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
-        res.end(vncViewerHtml(origin, nodeId));
+        res.end(vncViewerHtml(origin, nodeId, token));
         return;
       }
 
