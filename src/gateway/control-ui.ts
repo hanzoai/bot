@@ -24,6 +24,8 @@ export type ControlUiRequestOptions = {
   config?: BotConfig;
   agentId?: string;
   root?: ControlUiRootState;
+  /** Pre-authenticated token from HTTP Bearer to forward to the SPA. */
+  bearerToken?: string;
 };
 
 export type ControlUiRootState =
@@ -271,6 +273,7 @@ export function handleControlUiHttpRequest(
       assistantAgentId: identity.agentId,
       authMode,
       iam: iamBootstrap,
+      token: opts?.bearerToken,
     } satisfies ControlUiBootstrapConfig);
     return true;
   }
