@@ -12,7 +12,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, hanzo-k8s]
     steps:
       - name: Mark stale issues and pull requests
         uses: actions/stale@v9

@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   no-tabs:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, hanzo-k8s]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
