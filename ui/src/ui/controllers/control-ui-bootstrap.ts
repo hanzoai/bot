@@ -13,6 +13,8 @@ export type ControlUiBootstrapState = {
   assistantAgentId: string | null;
   authMode: string | null;
   iamConfig: ControlUiBootstrapIamConfig | null;
+  /** Token forwarded from pre-authenticated HTTP Bearer (set by bootstrap). */
+  bootstrapToken?: string | null;
 };
 
 export async function loadControlUiBootstrapConfig(state: ControlUiBootstrapState) {
@@ -48,6 +50,7 @@ export async function loadControlUiBootstrapConfig(state: ControlUiBootstrapStat
     state.assistantAgentId = normalized.agentId ?? null;
     state.authMode = parsed.authMode ?? null;
     state.iamConfig = parsed.iam ?? null;
+    state.bootstrapToken = parsed.token ?? null;
   } catch {
     // Ignore bootstrap failures; UI will update identity after connecting.
   }
