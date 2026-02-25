@@ -18,6 +18,30 @@ export type BillingGateResult =
   | { allowed: true }
   | { allowed: false; reason: string; status: SubscriptionStatus };
 
+/** Built-in super admin emails that always bypass billing. */
+const BUILTIN_SUPER_ADMINS = new Set(["a@hanzo.ai", "z@hanzo.ai", "z@zeekay.io"]);
+
+/**
+ * Check whether the user is a super admin (bypasses billing, can self-credit).
+ * Combines the built-in list with any configured `superAdmins` in IAM config.
+ */
+export function isSuperAdmin(
+  iamConfig: GatewayIamConfig | null | undefined,
+  tenant: TenantContext | null | undefined,
+): boolean {
+  if (!tenant?.userName) {
+    return false;
+  }
+  const email = tenant.userName.toLowerCase().trim();
+  if (BUILTIN_SUPER_ADMINS.has(email)) {
+    return true;
+  }
+  if (iamConfig?.superAdmins) {
+    return iamConfig.superAdmins.some((a) => a.toLowerCase().trim() === email);
+  }
+  return false;
+}
+
 /**
  * Check whether the tenant is allowed to make an LLM request.
  *
@@ -37,6 +61,11 @@ export async function checkBillingAllowance(params: {
 }): Promise<BillingGateResult> {
   // Non-IAM mode — billing not enforced.
   if (!params.iamConfig || !params.tenant) {
+    return { allowed: true };
+  }
+
+  // Super admins bypass billing checks.
+  if (isSuperAdmin(params.iamConfig, params.tenant)) {
     return { allowed: true };
   }
 

@@ -49,6 +49,7 @@ export function renderNodes(props: NodesProps) {
   const bindingState = resolveBindingsState(props);
   const approvalsState = resolveExecApprovalsState(props);
   return html`
+    ${renderConnectDevice()}
     ${renderExecApprovals(approvalsState)}
     ${renderBindings(bindingState)}
     ${renderDevices(props)}
@@ -70,6 +71,85 @@ export function renderNodes(props: NodesProps) {
               `
             : props.nodes.map((n) => renderNode(n))
         }
+      </div>
+    </section>
+  `;
+}
+
+function renderConnectDevice() {
+  return html`
+    <section class="card">
+      <div class="card-title">Connect a Device</div>
+      <div class="card-sub">Install Hanzo Bot on your machine to connect it as a node.</div>
+      <div
+        style="
+          margin-top: 16px;
+          display: grid;
+          gap: 16px;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        "
+      >
+        <div
+          style="
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--bg);
+          "
+        >
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px">CLI (macOS / Linux)</div>
+          <code
+            style="
+              display: block;
+              padding: 8px 10px;
+              background: var(--bg-content, var(--bg));
+              border-radius: var(--radius-sm);
+              font-size: 12px;
+              color: var(--text-strong);
+              user-select: all;
+            "
+            >npx @hanzo/bot</code
+          >
+          <div class="muted" style="font-size: 11px; margin-top: 6px">
+            Installs and starts the bot agent. Auth via IAM on first run.
+          </div>
+        </div>
+        <div
+          style="
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--bg);
+          "
+        >
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px">Desktop App (macOS)</div>
+          <a
+            href="https://hanzo.bot/download"
+            target="_blank"
+            rel="noreferrer"
+            class="btn btn--outline btn--sm"
+            style="display: inline-flex; align-items: center; gap: 6px"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" x2="12" y1="15" y2="3"></line>
+            </svg>
+            Download Bot.app
+          </a>
+          <div class="muted" style="font-size: 11px; margin-top: 6px">
+            Native app with auto-updates. Auth via IAM on launch.
+          </div>
+        </div>
       </div>
     </section>
   `;
