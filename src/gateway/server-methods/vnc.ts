@@ -304,7 +304,12 @@ export function createVncProxy(opts?: {
 }
 
 /** noVNC viewer HTML served at GET /vnc-viewer (self-contained, loads noVNC from CDN). */
-export function vncViewerHtml(gatewayOrigin: string, nodeId?: string, token?: string): string {
+export function vncViewerHtml(
+  gatewayOrigin: string,
+  nodeId?: string,
+  token?: string,
+  nonce?: string,
+): string {
   const base = gatewayOrigin.replace(/^http/, "ws") + "/vnc";
   const params = new URLSearchParams();
   if (nodeId) {
@@ -315,6 +320,7 @@ export function vncViewerHtml(gatewayOrigin: string, nodeId?: string, token?: st
   }
   const qs = params.toString();
   const wsUrl = qs ? `${base}?${qs}` : base;
+  const nonceAttr = nonce ? ` nonce="${nonce}"` : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -322,7 +328,7 @@ export function vncViewerHtml(gatewayOrigin: string, nodeId?: string, token?: st
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="referrer" content="no-referrer"/>
   <title>Hanzo Bot — Remote Desktop</title>
-  <style>
+  <style${nonceAttr}>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0a; }
     #status { position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
@@ -334,7 +340,7 @@ export function vncViewerHtml(gatewayOrigin: string, nodeId?: string, token?: st
 <body>
   <div id="status">Connecting…</div>
   <div id="screen"></div>
-  <script type="module">
+  <script type="module"${nonceAttr}>
     import RFB from "https://esm.sh/@novnc/novnc@1.5.0/lib/rfb.js";
     const status = document.getElementById("status");
     const rfb = new RFB(document.getElementById("screen"), "${wsUrl}");
