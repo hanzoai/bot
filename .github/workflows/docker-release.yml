@@ -181,7 +181,7 @@ jobs:
           kms_cid = os.environ['KMS_CLIENT_ID']
           kms_csec = os.environ['KMS_CLIENT_SECRET']
 
-          PAAS_URL = 'https://platform.hanzo.ai/v1'
+          PAAS_URL = 'https://platform.hanzo.ai/api/v1'
           ORG = '698cda6739f65183b3009313'
           PROJECT = '698cda6739f65183b3009318'
           ENV = '698cda6739f65183b300931c'
