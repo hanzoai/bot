@@ -261,9 +261,17 @@ export function createVncProxy(opts?: {
 }
 
 /** noVNC viewer HTML served at GET /vnc-viewer (self-contained, loads noVNC from CDN). */
-export function vncViewerHtml(gatewayOrigin: string, nodeId?: string): string {
+export function vncViewerHtml(gatewayOrigin: string, nodeId?: string, token?: string): string {
   const base = gatewayOrigin.replace(/^http/, "ws") + "/vnc";
-  const wsUrl = nodeId ? `${base}?nodeId=${encodeURIComponent(nodeId)}` : base;
+  const params = new URLSearchParams();
+  if (nodeId) {
+    params.set("nodeId", nodeId);
+  }
+  if (token) {
+    params.set("token", token);
+  }
+  const qs = params.toString();
+  const wsUrl = qs ? `${base}?${qs}` : base;
   return `<!doctype html>
 <html lang="en">
 <head>
