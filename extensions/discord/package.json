@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-discord",
-  "version": "2026.2.26",
+  "version": "2026.2.27",
   "description": "Hanzo Bot Discord channel plugin",
   "type": "module",
   "devDependencies": {
