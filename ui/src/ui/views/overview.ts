@@ -141,7 +141,19 @@ export function renderOverview(props: OverviewProps) {
         <div class="form-grid" style="margin-top: 16px;">
           ${
             isIam
-              ? renderIamAccessCard(props)
+              ? html`
+                <div class="field" style="padding: 8px 0;">
+                  <div class="muted" style="font-size: 13px;">
+                    ${
+                      props.iamUser
+                        ? t("overview.iam.connectedAs", {
+                            name: props.iamUser.name || props.iamUser.email || "User",
+                          })
+                        : t("overview.iam.subtitle")
+                    }
+                  </div>
+                </div>
+              `
               : html`
                 <label class="field">
                   <span>${t("overview.access.wsUrl")}</span>
@@ -306,55 +318,5 @@ export function renderOverview(props: OverviewProps) {
         </div>
       </div>
     </section>
-  `;
-}
-
-function renderIamAccessCard(props: OverviewProps) {
-  if (props.iamUser) {
-    const displayName = props.iamUser.name || props.iamUser.email || "Authenticated";
-    return html`
-      <div class="field" style="display: flex; align-items: center; gap: 12px; padding: 8px 0;">
-        ${
-          props.iamUser.avatar
-            ? html`<img
-              src=${props.iamUser.avatar}
-              alt=""
-              style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;"
-            />`
-            : html`<div
-              style="width: 36px; height: 36px; border-radius: 50%; background: var(--accent, #6366f1); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 14px;"
-            >${displayName.charAt(0).toUpperCase()}</div>`
-        }
-        <div style="flex: 1; min-width: 0;">
-          <div style="font-weight: 500;">${displayName}</div>
-          ${
-            props.iamUser.email && props.iamUser.name
-              ? html`<div class="muted" style="font-size: 12px;">${props.iamUser.email}</div>`
-              : ""
-          }
-        </div>
-        <button
-          class="btn btn--outline"
-          @click=${() => props.onIamLogout()}
-        >${t("overview.iam.signOut")}</button>
-      </div>
-    `;
-  }
-
-  return html`
-    <div class="field" style="padding: 8px 0;">
-      <div style="margin-bottom: 12px;" class="muted">${t("overview.iam.subtitle")}</div>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button
-          class="btn btn--primary"
-          ?disabled=${props.iamLoggingIn}
-          @click=${() => props.onIamLogin()}
-        >${props.iamLoggingIn ? t("overview.iam.signingIn") : t("overview.iam.signIn")}</button>
-        <button
-          class="btn btn--outline"
-          @click=${() => props.onIamSignup()}
-        >${t("overview.iam.createAccount")}</button>
-      </div>
-    </div>
   `;
 }

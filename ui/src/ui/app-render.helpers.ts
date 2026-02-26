@@ -533,3 +533,88 @@ export function renderTopbarUser(state: AppViewState) {
   // Non-IAM mode — no topbar auth buttons
   return nothing;
 }
+
+// ── Sidebar account footer ──────────────────────────────────────────
+
+const BILLING_URL = "https://billing.hanzo.ai";
+
+export function renderNavFooter(state: AppViewState) {
+  const isIam = state.authMode === "iam";
+
+  if (isIam && state.iamUser) {
+    const displayName = state.iamUser.name || state.iamUser.email || "User";
+    const initial = displayName.charAt(0).toUpperCase();
+    return html`
+      <div class="nav-footer">
+        <div class="nav-footer__account">
+          ${
+            state.iamUser.avatar
+              ? html`<img
+                  class="nav-footer__avatar"
+                  src=${state.iamUser.avatar}
+                  alt=${displayName}
+                />`
+              : html`<span class="nav-footer__initial">${initial}</span>`
+          }
+          <div class="nav-footer__info">
+            <span class="nav-footer__name">${displayName}</span>
+            ${
+              state.iamUser.email && state.iamUser.name
+                ? html`<span class="nav-footer__email">${state.iamUser.email}</span>`
+                : nothing
+            }
+          </div>
+          <button
+            class="btn btn--sm btn--ghost nav-footer__signout"
+            @click=${() => state.handleIamLogout()}
+            title="${t("overview.iam.signOut")}"
+            aria-label="${t("overview.iam.signOut")}"
+          >
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" x2="9" y1="12" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+        <a
+          class="nav-footer__billing"
+          href=${BILLING_URL}
+          target="_blank"
+          rel="noreferrer"
+          title="${t("nav.topUp")}"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+            <line x1="2" x2="22" y1="10" y2="10"></line>
+          </svg>
+          <span>${t("nav.topUp")}</span>
+        </a>
+      </div>
+    `;
+  }
+
+  if (isIam) {
+    return html`
+      <div class="nav-footer">
+        <div class="nav-footer__auth">
+          <button
+            class="btn btn--sm btn--primary nav-footer__signin"
+            ?disabled=${state.iamLoggingIn}
+            @click=${() => state.handleIamLogin()}
+          >
+            ${state.iamLoggingIn ? t("overview.iam.signingIn") : t("overview.iam.signIn")}
+          </button>
+          <button
+            class="btn btn--sm btn--outline"
+            @click=${() => state.handleIamSignup()}
+          >
+            ${t("overview.iam.createAccount")}
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  return nothing;
+}
