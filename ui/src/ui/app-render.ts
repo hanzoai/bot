@@ -47,7 +47,7 @@ import {
   updateExecApprovalsFormValue,
 } from "./controllers/exec-approvals.ts";
 import { loadLogs } from "./controllers/logs.ts";
-import { loadNodes } from "./controllers/nodes.ts";
+import { loadNodes, setNodeBilling } from "./controllers/nodes.ts";
 import { loadPresence } from "./controllers/presence.ts";
 import { deleteSession, loadSessions, patchSession } from "./controllers/sessions.ts";
 import {
@@ -815,6 +815,12 @@ export function renderApp(state: AppViewState) {
                       : { kind: "gateway" as const };
                   return saveExecApprovals(state, target);
                 },
+                onNodeBillingSet: (nodeId, billingMode, budgetCents) =>
+                  setNodeBilling(state, {
+                    nodeId,
+                    billingMode: billingMode as "global" | "dedicated" | "local",
+                    budgetCents,
+                  }),
               })
             : nothing
         }
