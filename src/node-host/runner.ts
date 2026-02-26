@@ -110,8 +110,6 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   const scheme = gateway.tls ? "wss" : "ws";
   const url = envGatewayUrl || remoteUrl || `${scheme}://${host}:${port}`;
   const pathEnv = ensureNodePathEnv();
-  // eslint-disable-next-line no-console
-  console.log(`node host PATH: ${pathEnv}`);
 
   // Build optional WS headers — BOT_NODE_GATEWAY_HOST overrides the Host
   // header sent to the gateway.  Useful when BOT_NODE_GATEWAY_URL points to a
@@ -155,6 +153,18 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
         return;
       }
       void handleInvoke(payload, client, skillBins);
+    },
+    onHelloOk: () => {
+      // eslint-disable-next-line no-console
+      console.log(`\n  Connected to gateway: ${url}`);
+      // eslint-disable-next-line no-console
+      console.log(`  Node name:   ${displayName}`);
+      if (isRemoteMode) {
+        // eslint-disable-next-line no-console
+        console.log(`  Playground:  https://app.hanzo.bot/nodes`);
+      }
+      // eslint-disable-next-line no-console
+      console.log("");
     },
     onConnectError: (err) => {
       // keep retrying (handled by GatewayClient)
