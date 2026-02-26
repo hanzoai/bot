@@ -94,6 +94,11 @@ export type GatewayIamConfig = {
   appName?: string;
   /** OAuth2 scopes to request (defaults to ["openid", "profile", "email"]). */
   scopes?: string[];
+  /**
+   * Email addresses with super-admin privileges.
+   * Super admins bypass billing checks and can credit their own account for testing.
+   */
+  superAdmins?: string[];
 };
 
 /**
