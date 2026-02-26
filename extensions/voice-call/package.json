@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-voice-call",
-  "version": "2026.2.23",
+  "version": "2026.2.26",
   "description": "Hanzo Bot voice-call plugin",
   "type": "module",
   "dependencies": {
