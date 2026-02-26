@@ -20,6 +20,7 @@ export const en: TranslationMap = {
     settings: "Settings",
     expand: "Expand sidebar",
     collapse: "Collapse sidebar",
+    topUp: "Billing & Top Up",
   },
   tabs: {
     agents: "Agents",
@@ -106,6 +107,7 @@ export const en: TranslationMap = {
       signingIn: "Signing in\u2026",
       createAccount: "Create Account",
       signOut: "Sign Out",
+      connectedAs: "Authenticated as {name}.",
     },
   },
   screen: {
