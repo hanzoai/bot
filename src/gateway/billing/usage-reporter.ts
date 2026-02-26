@@ -33,6 +33,8 @@ export type UsageRecord = {
   durationMs?: number;
   /** When the usage occurred. */
   timestamp: number;
+  /** Node that handled the request (for per-node billing attribution). */
+  nodeId?: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -116,7 +118,7 @@ export async function flushUsageQueue(): Promise<void> {
 
     // Send each record individually to Commerce /api/v1/billing/usage
     for (const record of batch) {
-      const payload = {
+      const payload: Record<string, unknown> = {
         user: record.tenant.userId || record.tenant.orgId,
         currency: "usd",
         amount: 0, // Commerce calculates cost from token counts + model
@@ -126,6 +128,9 @@ export async function flushUsageQueue(): Promise<void> {
         promptTokens: record.inputTokens,
         completionTokens: record.outputTokens,
       };
+      if (record.nodeId) {
+        payload.nodeId = record.nodeId;
+      }
 
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 10_000);
