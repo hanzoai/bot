@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   formal_conformance:
-    runs-on: [self-hosted, linux, x64, hanzo-k8s]
+    runs-on: hanzo-k8s
     continue-on-error: true
     timeout-minutes: 20
     permissions:
