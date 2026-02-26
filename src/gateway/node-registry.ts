@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { NodeBillingMode } from "../config/types.gateway.js";
 import type { GatewayWsClient } from "./server/ws-types.js";
 
 export type NodeSession = {
@@ -18,6 +19,12 @@ export type NodeSession = {
   permissions?: Record<string, boolean>;
   pathEnv?: string;
   connectedAtMs: number;
+  /** Billing mode for this node (default: "global"). */
+  billingMode?: NodeBillingMode;
+  /** Dedicated budget in cents (only used when billingMode is "dedicated"). */
+  dedicatedBudgetCents?: number;
+  /** Running total of cents spent (dedicated mode, persisted via config). */
+  dedicatedSpentCents?: number;
 };
 
 type PendingInvoke = {

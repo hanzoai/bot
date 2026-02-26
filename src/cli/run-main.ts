@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { loadDotEnv } from "../infra/dotenv.js";
@@ -97,6 +98,15 @@ export async function runCli(argv: string[] = process.argv) {
   // This makes bare `hanzo-bot` equivalent to `hanzo-bot node` (foreground connect mode).
   let primary = getPrimaryCommand(parseArgv);
   if (!primary && !hasHelpOrVersion(parseArgv)) {
+    // First-run detection: if no config file exists, run cloud connect (OAuth → config → link)
+    // so that `npx @hanzo/bot` just works for new users without manual setup.
+    const { resolveConfigPathCandidate } = await import("../config/paths.js");
+    const configPath = resolveConfigPathCandidate();
+    if (!fs.existsSync(configPath)) {
+      const { runFirstRunCloudConnect } = await import("../commands/cloud-connect.js");
+      await runFirstRunCloudConnect();
+    }
+
     // Insert "node" as the subcommand after the binary args (argv[0]=node, argv[1]=script)
     parseArgv = [...parseArgv.slice(0, 2), "node", ...parseArgv.slice(2)];
     primary = "node";

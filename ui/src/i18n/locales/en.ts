@@ -122,6 +122,26 @@ export const en: TranslationMap = {
     focusToggle: "Toggle focus mode (hide sidebar + page header)",
     onboardingDisabled: "Disabled during onboarding",
   },
+  nodes: {
+    billing: {
+      title: "Billing",
+      mode: "Billing Mode",
+      global: "Global Balance",
+      globalDesc: "Uses your account balance",
+      dedicated: "Dedicated Budget",
+      dedicatedDesc: "Node has its own credit budget",
+      local: "Local Only",
+      localDesc: "No cloud billing, uses local API keys",
+      budget: "Budget",
+      spent: "Spent",
+      remaining: "Remaining",
+      topUp: "Buy Credits",
+    },
+    usage: {
+      title: "Usage",
+      totalSpent: "Total spent",
+    },
+  },
   languages: {
     en: "English",
     zhCN: "简体中文 (Simplified Chinese)",
