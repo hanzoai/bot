@@ -2,11 +2,17 @@
  * Billing gate — checks whether a request is allowed to proceed
  * based on the tenant's subscription status AND prepaid balance.
  *
+ * Supports three per-node billing modes:
+ * - global: uses the owner's account balance (default)
+ * - dedicated: node has its own credit budget
+ * - local: no cloud billing, node uses local API keys
+ *
  * When billing is not applicable (non-IAM mode, no tenant), the gate
  * always allows the request.
  */
 
 import type { GatewayIamConfig } from "../../config/config.js";
+import type { NodeBillingMode } from "../../config/types.gateway.js";
 import type { TenantContext } from "../tenant-context.js";
 import {
   getSubscriptionStatus,
@@ -48,6 +54,9 @@ export function isSuperAdmin(
  * Returns `{ allowed: true }` when:
  * - No IAM config (personal / self-hosted mode)
  * - No tenant context (personal / self-hosted mode)
+ * - Tenant is a super admin
+ * - Node billing mode is "local" (node uses local API keys)
+ * - Node billing mode is "dedicated" and budget not exhausted
  * - Tenant has prepaid credit balance > 0
  *
  * Returns `{ allowed: false, reason }` when balance is zero
@@ -58,6 +67,12 @@ export async function checkBillingAllowance(params: {
   tenant?: TenantContext | null;
   /** Optional JWT token for authenticated billing API calls. */
   token?: string;
+  /** Per-node billing mode (default: "global"). */
+  nodeBillingMode?: NodeBillingMode;
+  /** Node dedicated budget in cents (only for dedicated mode). */
+  nodeBudgetCents?: number;
+  /** Node dedicated spent in cents (only for dedicated mode). */
+  nodeSpentCents?: number;
 }): Promise<BillingGateResult> {
   // Non-IAM mode — billing not enforced.
   if (!params.iamConfig || !params.tenant) {
@@ -67,6 +82,25 @@ export async function checkBillingAllowance(params: {
   // Super admins bypass billing checks.
   if (isSuperAdmin(params.iamConfig, params.tenant)) {
     return { allowed: true };
+  }
+
+  // Local mode — node uses local API keys, no billing enforced.
+  if (params.nodeBillingMode === "local") {
+    return { allowed: true };
+  }
+
+  // Dedicated mode — check node-level budget.
+  if (params.nodeBillingMode === "dedicated") {
+    const budget = params.nodeBudgetCents ?? 0;
+    const spent = params.nodeSpentCents ?? 0;
+    if (budget > 0 && spent < budget) {
+      return { allowed: true };
+    }
+    return {
+      allowed: false,
+      reason: `Node budget exhausted — $${(spent / 100).toFixed(2)} of $${(budget / 100).toFixed(2)} used`,
+      status: { active: false, subscription: null, plan: null },
+    };
   }
 
   // BILLING_GATE_MODE controls error behavior:
