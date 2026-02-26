@@ -283,6 +283,24 @@ export type GatewayHttpConfig = {
   endpoints?: GatewayHttpEndpointsConfig;
 };
 
+/**
+ * Per-node billing mode.
+ * - global: use the owner's account balance (default)
+ * - dedicated: node has its own credit budget
+ * - local: no cloud billing, node uses local API keys
+ */
+export type NodeBillingMode = "global" | "dedicated" | "local";
+
+/** Per-node billing configuration. */
+export type NodeBillingConfig = {
+  /** How this node is billed (default: "global"). */
+  mode?: NodeBillingMode;
+  /** Budget in cents for dedicated mode. When spent reaches budget, requests are blocked. */
+  budgetCents?: number;
+  /** Running spent total in cents (tracked by gateway, persisted across restarts). */
+  spentCents?: number;
+};
+
 export type GatewayNodesConfig = {
   /** Browser routing policy for node-hosted browser proxies. */
   browser?: {
@@ -295,6 +313,8 @@ export type GatewayNodesConfig = {
   allowCommands?: string[];
   /** Commands to deny even if they appear in the defaults or node claims. */
   denyCommands?: string[];
+  /** Per-node billing configuration (keyed by nodeId). */
+  billing?: Record<string, NodeBillingConfig>;
 };
 
 export type GatewayToolsConfig = {

@@ -1,5 +1,6 @@
+import type { NodeBillingMode } from "../../config/types.gateway.js";
 import type { GatewayRequestHandlers } from "./types.js";
-import { loadConfig } from "../../config/config.js";
+import { loadConfig, writeConfigFile } from "../../config/config.js";
 import { listDevicePairing } from "../../infra/device-pairing.js";
 import {
   approveNodePairing,
@@ -14,6 +15,7 @@ import { sanitizeNodeInvokeParamsForForwarding } from "../node-invoke-sanitize.j
 import {
   ErrorCodes,
   errorShape,
+  validateNodeBillingSetParams,
   validateNodeDescribeParams,
   validateNodeEventParams,
   validateNodeInvokeParams,
@@ -208,6 +210,57 @@ export const nodeHandlers: GatewayRequestHandlers = {
       respond(true, { nodeId: updated.nodeId, displayName: updated.displayName }, undefined);
     });
   },
+  "node.billing.set": async ({ params, respond, context }) => {
+    if (!validateNodeBillingSetParams(params)) {
+      respondInvalidParams({
+        respond,
+        method: "node.billing.set",
+        validator: validateNodeBillingSetParams,
+      });
+      return;
+    }
+    const p = params as {
+      nodeId: string;
+      billingMode: NodeBillingMode;
+      budgetCents?: number;
+    };
+    await respondUnavailableOnThrow(respond, async () => {
+      const cfg = loadConfig();
+      const gwCfg = cfg.gateway ?? {};
+      const nodesCfg = gwCfg.nodes ?? {};
+      const billing = nodesCfg.billing ?? {};
+      billing[p.nodeId] = {
+        mode: p.billingMode,
+        budgetCents: p.billingMode === "dedicated" ? (p.budgetCents ?? 0) : undefined,
+        spentCents: billing[p.nodeId]?.spentCents ?? 0,
+      };
+      const nextConfig = {
+        ...cfg,
+        gateway: { ...gwCfg, nodes: { ...nodesCfg, billing } },
+      };
+      await writeConfigFile(nextConfig);
+
+      // Update in-memory node session if connected.
+      const session = context.nodeRegistry.get(p.nodeId);
+      if (session) {
+        session.billingMode = p.billingMode;
+        if (p.billingMode === "dedicated") {
+          session.dedicatedBudgetCents = p.budgetCents ?? 0;
+        }
+      }
+
+      respond(
+        true,
+        {
+          nodeId: p.nodeId,
+          billingMode: p.billingMode,
+          budgetCents: billing[p.nodeId].budgetCents ?? 0,
+          spentCents: billing[p.nodeId].spentCents ?? 0,
+        },
+        undefined,
+      );
+    });
+  },
   "node.list": async ({ params, respond, context }) => {
     if (!validateNodeListParams(params)) {
       respondInvalidParams({
@@ -219,6 +272,8 @@ export const nodeHandlers: GatewayRequestHandlers = {
     }
     await respondUnavailableOnThrow(respond, async () => {
       const list = await listDevicePairing();
+      const cfg = loadConfig();
+      const billingCfg = cfg.gateway?.nodes?.billing ?? {};
       const pairedById = new Map(
         list.paired
           .filter((entry) => isNodeEntry(entry))
@@ -247,6 +302,7 @@ export const nodeHandlers: GatewayRequestHandlers = {
       const nodes = [...nodeIds].map((nodeId) => {
         const paired = pairedById.get(nodeId);
         const live = connectedById.get(nodeId);
+        const nodeBilling = billingCfg[nodeId];
 
         const caps = uniqueSortedStrings([...(live?.caps ?? paired?.caps ?? [])]);
         const commands = uniqueSortedStrings([...(live?.commands ?? paired?.commands ?? [])]);
@@ -268,6 +324,9 @@ export const nodeHandlers: GatewayRequestHandlers = {
           connectedAtMs: live?.connectedAtMs,
           paired: Boolean(paired),
           connected: Boolean(live),
+          billingMode: live?.billingMode ?? nodeBilling?.mode ?? "global",
+          dedicatedBudgetCents: live?.dedicatedBudgetCents ?? nodeBilling?.budgetCents ?? 0,
+          dedicatedSpentCents: live?.dedicatedSpentCents ?? nodeBilling?.spentCents ?? 0,
         };
       });
 

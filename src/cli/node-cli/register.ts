@@ -23,6 +23,29 @@ async function startNodeHost(opts: Record<string, unknown>) {
   const host = (opts.host as string | undefined)?.trim() || existing?.gateway?.host;
   const port = parsePortWithFallback(opts.port, existing?.gateway?.port ?? 18789);
 
+  // Auto-auth: when no explicit gateway credentials and no saved gateway host
+  // are configured, this is likely a first-run cloud connection.  Trigger IAM
+  // login and point at the default cloud gateway.
+  const hasExplicitToken = Boolean(
+    process.env.BOT_GATEWAY_TOKEN?.trim() || process.env.BOT_GATEWAY_PASSWORD?.trim(),
+  );
+  const hasExplicitGateway = Boolean(
+    (opts.host as string | undefined)?.trim() || process.env.BOT_NODE_GATEWAY_URL?.trim(),
+  );
+
+  if (!hasExplicitToken && !hasExplicitGateway && !existing?.gateway?.host) {
+    const { ensureCloudAuth, CLOUD_GATEWAY_URL } = await import("../../node-host/auto-auth.js");
+    const iamToken = await ensureCloudAuth();
+    if (iamToken) {
+      if (!process.env.BOT_NODE_GATEWAY_URL) {
+        process.env.BOT_NODE_GATEWAY_URL = CLOUD_GATEWAY_URL;
+      }
+      if (!process.env.BOT_GATEWAY_TOKEN) {
+        process.env.BOT_GATEWAY_TOKEN = iamToken;
+      }
+    }
+  }
+
   // Only override TLS if --tls or --tls-fingerprint was explicitly passed.
   // Otherwise let the saved config or remote URL scheme decide.
   const explicitTls = opts.tls === true || Boolean(opts.tlsFingerprint);
