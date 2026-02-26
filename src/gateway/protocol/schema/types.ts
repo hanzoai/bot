@@ -98,6 +98,7 @@ import type {
   LogsTailResultSchema,
 } from "./logs-chat.js";
 import type {
+  NodeBillingSetParamsSchema,
   NodeDescribeParamsSchema,
   NodeEventParamsSchema,
   NodeInvokeParamsSchema,
@@ -154,6 +155,7 @@ export type NodePairApproveParams = Static<typeof NodePairApproveParamsSchema>;
 export type NodePairRejectParams = Static<typeof NodePairRejectParamsSchema>;
 export type NodePairVerifyParams = Static<typeof NodePairVerifyParamsSchema>;
 export type NodeRenameParams = Static<typeof NodeRenameParamsSchema>;
+export type NodeBillingSetParams = Static<typeof NodeBillingSetParamsSchema>;
 export type NodeListParams = Static<typeof NodeListParamsSchema>;
 export type NodeDescribeParams = Static<typeof NodeDescribeParamsSchema>;
 export type NodeInvokeParams = Static<typeof NodeInvokeParamsSchema>;
