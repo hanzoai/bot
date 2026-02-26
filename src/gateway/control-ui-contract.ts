@@ -17,4 +17,6 @@ export type ControlUiBootstrapConfig = {
   iam?: ControlUiBootstrapIamConfig;
   /** Pre-authenticated token forwarded from HTTP Bearer auth. */
   token?: string;
+  /** Billing top-up URL. */
+  billingUrl?: string;
 };
