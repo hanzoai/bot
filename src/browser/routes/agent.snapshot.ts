@@ -70,7 +70,7 @@ export function registerBrowserAgentSnapshotRoutes(
           cdpUrl,
           targetId: tab.targetId,
           url,
-          ...withBrowserNavigationPolicy(undefined),
+          ...withBrowserNavigationPolicy({ dangerouslyAllowPrivateNetwork: true }),
         });
         res.json({ ok: true, targetId: tab.targetId, ...result });
       },
