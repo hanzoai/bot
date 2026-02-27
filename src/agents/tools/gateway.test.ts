@@ -16,7 +16,7 @@ vi.mock("../../gateway/call.js", () => ({
 describe("gateway tool defaults", () => {
   const envSnapshot = {
     bot: process.env.BOT_GATEWAY_TOKEN,
-    hanzo-bot: process.env.BOT_GATEWAY_TOKEN,
+    "hanzo-bot": process.env.BOT_GATEWAY_TOKEN,
   };
 
   beforeEach(() => {
@@ -32,10 +32,10 @@ describe("gateway tool defaults", () => {
     } else {
       process.env.BOT_GATEWAY_TOKEN = envSnapshot.bot;
     }
-    if (envSnapshot.hanzo-bot === undefined) {
+    if (envSnapshot["hanzo-bot"] === undefined) {
       delete process.env.BOT_GATEWAY_TOKEN;
     } else {
-      process.env.BOT_GATEWAY_TOKEN = envSnapshot.hanzo-bot;
+      process.env.BOT_GATEWAY_TOKEN = envSnapshot["hanzo-bot"];
     }
   });
 
