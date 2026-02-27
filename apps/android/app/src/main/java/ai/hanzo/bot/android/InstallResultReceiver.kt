@@ -1,4 +1,4 @@
-package ai.bot.android
+package ai.hanzo.bot.android
 
 import android.content.BroadcastReceiver
 import android.content.Context

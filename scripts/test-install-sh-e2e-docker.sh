@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 IMAGE_NAME="${BOT_INSTALL_E2E_IMAGE:-${BOT_INSTALL_E2E_IMAGE:-bot-install-e2e:local}}"
-INSTALL_URL="${BOT_INSTALL_URL:-${BOT_INSTALL_URL:-https://bot.bot/install.sh}}"
+INSTALL_URL="${BOT_INSTALL_URL:-https://raw.githubusercontent.com/hanzoai/bot/main/scripts/install.sh}"
 
 OPENAI_API_KEY="${OPENAI_API_KEY:-}"
 ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"

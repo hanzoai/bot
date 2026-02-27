@@ -402,14 +402,18 @@ export const BotSchema = z
             root: z.string().optional(),
             allowedOrigins: z.array(z.string()).optional(),
             allowInsecureAuth: z.boolean().optional(),
-            dangerouslyDisableDeviceAuth: z.boolean().optional(),
           })
           .strict()
           .optional(),
         auth: z
           .object({
             mode: z
-              .union([z.literal("token"), z.literal("password"), z.literal("trusted-proxy")])
+              .union([
+                z.literal("token"),
+                z.literal("password"),
+                z.literal("trusted-proxy"),
+                z.literal("iam"),
+              ])
               .optional(),
             token: z.string().optional().register(sensitive),
             password: z.string().optional().register(sensitive),
@@ -431,6 +435,17 @@ export const BotSchema = z
               })
               .strict()
               .optional(),
+            iam: z
+              .object({
+                serverUrl: z.string(),
+                clientId: z.string(),
+                clientSecret: z.string().optional().register(sensitive),
+                orgName: z.string().optional(),
+                appName: z.string().optional(),
+                scopes: z.array(z.string()).optional(),
+              })
+              .strict()
+              .optional(),
           })
           .strict()
           .optional(),
@@ -446,6 +461,22 @@ export const BotSchema = z
           .object({
             mode: z.union([z.literal("off"), z.literal("serve"), z.literal("funnel")]).optional(),
             resetOnExit: z.boolean().optional(),
+          })
+          .strict()
+          .optional(),
+        tunnel: z
+          .object({
+            provider: z
+              .union([
+                z.literal("cloudflared"),
+                z.literal("ngrok"),
+                z.literal("localxpose"),
+                z.literal("zrok"),
+                z.literal("none"),
+              ])
+              .optional(),
+            authToken: z.string().optional().register(sensitive),
+            domain: z.string().optional(),
           })
           .strict()
           .optional(),
