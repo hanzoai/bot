@@ -689,7 +689,10 @@ export function createGatewayHttpServer(opts: {
       res.statusCode = 404;
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.end("Not Found");
-    } catch {
+    } catch (err) {
+      console.error(
+        `[gateway] unhandled HTTP error on ${req.method} ${req.url}: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`,
+      );
       res.statusCode = 500;
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.end("Internal Server Error");
