@@ -3,6 +3,7 @@ import { stripMarkdown } from "bot/plugin-sdk";
 import crypto from "node:crypto";
 import { resolveBlueBubblesAccount } from "./accounts.js";
 import { getCachedBlueBubblesPrivateApiStatus } from "./probe.js";
+import { warnBlueBubbles } from "./runtime.js";
 import { extractBlueBubblesMessageId, resolveBlueBubblesSendTarget } from "./send-helpers.js";
 import { extractHandleFromChatGuid, normalizeBlueBubblesHandle } from "./targets.js";
 import {
@@ -373,11 +374,20 @@ export async function sendMessageBlueBubbles(
   const wantsReplyThread = Boolean(opts.replyToMessageGuid?.trim());
   const wantsEffect = Boolean(effectId);
   const needsPrivateApi = wantsReplyThread || wantsEffect;
-  const canUsePrivateApi = needsPrivateApi && privateApiStatus !== false;
   if (wantsEffect && privateApiStatus === false) {
     throw new Error(
       "BlueBubbles send failed: reply/effect requires Private API, but it is disabled on the BlueBubbles server.",
     );
+  }
+  // When private API status is unknown (null), warn and downgrade to plain send
+  // to avoid broken messages when the Private API might not be available.
+  let canUsePrivateApi = needsPrivateApi && privateApiStatus === true;
+  if (needsPrivateApi && privateApiStatus === null) {
+    warnBlueBubbles(
+      "Private API status unknown; downgrading reply/effect to plain send. " +
+        "Run `bluebubbles probe` to detect Private API availability.",
+    );
+    canUsePrivateApi = false;
   }
   const payload: Record<string, unknown> = {
     chatGuid,
@@ -395,7 +405,7 @@ export async function sendMessageBlueBubbles(
   }
 
   // Add message effects support
-  if (effectId) {
+  if (wantsEffect && canUsePrivateApi) {
     payload.effectId = effectId;
   }
 
