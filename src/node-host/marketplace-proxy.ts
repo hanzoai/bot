@@ -2,10 +2,14 @@
  * Marketplace proxy — handles incoming proxy requests on the seller's node.
  *
  * When the gateway routes a buyer's request to this node, this module:
- * 1. Reads the seller's Claude API key from config/env
- * 2. Calls the Anthropic Messages API
+ * 1. Reads the seller's API key from config/env (HANZO_API_KEY preferred)
+ * 2. Calls the Hanzo AI API (api.hanzo.ai) which routes to the appropriate model
  * 3. Streams chunks back via node.event (same relay pattern as VNC tunnel)
  * 4. Sends a final done event with token usage
+ *
+ * API priority:
+ *   HANZO_API_KEY + api.hanzo.ai → primary (Hanzo Cloud, all models)
+ *   ANTHROPIC_API_KEY + api.anthropic.com → explicit fallback only
  *
  * Privacy: prompts are held in memory only during the API call, never logged to disk.
  */
@@ -22,16 +26,57 @@ export type MarketplaceProxyRequest = {
   system?: string;
 };
 
-type AnthropicUsage = {
+type UsageInfo = {
   input_tokens: number;
   output_tokens: number;
 };
 
+/** Hanzo AI API — supports Anthropic Messages format via /v1/messages. */
+const HANZO_API_URL = "https://api.hanzo.ai/v1/messages";
+/** Anthropic direct API — only used when ANTHROPIC_API_KEY is explicitly set. */
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-const ANTHROPIC_API_VERSION = "2023-06-01";
+const API_VERSION = "2023-06-01";
+
+type ResolvedApi = {
+  url: string;
+  apiKey: string;
+  /** Header name for the API key. */
+  keyHeader: string;
+  /** Label for error messages. */
+  label: string;
+};
 
 /**
- * Handle a marketplace proxy request using the seller's Claude API key.
+ * Resolve which API endpoint and key to use.
+ * Priority: config.claudeApiKey → HANZO_API_KEY → ANTHROPIC_API_KEY (fallback).
+ */
+function resolveApi(config: NodeHostMarketplaceConfig): ResolvedApi | null {
+  const hanzoKey = config.claudeApiKey || process.env.HANZO_API_KEY || process.env.HANZO_ACCESS_KEY;
+  if (hanzoKey) {
+    return {
+      url: process.env.HANZO_API_URL?.trim() || HANZO_API_URL,
+      apiKey: hanzoKey,
+      keyHeader: "x-api-key",
+      label: "Hanzo API",
+    };
+  }
+
+  // Explicit fallback: only if the user has set ANTHROPIC_API_KEY directly.
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (anthropicKey) {
+    return {
+      url: ANTHROPIC_API_URL,
+      apiKey: anthropicKey,
+      keyHeader: "x-api-key",
+      label: "Anthropic API",
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Handle a marketplace proxy request using the seller's API key.
  * Caller is responsible for sending the initial invoke result (ok: true).
  */
 export async function handleMarketplaceProxy(
@@ -39,9 +84,14 @@ export async function handleMarketplaceProxy(
   config: NodeHostMarketplaceConfig,
   client: GatewayClient,
 ): Promise<void> {
-  const apiKey = config.claudeApiKey || process.env.HANZO_API_KEY || process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    sendProxyError(client, request.requestId, "NO_API_KEY", "no Claude API key configured");
+  const api = resolveApi(config);
+  if (!api) {
+    sendProxyError(
+      client,
+      request.requestId,
+      "NO_API_KEY",
+      "no API key configured (set HANZO_API_KEY or claudeApiKey in marketplace config)",
+    );
     return;
   }
 
@@ -60,12 +110,12 @@ export async function handleMarketplaceProxy(
   }
 
   try {
-    const response = await fetch(ANTHROPIC_API_URL, {
+    const response = await fetch(api.url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": ANTHROPIC_API_VERSION,
+        [api.keyHeader]: api.apiKey,
+        "anthropic-version": API_VERSION,
       },
       body: JSON.stringify(body),
     });
@@ -76,7 +126,7 @@ export async function handleMarketplaceProxy(
         client,
         request.requestId,
         `HTTP_${response.status}`,
-        `Anthropic API ${response.status}: ${errBody.substring(0, 200)}`,
+        `${api.label} ${response.status}: ${errBody.substring(0, 200)}`,
       );
       return;
     }
@@ -91,7 +141,7 @@ export async function handleMarketplaceProxy(
       client,
       request.requestId,
       "FETCH_ERROR",
-      `Failed to call Anthropic API: ${String(err)}`,
+      `Failed to call ${api.label}: ${String(err)}`,
     );
   }
 }
@@ -172,7 +222,7 @@ async function handleNonStreamingResponse(
   let outputTokens = 0;
   try {
     const parsed = JSON.parse(text);
-    const usage = parsed.usage as AnthropicUsage | undefined;
+    const usage = parsed.usage as UsageInfo | undefined;
     if (usage) {
       inputTokens = usage.input_tokens ?? 0;
       outputTokens = usage.output_tokens ?? 0;
