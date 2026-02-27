@@ -232,7 +232,7 @@ describe("channels command", () => {
     });
 
     await channelsListCommand({ json: true, usage: false }, runtime);
-    const payload = JSON.parse(String(runtime.log.mock.calls[0]?.[0] ?? "{}")) as {
+    const payload = JSON.parse(JSON.stringify(runtime.log.mock.calls[0]?.[0] ?? "{}")) as {
       auth?: Array<{ id: string }>;
     };
     const ids = payload.auth?.map((entry) => entry.id) ?? [];

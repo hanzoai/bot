@@ -35,7 +35,7 @@ export function guardCancel<T>(value: T | symbol, runtime: RuntimeEnv): T {
     // infer never from the void return type. Cast to satisfy the return type.
     return undefined as T;
   }
-  return value as T;
+  return value;
 }
 
 export function summarizeExistingConfig(config: BotConfig): string {
