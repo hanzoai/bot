@@ -1,6 +1,6 @@
-package ai.hanzo-bot.android.ui.chat
+package ai.hanzo.bot.android.ui.chat
 
-import ai.hanzo-bot.android.chat.ChatSessionEntry
+import ai.hanzo.bot.android.chat.ChatSessionEntry
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

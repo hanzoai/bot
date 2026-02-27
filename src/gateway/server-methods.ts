@@ -1,4 +1,5 @@
 import type { GatewayRequestHandlers, GatewayRequestOptions } from "./server-methods/types.js";
+import { checkBillingAllowance } from "./billing/billing-gate.js";
 import { ErrorCodes, errorShape } from "./protocol/index.js";
 import { agentHandlers } from "./server-methods/agent.js";
 import { agentsHandlers } from "./server-methods/agents.js";
@@ -12,6 +13,7 @@ import { deviceHandlers } from "./server-methods/devices.js";
 import { execApprovalsHandlers } from "./server-methods/exec-approvals.js";
 import { healthHandlers } from "./server-methods/health.js";
 import { logsHandlers } from "./server-methods/logs.js";
+import { marketplaceHandlers } from "./server-methods/marketplace.js";
 import { modelsHandlers } from "./server-methods/models.js";
 import { nodeHandlers } from "./server-methods/nodes.js";
 import { sendHandlers } from "./server-methods/send.js";
@@ -22,6 +24,7 @@ import { talkHandlers } from "./server-methods/talk.js";
 import { ttsHandlers } from "./server-methods/tts.js";
 import { updateHandlers } from "./server-methods/update.js";
 import { usageHandlers } from "./server-methods/usage.js";
+import { vncHandlers } from "./server-methods/vnc.js";
 import { voicewakeHandlers } from "./server-methods/voicewake.js";
 import { webHandlers } from "./server-methods/web.js";
 import { wizardHandlers } from "./server-methods/wizard.js";
@@ -51,6 +54,7 @@ const PAIRING_METHODS = new Set([
   "device.token.revoke",
   "node.rename",
 ]);
+const BILLABLE_METHODS = new Set(["agent", "agent.wait", "chat.send"]);
 const ADMIN_METHOD_PREFIXES = ["exec.approvals."];
 const READ_METHODS = new Set([
   "health",
@@ -78,6 +82,10 @@ const READ_METHODS = new Set([
   "chat.history",
   "config.get",
   "talk.config",
+  "screen.vnc",
+  "marketplace.status",
+  "marketplace.earnings",
+  "marketplace.config",
 ]);
 const WRITE_METHODS = new Set([
   "send",
@@ -94,6 +102,8 @@ const WRITE_METHODS = new Set([
   "chat.send",
   "chat.abort",
   "browser.request",
+  "marketplace.opt-in",
+  "marketplace.opt-out",
 ]);
 
 function authorizeGatewayMethod(method: string, client: GatewayRequestOptions["client"]) {
@@ -194,6 +204,8 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   ...agentHandlers,
   ...agentsHandlers,
   ...browserHandlers,
+  ...vncHandlers,
+  ...marketplaceHandlers,
 };
 
 export async function handleGatewayRequest(
@@ -205,6 +217,19 @@ export async function handleGatewayRequest(
     respond(false, undefined, authError);
     return;
   }
+
+  // Billing gate: block LLM-triggering methods when tenant has no credits
+  if (BILLABLE_METHODS.has(req.method) && context.iamConfig) {
+    const billing = await checkBillingAllowance({
+      iamConfig: context.iamConfig,
+      tenant: client?.tenant ?? null,
+    });
+    if (!billing.allowed) {
+      respond(false, undefined, errorShape(ErrorCodes.BILLING_ERROR, billing.reason));
+      return;
+    }
+  }
+
   const handler = opts.extraHandlers?.[req.method] ?? coreGatewayHandlers[req.method];
   if (!handler) {
     respond(

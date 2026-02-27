@@ -656,6 +656,187 @@ export function buildNvidiaProvider(): ProviderConfig {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Hanzo Cloud — routes through api.hanzo.ai with IAM JWT auth
+// ---------------------------------------------------------------------------
+
+const HANZO_API_BASE_URL = "https://api.hanzo.ai/v1";
+
+/** Build the Hanzo Cloud provider with Zen3/Zen4 + third-party models via api.hanzo.ai gateway. */
+export function buildHanzoCloudProvider(): ProviderConfig {
+  return {
+    baseUrl: HANZO_API_BASE_URL,
+    api: "openai-completions",
+    models: [
+      // -----------------------------------------------------------------------
+      // Zen4 — Latest generation (flagship)
+      // -----------------------------------------------------------------------
+      {
+        id: "zen4",
+        name: "Zen4 Flagship",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 3, output: 9.6, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 202000,
+        maxTokens: 16384,
+      },
+      {
+        id: "zen4-pro",
+        name: "Zen4 Pro",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 2.7, output: 2.7, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 131000,
+        maxTokens: 16384,
+      },
+      {
+        id: "zen4-max",
+        name: "Zen4 Max",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 3.6, output: 3.6, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 131000,
+        maxTokens: 16384,
+      },
+      {
+        id: "zen4-mini",
+        name: "Zen4 Mini",
+        reasoning: true,
+        input: ["text"],
+        cost: { input: 0.6, output: 0.6, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 40000,
+        maxTokens: 8192,
+      },
+      {
+        id: "zen4-ultra",
+        name: "Zen4 Ultra",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 3, output: 9.6, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 202000,
+        maxTokens: 16384,
+      },
+      {
+        id: "zen4-thinking",
+        name: "Zen4 Thinking",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 2.7, output: 2.7, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 131000,
+        maxTokens: 16384,
+      },
+      // -----------------------------------------------------------------------
+      // Zen4 — Coder variants
+      // -----------------------------------------------------------------------
+      {
+        id: "zen4-coder",
+        name: "Zen4 Coder",
+        reasoning: true,
+        input: ["text"],
+        cost: { input: 3.6, output: 3.6, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 262000,
+        maxTokens: 16384,
+      },
+      {
+        id: "zen4-coder-flash",
+        name: "Zen4 Coder Flash",
+        reasoning: true,
+        input: ["text"],
+        cost: { input: 1.5, output: 1.5, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 262000,
+        maxTokens: 16384,
+      },
+      {
+        id: "zen4-coder-pro",
+        name: "Zen4 Coder Pro",
+        reasoning: true,
+        input: ["text"],
+        cost: { input: 4.5, output: 4.5, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 262000,
+        maxTokens: 16384,
+      },
+      // -----------------------------------------------------------------------
+      // Zen3 — Multimodal / specialty
+      // -----------------------------------------------------------------------
+      {
+        id: "zen3-omni",
+        name: "Zen3 Omni",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 1.8, output: 6.6, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 202000,
+        maxTokens: 16384,
+      },
+      {
+        id: "zen3-vl",
+        name: "Zen3 VL",
+        reasoning: false,
+        input: ["text", "image"],
+        cost: { input: 0.45, output: 1.8, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 131000,
+        maxTokens: 8192,
+      },
+      {
+        id: "zen3-nano",
+        name: "Zen3 Nano",
+        reasoning: false,
+        input: ["text"],
+        cost: { input: 0.3, output: 0.3, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: 40000,
+        maxTokens: 4096,
+      },
+      // -----------------------------------------------------------------------
+      // Third-party models (via Hanzo gateway — unified billing)
+      // -----------------------------------------------------------------------
+      {
+        id: "claude-opus-4-6",
+        name: "Claude Opus 4.6",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 6, output: 30, cacheRead: 0.6, cacheWrite: 7.5 },
+        contextWindow: 1000000,
+        maxTokens: 32000,
+      },
+      {
+        id: "claude-sonnet-4-6",
+        name: "Claude Sonnet 4.6",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 3.6, output: 18, cacheRead: 0.36, cacheWrite: 4.5 },
+        contextWindow: 1000000,
+        maxTokens: 16384,
+      },
+      {
+        id: "claude-haiku-4-5",
+        name: "Claude Haiku 4.5",
+        reasoning: false,
+        input: ["text", "image"],
+        cost: { input: 1.2, output: 6, cacheRead: 0.12, cacheWrite: 1.5 },
+        contextWindow: 200000,
+        maxTokens: 8192,
+      },
+      {
+        id: "gpt-5",
+        name: "GPT-5",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 1.5, output: 12, cacheRead: 0.15, cacheWrite: 0 },
+        contextWindow: 400000,
+        maxTokens: 16384,
+      },
+      {
+        id: "gpt-5-mini",
+        name: "GPT-5 Mini",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 0.3, output: 2.4, cacheRead: 0.03, cacheWrite: 0 },
+        contextWindow: 400000,
+        maxTokens: 16384,
+      },
+    ],
+  };
+}
+
 export async function resolveImplicitProviders(params: {
   agentDir: string;
   explicitProviders?: Record<string, ProviderConfig> | null;
@@ -805,6 +986,15 @@ export async function resolveImplicitProviders(params: {
     resolveApiKeyFromProfiles({ provider: "nvidia", store: authStore });
   if (nvidiaKey) {
     providers.nvidia = { ...buildNvidiaProvider(), apiKey: nvidiaKey };
+  }
+
+  // Hanzo Cloud provider — routes through api.hanzo.ai with IAM JWT auth.
+  // Auto-registers when HANZO_API_KEY is set (via IAM OAuth) or hanzo-iam profile exists.
+  const hanzoKey =
+    resolveEnvApiKeyVarName("hanzo") ??
+    resolveApiKeyFromProfiles({ provider: "hanzo-iam", store: authStore });
+  if (hanzoKey) {
+    providers.hanzo = { ...buildHanzoCloudProvider(), apiKey: hanzoKey };
   }
 
   return providers;

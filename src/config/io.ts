@@ -50,6 +50,7 @@ export { CircularIncludeError, ConfigIncludeError } from "./includes.js";
 export { MissingEnvVarError } from "./env-substitution.js";
 
 const SHELL_ENV_EXPECTED_KEYS = [
+  "HANZO_API_KEY",
   "OPENAI_API_KEY",
   "ANTHROPIC_API_KEY",
   "ANTHROPIC_OAUTH_TOKEN",
