@@ -231,7 +231,7 @@ describe("buildServiceEnvironment", () => {
     expect(typeof env.BOT_SERVICE_VERSION).toBe("string");
     expect(env.BOT_SYSTEMD_UNIT).toBe("bot-gateway.service");
     if (process.platform === "darwin") {
-      expect(env.BOT_LAUNCHD_LABEL).toBe("ai.bot.gateway");
+      expect(env.BOT_LAUNCHD_LABEL).toBe("ai.hanzo.bot.gateway");
     }
   });
 
@@ -242,7 +242,7 @@ describe("buildServiceEnvironment", () => {
     });
     expect(env.BOT_SYSTEMD_UNIT).toBe("bot-gateway-work.service");
     if (process.platform === "darwin") {
-      expect(env.BOT_LAUNCHD_LABEL).toBe("ai.bot.work");
+      expect(env.BOT_LAUNCHD_LABEL).toBe("ai.hanzo.bot.work");
     }
   });
 });

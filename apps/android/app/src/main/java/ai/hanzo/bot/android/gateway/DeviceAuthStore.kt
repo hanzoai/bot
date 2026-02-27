@@ -1,6 +1,6 @@
-package ai.hanzo-bot.android.gateway
+package ai.hanzo.bot.android.gateway
 
-import ai.hanzo-bot.android.SecurePrefs
+import ai.hanzo.bot.android.SecurePrefs
 
 class DeviceAuthStore(private val prefs: SecurePrefs) {
   fun loadToken(deviceId: String, role: String): String? {

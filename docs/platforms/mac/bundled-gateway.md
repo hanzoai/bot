@@ -28,12 +28,12 @@ The macOS app’s **Install CLI** button runs the same flow via npm/pnpm (bun no
 
 Label:
 
-- `bot.molt.gateway` (or `bot.molt.<profile>`; legacy `com.bot.*` may remain)
+- `ai.hanzo.bot.gateway` (or `ai.hanzo.bot.<profile>`; legacy `com.bot.*` may remain)
 
 Plist location (per‑user):
 
-- `~/Library/LaunchAgents/bot.molt.gateway.plist`
-  (or `~/Library/LaunchAgents/bot.molt.<profile>.plist`)
+- `~/Library/LaunchAgents/ai.hanzo.bot.gateway.plist`
+  (or `~/Library/LaunchAgents/ai.hanzo.bot.<profile>.plist`)
 
 Manager:
 

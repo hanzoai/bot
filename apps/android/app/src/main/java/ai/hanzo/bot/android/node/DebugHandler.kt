@@ -1,9 +1,9 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
 import android.content.Context
-import ai.bot.android.BuildConfig
-import ai.bot.android.gateway.DeviceIdentityStore
-import ai.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.BuildConfig
+import ai.hanzo.bot.android.gateway.DeviceIdentityStore
+import ai.hanzo.bot.android.gateway.GatewaySession
 import kotlinx.serialization.json.JsonPrimitive
 
 class DebugHandler(
