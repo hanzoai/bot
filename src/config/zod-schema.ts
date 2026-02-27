@@ -583,6 +583,45 @@ export const BotSchema = z
               .optional(),
             allowCommands: z.array(z.string()).optional(),
             denyCommands: z.array(z.string()).optional(),
+            billing: z
+              .record(
+                z.string(),
+                z
+                  .object({
+                    mode: z
+                      .union([
+                        z.literal("global"),
+                        z.literal("dedicated"),
+                        z.literal("local"),
+                        z.literal("shared"),
+                      ])
+                      .optional(),
+                    budgetCents: z.number().int().nonnegative().optional(),
+                    spentCents: z.number().int().nonnegative().optional(),
+                  })
+                  .strict(),
+              )
+              .optional(),
+          })
+          .strict()
+          .optional(),
+        marketplace: z
+          .object({
+            enabled: z.boolean().optional(),
+            platformFeePct: z.number().min(0).max(100).optional(),
+            priceFraction: z.number().min(0).max(1).optional(),
+            minPayoutCents: z.number().int().nonnegative().optional(),
+            aiTokenBonusPct: z.number().min(0).max(100).optional(),
+            chain: z
+              .object({
+                chainId: z.number().int().positive().optional(),
+                rpcUrl: z.string().optional(),
+                tokenContract: z.string().optional(),
+                treasuryAddress: z.string().optional(),
+                treasuryKeyEnv: z.string().optional(),
+              })
+              .strict()
+              .optional(),
           })
           .strict()
           .optional(),
