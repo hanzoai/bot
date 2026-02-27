@@ -119,11 +119,15 @@ export class IdleDetector {
   }
 
   /**
-   * Detect if any Claude CLI tools are currently running.
-   * Returns true if activity is detected.
+   * Detect if the user's Claude API key is actively being consumed.
+   *
+   * Strategy: active outbound connections to Anthropic's API are the primary
+   * signal.  Process detection alone (e.g. Claude Code sitting open in a
+   * terminal) does NOT block sharing — only actual API traffic does.  This
+   * lets sellers share idle capacity even while their IDE or CLI is open.
    */
   private detectActivity(): boolean {
-    return this.detectWatchedProcesses() || this.detectAnthropicConnections();
+    return this.detectAnthropicConnections();
   }
 
   /** Check if any watched Claude-related processes are running. */
