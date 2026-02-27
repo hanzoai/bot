@@ -96,7 +96,7 @@ export async function deliverSessionMaintenanceWarning(params: WarningParams): P
 
   try {
     const { deliverOutboundPayloads } = await import("./outbound/deliver.js");
-    const outboundSession = buildOutboundSessionContext({
+    const _outboundSession = buildOutboundSessionContext({
       cfg: params.cfg,
       sessionKey: params.sessionKey,
     });

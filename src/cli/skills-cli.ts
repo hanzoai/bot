@@ -229,7 +229,7 @@ export function registerSkillsCli(program: Command) {
         // Check if target already exists
         if (fs.existsSync(targetDir)) {
           if (opts.force) {
-            defaultRuntime.log(`${theme.warn("Removing existing directory...")}`);
+            defaultRuntime.log(theme.warn("Removing existing directory..."));
             await unlinkFromAgents(dirName);
             await fs.promises.rm(targetDir, { recursive: true, force: true });
           } else {

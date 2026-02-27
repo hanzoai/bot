@@ -251,7 +251,7 @@ export function sanitizeAntigravityThinkingBlocks(messages: AgentMessage[]): Age
       out.push(msg);
       continue;
     }
-    const assistantMsg = msg as Extract<AgentMessage, { role: "assistant" }>;
+    const assistantMsg = msg;
     type ContentBlock = (typeof assistantMsg.content)[number];
     const nextContent: ContentBlock[] = [];
     let changed = false;

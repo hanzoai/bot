@@ -105,13 +105,6 @@ describe("session_status tool", () => {
       },
     });
 
-    const tool = createBotTools({ agentSessionKey: "main" }).find(
-      (candidate) => candidate.name === "session_status",
-    );
-    expect(tool).toBeDefined();
-    if (!tool) {
-      throw new Error("missing session_status tool");
-    }
     const tool = getSessionStatusTool();
 
     const result = await tool.execute("call1", {});
@@ -128,13 +121,6 @@ describe("session_status tool", () => {
       main: { sessionId: "s1", updatedAt: 10 },
     });
 
-    const tool = createBotTools({ agentSessionKey: "main" }).find(
-      (candidate) => candidate.name === "session_status",
-    );
-    expect(tool).toBeDefined();
-    if (!tool) {
-      throw new Error("missing session_status tool");
-    }
     const tool = getSessionStatusTool();
 
     await expect(tool.execute("call2", { sessionKey: "nope" })).rejects.toThrow(
@@ -152,13 +138,6 @@ describe("session_status tool", () => {
       },
     });
 
-    const tool = createBotTools({ agentSessionKey: "main" }).find(
-      (candidate) => candidate.name === "session_status",
-    );
-    expect(tool).toBeDefined();
-    if (!tool) {
-      throw new Error("missing session_status tool");
-    }
     const tool = getSessionStatusTool();
 
     const result = await tool.execute("call3", { sessionKey: sessionId });
@@ -175,13 +154,6 @@ describe("session_status tool", () => {
       },
     });
 
-    const tool = createBotTools({ agentSessionKey: "main" }).find(
-      (candidate) => candidate.name === "session_status",
-    );
-    expect(tool).toBeDefined();
-    if (!tool) {
-      throw new Error("missing session_status tool");
-    }
     const tool = getSessionStatusTool();
 
     const result = await tool.execute("call4", { sessionKey: "temp:slug-generator" });
@@ -198,13 +170,6 @@ describe("session_status tool", () => {
       },
     });
 
-    const tool = createBotTools({ agentSessionKey: "agent:main:main" }).find(
-      (candidate) => candidate.name === "session_status",
-    );
-    expect(tool).toBeDefined();
-    if (!tool) {
-      throw new Error("missing session_status tool");
-    }
     const tool = getSessionStatusTool("agent:main:main");
 
     await expect(tool.execute("call5", { sessionKey: "agent:other:main" })).rejects.toThrow(
@@ -241,13 +206,6 @@ describe("session_status tool", () => {
       },
     );
 
-    const tool = createBotTools({ agentSessionKey: "agent:support:main" }).find(
-      (candidate) => candidate.name === "session_status",
-    );
-    expect(tool).toBeDefined();
-    if (!tool) {
-      throw new Error("missing session_status tool");
-    }
     const tool = getSessionStatusTool("agent:support:main");
 
     const result = await tool.execute("call6", { sessionKey: "main" });
@@ -267,13 +225,6 @@ describe("session_status tool", () => {
       },
     });
 
-    const tool = createBotTools({ agentSessionKey: "main" }).find(
-      (candidate) => candidate.name === "session_status",
-    );
-    expect(tool).toBeDefined();
-    if (!tool) {
-      throw new Error("missing session_status tool");
-    }
     const tool = getSessionStatusTool();
 
     await tool.execute("call3", { model: "default" });
