@@ -37,7 +37,7 @@ import {
 import { resolveAgentRoute } from "../routing/resolve-route.js";
 import { resolveThreadSessionKeys } from "../routing/session-key.js";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
-import { firstDefined, isSenderAllowed, normalizeAllowFromWithStore } from "./bot-access.js";
+import { firstDefined, isSenderAllowed, normalizeDmAllowFromWithStore } from "./bot-access.js";
 import {
   buildCappedTelegramMenuCommands,
   buildPluginTelegramMenuCommands,
@@ -244,7 +244,7 @@ async function resolveTelegramCommandAuth(params: {
     }
   }
 
-  const dmAllow = normalizeAllowFromWithStore({
+  const dmAllow = normalizeDmAllowFromWithStore({
     allowFrom: allowFrom,
     storeAllowFrom,
   });
