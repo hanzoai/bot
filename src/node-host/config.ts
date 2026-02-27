@@ -14,7 +14,7 @@ export type NodeHostGatewayConfig = {
 export type NodeHostMarketplaceConfig = {
   /** Whether this node participates in the P2P marketplace. Default: false. */
   enabled: boolean;
-  /** Claude API key for shared requests. Falls back to HANZO_API_KEY or ANTHROPIC_API_KEY env. */
+  /** API key for shared requests. Falls back to HANZO_API_KEY env (→ api.hanzo.ai). */
   claudeApiKey?: string;
   /** Seconds of inactivity before declaring idle. Default: 300 (5 min). */
   idleThresholdSec?: number;
