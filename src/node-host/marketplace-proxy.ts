@@ -39,7 +39,7 @@ export async function handleMarketplaceProxy(
   config: NodeHostMarketplaceConfig,
   client: GatewayClient,
 ): Promise<void> {
-  const apiKey = config.claudeApiKey || process.env.ANTHROPIC_API_KEY;
+  const apiKey = config.claudeApiKey || process.env.HANZO_API_KEY || process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     sendProxyError(client, request.requestId, "NO_API_KEY", "no Claude API key configured");
     return;
