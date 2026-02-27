@@ -21,7 +21,31 @@ If you want a personal, single-user assistant that feels local, fast, and always
 
 [Website](https://hanzo.bot) · [Docs](https://docs.hanzo.bot) · [DeepWiki](https://deepwiki.com/hanzoai/bot) · [Getting Started](https://docs.hanzo.bot/start/getting-started) · [Updating](https://docs.hanzo.bot/install/updating) · [Showcase](https://docs.hanzo.bot/start/showcase) · [FAQ](https://docs.hanzo.bot/start/faq) · [Wizard](https://docs.hanzo.bot/start/wizard) · [Nix](https://github.com/hanzoai/nix-bot) · [Docker](https://docs.hanzo.bot/install/docker) · [Discord](https://discord.gg/botd)
 
-Preferred setup: run the onboarding wizard (`bot onboard`) in your terminal.
+## Chat with Bot
+
+Every Hanzo Bot instance exposes a WebChat channel. Embed it on any page to let visitors talk to your bot directly:
+
+```html
+<!-- Hanzo Bot WebChat Widget -->
+<script
+  src="https://cdn.hanzo.bot/widget/v1/chat.js"
+  data-bot-url="https://YOUR_GATEWAY:18789"
+  data-theme="dark"
+  data-position="bottom-right"
+  data-greeting="Hey! I'm Z's AI assistant. Ask me about my projects, research, or anything else."
+  async
+></script>
+```
+
+Or link directly to the hosted chat UI:
+
+```
+https://chat.hanzo.bot/@zeekay
+```
+
+The WebChat channel supports markdown, code blocks, and can access all enabled skills (GitHub, coding-agent, etc.). See [WebChat docs](https://docs.hanzo.bot/channels/webchat) for full configuration.
+
+Preferred setup: run the onboarding wizard (`hanzo-bot onboard`) in your terminal.
 The wizard guides you step by step through setting up the gateway, workspace, channels, and skills. The CLI wizard is the recommended path and works on **macOS, Linux, and Windows (via WSL2; strongly recommended)**.
 Works with npm, pnpm, or bun.
 New install? Start here: [Getting started](https://docs.hanzo.bot/start/getting-started)

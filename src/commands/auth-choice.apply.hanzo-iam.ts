@@ -8,7 +8,8 @@ import { openUrl } from "./onboard-helpers.js";
 
 const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/login/oauth/authorize";
 const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/api/login/oauth/access_token";
-const HANZO_CLIENT_ID = "hanzo-bot-client-id";
+const HANZO_CLIENT_ID = "hanzobot-client-id";
+const HANZO_CLIENT_SECRET = "";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 const HANZO_API_BASE_URL = "https://api.hanzo.ai/v1";
@@ -114,11 +115,13 @@ async function exchangeCodeForTokens(code: string): Promise<{
   expires_in?: number;
 }> {
   const clientId = process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID;
+  const clientSecret = process.env.HANZO_CLIENT_SECRET?.trim() || HANZO_CLIENT_SECRET;
   const redirectUri = process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI;
 
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     client_id: clientId,
+    client_secret: clientSecret,
     code,
     redirect_uri: redirectUri,
   });
@@ -221,10 +224,10 @@ export async function applyAuthChoiceHanzoIam(
     spin.stop("Hanzo login complete");
 
     const creds = {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token ?? "",
+      access: tokens.access_token,
+      refresh: tokens.refresh_token ?? "",
+      expires: tokens.expires_in ? Date.now() + tokens.expires_in * 1000 : 0,
       tokenType: tokens.token_type,
-      expiresIn: tokens.expires_in,
       createdAt: Date.now(),
     };
 
@@ -241,10 +244,10 @@ export async function applyAuthChoiceHanzoIam(
     await params.prompter.note(
       [
         "Hanzo Cloud connected. You now have access to:",
-        "  - Anthropic Claude (Opus, Sonnet, Haiku)",
-        "  - OpenAI GPT (5.2, 5.1, 5-nano)",
-        "  - Google Gemini (3 Pro, Flash)",
-        "  - Qwen 3, GLM 4.7, and 100+ more models",
+        "  - Zen4 (flagship, pro, max, mini, coder, thinking, ultra)",
+        "  - Zen3 (omni, vl, nano, embedding)",
+        "  - Claude (Opus, Sonnet, Haiku) via unified billing",
+        "  - GPT-5, Gemini, and 300+ more models",
         "",
         `API endpoint: ${HANZO_API_BASE_URL}`,
       ].join("\n"),

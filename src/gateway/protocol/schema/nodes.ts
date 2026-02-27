@@ -88,6 +88,19 @@ export const NodeEventParamsSchema = Type.Object(
   { additionalProperties: false },
 );
 
+export const NodeBillingSetParamsSchema = Type.Object(
+  {
+    nodeId: NonEmptyString,
+    billingMode: Type.Union([
+      Type.Literal("global"),
+      Type.Literal("dedicated"),
+      Type.Literal("local"),
+    ]),
+    budgetCents: Type.Optional(Type.Integer({ minimum: 0 })),
+  },
+  { additionalProperties: false },
+);
+
 export const NodeInvokeRequestEventSchema = Type.Object(
   {
     id: NonEmptyString,
