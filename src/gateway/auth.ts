@@ -379,7 +379,15 @@ export async function authorizeGatewayConnect(params: {
     if (!jwtToken) {
       return { ok: false, reason: "iam_token_missing" };
     }
-    const iamResult = await validateIamToken(jwtToken, auth.iam);
+    let iamResult: GatewayIamAuthResult;
+    try {
+      iamResult = await validateIamToken(jwtToken, auth.iam);
+    } catch {
+      // Token is not a valid JWT (e.g. hex gateway token) — the IAM SDK throws
+      // on malformed tokens.  Treat as failed IAM auth so the token fallback
+      // below can still match the gateway shared secret.
+      iamResult = { ok: false, reason: "iam_token_malformed" };
+    }
     if (!iamResult.ok) {
       // Fallback: accept the gateway's shared token for internal nodes (cloud pods).
       if (auth.token && safeEqualSecret(jwtToken, auth.token)) {
