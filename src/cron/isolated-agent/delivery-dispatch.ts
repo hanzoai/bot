@@ -171,7 +171,7 @@ export async function dispatchCronDelivery(
         });
       }
       deliveryAttempted = true;
-      const deliverySession = buildOutboundSessionContext({
+      const _deliverySession = buildOutboundSessionContext({
         cfg: params.cfgWithAgentDefaults,
         agentId: params.agentId,
         sessionKey: params.agentSessionKey,

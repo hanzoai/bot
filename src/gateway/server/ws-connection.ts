@@ -92,7 +92,7 @@ export function attachGatewayWsConnectionHandler(params: {
     canvasHostServerPort,
     resolvedAuth,
     rateLimiter,
-    browserRateLimiter,
+    browserRateLimiter: _browserRateLimiter,
     gatewayMethods,
     events,
     logGateway,
