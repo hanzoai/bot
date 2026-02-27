@@ -1,6 +1,6 @@
 import type { RuntimeEnv, ReplyPayload, BotConfig } from "bot/plugin-sdk";
-import { format } from "node:util";
 import { createReplyPrefixOptions } from "bot/plugin-sdk";
+import { format } from "node:util";
 import { getTlonRuntime } from "../runtime.js";
 import { normalizeShip, parseChannelNest } from "../targets.js";
 import { resolveTlonAccount } from "../types.js";
