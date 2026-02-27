@@ -2,7 +2,7 @@
  * Marketplace billing — pricing calculation and transaction reporting.
  *
  * Pricing model:
- * - Buyer pays a fraction of Anthropic's list price (default: 60%)
+ * - Buyer pays a fraction of the model's list price (default: 60%)
  * - Platform takes a percentage (default: 20%)
  * - Seller receives the remainder
  * - $AI token payouts get a bonus (default: 10%)
