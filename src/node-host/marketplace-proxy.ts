@@ -8,8 +8,8 @@
  * 4. Sends a final done event with token usage
  *
  * API priority:
+ *   HANZO_API_KEY + api.hanzo.ai → Hanzo Cloud proxy (OpenAI-compatible, preferred)
  *   ANTHROPIC_API_KEY + api.anthropic.com → direct Anthropic (seller's own key)
- *   HANZO_API_KEY + api.hanzo.ai → Hanzo Cloud proxy (OpenAI-compatible)
  *
  * Privacy: prompts are held in memory only during the API call, never logged to disk.
  */
@@ -49,33 +49,53 @@ type ResolvedApi = {
 
 /**
  * Model name mapping for Hanzo Cloud API.
- * The Hanzo API uses `anthropic/` prefixed model names.
+ * The Hanzo API uses short model aliases (no anthropic/ prefix).
  */
 const HANZO_MODEL_MAP: Record<string, string> = {
-  "claude-sonnet-4-20250514": "anthropic/claude-sonnet-4",
-  "claude-opus-4-20250514": "anthropic/claude-opus-4",
-  "claude-haiku-3-5-20241022": "anthropic/claude-haiku-4.5",
-  "claude-3-5-sonnet-20241022": "anthropic/claude-3.5-sonnet",
-  "claude-3-5-haiku-20241022": "anthropic/claude-3.5-haiku",
-  "claude-3-opus-20240229": "anthropic/claude-opus-4",
-  "claude-3-sonnet-20240229": "anthropic/claude-sonnet-4",
-  "claude-3-haiku-20240307": "anthropic/claude-3-haiku",
+  "claude-sonnet-4-20250514": "claude-sonnet-4",
+  "claude-opus-4-20250514": "claude-opus-4",
+  "claude-opus-4-20250620": "claude-opus-4-6",
+  "claude-sonnet-4-20250929": "claude-sonnet-4-5",
+  "claude-haiku-3-5-20241022": "claude-haiku-4-5",
+  "claude-3-5-sonnet-20241022": "claude-sonnet-4",
+  "claude-3-5-haiku-20241022": "claude-3-5-haiku",
+  "claude-3-opus-20240229": "claude-opus-4",
+  "claude-3-sonnet-20240229": "claude-sonnet-4",
+  "claude-3-haiku-20240307": "claude-3-5-haiku",
 };
 
 function mapModelForHanzo(model: string): string {
-  return HANZO_MODEL_MAP[model] ?? `anthropic/${model}`;
+  return HANZO_MODEL_MAP[model] ?? model;
 }
 
 /**
  * Resolve which API endpoint and key to use.
  *
  * Priority:
- *   1. Explicit ANTHROPIC_API_KEY (sk-ant-*) → api.anthropic.com (Anthropic format)
- *   2. config.claudeApiKey (if Anthropic key) → api.anthropic.com (Anthropic format)
- *   3. HANZO_API_KEY → api.hanzo.ai (OpenAI format)
+ *   1. HANZO_API_KEY or hk-* config key → api.hanzo.ai (OpenAI format, most reliable)
+ *   2. Explicit ANTHROPIC_API_KEY (sk-ant-*) → api.anthropic.com (Anthropic format)
+ *   3. config.claudeApiKey (if Anthropic key) → api.anthropic.com (Anthropic format)
  */
 function resolveApi(config: NodeHostMarketplaceConfig): ResolvedApi | null {
-  // 1. Real Anthropic API key (from env or config) — native Messages format.
+  const configKey = config.claudeApiKey;
+
+  // 1. Hanzo API — OpenAI-compatible chat completions format (preferred).
+  const hanzoKey = process.env.HANZO_API_KEY || process.env.HANZO_ACCESS_KEY;
+  if (hanzoKey || (configKey && !configKey.startsWith("sk-ant-"))) {
+    const key = hanzoKey ?? configKey!;
+    return {
+      url: process.env.HANZO_API_URL?.trim() || HANZO_API_URL,
+      apiKey: key,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      format: "openai",
+      label: "Hanzo API",
+    };
+  }
+
+  // 2. Direct Anthropic API key from env.
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (anthropicKey && anthropicKey.startsWith("sk-ant-")) {
     return {
@@ -90,7 +110,8 @@ function resolveApi(config: NodeHostMarketplaceConfig): ResolvedApi | null {
       label: "Anthropic API",
     };
   }
-  const configKey = config.claudeApiKey;
+
+  // 3. Anthropic API key from config.
   if (configKey && configKey.startsWith("sk-ant-")) {
     return {
       url: ANTHROPIC_API_URL,
@@ -102,21 +123,6 @@ function resolveApi(config: NodeHostMarketplaceConfig): ResolvedApi | null {
       },
       format: "anthropic",
       label: "Anthropic API",
-    };
-  }
-
-  // 2. Hanzo API — OpenAI-compatible chat completions format.
-  const hanzoKey = configKey || process.env.HANZO_API_KEY || process.env.HANZO_ACCESS_KEY;
-  if (hanzoKey) {
-    return {
-      url: process.env.HANZO_API_URL?.trim() || HANZO_API_URL,
-      apiKey: hanzoKey,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${hanzoKey}`,
-      },
-      format: "openai",
-      label: "Hanzo API",
     };
   }
 
