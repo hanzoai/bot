@@ -1,0 +1,18 @@
+{
+  "name": "@hanzo/bot-continuous-learning",
+  "version": "2026.2.26",
+  "private": true,
+  "description": "Continuous learning via GRPO experience management and telemetry feedback",
+  "type": "module",
+  "devDependencies": {
+    "@hanzo/bot": "workspace:*"
+  },
+  "peerDependencies": {
+    "@hanzo/bot": ">=2026.1.26"
+  },
+  "bot": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
