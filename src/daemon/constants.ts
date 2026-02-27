@@ -1,10 +1,10 @@
 // Default service labels (canonical + legacy compatibility)
-export const GATEWAY_LAUNCH_AGENT_LABEL = "ai.bot.gateway";
+export const GATEWAY_LAUNCH_AGENT_LABEL = "ai.hanzo.bot.gateway";
 export const GATEWAY_SYSTEMD_SERVICE_NAME = "bot-gateway";
 export const GATEWAY_WINDOWS_TASK_NAME = "Hanzo Bot Gateway";
 export const GATEWAY_SERVICE_MARKER = "bot";
 export const GATEWAY_SERVICE_KIND = "gateway";
-export const NODE_LAUNCH_AGENT_LABEL = "ai.bot.node";
+export const NODE_LAUNCH_AGENT_LABEL = "ai.hanzo.bot.node";
 export const NODE_SYSTEMD_SERVICE_NAME = "bot-node";
 export const NODE_WINDOWS_TASK_NAME = "Hanzo Bot Node";
 export const NODE_SERVICE_MARKER = "bot";
@@ -32,7 +32,7 @@ export function resolveGatewayLaunchAgentLabel(profile?: string): string {
   if (!normalized) {
     return GATEWAY_LAUNCH_AGENT_LABEL;
   }
-  return `ai.bot.${normalized}`;
+  return `ai.hanzo.bot.${normalized}`;
 }
 
 export function resolveLegacyGatewayLaunchAgentLabels(profile?: string): string[] {

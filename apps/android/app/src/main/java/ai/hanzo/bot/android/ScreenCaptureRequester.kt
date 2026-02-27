@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android
+package ai.hanzo.bot.android
 
 import android.app.Activity
 import android.content.Context

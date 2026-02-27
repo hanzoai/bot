@@ -170,10 +170,7 @@ export function applyMoonshotProviderConfigCn(cfg: BotConfig): BotConfig {
   return applyMoonshotProviderConfigWithBaseUrl(cfg, MOONSHOT_CN_BASE_URL);
 }
 
-function applyMoonshotProviderConfigWithBaseUrl(
-  cfg: BotConfig,
-  baseUrl: string,
-): BotConfig {
+function applyMoonshotProviderConfigWithBaseUrl(cfg: BotConfig, baseUrl: string): BotConfig {
   const models = { ...cfg.agents?.defaults?.models };
   models[MOONSHOT_DEFAULT_MODEL_REF] = {
     ...models[MOONSHOT_DEFAULT_MODEL_REF],

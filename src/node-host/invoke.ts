@@ -32,7 +32,9 @@ import {
   type ExecHostRunResult,
 } from "../infra/exec-host.js";
 import { validateSystemRunCommandConsistency } from "../infra/system-run-command.js";
+import { loadNodeHostConfig } from "./config.js";
 import { runBrowserProxyCommand } from "./invoke-browser.js";
+import { handleMarketplaceProxy, type MarketplaceProxyRequest } from "./marketplace-proxy.js";
 
 const OUTPUT_CAP = 200_000;
 const OUTPUT_EVENT_TAIL = 20_000;
@@ -480,6 +482,55 @@ export async function handleInvoke(
     return;
   }
 
+  if (command === "vnc.tunnel.open") {
+    try {
+      const params = decodeParams<{ tunnelId: string; tunnelUrl: string }>(frame.paramsJSON);
+      console.error(
+        `[vnc] received vnc.tunnel.open: tunnelId=${params.tunnelId?.substring(0, 8)} tunnelUrl=${params.tunnelUrl?.substring(0, 80)}`,
+      );
+      if (!params.tunnelId || !params.tunnelUrl) {
+        throw new Error("INVALID_REQUEST: tunnelId and tunnelUrl required");
+      }
+      // Respond immediately — tunnel setup happens asynchronously.
+      await sendInvokeResult(client, frame, { ok: true });
+      // Open VNC tunnel in the background.
+      void openVncTunnel(params.tunnelId, params.tunnelUrl);
+    } catch (err) {
+      await sendInvokeResult(client, frame, {
+        ok: false,
+        error: { code: "INVALID_REQUEST", message: String(err) },
+      });
+    }
+    return;
+  }
+
+  if (command === "marketplace.proxy") {
+    try {
+      const nodeConfig = await loadNodeHostConfig();
+      if (!nodeConfig?.marketplace?.enabled) {
+        await sendInvokeResult(client, frame, {
+          ok: false,
+          error: { code: "UNAVAILABLE", message: "marketplace not enabled on this node" },
+        });
+        return;
+      }
+      const params = decodeParams<MarketplaceProxyRequest>(frame.paramsJSON);
+      if (!params.requestId || !params.model || !params.messages) {
+        throw new Error("INVALID_REQUEST: requestId, model, and messages required");
+      }
+      // Respond immediately — proxy execution happens asynchronously via events.
+      await sendInvokeResult(client, frame, { ok: true });
+      // Execute proxy in background (chunks/done/error sent as node.event).
+      void handleMarketplaceProxy(params, nodeConfig.marketplace, client);
+    } catch (err) {
+      await sendInvokeResult(client, frame, {
+        ok: false,
+        error: { code: "INVALID_REQUEST", message: String(err) },
+      });
+    }
+    return;
+  }
+
   if (command !== "system.run") {
     await sendInvokeResult(client, frame, {
       ok: false,
@@ -809,6 +860,70 @@ export async function handleInvoke(
       stderr: result.stderr,
       error: result.error ?? null,
     }),
+  });
+}
+
+/**
+ * Open a VNC tunnel: connect a new WebSocket to the gateway and pipe binary
+ * data between it and a local VNC server (macOS Screen Sharing / x11vnc on
+ * port 5900).
+ */
+async function openVncTunnel(tunnelId: string, tunnelUrl: string): Promise<void> {
+  const { createConnection } = await import("node:net");
+  const { WebSocket: WsClient } = await import("ws");
+  const log = (msg: string) => console.error(`[vnc-tunnel ${tunnelId.substring(0, 8)}] ${msg}`);
+
+  const vncHost = process.env.BOT_VNC_HOST?.trim() ?? "127.0.0.1";
+  const vncPort = Number(process.env.BOT_VNC_PORT?.trim() ?? 5900);
+
+  log(`opening tunnel to ${tunnelUrl.substring(0, 80)}, vnc=${vncHost}:${vncPort}`);
+
+  // Connect back to the gateway's /vnc-tunnel endpoint.
+  const ws = new WsClient(tunnelUrl, { maxPayload: 25 * 1024 * 1024 });
+
+  ws.on("open", () => {
+    log("tunnel WS connected, connecting to local VNC server");
+    // Now connect to the local VNC server.
+    const tcp = createConnection({ host: vncHost, port: vncPort }, () => {
+      log("VNC TCP connected — relaying data");
+      // TCP → WS
+      tcp.on("data", (data: Buffer) => {
+        if (ws.readyState === WsClient.OPEN) {
+          ws.send(data);
+        }
+      });
+      tcp.on("end", () => ws.close(1000, "VNC server closed"));
+      tcp.on("error", (err) => ws.close(1011, `VNC error: ${err.message}`));
+    });
+
+    tcp.on("error", (err) => {
+      log(`VNC TCP error: ${err.message}`);
+      ws.close(1011, `Cannot connect to VNC at ${vncHost}:${vncPort}: ${err.message}`);
+    });
+
+    // WS → TCP
+    ws.on("message", (data: Buffer) => {
+      if (tcp && !tcp.destroyed) {
+        tcp.write(data);
+      }
+    });
+
+    ws.on("close", (code, reason) => {
+      log(`tunnel WS closed: code=${code} reason=${String(reason)}`);
+      if (tcp && !tcp.destroyed) {
+        tcp.end();
+      }
+    });
+    ws.on("error", (err) => {
+      log(`tunnel WS error: ${err.message}`);
+      if (tcp && !tcp.destroyed) {
+        tcp.destroy();
+      }
+    });
+  });
+
+  ws.on("error", (err) => {
+    log(`tunnel WS connect error: ${err.message}`);
   });
 }
 

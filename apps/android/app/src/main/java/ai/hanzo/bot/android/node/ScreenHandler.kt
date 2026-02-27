@@ -1,6 +1,6 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
-import ai.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.gateway.GatewaySession
 
 class ScreenHandler(
   private val screenRecorder: ScreenRecordManager,

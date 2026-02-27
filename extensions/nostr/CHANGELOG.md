@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026.2.23
+
+### Changes
+
+- Version alignment with core Hanzo Bot release numbers.
+
+## 2026.2.17
+
+### Changes
+
+- Version alignment with core Hanzo Bot release numbers.
+
 ## 2026.2.16
 
 ### Changes

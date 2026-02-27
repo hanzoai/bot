@@ -1,5 +1,6 @@
 import type { TlsOptions } from "node:tls";
 import type { WebSocketServer } from "ws";
+import { randomBytes } from "node:crypto";
 import {
   createServer as createHttpServer,
   type Server as HttpServer,
@@ -51,9 +52,12 @@ import {
 } from "./hooks.js";
 import { sendGatewayAuthFailure } from "./http-common.js";
 import { getBearerToken, getHeader } from "./http-utils.js";
+import { handleIamOAuthHttpRequest } from "./iam-oauth-http.js";
+import { handleMarketplaceHttpRequest, type MarketplaceHttpOptions } from "./marketplace-http.js";
 import { isPrivateOrLoopbackAddress, resolveGatewayClientIp } from "./net.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
+import { createVncProxy, vncViewerHtml } from "./server-methods/vnc.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
@@ -119,7 +123,17 @@ async function authorizeCanvasRequest(params: {
   }
 
   let lastAuthFailure: GatewayAuthResult | null = null;
-  const token = getBearerToken(req);
+  // Accept token from Authorization header or ?token= query parameter.
+  // Query param is needed for WebSocket upgrades (browsers can't set WS headers).
+  const queryToken = (() => {
+    try {
+      const url = new URL(req.url ?? "/", "http://localhost");
+      return url.searchParams.get("token") ?? undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+  const token = getBearerToken(req) ?? queryToken;
   if (token) {
     const authResult = await authorizeGatewayConnect({
       auth: { ...auth, allowTailscale: false },
@@ -450,6 +464,11 @@ export function createGatewayHttpServer(opts: {
   /** Optional rate limiter for auth brute-force protection. */
   rateLimiter?: AuthRateLimiter;
   tlsOptions?: TlsOptions;
+  /** VNC proxy for /vnc-viewer endpoint. */
+  vncEnabled?: boolean;
+  gatewayOrigin?: string;
+  /** P2P marketplace HTTP endpoint options. */
+  marketplace?: MarketplaceHttpOptions;
 }): HttpServer {
   const {
     canvasHost,
@@ -482,7 +501,70 @@ export function createGatewayHttpServer(opts: {
     try {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
-      const requestPath = new URL(req.url ?? "/", "http://localhost").pathname;
+      const requestUrl = new URL(req.url ?? "/", "http://localhost");
+      const requestPath = requestUrl.pathname;
+
+      // Health check endpoint — unauthenticated, used by K8s probes and load balancers.
+      if (requestPath === "/health" || requestPath === "/healthz") {
+        sendJson(res, 200, { status: "ok", timestamp: new Date().toISOString() });
+        return;
+      }
+
+      // VNC viewer — serves self-contained noVNC HTML page (gateway-auth protected).
+      // Supports both Bearer header and ?token= query param (for iframe embedding).
+      if (requestPath === "/vnc-viewer" && opts.vncEnabled) {
+        const headerToken = getBearerToken(req);
+        const queryToken = requestUrl.searchParams.get("token") ?? undefined;
+        const token = headerToken ?? queryToken;
+        const authResult = await authorizeGatewayConnect({
+          auth: resolvedAuth,
+          connectAuth: token ? { token, password: token } : null,
+          req,
+          trustedProxies,
+          rateLimiter,
+        });
+        if (!authResult.ok) {
+          sendGatewayAuthFailure(res, authResult);
+          return;
+        }
+        // Prefer the Host header + X-Forwarded-Proto so the noVNC viewer
+        // connects to the public URL (e.g. wss://gw.hanzo.bot/vnc) instead of
+        // the internal bind address (ws://0.0.0.0:18789/vnc).
+        const host = req.headers.host;
+        const proto = getHeader(req, "x-forwarded-proto") ?? (opts.tlsOptions ? "https" : "http");
+        const origin = host ? `${proto}://${host}` : (opts.gatewayOrigin ?? "http://localhost");
+        const nodeId = requestUrl.searchParams.get("nodeId") ?? undefined;
+        // Generate a per-request CSP nonce for inline script/style.
+        const cspNonce = randomBytes(16).toString("base64");
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        // Security headers: prevent token leaks, clickjacking, MIME sniffing.
+        res.setHeader("Referrer-Policy", "no-referrer");
+        res.setHeader("X-Content-Type-Options", "nosniff");
+        res.setHeader("X-Frame-Options", "DENY");
+        res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+        res.setHeader("Cache-Control", "no-store");
+        res.setHeader(
+          "Content-Security-Policy",
+          [
+            "default-src 'none'",
+            `script-src 'nonce-${cspNonce}' https://esm.sh`,
+            `style-src 'nonce-${cspNonce}'`,
+            `connect-src wss://${req.headers.host ?? "*"} ws://localhost:*`,
+            "frame-ancestors 'none'",
+          ].join("; "),
+        );
+        res.end(vncViewerHtml(origin, nodeId, token, cspNonce));
+        return;
+      }
+
+      // IAM OAuth proxy endpoints (/auth/*) — unauthenticated, handles its own auth
+      if (resolvedAuth.mode === "iam" && resolvedAuth.iam) {
+        if (await handleIamOAuthHttpRequest(req, res, resolvedAuth.iam)) {
+          return;
+        }
+      }
+
       if (await handleHooksRequest(req, res)) {
         return;
       }
@@ -527,8 +609,14 @@ export function createGatewayHttpServer(opts: {
             config: openResponsesConfig,
             trustedProxies,
             rateLimiter,
+            iamConfig: resolvedAuth.iam,
           })
         ) {
+          return;
+        }
+      }
+      if (opts.marketplace) {
+        if (await handleMarketplaceHttpRequest(req, res, opts.marketplace)) {
           return;
         }
       }
@@ -538,6 +626,7 @@ export function createGatewayHttpServer(opts: {
             auth: resolvedAuth,
             trustedProxies,
             rateLimiter,
+            iamConfig: resolvedAuth.iam,
           })
         ) {
           return;
@@ -573,11 +662,24 @@ export function createGatewayHttpServer(opts: {
         ) {
           return;
         }
+        // Forward a verified Bearer token to the Control UI bootstrap config
+        // so the SPA can use it for WebSocket auth without a separate login step.
+        const controlUiBearerToken = (() => {
+          const bt = getBearerToken(req);
+          if (!bt) {
+            return undefined;
+          }
+          if (resolvedAuth.token && safeEqualSecret(bt, resolvedAuth.token)) {
+            return bt;
+          }
+          return undefined;
+        })();
         if (
           handleControlUiHttpRequest(req, res, {
             basePath: controlUiBasePath,
             config: configSnapshot,
             root: controlUiRoot,
+            bearerToken: controlUiBearerToken,
           })
         ) {
           return;
@@ -605,10 +707,40 @@ export function attachGatewayUpgradeHandler(opts: {
   resolvedAuth: ResolvedGatewayAuth;
   /** Optional rate limiter for auth brute-force protection. */
   rateLimiter?: AuthRateLimiter;
+  /** VNC WebSocket-to-TCP proxy for /vnc path. */
+  vncProxy?: ReturnType<typeof createVncProxy>;
 }) {
   const { httpServer, wss, canvasHost, clients, resolvedAuth, rateLimiter } = opts;
   httpServer.on("upgrade", (req, socket, head) => {
     void (async () => {
+      // VNC WebSocket proxy — intercept /vnc and /vnc-tunnel before other
+      // upgrade handlers.
+      if (opts.vncProxy) {
+        const url = new URL(req.url ?? "/", "http://localhost");
+        if (url.pathname === "/vnc") {
+          const configSnapshot = loadConfig();
+          const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
+          const ok = await authorizeCanvasRequest({
+            req,
+            auth: resolvedAuth,
+            trustedProxies,
+            clients,
+            rateLimiter,
+          });
+          if (!ok.ok) {
+            writeUpgradeAuthFailure(socket, ok);
+            socket.destroy();
+            return;
+          }
+          opts.vncProxy.handleUpgrade(req, socket, head);
+          return;
+        }
+        // VNC tunnel callback from node — no auth required (tunnelId is secret).
+        if (url.pathname === "/vnc-tunnel") {
+          opts.vncProxy.handleTunnelUpgrade(req, socket, head);
+          return;
+        }
+      }
       if (canvasHost) {
         const url = new URL(req.url ?? "/", "http://localhost");
         if (url.pathname === CANVAS_WS_PATH) {

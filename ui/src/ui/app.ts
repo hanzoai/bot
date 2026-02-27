@@ -1,5 +1,6 @@
 import { LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import type { ControlUiBootstrapIamConfig } from "../../../src/gateway/control-ui-contract.js";
 import type { EventLogEntry } from "./app-events.ts";
 import type { AppViewState } from "./app-view-state.ts";
 import type { DevicePairingList } from "./controllers/devices.ts";
@@ -79,6 +80,7 @@ import {
 } from "./app-tool-stream.ts";
 import { normalizeAssistantIdentity } from "./assistant-identity.ts";
 import { loadAssistantIdentity as loadAssistantIdentityInternal } from "./controllers/assistant-identity.ts";
+import { startIamLogin, getIamSignupUrl, iamLogout } from "./controllers/iam-auth.ts";
 import { loadSettings, type UiSettings } from "./storage.ts";
 import { type ChatAttachment, type ChatQueueItem, type CronFormState } from "./ui-types.ts";
 
@@ -133,6 +135,11 @@ export class BotApp extends LitElement {
   @state() assistantAvatar = bootAssistantIdentity.avatar;
   @state() assistantAgentId = bootAssistantIdentity.agentId ?? null;
 
+  @state() authMode: string | null = null;
+  @state() iamConfig: ControlUiBootstrapIamConfig | null = null;
+  @state() iamUser: { email?: string; name?: string; avatar?: string } | null = null;
+  @state() iamLoggingIn = false;
+
   @state() sessionKey = this.settings.sessionKey;
   @state() chatLoading = false;
   @state() chatSending = false;
@@ -167,6 +174,7 @@ export class BotApp extends LitElement {
   @state() execApprovalsSelectedAgent: string | null = null;
   @state() execApprovalsTarget: "gateway" | "node" = "gateway";
   @state() execApprovalsTargetNodeId: string | null = null;
+  @state() screenNodeId: string | null = null;
   @state() execApprovalQueue: ExecApprovalRequest[] = [];
   @state() execApprovalBusy = false;
   @state() execApprovalError: string | null = null;
@@ -204,6 +212,7 @@ export class BotApp extends LitElement {
   @state() whatsappBusy = false;
   @state() nostrProfileFormState: NostrProfileFormState | null = null;
   @state() nostrProfileAccountId: string | null = null;
+  @state() expandedChannel: string | null = null;
 
   @state() presenceLoading = false;
   @state() presenceEntries: PresenceEntry[] = [];
@@ -292,6 +301,12 @@ export class BotApp extends LitElement {
   // Non-reactive (don’t trigger renders just for timer bookkeeping).
   usageQueryDebounceTimer: number | null = null;
 
+  @state() marketplaceLoading = false;
+  @state() marketplaceStatus:
+    | import("./controllers/marketplace.js").MarketplaceStatusResult
+    | null = null;
+  @state() marketplaceError: string | null = null;
+
   @state() cronLoading = false;
   @state() cronJobs: CronJob[] = [];
   @state() cronStatus: CronStatus | null = null;
@@ -351,6 +366,7 @@ export class BotApp extends LitElement {
   basePath = "";
   private popStateHandler = () =>
     onPopStateInternal(this as unknown as Parameters<typeof onPopStateInternal>[0]);
+  postMessageHandler: ((event: MessageEvent) => void) | null = null;
   private themeMedia: MediaQueryList | null = null;
   private themeMediaHandler: ((event: MediaQueryListEvent) => void) | null = null;
   private topbarObserver: ResizeObserver | null = null;
@@ -379,6 +395,25 @@ export class BotApp extends LitElement {
 
   connect() {
     connectGatewayInternal(this as unknown as Parameters<typeof connectGatewayInternal>[0]);
+  }
+
+  connectGateway() {
+    connectGatewayInternal(this as unknown as Parameters<typeof connectGatewayInternal>[0]);
+  }
+
+  handleIamLogin() {
+    void startIamLogin(this as unknown as Parameters<typeof startIamLogin>[0]);
+  }
+
+  handleIamSignup() {
+    const url = getIamSignupUrl(this as unknown as Parameters<typeof getIamSignupUrl>[0]);
+    if (url) {
+      window.open(url, "_blank", "noopener");
+    }
+  }
+
+  handleIamLogout() {
+    iamLogout(this as unknown as Parameters<typeof iamLogout>[0]);
   }
 
   handleChatScroll(event: Event) {

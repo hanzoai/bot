@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.voice
+package ai.hanzo.bot.android.voice
 
 import android.media.MediaDataSource
 import kotlin.math.min

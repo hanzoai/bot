@@ -81,14 +81,14 @@ Use this if the gateway service keeps running but `bot` is missing.
 
 ### macOS (launchd)
 
-Default label is `bot.molt.gateway` (or `bot.molt.<profile>`; legacy `com.bot.*` may still exist):
+Default label is `ai.hanzo.bot.gateway` (or `ai.hanzo.bot.<profile>`; legacy `com.bot.*` may still exist):
 
 ```bash
-launchctl bootout gui/$UID/bot.molt.gateway
-rm -f ~/Library/LaunchAgents/bot.molt.gateway.plist
+launchctl bootout gui/$UID/ai.hanzo.bot.gateway
+rm -f ~/Library/LaunchAgents/ai.hanzo.bot.gateway.plist
 ```
 
-If you used a profile, replace the label and plist name with `bot.molt.<profile>`. Remove any legacy `com.bot.*` plists if present.
+If you used a profile, replace the label and plist name with `ai.hanzo.bot.<profile>`. Remove any legacy `com.bot.*` plists if present.
 
 ### Linux (systemd user unit)
 

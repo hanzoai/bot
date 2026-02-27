@@ -88,10 +88,7 @@ export function applyMinimaxConfig(cfg: BotConfig): BotConfig {
   return applyAgentDefaultModelPrimary(next, "lmstudio/minimax-m2.1-gs32");
 }
 
-export function applyMinimaxHostedConfig(
-  cfg: BotConfig,
-  params?: { baseUrl?: string },
-): BotConfig {
+export function applyMinimaxHostedConfig(cfg: BotConfig, params?: { baseUrl?: string }): BotConfig {
   const next = applyMinimaxHostedProviderConfig(cfg, params);
   return {
     ...next,
@@ -120,10 +117,7 @@ export function applyMinimaxApiProviderConfig(
   });
 }
 
-export function applyMinimaxApiConfig(
-  cfg: BotConfig,
-  modelId: string = "MiniMax-M2.5",
-): BotConfig {
+export function applyMinimaxApiConfig(cfg: BotConfig, modelId: string = "MiniMax-M2.5"): BotConfig {
   return applyMinimaxApiConfigWithBaseUrl(cfg, {
     providerId: "minimax",
     modelId,

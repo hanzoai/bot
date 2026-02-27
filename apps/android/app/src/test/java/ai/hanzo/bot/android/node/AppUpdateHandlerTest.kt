@@ -1,4 +1,4 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
 import java.io.File
 import org.junit.Assert.assertEquals

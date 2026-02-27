@@ -31,6 +31,8 @@ export const pt_BR: TranslationMap = {
     cron: "Tarefas Cron",
     skills: "Habilidades",
     nodes: "Nós",
+    screen: "Tela",
+    marketplace: "Marketplace",
     chat: "Chat",
     config: "Config",
     debug: "Debug",
@@ -46,6 +48,9 @@ export const pt_BR: TranslationMap = {
     cron: "Agendar despertares e execuções recorrentes de agentes.",
     skills: "Gerenciar disponibilidade de habilidades e injeção de chaves de API.",
     nodes: "Dispositivos pareados, capacidades e exposição de comandos.",
+    screen: "Acesso remoto à área de trabalho via compartilhamento de tela VNC.",
+    marketplace:
+      "Compartilhamento P2P de computação — capacidade ociosa do Claude para compradores.",
     chat: "Sessão de chat direta com o gateway para intervenções rápidas.",
     config: "Editar ~/.bot/bot.json com segurança.",
     debug: "Snapshots do gateway, eventos e chamadas RPC manuais.",
@@ -100,6 +105,18 @@ export const pt_BR: TranslationMap = {
       hint: "Esta página é HTTP, então o navegador bloqueia a identidade do dispositivo. Use HTTPS (Tailscale Serve) ou abra {url} no host do gateway.",
       stayHttp: "Se você precisar permanecer em HTTP, defina {config} (apenas token).",
     },
+    iam: {
+      subtitle: "Entre com sua conta Hanzo para acessar este gateway.",
+      signIn: "Entrar com Hanzo",
+      signingIn: "Entrando\u2026",
+      createAccount: "Criar Conta",
+      signOut: "Sair",
+    },
+  },
+  screen: {
+    disconnected: "Conecte-se ao gateway para acessar a área de trabalho remota.",
+    openNewTab: "Abrir em nova aba",
+    hint: "Requer Compartilhamento de Tela do macOS ou um servidor VNC na porta 5900.",
   },
   chat: {
     disconnected: "Desconectado do gateway.",

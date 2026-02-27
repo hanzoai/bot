@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.voice
+package ai.hanzo.bot.android.voice
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

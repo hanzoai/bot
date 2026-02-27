@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-INSTALL_URL="${BOT_INSTALL_URL:-${BOT_INSTALL_URL:-https://bot.bot/install.sh}}"
+INSTALL_URL="${BOT_INSTALL_URL:-https://raw.githubusercontent.com/hanzoai/bot/main/scripts/install.sh}"
 MODELS_MODE="${BOT_E2E_MODELS:-${BOT_E2E_MODELS:-both}}" # both|openai|anthropic
 INSTALL_TAG="${BOT_INSTALL_TAG:-${BOT_INSTALL_TAG:-latest}}"
 E2E_PREVIOUS_VERSION="${BOT_INSTALL_E2E_PREVIOUS:-${BOT_INSTALL_E2E_PREVIOUS:-}}"

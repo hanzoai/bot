@@ -1,7 +1,7 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
-import ai.bot.android.SecurePrefs
-import ai.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.SecurePrefs
+import ai.hanzo.bot.android.gateway.GatewaySession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

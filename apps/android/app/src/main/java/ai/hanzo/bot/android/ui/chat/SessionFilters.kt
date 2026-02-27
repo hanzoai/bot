@@ -1,6 +1,6 @@
-package ai.hanzo-bot.android.ui.chat
+package ai.hanzo.bot.android.ui.chat
 
-import ai.hanzo-bot.android.chat.ChatSessionEntry
+import ai.hanzo.bot.android.chat.ChatSessionEntry
 
 private const val RECENT_WINDOW_MS = 24 * 60 * 60 * 1000L
 

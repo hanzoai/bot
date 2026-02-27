@@ -504,10 +504,7 @@ export function applyModelAllowlist(cfg: BotConfig, models: string[]): BotConfig
   };
 }
 
-export function applyModelFallbacksFromSelection(
-  cfg: BotConfig,
-  selection: string[],
-): BotConfig {
+export function applyModelFallbacksFromSelection(cfg: BotConfig, selection: string[]): BotConfig {
   const normalized = normalizeModelKeys(selection);
   if (normalized.length <= 1) {
     return cfg;

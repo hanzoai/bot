@@ -353,17 +353,6 @@ function collectGatewayConfigFindings(
     });
   }
 
-  if (cfg.gateway?.controlUi?.dangerouslyDisableDeviceAuth === true) {
-    findings.push({
-      checkId: "gateway.control_ui.device_auth_disabled",
-      severity: "critical",
-      title: "DANGEROUS: Control UI device auth disabled",
-      detail:
-        "gateway.controlUi.dangerouslyDisableDeviceAuth=true disables device identity checks for the Control UI.",
-      remediation: "Disable it unless you are in a short-lived break-glass scenario.",
-    });
-  }
-
   const token =
     typeof auth.token === "string" && auth.token.trim().length > 0 ? auth.token.trim() : null;
   if (auth.mode === "token" && token && token.length < 24) {

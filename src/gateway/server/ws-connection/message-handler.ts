@@ -50,6 +50,7 @@ import {
 import { MAX_BUFFERED_BYTES, MAX_PAYLOAD_BYTES, TICK_INTERVAL_MS } from "../../server-constants.js";
 import { handleGatewayRequest } from "../../server-methods.js";
 import { formatError } from "../../server-utils.js";
+import { resolveTenantContext, validateTenantAccess } from "../../tenant-context.js";
 import { formatForLog, logWs } from "../../ws-log.js";
 import { truncateCloseReason } from "../close-reason.js";
 import {
@@ -340,10 +341,8 @@ export function attachGatewayWsMessageHandler(params: {
         const hasSharedAuth = hasTokenAuth || hasPasswordAuth;
         const allowInsecureControlUi =
           isControlUi && configSnapshot.gateway?.controlUi?.allowInsecureAuth === true;
-        const disableControlUiDeviceAuth =
-          isControlUi && configSnapshot.gateway?.controlUi?.dangerouslyDisableDeviceAuth === true;
-        const allowControlUiBypass = allowInsecureControlUi || disableControlUiDeviceAuth;
-        const device = disableControlUiDeviceAuth ? null : deviceRaw;
+        const allowControlUiBypass = allowInsecureControlUi;
+        const device = deviceRaw;
 
         const hasDeviceTokenCandidate = Boolean(connectParams.auth?.token && device);
         let authResult: GatewayAuthResult = await authorizeGatewayConnect({
@@ -427,13 +426,17 @@ export function attachGatewayWsMessageHandler(params: {
           close(1008, truncateCloseReason(authMessage));
         };
         if (!device) {
-          if (scopes.length > 0 && !allowControlUiBypass) {
+          // IAM auth is cryptographically verified via JWKS — treat IAM-authenticated
+          // control UI connections as trusted (equivalent to shared-secret for bypass purposes).
+          const iamAuthOk = authOk && authMethod === "iam" && isControlUi;
+
+          if (scopes.length > 0 && !allowControlUiBypass && !iamAuthOk) {
             scopes = [];
             connectParams.scopes = scopes;
           }
-          const canSkipDevice = sharedAuthOk;
+          const canSkipDevice = sharedAuthOk || (authOk && allowControlUiBypass) || iamAuthOk;
 
-          if (isControlUi && !allowControlUiBypass) {
+          if (isControlUi && !allowControlUiBypass && !iamAuthOk) {
             const errorMessage = "control ui requires HTTPS or localhost (secure context)";
             setHandshakeState("failed");
             setCloseCause("control-ui-insecure-auth", {
@@ -452,7 +455,7 @@ export function attachGatewayWsMessageHandler(params: {
             return;
           }
 
-          // Allow shared-secret authenticated connections (e.g., control-ui) to skip device identity
+          // Allow shared-secret or IAM-authenticated connections (e.g., control-ui) to skip device identity
           if (!canSkipDevice) {
             if (!authOk && hasSharedAuth) {
               rejectUnauthorized(authResult);
@@ -649,7 +652,8 @@ export function attachGatewayWsMessageHandler(params: {
           return;
         }
 
-        const skipPairing = allowControlUiBypass && sharedAuthOk;
+        const skipPairing =
+          (allowControlUiBypass && sharedAuthOk) || (isControlUi && authOk && authMethod === "iam");
         if (device && devicePublicKey && !skipPairing) {
           const requirePairing = async (reason: string, _paired?: { deviceId: string }) => {
             const pairing = await requestDevicePairing({
@@ -662,7 +666,7 @@ export function attachGatewayWsMessageHandler(params: {
               role,
               scopes,
               remoteIp: reportedClientIp,
-              silent: isLocalClient,
+              silent: isLocalClient || authMethod === "iam" || authMethod === "token",
             });
             const context = buildRequestContext();
             if (pairing.request.silent === true) {
@@ -858,6 +862,29 @@ export function attachGatewayWsMessageHandler(params: {
           presenceKey,
           clientIp: reportedClientIp,
         };
+
+        // Enrich client with IAM tenant context when auth mode is "iam"
+        if (authResult.iamResult && authResult.iamResult.ok) {
+          nextClient.iamResult = authResult.iamResult;
+          const tenant = resolveTenantContext({
+            iamResult: authResult.iamResult,
+            requestedTenant: connectParams.tenant,
+          });
+          if (tenant) {
+            const accessError = validateTenantAccess({
+              iamResult: authResult.iamResult,
+              tenant,
+            });
+            if (accessError) {
+              setHandshakeState("failed");
+              send(errorShape(ErrorCodes.INVALID_REQUEST, `Tenant access denied: ${accessError}`));
+              close(4003, accessError);
+              return;
+            }
+            nextClient.tenant = tenant;
+          }
+        }
+
         setClient(nextClient);
         setHandshakeState("connected");
         if (role === "node") {
