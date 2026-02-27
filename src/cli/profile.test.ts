@@ -55,7 +55,7 @@ describe("applyCliProfileEnv", () => {
       env,
       homedir: () => "/home/peter",
     });
-    const expectedStateDir = path.join(path.resolve("/home/peter"), ".bot-dev");
+    const expectedStateDir = path.join(path.resolve("/home/peter"), ".hanzo", "bot-dev");
     expect(env.BOT_PROFILE).toBe("dev");
     expect(env.BOT_STATE_DIR).toBe(expectedStateDir);
     expect(env.BOT_CONFIG_PATH).toBe(path.join(expectedStateDir, "bot.json"));
@@ -89,8 +89,8 @@ describe("applyCliProfileEnv", () => {
     });
 
     const resolvedHome = path.resolve("/srv/bot-home");
-    expect(env.BOT_STATE_DIR).toBe(path.join(resolvedHome, ".bot-work"));
-    expect(env.BOT_CONFIG_PATH).toBe(path.join(resolvedHome, ".bot-work", "bot.json"));
+    expect(env.BOT_STATE_DIR).toBe(path.join(resolvedHome, ".hanzo", "bot-work"));
+    expect(env.BOT_CONFIG_PATH).toBe(path.join(resolvedHome, ".hanzo", "bot-work", "bot.json"));
   });
 });
 
