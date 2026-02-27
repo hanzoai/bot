@@ -153,7 +153,7 @@ describe("daemon-cli coverage", () => {
         BOT_CONFIG_PATH: "/tmp/bot-daemon-state/bot.json",
         BOT_GATEWAY_PORT: "19001",
       },
-      sourcePath: "/tmp/bot.molt.gateway.plist",
+      sourcePath: "/tmp/ai.hanzo.bot.gateway.plist",
     });
 
     const { registerDaemonCli } = await import("./daemon-cli.js");

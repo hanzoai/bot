@@ -1,21 +1,21 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
 import android.os.Build
-import ai.bot.android.BuildConfig
-import ai.bot.android.SecurePrefs
-import ai.bot.android.gateway.GatewayClientInfo
-import ai.bot.android.gateway.GatewayConnectOptions
-import ai.bot.android.gateway.GatewayEndpoint
-import ai.bot.android.gateway.GatewayTlsParams
-import ai.bot.android.protocol.BotCanvasA2UICommand
-import ai.bot.android.protocol.BotCanvasCommand
-import ai.bot.android.protocol.BotCameraCommand
-import ai.bot.android.protocol.BotLocationCommand
-import ai.bot.android.protocol.BotScreenCommand
-import ai.bot.android.protocol.BotSmsCommand
-import ai.bot.android.protocol.BotCapability
-import ai.bot.android.LocationMode
-import ai.bot.android.VoiceWakeMode
+import ai.hanzo.bot.android.BuildConfig
+import ai.hanzo.bot.android.SecurePrefs
+import ai.hanzo.bot.android.gateway.GatewayClientInfo
+import ai.hanzo.bot.android.gateway.GatewayConnectOptions
+import ai.hanzo.bot.android.gateway.GatewayEndpoint
+import ai.hanzo.bot.android.gateway.GatewayTlsParams
+import ai.hanzo.bot.android.protocol.HanzoBotCanvasA2UICommand
+import ai.hanzo.bot.android.protocol.HanzoBotCanvasCommand
+import ai.hanzo.bot.android.protocol.HanzoBotCameraCommand
+import ai.hanzo.bot.android.protocol.HanzoBotLocationCommand
+import ai.hanzo.bot.android.protocol.HanzoBotScreenCommand
+import ai.hanzo.bot.android.protocol.HanzoBotSmsCommand
+import ai.hanzo.bot.android.protocol.HanzoBotCapability
+import ai.hanzo.bot.android.LocationMode
+import ai.hanzo.bot.android.VoiceWakeMode
 
 class ConnectionManager(
   private val prefs: SecurePrefs,
@@ -81,24 +81,24 @@ class ConnectionManager(
 
   fun buildInvokeCommands(): List<String> =
     buildList {
-      add(BotCanvasCommand.Present.rawValue)
-      add(BotCanvasCommand.Hide.rawValue)
-      add(BotCanvasCommand.Navigate.rawValue)
-      add(BotCanvasCommand.Eval.rawValue)
-      add(BotCanvasCommand.Snapshot.rawValue)
-      add(BotCanvasA2UICommand.Push.rawValue)
-      add(BotCanvasA2UICommand.PushJSONL.rawValue)
-      add(BotCanvasA2UICommand.Reset.rawValue)
-      add(BotScreenCommand.Record.rawValue)
+      add(HanzoBotCanvasCommand.Present.rawValue)
+      add(HanzoBotCanvasCommand.Hide.rawValue)
+      add(HanzoBotCanvasCommand.Navigate.rawValue)
+      add(HanzoBotCanvasCommand.Eval.rawValue)
+      add(HanzoBotCanvasCommand.Snapshot.rawValue)
+      add(HanzoBotCanvasA2UICommand.Push.rawValue)
+      add(HanzoBotCanvasA2UICommand.PushJSONL.rawValue)
+      add(HanzoBotCanvasA2UICommand.Reset.rawValue)
+      add(HanzoBotScreenCommand.Record.rawValue)
       if (cameraEnabled()) {
-        add(BotCameraCommand.Snap.rawValue)
-        add(BotCameraCommand.Clip.rawValue)
+        add(HanzoBotCameraCommand.Snap.rawValue)
+        add(HanzoBotCameraCommand.Clip.rawValue)
       }
       if (locationMode() != LocationMode.Off) {
-        add(BotLocationCommand.Get.rawValue)
+        add(HanzoBotLocationCommand.Get.rawValue)
       }
       if (smsAvailable()) {
-        add(BotSmsCommand.Send.rawValue)
+        add(HanzoBotSmsCommand.Send.rawValue)
       }
       if (BuildConfig.DEBUG) {
         add("debug.logs")
@@ -109,15 +109,15 @@ class ConnectionManager(
 
   fun buildCapabilities(): List<String> =
     buildList {
-      add(BotCapability.Canvas.rawValue)
-      add(BotCapability.Screen.rawValue)
-      if (cameraEnabled()) add(BotCapability.Camera.rawValue)
-      if (smsAvailable()) add(BotCapability.Sms.rawValue)
+      add(HanzoBotCapability.Canvas.rawValue)
+      add(HanzoBotCapability.Screen.rawValue)
+      if (cameraEnabled()) add(HanzoBotCapability.Camera.rawValue)
+      if (smsAvailable()) add(HanzoBotCapability.Sms.rawValue)
       if (voiceWakeMode() != VoiceWakeMode.Off && hasRecordAudioPermission()) {
-        add(BotCapability.VoiceWake.rawValue)
+        add(HanzoBotCapability.VoiceWake.rawValue)
       }
       if (locationMode() != LocationMode.Off) {
-        add(BotCapability.Location.rawValue)
+        add(HanzoBotCapability.Location.rawValue)
       }
     }
 

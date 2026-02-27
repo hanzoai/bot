@@ -10,7 +10,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
 import type { ClientToolDefinition } from "../agents/pi-embedded-runner/run/params.js";
 import type { ImageContent } from "../commands/agent/types.js";
-import type { GatewayHttpResponsesConfig } from "../config/types.gateway.js";
+import type { GatewayHttpResponsesConfig, GatewayIamConfig } from "../config/types.gateway.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import type { ResolvedGatewayAuth } from "./auth.js";
 import { createDefaultDeps } from "../cli/deps.js";
@@ -41,6 +41,8 @@ import {
   buildAgentMessageFromConversationEntries,
   type ConversationEntry,
 } from "./agent-prompt.js";
+import { checkBillingAllowance } from "./billing/billing-gate.js";
+import { reportUsage } from "./billing/usage-reporter.js";
 import { sendJson, setSseHeaders, writeDone } from "./http-common.js";
 import { handleGatewayPostJsonEndpoint } from "./http-endpoint-helpers.js";
 import { resolveAgentIdForRequest, resolveSessionKey } from "./http-utils.js";
@@ -54,6 +56,7 @@ import {
   type StreamingEvent,
   type Usage,
 } from "./open-responses.schema.js";
+import { resolveTenantContext, type TenantContext } from "./tenant-context.js";
 
 type OpenResponsesHttpOptions = {
   auth: ResolvedGatewayAuth;
@@ -61,6 +64,7 @@ type OpenResponsesHttpOptions = {
   config?: GatewayHttpResponsesConfig;
   trustedProxies?: string[];
   rateLimiter?: AuthRateLimiter;
+  iamConfig?: GatewayIamConfig;
 };
 
 const DEFAULT_BODY_BYTES = 20 * 1024 * 1024;
@@ -383,6 +387,29 @@ export async function handleOpenResponsesHttpRequest(
   const model = payload.model;
   const user = payload.user;
 
+  // Resolve tenant context from IAM auth result (for billing & scoping)
+  let tenant: TenantContext | undefined;
+  if (handled.authResult?.iamResult && handled.authResult.iamResult.ok) {
+    tenant = resolveTenantContext({ iamResult: handled.authResult.iamResult }) ?? undefined;
+  }
+
+  // Billing gate: check subscription before dispatching LLM call
+  const billing = await checkBillingAllowance({
+    iamConfig: opts.iamConfig,
+    tenant,
+  });
+  if (!billing.allowed) {
+    sendJson(res, 402, {
+      error: {
+        message: billing.reason,
+        type: "billing_error",
+      },
+    });
+    return true;
+  }
+
+  const requestStartMs = Date.now();
+
   // Extract images + files from input (Phase 2)
   let images: ImageContent[] = [];
   let fileContexts: string[] = [];
@@ -552,6 +579,24 @@ export async function handleOpenResponsesHttpRequest(
           ? (meta as { pendingToolCalls?: Array<{ id: string; name: string; arguments: string }> })
               .pendingToolCalls
           : undefined;
+
+      // Report usage to IAM billing (async, non-blocking)
+      if (tenant && usage && (usage.input_tokens > 0 || usage.output_tokens > 0)) {
+        const agentMeta =
+          meta && typeof meta === "object"
+            ? (meta as { agentMeta?: { provider?: string } }).agentMeta
+            : undefined;
+        reportUsage({
+          tenant,
+          model,
+          provider: agentMeta?.provider ?? "unknown",
+          inputTokens: usage.input_tokens,
+          outputTokens: usage.output_tokens,
+          totalTokens: usage.total_tokens,
+          durationMs: Date.now() - requestStartMs,
+          timestamp: Date.now(),
+        });
+      }
 
       // If agent called a client tool, return function_call instead of text
       if (stopReason === "tool_calls" && pendingToolCalls && pendingToolCalls.length > 0) {
@@ -775,6 +820,26 @@ export async function handleOpenResponsesHttpRequest(
       });
 
       finalUsage = extractUsageFromResult(result);
+
+      // Report usage to IAM billing (streaming path)
+      if (tenant && finalUsage && (finalUsage.input_tokens > 0 || finalUsage.output_tokens > 0)) {
+        const sMeta = (result as { meta?: Record<string, unknown> } | null)?.meta;
+        const sAgentMeta =
+          sMeta && typeof sMeta === "object"
+            ? (sMeta as { agentMeta?: { provider?: string } }).agentMeta
+            : undefined;
+        reportUsage({
+          tenant,
+          model,
+          provider: sAgentMeta?.provider ?? "unknown",
+          inputTokens: finalUsage.input_tokens,
+          outputTokens: finalUsage.output_tokens,
+          totalTokens: finalUsage.total_tokens,
+          durationMs: Date.now() - requestStartMs,
+          timestamp: Date.now(),
+        });
+      }
+
       maybeFinalize();
 
       if (closed) {
