@@ -1,0 +1,8 @@
+{
+  "id": "self-improvement",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
