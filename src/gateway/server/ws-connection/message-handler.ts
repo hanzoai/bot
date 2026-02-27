@@ -31,7 +31,7 @@ import {
   type AuthRateLimiter,
 } from "../../auth-rate-limit.js";
 import { authorizeGatewayConnect, isLocalDirectRequest } from "../../auth.js";
-import { buildDeviceAuthPayload } from "../../device-auth.js";
+import { buildDeviceAuthPayload, buildDeviceAuthPayloadV3 } from "../../device-auth.js";
 import { isLoopbackAddress, isTrustedProxyAddress, resolveGatewayClientIp } from "../../net.js";
 import { resolveHostName } from "../../net.js";
 import { resolveNodeCommandAllowlist } from "../../node-command-policy.js";
@@ -550,7 +550,10 @@ export function attachGatewayWsMessageHandler(params: {
             close(1008, "device nonce mismatch");
             return;
           }
-          const payload = buildDeviceAuthPayload({
+          // Build the payload the node client signed.  Modern clients use v3
+          // (includes platform/deviceFamily), older clients use v2.  Try v3
+          // first, then fall back to v2.
+          const basePayloadParams = {
             deviceId: device.id,
             clientId: connectParams.client.id,
             clientMode: connectParams.client.mode,
@@ -558,9 +561,14 @@ export function attachGatewayWsMessageHandler(params: {
             scopes,
             signedAtMs: signedAt,
             token: connectParams.auth?.token ?? null,
-            nonce: providedNonce || undefined,
-            version: providedNonce ? "v2" : "v1",
+            nonce: providedNonce || "",
+          };
+          const v3Payload = buildDeviceAuthPayloadV3({
+            ...basePayloadParams,
+            platform: connectParams.client.platform,
+            deviceFamily: connectParams.client.deviceFamily,
           });
+          const v2Payload = buildDeviceAuthPayload(basePayloadParams);
           const rejectDeviceSignatureInvalid = () => {
             setHandshakeState("failed");
             setCloseCause("device-auth-invalid", {
@@ -576,26 +584,10 @@ export function attachGatewayWsMessageHandler(params: {
             });
             close(1008, "device signature invalid");
           };
-          const signatureOk = verifyDeviceSignature(device.publicKey, payload, device.signature);
-          const allowLegacy = !nonceRequired && !providedNonce;
-          if (!signatureOk && allowLegacy) {
-            const legacyPayload = buildDeviceAuthPayload({
-              deviceId: device.id,
-              clientId: connectParams.client.id,
-              clientMode: connectParams.client.mode,
-              role,
-              scopes,
-              signedAtMs: signedAt,
-              token: connectParams.auth?.token ?? null,
-              version: "v1",
-            });
-            if (verifyDeviceSignature(device.publicKey, legacyPayload, device.signature)) {
-              // accepted legacy loopback signature
-            } else {
-              rejectDeviceSignatureInvalid();
-              return;
-            }
-          } else if (!signatureOk) {
+          const signatureOk =
+            verifyDeviceSignature(device.publicKey, v3Payload, device.signature) ||
+            verifyDeviceSignature(device.publicKey, v2Payload, device.signature);
+          if (!signatureOk) {
             rejectDeviceSignatureInvalid();
             return;
           }
