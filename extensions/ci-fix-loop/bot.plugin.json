@@ -1,0 +1,8 @@
+{
+  "id": "ci-fix-loop",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
