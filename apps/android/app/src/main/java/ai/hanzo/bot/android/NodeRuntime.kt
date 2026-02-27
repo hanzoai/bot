@@ -1,25 +1,25 @@
-package ai.bot.android
+package ai.hanzo.bot.android
 
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.SystemClock
 import androidx.core.content.ContextCompat
-import ai.bot.android.chat.ChatController
-import ai.bot.android.chat.ChatMessage
-import ai.bot.android.chat.ChatPendingToolCall
-import ai.bot.android.chat.ChatSessionEntry
-import ai.bot.android.chat.OutgoingAttachment
-import ai.bot.android.gateway.DeviceAuthStore
-import ai.bot.android.gateway.DeviceIdentityStore
-import ai.bot.android.gateway.GatewayDiscovery
-import ai.bot.android.gateway.GatewayEndpoint
-import ai.bot.android.gateway.GatewaySession
-import ai.bot.android.gateway.probeGatewayTlsFingerprint
-import ai.bot.android.node.*
-import ai.bot.android.protocol.BotCanvasA2UIAction
-import ai.bot.android.voice.TalkModeManager
-import ai.bot.android.voice.VoiceWakeManager
+import ai.hanzo.bot.android.chat.ChatController
+import ai.hanzo.bot.android.chat.ChatMessage
+import ai.hanzo.bot.android.chat.ChatPendingToolCall
+import ai.hanzo.bot.android.chat.ChatSessionEntry
+import ai.hanzo.bot.android.chat.OutgoingAttachment
+import ai.hanzo.bot.android.gateway.DeviceAuthStore
+import ai.hanzo.bot.android.gateway.DeviceIdentityStore
+import ai.hanzo.bot.android.gateway.GatewayDiscovery
+import ai.hanzo.bot.android.gateway.GatewayEndpoint
+import ai.hanzo.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.gateway.probeGatewayTlsFingerprint
+import ai.hanzo.bot.android.node.*
+import ai.hanzo.bot.android.protocol.HanzoBotCanvasA2UIAction
+import ai.hanzo.bot.android.voice.TalkModeManager
+import ai.hanzo.bot.android.voice.VoiceWakeManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -619,7 +619,7 @@ class NodeRuntime(context: Context) {
       val actionId = (userActionObj["id"] as? JsonPrimitive)?.content?.trim().orEmpty().ifEmpty {
         java.util.UUID.randomUUID().toString()
       }
-      val name = BotCanvasA2UIAction.extractActionName(userActionObj) ?: return@launch
+      val name = HanzoBotCanvasA2UIAction.extractActionName(userActionObj) ?: return@launch
 
       val surfaceId =
         (userActionObj["surfaceId"] as? JsonPrimitive)?.content?.trim().orEmpty().ifEmpty { "main" }
@@ -629,7 +629,7 @@ class NodeRuntime(context: Context) {
 
       val sessionKey = resolveMainSessionKey()
       val message =
-        BotCanvasA2UIAction.formatAgentMessage(
+        HanzoBotCanvasA2UIAction.formatAgentMessage(
           actionName = name,
           sessionKey = sessionKey,
           surfaceId = surfaceId,
@@ -663,7 +663,7 @@ class NodeRuntime(context: Context) {
 
       try {
         canvas.eval(
-          BotCanvasA2UIAction.jsDispatchA2UIActionStatus(
+          HanzoBotCanvasA2UIAction.jsDispatchA2UIActionStatus(
             actionId = actionId,
             ok = connected && error == null,
             error = error,

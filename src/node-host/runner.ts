@@ -7,6 +7,7 @@ import { ensureBotCliOnPath } from "../infra/path-env.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 import { VERSION } from "../version.js";
 import { ensureNodeHostConfig, saveNodeHostConfig, type NodeHostGatewayConfig } from "./config.js";
+import { IdleDetector } from "./idle-detector.js";
 import {
   coerceNodeInvokePayload,
   handleInvoke,
@@ -17,7 +18,7 @@ import {
 export { buildNodeInvokeResultParams };
 
 type NodeHostRunOptions = {
-  gatewayHost: string;
+  gatewayHost?: string;
   gatewayPort: number;
   gatewayTls?: boolean;
   gatewayTlsFingerprint?: string;
@@ -90,6 +91,9 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   const resolvedBrowser = resolveBrowserConfig(cfg.browser, cfg);
   const browserProxyEnabled =
     cfg.nodeHost?.browserProxy?.enabled !== false && resolvedBrowser.enabled;
+  const marketplaceEnabled =
+    config.marketplace?.enabled === true &&
+    Boolean(config.marketplace?.claudeApiKey || process.env.ANTHROPIC_API_KEY);
   const isRemoteMode = cfg.gateway?.mode === "remote";
   const token =
     process.env.BOT_GATEWAY_TOKEN?.trim() ||
@@ -98,16 +102,30 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     process.env.BOT_GATEWAY_PASSWORD?.trim() ||
     (isRemoteMode ? cfg.gateway?.remote?.password : cfg.gateway?.auth?.password);
 
+  // Gateway URL resolution priority:
+  // 1. BOT_NODE_GATEWAY_URL env var (cloud pods set this for unified gateway)
+  // 2. gateway.remote.url from config (remote mode, e.g. wss://gw.hanzo.bot)
+  // 3. Constructed from CLI --host/--port/--tls options
+  const envGatewayUrl = process.env.BOT_NODE_GATEWAY_URL?.trim();
+  const envGatewayHost = process.env.BOT_NODE_GATEWAY_HOST?.trim();
+  const remoteUrl = isRemoteMode ? cfg.gateway?.remote?.url : undefined;
   const host = gateway.host ?? "127.0.0.1";
   const port = gateway.port ?? 18789;
   const scheme = gateway.tls ? "wss" : "ws";
-  const url = `${scheme}://${host}:${port}`;
+  const url = envGatewayUrl || remoteUrl || `${scheme}://${host}:${port}`;
   const pathEnv = ensureNodePathEnv();
-  // eslint-disable-next-line no-console
-  console.log(`node host PATH: ${pathEnv}`);
+
+  // Build optional WS headers — BOT_NODE_GATEWAY_HOST overrides the Host
+  // header sent to the gateway.  Useful when BOT_NODE_GATEWAY_URL points to a
+  // direct IP (bypassing CDN/proxy) but nginx-ingress still needs the original
+  // hostname for virtual-host routing.
+  const wsHeaders: Record<string, string> | undefined = envGatewayHost
+    ? { Host: envGatewayHost }
+    : undefined;
 
   const client = new GatewayClient({
     url,
+    wsHeaders,
     token: token?.trim() || undefined,
     password: password?.trim() || undefined,
     instanceId: nodeId,
@@ -118,13 +136,18 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     mode: GATEWAY_CLIENT_MODES.NODE,
     role: "node",
     scopes: [],
-    caps: ["system", ...(browserProxyEnabled ? ["browser"] : [])],
+    caps: [
+      "system",
+      ...(browserProxyEnabled ? ["browser"] : []),
+      ...(marketplaceEnabled ? ["marketplace"] : []),
+    ],
     commands: [
       "system.run",
       "system.which",
       "system.execApprovals.get",
       "system.execApprovals.set",
       ...(browserProxyEnabled ? ["browser.proxy"] : []),
+      ...(marketplaceEnabled ? ["marketplace.proxy"] : []),
     ],
     pathEnv,
     permissions: undefined,
@@ -139,6 +162,18 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
         return;
       }
       void handleInvoke(payload, client, skillBins);
+    },
+    onHelloOk: () => {
+      // eslint-disable-next-line no-console
+      console.log(`\n  Connected to gateway: ${url}`);
+      // eslint-disable-next-line no-console
+      console.log(`  Node name:   ${displayName}`);
+      if (isRemoteMode) {
+        // eslint-disable-next-line no-console
+        console.log(`  Playground:  https://app.hanzo.bot/nodes`);
+      }
+      // eslint-disable-next-line no-console
+      console.log("");
     },
     onConnectError: (err) => {
       // keep retrying (handled by GatewayClient)
@@ -157,6 +192,21 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     return bins;
   });
 
+  // Keep-alive handle: GatewayClient reconnect timers use .unref() and
+  // won't prevent process exit.  A referenced interval ensures the event
+  // loop stays active so the node host can reconnect indefinitely.
+  setInterval(() => {}, 2_147_483_647);
+
   client.start();
+
+  if (marketplaceEnabled && config.marketplace) {
+    const idleDetector = new IdleDetector(client, config.marketplace);
+    idleDetector.start();
+    // eslint-disable-next-line no-console
+    console.log(
+      `  Marketplace: enabled (idle threshold: ${config.marketplace.idleThresholdSec ?? 300}s)`,
+    );
+  }
+
   await new Promise(() => {});
 }
