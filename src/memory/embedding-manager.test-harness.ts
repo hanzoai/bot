@@ -14,11 +14,7 @@ export function installEmbeddingManagerFixture(opts: {
   fixturePrefix: string;
   largeTokens: number;
   smallTokens: number;
-  createCfg: (params: {
-    workspaceDir: string;
-    indexPath: string;
-    tokens: number;
-  }) => BotConfig;
+  createCfg: (params: { workspaceDir: string; indexPath: string; tokens: number }) => BotConfig;
   resetIndexEachTest?: boolean;
 }) {
   const embedBatch = getEmbedBatchMock();

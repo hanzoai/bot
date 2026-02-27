@@ -16,11 +16,17 @@ export type OverviewProps = {
   cronEnabled: boolean | null;
   cronNext: number | null;
   lastChannelsRefresh: number | null;
+  authMode: string | null;
+  iamUser: { email?: string; name?: string; avatar?: string } | null;
+  iamLoggingIn: boolean;
   onSettingsChange: (next: UiSettings) => void;
   onPasswordChange: (next: string) => void;
   onSessionKeyChange: (next: string) => void;
   onConnect: () => void;
   onRefresh: () => void;
+  onIamLogin: () => void;
+  onIamSignup: () => void;
+  onIamLogout: () => void;
 };
 
 export function renderOverview(props: OverviewProps) {
@@ -123,6 +129,9 @@ export function renderOverview(props: OverviewProps) {
   })();
 
   const currentLocale = i18n.getLocale();
+  const authMode = props.authMode ?? (snapshot as { authMode?: string } | undefined)?.authMode;
+  const isTrustedProxy = authMode === "trusted-proxy";
+  const isIam = authMode === "iam";
 
   return html`
     <section class="grid grid-cols-2">
@@ -130,44 +139,62 @@ export function renderOverview(props: OverviewProps) {
         <div class="card-title">${t("overview.access.title")}</div>
         <div class="card-sub">${t("overview.access.subtitle")}</div>
         <div class="form-grid" style="margin-top: 16px;">
-          <label class="field">
-            <span>${t("overview.access.wsUrl")}</span>
-            <input
-              .value=${props.settings.gatewayUrl}
-              @input=${(e: Event) => {
-                const v = (e.target as HTMLInputElement).value;
-                props.onSettingsChange({ ...props.settings, gatewayUrl: v });
-              }}
-              placeholder="ws://100.x.y.z:18789"
-            />
-          </label>
           ${
-            isTrustedProxy
-              ? ""
+            isIam
+              ? html`
+                <div class="field" style="padding: 8px 0;">
+                  <div class="muted" style="font-size: 13px;">
+                    ${
+                      props.iamUser
+                        ? t("overview.iam.connectedAs", {
+                            name: props.iamUser.name || props.iamUser.email || "User",
+                          })
+                        : t("overview.iam.subtitle")
+                    }
+                  </div>
+                </div>
+              `
               : html`
                 <label class="field">
-                  <span>${t("overview.access.token")}</span>
+                  <span>${t("overview.access.wsUrl")}</span>
                   <input
-                    .value=${props.settings.token}
+                    .value=${props.settings.gatewayUrl}
                     @input=${(e: Event) => {
                       const v = (e.target as HTMLInputElement).value;
-                      props.onSettingsChange({ ...props.settings, token: v });
+                      props.onSettingsChange({ ...props.settings, gatewayUrl: v });
                     }}
-                    placeholder="BOT_GATEWAY_TOKEN"
+                    placeholder="ws://100.x.y.z:18789"
                   />
                 </label>
-                <label class="field">
-                  <span>${t("overview.access.password")}</span>
-                  <input
-                    type="password"
-                    .value=${props.password}
-                    @input=${(e: Event) => {
-                      const v = (e.target as HTMLInputElement).value;
-                      props.onPasswordChange(v);
-                    }}
-                    placeholder="system or shared password"
-                  />
-                </label>
+                ${
+                  isTrustedProxy
+                    ? ""
+                    : html`
+                      <label class="field">
+                        <span>${t("overview.access.token")}</span>
+                        <input
+                          .value=${props.settings.token}
+                          @input=${(e: Event) => {
+                            const v = (e.target as HTMLInputElement).value;
+                            props.onSettingsChange({ ...props.settings, token: v });
+                          }}
+                          placeholder="BOT_GATEWAY_TOKEN"
+                        />
+                      </label>
+                      <label class="field">
+                        <span>${t("overview.access.password")}</span>
+                        <input
+                          type="password"
+                          .value=${props.password}
+                          @input=${(e: Event) => {
+                            const v = (e.target as HTMLInputElement).value;
+                            props.onPasswordChange(v);
+                          }}
+                          placeholder="system or shared password"
+                        />
+                      </label>
+                    `
+                }
               `
           }
           <label class="field">
@@ -197,11 +224,17 @@ export function renderOverview(props: OverviewProps) {
             </select>
           </label>
         </div>
-        <div class="row" style="margin-top: 14px;">
-          <button class="btn" @click=${() => props.onConnect()}>${t("common.connect")}</button>
-          <button class="btn" @click=${() => props.onRefresh()}>${t("common.refresh")}</button>
-          <span class="muted">${t("overview.access.connectHint")}</span>
-        </div>
+        ${
+          isIam
+            ? ""
+            : html`
+              <div class="row" style="margin-top: 14px;">
+                <button class="btn" @click=${() => props.onConnect()}>${t("common.connect")}</button>
+                <button class="btn" @click=${() => props.onRefresh()}>${t("common.refresh")}</button>
+                <span class="muted">${t("overview.access.connectHint")}</span>
+              </div>
+            `
+        }
       </div>
 
       <div class="card">
