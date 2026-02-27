@@ -1,8 +1,4 @@
-import {
-  resolveChannelMediaMaxBytes,
-  type BotConfig,
-  type PluginRuntime,
-} from "bot/plugin-sdk";
+import { resolveChannelMediaMaxBytes, type BotConfig, type PluginRuntime } from "bot/plugin-sdk";
 import type { MSTeamsAccessTokenProvider } from "./attachments/types.js";
 import type {
   MSTeamsConversationStore,
