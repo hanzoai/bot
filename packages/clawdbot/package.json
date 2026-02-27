@@ -1,16 +1,16 @@
 {
-  "name": "clawdbot",
+  "name": "hanzo-bot",
   "version": "2026.2.12",
-  "description": "Compatibility shim that forwards to openclaw",
+  "description": "Compatibility shim that forwards to bot",
   "bin": {
-    "clawdbot": "./bin/clawdbot.js"
+    "hanzo-bot": "./bin/hanzo-bot.js"
   },
   "type": "module",
   "exports": {
     ".": "./index.js",
-    "./cli-entry": "./bin/clawdbot.js"
+    "./cli-entry": "./bin/hanzo-bot.js"
   },
   "dependencies": {
-    "openclaw": "workspace:*"
+    "hanzo-bot": "workspace:*"
   }
 }

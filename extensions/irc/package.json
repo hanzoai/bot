@@ -1,9 +1,9 @@
 {
-  "name": "@openclaw/irc",
+  "name": "@bot/irc",
   "version": "2026.2.26",
-  "description": "OpenClaw IRC channel plugin",
+  "description": "Bot IRC channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]
