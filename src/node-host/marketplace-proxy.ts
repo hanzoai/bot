@@ -48,27 +48,45 @@ type ResolvedApi = {
 
 /**
  * Resolve which API endpoint and key to use.
- * Priority: config.claudeApiKey → HANZO_API_KEY → ANTHROPIC_API_KEY (fallback).
+ *
+ * Priority:
+ *   1. Explicit ANTHROPIC_API_KEY (sk-ant-*) → always goes to api.anthropic.com
+ *   2. config.claudeApiKey (if it looks like an Anthropic key) → api.anthropic.com
+ *   3. HANZO_API_KEY → api.hanzo.ai (Hanzo AI proxy, when available)
+ *
+ * The Hanzo AI proxy (api.hanzo.ai/v1/messages) is not yet operational, so we
+ * prefer real Anthropic keys when detected.  A JWT-shaped HANZO_API_KEY will
+ * still be tried as a last resort but will likely fail until the proxy is live.
  */
 function resolveApi(config: NodeHostMarketplaceConfig): ResolvedApi | null {
-  const hanzoKey = config.claudeApiKey || process.env.HANZO_API_KEY || process.env.HANZO_ACCESS_KEY;
+  // 1. Real Anthropic API key (from env or config) — always preferred.
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (anthropicKey && anthropicKey.startsWith("sk-ant-")) {
+    return {
+      url: ANTHROPIC_API_URL,
+      apiKey: anthropicKey,
+      keyHeader: "x-api-key",
+      label: "Anthropic API",
+    };
+  }
+  const configKey = config.claudeApiKey;
+  if (configKey && configKey.startsWith("sk-ant-")) {
+    return {
+      url: ANTHROPIC_API_URL,
+      apiKey: configKey,
+      keyHeader: "x-api-key",
+      label: "Anthropic API",
+    };
+  }
+
+  // 2. Hanzo API proxy (JWT-based).
+  const hanzoKey = configKey || process.env.HANZO_API_KEY || process.env.HANZO_ACCESS_KEY;
   if (hanzoKey) {
     return {
       url: process.env.HANZO_API_URL?.trim() || HANZO_API_URL,
       apiKey: hanzoKey,
       keyHeader: "x-api-key",
       label: "Hanzo API",
-    };
-  }
-
-  // Explicit fallback: only if the user has set ANTHROPIC_API_KEY directly.
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (anthropicKey) {
-    return {
-      url: ANTHROPIC_API_URL,
-      apiKey: anthropicKey,
-      keyHeader: "x-api-key",
-      label: "Anthropic API",
     };
   }
 
@@ -129,6 +147,25 @@ export async function handleMarketplaceProxy(
         `${api.label} ${response.status}: ${errBody.substring(0, 200)}`,
       );
       return;
+    }
+
+    // Detect non-JSON responses (e.g. SPA HTML from a non-functional API proxy).
+    const contentType = response.headers.get("content-type") ?? "";
+    if (
+      contentType.includes("text/html") ||
+      (!contentType.includes("json") && !contentType.includes("event-stream"))
+    ) {
+      const peek = await response.text().catch(() => "");
+      const isHtml = peek.trimStart().startsWith("<!") || peek.trimStart().startsWith("<html");
+      if (isHtml || (!contentType.includes("json") && !contentType.includes("event-stream"))) {
+        sendProxyError(
+          client,
+          request.requestId,
+          "INVALID_RESPONSE",
+          `${api.label} returned non-JSON response (content-type: ${contentType}). The API endpoint may not be operational.`,
+        );
+        return;
+      }
     }
 
     if (request.stream) {
