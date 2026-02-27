@@ -1,14 +1,14 @@
 {
-  "name": "@openclaw/voice-call",
+  "name": "@bot/voice-call",
   "version": "2026.2.26",
-  "description": "OpenClaw voice-call plugin",
+  "description": "Bot voice-call plugin",
   "type": "module",
   "dependencies": {
     "@sinclair/typebox": "0.34.48",
     "ws": "^8.19.0",
     "zod": "^4.3.6"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

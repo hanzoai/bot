@@ -1,7 +1,7 @@
-import OpenClawProtocol
+import BotProtocol
 import Testing
 
-@testable import OpenClaw
+@testable import Bot
 
 @Suite struct TalkModeConfigParsingTests {
     @Test func prefersNormalizedTalkProviderPayload() {
