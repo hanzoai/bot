@@ -316,16 +316,24 @@ export function resolveConfigDir(
   if (override) {
     return resolveUserPath(override);
   }
-  const newDir = path.join(resolveRequiredHomeDir(env, homedir), ".bot");
+  const home = resolveRequiredHomeDir(env, homedir);
+  const hanzoDir = path.join(home, ".hanzo", "bot");
   try {
-    const hasNew = fs.existsSync(newDir);
-    if (hasNew) {
-      return newDir;
+    if (fs.existsSync(hanzoDir)) {
+      return hanzoDir;
     }
   } catch {
     // best-effort
   }
-  return newDir;
+  const legacyDir = path.join(home, ".bot");
+  try {
+    if (fs.existsSync(legacyDir)) {
+      return legacyDir;
+    }
+  } catch {
+    // best-effort
+  }
+  return hanzoDir;
 }
 
 export function resolveHomeDir(): string | undefined {
