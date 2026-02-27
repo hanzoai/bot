@@ -146,10 +146,18 @@ export async function handleMarketplaceHttpRequest(
 
   if (!invokeResult.ok) {
     opts.scheduler.releaseSeller(seller.nodeId, false);
-    sendJson(res, 502, {
+    const errCode = invokeResult.error?.code;
+    const statusCode = errCode === "TIMEOUT" ? 504 : 502;
+    const errorType =
+      errCode === "UNAVAILABLE"
+        ? "seller_unavailable"
+        : errCode === "TIMEOUT"
+          ? "seller_timeout"
+          : "proxy_error";
+    sendJson(res, statusCode, {
       error: {
-        message: `marketplace proxy failed: ${invokeResult.error?.message ?? "unknown"}`,
-        type: "proxy_error",
+        message: invokeResult.error?.message ?? "marketplace proxy failed",
+        type: errorType,
       },
     });
     return true;
@@ -226,7 +234,13 @@ async function handleStreamingRelay(
         opts.scheduler.releaseSeller(sellerNodeId, true, done.durationMs);
         resolve();
       } else if (evt.kind === "error") {
-        res.write(`data: ${JSON.stringify({ error: evt.payload.message })}\n\n`);
+        const errorEvent = {
+          error: {
+            type: "server_error",
+            message: typeof evt.payload.message === "string" ? evt.payload.message : "proxy error",
+          },
+        };
+        res.write(`data: ${JSON.stringify(errorEvent)}\n\n`);
         writeDone(res);
         res.end();
         clearTimeout(timeout);
@@ -350,8 +364,14 @@ function reportMarketplaceUsage(
   const sellerUserId = sellerNodeId;
   const sellerPayoutPref = sellerSession?.marketplacePayoutPreference ?? "usd";
 
-  // Deposit seller earnings into their Commerce wallet.
-  void depositSellerEarnings(sellerUserId, sellerNodeId, pricing.sellerEarningsCents, done);
+  // Deposit seller earnings into their Hanzo Commerce wallet.
+  void depositSellerEarnings(sellerUserId, sellerNodeId, pricing.sellerEarningsCents, done).catch(
+    (err) =>
+      // eslint-disable-next-line no-console
+      console.error(
+        `[marketplace] CRITICAL: Failed to deposit seller earnings for ${sellerNodeId}: ${err instanceof Error ? err.message : String(err)}`,
+      ),
+  );
 
   // Log transaction for audit trail.
   const tx: MarketplaceTransaction = {
