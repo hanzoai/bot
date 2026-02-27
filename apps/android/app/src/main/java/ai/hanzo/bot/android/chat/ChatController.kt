@@ -1,6 +1,6 @@
-package ai.hanzo-bot.android.chat
+package ai.hanzo.bot.android.chat
 
-import ai.hanzo-bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.gateway.GatewaySession
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
