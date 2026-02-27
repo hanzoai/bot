@@ -321,7 +321,7 @@ function reportMarketplaceUsage(
     config: opts.marketplaceConfig,
   });
 
-  // Report buyer debit — charge the buyer's account.
+  // Report buyer debit — charge the buyer's account at marketplace price.
   reportUsage({
     tenant: { orgId: tenant.orgId, userId: tenant.userId },
     model: done.model,
@@ -331,25 +331,19 @@ function reportMarketplaceUsage(
     totalTokens: done.inputTokens + done.outputTokens,
     timestamp: Date.now(),
     nodeId: sellerNodeId,
+    amountCents: pricing.buyerCostCents,
   });
 
-  // Report seller credit — credit the seller's earnings.
-  // Seller is identified by nodeId; resolved to userId when available.
+  // Resolve seller identity from node session (nodeId is the primary identifier).
   const sellerSession = opts.nodeRegistry.get(sellerNodeId);
-  const sellerUserId = sellerSession?.marketplacePayoutPreference ? sellerNodeId : sellerNodeId;
-  reportUsage({
-    tenant: { orgId: "marketplace", userId: sellerUserId },
-    model: done.model,
-    provider: "marketplace_seller",
-    inputTokens: done.inputTokens,
-    outputTokens: done.outputTokens,
-    totalTokens: done.inputTokens + done.outputTokens,
-    timestamp: Date.now(),
-    nodeId: sellerNodeId,
-  });
+  const sellerUserId = sellerNodeId;
+  const sellerPayoutPref = sellerSession?.marketplacePayoutPreference ?? "usd";
+
+  // Deposit seller earnings into their Commerce wallet.
+  void depositSellerEarnings(sellerUserId, sellerNodeId, pricing.sellerEarningsCents, done);
 
   // Log transaction for audit trail.
-  const _tx: MarketplaceTransaction = {
+  const tx: MarketplaceTransaction = {
     requestId: done.requestId,
     buyerUserId: tenant.userId,
     buyerOrgId: tenant.orgId,
@@ -361,8 +355,67 @@ function reportMarketplaceUsage(
     buyerCostCents: pricing.buyerCostCents,
     sellerEarningsCents: pricing.sellerEarningsCents,
     platformFeeCents: pricing.platformFeeCents,
-    aiTokenPayout: false,
+    aiTokenPayout: sellerPayoutPref === "ai_token",
     timestamp: Date.now(),
     durationMs: done.durationMs,
   };
+  transactionLog.push(tx);
+  if (transactionLog.length > MAX_TX_LOG) {
+    transactionLog.splice(0, transactionLog.length - MAX_TX_LOG);
+  }
+}
+
+/** In-memory transaction log for audit trail and payout aggregation. */
+const transactionLog: MarketplaceTransaction[] = [];
+const MAX_TX_LOG = 10_000;
+
+/** Read the transaction log (used by payout processing and admin queries). */
+export function getTransactionLog(): readonly MarketplaceTransaction[] {
+  return transactionLog;
+}
+
+/** Deposit seller earnings into their Commerce wallet via billing/deposit. */
+async function depositSellerEarnings(
+  sellerUserId: string,
+  sellerNodeId: string,
+  amountCents: number,
+  done: MarketplaceProxyDonePayload,
+): Promise<void> {
+  if (amountCents <= 0) {
+    return;
+  }
+  const baseUrl = (
+    process.env.COMMERCE_API_URL ?? "http://commerce.hanzo.svc.cluster.local:8001"
+  ).replace(/\/+$/, "");
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+  if (process.env.COMMERCE_SERVICE_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.COMMERCE_SERVICE_TOKEN}`;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10_000);
+  try {
+    await fetch(`${baseUrl}/api/v1/billing/deposit`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        user: sellerUserId,
+        currency: "usd",
+        amount: amountCents,
+        notes: `Marketplace earnings: ${done.model} (${done.inputTokens + done.outputTokens} tokens)`,
+        tags: "marketplace-earning",
+      }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    console.warn(
+      `[marketplace] Failed to deposit seller earnings for ${sellerNodeId}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  } finally {
+    clearTimeout(timer);
+  }
 }
