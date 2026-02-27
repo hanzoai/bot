@@ -1,4 +1,4 @@
-import OpenClawProtocol
+import BotProtocol
 
-public typealias AnyCodable = OpenClawProtocol.AnyCodable
+public typealias AnyCodable = BotProtocol.AnyCodable
 
