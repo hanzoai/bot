@@ -1,9 +1,9 @@
 {
-  "name": "@openclaw/discord",
+  "name": "@bot/discord",
   "version": "2026.2.26",
-  "description": "OpenClaw Discord channel plugin",
+  "description": "Bot Discord channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]
