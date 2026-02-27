@@ -1075,18 +1075,31 @@ describe("followup queue collect routing", () => {
 const emptyCfg = {} as BotConfig;
 
 describe("createReplyDispatcher", () => {
-  it("drops empty payloads and silent tokens without media", async () => {
+  it("drops empty payloads and exact silent tokens without media", async () => {
     const deliver = vi.fn().mockResolvedValue(undefined);
     const dispatcher = createReplyDispatcher({ deliver });
 
     expect(dispatcher.sendFinalReply({})).toBe(false);
     expect(dispatcher.sendFinalReply({ text: " " })).toBe(false);
     expect(dispatcher.sendFinalReply({ text: SILENT_REPLY_TOKEN })).toBe(false);
-    expect(dispatcher.sendFinalReply({ text: `${SILENT_REPLY_TOKEN} -- nope` })).toBe(false);
-    expect(dispatcher.sendFinalReply({ text: `interject.${SILENT_REPLY_TOKEN}` })).toBe(false);
 
     await dispatcher.waitForIdle();
     expect(deliver).not.toHaveBeenCalled();
+  });
+
+  it("delivers substantive text that merely contains the silent token", async () => {
+    const deliver = vi.fn().mockResolvedValue(undefined);
+    const dispatcher = createReplyDispatcher({ deliver });
+
+    // "NO_REPLY -- nope" is substantive text, not an exact silent token
+    expect(dispatcher.sendFinalReply({ text: `${SILENT_REPLY_TOKEN} -- nope` })).toBe(true);
+    // "interject.NO_REPLY" is substantive text, not an exact silent token
+    expect(dispatcher.sendFinalReply({ text: `interject.${SILENT_REPLY_TOKEN}` })).toBe(true);
+
+    await dispatcher.waitForIdle();
+    expect(deliver).toHaveBeenCalledTimes(2);
+    expect(deliver.mock.calls[0][0].text).toBe(`${SILENT_REPLY_TOKEN} -- nope`);
+    expect(deliver.mock.calls[1][0].text).toBe(`interject.${SILENT_REPLY_TOKEN}`);
   });
 
   it("strips heartbeat tokens and applies responsePrefix", async () => {
@@ -1138,7 +1151,9 @@ describe("createReplyDispatcher", () => {
     expect(deliver).toHaveBeenCalledTimes(3);
     expect(deliver.mock.calls[0][0].text).toBe("PFX already");
     expect(deliver.mock.calls[1][0].text).toBe("");
-    expect(deliver.mock.calls[2][0].text).toBe("");
+    // "NO_REPLY -- explanation" is substantive (not exact silent token),
+    // so text is preserved and prefixed rather than stripped to empty.
+    expect(deliver.mock.calls[2][0].text).toBe(`PFX ${SILENT_REPLY_TOKEN} -- explanation`);
   });
 
   it("preserves ordering across tool, block, and final replies", async () => {
