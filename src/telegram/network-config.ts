@@ -4,9 +4,15 @@ import { isTruthyEnvValue } from "../infra/env.js";
 
 export const TELEGRAM_DISABLE_AUTO_SELECT_FAMILY_ENV = "BOT_TELEGRAM_DISABLE_AUTO_SELECT_FAMILY";
 export const TELEGRAM_ENABLE_AUTO_SELECT_FAMILY_ENV = "BOT_TELEGRAM_ENABLE_AUTO_SELECT_FAMILY";
+export const TELEGRAM_DNS_RESULT_ORDER_ENV = "BOT_TELEGRAM_DNS_RESULT_ORDER";
 
 export type TelegramAutoSelectFamilyDecision = {
   value: boolean | null;
+  source?: string;
+};
+
+export type TelegramDnsResultOrderDecision = {
+  value: string | null;
   source?: string;
 };
 
@@ -32,6 +38,22 @@ export function resolveTelegramAutoSelectFamilyDecision(params?: {
   }
   if (Number.isFinite(nodeMajor) && nodeMajor >= 22) {
     return { value: false, source: "default-node22" };
+  }
+  return { value: null };
+}
+
+export function resolveTelegramDnsResultOrderDecision(params?: {
+  network?: TelegramNetworkConfig;
+  env?: NodeJS.ProcessEnv;
+}): TelegramDnsResultOrderDecision {
+  const env = params?.env ?? process.env;
+
+  const envValue = env[TELEGRAM_DNS_RESULT_ORDER_ENV]?.trim();
+  if (envValue === "ipv4first" || envValue === "verbatim") {
+    return { value: envValue, source: `env:${TELEGRAM_DNS_RESULT_ORDER_ENV}` };
+  }
+  if (typeof params?.network?.dnsResultOrder === "string") {
+    return { value: params.network.dnsResultOrder, source: "config" };
   }
   return { value: null };
 }
