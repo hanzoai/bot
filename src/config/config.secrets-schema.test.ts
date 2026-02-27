@@ -9,13 +9,13 @@ describe("config secret refs schema", () => {
           default: { source: "env" },
           filemain: {
             source: "file",
-            path: "~/.openclaw/secrets.json",
+            path: "~/.hanzo/bot/secrets.json",
             mode: "json",
             timeoutMs: 10_000,
           },
           vault: {
             source: "exec",
-            command: "/usr/local/bin/openclaw-secret-resolver",
+            command: "/usr/local/bin/bot-secret-resolver",
             args: ["resolve"],
             allowSymlinkCommand: true,
           },
@@ -88,7 +88,7 @@ describe("config secret refs schema", () => {
         providers: {
           rawfile: {
             source: "file",
-            path: "~/.openclaw/token.txt",
+            path: "~/.hanzo/bot/token.txt",
             mode: "singleValue",
           },
         },
