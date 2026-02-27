@@ -399,4 +399,20 @@ export type MarketplaceConfig = {
   minPayoutCents?: number;
   /** Bonus percentage for $AI token payouts. Default: 10. */
   aiTokenBonusPct?: number;
+  /** On-chain $AI token settlement configuration. */
+  chain?: MarketplaceChainConfig;
+};
+
+/** On-chain $AI token settlement for marketplace payouts. */
+export type MarketplaceChainConfig = {
+  /** EVM chain ID. Default: 36963 (Hanzo). */
+  chainId?: number;
+  /** JSON-RPC endpoint for the settlement chain. */
+  rpcUrl?: string;
+  /** $AI token ERC-20 contract address (checksummed hex). */
+  tokenContract?: string;
+  /** Treasury/payout wallet address (hex). Signs payout transfers. */
+  treasuryAddress?: string;
+  /** Treasury private key env var name. Default: "MARKETPLACE_TREASURY_KEY". */
+  treasuryKeyEnv?: string;
 };
