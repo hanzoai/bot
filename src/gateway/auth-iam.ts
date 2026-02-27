@@ -86,6 +86,34 @@ export async function validateIamToken(
 ): Promise<GatewayIamAuthResult> {
   let sdkResult = await validateToken(token, toIamConfig(config));
 
+  // The @hanzo/iam SDK's audience retry checks for "audience" in the jose
+  // error message, but jose actually says '"aud" claim check failed'.
+  // Work around by decoding the JWT, checking for an audience mismatch, and
+  // retrying with the token's actual audience so jose's check passes while
+  // signature + issuer + expiry verification still applies.
+  if (!sdkResult.ok && sdkResult.reason === "iam_signature_invalid") {
+    try {
+      const parts = token.split(".");
+      if (parts.length === 3) {
+        const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString());
+        const aud = Array.isArray(payload.aud)
+          ? payload.aud
+          : typeof payload.aud === "string"
+            ? [payload.aud]
+            : [];
+        if (aud.length > 0 && !aud.includes(config.clientId)) {
+          const retryConfig: IamConfig = { ...toIamConfig(config), clientId: aud[0] };
+          const retryResult = await validateToken(token, retryConfig);
+          if (retryResult.ok) {
+            sdkResult = retryResult;
+          }
+        }
+      }
+    } catch {
+      // Fall through to original error
+    }
+  }
+
   // Application tokens may lack a standard `sub` claim but carry `owner`/`name`
   // (e.g. "admin/app-hanzobot").  Construct sub from those fields so the token
   // is still accepted after signature verification passed.
