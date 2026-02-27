@@ -2,7 +2,7 @@
  * Marketplace payout processing — automated seller payouts.
  *
  * Hybrid settlement model:
- *   USD:      Commerce Stripe Connect affiliate system
+ *   USD:      Hanzo Commerce affiliate payout system
  *   $AI token: On-chain ERC-20 transfer on Hanzo chain (36963) with 10% bonus,
  *              plus Commerce ledger recording for audit trail
  *
@@ -43,7 +43,7 @@ export type PayoutResult = {
  *
  * For each seller:
  * 1. Verify accumulated earnings meet minimum threshold
- * 2. For USD: POST to Commerce affiliate payout endpoint (Stripe Connect)
+ * 2. For USD: POST to Hanzo Commerce affiliate payout endpoint
  * 3. For $AI: On-chain ERC-20 transfer + Commerce ledger recording
  * 4. Record payout result
  */
