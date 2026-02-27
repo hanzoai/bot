@@ -4,7 +4,12 @@ import { parseAgentSessionKey } from "../../../src/routing/session-key.js";
 import { t } from "../i18n/index.ts";
 import { refreshChatAvatar } from "./app-chat.ts";
 import { renderUsageTab } from "./app-render-usage-tab.ts";
-import { renderChatControls, renderTab, renderThemeToggle } from "./app-render.helpers.ts";
+import {
+  renderChatControls,
+  renderNavFooter,
+  renderTab,
+  renderThemeToggle,
+} from "./app-render.helpers.ts";
 import { loadAgentFileContent, loadAgentFiles, saveAgentFile } from "./controllers/agent-files.ts";
 import { loadAgentIdentities, loadAgentIdentity } from "./controllers/agent-identity.ts";
 import { loadAgentSkills } from "./controllers/agent-skills.ts";
@@ -42,7 +47,8 @@ import {
   updateExecApprovalsFormValue,
 } from "./controllers/exec-approvals.ts";
 import { loadLogs } from "./controllers/logs.ts";
-import { loadNodes } from "./controllers/nodes.ts";
+import { loadMarketplace } from "./controllers/marketplace.ts";
+import { loadNodes, setNodeBilling } from "./controllers/nodes.ts";
 import { loadPresence } from "./controllers/presence.ts";
 import { deleteSession, loadSessions, patchSession } from "./controllers/sessions.ts";
 import {
@@ -64,8 +70,10 @@ import { renderExecApprovalPrompt } from "./views/exec-approval.ts";
 import { renderGatewayUrlConfirmation } from "./views/gateway-url-confirmation.ts";
 import { renderInstances } from "./views/instances.ts";
 import { renderLogs } from "./views/logs.ts";
+import { renderMarketplace } from "./views/marketplace.ts";
 import { renderNodes } from "./views/nodes.ts";
 import { renderOverview } from "./views/overview.ts";
+import { renderScreen } from "./views/screen.ts";
 import { renderSessions } from "./views/sessions.ts";
 import { renderSkills } from "./views/skills.ts";
 
@@ -146,53 +154,63 @@ export function renderApp(state: AppViewState) {
             <span>${t("common.health")}</span>
             <span class="mono">${state.connected ? t("common.ok") : t("common.offline")}</span>
           </div>
-          ${renderThemeToggle(state)}
+          <a
+            class="btn btn--primary btn--sm topbar-cta"
+            href="https://hanzo.bot/chat"
+            @click=${(e: MouseEvent) => {
+              e.preventDefault();
+              state.setTab("chat");
+            }}
+          >Try Hanzo</a>
         </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
-        ${TAB_GROUPS.map((group) => {
-          const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
-          const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
-          return html`
-            <div class="nav-group ${isGroupCollapsed && !hasActiveTab ? "nav-group--collapsed" : ""}">
-              <button
-                class="nav-label"
-                @click=${() => {
-                  const next = { ...state.settings.navGroupsCollapsed };
-                  next[group.label] = !isGroupCollapsed;
-                  state.applySettings({
-                    ...state.settings,
-                    navGroupsCollapsed: next,
-                  });
-                }}
-                aria-expanded=${!isGroupCollapsed}
-              >
-                <span class="nav-label__text">${t(`nav.${group.label}`)}</span>
-                <span class="nav-label__chevron">${isGroupCollapsed ? "+" : "−"}</span>
-              </button>
-              <div class="nav-group__items">
-                ${group.tabs.map((tab) => renderTab(state, tab))}
+        <div class="nav-scroll">
+          ${TAB_GROUPS.map((group) => {
+            const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
+            const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
+            return html`
+              <div class="nav-group ${isGroupCollapsed && !hasActiveTab ? "nav-group--collapsed" : ""}">
+                <button
+                  class="nav-label"
+                  @click=${() => {
+                    const next = { ...state.settings.navGroupsCollapsed };
+                    next[group.label] = !isGroupCollapsed;
+                    state.applySettings({
+                      ...state.settings,
+                      navGroupsCollapsed: next,
+                    });
+                  }}
+                  aria-expanded=${!isGroupCollapsed}
+                >
+                  <span class="nav-label__text">${t(`nav.${group.label}`)}</span>
+                  <span class="nav-label__chevron">${isGroupCollapsed ? "+" : "−"}</span>
+                </button>
+                <div class="nav-group__items">
+                  ${group.tabs.map((tab) => renderTab(state, tab))}
+                </div>
               </div>
+            `;
+          })}
+          <div class="nav-group nav-group--links">
+            <div class="nav-label nav-label--static">
+              <span class="nav-label__text">${t("common.resources")}</span>
             </div>
-          `;
-        })}
-        <div class="nav-group nav-group--links">
-          <div class="nav-label nav-label--static">
-            <span class="nav-label__text">${t("common.resources")}</span>
-          </div>
-          <div class="nav-group__items">
-            <a
-              class="nav-item nav-item--external"
-              href="https://docs.hanzo.bot"
-              target="_blank"
-              rel="noreferrer"
-              title="${t("common.docs")} (opens in new tab)"
-            >
-              <span class="nav-item__icon" aria-hidden="true">${icons.book}</span>
-              <span class="nav-item__text">${t("common.docs")}</span>
-            </a>
+            <div class="nav-group__items">
+              <a
+                class="nav-item nav-item--external"
+                href="https://docs.hanzo.bot"
+                target="_blank"
+                rel="noreferrer"
+                title="${t("common.docs")} (opens in new tab)"
+              >
+                <span class="nav-item__icon" aria-hidden="true">${icons.book}</span>
+                <span class="nav-item__text">${t("common.docs")}</span>
+              </a>
+            </div>
           </div>
         </div>
+        ${renderNavFooter(state)}
       </aside>
       <main class="content ${isChat ? "content--chat" : ""}">
         <section class="content-header">
@@ -219,6 +237,9 @@ export function renderApp(state: AppViewState) {
                 cronEnabled: state.cronStatus?.enabled ?? null,
                 cronNext,
                 lastChannelsRefresh: state.channelsLastSuccess,
+                authMode: state.authMode,
+                iamUser: state.iamUser,
+                iamLoggingIn: state.iamLoggingIn,
                 onSettingsChange: (next) => state.applySettings(next),
                 onPasswordChange: (next) => (state.password = next),
                 onSessionKeyChange: (next) => {
@@ -234,6 +255,9 @@ export function renderApp(state: AppViewState) {
                 },
                 onConnect: () => state.connect(),
                 onRefresh: () => state.loadOverview(),
+                onIamLogin: () => state.handleIamLogin(),
+                onIamSignup: () => state.handleIamSignup(),
+                onIamLogout: () => state.handleIamLogout(),
               })
             : nothing
         }
@@ -273,6 +297,10 @@ export function renderApp(state: AppViewState) {
                 onNostrProfileSave: () => state.handleNostrProfileSave(),
                 onNostrProfileImport: () => state.handleNostrProfileImport(),
                 onNostrProfileToggleAdvanced: () => state.handleNostrProfileToggleAdvanced(),
+                expandedChannel: state.expandedChannel,
+                onChannelSelect: (key) => {
+                  state.expandedChannel = key;
+                },
               })
             : nothing
         }
@@ -343,6 +371,17 @@ export function renderApp(state: AppViewState) {
                 onRun: (job) => runCronJob(state, job),
                 onRemove: (job) => removeCronJob(state, job),
                 onLoadRuns: (jobId) => loadCronRuns(state, jobId),
+              })
+            : nothing
+        }
+
+        ${
+          state.tab === "marketplace"
+            ? renderMarketplace({
+                loading: state.marketplaceLoading,
+                status: state.marketplaceStatus,
+                error: state.marketplaceError,
+                onRefresh: () => loadMarketplace(state),
               })
             : nothing
         }
@@ -789,6 +828,36 @@ export function renderApp(state: AppViewState) {
                       : { kind: "gateway" as const };
                   return saveExecApprovals(state, target);
                 },
+                onNodeBillingSet: (nodeId, billingMode, budgetCents) =>
+                  setNodeBilling(state, {
+                    nodeId,
+                    billingMode: billingMode as "global" | "dedicated" | "local",
+                    budgetCents,
+                  }),
+              })
+            : nothing
+        }
+
+        ${
+          state.tab === "screen"
+            ? renderScreen({
+                connected: state.connected,
+                gatewayUrl: state.settings.gatewayUrl,
+                token: state.settings.token,
+                nodes: state.nodes
+                  .filter(
+                    (n): n is Record<string, unknown> & { nodeId: string } =>
+                      typeof n.nodeId === "string",
+                  )
+                  .map((n) => ({
+                    nodeId: n.nodeId,
+                    displayName:
+                      typeof n.hostname === "string" ? n.hostname : n.nodeId.substring(0, 12),
+                  })),
+                selectedNodeId: state.screenNodeId,
+                onSelectNode: (nodeId) => {
+                  state.screenNodeId = nodeId;
+                },
               })
             : nothing
         }
@@ -956,6 +1025,16 @@ export function renderApp(state: AppViewState) {
             : nothing
         }
       </main>
+      <footer class="app-footer">
+        <div class="app-footer__left">
+          <span class="muted">Hanzo Bot</span>
+          <a class="app-footer__link" href="https://docs.hanzo.bot" target="_blank" rel="noreferrer">Docs</a>
+          <a class="app-footer__link" href="https://hanzo.ai" target="_blank" rel="noreferrer">Hanzo</a>
+        </div>
+        <div class="app-footer__right">
+          ${renderThemeToggle(state)}
+        </div>
+      </footer>
       ${renderExecApprovalPrompt(state)}
       ${renderGatewayUrlConfirmation(state)}
     </div>
