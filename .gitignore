@@ -26,7 +26,7 @@ apps/android/.cxx/
 # Bun build artifacts
 *.bun-build
 apps/macos/.build/
-apps/shared/MoltbotKit/.build/
+apps/shared/BotKit/.build/
 apps/shared/BotKit/.build/
 apps/shared/BotKit/Package.resolved
 **/ModuleCache/
@@ -35,7 +35,7 @@ bin/hanzo-bot-mac
 bin/docs-list
 apps/macos/.build-local/
 apps/macos/.swiftpm/
-apps/shared/MoltbotKit/.swiftpm/
+apps/shared/BotKit/.swiftpm/
 Core/
 apps/ios/*.xcodeproj/
 apps/ios/*.xcworkspace/

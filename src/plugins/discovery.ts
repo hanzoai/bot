@@ -66,6 +66,12 @@ function deriveIdHint(params: {
   const base = path.basename(params.filePath, path.extname(params.filePath));
   const rawPackageName = params.packageName?.trim();
   if (!rawPackageName) {
+    // When no package name is available and the file is an index file,
+    // use the parent directory name as the hint (e.g. "device-pair" from
+    // extensions/device-pair/index.ts) instead of the useless "index".
+    if (base === "index") {
+      return path.basename(path.dirname(params.filePath));
+    }
     return base;
   }
 
@@ -75,10 +81,15 @@ function deriveIdHint(params: {
     ? (rawPackageName.split("/").pop() ?? rawPackageName)
     : rawPackageName;
 
+  // Strip the "bot-" prefix that all built-in extensions use in their npm
+  // package name so the derived hint matches the manifest id
+  // (e.g. @hanzo/bot-telegram → "telegram", not "bot-telegram").
+  const normalized = unscoped.startsWith("bot-") ? unscoped.slice(4) : unscoped;
+
   if (!params.hasMultipleExtensions) {
-    return unscoped;
+    return normalized;
   }
-  return `${unscoped}/${base}`;
+  return `${normalized}/${base}`;
 }
 
 function addCandidate(params: {
@@ -188,7 +199,11 @@ function discoverInDirectory(params: {
       addCandidate({
         candidates: params.candidates,
         seen: params.seen,
-        idHint: entry.name,
+        idHint: deriveIdHint({
+          filePath: indexFile,
+          packageName: manifest?.name,
+          hasMultipleExtensions: false,
+        }),
         source: indexFile,
         rootDir: fullPath,
         origin: params.origin,
@@ -275,7 +290,11 @@ function discoverFromPath(params: {
       addCandidate({
         candidates: params.candidates,
         seen: params.seen,
-        idHint: path.basename(resolved),
+        idHint: deriveIdHint({
+          filePath: indexFile,
+          packageName: manifest?.name,
+          hasMultipleExtensions: false,
+        }),
         source: indexFile,
         rootDir: resolved,
         origin: params.origin,
