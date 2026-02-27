@@ -35,6 +35,8 @@ export type UsageRecord = {
   timestamp: number;
   /** Node that handled the request (for per-node billing attribution). */
   nodeId?: string;
+  /** Override amount in cents (marketplace pricing differs from standard). */
+  amountCents?: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -121,7 +123,7 @@ export async function flushUsageQueue(): Promise<void> {
       const payload: Record<string, unknown> = {
         user: record.tenant.userId || record.tenant.orgId,
         currency: "usd",
-        amount: 0, // Commerce calculates cost from token counts + model
+        amount: record.amountCents ?? 0, // 0 = Commerce calculates; marketplace sends actual price
         model: record.model,
         provider: record.provider,
         tokens: record.totalTokens,
