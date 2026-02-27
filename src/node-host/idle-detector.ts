@@ -111,6 +111,7 @@ export class IdleDetector {
         payloadJSON: JSON.stringify({
           status: this.status,
           lastActiveAtMs: this.lastActiveAtMs,
+          maxConcurrent: this.config.maxConcurrent ?? 1,
         }),
       });
     } catch {
