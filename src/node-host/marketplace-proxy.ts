@@ -2,14 +2,14 @@
  * Marketplace proxy — handles incoming proxy requests on the seller's node.
  *
  * When the gateway routes a buyer's request to this node, this module:
- * 1. Reads the seller's API key from config/env (HANZO_API_KEY preferred)
- * 2. Calls the Hanzo AI API (api.hanzo.ai) which routes to the appropriate model
+ * 1. Reads the seller's API key from config/env
+ * 2. Calls the appropriate API (Hanzo Cloud or Anthropic direct)
  * 3. Streams chunks back via node.event (same relay pattern as VNC tunnel)
  * 4. Sends a final done event with token usage
  *
  * API priority:
- *   HANZO_API_KEY + api.hanzo.ai → primary (Hanzo Cloud, all models)
- *   ANTHROPIC_API_KEY + api.anthropic.com → explicit fallback only
+ *   ANTHROPIC_API_KEY + api.anthropic.com → direct Anthropic (seller's own key)
+ *   HANZO_API_KEY + api.hanzo.ai → Hanzo Cloud proxy (OpenAI-compatible)
  *
  * Privacy: prompts are held in memory only during the API call, never logged to disk.
  */
@@ -31,41 +31,62 @@ type UsageInfo = {
   output_tokens: number;
 };
 
-/** Hanzo AI API — supports Anthropic Messages format via /v1/messages. */
-const HANZO_API_URL = "https://api.hanzo.ai/v1/messages";
-/** Anthropic direct API — only used when ANTHROPIC_API_KEY is explicitly set. */
+/** Hanzo Cloud API — OpenAI-compatible chat completions. */
+const HANZO_API_URL = "https://api.hanzo.ai/v1/chat/completions";
+/** Anthropic direct API — native Messages format. */
 const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-const API_VERSION = "2023-06-01";
+const ANTHROPIC_API_VERSION = "2023-06-01";
+
+type ApiFormat = "openai" | "anthropic";
 
 type ResolvedApi = {
   url: string;
   apiKey: string;
-  /** Header name for the API key. */
-  keyHeader: string;
-  /** Label for error messages. */
+  headers: Record<string, string>;
+  format: ApiFormat;
   label: string;
 };
+
+/**
+ * Model name mapping for Hanzo Cloud API.
+ * The Hanzo API uses `anthropic/` prefixed model names.
+ */
+const HANZO_MODEL_MAP: Record<string, string> = {
+  "claude-sonnet-4-20250514": "anthropic/claude-sonnet-4",
+  "claude-opus-4-20250514": "anthropic/claude-opus-4",
+  "claude-haiku-3-5-20241022": "anthropic/claude-haiku-4.5",
+  "claude-3-5-sonnet-20241022": "anthropic/claude-3.5-sonnet",
+  "claude-3-5-haiku-20241022": "anthropic/claude-3.5-haiku",
+  "claude-3-opus-20240229": "anthropic/claude-opus-4",
+  "claude-3-sonnet-20240229": "anthropic/claude-sonnet-4",
+  "claude-3-haiku-20240307": "anthropic/claude-3-haiku",
+};
+
+function mapModelForHanzo(model: string): string {
+  return HANZO_MODEL_MAP[model] ?? `anthropic/${model}`;
+}
 
 /**
  * Resolve which API endpoint and key to use.
  *
  * Priority:
- *   1. Explicit ANTHROPIC_API_KEY (sk-ant-*) → always goes to api.anthropic.com
- *   2. config.claudeApiKey (if it looks like an Anthropic key) → api.anthropic.com
- *   3. HANZO_API_KEY → api.hanzo.ai (Hanzo AI proxy, when available)
- *
- * The Hanzo AI proxy (api.hanzo.ai/v1/messages) is not yet operational, so we
- * prefer real Anthropic keys when detected.  A JWT-shaped HANZO_API_KEY will
- * still be tried as a last resort but will likely fail until the proxy is live.
+ *   1. Explicit ANTHROPIC_API_KEY (sk-ant-*) → api.anthropic.com (Anthropic format)
+ *   2. config.claudeApiKey (if Anthropic key) → api.anthropic.com (Anthropic format)
+ *   3. HANZO_API_KEY → api.hanzo.ai (OpenAI format)
  */
 function resolveApi(config: NodeHostMarketplaceConfig): ResolvedApi | null {
-  // 1. Real Anthropic API key (from env or config) — always preferred.
+  // 1. Real Anthropic API key (from env or config) — native Messages format.
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (anthropicKey && anthropicKey.startsWith("sk-ant-")) {
     return {
       url: ANTHROPIC_API_URL,
       apiKey: anthropicKey,
-      keyHeader: "x-api-key",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": anthropicKey,
+        "anthropic-version": ANTHROPIC_API_VERSION,
+      },
+      format: "anthropic",
       label: "Anthropic API",
     };
   }
@@ -74,23 +95,74 @@ function resolveApi(config: NodeHostMarketplaceConfig): ResolvedApi | null {
     return {
       url: ANTHROPIC_API_URL,
       apiKey: configKey,
-      keyHeader: "x-api-key",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": configKey,
+        "anthropic-version": ANTHROPIC_API_VERSION,
+      },
+      format: "anthropic",
       label: "Anthropic API",
     };
   }
 
-  // 2. Hanzo API proxy (JWT-based).
+  // 2. Hanzo API — OpenAI-compatible chat completions format.
   const hanzoKey = configKey || process.env.HANZO_API_KEY || process.env.HANZO_ACCESS_KEY;
   if (hanzoKey) {
     return {
       url: process.env.HANZO_API_URL?.trim() || HANZO_API_URL,
       apiKey: hanzoKey,
-      keyHeader: "x-api-key",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${hanzoKey}`,
+      },
+      format: "openai",
       label: "Hanzo API",
     };
   }
 
   return null;
+}
+
+/**
+ * Build the request body for the resolved API format.
+ */
+function buildRequestBody(
+  request: MarketplaceProxyRequest,
+  api: ResolvedApi,
+): Record<string, unknown> {
+  if (api.format === "anthropic") {
+    // Anthropic Messages format
+    const body: Record<string, unknown> = {
+      model: request.model,
+      messages: request.messages,
+      max_tokens: request.maxTokens ?? 4096,
+      stream: request.stream,
+    };
+    if (request.temperature !== undefined) {
+      body.temperature = request.temperature;
+    }
+    if (request.system) {
+      body.system = request.system;
+    }
+    return body;
+  }
+
+  // OpenAI Chat Completions format
+  const messages: Array<Record<string, unknown>> = [];
+  if (request.system) {
+    messages.push({ role: "system", content: request.system });
+  }
+  for (const msg of request.messages) {
+    messages.push({ role: msg.role, content: msg.content });
+  }
+
+  return {
+    model: mapModelForHanzo(request.model),
+    messages,
+    max_tokens: request.maxTokens ?? 4096,
+    stream: request.stream,
+    ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
+  };
 }
 
 /**
@@ -108,33 +180,18 @@ export async function handleMarketplaceProxy(
       client,
       request.requestId,
       "NO_API_KEY",
-      "no API key configured (set HANZO_API_KEY or claudeApiKey in marketplace config)",
+      "no API key configured (set HANZO_API_KEY or ANTHROPIC_API_KEY)",
     );
     return;
   }
 
   const startMs = Date.now();
-  const body: Record<string, unknown> = {
-    model: request.model,
-    messages: request.messages,
-    max_tokens: request.maxTokens ?? 4096,
-    stream: request.stream,
-  };
-  if (request.temperature !== undefined) {
-    body.temperature = request.temperature;
-  }
-  if (request.system) {
-    body.system = request.system;
-  }
+  const body = buildRequestBody(request, api);
 
   try {
     const response = await fetch(api.url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        [api.keyHeader]: api.apiKey,
-        "anthropic-version": API_VERSION,
-      },
+      headers: api.headers,
       body: JSON.stringify(body),
     });
 
@@ -144,34 +201,62 @@ export async function handleMarketplaceProxy(
         client,
         request.requestId,
         `HTTP_${response.status}`,
-        `${api.label} ${response.status}: ${errBody.substring(0, 200)}`,
+        `${api.label} ${response.status}: ${errBody.substring(0, 500)}`,
       );
       return;
     }
 
-    // Detect non-JSON responses (e.g. SPA HTML from a non-functional API proxy).
+    // Detect HTML error pages (SPA fallback from API gateway).
     const contentType = response.headers.get("content-type") ?? "";
-    if (
-      contentType.includes("text/html") ||
-      (!contentType.includes("json") && !contentType.includes("event-stream"))
-    ) {
+    if (contentType.includes("text/html")) {
       const peek = await response.text().catch(() => "");
-      const isHtml = peek.trimStart().startsWith("<!") || peek.trimStart().startsWith("<html");
-      if (isHtml || (!contentType.includes("json") && !contentType.includes("event-stream"))) {
+      if (peek.trimStart().startsWith("<!") || peek.trimStart().startsWith("<html")) {
         sendProxyError(
           client,
           request.requestId,
           "INVALID_RESPONSE",
-          `${api.label} returned non-JSON response (content-type: ${contentType}). The API endpoint may not be operational.`,
+          `${api.label} returned HTML — the endpoint may not exist. URL: ${api.url}`,
         );
         return;
       }
     }
 
     if (request.stream) {
-      await handleStreamingResponse(client, request.requestId, response, startMs, request.model);
+      if (api.format === "openai") {
+        await handleOpenAIStreamingResponse(
+          client,
+          request.requestId,
+          response,
+          startMs,
+          request.model,
+        );
+      } else {
+        await handleAnthropicStreamingResponse(
+          client,
+          request.requestId,
+          response,
+          startMs,
+          request.model,
+        );
+      }
     } else {
-      await handleNonStreamingResponse(client, request.requestId, response, startMs, request.model);
+      if (api.format === "openai") {
+        await handleOpenAINonStreamingResponse(
+          client,
+          request.requestId,
+          response,
+          startMs,
+          request.model,
+        );
+      } else {
+        await handleAnthropicNonStreamingResponse(
+          client,
+          request.requestId,
+          response,
+          startMs,
+          request.model,
+        );
+      }
     }
   } catch (err) {
     sendProxyError(
@@ -183,7 +268,11 @@ export async function handleMarketplaceProxy(
   }
 }
 
-async function handleStreamingResponse(
+// ---------------------------------------------------------------------------
+// Anthropic Messages format handlers
+// ---------------------------------------------------------------------------
+
+async function handleAnthropicStreamingResponse(
   client: GatewayClient,
   requestId: string,
   response: Response,
@@ -210,7 +299,6 @@ async function handleStreamingResponse(
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
-      // Keep the last partial line in the buffer.
       buffer = lines.pop() ?? "";
 
       for (const line of lines) {
@@ -222,7 +310,6 @@ async function handleStreamingResponse(
           continue;
         }
 
-        // Extract usage from message_start and message_delta events.
         try {
           const parsed = JSON.parse(data);
           if (parsed.type === "message_start" && parsed.message?.usage) {
@@ -232,10 +319,9 @@ async function handleStreamingResponse(
             outputTokens = parsed.usage.output_tokens ?? 0;
           }
         } catch {
-          // Not all data lines are JSON — some are just text chunks.
+          // Not all data lines are JSON.
         }
 
-        // Relay the SSE data line to the gateway.
         sendProxyChunk(client, requestId, data);
       }
     }
@@ -246,7 +332,7 @@ async function handleStreamingResponse(
   sendProxyDone(client, requestId, model, inputTokens, outputTokens, Date.now() - startMs);
 }
 
-async function handleNonStreamingResponse(
+async function handleAnthropicNonStreamingResponse(
   client: GatewayClient,
   requestId: string,
   response: Response,
@@ -268,10 +354,181 @@ async function handleNonStreamingResponse(
     // If we can't parse, still send the raw response.
   }
 
-  // Send the full response as a single chunk.
   sendProxyChunk(client, requestId, text, true);
   sendProxyDone(client, requestId, model, inputTokens, outputTokens, Date.now() - startMs);
 }
+
+// ---------------------------------------------------------------------------
+// OpenAI Chat Completions format handlers
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert an OpenAI chat completion response to Anthropic Messages format
+ * for consistent relay to the gateway.
+ */
+function openAIToAnthropicResponse(
+  openaiData: Record<string, unknown>,
+  requestModel: string,
+): { text: string; usage: UsageInfo } {
+  const choices = openaiData.choices as Array<Record<string, unknown>> | undefined;
+  const message = choices?.[0]?.message as Record<string, unknown> | undefined;
+  const content = typeof message?.content === "string" ? message.content : "";
+
+  const usage = openaiData.usage as Record<string, number> | undefined;
+  const inputTokens = usage?.prompt_tokens ?? 0;
+  const outputTokens = usage?.completion_tokens ?? 0;
+
+  const anthropicResponse = {
+    id: typeof openaiData.id === "string" ? openaiData.id : "",
+    type: "message",
+    role: "assistant",
+    model: requestModel,
+    content: [{ type: "text", text: content }],
+    stop_reason: "end_turn",
+    usage: { input_tokens: inputTokens, output_tokens: outputTokens },
+  };
+
+  return {
+    text: JSON.stringify(anthropicResponse),
+    usage: { input_tokens: inputTokens, output_tokens: outputTokens },
+  };
+}
+
+async function handleOpenAINonStreamingResponse(
+  client: GatewayClient,
+  requestId: string,
+  response: Response,
+  startMs: number,
+  model: string,
+): Promise<void> {
+  const text = await response.text();
+
+  let inputTokens = 0;
+  let outputTokens = 0;
+  let relayText = text;
+
+  try {
+    const parsed = JSON.parse(text);
+
+    // Check for API-level errors (Hanzo API returns 200 with error in body).
+    if (parsed.status === "error" || parsed.error) {
+      const errMsg = parsed.msg || parsed.error?.message || "unknown API error";
+      sendProxyError(client, requestId, "API_ERROR", `${errMsg}`);
+      return;
+    }
+
+    const converted = openAIToAnthropicResponse(parsed, model);
+    relayText = converted.text;
+    inputTokens = converted.usage.input_tokens;
+    outputTokens = converted.usage.output_tokens;
+  } catch {
+    // If we can't parse, send raw response.
+  }
+
+  sendProxyChunk(client, requestId, relayText, true);
+  sendProxyDone(client, requestId, model, inputTokens, outputTokens, Date.now() - startMs);
+}
+
+async function handleOpenAIStreamingResponse(
+  client: GatewayClient,
+  requestId: string,
+  response: Response,
+  startMs: number,
+  model: string,
+): Promise<void> {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    sendProxyError(client, requestId, "NO_BODY", "no response body");
+    return;
+  }
+
+  const decoder = new TextDecoder();
+  let inputTokens = 0;
+  let outputTokens = 0;
+  let buffer = "";
+
+  // Collect all text content for the final Anthropic-format response.
+  const contentParts: string[] = [];
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) {
+          continue;
+        }
+        const data = line.substring(6).trim();
+        if (data === "[DONE]") {
+          continue;
+        }
+
+        try {
+          const parsed = JSON.parse(data);
+
+          // Check for error in stream.
+          if (parsed.status === "error" || parsed.error) {
+            const errMsg = parsed.msg || parsed.error?.message || "stream error";
+            sendProxyError(client, requestId, "STREAM_ERROR", errMsg);
+            return;
+          }
+
+          // Extract content delta from OpenAI streaming format.
+          const delta = (parsed.choices as Array<Record<string, unknown>>)?.[0]?.delta as
+            | Record<string, unknown>
+            | undefined;
+          if (delta?.content && typeof delta.content === "string") {
+            contentParts.push(delta.content);
+          }
+
+          // Extract usage if present (some providers include it).
+          if (parsed.usage) {
+            const u = parsed.usage as Record<string, number>;
+            inputTokens = u.prompt_tokens ?? inputTokens;
+            outputTokens = u.completion_tokens ?? outputTokens;
+          }
+        } catch {
+          // Non-JSON data line.
+        }
+
+        // Convert OpenAI chunk to Anthropic SSE format for relay.
+        // The gateway expects Anthropic-style events.
+        try {
+          const parsed = JSON.parse(data);
+          const delta = (parsed.choices as Array<Record<string, unknown>>)?.[0]?.delta as
+            | Record<string, unknown>
+            | undefined;
+          if (delta?.content && typeof delta.content === "string") {
+            const anthropicChunk = JSON.stringify({
+              type: "content_block_delta",
+              index: 0,
+              delta: { type: "text_delta", text: delta.content },
+            });
+            sendProxyChunk(client, requestId, anthropicChunk);
+          }
+        } catch {
+          // Forward raw data as fallback.
+          sendProxyChunk(client, requestId, data);
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  sendProxyDone(client, requestId, model, inputTokens, outputTokens, Date.now() - startMs);
+}
+
+// ---------------------------------------------------------------------------
+// Event senders
+// ---------------------------------------------------------------------------
 
 function sendProxyChunk(
   client: GatewayClient,
