@@ -128,7 +128,7 @@ export function buildGatewayCronService(params: {
     return canonical;
   };
 
-  const resolveCronWakeTarget = (opts?: { agentId?: string; sessionKey?: string | null }) => {
+  const _resolveCronWakeTarget = (opts?: { agentId?: string; sessionKey?: string | null }) => {
     const runtimeConfig = loadConfig();
     const requestedAgentId = opts?.agentId ? resolveCronAgent(opts.agentId).agentId : undefined;
     const derivedAgentId =

@@ -740,7 +740,7 @@ export async function collectSandboxBrowserHashLabelFindings(params: {
     return findings;
   }
 
-  const browserEnabled = sandboxConfig.browser?.enabled !== false;
+  const browserEnabled = sandboxConfig.browser?.enabled ?? true;
   if (!browserEnabled) {
     return findings;
   }
