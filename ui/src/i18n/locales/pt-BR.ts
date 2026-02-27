@@ -32,6 +32,7 @@ export const pt_BR: TranslationMap = {
     skills: "Habilidades",
     nodes: "Nós",
     screen: "Tela",
+    marketplace: "Marketplace",
     chat: "Chat",
     config: "Config",
     debug: "Debug",
@@ -48,6 +49,8 @@ export const pt_BR: TranslationMap = {
     skills: "Gerenciar disponibilidade de habilidades e injeção de chaves de API.",
     nodes: "Dispositivos pareados, capacidades e exposição de comandos.",
     screen: "Acesso remoto à área de trabalho via compartilhamento de tela VNC.",
+    marketplace:
+      "Compartilhamento P2P de computação — capacidade ociosa do Claude para compradores.",
     chat: "Sessão de chat direta com o gateway para intervenções rápidas.",
     config: "Editar ~/.bot/bot.json com segurança.",
     debug: "Snapshots do gateway, eventos e chamadas RPC manuais.",
