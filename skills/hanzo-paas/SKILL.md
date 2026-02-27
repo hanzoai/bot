@@ -1,134 +1,163 @@
 ---
 name: hanzo-paas
-description: "Deploy and manage applications on Hanzo PaaS (platform.hanzo.ai). Manage projects, environments, deployments, domains, and logs via the Hanzo Platform API."
-metadata: { "bot": { "requires": { "bins": ["curl"] } } }
+description: "Deploy and manage applications on Hanzo PaaS. Manage projects, environments, deployments, domains, logs, and cloud services via the hanzo-tools-paas MCP tool or REST API."
+metadata:
+  {
+    "bot":
+      {
+        "requires": { "bins": ["python3"] },
+        "install":
+          [
+            {
+              "id": "pip",
+              "kind": "pip",
+              "package": "hanzo-tools-paas",
+              "label": "Install Hanzo PaaS Tools (pip)",
+            },
+          ],
+      },
+  }
 ---
 
 # Hanzo PaaS — Platform as a Service
 
-Hanzo PaaS (Dokploy-based) at `platform.hanzo.ai` provides application hosting, deployments, and infrastructure management.
+`pip install hanzo-tools-paas`
+
+Deploy and manage applications on Hanzo PaaS (platform.hanzo.ai). Supports Dokploy-based hosting, Docker/Compose deployments, domain management, and IAM integration.
 
 ## Authentication
 
 ```bash
-# Get auth token via IAM
-export HANZO_IAM_ENDPOINT=https://iam.hanzo.ai
-export HANZO_PLATFORM_URL=https://platform.hanzo.ai
+# Login via Hanzo CLI (stores token at ~/.hanzo/auth/token.json)
+hanzo login
 
-# Or use API token directly
-export HANZO_PLATFORM_TOKEN=your-api-token
+# Or set environment variables
+export HANZO_IAM_URL=https://hanzo.id
+export HANZO_IAM_CLIENT_ID=your-client-id
+export HANZO_IAM_CLIENT_SECRET=your-client-secret
 ```
 
-## API Base
+## MCP Tool (Recommended)
 
+The `paas` MCP tool provides a unified interface via `hanzo-mcp`:
+
+```python
+# Via hanzo-mcp server — single tool with action parameter
+# Tool: paas(action, org, project, environment, container)
 ```
-https://platform.hanzo.ai/api
+
+### IAM Actions
+
+```python
+# Who am I?
+paas(action="whoami")
+# → {"sub": "user-id", "name": "...", "email": "...", "organization": "hanzo"}
+
+# List users
+paas(action="users")
+# → {"count": 5, "users": [{"id": "...", "name": "...", "email": "..."}]}
+
+# List organizations
+paas(action="orgs")
+# → {"count": 3, "organizations": [...]}
+
+# List roles
+paas(action="roles")
+# → {"count": 4, "roles": [...]}
 ```
 
-All requests require `Authorization: Bearer <token>` header.
+### Deployment Actions
 
-## Project Management
+```python
+# List projects in org
+paas(action="projects", org="hanzo")
+# → {"org": "hanzo", "count": 12, "projects": [...]}
+
+# List environments for a project
+paas(action="env", org="hanzo", project="my-project")
+# → {"environments": [{"id": "...", "name": "production"}, ...]}
+
+# List containers/deployments
+paas(action="deployments", org="hanzo", project="my-project", environment="prod")
+# → {"containers": [{"id": "...", "name": "web", "image": "...", "status": "running", "replicas": 3}]}
+
+# Get deployment details
+paas(action="deploy", org="hanzo", project="my-project", environment="prod", container="web")
+
+# View container logs
+paas(action="logs", org="hanzo", project="my-project", environment="prod", container="web")
+
+# Redeploy (rolling restart)
+paas(action="redeploy", org="hanzo", project="my-project", environment="prod", container="web")
+```
+
+### Cloud Services
+
+```python
+# List managed services and cluster info
+paas(action="services")
+# → {"cluster": {...}, "templates": {...}}
+```
+
+## REST API (Direct)
+
+Base URL: `https://platform.hanzo.ai/api`
 
 ```bash
+TOKEN=$(cat ~/.hanzo/auth/token.json | jq -r .access_token)
+
 # List projects
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "$PLATFORM_URL/api/project.all" | jq
+  "https://platform.hanzo.ai/api/project.all" | jq
 
 # Create project
 curl -s -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name": "my-app", "description": "My application"}' \
-  "$PLATFORM_URL/api/project.create" | jq
+  "https://platform.hanzo.ai/api/project.create" | jq
 
-# Get project details
-curl -s -H "Authorization: Bearer $TOKEN" \
-  "$PLATFORM_URL/api/project.one?projectId=<id>" | jq
-```
-
-## Application Deployments
-
-```bash
-# Create application service
-curl -s -X POST -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "projectId": "<project-id>",
-    "name": "my-service",
-    "appName": "my-service",
-    "dockerImage": "ghcr.io/hanzoai/my-app:latest"
-  }' "$PLATFORM_URL/api/application.create" | jq
-
-# Deploy (trigger rebuild)
+# Deploy application
 curl -s -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"applicationId": "<app-id>"}' \
-  "$PLATFORM_URL/api/application.deploy" | jq
+  "https://platform.hanzo.ai/api/application.deploy" | jq
 
-# Get deployment logs
+# Read logs
 curl -s -H "Authorization: Bearer $TOKEN" \
-  "$PLATFORM_URL/api/application.readLogs?applicationId=<id>" | jq
+  "https://platform.hanzo.ai/api/application.readLogs?applicationId=<id>" | jq
 ```
 
 ## Docker Compose Deployments
 
 ```bash
-# Create compose service
 curl -s -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "projectId": "<project-id>",
     "name": "my-stack",
-    "composeFile": "version: '\''3.8'\''\nservices:\n  web:\n    image: nginx"
-  }' "$PLATFORM_URL/api/compose.create" | jq
-
-# Deploy compose
-curl -s -X POST -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"composeId": "<compose-id>"}' \
-  "$PLATFORM_URL/api/compose.deploy" | jq
+    "composeFile": "services:\n  web:\n    image: nginx"
+  }' "https://platform.hanzo.ai/api/compose.create" | jq
 ```
 
 ## Domain Management
 
 ```bash
-# Add domain to application
 curl -s -X POST -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "applicationId": "<app-id>",
     "host": "myapp.hanzo.ai",
     "certificateType": "letsencrypt"
-  }' "$PLATFORM_URL/api/domain.create" | jq
+  }' "https://platform.hanzo.ai/api/domain.create" | jq
 ```
 
 ## Environment Variables
 
 ```bash
-# Set env var on application
-curl -s -X POST -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "applicationId": "<app-id>",
-    "env": "DATABASE_URL=postgresql://..."
-  }' "$PLATFORM_URL/api/application.saveEnvironment" | jq
-```
-
-## Python SDK (via MCP tools)
-
-The `hanzo-tools-paas` package provides MCP tools for PaaS:
-
-```python
-# Available via hanzo-mcp server
-# Tools: paas_list_projects, paas_deploy, paas_logs, paas_env
-```
-
-## K8s Direct Access (for admins)
-
-```bash
-# Cluster: do-sfo3-hanzo-k8s (24.199.76.156)
-kubectl get pods -A
-kubectl rollout restart deployment/<name> -n <namespace>
-kubectl logs deployment/<name> -n <namespace> --tail=100
+HANZO_IAM_URL=https://hanzo.id           # IAM endpoint
+HANZO_IAM_CLIENT_ID=...                   # OAuth client ID
+HANZO_IAM_CLIENT_SECRET=...               # OAuth client secret
+HANZO_PLATFORM_URL=https://platform.hanzo.ai  # PaaS endpoint
 ```
 
 ## Key Endpoints
