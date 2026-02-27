@@ -51,10 +51,10 @@ describe("state + config path candidates", () => {
     } as NodeJS.ProcessEnv;
 
     const resolvedHome = path.resolve("/srv/bot-home");
-    expect(resolveStateDir(env)).toBe(path.join(resolvedHome, ".bot"));
+    expect(resolveStateDir(env)).toBe(path.join(resolvedHome, ".hanzo", "bot"));
 
     const candidates = resolveDefaultConfigCandidates(env);
-    expect(candidates[0]).toBe(path.join(resolvedHome, ".bot", "bot.json"));
+    expect(candidates[0]).toBe(path.join(resolvedHome, ".hanzo", "bot", "bot.json"));
   });
 
   it("prefers BOT_HOME over HOME for default state/config locations", () => {
@@ -64,17 +64,17 @@ describe("state + config path candidates", () => {
     } as NodeJS.ProcessEnv;
 
     const resolvedHome = path.resolve("/srv/bot-home");
-    expect(resolveStateDir(env)).toBe(path.join(resolvedHome, ".bot"));
+    expect(resolveStateDir(env)).toBe(path.join(resolvedHome, ".hanzo", "bot"));
 
     const candidates = resolveDefaultConfigCandidates(env);
-    expect(candidates[0]).toBe(path.join(resolvedHome, ".bot", "bot.json"));
+    expect(candidates[0]).toBe(path.join(resolvedHome, ".hanzo", "bot", "bot.json"));
   });
 
   it("returns single canonical config candidate", () => {
     const home = "/home/test";
     const resolvedHome = path.resolve(home);
     const candidates = resolveDefaultConfigCandidates({} as NodeJS.ProcessEnv, () => home);
-    const expected = [path.join(resolvedHome, ".bot", "bot.json")];
+    const expected = [path.join(resolvedHome, ".hanzo", "bot", "bot.json")];
     expect(candidates).toEqual(expected);
   });
 

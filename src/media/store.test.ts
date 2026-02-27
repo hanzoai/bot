@@ -17,7 +17,7 @@ describe("media store", () => {
     home = await fs.mkdtemp(path.join(os.tmpdir(), "bot-test-home-"));
     process.env.HOME = home;
     process.env.USERPROFILE = home;
-    process.env.BOT_STATE_DIR = path.join(home, ".bot");
+    process.env.BOT_STATE_DIR = path.join(home, ".hanzo", "bot");
     if (process.platform === "win32") {
       const match = home.match(/^([A-Za-z]:)(.*)$/);
       if (match) {
@@ -25,7 +25,7 @@ describe("media store", () => {
         process.env.HOMEPATH = match[2] || "\\";
       }
     }
-    await fs.mkdir(path.join(home, ".bot"), { recursive: true });
+    await fs.mkdir(path.join(home, ".hanzo", "bot"), { recursive: true });
     store = await import("./store.js");
   });
 
@@ -48,7 +48,7 @@ describe("media store", () => {
     await withTempStore(async (store, home) => {
       const dir = await store.ensureMediaDir();
       expect(isPathWithinBase(home, dir)).toBe(true);
-      expect(path.normalize(dir)).toContain(`${path.sep}.bot${path.sep}media`);
+      expect(path.normalize(dir)).toContain(`${path.sep}bot${path.sep}media`);
       const stat = await fs.stat(dir);
       expect(stat.isDirectory()).toBe(true);
     });

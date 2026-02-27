@@ -17,7 +17,8 @@ export function resolveIsNixMode(env: NodeJS.ProcessEnv = process.env): boolean 
 
 export const isNixMode = resolveIsNixMode();
 
-const STATE_DIRNAME = ".bot";
+const STATE_DIR_SEGMENTS = [".hanzo", "bot"];
+const LEGACY_STATE_DIRNAME = ".bot";
 const CONFIG_FILENAME = "bot.json";
 
 function resolveDefaultHomeDir(): string {
@@ -29,26 +30,56 @@ function envHomedir(env: NodeJS.ProcessEnv): () => string {
   return () => resolveRequiredHomeDir(env, os.homedir);
 }
 
+/** New canonical state dir: ~/.hanzo/bot */
+function newStateDir(homedir: () => string = resolveDefaultHomeDir): string {
+  return path.join(homedir(), ...STATE_DIR_SEGMENTS);
+}
+
+/** Legacy state dir: ~/.bot */
+function legacyStateDir(homedir: () => string = resolveDefaultHomeDir): string {
+  return path.join(homedir(), LEGACY_STATE_DIRNAME);
+}
+
+/**
+ * Resolve the state directory, preferring ~/.hanzo/bot but falling back
+ * to ~/.bot if it exists and the new location does not.
+ */
 function stateDir(homedir: () => string = resolveDefaultHomeDir): string {
-  return path.join(homedir(), STATE_DIRNAME);
+  const newDir = newStateDir(homedir);
+  try {
+    if (fs.existsSync(newDir)) {
+      return newDir;
+    }
+  } catch {
+    // fall through
+  }
+  const oldDir = legacyStateDir(homedir);
+  try {
+    if (fs.existsSync(oldDir)) {
+      return oldDir;
+    }
+  } catch {
+    // fall through
+  }
+  return newDir;
 }
 
 export function resolveLegacyStateDir(homedir: () => string = resolveDefaultHomeDir): string {
-  return stateDir(homedir);
+  return legacyStateDir(homedir);
 }
 
 export function resolveLegacyStateDirs(homedir: () => string = resolveDefaultHomeDir): string[] {
-  return [stateDir(homedir)];
+  return [legacyStateDir(homedir), newStateDir(homedir)];
 }
 
 export function resolveNewStateDir(homedir: () => string = resolveDefaultHomeDir): string {
-  return stateDir(homedir);
+  return newStateDir(homedir);
 }
 
 /**
  * State directory for mutable data (sessions, logs, caches).
  * Can be overridden via BOT_STATE_DIR.
- * Default: ~/.bot
+ * Default: ~/.hanzo/bot (legacy fallback: ~/.bot)
  */
 export function resolveStateDir(
   env: NodeJS.ProcessEnv = process.env,
@@ -87,7 +118,7 @@ export const STATE_DIR = resolveStateDir();
 /**
  * Config file path.
  * Can be overridden via BOT_CONFIG_PATH.
- * Default: ~/.bot/bot.json (or $BOT_STATE_DIR/bot.json)
+ * Default: ~/.hanzo/bot/bot.json (or $BOT_STATE_DIR/bot.json)
  */
 export function resolveCanonicalConfigPath(
   env: NodeJS.ProcessEnv = process.env,
