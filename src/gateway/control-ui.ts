@@ -266,6 +266,7 @@ export function handleControlUiHttpRequest(
           }
         : undefined;
 
+    const marketplaceEnabled = config?.gateway?.marketplace?.enabled === true;
     sendJson(res, 200, {
       basePath,
       assistantName: identity.name,
@@ -274,6 +275,7 @@ export function handleControlUiHttpRequest(
       authMode,
       iam: iamBootstrap,
       token: opts?.bearerToken,
+      marketplaceEnabled,
     } satisfies ControlUiBootstrapConfig);
     return true;
   }

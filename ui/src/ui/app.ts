@@ -301,6 +301,12 @@ export class BotApp extends LitElement {
   // Non-reactive (don’t trigger renders just for timer bookkeeping).
   usageQueryDebounceTimer: number | null = null;
 
+  @state() marketplaceLoading = false;
+  @state() marketplaceStatus:
+    | import("./controllers/marketplace.js").MarketplaceStatusResult
+    | null = null;
+  @state() marketplaceError: string | null = null;
+
   @state() cronLoading = false;
   @state() cronJobs: CronJob[] = [];
   @state() cronStatus: CronStatus | null = null;
