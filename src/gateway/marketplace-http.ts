@@ -65,6 +65,17 @@ export async function handleMarketplaceHttpRequest(
   if (handled.authResult?.iamResult && handled.authResult.iamResult.ok) {
     tenant = resolveTenantContext({ iamResult: handled.authResult.iamResult }) ?? undefined;
   }
+
+  // Token-auth fallback: when auth succeeded via gateway token (not IAM JWT)
+  // and billing gate is in warn/open mode, allow requests with a service tenant.
+  // This supports internal testing and the TRY FREE flow.
+  if (!tenant && handled.authResult?.method === "token") {
+    const gateMode = process.env.BILLING_GATE_MODE;
+    if (gateMode === "open" || gateMode === "warn") {
+      tenant = { orgId: "hanzo", userId: "service-marketplace", userName: "z@hanzo.ai" };
+    }
+  }
+
   if (!tenant) {
     sendJson(res, 403, { error: { message: "no tenant context", type: "auth_error" } });
     return true;
