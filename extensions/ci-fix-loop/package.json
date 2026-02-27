@@ -1,0 +1,18 @@
+{
+  "name": "@hanzo/bot-ci-fix-loop",
+  "version": "2026.2.26",
+  "private": true,
+  "description": "Autonomous CI failure detection, classification, and fix loop with budget controls",
+  "type": "module",
+  "devDependencies": {
+    "@hanzo/bot": "workspace:*"
+  },
+  "peerDependencies": {
+    "@hanzo/bot": ">=2026.1.26"
+  },
+  "bot": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
