@@ -1,0 +1,8 @@
+{
+  "id": "continuous-learning",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
