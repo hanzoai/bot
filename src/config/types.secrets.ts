@@ -60,7 +60,7 @@ export type SecretRefDefaultsCarrier =
 
 /** Normalize the polymorphic defaults carrier to a flat SecretDefaults. */
 function resolveDefaults(carrier?: SecretRefDefaultsCarrier): SecretDefaults | undefined {
-  if (!carrier) return undefined;
+  if (!carrier) { return undefined; }
   if ("secrets" in carrier) {
     return (carrier as { secrets?: { defaults?: SecretDefaults } }).secrets?.defaults;
   }
