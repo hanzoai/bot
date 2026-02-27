@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import type { NodeBillingMode } from "../config/types.gateway.js";
 import type { KVNodeSync, RemoteNodeInfo, InvokeRequest } from "./kv-node-sync.js";
 import type { GatewayWsClient } from "./server/ws-types.js";
 
@@ -19,6 +20,22 @@ export type NodeSession = {
   permissions?: Record<string, boolean>;
   pathEnv?: string;
   connectedAtMs: number;
+  /** Billing mode for this node (default: "global"). */
+  billingMode?: NodeBillingMode;
+  /** Dedicated budget in cents (only used when billingMode is "dedicated"). */
+  dedicatedBudgetCents?: number;
+  /** Running total of cents spent (dedicated mode, persisted via config). */
+  dedicatedSpentCents?: number;
+  /** Whether this node has opted into marketplace P2P sharing. */
+  marketplaceEnabled?: boolean;
+  /** Marketplace idle status: active, idle, or sharing. */
+  marketplaceStatus?: "active" | "idle" | "sharing";
+  /** Number of active marketplace proxy requests on this node. */
+  marketplaceActiveRequests?: number;
+  /** Maximum concurrent marketplace requests this node accepts. */
+  marketplaceMaxConcurrent?: number;
+  /** Seller's payout preference: USD or $AI token. */
+  marketplacePayoutPreference?: "usd" | "ai_token";
 };
 
 type PendingInvoke = {
@@ -139,6 +156,13 @@ export class NodeRegistry {
       pathEnv,
       connectedAtMs: Date.now(),
     };
+    // Detect marketplace capability from node's advertised caps.
+    if (caps.includes("marketplace")) {
+      session.marketplaceEnabled = true;
+      session.marketplaceStatus = "active";
+      session.marketplaceActiveRequests = 0;
+      session.marketplaceMaxConcurrent = 1;
+    }
     this.nodesById.set(nodeId, session);
     this.nodesByConn.set(client.connId, nodeId);
 

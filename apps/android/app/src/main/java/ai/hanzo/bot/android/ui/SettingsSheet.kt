@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.ui
+package ai.hanzo.bot.android.ui
 
 import android.Manifest
 import android.content.Context
@@ -60,12 +60,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import ai.hanzo-bot.android.BuildConfig
-import ai.hanzo-bot.android.LocationMode
-import ai.hanzo-bot.android.MainViewModel
-import ai.hanzo-bot.android.NodeForegroundService
-import ai.hanzo-bot.android.VoiceWakeMode
-import ai.hanzo-bot.android.WakeWords
+import ai.hanzo.bot.android.BuildConfig
+import ai.hanzo.bot.android.LocationMode
+import ai.hanzo.bot.android.MainViewModel
+import ai.hanzo.bot.android.NodeForegroundService
+import ai.hanzo.bot.android.VoiceWakeMode
+import ai.hanzo.bot.android.WakeWords
 
 @Composable
 fun SettingsSheet(viewModel: MainViewModel) {
