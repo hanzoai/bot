@@ -47,6 +47,7 @@ import {
   updateExecApprovalsFormValue,
 } from "./controllers/exec-approvals.ts";
 import { loadLogs } from "./controllers/logs.ts";
+import { loadMarketplace } from "./controllers/marketplace.ts";
 import { loadNodes, setNodeBilling } from "./controllers/nodes.ts";
 import { loadPresence } from "./controllers/presence.ts";
 import { deleteSession, loadSessions, patchSession } from "./controllers/sessions.ts";
@@ -69,6 +70,7 @@ import { renderExecApprovalPrompt } from "./views/exec-approval.ts";
 import { renderGatewayUrlConfirmation } from "./views/gateway-url-confirmation.ts";
 import { renderInstances } from "./views/instances.ts";
 import { renderLogs } from "./views/logs.ts";
+import { renderMarketplace } from "./views/marketplace.ts";
 import { renderNodes } from "./views/nodes.ts";
 import { renderOverview } from "./views/overview.ts";
 import { renderScreen } from "./views/screen.ts";
@@ -369,6 +371,17 @@ export function renderApp(state: AppViewState) {
                 onRun: (job) => runCronJob(state, job),
                 onRemove: (job) => removeCronJob(state, job),
                 onLoadRuns: (jobId) => loadCronRuns(state, jobId),
+              })
+            : nothing
+        }
+
+        ${
+          state.tab === "marketplace"
+            ? renderMarketplace({
+                loading: state.marketplaceLoading,
+                status: state.marketplaceStatus,
+                error: state.marketplaceError,
+                onRefresh: () => loadMarketplace(state),
               })
             : nothing
         }
