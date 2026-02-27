@@ -314,7 +314,7 @@ export const dispatchTelegramMessage = async ({
               finalText.length <= draftMaxChars &&
               !payload.isError;
             if (canFinalizeViaPreviewEdit) {
-              draftStream?.stop();
+              void draftStream?.stop();
               draftStoppedForPreviewEdit = true;
               if (
                 currentPreviewText &&
@@ -353,7 +353,7 @@ export const dispatchTelegramMessage = async ({
               );
             }
             if (!draftStoppedForPreviewEdit) {
-              draftStream?.stop();
+              void draftStream?.stop();
             }
           }
           const result = await deliverReplies({
@@ -424,7 +424,7 @@ export const dispatchTelegramMessage = async ({
     if (!finalizedViaPreviewMessage) {
       await draftStream?.clear();
     }
-    draftStream?.stop();
+    void draftStream?.stop();
   }
   let sentFallback = false;
   if (!deliveryState.delivered && deliveryState.skippedNonSilent > 0) {
