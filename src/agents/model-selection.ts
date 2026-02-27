@@ -95,6 +95,13 @@ function normalizeProviderModelId(provider: string, model: string): string {
   if (provider === "google") {
     return normalizeGoogleModelId(model);
   }
+  // OpenRouter's API expects fully-qualified model identifiers. Native
+  // OpenRouter models (no embedded slash) are prefixed with "openrouter/"
+  // so the API receives the canonical model path. External models like
+  // "anthropic/claude-sonnet-4-5" already carry their provider prefix.
+  if (provider === "openrouter" && !model.includes("/")) {
+    return `openrouter/${model}`;
+  }
   return model;
 }
 
