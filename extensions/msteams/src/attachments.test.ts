@@ -8,6 +8,50 @@ const saveMediaBufferMock = vi.fn(async () => ({
   contentType: "image/png",
 }));
 
+const fetchRemoteMediaMock = vi.fn(
+  async (params: {
+    url: string;
+    fetchImpl?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+    maxBytes?: number;
+    ssrfPolicy?: unknown;
+    filePathHint?: string;
+  }) => {
+    // Mirror the real fetchRemoteMedia: use fetchImpl (which wraps fetchFn
+    // with auth/scope fallback) so the test's fetchFn receives correct args.
+    const fetchFn = params.fetchImpl ?? globalThis.fetch;
+    let res: Response;
+    let finalUrl = params.url;
+    // The real fetchRemoteMedia uses fetchWithSsrFGuard which delegates
+    // to fetchImpl. When tests provide fetchImpl via downloadAndStoreMSTeamsRemoteMedia,
+    // the fetchImpl already wraps fetchWithAuthFallback that calls the test's fetchFn.
+    // We just call fetchImpl with the url and no init.
+    try {
+      res = await fetchFn(params.url);
+    } catch (err) {
+      throw new Error(`Failed to fetch media from ${params.url}: ${String(err)}`);
+    }
+    if (!res.ok) {
+      const text = await res.text().catch(() => "unknown");
+      throw new Error(
+        `Failed to fetch media from ${finalUrl}: HTTP ${res.status}; body: ${text}`,
+      );
+    }
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (typeof params.maxBytes === "number" && buffer.byteLength > params.maxBytes) {
+      const error = new Error(`payload exceeds maxBytes ${params.maxBytes}`) as Error & {
+        code?: string;
+      };
+      error.code = "max_bytes";
+      throw error;
+    }
+    return {
+      buffer,
+      contentType: res.headers.get("content-type") ?? undefined,
+      fileName: undefined,
+    };
+  },
+);
+
 const runtimeStub = {
   media: {
     detectMime: (...args: unknown[]) => detectMimeMock(...args),
@@ -15,6 +59,10 @@ const runtimeStub = {
   channel: {
     media: {
       saveMediaBuffer: (...args: unknown[]) => saveMediaBufferMock(...args),
+      fetchRemoteMedia: (...args: unknown[]) =>
+        fetchRemoteMediaMock(
+          ...(args as Parameters<typeof fetchRemoteMediaMock>),
+        ),
     },
   },
 } as unknown as PluginRuntime;
@@ -27,6 +75,7 @@ describe("msteams attachments", () => {
   beforeEach(() => {
     detectMimeMock.mockClear();
     saveMediaBufferMock.mockClear();
+    fetchRemoteMediaMock.mockClear();
     setMSTeamsRuntime(runtimeStub);
   });
 
@@ -117,7 +166,7 @@ describe("msteams attachments", () => {
         fetchFn: fetchMock as unknown as typeof fetch,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith("https://x/img");
+      expect(fetchMock).toHaveBeenCalledWith("https://x/img", expect.anything());
       expect(saveMediaBufferMock).toHaveBeenCalled();
       expect(media).toHaveLength(1);
       expect(media[0]?.path).toBe("/tmp/saved.png");
@@ -144,7 +193,7 @@ describe("msteams attachments", () => {
         fetchFn: fetchMock as unknown as typeof fetch,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith("https://x/dl");
+      expect(fetchMock).toHaveBeenCalledWith("https://x/dl", expect.anything());
       expect(media).toHaveLength(1);
     });
 
@@ -169,7 +218,7 @@ describe("msteams attachments", () => {
         fetchFn: fetchMock as unknown as typeof fetch,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith("https://x/doc.pdf");
+      expect(fetchMock).toHaveBeenCalledWith("https://x/doc.pdf", expect.anything());
       expect(media).toHaveLength(1);
       expect(media[0]?.path).toBe("/tmp/saved.pdf");
       expect(media[0]?.placeholder).toBe("<media:document>");
@@ -197,7 +246,7 @@ describe("msteams attachments", () => {
       });
 
       expect(media).toHaveLength(1);
-      expect(fetchMock).toHaveBeenCalledWith("https://x/inline.png");
+      expect(fetchMock).toHaveBeenCalledWith("https://x/inline.png", expect.anything());
     });
 
     it("stores inline data:image base64 payloads", async () => {
@@ -221,12 +270,17 @@ describe("msteams attachments", () => {
     it("retries with auth when the first request is unauthorized", async () => {
       const { downloadMSTeamsAttachments } = await load();
       const fetchMock = vi.fn(async (_url: string, opts?: RequestInit) => {
-        const hasAuth = Boolean(
-          opts &&
-          typeof opts === "object" &&
-          "headers" in opts &&
-          (opts.headers as Record<string, string>)?.Authorization,
-        );
+        let authValue: string | null | undefined;
+        if (opts?.headers) {
+          if (opts.headers instanceof Headers) {
+            authValue = opts.headers.get("Authorization");
+          } else if (Array.isArray(opts.headers)) {
+            authValue = opts.headers.find(([k]) => k.toLowerCase() === "authorization")?.[1];
+          } else {
+            authValue = (opts.headers as Record<string, string>).Authorization;
+          }
+        }
+        const hasAuth = Boolean(authValue);
         if (!hasAuth) {
           return new Response("unauthorized", { status: 401 });
         }
@@ -254,12 +308,17 @@ describe("msteams attachments", () => {
       const { downloadMSTeamsAttachments } = await load();
       const tokenProvider = { getAccessToken: vi.fn(async () => "token") };
       const fetchMock = vi.fn(async (_url: string, opts?: RequestInit) => {
-        const hasAuth = Boolean(
-          opts &&
-          typeof opts === "object" &&
-          "headers" in opts &&
-          (opts.headers as Record<string, string>)?.Authorization,
-        );
+        let authValue: string | null | undefined;
+        if (opts?.headers) {
+          if (opts.headers instanceof Headers) {
+            authValue = opts.headers.get("Authorization");
+          } else if (Array.isArray(opts.headers)) {
+            authValue = opts.headers.find(([k]) => k.toLowerCase() === "authorization")?.[1];
+          } else {
+            authValue = (opts.headers as Record<string, string>).Authorization;
+          }
+        }
+        const hasAuth = Boolean(authValue);
         if (!hasAuth) {
           return new Response("forbidden", { status: 403 });
         }

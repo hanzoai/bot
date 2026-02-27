@@ -4,6 +4,7 @@ import path from "node:path";
 import { resolveBlueBubblesServerAccount } from "./account-resolve.js";
 import { postMultipartFormData } from "./multipart.js";
 import { getCachedBlueBubblesPrivateApiStatus } from "./probe.js";
+import { tryGetBlueBubblesRuntime, warnBlueBubbles } from "./runtime.js";
 import { extractBlueBubblesMessageId, resolveBlueBubblesSendTarget } from "./send-helpers.js";
 import { resolveChatGuidForTarget } from "./send.js";
 import {
@@ -57,6 +58,21 @@ function resolveAccount(params: BlueBubblesAttachmentOpts) {
   return resolveBlueBubblesServerAccount(params);
 }
 
+function resolveBlueBubblesDownloadSsrfPolicy(
+  baseUrl: string,
+  allowPrivateNetwork: boolean,
+): Record<string, unknown> {
+  if (allowPrivateNetwork) {
+    return { allowPrivateNetwork: true };
+  }
+  try {
+    const parsed = new URL(baseUrl);
+    return { allowedHostnames: [parsed.hostname] };
+  } catch {
+    return {};
+  }
+}
+
 export async function downloadBlueBubblesAttachment(
   attachment: BlueBubblesAttachment,
   opts: BlueBubblesAttachmentOpts & { maxBytes?: number } = {},
@@ -65,12 +81,43 @@ export async function downloadBlueBubblesAttachment(
   if (!guid) {
     throw new Error("BlueBubbles attachment guid is required");
   }
-  const { baseUrl, password } = resolveAccount(opts);
+  const { baseUrl, password, allowPrivateNetwork } = resolveAccount(opts);
   const url = buildBlueBubblesApiUrl({
     baseUrl,
     path: `/api/v1/attachment/${encodeURIComponent(guid)}/download`,
     password,
   });
+  const maxBytes = typeof opts.maxBytes === "number" ? opts.maxBytes : DEFAULT_ATTACHMENT_MAX_BYTES;
+  const runtime = tryGetBlueBubblesRuntime();
+  if (runtime) {
+    const ssrfPolicy = resolveBlueBubblesDownloadSsrfPolicy(baseUrl, allowPrivateNetwork);
+    const fetchImpl = (input: RequestInfo | URL, init?: RequestInit) =>
+      blueBubblesFetchWithTimeout(
+        String(input),
+        { method: "GET", ...init },
+        opts.timeoutMs,
+      );
+    let result: { buffer: Buffer; contentType?: string; fileName?: string };
+    try {
+      result = await runtime.channel.media.fetchRemoteMedia({
+        url,
+        maxBytes,
+        fetchImpl,
+        ssrfPolicy,
+      });
+    } catch (err) {
+      const errAny = err as { code?: string; message?: string };
+      if (errAny.code === "max_bytes") {
+        throw new Error(
+          `BlueBubbles attachment too large (exceeds ${maxBytes} bytes)`,
+        );
+      }
+      throw err;
+    }
+    const contentType =
+      result.contentType ?? attachment.mimeType ?? undefined;
+    return { buffer: new Uint8Array(result.buffer), contentType };
+  }
   const res = await blueBubblesFetchWithTimeout(url, { method: "GET" }, opts.timeoutMs);
   if (!res.ok) {
     const errorText = await res.text().catch(() => "");
@@ -80,7 +127,6 @@ export async function downloadBlueBubblesAttachment(
   }
   const contentType = res.headers.get("content-type") ?? undefined;
   const buf = new Uint8Array(await res.arrayBuffer());
-  const maxBytes = typeof opts.maxBytes === "number" ? opts.maxBytes : DEFAULT_ATTACHMENT_MAX_BYTES;
   if (buf.byteLength > maxBytes) {
     throw new Error(`BlueBubbles attachment too large (${buf.byteLength} bytes)`);
   }
@@ -183,7 +229,20 @@ export async function sendBlueBubblesAttachment(params: {
   addField("chatGuid", chatGuid);
   addField("name", filename);
   addField("tempGuid", `temp-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`);
-  if (privateApiStatus !== false) {
+
+  // Resolve private API availability: true = enabled, false = disabled, null = unknown.
+  // When unknown, warn and downgrade to avoid broken messages.
+  const trimmedReplyTo = replyToMessageGuid?.trim();
+  const wantsPrivateApi = Boolean(trimmedReplyTo);
+  let canUsePrivateApi = privateApiStatus === true;
+  if (wantsPrivateApi && privateApiStatus === null) {
+    warnBlueBubbles(
+      "Private API status unknown; downgrading reply threading to plain send. " +
+        "Run `bluebubbles probe` to detect Private API availability.",
+    );
+    canUsePrivateApi = false;
+  }
+  if (canUsePrivateApi) {
     addField("method", "private-api");
   }
 
@@ -192,8 +251,7 @@ export async function sendBlueBubblesAttachment(params: {
     addField("isAudioMessage", "true");
   }
 
-  const trimmedReplyTo = replyToMessageGuid?.trim();
-  if (trimmedReplyTo && privateApiStatus !== false) {
+  if (trimmedReplyTo && canUsePrivateApi) {
     addField("selectedMessageGuid", trimmedReplyTo);
     addField("partIndex", typeof replyToPartIndex === "number" ? String(replyToPartIndex) : "0");
   }

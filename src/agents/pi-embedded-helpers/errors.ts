@@ -798,6 +798,9 @@ export function classifyFailoverReason(raw: string): FailoverReason | null {
   if (isAuthErrorMessage(raw)) {
     return "auth";
   }
+  if (isModelNotFoundErrorMessage(raw)) {
+    return "model_not_found";
+  }
   return null;
 }
 
@@ -840,7 +843,13 @@ export function isModelNotFoundErrorMessage(raw: string): boolean {
   if (/not_found_error/i.test(msg)) {
     return true;
   }
-  if (/model:\s*[a-z0-9._-]+/i.test(msg) && /not[_-]?found/i.test(msg)) {
+  if (/model:\s*[a-z0-9._/-]+/i.test(msg) && /not[_-]?found/i.test(msg)) {
+    return true;
+  }
+  if (/\bunknown model\b/i.test(msg)) {
+    return true;
+  }
+  if (/\bmodel not found\b/i.test(msg)) {
     return true;
   }
   return false;

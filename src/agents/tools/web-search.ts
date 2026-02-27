@@ -1,3 +1,4 @@
+import { EnvHttpProxyAgent } from "undici";
 import { Type } from "@sinclair/typebox";
 import type { BotConfig } from "../../config/config.js";
 import type { AnyAgentTool } from "./common.js";
@@ -19,7 +20,7 @@ import {
   writeCache,
 } from "./web-shared.js";
 
-const SEARCH_PROVIDERS = ["brave", "perplexity", "grok"] as const;
+const SEARCH_PROVIDERS = ["brave", "perplexity", "grok", "gemini", "kimi"] as const;
 const DEFAULT_SEARCH_COUNT = 5;
 const MAX_SEARCH_COUNT = 10;
 
@@ -32,6 +33,12 @@ const OPENROUTER_KEY_PREFIXES = ["sk-or-"];
 
 const XAI_API_ENDPOINT = "https://api.x.ai/v1/responses";
 const DEFAULT_GROK_MODEL = "grok-4-1-fast";
+
+const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
+const DEFAULT_GEMINI_MODEL = "gemini-2.0-flash";
+
+const DEFAULT_KIMI_BASE_URL = "https://api.moonshot.cn/v1";
+const DEFAULT_KIMI_MODEL = "moonshot-v1-128k";
 
 const SEARCH_CACHE = new Map<string, CacheEntry<Record<string, unknown>>>();
 const BRAVE_FRESHNESS_SHORTCUTS = new Set(["pd", "pw", "pm", "py"]);
@@ -173,6 +180,85 @@ type PerplexitySearchResponse = {
   citations?: string[];
 };
 
+type GeminiConfig = {
+  apiKey?: string;
+  model?: string;
+};
+
+type GeminiSearchResponse = {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string;
+      }>;
+    };
+    groundingMetadata?: {
+      groundingChunks?: Array<{
+        web?: {
+          uri?: string;
+          title?: string;
+        };
+      }>;
+    };
+  }>;
+};
+
+type KimiConfig = {
+  apiKey?: string;
+  baseUrl?: string;
+  model?: string;
+};
+
+type KimiSearchResponse = {
+  choices?: Array<{
+    finish_reason?: string;
+    message?: {
+      role?: string;
+      content?: string;
+      reasoning_content?: string;
+      tool_calls?: Array<{
+        id?: string;
+        type?: string;
+        function?: {
+          name?: string;
+          arguments?: string;
+        };
+      }>;
+    };
+  }>;
+  search_results?: Array<{
+    title?: string;
+    url?: string;
+    content?: string;
+  }>;
+};
+
+const ENV_PROXY_KEYS = [
+  "HTTP_PROXY",
+  "HTTPS_PROXY",
+  "ALL_PROXY",
+  "http_proxy",
+  "https_proxy",
+  "all_proxy",
+] as const;
+
+function hasEnvProxyConfigured(): boolean {
+  for (const key of ENV_PROXY_KEYS) {
+    const value = process.env[key];
+    if (typeof value === "string" && value.trim()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function resolveProxyDispatcher(): Record<string, unknown> {
+  if (hasEnvProxyConfigured()) {
+    return { dispatcher: new EnvHttpProxyAgent() };
+  }
+  return {};
+}
+
 type PerplexityBaseUrlHint = "direct" | "openrouter";
 
 function extractGrokContent(data: GrokSearchResponse): {
@@ -243,6 +329,22 @@ function missingSearchKeyPayload(provider: (typeof SEARCH_PROVIDERS)[number]) {
       docs: "https://docs.hanzo.bot/tools/web",
     };
   }
+  if (provider === "gemini") {
+    return {
+      error: "missing_gemini_api_key",
+      message:
+        "web_search (gemini) needs a Google API key. Set GEMINI_API_KEY in the Gateway environment, or configure tools.web.search.gemini.apiKey.",
+      docs: "https://docs.hanzo.bot/tools/web",
+    };
+  }
+  if (provider === "kimi") {
+    return {
+      error: "missing_kimi_api_key",
+      message:
+        "web_search (kimi) needs a Moonshot API key. Set KIMI_API_KEY or MOONSHOT_API_KEY in the Gateway environment, or configure tools.web.search.kimi.apiKey.",
+      docs: "https://docs.hanzo.bot/tools/web",
+    };
+  }
   return {
     error: "missing_brave_api_key",
     message: `web_search needs a Brave Search API key. Run \`${formatCliCommand("bot configure --section web")}\` to store it, or set BRAVE_API_KEY in the Gateway environment.`,
@@ -260,6 +362,12 @@ function resolveSearchProvider(search?: WebSearchConfig): (typeof SEARCH_PROVIDE
   }
   if (raw === "grok") {
     return "grok";
+  }
+  if (raw === "gemini") {
+    return "gemini";
+  }
+  if (raw === "kimi") {
+    return "kimi";
   }
   if (raw === "brave") {
     return "brave";
@@ -405,6 +513,68 @@ function resolveGrokInlineCitations(grok?: GrokConfig): boolean {
   return grok?.inlineCitations === true;
 }
 
+function resolveGeminiConfig(search?: WebSearchConfig): GeminiConfig {
+  if (!search || typeof search !== "object") {
+    return {};
+  }
+  const gemini = "gemini" in search ? search.gemini : undefined;
+  if (!gemini || typeof gemini !== "object") {
+    return {};
+  }
+  return gemini as GeminiConfig;
+}
+
+function resolveGeminiApiKey(gemini?: GeminiConfig): string | undefined {
+  const fromConfig = normalizeApiKey(gemini?.apiKey);
+  if (fromConfig) {
+    return fromConfig;
+  }
+  const fromEnv = normalizeApiKey(process.env.GEMINI_API_KEY);
+  return fromEnv || undefined;
+}
+
+function resolveGeminiModel(gemini?: GeminiConfig): string {
+  const fromConfig =
+    gemini && "model" in gemini && typeof gemini.model === "string" ? gemini.model.trim() : "";
+  return fromConfig || DEFAULT_GEMINI_MODEL;
+}
+
+function resolveKimiConfig(search?: WebSearchConfig): KimiConfig {
+  if (!search || typeof search !== "object") {
+    return {};
+  }
+  const kimi = "kimi" in search ? search.kimi : undefined;
+  if (!kimi || typeof kimi !== "object") {
+    return {};
+  }
+  return kimi as KimiConfig;
+}
+
+function resolveKimiApiKey(kimi?: KimiConfig): string | undefined {
+  const fromConfig = normalizeApiKey(kimi?.apiKey);
+  if (fromConfig) {
+    return fromConfig;
+  }
+  const fromEnvKimi = normalizeApiKey(process.env.KIMI_API_KEY);
+  if (fromEnvKimi) {
+    return fromEnvKimi;
+  }
+  const fromEnvMoonshot = normalizeApiKey(process.env.MOONSHOT_API_KEY);
+  return fromEnvMoonshot || undefined;
+}
+
+function resolveKimiBaseUrl(kimi?: KimiConfig): string {
+  const fromConfig =
+    kimi && "baseUrl" in kimi && typeof kimi.baseUrl === "string" ? kimi.baseUrl.trim() : "";
+  return fromConfig || DEFAULT_KIMI_BASE_URL;
+}
+
+function resolveKimiModel(kimi?: KimiConfig): string {
+  const fromConfig =
+    kimi && "model" in kimi && typeof kimi.model === "string" ? kimi.model.trim() : "";
+  return fromConfig || DEFAULT_KIMI_MODEL;
+}
+
 function resolveSearchCount(value: unknown, fallback: number): number {
   const parsed = typeof value === "number" && Number.isFinite(value) ? value : fallback;
   const clamped = Math.max(1, Math.min(MAX_SEARCH_COUNT, Math.floor(parsed)));
@@ -521,7 +691,8 @@ async function runPerplexitySearch(params: {
     },
     body: JSON.stringify(body),
     signal: withTimeout(undefined, params.timeoutSeconds * 1000),
-  });
+    ...resolveProxyDispatcher(),
+  } as RequestInit);
 
   if (!res.ok) {
     const detailResult = await readResponseText(res, { maxBytes: 64_000 });
@@ -571,7 +742,8 @@ async function runGrokSearch(params: {
     },
     body: JSON.stringify(body),
     signal: withTimeout(undefined, params.timeoutSeconds * 1000),
-  });
+    ...resolveProxyDispatcher(),
+  } as RequestInit);
 
   if (!res.ok) {
     const detailResult = await readResponseText(res, { maxBytes: 64_000 });
@@ -589,6 +761,134 @@ async function runGrokSearch(params: {
   return { content, citations, inlineCitations };
 }
 
+async function runGeminiSearch(params: {
+  query: string;
+  apiKey: string;
+  model: string;
+  timeoutSeconds: number;
+}): Promise<{ content: string; citations: string[] }> {
+  const endpoint = `${GEMINI_API_ENDPOINT}/${params.model}:generateContent?key=${params.apiKey}`;
+  const body = {
+    contents: [{ parts: [{ text: params.query }] }],
+    tools: [{ google_search: {} }],
+  };
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: withTimeout(undefined, params.timeoutSeconds * 1000),
+    ...resolveProxyDispatcher(),
+  } as RequestInit);
+
+  if (!res.ok) {
+    const detailResult = await readResponseText(res, { maxBytes: 64_000 });
+    const detail = detailResult.text;
+    throw new Error(`Gemini API error (${res.status}): ${detail || res.statusText}`);
+  }
+
+  const data = (await res.json()) as GeminiSearchResponse;
+  const candidate = data.candidates?.[0];
+  const content =
+    candidate?.content?.parts?.map((p) => p.text ?? "").join("") || "No response";
+  const citations = (candidate?.groundingMetadata?.groundingChunks ?? [])
+    .map((chunk) => chunk.web?.uri)
+    .filter((uri): uri is string => Boolean(uri));
+
+  return { content, citations };
+}
+
+async function runKimiSearch(params: {
+  query: string;
+  apiKey: string;
+  baseUrl: string;
+  model: string;
+  timeoutSeconds: number;
+}): Promise<{ content: string; citations: string[] }> {
+  const baseUrl = params.baseUrl.trim().replace(/\/$/, "");
+  const endpoint = `${baseUrl}/chat/completions`;
+  const body = {
+    model: params.model,
+    messages: [{ role: "user", content: params.query }],
+    tools: [{ type: "builtin_function", function: { name: "$web_search" } }],
+    tool_choice: "auto",
+  };
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${params.apiKey}`,
+    },
+    body: JSON.stringify(body),
+    signal: withTimeout(undefined, params.timeoutSeconds * 1000),
+    ...resolveProxyDispatcher(),
+  } as RequestInit);
+
+  if (!res.ok) {
+    const detailResult = await readResponseText(res, { maxBytes: 64_000 });
+    const detail = detailResult.text;
+    throw new Error(`Kimi API error (${res.status}): ${detail || res.statusText}`);
+  }
+
+  const data = (await res.json()) as KimiSearchResponse;
+  const choice = data.choices?.[0];
+
+  // If the model invoked tool_calls, we need to echo the tool results and make a second call
+  if (choice?.finish_reason === "tool_calls" && choice.message?.tool_calls?.length) {
+    const searchResults = data.search_results ?? [];
+    const toolCalls = choice.message.tool_calls;
+    const toolMessages = toolCalls.map((tc) => ({
+      role: "tool" as const,
+      tool_call_id: tc.id,
+      content: JSON.stringify({ search_results: searchResults }),
+    }));
+
+    const followUpBody = {
+      model: params.model,
+      messages: [
+        { role: "user", content: params.query },
+        choice.message,
+        ...toolMessages,
+      ],
+    };
+
+    const followUpRes = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${params.apiKey}`,
+      },
+      body: JSON.stringify(followUpBody),
+      signal: withTimeout(undefined, params.timeoutSeconds * 1000),
+      ...resolveProxyDispatcher(),
+    } as RequestInit);
+
+    if (!followUpRes.ok) {
+      const detailResult = await readResponseText(followUpRes, { maxBytes: 64_000 });
+      const detail = detailResult.text;
+      throw new Error(`Kimi API error (${followUpRes.status}): ${detail || followUpRes.statusText}`);
+    }
+
+    const followUpData = (await followUpRes.json()) as KimiSearchResponse;
+    const finalChoice = followUpData.choices?.[0];
+    const content = finalChoice?.message?.content ?? "No response";
+    const citations = searchResults
+      .map((r) => r.url)
+      .filter((url): url is string => Boolean(url));
+
+    return { content, citations };
+  }
+
+  // Direct response without tool calls
+  const content = choice?.message?.content ?? "No response";
+  const citations = (data.search_results ?? [])
+    .map((r) => r.url)
+    .filter((url): url is string => Boolean(url));
+
+  return { content, citations };
+}
+
 async function runWebSearch(params: {
   query: string;
   count: number;
@@ -604,6 +904,9 @@ async function runWebSearch(params: {
   perplexityModel?: string;
   grokModel?: string;
   grokInlineCitations?: boolean;
+  geminiModel?: string;
+  kimiBaseUrl?: string;
+  kimiModel?: string;
   urlAllowlist?: string[];
 }): Promise<Record<string, unknown>> {
   const cacheKey = normalizeCacheKey(
@@ -611,7 +914,11 @@ async function runWebSearch(params: {
       ? `${params.provider}:${params.query}:${params.count}:${params.country || "default"}:${params.search_lang || "default"}:${params.ui_lang || "default"}:${params.freshness || "default"}`
       : params.provider === "perplexity"
         ? `${params.provider}:${params.query}:${params.perplexityBaseUrl ?? DEFAULT_PERPLEXITY_BASE_URL}:${params.perplexityModel ?? DEFAULT_PERPLEXITY_MODEL}:${params.freshness || "default"}`
-        : `${params.provider}:${params.query}:${params.grokModel ?? DEFAULT_GROK_MODEL}:${String(params.grokInlineCitations ?? false)}`,
+        : params.provider === "gemini"
+          ? `${params.provider}:${params.query}:${params.geminiModel ?? DEFAULT_GEMINI_MODEL}`
+          : params.provider === "kimi"
+            ? `${params.provider}:${params.query}:${params.kimiBaseUrl ?? DEFAULT_KIMI_BASE_URL}:${params.kimiModel ?? DEFAULT_KIMI_MODEL}`
+            : `${params.provider}:${params.query}:${params.grokModel ?? DEFAULT_GROK_MODEL}:${String(params.grokInlineCitations ?? false)}`,
   );
   const cached = readCache(SEARCH_CACHE, cacheKey);
   if (cached) {
@@ -676,6 +983,59 @@ async function runWebSearch(params: {
     return payload;
   }
 
+  if (params.provider === "gemini") {
+    const { content, citations } = await runGeminiSearch({
+      query: params.query,
+      apiKey: params.apiKey,
+      model: params.geminiModel ?? DEFAULT_GEMINI_MODEL,
+      timeoutSeconds: params.timeoutSeconds,
+    });
+
+    const payload = {
+      query: params.query,
+      provider: params.provider,
+      model: params.geminiModel ?? DEFAULT_GEMINI_MODEL,
+      tookMs: Date.now() - start,
+      externalContent: {
+        untrusted: true,
+        source: "web_search",
+        provider: params.provider,
+        wrapped: true,
+      },
+      content: wrapWebContent(content),
+      citations,
+    };
+    writeCache(SEARCH_CACHE, cacheKey, payload, params.cacheTtlMs);
+    return payload;
+  }
+
+  if (params.provider === "kimi") {
+    const { content, citations } = await runKimiSearch({
+      query: params.query,
+      apiKey: params.apiKey,
+      baseUrl: params.kimiBaseUrl ?? DEFAULT_KIMI_BASE_URL,
+      model: params.kimiModel ?? DEFAULT_KIMI_MODEL,
+      timeoutSeconds: params.timeoutSeconds,
+    });
+
+    const payload = {
+      query: params.query,
+      provider: params.provider,
+      model: params.kimiModel ?? DEFAULT_KIMI_MODEL,
+      tookMs: Date.now() - start,
+      externalContent: {
+        untrusted: true,
+        source: "web_search",
+        provider: params.provider,
+        wrapped: true,
+      },
+      content: wrapWebContent(content),
+      citations,
+    };
+    writeCache(SEARCH_CACHE, cacheKey, payload, params.cacheTtlMs);
+    return payload;
+  }
+
   if (params.provider !== "brave") {
     throw new Error("Unsupported web search provider.");
   }
@@ -703,7 +1063,8 @@ async function runWebSearch(params: {
       "X-Subscription-Token": params.apiKey,
     },
     signal: withTimeout(undefined, params.timeoutSeconds * 1000),
-  });
+    ...resolveProxyDispatcher(),
+  } as RequestInit);
 
   if (!res.ok) {
     const detailResult = await readResponseText(res, { maxBytes: 64_000 });
@@ -761,6 +1122,8 @@ export function createWebSearchTool(options?: {
   const provider = resolveSearchProvider(search);
   const perplexityConfig = resolvePerplexityConfig(search);
   const grokConfig = resolveGrokConfig(search);
+  const geminiConfig = resolveGeminiConfig(search);
+  const kimiConfig = resolveKimiConfig(search);
   const urlAllowlist = resolveUrlAllowlist(options?.config?.tools?.web);
 
   const description =
@@ -768,7 +1131,11 @@ export function createWebSearchTool(options?: {
       ? "Search the web using Perplexity Sonar (direct or via OpenRouter). Returns AI-synthesized answers with citations from real-time web search."
       : provider === "grok"
         ? "Search the web using xAI Grok. Returns AI-synthesized answers with citations from real-time web search."
-        : "Search the web using Brave Search API. Supports region-specific and localized search via country and language parameters. Returns titles, URLs, and snippets for fast research.";
+        : provider === "gemini"
+          ? "Search the web using Google Gemini with grounding. Returns AI-synthesized answers with citations from real-time web search."
+          : provider === "kimi"
+            ? "Search the web using Moonshot Kimi. Returns AI-synthesized answers with citations from real-time web search."
+            : "Search the web using Brave Search API. Supports region-specific and localized search via country and language parameters. Returns titles, URLs, and snippets for fast research.";
 
   return {
     label: "Web Search",
@@ -783,7 +1150,11 @@ export function createWebSearchTool(options?: {
           ? perplexityAuth?.apiKey
           : provider === "grok"
             ? resolveGrokApiKey(grokConfig)
-            : resolveSearchApiKey(search);
+            : provider === "gemini"
+              ? resolveGeminiApiKey(geminiConfig)
+              : provider === "kimi"
+                ? resolveKimiApiKey(kimiConfig)
+                : resolveSearchApiKey(search);
 
       if (!apiKey) {
         return jsonResult(missingSearchKeyPayload(provider));
@@ -831,6 +1202,9 @@ export function createWebSearchTool(options?: {
         perplexityModel: resolvePerplexityModel(perplexityConfig),
         grokModel: resolveGrokModel(grokConfig),
         grokInlineCitations: resolveGrokInlineCitations(grokConfig),
+        geminiModel: resolveGeminiModel(geminiConfig),
+        kimiBaseUrl: resolveKimiBaseUrl(kimiConfig),
+        kimiModel: resolveKimiModel(kimiConfig),
         urlAllowlist,
       });
       return jsonResult(result);

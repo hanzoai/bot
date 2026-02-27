@@ -130,10 +130,15 @@ export async function deliverReplies(params: {
         if (!chunk) {
           continue;
         }
+        // Only attach reply threading to the first unsent chunk when replyToMode is "first".
+        const chunkReplyToId =
+          replyToMessageIdForPayload && (replyToMode === "all" || !hasReplied)
+            ? replyToMessageIdForPayload
+            : undefined;
         // Only attach buttons to the first chunk.
         const shouldAttachButtons = i === 0 && replyMarkup;
         await sendTelegramText(bot, chatId, chunk.html, runtime, {
-          replyToMessageId: replyToMessageIdForPayload,
+          replyToMessageId: chunkReplyToId,
           replyQuoteText,
           thread,
           textMode: "html",
@@ -142,10 +147,10 @@ export async function deliverReplies(params: {
           replyMarkup: shouldAttachButtons ? replyMarkup : undefined,
         });
         sentTextChunk = true;
+        if (chunkReplyToId && !hasReplied) {
+          hasReplied = true;
+        }
         markDelivered();
-      }
-      if (replyToMessageIdForPayload && !hasReplied && sentTextChunk) {
-        hasReplied = true;
       }
       continue;
     }
