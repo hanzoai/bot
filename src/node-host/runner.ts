@@ -93,7 +93,11 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     cfg.nodeHost?.browserProxy?.enabled !== false && resolvedBrowser.enabled;
   const marketplaceEnabled =
     config.marketplace?.enabled === true &&
-    Boolean(config.marketplace?.claudeApiKey || process.env.ANTHROPIC_API_KEY);
+    Boolean(
+      config.marketplace?.claudeApiKey ||
+      process.env.HANZO_API_KEY ||
+      process.env.ANTHROPIC_API_KEY,
+    );
   const isRemoteMode = cfg.gateway?.mode === "remote";
   const token =
     process.env.BOT_GATEWAY_TOKEN?.trim() ||

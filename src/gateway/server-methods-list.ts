@@ -107,6 +107,8 @@ const BASE_METHODS = [
   "marketplace.opt-out",
   "marketplace.earnings",
   "marketplace.config",
+  "marketplace.transactions",
+  "marketplace.process-payouts",
 ];
 
 export function listGatewayMethods(): string[] {
