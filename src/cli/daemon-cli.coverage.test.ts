@@ -97,15 +97,15 @@ describe("daemon-cli coverage", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv([
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_GATEWAY_PORT",
-      "OPENCLAW_PROFILE",
+      "BOT_STATE_DIR",
+      "BOT_CONFIG_PATH",
+      "BOT_GATEWAY_PORT",
+      "BOT_PROFILE",
     ]);
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-cli-state";
-    process.env.OPENCLAW_CONFIG_PATH = "/tmp/openclaw-cli-state/openclaw.json";
-    delete process.env.OPENCLAW_GATEWAY_PORT;
-    delete process.env.OPENCLAW_PROFILE;
+    process.env.BOT_STATE_DIR = "/tmp/bot-cli-state";
+    process.env.BOT_CONFIG_PATH = "/tmp/bot-cli-state/bot.json";
+    delete process.env.BOT_GATEWAY_PORT;
+    delete process.env.BOT_PROFILE;
     serviceReadCommand.mockResolvedValue(null);
   });
 
@@ -133,12 +133,12 @@ describe("daemon-cli coverage", () => {
     serviceReadCommand.mockResolvedValueOnce({
       programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
       environment: {
-        OPENCLAW_PROFILE: "dev",
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon-state",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon-state/openclaw.json",
-        OPENCLAW_GATEWAY_PORT: "19001",
+        BOT_PROFILE: "dev",
+        BOT_STATE_DIR: "/tmp/bot-daemon-state",
+        BOT_CONFIG_PATH: "/tmp/bot-daemon-state/bot.json",
+        BOT_GATEWAY_PORT: "19001",
       },
-      sourcePath: "/tmp/ai.openclaw.gateway.plist",
+      sourcePath: "/tmp/ai.bot.gateway.plist",
     });
 
     await runDaemonCommand(["daemon", "status", "--json"]);

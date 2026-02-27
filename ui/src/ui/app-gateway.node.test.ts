@@ -97,7 +97,7 @@ function createHost() {
     agentsList: null,
     agentsError: null,
     debugHealth: null,
-    assistantName: "OpenClaw",
+    assistantName: "Hanzo Bot",
     assistantAvatar: null,
     assistantAgentId: null,
     sessionKey: "main",
