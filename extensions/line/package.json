@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/line",
+  "name": "@bot/line",
   "version": "2026.2.26",
   "private": true,
-  "description": "OpenClaw LINE channel plugin",
+  "description": "Bot LINE channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -19,7 +19,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/line",
+      "npmSpec": "@bot/line",
       "localPath": "extensions/line",
       "defaultChoice": "npm"
     }

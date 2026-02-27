@@ -30,39 +30,39 @@ describe("gateway e2e", () => {
     async () => {
       const envSnapshot = captureEnv([
         "HOME",
-        "OPENCLAW_CONFIG_PATH",
-        "OPENCLAW_GATEWAY_TOKEN",
-        "OPENCLAW_SKIP_CHANNELS",
-        "OPENCLAW_SKIP_GMAIL_WATCHER",
-        "OPENCLAW_SKIP_CRON",
-        "OPENCLAW_SKIP_CANVAS_HOST",
-        "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
+        "BOT_CONFIG_PATH",
+        "BOT_GATEWAY_TOKEN",
+        "BOT_SKIP_CHANNELS",
+        "BOT_SKIP_GMAIL_WATCHER",
+        "BOT_SKIP_CRON",
+        "BOT_SKIP_CANVAS_HOST",
+        "BOT_SKIP_BROWSER_CONTROL_SERVER",
       ]);
 
       const { baseUrl: openaiBaseUrl, restore } = installOpenAiResponsesMock();
 
-      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-mock-home-"));
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gw-mock-home-"));
       process.env.HOME = tempHome;
-      process.env.OPENCLAW_SKIP_CHANNELS = "1";
-      process.env.OPENCLAW_SKIP_GMAIL_WATCHER = "1";
-      process.env.OPENCLAW_SKIP_CRON = "1";
-      process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
-      process.env.OPENCLAW_SKIP_BROWSER_CONTROL_SERVER = "1";
+      process.env.BOT_SKIP_CHANNELS = "1";
+      process.env.BOT_SKIP_GMAIL_WATCHER = "1";
+      process.env.BOT_SKIP_CRON = "1";
+      process.env.BOT_SKIP_CANVAS_HOST = "1";
+      process.env.BOT_SKIP_BROWSER_CONTROL_SERVER = "1";
 
       const token = `test-${randomUUID()}`;
-      process.env.OPENCLAW_GATEWAY_TOKEN = token;
+      process.env.BOT_GATEWAY_TOKEN = token;
 
-      const workspaceDir = path.join(tempHome, "openclaw");
+      const workspaceDir = path.join(tempHome, "hanzo-bot");
       await fs.mkdir(workspaceDir, { recursive: true });
 
       const nonceA = randomUUID();
       const nonceB = randomUUID();
-      const toolProbePath = path.join(workspaceDir, `.openclaw-tool-probe.${nonceA}.txt`);
+      const toolProbePath = path.join(workspaceDir, `.bot-tool-probe.${nonceA}.txt`);
       await fs.writeFile(toolProbePath, `nonceA=${nonceA}\nnonceB=${nonceB}\n`);
 
-      const configDir = path.join(tempHome, ".openclaw");
+      const configDir = path.join(tempHome, ".hanzo/bot");
       await fs.mkdir(configDir, { recursive: true });
-      const configPath = path.join(configDir, "openclaw.json");
+      const configPath = path.join(configDir, "bot.json");
 
       const cfg = {
         agents: { defaults: { workspace: workspaceDir } },
@@ -127,27 +127,27 @@ describe("gateway e2e", () => {
     async () => {
       const envSnapshot = captureEnv([
         "HOME",
-        "OPENCLAW_STATE_DIR",
-        "OPENCLAW_CONFIG_PATH",
-        "OPENCLAW_GATEWAY_TOKEN",
-        "OPENCLAW_SKIP_CHANNELS",
-        "OPENCLAW_SKIP_GMAIL_WATCHER",
-        "OPENCLAW_SKIP_CRON",
-        "OPENCLAW_SKIP_CANVAS_HOST",
-        "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
+        "BOT_STATE_DIR",
+        "BOT_CONFIG_PATH",
+        "BOT_GATEWAY_TOKEN",
+        "BOT_SKIP_CHANNELS",
+        "BOT_SKIP_GMAIL_WATCHER",
+        "BOT_SKIP_CRON",
+        "BOT_SKIP_CANVAS_HOST",
+        "BOT_SKIP_BROWSER_CONTROL_SERVER",
       ]);
 
-      process.env.OPENCLAW_SKIP_CHANNELS = "1";
-      process.env.OPENCLAW_SKIP_GMAIL_WATCHER = "1";
-      process.env.OPENCLAW_SKIP_CRON = "1";
-      process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
-      process.env.OPENCLAW_SKIP_BROWSER_CONTROL_SERVER = "1";
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
+      process.env.BOT_SKIP_CHANNELS = "1";
+      process.env.BOT_SKIP_GMAIL_WATCHER = "1";
+      process.env.BOT_SKIP_CRON = "1";
+      process.env.BOT_SKIP_CANVAS_HOST = "1";
+      process.env.BOT_SKIP_BROWSER_CONTROL_SERVER = "1";
+      delete process.env.BOT_GATEWAY_TOKEN;
 
-      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-wizard-home-"));
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "bot-wizard-home-"));
       process.env.HOME = tempHome;
-      delete process.env.OPENCLAW_STATE_DIR;
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_STATE_DIR;
+      delete process.env.BOT_CONFIG_PATH;
 
       const wizardToken = `wiz-${randomUUID()}`;
       const port = await getFreeGatewayPort();
