@@ -240,12 +240,12 @@ export function buildServiceEnvironment(params: {
 }): Record<string, string | undefined> {
   const { env, port, token, launchdLabel } = params;
   const platform = params.platform ?? process.platform;
-  const profile = env.OPENCLAW_PROFILE;
+  const profile = env.BOT_PROFILE;
   const resolvedLaunchdLabel =
     launchdLabel || (platform === "darwin" ? resolveGatewayLaunchAgentLabel(profile) : undefined);
   const systemdUnit = `${resolveGatewaySystemdServiceName(profile)}.service`;
-  const stateDir = env.OPENCLAW_STATE_DIR;
-  const configPath = env.OPENCLAW_CONFIG_PATH;
+  const stateDir = env.BOT_STATE_DIR;
+  const configPath = env.BOT_CONFIG_PATH;
   // Keep a usable temp directory for supervised services even when the host env omits TMPDIR.
   const tmpDir = env.TMPDIR?.trim() || os.tmpdir();
   const proxyEnv = readServiceProxyEnvironment(env);
@@ -260,16 +260,16 @@ export function buildServiceEnvironment(params: {
     PATH: buildMinimalServicePath({ env }),
     ...proxyEnv,
     NODE_EXTRA_CA_CERTS: nodeCaCerts,
-    OPENCLAW_PROFILE: profile,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_GATEWAY_PORT: String(port),
-    OPENCLAW_GATEWAY_TOKEN: token,
-    OPENCLAW_LAUNCHD_LABEL: resolvedLaunchdLabel,
-    OPENCLAW_SYSTEMD_UNIT: systemdUnit,
-    OPENCLAW_SERVICE_MARKER: GATEWAY_SERVICE_MARKER,
-    OPENCLAW_SERVICE_KIND: GATEWAY_SERVICE_KIND,
-    OPENCLAW_SERVICE_VERSION: VERSION,
+    BOT_PROFILE: profile,
+    BOT_STATE_DIR: stateDir,
+    BOT_CONFIG_PATH: configPath,
+    BOT_GATEWAY_PORT: String(port),
+    BOT_GATEWAY_TOKEN: token,
+    BOT_LAUNCHD_LABEL: resolvedLaunchdLabel,
+    BOT_SYSTEMD_UNIT: systemdUnit,
+    BOT_SERVICE_MARKER: GATEWAY_SERVICE_MARKER,
+    BOT_SERVICE_KIND: GATEWAY_SERVICE_KIND,
+    BOT_SERVICE_VERSION: VERSION,
   };
 }
 
@@ -279,8 +279,8 @@ export function buildNodeServiceEnvironment(params: {
 }): Record<string, string | undefined> {
   const { env } = params;
   const platform = params.platform ?? process.platform;
-  const stateDir = env.OPENCLAW_STATE_DIR;
-  const configPath = env.OPENCLAW_CONFIG_PATH;
+  const stateDir = env.BOT_STATE_DIR;
+  const configPath = env.BOT_CONFIG_PATH;
   const tmpDir = env.TMPDIR?.trim() || os.tmpdir();
   const proxyEnv = readServiceProxyEnvironment(env);
   // On macOS, launchd services don't inherit the shell environment, so Node's undici/fetch
@@ -294,15 +294,15 @@ export function buildNodeServiceEnvironment(params: {
     PATH: buildMinimalServicePath({ env }),
     ...proxyEnv,
     NODE_EXTRA_CA_CERTS: nodeCaCerts,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: configPath,
-    OPENCLAW_LAUNCHD_LABEL: resolveNodeLaunchAgentLabel(),
-    OPENCLAW_SYSTEMD_UNIT: resolveNodeSystemdServiceName(),
-    OPENCLAW_WINDOWS_TASK_NAME: resolveNodeWindowsTaskName(),
-    OPENCLAW_TASK_SCRIPT_NAME: NODE_WINDOWS_TASK_SCRIPT_NAME,
-    OPENCLAW_LOG_PREFIX: "node",
-    OPENCLAW_SERVICE_MARKER: NODE_SERVICE_MARKER,
-    OPENCLAW_SERVICE_KIND: NODE_SERVICE_KIND,
-    OPENCLAW_SERVICE_VERSION: VERSION,
+    BOT_STATE_DIR: stateDir,
+    BOT_CONFIG_PATH: configPath,
+    BOT_LAUNCHD_LABEL: resolveNodeLaunchAgentLabel(),
+    BOT_SYSTEMD_UNIT: resolveNodeSystemdServiceName(),
+    BOT_WINDOWS_TASK_NAME: resolveNodeWindowsTaskName(),
+    BOT_TASK_SCRIPT_NAME: NODE_WINDOWS_TASK_SCRIPT_NAME,
+    BOT_LOG_PREFIX: "node",
+    BOT_SERVICE_MARKER: NODE_SERVICE_MARKER,
+    BOT_SERVICE_KIND: NODE_SERVICE_KIND,
+    BOT_SERVICE_VERSION: VERSION,
   };
 }

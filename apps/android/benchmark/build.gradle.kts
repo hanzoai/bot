@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-  namespace = "ai.openclaw.android.benchmark"
+  namespace = "ai.hanzo.bot.android.benchmark"
   compileSdk = 36
 
   defaultConfig {

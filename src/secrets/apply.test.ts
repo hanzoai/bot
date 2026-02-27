@@ -30,15 +30,15 @@ describe("secrets apply", () => {
   let env: NodeJS.ProcessEnv;
 
   beforeEach(async () => {
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-secrets-apply-"));
-    stateDir = path.join(rootDir, ".openclaw");
-    configPath = path.join(stateDir, "openclaw.json");
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-secrets-apply-"));
+    stateDir = path.join(rootDir, ".hanzo/bot");
+    configPath = path.join(stateDir, "bot.json");
     authStorePath = path.join(stateDir, "agents", "main", "agent", "auth-profiles.json");
     authJsonPath = path.join(stateDir, "agents", "main", "agent", "auth.json");
     envPath = path.join(stateDir, ".env");
     env = {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
+      BOT_STATE_DIR: stateDir,
+      BOT_CONFIG_PATH: configPath,
       OPENAI_API_KEY: "sk-live-env",
     };
 

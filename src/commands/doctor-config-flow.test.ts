@@ -210,10 +210,10 @@ describe("doctor config flow", () => {
 
   it("converts numeric discord ids to strings on repair", async () => {
     await withTempHome(async (home) => {
-      const configDir = path.join(home, ".openclaw");
+      const configDir = path.join(home, ".hanzo/bot");
       await fs.mkdir(configDir, { recursive: true });
       await fs.writeFile(
-        path.join(configDir, "openclaw.json"),
+        path.join(configDir, "bot.json"),
         JSON.stringify(
           {
             channels: {
@@ -454,11 +454,11 @@ describe("doctor config flow", () => {
 
   it('repairs dmPolicy="allowlist" by restoring allowFrom from pairing store on repair', async () => {
     const result = await withTempHome(async (home) => {
-      const configDir = path.join(home, ".openclaw");
+      const configDir = path.join(home, ".hanzo/bot");
       const credentialsDir = path.join(configDir, "credentials");
       await fs.mkdir(credentialsDir, { recursive: true });
       await fs.writeFile(
-        path.join(configDir, "openclaw.json"),
+        path.join(configDir, "bot.json"),
         JSON.stringify(
           {
             channels: {

@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import type {
   GatewayAuthConfig,
   GatewayTailscaleConfig,
-  OpenClawConfig,
+  BotConfig,
 } from "../config/config.js";
 import { writeConfigFile } from "../config/config.js";
 import { resolveGatewayAuth, type ResolvedGatewayAuth } from "./auth.js";
@@ -54,7 +54,7 @@ export function mergeGatewayTailscaleConfig(
 }
 
 function resolveGatewayAuthFromConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   authOverride?: GatewayAuthConfig;
   tailscaleOverride?: GatewayTailscaleConfig;
@@ -89,13 +89,13 @@ function shouldPersistGeneratedToken(params: {
 }
 
 export async function ensureGatewayStartupAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   authOverride?: GatewayAuthConfig;
   tailscaleOverride?: GatewayTailscaleConfig;
   persist?: boolean;
 }): Promise<{
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   auth: ReturnType<typeof resolveGatewayAuth>;
   generatedToken?: string;
   persistedGeneratedToken: boolean;
@@ -114,7 +114,7 @@ export async function ensureGatewayStartupAuth(params: {
   }
 
   const generatedToken = crypto.randomBytes(24).toString("hex");
-  const nextCfg: OpenClawConfig = {
+  const nextCfg: BotConfig = {
     ...params.cfg,
     gateway: {
       ...params.cfg.gateway,
@@ -149,7 +149,7 @@ export async function ensureGatewayStartupAuth(params: {
 }
 
 export function assertHooksTokenSeparateFromGatewayAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   auth: ResolvedGatewayAuth;
 }): void {
   if (params.cfg.hooks?.enabled !== true) {

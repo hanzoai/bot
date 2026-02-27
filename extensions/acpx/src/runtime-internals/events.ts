@@ -1,4 +1,4 @@
-import type { AcpRuntimeEvent } from "openclaw/plugin-sdk";
+import type { AcpRuntimeEvent } from "bot/plugin-sdk";
 import {
   asOptionalBoolean,
   asOptionalString,

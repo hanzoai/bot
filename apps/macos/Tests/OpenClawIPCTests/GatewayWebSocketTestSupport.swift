@@ -1,4 +1,4 @@
-import OpenClawKit
+import BotKit
 import Foundation
 
 extension WebSocketTasking {

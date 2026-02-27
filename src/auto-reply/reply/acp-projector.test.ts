@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import { createAcpReplyProjector } from "./acp-projector.js";
 
-function createCfg(overrides?: Partial<OpenClawConfig>): OpenClawConfig {
+function createCfg(overrides?: Partial<BotConfig>): BotConfig {
   return {
     acp: {
       enabled: true,
@@ -12,7 +12,7 @@ function createCfg(overrides?: Partial<OpenClawConfig>): OpenClawConfig {
       },
     },
     ...overrides,
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 describe("createAcpReplyProjector", () => {

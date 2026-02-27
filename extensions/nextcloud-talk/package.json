@@ -1,9 +1,9 @@
 {
-  "name": "@openclaw/nextcloud-talk",
+  "name": "@bot/nextcloud-talk",
   "version": "2026.2.26",
-  "description": "OpenClaw Nextcloud Talk channel plugin",
+  "description": "Bot Nextcloud Talk channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -22,7 +22,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/nextcloud-talk",
+      "npmSpec": "@bot/nextcloud-talk",
       "localPath": "extensions/nextcloud-talk",
       "defaultChoice": "npm"
     }

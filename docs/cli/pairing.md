@@ -1,11 +1,11 @@
 ---
-summary: "CLI reference for `openclaw pairing` (approve/list pairing requests)"
+summary: "CLI reference for `hanzo-bot pairing` (approve/list pairing requests)"
 read_when:
   - You’re using pairing-mode DMs and need to approve senders
 title: "pairing"
 ---
 
-# `openclaw pairing`
+# `hanzo-bot pairing`
 
 Approve or inspect DM pairing requests (for channels that support pairing).
 
@@ -16,12 +16,12 @@ Related:
 ## Commands
 
 ```bash
-openclaw pairing list telegram
-openclaw pairing list --channel telegram --account work
-openclaw pairing list telegram --json
+hanzo-bot pairing list telegram
+hanzo-bot pairing list --channel telegram --account work
+hanzo-bot pairing list telegram --json
 
-openclaw pairing approve telegram <code>
-openclaw pairing approve --channel telegram --account work <code> --notify
+hanzo-bot pairing approve telegram <code>
+hanzo-bot pairing approve --channel telegram --account work <code> --notify
 ```
 
 ## Notes

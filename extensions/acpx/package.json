@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/acpx",
+  "name": "@bot/acpx",
   "version": "2026.2.26",
-  "description": "OpenClaw ACP runtime backend via acpx",
+  "description": "Bot ACP runtime backend via acpx",
   "type": "module",
   "dependencies": {
     "acpx": "^0.1.13"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

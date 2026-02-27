@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/telegram",
+  "name": "@bot/telegram",
   "version": "2026.2.26",
   "private": true,
-  "description": "OpenClaw Telegram channel plugin",
+  "description": "Bot Telegram channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

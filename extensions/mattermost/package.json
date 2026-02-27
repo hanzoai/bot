@@ -1,9 +1,9 @@
 {
-  "name": "@openclaw/mattermost",
+  "name": "@bot/mattermost",
   "version": "2026.2.26",
-  "description": "OpenClaw Mattermost channel plugin",
+  "description": "Bot Mattermost channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -17,7 +17,7 @@
       "order": 65
     },
     "install": {
-      "npmSpec": "@openclaw/mattermost",
+      "npmSpec": "@bot/mattermost",
       "localPath": "extensions/mattermost",
       "defaultChoice": "npm"
     }

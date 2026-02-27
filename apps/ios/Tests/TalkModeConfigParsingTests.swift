@@ -1,5 +1,5 @@
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 @MainActor
 @Suite struct TalkModeConfigParsingTests {
