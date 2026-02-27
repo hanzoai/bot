@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { NodeBillingMode } from "../config/types.gateway.js";
 import type { KVNodeSync, RemoteNodeInfo, InvokeRequest } from "./kv-node-sync.js";
 import type { GatewayWsClient } from "./server/ws-types.js";
+import { marketplaceEventBus } from "./marketplace/event-bus.js";
 
 export type NodeSession = {
   nodeId: string;
@@ -162,6 +163,12 @@ export class NodeRegistry {
       session.marketplaceStatus = "active";
       session.marketplaceActiveRequests = 0;
       session.marketplaceMaxConcurrent = 1;
+      // Notify the marketplace scheduler so it tracks this seller immediately.
+      marketplaceEventBus.emitIdleStatus({
+        nodeId,
+        status: "active",
+        maxConcurrent: 1,
+      });
     }
     this.nodesById.set(nodeId, session);
     this.nodesByConn.set(client.connId, nodeId);
