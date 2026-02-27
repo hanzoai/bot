@@ -36,10 +36,7 @@ export function resolveDefaultDiscordAccountId(cfg: BotConfig): string {
   return ids[0] ?? DEFAULT_ACCOUNT_ID;
 }
 
-function resolveAccountConfig(
-  cfg: BotConfig,
-  accountId: string,
-): DiscordAccountConfig | undefined {
+function resolveAccountConfig(cfg: BotConfig, accountId: string): DiscordAccountConfig | undefined {
   const accounts = cfg.channels?.discord?.accounts;
   if (!accounts || typeof accounts !== "object") {
     return undefined;

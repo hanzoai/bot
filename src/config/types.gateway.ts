@@ -72,11 +72,34 @@ export type GatewayControlUiConfig = {
   allowedOrigins?: string[];
   /** Allow token-only auth over insecure HTTP (default: false). */
   allowInsecureAuth?: boolean;
-  /** DANGEROUS: Disable device identity checks for the Control UI (default: false). */
-  dangerouslyDisableDeviceAuth?: boolean;
 };
 
-export type GatewayAuthMode = "token" | "password" | "trusted-proxy";
+export type GatewayAuthMode = "token" | "password" | "trusted-proxy" | "iam";
+
+/**
+ * Configuration for IAM (OIDC) authentication.
+ * Used when Bot connects to an IAM server (e.g. iam.hanzo.ai) for
+ * organization-based auth with JWT tokens.
+ */
+export type GatewayIamConfig = {
+  /** IAM server URL (e.g. "https://iam.hanzo.ai"). */
+  serverUrl: string;
+  /** OAuth2 client ID registered with the IAM server. */
+  clientId: string;
+  /** OAuth2 client secret (optional; required for confidential clients). */
+  clientSecret?: string;
+  /** Default org name/slug for login redirects. */
+  orgName?: string;
+  /** Casdoor application name (used for signup URL). */
+  appName?: string;
+  /** OAuth2 scopes to request (defaults to ["openid", "profile", "email"]). */
+  scopes?: string[];
+  /**
+   * Email addresses with super-admin privileges.
+   * Super admins bypass billing checks and can credit their own account for testing.
+   */
+  superAdmins?: string[];
+};
 
 /**
  * Configuration for trusted reverse proxy authentication.
@@ -119,6 +142,11 @@ export type GatewayAuthConfig = {
    * Required when mode is "trusted-proxy".
    */
   trustedProxy?: GatewayTrustedProxyConfig;
+  /**
+   * Configuration for IAM (OIDC) auth mode.
+   * Required when mode is "iam".
+   */
+  iam?: GatewayIamConfig;
 };
 
 export type GatewayAuthRateLimitConfig = {
@@ -255,6 +283,25 @@ export type GatewayHttpConfig = {
   endpoints?: GatewayHttpEndpointsConfig;
 };
 
+/**
+ * Per-node billing mode.
+ * - global: use the owner's account balance (default)
+ * - dedicated: node has its own credit budget
+ * - local: no cloud billing, node uses local API keys
+ * - shared: node participates in marketplace (buyer pays, seller earns)
+ */
+export type NodeBillingMode = "global" | "dedicated" | "local" | "shared";
+
+/** Per-node billing configuration. */
+export type NodeBillingConfig = {
+  /** How this node is billed (default: "global"). */
+  mode?: NodeBillingMode;
+  /** Budget in cents for dedicated mode. When spent reaches budget, requests are blocked. */
+  budgetCents?: number;
+  /** Running spent total in cents (tracked by gateway, persisted across restarts). */
+  spentCents?: number;
+};
+
 export type GatewayNodesConfig = {
   /** Browser routing policy for node-hosted browser proxies. */
   browser?: {
@@ -267,6 +314,8 @@ export type GatewayNodesConfig = {
   allowCommands?: string[];
   /** Commands to deny even if they appear in the defaults or node claims. */
   denyCommands?: string[];
+  /** Per-node billing configuration (keyed by nodeId). */
+  billing?: Record<string, NodeBillingConfig>;
 };
 
 export type GatewayToolsConfig = {
@@ -274,6 +323,24 @@ export type GatewayToolsConfig = {
   deny?: string[];
   /** Tools to explicitly allow (removes from default deny list). */
   allow?: string[];
+};
+
+export type GatewayTunnelProvider = "cloudflared" | "ngrok" | "localxpose" | "zrok" | "none";
+
+export type GatewayTunnelConfig = {
+  /**
+   * Tunnel provider to expose the gateway to the internet.
+   * - cloudflared: Cloudflare Tunnel (free, no auth token required for quick tunnels)
+   * - ngrok: ngrok tunnel (free tier available, auth token recommended)
+   * - localxpose: LocalXpose tunnel (requires auth token)
+   * - zrok: zrok tunnel (requires auth token)
+   * - none: Disable tunneling (default)
+   */
+  provider?: GatewayTunnelProvider;
+  /** Provider API key / auth token (required for ngrok, localxpose, zrok). */
+  authToken?: string;
+  /** Custom domain for the tunnel (paid feature on most providers). */
+  domain?: string;
 };
 
 export type GatewayConfig = {
@@ -299,6 +366,7 @@ export type GatewayConfig = {
   controlUi?: GatewayControlUiConfig;
   auth?: GatewayAuthConfig;
   tailscale?: GatewayTailscaleConfig;
+  tunnel?: GatewayTunnelConfig;
   remote?: GatewayRemoteConfig;
   reload?: GatewayReloadConfig;
   tls?: GatewayTlsConfig;
@@ -312,4 +380,23 @@ export type GatewayConfig = {
   trustedProxies?: string[];
   /** Tool access restrictions for HTTP /tools/invoke endpoint. */
   tools?: GatewayToolsConfig;
+  /** P2P marketplace configuration for idle compute sharing. */
+  marketplace?: MarketplaceConfig;
+};
+
+/** Marketplace (P2P idle compute sharing) configuration. */
+export type MarketplaceConfig = {
+  /** Whether the marketplace is enabled on this gateway. Default: false. */
+  enabled?: boolean;
+  /** Platform fee percentage taken from each transaction (0-100). Default: 20. */
+  platformFeePct?: number;
+  /**
+   * Marketplace price as a fraction of Anthropic list price (0-1). Default: 0.6.
+   * e.g. 0.6 = buyer pays 60% of list price.
+   */
+  priceFraction?: number;
+  /** Minimum payout threshold in cents. Default: 1000 ($10). */
+  minPayoutCents?: number;
+  /** Bonus percentage for $AI token payouts. Default: 10. */
+  aiTokenBonusPct?: number;
 };

@@ -193,19 +193,13 @@ describe("diagnostics-otel service", () => {
     });
 
     expect(telemetryState.counters.get("bot.webhook.received")?.add).toHaveBeenCalled();
-    expect(
-      telemetryState.histograms.get("bot.webhook.duration_ms")?.record,
-    ).toHaveBeenCalled();
+    expect(telemetryState.histograms.get("bot.webhook.duration_ms")?.record).toHaveBeenCalled();
     expect(telemetryState.counters.get("bot.message.queued")?.add).toHaveBeenCalled();
     expect(telemetryState.counters.get("bot.message.processed")?.add).toHaveBeenCalled();
-    expect(
-      telemetryState.histograms.get("bot.message.duration_ms")?.record,
-    ).toHaveBeenCalled();
+    expect(telemetryState.histograms.get("bot.message.duration_ms")?.record).toHaveBeenCalled();
     expect(telemetryState.histograms.get("bot.queue.wait_ms")?.record).toHaveBeenCalled();
     expect(telemetryState.counters.get("bot.session.stuck")?.add).toHaveBeenCalled();
-    expect(
-      telemetryState.histograms.get("bot.session.stuck_age_ms")?.record,
-    ).toHaveBeenCalled();
+    expect(telemetryState.histograms.get("bot.session.stuck_age_ms")?.record).toHaveBeenCalled();
     expect(telemetryState.counters.get("bot.run.attempt")?.add).toHaveBeenCalled();
 
     const spanNames = telemetryState.tracer.startSpan.mock.calls.map((call) => call[0]);

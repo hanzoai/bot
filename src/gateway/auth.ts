@@ -1,11 +1,13 @@
 import type { IncomingMessage } from "node:http";
 import type {
   GatewayAuthConfig,
+  GatewayIamConfig,
   GatewayTailscaleMode,
   GatewayTrustedProxyConfig,
 } from "../config/config.js";
 import { readTailscaleWhoisIdentity, type TailscaleWhoisIdentity } from "../infra/tailscale.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
+import { validateIamToken, type GatewayIamAuthResult } from "./auth-iam.js";
 import {
   AUTH_RATE_LIMIT_SCOPE_SHARED_SECRET,
   type AuthRateLimiter,
@@ -19,7 +21,7 @@ import {
   resolveGatewayClientIp,
 } from "./net.js";
 
-export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy";
+export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
 
 export type ResolvedGatewayAuth = {
   mode: ResolvedGatewayAuthMode;
@@ -27,13 +29,22 @@ export type ResolvedGatewayAuth = {
   password?: string;
   allowTailscale: boolean;
   trustedProxy?: GatewayTrustedProxyConfig;
+  iam?: GatewayIamConfig;
 };
 
 export type GatewayAuthResult = {
   ok: boolean;
-  method?: "none" | "token" | "password" | "tailscale" | "device-token" | "trusted-proxy";
+  method?: "none" | "token" | "password" | "tailscale" | "device-token" | "trusted-proxy" | "iam";
   user?: string;
   reason?: string;
+  /** IAM-specific: user ID from JWT sub claim. */
+  userId?: string;
+  /** IAM-specific: user email from JWT claims. */
+  email?: string;
+  /** IAM-specific: org IDs the user belongs to. */
+  orgIds?: string[];
+  /** IAM-specific: full IAM auth result for downstream use. */
+  iamResult?: GatewayIamAuthResult;
   /** Present when the request was blocked by the rate limiter. */
   rateLimited?: boolean;
   /** Milliseconds the client should wait before retrying (when rate-limited). */
@@ -180,16 +191,35 @@ export function resolveGatewayAuth(params: {
   authConfig?: GatewayAuthConfig | null;
   env?: NodeJS.ProcessEnv;
   tailscaleMode?: GatewayTailscaleMode;
+  /** Accepted for caller convenience; not used internally. */
+  cfg?: unknown;
 }): ResolvedGatewayAuth {
   const authConfig = params.authConfig ?? {};
   const env = params.env ?? process.env;
   const token = authConfig.token ?? env.BOT_GATEWAY_TOKEN ?? undefined;
   const password = authConfig.password ?? env.BOT_GATEWAY_PASSWORD ?? undefined;
   const trustedProxy = authConfig.trustedProxy;
+  const iam = authConfig.iam;
+
+  // Cloud playground agents run inside the K8s cluster behind the playground
+  // service mesh — resolve to IAM mode so the gateway starts without requiring
+  // a shared secret.
+  const isPlaygroundCloud =
+    env.HANZO_PLAYGROUND_CLOUD_NODE === "true" || env.BOT_GATEWAY_AUTH_MODE === "iam";
 
   let mode: ResolvedGatewayAuth["mode"];
   if (authConfig.mode) {
     mode = authConfig.mode;
+  } else if (
+    env.BOT_GATEWAY_AUTH_MODE &&
+    env.BOT_GATEWAY_AUTH_MODE !== "iam" &&
+    ["token", "password", "none", "trusted-proxy"].includes(env.BOT_GATEWAY_AUTH_MODE)
+  ) {
+    // Explicit env-var mode override takes precedence over cloud auto-detection.
+    // This lets cloud pods use token auth without requiring an IAM config file.
+    mode = env.BOT_GATEWAY_AUTH_MODE as ResolvedGatewayAuth["mode"];
+  } else if (isPlaygroundCloud || iam?.serverUrl) {
+    mode = "iam";
   } else if (password) {
     mode = "password";
   } else if (token) {
@@ -200,7 +230,10 @@ export function resolveGatewayAuth(params: {
 
   const allowTailscale =
     authConfig.allowTailscale ??
-    (params.tailscaleMode === "serve" && mode !== "password" && mode !== "trusted-proxy");
+    (params.tailscaleMode === "serve" &&
+      mode !== "password" &&
+      mode !== "trusted-proxy" &&
+      mode !== "iam");
 
   return {
     mode,
@@ -208,6 +241,7 @@ export function resolveGatewayAuth(params: {
     password,
     allowTailscale,
     trustedProxy,
+    iam,
   };
 }
 
@@ -232,6 +266,23 @@ export function assertGatewayAuthConfigured(auth: ResolvedGatewayAuth): void {
     if (!auth.trustedProxy.userHeader || auth.trustedProxy.userHeader.trim() === "") {
       throw new Error(
         "gateway auth mode is trusted-proxy, but trustedProxy.userHeader is empty (set gateway.auth.trustedProxy.userHeader)",
+      );
+    }
+  }
+  if (auth.mode === "iam") {
+    if (!auth.iam) {
+      throw new Error(
+        "gateway auth mode is iam, but no IAM config was provided (set gateway.auth.iam)",
+      );
+    }
+    if (!auth.iam.serverUrl) {
+      throw new Error(
+        "gateway auth mode is iam, but iam.serverUrl is missing (set gateway.auth.iam.serverUrl)",
+      );
+    }
+    if (!auth.iam.clientId) {
+      throw new Error(
+        "gateway auth mode is iam, but iam.clientId is missing (set gateway.auth.iam.clientId)",
       );
     }
   }
@@ -315,6 +366,36 @@ export async function authorizeGatewayConnect(params: {
       return { ok: true, method: "trusted-proxy", user: result.user };
     }
     return { ok: false, reason: result.reason };
+  }
+
+  // IAM (OIDC/JWT) auth — validate token from connect params against IAM JWKS.
+  // Falls back to shared-secret token if JWT validation fails (e.g. cloud pods
+  // authenticate with the gateway's BOT_GATEWAY_TOKEN, not an IAM JWT).
+  if (auth.mode === "iam") {
+    if (!auth.iam) {
+      return { ok: false, reason: "iam_config_missing" };
+    }
+    const jwtToken = connectAuth?.token;
+    if (!jwtToken) {
+      return { ok: false, reason: "iam_token_missing" };
+    }
+    const iamResult = await validateIamToken(jwtToken, auth.iam);
+    if (!iamResult.ok) {
+      // Fallback: accept the gateway's shared token for internal nodes (cloud pods).
+      if (auth.token && safeEqualSecret(jwtToken, auth.token)) {
+        return { ok: true, method: "token" };
+      }
+      return { ok: false, reason: iamResult.reason };
+    }
+    return {
+      ok: true,
+      method: "iam",
+      user: iamResult.name ?? iamResult.email ?? iamResult.userId,
+      userId: iamResult.userId,
+      email: iamResult.email,
+      orgIds: iamResult.orgIds,
+      iamResult,
+    };
   }
 
   const limiter = params.rateLimiter;

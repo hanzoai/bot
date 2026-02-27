@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.protocol
+package ai.hanzo.bot.android.protocol
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject

@@ -6,7 +6,7 @@ final class NetworkStatusService: @unchecked Sendable {
     func currentStatus(timeoutMs: Int = 1500) async -> HanzoBotNetworkStatusPayload {
         await withCheckedContinuation { cont in
             let monitor = NWPathMonitor()
-            let queue = DispatchQueue(label: "bot.molt.ios.network-status")
+            let queue = DispatchQueue(label: "ai.hanzo.bot.ios.network-status")
             let state = NetworkStatusState()
 
             monitor.pathUpdateHandler = { path in

@@ -391,10 +391,7 @@ type SummaryModelSelection = {
   source: "summaryModel" | "default";
 };
 
-function resolveSummaryModelRef(
-  cfg: BotConfig,
-  config: ResolvedTtsConfig,
-): SummaryModelSelection {
+function resolveSummaryModelRef(cfg: BotConfig, config: ResolvedTtsConfig): SummaryModelSelection {
   const defaultRef = resolveDefaultModelForAgent({ cfg });
   const override = config.summaryModel?.trim();
   if (!override) {

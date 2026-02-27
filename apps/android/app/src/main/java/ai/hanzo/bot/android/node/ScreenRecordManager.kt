@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.node
+package ai.hanzo.bot.android.node
 
 import android.content.Context
 import android.hardware.display.DisplayManager
@@ -6,7 +6,7 @@ import android.media.MediaRecorder
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.util.Base64
-import ai.hanzo-bot.android.ScreenCaptureRequester
+import ai.hanzo.bot.android.ScreenCaptureRequester
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -17,13 +17,13 @@ class ScreenRecordManager(private val context: Context) {
   data class Payload(val payloadJson: String)
 
   @Volatile private var screenCaptureRequester: ScreenCaptureRequester? = null
-  @Volatile private var permissionRequester: ai.hanzo-bot.android.PermissionRequester? = null
+  @Volatile private var permissionRequester: ai.hanzo.bot.android.PermissionRequester? = null
 
   fun attachScreenCaptureRequester(requester: ScreenCaptureRequester) {
     screenCaptureRequester = requester
   }
 
-  fun attachPermissionRequester(requester: ai.hanzo-bot.android.PermissionRequester) {
+  fun attachPermissionRequester(requester: ai.hanzo.bot.android.PermissionRequester) {
     permissionRequester = requester
   }
 

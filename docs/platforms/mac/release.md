@@ -33,7 +33,7 @@ Notes:
 ```bash
 # From repo root; set release IDs so Sparkle feed is enabled.
 # APP_BUILD must be numeric + monotonic for Sparkle compare.
-BUNDLE_ID=bot.molt.mac \
+BUNDLE_ID=ai.hanzo.bot.mac \
 APP_VERSION=2026.2.16 \
 APP_BUILD="$(git rev-list --count HEAD)" \
 BUILD_CONFIG=release \
@@ -51,7 +51,7 @@ scripts/create-dmg.sh dist/Bot.app dist/Bot-2026.2.16.dmg
 #   xcrun notarytool store-credentials "bot-notary" \
 #     --apple-id "<apple-id>" --team-id "<team-id>" --password "<app-specific-password>"
 NOTARIZE=1 NOTARYTOOL_PROFILE=bot-notary \
-BUNDLE_ID=bot.molt.mac \
+BUNDLE_ID=ai.hanzo.bot.mac \
 APP_VERSION=2026.2.16 \
 APP_BUILD="$(git rev-list --count HEAD)" \
 BUILD_CONFIG=release \

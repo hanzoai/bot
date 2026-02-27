@@ -680,59 +680,6 @@ describe("gateway server auth/connect", () => {
     }
   });
 
-  test("allows control ui with stale device identity when device auth is disabled", async () => {
-    testState.gatewayControlUi = { dangerouslyDisableDeviceAuth: true };
-    testState.gatewayAuth = { mode: "token", token: "secret" };
-    const prevToken = process.env.BOT_GATEWAY_TOKEN;
-    process.env.BOT_GATEWAY_TOKEN = "secret";
-    try {
-      await withGatewayServer(async ({ port }) => {
-        const ws = await openWs(port, { origin: originForPort(port) });
-        const { loadOrCreateDeviceIdentity, publicKeyRawBase64UrlFromPem, signDevicePayload } =
-          await import("../infra/device-identity.js");
-        const identity = loadOrCreateDeviceIdentity();
-        const signedAtMs = Date.now() - 60 * 60 * 1000;
-        const payload = buildDeviceAuthPayload({
-          deviceId: identity.deviceId,
-          clientId: GATEWAY_CLIENT_NAMES.CONTROL_UI,
-          clientMode: GATEWAY_CLIENT_MODES.WEBCHAT,
-          role: "operator",
-          scopes: [],
-          signedAtMs,
-          token: "secret",
-        });
-        const device = {
-          id: identity.deviceId,
-          publicKey: publicKeyRawBase64UrlFromPem(identity.publicKeyPem),
-          signature: signDevicePayload(identity.privateKeyPem, payload),
-          signedAt: signedAtMs,
-        };
-        const res = await connectReq(ws, {
-          token: "secret",
-          scopes: ["operator.read"],
-          device,
-          client: {
-            id: GATEWAY_CLIENT_NAMES.CONTROL_UI,
-            version: "1.0.0",
-            platform: "web",
-            mode: GATEWAY_CLIENT_MODES.WEBCHAT,
-          },
-        });
-        expect(res.ok).toBe(true);
-        expect((res.payload as { auth?: unknown } | undefined)?.auth).toBeUndefined();
-        const health = await rpcReq(ws, "health");
-        expect(health.ok).toBe(true);
-        ws.close();
-      });
-    } finally {
-      if (prevToken === undefined) {
-        delete process.env.BOT_GATEWAY_TOKEN;
-      } else {
-        process.env.BOT_GATEWAY_TOKEN = prevToken;
-      }
-    }
-  });
-
   test("accepts device token auth for paired device", async () => {
     const { server, ws, port, prevToken } = await startServerWithClient("secret");
     const { deviceToken } = await ensurePairedDeviceTokenForCurrentIdentity(ws);

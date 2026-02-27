@@ -1,6 +1,6 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
-import ai.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.gateway.GatewaySession
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

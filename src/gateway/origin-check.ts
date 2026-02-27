@@ -2,6 +2,24 @@ import { isLoopbackHost, normalizeHostHeader, resolveHostName } from "./net.js";
 
 type OriginCheckResult = { ok: true } | { ok: false; reason: string };
 
+/**
+ * Runtime-added origins (e.g. from tunnel startup).
+ * These supplement the config-based allowedOrigins without modifying the config file.
+ */
+const runtimeAllowedOrigins = new Set<string>();
+
+export function addRuntimeAllowedOrigin(origin: string): void {
+  runtimeAllowedOrigins.add(origin.trim().toLowerCase());
+}
+
+export function removeRuntimeAllowedOrigin(origin: string): void {
+  runtimeAllowedOrigins.delete(origin.trim().toLowerCase());
+}
+
+export function clearRuntimeAllowedOrigins(): void {
+  runtimeAllowedOrigins.clear();
+}
+
 function parseOrigin(
   originRaw?: string,
 ): { origin: string; host: string; hostname: string } | null {
@@ -35,6 +53,11 @@ export function checkBrowserOrigin(params: {
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
   if (allowlist.includes(parsedOrigin.origin)) {
+    return { ok: true };
+  }
+
+  // Check runtime-added origins (e.g. from tunnel or cloud playground)
+  if (runtimeAllowedOrigins.has(parsedOrigin.origin)) {
     return { ok: true };
   }
 

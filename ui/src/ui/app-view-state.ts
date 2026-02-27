@@ -1,8 +1,10 @@
+import type { ControlUiBootstrapIamConfig } from "../../../src/gateway/control-ui-contract.js";
 import type { EventLogEntry } from "./app-events.ts";
 import type { CompactionStatus } from "./app-tool-stream.ts";
 import type { DevicePairingList } from "./controllers/devices.ts";
 import type { ExecApprovalRequest } from "./controllers/exec-approval.ts";
 import type { ExecApprovalsFile, ExecApprovalsSnapshot } from "./controllers/exec-approvals.ts";
+import type { MarketplaceStatusResult } from "./controllers/marketplace.ts";
 import type { SkillMessage } from "./controllers/skills.ts";
 import type { GatewayBrowserClient, GatewayHelloOk } from "./gateway.ts";
 import type { Tab } from "./navigation.ts";
@@ -84,6 +86,7 @@ export type AppViewState = {
   execApprovalsSelectedAgent: string | null;
   execApprovalsTarget: "gateway" | "node";
   execApprovalsTargetNodeId: string | null;
+  screenNodeId: string | null;
   execApprovalQueue: ExecApprovalRequest[];
   execApprovalBusy: boolean;
   execApprovalError: string | null;
@@ -108,6 +111,7 @@ export type AppViewState = {
   configSearchQuery: string;
   configActiveSection: string | null;
   configActiveSubsection: string | null;
+  expandedChannel: string | null;
   channelsLoading: boolean;
   channelsSnapshot: ChannelsStatusSnapshot | null;
   channelsError: string | null;
@@ -182,6 +186,9 @@ export type AppViewState = {
   usageLogFilterTools: string[];
   usageLogFilterHasTools: boolean;
   usageLogFilterQuery: string;
+  marketplaceLoading: boolean;
+  marketplaceStatus: MarketplaceStatusResult | null;
+  marketplaceError: string | null;
   cronLoading: boolean;
   cronJobs: CronJob[];
   cronStatus: CronStatus | null;
@@ -221,7 +228,12 @@ export type AppViewState = {
   logsAtBottom: boolean;
   client: GatewayBrowserClient | null;
   refreshSessionsAfterChat: Set<string>;
+  authMode: string | null;
+  iamConfig: ControlUiBootstrapIamConfig | null;
+  iamUser: { email?: string; name?: string; avatar?: string } | null;
+  iamLoggingIn: boolean;
   connect: () => void;
+  connectGateway: () => void;
   setTab: (tab: Tab) => void;
   setTheme: (theme: ThemeMode, context?: ThemeTransitionContext) => void;
   applySettings: (next: UiSettings) => void;
@@ -282,4 +294,7 @@ export type AppViewState = {
   handleOpenSidebar: (content: string) => void;
   handleCloseSidebar: () => void;
   handleSplitRatioChange: (ratio: number) => void;
+  handleIamLogin: () => void;
+  handleIamSignup: () => void;
+  handleIamLogout: () => void;
 };

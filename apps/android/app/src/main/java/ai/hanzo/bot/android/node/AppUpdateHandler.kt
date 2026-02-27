@@ -1,12 +1,12 @@
-package ai.bot.android.node
+package ai.hanzo.bot.android.node
 
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import ai.bot.android.InstallResultReceiver
-import ai.bot.android.MainActivity
-import ai.bot.android.gateway.GatewayEndpoint
-import ai.bot.android.gateway.GatewaySession
+import ai.hanzo.bot.android.InstallResultReceiver
+import ai.hanzo.bot.android.MainActivity
+import ai.hanzo.bot.android.gateway.GatewayEndpoint
+import ai.hanzo.bot.android.gateway.GatewaySession
 import java.io.File
 import java.net.URI
 import java.security.MessageDigest

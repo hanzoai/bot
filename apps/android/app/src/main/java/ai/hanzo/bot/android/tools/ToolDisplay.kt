@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.tools
+package ai.hanzo.bot.android.tools
 
 import android.content.Context
 import kotlinx.serialization.Serializable

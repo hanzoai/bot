@@ -22,11 +22,7 @@ export type ResolveRunWorkspaceResult = {
   agentIdSource: AgentIdSource;
 };
 
-function resolveRunAgentId(params: {
-  sessionKey?: string;
-  agentId?: string;
-  config?: BotConfig;
-}): {
+function resolveRunAgentId(params: { sessionKey?: string; agentId?: string; config?: BotConfig }): {
   agentId: string;
   agentIdSource: AgentIdSource;
 } {
