@@ -5,6 +5,7 @@ import type { TelegramMessageContext } from "./bot-message-context.js";
 import type { TelegramBotOptions } from "./bot.js";
 import type { TelegramStreamMode } from "./bot/types.js";
 import type { TelegramInlineButtons } from "./button-types.js";
+import type { TelegramDraftStream } from "./draft-stream.js";
 import { resolveAgentDir } from "../agents/agent-scope.js";
 import {
   findModelInCatalog,
@@ -21,6 +22,7 @@ import { logAckFailure, logTypingFailure } from "../channels/logging.js";
 import { createReplyPrefixOptions } from "../channels/reply-prefix.js";
 import { createTypingCallbacks } from "../channels/typing.js";
 import { resolveMarkdownTableMode } from "../config/markdown-tables.js";
+import { loadSessionStore, resolveStorePath } from "../config/sessions.js";
 import { danger, logVerbose } from "../globals.js";
 import { getAgentScopedMediaLocalRoots } from "../media/local-roots.js";
 import { deliverReplies } from "./bot/delivery.js";
@@ -30,6 +32,8 @@ import { editMessageTelegram } from "./send.js";
 import { cacheSticker, describeStickerImage } from "./sticker-cache.js";
 
 const EMPTY_RESPONSE_FALLBACK = "No response generated. Please try again.";
+const THINK_TAG_REGEX = /^<think>([\s\S]*?)(?:<\/think>|$)([\s\S]*)$/;
+const REASONING_PREFIX = "Reasoning:\n";
 
 async function resolveStickerVisionSupport(cfg: BotConfig, agentId: string) {
   try {
@@ -43,6 +47,29 @@ async function resolveStickerVisionSupport(cfg: BotConfig, agentId: string) {
   } catch {
     return false;
   }
+}
+
+/**
+ * Parse think-tag content from a partial or final text.
+ * Returns { reasoning, answer } where reasoning is the italic-formatted
+ * content inside `<think>...</think>` and answer is everything after.
+ */
+function parseThinkTags(text: string): { reasoning: string; answer: string } | null {
+  const match = THINK_TAG_REGEX.exec(text);
+  if (!match) {
+    return null;
+  }
+  const thinkContent = match[1]?.trim() ?? "";
+  const answerContent = match[2]?.trim() ?? "";
+  return {
+    reasoning: thinkContent ? `${REASONING_PREFIX}_${thinkContent}_` : "",
+    answer: answerContent,
+  };
+}
+
+/** Check whether a text payload is reasoning-only (starts with "Reasoning:\n"). */
+function isReasoningOnlyPayload(text: string): boolean {
+  return text.startsWith(REASONING_PREFIX);
 }
 
 type DispatchTelegramMessageParams = {
@@ -86,27 +113,85 @@ export const dispatchTelegramMessage = async ({
     removeAckAfterReply,
   } = context;
 
+  // --- Session-based reasoning level resolution ---
+  const storePath = resolveStorePath();
+  const sessionStore = loadSessionStore(storePath, { skipCache: true });
+  const sessionKey = (ctxPayload as { SessionKey?: string }).SessionKey;
+  const sessionEntry = sessionKey ? sessionStore[sessionKey] : undefined;
+  const reasoningLevel = sessionEntry?.reasoningLevel;
+  const reasoningStreamEnabled = reasoningLevel === "stream";
+  const reasoningBlockEnabled = reasoningLevel === "on";
+
   const draftMaxChars = Math.min(textLimit, 4096);
   const accountBlockStreamingEnabled =
     typeof telegramCfg.blockStreaming === "boolean"
       ? telegramCfg.blockStreaming
       : cfg.agents?.defaults?.blockStreamingDefault === "on";
-  const canStreamDraft = streamMode !== "off" && !accountBlockStreamingEnabled;
+
+  // When reasoning level is "on", keep block streaming enabled (no draft streams).
+  const effectiveBlockStreamingEnabled = accountBlockStreamingEnabled || reasoningBlockEnabled;
+
+  // Answer draft stream: only created when streaming is possible and not overridden.
+  const canStreamAnswerDraft = streamMode !== "off" && !effectiveBlockStreamingEnabled;
+
   const draftReplyToMessageId =
     replyToMode !== "off" && typeof msg.message_id === "number" ? msg.message_id : undefined;
-  const draftStream = canStreamDraft
+
+  // Track superseded answer preview message IDs for multi-message finalization.
+  const supersededAnswerPreviews: Array<{ messageId: number; textSnapshot: string }> = [];
+
+  // --- Create answer draft stream ---
+  const answerDraftStream: TelegramDraftStream | undefined = canStreamAnswerDraft
     ? createTelegramDraftStream({
         api: bot.api,
         chatId,
         maxChars: draftMaxChars,
         thread: threadSpec,
         replyToMessageId: draftReplyToMessageId,
+        minInitialChars: 30,
+        onSupersededPreview: (preview) => {
+          supersededAnswerPreviews.push(preview);
+        },
         log: logVerbose,
         warn: logVerbose,
       })
     : undefined;
+
+  // --- Create reasoning draft stream ---
+  // Always created alongside the answer stream (dual-stream architecture).
+  // When reasoning streaming is off, the stream is idle but available.
+  // When reasoning streaming is enabled without answer streaming (streamMode=off),
+  // only the reasoning stream is created.
+  const canStreamReasoningDraft = canStreamAnswerDraft || reasoningStreamEnabled;
+  const reasoningDraftStream: TelegramDraftStream | undefined = canStreamReasoningDraft
+    ? createTelegramDraftStream({
+        api: bot.api,
+        chatId,
+        maxChars: draftMaxChars,
+        thread: threadSpec,
+        minInitialChars: 30,
+        onSupersededPreview: (preview) => {
+          // Clean up superseded reasoning preview messages by deleting them.
+          try {
+            void bot.api.deleteMessage(chatId, preview.messageId);
+          } catch {
+            logVerbose(`telegram: failed to delete superseded reasoning preview ${preview.messageId}`);
+          }
+        },
+        log: logVerbose,
+        warn: logVerbose,
+      })
+    : undefined;
+
+  // At least one draft stream is active.
+  const hasDraftStream = Boolean(answerDraftStream) || Boolean(reasoningDraftStream);
+
+  // Track message boundaries for multi-message preview finalization.
+  // Each entry stores the answer preview message ID at the boundary point.
+  const previewMessageIdHistory: Array<number | undefined> = [];
+
   const draftChunking =
-    draftStream && streamMode === "block"
+    answerDraftStream && streamMode === "block"
       ? resolveTelegramDraftStreamingChunking(cfg, route.accountId)
       : undefined;
   const draftChunker = draftChunking ? new EmbeddedBlockChunker(draftChunking) : undefined;
@@ -114,19 +199,30 @@ export const dispatchTelegramMessage = async ({
   let lastPartialText = "";
   let draftText = "";
   let hasStreamedMessage = false;
-  const updateDraftFromPartial = (text?: string) => {
-    if (!draftStream || !text) {
+  let hasStreamedReasoningMessage = false;
+  let reasoningEnded = false;
+
+  // Determine disableBlockStreaming.
+  let disableBlockStreaming: boolean | undefined;
+  if (streamMode === "off") {
+    disableBlockStreaming = true;
+  } else if (effectiveBlockStreamingEnabled) {
+    disableBlockStreaming = false;
+  } else if (answerDraftStream) {
+    disableBlockStreaming = true;
+  } else {
+    disableBlockStreaming = undefined;
+  }
+
+  const updateAnswerDraftFromPartial = (text: string) => {
+    if (!answerDraftStream) {
       return;
     }
     if (text === lastPartialText) {
       return;
     }
-    // Mark that we've received streaming content (for forceNewMessage decision).
     hasStreamedMessage = true;
     if (streamMode === "partial") {
-      // Some providers briefly emit a shorter prefix snapshot (for example
-      // "Sure." -> "Sure" -> "Sure."). Keep the longer preview to avoid
-      // visible punctuation flicker.
       if (
         lastPartialText &&
         lastPartialText.startsWith(text) &&
@@ -135,14 +231,13 @@ export const dispatchTelegramMessage = async ({
         return;
       }
       lastPartialText = text;
-      draftStream.update(text);
+      answerDraftStream.update(text);
       return;
     }
     let delta = text;
     if (text.startsWith(lastPartialText)) {
       delta = text.slice(lastPartialText.length);
     } else {
-      // Streaming buffer reset (or non-monotonic stream). Start fresh.
       draftChunker?.reset();
       draftText = "";
     }
@@ -152,7 +247,7 @@ export const dispatchTelegramMessage = async ({
     }
     if (!draftChunker) {
       draftText = text;
-      draftStream.update(draftText);
+      answerDraftStream.update(draftText);
       return;
     }
     draftChunker.append(delta);
@@ -160,12 +255,52 @@ export const dispatchTelegramMessage = async ({
       force: false,
       emit: (chunk) => {
         draftText += chunk;
-        draftStream.update(draftText);
+        answerDraftStream.update(draftText);
       },
     });
   };
+
+  /**
+   * Handle partial reply: split think-tag content into reasoning/answer lanes
+   * when reasoning streaming is enabled.
+   */
+  const updateDraftFromPartial = (text?: string) => {
+    if (!text) {
+      return;
+    }
+    if (!hasDraftStream) {
+      return;
+    }
+
+    if (reasoningStreamEnabled && reasoningDraftStream) {
+      const parsed = parseThinkTags(text);
+      if (parsed) {
+        if (parsed.reasoning) {
+          reasoningDraftStream.update(parsed.reasoning);
+          hasStreamedReasoningMessage = true;
+        }
+        if (parsed.answer) {
+          updateAnswerDraftFromPartial(parsed.answer);
+        }
+        return;
+      }
+    }
+
+    if (answerDraftStream) {
+      updateAnswerDraftFromPartial(text);
+    }
+  };
+
+  const updateReasoningDraft = (text?: string) => {
+    if (!reasoningDraftStream || !text) {
+      return;
+    }
+    hasStreamedReasoningMessage = true;
+    reasoningDraftStream.update(text);
+  };
+
   const flushDraft = async () => {
-    if (!draftStream) {
+    if (!answerDraftStream) {
       return;
     }
     if (draftChunker?.hasBuffered()) {
@@ -177,18 +312,11 @@ export const dispatchTelegramMessage = async ({
       });
       draftChunker.reset();
       if (draftText) {
-        draftStream.update(draftText);
+        answerDraftStream.update(draftText);
       }
     }
-    await draftStream.flush();
+    await answerDraftStream.flush();
   };
-
-  const disableBlockStreaming =
-    typeof telegramCfg.blockStreaming === "boolean"
-      ? !telegramCfg.blockStreaming
-      : draftStream || streamMode === "off"
-        ? true
-        : undefined;
 
   const { onModelSelected, ...prefixOptions } = createReplyPrefixOptions({
     cfg,
@@ -203,8 +331,7 @@ export const dispatchTelegramMessage = async ({
   });
   const chunkMode = resolveChunkMode(cfg, "telegram", route.accountId);
 
-  // Handle uncached stickers: get a dedicated vision description before dispatch
-  // This ensures we cache a raw description rather than a conversational response
+  // Handle uncached stickers
   const sticker = ctxPayload.Sticker;
   if (sticker?.fileId && sticker.fileUniqueId && ctxPayload.MediaPath) {
     const agentDir = resolveAgentDir(cfg, route.agentId);
@@ -219,7 +346,6 @@ export const dispatchTelegramMessage = async ({
       });
     }
     if (description) {
-      // Format the description with sticker context
       const stickerContext = [sticker.emoji, sticker.setName ? `from "${sticker.setName}"` : null]
         .filter(Boolean)
         .join(" ");
@@ -227,10 +353,8 @@ export const dispatchTelegramMessage = async ({
 
       sticker.cachedDescription = description;
       if (!stickerSupportsVision) {
-        // Update context to use description instead of image
         ctxPayload.Body = formattedDesc;
         ctxPayload.BodyForAgent = formattedDesc;
-        // Clear media paths so native vision doesn't process the image again
         ctxPayload.MediaPath = undefined;
         ctxPayload.MediaType = undefined;
         ctxPayload.MediaUrl = undefined;
@@ -239,7 +363,6 @@ export const dispatchTelegramMessage = async ({
         ctxPayload.MediaTypes = undefined;
       }
 
-      // Cache the description for future encounters
       if (sticker.fileId) {
         cacheSticker({
           fileId: sticker.fileId,
@@ -264,8 +387,11 @@ export const dispatchTelegramMessage = async ({
   const deliveryState = {
     delivered: false,
     skippedNonSilent: 0,
+    failedDeliveries: 0,
   };
-  let finalizedViaPreviewMessage = false;
+  // Set of answer preview message IDs that have been finalized via edit.
+  const finalizedPreviewIds = new Set<number>();
+  let finalDeliveryCount = 0;
   const clearGroupHistory = () => {
     if (isGroup && historyKey) {
       clearHistoryEntriesIfEnabled({ historyMap: groupHistories, historyKey, limit: historyLimit });
@@ -286,6 +412,48 @@ export const dispatchTelegramMessage = async ({
     replyQuoteText,
   };
 
+  /**
+   * Resolve the preview message ID for the Nth final delivery.
+   * Multi-message streams track historical IDs at boundary points.
+   */
+  const resolvePreviewMessageIdForFinal = (index: number): number | undefined => {
+    // First check superseded previews (late-resolved IDs from forceNewMessage rotations).
+    if (index < supersededAnswerPreviews.length) {
+      return supersededAnswerPreviews[index].messageId;
+    }
+    // Then check recorded boundary history.
+    if (index < previewMessageIdHistory.length) {
+      return previewMessageIdHistory[index];
+    }
+    // Fall back to current active preview.
+    return answerDraftStream?.messageId();
+  };
+
+  /**
+   * Try to edit a reasoning preview message with the given text.
+   * Returns true if the edit succeeded.
+   */
+  const tryEditReasoningPreview = async (text: string): Promise<boolean> => {
+    const reasoningMessageId = reasoningDraftStream?.messageId();
+    if (typeof reasoningMessageId !== "number") {
+      return false;
+    }
+    try {
+      await editMessageTelegram(chatId, reasoningMessageId, text, {
+        api: bot.api,
+        cfg,
+        accountId: route.accountId,
+        linkPreview: telegramCfg.linkPreview,
+      });
+      return true;
+    } catch (err) {
+      logVerbose(
+        `telegram: reasoning preview edit failed (${String(err)})`,
+      );
+      return false;
+    }
+  };
+
   let queuedFinal = false;
   try {
     ({ queuedFinal } = await dispatchReplyWithBufferedBlockDispatcher({
@@ -294,49 +462,151 @@ export const dispatchTelegramMessage = async ({
       dispatcherOptions: {
         ...prefixOptions,
         deliver: async (payload, info) => {
+          const finalText = typeof payload.text === "string" ? payload.text : undefined;
+
+          // Route reasoning block payloads to reasoning preview instead of normal delivery.
+          if (
+            info.kind === "block" &&
+            reasoningStreamEnabled &&
+            reasoningDraftStream &&
+            typeof finalText === "string" &&
+            isReasoningOnlyPayload(finalText)
+          ) {
+            void reasoningDraftStream.stop();
+            const edited = await tryEditReasoningPreview(finalText);
+            if (edited) {
+              deliveryState.delivered = true;
+              return;
+            }
+          }
+
           if (info.kind === "final") {
+            // Check for reasoning-only final payloads.
+            if (
+              typeof finalText === "string" &&
+              isReasoningOnlyPayload(finalText)
+            ) {
+              if (reasoningStreamEnabled && reasoningDraftStream) {
+                // Edit the reasoning preview with expanded final text.
+                void reasoningDraftStream.stop();
+                const edited = await tryEditReasoningPreview(finalText);
+                if (edited) {
+                  deliveryState.delivered = true;
+                  finalDeliveryCount += 1;
+                  return;
+                }
+              }
+              // Suppress reasoning-only finals when not streaming reasoning.
+              finalDeliveryCount += 1;
+              return;
+            }
+
+            // Handle think-tag finals: split into reasoning and answer lanes.
+            if (
+              reasoningStreamEnabled &&
+              reasoningDraftStream &&
+              typeof finalText === "string"
+            ) {
+              const parsed = parseThinkTags(finalText);
+              if (parsed) {
+                if (parsed.reasoning) {
+                  void reasoningDraftStream.stop();
+                  const edited = await tryEditReasoningPreview(parsed.reasoning);
+                  if (edited) {
+                    deliveryState.delivered = true;
+                  }
+                }
+                if (parsed.answer) {
+                  payload = { ...payload, text: parsed.answer };
+                } else {
+                  finalDeliveryCount += 1;
+                  return;
+                }
+              }
+            }
+
             await flushDraft();
             const hasMedia = Boolean(payload.mediaUrl) || (payload.mediaUrls?.length ?? 0) > 0;
-            const previewMessageId = draftStream?.messageId();
-            const finalText = payload.text;
+            let previewMessageId = resolvePreviewMessageIdForFinal(finalDeliveryCount);
+            const editFinalText = typeof payload.text === "string" ? payload.text : undefined;
             const currentPreviewText = streamMode === "block" ? draftText : lastPartialText;
             const previewButtons = (
               payload.channelData?.telegram as { buttons?: TelegramInlineButtons } | undefined
             )?.buttons;
-            let draftStoppedForPreviewEdit = false;
-            // Skip preview edit for error payloads to avoid overwriting previous content
-            const canFinalizeViaPreviewEdit =
-              !finalizedViaPreviewMessage &&
+            let draftStopped = false;
+            // Tracks whether the preview message was newly created by the stop-prime
+            // flow (content already visible as the stop-flush message).
+            let stopPrimedNewMessage = false;
+
+            // When no preview message exists yet, prime the draft with final text
+            // and await stop() to create one (handles minInitialChars debounce case).
+            if (
+              answerDraftStream &&
+              typeof previewMessageId !== "number" &&
               !hasMedia &&
-              typeof finalText === "string" &&
-              finalText.length > 0 &&
+              typeof editFinalText === "string" &&
+              editFinalText.length > 0 &&
+              editFinalText.length <= draftMaxChars &&
+              !payload.isError
+            ) {
+              answerDraftStream.update(editFinalText);
+              await answerDraftStream.stop();
+              draftStopped = true;
+              stopPrimedNewMessage = true;
+              previewMessageId = answerDraftStream.messageId();
+            }
+
+            // Skip preview edit for error payloads to avoid overwriting previous content.
+            const canFinalizeViaPreviewEdit =
+              !hasMedia &&
+              typeof editFinalText === "string" &&
+              editFinalText.length > 0 &&
               typeof previewMessageId === "number" &&
-              finalText.length <= draftMaxChars &&
+              !finalizedPreviewIds.has(previewMessageId) &&
+              editFinalText.length <= draftMaxChars &&
               !payload.isError;
+
             if (canFinalizeViaPreviewEdit) {
-              void draftStream?.stop();
-              draftStoppedForPreviewEdit = true;
+              if (!draftStopped) {
+                void answerDraftStream?.stop();
+                draftStopped = true;
+              }
               if (
                 currentPreviewText &&
-                currentPreviewText.startsWith(finalText) &&
-                finalText.length < currentPreviewText.length
+                currentPreviewText.startsWith(editFinalText) &&
+                editFinalText.length < currentPreviewText.length
               ) {
-                // Ignore regressive final edits (e.g., "Okay." -> "Ok"), which
-                // can appear transiently in some provider streams.
+                // Ignore regressive final edits (e.g., "Okay." -> "Ok").
+                // The preview already shows the longer text; treat as finalized.
+                finalizedPreviewIds.add(previewMessageId);
+                deliveryState.delivered = true;
+                finalDeliveryCount += 1;
                 return;
               }
               try {
-                await editMessageTelegram(chatId, previewMessageId, finalText, {
+                await editMessageTelegram(chatId, previewMessageId, editFinalText, {
                   api: bot.api,
                   cfg,
                   accountId: route.accountId,
                   linkPreview: telegramCfg.linkPreview,
                   buttons: previewButtons,
                 });
-                finalizedViaPreviewMessage = true;
+                finalizedPreviewIds.add(previewMessageId);
                 deliveryState.delivered = true;
+                finalDeliveryCount += 1;
                 return;
               } catch (err) {
+                // If the preview was created by stop() flush, the content was already
+                // sent as the stop-flush message. Don't fall back to a duplicate send.
+                if (stopPrimedNewMessage) {
+                  logVerbose(
+                    `telegram: stop-created preview edit failed (${String(err)}); content already visible`,
+                  );
+                  finalizedPreviewIds.add(previewMessageId);
+                  deliveryState.delivered = true;
+                  finalDeliveryCount += 1;
+                  return;
+                }
                 logVerbose(
                   `telegram: preview final edit failed; falling back to standard send (${String(err)})`,
                 );
@@ -345,15 +615,15 @@ export const dispatchTelegramMessage = async ({
             if (
               !hasMedia &&
               !payload.isError &&
-              typeof finalText === "string" &&
-              finalText.length > draftMaxChars
+              typeof editFinalText === "string" &&
+              editFinalText.length > draftMaxChars
             ) {
               logVerbose(
-                `telegram: preview final too long for edit (${finalText.length} > ${draftMaxChars}); falling back to standard send`,
+                `telegram: preview final too long for edit (${editFinalText.length} > ${draftMaxChars}); falling back to standard send`,
               );
             }
-            if (!draftStoppedForPreviewEdit) {
-              void draftStream?.stop();
+            if (!draftStopped) {
+              void answerDraftStream?.stop();
             }
           }
           const result = await deliverReplies({
@@ -364,6 +634,9 @@ export const dispatchTelegramMessage = async ({
           if (result.delivered) {
             deliveryState.delivered = true;
           }
+          if (info.kind === "final") {
+            finalDeliveryCount += 1;
+          }
         },
         onSkip: (_payload, info) => {
           if (info.reason !== "silent") {
@@ -371,6 +644,7 @@ export const dispatchTelegramMessage = async ({
           }
         },
         onError: (err, info) => {
+          deliveryState.failedDeliveries += 1;
           runtime.error?.(danger(`telegram ${info.kind} reply failed: ${String(err)}`));
         },
         onReplyStart: createTypingCallbacks({
@@ -388,46 +662,59 @@ export const dispatchTelegramMessage = async ({
       replyOptions: {
         skillFilter,
         disableBlockStreaming,
-        onPartialReply: draftStream ? (payload) => updateDraftFromPartial(payload.text) : undefined,
-        onAssistantMessageStart: draftStream
+        onPartialReply: hasDraftStream ? (payload) => updateDraftFromPartial(payload.text) : undefined,
+        onAssistantMessageStart: answerDraftStream
           ? () => {
-              // When a new assistant message starts (e.g., after tool call),
-              // force a new Telegram message if we have previous content.
-              // Only force once per response to avoid excessive splitting.
               logVerbose(
                 `telegram: onAssistantMessageStart called, hasStreamedMessage=${hasStreamedMessage}`,
               );
               if (hasStreamedMessage) {
+                // Record the current preview message ID before rotating.
+                previewMessageIdHistory.push(answerDraftStream.messageId());
                 logVerbose(`telegram: calling forceNewMessage()`);
-                draftStream.forceNewMessage();
+                answerDraftStream.forceNewMessage();
               }
               lastPartialText = "";
               draftText = "";
               draftChunker?.reset();
             }
           : undefined,
-        onReasoningEnd: draftStream
-          ? () => {
-              // When a thinking block ends, force a new Telegram message for the next text output.
-              if (hasStreamedMessage) {
-                draftStream.forceNewMessage();
-                lastPartialText = "";
-                draftText = "";
-                draftChunker?.reset();
+        onReasoningStream: reasoningStreamEnabled && reasoningDraftStream
+          ? (payload: { text?: string }) => {
+              if (reasoningEnded && hasStreamedReasoningMessage) {
+                reasoningDraftStream.forceNewMessage();
+                reasoningEnded = false;
               }
+              updateReasoningDraft(payload.text);
+            }
+          : undefined,
+        onReasoningEnd: hasDraftStream
+          ? () => {
+              reasoningEnded = true;
             }
           : undefined,
         onModelSelected,
       },
     }));
   } finally {
-    if (!finalizedViaPreviewMessage) {
-      await draftStream?.clear();
+    if (finalizedPreviewIds.size === 0) {
+      await answerDraftStream?.clear();
+      // Also clear reasoning stream if it is a separate object from the answer stream.
+      if (reasoningDraftStream && reasoningDraftStream !== answerDraftStream) {
+        await reasoningDraftStream.clear();
+      }
     }
-    void draftStream?.stop();
+    void answerDraftStream?.stop();
+    // Only stop reasoning stream separately if it is a distinct object.
+    if (reasoningDraftStream && reasoningDraftStream !== answerDraftStream) {
+      void reasoningDraftStream.stop();
+    }
   }
   let sentFallback = false;
-  if (!deliveryState.delivered && deliveryState.skippedNonSilent > 0) {
+  if (
+    !deliveryState.delivered &&
+    (deliveryState.skippedNonSilent > 0 || deliveryState.failedDeliveries > 0)
+  ) {
     const result = await deliverReplies({
       replies: [{ text: EMPTY_RESPONSE_FALLBACK }],
       ...deliveryBaseOptions,

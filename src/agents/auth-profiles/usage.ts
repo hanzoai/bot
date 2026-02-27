@@ -272,7 +272,11 @@ export function resolveProfilesUnavailableReason(params: {
   const now = params.now ?? Date.now();
 
   // Aggregate failure reasons across all profiles that are currently unavailable.
-  const aggregatedCounts: Partial<Record<AuthProfileFailureReason, number>> = {};
+  // Active disabled reasons (from disabledReason) represent the authoritative
+  // explanation for why a profile was explicitly disabled and take priority
+  // over accumulated historical failure counts.
+  const disabledReasons: Partial<Record<AuthProfileFailureReason, number>> = {};
+  const failureCountAggregated: Partial<Record<AuthProfileFailureReason, number>> = {};
   let allUnavailable = true;
 
   for (const id of profileIds) {
@@ -296,15 +300,16 @@ export function resolveProfilesUnavailableReason(params: {
       now < stats.disabledUntil &&
       stats.disabledReason
     ) {
-      aggregatedCounts[stats.disabledReason] = (aggregatedCounts[stats.disabledReason] ?? 0) + 1;
+      disabledReasons[stats.disabledReason] =
+        (disabledReasons[stats.disabledReason] ?? 0) + 1;
     }
 
-    // Also aggregate from failureCounts (excluding rate_limit for priority ranking).
+    // Also aggregate from failureCounts for fallback ranking.
     if (stats.failureCounts) {
       for (const [reason, count] of Object.entries(stats.failureCounts)) {
         if (typeof count === "number" && count > 0) {
           const key = reason as AuthProfileFailureReason;
-          aggregatedCounts[key] = (aggregatedCounts[key] ?? 0) + count;
+          failureCountAggregated[key] = (failureCountAggregated[key] ?? 0) + count;
         }
       }
     }
@@ -317,7 +322,7 @@ export function resolveProfilesUnavailableReason(params: {
       !stats.disabledReason &&
       (!stats.failureCounts || Object.keys(stats.failureCounts).length === 0)
     ) {
-      aggregatedCounts.rate_limit = (aggregatedCounts.rate_limit ?? 0) + 1;
+      failureCountAggregated.rate_limit = (failureCountAggregated.rate_limit ?? 0) + 1;
     }
   }
 
@@ -329,16 +334,43 @@ export function resolveProfilesUnavailableReason(params: {
     return null;
   }
 
-  // Pick the dominant reason: highest count wins; ties broken by REASON_PRIORITY.
+  // Active disabled reasons are authoritative. If any profile has an explicit
+  // disabled reason, that takes priority over historical failure counts.
+  const disabledReasonEntries = Object.entries(disabledReasons).filter(
+    ([, count]) => typeof count === "number" && count > 0,
+  );
+  if (disabledReasonEntries.length > 0) {
+    // Pick the highest-priority disabled reason using REASON_PRIORITY.
+    let bestReason: AuthProfileFailureReason | null = null;
+    let bestPriority = REASON_PRIORITY.length;
+    let bestCount = 0;
+    for (const [reason, count] of disabledReasonEntries) {
+      const key = reason as AuthProfileFailureReason;
+      const priority = REASON_PRIORITY.indexOf(key);
+      const effectivePriority = priority >= 0 ? priority : REASON_PRIORITY.length;
+      if (
+        effectivePriority < bestPriority ||
+        (effectivePriority === bestPriority && (count ?? 0) > bestCount)
+      ) {
+        bestReason = key;
+        bestPriority = effectivePriority;
+        bestCount = count ?? 0;
+      }
+    }
+    if (bestReason) {
+      return bestReason;
+    }
+  }
+
+  // Fall back to the highest count from historical failure counts.
   let bestReason: AuthProfileFailureReason | null = null;
   let bestCount = 0;
   let bestPriority = REASON_PRIORITY.length;
 
-  for (const [reason, count] of Object.entries(aggregatedCounts)) {
+  for (const [reason, count] of Object.entries(failureCountAggregated)) {
     if (typeof count !== "number" || count <= 0) {
       continue;
     }
-    // Exclude rate_limit from the "highest non-rl count" logic; it's the fallback.
     const key = reason as AuthProfileFailureReason;
     const priority = REASON_PRIORITY.indexOf(key);
     const effectivePriority = priority >= 0 ? priority : REASON_PRIORITY.length;
