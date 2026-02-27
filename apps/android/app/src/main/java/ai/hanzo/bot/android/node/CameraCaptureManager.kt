@@ -1,4 +1,4 @@
-package ai.hanzo-bot.android.node
+package ai.hanzo.bot.android.node
 
 import android.Manifest
 import android.content.Context
@@ -25,7 +25,7 @@ import androidx.camera.video.VideoRecordEvent
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.core.graphics.scale
-import ai.hanzo-bot.android.PermissionRequester
+import ai.hanzo.bot.android.PermissionRequester
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout

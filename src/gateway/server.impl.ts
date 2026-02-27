@@ -50,7 +50,6 @@ import { runOnboardingWizard } from "../wizard/onboarding.js";
 import { createAuthRateLimiter, type AuthRateLimiter } from "./auth-rate-limit.js";
 import { startGatewayConfigReloader } from "./config-reload.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
-import { KVNodeSync } from "./kv-node-sync.js";
 import { NodeRegistry } from "./node-registry.js";
 import { createChannelManager } from "./server-channels.js";
 import { createAgentEventHandler } from "./server-chat.js";
@@ -74,6 +73,7 @@ import { resolveSessionKeyForRun } from "./server-session-key.js";
 import { logGatewayStartup } from "./server-startup-log.js";
 import { startGatewaySidecars } from "./server-startup.js";
 import { startGatewayTailscaleExposure } from "./server-tailscale.js";
+import { startGatewayTunnel, type TunnelResult } from "./server-tunnel.js";
 import { createWizardSessionTracker } from "./server-wizard-sessions.js";
 import { attachGatewayWsHandlers } from "./server-ws-runtime.js";
 import {
@@ -93,6 +93,7 @@ const log = createSubsystemLogger("gateway");
 const logCanvas = log.child("canvas");
 const logDiscovery = log.child("discovery");
 const logTailscale = log.child("tailscale");
+const logTunnel = log.child("tunnel");
 const logChannels = log.child("channels");
 const logBrowser = log.child("browser");
 const logHealth = log.child("health");
@@ -332,12 +333,28 @@ export async function startGatewayServer(
   if (cfgAtStart.gateway?.tls?.enabled && !gatewayTls.enabled) {
     throw new Error(gatewayTls.error ?? "gateway tls: failed to enable");
   }
+  const nodeRegistry = new NodeRegistry();
+
+  // --- KV sync: cross-pod node state sharing via Hanzo KV ---
+  const kvUrl = process.env.KV_URL;
+  if (kvUrl) {
+    try {
+      const { KVNodeSync } = await import("./kv-node-sync.js");
+      const sync = new KVNodeSync(kvUrl);
+      nodeRegistry.setSync(sync);
+      log.info(`KV node sync enabled (pod=${sync.podId})`);
+    } catch (err) {
+      log.warn("KV node sync failed to init:", (err as Error).message);
+    }
+  }
+
   const {
     canvasHost,
     httpServer,
     httpServers,
     httpBindHosts,
     wss,
+    vncProxy,
     clients,
     broadcast,
     broadcastToConnIds,
@@ -373,55 +390,9 @@ export async function startGatewayServer(
     log,
     logHooks,
     logPlugins,
+    nodeRegistry,
   });
   let bonjourStop: (() => Promise<void>) | null = null;
-  const nodeRegistry = new NodeRegistry();
-
-  // --- KV sync: cross-pod node state sharing via Hanzo KV ---
-  const kvUrl = process.env.KV_URL;
-  if (kvUrl) {
-    try {
-      const sync = new KVNodeSync(kvUrl);
-      nodeRegistry.setSync(sync);
-      log.info(`KV node sync enabled (pod=${sync.podId})`);
-    } catch (err) {
-      log.warn("KV node sync failed to init:", (err as Error).message);
-    }
-  }
-
-  // --- Tunnel adapter: accept hanzo-tunnel protocol connections at /v1/tunnel ---
-  {
-    const { WebSocketServer: TunnelWSS } = await import("ws");
-    const { handleTunnelConnection } = await import("./tunnel-adapter.js");
-    const tunnelWss = new TunnelWSS({ noServer: true, maxPayload: 10 * 1024 * 1024 });
-    tunnelWss.on(
-      "connection",
-      (ws: import("ws").WebSocket, req: import("node:http").IncomingMessage) => {
-        const remoteIp = req.socket.remoteAddress ?? undefined;
-        handleTunnelConnection({ ws, nodeRegistry, remoteIp });
-      },
-    );
-    // Intercept upgrade events: replace existing listeners with a wrapper that
-    // routes /v1/tunnel to the tunnel WSS and everything else to the originals.
-    for (const server of httpServers) {
-      const origListeners = server.listeners("upgrade").slice() as ((...args: unknown[]) => void)[];
-      server.removeAllListeners("upgrade");
-      server.on("upgrade", (req, socket, head) => {
-        const url = new URL(req.url ?? "/", "http://localhost");
-        if (url.pathname === "/v1/tunnel") {
-          tunnelWss.handleUpgrade(req, socket, head, (ws) => {
-            tunnelWss.emit("connection", ws, req);
-          });
-          return;
-        }
-        for (const fn of origListeners) {
-          fn(req, socket, head);
-        }
-      });
-    }
-    log.info("tunnel adapter listening at /v1/tunnel");
-  }
-
   const nodePresenceTimers = new Map<string, ReturnType<typeof setInterval>>();
   const nodeSubscriptions = createNodeSubscriptionManager();
   const nodeSendEvent = (opts: { nodeId: string; event: string; payloadJSON?: string | null }) => {
@@ -595,6 +566,7 @@ export async function startGatewayServer(
     },
     broadcast,
     context: {
+      iamConfig: resolvedAuth.iam,
       deps,
       cron,
       cronStorePath,
@@ -656,6 +628,33 @@ export async function startGatewayServer(
         controlUiBasePath,
         logTailscale,
       });
+
+  // Always allow the Hanzo cloud playground origin for IAM-mode gateways
+  // (cloud deployments that don't use a tunnel are still accessed from app.hanzo.bot).
+  if (!minimalTestGateway && resolvedAuth.mode === "iam") {
+    const { addRuntimeAllowedOrigin } = await import("./origin-check.js");
+    addRuntimeAllowedOrigin("https://app.hanzo.bot");
+  }
+
+  // Start tunnel if configured (cloudflared, ngrok, localxpose, zrok)
+  let tunnelResult: TunnelResult | null = null;
+  const tunnelConfig = cfgAtStart.gateway?.tunnel;
+  if (!minimalTestGateway && tunnelConfig?.provider && tunnelConfig.provider !== "none") {
+    const { addRuntimeAllowedOrigin } = await import("./origin-check.js");
+    tunnelResult = await startGatewayTunnel({
+      config: tunnelConfig,
+      port,
+      log: logTunnel,
+    });
+    if (tunnelResult) {
+      // Allow the tunnel's own origin + the Hanzo cloud playground
+      addRuntimeAllowedOrigin(tunnelResult.publicOrigin);
+      addRuntimeAllowedOrigin("https://app.hanzo.bot");
+      logTunnel.info(
+        `gateway tunnel active: ${tunnelResult.publicUrl} (provider: ${tunnelResult.provider})`,
+      );
+    }
+  }
 
   let browserControl: Awaited<ReturnType<typeof startBrowserControlServerIfEnabled>> = null;
   if (!minimalTestGateway) {
@@ -767,6 +766,14 @@ export async function startGatewayServer(
       }
       skillsChangeUnsub();
       authRateLimiter?.dispose();
+      vncProxy.close();
+      if (tunnelResult) {
+        await tunnelResult.stop().catch((err) => {
+          logTunnel.warn(
+            `tunnel cleanup failed: ${err instanceof Error ? err.message : String(err)}`,
+          );
+        });
+      }
       await close(opts);
     },
   };
