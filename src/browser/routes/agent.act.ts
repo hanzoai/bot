@@ -17,8 +17,8 @@ import {
 import {
   DEFAULT_DOWNLOAD_DIR,
   DEFAULT_UPLOAD_DIR,
-  resolvePathWithinRoot,
   resolvePathsWithinRoot,
+  resolveWritablePathWithinRoot,
 } from "./path-output.js";
 import { jsonError, toBoolean, toNumber, toStringArray, toStringOrEmpty } from "./utils.js";
 
@@ -201,8 +201,8 @@ export function registerBrowserAgentActRoutes(
               }
               const rec = field as Record<string, unknown>;
               const ref = toStringOrEmpty(rec.ref);
-              const type = toStringOrEmpty(rec.type);
-              if (!ref || !type) {
+              const type = toStringOrEmpty(rec.type) || "text";
+              if (!ref) {
                 return null;
               }
               const value =
@@ -457,7 +457,7 @@ export function registerBrowserAgentActRoutes(
       }
       let downloadPath: string | undefined;
       if (out.trim()) {
-        const downloadPathResult = resolvePathWithinRoot({
+        const downloadPathResult = await resolveWritablePathWithinRoot({
           rootDir: DEFAULT_DOWNLOAD_DIR,
           requestedPath: out,
           scopeLabel: "downloads directory",
@@ -497,7 +497,7 @@ export function registerBrowserAgentActRoutes(
       return jsonError(res, 400, "path is required");
     }
     try {
-      const downloadPathResult = resolvePathWithinRoot({
+      const downloadPathResult = await resolveWritablePathWithinRoot({
         rootDir: DEFAULT_DOWNLOAD_DIR,
         requestedPath: out,
         scopeLabel: "downloads directory",
