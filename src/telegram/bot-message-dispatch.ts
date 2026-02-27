@@ -559,7 +559,7 @@ export const dispatchTelegramMessage = async ({
               editFinalText.length <= draftMaxChars &&
               !payload.isError;
 
-            if (canFinalizeViaPreviewEdit) {
+            if (canFinalizeViaPreviewEdit && typeof previewMessageId === "number") {
               if (!draftStopped) {
                 void answerDraftStream?.stop();
                 draftStopped = true;
