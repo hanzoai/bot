@@ -1,13 +1,28 @@
 import type { BotConfig } from "bot/plugin-sdk";
 import fs from "fs";
-import os from "os";
 import path from "path";
 import { Readable } from "stream";
+import { resolvePreferredBotTmpDir } from "../../../src/infra/tmp-bot-dir.js";
 import { resolveFeishuAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import { getFeishuRuntime } from "./runtime.js";
 import { assertFeishuMessageApiSuccess, toFeishuSendResult } from "./send-result.js";
 import { resolveReceiveIdType, normalizeFeishuTarget } from "./targets.js";
+
+/** Validate that a key does not contain path traversal or separator characters. */
+function assertSafeKey(key: string, label: string): void {
+  if (!key || key.includes("/") || key.includes("\\") || key.includes("..")) {
+    throw new Error(`invalid ${label}: ${key}`);
+  }
+}
+
+/** Build a temp path under the bot tmp dir with a sanitized suffix. */
+function buildIsolatedTmpPath(prefix: string, key: string): string {
+  const safeKey = key.replace(/[^a-zA-Z0-9_.-]/g, "_");
+  const tmpRoot = resolvePreferredBotTmpDir();
+  fs.mkdirSync(tmpRoot, { recursive: true });
+  return path.join(tmpRoot, `${prefix}_${Date.now()}_${safeKey}`);
+}
 
 export type DownloadImageResult = {
   buffer: Buffer;
@@ -88,6 +103,8 @@ export async function downloadImageFeishu(params: {
   accountId?: string;
 }): Promise<DownloadImageResult> {
   const { cfg, imageKey, accountId } = params;
+  assertSafeKey(imageKey, "image_key");
+
   const account = resolveFeishuAccount({ cfg, accountId });
   if (!account.configured) {
     throw new Error(`Feishu account "${account.accountId}" not configured`);
@@ -99,7 +116,7 @@ export async function downloadImageFeishu(params: {
     path: { image_key: imageKey },
   });
 
-  const tmpPath = path.join(os.tmpdir(), `feishu_img_${Date.now()}_${imageKey}`);
+  const tmpPath = buildIsolatedTmpPath("feishu_img", imageKey);
   const buffer = await readFeishuResponseBuffer({
     response,
     tmpPath,
@@ -120,6 +137,8 @@ export async function downloadMessageResourceFeishu(params: {
   accountId?: string;
 }): Promise<DownloadMessageResourceResult> {
   const { cfg, messageId, fileKey, type, accountId } = params;
+  assertSafeKey(fileKey, "file_key");
+
   const account = resolveFeishuAccount({ cfg, accountId });
   if (!account.configured) {
     throw new Error(`Feishu account "${account.accountId}" not configured`);
@@ -132,7 +151,7 @@ export async function downloadMessageResourceFeishu(params: {
     params: { type },
   });
 
-  const tmpPath = path.join(os.tmpdir(), `feishu_${Date.now()}_${fileKey}`);
+  const tmpPath = buildIsolatedTmpPath("feishu", fileKey);
   const buffer = await readFeishuResponseBuffer({
     response,
     tmpPath,
