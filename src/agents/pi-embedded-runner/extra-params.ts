@@ -370,7 +370,7 @@ function createAnthropicBetaWrapper(
     }
 
     // Build the beta header values
-    const existingBeta = options?.headers?.["anthropic-beta"] as string | undefined;
+    const existingBeta = options?.headers?.["anthropic-beta"];
     const parts: string[] = existingBeta ? existingBeta.split(",").map((s) => s.trim()) : [];
 
     if (isOAuthToken) {
