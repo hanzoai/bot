@@ -8,9 +8,11 @@ import { resolveThinkingDefault } from "../../agents/model-selection.js";
 import { resolveAgentTimeoutMs } from "../../agents/timeout.js";
 import { dispatchInboundMessage } from "../../auto-reply/dispatch.js";
 import { createReplyDispatcher } from "../../auto-reply/reply/reply-dispatcher.js";
+import { stripInboundMetadata } from "../../auto-reply/reply/strip-inbound-meta.js";
 import { createReplyPrefixOptions } from "../../channels/reply-prefix.js";
 import { resolveSessionFilePath } from "../../config/sessions.js";
 import { resolveSendPolicy } from "../../sessions/send-policy.js";
+import { stripInlineDirectiveTagsForDisplay } from "../../utils/directive-tags.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../../utils/message-channel.js";
 import {
   abortChatRunById,
@@ -70,6 +72,18 @@ function stripDisallowedChatControlChars(message: string): string {
     }
   }
   return output;
+}
+
+/**
+ * Strip injected inbound metadata blocks and inline directive tags from assistant
+ * text before it is broadcast to UI clients or stored in the transcript.
+ * Directive tags (e.g. [[reply_to_current]]) are model-routing hints — they
+ * must not surface in user-visible chat payloads.
+ */
+function stripAssistantBroadcastText(text: string): string {
+  const noMeta = stripInboundMetadata(text);
+  const result = stripInlineDirectiveTagsForDisplay(noMeta);
+  return result.changed ? result.text : noMeta;
 }
 
 export function sanitizeChatSendMessageInput(
@@ -738,13 +752,20 @@ export const chatHandlers: GatewayRequestHandlers = {
               .filter(Boolean)
               .join("\n\n")
               .trim();
+            // Strip injected inbound metadata blocks and directive tags before
+            // broadcasting to UI clients. The raw text is used only to decide
+            // whether a reply was produced at all; the cleaned version is what
+            // goes into the transcript and broadcast payload.
+            const displayReply = combinedReply
+              ? stripAssistantBroadcastText(combinedReply)
+              : combinedReply;
             let message: Record<string, unknown> | undefined;
             if (combinedReply) {
               const { storePath: latestStorePath, entry: latestEntry } =
                 loadSessionEntry(sessionKey);
               const sessionId = latestEntry?.sessionId ?? entry?.sessionId ?? clientRunId;
               const appended = appendAssistantTranscriptMessage({
-                message: combinedReply,
+                message: displayReply,
                 sessionId,
                 storePath: latestStorePath,
                 sessionFile: latestEntry?.sessionFile,
@@ -760,7 +781,7 @@ export const chatHandlers: GatewayRequestHandlers = {
                 const now = Date.now();
                 message = {
                   role: "assistant",
-                  content: [{ type: "text", text: combinedReply }],
+                  content: [{ type: "text", text: displayReply }],
                   timestamp: now,
                   // Keep this compatible with Pi stopReason enums even though this message isn't
                   // persisted to the transcript due to the append failure.
@@ -850,8 +871,12 @@ export const chatHandlers: GatewayRequestHandlers = {
       return;
     }
 
+    // Strip injected metadata blocks and directive tags so they don't surface in
+    // the UI or stored transcript. The raw p.message may contain channel metadata
+    // wrappers (<<<EXTERNAL_UNTRUSTED_CONTENT>>>) that are AI-facing only.
+    const injectDisplayMessage = stripAssistantBroadcastText(p.message);
     const appended = appendAssistantTranscriptMessage({
-      message: p.message,
+      message: injectDisplayMessage,
       label: p.label,
       sessionId,
       storePath,

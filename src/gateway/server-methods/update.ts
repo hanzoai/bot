@@ -1,5 +1,6 @@
 import type { GatewayRequestHandlers } from "./types.js";
 import { loadConfig } from "../../config/config.js";
+import { extractDeliveryInfo } from "../../config/sessions.js";
 import { resolveBotPackageRoot } from "../../infra/bot-root.js";
 import {
   formatDoctorNonInteractiveHint,
@@ -19,6 +20,8 @@ export const updateHandlers: GatewayRequestHandlers = {
       return;
     }
     const { sessionKey, note, restartDelayMs } = parseRestartRequestParams(params);
+    // Capture delivery context now so routing survives the post-update restart.
+    const { deliveryContext, threadId } = extractDeliveryInfo(sessionKey);
     const timeoutMsRaw = (params as { timeoutMs?: unknown }).timeoutMs;
     const timeoutMs =
       typeof timeoutMsRaw === "number" && Number.isFinite(timeoutMsRaw)
@@ -56,6 +59,8 @@ export const updateHandlers: GatewayRequestHandlers = {
       status: result.status,
       ts: Date.now(),
       sessionKey,
+      deliveryContext,
+      threadId,
       message: note ?? null,
       doctorHint: formatDoctorNonInteractiveHint(),
       stats: {
@@ -86,15 +91,18 @@ export const updateHandlers: GatewayRequestHandlers = {
       sentinelPath = null;
     }
 
-    const restart = scheduleGatewaySigusr1Restart({
-      delayMs: restartDelayMs,
-      reason: "update.run",
-    });
+    // Only schedule a restart when the update actually succeeded; skip on error so
+    // a broken install does not cycle the gateway into an unrecoverable restart loop.
+    // "skipped" (already up-to-date) is also considered successful.
+    const succeeded = result.status !== "error";
+    const restart = succeeded
+      ? scheduleGatewaySigusr1Restart({ delayMs: restartDelayMs, reason: "update.run" })
+      : null;
 
     respond(
       true,
       {
-        ok: true,
+        ok: succeeded,
         result,
         restart,
         sentinel: {
