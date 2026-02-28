@@ -530,7 +530,9 @@ function keccakPermute(state: BigUint64Array): void {
 
   const rot64 = (x: bigint, n: number): bigint => {
     const s = n % 64;
-    if (s === 0) return x;
+    if (s === 0) {
+      return x;
+    }
     return ((x << BigInt(s)) | (x >> BigInt(64 - s))) & MASK64;
   };
 
@@ -596,10 +598,18 @@ function modInverse(a: bigint, m: bigint): bigint {
 
 /** Point addition on secp256k1. */
 function pointAdd(x1: bigint, y1: bigint, x2: bigint, y2: bigint, p: bigint): [bigint, bigint] {
-  if (x1 === 0n && y1 === 0n) return [x2, y2];
-  if (x2 === 0n && y2 === 0n) return [x1, y1];
-  if (x1 === x2 && y1 === y2) return pointDouble(x1, y1, p);
-  if (x1 === x2) return [0n, 0n]; // Point at infinity
+  if (x1 === 0n && y1 === 0n) {
+    return [x2, y2];
+  }
+  if (x2 === 0n && y2 === 0n) {
+    return [x1, y1];
+  }
+  if (x1 === x2 && y1 === y2) {
+    return pointDouble(x1, y1, p);
+  }
+  if (x1 === x2) {
+    return [0n, 0n];
+  } // Point at infinity
 
   const slope = ((y2 - y1) * modInverse((((x2 - x1) % p) + p) % p, p)) % p;
   const sPos = (slope + p) % p;
@@ -612,7 +622,9 @@ function pointAdd(x1: bigint, y1: bigint, x2: bigint, y2: bigint, p: bigint): [b
 
 /** Point doubling on secp256k1. */
 function pointDouble(x: bigint, y: bigint, p: bigint): [bigint, bigint] {
-  if (y === 0n) return [0n, 0n];
+  if (y === 0n) {
+    return [0n, 0n];
+  }
   const slope = ((3n * x * x + SECP256K1.a) * modInverse((2n * y) % p, p)) % p;
   const sPos = (slope + p) % p;
   let rx = (sPos * sPos - 2n * x) % p;
@@ -717,7 +729,9 @@ function hmacSha256(key: Uint8Array, data: Uint8Array): Uint8Array {
 }
 
 function padTo32(bytes: Uint8Array): Uint8Array {
-  if (bytes.length >= 32) return bytes.subarray(0, 32);
+  if (bytes.length >= 32) {
+    return bytes.subarray(0, 32);
+  }
   const padded = new Uint8Array(32);
   padded.set(bytes, 32 - bytes.length);
   return padded;
