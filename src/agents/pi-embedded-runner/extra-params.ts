@@ -424,7 +424,9 @@ function createCodexTransportWrapper(
 ): StreamFn {
   const underlying = baseStreamFn ?? streamSimple;
   const configured = extraParams?.transport as string | undefined;
-  const validTransport = configured && VALID_TRANSPORT_VALUES.has(configured) ? configured : "auto";
+  const validTransport = (
+    configured && VALID_TRANSPORT_VALUES.has(configured) ? configured : "auto"
+  ) as "auto" | "sse" | "websocket";
 
   return (model, context, options) => {
     // Runtime options override configured transport
