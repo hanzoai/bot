@@ -399,10 +399,10 @@ private fun CanvasView(viewModel: MainViewModel, modifier: Modifier = Modifier) 
         // Use default layer/background; avoid forcing a black fill over WebView content.
 
         val a2uiBridge =
-          CanvasA2UIActionBridge { payload ->
+          RootCanvasA2UIActionBridge { payload ->
             viewModel.handleCanvasA2UIActionFromWebView(payload)
           }
-        addJavascriptInterface(a2uiBridge, CanvasA2UIActionBridge.interfaceName)
+        addJavascriptInterface(a2uiBridge, RootCanvasA2UIActionBridge.interfaceName)
         viewModel.canvas.attach(this)
       }
     },
@@ -415,7 +415,7 @@ private fun disableForceDarkIfSupported(settings: WebSettings) {
   WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_OFF)
 }
 
-private class CanvasA2UIActionBridge(private val onMessage: (String) -> Unit) {
+private class RootCanvasA2UIActionBridge(private val onMessage: (String) -> Unit) {
   @JavascriptInterface
   fun postMessage(payload: String?) {
     val msg = payload?.trim().orEmpty()
