@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { DEFAULT_PROVIDER } from "../agents/defaults.js";
+import { __testing as controlPlaneTestHooks } from "./control-plane-rate-limit.js";
 import { startGatewayServerHarness, type GatewayServerHarness } from "./server.e2e-ws-harness.js";
 import {
   connectOk,
@@ -281,6 +282,8 @@ describe("gateway server sessions", () => {
     expect(labelPatched.ok).toBe(true);
     expect(labelPatched.payload?.entry.label).toBe("Briefing");
 
+    // Reset rate limit before the 4th write (duplicate label check).
+    controlPlaneTestHooks.resetControlPlaneRateLimitState();
     const labelPatchedDuplicate = await rpcReq(ws, "sessions.patch", {
       key: "agent:main:discord:group:dev",
       label: "Briefing",
@@ -306,6 +309,8 @@ describe("gateway server sessions", () => {
     expect(subagent?.label).toBe("Briefing");
     expect(subagent?.displayName).toBe("Briefing");
 
+    // Reset rate limit before the next patch (verboseLevel clear).
+    controlPlaneTestHooks.resetControlPlaneRateLimitState();
     const clearedVerbose = await rpcReq<{ ok: true; key: string }>(ws, "sessions.patch", {
       key: "agent:main:main",
       verboseLevel: null,
@@ -365,6 +370,8 @@ describe("gateway server sessions", () => {
     });
     expect(spawnedPatchedInvalidKey.ok).toBe(false);
 
+    // Reset rate limit before model patch (spawnedBy writes consumed the budget).
+    controlPlaneTestHooks.resetControlPlaneRateLimitState();
     piSdkMock.enabled = true;
     piSdkMock.models = [{ id: "gpt-test-a", name: "A", provider: "openai" }];
     const modelPatched = await rpcReq<{
@@ -406,6 +413,8 @@ describe("gateway server sessions", () => {
     const filesAfterDelete = await fs.readdir(dir);
     expect(filesAfterDelete.some((f) => f.startsWith("sess-group.jsonl.deleted."))).toBe(true);
 
+    // Reset rate limit before sessions.reset (compact+delete consumed the budget).
+    controlPlaneTestHooks.resetControlPlaneRateLimitState();
     const reset = await rpcReq<{
       ok: true;
       key: string;

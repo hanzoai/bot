@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { captureEnv } from "../test-utils/env.js";
+import { __testing as controlPlaneTestHooks } from "./control-plane-rate-limit.js";
 import { startGatewayServer } from "./server.js";
 import { extractPayloadText } from "./test-helpers.agent-results.js";
 import {
@@ -188,6 +189,7 @@ describe("gateway e2e", () => {
 
         let next = start;
         let didSendToken = false;
+        let wizardStepCount = 1; // wizard.start already consumed 1 rate-limit slot
         while (!next.done) {
           const step = next.step;
           if (!step) {
@@ -197,6 +199,12 @@ describe("gateway e2e", () => {
           if (step.type === "text") {
             didSendToken = true;
           }
+          // Reset rate limit every 2 calls to stay within the 3-per-60s budget.
+          if (wizardStepCount >= 2) {
+            controlPlaneTestHooks.resetControlPlaneRateLimitState();
+            wizardStepCount = 0;
+          }
+          wizardStepCount += 1;
           next = await client.request("wizard.next", {
             sessionId,
             answer: { stepId: step.id, value },

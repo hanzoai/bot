@@ -507,6 +507,7 @@ export async function connectReq(
   opts?: {
     token?: string;
     password?: string;
+    deviceToken?: string;
     skipDefaultAuth?: boolean;
     minProtocol?: number;
     maxProtocol?: number;
@@ -525,6 +526,7 @@ export async function connectReq(
     caps?: string[];
     commands?: string[];
     permissions?: Record<string, boolean>;
+    deviceIdentityPath?: string;
     device?: {
       id: string;
       publicKey: string;
@@ -537,24 +539,8 @@ export async function connectReq(
   // Ensure challenge nonce tracking is active before we need it.
   trackConnectChallengeNonce(ws);
 
-  // Wait briefly for the challenge nonce to arrive (server sends it on open).
-  if (!getTrackedConnectChallengeNonce(ws)) {
-    await new Promise<void>((resolve) => {
-      const check = () => {
-        if (getTrackedConnectChallengeNonce(ws)) {
-          clearTimeout(timer);
-          resolve();
-        }
-      };
-      const timer = setTimeout(() => {
-        ws.off("message", check);
-        resolve(); // proceed without nonce — tests that don't need device auth
-      }, 500);
-      ws.on("message", check);
-      // Check immediately in case it already arrived.
-      check();
-    });
-  }
+  // Wait for the connect-challenge nonce using the robust helper (2 s timeout).
+  const nonce = (await readConnectChallengeNonce(ws)) ?? "";
 
   const { randomUUID } = await import("node:crypto");
   const id = randomUUID();
@@ -579,6 +565,7 @@ export async function connectReq(
         : process.env.BOT_GATEWAY_PASSWORD;
   const token = opts?.token ?? defaultToken;
   const password = opts?.password ?? defaultPassword;
+  const deviceToken = opts?.deviceToken;
   const requestedScopes = Array.isArray(opts?.scopes)
     ? opts.scopes
     : role === "operator"
@@ -591,9 +578,8 @@ export async function connectReq(
     if (opts?.device) {
       return opts.device;
     }
-    const identity = loadOrCreateDeviceIdentity();
+    const identity = loadOrCreateDeviceIdentity(opts?.deviceIdentityPath);
     const signedAtMs = Date.now();
-    const nonce = getTrackedConnectChallengeNonce(ws) ?? "";
     const payload = buildDeviceAuthPayload({
       deviceId: identity.deviceId,
       clientId: client.id,
@@ -609,7 +595,8 @@ export async function connectReq(
       publicKey: publicKeyRawBase64UrlFromPem(identity.publicKeyPem),
       signature: signDevicePayload(identity.privateKeyPem, payload),
       signedAt: signedAtMs,
-      nonce: nonce || undefined,
+      // Always include nonce as string (may be "" for loopback — server accepts that).
+      nonce,
     };
   })();
   ws.send(
@@ -627,10 +614,11 @@ export async function connectReq(
         role,
         scopes: requestedScopes,
         auth:
-          token || password
+          token || password || deviceToken
             ? {
                 token,
                 password,
+                ...(deviceToken ? { deviceToken } : {}),
               }
             : undefined,
         device,
