@@ -5,7 +5,6 @@ import type { BotConfig } from "../../config/config.js";
 import type { SandboxFsBridge } from "../sandbox/fs-bridge.js";
 import type { AnyAgentTool } from "./common.js";
 import { resolveUserPath } from "../../utils.js";
-import { resolveSandboxPath } from "../sandbox-paths.js";
 import { getDefaultLocalRoots, loadWebMedia } from "../../web/media.js";
 import { ensureAuthProfileStore, listProfilesForProvider } from "../auth-profiles.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../defaults.js";
@@ -15,6 +14,7 @@ import { runWithImageModelFallback } from "../model-fallback.js";
 import { resolveConfiguredModelRef } from "../model-selection.js";
 import { ensureBotModelsJson } from "../models-config.js";
 import { discoverAuthStorage, discoverModels } from "../pi-model-discovery.js";
+import { resolveSandboxPath } from "../sandbox-paths.js";
 import { normalizeWorkspaceDir } from "../workspace-dir.js";
 import {
   coerceImageAssistantText,
@@ -379,9 +379,7 @@ export function createImageTool(options?: {
     description,
     parameters: Type.Object({
       prompt: Type.Optional(Type.String()),
-      image: Type.Optional(
-        Type.String({ description: "Single image path or URL." }),
-      ),
+      image: Type.Optional(Type.String({ description: "Single image path or URL." })),
       images: Type.Optional(
         Type.Array(Type.String(), {
           description: "Multiple image paths or URLs (up to maxImages, default 20).",
@@ -507,7 +505,9 @@ export function createImageTool(options?: {
 
         // workspaceOnly guard: validate path is within sandbox/workspace root
         if (workspaceOnlyEnabled && sandboxConfig && !isDataUrl && !isHttpUrl) {
-          const filePath = imageRaw.startsWith("file://") ? imageRaw.slice("file://".length) : imageRaw;
+          const filePath = imageRaw.startsWith("file://")
+            ? imageRaw.slice("file://".length)
+            : imageRaw;
           resolveSandboxPath({ filePath, cwd: sandboxConfig.root, root: sandboxConfig.root });
         }
 
