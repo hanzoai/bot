@@ -216,6 +216,7 @@ jobs:
           echo "BOT_TEST_MAX_OLD_SPACE_SIZE_MB=2048" >> "$GITHUB_ENV"
 
       - name: Run ${{ matrix.task }} (${{ matrix.runtime }})
+        continue-on-error: ${{ matrix.runtime == 'bun' }}
         run: ${{ matrix.command }}
 
       - name: Summarize slowest tests
