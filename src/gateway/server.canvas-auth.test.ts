@@ -185,7 +185,9 @@ describe("gateway canvas host auth", () => {
     await withTempConfig({
       cfg: {
         gateway: {
-          trustedProxies: ["127.0.0.1"],
+          // Include both IPv4 and IPv6 loopback forms so tests pass on platforms
+          // where Node.js reports remoteAddress as ::ffff:127.0.0.1 or ::1.
+          trustedProxies: ["127.0.0.1", "::1", "::ffff:127.0.0.1"],
         },
       },
       ...(prefix ? { prefix } : {}),

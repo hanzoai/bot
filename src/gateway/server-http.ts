@@ -28,6 +28,7 @@ import {
   type GatewayAuthResult,
   type ResolvedGatewayAuth,
 } from "./auth.js";
+import { CANVAS_CAPABILITY_PATH_PREFIX, normalizeCanvasScopedUrl } from "./canvas-capability.js";
 import {
   handleControlUiAvatarRequest,
   handleControlUiHttpRequest,
@@ -57,6 +58,7 @@ import { handleMarketplaceHttpRequest, type MarketplaceHttpOptions } from "./mar
 import { isPrivateOrLoopbackAddress, resolveGatewayClientIp } from "./net.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
+import { isProtectedPluginRoutePath } from "./security-path.js";
 import { createVncProxy, vncViewerHtml } from "./server-methods/vnc.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
 
@@ -108,6 +110,28 @@ function hasAuthorizedWsClientForIp(clients: Set<GatewayWsClient>, clientIp: str
     }
   }
   return false;
+}
+
+/**
+ * Checks whether a capability token matches an active node-role WsClient.
+ * Only node-role clients with a valid (non-expired) canvas capability grant access.
+ */
+function resolveActiveNodeCapability(
+  clients: Set<GatewayWsClient>,
+  capability: string,
+): GatewayWsClient | undefined {
+  const nowMs = Date.now();
+  for (const client of clients) {
+    if (
+      client.canvasCapability === capability &&
+      client.connect?.role === "node" &&
+      typeof client.canvasCapabilityExpiresAtMs === "number" &&
+      client.canvasCapabilityExpiresAtMs > nowMs
+    ) {
+      return client;
+    }
+  }
+  return undefined;
 }
 
 async function authorizeCanvasRequest(params: {
@@ -474,6 +498,11 @@ export function createGatewayHttpServer(opts: {
   gatewayOrigin?: string;
   /** P2P marketplace HTTP endpoint options. */
   marketplace?: MarketplaceHttpOptions;
+  /**
+   * When set, adds a Strict-Transport-Security header to every response
+   * (e.g. "max-age=31536000; includeSubDomains").
+   */
+  strictTransportSecurityHeader?: string;
 }): HttpServer {
   const {
     canvasHost,
@@ -501,6 +530,15 @@ export function createGatewayHttpServer(opts: {
     // Don't interfere with WebSocket upgrades; ws handles the 'upgrade' event.
     if (String(req.headers.upgrade ?? "").toLowerCase() === "websocket") {
       return;
+    }
+
+    // Apply baseline security headers to every HTTP response.
+    // These protect against MIME sniffing and referrer leakage regardless of
+    // what the downstream handler returns.
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Referrer-Policy", "no-referrer");
+    if (opts.strictTransportSecurityHeader) {
+      res.setHeader("Strict-Transport-Security", opts.strictTransportSecurityHeader);
     }
 
     try {
@@ -587,9 +625,10 @@ export function createGatewayHttpServer(opts: {
       }
       if (handlePluginRequest) {
         // Channel HTTP endpoints are gateway-auth protected by default.
-        // Non-channel plugin routes remain plugin-owned and must enforce
-        // their own auth when exposing sensitive functionality.
-        if (requestPath.startsWith("/api/channels/")) {
+        // isProtectedPluginRoutePath handles case normalization and path
+        // canonicalization (e.g. /API/channels/, encoded segments, dot traversal)
+        // so auth cannot be bypassed by case variants or encoded paths.
+        if (isProtectedPluginRoutePath(requestPath)) {
           const token = getBearerToken(req);
           const authResult = await authorizeGatewayConnect({
             auth: resolvedAuth,
@@ -638,6 +677,40 @@ export function createGatewayHttpServer(opts: {
         }
       }
       if (canvasHost) {
+        // Capability-scoped canvas paths (/__bot__/cap/<token>/...) allow node
+        // clients to expose their canvas to the browser without needing a gateway
+        // bearer token. The capability token is validated against the live client
+        // set: only active node-role clients with a non-expired capability grant.
+        if (
+          requestPath.startsWith(`${CANVAS_CAPABILITY_PATH_PREFIX}/`) ||
+          requestPath === CANVAS_CAPABILITY_PATH_PREFIX
+        ) {
+          const scopedUrl = normalizeCanvasScopedUrl(req.url ?? "/");
+          if (scopedUrl.malformedScopedPath || !scopedUrl.capability) {
+            // Malformed or missing capability — fail with 401, not 404, to avoid
+            // leaking information about the path structure.
+            sendGatewayAuthFailure(res, { ok: false, reason: "unauthorized" });
+            return;
+          }
+          const activeClient = resolveActiveNodeCapability(clients, scopedUrl.capability);
+          if (!activeClient) {
+            sendGatewayAuthFailure(res, { ok: false, reason: "unauthorized" });
+            return;
+          }
+          // Rewrite the request URL to the canonical canvas path before
+          // forwarding to the underlying handlers.
+          if (scopedUrl.rewrittenUrl) {
+            req.url = scopedUrl.rewrittenUrl;
+          }
+          // Fall through to A2UI / canvas host handlers with the rewritten URL.
+          if (await handleA2uiHttpRequest(req, res)) {
+            return;
+          }
+          if (await canvasHost.handleHttpRequest(req, res)) {
+            return;
+          }
+          return;
+        }
         if (isCanvasPath(requestPath)) {
           const ok = await authorizeCanvasRequest({
             req,
@@ -755,6 +828,33 @@ export function attachGatewayUpgradeHandler(opts: {
       }
       if (canvasHost) {
         const url = new URL(req.url ?? "/", "http://localhost");
+        // Capability-scoped WebSocket upgrades (/__bot__/cap/<token>/...).
+        // Same capability check as for HTTP: only active node-role clients.
+        if (
+          url.pathname.startsWith(`${CANVAS_CAPABILITY_PATH_PREFIX}/`) ||
+          url.pathname === CANVAS_CAPABILITY_PATH_PREFIX
+        ) {
+          const scopedUrl = normalizeCanvasScopedUrl(req.url ?? "/");
+          if (scopedUrl.malformedScopedPath || !scopedUrl.capability) {
+            writeUpgradeAuthFailure(socket, { ok: false, reason: "unauthorized" });
+            socket.destroy();
+            return;
+          }
+          const activeClient = resolveActiveNodeCapability(clients, scopedUrl.capability);
+          if (!activeClient) {
+            writeUpgradeAuthFailure(socket, { ok: false, reason: "unauthorized" });
+            socket.destroy();
+            return;
+          }
+          if (scopedUrl.rewrittenUrl) {
+            req.url = scopedUrl.rewrittenUrl;
+          }
+          if (canvasHost.handleUpgrade(req, socket, head)) {
+            return;
+          }
+          socket.destroy();
+          return;
+        }
         if (url.pathname === CANVAS_WS_PATH) {
           const configSnapshot = loadConfig();
           const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
