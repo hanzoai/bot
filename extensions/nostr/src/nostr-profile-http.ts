@@ -161,6 +161,12 @@ function isPrivateIp(ip: string): boolean {
     return isPrivateIp(v4Mapped[1]);
   }
 
+  // ISATAP / 6to4 / Teredo embedded IPv4 (e.g. ::5efe:A.B.C.D or 2001:0:...A.B.C.D)
+  const embeddedV4 = ipLower.match(/(\d+\.\d+\.\d+\.\d+)$/);
+  if (embeddedV4) {
+    return isPrivateIp(embeddedV4[1]);
+  }
+
   return false;
 }
 

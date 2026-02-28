@@ -163,7 +163,7 @@ beforeEach(() => {
 });
 
 describe("installPluginFromArchive", () => {
-  it("installs into ~/.bot/extensions and uses unscoped id", async () => {
+  it("installs into ~/.hanzo/bot/extensions and uses unscoped id", async () => {
     const stateDir = makeTempDir();
     const workDir = makeTempDir();
     const { archivePath } = await createVoiceCallArchive({

@@ -257,7 +257,7 @@ export function resolveDiscordOwnerAllowFrom(params: {
       name: params.sender.name,
       tag: params.sender.tag,
     },
-    allowNameMatching: params.allowNameMatching,
+    allowNameMatching: params.allowNameMatching ?? true,
   });
   if (!match.allowed || !match.matchKey || match.matchKey === "*") {
     return undefined;
