@@ -109,11 +109,13 @@ async function runTelegramReply(params: {
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
   const home = path.join(fixtureRoot, `case-${++caseId}`);
-  await fs.mkdir(path.join(home, ".bot", "agents", "main", "sessions"), { recursive: true });
+  await fs.mkdir(path.join(home, ".hanzo", "bot", "agents", "main", "sessions"), {
+    recursive: true,
+  });
   const envSnapshot = snapshotHomeEnv();
   process.env.HOME = home;
   process.env.USERPROFILE = home;
-  process.env.BOT_STATE_DIR = path.join(home, ".bot");
+  process.env.BOT_STATE_DIR = path.join(home, ".hanzo", "bot");
 
   if (process.platform === "win32") {
     const match = home.match(/^([A-Za-z]:)(.*)$/);
