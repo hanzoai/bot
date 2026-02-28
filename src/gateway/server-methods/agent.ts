@@ -539,7 +539,14 @@ export const agentHandlers: GatewayRequestHandlers = {
       } catch {
         // Multiple channels configured — try to find one with a resolvable
         // outbound target (e.g. via allowFrom) so delivery can proceed.
-        const configured = await listConfiguredMessageChannels(cfgResolved);
+        // Guard against plugin initialization errors (e.g. runtime not initialized)
+        // so they produce INVALID_REQUEST rather than UNAVAILABLE.
+        let configured: Awaited<ReturnType<typeof listConfiguredMessageChannels>> = [];
+        try {
+          configured = await listConfiguredMessageChannels(cfgResolved);
+        } catch {
+          // Channel plugin not initialized or unavailable; treat as no configured channels.
+        }
         let picked = false;
         for (const candidate of configured) {
           const probe = resolveOutboundTarget({
