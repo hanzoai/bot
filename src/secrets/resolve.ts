@@ -5,10 +5,12 @@ import type { BotConfig } from "../config/config.js";
 import type {
   ExecSecretProviderConfig,
   FileSecretProviderConfig,
+  KmsSecretProviderConfig,
   SecretProviderConfig,
   SecretRef,
   SecretRefSource,
 } from "../config/types.secrets.js";
+import { resolveKmsSecretReference } from "../infra/secrets/kms.js";
 import { inspectPathPermissions, safeStat } from "../security/audit-fs.js";
 import { isPathInside } from "../security/scan-paths.js";
 import { resolveUserPath } from "../utils.js";
@@ -83,6 +85,9 @@ function resolveConfiguredProvider(ref: SecretRef, config: BotConfig): SecretPro
   if (!providerConfig) {
     if (ref.source === "env" && ref.provider === resolveDefaultSecretProviderAlias(config, "env")) {
       return { source: "env" };
+    }
+    if (ref.source === "kms" && ref.provider === resolveDefaultSecretProviderAlias(config, "kms")) {
+      return { source: "kms" };
     }
     throw new Error(
       `Secret provider "${ref.provider}" is not configured (ref: ${ref.source}:${ref.provider}:${ref.id}).`,
@@ -563,6 +568,46 @@ async function resolveExecRefs(params: {
   return resolved;
 }
 
+async function resolveKmsRefs(params: {
+  refs: SecretRef[];
+  providerName: string;
+  providerConfig: KmsSecretProviderConfig;
+  options: ResolveSecretRefOptions;
+}): Promise<ProviderResolutionOutput> {
+  const resolved = new Map<string, unknown>();
+  const ids = [...new Set(params.refs.map((ref) => ref.id))];
+  const kmsCfg = params.options.config.secrets?.kms;
+  const providerProjectId = params.providerConfig.projectId ?? kmsCfg?.projectId;
+  const providerEnvironment = params.providerConfig.environment ?? kmsCfg?.environment;
+  const providerSecretPath = params.providerConfig.secretPath ?? kmsCfg?.secretPath;
+  const siteUrl = kmsCfg?.siteUrl ?? "https://kms.hanzo.ai";
+
+  for (const id of ids) {
+    const queryParams = new URLSearchParams();
+    if (providerProjectId) {
+      queryParams.set("projectId", providerProjectId);
+    }
+    if (providerEnvironment) {
+      queryParams.set("environment", providerEnvironment);
+    }
+    if (providerSecretPath) {
+      queryParams.set("secretPath", providerSecretPath);
+    }
+    if (siteUrl !== "https://kms.hanzo.ai") {
+      queryParams.set("siteUrl", siteUrl);
+    }
+    const qs = queryParams.toString();
+    const reference = `kms://${encodeURIComponent(id)}${qs ? `?${qs}` : ""}`;
+    const value = await resolveKmsSecretReference({
+      reference,
+      cfg: params.options.config,
+      env: params.options.env,
+    });
+    resolved.set(id, value);
+  }
+  return resolved;
+}
+
 async function resolveProviderRefs(params: {
   refs: SecretRef[];
   source: SecretRefSource;
@@ -596,6 +641,14 @@ async function resolveProviderRefs(params: {
       limits: params.limits,
     });
   }
+  if (params.providerConfig.source === "kms") {
+    return await resolveKmsRefs({
+      refs: params.refs,
+      providerName: params.providerName,
+      providerConfig: params.providerConfig,
+      options: params.options,
+    });
+  }
   throw new Error(
     `Unsupported secret provider source "${String((params.providerConfig as { source?: unknown }).source)}".`,
   );
@@ -607,6 +660,14 @@ export async function resolveSecretRefValues(
 ): Promise<Map<string, unknown>> {
   if (refs.length === 0) {
     return new Map();
+  }
+  const backend = options.config.secrets?.backend ?? "local";
+  const hasKmsRefs = refs.some((ref) => ref.source === "kms");
+  if (hasKmsRefs && backend !== "kms") {
+    throw new Error(
+      'KMS secret references require secrets.backend to be "kms". ' +
+        `Current backend is "${backend}".`,
+    );
   }
   const limits = resolveResolutionLimits(options.config);
   const uniqueRefs = new Map<string, SecretRef>();
