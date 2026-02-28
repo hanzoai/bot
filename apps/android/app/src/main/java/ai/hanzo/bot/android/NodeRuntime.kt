@@ -175,6 +175,18 @@ class NodeRuntime(context: Context) {
   private val _isConnected = MutableStateFlow(false)
   val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
 
+  private val _isNodeConnected = MutableStateFlow(false)
+  val isNodeConnected: StateFlow<Boolean> = _isNodeConnected.asStateFlow()
+
+  val canvasCurrentUrl: StateFlow<String?> = canvas.currentUrlFlow
+  val canvasA2uiHydrated: StateFlow<Boolean> = canvas.a2uiHydrated
+
+  private val _canvasRehydratePending = MutableStateFlow(false)
+  val canvasRehydratePending: StateFlow<Boolean> = _canvasRehydratePending.asStateFlow()
+
+  private val _canvasRehydrateErrorText = MutableStateFlow<String?>(null)
+  val canvasRehydrateErrorText: StateFlow<String?> = _canvasRehydrateErrorText.asStateFlow()
+
   private val _statusText = MutableStateFlow("Offline")
   val statusText: StateFlow<String> = _statusText.asStateFlow()
 
@@ -255,12 +267,14 @@ class NodeRuntime(context: Context) {
       deviceAuthStore = deviceAuthStore,
       onConnected = { _, _, _ ->
         nodeConnected = true
+        _isNodeConnected.value = true
         nodeStatusText = "Connected"
         updateStatus()
         maybeNavigateToA2uiOnConnect()
       },
       onDisconnected = { message ->
         nodeConnected = false
+        _isNodeConnected.value = false
         nodeStatusText = message
         updateStatus()
         showLocalCanvasOnDisconnect()
@@ -671,6 +685,45 @@ class NodeRuntime(context: Context) {
         )
       } catch (_: Throwable) {
         // ignore
+      }
+    }
+  }
+
+  fun requestCanvasRehydrate(source: String) {
+    if (_canvasRehydratePending.value) return
+    _canvasRehydratePending.value = true
+    _canvasRehydrateErrorText.value = null
+    scope.launch {
+      try {
+        val a2uiUrl = a2uiHandler.resolveA2uiHostUrl()
+        if (a2uiUrl == null) {
+          _canvasRehydrateErrorText.value = "No A2UI host available"
+          _canvasRehydratePending.value = false
+          return@launch
+        }
+        val ready = a2uiHandler.ensureA2uiReady(a2uiUrl)
+        if (!ready) {
+          _canvasRehydrateErrorText.value = "A2UI did not become ready"
+          _canvasRehydratePending.value = false
+          return@launch
+        }
+        val sessionKey = resolveMainSessionKey()
+        nodeSession.sendNodeEvent(
+          event = "agent.request",
+          payloadJson =
+            buildJsonObject {
+              put("message", JsonPrimitive("/canvas restore"))
+              put("sessionKey", JsonPrimitive(sessionKey))
+              put("thinking", JsonPrimitive("low"))
+              put("deliver", JsonPrimitive(false))
+            }.toString(),
+        )
+        // Clear pending after a timeout; the gateway response will update the canvas.
+        delay(10_000)
+        _canvasRehydratePending.value = false
+      } catch (e: Throwable) {
+        _canvasRehydrateErrorText.value = e.message ?: "Rehydrate failed"
+        _canvasRehydratePending.value = false
       }
     }
   }
