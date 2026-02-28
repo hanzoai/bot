@@ -25,6 +25,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   val discoveryStatusText: StateFlow<String> = runtime.discoveryStatusText
 
   val isConnected: StateFlow<Boolean> = runtime.isConnected
+  val isNodeConnected: StateFlow<Boolean> = runtime.isNodeConnected
   val statusText: StateFlow<String> = runtime.statusText
   val serverName: StateFlow<String?> = runtime.serverName
   val remoteAddress: StateFlow<String?> = runtime.remoteAddress
@@ -57,6 +58,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   val manualTls: StateFlow<Boolean> = runtime.manualTls
   val gatewayToken: StateFlow<String> = runtime.gatewayToken
   val canvasDebugStatusEnabled: StateFlow<Boolean> = runtime.canvasDebugStatusEnabled
+  val canvasCurrentUrl: StateFlow<String?> = runtime.canvasCurrentUrl
+  val canvasA2uiHydrated: StateFlow<Boolean> = runtime.canvasA2uiHydrated
+  val canvasRehydratePending: StateFlow<Boolean> = runtime.canvasRehydratePending
+  val canvasRehydrateErrorText: StateFlow<String?> = runtime.canvasRehydrateErrorText
 
   val chatSessionKey: StateFlow<String> = runtime.chatSessionKey
   val chatSessionId: StateFlow<String?> = runtime.chatSessionId
@@ -159,6 +164,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
   fun handleCanvasA2UIActionFromWebView(payloadJson: String) {
     runtime.handleCanvasA2UIActionFromWebView(payloadJson)
+  }
+
+  fun requestCanvasRehydrate(source: String) {
+    runtime.requestCanvasRehydrate(source)
   }
 
   fun loadChat(sessionKey: String) {

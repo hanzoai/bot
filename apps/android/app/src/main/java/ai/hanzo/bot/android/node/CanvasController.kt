@@ -8,6 +8,9 @@ import android.webkit.WebView
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -32,6 +35,12 @@ class CanvasController {
   @Volatile private var debugStatusTitle: String? = null
   @Volatile private var debugStatusSubtitle: String? = null
 
+  private val _currentUrl = MutableStateFlow<String?>(null)
+  val currentUrlFlow: StateFlow<String?> = _currentUrl.asStateFlow()
+
+  private val _a2uiHydrated = MutableStateFlow(false)
+  val a2uiHydrated: StateFlow<Boolean> = _a2uiHydrated.asStateFlow()
+
   private val scaffoldAssetUrl = "file:///android_asset/CanvasScaffold/scaffold.html"
 
   private fun clampJpegQuality(quality: Double?): Int {
@@ -45,9 +54,18 @@ class CanvasController {
     applyDebugStatus()
   }
 
+  fun detach(webView: WebView) {
+    if (this.webView === webView) {
+      this.webView = null
+    }
+  }
+
   fun navigate(url: String) {
     val trimmed = url.trim()
-    this.url = if (trimmed.isBlank() || trimmed == "/") null else trimmed
+    val resolved = if (trimmed.isBlank() || trimmed == "/") null else trimmed
+    this.url = resolved
+    _currentUrl.value = resolved
+    _a2uiHydrated.value = false
     reload()
   }
 
@@ -68,6 +86,11 @@ class CanvasController {
 
   fun onPageFinished() {
     applyDebugStatus()
+    // Mark a2ui as hydrated if the current URL is an a2ui URL.
+    val current = url
+    if (current != null && current.contains("/__bot__/a2ui/")) {
+      _a2uiHydrated.value = true
+    }
   }
 
   private inline fun withWebViewOnMain(crossinline block: (WebView) -> Unit) {
