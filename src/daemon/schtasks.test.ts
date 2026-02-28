@@ -37,13 +37,15 @@ describe("schtasks runtime parsing", () => {
 describe("resolveTaskScriptPath", () => {
   it("uses default path when BOT_PROFILE is unset", () => {
     const env = { USERPROFILE: "C:\\Users\\test" };
-    expect(resolveTaskScriptPath(env)).toBe(path.join("C:\\Users\\test", ".bot", "gateway.cmd"));
+    expect(resolveTaskScriptPath(env)).toBe(
+      path.join("C:\\Users\\test", ".hanzo", "bot", "gateway.cmd"),
+    );
   });
 
   it("uses profile-specific path when BOT_PROFILE is set to a custom value", () => {
     const env = { USERPROFILE: "C:\\Users\\test", BOT_PROFILE: "jbphoenix" };
     expect(resolveTaskScriptPath(env)).toBe(
-      path.join("C:\\Users\\test", ".bot-jbphoenix", "gateway.cmd"),
+      path.join("C:\\Users\\test", ".hanzo", "bot-jbphoenix", "gateway.cmd"),
     );
   });
 
@@ -58,7 +60,9 @@ describe("resolveTaskScriptPath", () => {
 
   it("falls back to HOME when USERPROFILE is not set", () => {
     const env = { HOME: "/home/test", BOT_PROFILE: "default" };
-    expect(resolveTaskScriptPath(env)).toBe(path.join("/home/test", ".bot", "gateway.cmd"));
+    expect(resolveTaskScriptPath(env)).toBe(
+      path.join("/home/test", ".hanzo", "bot", "gateway.cmd"),
+    );
   });
 });
 
@@ -66,7 +70,7 @@ describe("readScheduledTaskCommand", () => {
   it("parses script with quoted arguments containing spaces", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
     try {
-      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
+      const scriptPath = path.join(tmpDir, ".hanzo", "bot", "gateway.cmd");
       await fs.mkdir(path.dirname(scriptPath), { recursive: true });
       // Use forward slashes which work in Windows cmd and avoid escape parsing issues
       await fs.writeFile(
@@ -99,7 +103,7 @@ describe("readScheduledTaskCommand", () => {
   it("returns null when script has no command", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
     try {
-      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
+      const scriptPath = path.join(tmpDir, ".hanzo", "bot", "gateway.cmd");
       await fs.mkdir(path.dirname(scriptPath), { recursive: true });
       await fs.writeFile(
         scriptPath,
@@ -118,7 +122,7 @@ describe("readScheduledTaskCommand", () => {
   it("parses full script with all components", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
     try {
-      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
+      const scriptPath = path.join(tmpDir, ".hanzo", "bot", "gateway.cmd");
       await fs.mkdir(path.dirname(scriptPath), { recursive: true });
       await fs.writeFile(
         scriptPath,
@@ -150,7 +154,7 @@ describe("readScheduledTaskCommand", () => {
   it("parses command with Windows backslash paths", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
     try {
-      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
+      const scriptPath = path.join(tmpDir, ".hanzo", "bot", "gateway.cmd");
       await fs.mkdir(path.dirname(scriptPath), { recursive: true });
       await fs.writeFile(
         scriptPath,
@@ -180,7 +184,7 @@ describe("readScheduledTaskCommand", () => {
   it("preserves UNC paths in command arguments", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-test-"));
     try {
-      const scriptPath = path.join(tmpDir, ".bot", "gateway.cmd");
+      const scriptPath = path.join(tmpDir, ".hanzo", "bot", "gateway.cmd");
       await fs.mkdir(path.dirname(scriptPath), { recursive: true });
       await fs.writeFile(
         scriptPath,
