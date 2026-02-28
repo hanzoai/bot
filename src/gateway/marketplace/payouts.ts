@@ -681,8 +681,8 @@ function ecdsaSign(
  */
 function generateDeterministicK(msgHash: Uint8Array, privateKey: Uint8Array, n: bigint): bigint {
   // Initialize per RFC 6979 section 3.2.
-  let v = new Uint8Array(32).fill(0x01);
-  let kHmac = new Uint8Array(32).fill(0x00);
+  let v: Uint8Array = new Uint8Array(32).fill(0x01);
+  let kHmac: Uint8Array = new Uint8Array(32).fill(0x00);
 
   const privBytes = padTo32(privateKey);
   const hashBytes = padTo32(msgHash);
