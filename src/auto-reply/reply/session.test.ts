@@ -244,7 +244,7 @@ describe("initSessionState RawBody", () => {
 
   it("uses the default per-agent sessions store when config store is unset", async () => {
     const root = await makeCaseDir("bot-session-store-default-");
-    const stateDir = path.join(root, ".bot");
+    const stateDir = path.join(root, ".hanzo", "bot");
     const agentId = "worker1";
     const sessionKey = `agent:${agentId}:telegram:12345`;
     const sessionId = "sess-worker-1";
