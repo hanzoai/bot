@@ -57,6 +57,8 @@ export function createBotTools(options?: {
   hasRepliedRef?: { value: boolean };
   /** If true, the model has native vision capability */
   modelHasVision?: boolean;
+  /** If true, restrict file-based tools to the workspace/sandbox root. */
+  workspaceOnly?: boolean;
   /** Explicit agent ID override for cron/hook sessions. */
   requesterAgentIdOverride?: string;
   /** Require explicit message targets (no implicit last-route sends). */
@@ -75,6 +77,7 @@ export function createBotTools(options?: {
             ? { root: options.sandboxRoot, bridge: options.sandboxFsBridge }
             : undefined,
         modelHasVision: options?.modelHasVision,
+        workspaceOnly: options?.workspaceOnly,
       })
     : null;
   const webSearchTool = createWebSearchTool({

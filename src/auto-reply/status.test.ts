@@ -338,7 +338,8 @@ describe("buildStatusMessage", () => {
   }) {
     const logPath = path.join(
       params.dir,
-      ".bot",
+      ".hanzo",
+      "bot",
       "agents",
       params.agentId,
       "sessions",

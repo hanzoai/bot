@@ -13,7 +13,7 @@ import type { MarketplaceScheduler } from "../marketplace/scheduler.js";
  */
 import type { GatewayRequestHandlers } from "./types.js";
 import { loadConfig } from "../../config/config.js";
-import { getTransactionLog } from "../marketplace-http.js";
+import { getTransactionLog, fetchTransactionsFromCommerce } from "../marketplace-http.js";
 import { processPayouts, type PayoutRequest } from "../marketplace/payouts.js";
 
 let schedulerRef: MarketplaceScheduler | null = null;
@@ -172,13 +172,19 @@ export const marketplaceHandlers: GatewayRequestHandlers = {
   },
 
   "marketplace.transactions": async ({ params, respond }) => {
-    const txLog = getTransactionLog();
     const limit = typeof params.limit === "number" ? Math.min(params.limit, 1000) : 100;
-    const recent = txLog.slice(-limit);
+
+    // Query Commerce API as the source of truth; fall back to in-memory cache.
+    let transactions = await fetchTransactionsFromCommerce(limit);
+    if (transactions.length === 0) {
+      // Commerce unavailable or empty -- fall back to in-memory hot cache.
+      const txLog = getTransactionLog();
+      transactions = txLog.slice(-limit) as typeof transactions;
+    }
 
     respond(true, {
-      count: txLog.length,
-      transactions: recent.map((tx) => ({
+      count: transactions.length,
+      transactions: transactions.map((tx) => ({
         requestId: tx.requestId,
         buyerUserId: tx.buyerUserId,
         sellerNodeId: tx.sellerNodeId,
@@ -204,9 +210,12 @@ export const marketplaceHandlers: GatewayRequestHandlers = {
       return;
     }
 
-    // Aggregate earnings from transaction log by seller.
-    const txLog = getTransactionLog();
+    // Aggregate earnings from Commerce API (source of truth); fall back to in-memory.
     const now = Date.now();
+    let txLog = await fetchTransactionsFromCommerce(10_000);
+    if (txLog.length === 0) {
+      txLog = getTransactionLog() as typeof txLog;
+    }
     const earningsBySeller = new Map<
       string,
       { amountCents: number; nodeId: string; preference: "usd" | "ai_token" }

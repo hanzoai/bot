@@ -63,7 +63,7 @@ function setTempHome(base: string) {
   process.env.USERPROFILE = base;
   // Ensure tests using HOME isolation aren't affected by leaked BOT_HOME.
   delete process.env.BOT_HOME;
-  process.env.BOT_STATE_DIR = path.join(base, ".bot");
+  process.env.BOT_STATE_DIR = path.join(base, ".hanzo", "bot");
 
   if (process.platform !== "win32") {
     return;
@@ -91,7 +91,9 @@ export async function withTempHome<T>(
   const envSnapshot = snapshotExtraEnv(envKeys);
 
   setTempHome(base);
-  await fs.mkdir(path.join(base, ".bot", "agents", "main", "sessions"), { recursive: true });
+  await fs.mkdir(path.join(base, ".hanzo", "bot", "agents", "main", "sessions"), {
+    recursive: true,
+  });
   if (opts.env) {
     for (const [key, raw] of Object.entries(opts.env)) {
       const value = typeof raw === "function" ? raw(base) : raw;

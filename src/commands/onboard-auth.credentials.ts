@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import type { OAuthCredentials } from "@mariozechner/pi-ai";
 import type { SecretInput, SecretRef } from "../config/types.secrets.js";
 import { resolveBotAgentDir } from "../agents/agent-paths.js";
@@ -6,6 +8,39 @@ export { CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF } from "../agents/cloudflare-ai
 export { XAI_DEFAULT_MODEL_REF } from "./onboard-auth.models.js";
 
 const resolveAuthAgentDir = (agentDir?: string) => agentDir ?? resolveBotAgentDir();
+
+/**
+ * Discover sibling agent dirs under the same `agents/` parent directory.
+ * Given `<root>/agents/<id>/agent`, returns all `<root>/agents/* /agent` directories.
+ */
+function discoverSiblingAgentDirs(agentDir: string): string[] {
+  // agentDir is typically `<root>/agents/<id>/agent`
+  const agentParent = path.dirname(agentDir); // <root>/agents/<id>
+  const agentsRoot = path.dirname(agentParent); // <root>/agents
+  const agentsBasename = path.basename(agentsRoot);
+  if (agentsBasename !== "agents") {
+    return [agentDir];
+  }
+  try {
+    const entries = fs.readdirSync(agentsRoot, { withFileTypes: true });
+    const siblings: string[] = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+      const candidateDir = path.join(agentsRoot, entry.name, "agent");
+      try {
+        fs.accessSync(candidateDir, fs.constants.F_OK);
+        siblings.push(candidateDir);
+      } catch {
+        // skip non-existent agent subdirs
+      }
+    }
+    return siblings.length > 0 ? siblings : [agentDir];
+  } catch {
+    return [agentDir];
+  }
+}
 
 function isSecretRef(value: SecretInput): value is SecretRef {
   return typeof value === "object" && value !== null && "source" in value && "id" in value;
@@ -22,18 +57,24 @@ export async function writeOAuthCredentials(
   provider: string,
   creds: OAuthCredentials,
   agentDir?: string,
+  options?: { syncSiblingAgents?: boolean },
 ): Promise<void> {
   const email =
     typeof creds.email === "string" && creds.email.trim() ? creds.email.trim() : "default";
-  upsertAuthProfile({
-    profileId: `${provider}:${email}`,
-    credential: {
-      type: "oauth",
-      provider,
-      ...creds,
-    },
-    agentDir: resolveAuthAgentDir(agentDir),
-  });
+  const resolvedDir = resolveAuthAgentDir(agentDir);
+  const dirs =
+    options?.syncSiblingAgents ? discoverSiblingAgentDirs(resolvedDir) : [resolvedDir];
+  for (const dir of dirs) {
+    upsertAuthProfile({
+      profileId: `${provider}:${email}`,
+      credential: {
+        type: "oauth",
+        provider,
+        ...creds,
+      },
+      agentDir: dir,
+    });
+  }
 }
 
 export async function setOpenaiApiKey(input: SecretInput, agentDir?: string) {

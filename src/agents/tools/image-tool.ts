@@ -5,6 +5,7 @@ import type { BotConfig } from "../../config/config.js";
 import type { SandboxFsBridge } from "../sandbox/fs-bridge.js";
 import type { AnyAgentTool } from "./common.js";
 import { resolveUserPath } from "../../utils.js";
+import { resolveSandboxPath } from "../sandbox-paths.js";
 import { getDefaultLocalRoots, loadWebMedia } from "../../web/media.js";
 import { ensureAuthProfileStore, listProfilesForProvider } from "../auth-profiles.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../defaults.js";
@@ -338,6 +339,8 @@ export function createImageTool(options?: {
   sandbox?: ImageSandboxConfig;
   /** If true, the model has native vision capability and images in the prompt are auto-injected */
   modelHasVision?: boolean;
+  /** If true, restrict image paths to within the sandbox/workspace root (tools.fs.workspaceOnly). */
+  workspaceOnly?: boolean;
 }): AnyAgentTool | null {
   const agentDir = options?.agentDir?.trim();
   if (!agentDir) {
@@ -376,7 +379,14 @@ export function createImageTool(options?: {
     description,
     parameters: Type.Object({
       prompt: Type.Optional(Type.String()),
-      image: Type.String({ description: "Image path or URL (pass multiple as comma-separated)" }),
+      image: Type.Optional(
+        Type.String({ description: "Single image path or URL." }),
+      ),
+      images: Type.Optional(
+        Type.Array(Type.String(), {
+          description: "Multiple image paths or URLs (up to maxImages, default 20).",
+        }),
+      ),
       model: Type.Optional(Type.String()),
       maxBytesMb: Type.Optional(Type.Number()),
       maxImages: Type.Optional(Type.Number()),
@@ -384,16 +394,35 @@ export function createImageTool(options?: {
     execute: async (_toolCallId, args) => {
       const record = args && typeof args === "object" ? (args as Record<string, unknown>) : {};
 
-      // MARK: - Normalize image input (string | string[])
+      // MARK: - Normalize image input (image: string, images: string[])
       const rawImageInput = record.image;
+      const rawImagesInput = record.images;
       const imageInputs: string[] = (() => {
-        if (typeof rawImageInput === "string") {
-          return [rawImageInput];
+        const collected: string[] = [];
+        const seen = new Set<string>();
+        const addUnique = (val: string) => {
+          if (!seen.has(val)) {
+            seen.add(val);
+            collected.push(val);
+          }
+        };
+        if (typeof rawImageInput === "string" && rawImageInput.trim()) {
+          addUnique(rawImageInput.trim());
+        } else if (Array.isArray(rawImageInput)) {
+          for (const v of rawImageInput) {
+            if (typeof v === "string" && v.trim()) {
+              addUnique(v.trim());
+            }
+          }
         }
-        if (Array.isArray(rawImageInput)) {
-          return rawImageInput.filter((v): v is string => typeof v === "string");
+        if (Array.isArray(rawImagesInput)) {
+          for (const v of rawImagesInput) {
+            if (typeof v === "string" && v.trim()) {
+              addUnique(v.trim());
+            }
+          }
         }
-        return [];
+        return collected;
       })();
       if (imageInputs.length === 0) {
         throw new Error("image required");
@@ -430,6 +459,7 @@ export function createImageTool(options?: {
         options?.sandbox && options?.sandbox.root.trim()
           ? { root: options.sandbox.root.trim(), bridge: options.sandbox.bridge }
           : null;
+      const workspaceOnlyEnabled = options?.workspaceOnly === true;
 
       // MARK: - Load and resolve each image
       const loadedImages: Array<{
@@ -473,6 +503,12 @@ export function createImageTool(options?: {
 
         if (sandboxConfig && isHttpUrl) {
           throw new Error("Sandboxed image tool does not allow remote URLs.");
+        }
+
+        // workspaceOnly guard: validate path is within sandbox/workspace root
+        if (workspaceOnlyEnabled && sandboxConfig && !isDataUrl && !isHttpUrl) {
+          const filePath = imageRaw.startsWith("file://") ? imageRaw.slice("file://".length) : imageRaw;
+          resolveSandboxPath({ filePath, cwd: sandboxConfig.root, root: sandboxConfig.root });
         }
 
         const resolvedImage = (() => {

@@ -3,6 +3,7 @@
  * and assigns buyer requests to the best available seller.
  */
 import type { NodeSession } from "../node-registry.js";
+import type { TrustManager } from "./trust.js";
 
 export type SellerNodeState = {
   nodeId: string;
@@ -20,6 +21,11 @@ export type SellerNodeState = {
 
 export class MarketplaceScheduler {
   private sellers = new Map<string, SellerNodeState>();
+  private trustManager: TrustManager | null;
+
+  constructor(trustManager?: TrustManager) {
+    this.trustManager = trustManager ?? null;
+  }
 
   /** Update seller status from a node's marketplace.idle.status event. */
   updateSellerStatus(
@@ -71,6 +77,10 @@ export class MarketplaceScheduler {
         continue;
       }
       if (seller.activeRequests >= seller.maxConcurrent) {
+        continue;
+      }
+      // Filter out sellers with low trust scores or suspended status.
+      if (this.trustManager && !this.trustManager.isEligible(seller.nodeId)) {
         continue;
       }
       candidates.push(seller);
@@ -161,6 +171,11 @@ export class MarketplaceScheduler {
       }
     }
     return count;
+  }
+
+  /** Get the trust manager (if wired in). */
+  getTrustManager(): TrustManager | null {
+    return this.trustManager;
   }
 
   /** Sync marketplace state from a node session (called on node registration). */

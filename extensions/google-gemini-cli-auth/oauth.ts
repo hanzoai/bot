@@ -10,7 +10,11 @@ const REDIRECT_URI = "http://localhost:8085/oauth2callback";
 const AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const USERINFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json";
-const CODE_ASSIST_ENDPOINT = "https://cloudcode-pa.googleapis.com";
+const CODE_ASSIST_ENDPOINTS = [
+  "https://cloudcode-pa.googleapis.com",
+  "https://daily-cloudcode-pa.sandbox.googleapis.com",
+  "https://autopush-cloudcode-pa.sandbox.googleapis.com",
+] as const;
 const SCOPES = [
   "https://www.googleapis.com/auth/cloud-platform",
   "https://www.googleapis.com/auth/userinfo.email",
@@ -69,6 +73,9 @@ export function extractGeminiCliCredentials(): { clientId: string; clientSecret:
 
     const resolvedPath = realpathSync(geminiPath);
     const geminiCliDir = dirname(dirname(resolvedPath));
+    // For npm global shims, the resolved path IS the shim itself, so the
+    // node_modules directory sits alongside the bin in the parent directory.
+    const shimDir = dirname(geminiPath);
 
     const searchPaths = [
       join(
@@ -87,6 +94,19 @@ export function extractGeminiCliCredentials(): { clientId: string; clientSecret:
         "@google",
         "gemini-cli-core",
         "dist",
+        "code_assist",
+        "oauth2.js",
+      ),
+      join(
+        shimDir,
+        "node_modules",
+        "@google",
+        "gemini-cli",
+        "node_modules",
+        "@google",
+        "gemini-cli-core",
+        "dist",
+        "src",
         "code_assist",
         "oauth2.js",
       ),
@@ -387,23 +407,34 @@ async function getUserEmail(accessToken: string): Promise<string | undefined> {
   return undefined;
 }
 
+function resolvePlatform(): "WINDOWS" | "MACOS" | "LINUX" {
+  if (process.platform === "win32") {
+    return "WINDOWS";
+  }
+  if (process.platform === "linux") {
+    return "LINUX";
+  }
+  return "MACOS";
+}
+
 async function discoverProject(accessToken: string): Promise<string> {
   const envProject = process.env.GOOGLE_CLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT_ID;
-  const headers = {
+  const platform = resolvePlatform();
+  const clientMetadata = {
+    ideType: "ANTIGRAVITY",
+    platform,
+    pluginType: "GEMINI",
+  };
+  const headers: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,
     "Content-Type": "application/json",
     "User-Agent": "google-api-nodejs-client/9.15.1",
-    "X-Goog-Api-Client": "gl-node/bot",
+    "X-Goog-Api-Client": `gl-node/${process.versions.node}`,
+    "Client-Metadata": JSON.stringify(clientMetadata),
   };
 
   const loadBody = {
-    cloudaicompanionProject: envProject,
-    metadata: {
-      ideType: "IDE_UNSPECIFIED",
-      platform: "PLATFORM_UNSPECIFIED",
-      pluginType: "GEMINI",
-      duetProject: envProject,
-    },
+    metadata: clientMetadata,
   };
 
   let data: {
@@ -412,28 +443,41 @@ async function discoverProject(accessToken: string): Promise<string> {
     allowedTiers?: Array<{ id?: string; isDefault?: boolean }>;
   } = {};
 
-  try {
-    const response = await fetch(`${CODE_ASSIST_ENDPOINT}/v1internal:loadCodeAssist`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(loadBody),
-    });
+  // Try each loadCodeAssist endpoint in sequence, falling back on non-VPC-SC errors
+  let lastError: Error | null = null;
+  for (const endpoint of CODE_ASSIST_ENDPOINTS) {
+    try {
+      const response = await fetch(`${endpoint}/v1internal:loadCodeAssist`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(loadBody),
+      });
 
-    if (!response.ok) {
-      const errorPayload = await response.json().catch(() => null);
-      if (isVpcScAffected(errorPayload)) {
-        data = { currentTier: { id: TIER_STANDARD } };
-      } else {
-        throw new Error(`loadCodeAssist failed: ${response.status} ${response.statusText}`);
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => null);
+        if (isVpcScAffected(errorPayload)) {
+          data = { currentTier: { id: TIER_STANDARD } };
+          lastError = null;
+          break;
+        }
+        lastError = new Error(`loadCodeAssist failed: ${response.status} ${response.statusText}`);
+        continue;
       }
-    } else {
+
       data = (await response.json()) as typeof data;
+      lastError = null;
+      break;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error("loadCodeAssist failed", { cause: err });
     }
-  } catch (err) {
-    if (err instanceof Error) {
-      throw err;
+  }
+
+  // All endpoints failed: fall back to env var
+  if (lastError) {
+    if (envProject) {
+      return envProject;
     }
-    throw new Error("loadCodeAssist failed", { cause: err });
+    throw lastError;
   }
 
   if (data.currentTier) {
@@ -462,18 +506,14 @@ async function discoverProject(accessToken: string): Promise<string> {
 
   const onboardBody: Record<string, unknown> = {
     tierId,
-    metadata: {
-      ideType: "IDE_UNSPECIFIED",
-      platform: "PLATFORM_UNSPECIFIED",
-      pluginType: "GEMINI",
-    },
+    metadata: clientMetadata,
   };
   if (tierId !== TIER_FREE && envProject) {
     onboardBody.cloudaicompanionProject = envProject;
     (onboardBody.metadata as Record<string, unknown>).duetProject = envProject;
   }
 
-  const onboardResponse = await fetch(`${CODE_ASSIST_ENDPOINT}/v1internal:onboardUser`, {
+  const onboardResponse = await fetch(`${CODE_ASSIST_ENDPOINTS[0]}/v1internal:onboardUser`, {
     method: "POST",
     headers,
     body: JSON.stringify(onboardBody),
@@ -541,7 +581,7 @@ async function pollOperation(
 ): Promise<{ done?: boolean; response?: { cloudaicompanionProject?: { id?: string } } }> {
   for (let attempt = 0; attempt < 24; attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 5000));
-    const response = await fetch(`${CODE_ASSIST_ENDPOINT}/v1internal/${operationName}`, {
+    const response = await fetch(`${CODE_ASSIST_ENDPOINTS[0]}/v1internal/${operationName}`, {
       headers,
     });
     if (!response.ok) {
