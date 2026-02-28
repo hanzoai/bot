@@ -195,6 +195,167 @@ function collectGoogleChatAssignments(params: {
   }
 }
 
+type ChannelTokenLike = {
+  botToken?: unknown;
+  appToken?: unknown;
+  userToken?: unknown;
+  token?: unknown;
+  accounts?: Record<string, unknown>;
+};
+
+type ToolSearchConfigLike = {
+  apiKey?: unknown;
+  perplexity?: { apiKey?: unknown };
+  grok?: { apiKey?: unknown };
+  gemini?: { apiKey?: unknown };
+  kimi?: { apiKey?: unknown };
+};
+
+type ToolFetchFirecrawlLike = {
+  apiKey?: unknown;
+};
+
+type ToolFetchConfigLike = {
+  firecrawl?: ToolFetchFirecrawlLike;
+};
+
+type ToolEmbeddingRemoteLike = {
+  apiKey?: unknown;
+};
+
+type ToolEmbeddingConfigLike = {
+  remote?: ToolEmbeddingRemoteLike;
+};
+
+type ToolWebConfigLike = {
+  search?: ToolSearchConfigLike;
+  fetch?: ToolFetchConfigLike;
+};
+
+type ToolsConfigLike = {
+  web?: ToolWebConfigLike;
+  embedding?: ToolEmbeddingConfigLike;
+};
+
+function collectChannelSecrets(params: {
+  channels: Record<string, unknown>;
+  defaults: SecretDefaults;
+  context: ResolverContext;
+}): void {
+  const TOKEN_KEYS = ["botToken", "appToken", "userToken", "token"] as const;
+  for (const [channelId, channelConfig] of Object.entries(params.channels)) {
+    if (!isRecord(channelConfig)) {
+      continue;
+    }
+    const channel = channelConfig as ChannelTokenLike;
+    for (const tokenKey of TOKEN_KEYS) {
+      const ref = coerceSecretRef(channel[tokenKey], params.defaults);
+      if (!ref) {
+        continue;
+      }
+      pushAssignment(params.context, {
+        ref,
+        path: `channels.${channelId}.${tokenKey}`,
+        expected: "string",
+        apply: (value) => {
+          (channel as Record<string, unknown>)[tokenKey] = value;
+        },
+      });
+    }
+    if (isRecord(channel.accounts)) {
+      for (const [accountId, account] of Object.entries(channel.accounts)) {
+        if (!isRecord(account)) {
+          continue;
+        }
+        const acct = account as ChannelTokenLike;
+        for (const tokenKey of TOKEN_KEYS) {
+          const ref = coerceSecretRef(acct[tokenKey], params.defaults);
+          if (!ref) {
+            continue;
+          }
+          pushAssignment(params.context, {
+            ref,
+            path: `channels.${channelId}.accounts.${accountId}.${tokenKey}`,
+            expected: "string",
+            apply: (value) => {
+              (acct as Record<string, unknown>)[tokenKey] = value;
+            },
+          });
+        }
+      }
+    }
+  }
+}
+
+function collectToolSecrets(params: {
+  tools: ToolsConfigLike;
+  defaults: SecretDefaults;
+  context: ResolverContext;
+}): void {
+  const web = params.tools.web;
+  if (web?.search) {
+    const search = web.search;
+    const searchRef = coerceSecretRef(search.apiKey, params.defaults);
+    if (searchRef) {
+      pushAssignment(params.context, {
+        ref: searchRef,
+        path: "tools.web.search.apiKey",
+        expected: "string",
+        apply: (value) => {
+          search.apiKey = value;
+        },
+      });
+    }
+    const subProviders = ["perplexity", "grok", "gemini", "kimi"] as const;
+    for (const subKey of subProviders) {
+      const sub = search[subKey] as { apiKey?: unknown } | undefined;
+      if (!sub) {
+        continue;
+      }
+      const subRef = coerceSecretRef(sub.apiKey, params.defaults);
+      if (!subRef) {
+        continue;
+      }
+      pushAssignment(params.context, {
+        ref: subRef,
+        path: `tools.web.search.${subKey}.apiKey`,
+        expected: "string",
+        apply: (value) => {
+          sub.apiKey = value;
+        },
+      });
+    }
+  }
+  if (web?.fetch?.firecrawl) {
+    const firecrawl = web.fetch.firecrawl;
+    const firecrawlRef = coerceSecretRef(firecrawl.apiKey, params.defaults);
+    if (firecrawlRef) {
+      pushAssignment(params.context, {
+        ref: firecrawlRef,
+        path: "tools.web.fetch.firecrawl.apiKey",
+        expected: "string",
+        apply: (value) => {
+          firecrawl.apiKey = value;
+        },
+      });
+    }
+  }
+  if (params.tools.embedding?.remote) {
+    const remote = params.tools.embedding.remote;
+    const embeddingRef = coerceSecretRef(remote.apiKey, params.defaults);
+    if (embeddingRef) {
+      pushAssignment(params.context, {
+        ref: embeddingRef,
+        path: "tools.embedding.remote.apiKey",
+        expected: "string",
+        apply: (value) => {
+          remote.apiKey = value;
+        },
+      });
+    }
+  }
+}
+
 function collectConfigAssignments(params: { config: BotConfig; context: ResolverContext }): void {
   const defaults = params.context.sourceConfig.secrets?.defaults;
   const providers = params.config.models?.providers as Record<string, ProviderLike> | undefined;
@@ -219,6 +380,24 @@ function collectConfigAssignments(params: { config: BotConfig; context: Resolver
   if (googleChat) {
     collectGoogleChatAssignments({
       googleChat,
+      defaults,
+      context: params.context,
+    });
+  }
+
+  const channels = params.config.channels as Record<string, unknown> | undefined;
+  if (channels) {
+    collectChannelSecrets({
+      channels,
+      defaults,
+      context: params.context,
+    });
+  }
+
+  const tools = params.config.tools as ToolsConfigLike | undefined;
+  if (tools) {
+    collectToolSecrets({
+      tools,
       defaults,
       context: params.context,
     });

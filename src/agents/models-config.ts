@@ -53,7 +53,7 @@ function mergeProviderModels(implicit: ProviderConfig, explicit: ProviderConfig)
     // box without requiring every user to configure it.
     return {
       ...explicitModel,
-      input: implicitModel.input,
+      input: "input" in explicitModel ? explicitModel.input : implicitModel.input,
       reasoning: "reasoning" in explicitModel ? explicitModel.reasoning : implicitModel.reasoning,
       contextWindow: implicitModel.contextWindow,
       maxTokens: implicitModel.maxTokens,

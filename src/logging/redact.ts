@@ -35,6 +35,8 @@ const DEFAULT_REDACT_PATTERNS: string[] = [
   // Telegram Bot API URLs embed the token as `/bot<token>/...` (no word-boundary before digits).
   String.raw`\bbot(\d{6,}:[A-Za-z0-9_-]{20,})\b`,
   String.raw`\b(\d{6,}:[A-Za-z0-9_-]{20,})\b`,
+  // KMS URI references (kms://SECRET_NAME?accessToken=...).
+  String.raw`kms://[A-Za-z0-9_./-]+\?[^\s"']+`,
 ];
 
 type RedactOptions = {
