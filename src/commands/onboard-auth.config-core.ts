@@ -425,26 +425,51 @@ export function applyAuthProfileConfig(
     },
   };
 
-  // Only maintain `auth.order` when the user explicitly configured it.
-  // Default behavior: no explicit order -> resolveAuthProfileOrder can round-robin by lastUsed.
+  // Maintain `auth.order` when the user explicitly configured it, or when mixed
+  // provider modes (e.g. api_key + oauth) require deterministic ordering.
   const existingProviderOrder = cfg.auth?.order?.[params.provider];
   const preferProfileFirst = params.preferProfileFirst ?? true;
-  const reorderedProviderOrder =
-    existingProviderOrder && preferProfileFirst
+
+  // Detect mixed modes: if the new profile's mode differs from any existing
+  // profile for the same provider, create an explicit order to ensure predictable
+  // auth profile resolution (api_key should come before oauth by default).
+  const hasMixedModes =
+    !existingProviderOrder &&
+    Object.entries(profiles).some(
+      ([id, profile]) =>
+        id !== params.profileId &&
+        (profile as { provider?: string; mode?: string }).provider === params.provider &&
+        (profile as { provider?: string; mode?: string }).mode !== params.mode,
+    );
+
+  let order: Record<string, string[]> | undefined;
+  if (existingProviderOrder) {
+    const reorderedProviderOrder = preferProfileFirst
       ? [
           params.profileId,
           ...existingProviderOrder.filter((profileId) => profileId !== params.profileId),
         ]
       : existingProviderOrder;
-  const order =
-    existingProviderOrder !== undefined
-      ? {
-          ...cfg.auth?.order,
-          [params.provider]: reorderedProviderOrder?.includes(params.profileId)
-            ? reorderedProviderOrder
-            : [...(reorderedProviderOrder ?? []), params.profileId],
-        }
-      : cfg.auth?.order;
+    order = {
+      ...cfg.auth?.order,
+      [params.provider]: reorderedProviderOrder.includes(params.profileId)
+        ? reorderedProviderOrder
+        : [...reorderedProviderOrder, params.profileId],
+    };
+  } else if (hasMixedModes) {
+    // Create explicit order with new profile first, then existing profiles for this provider
+    const siblingIds = Object.keys(profiles).filter(
+      (id) =>
+        id !== params.profileId &&
+        (profiles[id] as { provider?: string }).provider === params.provider,
+    );
+    order = {
+      ...cfg.auth?.order,
+      [params.provider]: [params.profileId, ...siblingIds],
+    };
+  } else {
+    order = cfg.auth?.order;
+  }
   return {
     ...cfg,
     auth: {
