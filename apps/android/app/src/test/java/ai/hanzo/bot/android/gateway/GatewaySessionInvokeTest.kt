@@ -19,7 +19,6 @@ import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.RecordedRequest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -166,7 +165,7 @@ class GatewaySessionInvokeTest {
       assertEquals("node-1", req.nodeId)
       assertEquals("debug.ping", req.command)
       assertEquals("""{"ping":"pong"}""", req.paramsJson)
-      assertNull(handshakeOrigin.get())
+      assertEquals("http://127.0.0.1:${server.port}", handshakeOrigin.get())
       assertEquals("invoke-1", resultParams["id"]?.jsonPrimitive?.content)
       assertEquals("node-1", resultParams["nodeId"]?.jsonPrimitive?.content)
       assertEquals(true, resultParams["ok"]?.jsonPrimitive?.content?.toBooleanStrict())
