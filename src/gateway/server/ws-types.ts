@@ -13,4 +13,14 @@ export type GatewayWsClient = {
   tenant?: TenantContext;
   /** IAM auth result (when auth mode is "iam"). */
   iamResult?: GatewayIamAuthResult & { ok: true };
+  /**
+   * Canvas capability token issued to this client.
+   * Only node-role clients may hold a canvas capability.
+   */
+  canvasCapability?: string;
+  /**
+   * Expiry timestamp (ms since epoch) for the canvas capability.
+   * Requests arriving after this time are rejected.
+   */
+  canvasCapabilityExpiresAtMs?: number;
 };
