@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, test, vi } from "vitest";
+import { __testing as controlPlaneTestHooks } from "./control-plane-rate-limit.js";
 import {
   connectOk,
   cronIsolatedRun,
@@ -11,6 +12,17 @@ import {
   testState,
   waitForSystemEvent,
 } from "./test-helpers.js";
+
+// Replace fetchWithSsrFGuard with a shim that delegates to globalThis.fetch so
+// the webhook tests can assert on vi.stubGlobal("fetch", ...) without hitting
+// real DNS resolution for .invalid domains.
+vi.mock("../infra/net/fetch-guard.js", () => ({
+  fetchWithSsrFGuard: async (params: { url: string; init?: RequestInit }) => {
+    const fetcher = globalThis.fetch;
+    const response = await fetcher(params.url, params.init);
+    return { response, finalUrl: params.url, release: async () => {} };
+  },
+}));
 
 installGatewayTestHooks({ scope: "suite" });
 
@@ -123,6 +135,8 @@ describe("gateway server cron", () => {
       const events = await waitForSystemEvent();
       expect(events.some((event) => event.includes("cron route check"))).toBe(true);
 
+      // Reset rate limit before the wrapped cron.add (2 adds + 1 run consumed the budget).
+      controlPlaneTestHooks.resetControlPlaneRateLimitState();
       const wrappedAtMs = Date.now() + 1000;
       const wrappedRes = await rpcReq(ws, "cron.add", {
         data: {
@@ -167,6 +181,8 @@ describe("gateway server cron", () => {
       expect(updated?.schedule?.kind).toBe("at");
       expect(updated?.payload?.kind).toBe("systemEvent");
 
+      // Reset rate limit before patch merge (wrapped add + patch add + update consumed the budget).
+      controlPlaneTestHooks.resetControlPlaneRateLimitState();
       const mergeRes = await rpcReq(ws, "cron.add", {
         name: "patch merge",
         enabled: true,
@@ -222,6 +238,8 @@ describe("gateway server cron", () => {
       expect(modelOnlyPatched?.payload?.message).toBe("hello");
       expect(modelOnlyPatched?.payload?.model).toBe("anthropic/claude-sonnet-4-5");
 
+      // Reset rate limit before legacy delivery patch (3 writes consumed the budget).
+      controlPlaneTestHooks.resetControlPlaneRateLimitState();
       const legacyDeliveryPatchRes = await rpcReq(ws, "cron.update", {
         id: mergeJobId,
         patch: {
@@ -269,6 +287,8 @@ describe("gateway server cron", () => {
       });
       expect(rejectUpdateRes.ok).toBe(false);
 
+      // Reset rate limit before jobId test (reject add + reject update consumed the budget).
+      controlPlaneTestHooks.resetControlPlaneRateLimitState();
       const jobIdRes = await rpcReq(ws, "cron.add", {
         name: "jobId test",
         enabled: true,
@@ -304,6 +324,8 @@ describe("gateway server cron", () => {
       const disableJobId = typeof disableJobIdValue === "string" ? disableJobIdValue : "";
       expect(disableJobId.length > 0).toBe(true);
 
+      // Reset rate limit before disable update (jobId add + jobId update + disable add consumed the budget).
+      controlPlaneTestHooks.resetControlPlaneRateLimitState();
       const disableUpdateRes = await rpcReq(ws, "cron.update", {
         id: disableJobId,
         patch: { enabled: false },
@@ -519,6 +541,8 @@ describe("gateway server cron", () => {
       expect(notifyBody.action).toBe("finished");
       expect(notifyBody.jobId).toBe(notifyJobId);
 
+      // Reset rate limit before legacy run (invalid add + notify add + notify run consumed the budget).
+      controlPlaneTestHooks.resetControlPlaneRateLimitState();
       const legacyRunRes = await rpcReq(
         ws,
         "cron.run",
@@ -561,6 +585,8 @@ describe("gateway server cron", () => {
       await yieldToEventLoop();
       expect(fetchMock).toHaveBeenCalledTimes(2);
 
+      // Reset rate limit before no-summary add (silent add + silent run consumed the budget).
+      controlPlaneTestHooks.resetControlPlaneRateLimitState();
       cronIsolatedRun.mockResolvedValueOnce({ status: "ok" });
       const noSummaryRes = await rpcReq(ws, "cron.add", {
         name: "webhook no summary",
