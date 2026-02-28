@@ -26,6 +26,7 @@ export type OutboundTarget = {
   to?: string;
   reason?: string;
   accountId?: string;
+  threadId?: string | number;
   lastChannel?: DeliverableMessageChannel;
   lastAccountId?: string;
 };
@@ -43,12 +44,17 @@ export type SessionDeliveryTarget = {
   to?: string;
   accountId?: string;
   threadId?: string | number;
+  /** True when threadId was provided as an explicit parameter (not inherited from session). */
+  threadIdExplicit: boolean;
   mode: ChannelOutboundTargetMode;
   lastChannel?: DeliverableMessageChannel;
   lastTo?: string;
   lastAccountId?: string;
   lastThreadId?: string | number;
 };
+
+/** Regex to extract `:topic:NNN` suffix from Telegram-style explicit targets. */
+const TOPIC_SUFFIX_RE = /^(.+?):topic:(\d+)$/;
 
 export function resolveSessionDeliveryTarget(params: {
   entry?: SessionEntry;
@@ -72,13 +78,15 @@ export function resolveSessionDeliveryTarget(params: {
     context?.channel && isDeliverableMessageChannel(context.channel) ? context.channel : undefined;
   // When a turn-source channel is provided, prefer it over session-level last* to prevent
   // cross-channel reply routing in shared sessions (dmScope="main").
+  // When turnSourceChannel is set but turnSourceTo is NOT, we intentionally set lastTo
+  // to undefined to prevent stale session metadata from leaking into the wrong channel.
   const lastChannel = params.turnSourceChannel ?? sessionLastChannel;
-  const lastTo = params.turnSourceChannel ? (params.turnSourceTo ?? context?.to) : context?.to;
+  const lastTo = params.turnSourceChannel ? params.turnSourceTo : context?.to;
   const lastAccountId = params.turnSourceChannel
-    ? (params.turnSourceAccountId ?? context?.accountId)
+    ? params.turnSourceAccountId
     : context?.accountId;
   const lastThreadId = params.turnSourceChannel
-    ? (params.turnSourceThreadId ?? context?.threadId)
+    ? params.turnSourceThreadId
     : context?.threadId;
 
   const rawRequested = params.requestedChannel ?? "last";
@@ -90,7 +98,7 @@ export function resolveSessionDeliveryTarget(params: {
         ? requested
         : undefined;
 
-  const explicitTo =
+  let rawExplicitTo =
     typeof params.explicitTo === "string" && params.explicitTo.trim()
       ? params.explicitTo.trim()
       : undefined;
@@ -104,7 +112,17 @@ export function resolveSessionDeliveryTarget(params: {
     channel = params.fallbackChannel;
   }
 
-  let to = explicitTo;
+  // Parse :topic:NNN suffix from explicitTo for Telegram channels only
+  let topicThreadId: number | undefined;
+  if (rawExplicitTo && channel === "telegram") {
+    const topicMatch = rawExplicitTo.match(TOPIC_SUFFIX_RE);
+    if (topicMatch) {
+      rawExplicitTo = topicMatch[1];
+      topicThreadId = Number.parseInt(topicMatch[2], 10);
+    }
+  }
+
+  let to = rawExplicitTo;
   if (!to && lastTo) {
     if (channel && channel === lastChannel) {
       to = lastTo;
@@ -114,14 +132,19 @@ export function resolveSessionDeliveryTarget(params: {
   }
 
   const accountId = channel && channel === lastChannel ? lastAccountId : undefined;
-  const threadId = channel && channel === lastChannel ? lastThreadId : undefined;
-  const mode = params.mode ?? (explicitTo ? "explicit" : "implicit");
+  // In heartbeat mode, do not inherit lastThreadId (heartbeats target the top-level
+  // channel, not a specific thread). Explicit threadId and topic-parsed threadId still apply.
+  const mode = params.mode ?? (rawExplicitTo ? "explicit" : "implicit");
+  const inheritedThreadId =
+    mode === "heartbeat" ? undefined : channel && channel === lastChannel ? lastThreadId : undefined;
+  const resolvedThreadId = explicitThreadId ?? topicThreadId ?? inheritedThreadId;
 
   return {
     channel,
     to,
     accountId,
-    threadId: explicitThreadId ?? threadId,
+    threadId: resolvedThreadId,
+    threadIdExplicit: explicitThreadId != null,
     mode,
     lastChannel,
     lastTo,
@@ -165,18 +188,28 @@ export function resolveOutboundTarget(params: {
         })
       : undefined);
 
+  // Fall back to channel's defaultTo config when no explicit target is provided
+  const mode = params.mode ?? "explicit";
+  let effectiveTo = params.to;
+  if ((!effectiveTo || !effectiveTo.trim()) && mode === "implicit" && params.cfg) {
+    const channelConfig = (params.cfg.channels as Record<string, { defaultTo?: string }> | undefined)?.[params.channel];
+    if (channelConfig?.defaultTo) {
+      effectiveTo = channelConfig.defaultTo;
+    }
+  }
+
   const resolveTarget = plugin.outbound?.resolveTarget;
   if (resolveTarget) {
     return resolveTarget({
       cfg: params.cfg,
-      to: params.to,
+      to: effectiveTo,
       allowFrom,
       accountId: params.accountId ?? undefined,
-      mode: params.mode ?? "explicit",
+      mode,
     });
   }
 
-  const trimmed = params.to?.trim();
+  const trimmed = effectiveTo?.trim();
   if (trimmed) {
     return { ok: true, to: trimmed };
   }
@@ -185,6 +218,33 @@ export function resolveOutboundTarget(params: {
     ok: false,
     error: missingTargetError(plugin.meta.label ?? params.channel, hint),
   };
+}
+
+/**
+ * Detect whether a delivery target represents a direct/DM conversation.
+ * Uses channel-specific heuristics and falls back to session chatType hints.
+ */
+function isDirectTarget(
+  channel: DeliverableMessageChannel,
+  to: string,
+  entry?: SessionEntry,
+): boolean {
+  switch (channel) {
+    case "slack":
+      // Slack DMs are prefixed with "user:" or "U" (user IDs)
+      return to.startsWith("user:") || /^U[A-Z0-9]+$/.test(to);
+    case "discord":
+      return to.startsWith("user:");
+    case "telegram":
+      // Telegram groups start with "-100"; direct chats are positive integers
+      return !to.startsWith("-");
+    case "whatsapp":
+      // WhatsApp groups end with @g.us
+      return !to.includes("@g.us");
+    default:
+      // Fall back to session chatType hint
+      return entry?.chatType === "direct";
+  }
 }
 
 export function resolveHeartbeatDeliveryTarget(params: {
@@ -259,6 +319,20 @@ export function resolveHeartbeatDeliveryTarget(params: {
     };
   }
 
+  // Block DM delivery when directPolicy is "block"
+  if (
+    heartbeat?.directPolicy === "block" &&
+    isDirectTarget(resolvedTarget.channel, resolvedTarget.to, entry)
+  ) {
+    return {
+      channel: "none",
+      reason: "dm-blocked",
+      accountId: effectiveAccountId,
+      lastChannel: resolvedTarget.lastChannel,
+      lastAccountId: resolvedTarget.lastAccountId,
+    };
+  }
+
   const resolved = resolveOutboundTarget({
     channel: resolvedTarget.channel,
     to: resolvedTarget.to,
@@ -296,6 +370,7 @@ export function resolveHeartbeatDeliveryTarget(params: {
     to: resolved.to,
     reason,
     accountId: effectiveAccountId,
+    threadId: resolvedTarget.threadId,
     lastChannel: resolvedTarget.lastChannel,
     lastAccountId: resolvedTarget.lastAccountId,
   };

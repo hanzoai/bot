@@ -134,18 +134,7 @@ export async function flushUsageQueue(): Promise<void> {
         payload.nodeId = record.nodeId;
       }
 
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 10_000);
-      try {
-        await fetch(`${baseUrl}/api/v1/billing/usage`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(payload),
-          signal: controller.signal,
-        });
-      } finally {
-        clearTimeout(timer);
-      }
+      await sendUsageWithRetry(`${baseUrl}/api/v1/billing/usage`, headers, payload);
     }
   } catch (err) {
     // Usage reporting is best-effort. Log and discard on failure.
@@ -153,6 +142,80 @@ export async function flushUsageQueue(): Promise<void> {
       `[usage-reporter] Failed to report ${batch.length} usage records: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
+}
+
+const MAX_RETRIES = 3;
+const INITIAL_BACKOFF_MS = 500;
+
+/** Sentinel class for non-retryable HTTP errors (4xx). */
+class NonRetryableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NonRetryableError";
+  }
+}
+
+/**
+ * POST a usage record to Commerce API with retry logic.
+ * Retries up to MAX_RETRIES times with exponential backoff for 5xx errors.
+ * Non-retryable errors (4xx) are thrown immediately.
+ */
+async function sendUsageWithRetry(
+  url: string,
+  headers: Record<string, string>,
+  payload: Record<string, unknown>,
+): Promise<void> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+
+      if (response.ok) {
+        return;
+      }
+
+      const errText = await response.text().catch(() => "");
+      const statusMsg = `Commerce API ${response.status}: ${errText.substring(0, 200)}`;
+
+      // Only retry on 5xx server errors; 4xx are not retryable.
+      if (response.status < 500) {
+        console.warn(`[usage-reporter] non-retryable error: ${statusMsg}`);
+        throw new NonRetryableError(statusMsg);
+      }
+
+      lastError = new Error(statusMsg);
+      console.warn(`[usage-reporter] attempt ${attempt + 1}/${MAX_RETRIES} failed: ${statusMsg}`);
+    } catch (err) {
+      // Non-retryable 4xx errors thrown above bubble up immediately.
+      if (err instanceof NonRetryableError) {
+        throw err;
+      }
+      lastError = err instanceof Error ? err : new Error(String(err));
+      console.warn(
+        `[usage-reporter] attempt ${attempt + 1}/${MAX_RETRIES} error: ${lastError.message}`,
+      );
+    } finally {
+      clearTimeout(timer);
+    }
+
+    // Exponential backoff before retry: 500ms, 1000ms, 2000ms.
+    if (attempt < MAX_RETRIES - 1) {
+      const backoffMs = INITIAL_BACKOFF_MS * Math.pow(2, attempt);
+      await new Promise<void>((resolve) => setTimeout(resolve, backoffMs));
+    }
+  }
+
+  // All retries exhausted.
+  throw lastError ?? new Error("usage report failed after retries");
 }
 
 /**

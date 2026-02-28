@@ -1,4 +1,5 @@
 export const IRC_FIELD_LABELS: Record<string, string> = {
+  "channels.irc.configWrites": "IRC Config Writes",
   "channels.irc": "IRC",
   "channels.irc.dmPolicy": "IRC DM Policy",
   "channels.irc.nickserv.enabled": "IRC NickServ Enabled",

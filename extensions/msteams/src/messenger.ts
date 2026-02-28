@@ -93,6 +93,12 @@ export type MSTeamsSendRetryEvent = {
   classification: ReturnType<typeof classifyMSTeamsSendError>;
 };
 
+/** Check if text starts with the silent reply token (prefix match). */
+function isSilentPrefix(text: string): boolean {
+  const upper = text.trimStart();
+  return upper.startsWith(SILENT_REPLY_TOKEN);
+}
+
 function normalizeConversationId(rawId: string): string {
   return rawId.split(";")[0] ?? rawId;
 }
@@ -146,7 +152,7 @@ function pushTextMessages(
       opts.chunkMode,
     )) {
       const trimmed = chunk.trim();
-      if (!trimmed || isSilentReplyText(trimmed, SILENT_REPLY_TOKEN)) {
+      if (!trimmed || isSilentReplyText(trimmed, SILENT_REPLY_TOKEN) || isSilentPrefix(trimmed)) {
         continue;
       }
       out.push({ text: trimmed });
@@ -155,7 +161,7 @@ function pushTextMessages(
   }
 
   const trimmed = text.trim();
-  if (!trimmed || isSilentReplyText(trimmed, SILENT_REPLY_TOKEN)) {
+  if (!trimmed || isSilentReplyText(trimmed, SILENT_REPLY_TOKEN) || isSilentPrefix(trimmed)) {
     return;
   }
   out.push({ text: trimmed });

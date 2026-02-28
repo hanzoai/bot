@@ -479,6 +479,7 @@ async function ensureDmComponentAuthorized(params: {
           name: user.username,
           tag: formatDiscordUserTag(user),
         },
+        allowNameMatching: true,
       })
     : { allowed: false };
   if (allowMatch.allowed) {

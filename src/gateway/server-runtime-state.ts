@@ -18,6 +18,7 @@ import { CANVAS_HOST_PATH } from "../canvas-host/a2ui.js";
 import { type CanvasHostHandler, createCanvasHostHandler } from "../canvas-host/server.js";
 import { marketplaceEventBus } from "./marketplace/event-bus.js";
 import { MarketplaceScheduler } from "./marketplace/scheduler.js";
+import { TrustManager } from "./marketplace/trust.js";
 import { resolveGatewayListenHosts } from "./net.js";
 import {
   createGatewayBroadcaster,
@@ -132,7 +133,8 @@ export async function createGatewayRuntimeState(params: {
   let marketplaceOpts: MarketplaceHttpOptions | undefined;
   const marketplaceConfig = params.cfg.gateway?.marketplace;
   if (marketplaceConfig?.enabled && params.nodeRegistry) {
-    const scheduler = new MarketplaceScheduler();
+    const trustManager = new TrustManager();
+    const scheduler = new MarketplaceScheduler(trustManager);
     setMarketplaceScheduler(scheduler);
 
     // Wire idle status events from nodes to the scheduler.

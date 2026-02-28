@@ -2,7 +2,7 @@
 // Secret reference types
 // ---------------------------------------------------------------------------
 
-export type SecretRefSource = "env" | "file" | "exec";
+export type SecretRefSource = "env" | "file" | "exec" | "kms";
 
 export type SecretRef = {
   source: SecretRefSource;
@@ -47,10 +47,21 @@ export type ExecSecretProviderConfig = {
   allowSymlinkCommand?: boolean;
 };
 
+export type KmsSecretProviderConfig = {
+  source: "kms";
+  /** KMS project/workspace id (overrides secrets.kms.projectId). */
+  projectId?: string;
+  /** KMS environment slug (overrides secrets.kms.environment). */
+  environment?: string;
+  /** KMS secret folder path (overrides secrets.kms.secretPath). */
+  secretPath?: string;
+};
+
 export type SecretProviderConfig =
   | EnvSecretProviderConfig
   | FileSecretProviderConfig
-  | ExecSecretProviderConfig;
+  | ExecSecretProviderConfig
+  | KmsSecretProviderConfig;
 
 /** Shape accepted as `defaults` parameter by `coerceSecretRef`. */
 export type SecretRefDefaultsCarrier =
@@ -82,7 +93,7 @@ export function coerceSecretRef(
   }
   const obj = value as Record<string, unknown>;
   const source = obj.source;
-  if (source !== "env" && source !== "file" && source !== "exec") {
+  if (source !== "env" && source !== "file" && source !== "exec" && source !== "kms") {
     return null;
   }
   const id = typeof obj.id === "string" ? obj.id : undefined;
@@ -93,8 +104,13 @@ export function coerceSecretRef(
   const provider =
     typeof obj.provider === "string" && obj.provider.trim()
       ? obj.provider
-      : ((source === "env" ? d?.env : source === "file" ? d?.file : d?.exec) ??
-        DEFAULT_SECRET_PROVIDER_ALIAS);
+      : ((source === "env"
+          ? d?.env
+          : source === "file"
+            ? d?.file
+            : source === "exec"
+              ? d?.exec
+              : d?.kms) ?? DEFAULT_SECRET_PROVIDER_ALIAS);
   return { source, provider, id };
 }
 
@@ -136,6 +152,7 @@ export type SecretDefaults = {
   env?: string;
   file?: string;
   exec?: string;
+  kms?: string;
 };
 
 export type SecretResolutionConfig = {
