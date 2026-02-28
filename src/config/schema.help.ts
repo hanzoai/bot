@@ -439,8 +439,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Maximum size of each cron run log file before truncation. Accepts size strings like 2mb or 500kb. Older content is discarded when the log exceeds this limit. Default: 2mb.",
   "cron.runLog.keepLines":
     "Number of most recent lines to keep when a cron run log is truncated due to maxBytes. Preserves the tail of the log for debugging. Default: 2000 lines retained after truncation.",
-  session:
-    "Session lifecycle, scoping, reset behavior, and maintenance configuration. Controls how conversations are tracked, when they reset, and how old session data is pruned or archived.",
   "session.scope":
     "Session scoping strategy that determines how conversations map to session keys. Use per-channel, per-peer, or per-account scoping to isolate or share conversation history.",
   "session.resetTriggers":
@@ -521,8 +519,6 @@ export const FIELD_HELP: Record<string, string> = {
     'Sets a hard cap on total disk usage for all session data. Use size strings like "500mb" or "2gb". When exceeded, the oldest sessions are pruned to bring usage below the limit.',
   "session.maintenance.highWaterBytes":
     "Defines a soft limit expressed as a percentage (e.g. 80%) of maxDiskBytes. When disk usage exceeds this threshold, background maintenance begins pruning older sessions.",
-  approvals:
-    "Execution approval workflow configuration. Use approvals.exec to enable human-in-the-loop gating on tool calls, define notification targets, and set filtering rules.",
   "approvals.exec":
     "Exec approval settings that gate shell command and tool execution on human review. Use to define which sessions and agents require approval before executing commands.",
   "approvals.exec.enabled":
@@ -543,56 +539,22 @@ export const FIELD_HELP: Record<string, string> = {
     "Optional account ID override for multi-account channel setups. Use when the approval target channel has multiple bot accounts and you need to specify which account sends the notification.",
   "approvals.exec.targets[].threadId":
     "Optional thread or topic ID for routing the approval notification to a specific thread. Use to keep approval messages organized in a dedicated thread or topic.",
-  nodeHost:
-    "Node host settings that control how this machine exposes capabilities to the gateway. Use nodeHost.browserProxy to selectively share browser profiles with connected gateway nodes.",
   "nodeHost.browserProxy":
     "Browser proxy configuration for exposing local browser automation to the gateway. Use to share Chromium control with remote nodes through the gateway relay.",
-  media:
-    "Media handling settings that control filename preservation and attachment processing. Use media.preserveFilenames to keep original attachment names across channel providers.",
   "media.preserveFilenames":
     "Preserve original filenames on media attachments when forwarding between channels. When enabled, files keep their original names instead of receiving auto-generated identifiers.",
-  audio:
-    "Audio processing settings including transcription command configuration and timeout controls. Use audio.transcription to define the speech-to-text pipeline for voice messages.",
   "audio.transcription":
     "Transcription pipeline settings for converting audio attachments to text. Use audio.transcription.command to define the external transcription binary and its arguments.",
   "audio.transcription.command":
     'External transcription command template. Use {input} as the audio file placeholder. Example: "whisper-cli --model base --output-format txt {input}". The command must write text to stdout.',
   "audio.transcription.timeoutSeconds":
     "Maximum seconds to wait for the transcription command to complete before timing out. Use to prevent hung transcription processes from blocking the message pipeline. Default: 30.",
-  bindings:
-    "Channel-to-agent binding rules that route inbound messages to specific agents based on match criteria. Use bindings to define which agent handles messages from specific channels, peers, or roles.",
-  "bindings[].agentId":
-    "Agent ID that receives messages matching this binding rule. Use the agent identifier from agents.list to route matched conversations to the correct agent.",
-  "bindings[].match":
-    "Match criteria that defines when this binding rule applies. Use channel, accountId, peer, guildId, teamId, and roles conditions. All specified conditions must match.",
-  "bindings[].match.channel":
-    "Channel provider name to match for this binding (e.g. discord, telegram, slack). Use to restrict this binding to messages from a specific channel provider.",
-  "bindings[].match.accountId":
-    "Account ID to match for this binding. Use when running multiple bot accounts on the same channel and you need to route based on which account received the message.",
-  "bindings[].match.peer":
-    "Peer filter for this binding. Use peer.kind and peer.id to match specific conversation types and sender identifiers for fine-grained agent routing.",
-  "bindings[].match.peer.kind":
-    'Conversation type to match: "direct" for 1:1 messages, "group" for group chats, "channel" for server channels, "dm" for direct messages. Controls which conversation context triggers this binding.',
-  "bindings[].match.peer.id":
-    "Peer identifier to match for this binding. Use the channel-native peer ID (e.g. Discord user snowflake, Telegram chat ID) to route specific peers to designated agents.",
-  "bindings[].match.guildId":
-    "Discord guild (server) ID to match for this binding. Use to route all messages from a specific Discord server to a designated agent regardless of channel or peer.",
-  "bindings[].match.teamId":
-    "Slack team (workspace) ID to match for this binding. Use to route all messages from a specific Slack workspace to a designated agent regardless of channel.",
-  "bindings[].match.roles":
-    "Role names to match for this binding. When set, only messages from users with one of the specified roles trigger this binding. Use for role-based agent routing.",
-  broadcast:
-    "Broadcast relay settings that define how messages from one peer are forwarded to a set of destination peers. Use broadcast.strategy to choose parallel or sequential delivery.",
   "broadcast.strategy":
     'Broadcast delivery order: "parallel" sends to all destination peers concurrently for lowest latency; "sequential" sends one-by-one in order, useful when delivery ordering matters.',
   "broadcast.*":
     "Broadcast relay map entry keyed by source peer ID, with an array of destination peer IDs as the value. Each entry defines a one-to-many relay from a single sender to multiple recipients.",
-  commands:
-    "Chat command availability and access control settings. Use commands.allowFrom to restrict who can invoke privileged commands, and per-command toggles to enable or disable specific capabilities.",
   "commands.allowFrom":
     "Explicit allowlist of user identifiers permitted to invoke privileged chat commands. Use channel-native IDs (e.g. telegram:123456, discord:snowflake). Empty means no restrictions.",
-  hooks:
-    "Inbound webhook handler configuration including route mappings, Gmail integration, and internal event handlers. Use hooks.mappings to define how incoming HTTP requests create or wake agent sessions.",
   "hooks.enabled":
     "Enable or disable the webhook handler subsystem. When disabled, no inbound webhooks are accepted. Use hooks.enabled=true to activate the HTTP webhook endpoint.",
   "hooks.path":
@@ -639,8 +601,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Module path for this internal event handler. Use a relative path from the hooks directory to a JavaScript/TypeScript module that exports a handler function.",
   "hooks.internal.load.extraDirs":
     "Additional directories to scan for internal event handler modules. Use to keep handler code organized outside the default hooks directory structure.",
-  messages:
-    "Message processing pipeline configuration including queue behavior, group chat settings, prefix injection, and inbound batching. Controls how the bot handles concurrent and rapid-fire messages.",
   "messages.messagePrefix":
     "Text prepended to every inbound message before the agent sees it. Use to inject context like channel metadata, sender info, or custom routing tags into the conversation.",
   "messages.responsePrefix":
@@ -673,8 +633,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Remove the acknowledgment reaction after the agent sends its reply. Use to keep chat clean by removing the processing indicator once the response is delivered.",
   "messages.tts":
     "Text-to-speech settings for message delivery. Use to enable automatic voice synthesis of agent responses when the channel supports audio playback.",
-  channels:
-    "Messaging channel configuration for Telegram, Discord, Slack, Signal, WhatsApp, iMessage, MS Teams, IRC, Mattermost, and more. Use per-channel sections to define tokens, policies, and stream modes.",
   "channels.defaults":
     "Default settings inherited by all channels unless overridden per-channel. Use to set baseline group policy, heartbeat behavior, and other shared channel configuration.",
   "channels.defaults.groupPolicy":
@@ -687,8 +645,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Show alert notifications during heartbeat when issues are detected. Use to surface configuration problems, API errors, or connectivity issues proactively. Default: true.",
   "channels.defaults.heartbeat.useIndicator":
     "Use a visual indicator (emoji or icon) in heartbeat status messages. When enabled, heartbeat messages include a colored status dot or icon for quick visual scanning.",
-  gateway:
-    "Gateway server configuration controlling bind address, authentication, TLS, hot-reload, tool policy, and HTTP endpoints. Use gateway.mode to select local or remote operation.",
   "gateway.mode":
     'Selects the gateway operation mode: "local" runs the gateway on this machine accepting direct connections; "remote" connects to an external gateway instance as a client node.',
   "gateway.bind":
@@ -709,8 +665,6 @@ export const FIELD_HELP: Record<string, string> = {
     "HTTP endpoint configuration for the gateway server. Controls which additional HTTP APIs are exposed alongside the core WebSocket endpoint.",
   "gateway.http.endpoints":
     "Named HTTP endpoint toggles. Use to enable or disable specific REST API endpoints on the gateway (e.g. OpenAI-compatible chat completions).",
-  browser:
-    "Browser automation settings for headless or headed Chromium control. Use browser.cdpUrl to connect to an existing browser instance or enable browser.headless for serverless operation.",
   "browser.enabled":
     "Enable the browser automation subsystem. When enabled, the gateway can launch or connect to a Chromium instance for web browsing, screenshots, and page interaction.",
   "browser.cdpUrl":
@@ -723,8 +677,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Named browser profile configurations. Each profile defines a separate browser context with its own cookies, storage, and extensions for multi-account browsing.",
   "browser.profiles.*.driver":
     'Browser automation driver for this profile: "clawd" uses the built-in CDP driver with full page control; "extension" uses a browser extension for lighter-weight interaction.',
-  tools:
-    "Tool availability, execution policy, and security settings. Use tools.allow and tools.deny to control which tools agents may invoke, and tools.exec for shell command execution policy.",
   "tools.allow":
     "Global tool allowlist. When set, only the listed tool names are available to agents. Use to restrict the tool surface in production or high-security environments.",
   "tools.deny":
@@ -749,7 +701,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Tool catalog for spawned subagent sessions. Controls which tools are available to subagents independently of the parent agent tool policy.",
   "tools.sandbox.tools":
     "Tool catalog for sandboxed execution environments. Controls which tools are available inside sandbox containers independently of the host tool policy.",
-  web: "Web UI provider settings that controls the embedded web server, heartbeat intervals, and WebSocket reconnect behavior. Use web.port and web.host to define the listener address.",
   "web.enabled":
     "Enable the web UI provider. When enabled, the gateway serves a browser-based chat interface for direct web access to agent conversations.",
   "web.heartbeatSeconds":
@@ -766,14 +717,10 @@ export const FIELD_HELP: Record<string, string> = {
     "Jitter factor (0-1) applied to the reconnect delay to prevent thundering-herd reconnects. Use to randomize retry timing across multiple clients. Default: 0.5.",
   "web.reconnect.maxAttempts":
     "Maximum number of reconnect attempts before giving up. 0 means no retries and the client stops after the first failure sequence. Use to limit how long clients retry.",
-  discovery:
-    "Service discovery settings for mDNS and wide-area networking. Use discovery.mdns to control how the gateway advertises itself on the local network and discovery.wideArea for broader reach.",
   "discovery.wideArea.enabled":
     "Enable wide-area service discovery for cross-network gateway visibility. When enabled, the gateway registers with a discovery service for remote node connections.",
   "discovery.mdns":
     'mDNS discovery settings controlling local network advertisement. Use discovery.mdns.mode to choose between "off", "minimal" (default, name only), and "full" (includes cliPath/sshPort).',
-  canvasHost:
-    "Built-in canvas web server for hosting agent-generated HTML/JS artifacts. Use canvasHost.enabled to serve a local development server with optional live-reload support for rapid prototyping.",
   "canvasHost.enabled":
     "Enable the canvas host web server. When enabled, agent-generated HTML and JavaScript artifacts are served on a local port for browser preview and testing.",
   "canvasHost.root":
@@ -782,7 +729,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Port number for the canvas host web server. Use to set a specific port for browser access to canvas artifacts. Default: auto-assigned available port.",
   "canvasHost.liveReload":
     "Enable live-reload for the canvas host web server. When enabled, the browser automatically refreshes when canvas artifacts change on disk for faster development iteration.",
-  talk: "Text-to-speech configuration for voice output. Use talk.voiceId to select the TTS voice, talk.modelId for the synthesis model, and talk.outputFormat for the audio codec.",
   "talk.voiceId":
     "Voice identifier for TTS synthesis. Use the provider's voice catalog to select a voice that matches your desired personality, accent, and language for agent voice output.",
   "talk.voiceAliases":
@@ -793,8 +739,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Audio output format for TTS synthesis (e.g. mp3, wav, opus). Use to control the codec and quality of generated voice audio based on your channel's playback capabilities.",
   "talk.interruptOnSpeech":
     "Enable speech interruption detection. When enabled, incoming user speech automatically interrupts the current TTS playback and cancels the active voice output.",
-  meta: "Internal metadata written by Bot when it touches the config file. Controls version tracking and last-write timestamps used for upgrade heuristics and migration detection.",
-  env: "Environment variable injection and shell environment capture settings. Use env.vars to define static variables and env.shellEnv to capture the login shell environment at startup.",
   "env.shellEnv":
     "Shell environment capture settings. When enabled, the gateway captures environment variables from the user's login shell at startup for use in exec commands.",
   "env.shellEnv.enabled":
@@ -803,8 +747,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Timeout in milliseconds for the shell environment capture subprocess. Use to prevent hung shells from blocking gateway startup. Default: 5000.",
   "env.vars":
     "Static environment variables injected into all exec command environments. Use to define persistent variables that should be available to every agent shell execution.",
-  wizard:
-    "Setup wizard metadata that tracks the last run state. Controls when and how the setup wizard re-runs to detect configuration changes and keep settings current.",
   "wizard.lastRunAt":
     "ISO timestamp of the last wizard run. Use to track when the setup wizard was last executed for determining whether re-running is needed after upgrades.",
   "wizard.lastRunVersion":
@@ -815,14 +757,10 @@ export const FIELD_HELP: Record<string, string> = {
     "CLI command used in the last wizard run. Use to record whether the wizard was invoked manually or automatically during startup for audit and troubleshooting.",
   "wizard.lastRunMode":
     'Defines the gateway mode during the last wizard run: "local" for a locally-bound gateway, "remote" for a remote-connected client node. Recorded for configuration context.',
-  diagnostics:
-    "Diagnostics and observability settings including OpenTelemetry, cache tracing, and debug flags. Enable diagnostics to export traces, metrics, and logs to an OTEL collector.",
   "diagnostics.otel":
     "OpenTelemetry configuration for exporting traces, metrics, and logs. Use diagnostics.otel.enabled to activate the OTEL exporter and configure the collector endpoint.",
   "diagnostics.cacheTrace":
     "Cache trace diagnostics for debugging embedded agent run caching behavior. Use diagnostics.cacheTrace.enabled to capture detailed cache hit/miss snapshots.",
-  logging:
-    "Logging configuration controlling console and file output levels, formatting style, and sensitive-data redaction. Use logging.level to set the global minimum severity for all outputs.",
   "logging.level":
     'Sets the global log level minimum: "silent" suppresses all output, "fatal" and "error" for critical issues, "warn" for warnings, "info" for standard operation, "debug" and "trace" for troubleshooting.',
   "logging.file":
@@ -835,22 +773,10 @@ export const FIELD_HELP: Record<string, string> = {
     'Sensitive data redaction mode: "off" disables redaction (development only), "tools" redacts sensitive values in tool input/output logs. Use to prevent credential leakage in log files.',
   "logging.redactPatterns":
     "Custom regex patterns for redacting sensitive data in log output. Use to define additional redaction rules beyond the built-in patterns for project-specific secrets.",
-  update:
-    "Automatic update settings that control which release channel is tracked and whether the gateway checks for updates on startup. Use update.channel to select stable, beta, or dev releases.",
-  ui: "User interface customization for the control panel and assistant identity. Use ui.assistant to set the display name and avatar, and ui.seamColor for the accent color theme.",
   "ui.assistant":
     "Assistant identity settings displayed in the web UI and control panel. Use ui.assistant.name and ui.assistant.avatar to customize how the bot presents itself.",
-  plugins:
-    "Plugin/extension loading configuration. Use plugins.enabled to toggle the plugin system, plugins.allow/deny for access control, and plugins.entries for per-plugin settings and credentials.",
-  "plugins.entries.*.apiKey":
-    "API key or secret credential for this plugin. Use an environment variable reference or secret manager URI to avoid storing credentials in plaintext configuration files.",
-  "plugins.entries.*.env":
-    "Environment variables scoped to this plugin only. Use to inject plugin-specific configuration values, API keys, or feature flags that should not leak to other plugins or the host environment.",
-  auth: "Authentication profiles, provider ordering, and cooldown/backoff settings for API credential management. Use auth.profiles to define multiple auth identities with automatic failover.",
   "auth.cooldowns":
     "Cooldown and backoff settings for authentication failures. Use auth.cooldowns.billingBackoffHours to control how long a profile is sidelined after a billing or retry failure before trying again.",
-  models:
-    "Model provider registry, discovery, and merge configuration. Use models.providers to define API endpoints and credentials, and models.bedrockDiscovery for automatic AWS Bedrock model catalog refresh.",
   "models.providers":
     "Named provider endpoint definitions keyed by provider slug. Each entry defines the base URL, authentication, and model catalog for a specific API provider.",
   "models.providers.*.baseUrl":
@@ -877,8 +803,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Default context window size for discovered Bedrock models when the API does not provide this metadata. Use to set a sensible fallback for models without explicit limits.",
   "models.bedrockDiscovery.defaultMaxTokens":
     "Default max output tokens for discovered Bedrock models when the API does not provide this metadata. Use to set a sensible fallback for models without explicit limits.",
-  agents:
-    "Agent definitions, default parameters, model selection, compaction behavior, and memory search settings. Use agents.defaults for shared configuration inherited by all agents.",
   "agents.defaults":
     "Default agent configuration inherited by all agents unless overridden in agents.list entries. Defines model selection, compaction, memory search, and other shared settings.",
   "agents.list":
