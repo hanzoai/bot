@@ -82,12 +82,8 @@ export function resolveSessionDeliveryTarget(params: {
   // to undefined to prevent stale session metadata from leaking into the wrong channel.
   const lastChannel = params.turnSourceChannel ?? sessionLastChannel;
   const lastTo = params.turnSourceChannel ? params.turnSourceTo : context?.to;
-  const lastAccountId = params.turnSourceChannel
-    ? params.turnSourceAccountId
-    : context?.accountId;
-  const lastThreadId = params.turnSourceChannel
-    ? params.turnSourceThreadId
-    : context?.threadId;
+  const lastAccountId = params.turnSourceChannel ? params.turnSourceAccountId : context?.accountId;
+  const lastThreadId = params.turnSourceChannel ? params.turnSourceThreadId : context?.threadId;
 
   const rawRequested = params.requestedChannel ?? "last";
   const requested = rawRequested === "last" ? "last" : normalizeMessageChannel(rawRequested);
@@ -136,7 +132,11 @@ export function resolveSessionDeliveryTarget(params: {
   // channel, not a specific thread). Explicit threadId and topic-parsed threadId still apply.
   const mode = params.mode ?? (rawExplicitTo ? "explicit" : "implicit");
   const inheritedThreadId =
-    mode === "heartbeat" ? undefined : channel && channel === lastChannel ? lastThreadId : undefined;
+    mode === "heartbeat"
+      ? undefined
+      : channel && channel === lastChannel
+        ? lastThreadId
+        : undefined;
   const resolvedThreadId = explicitThreadId ?? topicThreadId ?? inheritedThreadId;
 
   return {
@@ -192,7 +192,9 @@ export function resolveOutboundTarget(params: {
   const mode = params.mode ?? "explicit";
   let effectiveTo = params.to;
   if ((!effectiveTo || !effectiveTo.trim()) && mode === "implicit" && params.cfg) {
-    const channelConfig = (params.cfg.channels as Record<string, { defaultTo?: string }> | undefined)?.[params.channel];
+    const channelConfig = (
+      params.cfg.channels as Record<string, { defaultTo?: string }> | undefined
+    )?.[params.channel];
     if (channelConfig?.defaultTo) {
       effectiveTo = channelConfig.defaultTo;
     }

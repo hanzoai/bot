@@ -1,6 +1,6 @@
+import type { OAuthCredentials } from "@mariozechner/pi-ai";
 import fs from "node:fs";
 import path from "node:path";
-import type { OAuthCredentials } from "@mariozechner/pi-ai";
 import type { SecretInput, SecretRef } from "../config/types.secrets.js";
 import { resolveBotAgentDir } from "../agents/agent-paths.js";
 import { upsertAuthProfile } from "../agents/auth-profiles.js";
@@ -62,8 +62,7 @@ export async function writeOAuthCredentials(
   const email =
     typeof creds.email === "string" && creds.email.trim() ? creds.email.trim() : "default";
   const resolvedDir = resolveAuthAgentDir(agentDir);
-  const dirs =
-    options?.syncSiblingAgents ? discoverSiblingAgentDirs(resolvedDir) : [resolvedDir];
+  const dirs = options?.syncSiblingAgents ? discoverSiblingAgentDirs(resolvedDir) : [resolvedDir];
   for (const dir of dirs) {
     upsertAuthProfile({
       profileId: `${provider}:${email}`,
