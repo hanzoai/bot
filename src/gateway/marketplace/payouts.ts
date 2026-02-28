@@ -710,10 +710,13 @@ function generateDeterministicK(msgHash: Uint8Array, privateKey: Uint8Array, n: 
   throw new Error("RFC 6979: failed to generate k after 1000 attempts");
 }
 
-function hmacSha256(key: Uint8Array, data: Uint8Array): Uint8Array {
+function hmacSha256(
+  key: Uint8Array<ArrayBuffer>,
+  data: Uint8Array<ArrayBuffer>,
+): Uint8Array<ArrayBuffer> {
   const hmac = createHmac("sha256", key);
   hmac.update(data);
-  return new Uint8Array(hmac.digest());
+  return new Uint8Array(hmac.digest().buffer);
 }
 
 function padTo32(bytes: Uint8Array): Uint8Array {
