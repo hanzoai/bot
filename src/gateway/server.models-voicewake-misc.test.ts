@@ -198,7 +198,7 @@ describe("gateway server models + voicewake", () => {
       await withTempHome(async (homeDir) => {
         const initial = await rpcReq<{ triggers: string[] }>(ws, "voicewake.get");
         expect(initial.ok).toBe(true);
-        expect(initial.payload?.triggers).toEqual(["hanzo-bot", "claude", "computer"]);
+        expect(initial.payload?.triggers).toEqual(["bot", "claude", "computer"]);
 
         const changedP = onceMessage(
           ws,
@@ -253,7 +253,7 @@ describe("gateway server models + voicewake", () => {
       const first = (await firstEventP) as { event?: string; payload?: unknown };
       expect(first.event).toBe("voicewake.changed");
       expect((first.payload as { triggers?: unknown } | undefined)?.triggers).toEqual([
-        "hanzo-bot",
+        "bot",
         "claude",
         "computer",
       ]);
@@ -450,10 +450,13 @@ describe("gateway server misc", () => {
     const updated = JSON.parse(await fs.readFile(configPath, "utf-8")) as Record<string, unknown>;
     const channels = updated.channels as Record<string, unknown> | undefined;
     const discord = channels?.discord as Record<string, unknown> | undefined;
-    expect(discord).toMatchObject({
-      token: "token-123",
-      enabled: true,
-    });
+    // applyPluginAutoEnable writes enabled=true to plugins.entries.discord, not channels.discord
+    expect(discord).toMatchObject({ token: "token-123" });
+    const pluginEntries = (updated.plugins as Record<string, unknown> | undefined)?.entries as
+      | Record<string, unknown>
+      | undefined;
+    const discordEntry = pluginEntries?.discord as Record<string, unknown> | undefined;
+    expect(discordEntry?.enabled).toBe(true);
   });
 
   test("refuses to start when port already bound", async () => {
