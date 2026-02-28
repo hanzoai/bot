@@ -79,6 +79,11 @@ export function isLocalPath(url: string): boolean {
     return true;
   }
 
+  // Windows rooted path without drive letter (e.g. \tmp\bot\file.txt)
+  if (url.startsWith("\\") && url.length > 1 && url[1] !== "\\") {
+    return true;
+  }
+
   return false;
 }
 
