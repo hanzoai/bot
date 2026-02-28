@@ -324,7 +324,11 @@ function createBedrockCacheWrapper(
         cacheRetention: "none",
       });
     }
-    if (explicitCacheRetention === "none" || explicitCacheRetention === "short" || explicitCacheRetention === "long") {
+    if (
+      explicitCacheRetention === "none" ||
+      explicitCacheRetention === "short" ||
+      explicitCacheRetention === "long"
+    ) {
       return underlying(model, context, {
         ...options,
         cacheRetention: explicitCacheRetention,
@@ -345,7 +349,9 @@ function createAnthropicBetaWrapper(
 ): StreamFn {
   const underlying = baseStreamFn ?? streamSimple;
   const context1m = extraParams?.context1m === true;
-  const customBetas = Array.isArray(extraParams?.anthropicBeta) ? (extraParams.anthropicBeta as string[]) : [];
+  const customBetas = Array.isArray(extraParams?.anthropicBeta)
+    ? (extraParams.anthropicBeta as string[])
+    : [];
 
   return (model, context, options) => {
     const isOpusSonnet = OPUS_SONNET_RE.test(modelId);
