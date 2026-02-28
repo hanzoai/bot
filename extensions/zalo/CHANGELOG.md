@@ -3,6 +3,7 @@
 ## 2026.2.27
 
 ### Changes
+
 - Version alignment with core Hanzo Bot release numbers.
 
 ## 2026.2.23
