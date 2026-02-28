@@ -309,6 +309,8 @@ describe("exec approval handlers", () => {
       broadcast: (event: string, payload: unknown) => {
         broadcasts.push({ event, payload });
       },
+      // Signal that approval clients are present so requests are not auto-expired.
+      hasExecApprovalClients: () => true,
     };
     return { handlers, broadcasts, respond, context };
   }
@@ -402,6 +404,8 @@ describe("exec approval handlers", () => {
 
     const resolveContext = {
       broadcast: () => {},
+      // Signal that approval clients are present so requests are not auto-expired.
+      hasExecApprovalClients: () => true,
     };
 
     const context = {
@@ -417,6 +421,8 @@ describe("exec approval handlers", () => {
           context: resolveContext,
         });
       },
+      // Signal that approval clients are present so requests are not auto-expired.
+      hasExecApprovalClients: () => true,
     };
 
     await requestExecApproval({

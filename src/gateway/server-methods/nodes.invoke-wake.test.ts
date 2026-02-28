@@ -67,6 +67,7 @@ function makeNodeInvokeParams(overrides?: Partial<Record<string, unknown>>) {
 async function invokeNode(params: {
   nodeRegistry: {
     get: (nodeId: string) => TestNodeSession | undefined;
+    getRemoteNode: (nodeId: string) => Promise<null>;
     invoke: (payload: {
       nodeId: string;
       command: string;
@@ -154,6 +155,7 @@ describe("node.invoke APNs wake path", () => {
 
     const nodeRegistry = {
       get: vi.fn(() => undefined),
+      getRemoteNode: vi.fn(() => Promise.resolve(null)),
       invoke: vi.fn().mockResolvedValue({ ok: true }),
     };
 
@@ -179,6 +181,7 @@ describe("node.invoke APNs wake path", () => {
         }
         return connected ? session : undefined;
       }),
+      getRemoteNode: vi.fn(() => Promise.resolve(null)),
       invoke: vi.fn().mockResolvedValue({
         ok: true,
         payload: { ok: true },
@@ -216,6 +219,7 @@ describe("node.invoke APNs wake path", () => {
 
     const nodeRegistry = {
       get: vi.fn(() => undefined),
+      getRemoteNode: vi.fn(() => Promise.resolve(null)),
       invoke: vi.fn().mockResolvedValue({ ok: true }),
     };
 
