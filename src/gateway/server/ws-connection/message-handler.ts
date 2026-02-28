@@ -320,6 +320,7 @@ export function attachGatewayWsMessageHandler(params: {
             requestHost,
             origin: requestOrigin,
             allowedOrigins: configSnapshot.gateway?.controlUi?.allowedOrigins,
+            allowHostHeaderOriginFallback: true,
           });
           if (!originCheck.ok) {
             const errorMessage =
