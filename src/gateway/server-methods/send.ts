@@ -253,6 +253,7 @@ export const sendHandlers: GatewayRequestHandlers = {
           gifPlayback: request.gifPlayback,
           threadId: threadId ?? null,
           deps: outboundDeps,
+          session: outboundSession,
           mirror: providedSessionKey
             ? {
                 sessionKey: providedSessionKey,
