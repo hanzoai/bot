@@ -403,8 +403,6 @@ export const FIELD_HELP: Record<string, string> = {
 
   "memory.qmd.searchMode":
     'QMD search algorithm: "query" uses keyword matching, "search" uses full-text search, "vsearch" uses vector similarity search. Choose based on your index size and accuracy needs.',
-  "memory.qmd.scope":
-    "Session/channel scope for QMD recall (same syntax as session.sendPolicy; default: direct-only). Use match.rawKeyPrefix to match full agent-prefixed session keys.",
   "memory.qmd.mcporter":
     "MCP transport settings for the QMD sidecar. Controls how the bot communicates with QMD via the MCP protocol when running as a managed subprocess.",
   "memory.qmd.mcporter.enabled":
@@ -419,8 +417,6 @@ export const FIELD_HELP: Record<string, string> = {
     'Authentication method for this provider endpoint: "api-key" sends a bearer API key, "token" sends a raw token, "oauth" uses OAuth2 flow, "aws-sdk" uses AWS SDK credential chain for Bedrock.',
   "models.providers.*.authHeader":
     "Custom HTTP header name used to send the authentication credential. Use when the provider expects a non-standard header instead of the default Authorization bearer token format.",
-  "gateway.reload.mode":
-    'Hot reload strategy for config changes: "off" disables reload, "restart" restarts the gateway process, "hot" applies changes in-place, "hybrid" (recommended) hot-reloads what it can and restarts for structural changes.',
   "gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback":
     "Allow falling back to the Host header for origin validation when the Origin header is absent. Controls a relaxed CORS check that may be needed behind certain reverse proxies but weakens CSRF protection.",
   "gateway.controlUi.dangerouslyDisableDeviceAuth":
@@ -447,10 +443,6 @@ export const FIELD_HELP: Record<string, string> = {
     "Session lifecycle, scoping, reset behavior, and maintenance configuration. Controls how conversations are tracked, when they reset, and how old session data is pruned or archived.",
   "session.scope":
     "Session scoping strategy that determines how conversations map to session keys. Use per-channel, per-peer, or per-account scoping to isolate or share conversation history.",
-  "session.dmScope":
-    'DM session scoping: "main" keeps continuity; "per-peer", "per-channel-peer", or "per-account-channel-peer" isolates DM history (recommended for shared inboxes/multi-account).',
-  "session.identityLinks":
-    "Map canonical identities to provider-prefixed peer IDs for DM session linking (example: telegram:123456). Use to unify sessions across providers for the same human user.",
   "session.resetTriggers":
     "Patterns or events that trigger automatic session resets. Use to define keywords, commands, or lifecycle events that clear the conversation context and start fresh.",
   "session.idleMinutes":
@@ -1178,8 +1170,6 @@ export const FIELD_HELP: Record<string, string> = {
     'Override native skill commands for Slack (bool or "auto").',
   "channels.slack.streamMode":
     "Live stream preview mode for Slack replies (replace | status_final | append).",
-  "session.agentToAgent.maxPingPongTurns":
-    "Max reply-back turns between requester and target (0-5). Controls the depth of recursive agent-to-agent conversations to prevent infinite loops.",
   "channels.telegram.customCommands":
     "Additional Telegram bot menu commands (merged with native; conflicts ignored).",
   "messages.suppressToolErrors":
