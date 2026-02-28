@@ -259,17 +259,17 @@ describe("buildNodeServiceEnvironment", () => {
 describe("resolveGatewayStateDir", () => {
   it("uses the default state dir when no overrides are set", () => {
     const env = { HOME: "/Users/test" };
-    expect(resolveGatewayStateDir(env)).toBe(path.join("/Users/test", ".bot"));
+    expect(resolveGatewayStateDir(env)).toBe(path.join("/Users/test", ".hanzo", "bot"));
   });
 
   it("appends the profile suffix when set", () => {
     const env = { HOME: "/Users/test", BOT_PROFILE: "rescue" };
-    expect(resolveGatewayStateDir(env)).toBe(path.join("/Users/test", ".bot-rescue"));
+    expect(resolveGatewayStateDir(env)).toBe(path.join("/Users/test", ".hanzo", "bot-rescue"));
   });
 
   it("treats default profiles as the base state dir", () => {
     const env = { HOME: "/Users/test", BOT_PROFILE: "Default" };
-    expect(resolveGatewayStateDir(env)).toBe(path.join("/Users/test", ".bot"));
+    expect(resolveGatewayStateDir(env)).toBe(path.join("/Users/test", ".hanzo", "bot"));
   });
 
   it("uses BOT_STATE_DIR when provided", () => {
