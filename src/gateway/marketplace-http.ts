@@ -184,6 +184,7 @@ export async function handleMarketplaceHttpRequest(
   });
 
   if (!invokeResult.ok) {
+    opts.scheduler.getTrustManager()?.recordFailure(seller.nodeId);
     opts.scheduler.releaseSeller(seller.nodeId, false);
     const errCode = invokeResult.error?.code;
     const statusCode = errCode === "TIMEOUT" ? 504 : 502;
@@ -229,12 +230,15 @@ async function handleStreamingRelay(
   await new Promise<void>((resolve) => {
     let completed = false;
 
+    const trust = opts.scheduler.getTrustManager();
+
     const timeout = setTimeout(() => {
       if (!completed) {
         completed = true;
         unsubscribe();
         writeDone(res);
         res.end();
+        trust?.recordFailure(sellerNodeId);
         opts.scheduler.releaseSeller(sellerNodeId, false);
         resolve();
       }
@@ -245,6 +249,7 @@ async function handleStreamingRelay(
         completed = true;
         unsubscribe();
         clearTimeout(timeout);
+        trust?.recordFailure(sellerNodeId);
         opts.scheduler.releaseSeller(sellerNodeId, false);
         resolve();
       }
@@ -269,6 +274,7 @@ async function handleStreamingRelay(
         clearTimeout(timeout);
         completed = true;
         unsubscribe();
+        trust?.recordSuccess(sellerNodeId, done.durationMs, done.inputTokens, done.outputTokens);
         reportMarketplaceUsage(done, sellerNodeId, tenant, opts);
         opts.scheduler.releaseSeller(sellerNodeId, true, done.durationMs);
         resolve();
@@ -285,6 +291,7 @@ async function handleStreamingRelay(
         clearTimeout(timeout);
         completed = true;
         unsubscribe();
+        trust?.recordFailure(sellerNodeId);
         opts.scheduler.releaseSeller(sellerNodeId, false);
         resolve();
       }
@@ -306,6 +313,7 @@ async function handleNonStreamingRelay(
   await new Promise<void>((resolve) => {
     let completed = false;
     let responseSent = false;
+    const trust = opts.scheduler.getTrustManager();
 
     const timeout = setTimeout(() => {
       if (!completed) {
@@ -316,6 +324,7 @@ async function handleNonStreamingRelay(
             error: { message: "marketplace proxy timeout", type: "timeout" },
           });
         }
+        trust?.recordFailure(sellerNodeId);
         opts.scheduler.releaseSeller(sellerNodeId, false);
         resolve();
       }
@@ -326,6 +335,7 @@ async function handleNonStreamingRelay(
         completed = true;
         unsubscribe();
         clearTimeout(timeout);
+        trust?.recordFailure(sellerNodeId);
         opts.scheduler.releaseSeller(sellerNodeId, false);
         resolve();
       }
@@ -344,7 +354,7 @@ async function handleNonStreamingRelay(
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(data);
         responseSent = true;
-        // Don't resolve yet — wait for the "done" event for billing.
+        // Don't resolve yet -- wait for the "done" event for billing.
       } else if (evt.kind === "done") {
         const done = evt.payload as unknown as MarketplaceProxyDonePayload;
         clearTimeout(timeout);
@@ -353,6 +363,7 @@ async function handleNonStreamingRelay(
         }
         completed = true;
         unsubscribe();
+        trust?.recordSuccess(sellerNodeId, done.durationMs, done.inputTokens, done.outputTokens);
         reportMarketplaceUsage(done, sellerNodeId, tenant, opts);
         opts.scheduler.releaseSeller(sellerNodeId, true, done.durationMs);
         resolve();
@@ -365,6 +376,7 @@ async function handleNonStreamingRelay(
         }
         completed = true;
         unsubscribe();
+        trust?.recordFailure(sellerNodeId);
         opts.scheduler.releaseSeller(sellerNodeId, false);
         resolve();
       }
@@ -433,15 +445,119 @@ function reportMarketplaceUsage(
   if (transactionLog.length > MAX_TX_LOG) {
     transactionLog.splice(0, transactionLog.length - MAX_TX_LOG);
   }
+
+  // Persist transaction to Commerce API (fire-and-forget; in-memory is the hot cache).
+  void persistTransaction(tx).catch((err) =>
+    console.error(
+      `[marketplace] Failed to persist transaction ${tx.requestId}: ${err instanceof Error ? err.message : String(err)}`,
+    ),
+  );
 }
 
 /** In-memory transaction log for audit trail and payout aggregation. */
 const transactionLog: MarketplaceTransaction[] = [];
 const MAX_TX_LOG = 10_000;
 
-/** Read the transaction log (used by payout processing and admin queries). */
+/** Read the in-memory transaction log (hot cache; Commerce API is source of truth). */
 export function getTransactionLog(): readonly MarketplaceTransaction[] {
   return transactionLog;
+}
+
+/**
+ * Persist a marketplace transaction to Commerce API for durable storage.
+ * Commerce is the source of truth; the in-memory log is a hot cache only.
+ */
+export async function persistTransaction(tx: MarketplaceTransaction): Promise<void> {
+  const baseUrl = getCommerceBaseUrl();
+  const headers = getCommerceHeaders();
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10_000);
+  try {
+    const response = await fetch(`${baseUrl}/api/v1/marketplace/transactions`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        requestId: tx.requestId,
+        buyerUserId: tx.buyerUserId,
+        buyerOrgId: tx.buyerOrgId,
+        sellerNodeId: tx.sellerNodeId,
+        sellerUserId: tx.sellerUserId,
+        model: tx.model,
+        inputTokens: tx.inputTokens,
+        outputTokens: tx.outputTokens,
+        buyerCostCents: tx.buyerCostCents,
+        sellerEarningsCents: tx.sellerEarningsCents,
+        platformFeeCents: tx.platformFeeCents,
+        aiTokenPayout: tx.aiTokenPayout,
+        timestamp: tx.timestamp,
+        durationMs: tx.durationMs,
+      }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errText = await response.text().catch(() => "");
+      throw new Error(`Commerce API ${response.status}: ${errText.substring(0, 200)}`);
+    }
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Fetch recent transactions from Commerce API (source of truth).
+ * Used by the marketplace.transactions WS method and payout processing.
+ * Falls back to empty array on failure (Commerce unavailable at startup is acceptable).
+ */
+export async function fetchTransactionsFromCommerce(
+  limit = 1000,
+): Promise<MarketplaceTransaction[]> {
+  const baseUrl = getCommerceBaseUrl();
+  const headers = getCommerceHeaders();
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10_000);
+  try {
+    const response = await fetch(`${baseUrl}/api/v1/marketplace/transactions?limit=${limit}`, {
+      method: "GET",
+      headers,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      console.warn(`[marketplace] Failed to fetch transactions from Commerce: ${response.status}`);
+      return [];
+    }
+
+    const data = (await response.json()) as { transactions?: MarketplaceTransaction[] };
+    return data.transactions ?? [];
+  } catch (err) {
+    console.warn(
+      `[marketplace] Failed to fetch transactions from Commerce: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function getCommerceBaseUrl(): string {
+  return (process.env.COMMERCE_API_URL ?? "http://commerce.hanzo.svc.cluster.local:8001").replace(
+    /\/+$/,
+    "",
+  );
+}
+
+function getCommerceHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+  if (process.env.COMMERCE_SERVICE_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.COMMERCE_SERVICE_TOKEN}`;
+  }
+  return headers;
 }
 
 /** Deposit seller earnings into their Commerce wallet via billing/deposit. */
