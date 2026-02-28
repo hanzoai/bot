@@ -38,6 +38,10 @@ import { resolveNodeCommandAllowlist } from "../../node-command-policy.js";
 import { checkBrowserOrigin } from "../../origin-check.js";
 import { GATEWAY_CLIENT_IDS } from "../../protocol/client-info.js";
 import {
+  resolveAuthConnectErrorDetailCode,
+  resolveDeviceAuthConnectErrorDetailCode,
+} from "../../protocol/connect-error-details.js";
+import {
   type ConnectParams,
   ErrorCodes,
   type ErrorShape,
@@ -350,7 +354,9 @@ export function attachGatewayWsMessageHandler(params: {
         const allowControlUiBypass = allowInsecureControlUi;
         const device = deviceRaw;
 
-        const hasDeviceTokenCandidate = Boolean(connectParams.auth?.token && device);
+        const hasDeviceTokenCandidate = Boolean(
+          (connectParams.auth?.token || connectParams.auth?.deviceToken) && device,
+        );
         // Browser-origin connections use the non-loopback-exempt rate limiter to prevent
         // brute-force attacks from browser-injected WebSocket connections on localhost.
         const effectiveRateLimiter =
@@ -434,7 +440,9 @@ export function attachGatewayWsMessageHandler(params: {
             type: "res",
             id: frame.id,
             ok: false,
-            error: errorShape(ErrorCodes.INVALID_REQUEST, authMessage),
+            error: errorShape(ErrorCodes.INVALID_REQUEST, authMessage, {
+              details: { code: resolveAuthConnectErrorDetailCode(failedAuth.reason) },
+            }),
           });
           close(1008, truncateCloseReason(authMessage));
         };
@@ -504,7 +512,12 @@ export function attachGatewayWsMessageHandler(params: {
               type: "res",
               id: frame.id,
               ok: false,
-              error: errorShape(ErrorCodes.INVALID_REQUEST, "device identity mismatch"),
+              error: errorShape(ErrorCodes.INVALID_REQUEST, "device identity mismatch", {
+                details: {
+                  code: resolveDeviceAuthConnectErrorDetailCode("device-id-mismatch"),
+                  reason: "device-id-mismatch",
+                },
+              }),
             });
             close(1008, "device identity mismatch");
             return;
@@ -524,7 +537,12 @@ export function attachGatewayWsMessageHandler(params: {
               type: "res",
               id: frame.id,
               ok: false,
-              error: errorShape(ErrorCodes.INVALID_REQUEST, "device signature expired"),
+              error: errorShape(ErrorCodes.INVALID_REQUEST, "device signature expired", {
+                details: {
+                  code: resolveDeviceAuthConnectErrorDetailCode("device-signature-stale"),
+                  reason: "device-signature-stale",
+                },
+              }),
             });
             close(1008, "device signature expired");
             return;
@@ -542,7 +560,12 @@ export function attachGatewayWsMessageHandler(params: {
               type: "res",
               id: frame.id,
               ok: false,
-              error: errorShape(ErrorCodes.INVALID_REQUEST, "device nonce required"),
+              error: errorShape(ErrorCodes.INVALID_REQUEST, "device nonce required", {
+                details: {
+                  code: resolveDeviceAuthConnectErrorDetailCode("device-nonce-missing"),
+                  reason: "device-nonce-missing",
+                },
+              }),
             });
             close(1008, "device nonce required");
             return;
@@ -558,7 +581,12 @@ export function attachGatewayWsMessageHandler(params: {
               type: "res",
               id: frame.id,
               ok: false,
-              error: errorShape(ErrorCodes.INVALID_REQUEST, "device nonce mismatch"),
+              error: errorShape(ErrorCodes.INVALID_REQUEST, "device nonce mismatch", {
+                details: {
+                  code: resolveDeviceAuthConnectErrorDetailCode("device-nonce-mismatch"),
+                  reason: "device-nonce-mismatch",
+                },
+              }),
             });
             close(1008, "device nonce mismatch");
             return;
@@ -593,7 +621,12 @@ export function attachGatewayWsMessageHandler(params: {
               type: "res",
               id: frame.id,
               ok: false,
-              error: errorShape(ErrorCodes.INVALID_REQUEST, "device signature invalid"),
+              error: errorShape(ErrorCodes.INVALID_REQUEST, "device signature invalid", {
+                details: {
+                  code: resolveDeviceAuthConnectErrorDetailCode("device-signature"),
+                  reason: "device-signature",
+                },
+              }),
             });
             close(1008, "device signature invalid");
           };
@@ -623,7 +656,11 @@ export function attachGatewayWsMessageHandler(params: {
           }
         }
 
-        if (!authOk && connectParams.auth?.token && device) {
+        // Attempt device-token verification when shared-token auth failed.
+        // Accept either auth.deviceToken (dedicated field) or auth.token as the
+        // device token candidate so clients have flexibility in how they present it.
+        const deviceTokenCandidate = connectParams.auth?.deviceToken || connectParams.auth?.token;
+        if (!authOk && deviceTokenCandidate && device) {
           if (effectiveRateLimiter) {
             const deviceRateCheck = effectiveRateLimiter.check(
               clientIp,
@@ -641,7 +678,7 @@ export function attachGatewayWsMessageHandler(params: {
           if (!authResult.rateLimited) {
             const tokenCheck = await verifyDeviceToken({
               deviceId: device.id,
-              token: connectParams.auth.token,
+              token: deviceTokenCandidate,
               role,
               scopes,
             });
@@ -844,7 +881,11 @@ export function attachGatewayWsMessageHandler(params: {
           type: "hello-ok",
           protocol: PROTOCOL_VERSION,
           server: {
-            version: process.env.BOT_VERSION ?? process.env.npm_package_version ?? "dev",
+            version:
+              (process.env.BOT_VERSION?.trim() || undefined) ??
+              (process.env.BOT_SERVICE_VERSION?.trim() || undefined) ??
+              (process.env.npm_package_version?.trim() || undefined) ??
+              "dev",
             commit: process.env.GIT_COMMIT,
             host: os.hostname(),
             connId,
