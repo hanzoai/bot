@@ -102,7 +102,8 @@ async function setupGatewayTestHome() {
   tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gateway-home-"));
   process.env.HOME = tempHome;
   process.env.USERPROFILE = tempHome;
-  process.env.BOT_STATE_DIR = path.join(tempHome, ".bot");
+  await fs.mkdir(path.join(tempHome, ".hanzo/bot"), { recursive: true });
+  process.env.BOT_STATE_DIR = path.join(tempHome, ".hanzo/bot");
   delete process.env.BOT_CONFIG_PATH;
 }
 
@@ -293,6 +294,37 @@ export async function occupyPort(): Promise<{
       const port = (server.address() as AddressInfo).port;
       resolve({ server, port });
     });
+  });
+}
+
+const CONNECT_CHALLENGE_NONCE_KEY = "__botTestConnectChallengeNonce";
+const CONNECT_CHALLENGE_TRACKED_KEY = "__botTestConnectChallengeTracked";
+type TrackedWs = WebSocket & Record<string, unknown>;
+
+export function getTrackedConnectChallengeNonce(ws: WebSocket): string | undefined {
+  const tracked = (ws as TrackedWs)[CONNECT_CHALLENGE_NONCE_KEY];
+  return typeof tracked === "string" && tracked.trim().length > 0 ? tracked.trim() : undefined;
+}
+
+export function trackConnectChallengeNonce(ws: WebSocket): void {
+  const trackedWs = ws as TrackedWs;
+  if (trackedWs[CONNECT_CHALLENGE_TRACKED_KEY] === true) {
+    return;
+  }
+  trackedWs[CONNECT_CHALLENGE_TRACKED_KEY] = true;
+  ws.on("message", (data) => {
+    try {
+      const obj = JSON.parse(rawDataToString(data)) as Record<string, unknown>;
+      if (obj.type !== "event" || obj.event !== "connect.challenge") {
+        return;
+      }
+      const nonce = (obj.payload as { nonce?: unknown } | undefined)?.nonce;
+      if (typeof nonce === "string" && nonce.trim().length > 0) {
+        trackedWs[CONNECT_CHALLENGE_NONCE_KEY] = nonce.trim();
+      }
+    } catch {
+      // ignore parse errors in nonce tracker
+    }
   });
 }
 
