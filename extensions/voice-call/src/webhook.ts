@@ -348,8 +348,26 @@ export class VoiceCallWebhookServer {
       return;
     }
 
-    // Parse events
-    const result = this.provider.parseWebhookEvent(ctx);
+    // Reject requests where verification succeeded but no request key was produced
+    if (!verification.verifiedRequestKey) {
+      console.warn("[voice-call] Webhook verification succeeded but no request key produced");
+      res.statusCode = 401;
+      res.end("Unauthorized");
+      return;
+    }
+
+    // Acknowledge replayed requests without side-effects
+    if (verification.isReplay) {
+      console.log("[voice-call] Acknowledged replayed webhook request, skipping event processing");
+      res.statusCode = 200;
+      res.end("OK");
+      return;
+    }
+
+    // Parse events, forwarding the verified request key
+    const result = this.provider.parseWebhookEvent(ctx, {
+      verifiedRequestKey: verification.verifiedRequestKey,
+    });
 
     // Process each event
     for (const event of result.events) {

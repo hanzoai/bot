@@ -61,7 +61,7 @@ vi.mock("../media/store.js", () => {
       ) => {
         saveMediaBufferSpy(buffer, contentType, subdir, _maxBytes, originalFilename);
         const home = process.env.HOME ?? process.env.USERPROFILE ?? nodeOs.homedir();
-        const dir = nodePath.join(home, ".bot", "media", subdir ?? "inbound");
+        const dir = nodePath.join(home, ".hanzo", "bot", "media", subdir ?? "inbound");
         await nodeFs.mkdir(dir, { recursive: true });
         const uuid = nodeCrypto.randomUUID();
         const mime = contentType?.split(";")[0]?.trim() ?? "";
