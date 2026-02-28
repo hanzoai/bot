@@ -121,7 +121,10 @@ function providerHint(provider: SecretProviderConfig): string {
   if (provider.source === "file") {
     return `file (${provider.mode ?? "json"})`;
   }
-  return `exec (${provider.jsonOnly === false ? "json+text" : "json"})`;
+  if (provider.source === "kms") {
+    return "kms";
+  }
+  return `exec (${(provider as { jsonOnly?: boolean }).jsonOnly === false ? "json+text" : "json"})`;
 }
 
 function buildCandidates(config: BotConfig): ConfigureCandidate[] {
