@@ -64,8 +64,9 @@ export function checkBrowserOrigin(params: {
 
   const requestHost = normalizeHostHeader(params.requestHost);
   // Same-origin check: accept when the origin host matches the request Host header.
-  // This covers both tailscale serve (.ts.net) and standard same-origin requests.
-  if (requestHost && parsedOrigin.host === requestHost) {
+  // Gated behind allowHostHeaderOriginFallback to avoid trusting spoofable Host headers
+  // in environments that haven't opted in. Covers tailscale serve (.ts.net) etc.
+  if (params.allowHostHeaderOriginFallback && requestHost && parsedOrigin.host === requestHost) {
     return { ok: true };
   }
 
