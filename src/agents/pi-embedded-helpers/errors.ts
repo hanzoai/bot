@@ -53,7 +53,9 @@ export function isContextOverflowError(errorMessage?: string): boolean {
     (lower.includes("413") && lower.includes("too large")) ||
     lower.includes("exceeded model token limit") ||
     /(?:input|length).*(?:max_tokens|context).*(?:exceed|limit)/i.test(errorMessage) ||
-    /(?:exceed|exceeds).*(?:context|max_tokens).*(?:limit|length|window|budget)/i.test(errorMessage) ||
+    /(?:exceed|exceeds).*(?:context|max_tokens).*(?:limit|length|window|budget)/i.test(
+      errorMessage,
+    ) ||
     /(?:exceed|would exceed).*context\s+(?:budget|limit|window|length)/i.test(errorMessage) ||
     /上下文(?:过长|超出|长度超出)/i.test(errorMessage) ||
     /超出.*上下文/i.test(errorMessage) ||
