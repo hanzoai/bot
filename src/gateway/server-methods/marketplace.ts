@@ -179,7 +179,7 @@ export const marketplaceHandlers: GatewayRequestHandlers = {
     if (transactions.length === 0) {
       // Commerce unavailable or empty -- fall back to in-memory hot cache.
       const txLog = getTransactionLog();
-      transactions = txLog.slice(-limit) as typeof transactions;
+      transactions = txLog.slice(-limit);
     }
 
     respond(true, {

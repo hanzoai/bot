@@ -1,5 +1,3 @@
-import { IRC_FIELD_LABELS } from "./schema.irc.js";
-
 export const FIELD_LABELS: Record<string, string> = {
   "meta.lastTouchedVersion": "Config Last Touched Version",
   "meta.lastTouchedAt": "Config Last Touched At",
