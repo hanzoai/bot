@@ -10,6 +10,11 @@ import {
   requestNodePairing,
   verifyNodeToken,
 } from "../../infra/node-pairing.js";
+import {
+  loadApnsRegistration,
+  resolveApnsAuthConfigFromEnv,
+  sendApnsBackgroundWake,
+} from "../../infra/push-apns.js";
 import { isNodeCommandAllowed, resolveNodeCommandAllowlist } from "../node-command-policy.js";
 import { sanitizeNodeInvokeParamsForForwarding } from "../node-invoke-sanitize.js";
 import {
@@ -36,6 +41,11 @@ import {
   uniqueSortedStrings,
 } from "./nodes.helpers.js";
 
+// How long to poll for a node to reconnect after an APNs background wake.
+const APNS_WAKE_WAIT_TIMEOUT_MS = 3_000;
+// Poll interval when waiting for a woken node to reconnect.
+const APNS_WAKE_POLL_INTERVAL_MS = 100;
+
 function isNodeEntry(entry: { role?: string; roles?: string[] }) {
   if (entry.role === "node") {
     return true;
@@ -43,6 +53,53 @@ function isNodeEntry(entry: { role?: string; roles?: string[] }) {
   if (Array.isArray(entry.roles) && entry.roles.includes("node")) {
     return true;
   }
+  return false;
+}
+
+/**
+ * Attempt to wake a disconnected iOS node via APNs and wait for it to
+ * reconnect.  Returns the reconnected node session if it comes online within
+ * `APNS_WAKE_WAIT_TIMEOUT_MS`, or `null` if it does not.  Always sends one
+ * retry wake on timeout so the OS has a second chance to deliver the push.
+ */
+async function tryApnsWakeAndWait(
+  nodeId: string,
+  getNode: (id: string) => unknown,
+): Promise<boolean> {
+  const [registration, authResult] = await Promise.all([
+    loadApnsRegistration(nodeId),
+    resolveApnsAuthConfigFromEnv(),
+  ]);
+  if (!registration || !authResult.ok) {
+    // No APNs config available; fall through to the standard not-connected path.
+    return false;
+  }
+
+  // Send the first background wake push.
+  await sendApnsBackgroundWake({
+    auth: authResult.value,
+    registration,
+    nodeId,
+    wakeReason: "node.invoke",
+  });
+
+  // Poll for the node to come back online.
+  const deadline = Date.now() + APNS_WAKE_WAIT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    await new Promise<void>((r) => setTimeout(r, APNS_WAKE_POLL_INTERVAL_MS));
+    if (getNode(nodeId)) {
+      return true;
+    }
+  }
+
+  // Node did not reconnect in time; send one retry wake so the OS has a
+  // second chance, then report not connected to the caller.
+  await sendApnsBackgroundWake({
+    auth: authResult.value,
+    registration,
+    nodeId,
+    wakeReason: "node.invoke.retry",
+  });
   return false;
 }
 
@@ -445,17 +502,24 @@ export const nodeHandlers: GatewayRequestHandlers = {
     await respondUnavailableOnThrow(respond, async () => {
       // Check both local and remote nodes. Local session is authoritative
       // when available; remote node info from KV is used for cross-pod routing.
-      const nodeSession = context.nodeRegistry.get(nodeId);
+      let nodeSession = context.nodeRegistry.get(nodeId);
       const remoteNode = !nodeSession ? await context.nodeRegistry.getRemoteNode(nodeId) : null;
       if (!nodeSession && !remoteNode) {
-        respond(
-          false,
-          undefined,
-          errorShape(ErrorCodes.UNAVAILABLE, "node not connected", {
-            details: { code: "NOT_CONNECTED" },
-          }),
-        );
-        return;
+        // Attempt APNs background wake and wait for the node to reconnect.
+        const reconnected = await tryApnsWakeAndWait(nodeId, (id) => context.nodeRegistry.get(id));
+        if (reconnected) {
+          nodeSession = context.nodeRegistry.get(nodeId);
+        }
+        if (!nodeSession) {
+          respond(
+            false,
+            undefined,
+            errorShape(ErrorCodes.UNAVAILABLE, "node not connected", {
+              details: { code: "NOT_CONNECTED" },
+            }),
+          );
+          return;
+        }
       }
       const declaredCommands = nodeSession?.commands ?? remoteNode?.commands ?? [];
       const cfg = loadConfig();
