@@ -37,6 +37,10 @@ export function isContextOverflowError(errorMessage?: string): boolean {
     lower.includes("context window") ||
     lower.includes("context length") ||
     lower.includes("maximum context length");
+  // Exclude reasoning-required errors that look like invalid request
+  if (/reasoning is mandatory/i.test(errorMessage)) {
+    return false;
+  }
   return (
     lower.includes("request_too_large") ||
     lower.includes("request exceeds the maximum size") ||
@@ -46,7 +50,14 @@ export function isContextOverflowError(errorMessage?: string): boolean {
     lower.includes("exceeds model context window") ||
     (hasRequestSizeExceeds && hasContextWindow) ||
     lower.includes("context overflow:") ||
-    (lower.includes("413") && lower.includes("too large"))
+    (lower.includes("413") && lower.includes("too large")) ||
+    lower.includes("exceeded model token limit") ||
+    /(?:input|length).*(?:max_tokens|context).*(?:exceed|limit)/i.test(errorMessage) ||
+    /(?:exceed|exceeds).*(?:context|max_tokens).*(?:limit|length|window|budget)/i.test(errorMessage) ||
+    /(?:exceed|would exceed).*context\s+(?:budget|limit|window|length)/i.test(errorMessage) ||
+    /上下文(?:过长|超出|长度超出)/i.test(errorMessage) ||
+    /超出.*上下文/i.test(errorMessage) ||
+    /压缩上下文/i.test(errorMessage)
   );
 }
 
@@ -61,6 +72,10 @@ export function isLikelyContextOverflowError(errorMessage?: string): boolean {
     return false;
   }
   if (CONTEXT_WINDOW_TOO_SMALL_RE.test(errorMessage)) {
+    return false;
+  }
+  // Reasoning-required errors are not context overflow
+  if (/reasoning is mandatory|requires reasoning/i.test(errorMessage)) {
     return false;
   }
   // Rate limit errors can match the broad CONTEXT_OVERFLOW_HINT_RE pattern
@@ -113,7 +128,7 @@ const HTTP_STATUS_PREFIX_RE = /^(?:http\s*)?(\d{3})\s+(.+)$/i;
 const HTTP_STATUS_CODE_PREFIX_RE = /^(?:http\s*)?(\d{3})(?:\s+([\s\S]+))?$/i;
 const HTML_ERROR_PREFIX_RE = /^\s*(?:<!doctype\s+html\b|<html\b)/i;
 const CLOUDFLARE_HTML_ERROR_CODES = new Set([521, 522, 523, 524, 525, 526, 530]);
-const TRANSIENT_HTTP_ERROR_CODES = new Set([500, 502, 503, 521, 522, 523, 524, 529]);
+const TRANSIENT_HTTP_ERROR_CODES = new Set([500, 502, 503, 504, 521, 522, 523, 524, 529]);
 const HTTP_ERROR_HINTS = [
   "error",
   "bad request",
@@ -591,6 +606,11 @@ const ERROR_PATTERNS = {
     "quota exceeded",
     "resource_exhausted",
     "usage limit",
+    /\bcooling down\b/i,
+    /\bmodel_cooldown\b/i,
+    /\bhigh demand\b/i,
+    /\bservice unavailable\b/i,
+    /\b"status"\s*:\s*"UNAVAILABLE"/i,
   ],
   overloaded: [/overloaded_error|"type"\s*:\s*"overloaded_error"/i, "overloaded"],
   timeout: [
@@ -627,6 +647,8 @@ const ERROR_PATTERNS = {
     /\b403\b/,
     "no credentials found",
     "no api key found",
+    "insufficient permissions",
+    /\bmissing scopes\b/i,
   ],
   format: [
     "string should match pattern",
@@ -665,10 +687,30 @@ export function isTimeoutErrorMessage(raw: string): boolean {
   return matchesErrorPatterns(raw, ERROR_PATTERNS.timeout);
 }
 
+/** Maximum message length for loose billing keyword matching.
+ * Longer messages are likely assistant responses, not error payloads. */
+const BILLING_LOOSE_MAX_LEN = 512;
+
+/** Strict billing patterns that match structured API error payloads even in long text.
+ * Only matches structured / unambiguous 402 markers (JSON status, HTTP code prefix, explicit error codes).
+ * Excludes casual "returned 402 records" style text that appears in analytics/log output. */
+const BILLING_STRICT_PATTERNS: readonly ErrorPattern[] = [
+  /["']?(?:status|code)["']?\s*[:=]\s*402\b/i,
+  /\bhttp\s*402\b/i,
+  /\berror(?:\s+code)?\s*[:=]?\s*402\b/i,
+  /^\s*402\s+payment/i,
+  "payment required",
+];
+
 export function isBillingErrorMessage(raw: string): boolean {
   const value = raw.toLowerCase();
   if (!value) {
     return false;
+  }
+  // For long messages (likely assistant/conversational text), only match
+  // explicit HTTP 402 / structured error patterns to avoid false positives.
+  if (raw.length > BILLING_LOOSE_MAX_LEN) {
+    return matchesErrorPatterns(value, BILLING_STRICT_PATTERNS);
   }
   if (matchesErrorPatterns(value, ERROR_PATTERNS.billing)) {
     return true;
@@ -795,8 +837,14 @@ export function classifyFailoverReason(raw: string): FailoverReason | null {
   if (isTimeoutErrorMessage(raw)) {
     return "timeout";
   }
+  if (isAuthPermanentErrorMessage(raw)) {
+    return "auth_permanent";
+  }
   if (isAuthErrorMessage(raw)) {
     return "auth";
+  }
+  if (isApiErrorInternalServerFailure(raw)) {
+    return "timeout";
   }
   if (isModelNotFoundErrorMessage(raw)) {
     return "model_not_found";
@@ -816,19 +864,38 @@ export function isFailoverAssistantError(msg: AssistantMessage | undefined): boo
 }
 
 const AUTH_PERMANENT_PATTERNS: readonly ErrorPattern[] = [
-  /invalid[_ ]?api[_ ]?key\b/,
+  /\binvalid_api_key\b/i,
   /api[_ ]?key[_ ]?(?:revoked|deactivated|deleted)\b/,
   /key[_ ]has[_ ]been[_ ](?:disabled|revoked)\b/,
   /account[_ ]has[_ ]been[_ ]deactivated\b/,
   /could[_ ]not[_ ]authenticate[_ ]api[_ ]key\b/,
   /could[_ ]not[_ ]validate[_ ]credentials\b/,
-  /api_key_revoked\b/,
-  /api_key_deleted\b/,
+  /api_key_revoked\b/i,
+  /api_key_deleted\b/i,
 ];
 
 /** Returns true for permanent auth failures (revoked/deleted/deactivated credentials). */
 export function isAuthPermanentErrorMessage(raw: string): boolean {
   return matchesErrorPatterns(raw, AUTH_PERMANENT_PATTERNS);
+}
+
+/**
+ * Returns true when the error is a JSON api_error payload indicating an
+ * internal server failure. These are transient and should be retried.
+ */
+function isApiErrorInternalServerFailure(raw: string): boolean {
+  const payload = parseApiErrorPayload(raw);
+  if (!payload) {
+    return false;
+  }
+  if (payload.type !== "error") {
+    return false;
+  }
+  const err = payload.error as Record<string, unknown> | undefined;
+  if (!err || typeof err !== "object") {
+    return false;
+  }
+  return err.type === "api_error";
 }
 
 /** Returns true when the error indicates that the requested model was not found. */
