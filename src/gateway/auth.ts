@@ -406,6 +406,11 @@ export async function authorizeGatewayConnect(params: {
     };
   }
 
+  // No-auth mode: all connections are accepted without any shared secret.
+  if (auth.mode === "none") {
+    return { ok: true, method: "none" };
+  }
+
   const limiter = params.rateLimiter;
   const ip =
     params.clientIp ?? resolveRequestClientIp(req, trustedProxies) ?? req?.socket?.remoteAddress;
