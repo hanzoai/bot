@@ -9,7 +9,6 @@ describe("buildControlUiCspHeader", () => {
     expect(csp).toContain("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com");
   });
 
-<<<<<<< HEAD
   it("allows trusted frame ancestors for Playground embedding", () => {
     const csp = buildControlUiCspHeader();
     expect(csp).toContain(
@@ -31,11 +30,5 @@ describe("buildControlUiCspHeader", () => {
   it("includes IAM server in connect-src when provided", () => {
     const csp = buildControlUiCspHeader("https://hanzo.id");
     expect(csp).toContain("connect-src 'self' ws: wss: https://hanzo.id");
-=======
-  it("allows Google Fonts for style and font loading", () => {
-    const csp = buildControlUiCspHeader();
-    expect(csp).toContain("https://fonts.googleapis.com");
-    expect(csp).toContain("font-src 'self' https://fonts.gstatic.com");
->>>>>>> d123ade0c (fix(gateway): allow required Google Fonts origins in Control UI CSP (#29279))
   });
 });
