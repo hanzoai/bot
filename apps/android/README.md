@@ -2,12 +2,11 @@
 
 Modern Android node app: connects to the **Gateway WebSocket** (`_bot-gw._tcp`) and exposes **Canvas + Chat + Camera**.
 
-<<<<<<< HEAD
 Notes:
 - The node keeps the connection alive via a **foreground service** (persistent notification with a Disconnect action).
 - Chat always uses the shared session key **`main`** (same session across iOS/macOS/WebChat/Android).
 - Supports modern Android only (`minSdk 31`, Kotlin + Jetpack Compose).
-=======
+
 ### Rebuild Checklist
 
 - [x] New 4-step onboarding flow
@@ -24,7 +23,6 @@ Notes:
 - [x] Voice tab full functionality
 - [x] Screen tab full functionality
 - [ ] Full end-to-end QA and release hardening
->>>>>>> 7f9274b71 (chore(android): add kotlin lint/format tooling)
 
 ## Open in Android Studio
 - Open the folder `apps/android`.

@@ -1,44 +1,6 @@
 import { LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import type { ControlUiBootstrapIamConfig } from "../../../src/gateway/control-ui-contract.js";
-import type { EventLogEntry } from "./app-events.ts";
-import type { AppViewState } from "./app-view-state.ts";
-import type { CronFieldErrors } from "./controllers/cron.ts";
-import type { DevicePairingList } from "./controllers/devices.ts";
-import type { ExecApprovalRequest } from "./controllers/exec-approval.ts";
-import type { ExecApprovalsFile, ExecApprovalsSnapshot } from "./controllers/exec-approvals.ts";
-import type { SkillMessage } from "./controllers/skills.ts";
-import type { GatewayBrowserClient, GatewayHelloOk } from "./gateway.ts";
-import type { Tab } from "./navigation.ts";
-import type { ResolvedTheme, ThemeMode } from "./theme.ts";
-import type {
-  AgentsListResult,
-  AgentsFilesListResult,
-  AgentIdentityResult,
-  ConfigSnapshot,
-  ConfigUiHints,
-  CronDeliveryStatus,
-  CronJob,
-  CronJobsEnabledFilter,
-  CronJobsSortBy,
-  CronRunLogEntry,
-  CronRunScope,
-  CronRunsStatusFilter,
-  CronRunsStatusValue,
-  CronSortDir,
-  CronStatus,
-  HealthSnapshot,
-  LogEntry,
-  LogLevel,
-  PresenceEntry,
-  ChannelsStatusSnapshot,
-  SessionsListResult,
-  SkillStatusReport,
-  StatusSummary,
-  NostrProfile,
-} from "./types.ts";
-import type { NostrProfileFormState } from "./views/channels.nostr-profile-form.ts";
-import { i18n, I18nController, type Locale } from "../i18n/index.ts";
+import { i18n, I18nController, isSupportedLocale } from "../i18n/index.ts";
 import {
   handleChannelConfigReload as handleChannelConfigReloadInternal,
   handleChannelConfigSave as handleChannelConfigSaveInternal,
@@ -58,6 +20,7 @@ import {
   removeQueuedMessage as removeQueuedMessageInternal,
 } from "./app-chat.ts";
 import { DEFAULT_CRON_FORM, DEFAULT_LOG_LEVEL_FILTERS } from "./app-defaults.ts";
+import type { EventLogEntry } from "./app-events.ts";
 import { connectGateway as connectGatewayInternal } from "./app-gateway.ts";
 import {
   handleConnected,
@@ -85,12 +48,43 @@ import {
   resetToolStream as resetToolStreamInternal,
   type ToolStreamEntry,
   type CompactionStatus,
+  type FallbackStatus,
 } from "./app-tool-stream.ts";
+import type { AppViewState } from "./app-view-state.ts";
 import { normalizeAssistantIdentity } from "./assistant-identity.ts";
 import { loadAssistantIdentity as loadAssistantIdentityInternal } from "./controllers/assistant-identity.ts";
-import { startIamLogin, getIamSignupUrl, iamLogout } from "./controllers/iam-auth.ts";
+import type { CronFieldErrors } from "./controllers/cron.ts";
+import type { DevicePairingList } from "./controllers/devices.ts";
+import type { ExecApprovalRequest } from "./controllers/exec-approval.ts";
+import type { ExecApprovalsFile, ExecApprovalsSnapshot } from "./controllers/exec-approvals.ts";
+import type { SkillMessage } from "./controllers/skills.ts";
+import type { GatewayBrowserClient, GatewayHelloOk } from "./gateway.ts";
+import type { Tab } from "./navigation.ts";
 import { loadSettings, type UiSettings } from "./storage.ts";
+import type { ResolvedTheme, ThemeMode } from "./theme.ts";
+import type {
+  AgentsListResult,
+  AgentsFilesListResult,
+  AgentIdentityResult,
+  ConfigSnapshot,
+  ConfigUiHints,
+  CronJob,
+  CronRunLogEntry,
+  CronStatus,
+  HealthSnapshot,
+  LogEntry,
+  LogLevel,
+  PresenceEntry,
+  ChannelsStatusSnapshot,
+  SessionsListResult,
+  SkillStatusReport,
+  ToolsCatalogResult,
+  StatusSummary,
+  NostrProfile,
+} from "./types.ts";
 import { type ChatAttachment, type ChatQueueItem, type CronFormState } from "./ui-types.ts";
+import { generateUUID } from "./uuid.ts";
+import type { NostrProfileFormState } from "./views/channels.nostr-profile-form.ts";
 
 declare global {
   interface Window {
@@ -116,14 +110,12 @@ function resolveOnboardingMode(): boolean {
 @customElement("bot-app")
 export class BotApp extends LitElement {
   private i18nController = new I18nController(this);
+  clientInstanceId = generateUUID();
   @state() settings: UiSettings = loadSettings();
   constructor() {
     super();
-    if (this.settings.locale) {
-      const supportedLocales: Locale[] = ["en", "zh-CN", "zh-TW", "pt-BR"];
-      if (supportedLocales.includes(this.settings.locale as Locale)) {
-        void i18n.setLocale(this.settings.locale as Locale);
-      }
+    if (isSupportedLocale(this.settings.locale)) {
+      void i18n.setLocale(this.settings.locale);
     }
   }
   @state() password = "";
@@ -134,6 +126,7 @@ export class BotApp extends LitElement {
   @state() themeResolved: ResolvedTheme = "dark";
   @state() hello: GatewayHelloOk | null = null;
   @state() lastError: string | null = null;
+  @state() lastErrorCode: string | null = null;
   @state() eventLog: EventLogEntry[] = [];
   private eventLogBuffer: EventLogEntry[] = [];
   private toolStreamSyncTimer: number | null = null;
@@ -142,11 +135,6 @@ export class BotApp extends LitElement {
   @state() assistantName = bootAssistantIdentity.name;
   @state() assistantAvatar = bootAssistantIdentity.avatar;
   @state() assistantAgentId = bootAssistantIdentity.agentId ?? null;
-
-  @state() authMode: string | null = null;
-  @state() iamConfig: ControlUiBootstrapIamConfig | null = null;
-  @state() iamUser: { email?: string; name?: string; avatar?: string } | null = null;
-  @state() iamLoggingIn = false;
 
   @state() sessionKey = this.settings.sessionKey;
   @state() chatLoading = false;
@@ -158,6 +146,7 @@ export class BotApp extends LitElement {
   @state() chatStreamStartedAt: number | null = null;
   @state() chatRunId: string | null = null;
   @state() compactionStatus: CompactionStatus | null = null;
+  @state() fallbackStatus: FallbackStatus | null = null;
   @state() chatAvatarUrl: string | null = null;
   @state() chatThinkingLevel: string | null = null;
   @state() chatQueue: ChatQueueItem[] = [];
@@ -182,14 +171,15 @@ export class BotApp extends LitElement {
   @state() execApprovalsSelectedAgent: string | null = null;
   @state() execApprovalsTarget: "gateway" | "node" = "gateway";
   @state() execApprovalsTargetNodeId: string | null = null;
-  @state() screenNodeId: string | null = null;
   @state() execApprovalQueue: ExecApprovalRequest[] = [];
   @state() execApprovalBusy = false;
   @state() execApprovalError: string | null = null;
   @state() pendingGatewayUrl: string | null = null;
 
   @state() configLoading = false;
-  @state() configRaw = "{\n}\n";
+  @state() configRaw = "{
+}
+";
   @state() configRawOriginal = "";
   @state() configValid: boolean | null = null;
   @state() configIssues: unknown[] = [];
@@ -220,7 +210,6 @@ export class BotApp extends LitElement {
   @state() whatsappBusy = false;
   @state() nostrProfileFormState: NostrProfileFormState | null = null;
   @state() nostrProfileAccountId: string | null = null;
-  @state() expandedChannel: string | null = null;
 
   @state() presenceLoading = false;
   @state() presenceEntries: PresenceEntry[] = [];
@@ -231,6 +220,9 @@ export class BotApp extends LitElement {
   @state() agentsList: AgentsListResult | null = null;
   @state() agentsError: string | null = null;
   @state() agentsSelectedId: string | null = null;
+  @state() toolsCatalogLoading = false;
+  @state() toolsCatalogError: string | null = null;
+  @state() toolsCatalogResult: ToolsCatalogResult | null = null;
   @state() agentsPanel: "overview" | "files" | "tools" | "skills" | "channels" | "cron" =
     "overview";
   @state() agentFilesLoading = false;
@@ -247,10 +239,6 @@ export class BotApp extends LitElement {
   @state() agentSkillsError: string | null = null;
   @state() agentSkillsReport: SkillStatusReport | null = null;
   @state() agentSkillsAgentId: string | null = null;
-
-  @state() toolsCatalogLoading = false;
-  @state() toolsCatalogError: string | null = null;
-  @state() toolsCatalogResult: import("./types.js").ToolsCatalogResult | null = null;
 
   @state() sessionsLoading = false;
   @state() sessionsResult: SessionsListResult | null = null;
@@ -282,6 +270,8 @@ export class BotApp extends LitElement {
   @state() usageTimeSeriesBreakdownMode: "total" | "by-type" = "by-type";
   @state() usageTimeSeries: import("./types.js").SessionUsageTimeSeries | null = null;
   @state() usageTimeSeriesLoading = false;
+  @state() usageTimeSeriesCursorStart: number | null = null;
+  @state() usageTimeSeriesCursorEnd: number | null = null;
   @state() usageSessionLogs: import("./views/usage.js").SessionLogEntry[] | null = null;
   @state() usageSessionLogsLoading = false;
   @state() usageSessionLogsExpanded = false;
@@ -314,12 +304,6 @@ export class BotApp extends LitElement {
   // Non-reactive (don’t trigger renders just for timer bookkeeping).
   usageQueryDebounceTimer: number | null = null;
 
-  @state() marketplaceLoading = false;
-  @state() marketplaceStatus:
-    | import("./controllers/marketplace.js").MarketplaceStatusResult
-    | null = null;
-  @state() marketplaceError: string | null = null;
-
   @state() cronLoading = false;
   @state() cronJobsLoadingMore = false;
   @state() cronJobs: CronJob[] = [];
@@ -328,11 +312,6 @@ export class BotApp extends LitElement {
   @state() cronJobsNextOffset: number | null = null;
   @state() cronJobsLimit = 50;
   @state() cronJobsQuery = "";
-<<<<<<< HEAD
-  @state() cronJobsEnabledFilter: CronJobsEnabledFilter = "all";
-  @state() cronJobsSortBy: CronJobsSortBy = "nextRunAtMs";
-  @state() cronJobsSortDir: CronSortDir = "asc";
-=======
   @state() cronJobsEnabledFilter: import("./types.js").CronJobsEnabledFilter = "all";
   @state() cronJobsScheduleKindFilter: import("./controllers/cron.js").CronJobsScheduleKindFilter =
     "all";
@@ -340,7 +319,6 @@ export class BotApp extends LitElement {
     "all";
   @state() cronJobsSortBy: import("./types.js").CronJobsSortBy = "nextRunAtMs";
   @state() cronJobsSortDir: import("./types.js").CronSortDir = "asc";
->>>>>>> e3ba59dc7 (Control UI: add cron jobs schedule/status filters with reset (#9510))
   @state() cronStatus: CronStatus | null = null;
   @state() cronError: string | null = null;
   @state() cronForm: CronFormState = { ...DEFAULT_CRON_FORM };
@@ -353,13 +331,16 @@ export class BotApp extends LitElement {
   @state() cronRunsHasMore = false;
   @state() cronRunsNextOffset: number | null = null;
   @state() cronRunsLimit = 50;
-  @state() cronRunsScope: CronRunScope = "job";
-  @state() cronRunsStatuses: CronRunsStatusValue[] = [];
-  @state() cronRunsDeliveryStatuses: CronDeliveryStatus[] = [];
-  @state() cronRunsStatusFilter: CronRunsStatusFilter = "all";
+  @state() cronRunsScope: import("./types.js").CronRunScope = "all";
+  @state() cronRunsStatuses: import("./types.js").CronRunsStatusValue[] = [];
+  @state() cronRunsDeliveryStatuses: import("./types.js").CronDeliveryStatus[] = [];
+  @state() cronRunsStatusFilter: import("./types.js").CronRunsStatusFilter = "all";
   @state() cronRunsQuery = "";
-  @state() cronRunsSortDir: CronSortDir = "desc";
+  @state() cronRunsSortDir: import("./types.js").CronSortDir = "desc";
+  @state() cronModelSuggestions: string[] = [];
   @state() cronBusy = false;
+
+  @state() updateAvailable: import("./types.js").UpdateAvailable | null = null;
 
   @state() skillsLoading = false;
   @state() skillsReport: SkillStatusReport | null = null;
@@ -411,7 +392,6 @@ export class BotApp extends LitElement {
   basePath = "";
   private popStateHandler = () =>
     onPopStateInternal(this as unknown as Parameters<typeof onPopStateInternal>[0]);
-  postMessageHandler: ((event: MessageEvent) => void) | null = null;
   private themeMedia: MediaQueryList | null = null;
   private themeMediaHandler: ((event: MediaQueryListEvent) => void) | null = null;
   private topbarObserver: ResizeObserver | null = null;
@@ -440,25 +420,6 @@ export class BotApp extends LitElement {
 
   connect() {
     connectGatewayInternal(this as unknown as Parameters<typeof connectGatewayInternal>[0]);
-  }
-
-  connectGateway() {
-    connectGatewayInternal(this as unknown as Parameters<typeof connectGatewayInternal>[0]);
-  }
-
-  handleIamLogin() {
-    void startIamLogin(this as unknown as Parameters<typeof startIamLogin>[0]);
-  }
-
-  handleIamSignup() {
-    const url = getIamSignupUrl(this as unknown as Parameters<typeof getIamSignupUrl>[0]);
-    if (url) {
-      window.open(url, "_blank", "noopener");
-    }
-  }
-
-  handleIamLogout() {
-    iamLogout(this as unknown as Parameters<typeof iamLogout>[0]);
   }
 
   handleChatScroll(event: Event) {

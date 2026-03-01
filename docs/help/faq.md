@@ -14,7 +14,7 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
 
 - [Quick start and first-run setup]
   - [Im stuck what's the fastest way to get unstuck?](#im-stuck-whats-the-fastest-way-to-get-unstuck)
-  - [What's the recommended way to install and set up Bot?](#whats-the-recommended-way-to-install-and-set-up-openclaw)
+  - [What's the recommended way to install and set up Bot?](#whats-the-recommended-way-to-install-and-set-up-bot)
   - [How do I open the dashboard after onboarding?](#how-do-i-open-the-dashboard-after-onboarding)
   - [How do I authenticate the dashboard (token) on localhost vs remote?](#how-do-i-authenticate-the-dashboard-token-on-localhost-vs-remote)
   - [What runtime do I need?](#what-runtime-do-i-need)
@@ -23,18 +23,18 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [It is stuck on "wake up my friend" / onboarding will not hatch. What now?](#it-is-stuck-on-wake-up-my-friend-onboarding-will-not-hatch-what-now)
   - [Can I migrate my setup to a new machine (Mac mini) without redoing onboarding?](#can-i-migrate-my-setup-to-a-new-machine-mac-mini-without-redoing-onboarding)
   - [Where do I see what is new in the latest version?](#where-do-i-see-what-is-new-in-the-latest-version)
-  - [I can't access docs.bot.ai (SSL error). What now?](#i-cant-access-docsopenclawai-ssl-error-what-now)
+  - [I can't access docs.bot.ai (SSL error). What now?](#i-cant-access-docshanzoai-ssl-error-what-now)
   - [What's the difference between stable and beta?](#whats-the-difference-between-stable-and-beta)
   - [How do I install the beta version, and what's the difference between beta and dev?](#how-do-i-install-the-beta-version-and-whats-the-difference-between-beta-and-dev)
   - [How do I try the latest bits?](#how-do-i-try-the-latest-bits)
   - [How long does install and onboarding usually take?](#how-long-does-install-and-onboarding-usually-take)
   - [Installer stuck? How do I get more feedback?](#installer-stuck-how-do-i-get-more-feedback)
-  - [Windows install says git not found or bot not recognized](#windows-install-says-git-not-found-or-openclaw-not-recognized)
+  - [Windows install says git not found or bot not recognized](#windows-install-says-git-not-found-or-bot-not-recognized)
   - [The docs didn't answer my question - how do I get a better answer?](#the-docs-didnt-answer-my-question-how-do-i-get-a-better-answer)
-  - [How do I install Bot on Linux?](#how-do-i-install-openclaw-on-linux)
-  - [How do I install Bot on a VPS?](#how-do-i-install-openclaw-on-a-vps)
+  - [How do I install Bot on Linux?](#how-do-i-install-bot-on-linux)
+  - [How do I install Bot on a VPS?](#how-do-i-install-bot-on-a-vps)
   - [Where are the cloud/VPS install guides?](#where-are-the-cloudvps-install-guides)
-  - [Can I ask Bot to update itself?](#can-i-ask-openclaw-to-update-itself)
+  - [Can I ask Bot to update itself?](#can-i-ask-bot-to-update-itself)
   - [What does the onboarding wizard actually do?](#what-does-the-onboarding-wizard-actually-do)
   - [Do I need a Claude or OpenAI subscription to run this?](#do-i-need-a-claude-or-openai-subscription-to-run-this)
   - [Can I use Claude Max subscription without an API key](#can-i-use-claude-max-subscription-without-an-api-key)
@@ -50,24 +50,24 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [How do I keep hosted model traffic in a specific region?](#how-do-i-keep-hosted-model-traffic-in-a-specific-region)
   - [Do I have to buy a Mac Mini to install this?](#do-i-have-to-buy-a-mac-mini-to-install-this)
   - [Do I need a Mac mini for iMessage support?](#do-i-need-a-mac-mini-for-imessage-support)
-  - [If I buy a Mac mini to run Bot, can I connect it to my MacBook Pro?](#if-i-buy-a-mac-mini-to-run-openclaw-can-i-connect-it-to-my-macbook-pro)
+  - [If I buy a Mac mini to run Bot, can I connect it to my MacBook Pro?](#if-i-buy-a-mac-mini-to-run-bot-can-i-connect-it-to-my-macbook-pro)
   - [Can I use Bun?](#can-i-use-bun)
   - [Telegram: what goes in `allowFrom`?](#telegram-what-goes-in-allowfrom)
-  - [Can multiple people use one WhatsApp number with different Bot instances?](#can-multiple-people-use-one-whatsapp-number-with-different-openclaw-instances)
+  - [Can multiple people use one WhatsApp number with different Bot instances?](#can-multiple-people-use-one-whatsapp-number-with-different-bot-instances)
   - [Can I run a "fast chat" agent and an "Opus for coding" agent?](#can-i-run-a-fast-chat-agent-and-an-opus-for-coding-agent)
   - [Does Homebrew work on Linux?](#does-homebrew-work-on-linux)
   - [What's the difference between the hackable (git) install and npm install?](#whats-the-difference-between-the-hackable-git-install-and-npm-install)
   - [Can I switch between npm and git installs later?](#can-i-switch-between-npm-and-git-installs-later)
   - [Should I run the Gateway on my laptop or a VPS?](#should-i-run-the-gateway-on-my-laptop-or-a-vps)
-  - [How important is it to run Bot on a dedicated machine?](#how-important-is-it-to-run-openclaw-on-a-dedicated-machine)
+  - [How important is it to run Bot on a dedicated machine?](#how-important-is-it-to-run-bot-on-a-dedicated-machine)
   - [What are the minimum VPS requirements and recommended OS?](#what-are-the-minimum-vps-requirements-and-recommended-os)
-  - [Can I run Bot in a VM and what are the requirements](#can-i-run-openclaw-in-a-vm-and-what-are-the-requirements)
-- [What is Bot?](#what-is-openclaw)
-  - [What is Bot, in one paragraph?](#what-is-openclaw-in-one-paragraph)
+  - [Can I run Bot in a VM and what are the requirements](#can-i-run-bot-in-a-vm-and-what-are-the-requirements)
+- [What is Bot?](#what-is-bot)
+  - [What is Bot, in one paragraph?](#what-is-bot-in-one-paragraph)
   - [What's the value proposition?](#whats-the-value-proposition)
   - [I just set it up what should I do first](#i-just-set-it-up-what-should-i-do-first)
-  - [What are the top five everyday use cases for Bot](#what-are-the-top-five-everyday-use-cases-for-openclaw)
-  - [Can Bot help with lead gen outreach ads and blogs for a SaaS](#can-openclaw-help-with-lead-gen-outreach-ads-and-blogs-for-a-saas)
+  - [What are the top five everyday use cases for Bot](#what-are-the-top-five-everyday-use-cases-for-bot)
+  - [Can Bot help with lead gen outreach ads and blogs for a SaaS](#can-bot-help-with-lead-gen-outreach-ads-and-blogs-for-a-saas)
   - [What are the advantages vs Claude Code for web development?](#what-are-the-advantages-vs-claude-code-for-web-development)
 - [Skills and automation](#skills-and-automation)
   - [How do I customize skills without keeping the repo dirty?](#how-do-i-customize-skills-without-keeping-the-repo-dirty)
@@ -76,7 +76,7 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [The bot freezes while doing heavy work. How do I offload that?](#the-bot-freezes-while-doing-heavy-work-how-do-i-offload-that)
   - [Cron or reminders do not fire. What should I check?](#cron-or-reminders-do-not-fire-what-should-i-check)
   - [How do I install skills on Linux?](#how-do-i-install-skills-on-linux)
-  - [Can Bot run tasks on a schedule or continuously in the background?](#can-openclaw-run-tasks-on-a-schedule-or-continuously-in-the-background)
+  - [Can Bot run tasks on a schedule or continuously in the background?](#can-bot-run-tasks-on-a-schedule-or-continuously-in-the-background)
   - [Can I run Apple macOS-only skills from Linux?](#can-i-run-apple-macos-only-skills-from-linux)
   - [Do you have a Notion or HeyGen integration?](#do-you-have-a-notion-or-heygen-integration)
   - [How do I install the Chrome extension for browser takeover?](#how-do-i-install-the-chrome-extension-for-browser-takeover)
@@ -88,11 +88,11 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [Does memory persist forever? What are the limits?](#does-memory-persist-forever-what-are-the-limits)
   - [Does semantic memory search require an OpenAI API key?](#does-semantic-memory-search-require-an-openai-api-key)
 - [Where things live on disk](#where-things-live-on-disk)
-  - [Is all data used with Bot saved locally?](#is-all-data-used-with-openclaw-saved-locally)
-  - [Where does Bot store its data?](#where-does-openclaw-store-its-data)
+  - [Is all data used with Bot saved locally?](#is-all-data-used-with-bot-saved-locally)
+  - [Where does Bot store its data?](#where-does-bot-store-its-data)
   - [Where should AGENTS.md / SOUL.md / USER.md / MEMORY.md live?](#where-should-agentsmd-soulmd-usermd-memorymd-live)
   - [What's the recommended backup strategy?](#whats-the-recommended-backup-strategy)
-  - [How do I completely uninstall Bot?](#how-do-i-completely-uninstall-openclaw)
+  - [How do I completely uninstall Bot?](#how-do-i-completely-uninstall-bot)
   - [Can agents work outside the workspace?](#can-agents-work-outside-the-workspace)
   - [I'm in remote mode - where is the session store?](#im-in-remote-mode-where-is-the-session-store)
 - [Config basics](#config-basics)
@@ -103,13 +103,13 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [How do I enable web search (and web fetch)?](#how-do-i-enable-web-search-and-web-fetch)
   - [config.apply wiped my config. How do I recover and avoid this?](#configapply-wiped-my-config-how-do-i-recover-and-avoid-this)
   - [How do I run a central Gateway with specialized workers across devices?](#how-do-i-run-a-central-gateway-with-specialized-workers-across-devices)
-  - [Can the Bot browser run headless?](#can-the-openclaw-browser-run-headless)
+  - [Can the Bot browser run headless?](#can-the-bot-browser-run-headless)
   - [How do I use Brave for browser control?](#how-do-i-use-brave-for-browser-control)
 - [Remote gateways and nodes](#remote-gateways-and-nodes)
   - [How do commands propagate between Telegram, the gateway, and nodes?](#how-do-commands-propagate-between-telegram-the-gateway-and-nodes)
   - [How can my agent access my computer if the Gateway is hosted remotely?](#how-can-my-agent-access-my-computer-if-the-gateway-is-hosted-remotely)
   - [Tailscale is connected but I get no replies. What now?](#tailscale-is-connected-but-i-get-no-replies-what-now)
-  - [Can two Bot instances talk to each other (local + VPS)?](#can-two-openclaw-instances-talk-to-each-other-local-vps)
+  - [Can two Bot instances talk to each other (local + VPS)?](#can-two-bot-instances-talk-to-each-other-local-vps)
   - [Do I need separate VPSes for multiple agents](#do-i-need-separate-vpses-for-multiple-agents)
   - [Is there a benefit to using a node on my personal laptop instead of SSH from a VPS?](#is-there-a-benefit-to-using-a-node-on-my-personal-laptop-instead-of-ssh-from-a-vps)
   - [Do nodes run a gateway service?](#do-nodes-run-a-gateway-service)
@@ -119,21 +119,21 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [How do I connect a Mac node to a remote Gateway (Tailscale Serve)?](#how-do-i-connect-a-mac-node-to-a-remote-gateway-tailscale-serve)
   - [Should I install on a second laptop or just add a node?](#should-i-install-on-a-second-laptop-or-just-add-a-node)
 - [Env vars and .env loading](#env-vars-and-env-loading)
-  - [How does Bot load environment variables?](#how-does-openclaw-load-environment-variables)
+  - [How does Bot load environment variables?](#how-does-bot-load-environment-variables)
   - ["I started the Gateway via the service and my env vars disappeared." What now?](#i-started-the-gateway-via-the-service-and-my-env-vars-disappeared-what-now)
   - [I set `COPILOT_GITHUB_TOKEN`, but models status shows "Shell env: off." Why?](#i-set-copilotgithubtoken-but-models-status-shows-shell-env-off-why)
 - [Sessions and multiple chats](#sessions-and-multiple-chats)
   - [How do I start a fresh conversation?](#how-do-i-start-a-fresh-conversation)
   - [Do sessions reset automatically if I never send `/new`?](#do-sessions-reset-automatically-if-i-never-send-new)
-  - [Is there a way to make a team of Bot instances one CEO and many agents](#is-there-a-way-to-make-a-team-of-openclaw-instances-one-ceo-and-many-agents)
+  - [Is there a way to make a team of Bot instances one CEO and many agents](#is-there-a-way-to-make-a-team-of-bot-instances-one-ceo-and-many-agents)
   - [Why did context get truncated mid-task? How do I prevent it?](#why-did-context-get-truncated-midtask-how-do-i-prevent-it)
-  - [How do I completely reset Bot but keep it installed?](#how-do-i-completely-reset-openclaw-but-keep-it-installed)
+  - [How do I completely reset Bot but keep it installed?](#how-do-i-completely-reset-bot-but-keep-it-installed)
   - [I'm getting "context too large" errors - how do I reset or compact?](#im-getting-context-too-large-errors-how-do-i-reset-or-compact)
   - [Why am I seeing "LLM request rejected: messages.content.tool_use.input field required"?](#why-am-i-seeing-llm-request-rejected-messagescontenttool_useinput-field-required)
   - [Why am I getting heartbeat messages every 30 minutes?](#why-am-i-getting-heartbeat-messages-every-30-minutes)
   - [Do I need to add a "bot account" to a WhatsApp group?](#do-i-need-to-add-a-bot-account-to-a-whatsapp-group)
   - [How do I get the JID of a WhatsApp group?](#how-do-i-get-the-jid-of-a-whatsapp-group)
-  - [Why doesn't Bot reply in a group?](#why-doesnt-openclaw-reply-in-a-group)
+  - [Why doesn't Bot reply in a group?](#why-doesnt-bot-reply-in-a-group)
   - [Do groups/threads share context with DMs?](#do-groupsthreads-share-context-with-dms)
   - [How many workspaces and agents can I create?](#how-many-workspaces-and-agents-can-i-create)
   - [Can I run multiple bots or chats at the same time (Slack), and how should I set that up?](#can-i-run-multiple-bots-or-chats-at-the-same-time-slack-and-how-should-i-set-that-up)
@@ -142,7 +142,7 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [What model do you recommend?](#what-model-do-you-recommend)
   - [How do I switch models without wiping my config?](#how-do-i-switch-models-without-wiping-my-config)
   - [Can I use self-hosted models (llama.cpp, vLLM, Ollama)?](#can-i-use-selfhosted-models-llamacpp-vllm-ollama)
-  - [What do Bot, Flawd, and Krill use for models?](#what-do-openclaw-flawd-and-krill-use-for-models)
+  - [What do Bot, Flawd, and Krill use for models?](#what-do-bot-flawd-and-krill-use-for-models)
   - [How do I switch models on the fly (without restarting)?](#how-do-i-switch-models-on-the-fly-without-restarting)
   - [Can I use GPT 5.2 for daily tasks and Codex 5.3 for coding](#can-i-use-gpt-52-for-daily-tasks-and-codex-53-for-coding)
   - [Why do I see "Model … is not allowed" and then no reply?](#why-do-i-see-model-is-not-allowed-and-then-no-reply)
@@ -163,10 +163,10 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
   - [OAuth vs API key: what's the difference?](#oauth-vs-api-key-whats-the-difference)
 - [Gateway: ports, "already running", and remote mode](#gateway-ports-already-running-and-remote-mode)
   - [What port does the Gateway use?](#what-port-does-the-gateway-use)
-  - [Why does `bot gateway status` say `Runtime: running` but `RPC probe: failed`?](#why-does-openclaw-gateway-status-say-runtime-running-but-rpc-probe-failed)
-  - [Why does `bot gateway status` show `Config (cli)` and `Config (service)` different?](#why-does-openclaw-gateway-status-show-config-cli-and-config-service-different)
+  - [Why does `bot gateway status` say `Runtime: running` but `RPC probe: failed`?](#why-does-bot-gateway-status-say-runtime-running-but-rpc-probe-failed)
+  - [Why does `bot gateway status` show `Config (cli)` and `Config (service)` different?](#why-does-bot-gateway-status-show-config-cli-and-config-service-different)
   - [What does "another gateway instance is already listening" mean?](#what-does-another-gateway-instance-is-already-listening-mean)
-  - [How do I run Bot in remote mode (client connects to a Gateway elsewhere)?](#how-do-i-run-openclaw-in-remote-mode-client-connects-to-a-gateway-elsewhere)
+  - [How do I run Bot in remote mode (client connects to a Gateway elsewhere)?](#how-do-i-run-bot-in-remote-mode-client-connects-to-a-gateway-elsewhere)
   - [The Control UI says "unauthorized" (or keeps reconnecting). What now?](#the-control-ui-says-unauthorized-or-keeps-reconnecting-what-now)
   - [I set `gateway.bind: "tailnet"` but it can't bind / nothing listens](#i-set-gatewaybind-tailnet-but-it-cant-bind-nothing-listens)
   - [Can I run multiple Gateways on the same host?](#can-i-run-multiple-gateways-on-the-same-host)
@@ -174,18 +174,18 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
 - [Logging and debugging](#logging-and-debugging)
   - [Where are logs?](#where-are-logs)
   - [How do I start/stop/restart the Gateway service?](#how-do-i-startstoprestart-the-gateway-service)
-  - [I closed my terminal on Windows - how do I restart Bot?](#i-closed-my-terminal-on-windows-how-do-i-restart-openclaw)
+  - [I closed my terminal on Windows - how do I restart Bot?](#i-closed-my-terminal-on-windows-how-do-i-restart-bot)
   - [The Gateway is up but replies never arrive. What should I check?](#the-gateway-is-up-but-replies-never-arrive-what-should-i-check)
   - ["Disconnected from gateway: no reason" - what now?](#disconnected-from-gateway-no-reason-what-now)
   - [Telegram setMyCommands fails with network errors. What should I check?](#telegram-setmycommands-fails-with-network-errors-what-should-i-check)
   - [TUI shows no output. What should I check?](#tui-shows-no-output-what-should-i-check)
   - [How do I completely stop then start the Gateway?](#how-do-i-completely-stop-then-start-the-gateway)
-  - [ELI5: `bot gateway restart` vs `bot gateway`](#eli5-openclaw-gateway-restart-vs-openclaw-gateway)
+  - [ELI5: `bot gateway restart` vs `bot gateway`](#eli5-bot-gateway-restart-vs-bot-gateway)
   - [What's the fastest way to get more details when something fails?](#whats-the-fastest-way-to-get-more-details-when-something-fails)
 - [Media and attachments](#media-and-attachments)
   - [My skill generated an image/PDF, but nothing was sent](#my-skill-generated-an-imagepdf-but-nothing-was-sent)
 - [Security and access control](#security-and-access-control)
-  - [Is it safe to expose Bot to inbound DMs?](#is-it-safe-to-expose-openclaw-to-inbound-dms)
+  - [Is it safe to expose Bot to inbound DMs?](#is-it-safe-to-expose-bot-to-inbound-dms)
   - [Is prompt injection only a concern for public bots?](#is-prompt-injection-only-a-concern-for-public-bots)
   - [Should my bot have its own email GitHub account or phone number](#should-my-bot-have-its-own-email-github-account-or-phone-number)
   - [Can I give it autonomy over my text messages and is that safe](#can-i-give-it-autonomy-over-my-text-messages-and-is-that-safe)
@@ -241,7 +241,7 @@ Quick answers plus deeper troubleshooting for real-world setups (local dev, VPS,
    If RPC is down, fall back to:
 
    ```bash
-   tail -f "$(ls -t /tmp/openclaw/openclaw-*.log | head -1)"
+   tail -f "$(ls -t /tmp/bot/bot-*.log | head -1)"
    ```
 
    File logs are separate from service logs; see [Logging](/logging) and [Troubleshooting](/gateway/troubleshooting).
@@ -290,8 +290,8 @@ Tip: ask the agent to **plan and supervise** the fix (step-by-step), then execut
 necessary commands. That keeps changes small and easier to audit.
 
 If you discover a real bug or fix, please file a GitHub issue or send a PR:
-[https://github.com/openclaw/openclaw/issues](https://github.com/openclaw/openclaw/issues)
-[https://github.com/openclaw/openclaw/pulls](https://github.com/openclaw/openclaw/pulls)
+[https://github.com/hanzoai/bot/issues](https://github.com/hanzoai/bot/issues)
+[https://github.com/hanzoai/bot/pulls](https://github.com/hanzoai/bot/pulls)
 
 Start with these commands (share outputs when asking for help):
 
@@ -327,8 +327,8 @@ The wizard can also build UI assets automatically. After onboarding, you typical
 From source (contributors/dev):
 
 ```bash
-git clone https://github.com/openclaw/bot.git
-cd openclaw
+git clone https://github.com/hanzoai/bot.git
+cd bot
 pnpm install
 pnpm build
 pnpm ui:build # auto-installs UI deps on first run
@@ -346,7 +346,7 @@ The wizard opens your browser with a clean (non-tokenized) dashboard URL right a
 **Localhost (same machine):**
 
 - Open `http://127.0.0.1:18789/`.
-- If it asks for auth, paste the token from `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`) into Control UI settings.
+- If it asks for auth, paste the token from `gateway.auth.token` (or `BOT_GATEWAY_TOKEN`) into Control UI settings.
 - Retrieve it from the gateway host: `bot config get gateway.auth.token` (or generate one: `bot doctor --generate-gateway-token`).
 
 **Not on localhost:**
@@ -419,7 +419,7 @@ keeps your bot "exactly the same" (memory, session history, auth, and channel
 state) as long as you copy **both** locations:
 
 1. Install Bot on the new machine.
-2. Copy `$OPENCLAW_STATE_DIR` (default: `~/.openclaw`) from the old machine.
+2. Copy `$BOT_STATE_DIR` (default: `~/.hanzo/bot`) from the old machine.
 3. Copy your workspace (default: `~/.hanzo/workspace`).
 4. Run `bot doctor` and restart the Gateway service.
 
@@ -430,14 +430,14 @@ remote mode, remember the gateway host owns the session store and workspace.
 up **memory + bootstrap files**, but **not** session history or auth. Those live
 under `~/.hanzo/` (for example `~/.hanzo/agents/<agentId>/sessions/`).
 
-Related: [Migrating](/install/migrating), [Where things live on disk](/help/faq#where-does-openclaw-store-its-data),
+Related: [Migrating](/install/migrating), [Where things live on disk](/help/faq#where-does-bot-store-its-data),
 [Agent workspace](/concepts/agent-workspace), [Doctor](/gateway/doctor),
 [Remote mode](/gateway/remote).
 
 ### Where do I see what is new in the latest version
 
 Check the GitHub changelog:
-[https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md](https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md)
+[https://github.com/hanzoai/bot/blob/main/CHANGELOG.md](https://github.com/hanzoai/bot/blob/main/CHANGELOG.md)
 
 Newest entries are at the top. If the top section is marked **Unreleased**, the next dated
 section is the latest shipped version. Entries are grouped by **Highlights**, **Changes**, and
@@ -447,11 +447,11 @@ section is the latest shipped version. Entries are grouped by **Highlights**, **
 
 Some Comcast/Xfinity connections incorrectly block `docs.bot.ai` via Xfinity
 Advanced Security. Disable it or allowlist `docs.bot.ai`, then retry. More
-detail: [Troubleshooting](/help/troubleshooting#docsopenclawai-shows-an-ssl-error-comcastxfinity).
+detail: [Troubleshooting](/help/troubleshooting#docshanzoai-shows-an-ssl-error-comcastxfinity).
 Please help us unblock it by reporting here: [https://spa.xfinity.com/check_url_status](https://spa.xfinity.com/check_url_status).
 
 If you still can't reach the site, the docs are mirrored on GitHub:
-[https://github.com/openclaw/openclaw/tree/main/docs](https://github.com/openclaw/openclaw/tree/main/docs)
+[https://github.com/hanzoai/bot/tree/main/docs](https://github.com/hanzoai/bot/tree/main/docs)
 
 ### What's the difference between stable and beta
 
@@ -465,7 +465,7 @@ that same version to `latest`**. That's why beta and stable can point at the
 **same version**.
 
 See what changed:
-[https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md](https://github.com/openclaw/openclaw/blob/main/CHANGELOG.md)
+[https://github.com/hanzoai/bot/blob/main/CHANGELOG.md](https://github.com/hanzoai/bot/blob/main/CHANGELOG.md)
 
 ### How do I install the beta version and what's the difference between beta and dev
 
@@ -520,8 +520,8 @@ That gives you a local repo you can edit, then update via git.
 If you prefer a clean clone manually, use:
 
 ```bash
-git clone https://github.com/openclaw/bot.git
-cd openclaw
+git clone https://github.com/hanzoai/bot.git
+cd bot
 pnpm install
 pnpm build
 ```
@@ -850,13 +850,13 @@ Docs: [Getting started](/start/getting-started), [Updating](/install/updating).
 
 Yes. Install the other flavor, then run Doctor so the gateway service points at the new entrypoint.
 This **does not delete your data** - it only changes the Bot code install. Your state
-(`~/.openclaw`) and workspace (`~/.hanzo/workspace`) stay untouched.
+(`~/.hanzo/bot`) and workspace (`~/.hanzo/workspace`) stay untouched.
 
 From npm → git:
 
 ```bash
-git clone https://github.com/openclaw/bot.git
-cd openclaw
+git clone https://github.com/hanzoai/bot.git
+cd bot
 pnpm install
 pnpm build
 bot doctor
@@ -866,7 +866,7 @@ bot gateway restart
 From git → npm:
 
 ```bash
-npm install -g openclaw@latest
+npm install -g bot@latest
 bot doctor
 bot gateway restart
 ```
@@ -1068,7 +1068,7 @@ scheduled jobs will not run.
 
 Checklist:
 
-- Confirm cron is enabled (`cron.enabled`) and `OPENCLAW_SKIP_CRON` is not set.
+- Confirm cron is enabled (`cron.enabled`) and `BOT_SKIP_CRON` is not set.
 - Check the Gateway is running 24/7 (no sleep/restarts).
 - Verify timezone settings for the job (`--tz` vs host timezone).
 
@@ -1114,7 +1114,7 @@ Not directly. macOS skills are gated by `metadata.bot.os` plus required binaries
 You have three supported patterns:
 
 **Option A - run the Gateway on a Mac (simplest).**
-Run the Gateway where the macOS binaries exist, then connect from Linux in [remote mode](#how-do-i-run-openclaw-in-remote-mode-client-connects-to-a-gateway-elsewhere) or over Tailscale. The skills load normally because the Gateway host is macOS.
+Run the Gateway where the macOS binaries exist, then connect from Linux in [remote mode](#how-do-i-run-bot-in-remote-mode-client-connects-to-a-gateway-elsewhere) or over Tailscale. The skills load normally because the Gateway host is macOS.
 
 **Option B - use a macOS node (no SSH).**
 Run the Gateway on Linux, pair a macOS node (menubar app), and set **Node Run Commands** to "Always Ask" or "Always Allow" on the Mac. Bot can treat macOS-only skills as eligible when the required binaries exist on the node. The agent runs those skills via the `nodes` tool. If you choose "Always Ask", approving "Always Allow" in the prompt adds that command to the allowlist.
@@ -1197,8 +1197,8 @@ Yes. See [Sandboxing](/gateway/sandboxing). For Docker-specific setup (full gate
 The default image is security-first and runs as the `node` user, so it does not
 include system packages, Homebrew, or bundled browsers. For a fuller setup:
 
-- Persist `/home/node` with `OPENCLAW_HOME_VOLUME` so caches survive.
-- Bake system deps into the image with `OPENCLAW_DOCKER_APT_PACKAGES`.
+- Persist `/home/node` with `BOT_HOME_VOLUME` so caches survive.
+- Bake system deps into the image with `BOT_DOCKER_APT_PACKAGES`.
 - Install Playwright browsers via the bundled CLI:
   `node /app/node_modules/playwright-core/cli.js install chromium`
 - Set `PLAYWRIGHT_BROWSERS_PATH` and ensure the path is persisted.
@@ -1278,7 +1278,7 @@ Docs: [Memory](/concepts/memory), [Context](/concepts/context).
 No - **Bot's state is local**, but **external services still see what you send them**.
 
 - **Local by default:** sessions, memory files, config, and workspace live on the Gateway host
-  (`~/.openclaw` + your workspace directory).
+  (`~/.hanzo/bot` + your workspace directory).
 - **Remote by necessity:** messages you send to model providers (Anthropic/OpenAI/etc.) go to
   their APIs, and chat platforms (WhatsApp/Telegram/Slack/etc.) store message data on their
   servers.
@@ -1289,19 +1289,19 @@ Related: [Agent workspace](/concepts/agent-workspace), [Memory](/concepts/memory
 
 ### Where does Bot store its data
 
-Everything lives under `$OPENCLAW_STATE_DIR` (default: `~/.openclaw`):
+Everything lives under `$BOT_STATE_DIR` (default: `~/.hanzo/bot`):
 
 | Path                                                            | Purpose                                                            |
 | --------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `$OPENCLAW_STATE_DIR/bot.json`                             | Main config (JSON5)                                                |
-| `$OPENCLAW_STATE_DIR/credentials/oauth.json`                    | Legacy OAuth import (copied into auth profiles on first use)       |
-| `$OPENCLAW_STATE_DIR/agents/<agentId>/agent/auth-profiles.json` | Auth profiles (OAuth, API keys, and optional `keyRef`/`tokenRef`)  |
-| `$OPENCLAW_STATE_DIR/secrets.json`                              | Optional file-backed secret payload for `file` SecretRef providers |
-| `$OPENCLAW_STATE_DIR/agents/<agentId>/agent/auth.json`          | Legacy compatibility file (static `api_key` entries scrubbed)      |
-| `$OPENCLAW_STATE_DIR/credentials/`                              | Provider state (e.g. `whatsapp/<accountId>/creds.json`)            |
-| `$OPENCLAW_STATE_DIR/agents/`                                   | Per-agent state (agentDir + sessions)                              |
-| `$OPENCLAW_STATE_DIR/agents/<agentId>/sessions/`                | Conversation history & state (per agent)                           |
-| `$OPENCLAW_STATE_DIR/agents/<agentId>/sessions/sessions.json`   | Session metadata (per agent)                                       |
+| `$BOT_STATE_DIR/bot.json`                             | Main config (JSON5)                                                |
+| `$BOT_STATE_DIR/credentials/oauth.json`                    | Legacy OAuth import (copied into auth profiles on first use)       |
+| `$BOT_STATE_DIR/agents/<agentId>/agent/auth-profiles.json` | Auth profiles (OAuth, API keys, and optional `keyRef`/`tokenRef`)  |
+| `$BOT_STATE_DIR/secrets.json`                              | Optional file-backed secret payload for `file` SecretRef providers |
+| `$BOT_STATE_DIR/agents/<agentId>/agent/auth.json`          | Legacy compatibility file (static `api_key` entries scrubbed)      |
+| `$BOT_STATE_DIR/credentials/`                              | Provider state (e.g. `whatsapp/<accountId>/creds.json`)            |
+| `$BOT_STATE_DIR/agents/`                                   | Per-agent state (agentDir + sessions)                              |
+| `$BOT_STATE_DIR/agents/<agentId>/sessions/`                | Conversation history & state (per agent)                           |
+| `$BOT_STATE_DIR/agents/<agentId>/sessions/sessions.json`   | Session metadata (per agent)                                       |
 
 Legacy single-agent path: `~/.hanzo/agent/*` (migrated by `bot doctor`).
 
@@ -1309,11 +1309,11 @@ Your **workspace** (AGENTS.md, memory files, skills, etc.) is separate and confi
 
 ### Where should AGENTSmd SOULmd USERmd MEMORYmd live
 
-These files live in the **agent workspace**, not `~/.openclaw`.
+These files live in the **agent workspace**, not `~/.hanzo/bot`.
 
 - **Workspace (per agent)**: `AGENTS.md`, `SOUL.md`, `IDENTITY.md`, `USER.md`,
   `MEMORY.md` (or `memory.md`), `memory/YYYY-MM-DD.md`, optional `HEARTBEAT.md`.
-- **State dir (`~/.openclaw`)**: config, credentials, auth profiles, sessions, logs,
+- **State dir (`~/.hanzo/bot`)**: config, credentials, auth profiles, sessions, logs,
   and shared skills (`~/.hanzo/skills`).
 
 Default workspace is `~/.hanzo/workspace`, configurable via:
@@ -1339,7 +1339,7 @@ Put your **agent workspace** in a **private** git repo and back it up somewhere
 private (for example GitHub private). This captures memory + AGENTS/SOUL/USER
 files, and lets you restore the assistant's "mind" later.
 
-Do **not** commit anything under `~/.openclaw` (credentials, sessions, tokens, or encrypted secrets payloads).
+Do **not** commit anything under `~/.hanzo/bot` (credentials, sessions, tokens, or encrypted secrets payloads).
 If you need a full restore, back up both the workspace and the state directory
 separately (see the migration question above).
 
@@ -1379,17 +1379,17 @@ Session state is owned by the **gateway host**. If you're in remote mode, the se
 
 ### What format is the config Where is it
 
-Bot reads an optional **JSON5** config from `$OPENCLAW_CONFIG_PATH` (default: `~/.hanzo/bot.json`):
+Bot reads an optional **JSON5** config from `$BOT_CONFIG_PATH` (default: `~/.hanzo/bot.json`):
 
 ```
-$OPENCLAW_CONFIG_PATH
+$BOT_CONFIG_PATH
 ```
 
 If the file is missing, it uses safe-ish defaults (including a default workspace of `~/.hanzo/workspace`).
 
 ### I set gatewaybind lan or tailnet and now nothing listens the UI says unauthorized
 
-Non-loopback binds **require auth**. Configure `gateway.auth.mode` + `gateway.auth.token` (or use `OPENCLAW_GATEWAY_TOKEN`).
+Non-loopback binds **require auth**. Configure `gateway.auth.mode` + `gateway.auth.token` (or use `BOT_GATEWAY_TOKEN`).
 
 ```json5
 {
@@ -1703,7 +1703,7 @@ Docs: [Gateway protocol](/gateway/protocol), [Discovery](/gateway/discovery), [m
 Bot reads env vars from the parent process (shell, launchd/systemd, CI, etc.) and additionally loads:
 
 - `.env` from the current working directory
-- a global fallback `.env` from `~/.hanzo/.env` (aka `$OPENCLAW_STATE_DIR/.env`)
+- a global fallback `.env` from `~/.hanzo/.env` (aka `$BOT_STATE_DIR/.env`)
 
 Neither `.env` file overrides existing env vars.
 
@@ -1739,7 +1739,7 @@ Two common fixes:
 ```
 
 This runs your login shell and imports only missing expected keys (never overrides). Env var equivalents:
-`OPENCLAW_LOAD_SHELL_ENV=1`, `OPENCLAW_SHELL_ENV_TIMEOUT_MS=15000`.
+`BOT_LOAD_SHELL_ENV=1`, `BOT_SHELL_ENV_TIMEOUT_MS=15000`.
 
 ### I set COPILOTGITHUBTOKEN but models status shows Shell env off Why
 
@@ -1836,7 +1836,7 @@ bot onboard --install-daemon
 Notes:
 
 - The onboarding wizard also offers **Reset** if it sees an existing config. See [Wizard](/start/wizard).
-- If you used profiles (`--profile` / `OPENCLAW_PROFILE`), reset each state dir (defaults are `~/.openclaw-<profile>`).
+- If you used profiles (`--profile` / `BOT_PROFILE`), reset each state dir (defaults are `~/.hanzo/bot-<profile>`).
 - Dev reset: `bot gateway --dev --reset` (dev-only; wipes dev config + credentials + sessions + workspace).
 
 ### Im getting context too large errors how do I reset or compact
@@ -2379,7 +2379,7 @@ The wizard explicitly supports Anthropic setup-token and OpenAI Codex OAuth and 
 Precedence:
 
 ```
---port > OPENCLAW_GATEWAY_PORT > gateway.port > default 18789
+--port > BOT_GATEWAY_PORT > gateway.port > default 18789
 ```
 
 ### Why does bot gateway status say Runtime running but RPC probe failed
@@ -2394,7 +2394,7 @@ Use `bot gateway status` and trust these lines:
 
 ### Why does bot gateway status show Config cli and Config service different
 
-You're editing one config file while the service is running another (often a `--profile` / `OPENCLAW_STATE_DIR` mismatch).
+You're editing one config file while the service is running another (often a `--profile` / `BOT_STATE_DIR` mismatch).
 
 Fix:
 
@@ -2445,7 +2445,7 @@ Fix:
 - Fastest: `bot dashboard` (prints + copies the dashboard URL, tries to open; shows SSH hint if headless).
 - If you don't have a token yet: `bot doctor --generate-gateway-token`.
 - If remote, tunnel first: `ssh -N -L 18789:127.0.0.1:18789 user@host` then open `http://127.0.0.1:18789/`.
-- Set `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`) on the gateway host.
+- Set `gateway.auth.token` (or `BOT_GATEWAY_TOKEN`) on the gateway host.
 - In the Control UI settings, paste the same token.
 - Still stuck? Run `bot status --all` and follow [Troubleshooting](/gateway/troubleshooting). See [Dashboard](/web/dashboard) for auth details.
 
@@ -2466,18 +2466,18 @@ Usually no - one Gateway can run multiple messaging channels and agents. Use mul
 
 Yes, but you must isolate:
 
-- `OPENCLAW_CONFIG_PATH` (per-instance config)
-- `OPENCLAW_STATE_DIR` (per-instance state)
+- `BOT_CONFIG_PATH` (per-instance config)
+- `BOT_STATE_DIR` (per-instance state)
 - `agents.defaults.workspace` (workspace isolation)
 - `gateway.port` (unique ports)
 
 Quick setup (recommended):
 
-- Use `bot --profile <name> …` per instance (auto-creates `~/.openclaw-<name>`).
+- Use `bot --profile <name> …` per instance (auto-creates `~/.hanzo/bot-<name>`).
 - Set a unique `gateway.port` in each profile config (or pass `--port` for manual runs).
 - Install a per-profile service: `bot --profile <name> gateway install`.
 
-Profiles also suffix service names (`ai.bot.<profile>`; legacy `com.bot.*`, `openclaw-gateway-<profile>.service`, `Bot Gateway (<profile>)`).
+Profiles also suffix service names (`ai.bot.<profile>`; legacy `com.bot.*`, `bot-gateway-<profile>.service`, `Bot Gateway (<profile>)`).
 Full guide: [Multiple gateways](/gateway/multiple-gateways).
 
 ### What does invalid handshake code 1008 mean
@@ -2513,7 +2513,7 @@ Protocol details: [Gateway protocol](/gateway/protocol).
 File logs (structured):
 
 ```
-/tmp/openclaw/openclaw-YYYY-MM-DD.log
+/tmp/bot/bot-YYYY-MM-DD.log
 ```
 
 You can set a stable path via `logging.file`. File log level is controlled by `logging.level`. Console verbosity is controlled by `--verbose` and `logging.consoleLevel`.
@@ -2526,8 +2526,8 @@ bot logs --follow
 
 Service/supervisor logs (when the gateway runs via launchd/systemd):
 
-- macOS: `$OPENCLAW_STATE_DIR/logs/gateway.log` and `gateway.err.log` (default: `~/.hanzo/logs/...`; profiles use `~/.openclaw-<profile>/logs/...`)
-- Linux: `journalctl --user -u openclaw-gateway[-<profile>].service -n 200 --no-pager`
+- macOS: `$BOT_STATE_DIR/logs/gateway.log` and `gateway.err.log` (default: `~/.hanzo/logs/...`; profiles use `~/.hanzo/bot-<profile>/logs/...`)
+- Linux: `journalctl --user -u bot-gateway[-<profile>].service -n 200 --no-pager`
 - Windows: `schtasks /Query /TN "Bot Gateway (<profile>)" /V /FO LIST`
 
 See [Troubleshooting](/gateway/troubleshooting#log-locations) for more.
@@ -2684,7 +2684,7 @@ Start the Gateway with `--verbose` to get more console detail. Then inspect the 
 
 ### My skill generated an imagePDF but nothing was sent
 
-Outbound attachments from the agent must include a `MEDIA:<path-or-url>` line (on its own line). See [Bot assistant setup](/start/openclaw) and [Agent send](/tools/agent-send).
+Outbound attachments from the agent must include a `MEDIA:<path-or-url>` line (on its own line). See [Bot assistant setup](/start/bot) and [Agent send](/tools/agent-send).
 
 CLI sending:
 
@@ -2822,7 +2822,7 @@ stop run
 stop current run
 stop agent
 stop the agent
-stop openclaw
+stop bot
 bot stop
 stop don't do anything
 stop do not do anything
@@ -2895,4 +2895,4 @@ You can add options like `debounce:2s cap:25 drop:summarize` for followup modes.
 
 ---
 
-Still stuck? Ask in [Discord](https://discord.com/invite/clawd) or open a [GitHub discussion](https://github.com/openclaw/openclaw/discussions).
+Still stuck? Ask in [Discord](https://discord.gg/hanzo) or open a [GitHub discussion](https://github.com/hanzoai/bot/discussions).
