@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { SafeOpenError } from "../infra/fs-safe.js";
 import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 
 export const DEFAULT_BROWSER_TMP_DIR = resolvePreferredBotTmpDir();
@@ -132,7 +133,13 @@ export async function resolveStrictExistingPathsWithinRoot(params: {
         return { ok: false, error: `Invalid path: must stay within ${params.scopeLabel}` };
       }
       resolvedPaths.push(realPath);
-    } catch {
+    } catch (err) {
+      if (err instanceof SafeOpenError && err.code === "outside-workspace") {
+        return {
+          ok: false,
+          error: `File is outside ${params.scopeLabel}`,
+        };
+      }
       return {
         ok: false,
         error: `Invalid path: ${trimmed} must be a regular non-symlink file`,
