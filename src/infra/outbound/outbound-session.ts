@@ -173,9 +173,7 @@ async function resolveSlackChannelType(params: {
     return "channel";
   }
 
-  const token =
-    account.botToken?.trim() ||
-    (typeof account.config.userToken === "string" ? account.config.userToken.trim() : "");
+  const token = account.botToken?.trim() || account.userToken || "";
   if (!token) {
     SLACK_CHANNEL_TYPE_CACHE.set(`${account.accountId}:${channelId}`, "unknown");
     return "unknown";
