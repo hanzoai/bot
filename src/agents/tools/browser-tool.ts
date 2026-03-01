@@ -54,6 +54,37 @@ function wrapBrowserExternalJson(params: {
   };
 }
 
+function formatTabsToolResult(tabs: unknown[]): AgentToolResult<unknown> {
+  const wrapped = wrapBrowserExternalJson({
+    kind: "tabs",
+    payload: { tabs },
+    includeWarning: false,
+  });
+  const content: AgentToolResult<unknown>["content"] = [
+    { type: "text", text: wrapped.wrappedText },
+  ];
+  return {
+    content,
+    details: { ...wrapped.safeDetails, tabCount: tabs.length },
+  };
+}
+
+function readOptionalTargetAndTimeout(params: Record<string, unknown>) {
+  const targetId = typeof params.targetId === "string" ? params.targetId.trim() : undefined;
+  const timeoutMs =
+    typeof params.timeoutMs === "number" && Number.isFinite(params.timeoutMs)
+      ? params.timeoutMs
+      : undefined;
+  return { targetId, timeoutMs };
+}
+
+function readTargetUrlParam(params: Record<string, unknown>) {
+  return (
+    readStringParam(params, "targetUrl") ??
+    readStringParam(params, "url", { required: true, label: "targetUrl" })
+  );
+}
+
 type BrowserProxyFile = {
   path: string;
   base64: string;
@@ -382,9 +413,7 @@ export function createBrowserTool(opts?: {
             };
           }
         case "open": {
-          const targetUrl = readStringParam(params, "targetUrl", {
-            required: true,
-          });
+          const targetUrl = readTargetUrlParam(params);
           if (proxyRequest) {
             const result = await proxyRequest({
               method: "POST",
@@ -612,9 +641,7 @@ export function createBrowserTool(opts?: {
           });
         }
         case "navigate": {
-          const targetUrl = readStringParam(params, "targetUrl", {
-            required: true,
-          });
+          const targetUrl = readTargetUrlParam(params);
           const targetId = readStringParam(params, "targetId");
           if (proxyRequest) {
             const result = await proxyRequest({
