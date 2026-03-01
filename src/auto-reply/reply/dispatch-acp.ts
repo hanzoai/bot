@@ -296,8 +296,7 @@ export async function tryDispatchAcpReply(params: {
         });
         if (resolvedDetails.length > 0) {
           const delivered = await delivery.deliver("final", {
-            text: prefixSystemMessage(["Session ids resolved.", ...resolvedDetails].join("
-")),
+            text: prefixSystemMessage(["Session ids resolved.", ...resolvedDetails].join("\n")),
           });
           queuedFinal = queuedFinal || delivered;
         }
