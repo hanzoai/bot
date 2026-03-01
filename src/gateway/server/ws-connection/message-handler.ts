@@ -55,6 +55,11 @@ import {
 import { MAX_BUFFERED_BYTES, MAX_PAYLOAD_BYTES, TICK_INTERVAL_MS } from "../../server-constants.js";
 import { handleGatewayRequest } from "../../server-methods.js";
 import { formatError } from "../../server-utils.js";
+import {
+  buildCanvasScopedHostUrl,
+  CANVAS_CAPABILITY_TTL_MS,
+  mintCanvasCapabilityToken,
+} from "../../canvas-capability.js";
 import { resolveTenantContext, validateTenantAccess } from "../../tenant-context.js";
 import { formatForLog, logWs } from "../../ws-log.js";
 import { truncateCloseReason } from "../close-reason.js";
@@ -986,6 +991,15 @@ export function attachGatewayWsMessageHandler(params: {
           snapshot.health = cachedHealth;
           snapshot.stateVersion.health = getHealthVersion();
         }
+        const canvasCapability =
+          role === "node" && canvasHostUrl ? mintCanvasCapabilityToken() : undefined;
+        const canvasCapabilityExpiresAtMs = canvasCapability
+          ? Date.now() + CANVAS_CAPABILITY_TTL_MS
+          : undefined;
+        const scopedCanvasHostUrl =
+          canvasHostUrl && canvasCapability
+            ? (buildCanvasScopedHostUrl(canvasHostUrl, canvasCapability) ?? canvasHostUrl)
+            : canvasHostUrl;
         const helloOk = {
           type: "hello-ok",
           protocol: PROTOCOL_VERSION,
@@ -1001,7 +1015,7 @@ export function attachGatewayWsMessageHandler(params: {
           },
           features: { methods: gatewayMethods, events },
           snapshot,
-          canvasHostUrl,
+          canvasHostUrl: scopedCanvasHostUrl,
           auth: deviceToken
             ? {
                 deviceToken: deviceToken.token,
@@ -1024,6 +1038,9 @@ export function attachGatewayWsMessageHandler(params: {
           connId,
           presenceKey,
           clientIp: reportedClientIp,
+          canvasHostUrl,
+          canvasCapability,
+          canvasCapabilityExpiresAtMs,
         };
 
         // Enrich client with IAM tenant context when auth mode is "iam"
