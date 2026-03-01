@@ -183,7 +183,7 @@ function renderDiffCard(payload: DiffViewerPayload): string {
 
 function renderStaticDiffCard(prerenderedHTML: string): string {
   return `<section class="oc-diff-card">
-    <diffs-container class="oc-diff-host" data-openclaw-diff-host>
+    <diffs-container class="oc-diff-host" data-bot-diff-host>
       <template shadowrootmode="open">${prerenderedHTML}</template>
     </diffs-container>
   </section>`;
@@ -196,7 +196,7 @@ function buildHtmlDocument(params: {
   runtimeMode: "viewer" | "image";
 }): string {
   return `<!doctype html>
-<html lang="en"${params.runtimeMode === "image" ? ' data-openclaw-diffs-ready="true"' : ""}>
+<html lang="en"${params.runtimeMode === "image" ? ' data-bot-diffs-ready="true"' : ""}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -277,13 +277,8 @@ function buildHtmlDocument(params: {
     </style>
   </head>
   <body data-theme="${params.theme}">
-<<<<<<< HEAD
-    <main class="oc-frame" data-render-mode="viewer">
-      <div data-bot-diff-root>
-=======
     <main class="oc-frame" data-render-mode="${params.runtimeMode}">
-      <div data-openclaw-diff-root>
->>>>>>> 0abf47cfd (plugin(diffs): optimize rendering for image/view modes)
+      <div data-bot-diff-root>
         ${params.bodyHtml}
       </div>
     </main>
