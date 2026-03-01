@@ -45,6 +45,8 @@ export type GatewayAuthResult = {
   orgIds?: string[];
   /** IAM-specific: full IAM auth result for downstream use. */
   iamResult?: GatewayIamAuthResult;
+  /** The raw JWT/bearer token from the Authorization header (for downstream forwarding). */
+  rawToken?: string;
   /** Present when the request was blocked by the rate limiter. */
   rateLimited?: boolean;
   /** Milliseconds the client should wait before retrying (when rate-limited). */
