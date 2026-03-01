@@ -38,7 +38,6 @@ Notes:
 # Default is auto-derived from APP_VERSION when omitted.
 BUNDLE_ID=ai.hanzo.bot.mac \
 APP_VERSION=2026.2.27 \
-APP_BUILD="$(git rev-list --count HEAD)" \
 BUILD_CONFIG=release \
 SIGN_IDENTITY="Developer ID Application: <Developer Name> (<TEAMID>)" \
 scripts/package-mac-app.sh
@@ -55,8 +54,7 @@ scripts/create-dmg.sh dist/Bot.app dist/Bot-2026.2.16.dmg
 #     --apple-id "<apple-id>" --team-id "<team-id>" --password "<app-specific-password>"
 NOTARIZE=1 NOTARYTOOL_PROFILE=bot-notary \
 BUNDLE_ID=ai.hanzo.bot.mac \
-APP_VERSION=2026.2.16 \
-APP_BUILD="$(git rev-list --count HEAD)" \
+APP_VERSION=2026.2.27 \
 BUILD_CONFIG=release \
 SIGN_IDENTITY="Developer ID Application: <Developer Name> (<TEAMID>)" \
 scripts/package-mac-dist.sh
