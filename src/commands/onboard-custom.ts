@@ -1,30 +1,24 @@
-import type { BotConfig } from "../config/config.js";
-import type { ModelProviderConfig } from "../config/types.models.js";
-import type { RuntimeEnv } from "../runtime.js";
-import type { WizardPrompter } from "../wizard/prompts.js";
-import type { SecretInputMode } from "./onboard-types.js";
-import { CONTEXT_WINDOW_HARD_MIN_TOKENS } from "../agents/context-window-guard.js";
 import { DEFAULT_PROVIDER } from "../agents/defaults.js";
 import { buildModelAliasIndex, modelKey } from "../agents/model-selection.js";
+import type { BotConfig } from "../config/config.js";
+import type { ModelProviderConfig } from "../config/types.models.js";
 import { isSecretRef, type SecretInput } from "../config/types.secrets.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { fetchWithTimeout } from "../utils/fetch-timeout.js";
 import {
   normalizeSecretInput,
   normalizeOptionalSecretInput,
 } from "../utils/normalize-secret-input.js";
+import type { WizardPrompter } from "../wizard/prompts.js";
 import { ensureApiKeyFromEnvOrPrompt } from "./auth-choice.apply-helpers.js";
 import { applyPrimaryModel } from "./model-picker.js";
 import { normalizeAlias } from "./models/shared.js";
+import type { SecretInputMode } from "./onboard-types.js";
 
 const DEFAULT_OLLAMA_BASE_URL = "http://127.0.0.1:11434/v1";
-const DEFAULT_CONTEXT_WINDOW = CONTEXT_WINDOW_HARD_MIN_TOKENS;
+const DEFAULT_CONTEXT_WINDOW = 4096;
 const DEFAULT_MAX_TOKENS = 4096;
 const VERIFY_TIMEOUT_MS = 30_000;
-
-function normalizeContextWindowForCustomModel(value: unknown): number {
-  const parsed = typeof value === "number" && Number.isFinite(value) ? Math.floor(value) : 0;
-  return parsed >= CONTEXT_WINDOW_HARD_MIN_TOKENS ? parsed : CONTEXT_WINDOW_HARD_MIN_TOKENS;
-}
 
 /**
  * Detects if a URL is from Azure AI Foundry or Azure OpenAI.
@@ -44,9 +38,17 @@ function isAzureUrl(baseUrl: string): boolean {
 
 /**
  * Transforms an Azure AI Foundry/OpenAI URL to include the deployment path.
+ * Azure requires: https://host/openai/deployments/<model-id>/chat/completions?api-version=2024-xx-xx-preview
+ * But we can't add query params here, so we just add the path prefix.
+ * The api-version will be handled by the Azure OpenAI client or as a query param.
+ *
+ * Example:
+ *   https://my-resource.services.ai.azure.com + gpt-5-nano
+ *   => https://my-resource.services.ai.azure.com/openai/deployments/gpt-5-nano
  */
 function transformAzureUrl(baseUrl: string, modelId: string): string {
   const normalizedUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  // Check if the URL already includes the deployment path
   if (normalizedUrl.includes("/openai/deployments/")) {
     return normalizedUrl;
   }
@@ -257,29 +259,39 @@ function normalizeOptionalProviderApiKey(value: unknown): SecretInput | undefine
   return normalizeOptionalSecretInput(value);
 }
 
-async function requestOpenAiVerification(params: {
+function resolveVerificationEndpoint(params: {
   baseUrl: string;
-  apiKey: string;
   modelId: string;
+  endpointPath: "chat/completions" | "messages";
+}) {
+  const resolvedUrl = isAzureUrl(params.baseUrl)
+    ? transformAzureUrl(params.baseUrl, params.modelId)
+    : params.baseUrl;
+  const endpointUrl = new URL(
+    params.endpointPath,
+    resolvedUrl.endsWith("/") ? resolvedUrl : `${resolvedUrl}/`,
+  );
+  if (isAzureUrl(params.baseUrl)) {
+    endpointUrl.searchParams.set("api-version", "2024-10-21");
+  }
+  return endpointUrl.href;
+}
+
+async function requestVerification(params: {
+  endpoint: string;
+  headers: Record<string, string>;
+  body: Record<string, unknown>;
 }): Promise<VerificationResult> {
-  const endpoint = new URL(
-    "chat/completions",
-    params.baseUrl.endsWith("/") ? params.baseUrl : `${params.baseUrl}/`,
-  ).href;
   try {
     const res = await fetchWithTimeout(
-      endpoint,
+      params.endpoint,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...buildOpenAiHeaders(params.apiKey),
+          ...params.headers,
         },
-        body: JSON.stringify({
-          model: params.modelId,
-          messages: [{ role: "user", content: "Hi" }],
-          max_tokens: 1024,
-        }),
+        body: JSON.stringify(params.body),
       },
       VERIFY_TIMEOUT_MS,
     );
@@ -289,36 +301,54 @@ async function requestOpenAiVerification(params: {
   }
 }
 
+async function requestOpenAiVerification(params: {
+  baseUrl: string;
+  apiKey: string;
+  modelId: string;
+}): Promise<VerificationResult> {
+  const endpoint = resolveVerificationEndpoint({
+    baseUrl: params.baseUrl,
+    modelId: params.modelId,
+    endpointPath: "chat/completions",
+  });
+  return await requestVerification({
+    endpoint,
+    headers: buildOpenAiHeaders(params.apiKey),
+    body: {
+      model: params.modelId,
+      messages: [{ role: "user", content: "Hi" }],
+      max_tokens: 1,
+      stream: false,
+    },
+  });
+}
+
 async function requestAnthropicVerification(params: {
   baseUrl: string;
   apiKey: string;
   modelId: string;
 }): Promise<VerificationResult> {
-  const endpoint = new URL(
-    "messages",
-    params.baseUrl.endsWith("/") ? params.baseUrl : `${params.baseUrl}/`,
-  ).href;
-  try {
-    const res = await fetchWithTimeout(
-      endpoint,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...buildAnthropicHeaders(params.apiKey),
-        },
-        body: JSON.stringify({
-          model: params.modelId,
-          max_tokens: 1024,
-          messages: [{ role: "user", content: "Hi" }],
-        }),
-      },
-      VERIFY_TIMEOUT_MS,
-    );
-    return { ok: res.ok, status: res.status };
-  } catch (error) {
-    return { ok: false, error };
-  }
+  // Use a base URL with /v1 injected for this raw fetch only. The rest of the app uses the
+  // Anthropic client, which appends /v1 itself; config should store the base URL
+  // without /v1 to avoid /v1/v1/messages at runtime. See docs/gateway/configuration-reference.md.
+  const baseUrlForRequest = /\/v1\/?$/.test(params.baseUrl.trim())
+    ? params.baseUrl.trim()
+    : params.baseUrl.trim().replace(/\/?$/, "") + "/v1";
+  const endpoint = resolveVerificationEndpoint({
+    baseUrl: baseUrlForRequest,
+    modelId: params.modelId,
+    endpointPath: "messages",
+  });
+  return await requestVerification({
+    endpoint,
+    headers: buildAnthropicHeaders(params.apiKey),
+    body: {
+      model: params.modelId,
+      max_tokens: 1,
+      messages: [{ role: "user", content: "Hi" }],
+      stream: false,
+    },
+  });
 }
 
 async function promptBaseUrlAndKey(params: {
@@ -512,9 +542,12 @@ export function applyCustomApiConfig(params: ApplyCustomApiConfigParams): Custom
     throw new CustomApiError("invalid_model_id", "Custom provider model ID is required.");
   }
 
+  // Transform Azure URLs to include the deployment path for API calls
+  const resolvedBaseUrl = isAzureUrl(baseUrl) ? transformAzureUrl(baseUrl, modelId) : baseUrl;
+
   const providerIdResult = resolveCustomProviderId({
     config: params.config,
-    baseUrl,
+    baseUrl: resolvedBaseUrl,
     providerId: params.providerId,
   });
   const providerId = providerIdResult.providerId;
@@ -543,16 +576,7 @@ export function applyCustomApiConfig(params: ApplyCustomApiConfigParams): Custom
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
     reasoning: false,
   };
-  const mergedModels = hasModel
-    ? existingModels.map((model) =>
-        model.id === modelId
-          ? {
-              ...model,
-              contextWindow: normalizeContextWindowForCustomModel(model.contextWindow),
-            }
-          : model,
-      )
-    : [...existingModels, nextModel];
+  const mergedModels = hasModel ? existingModels : [...existingModels, nextModel];
   const { apiKey: existingApiKey, ...existingProviderRest } = existingProvider ?? {};
   const normalizedApiKey =
     normalizeOptionalProviderApiKey(params.apiKey) ??
@@ -567,7 +591,7 @@ export function applyCustomApiConfig(params: ApplyCustomApiConfigParams): Custom
         ...providers,
         [providerId]: {
           ...existingProviderRest,
-          baseUrl,
+          baseUrl: resolvedBaseUrl,
           api: resolveProviderApi(params.compatibility),
           ...(normalizedApiKey ? { apiKey: normalizedApiKey } : {}),
           models: mergedModels.length > 0 ? mergedModels : [nextModel],
