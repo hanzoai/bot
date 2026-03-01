@@ -1,19 +1,14 @@
 import { html, nothing } from "lit";
-import type { AppViewState } from "./app-view-state.ts";
 import { parseAgentSessionKey } from "../../../src/routing/session-key.js";
 import { t } from "../i18n/index.ts";
 import { refreshChatAvatar } from "./app-chat.ts";
 import { renderUsageTab } from "./app-render-usage-tab.ts";
-import {
-  renderChatControls,
-  renderNavFooter,
-  renderTab,
-  renderThemeToggle,
-} from "./app-render.helpers.ts";
+import { renderChatControls, renderTab, renderThemeToggle } from "./app-render.helpers.ts";
+import type { AppViewState } from "./app-view-state.ts";
 import { loadAgentFileContent, loadAgentFiles, saveAgentFile } from "./controllers/agent-files.ts";
 import { loadAgentIdentities, loadAgentIdentity } from "./controllers/agent-identity.ts";
 import { loadAgentSkills } from "./controllers/agent-skills.ts";
-import { loadAgents } from "./controllers/agents.ts";
+import { loadAgents, loadToolsCatalog } from "./controllers/agents.ts";
 import { loadChannels } from "./controllers/channels.ts";
 import { loadChatHistory } from "./controllers/chat.ts";
 import {
@@ -25,26 +20,23 @@ import {
   removeConfigFormValue,
 } from "./controllers/config.ts";
 import {
-  cancelCronEdit,
-  hasCronFormErrors,
   loadCronRuns,
   loadMoreCronJobs,
   loadMoreCronRuns,
-  normalizeCronFormState,
-<<<<<<< HEAD
-  toggleCronJob,
   reloadCronJobs,
-  removeCronJob,
+  toggleCronJob,
   runCronJob,
+  removeCronJob,
   addCronJob,
-  startCronClone,
   startCronEdit,
-=======
+  startCronClone,
+  cancelCronEdit,
+  validateCronForm,
+  hasCronFormErrors,
+  normalizeCronFormState,
   getVisibleCronJobs,
->>>>>>> e3ba59dc7 (Control UI: add cron jobs schedule/status filters with reset (#9510))
   updateCronJobsFilter,
   updateCronRunsFilter,
-  validateCronForm,
 } from "./controllers/cron.ts";
 import { loadDebug, callDebugMethod } from "./controllers/debug.ts";
 import {
@@ -61,10 +53,9 @@ import {
   updateExecApprovalsFormValue,
 } from "./controllers/exec-approvals.ts";
 import { loadLogs } from "./controllers/logs.ts";
-import { loadMarketplace } from "./controllers/marketplace.ts";
-import { loadNodes, setNodeBilling } from "./controllers/nodes.ts";
+import { loadNodes } from "./controllers/nodes.ts";
 import { loadPresence } from "./controllers/presence.ts";
-import { deleteSession, loadSessions, patchSession } from "./controllers/sessions.ts";
+import { deleteSessionAndRefresh, loadSessions, patchSession } from "./controllers/sessions.ts";
 import {
   installSkill,
   loadSkills,
@@ -72,6 +63,7 @@ import {
   updateSkillEdit,
   updateSkillEnabled,
 } from "./controllers/skills.ts";
+import { buildExternalLinkRel, EXTERNAL_LINK_TARGET } from "./external-link.ts";
 import { icons } from "./icons.ts";
 import { normalizeBasePath, TAB_GROUPS, subtitleForTab, titleForTab } from "./navigation.ts";
 import { resolveConfiguredCronModelSuggestions } from "./views/agents-utils.ts";
@@ -85,15 +77,50 @@ import { renderExecApprovalPrompt } from "./views/exec-approval.ts";
 import { renderGatewayUrlConfirmation } from "./views/gateway-url-confirmation.ts";
 import { renderInstances } from "./views/instances.ts";
 import { renderLogs } from "./views/logs.ts";
-import { renderMarketplace } from "./views/marketplace.ts";
 import { renderNodes } from "./views/nodes.ts";
 import { renderOverview } from "./views/overview.ts";
-import { renderScreen } from "./views/screen.ts";
 import { renderSessions } from "./views/sessions.ts";
 import { renderSkills } from "./views/skills.ts";
 
 const AVATAR_DATA_RE = /^data:/i;
 const AVATAR_HTTP_RE = /^https?:\/\//i;
+const CRON_THINKING_SUGGESTIONS = ["off", "minimal", "low", "medium", "high"];
+const CRON_TIMEZONE_SUGGESTIONS = [
+  "UTC",
+  "America/Los_Angeles",
+  "America/Denver",
+  "America/Chicago",
+  "America/New_York",
+  "Europe/London",
+  "Europe/Berlin",
+  "Asia/Tokyo",
+];
+
+function isHttpUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value.trim());
+}
+
+function normalizeSuggestionValue(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function uniquePreserveOrder(values: string[]): string[] {
+  const seen = new Set<string>();
+  const output: string[] = [];
+  for (const value of values) {
+    const normalized = value.trim();
+    if (!normalized) {
+      continue;
+    }
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    output.push(normalized);
+  }
+  return output;
+}
 
 function resolveAssistantAvatarUrl(state: AppViewState): string | undefined {
   const list = state.agentsList?.agents ?? [];
@@ -112,6 +139,16 @@ function resolveAssistantAvatarUrl(state: AppViewState): string | undefined {
 }
 
 export function renderApp(state: AppViewState) {
+  const botVersion =
+    (typeof state.hello?.server?.version === "string" && state.hello.server.version.trim()) ||
+    state.updateAvailable?.currentVersion ||
+    t("common.na");
+  const availableUpdate =
+    state.updateAvailable &&
+    state.updateAvailable.latestVersion !== state.updateAvailable.currentVersion
+      ? state.updateAvailable
+      : null;
+  const versionStatusClass = availableUpdate ? "warn" : "ok";
   const presenceCount = state.presenceEntries.length;
   const sessionsCount = state.sessionsResult?.count ?? null;
   const cronNext = state.cronStatus?.nextWakeAtMs ?? null;
@@ -123,14 +160,12 @@ export function renderApp(state: AppViewState) {
   const chatAvatarUrl = state.chatAvatarUrl ?? assistantAvatarUrl ?? null;
   const configValue =
     state.configForm ?? (state.configSnapshot?.config as Record<string, unknown> | null);
-  const _basePath = normalizeBasePath(state.basePath ?? "");
+  const basePath = normalizeBasePath(state.basePath ?? "");
   const resolvedAgentId =
     state.agentsSelectedId ??
     state.agentsList?.defaultId ??
     state.agentsList?.agents?.[0]?.id ??
     null;
-<<<<<<< HEAD
-=======
   const cronAgentSuggestions = Array.from(
     new Set(
       [
@@ -183,7 +218,6 @@ export function renderApp(state: AppViewState) {
     state.cronForm.deliveryMode === "webhook"
       ? rawDeliveryToSuggestions.filter((value) => isHttpUrl(value))
       : rawDeliveryToSuggestions;
->>>>>>> f10734760 (fix(ui-cron): include configured model suggestions for scheduled jobs (openclaw#29709) thanks @Sid-Qin)
 
   return html`
     <div class="shell ${isChat ? "shell--chat" : ""} ${chatFocus ? "shell--chat-focus" : ""} ${state.settings.navCollapsed ? "shell--nav-collapsed" : ""} ${state.onboarding ? "shell--onboarding" : ""}">
@@ -203,86 +237,87 @@ export function renderApp(state: AppViewState) {
           </button>
           <div class="brand">
             <div class="brand-logo">
-              <svg viewBox="0 0 67 67" xmlns="http://www.w3.org/2000/svg" class="brand-h">
-                <path d="M22.21 67V44.6369H0V67H22.21Z" fill="#ffffff"/>
-                <path d="M0 44.6369L22.21 46.8285V44.6369H0Z" fill="#ffffff"/>
-                <path d="M66.7038 22.3184H22.2534L0.0878906 44.6367H44.4634L66.7038 22.3184Z" fill="#ffffff"/>
-                <path d="M22.21 0H0V22.3184H22.21V0Z" fill="#ffffff"/>
-                <path d="M66.7198 0H44.5098V22.3184H66.7198V0Z" fill="#ffffff"/>
-                <path d="M66.6753 22.3185L44.5098 20.0822V22.3185H66.6753Z" fill="#ffffff"/>
-                <path d="M66.7198 67V44.6369H44.5098V67H66.7198Z" fill="#ffffff"/>
-              </svg>
+              <img src=${basePath ? `${basePath}/favicon.svg` : "/favicon.svg"} alt="Bot" />
             </div>
             <div class="brand-text">
-              <div class="brand-title">Hanzo Bot</div>
+              <div class="brand-title">BOT</div>
+              <div class="brand-sub">Gateway Dashboard</div>
             </div>
           </div>
         </div>
         <div class="topbar-status">
           <div class="pill">
+            <span class="statusDot ${versionStatusClass}"></span>
+            <span>${t("common.version")}</span>
+            <span class="mono">${botVersion}</span>
+          </div>
+          <div class="pill">
             <span class="statusDot ${state.connected ? "ok" : ""}"></span>
             <span>${t("common.health")}</span>
             <span class="mono">${state.connected ? t("common.ok") : t("common.offline")}</span>
           </div>
-          <a
-            class="btn btn--primary btn--sm topbar-cta"
-            href="https://hanzo.bot/chat"
-            @click=${(e: MouseEvent) => {
-              e.preventDefault();
-              state.setTab("chat");
-            }}
-          >Try Hanzo</a>
+          ${renderThemeToggle(state)}
         </div>
       </header>
       <aside class="nav ${state.settings.navCollapsed ? "nav--collapsed" : ""}">
-        <div class="nav-scroll">
-          ${TAB_GROUPS.map((group) => {
-            const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
-            const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
-            return html`
-              <div class="nav-group ${isGroupCollapsed && !hasActiveTab ? "nav-group--collapsed" : ""}">
-                <button
-                  class="nav-label"
-                  @click=${() => {
-                    const next = { ...state.settings.navGroupsCollapsed };
-                    next[group.label] = !isGroupCollapsed;
-                    state.applySettings({
-                      ...state.settings,
-                      navGroupsCollapsed: next,
-                    });
-                  }}
-                  aria-expanded=${!isGroupCollapsed}
-                >
-                  <span class="nav-label__text">${t(`nav.${group.label}`)}</span>
-                  <span class="nav-label__chevron">${isGroupCollapsed ? "+" : "−"}</span>
-                </button>
-                <div class="nav-group__items">
-                  ${group.tabs.map((tab) => renderTab(state, tab))}
-                </div>
-              </div>
-            `;
-          })}
-          <div class="nav-group nav-group--links">
-            <div class="nav-label nav-label--static">
-              <span class="nav-label__text">${t("common.resources")}</span>
-            </div>
-            <div class="nav-group__items">
-              <a
-                class="nav-item nav-item--external"
-                href="https://docs.hanzo.bot"
-                target="_blank"
-                rel="noreferrer"
-                title="${t("common.docs")} (opens in new tab)"
+        ${TAB_GROUPS.map((group) => {
+          const isGroupCollapsed = state.settings.navGroupsCollapsed[group.label] ?? false;
+          const hasActiveTab = group.tabs.some((tab) => tab === state.tab);
+          return html`
+            <div class="nav-group ${isGroupCollapsed && !hasActiveTab ? "nav-group--collapsed" : ""}">
+              <button
+                class="nav-label"
+                @click=${() => {
+                  const next = { ...state.settings.navGroupsCollapsed };
+                  next[group.label] = !isGroupCollapsed;
+                  state.applySettings({
+                    ...state.settings,
+                    navGroupsCollapsed: next,
+                  });
+                }}
+                aria-expanded=${!isGroupCollapsed}
               >
-                <span class="nav-item__icon" aria-hidden="true">${icons.book}</span>
-                <span class="nav-item__text">${t("common.docs")}</span>
-              </a>
+                <span class="nav-label__text">${t(`nav.${group.label}`)}</span>
+                <span class="nav-label__chevron">${isGroupCollapsed ? "+" : "−"}</span>
+              </button>
+              <div class="nav-group__items">
+                ${group.tabs.map((tab) => renderTab(state, tab))}
+              </div>
             </div>
+          `;
+        })}
+        <div class="nav-group nav-group--links">
+          <div class="nav-label nav-label--static">
+            <span class="nav-label__text">${t("common.resources")}</span>
+          </div>
+          <div class="nav-group__items">
+            <a
+              class="nav-item nav-item--external"
+              href="https://docs.hanzo.bot"
+              target=${EXTERNAL_LINK_TARGET}
+              rel=${buildExternalLinkRel()}
+              title="${t("common.docs")} (opens in new tab)"
+            >
+              <span class="nav-item__icon" aria-hidden="true">${icons.book}</span>
+              <span class="nav-item__text">${t("common.docs")}</span>
+            </a>
           </div>
         </div>
-        ${renderNavFooter(state)}
       </aside>
       <main class="content ${isChat ? "content--chat" : ""}">
+        ${
+          availableUpdate
+            ? html`<div class="update-banner callout danger" role="alert">
+              <strong>Update available:</strong> v${availableUpdate.latestVersion}
+              (running v${availableUpdate.currentVersion}).
+              <button
+                class="btn btn--sm update-banner__btn"
+                ?disabled=${state.updateRunning || !state.connected}
+                @click=${() => runUpdate(state)}
+              >${state.updateRunning ? "Updating…" : "Update now"}</button>
+            </div>`
+            : nothing
+        }
         <section class="content-header">
           <div>
             ${state.tab === "usage" ? nothing : html`<div class="page-title">${titleForTab(state.tab)}</div>`}
@@ -302,14 +337,12 @@ export function renderApp(state: AppViewState) {
                 settings: state.settings,
                 password: state.password,
                 lastError: state.lastError,
+                lastErrorCode: state.lastErrorCode,
                 presenceCount,
                 sessionsCount,
                 cronEnabled: state.cronStatus?.enabled ?? null,
                 cronNext,
                 lastChannelsRefresh: state.channelsLastSuccess,
-                authMode: state.authMode,
-                iamUser: state.iamUser,
-                iamLoggingIn: state.iamLoggingIn,
                 onSettingsChange: (next) => state.applySettings(next),
                 onPasswordChange: (next) => (state.password = next),
                 onSessionKeyChange: (next) => {
@@ -325,9 +358,6 @@ export function renderApp(state: AppViewState) {
                 },
                 onConnect: () => state.connect(),
                 onRefresh: () => state.loadOverview(),
-                onIamLogin: () => state.handleIamLogin(),
-                onIamSignup: () => state.handleIamSignup(),
-                onIamLogout: () => state.handleIamLogout(),
               })
             : nothing
         }
@@ -367,10 +397,6 @@ export function renderApp(state: AppViewState) {
                 onNostrProfileSave: () => state.handleNostrProfileSave(),
                 onNostrProfileImport: () => state.handleNostrProfileImport(),
                 onNostrProfileToggleAdvanced: () => state.handleNostrProfileToggleAdvanced(),
-                expandedChannel: state.expandedChannel,
-                onChannelSelect: (key) => {
-                  state.expandedChannel = key;
-                },
               })
             : nothing
         }
@@ -406,10 +432,7 @@ export function renderApp(state: AppViewState) {
                 },
                 onRefresh: () => loadSessions(state),
                 onPatch: (key, patch) => patchSession(state, key, patch),
-                onDelete: async (key) => {
-                  await deleteSession(state, key);
-                  await loadSessions(state);
-                },
+                onDelete: (key) => deleteSessionAndRefresh(state, key),
               })
             : nothing
         }
@@ -436,7 +459,7 @@ export function renderApp(state: AppViewState) {
                 busy: state.cronBusy,
                 form: state.cronForm,
                 fieldErrors: state.cronFieldErrors,
-                canSubmit: !hasCronFormErrors(validateCronForm(state.cronForm)),
+                canSubmit: !hasCronFormErrors(state.cronFieldErrors),
                 editingJobId: state.cronEditingJobId,
                 channels: state.channelsSnapshot?.channelMeta?.length
                   ? state.channelsSnapshot.channelMeta.map((entry) => entry.id)
@@ -454,14 +477,11 @@ export function renderApp(state: AppViewState) {
                 runsStatusFilter: state.cronRunsStatusFilter,
                 runsQuery: state.cronRunsQuery,
                 runsSortDir: state.cronRunsSortDir,
-                agentSuggestions: state.agentsList?.agents?.map((entry) => entry.id) ?? [],
-                modelSuggestions: state.cronModelSuggestions ?? [],
-                thinkingSuggestions: ["none", "low", "medium", "high"],
-                timezoneSuggestions: [
-                  Intl.DateTimeFormat().resolvedOptions().timeZone,
-                  "UTC",
-                ].filter((v, i, a) => a.indexOf(v) === i),
-                deliveryToSuggestions: [],
+                agentSuggestions: cronAgentSuggestions,
+                modelSuggestions: cronModelSuggestions,
+                thinkingSuggestions: CRON_THINKING_SUGGESTIONS,
+                timezoneSuggestions: CRON_TIMEZONE_SUGGESTIONS,
+                deliveryToSuggestions,
                 onFormChange: (patch) => {
                   state.cronForm = normalizeCronFormState({ ...state.cronForm, ...patch });
                   state.cronFieldErrors = validateCronForm(state.cronForm);
@@ -474,13 +494,13 @@ export function renderApp(state: AppViewState) {
                 onToggle: (job, enabled) => toggleCronJob(state, job, enabled),
                 onRun: (job) => runCronJob(state, job),
                 onRemove: (job) => removeCronJob(state, job),
-                onLoadRuns: (jobId) => loadCronRuns(state, jobId),
+                onLoadRuns: async (jobId) => {
+                  updateCronRunsFilter(state, { cronRunsScope: "job" });
+                  await loadCronRuns(state, jobId);
+                },
                 onLoadMoreJobs: () => loadMoreCronJobs(state),
-                onJobsFiltersChange: (patch) => {
+                onJobsFiltersChange: async (patch) => {
                   updateCronJobsFilter(state, patch);
-<<<<<<< HEAD
-                  void reloadCronJobs(state);
-=======
                   const shouldReload =
                     typeof patch.cronJobsQuery === "string" ||
                     Boolean(patch.cronJobsEnabledFilter) ||
@@ -500,24 +520,16 @@ export function renderApp(state: AppViewState) {
                     cronJobsSortDir: "asc",
                   });
                   await reloadCronJobs(state);
->>>>>>> e3ba59dc7 (Control UI: add cron jobs schedule/status filters with reset (#9510))
                 },
                 onLoadMoreRuns: () => loadMoreCronRuns(state),
-                onRunsFiltersChange: (patch) => {
+                onRunsFiltersChange: async (patch) => {
                   updateCronRunsFilter(state, patch);
-                  void loadCronRuns(state, state.cronRunsJobId);
+                  if (state.cronRunsScope === "all") {
+                    await loadCronRuns(state, null);
+                    return;
+                  }
+                  await loadCronRuns(state, state.cronRunsJobId);
                 },
-              })
-            : nothing
-        }
-
-        ${
-          state.tab === "marketplace"
-            ? renderMarketplace({
-                loading: state.marketplaceLoading,
-                status: state.marketplaceStatus,
-                error: state.marketplaceError,
-                onRefresh: () => loadMarketplace(state),
               })
             : nothing
         }
@@ -562,6 +574,12 @@ export function renderApp(state: AppViewState) {
                 skillsFilter: state.skillsFilter,
                 onRefresh: async () => {
                   await loadAgents(state);
+                  const nextSelected =
+                    state.agentsSelectedId ??
+                    state.agentsList?.defaultId ??
+                    state.agentsList?.agents?.[0]?.id ??
+                    null;
+                  await loadToolsCatalog(state, nextSelected);
                   const agentIds = state.agentsList?.agents?.map((entry) => entry.id) ?? [];
                   if (agentIds.length > 0) {
                     void loadAgentIdentities(state, agentIds);
@@ -582,6 +600,9 @@ export function renderApp(state: AppViewState) {
                   state.agentSkillsError = null;
                   state.agentSkillsAgentId = null;
                   void loadAgentIdentity(state, agentId);
+                  if (state.agentsPanel === "tools") {
+                    void loadToolsCatalog(state, agentId);
+                  }
                   if (state.agentsPanel === "files") {
                     void loadAgentFiles(state, agentId);
                   }
@@ -600,6 +621,9 @@ export function renderApp(state: AppViewState) {
                       state.agentFileDrafts = {};
                       void loadAgentFiles(state, resolvedAgentId);
                     }
+                  }
+                  if (panel === "tools") {
+                    void loadToolsCatalog(state, resolvedAgentId);
                   }
                   if (panel === "skills") {
                     if (resolvedAgentId) {
@@ -967,36 +991,6 @@ export function renderApp(state: AppViewState) {
                       : { kind: "gateway" as const };
                   return saveExecApprovals(state, target);
                 },
-                onNodeBillingSet: (nodeId, billingMode, budgetCents) =>
-                  setNodeBilling(state, {
-                    nodeId,
-                    billingMode: billingMode as "global" | "dedicated" | "local",
-                    budgetCents,
-                  }),
-              })
-            : nothing
-        }
-
-        ${
-          state.tab === "screen"
-            ? renderScreen({
-                connected: state.connected,
-                gatewayUrl: state.settings.gatewayUrl,
-                token: state.settings.token,
-                nodes: state.nodes
-                  .filter(
-                    (n): n is Record<string, unknown> & { nodeId: string } =>
-                      typeof n.nodeId === "string",
-                  )
-                  .map((n) => ({
-                    nodeId: n.nodeId,
-                    displayName:
-                      typeof n.hostname === "string" ? n.hostname : n.nodeId.substring(0, 12),
-                  })),
-                selectedNodeId: state.screenNodeId,
-                onSelectNode: (nodeId) => {
-                  state.screenNodeId = nodeId;
-                },
               })
             : nothing
         }
@@ -1029,6 +1023,7 @@ export function renderApp(state: AppViewState) {
                 loading: state.chatLoading,
                 sending: state.chatSending,
                 compactionStatus: state.compactionStatus,
+                fallbackStatus: state.fallbackStatus,
                 assistantAvatarUrl: chatAvatarUrl,
                 messages: state.chatMessages,
                 toolMessages: state.chatToolMessages,
@@ -1164,16 +1159,6 @@ export function renderApp(state: AppViewState) {
             : nothing
         }
       </main>
-      <footer class="app-footer">
-        <div class="app-footer__left">
-          <span class="muted">Hanzo Bot</span>
-          <a class="app-footer__link" href="https://docs.hanzo.bot" target="_blank" rel="noreferrer">Docs</a>
-          <a class="app-footer__link" href="https://hanzo.ai" target="_blank" rel="noreferrer">Hanzo</a>
-        </div>
-        <div class="app-footer__right">
-          ${renderThemeToggle(state)}
-        </div>
-      </footer>
       ${renderExecApprovalPrompt(state)}
       ${renderGatewayUrlConfirmation(state)}
     </div>
