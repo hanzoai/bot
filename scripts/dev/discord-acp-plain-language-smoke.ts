@@ -296,7 +296,7 @@ async function botCliJson<T>(params: { botBin: string; args: string[] }): Promis
   return JSON.parse(stdout) as T;
 }
 
-async function readMessagesWithOpenclaw(params: {
+async function readMessagesWithBot(params: {
   botBin: string;
   target: string;
   limit: number;
@@ -716,7 +716,7 @@ async function run(): Promise<SuccessResult | FailureResult> {
       try {
         parentRecent =
           args.driverMode === "bot"
-            ? await readMessagesWithOpenclaw({
+            ? await readMessagesWithBot({
                 botBin: args.botBin,
                 target: args.channelId,
                 limit: 20,
@@ -753,7 +753,7 @@ async function run(): Promise<SuccessResult | FailureResult> {
       try {
         const threadMessages =
           args.driverMode === "bot"
-            ? await readMessagesWithOpenclaw({
+            ? await readMessagesWithBot({
                 botBin: args.botBin,
                 target: threadId,
                 limit: 50,
@@ -784,7 +784,7 @@ async function run(): Promise<SuccessResult | FailureResult> {
       try {
         parentRecent =
           args.driverMode === "bot"
-            ? await readMessagesWithOpenclaw({
+            ? await readMessagesWithBot({
                 botBin: args.botBin,
                 target: args.channelId,
                 limit: 20,
