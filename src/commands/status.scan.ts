@@ -1,5 +1,3 @@
-import type { MemoryProviderStatus } from "../memory/types.js";
-import type { RuntimeEnv } from "../runtime.js";
 import { withProgress } from "../cli/progress.js";
 import { loadConfig } from "../config/config.js";
 import { buildGatewayConnectionDetails, callGateway } from "../gateway/call.js";
@@ -9,7 +7,9 @@ import { collectChannelStatusIssues } from "../infra/channels-status-issues.js";
 import { resolveOsSummary } from "../infra/os-summary.js";
 import { getTailnetHostname } from "../infra/tailscale.js";
 import { getMemorySearchManager } from "../memory/index.js";
+import type { MemoryProviderStatus } from "../memory/types.js";
 import { runExec } from "../process/exec.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { buildChannelsTable } from "./status-all/channels.js";
 import { getAgentLocalStatuses } from "./status.agent-local.js";
 import { pickGatewaySelfPresence, resolveGatewayProbeAuth } from "./status.gateway-probe.js";
@@ -182,7 +182,7 @@ async function scanStatusJsonFast(opts: {
     gatewaySelf,
     channelIssues,
     agentStatus,
-    channels: [],
+    channels: { rows: [], details: [] },
     summary,
     memory,
     memoryPlugin,
@@ -204,7 +204,7 @@ export async function scanStatus(
     {
       label: "Scanning status…",
       total: 10,
-      enabled: opts.json !== true,
+      enabled: true,
     },
     async (progress) => {
       progress.setLabel("Loading config…");
@@ -282,8 +282,8 @@ export async function scanStatus(
       progress.setLabel("Summarizing channels…");
       const channels = await buildChannelsTable(cfg, {
         // Show token previews in regular status; keep `status --all` redacted.
-        // Set `BOT_SHOW_SECRETS=0` to force redaction.
-        showSecrets: process.env.BOT_SHOW_SECRETS?.trim() !== "0",
+        // Set `CLAWDBOT_SHOW_SECRETS=0` to force redaction.
+        showSecrets: process.env.CLAWDBOT_SHOW_SECRETS?.trim() !== "0",
       });
       progress.tick();
 
