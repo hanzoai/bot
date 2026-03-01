@@ -38,7 +38,9 @@ export async function loadNodes(state: NodesState, opts?: { quiet?: boolean }) {
     state.lastError = null;
   }
   try {
-    const res = await state.client.request<{ nodes?: Record<string, unknown> }>("node.list", {});
+    const res = await state.client.request<{ nodes?: Record<string, unknown> }>("node.list", {
+      connectedOnly: true,
+    });
     state.nodes = Array.isArray(res.nodes) ? res.nodes : [];
   } catch (err) {
     if (!opts?.quiet) {
