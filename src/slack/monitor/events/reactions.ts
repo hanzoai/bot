@@ -5,8 +5,11 @@ import { danger } from "../../../globals.js";
 import { enqueueSystemEvent } from "../../../infra/system-events.js";
 import { authorizeAndResolveSlackSystemEventContext } from "./system-event-context.js";
 
-export function registerSlackReactionEvents(params: { ctx: SlackMonitorContext }) {
-  const { ctx } = params;
+export function registerSlackReactionEvents(params: {
+  ctx: SlackMonitorContext;
+  trackEvent?: () => void;
+}) {
+  const { ctx, trackEvent } = params;
 
   const handleReactionEvent = async (event: SlackReactionEvent, action: string) => {
     try {
@@ -14,6 +17,7 @@ export function registerSlackReactionEvents(params: { ctx: SlackMonitorContext }
       if (!item || item.type !== "message") {
         return;
       }
+      trackEvent?.();
 
       const ingressContext = await authorizeAndResolveSlackSystemEventContext({
         ctx,
