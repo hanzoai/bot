@@ -144,6 +144,45 @@ export function parseModelRef(raw: string, defaultProvider: string): ModelRef | 
   return normalizeModelRef(providerRaw, model);
 }
 
+<<<<<<< HEAD
+=======
+export function inferUniqueProviderFromConfiguredModels(params: {
+  cfg: OpenClawConfig;
+  model: string;
+}): string | undefined {
+  const model = params.model.trim();
+  if (!model) {
+    return undefined;
+  }
+  const configuredModels = params.cfg.agents?.defaults?.models;
+  if (!configuredModels) {
+    return undefined;
+  }
+  const normalized = model.toLowerCase();
+  const providers = new Set<string>();
+  for (const key of Object.keys(configuredModels)) {
+    const ref = key.trim();
+    if (!ref || !ref.includes("/")) {
+      continue;
+    }
+    const parsed = parseModelRef(ref, DEFAULT_PROVIDER);
+    if (!parsed) {
+      continue;
+    }
+    if (parsed.model === model || parsed.model.toLowerCase() === normalized) {
+      providers.add(parsed.provider);
+      if (providers.size > 1) {
+        return undefined;
+      }
+    }
+  }
+  if (providers.size !== 1) {
+    return undefined;
+  }
+  return providers.values().next().value;
+}
+
+>>>>>>> d0ca02e96 (fix(cron): respect subagents.model in isolated cron sessions (#11474))
 export function resolveAllowlistModelKey(raw: string, defaultProvider: string): string | null {
   const parsed = parseModelRef(raw, defaultProvider);
   if (!parsed) {
@@ -513,4 +552,24 @@ export function resolveHooksGmailModel(params: {
   });
 
   return resolved?.ref ?? null;
+}
+
+/**
+ * Normalize a model selection value (string or `{primary?: string}`) to a
+ * plain trimmed string.  Returns `undefined` when the input is empty/missing.
+ * Shared by sessions-spawn and cron isolated-agent model resolution.
+ */
+export function normalizeModelSelection(value: unknown): string | undefined {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || undefined;
+  }
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  const primary = (value as { primary?: unknown }).primary;
+  if (typeof primary === "string" && primary.trim()) {
+    return primary.trim();
+  }
+  return undefined;
 }
