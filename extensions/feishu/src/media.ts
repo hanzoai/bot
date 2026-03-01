@@ -1,28 +1,13 @@
-import type { BotConfig } from "bot/plugin-sdk";
 import fs from "fs";
 import path from "path";
 import { Readable } from "stream";
-import { resolvePreferredBotTmpDir } from "../../../src/infra/tmp-bot-dir.js";
+import { withTempDownloadPath, type BotConfig } from "bot/plugin-sdk";
 import { resolveFeishuAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
+import { normalizeFeishuExternalKey } from "./external-keys.js";
 import { getFeishuRuntime } from "./runtime.js";
 import { assertFeishuMessageApiSuccess, toFeishuSendResult } from "./send-result.js";
-import { resolveReceiveIdType, normalizeFeishuTarget } from "./targets.js";
-
-/** Validate that a key does not contain path traversal or separator characters. */
-function assertSafeKey(key: string, label: string): void {
-  if (!key || key.includes("/") || key.includes("\\") || key.includes("..")) {
-    throw new Error(`invalid ${label}: ${key}`);
-  }
-}
-
-/** Build a temp path under the bot tmp dir with a sanitized suffix. */
-function buildIsolatedTmpPath(prefix: string, key: string): string {
-  const safeKey = key.replace(/[^a-zA-Z0-9_.-]/g, "_");
-  const tmpRoot = resolvePreferredBotTmpDir();
-  fs.mkdirSync(tmpRoot, { recursive: true });
-  return path.join(tmpRoot, `${prefix}_${Date.now()}_${safeKey}`);
-}
+import { resolveFeishuSendTarget } from "./send-target.js";
 
 export type DownloadImageResult = {
   buffer: Buffer;
@@ -37,7 +22,7 @@ export type DownloadMessageResourceResult = {
 
 async function readFeishuResponseBuffer(params: {
   response: unknown;
-  tmpPath: string;
+  tmpDirPrefix: string;
   errorPrefix: string;
 }): Promise<Buffer> {
   const { response } = params;
@@ -68,10 +53,10 @@ async function readFeishuResponseBuffer(params: {
     return Buffer.concat(chunks);
   }
   if (typeof responseAny.writeFile === "function") {
-    await responseAny.writeFile(params.tmpPath);
-    const buffer = await fs.promises.readFile(params.tmpPath);
-    await fs.promises.unlink(params.tmpPath).catch(() => {});
-    return buffer;
+    return await withTempDownloadPath({ prefix: params.tmpDirPrefix }, async (tmpPath) => {
+      await responseAny.writeFile(tmpPath);
+      return await fs.promises.readFile(tmpPath);
+    });
   }
   if (typeof responseAny[Symbol.asyncIterator] === "function") {
     const chunks: Buffer[] = [];
@@ -103,8 +88,10 @@ export async function downloadImageFeishu(params: {
   accountId?: string;
 }): Promise<DownloadImageResult> {
   const { cfg, imageKey, accountId } = params;
-  assertSafeKey(imageKey, "image_key");
-
+  const normalizedImageKey = normalizeFeishuExternalKey(imageKey);
+  if (!normalizedImageKey) {
+    throw new Error("Feishu image download failed: invalid image_key");
+  }
   const account = resolveFeishuAccount({ cfg, accountId });
   if (!account.configured) {
     throw new Error(`Feishu account "${account.accountId}" not configured`);
@@ -113,13 +100,12 @@ export async function downloadImageFeishu(params: {
   const client = createFeishuClient(account);
 
   const response = await client.im.image.get({
-    path: { image_key: imageKey },
+    path: { image_key: normalizedImageKey },
   });
 
-  const tmpPath = buildIsolatedTmpPath("feishu_img", imageKey);
   const buffer = await readFeishuResponseBuffer({
     response,
-    tmpPath,
+    tmpDirPrefix: "bot-feishu-img-",
     errorPrefix: "Feishu image download failed",
   });
   return { buffer };
@@ -137,8 +123,10 @@ export async function downloadMessageResourceFeishu(params: {
   accountId?: string;
 }): Promise<DownloadMessageResourceResult> {
   const { cfg, messageId, fileKey, type, accountId } = params;
-  assertSafeKey(fileKey, "file_key");
-
+  const normalizedFileKey = normalizeFeishuExternalKey(fileKey);
+  if (!normalizedFileKey) {
+    throw new Error("Feishu message resource download failed: invalid file_key");
+  }
   const account = resolveFeishuAccount({ cfg, accountId });
   if (!account.configured) {
     throw new Error(`Feishu account "${account.accountId}" not configured`);
@@ -147,14 +135,13 @@ export async function downloadMessageResourceFeishu(params: {
   const client = createFeishuClient(account);
 
   const response = await client.im.messageResource.get({
-    path: { message_id: messageId, file_key: fileKey },
+    path: { message_id: messageId, file_key: normalizedFileKey },
     params: { type },
   });
 
-  const tmpPath = buildIsolatedTmpPath("feishu", fileKey);
   const buffer = await readFeishuResponseBuffer({
     response,
-    tmpPath,
+    tmpDirPrefix: "bot-feishu-resource-",
     errorPrefix: "Feishu message resource download failed",
   });
   return { buffer };
@@ -278,21 +265,15 @@ export async function sendImageFeishu(params: {
   to: string;
   imageKey: string;
   replyToMessageId?: string;
+  replyInThread?: boolean;
   accountId?: string;
 }): Promise<SendMediaResult> {
-  const { cfg, to, imageKey, replyToMessageId, accountId } = params;
-  const account = resolveFeishuAccount({ cfg, accountId });
-  if (!account.configured) {
-    throw new Error(`Feishu account "${account.accountId}" not configured`);
-  }
-
-  const client = createFeishuClient(account);
-  const receiveId = normalizeFeishuTarget(to);
-  if (!receiveId) {
-    throw new Error(`Invalid Feishu target: ${to}`);
-  }
-
-  const receiveIdType = resolveReceiveIdType(receiveId);
+  const { cfg, to, imageKey, replyToMessageId, replyInThread, accountId } = params;
+  const { client, receiveId, receiveIdType } = resolveFeishuSendTarget({
+    cfg,
+    to,
+    accountId,
+  });
   const content = JSON.stringify({ image_key: imageKey });
 
   if (replyToMessageId) {
@@ -301,6 +282,7 @@ export async function sendImageFeishu(params: {
       data: {
         content,
         msg_type: "image",
+        ...(replyInThread ? { reply_in_thread: true } : {}),
       },
     });
     assertFeishuMessageApiSuccess(response, "Feishu image reply failed");
@@ -329,22 +311,16 @@ export async function sendFileFeishu(params: {
   /** Use "media" for video, "audio" for audio, "file" for documents */
   msgType?: "file" | "media" | "audio";
   replyToMessageId?: string;
+  replyInThread?: boolean;
   accountId?: string;
 }): Promise<SendMediaResult> {
-  const { cfg, to, fileKey, replyToMessageId, accountId } = params;
+  const { cfg, to, fileKey, replyToMessageId, replyInThread, accountId } = params;
   const msgType = params.msgType ?? "file";
-  const account = resolveFeishuAccount({ cfg, accountId });
-  if (!account.configured) {
-    throw new Error(`Feishu account "${account.accountId}" not configured`);
-  }
-
-  const client = createFeishuClient(account);
-  const receiveId = normalizeFeishuTarget(to);
-  if (!receiveId) {
-    throw new Error(`Invalid Feishu target: ${to}`);
-  }
-
-  const receiveIdType = resolveReceiveIdType(receiveId);
+  const { client, receiveId, receiveIdType } = resolveFeishuSendTarget({
+    cfg,
+    to,
+    accountId,
+  });
   const content = JSON.stringify({ file_key: fileKey });
 
   if (replyToMessageId) {
@@ -353,6 +329,7 @@ export async function sendFileFeishu(params: {
       data: {
         content,
         msg_type: msgType,
+        ...(replyInThread ? { reply_in_thread: true } : {}),
       },
     });
     assertFeishuMessageApiSuccess(response, "Feishu file reply failed");
@@ -414,12 +391,22 @@ export async function sendMediaFeishu(params: {
   mediaBuffer?: Buffer;
   fileName?: string;
   replyToMessageId?: string;
+  replyInThread?: boolean;
   accountId?: string;
   /** Allowed roots for local path reads; required for local filePath to work. */
   mediaLocalRoots?: readonly string[];
 }): Promise<SendMediaResult> {
-  const { cfg, to, mediaUrl, mediaBuffer, fileName, replyToMessageId, accountId, mediaLocalRoots } =
-    params;
+  const {
+    cfg,
+    to,
+    mediaUrl,
+    mediaBuffer,
+    fileName,
+    replyToMessageId,
+    replyInThread,
+    accountId,
+    mediaLocalRoots,
+  } = params;
   const account = resolveFeishuAccount({ cfg, accountId });
   if (!account.configured) {
     throw new Error(`Feishu account "${account.accountId}" not configured`);
@@ -450,7 +437,7 @@ export async function sendMediaFeishu(params: {
 
   if (isImage) {
     const { imageKey } = await uploadImageFeishu({ cfg, image: buffer, accountId });
-    return sendImageFeishu({ cfg, to, imageKey, replyToMessageId, accountId });
+    return sendImageFeishu({ cfg, to, imageKey, replyToMessageId, replyInThread, accountId });
   } else {
     const fileType = detectFileType(name);
     const { fileKey } = await uploadFileFeishu({
@@ -468,6 +455,7 @@ export async function sendMediaFeishu(params: {
       fileKey,
       msgType,
       replyToMessageId,
+      replyInThread,
       accountId,
     });
   }
