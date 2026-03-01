@@ -129,17 +129,22 @@ describe("resolveWhatsAppOutboundTarget", () => {
       );
     });
 
-    it("denies message when target is not in allowList", () => {
+    it("reroutes to first allowFrom entry when target is not in allowList (implicit)", () => {
+      // normalizeWhatsAppTarget is called first for allowFrom entries, then for the `to` param.
       vi.mocked(normalize.normalizeWhatsAppTarget)
-        .mockReturnValueOnce("+11234567890")
-        .mockReturnValueOnce("+19876543210");
+        .mockReturnValueOnce("+19876543210") // allowFrom[0]
+        .mockReturnValueOnce("+11234567890"); // to
       vi.mocked(normalize.isWhatsAppGroupJid).mockReturnValueOnce(false);
 
-      expectResolutionError({
+      const result = resolveWhatsAppOutboundTarget({
         to: "+11234567890",
         allowFrom: ["+19876543210"],
         mode: "implicit",
       });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.to).toBe("+19876543210");
+      }
     });
 
     it("handles mixed numeric and string allowList entries", () => {

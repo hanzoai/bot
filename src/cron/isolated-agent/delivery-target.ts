@@ -34,6 +34,8 @@ export async function resolveDeliveryTarget(
   jobPayload: {
     channel?: "last" | ChannelId;
     to?: string;
+    sessionKey?: string;
+    accountId?: string;
   },
 ): Promise<DeliveryTargetResolution> {
   const requestedChannel = typeof jobPayload.channel === "string" ? jobPayload.channel : "last";
@@ -46,26 +48,48 @@ export async function resolveDeliveryTarget(
   const store = loadSessionStore(storePath);
   const main = store[mainSessionKey];
 
+  // Prefer the thread-specific session entry when a sessionKey is provided.
+  const threadEntry =
+    jobPayload.sessionKey && jobPayload.sessionKey !== mainSessionKey
+      ? store[jobPayload.sessionKey]
+      : undefined;
+  const entry = threadEntry ?? main;
+
   const preliminary = resolveSessionDeliveryTarget({
-    entry: main,
+    entry,
     requestedChannel,
     explicitTo,
     allowMismatchedLastTo,
   });
 
   let fallbackChannel: Exclude<OutboundChannel, "none"> | undefined;
+  let ambiguousChannelError: Error | undefined;
   if (!preliminary.channel) {
     try {
       const selection = await resolveMessageChannelSelection({ cfg });
       fallbackChannel = selection.channel;
-    } catch {
-      fallbackChannel = preliminary.lastChannel ?? DEFAULT_CHAT_CHANNEL;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("Channel is required")) {
+        ambiguousChannelError = err instanceof Error ? err : new Error(msg);
+      } else {
+        fallbackChannel = preliminary.lastChannel ?? DEFAULT_CHAT_CHANNEL;
+      }
     }
+  }
+
+  if (ambiguousChannelError) {
+    return {
+      ok: false,
+      channel: undefined as unknown as Exclude<OutboundChannel, "none">,
+      mode: "implicit",
+      error: ambiguousChannelError,
+    };
   }
 
   const resolved = fallbackChannel
     ? resolveSessionDeliveryTarget({
-        entry: main,
+        entry,
         requestedChannel,
         explicitTo,
         fallbackChannel,
@@ -79,22 +103,32 @@ export async function resolveDeliveryTarget(
   const toCandidate = resolved.to;
 
   // Only carry threadId when delivering to the same recipient as the session's
-  // last conversation. This prevents stale thread IDs (e.g. from a Telegram
-  // supergroup topic) from being sent to a different target (e.g. a private
-  // chat) where they would cause API errors.
+  // last conversation, OR when the threadId was explicitly parsed from the
+  // target (e.g. `:topic:NNN`). This prevents stale thread IDs from being
+  // sent to a different target where they would cause API errors.
   const threadId =
-    resolved.threadId && resolved.to && resolved.to === resolved.lastTo
+    resolved.threadId &&
+    (resolved.threadIdExplicit || (resolved.to && resolved.to === resolved.lastTo))
       ? resolved.threadId
       : undefined;
+
+  // Resolve accountId: explicit payload overrides session and bindings.
+  let accountId = jobPayload.accountId ?? resolved.accountId;
+  if (!accountId && cfg.bindings) {
+    const binding = cfg.bindings.find((b) => b.agentId === agentId && b.match?.channel === channel);
+    if (binding?.match?.accountId) {
+      accountId = binding.match.accountId;
+    }
+  }
 
   if (!toCandidate) {
     return {
       ok: false,
       channel,
-      accountId: resolved.accountId,
+      accountId,
       threadId,
       mode,
-      error: new Error("delivery target missing"),
+      error: new Error(`No delivery target resolved for channel "${channel}"`),
     };
   }
 
@@ -102,14 +136,14 @@ export async function resolveDeliveryTarget(
     channel,
     to: toCandidate,
     cfg,
-    accountId: resolved.accountId,
+    accountId,
     mode,
   });
   if (!docked.ok) {
     return {
       ok: false,
       channel,
-      accountId: resolved.accountId,
+      accountId,
       threadId,
       mode,
       error: docked.error,
@@ -119,7 +153,7 @@ export async function resolveDeliveryTarget(
     ok: true,
     channel,
     to: docked.to,
-    accountId: resolved.accountId,
+    accountId,
     threadId,
     mode,
   };

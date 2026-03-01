@@ -1,5 +1,5 @@
 import type { HeartbeatRunResult } from "../../infra/heartbeat-wake.js";
-import type { CronJob } from "../types.js";
+import type { CronDeliveryStatus, CronJob } from "../types.js";
 import type { CronEvent, CronServiceState } from "./state.js";
 import { DEFAULT_AGENT_ID } from "../../routing/session-key.js";
 import { resolveCronDeliveryPlan } from "../delivery.js";
@@ -12,15 +12,11 @@ import {
 } from "./jobs.js";
 import { locked } from "./locked.js";
 import { ensureLoaded, persist } from "./store.js";
+import { DEFAULT_JOB_TIMEOUT_MS, resolveCronJobTimeoutMs } from "./timeout-policy.js";
+
+export { DEFAULT_JOB_TIMEOUT_MS } from "./timeout-policy.js";
 
 const MAX_TIMER_DELAY_MS = 60_000;
-
-/**
- * Maximum wall-clock time for a single job execution. Acts as a safety net
- * on top of the per-provider / per-agent timeouts to prevent one stuck job
- * from wedging the entire cron lane.
- */
-const DEFAULT_JOB_TIMEOUT_MS = 10 * 60_000; // 10 minutes
 
 /**
  * Exponential backoff delays (in ms) indexed by consecutive error count.
@@ -33,6 +29,12 @@ const ERROR_BACKOFF_SCHEDULE_MS = [
   15 * 60_000, // 4th error  →  15 min
   60 * 60_000, // 5th+ error →  60 min
 ];
+
+/**
+ * Minimum gap between consecutive runs to prevent sub-second cron
+ * expressions from overwhelming the system.
+ */
+const MIN_REFIRE_GAP_MS = 2_000;
 
 function errorBackoffMs(consecutiveErrors: number): number {
   const idx = Math.min(consecutiveErrors - 1, ERROR_BACKOFF_SCHEDULE_MS.length - 1);
@@ -58,8 +60,26 @@ export function applyJobResult(
   job.state.runningAtMs = undefined;
   job.state.lastRunAtMs = result.startedAt;
   job.state.lastStatus = result.status;
+  job.state.lastRunStatus = result.status;
   job.state.lastDurationMs = Math.max(0, result.endedAt - result.startedAt);
   job.state.lastError = result.error;
+  if (result.delivered !== undefined) {
+    job.state.lastDelivered = result.delivered;
+  }
+
+  // Compute delivery status. Explicit `delivered` from the runner takes priority
+  // over the delivery plan — if the runner reported a value, trust it.
+  const deliveryPlan = resolveCronDeliveryPlan(job);
+  if (result.delivered === true) {
+    job.state.lastDeliveryStatus = "delivered" as CronDeliveryStatus;
+  } else if (result.delivered === false) {
+    job.state.lastDeliveryStatus = "not-delivered" as CronDeliveryStatus;
+  } else if (!deliveryPlan.requested) {
+    job.state.lastDeliveryStatus = "not-requested" as CronDeliveryStatus;
+  } else {
+    job.state.lastDeliveryStatus = "unknown" as CronDeliveryStatus;
+  }
+
   job.updatedAtMs = result.endedAt;
 
   // Track consecutive errors for backoff / auto-disable.
@@ -108,7 +128,9 @@ export function applyJobResult(
         "cron: applying error backoff",
       );
     } else if (job.enabled) {
-      job.state.nextRunAtMs = computeJobNextRunAtMs(job, result.endedAt);
+      const computed = computeJobNextRunAtMs(job, result.endedAt);
+      const minNext = result.endedAt + MIN_REFIRE_GAP_MS;
+      job.state.nextRunAtMs = computed !== undefined ? Math.max(computed, minNext) : undefined;
     } else {
       job.state.nextRunAtMs = undefined;
     }
@@ -181,6 +203,16 @@ export async function onTimer(state: CronServiceState) {
     return;
   }
   state.running = true;
+  // Arm a watchdog timer so the scheduler re-checks even if the
+  // current execution hangs. The finally block re-arms with normal timing.
+  if (state.timer) {
+    clearTimeout(state.timer);
+  }
+  state.timer = setTimeout(() => {
+    void onTimer(state).catch((err) => {
+      state.deps.log.error({ err: String(err) }, "cron: timer tick failed");
+    });
+  }, MAX_TIMER_DELAY_MS);
   try {
     const dueJobs = await locked(state, async () => {
       await ensureLoaded(state, { forceReload: true, skipRecompute: true });
@@ -217,31 +249,43 @@ export async function onTimer(state: CronServiceState) {
       summary?: string;
       sessionId?: string;
       sessionKey?: string;
+      delivered?: boolean;
       startedAt: number;
       endedAt: number;
     }> = [];
 
-    for (const { id, job } of dueJobs) {
+    const runOneJob = async (entry: { id: string; job: CronJob }) => {
+      const { id, job } = entry;
       const startedAt = state.deps.nowMs();
       job.state.runningAtMs = startedAt;
       emit(state, { jobId: job.id, action: "started", runAtMs: startedAt });
 
-      const jobTimeoutMs =
-        job.payload.kind === "agentTurn" && typeof job.payload.timeoutSeconds === "number"
-          ? job.payload.timeoutSeconds * 1_000
-          : DEFAULT_JOB_TIMEOUT_MS;
+      const jobTimeoutMs = resolveCronJobTimeoutMs(job);
 
       try {
-        let timeoutId: NodeJS.Timeout;
+        const abortController = new AbortController();
+        let timeoutId: NodeJS.Timeout | undefined;
+        if (jobTimeoutMs !== undefined) {
+          timeoutId = setTimeout(() => {
+            abortController.abort("cron: job execution timed out");
+          }, jobTimeoutMs);
+        }
         const result = await Promise.race([
-          executeJobCore(state, job),
-          new Promise<never>((_, reject) => {
-            timeoutId = setTimeout(
-              () => reject(new Error("cron: job execution timed out")),
-              jobTimeoutMs,
-            );
-          }),
-        ]).finally(() => clearTimeout(timeoutId!));
+          executeJobCore(state, job, abortController.signal),
+          ...(jobTimeoutMs !== undefined
+            ? [
+                new Promise<never>((_, reject) => {
+                  abortController.signal.addEventListener(
+                    "abort",
+                    () => reject(new Error(String(abortController.signal.reason))),
+                    { once: true },
+                  );
+                }),
+              ]
+            : []),
+        ]).finally(() => {
+          if (timeoutId) clearTimeout(timeoutId);
+        });
         results.push({ jobId: id, ...result, startedAt, endedAt: state.deps.nowMs() });
       } catch (err) {
         state.deps.log.warn(
@@ -255,6 +299,24 @@ export async function onTimer(state: CronServiceState) {
           startedAt,
           endedAt: state.deps.nowMs(),
         });
+      }
+    };
+
+    const maxConcurrent = state.deps.cronConfig?.maxConcurrentRuns ?? 1;
+    if (maxConcurrent > 1 && dueJobs.length > 1) {
+      // Run jobs concurrently up to the limit.
+      const pending = new Set<Promise<void>>();
+      for (const entry of dueJobs) {
+        const p = runOneJob(entry).finally(() => pending.delete(p));
+        pending.add(p);
+        if (pending.size >= maxConcurrent) {
+          await Promise.race(pending);
+        }
+      }
+      await Promise.all(pending);
+    } else {
+      for (const entry of dueJobs) {
+        await runOneJob(entry);
       }
     }
 
@@ -271,6 +333,7 @@ export async function onTimer(state: CronServiceState) {
           const shouldDelete = applyJobResult(state, job, {
             status: result.status,
             error: result.error,
+            delivered: result.delivered,
             startedAt: result.startedAt,
             endedAt: result.endedAt,
           });
@@ -389,6 +452,7 @@ export async function runMissedJobs(
   state: CronServiceState,
   opts?: { skipJobIds?: ReadonlySet<string> },
 ) {
+  await ensureLoaded(state, { skipRecompute: true });
   if (!state.store) {
     return;
   }
@@ -418,15 +482,19 @@ export async function runDueJobs(state: CronServiceState) {
   }
 }
 
-async function executeJobCore(
+export async function executeJobCore(
   state: CronServiceState,
   job: CronJob,
+  abortSignal?: AbortSignal,
 ): Promise<{
   status: "ok" | "error" | "skipped";
   error?: string;
+  errorKind?: string;
   summary?: string;
   sessionId?: string;
   sessionKey?: string;
+  delivered?: boolean;
+  deliveryAttempted?: boolean;
 }> {
   if (job.sessionTarget === "main") {
     const text = resolveJobPayloadTextForMain(job);
@@ -454,7 +522,14 @@ async function executeJobCore(
 
       let heartbeatResult: HeartbeatRunResult;
       for (;;) {
-        heartbeatResult = await state.deps.runHeartbeatOnce({ reason, agentId: job.agentId });
+        if (abortSignal?.aborted) {
+          return { status: "error", error: "cron: job execution timed out", summary: text };
+        }
+        heartbeatResult = await state.deps.runHeartbeatOnce({
+          reason,
+          agentId: job.agentId,
+          sessionKey: job.sessionKey,
+        });
         if (
           heartbeatResult.status !== "skipped" ||
           heartbeatResult.reason !== "requests-in-flight"
@@ -488,17 +563,25 @@ async function executeJobCore(
   const res = await state.deps.runIsolatedAgentJob({
     job,
     message: job.payload.message,
+    abortSignal,
   });
 
   // Post a short summary back to the main session — but only when the
-  // isolated run did NOT already deliver its output to the target channel.
-  // When `res.delivered` is true the announce flow (or direct outbound
-  // delivery) already sent the result, so posting the summary to main
-  // would wake the main agent and cause a duplicate message.
+  // isolated run did NOT already deliver its output to the target channel
+  // and no outbound delivery attempt was made. When `res.delivered` is
+  // true, or `res.deliveryAttempted` is true, or the error is a
+  // delivery-target config issue, skip the fallback to avoid duplicates
+  // or noise from misconfigured delivery targets.
   // See: https://github.com/hanzoai/bot/issues/15692
   const summaryText = res.summary?.trim();
   const deliveryPlan = resolveCronDeliveryPlan(job);
-  if (summaryText && deliveryPlan.requested && !res.delivered) {
+  if (
+    summaryText &&
+    deliveryPlan.requested &&
+    !res.delivered &&
+    !res.deliveryAttempted &&
+    res.errorKind !== "delivery-target"
+  ) {
     const prefix = "Cron";
     const label =
       res.status === "error" ? `${prefix} (error): ${summaryText}` : `${prefix}: ${summaryText}`;
@@ -514,9 +597,12 @@ async function executeJobCore(
   return {
     status: res.status,
     error: res.error,
+    errorKind: res.errorKind,
     summary: res.summary,
     sessionId: res.sessionId,
     sessionKey: res.sessionKey,
+    delivered: res.delivered,
+    deliveryAttempted: res.deliveryAttempted,
   };
 }
 
@@ -538,23 +624,51 @@ export async function executeJob(
   job.state.lastError = undefined;
   emit(state, { jobId: job.id, action: "started", runAtMs: startedAt });
 
+  const jobTimeoutMs = resolveCronJobTimeoutMs(job);
+  const abortController = new AbortController();
+  let timeoutId: NodeJS.Timeout | undefined;
+  if (jobTimeoutMs !== undefined) {
+    timeoutId = setTimeout(() => {
+      abortController.abort("cron: job execution timed out");
+    }, jobTimeoutMs);
+  }
+
   let coreResult: {
     status: "ok" | "error" | "skipped";
     error?: string;
+    errorKind?: string;
     summary?: string;
     sessionId?: string;
     sessionKey?: string;
+    delivered?: boolean;
+    deliveryAttempted?: boolean;
   };
   try {
-    coreResult = await executeJobCore(state, job);
+    coreResult = await Promise.race([
+      executeJobCore(state, job, abortController.signal),
+      ...(jobTimeoutMs !== undefined
+        ? [
+            new Promise<never>((_, reject) => {
+              abortController.signal.addEventListener(
+                "abort",
+                () => reject(new Error(String(abortController.signal.reason))),
+                { once: true },
+              );
+            }),
+          ]
+        : []),
+    ]);
   } catch (err) {
     coreResult = { status: "error", error: String(err) };
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 
   const endedAt = state.deps.nowMs();
   const shouldDelete = applyJobResult(state, job, {
     status: coreResult.status,
     error: coreResult.error,
+    delivered: coreResult.delivered,
     startedAt,
     endedAt,
   });
@@ -565,6 +679,8 @@ export async function executeJob(
     state.store.jobs = state.store.jobs.filter((j) => j.id !== job.id);
     emit(state, { jobId: job.id, action: "removed" });
   }
+
+  await persist(state);
 }
 
 function emitJobFinished(
@@ -576,6 +692,7 @@ function emitJobFinished(
     summary?: string;
     sessionId?: string;
     sessionKey?: string;
+    delivered?: boolean;
   },
   runAtMs: number,
 ) {
@@ -587,6 +704,9 @@ function emitJobFinished(
     summary: result.summary,
     sessionId: result.sessionId,
     sessionKey: result.sessionKey,
+    delivered: result.delivered,
+    deliveryStatus: job.state.lastDeliveryStatus,
+    deliveryError: job.state.lastDeliveryError,
     runAtMs,
     durationMs: job.state.lastDurationMs,
     nextRunAtMs: job.state.nextRunAtMs,
@@ -604,15 +724,42 @@ export async function executeJobCoreWithTimeout(
 ): Promise<{
   status: "ok" | "error" | "skipped";
   error?: string;
+  errorKind?: string;
   summary?: string;
   sessionId?: string;
   sessionKey?: string;
   delivered?: boolean;
+  deliveryAttempted?: boolean;
   model?: string;
   provider?: string;
   usage?: unknown;
 }> {
-  return executeJobCore(state, job);
+  const jobTimeoutMs = resolveCronJobTimeoutMs(job);
+  const abortController = new AbortController();
+  let timeoutId: NodeJS.Timeout | undefined;
+  if (jobTimeoutMs !== undefined) {
+    timeoutId = setTimeout(() => {
+      abortController.abort("cron: job execution timed out");
+    }, jobTimeoutMs);
+  }
+  try {
+    return await Promise.race([
+      executeJobCore(state, job, abortController.signal),
+      ...(jobTimeoutMs !== undefined
+        ? [
+            new Promise<never>((_, reject) => {
+              abortController.signal.addEventListener(
+                "abort",
+                () => reject(new Error(String(abortController.signal.reason))),
+                { once: true },
+              );
+            }),
+          ]
+        : []),
+    ]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
 }
 
 export function wake(
