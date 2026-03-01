@@ -257,7 +257,7 @@ describe("handleFeishuMessage command authorization", () => {
   });
 
   it("skips sender-name lookup when resolveSenderNames is false", async () => {
-    const cfg: ClawdbotConfig = {
+    const cfg: BotConfig = {
       channels: {
         feishu: {
           dmPolicy: "open",
@@ -265,7 +265,7 @@ describe("handleFeishuMessage command authorization", () => {
           resolveSenderNames: false,
         },
       },
-    } as ClawdbotConfig;
+    } as BotConfig;
 
     const event: FeishuMessageEvent = {
       sender: {
@@ -437,7 +437,7 @@ describe("handleFeishuMessage command authorization", () => {
   it("allows group sender when global groupSenderAllowFrom includes sender", async () => {
     mockShouldComputeCommandAuthorized.mockReturnValue(false);
 
-    const cfg: ClawdbotConfig = {
+    const cfg: BotConfig = {
       channels: {
         feishu: {
           groupPolicy: "open",
@@ -449,7 +449,7 @@ describe("handleFeishuMessage command authorization", () => {
           },
         },
       },
-    } as ClawdbotConfig;
+    } as BotConfig;
 
     const event: FeishuMessageEvent = {
       sender: {
@@ -480,7 +480,7 @@ describe("handleFeishuMessage command authorization", () => {
   it("blocks group sender when global groupSenderAllowFrom excludes sender", async () => {
     mockShouldComputeCommandAuthorized.mockReturnValue(false);
 
-    const cfg: ClawdbotConfig = {
+    const cfg: BotConfig = {
       channels: {
         feishu: {
           groupPolicy: "open",
@@ -492,7 +492,7 @@ describe("handleFeishuMessage command authorization", () => {
           },
         },
       },
-    } as ClawdbotConfig;
+    } as BotConfig;
 
     const event: FeishuMessageEvent = {
       sender: {
@@ -518,7 +518,7 @@ describe("handleFeishuMessage command authorization", () => {
   it("prefers per-group allowFrom over global groupSenderAllowFrom", async () => {
     mockShouldComputeCommandAuthorized.mockReturnValue(false);
 
-    const cfg: ClawdbotConfig = {
+    const cfg: BotConfig = {
       channels: {
         feishu: {
           groupPolicy: "open",
@@ -531,7 +531,7 @@ describe("handleFeishuMessage command authorization", () => {
           },
         },
       },
-    } as ClawdbotConfig;
+    } as BotConfig;
 
     const event: FeishuMessageEvent = {
       sender: {
@@ -605,13 +605,13 @@ describe("handleFeishuMessage command authorization", () => {
   it("uses media message_type file_key (not thumbnail image_key) for inbound mobile video download", async () => {
     mockShouldComputeCommandAuthorized.mockReturnValue(false);
 
-    const cfg: ClawdbotConfig = {
+    const cfg: BotConfig = {
       channels: {
         feishu: {
           dmPolicy: "open",
         },
       },
-    } as ClawdbotConfig;
+    } as BotConfig;
 
     const event: FeishuMessageEvent = {
       sender: {
@@ -726,13 +726,13 @@ describe("handleFeishuMessage command authorization", () => {
       },
     });
 
-    const cfg: ClawdbotConfig = {
+    const cfg: BotConfig = {
       channels: {
         feishu: {
           dmPolicy: "open",
         },
       },
-    } as ClawdbotConfig;
+    } as BotConfig;
 
     const event: FeishuMessageEvent = {
       sender: {
@@ -778,13 +778,13 @@ describe("handleFeishuMessage command authorization", () => {
       },
     });
 
-    const cfg: ClawdbotConfig = {
+    const cfg: BotConfig = {
       channels: {
         feishu: {
           dmPolicy: "open",
         },
       },
-    } as ClawdbotConfig;
+    } as BotConfig;
 
     const event: FeishuMessageEvent = {
       sender: {
@@ -989,7 +989,7 @@ describe("handleFeishuMessage command authorization", () => {
   it("uses message_id as topic root when group_topic + replyInThread and no root_id", async () => {
     mockShouldComputeCommandAuthorized.mockReturnValue(false);
 
-    const cfg: ClawdbotConfig = {
+    const cfg: BotConfig = {
       channels: {
         feishu: {
           groups: {
@@ -1001,7 +1001,7 @@ describe("handleFeishuMessage command authorization", () => {
           },
         },
       },
-    } as ClawdbotConfig;
+    } as BotConfig;
 
     const event: FeishuMessageEvent = {
       sender: { sender_id: { open_id: "ou-topic-init" } },
