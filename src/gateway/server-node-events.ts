@@ -17,6 +17,96 @@ import {
 import { formatForLog } from "./ws-log.js";
 
 const MAX_EXEC_EVENT_OUTPUT_CHARS = 180;
+<<<<<<< HEAD
+=======
+const MAX_NOTIFICATION_EVENT_TEXT_CHARS = 120;
+const VOICE_TRANSCRIPT_DEDUPE_WINDOW_MS = 1500;
+const MAX_RECENT_VOICE_TRANSCRIPTS = 200;
+
+const recentVoiceTranscripts = new Map<string, { fingerprint: string; ts: number }>();
+
+function normalizeNonEmptyString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function normalizeFiniteInteger(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? Math.trunc(value) : null;
+}
+
+function resolveVoiceTranscriptFingerprint(obj: Record<string, unknown>, text: string): string {
+  const eventId =
+    normalizeNonEmptyString(obj.eventId) ??
+    normalizeNonEmptyString(obj.providerEventId) ??
+    normalizeNonEmptyString(obj.transcriptId);
+  if (eventId) {
+    return `event:${eventId}`;
+  }
+
+  const callId = normalizeNonEmptyString(obj.providerCallId) ?? normalizeNonEmptyString(obj.callId);
+  const sequence = normalizeFiniteInteger(obj.sequence) ?? normalizeFiniteInteger(obj.seq);
+  if (callId && sequence !== null) {
+    return `call-seq:${callId}:${sequence}`;
+  }
+
+  const eventTimestamp =
+    normalizeFiniteInteger(obj.timestamp) ??
+    normalizeFiniteInteger(obj.ts) ??
+    normalizeFiniteInteger(obj.eventTimestamp);
+  if (callId && eventTimestamp !== null) {
+    return `call-ts:${callId}:${eventTimestamp}`;
+  }
+
+  if (eventTimestamp !== null) {
+    return `timestamp:${eventTimestamp}|text:${text}`;
+  }
+
+  return `text:${text}`;
+}
+
+function shouldDropDuplicateVoiceTranscript(params: {
+  sessionKey: string;
+  fingerprint: string;
+  now: number;
+}): boolean {
+  const previous = recentVoiceTranscripts.get(params.sessionKey);
+  if (
+    previous &&
+    previous.fingerprint === params.fingerprint &&
+    params.now - previous.ts <= VOICE_TRANSCRIPT_DEDUPE_WINDOW_MS
+  ) {
+    return true;
+  }
+  recentVoiceTranscripts.set(params.sessionKey, {
+    fingerprint: params.fingerprint,
+    ts: params.now,
+  });
+
+  if (recentVoiceTranscripts.size > MAX_RECENT_VOICE_TRANSCRIPTS) {
+    const cutoff = params.now - VOICE_TRANSCRIPT_DEDUPE_WINDOW_MS * 2;
+    for (const [key, value] of recentVoiceTranscripts) {
+      if (value.ts < cutoff) {
+        recentVoiceTranscripts.delete(key);
+      }
+      if (recentVoiceTranscripts.size <= MAX_RECENT_VOICE_TRANSCRIPTS) {
+        break;
+      }
+    }
+    while (recentVoiceTranscripts.size > MAX_RECENT_VOICE_TRANSCRIPTS) {
+      const oldestKey = recentVoiceTranscripts.keys().next().value;
+      if (oldestKey === undefined) {
+        break;
+      }
+      recentVoiceTranscripts.delete(oldestKey);
+    }
+  }
+
+  return false;
+}
+>>>>>>> 9d3ccf475 (feat(gateway): enable Android notify + notification events)
 
 function compactExecEventOutput(raw: string) {
   const normalized = raw.replace(/\s+/g, " ").trim();
@@ -27,6 +117,18 @@ function compactExecEventOutput(raw: string) {
     return normalized;
   }
   const safe = Math.max(1, MAX_EXEC_EVENT_OUTPUT_CHARS - 1);
+  return `${normalized.slice(0, safe)}…`;
+}
+
+function compactNotificationEventText(raw: string) {
+  const normalized = raw.replace(/\s+/g, " ").trim();
+  if (!normalized) {
+    return "";
+  }
+  if (normalized.length <= MAX_NOTIFICATION_EVENT_TEXT_CHARS) {
+    return normalized;
+  }
+  const safe = Math.max(1, MAX_NOTIFICATION_EVENT_TEXT_CHARS - 1);
   return `${normalized.slice(0, safe)}…`;
 }
 
@@ -237,6 +339,40 @@ export const handleNodeEvent = async (ctx: NodeEventContext, nodeId: string, evt
       ).catch((err) => {
         ctx.logGateway.warn(`agent failed node=${nodeId}: ${formatForLog(err)}`);
       });
+      return;
+    }
+    case "notifications.changed": {
+      const obj = parsePayloadObject(evt.payloadJSON);
+      if (!obj) {
+        return;
+      }
+      const change = normalizeNonEmptyString(obj.change)?.toLowerCase();
+      if (change !== "posted" && change !== "removed") {
+        return;
+      }
+      const key = normalizeNonEmptyString(obj.key);
+      if (!key) {
+        return;
+      }
+      const sessionKey = normalizeNonEmptyString(obj.sessionKey) ?? `node-${nodeId}`;
+      const packageName = normalizeNonEmptyString(obj.packageName);
+      const title = compactNotificationEventText(normalizeNonEmptyString(obj.title) ?? "");
+      const text = compactNotificationEventText(normalizeNonEmptyString(obj.text) ?? "");
+
+      let summary = `Notification ${change} (node=${nodeId} key=${key}`;
+      if (packageName) {
+        summary += ` package=${packageName}`;
+      }
+      summary += ")";
+      if (change === "posted") {
+        const messageParts = [title, text].filter(Boolean);
+        if (messageParts.length > 0) {
+          summary += `: ${messageParts.join(" - ")}`;
+        }
+      }
+
+      enqueueSystemEvent(summary, { sessionKey, contextKey: `notification:${key}` });
+      requestHeartbeatNow({ reason: "notifications-event" });
       return;
     }
     case "chat.subscribe": {
