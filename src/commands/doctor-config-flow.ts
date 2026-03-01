@@ -631,14 +631,12 @@ function maybeRepairOpenPolicyAllowFrom(cfg: BotConfig): {
   return { config: next, changes };
 }
 
-<<<<<<< HEAD
-=======
 function hasAllowFromEntries(list?: Array<string | number>) {
   return Array.isArray(list) && list.map((v) => String(v).trim()).filter(Boolean).length > 0;
 }
 
-async function maybeRepairAllowlistPolicyAllowFrom(cfg: OpenClawConfig): Promise<{
-  config: OpenClawConfig;
+async function maybeRepairAllowlistPolicyAllowFrom(cfg: BotConfig): Promise<{
+  config: BotConfig;
   changes: string[];
 }> {
   const channels = cfg.channels;
@@ -796,7 +794,7 @@ async function maybeRepairAllowlistPolicyAllowFrom(cfg: OpenClawConfig): Promise
  * allowlist. Common after upgrades that remove external allowlist
  * file support.
  */
-function detectEmptyAllowlistPolicy(cfg: OpenClawConfig): string[] {
+function detectEmptyAllowlistPolicy(cfg: BotConfig): string[] {
   const channels = cfg.channels;
   if (!channels || typeof channels !== "object") {
     return [];
@@ -859,7 +857,7 @@ function detectEmptyAllowlistPolicy(cfg: OpenClawConfig): string[] {
 
     if (dmPolicy === "allowlist" && !hasAllowFromEntries(effectiveAllowFrom)) {
       warnings.push(
-        `- ${prefix}.dmPolicy is "allowlist" but allowFrom is empty — all DMs will be blocked. Add sender IDs to ${prefix}.allowFrom, or run "${formatCliCommand("openclaw doctor --fix")}" to auto-migrate from pairing store when entries exist.`,
+        `- ${prefix}.dmPolicy is "allowlist" but allowFrom is empty — all DMs will be blocked. Add sender IDs to ${prefix}.allowFrom, or run "${formatCliCommand("bot doctor --fix")}" to auto-migrate from pairing store when entries exist.`,
       );
     }
 
@@ -964,7 +962,7 @@ function normalizeConfiguredTrustedSafeBinDirs(entries: unknown): string[] {
   );
 }
 
-function collectExecSafeBinScopes(cfg: OpenClawConfig): ExecSafeBinScopeRef[] {
+function collectExecSafeBinScopes(cfg: BotConfig): ExecSafeBinScopeRef[] {
   const scopes: ExecSafeBinScopeRef[] = [];
   const globalExec = asObjectRecord(cfg.tools?.exec);
   const globalTrustedDirs = normalizeConfiguredTrustedSafeBinDirs(globalExec?.safeBinTrustedDirs);
@@ -1018,7 +1016,7 @@ function collectExecSafeBinScopes(cfg: OpenClawConfig): ExecSafeBinScopeRef[] {
   return scopes;
 }
 
-function scanExecSafeBinCoverage(cfg: OpenClawConfig): ExecSafeBinCoverageHit[] {
+function scanExecSafeBinCoverage(cfg: BotConfig): ExecSafeBinCoverageHit[] {
   const hits: ExecSafeBinCoverageHit[] = [];
   for (const scope of collectExecSafeBinScopes(cfg)) {
     const interpreterBins = new Set(listInterpreterLikeSafeBins(scope.safeBins));
@@ -1036,7 +1034,7 @@ function scanExecSafeBinCoverage(cfg: OpenClawConfig): ExecSafeBinCoverageHit[] 
   return hits;
 }
 
-function scanExecSafeBinTrustedDirHints(cfg: OpenClawConfig): ExecSafeBinTrustedDirHintHit[] {
+function scanExecSafeBinTrustedDirHints(cfg: BotConfig): ExecSafeBinTrustedDirHintHit[] {
   const hits: ExecSafeBinTrustedDirHintHit[] = [];
   for (const scope of collectExecSafeBinScopes(cfg)) {
     for (const bin of scope.safeBins) {
@@ -1062,8 +1060,8 @@ function scanExecSafeBinTrustedDirHints(cfg: OpenClawConfig): ExecSafeBinTrusted
   return hits;
 }
 
-function maybeRepairExecSafeBinProfiles(cfg: OpenClawConfig): {
-  config: OpenClawConfig;
+function maybeRepairExecSafeBinProfiles(cfg: BotConfig): {
+  config: BotConfig;
   changes: string[];
   warnings: string[];
 } {
@@ -1151,14 +1149,14 @@ function collectLegacyToolsBySenderKeyHits(
   }
 }
 
-function scanLegacyToolsBySenderKeys(cfg: OpenClawConfig): LegacyToolsBySenderKeyHit[] {
+function scanLegacyToolsBySenderKeys(cfg: BotConfig): LegacyToolsBySenderKeyHit[] {
   const hits: LegacyToolsBySenderKeyHit[] = [];
   collectLegacyToolsBySenderKeyHits(cfg, [], hits);
   return hits;
 }
 
-function maybeRepairLegacyToolsBySenderKeys(cfg: OpenClawConfig): {
-  config: OpenClawConfig;
+function maybeRepairLegacyToolsBySenderKeys(cfg: BotConfig): {
+  config: BotConfig;
   changes: string[];
 } {
   const next = structuredClone(cfg);
@@ -1216,7 +1214,6 @@ function maybeRepairLegacyToolsBySenderKeys(cfg: OpenClawConfig): {
   return { config: next, changes };
 }
 
->>>>>>> f1bf55868 (fix(doctor): detect groupPolicy=allowlist with empty groupAllowFrom (#28477))
 async function maybeMigrateLegacyConfig(): Promise<string[]> {
   const changes: string[] = [];
   const home = resolveHomeDir();
