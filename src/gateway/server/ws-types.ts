@@ -13,6 +13,7 @@ export type GatewayWsClient = {
   tenant?: TenantContext;
   /** IAM auth result (when auth mode is "iam"). */
   iamResult?: GatewayIamAuthResult & { ok: true };
+  canvasHostUrl?: string;
   /**
    * Canvas capability token issued to this client.
    * Only node-role clients may hold a canvas capability.
