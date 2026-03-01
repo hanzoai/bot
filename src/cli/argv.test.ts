@@ -8,118 +8,270 @@ import {
   getVerboseFlag,
   hasHelpOrVersion,
   hasFlag,
+  isRootVersionInvocation,
   shouldMigrateState,
   shouldMigrateStateFromPath,
 } from "./argv.js";
 
 describe("argv helpers", () => {
-  it("detects help/version flags", () => {
-    expect(hasHelpOrVersion(["node", "bot", "--help"])).toBe(true);
-    expect(hasHelpOrVersion(["node", "bot", "-V"])).toBe(true);
-    expect(hasHelpOrVersion(["node", "bot", "status"])).toBe(false);
+  it.each([
+    {
+      name: "help flag",
+      argv: ["node", "bot", "--help"],
+      expected: true,
+    },
+    {
+      name: "version flag",
+      argv: ["node", "bot", "-V"],
+      expected: true,
+    },
+    {
+      name: "normal command",
+      argv: ["node", "bot", "status"],
+      expected: false,
+    },
+    {
+      name: "root -v alias",
+      argv: ["node", "bot", "-v"],
+      expected: true,
+    },
+    {
+      name: "root -v alias with profile",
+      argv: ["node", "bot", "--profile", "work", "-v"],
+      expected: true,
+    },
+    {
+      name: "root -v alias with log-level",
+      argv: ["node", "bot", "--log-level", "debug", "-v"],
+      expected: true,
+    },
+    {
+      name: "subcommand -v should not be treated as version",
+      argv: ["node", "bot", "acp", "-v"],
+      expected: false,
+    },
+    {
+      name: "root -v alias with equals profile",
+      argv: ["node", "bot", "--profile=work", "-v"],
+      expected: true,
+    },
+    {
+      name: "subcommand path after global root flags should not be treated as version",
+      argv: ["node", "bot", "--dev", "skills", "list", "-v"],
+      expected: false,
+    },
+  ])("detects help/version flags: $name", ({ argv, expected }) => {
+    expect(hasHelpOrVersion(argv)).toBe(expected);
   });
 
-  it("extracts command path ignoring flags and terminator", () => {
-    expect(getCommandPath(["node", "bot", "status", "--json"], 2)).toEqual(["status"]);
-    expect(getCommandPath(["node", "bot", "agents", "list"], 2)).toEqual(["agents", "list"]);
-    expect(getCommandPath(["node", "bot", "status", "--", "ignored"], 2)).toEqual(["status"]);
+  it.each([
+    {
+      name: "root --version",
+      argv: ["node", "bot", "--version"],
+      expected: true,
+    },
+    {
+      name: "root -V",
+      argv: ["node", "bot", "-V"],
+      expected: true,
+    },
+    {
+      name: "root -v alias with profile",
+      argv: ["node", "bot", "--profile", "work", "-v"],
+      expected: true,
+    },
+    {
+      name: "subcommand version flag",
+      argv: ["node", "bot", "status", "--version"],
+      expected: false,
+    },
+    {
+      name: "unknown root flag with version",
+      argv: ["node", "bot", "--unknown", "--version"],
+      expected: false,
+    },
+  ])("detects root-only version invocations: $name", ({ argv, expected }) => {
+    expect(isRootVersionInvocation(argv)).toBe(expected);
   });
 
-  it("returns primary command", () => {
-    expect(getPrimaryCommand(["node", "bot", "agents", "list"])).toBe("agents");
-    expect(getPrimaryCommand(["node", "bot"])).toBeNull();
+  it.each([
+    {
+      name: "single command with trailing flag",
+      argv: ["node", "bot", "status", "--json"],
+      expected: ["status"],
+    },
+    {
+      name: "two-part command",
+      argv: ["node", "bot", "agents", "list"],
+      expected: ["agents", "list"],
+    },
+    {
+      name: "terminator cuts parsing",
+      argv: ["node", "bot", "status", "--", "ignored"],
+      expected: ["status"],
+    },
+  ])("extracts command path: $name", ({ argv, expected }) => {
+    expect(getCommandPath(argv, 2)).toEqual(expected);
   });
 
-  it("parses boolean flags and ignores terminator", () => {
-    expect(hasFlag(["node", "bot", "status", "--json"], "--json")).toBe(true);
-    expect(hasFlag(["node", "bot", "--", "--json"], "--json")).toBe(false);
+  it.each([
+    {
+      name: "returns first command token",
+      argv: ["node", "bot", "agents", "list"],
+      expected: "agents",
+    },
+    {
+      name: "returns null when no command exists",
+      argv: ["node", "bot"],
+      expected: null,
+    },
+  ])("returns primary command: $name", ({ argv, expected }) => {
+    expect(getPrimaryCommand(argv)).toBe(expected);
   });
 
-  it("extracts flag values with equals and missing values", () => {
-    expect(getFlagValue(["node", "bot", "status", "--timeout", "5000"], "--timeout")).toBe("5000");
-    expect(getFlagValue(["node", "bot", "status", "--timeout=2500"], "--timeout")).toBe("2500");
-    expect(getFlagValue(["node", "bot", "status", "--timeout"], "--timeout")).toBeNull();
-    expect(getFlagValue(["node", "bot", "status", "--timeout", "--json"], "--timeout")).toBe(null);
-    expect(getFlagValue(["node", "bot", "--", "--timeout=99"], "--timeout")).toBeUndefined();
+  it.each([
+    {
+      name: "detects flag before terminator",
+      argv: ["node", "bot", "status", "--json"],
+      flag: "--json",
+      expected: true,
+    },
+    {
+      name: "ignores flag after terminator",
+      argv: ["node", "bot", "--", "--json"],
+      flag: "--json",
+      expected: false,
+    },
+  ])("parses boolean flags: $name", ({ argv, flag, expected }) => {
+    expect(hasFlag(argv, flag)).toBe(expected);
+  });
+
+  it.each([
+    {
+      name: "value in next token",
+      argv: ["node", "bot", "status", "--timeout", "5000"],
+      expected: "5000",
+    },
+    {
+      name: "value in equals form",
+      argv: ["node", "bot", "status", "--timeout=2500"],
+      expected: "2500",
+    },
+    {
+      name: "missing value",
+      argv: ["node", "bot", "status", "--timeout"],
+      expected: null,
+    },
+    {
+      name: "next token is another flag",
+      argv: ["node", "bot", "status", "--timeout", "--json"],
+      expected: null,
+    },
+    {
+      name: "flag appears after terminator",
+      argv: ["node", "bot", "--", "--timeout=99"],
+      expected: undefined,
+    },
+  ])("extracts flag values: $name", ({ argv, expected }) => {
+    expect(getFlagValue(argv, "--timeout")).toBe(expected);
   });
 
   it("parses verbose flags", () => {
     expect(getVerboseFlag(["node", "bot", "status", "--verbose"])).toBe(true);
     expect(getVerboseFlag(["node", "bot", "status", "--debug"])).toBe(false);
-    expect(getVerboseFlag(["node", "bot", "status", "--debug"], { includeDebug: true })).toBe(true);
+    expect(getVerboseFlag(["node", "bot", "status", "--debug"], { includeDebug: true })).toBe(
+      true,
+    );
   });
 
-  it("parses positive integer flag values", () => {
-    expect(getPositiveIntFlagValue(["node", "bot", "status"], "--timeout")).toBeUndefined();
-    expect(getPositiveIntFlagValue(["node", "bot", "status", "--timeout"], "--timeout")).toBeNull();
-    expect(
-      getPositiveIntFlagValue(["node", "bot", "status", "--timeout", "5000"], "--timeout"),
-    ).toBe(5000);
-    expect(
-      getPositiveIntFlagValue(["node", "bot", "status", "--timeout", "nope"], "--timeout"),
-    ).toBeUndefined();
+  it.each([
+    {
+      name: "missing flag",
+      argv: ["node", "bot", "status"],
+      expected: undefined,
+    },
+    {
+      name: "missing value",
+      argv: ["node", "bot", "status", "--timeout"],
+      expected: null,
+    },
+    {
+      name: "valid positive integer",
+      argv: ["node", "bot", "status", "--timeout", "5000"],
+      expected: 5000,
+    },
+    {
+      name: "invalid integer",
+      argv: ["node", "bot", "status", "--timeout", "nope"],
+      expected: undefined,
+    },
+  ])("parses positive integer flag values: $name", ({ argv, expected }) => {
+    expect(getPositiveIntFlagValue(argv, "--timeout")).toBe(expected);
   });
 
   it("builds parse argv from raw args", () => {
-    const nodeArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["node", "bot", "status"],
-    });
-    expect(nodeArgv).toEqual(["node", "bot", "status"]);
+    const cases = [
+      {
+        rawArgs: ["node", "bot", "status"],
+        expected: ["node", "bot", "status"],
+      },
+      {
+        rawArgs: ["node-22", "bot", "status"],
+        expected: ["node-22", "bot", "status"],
+      },
+      {
+        rawArgs: ["node-22.2.0.exe", "bot", "status"],
+        expected: ["node-22.2.0.exe", "bot", "status"],
+      },
+      {
+        rawArgs: ["node-22.2", "bot", "status"],
+        expected: ["node-22.2", "bot", "status"],
+      },
+      {
+        rawArgs: ["node-22.2.exe", "bot", "status"],
+        expected: ["node-22.2.exe", "bot", "status"],
+      },
+      {
+        rawArgs: ["/usr/bin/node-22.2.0", "bot", "status"],
+        expected: ["/usr/bin/node-22.2.0", "bot", "status"],
+      },
+      {
+        rawArgs: ["node24", "bot", "status"],
+        expected: ["node24", "bot", "status"],
+      },
+      {
+        rawArgs: ["/usr/bin/node24", "bot", "status"],
+        expected: ["/usr/bin/node24", "bot", "status"],
+      },
+      {
+        rawArgs: ["node24.exe", "bot", "status"],
+        expected: ["node24.exe", "bot", "status"],
+      },
+      {
+        rawArgs: ["nodejs", "bot", "status"],
+        expected: ["nodejs", "bot", "status"],
+      },
+      {
+        rawArgs: ["node-dev", "bot", "status"],
+        expected: ["node", "bot", "node-dev", "bot", "status"],
+      },
+      {
+        rawArgs: ["bot", "status"],
+        expected: ["node", "bot", "status"],
+      },
+      {
+        rawArgs: ["bun", "src/entry.ts", "status"],
+        expected: ["bun", "src/entry.ts", "status"],
+      },
+    ] as const;
 
-    const versionedNodeArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["node-22", "bot", "status"],
-    });
-    expect(versionedNodeArgv).toEqual(["node-22", "bot", "status"]);
-
-    const versionedNodeWindowsArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["node-22.2.0.exe", "bot", "status"],
-    });
-    expect(versionedNodeWindowsArgv).toEqual(["node-22.2.0.exe", "bot", "status"]);
-
-    const versionedNodePatchlessArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["node-22.2", "bot", "status"],
-    });
-    expect(versionedNodePatchlessArgv).toEqual(["node-22.2", "bot", "status"]);
-
-    const versionedNodeWindowsPatchlessArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["node-22.2.exe", "bot", "status"],
-    });
-    expect(versionedNodeWindowsPatchlessArgv).toEqual(["node-22.2.exe", "bot", "status"]);
-
-    const versionedNodeWithPathArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["/usr/bin/node-22.2.0", "bot", "status"],
-    });
-    expect(versionedNodeWithPathArgv).toEqual(["/usr/bin/node-22.2.0", "bot", "status"]);
-
-    const nodejsArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["nodejs", "bot", "status"],
-    });
-    expect(nodejsArgv).toEqual(["nodejs", "bot", "status"]);
-
-    const nonVersionedNodeArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["node-dev", "bot", "status"],
-    });
-    expect(nonVersionedNodeArgv).toEqual(["node", "bot", "node-dev", "bot", "status"]);
-
-    const directArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["bot", "status"],
-    });
-    expect(directArgv).toEqual(["node", "bot", "status"]);
-
-    const bunArgv = buildParseArgv({
-      programName: "bot",
-      rawArgs: ["bun", "src/entry.ts", "status"],
-    });
-    expect(bunArgv).toEqual(["bun", "src/entry.ts", "status"]);
+    for (const testCase of cases) {
+      const parsed = buildParseArgv({
+        programName: "bot",
+        rawArgs: [...testCase.rawArgs],
+      });
+      expect(parsed).toEqual([...testCase.expected]);
+    }
   });
 
   it("builds parse argv from fallback args", () => {
@@ -131,23 +283,36 @@ describe("argv helpers", () => {
   });
 
   it("decides when to migrate state", () => {
-    expect(shouldMigrateState(["node", "bot", "status"])).toBe(false);
-    expect(shouldMigrateState(["node", "bot", "health"])).toBe(false);
-    expect(shouldMigrateState(["node", "bot", "sessions"])).toBe(false);
-    expect(shouldMigrateState(["node", "bot", "config", "get", "update"])).toBe(false);
-    expect(shouldMigrateState(["node", "bot", "config", "unset", "update"])).toBe(false);
-    expect(shouldMigrateState(["node", "bot", "models", "list"])).toBe(false);
-    expect(shouldMigrateState(["node", "bot", "models", "status"])).toBe(false);
-    expect(shouldMigrateState(["node", "bot", "memory", "status"])).toBe(false);
-    expect(shouldMigrateState(["node", "bot", "agent", "--message", "hi"])).toBe(false);
-    expect(shouldMigrateState(["node", "bot", "agents", "list"])).toBe(true);
-    expect(shouldMigrateState(["node", "bot", "message", "send"])).toBe(true);
+    const nonMutatingArgv = [
+      ["node", "bot", "status"],
+      ["node", "bot", "health"],
+      ["node", "bot", "sessions"],
+      ["node", "bot", "config", "get", "update"],
+      ["node", "bot", "config", "unset", "update"],
+      ["node", "bot", "models", "list"],
+      ["node", "bot", "models", "status"],
+      ["node", "bot", "memory", "status"],
+      ["node", "bot", "agent", "--message", "hi"],
+    ] as const;
+    const mutatingArgv = [
+      ["node", "bot", "agents", "list"],
+      ["node", "bot", "message", "send"],
+    ] as const;
+
+    for (const argv of nonMutatingArgv) {
+      expect(shouldMigrateState([...argv])).toBe(false);
+    }
+    for (const argv of mutatingArgv) {
+      expect(shouldMigrateState([...argv])).toBe(true);
+    }
   });
 
-  it("reuses command path for migrate state decisions", () => {
-    expect(shouldMigrateStateFromPath(["status"])).toBe(false);
-    expect(shouldMigrateStateFromPath(["config", "get"])).toBe(false);
-    expect(shouldMigrateStateFromPath(["models", "status"])).toBe(false);
-    expect(shouldMigrateStateFromPath(["agents", "list"])).toBe(true);
+  it.each([
+    { path: ["status"], expected: false },
+    { path: ["config", "get"], expected: false },
+    { path: ["models", "status"], expected: false },
+    { path: ["agents", "list"], expected: true },
+  ])("reuses command path for migrate state decisions: $path", ({ path, expected }) => {
+    expect(shouldMigrateStateFromPath(path)).toBe(expected);
   });
 });
