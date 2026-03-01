@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import type { BotConfig } from "../../config/config.js";
-import type { SandboxContext, SandboxWorkspaceInfo } from "./types.js";
+import type { SandboxContext, SandboxDockerConfig, SandboxWorkspaceInfo } from "./types.js";
 import { DEFAULT_BROWSER_EVALUATE_ENABLED } from "../../browser/constants.js";
 import { ensureBrowserControlAuth, resolveBrowserControlAuth } from "../../browser/control-auth.js";
 import { loadConfig } from "../../config/config.js";
@@ -62,6 +62,29 @@ async function ensureSandboxWorkspaceLayout(params: {
   }
 
   return { agentWorkspaceDir, scopeKey, sandboxWorkspaceDir, workspaceDir };
+}
+
+export async function resolveSandboxDockerUser(params: {
+  docker: SandboxDockerConfig;
+  workspaceDir: string;
+  stat?: (workspaceDir: string) => Promise<{ uid: number; gid: number }>;
+}): Promise<SandboxDockerConfig> {
+  const configuredUser = params.docker.user?.trim();
+  if (configuredUser) {
+    return params.docker;
+  }
+  const stat = params.stat ?? ((dir: string) => fs.stat(dir));
+  try {
+    const workspaceStat = await stat(params.workspaceDir);
+    const uid = Number.isInteger(workspaceStat.uid) ? workspaceStat.uid : null;
+    const gid = Number.isInteger(workspaceStat.gid) ? workspaceStat.gid : null;
+    if (uid === null || gid === null || uid < 0 || gid < 0) {
+      return params.docker;
+    }
+    return { ...params.docker, user: `${uid}:${gid}` };
+  } catch {
+    return params.docker;
+  }
 }
 
 function resolveSandboxSession(params: { config?: BotConfig; sessionKey?: string }) {

@@ -27,6 +27,8 @@ import {
 } from "../../config/commands.js";
 import { loadConfig } from "../../config/config.js";
 import { isDangerousNameMatchingEnabled } from "../../config/dangerous-name-matching.js";
+import type { GroupPolicy } from "../../config/types.base.js";
+import { resolveOpenProviderRuntimeGroupPolicy } from "../../config/runtime-group-policy.js";
 import { danger, logVerbose, shouldLogVerbose, warn } from "../../globals.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { createDiscordRetryRunner } from "../../infra/retry-policy.js";
@@ -701,7 +703,16 @@ async function clearDiscordNativeCommands(params: {
   }
 }
 
+function resolveDiscordRuntimeGroupPolicy(params: {
+  providerConfigPresent: boolean;
+  groupPolicy?: GroupPolicy;
+  defaultGroupPolicy?: GroupPolicy;
+}) {
+  return resolveOpenProviderRuntimeGroupPolicy(params);
+}
+
 export const __testing = {
   createDiscordGatewayPlugin,
   dedupeSkillCommandsForDiscord,
+  resolveDiscordRuntimeGroupPolicy,
 };
