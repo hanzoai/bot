@@ -384,7 +384,7 @@ describe("createTelegramBot", () => {
             from: { first_name: "Ada" },
           },
         },
-        me: { username: "openclaw_bot" },
+        me: { username: "bot_bot" },
         getFile: async () => ({}),
       });
 
@@ -433,7 +433,7 @@ describe("createTelegramBot", () => {
           from: { first_name: "Ada" },
         },
       },
-      me: { username: "openclaw_bot" },
+      me: { username: "bot_bot" },
       getFile: async () => ({}),
     });
 
@@ -491,7 +491,7 @@ describe("createTelegramBot", () => {
             from: { first_name: "Ada" },
           },
         },
-        me: { username: "openclaw_bot" },
+        me: { username: "bot_bot" },
         getFile: async () => ({}),
       });
       await handler({
@@ -507,7 +507,7 @@ describe("createTelegramBot", () => {
             from: { first_name: "Ada" },
           },
         },
-        me: { username: "openclaw_bot" },
+        me: { username: "bot_bot" },
         getFile: async () => ({}),
       });
 
