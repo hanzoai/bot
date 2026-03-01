@@ -821,7 +821,7 @@ describe("gateway server sessions", () => {
   });
 
   test("control-ui client can delete sessions even in webchat mode", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sessions-control-ui-delete-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-sessions-control-ui-delete-"));
     const storePath = path.join(dir, "sessions.json");
     testState.sessionStorePath = storePath;
 
