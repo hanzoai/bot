@@ -502,7 +502,7 @@ describe("runReplyAgent auto-compaction token update", () => {
   });
 
   it("does not enqueue legacy post-compaction audit warnings", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-no-audit-warning-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-no-audit-warning-"));
     const workspaceDir = path.join(tmp, "workspace");
     await fs.mkdir(workspaceDir, { recursive: true });
     const sessionFile = path.join(tmp, "session.jsonl");
