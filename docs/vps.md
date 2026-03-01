@@ -41,3 +41,21 @@ You can keep the Gateway in the cloud and pair **nodes** on your local devices
 capabilities while the Gateway stays in the cloud.
 
 Docs: [Nodes](/nodes), [Nodes CLI](/cli/nodes)
+
+## Startup tuning for small VMs and ARM hosts
+
+If CLI commands feel slow on low-power VMs (or ARM hosts), enable Node's module compile cache:
+
+```bash
+grep -q 'NODE_COMPILE_CACHE=/var/tmp/bot-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF'
+export NODE_COMPILE_CACHE=/var/tmp/bot-compile-cache
+mkdir -p /var/tmp/bot-compile-cache
+export BOT_NO_RESPAWN=1
+EOF
+source ~/.bashrc
+```
+
+- `NODE_COMPILE_CACHE` improves repeated command startup times.
+- `BOT_NO_RESPAWN=1` avoids extra startup overhead from a self-respawn path.
+- First command run warms cache; subsequent runs are faster.
+- For Raspberry Pi specifics, see [Raspberry Pi](/platforms/raspberry-pi).
