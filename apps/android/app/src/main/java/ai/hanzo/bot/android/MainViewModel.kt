@@ -61,6 +61,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   val micConversation: StateFlow<List<VoiceConversationEntry>> = runtime.micConversation
   val micInputLevel: StateFlow<Float> = runtime.micInputLevel
   val micIsSending: StateFlow<Boolean> = runtime.micIsSending
+  val speakerEnabled: StateFlow<Boolean> = runtime.speakerEnabled
   val manualEnabled: StateFlow<Boolean> = runtime.manualEnabled
   val manualHost: StateFlow<String> = runtime.manualHost
   val manualPort: StateFlow<Int> = runtime.manualPort
@@ -157,6 +158,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
   fun setOnboardingCompleted(value: Boolean) {
     runtime.setOnboardingCompleted(value)
+  }
+
+  fun setSpeakerEnabled(enabled: Boolean) {
+    runtime.setSpeakerEnabled(enabled)
   }
 
   fun refreshGatewayConnection() {
