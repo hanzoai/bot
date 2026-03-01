@@ -67,13 +67,10 @@ function resolveHiddenBoundarySeparatorText(mode: AcpHiddenBoundarySeparator): s
     return " ";
   }
   if (mode === "newline") {
-    return "
-";
+    return "\n";
   }
   if (mode === "paragraph") {
-    return "
-
-";
+    return "\n\n";
   }
   return "";
 }
@@ -100,11 +97,7 @@ function shouldInsertSeparator(params: {
   if (params.separator === " " && /\s$/.test(tail)) {
     return false;
   }
-  if ((params.separator === "
-" || params.separator === "
-
-") && tail.endsWith("
-")) {
+  if ((params.separator === "\n" || params.separator === "\n\n") && tail.endsWith("\n")) {
     return false;
   }
   return true;
@@ -117,9 +110,7 @@ function shouldFlushLiveBufferOnBoundary(text: string): boolean {
   if (text.length >= ACP_LIVE_HARD_FLUSH_CHARS) {
     return true;
   }
-  if (text.endsWith("
-
-")) {
+  if (text.endsWith("\n\n")) {
     return true;
   }
   if (/[.!?][)"'`]*\s$/.test(text)) {
@@ -141,8 +132,7 @@ function shouldFlushLiveBufferOnIdle(text: string): boolean {
   if (/[.!?][)"'`]*$/.test(text.trimEnd())) {
     return true;
   }
-  if (text.includes("
-")) {
+  if (text.includes("\n")) {
     return true;
   }
   return false;

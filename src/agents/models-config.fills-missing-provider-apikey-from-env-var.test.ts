@@ -313,7 +313,7 @@ describe("models-config", () => {
       const prevKey = process.env.MOONSHOT_API_KEY;
       process.env.MOONSHOT_API_KEY = "sk-moonshot-test";
       try {
-        const cfg: Hanzo BotConfig = {
+        const cfg: BotConfig = {
           models: {
             providers: {
               moonshot: {
