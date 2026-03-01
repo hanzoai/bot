@@ -55,6 +55,7 @@ describe("resolveCronDeliveryPlan", () => {
     expect(plan.to).toBe("telegram:123");
   });
 
+
   it("passes through accountId from delivery config", () => {
     const plan = resolveCronDeliveryPlan(
       makeJob({
