@@ -180,7 +180,7 @@ Examples:
 
 ```
 /debug show
-/debug set messages.responsePrefix="[openclaw]"
+/debug set messages.responsePrefix="[bot]"
 /debug set channels.whatsapp.allowFrom=["+1555","+4477"]
 /debug unset messages.responsePrefix
 /debug reset
@@ -201,7 +201,7 @@ Examples:
 /config show
 /config show messages.responsePrefix
 /config get messages.responsePrefix
-/config set messages.responsePrefix="[openclaw]"
+/config set messages.responsePrefix="[bot]"
 /config unset messages.responsePrefix
 ```
 
@@ -218,4 +218,5 @@ Notes:
   - Slack: `agent:<agentId>:slack:slash:<userId>` (prefix configurable via `channels.slack.slashCommand.sessionPrefix`)
   - Telegram: `telegram:slash:<userId>` (targets the chat session via `CommandTargetSessionKey`)
 - **`/stop`** targets the active chat session so it can abort the current run.
-- **Slack:** `channels.slack.slashCommand` is still supported for a single `/openclaw`-style command. If you enable `commands.native`, you must create one Slack slash command per built-in command (same names as `/help`). Command argument menus for Slack are delivered as ephemeral Block Kit buttons.
+- **Slack:** `channels.slack.slashCommand` is still supported for a single `/bot`-style command. If you enable `commands.native`, you must create one Slack slash command per built-in command (same names as `/help`). Command argument menus for Slack are delivered as ephemeral Block Kit buttons.
+  - Slack native exception: register `/agentstatus` (not `/status`) because Slack reserves `/status`. Text `/status` still works in Slack messages.

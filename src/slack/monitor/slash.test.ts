@@ -8,6 +8,34 @@ vi.mock("../../auto-reply/commands-registry.js", () => {
   const reportExternalCommand = { key: "reportexternal", nativeName: "reportexternal" };
   const reportLongCommand = { key: "reportlong", nativeName: "reportlong" };
   const unsafeConfirmCommand = { key: "unsafeconfirm", nativeName: "unsafeconfirm" };
+  const statusAliasCommand = { key: "status", nativeName: "status" };
+  const periodArg = { name: "period", description: "period" };
+  const baseReportPeriodChoices = [
+    { value: "day", label: "day" },
+    { value: "week", label: "week" },
+    { value: "month", label: "month" },
+    { value: "quarter", label: "quarter" },
+  ];
+  const fullReportPeriodChoices = [...baseReportPeriodChoices, { value: "year", label: "year" }];
+  const hasNonEmptyArgValue = (values: unknown, key: string) => {
+    const raw =
+      typeof values === "object" && values !== null
+        ? (values as Record<string, unknown>)[key]
+        : undefined;
+    return typeof raw === "string" && raw.trim().length > 0;
+  };
+  const resolvePeriodMenu = (
+    params: { args?: { values?: unknown } },
+    choices: Array<{
+      value: string;
+      label: string;
+    }>,
+  ) => {
+    if (hasNonEmptyArgValue(params.args?.values, "period")) {
+      return null;
+    }
+    return { arg: periodArg, choices };
+  };
 
   return {
     buildCommandTextFromArgs: (
@@ -46,6 +74,9 @@ vi.mock("../../auto-reply/commands-registry.js", () => {
       if (normalized === "unsafeconfirm") {
         return unsafeConfirmCommand;
       }
+      if (normalized === "agentstatus") {
+        return statusAliasCommand;
+      }
       return undefined;
     },
     listNativeCommandSpecsForConfig: () => [
@@ -83,6 +114,12 @@ vi.mock("../../auto-reply/commands-registry.js", () => {
         name: "unsafeconfirm",
         description: "UnsafeConfirm",
         acceptsArgs: true,
+        args: [],
+      },
+      {
+        name: "agentstatus",
+        description: "Status",
+        acceptsArgs: false,
         args: [],
       },
     ],
@@ -274,54 +311,22 @@ describe("Slack native command argument menus", () => {
   let reportExternalHandler: (args: unknown) => Promise<void>;
   let reportLongHandler: (args: unknown) => Promise<void>;
   let unsafeConfirmHandler: (args: unknown) => Promise<void>;
+  let agentStatusHandler: (args: unknown) => Promise<void>;
   let argMenuHandler: (args: unknown) => Promise<void>;
   let argMenuOptionsHandler: (args: unknown) => Promise<void>;
 
   beforeAll(async () => {
     harness = createArgMenusHarness();
     await registerCommands(harness.ctx, harness.account);
-
-    const usage = harness.commands.get("/usage");
-    if (!usage) {
-      throw new Error("Missing /usage handler");
-    }
-    usageHandler = usage;
-    const report = harness.commands.get("/report");
-    if (!report) {
-      throw new Error("Missing /report handler");
-    }
-    reportHandler = report;
-    const reportCompact = harness.commands.get("/reportcompact");
-    if (!reportCompact) {
-      throw new Error("Missing /reportcompact handler");
-    }
-    reportCompactHandler = reportCompact;
-    const reportExternal = harness.commands.get("/reportexternal");
-    if (!reportExternal) {
-      throw new Error("Missing /reportexternal handler");
-    }
-    reportExternalHandler = reportExternal;
-    const reportLong = harness.commands.get("/reportlong");
-    if (!reportLong) {
-      throw new Error("Missing /reportlong handler");
-    }
-    reportLongHandler = reportLong;
-    const unsafeConfirm = harness.commands.get("/unsafeconfirm");
-    if (!unsafeConfirm) {
-      throw new Error("Missing /unsafeconfirm handler");
-    }
-    unsafeConfirmHandler = unsafeConfirm;
-
-    const argMenu = harness.actions.get("bot_cmdarg");
-    if (!argMenu) {
-      throw new Error("Missing arg-menu action handler");
-    }
-    argMenuHandler = argMenu;
-    const argMenuOptions = harness.options.get("bot_cmdarg");
-    if (!argMenuOptions) {
-      throw new Error("Missing arg-menu options handler");
-    }
-    argMenuOptionsHandler = argMenuOptions;
+    usageHandler = requireHandler(harness.commands, "/usage", "/usage");
+    reportHandler = requireHandler(harness.commands, "/report", "/report");
+    reportCompactHandler = requireHandler(harness.commands, "/reportcompact", "/reportcompact");
+    reportExternalHandler = requireHandler(harness.commands, "/reportexternal", "/reportexternal");
+    reportLongHandler = requireHandler(harness.commands, "/reportlong", "/reportlong");
+    unsafeConfirmHandler = requireHandler(harness.commands, "/unsafeconfirm", "/unsafeconfirm");
+    agentStatusHandler = requireHandler(harness.commands, "/agentstatus", "/agentstatus");
+    argMenuHandler = requireHandler(harness.actions, "bot_cmdarg", "arg-menu action");
+    argMenuOptionsHandler = requireHandler(harness.options, "bot_cmdarg", "arg-menu options");
   });
 
   beforeEach(() => {
@@ -482,6 +487,11 @@ describe("Slack native command argument menus", () => {
     expect(dispatchMock).toHaveBeenCalledTimes(1);
     const call = dispatchMock.mock.calls[0]?.[0] as { ctx?: { Body?: string } };
     expect(call.ctx?.Body).toBe("/usage tokens");
+  });
+
+  it("maps /agentstatus to /status when dispatching", async () => {
+    await runCommandHandler(agentStatusHandler);
+    expectSingleDispatchedSlashBody("/status");
   });
 
   it("dispatches the command when a static_select option is chosen", async () => {
