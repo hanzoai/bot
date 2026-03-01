@@ -1563,8 +1563,8 @@ private fun FinalStep(
       } else {
         GuideBlock(title = "Pairing Required") {
           Text("Run these on the gateway host:", style = onboardingCalloutStyle, color = onboardingTextSecondary)
-          CommandBlock("bot nodes pending")
-          CommandBlock("bot nodes approve <requestId>")
+          CommandBlock("bot devices list")
+          CommandBlock("bot devices approve <requestId>")
           Text("Then tap Connect again.", style = onboardingCalloutStyle, color = onboardingTextSecondary)
         }
       }
