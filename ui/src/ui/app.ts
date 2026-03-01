@@ -328,9 +328,19 @@ export class BotApp extends LitElement {
   @state() cronJobsNextOffset: number | null = null;
   @state() cronJobsLimit = 50;
   @state() cronJobsQuery = "";
+<<<<<<< HEAD
   @state() cronJobsEnabledFilter: CronJobsEnabledFilter = "all";
   @state() cronJobsSortBy: CronJobsSortBy = "nextRunAtMs";
   @state() cronJobsSortDir: CronSortDir = "asc";
+=======
+  @state() cronJobsEnabledFilter: import("./types.js").CronJobsEnabledFilter = "all";
+  @state() cronJobsScheduleKindFilter: import("./controllers/cron.js").CronJobsScheduleKindFilter =
+    "all";
+  @state() cronJobsLastStatusFilter: import("./controllers/cron.js").CronJobsLastStatusFilter =
+    "all";
+  @state() cronJobsSortBy: import("./types.js").CronJobsSortBy = "nextRunAtMs";
+  @state() cronJobsSortDir: import("./types.js").CronSortDir = "asc";
+>>>>>>> e3ba59dc7 (Control UI: add cron jobs schedule/status filters with reset (#9510))
   @state() cronStatus: CronStatus | null = null;
   @state() cronError: string | null = null;
   @state() cronForm: CronFormState = { ...DEFAULT_CRON_FORM };
