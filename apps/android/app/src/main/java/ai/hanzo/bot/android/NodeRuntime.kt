@@ -197,7 +197,8 @@ class NodeRuntime(context: Context) {
     cameraEnabled = { cameraEnabled.value },
     locationMode = { locationMode.value },
     voiceWakeMode = { voiceWakeMode.value },
-    motionAvailable = { motionHandler.isAvailable() },
+    motionActivityAvailable = { motionHandler.isActivityAvailable() },
+    motionPedometerAvailable = { motionHandler.isPedometerAvailable() },
     smsAvailable = { sms.canSendSms() },
     hasRecordAudioPermission = { hasRecordAudioPermission() },
     manualTls = { manualTls.value },
@@ -222,7 +223,6 @@ class NodeRuntime(context: Context) {
     isForeground = { _isForeground.value },
     cameraEnabled = { cameraEnabled.value },
     locationEnabled = { locationMode.value != LocationMode.Off },
-    motionAvailable = { motionHandler.isAvailable() },
     smsAvailable = { sms.canSendSms() },
     debugBuild = { BuildConfig.DEBUG },
     refreshNodeCanvasCapability = { nodeSession.refreshNodeCanvasCapability() },
@@ -232,6 +232,8 @@ class NodeRuntime(context: Context) {
       _canvasRehydrateErrorText.value = null
     },
     onCanvasA2uiReset = { _canvasA2uiHydrated.value = false },
+    motionActivityAvailable = { motionHandler.isActivityAvailable() },
+    motionPedometerAvailable = { motionHandler.isPedometerAvailable() },
   )
 
   private lateinit var gatewayEventHandler: GatewayEventHandler
