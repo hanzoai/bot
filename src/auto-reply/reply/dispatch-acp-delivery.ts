@@ -121,8 +121,7 @@ export function createAcpDispatchDeliveryCoordinator(params: {
   ): Promise<boolean> => {
     if (kind === "block" && payload.text?.trim()) {
       if (state.accumulatedBlockText.length > 0) {
-        state.accumulatedBlockText += "
-";
+        state.accumulatedBlockText += "\n";
       }
       state.accumulatedBlockText += payload.text;
       state.blockCount += 1;

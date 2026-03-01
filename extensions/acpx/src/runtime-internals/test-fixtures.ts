@@ -22,11 +22,9 @@ const args = process.argv.slice(2);
 const logPath = process.env.MOCK_ACPX_LOG;
 const writeLog = (entry) => {
   if (!logPath) return;
-  fs.appendFileSync(logPath, JSON.stringify(entry) + "
-");
+  fs.appendFileSync(logPath, JSON.stringify(entry) + "\n");
 };
-const emitJson = (payload) => process.stdout.write(JSON.stringify(payload) + "
-");
+const emitJson = (payload) => process.stdout.write(JSON.stringify(payload) + "\n");
 const emitUpdate = (sessionId, update) =>
   emitJson({
     jsonrpc: "2.0",

@@ -790,8 +790,7 @@ export class QmdMemoryManager implements MemorySearchManager {
     if (!params.from && !params.lines) {
       return { text: full.text, path: relPath };
     }
-    const lines = full.text.split("
-");
+    const lines = full.text.split("\n");
     const start = Math.max(1, params.from ?? 1);
     const count = Math.max(1, params.lines ?? lines.length);
     const slice = lines.slice(start - 1, start - 1 + count);
