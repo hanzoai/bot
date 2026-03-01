@@ -1,11 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-<<<<<<< HEAD
-=======
 import * as ssrf from "../../infra/net/ssrf.js";
 import * as mediaFetch from "../../media/fetch.js";
->>>>>>> 39a45121d (fix(discord,slack): add SSRF policy for media downloads in proxy environments (#25475))
 import type { SavedMedia } from "../../media/store.js";
-import * as ssrf from "../../infra/net/ssrf.js";
 import * as mediaStore from "../../media/store.js";
 import { mockPinnedHostnameResolution } from "../../test-helpers/ssrf.js";
 import { type FetchMock, withFetchPreconnect } from "../../test-utils/fetch-mock.js";
@@ -602,7 +598,8 @@ describe("resolveSlackAttachmentContent", () => {
     });
 
     expect(result).toEqual({
-      text: "[Forwarded message from Bob]\nPlease review this",
+      text: "[Forwarded message from Bob]
+Please review this",
       media: [],
     });
     expect(mockFetch).not.toHaveBeenCalled();
