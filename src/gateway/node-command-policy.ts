@@ -81,11 +81,7 @@ const PLATFORM_DEFAULTS: Record<string, string[]> = {
     ...DEVICE_COMMANDS,
     ...DEVICE_DIAGNOSTICS_COMMANDS,
     ...ANDROID_NOTIFICATION_COMMANDS,
-<<<<<<< HEAD
-=======
-    NODE_SYSTEM_NOTIFY_COMMAND,
-    ...ANDROID_DEVICE_COMMANDS,
->>>>>>> 9d3ccf475 (feat(gateway): enable Android notify + notification events)
+    "system.notify",
     ...CONTACTS_COMMANDS,
     ...CALENDAR_COMMANDS,
     ...REMINDERS_COMMANDS,
