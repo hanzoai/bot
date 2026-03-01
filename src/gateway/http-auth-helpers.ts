@@ -43,5 +43,10 @@ export async function authorizeGatewayBearerRequest(params: {
     sendGatewayAuthFailure(params.res, authResult);
     return null;
   }
+  // Attach the raw bearer token so downstream handlers can forward it
+  // to billing APIs and cloud AI endpoints for per-user authorization.
+  if (token && !authResult.rawToken) {
+    authResult.rawToken = token;
+  }
   return authResult;
 }
