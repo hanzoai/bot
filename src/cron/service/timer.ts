@@ -512,10 +512,13 @@ export async function executeJobCore(
             : 'main job requires payload.kind="systemEvent"',
       };
     }
+    // main-target cron jobs should always resolve via the agent's main session.
+    // Avoid forwarding persisted channel session keys from legacy records.
+    const targetMainSessionKey = undefined;
     state.deps.enqueueSystemEvent(text, {
       agentId: job.agentId,
+      sessionKey: targetMainSessionKey,
       contextKey: `cron:${job.id}`,
-      sessionKey: job.sessionKey,
     });
     if (job.wakeMode === "now" && state.deps.runHeartbeatOnce) {
       const reason = `cron:${job.id}`;
@@ -532,7 +535,7 @@ export async function executeJobCore(
         heartbeatResult = await state.deps.runHeartbeatOnce({
           reason,
           agentId: job.agentId,
-          sessionKey: job.sessionKey,
+          sessionKey: targetMainSessionKey,
           // Cron-triggered heartbeats should deliver to the last active channel.
           // Without this override, heartbeat target defaults to "none" (since
           // e2362d35) and cron main-session responses are silently swallowed.
@@ -545,7 +548,14 @@ export async function executeJobCore(
           break;
         }
         if (state.deps.nowMs() - waitStartedAt > maxWaitMs) {
-          state.deps.requestHeartbeatNow({ reason, sessionKey: job.sessionKey });
+          if (abortSignal?.aborted) {
+            return { status: "error" as const, error: "cron: job execution timed out", summary: text };
+          }
+          state.deps.requestHeartbeatNow({
+            reason,
+            agentId: job.agentId,
+            sessionKey: targetMainSessionKey,
+          });
           return { status: "ok", summary: text };
         }
         await delay(retryDelayMs);
@@ -559,7 +569,14 @@ export async function executeJobCore(
         return { status: "error", error: heartbeatResult.reason, summary: text };
       }
     } else {
-      state.deps.requestHeartbeatNow({ reason: `cron:${job.id}`, sessionKey: job.sessionKey });
+      if (abortSignal?.aborted) {
+        return { status: "error" as const, error: "cron: job execution timed out", summary: text };
+      }
+      state.deps.requestHeartbeatNow({
+        reason: `cron:${job.id}`,
+        agentId: job.agentId,
+        sessionKey: targetMainSessionKey,
+      });
       return { status: "ok", summary: text };
     }
   }
