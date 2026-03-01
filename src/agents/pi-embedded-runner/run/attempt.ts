@@ -163,7 +163,7 @@ export function isOllamaCompatProvider(model: {
 }
 
 export function resolveOllamaCompatNumCtxEnabled(params: {
-  config?: Hanzo BotConfig;
+  config?: BotConfig;
   providerId?: string;
 }): boolean {
   const providerId = params.providerId?.trim();
@@ -189,7 +189,7 @@ export function resolveOllamaCompatNumCtxEnabled(params: {
 
 export function shouldInjectOllamaCompatNumCtx(params: {
   model: { api?: string; provider?: string; baseUrl?: string };
-  config?: Hanzo BotConfig;
+  config?: BotConfig;
   providerId?: string;
 }): boolean {
   // Restrict to the OpenAI-compatible adapter path only.
