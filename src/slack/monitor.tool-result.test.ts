@@ -6,7 +6,9 @@ import {
   defaultSlackTestConfig,
   getSlackTestState,
   getSlackClient,
+  getSlackHandlers,
   getSlackHandlerOrThrow,
+  flush,
   resetSlackTestState,
   runSlackMessageOnce,
   startSlackMonitor,
@@ -80,6 +82,51 @@ describe("monitorSlackProvider tool results", () => {
     });
   }
 
+<<<<<<< HEAD
+=======
+  function setPairingOnlyDirectMessages() {
+    const currentConfig = slackTestState.config as {
+      channels?: { slack?: Record<string, unknown> };
+    };
+    slackTestState.config = {
+      ...currentConfig,
+      channels: {
+        ...currentConfig.channels,
+        slack: {
+          ...currentConfig.channels?.slack,
+          dm: { enabled: true, policy: "pairing", allowFrom: [] },
+        },
+      },
+    };
+  }
+
+  it("skips socket startup when Slack channel is disabled", async () => {
+    slackTestState.config = {
+      channels: {
+        slack: {
+          enabled: false,
+          mode: "socket",
+          botToken: "xoxb-config",
+          appToken: "xapp-config",
+        },
+      },
+    };
+    const client = getSlackClient();
+    if (!client) {
+      throw new Error("Slack client not registered");
+    }
+    client.auth.test.mockClear();
+
+    const { controller, run } = startSlackMonitor(monitorSlackProvider);
+    await flush();
+    controller.abort();
+    await run;
+
+    expect(client.auth.test).not.toHaveBeenCalled();
+    expect(getSlackHandlers()?.size ?? 0).toBe(0);
+  });
+
+>>>>>>> 265b22c40 (fix(slack): skip monitor startup for disabled accounts [AI-assisted] (openclaw#30592) thanks @liuxiaopai-ai)
   it("skips tool summaries with responsePrefix", async () => {
     replyMock.mockResolvedValue({ text: "final reply" });
 
