@@ -493,8 +493,7 @@ export class QmdMemoryManager implements MemorySearchManager {
     }
 
     let currentName: string | null = null;
-    for (const rawLine of output.split(/?
-/)) {
+    for (const rawLine of output.split(/\r?\n/)) {
       const line = rawLine.trimEnd();
       if (!line.trim()) {
         currentName = null;
@@ -794,8 +793,7 @@ export class QmdMemoryManager implements MemorySearchManager {
     const start = Math.max(1, params.from ?? 1);
     const count = Math.max(1, params.lines ?? lines.length);
     const slice = lines.slice(start - 1, start - 1 + count);
-    return { text: slice.join("
-"), path: relPath };
+    return { text: slice.join("\n"), path: relPath };
   }
 
   status(): MemoryProviderStatus {
@@ -1327,8 +1325,7 @@ export class QmdMemoryManager implements MemorySearchManager {
       rl.close();
       await handle.close();
     }
-    return { missing: false, text: selected.slice(0, count).join("
-") };
+    return { missing: false, text: selected.slice(0, count).join("\n") };
   }
 
   private async readFullText(
@@ -1527,8 +1524,7 @@ ${body}
         return { startLine: start, endLine: start + count - 1 };
       }
     }
-    const lines = snippet.split("
-").length;
+    const lines = snippet.split("\n").length;
     return { startLine: 1, endLine: lines };
   }
 
@@ -1595,7 +1591,7 @@ ${body}
     if (!root) {
       return null;
     }
-    const normalizedRelative = collectionRelativePath.replace(/\/g, "/");
+    const normalizedRelative = collectionRelativePath.replace(/\\/g, "/");
     const absPath = path.normalize(path.resolve(root.path, collectionRelativePath));
     const relativeToWorkspace = path.relative(this.workspaceDir, absPath);
     const relPath = this.buildSearchPath(
@@ -1615,7 +1611,7 @@ ${body}
   ): string {
     const insideWorkspace = this.isInsideWorkspace(relativeToWorkspace);
     if (insideWorkspace) {
-      const normalized = relativeToWorkspace.replace(/\/g, "/");
+      const normalized = relativeToWorkspace.replace(/\\/g, "/");
       if (!normalized) {
         return path.basename(absPath);
       }
