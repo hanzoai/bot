@@ -17,8 +17,6 @@ import {
 import { formatForLog } from "./ws-log.js";
 
 const MAX_EXEC_EVENT_OUTPUT_CHARS = 180;
-<<<<<<< HEAD
-=======
 const MAX_NOTIFICATION_EVENT_TEXT_CHARS = 120;
 const VOICE_TRANSCRIPT_DEDUPE_WINDOW_MS = 1500;
 const MAX_RECENT_VOICE_TRANSCRIPTS = 200;
@@ -106,7 +104,6 @@ function shouldDropDuplicateVoiceTranscript(params: {
 
   return false;
 }
->>>>>>> 9d3ccf475 (feat(gateway): enable Android notify + notification events)
 
 function compactExecEventOutput(raw: string) {
   const normalized = raw.replace(/\s+/g, " ").trim();
