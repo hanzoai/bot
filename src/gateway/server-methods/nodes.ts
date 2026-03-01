@@ -332,6 +332,7 @@ export const nodeHandlers: GatewayRequestHandlers = {
       });
       return;
     }
+    const p = params as { connectedOnly?: boolean };
     await respondUnavailableOnThrow(respond, async () => {
       const list = await listDevicePairing();
       const cfg = loadConfig();
@@ -362,7 +363,7 @@ export const nodeHandlers: GatewayRequestHandlers = {
       const connectedById = new Map(allNodes.map((n) => [n.nodeId, n]));
       const nodeIds = new Set<string>([...pairedById.keys(), ...connectedById.keys()]);
 
-      const nodes = [...nodeIds].map((nodeId) => {
+      let nodes = [...nodeIds].map((nodeId) => {
         const paired = pairedById.get(nodeId);
         const live = connectedById.get(nodeId);
         const nodeBilling = billingCfg[nodeId];
@@ -392,6 +393,11 @@ export const nodeHandlers: GatewayRequestHandlers = {
           dedicatedSpentCents: live?.dedicatedSpentCents ?? nodeBilling?.spentCents ?? 0,
         };
       });
+
+      // When connectedOnly is set, exclude offline (paired-but-disconnected) nodes.
+      if (p.connectedOnly) {
+        nodes = nodes.filter((n) => n.connected);
+      }
 
       nodes.sort((a, b) => {
         if (a.connected !== b.connected) {

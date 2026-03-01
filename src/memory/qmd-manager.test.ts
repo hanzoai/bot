@@ -536,8 +536,7 @@ describe("QmdMemoryManager", () => {
             "memory-dir (qmd://memory-dir/)",
             "  Pattern:  **/*.md",
             "",
-          ].join("
-"),
+          ].join("\n"),
         );
         return child;
       }
@@ -1870,8 +1869,7 @@ session top 4" },
 
   it("reads only requested line ranges without loading the whole file", async () => {
     const readFileSpy = vi.spyOn(fs, "readFile");
-    const text = Array.from({ length: 50 }, (_, index) => `line-${index + 1}`).join("
-");
+    const text = Array.from({ length: 50 }, (_, index) => `line-${index + 1}`).join("\n");
     await fs.writeFile(path.join(workspaceDir, "window.md"), text, "utf-8");
 
     const { manager } = await createManager();
@@ -2257,8 +2255,7 @@ workspace hit",
       if (args[0] === "query") {
         const child = createMockChild({ autoClose: false });
         queueMicrotask(() => {
-          child.stdout.emit("data", "   
-");
+          child.stdout.emit("data", "   \n");
           child.stderr.emit("data", "unexpected parser error");
           child.closeWith(0);
         });

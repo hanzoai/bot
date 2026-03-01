@@ -191,7 +191,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as BotConfig;
 
     const result = resolveModel("custom", "model-b", "/tmp/agent", cfg);
 

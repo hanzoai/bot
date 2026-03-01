@@ -376,8 +376,7 @@ export async function prepareSlackMessage(params: {
       ? (message.attachments ?? [])
           .map((a) => a.text?.trim() || a.fallback?.trim())
           .filter(Boolean)
-          .join("
-")
+          .join("\n")
       : undefined;
 
   const rawBody =

@@ -443,8 +443,7 @@ export async function dispatchReplyFromConfig(params: {
             // Accumulate block text for TTS generation after streaming
             if (payload.text) {
               if (accumulatedBlockText.length > 0) {
-                accumulatedBlockText += "
-";
+                accumulatedBlockText += "\n";
               }
               accumulatedBlockText += payload.text;
               blockCount++;
