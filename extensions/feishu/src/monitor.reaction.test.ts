@@ -1,8 +1,8 @@
-import type { ClawdbotConfig } from "openclaw/plugin-sdk";
+import type { BotConfig } from "bot/plugin-sdk";
 import { describe, expect, it, vi } from "vitest";
 import { resolveReactionSyntheticEvent, type FeishuReactionCreatedEvent } from "./monitor.js";
 
-const cfg = {} as ClawdbotConfig;
+const cfg = {} as BotConfig;
 
 function makeReactionEvent(
   overrides: Partial<FeishuReactionCreatedEvent> = {},
@@ -58,7 +58,7 @@ describe("resolveReactionSyntheticEvent", () => {
             reactionNotifications: "off",
           },
         },
-      } as ClawdbotConfig,
+      } as BotConfig,
       accountId: "default",
       event,
       botOpenId: "ou_bot",
@@ -102,7 +102,7 @@ describe("resolveReactionSyntheticEvent", () => {
             reactionNotifications: "all",
           },
         },
-      } as ClawdbotConfig,
+      } as BotConfig,
       accountId: "default",
       event,
       botOpenId: "ou_bot",
