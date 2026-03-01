@@ -316,12 +316,20 @@ export async function registerSlackMonitorSlashCommands(params: {
     command: SlackCommandMiddlewareArgs["command"];
     ack: SlackCommandMiddlewareArgs["ack"];
     respond: SlackCommandMiddlewareArgs["respond"];
+    body?: unknown;
     prompt: string;
     commandArgs?: CommandArgs;
     commandDefinition?: ChatCommandDefinition;
   }) => {
-    const { command, ack, respond, prompt, commandArgs, commandDefinition } = p;
+    const { command, ack, respond, body, prompt, commandArgs, commandDefinition } = p;
     try {
+      if (ctx.shouldDropMismatchedSlackEvent?.(body)) {
+        await ack();
+        runtime.log?.(
+          `slack: drop slash command from user=${command.user_id ?? "unknown"} channel=${command.channel_id ?? "unknown"} (mismatched app/team)`,
+        );
+        return;
+      }
       if (!prompt.trim()) {
         await ack({
           text: "Message required.",
@@ -699,7 +707,7 @@ export async function registerSlackMonitorSlashCommands(params: {
     for (const command of nativeCommands) {
       ctx.app.command(
         `/${command.name}`,
-        async ({ command: cmd, ack, respond }: SlackCommandMiddlewareArgs) => {
+        async ({ command: cmd, ack, respond, body }: SlackCommandMiddlewareArgs) => {
           const commandDefinition = registry.findCommandByNativeName(command.name, "slack");
           const rawText = cmd.text?.trim() ?? "";
           const commandArgs = commandDefinition
@@ -716,6 +724,7 @@ export async function registerSlackMonitorSlashCommands(params: {
             command: cmd,
             ack,
             respond,
+            body,
             prompt,
             commandArgs,
             commandDefinition: commandDefinition ?? undefined,
@@ -726,11 +735,12 @@ export async function registerSlackMonitorSlashCommands(params: {
   } else if (slashCommand.enabled) {
     ctx.app.command(
       buildSlackSlashCommandMatcher(slashCommand.name),
-      async ({ command, ack, respond }: SlackCommandMiddlewareArgs) => {
+      async ({ command, ack, respond, body }: SlackCommandMiddlewareArgs) => {
         await handleSlashCommand({
           command,
           ack,
           respond,
+          body,
           prompt: command.text?.trim() ?? "",
         });
       },
@@ -758,7 +768,16 @@ export async function registerSlackMonitorSlashCommands(params: {
     if (typeof optionsHandler !== "function") {
       return;
     }
+<<<<<<< HEAD
     optionsHandler(SLACK_COMMAND_ARG_ACTION_ID, async ({ ack, body }) => {
+=======
+    appWithOptions.options(SLACK_COMMAND_ARG_ACTION_ID, async ({ ack, body }) => {
+      if (ctx.shouldDropMismatchedSlackEvent?.(body)) {
+        await ack({ options: [] });
+        runtime.log?.("slack: drop slash arg options payload (mismatched app/team)");
+        return;
+      }
+>>>>>>> 0f36ee5a2 (Slack: harden slash and interactions ingress checks (openclaw#29091) thanks @Solvely-Colin)
       const typedBody = body as {
         value?: string;
         user?: { id?: string };
@@ -813,6 +832,10 @@ export async function registerSlackMonitorSlashCommands(params: {
       const { ack, body, respond } = args;
       const action = args.action as { value?: string; selected_option?: { value?: string } };
       await ack();
+      if (ctx.shouldDropMismatchedSlackEvent?.(body)) {
+        runtime.log?.("slack: drop slash arg action payload (mismatched app/team)");
+        return;
+      }
       const respondFn =
         respond ??
         (async (payload: { text: string; blocks?: SlackBlock[]; response_type?: string }) => {
@@ -870,6 +893,7 @@ export async function registerSlackMonitorSlashCommands(params: {
         command: commandPayload,
         ack: async () => {},
         respond: respondFn,
+        body,
         prompt,
         commandArgs,
         commandDefinition: commandDefinition ?? undefined,
