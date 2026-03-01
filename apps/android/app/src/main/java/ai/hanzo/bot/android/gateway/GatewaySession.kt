@@ -166,6 +166,43 @@ class GatewaySession(
     throw IllegalStateException("${err?.code ?: "UNAVAILABLE"}: ${err?.message ?: "request failed"}")
   }
 
+  suspend fun refreshNodeCanvasCapability(timeoutMs: Long = 8_000): Boolean {
+    val conn = currentConnection ?: return false
+    val response =
+      try {
+        conn.request("node.canvas.capability.refresh", params = null, timeoutMs = timeoutMs)
+      } catch (err: Throwable) {
+        Log.w("HanzoBotGateway", "node.canvas.capability.refresh failed: ${err.message ?: err::class.java.simpleName}")
+        return false
+      }
+    if (!response.ok) {
+      val err = response.error
+      Log.w(
+        "HanzoBotGateway",
+        "node.canvas.capability.refresh rejected: ${err?.code ?: "UNAVAILABLE"}: ${err?.message ?: "request failed"}",
+      )
+      return false
+    }
+    val payloadObj = response.payloadJson?.let(::parseJsonOrNull)?.asObjectOrNull()
+    val refreshedCapability = payloadObj?.get("canvasCapability").asStringOrNull()?.trim().orEmpty()
+    if (refreshedCapability.isEmpty()) {
+      Log.w("HanzoBotGateway", "node.canvas.capability.refresh missing canvasCapability")
+      return false
+    }
+    val scopedCanvasHostUrl = canvasHostUrl?.trim().orEmpty()
+    if (scopedCanvasHostUrl.isEmpty()) {
+      Log.w("HanzoBotGateway", "node.canvas.capability.refresh missing local canvasHostUrl")
+      return false
+    }
+    val refreshedUrl = replaceCanvasCapabilityInScopedHostUrl(scopedCanvasHostUrl, refreshedCapability)
+    if (refreshedUrl == null) {
+      Log.w("HanzoBotGateway", "node.canvas.capability.refresh unable to rewrite scoped canvas URL")
+      return false
+    }
+    canvasHostUrl = refreshedUrl
+    return true
+  }
+
   private data class RpcResponse(val id: String, val ok: Boolean, val payloadJson: String?, val error: ErrorShape?)
 
   private inner class Connection(
@@ -703,12 +740,20 @@ private fun parseJsonOrNull(payload: String): JsonElement? {
   }
 }
 
-private const val INVOKE_ACK_TIMEOUT_FLOOR_MS = 15_000L
-private const val INVOKE_ACK_TIMEOUT_CEILING_MS = 120_000L
+private fun replaceCanvasCapabilityInScopedHostUrl(
+  scopedUrl: String,
+  capability: String,
+): String? {
+  val marker = "/__bot__/cap/"
+  val markerStart = scopedUrl.indexOf(marker)
+  if (markerStart < 0) return null
+  val capabilityStart = markerStart + marker.length
+  val capabilityEnd = scopedUrl.indexOf("/", capabilityStart)
+  if (capabilityEnd <= capabilityStart) return null
+  return scopedUrl.substring(0, capabilityStart) + capability + scopedUrl.substring(capabilityEnd)
+}
 
-internal fun resolveInvokeResultAckTimeoutMs(timeoutMs: Long?): Long {
-  val value = timeoutMs ?: return INVOKE_ACK_TIMEOUT_FLOOR_MS
-  if (value <= INVOKE_ACK_TIMEOUT_FLOOR_MS) return INVOKE_ACK_TIMEOUT_FLOOR_MS
-  if (value > INVOKE_ACK_TIMEOUT_CEILING_MS) return INVOKE_ACK_TIMEOUT_CEILING_MS
-  return value
+internal fun resolveInvokeResultAckTimeoutMs(invokeTimeoutMs: Long?): Long {
+  val normalized = invokeTimeoutMs?.takeIf { it > 0L } ?: 15_000L
+  return normalized.coerceIn(15_000L, 120_000L)
 }
