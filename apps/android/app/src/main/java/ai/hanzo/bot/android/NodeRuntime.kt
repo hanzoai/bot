@@ -196,6 +196,15 @@ class NodeRuntime(context: Context) {
     isForeground = { _isForeground.value },
     cameraEnabled = { cameraEnabled.value },
     locationEnabled = { locationMode.value != LocationMode.Off },
+    smsAvailable = { sms.canSendSms() },
+    debugBuild = { BuildConfig.DEBUG },
+    refreshNodeCanvasCapability = { nodeSession.refreshNodeCanvasCapability() },
+    onCanvasA2uiPush = {
+      _canvasA2uiHydrated.value = true
+      _canvasRehydratePending.value = false
+      _canvasRehydrateErrorText.value = null
+    },
+    onCanvasA2uiReset = { _canvasA2uiHydrated.value = false },
   )
 
   private lateinit var gatewayEventHandler: GatewayEventHandler
