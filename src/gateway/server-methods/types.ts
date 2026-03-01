@@ -23,6 +23,9 @@ export type GatewayClient = {
   clientIp?: string;
   /** Resolved tenant context (multi-tenant IAM mode). */
   tenant?: TenantContext;
+  canvasHostUrl?: string;
+  canvasCapability?: string;
+  canvasCapabilityExpiresAtMs?: number;
 };
 
 export type RespondFn = (
