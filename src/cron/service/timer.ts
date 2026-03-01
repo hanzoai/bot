@@ -539,6 +539,7 @@ export async function executeJobCore(
           // Cron-triggered heartbeats should deliver to the last active channel.
           // Without this override, heartbeat target defaults to "none" (since
           // e2362d35) and cron main-session responses are silently swallowed.
+          // See: https://github.com/hanzoai/bot/issues/28508
           heartbeat: { target: "last" },
         });
         if (
