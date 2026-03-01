@@ -52,7 +52,11 @@ export type CronServiceDeps = {
     opts?: { agentId?: string; contextKey?: string; sessionKey?: string },
   ) => void;
   requestHeartbeatNow: (opts?: { reason?: string; sessionKey?: string }) => void;
-  runHeartbeatOnce?: (opts?: { reason?: string; agentId?: string }) => Promise<HeartbeatRunResult>;
+  runHeartbeatOnce?: (opts?: {
+    reason?: string;
+    agentId?: string;
+    sessionKey?: string;
+  }) => Promise<HeartbeatRunResult>;
   /**
    * WakeMode=now: max time to wait for runHeartbeatOnce to stop returning
    * { status:"skipped", reason:"requests-in-flight" } before falling back to
@@ -61,12 +65,18 @@ export type CronServiceDeps = {
   wakeNowHeartbeatBusyMaxWaitMs?: number;
   /** WakeMode=now: delay between runHeartbeatOnce retries while busy. */
   wakeNowHeartbeatBusyRetryDelayMs?: number;
-  runIsolatedAgentJob: (params: { job: CronJob; message: string }) => Promise<{
+  runIsolatedAgentJob: (params: {
+    job: CronJob;
+    message: string;
+    abortSignal?: AbortSignal;
+  }) => Promise<{
     status: "ok" | "error" | "skipped";
     summary?: string;
     /** Last non-empty agent text output (not truncated). */
     outputText?: string;
     error?: string;
+    /** Categorises the error kind for cron delivery diagnostics. */
+    errorKind?: string;
     sessionId?: string;
     sessionKey?: string;
     /**
@@ -75,6 +85,8 @@ export type CronServiceDeps = {
      * https://github.com/hanzoai/bot/issues/15692
      */
     delivered?: boolean;
+    /** Whether an outbound delivery attempt was made. */
+    deliveryAttempted?: boolean;
   }>;
   onEvent?: (evt: CronEvent) => void;
 };
