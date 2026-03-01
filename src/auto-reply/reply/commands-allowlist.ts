@@ -287,7 +287,7 @@ async function resolveSlackNames(params: {
   entries: string[];
 }) {
   const account = resolveSlackAccount({ cfg: params.cfg, accountId: params.accountId });
-  const token = account.config.userToken?.trim() || account.botToken?.trim();
+  const token = account.userToken || account.botToken?.trim();
   if (!token) {
     return new Map<string, string>();
   }
