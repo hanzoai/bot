@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import * as noteModule from "../terminal/note.js";
 import { withTempHome } from "../../test/helpers/temp-home.js";
 import { loadAndMaybeMigrateDoctorConfig } from "./doctor-config-flow.js";
 
@@ -23,15 +24,10 @@ async function runDoctorConfigWithInput(params: {
   });
 }
 
-<<<<<<< HEAD
-=======
 async function collectDoctorWarnings(config: Record<string, unknown>): Promise<string[]> {
   const noteSpy = vi.spyOn(noteModule, "note").mockImplementation(() => {});
   try {
-    await runDoctorConfigWithInput({
-      config,
-      run: loadAndMaybeMigrateDoctorConfig,
-    });
+    await runDoctorConfigWithInput({ config });
     return noteSpy.mock.calls
       .filter((call) => call[1] === "Doctor warnings")
       .map((call) => String(call[0]));
@@ -61,7 +57,7 @@ type RepairedDiscordPolicy = {
   accounts: Record<string, DiscordAccountRule>;
 };
 
->>>>>>> f1bf55868 (fix(doctor): detect groupPolicy=allowlist with empty groupAllowFrom (#28477))
+
 describe("doctor config flow", () => {
   it("preserves invalid config for doctor repairs", async () => {
     const result = await runDoctorConfigWithInput({
@@ -76,8 +72,6 @@ describe("doctor config flow", () => {
     });
   });
 
-<<<<<<< HEAD
-=======
   it("does not warn on mutable account allowlists when dangerous name matching is inherited", async () => {
     const doctorWarnings = await collectDoctorWarnings({
       channels: {
@@ -134,7 +128,7 @@ describe("doctor config flow", () => {
     ).toBe(true);
   });
 
->>>>>>> f1bf55868 (fix(doctor): detect groupPolicy=allowlist with empty groupAllowFrom (#28477))
+
   it("drops unknown keys on repair", async () => {
     const result = await runDoctorConfigWithInput({
       repair: true,
