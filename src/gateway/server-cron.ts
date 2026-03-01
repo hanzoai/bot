@@ -128,7 +128,7 @@ export function buildGatewayCronService(params: {
     return canonical;
   };
 
-  const _resolveCronWakeTarget = (opts?: { agentId?: string; sessionKey?: string | null }) => {
+  const resolveCronWakeTarget = (opts?: { agentId?: string; sessionKey?: string | null }) => {
     const runtimeConfig = loadConfig();
     const requestedAgentId = opts?.agentId ? resolveCronAgent(opts.agentId).agentId : undefined;
     const derivedAgentId =
@@ -192,11 +192,29 @@ export function buildGatewayCronService(params: {
       }
     },
     runHeartbeatOnce: async (opts) => {
-      const runtimeConfig = loadConfig();
+      const { runtimeConfig, agentId, sessionKey } = resolveCronWakeTarget(opts);
+      // Merge cron-supplied heartbeat overrides (e.g. target: "last") with the
+      // fully resolved agent heartbeat config so cron-triggered heartbeats
+      // respect agent-specific overrides (agents.list[].heartbeat) before
+      // falling back to agents.defaults.heartbeat.
+      const agentEntry = Array.isArray(runtimeConfig.agents?.list)
+        ? runtimeConfig.agents.list.find(
+            (entry) =>
+              entry && typeof entry.id === "string" && normalizeAgentId(entry.id) === agentId,
+          )
+        : undefined;
+      const baseHeartbeat = {
+        ...runtimeConfig.agents?.defaults?.heartbeat,
+        ...agentEntry?.heartbeat,
+      };
+      const heartbeatOverride = opts?.heartbeat
+        ? { ...baseHeartbeat, ...opts.heartbeat }
+        : undefined;
       return await runHeartbeatOnce({
         cfg: runtimeConfig,
         reason: opts?.reason,
-        agentId: opts?.agentId,
+        agentId,
+        heartbeat: heartbeatOverride,
         deps: { ...params.deps, runtime: defaultRuntime },
       });
     },
