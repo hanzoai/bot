@@ -1,5 +1,6 @@
 import type { BotConfig } from "../config/config.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
+import { createSubsystemLogger } from "../logging/subsystem.js";
 import {
   DEFAULT_COPILOT_API_BASE_URL,
   resolveCopilotApiToken,
@@ -188,6 +189,8 @@ export function resolveOllamaApiBase(configuredBaseUrl?: string): string {
   return trimmed.replace(/\/v1$/i, "");
 }
 
+const log = createSubsystemLogger("agents/model-providers");
+
 async function discoverOllamaModels(
   baseUrl?: string,
   opts?: { quiet?: boolean },
@@ -202,7 +205,9 @@ async function discoverOllamaModels(
       signal: AbortSignal.timeout(5000),
     });
     if (!response.ok) {
-      if (!opts?.quiet) console.warn(`Failed to discover Ollama models: ${response.status}`);
+      if (!opts?.quiet) {
+        log.warn(`Failed to discover Ollama models: ${response.status}`);
+      }
       return [];
     }
     const data = (await response.json()) as OllamaTagsResponse;
@@ -225,7 +230,9 @@ async function discoverOllamaModels(
       };
     });
   } catch (error) {
-    if (!opts?.quiet) console.warn(`Failed to discover Ollama models: ${String(error)}`);
+    if (!opts?.quiet) {
+      log.warn(`Failed to discover Ollama models: ${String(error)}`);
+    }
     return [];
   }
 }
@@ -934,7 +941,7 @@ export async function resolveImplicitProviders(params: {
     break;
   }
 
-  // Ollama provider - only add if explicitly configured.
+  // Ollama provider - auto-discover if running locally, or add if explicitly configured.
   // Use the user's configured baseUrl (from explicit providers) for model
   // discovery so that remote / non-default Ollama instances are reachable.
   // Skip discovery when explicit models are already defined.
