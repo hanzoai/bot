@@ -1,14 +1,10 @@
 import { describe, expect, it } from "vitest";
-<<<<<<< HEAD
-=======
 import {
   isCronSessionKey,
   parseSessionKey,
   resolveSessionDisplayName,
 } from "./app-render.helpers.ts";
->>>>>>> 266d32006 (feat(ui): add hide-cron toggle to chat session selector (#26976))
 import type { SessionsListResult } from "./types.ts";
-import { parseSessionKey, resolveSessionDisplayName } from "./app-render.helpers.ts";
 
 type SessionRow = SessionsListResult["sessions"][number];
 
