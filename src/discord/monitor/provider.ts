@@ -9,6 +9,7 @@ import { Routes } from "discord-api-types/v10";
 import { inspect } from "node:util";
 import type { HistoryEntry } from "../../auto-reply/reply/history.js";
 import type { BotConfig, ReplyToMode } from "../../config/config.js";
+import type { GroupPolicy } from "../../config/types.base.js";
 import { resolveTextChunkLimit } from "../../auto-reply/chunk.js";
 import { listNativeCommandSpecsForConfig } from "../../auto-reply/commands-registry.js";
 import { listSkillCommandsForAgents } from "../../auto-reply/skill-commands.js";
@@ -27,7 +28,6 @@ import {
 } from "../../config/commands.js";
 import { loadConfig } from "../../config/config.js";
 import { isDangerousNameMatchingEnabled } from "../../config/dangerous-name-matching.js";
-import type { GroupPolicy } from "../../config/types.base.js";
 import { resolveOpenProviderRuntimeGroupPolicy } from "../../config/runtime-group-policy.js";
 import { danger, logVerbose, shouldLogVerbose, warn } from "../../globals.js";
 import { formatErrorMessage } from "../../infra/errors.js";
