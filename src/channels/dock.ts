@@ -18,6 +18,7 @@ import {
 } from "../config/group-policy.js";
 import { resolveDiscordAccount } from "../discord/accounts.js";
 import { resolveIMessageAccount } from "../imessage/accounts.js";
+import { readChannelAllowFromStoreSync } from "../pairing/pairing-store.js";
 import { requireActivePluginRegistry } from "../plugins/runtime.js";
 import { normalizeAccountId } from "../routing/session-key.js";
 import { resolveSignalAccount } from "../signal/accounts.js";
@@ -157,8 +158,17 @@ const DOCKS: Record<ChatChannelId, ChannelDock> = {
     },
     outbound: { textChunkLimit: 4000 },
     config: {
-      resolveAllowFrom: ({ cfg, accountId }) =>
-        resolveWhatsAppAccount({ cfg, accountId }).allowFrom ?? [],
+      resolveAllowFrom: ({ cfg, accountId }) => {
+        const configEntries = resolveWhatsAppAccount({ cfg, accountId }).allowFrom ?? [];
+        const storeEntries = readChannelAllowFromStoreSync(
+          "whatsapp",
+          process.env,
+          accountId ?? "",
+        );
+        if (storeEntries.length === 0) return configEntries;
+        if (configEntries.length === 0) return storeEntries;
+        return [...new Set([...configEntries, ...storeEntries])];
+      },
       formatAllowFrom: ({ allowFrom }) =>
         allowFrom
           .map((entry) => String(entry).trim())

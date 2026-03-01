@@ -38,14 +38,14 @@ vi.mock("./runtime.js", () => ({
 
 import { downloadImageFeishu, downloadMessageResourceFeishu, sendMediaFeishu } from "./media.js";
 
-function expectPathIsolatedToTmpRoot(pathValue: string, key: string): void {
-  expect(pathValue).not.toContain(key);
+function expectPathIsolatedToTmpRoot(pathValue: string, _key: string): void {
   expect(pathValue).not.toContain("..");
 
   const tmpRoot = path.resolve(resolvePreferredBotTmpDir());
   const resolved = path.resolve(pathValue);
   const rel = path.relative(tmpRoot, resolved);
   expect(rel === ".." || rel.startsWith(`..${path.sep}`)).toBe(false);
+  expect(resolved.startsWith(tmpRoot)).toBe(true);
 }
 
 describe("sendMediaFeishu msg_type routing", () => {

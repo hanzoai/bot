@@ -9,6 +9,10 @@ import {
   resolveAgentWorkspaceDir,
   resolveDefaultAgentId,
 } from "../../agents/agent-scope.js";
+import {
+  loadAuthProfileStoreForSecretsRuntime,
+  resolveAuthProfileOrder,
+} from "../../agents/auth-profiles.js";
 import { runCliAgent } from "../../agents/cli-runner.js";
 import { getCliSessionId, setCliSessionId } from "../../agents/cli-session.js";
 import { lookupContextTokens } from "../../agents/context.js";
@@ -46,7 +50,11 @@ import { registerAgentRunContext } from "../../infra/agent-events.js";
 import { deliverOutboundPayloads } from "../../infra/outbound/deliver.js";
 import { resolveAgentOutboundIdentity } from "../../infra/outbound/identity.js";
 import { logWarn } from "../../logger.js";
-import { buildAgentMainSessionKey, normalizeAgentId } from "../../routing/session-key.js";
+import {
+  buildAgentMainSessionKey,
+  buildAgentPeerSessionKey,
+  normalizeAgentId,
+} from "../../routing/session-key.js";
 import {
   buildSafeExternalPrompt,
   detectSuspiciousPatterns,
@@ -154,9 +162,9 @@ export async function runCronIsolatedAgentTurn(params: {
     agentOverrideRest as Partial<AgentDefaultsConfig>,
   );
   if (typeof overrideModel === "string") {
-    agentCfg.model = { primary: overrideModel };
+    agentCfg.model = { ...agentCfg.model, primary: overrideModel };
   } else if (overrideModel) {
-    agentCfg.model = overrideModel;
+    agentCfg.model = { ...agentCfg.model, ...overrideModel };
   }
   const cfgWithAgentDefaults: BotConfig = {
     ...params.cfg,
@@ -176,6 +184,9 @@ export async function runCronIsolatedAgentTurn(params: {
     ensureBootstrapFiles: !agentCfg?.skipBootstrap && !isFastTestEnv,
   });
   const workspaceDir = workspace.dir;
+
+  // Resolve auth profiles for the current provider so API keys are available.
+  const authProfileStore = loadAuthProfileStoreForSecretsRuntime(agentDir);
 
   const resolvedDefault = resolveConfiguredModelRef({
     cfg: cfgWithAgentDefaults,
@@ -226,10 +237,15 @@ export async function runCronIsolatedAgentTurn(params: {
       defaultModel: resolvedDefault.model,
     });
     if ("error" in resolvedOverride) {
-      return { status: "error", error: resolvedOverride.error };
+      const errMsg = resolvedOverride.error;
+      if (errMsg.startsWith("invalid model")) {
+        return { status: "error", error: errMsg };
+      }
+      logWarn(`cron: payload.model '${modelOverride}' not allowed, falling back to agent defaults`);
+    } else {
+      provider = resolvedOverride.ref.provider;
+      model = resolvedOverride.ref.model;
     }
-    provider = resolvedOverride.ref.provider;
-    model = resolvedOverride.ref.model;
   }
   const now = Date.now();
   const cronSession = resolveCronSession({
@@ -237,6 +253,7 @@ export async function runCronIsolatedAgentTurn(params: {
     sessionKey: agentSessionKey,
     agentId,
     nowMs: now,
+    forceNew: true,
   });
   const runSessionId = cronSession.sessionEntry.sessionId;
   const runSessionKey = baseSessionKey.startsWith("cron:")
@@ -332,6 +349,8 @@ export async function runCronIsolatedAgentTurn(params: {
   const resolvedDelivery = await resolveDeliveryTarget(cfgWithAgentDefaults, agentId, {
     channel: deliveryPlan.channel ?? "last",
     to: deliveryPlan.to,
+    sessionKey: params.job.sessionKey,
+    accountId: deliveryPlan.accountId,
   });
 
   const { formattedTime, timeLine } = resolveCronStyleNow(params.cfg, now);
@@ -399,6 +418,14 @@ export async function runCronIsolatedAgentTurn(params: {
   cronSession.sessionEntry.systemSent = true;
   await persistSessionEntry();
 
+  // Resolve auth profile for the current provider (enables API key lookup for third-party providers).
+  const authProfileOrder = resolveAuthProfileOrder({
+    cfg: cfgWithAgentDefaults,
+    store: authProfileStore,
+    provider,
+  });
+  const authProfileId = authProfileOrder.length > 0 ? authProfileOrder[0] : undefined;
+
   let runResult: Awaited<ReturnType<typeof runEmbeddedPiAgent>>;
   let fallbackProvider = provider;
   let fallbackModel = model;
@@ -454,6 +481,8 @@ export async function runCronIsolatedAgentTurn(params: {
           lane: params.lane ?? "cron",
           provider: providerOverride,
           model: modelOverride,
+          authProfileId,
+          authProfileIdSource: authProfileId ? "auto" : undefined,
           thinkLevel,
           verboseLevel: resolvedVerboseLevel,
           timeoutMs,
@@ -541,18 +570,24 @@ export async function runCronIsolatedAgentTurn(params: {
   // `true` means we confirmed at least one outbound send reached the target.
   // Keep this strict so timer fallback can safely decide whether to wake main.
   let delivered = skipMessagingToolDelivery;
+  let deliveryAttempted = skipMessagingToolDelivery;
   if (deliveryRequested && !skipHeartbeatDelivery && !skipMessagingToolDelivery) {
     if (resolvedDelivery.error) {
+      const errorKind = resolvedDelivery.error.message.includes("Channel is required")
+        ? ("delivery-target" as const)
+        : undefined;
       if (!deliveryBestEffort) {
         return withRunSession({
           status: "error",
           error: resolvedDelivery.error.message,
+          errorKind,
           summary,
           outputText,
+          deliveryAttempted,
         });
       }
       logWarn(`[cron:${params.job.id}] ${resolvedDelivery.error.message}`);
-      return withRunSession({ status: "ok", summary, outputText });
+      return withRunSession({ status: "ok", summary, outputText, deliveryAttempted });
     }
     if (!resolvedDelivery.to) {
       const message = "cron delivery target is missing";
@@ -562,19 +597,22 @@ export async function runCronIsolatedAgentTurn(params: {
           error: message,
           summary,
           outputText,
+          deliveryAttempted,
         });
       }
       logWarn(`[cron:${params.job.id}] ${message}`);
-      return withRunSession({ status: "ok", summary, outputText });
+      return withRunSession({ status: "ok", summary, outputText, deliveryAttempted });
     }
     const identity = resolveAgentOutboundIdentity(cfgWithAgentDefaults, agentId);
 
     // Shared subagent announce flow is text-based and prompts the main agent to
-    // summarize. When we have an explicit delivery target (delivery.to), sender
-    // identity, or structured content, prefer direct outbound delivery to send
-    // the actual cron output without summarization.
-    const hasExplicitDeliveryTarget = Boolean(deliveryPlan.to);
-    if (deliveryPayloadHasStructuredContent || identity || hasExplicitDeliveryTarget) {
+    // summarize. When we have structured content, a sender identity, or a
+    // threaded target, prefer direct outbound delivery to send the actual cron
+    // output without summarization. Text-only non-threaded targets use the
+    // announce flow so the main agent can format the summary.
+    const useDirectDelivery =
+      deliveryPayloadHasStructuredContent || identity || resolvedDelivery.threadId != null;
+    if (useDirectDelivery) {
       try {
         const payloadsForDelivery =
           deliveryPayloadHasStructuredContent && deliveryPayloads.length > 0
@@ -583,6 +621,7 @@ export async function runCronIsolatedAgentTurn(params: {
               ? [{ text: synthesizedText }]
               : [];
         if (payloadsForDelivery.length > 0) {
+          deliveryAttempted = true;
           const deliveryResults = await deliverOutboundPayloads({
             cfg: cfgWithAgentDefaults,
             channel: resolvedDelivery.channel,
@@ -596,17 +635,41 @@ export async function runCronIsolatedAgentTurn(params: {
             deps: createOutboundSendDeps(params.deps),
           });
           delivered = deliveryResults.length > 0;
+          if (!delivered && !deliveryBestEffort) {
+            return withRunSession({
+              status: "error",
+              summary,
+              outputText,
+              error: "cron direct delivery failed",
+              deliveryAttempted,
+            });
+          }
         }
       } catch (err) {
+        deliveryAttempted = true;
         if (!deliveryBestEffort) {
-          return withRunSession({ status: "error", summary, outputText, error: String(err) });
+          return withRunSession({
+            status: "error",
+            summary,
+            outputText,
+            error: String(err),
+            deliveryAttempted,
+          });
         }
       }
     } else if (synthesizedText) {
-      const announceSessionKey = resolveAgentMainSessionKey({
-        cfg: params.cfg,
-        agentId,
-      });
+      const deliveryTargetSessionKey =
+        resolvedDelivery.channel && resolvedDelivery.to
+          ? buildAgentPeerSessionKey({
+              agentId,
+              channel: resolvedDelivery.channel,
+              peerId: resolvedDelivery.to,
+              dmScope: params.cfg.session?.dmScope ?? "main",
+              mainKey: params.cfg.session?.mainKey,
+            })
+          : params.job.sessionKey
+            ? params.job.sessionKey
+            : resolveAgentMainSessionKey({ cfg: params.cfg, agentId });
       const taskLabel =
         typeof params.job.name === "string" && params.job.name.trim()
           ? params.job.name.trim()
@@ -643,7 +706,7 @@ export async function runCronIsolatedAgentTurn(params: {
       if (activeSubagentRuns > 0) {
         // Parent orchestration is still in progress; avoid announcing a partial
         // update to the main requester.
-        return withRunSession({ status: "ok", summary, outputText });
+        return withRunSession({ status: "ok", summary, outputText, deliveryAttempted });
       }
       if (
         (hadActiveDescendants || expectedSubagentFollowup) &&
@@ -653,23 +716,24 @@ export async function runCronIsolatedAgentTurn(params: {
       ) {
         // Descendants existed but no post-orchestration synthesis arrived, so
         // suppress stale parent text like "on it, pulling everything together".
-        return withRunSession({ status: "ok", summary, outputText });
+        return withRunSession({ status: "ok", summary, outputText, deliveryAttempted });
       }
       if (synthesizedText.toUpperCase() === SILENT_REPLY_TOKEN.toUpperCase()) {
-        return withRunSession({ status: "ok", summary, outputText });
+        return withRunSession({ status: "ok", summary, outputText, deliveryAttempted });
       }
       try {
+        deliveryAttempted = true;
         const didAnnounce = await runSubagentAnnounceFlow({
           childSessionKey: agentSessionKey,
           childRunId: `${params.job.id}:${runSessionId}`,
-          requesterSessionKey: announceSessionKey,
+          requesterSessionKey: deliveryTargetSessionKey,
           requesterOrigin: {
             channel: resolvedDelivery.channel,
             to: resolvedDelivery.to,
             accountId: resolvedDelivery.accountId,
             threadId: resolvedDelivery.threadId,
           },
-          requesterDisplayKey: announceSessionKey,
+          requesterDisplayKey: deliveryTargetSessionKey,
           task: taskLabel,
           timeoutMs,
           cleanup: params.job.deleteAfterRun ? "delete" : "keep",
@@ -679,6 +743,7 @@ export async function runCronIsolatedAgentTurn(params: {
           endedAt: runEndedAt,
           outcome: { status: "ok" },
           announceType: "cron job",
+          bestEffortDeliver: false,
         });
         if (didAnnounce) {
           delivered = true;
@@ -690,18 +755,25 @@ export async function runCronIsolatedAgentTurn(params: {
               summary,
               outputText,
               error: message,
+              deliveryAttempted,
             });
           }
           logWarn(`[cron:${params.job.id}] ${message}`);
         }
       } catch (err) {
         if (!deliveryBestEffort) {
-          return withRunSession({ status: "error", summary, outputText, error: String(err) });
+          return withRunSession({
+            status: "error",
+            summary,
+            outputText,
+            error: String(err),
+            deliveryAttempted,
+          });
         }
         logWarn(`[cron:${params.job.id}] ${String(err)}`);
       }
     }
   }
 
-  return withRunSession({ status: "ok", summary, outputText, delivered });
+  return withRunSession({ status: "ok", summary, outputText, delivered, deliveryAttempted });
 }
