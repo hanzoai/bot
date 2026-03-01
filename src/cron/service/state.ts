@@ -1,8 +1,5 @@
 import type { CronConfig } from "../../config/types.cron.js";
 import type { HeartbeatRunResult } from "../../infra/heartbeat-wake.js";
-<<<<<<< HEAD
-import type { CronJob, CronJobCreate, CronJobPatch, CronStoreFile } from "../types.js";
-=======
 import type {
   CronDeliveryStatus,
   CronJob,
@@ -14,32 +11,22 @@ import type {
   CronRunTelemetry,
   CronStoreFile,
 } from "../types.js";
->>>>>>> 4637b90c0 (feat(cron): configurable failure alerts for repeated job errors (openclaw#24789) thanks @0xbrak)
 
 export type CronEvent = {
   jobId: string;
   action: "added" | "updated" | "removed" | "started" | "finished";
   runAtMs?: number;
   durationMs?: number;
-  status?: "ok" | "error" | "skipped";
+  status?: CronRunStatus;
   error?: string;
   summary?: string;
+  delivered?: boolean;
+  deliveryStatus?: CronDeliveryStatus;
+  deliveryError?: string;
   sessionId?: string;
   sessionKey?: string;
   nextRunAtMs?: number;
-  /** Whether delivery was completed by the isolated run. */
-  delivered?: boolean;
-  /** Last delivery attempt status. */
-  deliveryStatus?: string;
-  /** Last delivery attempt error. */
-  deliveryError?: string;
-  /** Model used during the run. */
-  model?: string;
-  /** Provider used during the run. */
-  provider?: string;
-  /** Token usage from the run. */
-  usage?: unknown;
-};
+} & CronRunTelemetry;
 
 export type Logger = {
   debug: (obj: unknown, msg?: string) => void;
@@ -63,9 +50,9 @@ export type CronServiceDeps = {
   sessionStorePath?: string;
   enqueueSystemEvent: (
     text: string,
-    opts?: { agentId?: string; contextKey?: string; sessionKey?: string },
+    opts?: { agentId?: string; sessionKey?: string; contextKey?: string },
   ) => void;
-  requestHeartbeatNow: (opts?: { reason?: string; sessionKey?: string }) => void;
+  requestHeartbeatNow: (opts?: { reason?: string; agentId?: string; sessionKey?: string }) => void;
   runHeartbeatOnce?: (opts?: {
     reason?: string;
     agentId?: string;
@@ -85,27 +72,6 @@ export type CronServiceDeps = {
     job: CronJob;
     message: string;
     abortSignal?: AbortSignal;
-<<<<<<< HEAD
-  }) => Promise<{
-    status: "ok" | "error" | "skipped";
-    summary?: string;
-    /** Last non-empty agent text output (not truncated). */
-    outputText?: string;
-    error?: string;
-    /** Categorises the error kind for cron delivery diagnostics. */
-    errorKind?: string;
-    sessionId?: string;
-    sessionKey?: string;
-    /**
-     * `true` when the isolated run already delivered its output to the target
-     * channel (including matching messaging-tool sends). See:
-     * https://github.com/hanzoai/bot/issues/15692
-     */
-    delivered?: boolean;
-    /** Whether an outbound delivery attempt was made. */
-    deliveryAttempted?: boolean;
-  }>;
-=======
   }) => Promise<
     {
       summary?: string;
@@ -114,7 +80,7 @@ export type CronServiceDeps = {
       /**
        * `true` when the isolated run already delivered its output to the target
        * channel (including matching messaging-tool sends). See:
-       * https://github.com/openclaw/openclaw/issues/15692
+       * https://github.com/hanzoai/bot/issues/15692
        */
       delivered?: boolean;
       /**
@@ -131,7 +97,6 @@ export type CronServiceDeps = {
     channel: CronMessageChannel;
     to?: string;
   }) => Promise<void>;
->>>>>>> 4637b90c0 (feat(cron): configurable failure alerts for repeated job errors (openclaw#24789) thanks @0xbrak)
   onEvent?: (evt: CronEvent) => void;
 };
 
