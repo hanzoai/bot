@@ -85,7 +85,7 @@ export function resolveModel(
         api: providerCfg?.api ?? "openai-responses",
         provider,
         baseUrl: providerCfg?.baseUrl,
-        reasoning: false,
+        reasoning: configuredModel?.reasoning ?? false,
         input: ["text"],
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
         contextWindow:
