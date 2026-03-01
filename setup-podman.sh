@@ -56,6 +56,11 @@ run_as_bot() {
   run_as_user "$BOT_USER" env HOME="$BOT_HOME" "$@"
 }
 
+escape_sed_replacement_pipe_delim() {
+  # Escape replacement metacharacters for sed "s|...|...|g" replacement text.
+  printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'
+}
+
 # Quadlet: opt-in via --quadlet or BOT_PODMAN_QUADLET=1
 INSTALL_QUADLET=false
 for arg in "$@"; do
@@ -224,7 +229,7 @@ QUADLET_DIR="$BOT_HOME/.config/containers/systemd"
 if [[ "$INSTALL_QUADLET" == true && -f "$QUADLET_TEMPLATE" ]]; then
   echo "Installing systemd quadlet for $BOT_USER..."
   run_as_bot mkdir -p "$QUADLET_DIR"
-  BOT_HOME_SED="$(printf '%s' "$BOT_HOME" | sed -e 's/[\\/&|]/\\\\&/g')"
+  BOT_HOME_SED="$(escape_sed_replacement_pipe_delim "$BOT_HOME")"
   sed "s|{{BOT_HOME}}|$BOT_HOME_SED|g" "$QUADLET_TEMPLATE" | run_as_bot tee "$QUADLET_DIR/bot.container" >/dev/null
   run_as_bot chmod 700 "$BOT_HOME/.config" "$BOT_HOME/.config/containers" "$QUADLET_DIR" 2>/dev/null || true
   run_as_bot chmod 600 "$QUADLET_DIR/bot.container" 2>/dev/null || true
