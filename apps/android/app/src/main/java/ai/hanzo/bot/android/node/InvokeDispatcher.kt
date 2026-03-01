@@ -24,6 +24,11 @@ class InvokeDispatcher(
   private val isForeground: () -> Boolean,
   private val cameraEnabled: () -> Boolean,
   private val locationEnabled: () -> Boolean,
+  private val smsAvailable: () -> Boolean,
+  private val debugBuild: () -> Boolean,
+  private val refreshNodeCanvasCapability: suspend () -> Boolean,
+  private val onCanvasA2uiPush: () -> Unit,
+  private val onCanvasA2uiReset: () -> Unit,
 ) {
   suspend fun handleInvoke(command: String, paramsJson: String?): GatewaySession.InvokeResult {
     // Check foreground requirement for canvas/camera/screen commands
@@ -107,20 +112,9 @@ class InvokeDispatcher(
       }
 
       // A2UI commands
-      HanzoBotCanvasA2UICommand.Reset.rawValue -> {
-        val a2uiUrl = a2uiHandler.resolveA2uiHostUrl()
-          ?: return GatewaySession.InvokeResult.error(
-            code = "A2UI_HOST_NOT_CONFIGURED",
-            message = "A2UI_HOST_NOT_CONFIGURED: gateway did not advertise canvas host",
-          )
-        val ready = a2uiHandler.ensureA2uiReady(a2uiUrl)
-        if (!ready) {
-          return GatewaySession.InvokeResult.error(
-            code = "A2UI_HOST_UNAVAILABLE",
-            message = "A2UI host not reachable",
-          )
-        }
+      HanzoBotCanvasA2UICommand.Reset.rawValue -> withReadyA2ui {
         val res = canvas.eval(A2UIHandler.a2uiResetJS)
+        onCanvasA2uiReset()
         GatewaySession.InvokeResult.ok(res)
       }
       HanzoBotCanvasA2UICommand.Push.rawValue, HanzoBotCanvasA2UICommand.PushJSONL.rawValue -> {
@@ -133,21 +127,12 @@ class InvokeDispatcher(
               message = err.message ?: "invalid A2UI payload"
             )
           }
-        val a2uiUrl = a2uiHandler.resolveA2uiHostUrl()
-          ?: return GatewaySession.InvokeResult.error(
-            code = "A2UI_HOST_NOT_CONFIGURED",
-            message = "A2UI_HOST_NOT_CONFIGURED: gateway did not advertise canvas host",
-          )
-        val ready = a2uiHandler.ensureA2uiReady(a2uiUrl)
-        if (!ready) {
-          return GatewaySession.InvokeResult.error(
-            code = "A2UI_HOST_UNAVAILABLE",
-            message = "A2UI host not reachable",
-          )
+        withReadyA2ui {
+          val js = A2UIHandler.a2uiApplyMessagesJS(messages)
+          val res = canvas.eval(js)
+          onCanvasA2uiPush()
+          GatewaySession.InvokeResult.ok(res)
         }
-        val js = A2UIHandler.a2uiApplyMessagesJS(messages)
-        val res = canvas.eval(js)
-        GatewaySession.InvokeResult.ok(res)
       }
 
       // Camera commands
@@ -187,5 +172,35 @@ class InvokeDispatcher(
           message = "INVALID_REQUEST: unknown command",
         )
     }
+  }
+
+  private suspend fun withReadyA2ui(
+    block: suspend () -> GatewaySession.InvokeResult,
+  ): GatewaySession.InvokeResult {
+    var a2uiUrl = a2uiHandler.resolveA2uiHostUrl()
+      ?: return GatewaySession.InvokeResult.error(
+        code = "A2UI_HOST_NOT_CONFIGURED",
+        message = "A2UI_HOST_NOT_CONFIGURED: gateway did not advertise canvas host",
+      )
+    if (!a2uiHandler.ensureA2uiReady(a2uiUrl)) {
+      if (!refreshNodeCanvasCapability()) {
+        return GatewaySession.InvokeResult.error(
+          code = "A2UI_HOST_UNAVAILABLE",
+          message = "A2UI_HOST_UNAVAILABLE: A2UI host not reachable",
+        )
+      }
+      a2uiUrl = a2uiHandler.resolveA2uiHostUrl()
+        ?: return GatewaySession.InvokeResult.error(
+          code = "A2UI_HOST_NOT_CONFIGURED",
+          message = "A2UI_HOST_NOT_CONFIGURED: gateway did not advertise canvas host",
+        )
+    }
+    if (!a2uiHandler.ensureA2uiReady(a2uiUrl)) {
+      return GatewaySession.InvokeResult.error(
+        code = "A2UI_HOST_UNAVAILABLE",
+        message = "A2UI_HOST_UNAVAILABLE: A2UI host not reachable",
+      )
+    }
+    return block()
   }
 }
