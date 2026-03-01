@@ -60,6 +60,7 @@ export class PlaywrightDiffScreenshotter implements DiffScreenshotter {
     try {
       page = await lease.browser.newPage({
         viewport: { width: 1200, height: 900 },
+        deviceScaleFactor: 2,
         colorScheme: params.theme,
       });
       await page.route(`http://127.0.0.1${VIEWER_ASSET_PREFIX}*`, async (route) => {
@@ -138,6 +139,7 @@ export class PlaywrightDiffScreenshotter implements DiffScreenshotter {
       await page.screenshot({
         path: params.outputPath,
         type: "png",
+        scale: "device",
         clip: {
           x,
           y,
