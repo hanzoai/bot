@@ -565,6 +565,7 @@ export const BotSchema = z
                 z.literal("token"),
                 z.literal("password"),
                 z.literal("trusted-proxy"),
+                z.literal("iam"),
               ])
               .optional(),
             token: z.string().optional().register(sensitive),
@@ -584,6 +585,18 @@ export const BotSchema = z
                 userHeader: z.string().min(1, "userHeader is required for trusted-proxy mode"),
                 requiredHeaders: z.array(z.string()).optional(),
                 allowUsers: z.array(z.string()).optional(),
+              })
+              .strict()
+              .optional(),
+            iam: z
+              .object({
+                serverUrl: z.string(),
+                clientId: z.string(),
+                clientSecret: z.string().optional().register(sensitive),
+                orgName: z.string().optional(),
+                appName: z.string().optional(),
+                scopes: z.array(z.string()).optional(),
+                superAdmins: z.array(z.string()).optional(),
               })
               .strict()
               .optional(),
@@ -716,6 +729,17 @@ export const BotSchema = z
               .optional(),
             allowCommands: z.array(z.string()).optional(),
             denyCommands: z.array(z.string()).optional(),
+          })
+          .strict()
+          .optional(),
+        marketplace: z
+          .object({
+            enabled: z.boolean().optional(),
+            comingSoon: z.boolean().optional(),
+            platformFeePct: z.number().min(0).max(100).optional(),
+            priceFraction: z.number().min(0).max(1).optional(),
+            minPayoutCents: z.number().int().min(0).optional(),
+            aiTokenBonusPct: z.number().min(0).max(100).optional(),
           })
           .strict()
           .optional(),
