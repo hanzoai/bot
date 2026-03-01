@@ -602,6 +602,18 @@ export async function runCronIsolatedAgentTurn(params: {
   const embeddedRunError = hasFatalErrorPayload
     ? (lastErrorPayloadText ?? "cron isolated run returned an error payload")
     : undefined;
+  const resolveRunOutcome = (params?: { delivered?: boolean; deliveryAttempted?: boolean }) =>
+    withRunSession({
+      status: hasFatalErrorPayload ? "error" : "ok",
+      ...(hasFatalErrorPayload
+        ? { error: embeddedRunError ?? "cron isolated run returned an error payload" }
+        : {}),
+      summary,
+      outputText,
+      delivered: params?.delivered,
+      deliveryAttempted: params?.deliveryAttempted,
+      ...telemetry,
+    });
 
   // Skip delivery for heartbeat-only responses (HEARTBEAT_OK with no real content).
   const ackMaxChars = resolveHeartbeatAckMaxChars(agentCfg);
@@ -829,14 +841,5 @@ export async function runCronIsolatedAgentTurn(params: {
     }
   }
 
-  return withRunSession({
-    status: hasFatalErrorPayload ? "error" : "ok",
-    ...(hasFatalErrorPayload
-      ? { error: embeddedRunError ?? "cron isolated run returned an error payload" }
-      : {}),
-    summary,
-    outputText,
-    delivered,
-    deliveryAttempted,
-  });
+  return resolveRunOutcome({ delivered, deliveryAttempted });
 }
