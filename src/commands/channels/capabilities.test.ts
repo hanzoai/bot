@@ -86,6 +86,7 @@ describe("channelsCapabilitiesCommand", () => {
       account: {
         accountId: "default",
         botToken: "xoxb-bot",
+        userToken: "xoxp-user",
         config: { userToken: "xoxp-user" },
       },
       probe: { ok: true, bot: { name: "bot" }, team: { name: "team" } },
