@@ -15,6 +15,19 @@ installCronTestHooks({
   baseTimeIso: "2026-02-06T17:00:00.000Z",
 });
 
+async function createStartedCron(storePath: string): Promise<CronService> {
+  const cron = new CronService({
+    storePath,
+    cronEnabled: true,
+    log: noopLogger,
+    enqueueSystemEvent: vi.fn(),
+    requestHeartbeatNow: vi.fn(),
+    runIsolatedAgentJob: vi.fn(async () => ({ status: "ok", summary: "ok" })),
+  });
+  await cron.start();
+  return cron;
+}
+
 describe("CronService store migrations", () => {
   it("migrates legacy top-level agentTurn fields and initializes missing state", async () => {
     const store = await makeStorePath();
@@ -132,7 +145,7 @@ describe("CronService store migrations", () => {
       "utf-8",
     );
 
-    const cron = await createStartedCron(store.storePath).start();
+    const cron = await createStartedCron(store.storePath);
 
     const jobs = await cron.list({ includeDisabled: true });
     const job = jobs.find((entry) => entry.id === "legacy-agentturn-no-timeout");
@@ -173,7 +186,7 @@ describe("CronService store migrations", () => {
       "utf-8",
     );
 
-    const cron = await createStartedCron(store.storePath).start();
+    const cron = await createStartedCron(store.storePath);
     const jobs = await cron.list({ includeDisabled: true });
     const job = jobs.find((entry) => entry.id === "legacy-cron-field-job");
     expect(job).toBeDefined();
