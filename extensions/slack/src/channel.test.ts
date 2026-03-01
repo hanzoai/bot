@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk";
+import type { BotConfig } from "bot/plugin-sdk";
 import { describe, expect, it, vi } from "vitest";
 
 const handleSlackActionMock = vi.fn();
@@ -107,8 +107,8 @@ describe("slackPlugin outbound", () => {
 });
 
 describe("slackPlugin config", () => {
-  it("treats HTTP mode accounts with bot token + signing secret as configured", () => {
-    const cfg: OpenClawConfig = {
+  it("treats HTTP mode accounts with bot token + signing secret as configured", async () => {
+    const cfg: BotConfig = {
       channels: {
         slack: {
           mode: "http",
@@ -120,14 +120,18 @@ describe("slackPlugin config", () => {
 
     const account = slackPlugin.config.resolveAccount(cfg, "default");
     const configured = slackPlugin.config.isConfigured?.(account, cfg);
-    const snapshot = slackPlugin.status?.buildAccountSnapshot?.({ account, runtime: undefined });
+    const snapshot = await slackPlugin.status?.buildAccountSnapshot?.({
+      account,
+      cfg,
+      runtime: undefined,
+    });
 
     expect(configured).toBe(true);
     expect(snapshot?.configured).toBe(true);
   });
 
-  it("keeps socket mode requiring app token", () => {
-    const cfg: OpenClawConfig = {
+  it("keeps socket mode requiring app token", async () => {
+    const cfg: BotConfig = {
       channels: {
         slack: {
           mode: "socket",
@@ -138,7 +142,11 @@ describe("slackPlugin config", () => {
 
     const account = slackPlugin.config.resolveAccount(cfg, "default");
     const configured = slackPlugin.config.isConfigured?.(account, cfg);
-    const snapshot = slackPlugin.status?.buildAccountSnapshot?.({ account, runtime: undefined });
+    const snapshot = await slackPlugin.status?.buildAccountSnapshot?.({
+      account,
+      cfg,
+      runtime: undefined,
+    });
 
     expect(configured).toBe(false);
     expect(snapshot?.configured).toBe(false);
