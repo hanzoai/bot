@@ -23,6 +23,45 @@ async function runDoctorConfigWithInput(params: {
   });
 }
 
+<<<<<<< HEAD
+=======
+async function collectDoctorWarnings(config: Record<string, unknown>): Promise<string[]> {
+  const noteSpy = vi.spyOn(noteModule, "note").mockImplementation(() => {});
+  try {
+    await runDoctorConfigWithInput({
+      config,
+      run: loadAndMaybeMigrateDoctorConfig,
+    });
+    return noteSpy.mock.calls
+      .filter((call) => call[1] === "Doctor warnings")
+      .map((call) => String(call[0]));
+  } finally {
+    noteSpy.mockRestore();
+  }
+}
+
+type DiscordGuildRule = {
+  users: string[];
+  roles: string[];
+  channels: Record<string, { users: string[]; roles: string[] }>;
+};
+
+type DiscordAccountRule = {
+  allowFrom?: string[];
+  dm?: { allowFrom: string[]; groupChannels: string[] };
+  execApprovals?: { approvers: string[] };
+  guilds?: Record<string, DiscordGuildRule>;
+};
+
+type RepairedDiscordPolicy = {
+  allowFrom?: string[];
+  dm: { allowFrom: string[]; groupChannels: string[] };
+  execApprovals: { approvers: string[] };
+  guilds: Record<string, DiscordGuildRule>;
+  accounts: Record<string, DiscordAccountRule>;
+};
+
+>>>>>>> f1bf55868 (fix(doctor): detect groupPolicy=allowlist with empty groupAllowFrom (#28477))
 describe("doctor config flow", () => {
   it("preserves invalid config for doctor repairs", async () => {
     const result = await runDoctorConfigWithInput({
@@ -37,6 +76,65 @@ describe("doctor config flow", () => {
     });
   });
 
+<<<<<<< HEAD
+=======
+  it("does not warn on mutable account allowlists when dangerous name matching is inherited", async () => {
+    const doctorWarnings = await collectDoctorWarnings({
+      channels: {
+        slack: {
+          dangerouslyAllowNameMatching: true,
+          accounts: {
+            work: {
+              allowFrom: ["alice"],
+            },
+          },
+        },
+      },
+    });
+    expect(doctorWarnings.some((line) => line.includes("mutable allowlist"))).toBe(false);
+  });
+
+  it("does not warn about sender-based group allowlist for googlechat", async () => {
+    const doctorWarnings = await collectDoctorWarnings({
+      channels: {
+        googlechat: {
+          groupPolicy: "allowlist",
+          accounts: {
+            work: {
+              groupPolicy: "allowlist",
+            },
+          },
+        },
+      },
+    });
+
+    expect(
+      doctorWarnings.some(
+        (line) => line.includes('groupPolicy is "allowlist"') && line.includes("groupAllowFrom"),
+      ),
+    ).toBe(false);
+  });
+
+  it("warns when imessage group allowlist is empty even if allowFrom is set", async () => {
+    const doctorWarnings = await collectDoctorWarnings({
+      channels: {
+        imessage: {
+          groupPolicy: "allowlist",
+          allowFrom: ["+15551234567"],
+        },
+      },
+    });
+
+    expect(
+      doctorWarnings.some(
+        (line) =>
+          line.includes('channels.imessage.groupPolicy is "allowlist"') &&
+          line.includes("does not fall back to allowFrom"),
+      ),
+    ).toBe(true);
+  });
+
+>>>>>>> f1bf55868 (fix(doctor): detect groupPolicy=allowlist with empty groupAllowFrom (#28477))
   it("drops unknown keys on repair", async () => {
     const result = await runDoctorConfigWithInput({
       repair: true,
