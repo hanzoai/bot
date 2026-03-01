@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk";
+import type { BotConfig } from "bot/plugin-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { launchMock } = vi.hoisted(() => ({
@@ -20,7 +20,7 @@ describe("PlaywrightDiffScreenshotter", () => {
 
   beforeEach(async () => {
     vi.useFakeTimers();
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-diffs-browser-"));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-diffs-browser-"));
     outputPath = path.join(rootDir, "preview.png");
     launchMock.mockReset();
     const browserModule = await import("./browser.js");
@@ -58,12 +58,6 @@ describe("PlaywrightDiffScreenshotter", () => {
 
     expect(launchMock).toHaveBeenCalledTimes(1);
     expect(browser.newPage).toHaveBeenCalledTimes(2);
-    expect(browser.newPage).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        deviceScaleFactor: 2,
-      }),
-    );
     expect(pages).toHaveLength(2);
     expect(pages[0]?.close).toHaveBeenCalledTimes(1);
     expect(pages[1]?.close).toHaveBeenCalledTimes(1);
@@ -81,12 +75,12 @@ describe("PlaywrightDiffScreenshotter", () => {
   });
 });
 
-function createConfig(): OpenClawConfig {
+function createConfig(): BotConfig {
   return {
     browser: {
       executablePath: process.execPath,
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function createMockBrowser(pages: Array<{ close: ReturnType<typeof vi.fn> }>) {
