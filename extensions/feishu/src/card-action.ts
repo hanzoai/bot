@@ -1,4 +1,4 @@
-import type { ClawdbotConfig, RuntimeEnv } from "openclaw/plugin-sdk";
+import type { BotConfig, RuntimeEnv } from "bot/plugin-sdk";
 import { resolveFeishuAccount } from "./accounts.js";
 import { handleFeishuMessage, type FeishuMessageEvent } from "./bot.js";
 
@@ -21,7 +21,7 @@ export type FeishuCardActionEvent = {
 };
 
 export async function handleFeishuCardAction(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   event: FeishuCardActionEvent;
   botOpenId?: string;
   runtime?: RuntimeEnv;
