@@ -124,6 +124,7 @@ export async function handleMarketplaceHttpRequest(
   const billingResult = await checkBillingAllowance({
     iamConfig: opts.iamConfig,
     tenant,
+    token: handled.authResult?.rawToken,
   });
   if (!billingResult.allowed) {
     sendJson(res, 402, {
