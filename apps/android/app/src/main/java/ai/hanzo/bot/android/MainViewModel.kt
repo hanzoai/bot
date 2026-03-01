@@ -55,6 +55,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
   val talkIsSpeaking: StateFlow<Boolean> = runtime.talkIsSpeaking
   val onboardingCompleted: StateFlow<Boolean> = runtime.onboardingCompleted
   val micEnabled: StateFlow<Boolean> = runtime.micEnabled
+  val micCooldown: StateFlow<Boolean> = runtime.micCooldown
   val micStatusText: StateFlow<String> = runtime.micStatusText
   val micLiveTranscript: StateFlow<String?> = runtime.micLiveTranscript
   val micQueuedMessages: StateFlow<List<String>> = runtime.micQueuedMessages
