@@ -1,36 +1,84 @@
 package ai.hanzo.bot.android.node
 
-import ai.hanzo.bot.android.protocol.BotCameraCommand
-import ai.hanzo.bot.android.protocol.BotDeviceCommand
-import ai.hanzo.bot.android.protocol.BotLocationCommand
-import ai.hanzo.bot.android.protocol.BotNotificationsCommand
-import ai.hanzo.bot.android.protocol.BotSmsCommand
+import ai.hanzo.bot.android.protocol.HanzoBotCameraCommand
+import ai.hanzo.bot.android.protocol.HanzoBotCapability
+import ai.hanzo.bot.android.protocol.HanzoBotDeviceCommand
+import ai.hanzo.bot.android.protocol.HanzoBotLocationCommand
+import ai.hanzo.bot.android.protocol.HanzoBotNotificationsCommand
+import ai.hanzo.bot.android.protocol.HanzoBotSmsCommand
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class InvokeCommandRegistryTest {
   @Test
+  fun advertisedCapabilities_respectsFeatureAvailability() {
+    val capabilities =
+      InvokeCommandRegistry.advertisedCapabilities(
+        NodeRuntimeFlags(
+          cameraEnabled = false,
+          locationEnabled = false,
+          smsAvailable = false,
+          voiceWakeEnabled = false,
+          debugBuild = false,
+        ),
+      )
+
+    assertTrue(capabilities.contains(HanzoBotCapability.Canvas.rawValue))
+    assertTrue(capabilities.contains(HanzoBotCapability.Screen.rawValue))
+    assertTrue(capabilities.contains(HanzoBotCapability.Device.rawValue))
+    assertFalse(capabilities.contains(HanzoBotCapability.Camera.rawValue))
+    assertFalse(capabilities.contains(HanzoBotCapability.Location.rawValue))
+    assertFalse(capabilities.contains(HanzoBotCapability.Sms.rawValue))
+    assertFalse(capabilities.contains(HanzoBotCapability.VoiceWake.rawValue))
+  }
+
+  @Test
+  fun advertisedCapabilities_includesFeatureCapabilitiesWhenEnabled() {
+    val capabilities =
+      InvokeCommandRegistry.advertisedCapabilities(
+        NodeRuntimeFlags(
+          cameraEnabled = true,
+          locationEnabled = true,
+          smsAvailable = true,
+          voiceWakeEnabled = true,
+          debugBuild = false,
+        ),
+      )
+
+    assertTrue(capabilities.contains(HanzoBotCapability.Canvas.rawValue))
+    assertTrue(capabilities.contains(HanzoBotCapability.Screen.rawValue))
+    assertTrue(capabilities.contains(HanzoBotCapability.Device.rawValue))
+    assertTrue(capabilities.contains(HanzoBotCapability.Camera.rawValue))
+    assertTrue(capabilities.contains(HanzoBotCapability.Location.rawValue))
+    assertTrue(capabilities.contains(HanzoBotCapability.Sms.rawValue))
+    assertTrue(capabilities.contains(HanzoBotCapability.VoiceWake.rawValue))
+  }
+
+  @Test
   fun advertisedCommands_respectsFeatureAvailability() {
     val commands =
       InvokeCommandRegistry.advertisedCommands(
-        cameraEnabled = false,
-        locationEnabled = false,
-        smsAvailable = false,
-        debugBuild = false,
+        NodeRuntimeFlags(
+          cameraEnabled = false,
+          locationEnabled = false,
+          smsAvailable = false,
+          voiceWakeEnabled = false,
+          debugBuild = false,
+        ),
       )
 
-    assertFalse(commands.contains(BotCameraCommand.Snap.rawValue))
-    assertFalse(commands.contains(BotCameraCommand.Clip.rawValue))
-    assertFalse(commands.contains(BotCameraCommand.List.rawValue))
-    assertFalse(commands.contains(BotLocationCommand.Get.rawValue))
-    assertTrue(commands.contains(BotDeviceCommand.Status.rawValue))
-    assertTrue(commands.contains(BotDeviceCommand.Info.rawValue))
-    assertTrue(commands.contains(BotDeviceCommand.Permissions.rawValue))
-    assertTrue(commands.contains(BotDeviceCommand.Health.rawValue))
-    assertTrue(commands.contains(BotNotificationsCommand.List.rawValue))
-    assertTrue(commands.contains(BotNotificationsCommand.Actions.rawValue))
-    assertFalse(commands.contains(BotSmsCommand.Send.rawValue))
+    assertFalse(commands.contains(HanzoBotCameraCommand.Snap.rawValue))
+    assertFalse(commands.contains(HanzoBotCameraCommand.Clip.rawValue))
+    assertFalse(commands.contains(HanzoBotCameraCommand.List.rawValue))
+    assertFalse(commands.contains(HanzoBotLocationCommand.Get.rawValue))
+    assertTrue(commands.contains(HanzoBotDeviceCommand.Status.rawValue))
+    assertTrue(commands.contains(HanzoBotDeviceCommand.Info.rawValue))
+    assertTrue(commands.contains(HanzoBotDeviceCommand.Permissions.rawValue))
+    assertTrue(commands.contains(HanzoBotDeviceCommand.Health.rawValue))
+    assertTrue(commands.contains(HanzoBotNotificationsCommand.List.rawValue))
+    assertTrue(commands.contains(HanzoBotNotificationsCommand.Actions.rawValue))
+    assertFalse(commands.contains(HanzoBotSmsCommand.Send.rawValue))
     assertFalse(commands.contains("debug.logs"))
     assertFalse(commands.contains("debug.ed25519"))
     assertTrue(commands.contains("app.update"))
@@ -40,23 +88,26 @@ class InvokeCommandRegistryTest {
   fun advertisedCommands_includesFeatureCommandsWhenEnabled() {
     val commands =
       InvokeCommandRegistry.advertisedCommands(
-        cameraEnabled = true,
-        locationEnabled = true,
-        smsAvailable = true,
-        debugBuild = true,
+        NodeRuntimeFlags(
+          cameraEnabled = true,
+          locationEnabled = true,
+          smsAvailable = true,
+          voiceWakeEnabled = false,
+          debugBuild = true,
+        ),
       )
 
-    assertTrue(commands.contains(BotCameraCommand.Snap.rawValue))
-    assertTrue(commands.contains(BotCameraCommand.Clip.rawValue))
-    assertTrue(commands.contains(BotCameraCommand.List.rawValue))
-    assertTrue(commands.contains(BotLocationCommand.Get.rawValue))
-    assertTrue(commands.contains(BotDeviceCommand.Status.rawValue))
-    assertTrue(commands.contains(BotDeviceCommand.Info.rawValue))
-    assertTrue(commands.contains(BotDeviceCommand.Permissions.rawValue))
-    assertTrue(commands.contains(BotDeviceCommand.Health.rawValue))
-    assertTrue(commands.contains(BotNotificationsCommand.List.rawValue))
-    assertTrue(commands.contains(BotNotificationsCommand.Actions.rawValue))
-    assertTrue(commands.contains(BotSmsCommand.Send.rawValue))
+    assertTrue(commands.contains(HanzoBotCameraCommand.Snap.rawValue))
+    assertTrue(commands.contains(HanzoBotCameraCommand.Clip.rawValue))
+    assertTrue(commands.contains(HanzoBotCameraCommand.List.rawValue))
+    assertTrue(commands.contains(HanzoBotLocationCommand.Get.rawValue))
+    assertTrue(commands.contains(HanzoBotDeviceCommand.Status.rawValue))
+    assertTrue(commands.contains(HanzoBotDeviceCommand.Info.rawValue))
+    assertTrue(commands.contains(HanzoBotDeviceCommand.Permissions.rawValue))
+    assertTrue(commands.contains(HanzoBotDeviceCommand.Health.rawValue))
+    assertTrue(commands.contains(HanzoBotNotificationsCommand.List.rawValue))
+    assertTrue(commands.contains(HanzoBotNotificationsCommand.Actions.rawValue))
+    assertTrue(commands.contains(HanzoBotSmsCommand.Send.rawValue))
     assertTrue(commands.contains("debug.logs"))
     assertTrue(commands.contains("debug.ed25519"))
     assertTrue(commands.contains("app.update"))
