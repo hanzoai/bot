@@ -1,15 +1,13 @@
 import type { SlackActionMiddlewareArgs } from "@slack/bolt";
 import type { Block, KnownBlock } from "@slack/web-api";
-import type { SlackMonitorContext } from "../context.js";
 import { enqueueSystemEvent } from "../../../infra/system-events.js";
 import { parseSlackModalPrivateMetadata } from "../../modal-metadata.js";
+import { authorizeSlackSystemEventSender } from "../auth.js";
+import type { SlackMonitorContext } from "../context.js";
+import { escapeSlackMrkdwn } from "../mrkdwn.js";
 
-<<<<<<< HEAD
 // Prefix for Bot-generated action IDs to scope our handler
 const BOT_ACTION_PREFIX = "bot:";
-=======
-// Prefix for OpenClaw-generated action IDs to scope our handler
-const OPENCLAW_ACTION_PREFIX = "openclaw:";
 const SLACK_INTERACTION_EVENT_PREFIX = "Slack interaction: ";
 const REDACTED_INTERACTION_VALUE = "[redacted]";
 const SLACK_INTERACTION_EVENT_MAX_CHARS = 2400;
@@ -23,7 +21,6 @@ const SLACK_INTERACTION_REDACTED_KEYS = new Set([
   "privateMetadata",
   "viewHash",
 ]);
->>>>>>> 746688ddc (Slack: redact and cap interaction system events (#28982))
 
 type InteractionMessageBlock = {
   type?: string;
@@ -36,42 +33,9 @@ type SelectOption = {
   text?: { text?: string };
 };
 
-type InteractionSummary = {
-  interactionType?: "block_action" | "view_submission" | "view_closed";
-  actionId: string;
+type InteractionSelectionFields = {
+  actionType?: string;
   blockId?: string;
-  actionType?: string;
-  inputKind?: "text" | "number" | "email" | "url" | "rich_text";
-  value?: string;
-  selectedValues?: string[];
-  selectedUsers?: string[];
-  selectedChannels?: string[];
-  selectedConversations?: string[];
-  selectedLabels?: string[];
-  selectedDate?: string;
-  selectedTime?: string;
-  selectedDateTime?: number;
-  inputValue?: string;
-  inputNumber?: number;
-  inputEmail?: string;
-  inputUrl?: string;
-  richTextValue?: unknown;
-  richTextPreview?: string;
-  userId?: string;
-  teamId?: string;
-  triggerId?: string;
-  responseUrl?: string;
-  workflowTriggerUrl?: string;
-  workflowId?: string;
-  channelId?: string;
-  messageTs?: string;
-  threadTs?: string;
-};
-
-type ModalInputSummary = {
-  blockId: string;
-  actionId: string;
-  actionType?: string;
   inputKind?: "text" | "number" | "email" | "url" | "rich_text";
   value?: string;
   selectedValues?: string[];
@@ -90,8 +54,6 @@ type ModalInputSummary = {
   richTextPreview?: string;
 };
 
-<<<<<<< HEAD
-=======
 type InteractionSummary = InteractionSelectionFields & {
   interactionType?: "block_action" | "view_submission" | "view_closed";
   actionId: string;
@@ -297,7 +259,6 @@ function formatSlackInteractionSystemEvent(payload: Record<string, unknown>): st
   });
 }
 
->>>>>>> 746688ddc (Slack: redact and cap interaction system events (#28982))
 function readOptionValues(options: unknown): string[] | undefined {
   if (!Array.isArray(options)) {
     return undefined;
@@ -337,15 +298,6 @@ function uniqueNonEmptyStrings(values: string[]): string[] {
   return unique;
 }
 
-function escapeSlackMrkdwn(value: string): string {
-  return value
-    .replaceAll("\\", "\\\\")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replace(/([*_`~])/g, "\\$1");
-}
-
 function collectRichTextFragments(value: unknown, out: string[]): void {
   if (!value || typeof value !== "object") {
     return;
@@ -373,6 +325,13 @@ function summarizeRichTextPreview(value: unknown): string | undefined {
   }
   const max = 120;
   return joined.length <= max ? joined : `${joined.slice(0, max - 1)}…`;
+}
+
+function readInteractionAction(raw: unknown) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return undefined;
+  }
+  return raw as Record<string, unknown>;
 }
 
 function summarizeAction(
@@ -561,11 +520,15 @@ function summarizeViewState(values: unknown): ModalInputSummary[] {
 
 function resolveModalSessionRouting(params: {
   ctx: SlackMonitorContext;
-  privateMetadata: unknown;
+  metadata: ReturnType<typeof parseSlackModalPrivateMetadata>;
 }): { sessionKey: string; channelId?: string; channelType?: string } {
-  const metadata = parseSlackModalPrivateMetadata(params.privateMetadata);
+  const metadata = params.metadata;
   if (metadata.sessionKey) {
-    return { sessionKey: metadata.sessionKey };
+    return {
+      sessionKey: metadata.sessionKey,
+      channelId: metadata.channelId,
+      channelType: metadata.channelType,
+    };
   }
   if (metadata.channelId) {
     return {
@@ -607,8 +570,6 @@ function summarizeSlackViewLifecycleContext(view: {
   };
 }
 
-<<<<<<< HEAD
-=======
 function resolveSlackModalEventBase(params: {
   ctx: SlackMonitorContext;
   body: SlackModalBody;
@@ -733,7 +694,6 @@ function registerModalLifecycleHandler(params: {
   });
 }
 
->>>>>>> 0f36ee5a2 (Slack: harden slash and interactions ingress checks (openclaw#29091) thanks @Solvely-Colin)
 export function registerSlackInteractionEvents(params: { ctx: SlackMonitorContext }) {
   const { ctx } = params;
   if (typeof ctx.app.action !== "function") {
@@ -743,118 +703,93 @@ export function registerSlackInteractionEvents(params: { ctx: SlackMonitorContex
   // Handle Block Kit button clicks from Bot-generated messages
   // Only matches action_ids that start with our prefix to avoid interfering
   // with other Slack integrations or future features
-  ctx.app.action(new RegExp(`^${BOT_ACTION_PREFIX}`), async (args: SlackActionMiddlewareArgs) => {
-    const { ack, body, action, respond } = args;
-    const typedBody = body as unknown as {
-      user?: { id?: string };
-      team?: { id?: string };
-      trigger_id?: string;
-      response_url?: string;
-      channel?: { id?: string };
-      container?: { channel_id?: string; message_ts?: string; thread_ts?: string };
-      message?: { ts?: string; text?: string; blocks?: unknown[] };
-    };
+  ctx.app.action(
+    new RegExp(`^${BOT_ACTION_PREFIX}`),
+    async (args: SlackActionMiddlewareArgs) => {
+      const { ack, body, action, respond } = args;
+      const typedBody = body as unknown as {
+        user?: { id?: string };
+        team?: { id?: string };
+        trigger_id?: string;
+        response_url?: string;
+        channel?: { id?: string };
+        container?: { channel_id?: string; message_ts?: string; thread_ts?: string };
+        message?: { ts?: string; text?: string; blocks?: unknown[] };
+      };
 
-<<<<<<< HEAD
-    // Acknowledge the action immediately to prevent the warning icon
-    await ack();
-=======
       // Acknowledge the action immediately to prevent the warning icon
       await ack();
       if (ctx.shouldDropMismatchedSlackEvent?.(body)) {
         ctx.runtime.log?.("slack:interaction drop block action payload (mismatched app/team)");
         return;
       }
->>>>>>> 0f36ee5a2 (Slack: harden slash and interactions ingress checks (openclaw#29091) thanks @Solvely-Colin)
 
-    // Extract action details using proper Bolt types
-    const typedAction = action as unknown as Record<string, unknown> & {
-      action_id?: string;
-      block_id?: string;
-      type?: string;
-      text?: { text?: string };
-    };
-    const actionId = typedAction.action_id ?? "unknown";
-    const blockId = typedAction.block_id;
-    const userId = typedBody.user?.id ?? "unknown";
-    const channelId = typedBody.channel?.id ?? typedBody.container?.channel_id;
-    const messageTs = typedBody.message?.ts ?? typedBody.container?.message_ts;
-    const threadTs = typedBody.container?.thread_ts;
-    const actionSummary = summarizeAction(typedAction);
-    const eventPayload: InteractionSummary = {
-      interactionType: "block_action",
-      actionId,
-      blockId,
-      ...actionSummary,
-      userId,
-      teamId: typedBody.team?.id,
-      triggerId: typedBody.trigger_id,
-      responseUrl: typedBody.response_url,
-      channelId,
-      messageTs,
-      threadTs,
-    };
-
-    // Log the interaction for debugging
-    ctx.runtime.log?.(
-      `slack:interaction action=${actionId} type=${actionSummary.actionType ?? "unknown"} user=${userId} channel=${channelId}`,
-    );
-
-    // Send a system event to notify the agent about the button click
-    // Pass undefined (not "unknown") to allow proper main session fallback
-    const sessionKey = ctx.resolveSlackSystemEventSessionKey({
-      channelId: channelId,
-      channelType: undefined,
-    });
-
-    // Build context key - only include defined values to avoid "unknown" noise
-    const contextParts = ["slack:interaction", channelId, messageTs, actionId].filter(Boolean);
-    const contextKey = contextParts.join(":");
-
-    enqueueSystemEvent(`Slack interaction: ${JSON.stringify(eventPayload)}`, {
-      sessionKey,
-      contextKey,
-    });
-
-    const originalBlocks = typedBody.message?.blocks;
-    if (!Array.isArray(originalBlocks) || !channelId || !messageTs) {
-      return;
-    }
-
-    if (!blockId) {
-      return;
-    }
-
-    const selectedLabel = formatInteractionSelectionLabel({
-      actionId,
-      summary: actionSummary,
-      buttonText: typedAction.text?.text,
-    });
-    let updatedBlocks = originalBlocks.map((block) => {
-      const typedBlock = block as InteractionMessageBlock;
-      if (typedBlock.type === "actions" && typedBlock.block_id === blockId) {
-        return {
-          type: "context",
-          elements: [
-            {
-              type: "mrkdwn",
-              text: formatInteractionConfirmationText({ selectedLabel, userId }),
-            },
-          ],
-        };
+      // Extract action details using proper Bolt types
+      const typedAction = readInteractionAction(action);
+      if (!typedAction) {
+        ctx.runtime.log?.(
+          `slack:interaction malformed action payload channel=${typedBody.channel?.id ?? typedBody.container?.channel_id ?? "unknown"} user=${
+            typedBody.user?.id ?? "unknown"
+          }`,
+        );
+        return;
       }
-      return block;
-    });
+      const typedActionWithText = typedAction as {
+        action_id?: string;
+        block_id?: string;
+        type?: string;
+        text?: { text?: string };
+      };
+      const actionId =
+        typeof typedActionWithText.action_id === "string"
+          ? typedActionWithText.action_id
+          : "unknown";
+      const blockId = typedActionWithText.block_id;
+      const userId = typedBody.user?.id ?? "unknown";
+      const channelId = typedBody.channel?.id ?? typedBody.container?.channel_id;
+      const messageTs = typedBody.message?.ts ?? typedBody.container?.message_ts;
+      const threadTs = typedBody.container?.thread_ts;
+      const auth = await authorizeSlackSystemEventSender({
+        ctx,
+        senderId: userId,
+        channelId,
+      });
+      if (!auth.allowed) {
+        ctx.runtime.log?.(
+          `slack:interaction drop action=${actionId} user=${userId} channel=${channelId ?? "unknown"} reason=${auth.reason ?? "unauthorized"}`,
+        );
+        if (respond) {
+          try {
+            await respond({
+              text: "You are not authorized to use this control.",
+              response_type: "ephemeral",
+            });
+          } catch {
+            // Best-effort feedback only.
+          }
+        }
+        return;
+      }
+      const actionSummary = summarizeAction(typedAction);
+      const eventPayload: InteractionSummary = {
+        interactionType: "block_action",
+        actionId,
+        blockId,
+        ...actionSummary,
+        userId,
+        teamId: typedBody.team?.id,
+        triggerId: typedBody.trigger_id,
+        responseUrl: typedBody.response_url,
+        channelId,
+        messageTs,
+        threadTs,
+      };
 
-    const hasRemainingIndividualActionRows = updatedBlocks.some((block) => {
-      const typedBlock = block as InteractionMessageBlock;
-      return typedBlock.type === "actions" && !isBulkActionsBlock(typedBlock);
-    });
+      // Log the interaction for debugging
+      ctx.runtime.log?.(
+        `slack:interaction action=${actionId} type=${actionSummary.actionType ?? "unknown"} user=${userId} channel=${channelId}`,
+      );
 
-<<<<<<< HEAD
-    if (!hasRemainingIndividualActionRows) {
-      updatedBlocks = updatedBlocks.filter((block, index) => {
-=======
       // Send a system event to notify the agent about the button click
       // Pass undefined (not "unknown") to allow proper main session fallback
       const sessionKey = ctx.resolveSlackSystemEventSessionKey({
@@ -886,113 +821,81 @@ export function registerSlackInteractionEvents(params: { ctx: SlackMonitorContex
         buttonText: typedActionWithText.text?.text,
       });
       let updatedBlocks = originalBlocks.map((block) => {
->>>>>>> 746688ddc (Slack: redact and cap interaction system events (#28982))
         const typedBlock = block as InteractionMessageBlock;
-        if (isBulkActionsBlock(typedBlock)) {
-          return false;
+        if (typedBlock.type === "actions" && typedBlock.block_id === blockId) {
+          return {
+            type: "context",
+            elements: [
+              {
+                type: "mrkdwn",
+                text: formatInteractionConfirmationText({ selectedLabel, userId }),
+              },
+            ],
+          };
         }
-        if (typedBlock.type !== "divider") {
-          return true;
-        }
-        const next = updatedBlocks[index + 1] as InteractionMessageBlock | undefined;
-        return !next || !isBulkActionsBlock(next);
+        return block;
       });
-    }
 
-    try {
-      await ctx.app.client.chat.update({
-        channel: channelId,
-        ts: messageTs,
-        text: typedBody.message?.text ?? "",
-        blocks: updatedBlocks as (Block | KnownBlock)[],
+      const hasRemainingIndividualActionRows = updatedBlocks.some((block) => {
+        const typedBlock = block as InteractionMessageBlock;
+        return typedBlock.type === "actions" && !isBulkActionsBlock(typedBlock);
       });
-    } catch {
-      // If update fails, fallback to ephemeral confirmation for immediate UX feedback.
-      if (!respond) {
-        return;
+
+      if (!hasRemainingIndividualActionRows) {
+        updatedBlocks = updatedBlocks.filter((block, index) => {
+          const typedBlock = block as InteractionMessageBlock;
+          if (isBulkActionsBlock(typedBlock)) {
+            return false;
+          }
+          if (typedBlock.type !== "divider") {
+            return true;
+          }
+          const next = updatedBlocks[index + 1] as InteractionMessageBlock | undefined;
+          return !next || !isBulkActionsBlock(next);
+        });
       }
+
       try {
-        await respond({
-          text: `Button "${actionId}" clicked!`,
-          response_type: "ephemeral",
+        await ctx.app.client.chat.update({
+          channel: channelId,
+          ts: messageTs,
+          text: typedBody.message?.text ?? "",
+          blocks: updatedBlocks as (Block | KnownBlock)[],
         });
       } catch {
-        // Action was acknowledged and system event enqueued even when response updates fail.
+        // If update fails, fallback to ephemeral confirmation for immediate UX feedback.
+        if (!respond) {
+          return;
+        }
+        try {
+          await respond({
+            text: `Button "${actionId}" clicked!`,
+            response_type: "ephemeral",
+          });
+        } catch {
+          // Action was acknowledged and system event enqueued even when response updates fail.
+        }
       }
-    }
-  });
+    },
+  );
 
   if (typeof ctx.app.view !== "function") {
     return;
   }
+  const modalMatcher = new RegExp(`^${BOT_ACTION_PREFIX}`);
 
   // Handle Bot modal submissions with callback_ids scoped by our prefix.
-  ctx.app.view(
-    new RegExp(`^${BOT_ACTION_PREFIX}`),
-    async ({ ack, body }: { ack: () => Promise<void>; body: unknown }) => {
-      await ack();
-
-      const typedBody = body as {
-        user?: { id?: string };
-        team?: { id?: string };
-        view?: {
-          id?: string;
-          callback_id?: string;
-          private_metadata?: string;
-          root_view_id?: string;
-          previous_view_id?: string;
-          external_id?: string;
-          hash?: string;
-          state?: { values?: unknown };
-        };
-      };
-
-      const callbackId = typedBody.view?.callback_id ?? "unknown";
-      const userId = typedBody.user?.id ?? "unknown";
-      const viewId = typedBody.view?.id;
-      const inputs = summarizeViewState(typedBody.view?.state?.values);
-      const sessionRouting = resolveModalSessionRouting({
-        ctx,
-        privateMetadata: typedBody.view?.private_metadata,
-      });
-      const eventPayload = {
-        interactionType: "view_submission",
-        actionId: `view:${callbackId}`,
-        callbackId,
-        viewId,
-        userId,
-        teamId: typedBody.team?.id,
-        ...summarizeSlackViewLifecycleContext({
-          root_view_id: typedBody.view?.root_view_id,
-          previous_view_id: typedBody.view?.previous_view_id,
-          external_id: typedBody.view?.external_id,
-          hash: typedBody.view?.hash,
-        }),
-        privateMetadata: typedBody.view?.private_metadata,
-        routedChannelId: sessionRouting.channelId,
-        routedChannelType: sessionRouting.channelType,
-        inputs,
-      };
-
-      ctx.runtime.log?.(
-        `slack:interaction view_submission callback=${callbackId} user=${userId} inputs=${inputs.length}`,
-      );
-
-      enqueueSystemEvent(`Slack interaction: ${JSON.stringify(eventPayload)}`, {
-        sessionKey: sessionRouting.sessionKey,
-        contextKey: ["slack:interaction:view", callbackId, viewId, userId]
-          .filter(Boolean)
-          .join(":"),
-      });
-    },
-  );
+  registerModalLifecycleHandler({
+    register: (matcher, handler) => ctx.app.view(matcher, handler),
+    matcher: modalMatcher,
+    ctx,
+    interactionType: "view_submission",
+    contextPrefix: "slack:interaction:view",
+  });
 
   const viewClosed = (
     ctx.app as unknown as {
-      viewClosed?: (
-        matcher: RegExp,
-        handler: (args: { ack: () => Promise<void>; body: unknown }) => Promise<void>,
-      ) => void;
+      viewClosed?: RegisterSlackModalHandler;
     }
   ).viewClosed;
   if (typeof viewClosed !== "function") {
@@ -1000,67 +903,11 @@ export function registerSlackInteractionEvents(params: { ctx: SlackMonitorContex
   }
 
   // Handle modal close events so agent workflows can react to cancelled forms.
-  viewClosed(
-    new RegExp(`^${BOT_ACTION_PREFIX}`),
-    async ({ ack, body }: { ack: () => Promise<void>; body: unknown }) => {
-      await ack();
-
-      const typedBody = body as {
-        user?: { id?: string };
-        team?: { id?: string };
-        view?: {
-          id?: string;
-          callback_id?: string;
-          private_metadata?: string;
-          root_view_id?: string;
-          previous_view_id?: string;
-          external_id?: string;
-          hash?: string;
-          state?: { values?: unknown };
-        };
-        is_cleared?: boolean;
-      };
-
-      const callbackId = typedBody.view?.callback_id ?? "unknown";
-      const userId = typedBody.user?.id ?? "unknown";
-      const viewId = typedBody.view?.id;
-      const inputs = summarizeViewState(typedBody.view?.state?.values);
-      const sessionRouting = resolveModalSessionRouting({
-        ctx,
-        privateMetadata: typedBody.view?.private_metadata,
-      });
-      const eventPayload = {
-        interactionType: "view_closed",
-        actionId: `view:${callbackId}`,
-        callbackId,
-        viewId,
-        userId,
-        teamId: typedBody.team?.id,
-        ...summarizeSlackViewLifecycleContext({
-          root_view_id: typedBody.view?.root_view_id,
-          previous_view_id: typedBody.view?.previous_view_id,
-          external_id: typedBody.view?.external_id,
-          hash: typedBody.view?.hash,
-        }),
-        isCleared: typedBody.is_cleared === true,
-        privateMetadata: typedBody.view?.private_metadata,
-        routedChannelId: sessionRouting.channelId,
-        routedChannelType: sessionRouting.channelType,
-        inputs,
-      };
-
-      ctx.runtime.log?.(
-        `slack:interaction view_closed callback=${callbackId} user=${userId} cleared=${
-          typedBody.is_cleared === true
-        }`,
-      );
-
-      enqueueSystemEvent(`Slack interaction: ${JSON.stringify(eventPayload)}`, {
-        sessionKey: sessionRouting.sessionKey,
-        contextKey: ["slack:interaction:view-closed", callbackId, viewId, userId]
-          .filter(Boolean)
-          .join(":"),
-      });
-    },
-  );
+  registerModalLifecycleHandler({
+    register: viewClosed,
+    matcher: modalMatcher,
+    ctx,
+    interactionType: "view_closed",
+    contextPrefix: "slack:interaction:view-closed",
+  });
 }
