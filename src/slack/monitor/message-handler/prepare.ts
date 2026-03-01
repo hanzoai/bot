@@ -388,8 +388,7 @@ export async function prepareSlackMessage(params: {
       fileOnlyPlaceholder,
     ]
       .filter(Boolean)
-      .join("
-") || "";
+      .join("\n") || "";
   if (!rawBody) {
     return null;
   }
@@ -594,9 +593,7 @@ export async function prepareSlackMessage(params: {
             }),
           );
         }
-        threadHistoryBody = historyParts.join("
-
-");
+        threadHistoryBody = historyParts.join("\n\n");
         logVerbose(
           `slack: populated thread history with ${threadHistory.length} messages for new session`,
         );
