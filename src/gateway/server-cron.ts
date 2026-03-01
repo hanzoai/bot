@@ -214,6 +214,7 @@ export function buildGatewayCronService(params: {
         cfg: runtimeConfig,
         reason: opts?.reason,
         agentId,
+        sessionKey,
         heartbeat: heartbeatOverride,
         deps: { ...params.deps, runtime: defaultRuntime },
       });
