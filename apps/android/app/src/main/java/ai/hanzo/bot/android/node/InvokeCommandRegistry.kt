@@ -1,13 +1,22 @@
 package ai.hanzo.bot.android.node
 
-import ai.hanzo.bot.android.protocol.BotCanvasA2UICommand
-import ai.hanzo.bot.android.protocol.BotCanvasCommand
-import ai.hanzo.bot.android.protocol.BotCameraCommand
-import ai.hanzo.bot.android.protocol.BotDeviceCommand
-import ai.hanzo.bot.android.protocol.BotLocationCommand
-import ai.hanzo.bot.android.protocol.BotNotificationsCommand
-import ai.hanzo.bot.android.protocol.BotScreenCommand
-import ai.hanzo.bot.android.protocol.BotSmsCommand
+import ai.hanzo.bot.android.protocol.HanzoBotCanvasA2UICommand
+import ai.hanzo.bot.android.protocol.HanzoBotCanvasCommand
+import ai.hanzo.bot.android.protocol.HanzoBotCameraCommand
+import ai.hanzo.bot.android.protocol.HanzoBotCapability
+import ai.hanzo.bot.android.protocol.HanzoBotDeviceCommand
+import ai.hanzo.bot.android.protocol.HanzoBotLocationCommand
+import ai.hanzo.bot.android.protocol.HanzoBotNotificationsCommand
+import ai.hanzo.bot.android.protocol.HanzoBotScreenCommand
+import ai.hanzo.bot.android.protocol.HanzoBotSmsCommand
+
+data class NodeRuntimeFlags(
+  val cameraEnabled: Boolean,
+  val locationEnabled: Boolean,
+  val smsAvailable: Boolean,
+  val voiceWakeEnabled: Boolean,
+  val debugBuild: Boolean,
+)
 
 enum class InvokeCommandAvailability {
   Always,
@@ -17,6 +26,19 @@ enum class InvokeCommandAvailability {
   DebugBuild,
 }
 
+enum class NodeCapabilityAvailability {
+  Always,
+  CameraEnabled,
+  LocationEnabled,
+  SmsAvailable,
+  VoiceWakeEnabled,
+}
+
+data class NodeCapabilitySpec(
+  val name: String,
+  val availability: NodeCapabilityAvailability = NodeCapabilityAvailability.Always,
+)
+
 data class InvokeCommandSpec(
   val name: String,
   val requiresForeground: Boolean = false,
@@ -24,83 +46,106 @@ data class InvokeCommandSpec(
 )
 
 object InvokeCommandRegistry {
+  val capabilityManifest: List<NodeCapabilitySpec> =
+    listOf(
+      NodeCapabilitySpec(name = HanzoBotCapability.Canvas.rawValue),
+      NodeCapabilitySpec(name = HanzoBotCapability.Screen.rawValue),
+      NodeCapabilitySpec(name = HanzoBotCapability.Device.rawValue),
+      NodeCapabilitySpec(
+        name = HanzoBotCapability.Camera.rawValue,
+        availability = NodeCapabilityAvailability.CameraEnabled,
+      ),
+      NodeCapabilitySpec(
+        name = HanzoBotCapability.Sms.rawValue,
+        availability = NodeCapabilityAvailability.SmsAvailable,
+      ),
+      NodeCapabilitySpec(
+        name = HanzoBotCapability.VoiceWake.rawValue,
+        availability = NodeCapabilityAvailability.VoiceWakeEnabled,
+      ),
+      NodeCapabilitySpec(
+        name = HanzoBotCapability.Location.rawValue,
+        availability = NodeCapabilityAvailability.LocationEnabled,
+      ),
+    )
+
   val all: List<InvokeCommandSpec> =
     listOf(
       InvokeCommandSpec(
-        name = BotCanvasCommand.Present.rawValue,
+        name = HanzoBotCanvasCommand.Present.rawValue,
         requiresForeground = true,
       ),
       InvokeCommandSpec(
-        name = BotCanvasCommand.Hide.rawValue,
+        name = HanzoBotCanvasCommand.Hide.rawValue,
         requiresForeground = true,
       ),
       InvokeCommandSpec(
-        name = BotCanvasCommand.Navigate.rawValue,
+        name = HanzoBotCanvasCommand.Navigate.rawValue,
         requiresForeground = true,
       ),
       InvokeCommandSpec(
-        name = BotCanvasCommand.Eval.rawValue,
+        name = HanzoBotCanvasCommand.Eval.rawValue,
         requiresForeground = true,
       ),
       InvokeCommandSpec(
-        name = BotCanvasCommand.Snapshot.rawValue,
+        name = HanzoBotCanvasCommand.Snapshot.rawValue,
         requiresForeground = true,
       ),
       InvokeCommandSpec(
-        name = BotCanvasA2UICommand.Push.rawValue,
+        name = HanzoBotCanvasA2UICommand.Push.rawValue,
         requiresForeground = true,
       ),
       InvokeCommandSpec(
-        name = BotCanvasA2UICommand.PushJSONL.rawValue,
+        name = HanzoBotCanvasA2UICommand.PushJSONL.rawValue,
         requiresForeground = true,
       ),
       InvokeCommandSpec(
-        name = BotCanvasA2UICommand.Reset.rawValue,
+        name = HanzoBotCanvasA2UICommand.Reset.rawValue,
         requiresForeground = true,
       ),
       InvokeCommandSpec(
-        name = BotScreenCommand.Record.rawValue,
+        name = HanzoBotScreenCommand.Record.rawValue,
         requiresForeground = true,
       ),
       InvokeCommandSpec(
-        name = BotCameraCommand.List.rawValue,
-        requiresForeground = true,
-        availability = InvokeCommandAvailability.CameraEnabled,
-      ),
-      InvokeCommandSpec(
-        name = BotCameraCommand.Snap.rawValue,
+        name = HanzoBotCameraCommand.List.rawValue,
         requiresForeground = true,
         availability = InvokeCommandAvailability.CameraEnabled,
       ),
       InvokeCommandSpec(
-        name = BotCameraCommand.Clip.rawValue,
+        name = HanzoBotCameraCommand.Snap.rawValue,
         requiresForeground = true,
         availability = InvokeCommandAvailability.CameraEnabled,
       ),
       InvokeCommandSpec(
-        name = BotLocationCommand.Get.rawValue,
+        name = HanzoBotCameraCommand.Clip.rawValue,
+        requiresForeground = true,
+        availability = InvokeCommandAvailability.CameraEnabled,
+      ),
+      InvokeCommandSpec(
+        name = HanzoBotLocationCommand.Get.rawValue,
         availability = InvokeCommandAvailability.LocationEnabled,
       ),
       InvokeCommandSpec(
-        name = BotDeviceCommand.Status.rawValue,
+        name = HanzoBotDeviceCommand.Status.rawValue,
       ),
       InvokeCommandSpec(
-        name = BotDeviceCommand.Info.rawValue,
+        name = HanzoBotDeviceCommand.Info.rawValue,
       ),
       InvokeCommandSpec(
-        name = BotDeviceCommand.Permissions.rawValue,
+        name = HanzoBotDeviceCommand.Permissions.rawValue,
       ),
       InvokeCommandSpec(
-        name = BotDeviceCommand.Health.rawValue,
+        name = HanzoBotDeviceCommand.Health.rawValue,
       ),
       InvokeCommandSpec(
-        name = BotNotificationsCommand.List.rawValue,
+        name = HanzoBotNotificationsCommand.List.rawValue,
       ),
       InvokeCommandSpec(
-        name = BotNotificationsCommand.Actions.rawValue,
+        name = HanzoBotNotificationsCommand.Actions.rawValue,
       ),
       InvokeCommandSpec(
-        name = BotSmsCommand.Send.rawValue,
+        name = HanzoBotSmsCommand.Send.rawValue,
         availability = InvokeCommandAvailability.SmsAvailable,
       ),
       InvokeCommandSpec(
@@ -118,20 +163,29 @@ object InvokeCommandRegistry {
 
   fun find(command: String): InvokeCommandSpec? = byNameInternal[command]
 
-  fun advertisedCommands(
-    cameraEnabled: Boolean,
-    locationEnabled: Boolean,
-    smsAvailable: Boolean,
-    debugBuild: Boolean,
-  ): List<String> {
+  fun advertisedCapabilities(flags: NodeRuntimeFlags): List<String> {
+    return capabilityManifest
+      .filter { spec ->
+        when (spec.availability) {
+          NodeCapabilityAvailability.Always -> true
+          NodeCapabilityAvailability.CameraEnabled -> flags.cameraEnabled
+          NodeCapabilityAvailability.LocationEnabled -> flags.locationEnabled
+          NodeCapabilityAvailability.SmsAvailable -> flags.smsAvailable
+          NodeCapabilityAvailability.VoiceWakeEnabled -> flags.voiceWakeEnabled
+        }
+      }
+      .map { it.name }
+  }
+
+  fun advertisedCommands(flags: NodeRuntimeFlags): List<String> {
     return all
       .filter { spec ->
         when (spec.availability) {
           InvokeCommandAvailability.Always -> true
-          InvokeCommandAvailability.CameraEnabled -> cameraEnabled
-          InvokeCommandAvailability.LocationEnabled -> locationEnabled
-          InvokeCommandAvailability.SmsAvailable -> smsAvailable
-          InvokeCommandAvailability.DebugBuild -> debugBuild
+          InvokeCommandAvailability.CameraEnabled -> flags.cameraEnabled
+          InvokeCommandAvailability.LocationEnabled -> flags.locationEnabled
+          InvokeCommandAvailability.SmsAvailable -> flags.smsAvailable
+          InvokeCommandAvailability.DebugBuild -> flags.debugBuild
         }
       }
       .map { it.name }
