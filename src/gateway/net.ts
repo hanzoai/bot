@@ -379,7 +379,7 @@ export function isSecureWebSocketUrl(url: string): boolean {
 
 // ---------------------------------------------------------------------------
 // Aliases for names used in auth.ts / server-http.ts that were renamed
-// during the openclaw→hanzo merge.  Keeps existing call-sites working.
+// during the upstream fork to hanzo merge.  Keeps existing call-sites working.
 // ---------------------------------------------------------------------------
 
 /** @deprecated Use `resolveClientIp` */

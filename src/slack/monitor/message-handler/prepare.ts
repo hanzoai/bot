@@ -1,7 +1,3 @@
-import type { FinalizedMsgContext } from "../../../auto-reply/templating.js";
-import type { ResolvedSlackAccount } from "../../accounts.js";
-import type { SlackMessageEvent } from "../../types.js";
-import type { PreparedSlackMessage } from "./types.js";
 import { resolveAckReaction } from "../../../agents/identity.js";
 import { hasControlCommand } from "../../../auto-reply/command-detection.js";
 import { shouldHandleTextCommands } from "../../../auto-reply/commands-registry.js";
@@ -18,6 +14,7 @@ import {
   buildMentionRegexes,
   matchesMentionWithExplicit,
 } from "../../../auto-reply/reply/mentions.js";
+import type { FinalizedMsgContext } from "../../../auto-reply/templating.js";
 import {
   shouldAckReaction as shouldAckReactionGate,
   type AckReactionScope,
@@ -32,14 +29,12 @@ import { logVerbose, shouldLogVerbose } from "../../../globals.js";
 import { enqueueSystemEvent } from "../../../infra/system-events.js";
 import { resolveAgentRoute } from "../../../routing/resolve-route.js";
 import { resolveThreadSessionKeys } from "../../../routing/session-key.js";
-<<<<<<< HEAD
-=======
 import { resolveSlackReplyToMode, type ResolvedSlackAccount } from "../../accounts.js";
->>>>>>> 9ae94390b (fix(slack): resolve replyToMode per-message using chat type (#24717))
 import { reactSlackMessage } from "../../actions.js";
 import { sendMessageSlack } from "../../send.js";
 import { hasSlackThreadParticipation } from "../../sent-thread-cache.js";
 import { resolveSlackThreadContext } from "../../threading.js";
+import type { SlackMessageEvent } from "../../types.js";
 import { resolveSlackAllowListMatch, resolveSlackUserAllowed } from "../allow-list.js";
 import { resolveSlackEffectiveAllowFrom } from "../auth.js";
 import { resolveSlackChannelConfig } from "../channel-config.js";
@@ -54,6 +49,7 @@ import {
   resolveSlackThreadStarter,
 } from "../media.js";
 import { resolveSlackRoomContextHints } from "../room-context.js";
+import type { PreparedSlackMessage } from "./types.js";
 
 export async function prepareSlackMessage(params: {
   ctx: SlackMonitorContext;
@@ -380,7 +376,8 @@ export async function prepareSlackMessage(params: {
       ? (message.attachments ?? [])
           .map((a) => a.text?.trim() || a.fallback?.trim())
           .filter(Boolean)
-          .join("\n")
+          .join("
+")
       : undefined;
 
   const rawBody =
@@ -392,7 +389,8 @@ export async function prepareSlackMessage(params: {
       fileOnlyPlaceholder,
     ]
       .filter(Boolean)
-      .join("\n") || "";
+      .join("
+") || "";
   if (!rawBody) {
     return null;
   }
@@ -460,7 +458,8 @@ export async function prepareSlackMessage(params: {
     isThreadReply && threadTs
       ? ` thread_ts: ${threadTs}${message.parent_user_id ? ` parent_user_id: ${message.parent_user_id}` : ""}`
       : "";
-  const textWithId = `${rawBody}\n[slack message id: ${message.ts} channel: ${message.channel}${threadInfo}]`;
+  const textWithId = `${rawBody}
+[slack message id: ${message.ts} channel: ${message.channel}${threadInfo}]`;
   const storePath = resolveStorePath(ctx.cfg.session?.store, {
     agentId: route.agentId,
   });
@@ -583,7 +582,8 @@ export async function prepareSlackMessage(params: {
             msgUser?.name ?? (historyMsg.botId ? `Bot (${historyMsg.botId})` : "Unknown");
           const isBot = Boolean(historyMsg.botId);
           const role = isBot ? "assistant" : "user";
-          const msgWithId = `${historyMsg.text}\n[slack message id: ${historyMsg.ts ?? "unknown"} channel: ${message.channel}]`;
+          const msgWithId = `${historyMsg.text}
+[slack message id: ${historyMsg.ts ?? "unknown"} channel: ${message.channel}]`;
           historyParts.push(
             formatInboundEnvelope({
               channel: "Slack",
@@ -595,7 +595,9 @@ export async function prepareSlackMessage(params: {
             }),
           );
         }
-        threadHistoryBody = historyParts.join("\n\n");
+        threadHistoryBody = historyParts.join("
+
+");
         logVerbose(
           `slack: populated thread history with ${threadHistory.length} messages for new session`,
         );

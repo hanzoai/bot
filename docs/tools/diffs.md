@@ -80,7 +80,7 @@ Useful options:
 
 ## Plugin defaults
 
-Set plugin-wide defaults in `~/.openclaw/openclaw.json`:
+Set plugin-wide defaults in `~/.hanzo/bot/bot.json`:
 
 ```json5
 {

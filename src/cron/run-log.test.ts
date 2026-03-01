@@ -99,7 +99,7 @@ describe("cron run log", () => {
   });
 
   it("read drains pending fire-and-forget writes", async () => {
-    await withRunLogDir("openclaw-cron-log-drain-", async (dir) => {
+    await withRunLogDir("bot-cron-log-drain-", async (dir) => {
       const logPath = path.join(dir, "runs", "job-drain.jsonl");
 
       // Fire-and-forget write (simulates the `void appendCronRunLog(...)` pattern

@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
 import { t } from "../../i18n/index.ts";
 import { DEFAULT_CRON_FORM } from "../app-defaults.ts";
 import { toNumber } from "../format.ts";
->>>>>>> 8c98cf05b (i18n: add zh-CN for cron page and validation errors (#29315))
 import type { GatewayBrowserClient } from "../gateway.ts";
 import type {
   CronJob,
@@ -19,10 +16,8 @@ import type {
   CronSortDir,
   CronStatus,
 } from "../types.ts";
-import type { CronFormState } from "../ui-types.ts";
-import { DEFAULT_CRON_FORM } from "../app-defaults.ts";
-import { toNumber } from "../format.ts";
 import { CRON_CHANNEL_LAST } from "../ui-types.ts";
+import type { CronFormState } from "../ui-types.ts";
 
 export type CronFieldKey =
   | "name"

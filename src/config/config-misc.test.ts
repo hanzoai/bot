@@ -177,7 +177,7 @@ describe("cron webhook schema", () => {
   });
 
   it("accepts cron.retry config", () => {
-    const res = OpenClawSchema.safeParse({
+    const res = BotSchema.safeParse({
       cron: {
         retry: {
           maxAttempts: 5,

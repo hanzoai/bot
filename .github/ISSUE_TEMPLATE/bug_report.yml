@@ -1,9 +1,5 @@
 name: Bug report
-<<<<<<< HEAD
-description: Report a non-regression defect or unexpected behavior in Bot.
-=======
 description: Report defects, including regressions, crashes, and behavior bugs.
->>>>>>> ff563eef0 (Issues: unify bug form and subtype auto-labeling (openclaw#30733) thanks @Takhoffman)
 title: "[Bug]: "
 labels:
   - bug
