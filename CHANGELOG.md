@@ -77,6 +77,20 @@ Docs: https://docs.openclaw.ai
 
 ### Fixes
 
+- Cron/Schedule errors: notify users when a job is auto-disabled after repeated schedule computation failures. (#29098) Thanks .
+- Cron/Schedule errors: notify users when a job is auto-disabled after repeated schedule computation failures. (#29098) Thanks .
+- Onboarding/Custom providers: raise default custom-provider model context window to the runtime hard minimum (16k) and auto-heal existing custom model entries below that threshold during reconfiguration, preventing immediate `Model context window too small (4096 tokens)` failures. (#21653) Thanks @r4jiv007.
+- Web UI/Assistant text: strip internal `<relevant-memories>...</relevant-memories>` scaffolding from rendered assistant messages (while preserving code-fence literals), preventing memory-context leakage in chat output for models that echo internal blocks. (#29851) Thanks @Valkster70.
+- Dashboard/Sessions: allow authenticated Control UI clients to delete and patch sessions while still blocking regular webchat clients from session mutation RPCs, fixing Dashboard session delete failures. (#21264) Thanks @jskoiz.
+- TUI/Session model status: clear stale runtime model identity when model overrides change so `/model` updates are reflected immediately in `sessions.patch` responses and `sessions.list` status surfaces. (#28619) Thanks @lejean2000.
+- Agents/Session status: read thinking/verbose/reasoning levels from persisted session state in `session_status` output when resolved levels are not provided, so status reflects runtime toggles correctly. (#30129) Thanks @YuzuruS.
+- TUI/SIGTERM shutdown: ignore `setRawMode EBADF` teardown errors during `SIGTERM` exit so long-running TUI sessions do not crash on terminal shutdown races, while still rethrowing unrelated stop errors. (#29430) Thanks @Cormazabal.
+- Memory/Hybrid recall: when strict hybrid scoring yields no hits, preserve keyword-backed matches using a text-weight floor so freshly indexed lexical canaries no longer disappear behind `minScore` filtering. (#29112) Thanks @ceo-nada.
+- Cron/Reminder session routing: preserve `job.sessionKey` for `sessionTarget="main"` runs so queued reminders wake and deliver in the originating scoped session/channel instead of being forced to the agent main session.
+- Agents/Sessions list transcript paths: resolve `sessions_list` `transcriptPath` via agent-aware session path options and ignore combined-store sentinel paths (`(multiple)`) so listed transcript paths always point to the state directory. (#28379) Thanks @fafuzuoluo.
+- Podman/Quadlet setup: fix `sed` escaping and UID mismatch in Podman Quadlet setup. (#26414) Thanks @KnHack and @vincentkoc.
+- Browser/Navigate: resolve the correct `targetId` in navigate responses after renderer swaps. (#25326) Thanks @stone-jin and @vincentkoc.
+- Agents/Ollama discovery: skip Ollama discovery when explicit models are configured. (#28827) Thanks @Kansodata and @vincentkoc.
 - Android/Onboarding + voice reliability: request per-toggle onboarding permissions, update pairing guidance to `openclaw devices list/approve`, restore assistant speech playback in mic capture flow, cancel superseded in-flight speech (mute + per-reply token rotation), and keep `talk.config` loads retryable after transient failures. (#29796) Thanks @obviyus.
 - FS/Sandbox workspace boundaries: add a dedicated `outside-workspace` safe-open error code for root-escape checks, and propagate specific outside-workspace messages across edit/browser/media consumers instead of generic not-found/invalid-path fallbacks. (#29715) Thanks @YuzuruS.
 - Config/Doctor group allowlist diagnostics: align `groupPolicy: "allowlist"` warnings with per-channel runtime semantics by excluding Google Chat sender-list checks and by warning when no-fallback channels (for example iMessage) omit `groupAllowFrom`, with regression coverage. (#28477) Thanks @tonydehnke.
