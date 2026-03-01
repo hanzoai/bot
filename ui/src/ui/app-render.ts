@@ -31,6 +31,7 @@ import {
   loadMoreCronJobs,
   loadMoreCronRuns,
   normalizeCronFormState,
+<<<<<<< HEAD
   toggleCronJob,
   reloadCronJobs,
   removeCronJob,
@@ -38,6 +39,9 @@ import {
   addCronJob,
   startCronClone,
   startCronEdit,
+=======
+  getVisibleCronJobs,
+>>>>>>> e3ba59dc7 (Control UI: add cron jobs schedule/status filters with reset (#9510))
   updateCronJobsFilter,
   updateCronRunsFilter,
   validateCronForm,
@@ -153,6 +157,7 @@ export function renderApp(state: AppViewState) {
       ].filter(Boolean),
     ),
   ).toSorted((a, b) => a.localeCompare(b));
+  const visibleCronJobs = getVisibleCronJobs(state);
   const selectedDeliveryChannel =
     state.cronForm.deliveryChannel && state.cronForm.deliveryChannel.trim()
       ? state.cronForm.deliveryChannel.trim()
@@ -418,11 +423,13 @@ export function renderApp(state: AppViewState) {
                 loading: state.cronLoading,
                 jobsLoadingMore: state.cronJobsLoadingMore,
                 status: state.cronStatus,
-                jobs: state.cronJobs,
+                jobs: visibleCronJobs,
                 jobsTotal: state.cronJobsTotal,
                 jobsHasMore: state.cronJobsHasMore,
                 jobsQuery: state.cronJobsQuery,
                 jobsEnabledFilter: state.cronJobsEnabledFilter,
+                jobsScheduleKindFilter: state.cronJobsScheduleKindFilter,
+                jobsLastStatusFilter: state.cronJobsLastStatusFilter,
                 jobsSortBy: state.cronJobsSortBy,
                 jobsSortDir: state.cronJobsSortDir,
                 error: state.cronError,
@@ -471,7 +478,29 @@ export function renderApp(state: AppViewState) {
                 onLoadMoreJobs: () => loadMoreCronJobs(state),
                 onJobsFiltersChange: (patch) => {
                   updateCronJobsFilter(state, patch);
+<<<<<<< HEAD
                   void reloadCronJobs(state);
+=======
+                  const shouldReload =
+                    typeof patch.cronJobsQuery === "string" ||
+                    Boolean(patch.cronJobsEnabledFilter) ||
+                    Boolean(patch.cronJobsSortBy) ||
+                    Boolean(patch.cronJobsSortDir);
+                  if (shouldReload) {
+                    await reloadCronJobs(state);
+                  }
+                },
+                onJobsFiltersReset: async () => {
+                  updateCronJobsFilter(state, {
+                    cronJobsQuery: "",
+                    cronJobsEnabledFilter: "all",
+                    cronJobsScheduleKindFilter: "all",
+                    cronJobsLastStatusFilter: "all",
+                    cronJobsSortBy: "nextRunAtMs",
+                    cronJobsSortDir: "asc",
+                  });
+                  await reloadCronJobs(state);
+>>>>>>> e3ba59dc7 (Control UI: add cron jobs schedule/status filters with reset (#9510))
                 },
                 onLoadMoreRuns: () => loadMoreCronRuns(state),
                 onRunsFiltersChange: (patch) => {
