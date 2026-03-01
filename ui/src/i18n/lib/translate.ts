@@ -3,6 +3,12 @@ import { en } from "../locales/en.ts";
 
 type Subscriber = (locale: Locale) => void;
 
+export const SUPPORTED_LOCALES: ReadonlyArray<Locale> = ["en", "zh-CN", "zh-TW", "pt-BR", "de"];
+
+export function isSupportedLocale(value: string | null | undefined): value is Locale {
+  return value !== null && value !== undefined && SUPPORTED_LOCALES.includes(value as Locale);
+}
+
 class I18nManager {
   private locale: Locale = "en";
   private translations: Record<Locale, TranslationMap> = { en } as Record<Locale, TranslationMap>;
@@ -12,20 +18,26 @@ class I18nManager {
     this.loadLocale();
   }
 
-  private loadLocale() {
-    const saved = localStorage.getItem("bot.i18n.locale") as Locale;
-    if (saved && ["en", "zh-CN", "zh-TW", "pt-BR"].includes(saved)) {
-      this.locale = saved;
-    } else {
-      const navLang = navigator.language;
-      if (navLang.startsWith("zh")) {
-        this.locale = navLang === "zh-TW" || navLang === "zh-HK" ? "zh-TW" : "zh-CN";
-      } else if (navLang.startsWith("pt")) {
-        this.locale = "pt-BR";
-      } else {
-        this.locale = "en";
-      }
+  private resolveInitialLocale(): Locale {
+    const saved = localStorage.getItem("bot.i18n.locale");
+    if (isSupportedLocale(saved)) {
+      return saved;
     }
+    const navLang = navigator.language;
+    if (navLang.startsWith("zh")) {
+      return navLang === "zh-TW" || navLang === "zh-HK" ? "zh-TW" : "zh-CN";
+    }
+    if (navLang.startsWith("pt")) {
+      return "pt-BR";
+    }
+    if (navLang.startsWith("de")) {
+      return "de";
+    }
+    return "en";
+  }
+
+  private loadLocale() {
+    this.locale = this.resolveInitialLocale();
   }
 
   public getLocale(): Locale {
@@ -47,6 +59,8 @@ class I18nManager {
           module = await import("../locales/zh-TW.ts");
         } else if (locale === "pt-BR") {
           module = await import("../locales/pt-BR.ts");
+        } else if (locale === "de") {
+          module = await import("../locales/de.ts");
         } else {
           return;
         }
