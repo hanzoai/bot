@@ -115,7 +115,7 @@ describe("buildSlackThreadingToolContext", () => {
           replyToModeByChatType: { direct: "off" },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const result = buildSlackThreadingToolContext({
       cfg,
       accountId: null,
@@ -135,7 +135,7 @@ describe("buildSlackThreadingToolContext", () => {
           replyToModeByChatType: { channel: "first" },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const result = buildSlackThreadingToolContext({
       cfg,
       accountId: null,
