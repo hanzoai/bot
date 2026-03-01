@@ -1,10 +1,6 @@
-import type { CliDeps } from "../cli/deps.js";
-<<<<<<< HEAD
-import type { CronDeliveryStatus, CronUsageSummary } from "../cron/types.js";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
-=======
+import type { CliDeps } from "../cli/deps.js";
 import { createOutboundSendDeps } from "../cli/outbound-send-deps.js";
->>>>>>> 4637b90c0 (feat(cron): configurable failure alerts for repeated job errors (openclaw#24789) thanks @0xbrak)
 import { loadConfig } from "../config/config.js";
 import {
   canonicalizeMainSessionAlias,
@@ -180,22 +176,12 @@ export function buildGatewayCronService(params: {
       enqueueSystemEvent(text, { sessionKey, contextKey: opts?.contextKey });
     },
     requestHeartbeatNow: (opts) => {
-      if (opts?.sessionKey) {
-        const { agentId, cfg: runtimeConfig } = resolveCronAgent();
-        const sessionKey = resolveCronSessionKey({
-          runtimeConfig,
-          agentId,
-          requestedSessionKey: opts.sessionKey,
-        });
-        requestHeartbeatNow({
-          reason: opts?.reason,
-          sessionKey,
-        });
-      } else {
-        requestHeartbeatNow({
-          reason: opts?.reason,
-        });
-      }
+      const { agentId, sessionKey } = resolveCronWakeTarget(opts);
+      requestHeartbeatNow({
+        reason: opts?.reason,
+        agentId,
+        sessionKey,
+      });
     },
     runHeartbeatOnce: async (opts) => {
       const { runtimeConfig, agentId, sessionKey } = resolveCronWakeTarget(opts);
@@ -227,13 +213,14 @@ export function buildGatewayCronService(params: {
         deps: { ...params.deps, runtime: defaultRuntime },
       });
     },
-    runIsolatedAgentJob: async ({ job, message }) => {
+    runIsolatedAgentJob: async ({ job, message, abortSignal }) => {
       const { agentId, cfg: runtimeConfig } = resolveCronAgent(job.agentId);
       return await runCronIsolatedAgentTurn({
         cfg: runtimeConfig,
         deps: params.deps,
         job,
         message,
+        abortSignal,
         agentId,
         sessionKey: `cron:${job.id}`,
         lane: "cron",
@@ -359,7 +346,7 @@ export function buildGatewayCronService(params: {
             error: evt.error,
             summary: evt.summary,
             delivered: evt.delivered,
-            deliveryStatus: evt.deliveryStatus as CronDeliveryStatus | undefined,
+            deliveryStatus: evt.deliveryStatus,
             deliveryError: evt.deliveryError,
             sessionId: evt.sessionId,
             sessionKey: evt.sessionKey,
@@ -368,7 +355,7 @@ export function buildGatewayCronService(params: {
             nextRunAtMs: evt.nextRunAtMs,
             model: evt.model,
             provider: evt.provider,
-            usage: evt.usage as CronUsageSummary | undefined,
+            usage: evt.usage,
           },
           runLogPrune,
         ).catch((err) => {
