@@ -410,7 +410,9 @@ class NodeRuntime(context: Context) {
         parsed ?: runId
       },
       speakAssistantReply = { text ->
-        voiceReplySpeaker.speakAssistantReply(text)
+        if (prefs.speakerEnabled.value) {
+          voiceReplySpeaker.speakAssistantReply(text)
+        }
       },
     )
   }
@@ -666,6 +668,13 @@ class NodeRuntime(context: Context) {
 
   fun setOnboardingCompleted(value: Boolean) {
     prefs.setOnboardingCompleted(value)
+  }
+
+  val speakerEnabled: StateFlow<Boolean>
+    get() = prefs.speakerEnabled
+
+  fun setSpeakerEnabled(value: Boolean) {
+    prefs.setSpeakerEnabled(value)
   }
 
   fun refreshGatewayConnection() {
