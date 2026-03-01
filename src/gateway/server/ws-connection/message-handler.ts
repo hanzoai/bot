@@ -817,9 +817,7 @@ export function attachGatewayWsMessageHandler(params: {
               silent:
                 hasBrowserOrigin && !isControlUi
                   ? false
-                  : isLocalClient ||
-                    authMethod === "iam" ||
-                    authMethod === "token",
+                  : isLocalClient || authMethod === "iam" || authMethod === "token",
             });
             const context = buildRequestContext();
             if (pairing.request.silent === true) {
