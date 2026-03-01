@@ -9,7 +9,7 @@ title: "Configuration"
 
 # Configuration
 
-Bot reads an optional <Tooltip tip="JSON5 supports comments and trailing commas">**JSON5**</Tooltip> config from `~/.bot/bot.json`.
+Bot reads an optional <Tooltip tip="JSON5 supports comments and trailing commas">**JSON5**</Tooltip> config from `~/.hanzo/bot.json`.
 
 If the file is missing, Bot uses safe defaults. Common reasons to add a config:
 
@@ -26,9 +26,9 @@ See the [full reference](/gateway/configuration-reference) for every available f
 ## Minimal config
 
 ```json5
-// ~/.bot/bot.json
+// ~/.hanzo/bot.json
 {
-  agents: { defaults: { workspace: "~/.bot/workspace" } },
+  agents: { defaults: { workspace: "~/.hanzo/workspace" } },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
@@ -54,7 +54,7 @@ See the [full reference](/gateway/configuration-reference) for every available f
     The Control UI renders a form from the config schema, with a **Raw JSON** editor as an escape hatch.
   </Tab>
   <Tab title="Direct edit">
-    Edit `~/.bot/bot.json` directly. The Gateway watches the file and applies changes automatically (see [hot reload](#config-hot-reload)).
+    Edit `~/.hanzo/bot.json` directly. The Gateway watches the file and applies changes automatically (see [hot reload](#config-hot-reload)).
   </Tab>
 </Tabs>
 
@@ -126,6 +126,7 @@ When validation fails:
 
     - `agents.defaults.models` defines the model catalog and acts as the allowlist for `/model`.
     - Model refs use `provider/model` format (e.g. `anthropic/claude-opus-4-6`).
+    - `agents.defaults.imageMaxDimensionPx` controls transcript/tool image downscaling (default `1200`); lower values usually reduce vision-token usage on screenshot-heavy runs.
     - See [Models CLI](/concepts/models) for switching models in chat and [Model Failover](/concepts/model-failover) for auth rotation and fallback behavior.
     - For custom/self-hosted providers, see [Custom providers](/gateway/configuration-reference#custom-providers-and-base-urls) in the reference.
 
@@ -181,6 +182,11 @@ When validation fails:
     {
       session: {
         dmScope: "per-channel-peer",  // recommended for multi-user
+        threadBindings: {
+          enabled: true,
+          idleHours: 24,
+          maxAgeHours: 0,
+        },
         reset: {
           mode: "daily",
           atHour: 4,
@@ -191,6 +197,7 @@ When validation fails:
     ```
 
     - `dmScope`: `main` (shared) | `per-peer` | `per-channel-peer` | `per-account-channel-peer`
+    - `threadBindings`: global defaults for thread-bound session routing (Discord supports `/focus`, `/unfocus`, `/agents`, `/session idle`, and `/session max-age`).
     - See [Session Management](/concepts/session) for scoping, identity links, and send policy.
     - See [full reference](/gateway/configuration-reference#session) for all fields.
 
@@ -234,6 +241,7 @@ When validation fails:
 
     - `every`: duration string (`30m`, `2h`). Set `0m` to disable.
     - `target`: `last` | `whatsapp` | `telegram` | `discord` | `none`
+    - `directPolicy`: `allow` (default) or `block` for DM-style heartbeat targets
     - See [Heartbeat](/gateway/heartbeat) for the full guide.
 
   </Accordion>
@@ -245,11 +253,17 @@ When validation fails:
         enabled: true,
         maxConcurrentRuns: 2,
         sessionRetention: "24h",
+        runLog: {
+          maxBytes: "2mb",
+          keepLines: 2000,
+        },
       },
     }
     ```
 
-    See [Cron jobs](/automation/cron-jobs) for the feature overview and CLI examples.
+    - `sessionRetention`: prune completed isolated run sessions from `sessions.json` (default `24h`; set `false` to disable).
+    - `runLog`: prune `cron/runs/<jobId>.jsonl` by size and retained lines.
+    - See [Cron jobs](/automation/cron-jobs) for feature overview and CLI examples.
 
   </Accordion>
 
@@ -288,8 +302,8 @@ When validation fails:
     {
       agents: {
         list: [
-          { id: "home", default: true, workspace: "~/.bot/workspace-home" },
-          { id: "work", workspace: "~/.bot/workspace-work" },
+          { id: "home", default: true, workspace: "~/.hanzo/workspace-home" },
+          { id: "work", workspace: "~/.hanzo/workspace-work" },
         ],
       },
       bindings: [
@@ -307,7 +321,7 @@ When validation fails:
     Use `$include` to organize large configs:
 
     ```json5
-    // ~/.bot/bot.json
+    // ~/.hanzo/bot.json
     {
       gateway: { port: 18789 },
       agents: { $include: "./agents.json5" },
@@ -329,7 +343,7 @@ When validation fails:
 
 ## Config hot reload
 
-The Gateway watches `~/.bot/bot.json` and applies changes automatically — no manual restart needed for most settings.
+The Gateway watches `~/.hanzo/bot.json` and applies changes automatically — no manual restart needed for most settings.
 
 ### Reload modes
 
@@ -369,6 +383,10 @@ Most fields hot-apply without downtime. In `hybrid` mode, restart-required chang
 
 ## Config RPC (programmatic updates)
 
+<Note>
+Control-plane write RPCs (`config.apply`, `config.patch`, `update.run`) are rate-limited to **3 requests per 60 seconds** per `deviceId+clientIp`. When limited, the RPC returns `UNAVAILABLE` with `retryAfterMs`.
+</Note>
+
 <AccordionGroup>
   <Accordion title="config.apply (full replace)">
     Validates + writes the full config and restarts the Gateway in one step.
@@ -385,10 +403,12 @@ Most fields hot-apply without downtime. In `hybrid` mode, restart-required chang
     - `note` (optional) — note for the restart sentinel
     - `restartDelayMs` (optional) — delay before restart (default 2000)
 
+    Restart requests are coalesced while one is already pending/in-flight, and a 30-second cooldown applies between restart cycles.
+
     ```bash
     bot gateway call config.get --params '{}'  # capture payload.hash
     bot gateway call config.apply --params '{
-      "raw": "{ agents: { defaults: { workspace: \"~/.bot/workspace\" } } }",
+      "raw": "{ agents: { defaults: { workspace: \"~/.hanzo/workspace\" } } }",
       "baseHash": "<hash>",
       "sessionKey": "agent:main:whatsapp:dm:+15555550123"
     }'
@@ -409,6 +429,8 @@ Most fields hot-apply without downtime. In `hybrid` mode, restart-required chang
     - `baseHash` (required) — config hash from `config.get`
     - `sessionKey`, `note`, `restartDelayMs` — same as `config.apply`
 
+    Restart behavior matches `config.apply`: coalesced pending restarts plus a 30-second cooldown between restart cycles.
+
     ```bash
     bot gateway call config.patch --params '{
       "raw": "{ channels: { telegram: { groups: { \"*\": { requireMention: false } } } } }",
@@ -424,7 +446,7 @@ Most fields hot-apply without downtime. In `hybrid` mode, restart-required chang
 Bot reads env vars from the parent process plus:
 
 - `.env` from the current working directory (if present)
-- `~/.bot/.env` (global fallback)
+- `~/.hanzo/.env` (global fallback)
 
 Neither file overrides existing env vars. You can also set inline env vars in config:
 
@@ -448,7 +470,7 @@ Neither file overrides existing env vars. You can also set inline env vars in co
 }
 ```
 
-Env var equivalent: `BOT_LOAD_SHELL_ENV=1`
+Env var equivalent: `OPENCLAW_LOAD_SHELL_ENV=1`
 </Accordion>
 
 <Accordion title="Env var substitution in config values">
@@ -456,7 +478,7 @@ Env var equivalent: `BOT_LOAD_SHELL_ENV=1`
 
 ```json5
 {
-  gateway: { auth: { token: "${BOT_GATEWAY_TOKEN}" } },
+  gateway: { auth: { token: "${OPENCLAW_GATEWAY_TOKEN}" } },
   models: { providers: { custom: { apiKey: "${CUSTOM_API_KEY}" } } },
 }
 ```
@@ -469,6 +491,42 @@ Rules:
 - Works inside `$include` files
 - Inline substitution: `"${BASE}/v1"` → `"https://api.example.com/v1"`
 
+</Accordion>
+
+<Accordion title="Secret refs (env, file, exec)">
+  For fields that support SecretRef objects, you can use:
+
+```json5
+{
+  models: {
+    providers: {
+      openai: { apiKey: { source: "env", provider: "default", id: "OPENAI_API_KEY" } },
+    },
+  },
+  skills: {
+    entries: {
+      "nano-banana-pro": {
+        apiKey: {
+          source: "file",
+          provider: "filemain",
+          id: "/skills/entries/nano-banana-pro/apiKey",
+        },
+      },
+    },
+  },
+  channels: {
+    googlechat: {
+      serviceAccountRef: {
+        source: "exec",
+        provider: "vault",
+        id: "channels/googlechat/serviceAccount",
+      },
+    },
+  },
+}
+```
+
+SecretRef details (including `secrets.providers` for `env`/`file`/`exec`) are in [Secrets Management](/gateway/secrets).
 </Accordion>
 
 See [Environment](/help/environment) for full precedence and sources.
