@@ -37,16 +37,10 @@ let sharedBrowserState: SharedBrowserState | null = null;
 let executablePathCache: ExecutablePathCache | null = null;
 
 export class PlaywrightDiffScreenshotter implements DiffScreenshotter {
-<<<<<<< HEAD
   private readonly config: BotConfig;
-
-  constructor(params: { config: BotConfig }) {
-=======
-  private readonly config: OpenClawConfig;
   private readonly browserIdleMs: number;
 
-  constructor(params: { config: OpenClawConfig; browserIdleMs?: number }) {
->>>>>>> 0abf47cfd (plugin(diffs): optimize rendering for image/view modes)
+  constructor(params: { config: BotConfig; browserIdleMs?: number }) {
     this.config = params.config;
     this.browserIdleMs = params.browserIdleMs ?? DEFAULT_BROWSER_IDLE_MS;
   }
@@ -176,14 +170,11 @@ function injectBaseHref(html: string): string {
   return html.replace("<head>", '<head><base href="http://127.0.0.1/" />');
 }
 
-<<<<<<< HEAD
 async function resolveBrowserExecutablePath(config: BotConfig): Promise<string | undefined> {
-=======
-async function resolveBrowserExecutablePath(config: OpenClawConfig): Promise<string | undefined> {
   const cacheKey = JSON.stringify({
     configPath: config.browser?.executablePath?.trim() || "",
     env: [
-      process.env.OPENCLAW_BROWSER_EXECUTABLE_PATH ?? "",
+      process.env.BOT_BROWSER_EXECUTABLE_PATH ?? "",
       process.env.BROWSER_EXECUTABLE_PATH ?? "",
       process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?? "",
     ],
@@ -208,9 +199,8 @@ async function resolveBrowserExecutablePath(config: OpenClawConfig): Promise<str
 }
 
 async function resolveBrowserExecutablePathUncached(
-  config: OpenClawConfig,
+  config: BotConfig,
 ): Promise<string | undefined> {
->>>>>>> 0abf47cfd (plugin(diffs): optimize rendering for image/view modes)
   const configPath = config.browser?.executablePath?.trim();
   if (configPath) {
     await assertExecutable(configPath, "browser.executablePath");
@@ -241,7 +231,7 @@ async function resolveBrowserExecutablePathUncached(
 }
 
 async function acquireSharedBrowser(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   idleMs: number;
 }): Promise<BrowserLease> {
   const executablePath = await resolveBrowserExecutablePath(params.config);
@@ -255,7 +245,7 @@ async function acquireSharedBrowser(params: {
       .launch({
         headless: true,
         ...(executablePath ? { executablePath } : {}),
-        args: ["--disable-dev-shm-usage"],
+        args: ["--disable-dev-shm-usage", "--disable-gpu"],
       })
       .then((browser) => {
         if (sharedBrowserState?.browserPromise === browserPromise) {
