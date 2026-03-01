@@ -400,6 +400,7 @@ class NodeRuntime(context: Context) {
     MicCaptureManager(
       context = appContext,
       scope = scope,
+<<<<<<< HEAD:apps/android/app/src/main/java/ai/hanzo/bot/android/NodeRuntime.kt
       sendToGateway = { message ->
         val sessionKey = resolveMainSessionKey()
         val runId = java.util.UUID.randomUUID().toString()
@@ -417,6 +418,23 @@ class NodeRuntime(context: Context) {
           null
         }
         parsed ?: runId
+=======
+      sendToGateway = { message, onRunIdKnown ->
+        val idempotencyKey = UUID.randomUUID().toString()
+        // Notify MicCaptureManager of the idempotency key *before* the network
+        // call so pendingRunId is set before any chat events can arrive.
+        onRunIdKnown(idempotencyKey)
+        val params =
+          buildJsonObject {
+            put("sessionKey", JsonPrimitive(resolveMainSessionKey()))
+            put("message", JsonPrimitive(message))
+            put("thinking", JsonPrimitive(chatThinkingLevel.value))
+            put("timeoutMs", JsonPrimitive(30_000))
+            put("idempotencyKey", JsonPrimitive(idempotencyKey))
+          }
+        val response = operatorSession.request("chat.send", params.toString())
+        parseChatSendRunId(response) ?: idempotencyKey
+>>>>>>> 587790e84 (fix(android): talk mode stability — thread safety, TTS fallback, mic cooldown):apps/android/app/src/main/java/ai/openclaw/android/NodeRuntime.kt
       },
       speakAssistantReply = { text ->
         voiceReplySpeaker.speakAssistantReply(text)
@@ -437,6 +455,9 @@ class NodeRuntime(context: Context) {
 
   val micEnabled: StateFlow<Boolean>
     get() = micCapture.micEnabled
+
+  val micCooldown: StateFlow<Boolean>
+    get() = micCapture.micCooldown
 
   val micQueuedMessages: StateFlow<List<String>>
     get() = micCapture.queuedMessages
