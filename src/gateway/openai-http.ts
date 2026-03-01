@@ -180,6 +180,7 @@ export async function handleOpenAiHttpRequest(
   const billing = await checkBillingAllowance({
     iamConfig: opts.iamConfig,
     tenant,
+    token: handled.authResult?.rawToken,
   });
   if (!billing.allowed) {
     sendJson(res, 402, {
