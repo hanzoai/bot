@@ -144,7 +144,7 @@ export function resolveSessionDeliveryTarget(params: {
     to,
     accountId,
     threadId: resolvedThreadId,
-    threadIdExplicit: explicitThreadId != null,
+    threadIdExplicit: explicitThreadId != null || topicThreadId != null,
     mode,
     lastChannel,
     lastTo,
