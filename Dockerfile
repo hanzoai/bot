@@ -36,6 +36,9 @@ RUN if [ -n "$BOT_INSTALL_BROWSER" ]; then \
       rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
     fi
 
+# CACHE_BUST invalidates all layers below when the commit SHA changes,
+# ensuring COPY and build always use fresh source from the current commit.
+ARG CACHE_BUST=""
 COPY . .
 RUN pnpm build
 
