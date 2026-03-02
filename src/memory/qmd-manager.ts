@@ -3,8 +3,16 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
-import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import type { BotConfig } from "../config/config.js";
+import type {
+  MemoryEmbeddingProbeResult,
+  MemoryProviderStatus,
+  MemorySearchManager,
+  MemorySearchResult,
+  MemorySource,
+  MemorySyncProgressUpdate,
+} from "./types.js";
+import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { resolveStateDir } from "../config/paths.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { isFileMissingError, statRegularFile } from "./fs-utils.js";
@@ -15,14 +23,6 @@ import {
   type SessionFileEntry,
 } from "./session-files.js";
 import { requireNodeSqlite } from "./sqlite.js";
-import type {
-  MemoryEmbeddingProbeResult,
-  MemoryProviderStatus,
-  MemorySearchManager,
-  MemorySearchResult,
-  MemorySource,
-  MemorySyncProgressUpdate,
-} from "./types.js";
 
 type SqliteDatabase = import("node:sqlite").DatabaseSync;
 import type {
@@ -38,6 +38,7 @@ const log = createSubsystemLogger("memory");
 const SNIPPET_HEADER_RE = /@@\s*-([0-9]+),([0-9]+)/;
 const SEARCH_PENDING_UPDATE_WAIT_MS = 500;
 const MAX_QMD_OUTPUT_CHARS = 200_000;
+// eslint-disable-next-line no-control-regex -- intentional: matching null bytes in output
 const NUL_MARKER_RE = /(?:\^@|\0|\x00|\u0000|null\s*byte|nul\s*byte)/i;
 const QMD_EMBED_BACKOFF_BASE_MS = 60_000;
 const QMD_EMBED_BACKOFF_MAX_MS = 60 * 60 * 1000;
@@ -193,11 +194,7 @@ export class QmdMemoryManager implements MemorySearchManager {
   private embedFailureCount = 0;
   private attemptedNullByteCollectionRepair = false;
 
-  private constructor(params: {
-    cfg: BotConfig;
-    agentId: string;
-    resolved: ResolvedQmdConfig;
-  }) {
+  private constructor(params: { cfg: BotConfig; agentId: string; resolved: ResolvedQmdConfig }) {
     this.cfg = params.cfg;
     this.agentId = params.agentId;
     this.qmd = params.resolved;
