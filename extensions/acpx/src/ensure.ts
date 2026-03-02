@@ -1,6 +1,6 @@
+import type { PluginLogger } from "bot/plugin-sdk";
 import fs from "node:fs";
 import path from "node:path";
-import type { PluginLogger } from "bot/plugin-sdk";
 import { ACPX_PINNED_VERSION, ACPX_PLUGIN_ROOT, buildAcpxLocalInstallCommand } from "./config.js";
 import { resolveSpawnFailure, spawnAndCollect } from "./runtime-internals/process.js";
 
@@ -33,7 +33,7 @@ function isExpectedVersionConfigured(value: string | undefined): value is string
 }
 
 function supportsPathResolution(command: string): boolean {
-  return path.isAbsolute(command) || command.includes("/") || command.includes("\");
+  return path.isAbsolute(command) || command.includes("/") || command.includes("\\");
 }
 
 function isUnsupportedVersionProbe(stdout: string, stderr: string): boolean {
