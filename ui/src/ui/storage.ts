@@ -1,8 +1,7 @@
 const KEY = "bot.control.settings.v1";
 
-import { isSupportedLocale } from "../i18n/index.ts";
-import { inferBasePathFromPathname, normalizeBasePath } from "./navigation.ts";
 import type { ThemeMode } from "./theme.ts";
+import { inferBasePathFromPathname, normalizeBasePath } from "./navigation.ts";
 
 export type UiSettings = {
   gatewayUrl: string;

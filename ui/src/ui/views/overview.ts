@@ -1,10 +1,8 @@
 import { html } from "lit";
-import { ConnectErrorDetailCodes } from "../../../../src/gateway/protocol/connect-error-details.js";
-import { t, i18n, SUPPORTED_LOCALES, type Locale } from "../../i18n/index.ts";
-import { buildExternalLinkRel, EXTERNAL_LINK_TARGET } from "../external-link.ts";
-import { formatRelativeTimestamp, formatDurationHuman } from "../format.ts";
 import type { GatewayHelloOk } from "../gateway.ts";
 import type { UiSettings } from "../storage.ts";
+import { t, i18n, SUPPORTED_LOCALES, type Locale } from "../../i18n/index.ts";
+import { formatRelativeTimestamp, formatDurationHuman } from "../format.ts";
 import { formatNextRun } from "../presenter.ts";
 
 export type OverviewProps = {
