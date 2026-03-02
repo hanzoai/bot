@@ -285,6 +285,10 @@ export async function handleGatewayRequest(
       respond(false, undefined, errorShape(ErrorCodes.BILLING_ERROR, billing.reason));
       return;
     }
+    // Stash billing tier on client for downstream model routing.
+    if (client && billing.tier) {
+      client.billingTier = billing.tier;
+    }
   }
 
   const handler = opts.extraHandlers?.[req.method] ?? coreGatewayHandlers[req.method];
