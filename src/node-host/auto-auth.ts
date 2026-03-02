@@ -14,8 +14,8 @@ import { openUrl } from "../commands/onboard-helpers.js";
 
 const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/login/oauth/authorize";
 const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/api/login/oauth/access_token";
-const HANZO_CLIENT_ID = "hanzobot-client-id";
-const HANZO_CLIENT_SECRET = "";
+const HANZO_CLIENT_ID = process.env.HANZO_CLIENT_ID ?? "hanzobot-client-id";
+const HANZO_CLIENT_SECRET = process.env.HANZO_CLIENT_SECRET ?? "";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 const OAUTH_TIMEOUT_MS = 3 * 60 * 1000;
