@@ -1,6 +1,6 @@
-import path from "node:path";
 import type { BotPluginApi } from "bot/plugin-sdk";
 import { resolvePreferredBotTmpDir } from "bot/plugin-sdk";
+import path from "node:path";
 import { diffsPluginConfigSchema, resolveDiffsPluginDefaults } from "./src/config.js";
 import { createDiffsHttpHandler } from "./src/http.js";
 import { DIFFS_AGENT_GUIDANCE } from "./src/prompt-guidance.js";

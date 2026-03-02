@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { withTempHome as withTempHomeBase } from "../../test/helpers/temp-home.js";
 import type { CliDeps } from "../cli/deps.js";
 import type { BotConfig } from "../config/config.js";
 import type { CronJob } from "./types.js";
+import { withTempHome as withTempHomeBase } from "../../test/helpers/temp-home.js";
 
 vi.mock("../agents/pi-embedded.js", () => ({
   abortEmbeddedPiRun: vi.fn().mockReturnValue(false),
@@ -46,11 +46,7 @@ async function writeSessionStore(home: string) {
   return storePath;
 }
 
-function makeCfg(
-  home: string,
-  storePath: string,
-  overrides: Partial<BotConfig> = {},
-): BotConfig {
+function makeCfg(home: string, storePath: string, overrides: Partial<BotConfig> = {}): BotConfig {
   const base: BotConfig = {
     agents: {
       defaults: {
