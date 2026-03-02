@@ -1,8 +1,8 @@
+import type { Mock } from "vitest";
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { Mock } from "vitest";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { logWarnMock, logDebugMock, logInfoMock } = vi.hoisted(() => ({
@@ -61,7 +61,7 @@ function isMcporterCommand(cmd: unknown): boolean {
   if (typeof cmd !== "string") {
     return false;
   }
-  return /(^|[\/])mcporter(?:\.cmd)?$/i.test(cmd);
+  return /(^|[/])mcporter(?:\.cmd)?$/i.test(cmd);
 }
 
 vi.mock("../logging/subsystem.js", () => ({
@@ -838,8 +838,7 @@ describe("QmdMemoryManager", () => {
           emitAndClose(
             child,
             "stdout",
-            JSON.stringify([{ docid: expectedDocId, score: 1, snippet: "@@ -1,1
-remember this" }]),
+            JSON.stringify([{ docid: expectedDocId, score: 1, snippet: "@@ -1,1\nremember this" }]),
           );
           return child;
         }
@@ -874,8 +873,7 @@ remember this" }]),
         startLine: 1,
         endLine: 1,
         score: 1,
-        snippet: "@@ -1,1
-remember this",
+        snippet: "@@ -1,1\nremember this",
         source: "memory",
       },
     ]);
@@ -1448,7 +1446,7 @@ remember this",
     );
     expect(mcporterCall).toBeDefined();
     const spawnOpts = mcporterCall?.[2] as { env?: NodeJS.ProcessEnv } | undefined;
-    const normalizePath = (value?: string) => value?.replace(/\/g, "/");
+    const normalizePath = (value?: string) => value?.replace(/\\/g, "/");
     expect(normalizePath(spawnOpts?.env?.XDG_CONFIG_HOME)).toContain("/agents/main/qmd/xdg-config");
     expect(normalizePath(spawnOpts?.env?.XDG_CACHE_HOME)).toContain("/agents/main/qmd/xdg-cache");
 
@@ -1583,8 +1581,7 @@ remember this",
         emitAndClose(
           child,
           "stdout",
-          JSON.stringify([{ docid: "m1", score: 0.6, snippet: "@@ -1,1
-memory fact" }]),
+          JSON.stringify([{ docid: "m1", score: 0.6, snippet: "@@ -1,1\nmemory fact" }]),
         );
         return child;
       }
@@ -1594,14 +1591,10 @@ memory fact" }]),
           child,
           "stdout",
           JSON.stringify([
-            { docid: "s1", score: 0.99, snippet: "@@ -1,1
-session top 1" },
-            { docid: "s2", score: 0.95, snippet: "@@ -1,1
-session top 2" },
-            { docid: "s3", score: 0.91, snippet: "@@ -1,1
-session top 3" },
-            { docid: "s4", score: 0.88, snippet: "@@ -1,1
-session top 4" },
+            { docid: "s1", score: 0.99, snippet: "@@ -1,1\nsession top 1" },
+            { docid: "s2", score: 0.95, snippet: "@@ -1,1\nsession top 2" },
+            { docid: "s3", score: 0.91, snippet: "@@ -1,1\nsession top 3" },
+            { docid: "s4", score: 0.88, snippet: "@@ -1,1\nsession top 4" },
           ]),
         );
         return child;
@@ -1875,9 +1868,7 @@ session top 4" },
     const { manager } = await createManager();
 
     const result = await manager.readFile({ relPath: "window.md", from: 10, lines: 3 });
-    expect(result.text).toBe("line-10
-line-11
-line-12");
+    expect(result.text).toBe("line-10\nline-11\nline-12");
     expect(readFileSpy).not.toHaveBeenCalled();
 
     await manager.close();
@@ -1887,9 +1878,7 @@ line-12");
   it("returns empty text when qmd files are missing before or during read", async () => {
     const relPath = "qmd-window.md";
     const absPath = path.join(workspaceDir, relPath);
-    await fs.writeFile(absPath, "one
-two
-three", "utf-8");
+    await fs.writeFile(absPath, "one\ntwo\nthree", "utf-8");
 
     const cases = [
       {
@@ -1941,8 +1930,7 @@ three", "utf-8");
     const sessionFile = path.join(sessionsDir, "session-1.jsonl");
     await fs.writeFile(
       sessionFile,
-      '{"type":"message","message":{"role":"user","content":"hello"}}
-',
+      '{"type":"message","message":{"role":"user","content":"hello"}}\n',
       "utf-8",
     );
 
@@ -1972,8 +1960,7 @@ three", "utf-8");
 
     await fs.writeFile(
       sessionFile,
-      '{"type":"message","message":{"role":"user","content":"follow-up update"}}
-',
+      '{"type":"message","message":{"role":"user","content":"follow-up update"}}\n',
       "utf-8",
     );
     await manager.sync({ reason: "manual" });
@@ -2024,8 +2011,7 @@ three", "utf-8");
               emitAndClose(
                 child,
                 "stdout",
-                JSON.stringify([{ docid: "abc123", score: 1, snippet: "@@ -1,1
-remember this" }]),
+                JSON.stringify([{ docid: "abc123", score: 1, snippet: "@@ -1,1\nremember this" }]),
               );
               return child;
             }
@@ -2076,9 +2062,7 @@ remember this" }]),
           child,
           "stdout",
           JSON.stringify([
-            { docid: exactDocid, score: 1, snippet: "@@ -5,2
-remember this
-next line" },
+            { docid: exactDocid, score: 1, snippet: "@@ -5,2\nremember this\nnext line" },
           ]),
         );
         return child;
@@ -2117,9 +2101,7 @@ next line" },
         startLine: 5,
         endLine: 6,
         score: 1,
-        snippet: "@@ -5,2
-remember this
-next line",
+        snippet: "@@ -5,2\nremember this\nnext line",
         source: "memory",
       },
     ]);
@@ -2154,8 +2136,7 @@ next line",
           child,
           "stdout",
           JSON.stringify([
-            { docid: duplicateDocid, score: 0.9, snippet: "@@ -3,1
-workspace hit" },
+            { docid: duplicateDocid, score: 0.9, snippet: "@@ -3,1\nworkspace hit" },
           ]),
         );
         return child;
@@ -2194,8 +2175,7 @@ workspace hit" },
         startLine: 3,
         endLine: 3,
         score: 0.9,
-        snippet: "@@ -3,1
-workspace hit",
+        snippet: "@@ -3,1\nworkspace hit",
         source: "memory",
       },
     ]);
@@ -2224,11 +2204,8 @@ workspace hit",
   it("treats plain-text no-results markers from stdout/stderr as empty result sets", async () => {
     const cases = [
       { name: "stdout with punctuation", stream: "stdout", payload: "No results found." },
-      { name: "stdout without punctuation", stream: "stdout", payload: "No results found
-
-" },
-      { name: "stderr", stream: "stderr", payload: "No results found.
-" },
+      { name: "stdout without punctuation", stream: "stdout", payload: "No results found\n\n" },
+      { name: "stderr", stream: "stderr", payload: "No results found.\n" },
     ] as const;
 
     for (const testCase of cases) {

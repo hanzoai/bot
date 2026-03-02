@@ -335,7 +335,7 @@ describe("models-config", () => {
           },
         };
 
-        await ensureHanzo BotModelsJson(cfg);
+        await ensureBotModelsJson(cfg);
         const parsed = await readGeneratedModelsJson<{
           providers: Record<
             string,

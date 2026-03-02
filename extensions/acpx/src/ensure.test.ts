@@ -42,8 +42,7 @@ describe("acpx ensure", () => {
       JSON.stringify({ name: "acpx", version }, null, 2),
       "utf8",
     );
-    fs.writeFileSync(path.join(packageRoot, "dist", "cli.js"), "#!/usr/bin/env node
-", "utf8");
+    fs.writeFileSync(path.join(packageRoot, "dist", "cli.js"), "#!/usr/bin/env node\n", "utf8");
     const binPath = path.join(root, "node_modules", ".bin", "acpx");
     fs.symlinkSync(path.join(packageRoot, "dist", "cli.js"), binPath);
     return binPath;
@@ -84,8 +83,7 @@ describe("acpx ensure", () => {
 
   it("reports version mismatch", async () => {
     spawnAndCollectMock.mockResolvedValueOnce({
-      stdout: "acpx 0.0.9
-",
+      stdout: "acpx 0.0.9\n",
       stderr: "",
       code: 0,
       error: null,
@@ -130,8 +128,7 @@ describe("acpx ensure", () => {
 
   it("accepts command availability when expectedVersion is unset", async () => {
     spawnAndCollectMock.mockResolvedValueOnce({
-      stdout: "Usage: acpx [options]
-",
+      stdout: "Usage: acpx [options]\n",
       stderr: "",
       code: 0,
       error: null,
@@ -158,15 +155,13 @@ describe("acpx ensure", () => {
   it("installs and verifies pinned acpx when precheck fails", async () => {
     spawnAndCollectMock
       .mockResolvedValueOnce({
-        stdout: "acpx 0.0.9
-",
+        stdout: "acpx 0.0.9\n",
         stderr: "",
         code: 0,
         error: null,
       })
       .mockResolvedValueOnce({
-        stdout: "added 1 package
-",
+        stdout: "added 1 package\n",
         stderr: "",
         code: 0,
         error: null,
@@ -196,8 +191,7 @@ describe("acpx ensure", () => {
   it("fails with actionable error when npm install fails", async () => {
     spawnAndCollectMock
       .mockResolvedValueOnce({
-        stdout: "acpx 0.0.9
-",
+        stdout: "acpx 0.0.9\n",
         stderr: "",
         code: 0,
         error: null,
@@ -241,8 +235,7 @@ describe("acpx ensure", () => {
 
   it("uses expectedVersion for install command metadata", async () => {
     spawnAndCollectMock.mockResolvedValueOnce({
-      stdout: "acpx 0.0.9
-",
+      stdout: "acpx 0.0.9\n",
       stderr: "",
       code: 0,
       error: null,
