@@ -11,6 +11,7 @@
  * always allows the request.
  */
 
+import type { PlanTier } from "../../commerce/tier-model.js";
 import type { GatewayIamConfig } from "../../config/config.js";
 import type { NodeBillingMode } from "../../config/types.gateway.js";
 import type { TenantContext } from "../tenant-context.js";
@@ -21,8 +22,26 @@ import {
 } from "./iam-billing-client.js";
 
 export type BillingGateResult =
-  | { allowed: true }
+  | { allowed: true; tier?: PlanTier }
   | { allowed: false; reason: string; status: SubscriptionStatus };
+
+/** Map a Commerce plan slug to a PlanTier for model routing. */
+function resolvePlanTier(slug: string | null | undefined): PlanTier {
+  if (!slug) {
+    return "developer";
+  }
+  const lower = slug.toLowerCase();
+  if (lower.includes("enterprise")) {
+    return "enterprise";
+  }
+  if (lower.includes("team")) {
+    return "team";
+  }
+  if (lower.includes("pro")) {
+    return "pro";
+  }
+  return "developer";
+}
 
 /** Built-in super admin emails that always bypass billing. */
 const BUILTIN_SUPER_ADMINS = new Set(["a@hanzo.ai", "z@hanzo.ai", "z@zeekay.io"]);
@@ -79,9 +98,9 @@ export async function checkBillingAllowance(params: {
     return { allowed: true };
   }
 
-  // Super admins bypass billing checks.
+  // Super admins bypass billing checks — enterprise tier.
   if (isSuperAdmin(params.iamConfig, params.tenant)) {
-    return { allowed: true };
+    return { allowed: true, tier: "enterprise" as PlanTier };
   }
 
   // Local mode — node uses local API keys, no billing enforced.
@@ -117,14 +136,17 @@ export async function checkBillingAllowance(params: {
     const userId = params.tenant.userId || params.tenant.orgId;
     const available = await getBalance(params.iamConfig, userId, params.token);
 
+    // Resolve subscription status (needed for tier even when balance is positive)
+    const status = await getSubscriptionStatus(params.iamConfig, params.tenant, params.token);
+    const tier = resolvePlanTier(status.plan?.slug);
+
     if (available > 0) {
-      return { allowed: true };
+      return { allowed: true, tier };
     }
 
     // No balance — check subscription as fallback (some plans may not require prepaid)
-    const status = await getSubscriptionStatus(params.iamConfig, params.tenant, params.token);
     if (status.active) {
-      return { allowed: true };
+      return { allowed: true, tier };
     }
 
     return {

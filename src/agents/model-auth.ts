@@ -307,6 +307,10 @@ export function resolveEnvApiKey(provider: string): EnvApiKeyResult | null {
     return pick("HANZO_API_KEY");
   }
 
+  if (normalized === "digitalocean") {
+    return pick("DIGITALOCEAN_ACCESS_TOKEN") ?? pick("GRADIENT_MODEL_ACCESS_KEY");
+  }
+
   const envMap: Record<string, string> = {
     openai: "OPENAI_API_KEY",
     google: "GEMINI_API_KEY",
