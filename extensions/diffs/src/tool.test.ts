@@ -1,7 +1,7 @@
+import type { BotPluginApi } from "bot/plugin-sdk";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { BotPluginApi } from "bot/plugin-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_DIFFS_TOOL_DEFAULTS } from "./config.js";
 import { DiffArtifactStore } from "./store.js";
