@@ -1,7 +1,7 @@
+import type { BotConfig } from "bot/plugin-sdk";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { BotConfig } from "bot/plugin-sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { launchMock } = vi.hoisted(() => ({
