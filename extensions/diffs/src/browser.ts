@@ -1,7 +1,7 @@
+import type { BotConfig } from "bot/plugin-sdk";
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { BotConfig } from "bot/plugin-sdk";
 import { chromium } from "playwright-core";
 import type { DiffTheme } from "./types.js";
 import { VIEWER_ASSET_PREFIX, getServedViewerAsset } from "./viewer-assets.js";
