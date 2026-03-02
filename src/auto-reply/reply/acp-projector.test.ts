@@ -917,8 +917,7 @@ describe("createAcpReplyProjector", () => {
 
     await projector.onEvent({
       type: "text_delta",
-      text: "fallback.
-",
+      text: "fallback.\n",
       tag: "agent_message_chunk",
     });
     await projector.onEvent({
@@ -936,8 +935,7 @@ describe("createAcpReplyProjector", () => {
       .filter((entry) => entry.kind === "block")
       .map((entry) => entry.text ?? "")
       .join("");
-    expect(combinedText).toBe("fallback.
-I don't");
+    expect(combinedText).toBe("fallback.\nI don't");
   });
 
   it("does not insert boundary separator for hidden non-tool status updates", async () => {
