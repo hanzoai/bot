@@ -1,10 +1,10 @@
-import fs from "node:fs/promises";
-import { Static, Type } from "@sinclair/typebox";
 import type { AnyAgentTool, BotPluginApi } from "bot/plugin-sdk";
-import { PlaywrightDiffScreenshotter, type DiffScreenshotter } from "./browser.js";
-import { renderDiffDocument } from "./render.js";
+import { Static, Type } from "@sinclair/typebox";
+import fs from "node:fs/promises";
 import type { DiffArtifactStore } from "./store.js";
 import type { DiffToolDefaults } from "./types.js";
+import { PlaywrightDiffScreenshotter, type DiffScreenshotter } from "./browser.js";
+import { renderDiffDocument } from "./render.js";
 import {
   DIFF_LAYOUTS,
   DIFF_MODES,
