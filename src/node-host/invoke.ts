@@ -947,11 +947,12 @@ async function openVncTunnel(tunnelId: string, tunnelUrl: string): Promise<void>
     const tcp = createConnection({ host: vncHost, port: vncPort }, () => {
       log("VNC TCP connected — relaying data");
 
-      // RFB handshake state machine:
-      //   phase 0: waiting for server version (12 bytes)
-      //   phase 1: waiting for security-types message (after client version sent)
+      // RFB handshake state machine (with proper TCP chunk buffering):
+      //   phase 0: buffering server version (exactly 12 bytes, e.g. "RFB 003.889\n")
+      //   phase 1: buffering security-types message (1 count byte + N type bytes)
       //   phase 2: passthrough (handshake complete, relay everything as-is)
       let phase = 0;
+      let handshakeBuf = Buffer.alloc(0);
 
       // TCP → WS (with security-type filtering during handshake)
       tcp.on("data", (data: Buffer) => {
@@ -959,32 +960,65 @@ async function openVncTunnel(tunnelId: string, tunnelUrl: string): Promise<void>
           return;
         }
 
-        if (phase === 0) {
-          // Server version string (e.g. "RFB 003.889\n") — pass through.
+        if (phase === 2) {
           ws.send(data);
-          phase = 1;
           return;
         }
 
+        // Buffer handshake data until we have a complete message
+        handshakeBuf = Buffer.concat([handshakeBuf, data]);
+
+        if (phase === 0) {
+          // Server version is always 12 bytes (e.g. "RFB 003.889\n")
+          if (handshakeBuf.length < 12) {
+            return;
+          }
+          ws.send(handshakeBuf.subarray(0, 12));
+          handshakeBuf = handshakeBuf.subarray(12);
+          phase = 1;
+          // Fall through to check if security types are also in buffer
+        }
+
         if (phase === 1) {
-          // Security types message: filter to noVNC-supported types.
-          const filtered = filterVncSecurityTypes(data);
+          // Security types: first byte is count, then N type bytes
+          if (handshakeBuf.length < 1) {
+            return;
+          }
+          const numTypes = handshakeBuf[0];
+          if (numTypes === 0) {
+            // Error from server (RFB 003.008 format: 0 types followed by error)
+            ws.send(handshakeBuf);
+            handshakeBuf = Buffer.alloc(0);
+            phase = 2;
+            return;
+          }
+          if (handshakeBuf.length < 1 + numTypes) {
+            return;
+          }
+
+          const secTypesMsg = handshakeBuf.subarray(0, 1 + numTypes);
+          const remainder = handshakeBuf.subarray(1 + numTypes);
+
+          const filtered = filterVncSecurityTypes(secTypesMsg);
           if (!filtered) {
             log("VNC server offers no noVNC-compatible security types");
             ws.close(1011, "No compatible VNC security types");
             tcp.end();
             return;
           }
-          const origCount = data[0];
+          const origCount = secTypesMsg[0];
           const filteredCount = filtered[0];
           log(`filtered security types: ${origCount} → ${filteredCount} types`);
           ws.send(filtered);
-          phase = 2;
-          return;
-        }
 
-        // phase 2: passthrough
-        ws.send(data);
+          handshakeBuf = Buffer.alloc(0);
+          phase = 2;
+
+          // Forward any remaining data that arrived after the security types
+          if (remainder.length > 0) {
+            ws.send(remainder);
+          }
+        }
       });
       tcp.on("end", () => ws.close(1000, "VNC server closed"));
       tcp.on("error", (err) => ws.close(1011, `VNC error: ${err.message}`));
