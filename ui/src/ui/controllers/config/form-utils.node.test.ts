@@ -114,12 +114,13 @@ describe("form-utils preserves numeric types", () => {
     const xai = providers.xai as Record<string, unknown>;
     const models = xai.models as Array<Record<string, unknown>>;
     const first = models[0];
+    const cost = first.cost as Record<string, unknown>;
 
     expect(typeof first.maxTokens).toBe("number");
     expect(first.maxTokens).toBe(8192);
     expect(typeof first.contextWindow).toBe("number");
-    expect(typeof first.cost).toBe("object");
-    expect(typeof (first.cost as Record<string, unknown>).input).toBe("number");
+    expect(typeof cost).toBe("object");
+    expect(typeof cost.input).toBe("number");
   });
 });
 
