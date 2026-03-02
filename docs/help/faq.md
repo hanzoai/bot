@@ -1291,9 +1291,9 @@ Related: [Agent workspace](/concepts/agent-workspace), [Memory](/concepts/memory
 
 Everything lives under `$BOT_STATE_DIR` (default: `~/.hanzo/bot`):
 
-| Path                                                            | Purpose                                                            |
-| --------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `$BOT_STATE_DIR/bot.json`                             | Main config (JSON5)                                                |
+| Path                                                       | Purpose                                                            |
+| ---------------------------------------------------------- | ------------------------------------------------------------------ |
+| `$BOT_STATE_DIR/bot.json`                                  | Main config (JSON5)                                                |
 | `$BOT_STATE_DIR/credentials/oauth.json`                    | Legacy OAuth import (copied into auth profiles on first use)       |
 | `$BOT_STATE_DIR/agents/<agentId>/agent/auth-profiles.json` | Auth profiles (OAuth, API keys, and optional `keyRef`/`tokenRef`)  |
 | `$BOT_STATE_DIR/secrets.json`                              | Optional file-backed secret payload for `file` SecretRef providers |
