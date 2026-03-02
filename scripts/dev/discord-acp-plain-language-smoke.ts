@@ -221,9 +221,7 @@ function parseArgs(): Args {
     process.env.DISCORD_BOT_TOKEN ||
     "";
   const botTokenPrefix =
-    resolveArg("--bot-token-prefix") ||
-    process.env.BOT_DISCORD_SMOKE_BOT_TOKEN_PREFIX ||
-    "Bot";
+    resolveArg("--bot-token-prefix") || process.env.BOT_DISCORD_SMOKE_BOT_TOKEN_PREFIX || "Bot";
   const targetAgent =
     resolveArg("--agent") ||
     process.env.BOT_DISCORD_SMOKE_AGENT ||
@@ -252,8 +250,7 @@ function parseArgs(): Args {
     resolveArg("--thread-bindings-path") ||
     process.env.BOT_DISCORD_SMOKE_THREAD_BINDINGS_PATH ||
     defaultBindingsPath;
-  const botBin =
-    resolveArg("--bot-bin") || process.env.BOT_DISCORD_SMOKE_BOT_BIN || "bot";
+  const botBin = resolveArg("--bot-bin") || process.env.BOT_DISCORD_SMOKE_BOT_BIN || "bot";
   const json = hasFlag("--json");
 
   if (!channelId) {

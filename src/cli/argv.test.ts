@@ -179,9 +179,7 @@ describe("argv helpers", () => {
   it("parses verbose flags", () => {
     expect(getVerboseFlag(["node", "bot", "status", "--verbose"])).toBe(true);
     expect(getVerboseFlag(["node", "bot", "status", "--debug"])).toBe(false);
-    expect(getVerboseFlag(["node", "bot", "status", "--debug"], { includeDebug: true })).toBe(
-      true,
-    );
+    expect(getVerboseFlag(["node", "bot", "status", "--debug"], { includeDebug: true })).toBe(true);
   });
 
   it.each([

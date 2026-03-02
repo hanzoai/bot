@@ -1,4 +1,3 @@
-import { createInterface } from "node:readline";
 import type {
   AcpRuntimeCapabilities,
   AcpRuntimeDoctorReport,
@@ -12,6 +11,7 @@ import type {
   PluginLogger,
 } from "bot/plugin-sdk";
 import { AcpRuntimeError } from "bot/plugin-sdk";
+import { createInterface } from "node:readline";
 import { type ResolvedAcpxPluginConfig } from "./config.js";
 import { checkAcpxVersion } from "./ensure.js";
 import {

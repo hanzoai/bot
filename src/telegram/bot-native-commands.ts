@@ -9,6 +9,7 @@ import type {
   TelegramTopicConfig,
 } from "../config/types.js";
 import type { RuntimeEnv } from "../runtime.js";
+import type { TelegramMediaRef } from "./bot-message-context.js";
 import type { TelegramContext } from "./bot/types.js";
 import { resolveChunkMode } from "../auto-reply/chunk.js";
 import {
@@ -38,7 +39,6 @@ import { resolveAgentRoute } from "../routing/resolve-route.js";
 import { resolveThreadSessionKeys } from "../routing/session-key.js";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import { firstDefined, isSenderAllowed, normalizeDmAllowFromWithStore } from "./bot-access.js";
-import type { TelegramMediaRef } from "./bot-message-context.js";
 import {
   buildCappedTelegramMenuCommands,
   buildPluginTelegramMenuCommands,
