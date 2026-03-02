@@ -724,6 +724,31 @@ export function buildNvidiaProvider(): ProviderConfig {
 }
 
 // ---------------------------------------------------------------------------
+// DigitalOcean GenAI — direct access for self-hosted deployments
+// ---------------------------------------------------------------------------
+
+const DO_GENAI_BASE_URL = "https://inference.do-ai.run/v1";
+
+/** Build DigitalOcean GenAI provider with Claude Sonnet 4.6 (cheap free-tier default). */
+export function buildDigitalOceanProvider(): ProviderConfig {
+  return {
+    baseUrl: DO_GENAI_BASE_URL,
+    api: "openai-completions",
+    models: [
+      {
+        id: "claude-sonnet-4-6",
+        name: "Claude Sonnet 4.6 (DigitalOcean)",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 3.6, output: 18, cacheRead: 0.36, cacheWrite: 4.5 },
+        contextWindow: 1000000,
+        maxTokens: 16384,
+      },
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Hanzo Cloud — routes through api.hanzo.ai with IAM JWT auth
 // ---------------------------------------------------------------------------
 
@@ -1084,6 +1109,14 @@ export async function resolveImplicitProviders(params: {
     resolveApiKeyFromProfiles({ provider: "hanzo-iam", store: authStore });
   if (hanzoKey) {
     providers.hanzo = { ...buildHanzoCloudProvider(), apiKey: hanzoKey };
+  }
+
+  // DigitalOcean GenAI — for self-hosted direct access (bypasses Hanzo gateway).
+  const doToken =
+    resolveEnvApiKeyVarName("digitalocean") ??
+    resolveApiKeyFromProfiles({ provider: "digitalocean", store: authStore });
+  if (doToken) {
+    providers.digitalocean = { ...buildDigitalOceanProvider(), apiKey: doToken };
   }
 
   return providers;
