@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import * as noteModule from "../terminal/note.js";
 import { withTempHome } from "../../test/helpers/temp-home.js";
+import * as noteModule from "../terminal/note.js";
 import { loadAndMaybeMigrateDoctorConfig } from "./doctor-config-flow.js";
 
 async function runDoctorConfigWithInput(params: {
@@ -35,28 +35,6 @@ async function collectDoctorWarnings(config: Record<string, unknown>): Promise<s
     noteSpy.mockRestore();
   }
 }
-
-type DiscordGuildRule = {
-  users: string[];
-  roles: string[];
-  channels: Record<string, { users: string[]; roles: string[] }>;
-};
-
-type DiscordAccountRule = {
-  allowFrom?: string[];
-  dm?: { allowFrom: string[]; groupChannels: string[] };
-  execApprovals?: { approvers: string[] };
-  guilds?: Record<string, DiscordGuildRule>;
-};
-
-type RepairedDiscordPolicy = {
-  allowFrom?: string[];
-  dm: { allowFrom: string[]; groupChannels: string[] };
-  execApprovals: { approvers: string[] };
-  guilds: Record<string, DiscordGuildRule>;
-  accounts: Record<string, DiscordAccountRule>;
-};
-
 
 describe("doctor config flow", () => {
   it("preserves invalid config for doctor repairs", async () => {
@@ -127,7 +105,6 @@ describe("doctor config flow", () => {
       ),
     ).toBe(true);
   });
-
 
   it("drops unknown keys on repair", async () => {
     const result = await runDoctorConfigWithInput({
