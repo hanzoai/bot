@@ -1,6 +1,7 @@
 import type { ModelCatalogEntry } from "../../agents/model-catalog.js";
 import type { createDefaultDeps } from "../../cli/deps.js";
 import type { HealthSummary } from "../../commands/health.js";
+import type { PlanTier } from "../../commerce/tier-model.js";
 import type { GatewayIamConfig } from "../../config/config.js";
 import type { CronService } from "../../cron/service.js";
 import type { createSubsystemLogger } from "../../logging/subsystem.js";
@@ -23,6 +24,8 @@ export type GatewayClient = {
   clientIp?: string;
   /** Resolved tenant context (multi-tenant IAM mode). */
   tenant?: TenantContext;
+  /** Billing tier resolved from the tenant's subscription plan. */
+  billingTier?: PlanTier;
   canvasHostUrl?: string;
   canvasCapability?: string;
   canvasCapabilityExpiresAtMs?: number;
