@@ -1,5 +1,5 @@
-import os from "node:os";
 import type { BotConfig } from "bot/plugin-sdk";
+import os from "node:os";
 
 const DEFAULT_GATEWAY_PORT = 18789;
 
