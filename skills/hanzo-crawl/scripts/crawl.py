@@ -29,7 +29,7 @@ import urllib.error
 
 def build_request_body(args: argparse.Namespace) -> dict:
     body: dict = {
-        "urls": [args.url],
+        "urls": args.url,
         "word_count_threshold": args.word_count_threshold,
     }
 
@@ -55,7 +55,7 @@ def build_request_body(args: argparse.Namespace) -> dict:
 
 def poll_task(base_url: str, token: str, task_id: str, timeout: int = 300) -> dict:
     """Poll a Crawl4AI async task until completion or timeout."""
-    url = f"{base_url}/crawl/job/{task_id}"
+    url = f"{base_url}/task/{task_id}"
     headers = {
         "Accept": "application/json",
         "User-Agent": "hanzo-bot/1.0",
@@ -135,6 +135,7 @@ def crawl(args: argparse.Namespace) -> dict:
 
     # Synchronous response (single-page crawl may return directly).
     return result
+
 
 
 def format_result_item(crawl_result: dict) -> list[str]:
