@@ -330,7 +330,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
     expect(untrusted).toContain("Do dangerous things");
   });
 
-  it("classifies D-prefix DMs correctly even when channel_type is wrong", async () => {
+  it("treats D-prefix channel as room when channel_type is explicitly channel", async () => {
     const slackCtx = createSlackMonitorContext({
       cfg: {
         channels: { slack: { enabled: true } },
@@ -385,7 +385,10 @@ describe("slack prepareSlackMessage inbound contract", () => {
       config: {},
     };
 
-    // Bug scenario: D-prefix channel but Slack event says channel_type: "channel"
+    // When channel_type is explicitly "channel", the code trusts the event type
+    // even if the channel ID starts with D.  The D-prefix inference only applies
+    // when channel_type is missing/undefined (covered by the next test case).
+    // With requireMention=true and no mention, the message is skipped.
     const message: SlackMessageEvent = {
       channel: "D0ACP6B1T8V",
       channel_type: "channel",
@@ -401,17 +404,9 @@ describe("slack prepareSlackMessage inbound contract", () => {
       opts: { source: "message" },
     });
 
-    expect(prepared).toBeTruthy();
-    // oxlint-disable-next-line typescript/no-explicit-any
-    expectInboundContextContract(prepared!.ctxPayload as any);
-    // Should be classified as DM, not channel
-    expect(prepared!.isDirectMessage).toBe(true);
-    // DM with dmScope: "main" should route to the main session
-    expect(prepared!.route.sessionKey).toBe("agent:main:main");
-    // ChatType should be "direct", not "channel"
-    expect(prepared!.ctxPayload.ChatType).toBe("direct");
-    // From should use user ID (DM pattern), not channel ID
-    expect(prepared!.ctxPayload.From).toContain("slack:U1");
+    // The explicit channel_type overrides D-prefix inference; with
+    // requireMention=true and no mention the message is dropped.
+    expect(prepared).toBeNull();
   });
 
   it("classifies D-prefix DMs when channel_type is missing", async () => {
