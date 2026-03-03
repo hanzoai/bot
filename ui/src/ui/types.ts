@@ -1,5 +1,4 @@
 export type UpdateAvailable = import("../../../src/infra/update-startup.js").UpdateAvailable;
-import type { CronJobBase } from "../../../src/cron/types-shared.js";
 import type { ConfigUiHints } from "../../../src/shared/config-ui-hints-types.js";
 import type {
   GatewayAgentRow as SharedGatewayAgentRow,
@@ -483,13 +482,6 @@ export type CronFailureAlert = {
   accountId?: string;
 };
 
-export type CronFailureAlert = {
-  after?: number;
-  channel?: string;
-  to?: string;
-  cooldownMs?: number;
-};
-
 export type CronJobState = {
   nextRunAtMs?: number;
   runningAtMs?: number;
@@ -503,6 +495,7 @@ export type CronJobState = {
 export type CronJob = {
   id: string;
   agentId?: string;
+  sessionKey?: string;
   name: string;
   description?: string;
   enabled: boolean;
