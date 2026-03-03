@@ -172,10 +172,14 @@ class Embeddings {
   }
 
   async embed(text: string): Promise<number[]> {
-    const response = await this.client.embeddings.create({
+    const params: { model: string; input: string; dimensions?: number } = {
       model: this.model,
       input: text,
-    });
+    };
+    if (this.dimensions) {
+      params.dimensions = this.dimensions;
+    }
+    const response = await this.client.embeddings.create(params);
     return response.data[0].embedding;
   }
 }

@@ -80,6 +80,8 @@ export const discordOutbound: ChannelOutboundAdapter = {
   textChunkLimit: 2000,
   pollMaxOptions: 10,
   resolveTarget: ({ to }) => normalizeDiscordOutboundTarget(to),
+  sendPayload: async (ctx) =>
+    await sendTextMediaPayload({ channel: "discord", ctx, adapter: discordOutbound }),
   sendText: async ({ to, text, accountId, deps, replyToId, threadId, identity, silent }) => {
     if (!silent) {
       const webhookResult = await maybeSendDiscordWebhookText({

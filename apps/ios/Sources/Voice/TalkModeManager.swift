@@ -7,6 +7,23 @@ import Observation
 import OSLog
 import Speech
 
+private final class StreamFailureBox: @unchecked Sendable {
+    private let lock = NSLock()
+    private var valueInternal: Error?
+
+    func set(_ error: Error) {
+        self.lock.lock()
+        self.valueInternal = error
+        self.lock.unlock()
+    }
+
+    var value: Error? {
+        self.lock.lock()
+        defer { self.lock.unlock() }
+        return self.valueInternal
+    }
+}
+
 // This file intentionally centralizes talk mode state + behavior.
 // It's large, and splitting would force `private` -> `fileprivate` across many members.
 // We'll refactor into smaller files when the surface stabilizes.
@@ -67,6 +84,9 @@ final class TalkModeManager: NSObject {
     private var mainSessionKey: String = "main"
     private var fallbackVoiceId: String?
     private var lastPlaybackWasPCM: Bool = false
+    /// Set when the ElevenLabs API rejects PCM format (e.g. 403 subscription_required).
+    /// Once set, all subsequent requests in this session use MP3 instead of re-trying PCM.
+    private var pcmFormatUnavailable: Bool = false
     var pcmPlayer: PCMStreamingAudioPlaying = PCMStreamingAudioPlayer.shared
     var mp3Player: StreamingAudioPlaying = StreamingAudioPlayer.shared
 
@@ -970,9 +990,12 @@ final class TalkModeManager: NSObject {
                 self.logger.warning("unknown voice alias \(requestedVoice ?? "?", privacy: .public)")
             }
 
-            let resolvedKey =
-                (self.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? self.apiKey : nil) ??
-                ProcessInfo.processInfo.environment["ELEVENLABS_API_KEY"]
+            let configuredKey = self.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? self.apiKey : nil
+            #if DEBUG
+            let resolvedKey = configuredKey ?? ProcessInfo.processInfo.environment["ELEVENLABS_API_KEY"]
+            #else
+            let resolvedKey = configuredKey
+            #endif
             let apiKey = resolvedKey?.trimmingCharacters(in: .whitespacesAndNewlines)
             let preferredVoice = resolvedVoice ?? self.currentVoiceId ?? self.defaultVoiceId
             let voiceId: String? = if let apiKey, !apiKey.isEmpty {
@@ -987,7 +1010,8 @@ final class TalkModeManager: NSObject {
                 let desiredOutputFormat = (directive?.outputFormat ?? self.defaultOutputFormat)?
                     .trimmingCharacters(in: .whitespacesAndNewlines)
                 let requestedOutputFormat = (desiredOutputFormat?.isEmpty == false) ? desiredOutputFormat : nil
-                let outputFormat = ElevenLabsTTSClient.validatedOutputFormat(requestedOutputFormat ?? "pcm_44100")
+                let outputFormat = ElevenLabsTTSClient.validatedOutputFormat(
+                    requestedOutputFormat ?? self.effectiveDefaultOutputFormat)
                 if outputFormat == nil, let requestedOutputFormat {
                     self.logger.warning(
                         "talk output_format unsupported for local playback: \(requestedOutputFormat, privacy: .public)")
@@ -1016,7 +1040,7 @@ final class TalkModeManager: NSObject {
                 let request = makeRequest(outputFormat: outputFormat)
 
                 let client = ElevenLabsTTSClient(apiKey: apiKey)
-                let stream = client.streamSynthesize(voiceId: voiceId, request: request)
+                let rawStream = client.streamSynthesize(voiceId: voiceId, request: request)
 
                 if self.interruptOnSpeech {
                     do {
@@ -1031,11 +1055,16 @@ final class TalkModeManager: NSObject {
                 let sampleRate = TalkTTSValidation.pcmSampleRate(from: outputFormat)
                 let result: StreamingPlaybackResult
                 if let sampleRate {
+                    let streamFailure = StreamFailureBox()
+                    let stream = Self.monitorStreamFailures(rawStream, failureBox: streamFailure)
                     self.lastPlaybackWasPCM = true
                     var playback = await self.pcmPlayer.play(stream: stream, sampleRate: sampleRate)
                     if !playback.finished, playback.interruptedAt == nil {
-                        let mp3Format = ElevenLabsTTSClient.validatedOutputFormat("mp3_44100")
+                        let mp3Format = ElevenLabsTTSClient.validatedOutputFormat("mp3_44100_128")
                         self.logger.warning("pcm playback failed; retrying mp3")
+                        if Self.isPCMFormatRejectedByAPI(streamFailure.value) {
+                            self.pcmFormatUnavailable = true
+                        }
                         self.lastPlaybackWasPCM = false
                         let mp3Stream = client.streamSynthesize(
                             voiceId: voiceId,
@@ -1045,7 +1074,7 @@ final class TalkModeManager: NSObject {
                     result = playback
                 } else {
                     self.lastPlaybackWasPCM = false
-                    result = await self.mp3Player.play(stream: stream)
+                    result = await self.mp3Player.play(stream: rawStream)
                 }
                 let duration = Date().timeIntervalSince(started)
                 self.logger.info("elevenlabs stream finished=\(result.finished, privacy: .public) dur=\(duration, privacy: .public)s")
@@ -1307,15 +1336,19 @@ final class TalkModeManager: NSObject {
         let desiredOutputFormat = (directive?.outputFormat ?? self.defaultOutputFormat)?
             .trimmingCharacters(in: .whitespacesAndNewlines)
         let requestedOutputFormat = (desiredOutputFormat?.isEmpty == false) ? desiredOutputFormat : nil
-        let outputFormat = ElevenLabsTTSClient.validatedOutputFormat(requestedOutputFormat ?? "pcm_44100")
+        let outputFormat = ElevenLabsTTSClient.validatedOutputFormat(
+            requestedOutputFormat ?? self.effectiveDefaultOutputFormat)
         if outputFormat == nil, let requestedOutputFormat {
             self.logger.warning(
                 "talk output_format unsupported for local playback: \(requestedOutputFormat, privacy: .public)")
         }
 
-        let resolvedKey =
-            (self.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? self.apiKey : nil) ??
-            ProcessInfo.processInfo.environment["ELEVENLABS_API_KEY"]
+        let configuredKey = self.apiKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? self.apiKey : nil
+        #if DEBUG
+        let resolvedKey = configuredKey ?? ProcessInfo.processInfo.environment["ELEVENLABS_API_KEY"]
+        #else
+        let resolvedKey = configuredKey
+        #endif
         let apiKey = resolvedKey?.trimmingCharacters(in: .whitespacesAndNewlines)
         let voiceId: String? = if let apiKey, !apiKey.isEmpty {
             await self.resolveVoiceId(preferred: preferredVoice, apiKey: apiKey)
@@ -1695,6 +1728,7 @@ extension TalkModeManager {
 
     func reloadConfig() async {
         guard let gateway else { return }
+        self.pcmFormatUnavailable = false
         do {
             let res = try await gateway.request(method: "talk.config", paramsJSON: "{\"includeSecrets\":true}", timeoutSeconds: 8)
             guard let json = try JSONSerialization.jsonObject(with: res) as? [String: Any] else { return }
@@ -1835,6 +1869,10 @@ private final class AudioTapDiagnostics: @unchecked Sendable {
 
 #if DEBUG
 extension TalkModeManager {
+    static func _test_isPCMFormatRejectedByAPI(_ error: Error?) -> Bool {
+        self.isPCMFormatRejectedByAPI(error)
+    }
+
     func _test_seedTranscript(_ transcript: String) {
         self.lastTranscript = transcript
         self.lastHeard = Date()

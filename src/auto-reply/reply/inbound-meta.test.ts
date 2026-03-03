@@ -17,6 +17,7 @@ describe("buildInboundMetaSystemPrompt", () => {
       MessageSidFull: "123",
       ReplyToId: "99",
       OriginatingTo: "telegram:5494292670",
+      AccountId: " work ",
       OriginatingChannel: "telegram",
       Provider: "telegram",
       Surface: "telegram",
@@ -29,6 +30,7 @@ describe("buildInboundMetaSystemPrompt", () => {
     expect(payload["message_id_full"]).toBeUndefined();
     expect(payload["reply_to_id"]).toBe("99");
     expect(payload["chat_id"]).toBe("telegram:5494292670");
+    expect(payload["account_id"]).toBe("work");
     expect(payload["channel"]).toBe("telegram");
   });
 

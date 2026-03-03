@@ -160,8 +160,7 @@ TRASH
     local validate_fn="${6:-}"
 
     echo "== Wizard case: $case_name =="
-    export HOME="$home_dir"
-    mkdir -p "$HOME"
+    set_isolated_bot_env "$home_dir"
 
     input_fifo="$(mktemp -u "/tmp/bot-onboard-${case_name}.XXXXXX")"
     mkfifo "$input_fifo"
@@ -361,8 +360,7 @@ NODE
   run_case_remote_non_interactive() {
     local home_dir
     home_dir="$(make_home remote-non-interactive)"
-    export HOME="$home_dir"
-	    mkdir -p "$HOME"
+    set_isolated_bot_env "$home_dir"
 	    # Smoke test non-interactive remote config write.
 	    node "$BOT_ENTRY" onboard --non-interactive --accept-risk \
 	      --mode remote \

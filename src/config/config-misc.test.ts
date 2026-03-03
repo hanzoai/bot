@@ -1,5 +1,3 @@
-import fs from "node:fs/promises";
-import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   getConfigValueAtPath,
@@ -166,6 +164,21 @@ describe("cron webhook schema", () => {
     expect(res.success).toBe(true);
   });
 
+  it("accepts cron.webhookToken SecretRef values", () => {
+    const res = BotSchema.safeParse({
+      cron: {
+        webhook: "https://example.invalid/legacy-cron-webhook",
+        webhookToken: {
+          source: "env",
+          provider: "default",
+          id: "CRON_WEBHOOK_TOKEN",
+        },
+      },
+    });
+
+    expect(res.success).toBe(true);
+  });
+
   it("rejects non-http cron.webhook URLs", () => {
     const res = BotSchema.safeParse({
       cron: {
@@ -301,6 +314,41 @@ describe("config strict validation", () => {
 
       expect(snap.valid).toBe(false);
       expect(snap.legacyIssues).not.toHaveLength(0);
+    });
+  });
+
+  it("does not mark resolved-only gateway.bind aliases as auto-migratable legacy", async () => {
+    await withTempHome(async (home) => {
+      await writeBotConfig(home, {
+        gateway: { bind: "${BOT_BIND}" },
+      });
+
+      const prev = process.env.BOT_BIND;
+      process.env.BOT_BIND = "0.0.0.0";
+      try {
+        const snap = await readConfigFileSnapshot();
+        expect(snap.valid).toBe(false);
+        expect(snap.legacyIssues).toHaveLength(0);
+        expect(snap.issues.some((issue) => issue.path === "gateway.bind")).toBe(true);
+      } finally {
+        if (prev === undefined) {
+          delete process.env.BOT_BIND;
+        } else {
+          process.env.BOT_BIND = prev;
+        }
+      }
+    });
+  });
+
+  it("still marks literal gateway.bind host aliases as legacy", async () => {
+    await withTempHome(async (home) => {
+      await writeBotConfig(home, {
+        gateway: { bind: "0.0.0.0" },
+      });
+
+      const snap = await readConfigFileSnapshot();
+      expect(snap.valid).toBe(false);
+      expect(snap.legacyIssues.some((issue) => issue.path === "gateway.bind")).toBe(true);
     });
   });
 });

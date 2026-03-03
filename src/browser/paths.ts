@@ -140,6 +140,12 @@ export async function resolveStrictExistingPathsWithinRoot(params: {
           error: `File is outside ${params.scopeLabel}`,
         };
       }
+      if (err instanceof SafeOpenError && err.code === "outside-workspace") {
+        return {
+          ok: false,
+          error: `File is outside ${params.scopeLabel}`,
+        };
+      }
       return {
         ok: false,
         error: `Invalid path: ${trimmed} must be a regular non-symlink file`,

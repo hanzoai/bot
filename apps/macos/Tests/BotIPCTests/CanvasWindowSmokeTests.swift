@@ -1,6 +1,7 @@
 import AppKit
 import BotIPC
 import Foundation
+import BotIPC
 import Testing
 @testable import HanzoBot
 
@@ -30,7 +31,7 @@ struct CanvasWindowSmokeTests {
         controller.close()
     }
 
-    @Test func windowControllerShowsAndCloses() async throws {
+    @Test func windowControllerShowsAndCloses() throws {
         let root = FileManager().temporaryDirectory
             .appendingPathComponent("hanzo-bot-canvas-test-\(UUID().uuidString)")
         try FileManager().createDirectory(at: root, withIntermediateDirectories: true)

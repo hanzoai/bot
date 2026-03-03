@@ -1,5 +1,6 @@
 import BotIPC
 import CoreLocation
+import BotIPC
 import Testing
 @testable import HanzoBot
 

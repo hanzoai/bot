@@ -484,10 +484,7 @@ type BindingAgent = {
   binding: string | null;
 };
 
-type BindingNode = {
-  id: string;
-  label: string;
-};
+type BindingNode = NodeTargetOption;
 
 type BindingState = {
   ready: boolean;
@@ -720,34 +717,22 @@ function resolveAgentBindings(config: Record<string, unknown> | null): {
     typeof exec.node === "string" && exec.node.trim() ? exec.node.trim() : null;
 
   const agentsNode = (config.agents ?? {}) as Record<string, unknown>;
-  const list = Array.isArray(agentsNode.list) ? agentsNode.list : [];
-  if (list.length === 0) {
+  if (!Array.isArray(agentsNode.list) || agentsNode.list.length === 0) {
     return { defaultBinding, agents: [fallbackAgent] };
   }
 
-  const agents: BindingAgent[] = [];
-  list.forEach((entry, index) => {
-    if (!entry || typeof entry !== "object") {
-      return;
-    }
-    const record = entry as Record<string, unknown>;
-    const id = typeof record.id === "string" ? record.id.trim() : "";
-    if (!id) {
-      return;
-    }
-    const name = typeof record.name === "string" ? record.name.trim() : undefined;
-    const isDefault = record.default === true;
-    const toolsEntry = (record.tools ?? {}) as Record<string, unknown>;
+  const agents = resolveConfigAgents(config).map((entry) => {
+    const toolsEntry = (entry.record.tools ?? {}) as Record<string, unknown>;
     const execEntry = (toolsEntry.exec ?? {}) as Record<string, unknown>;
     const binding =
       typeof execEntry.node === "string" && execEntry.node.trim() ? execEntry.node.trim() : null;
-    agents.push({
-      id,
-      name: name || undefined,
-      index,
-      isDefault,
+    return {
+      id: entry.id,
+      name: entry.name,
+      index: entry.index,
+      isDefault: entry.isDefault,
       binding,
-    });
+    };
   });
 
   if (agents.length === 0) {

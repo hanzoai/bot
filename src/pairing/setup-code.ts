@@ -1,8 +1,6 @@
 import os from "node:os";
 import type { BotConfig } from "../config/types.js";
 
-const DEFAULT_GATEWAY_PORT = 18789;
-
 export type PairingSetupPayload = {
   url: string;
   token?: string;
@@ -275,6 +273,56 @@ function resolveAuth(cfg: BotConfig, env: NodeJS.ProcessEnv): ResolveAuthResult 
   return { error: "Gateway auth is not configured (no token or password)." };
 }
 
+async function resolveGatewayPasswordSecretRef(
+  cfg: BotConfig,
+  env: NodeJS.ProcessEnv,
+): Promise<BotConfig> {
+  const authPassword = cfg.gateway?.auth?.password;
+  const { ref } = resolveSecretInputRef({
+    value: authPassword,
+    defaults: cfg.secrets?.defaults,
+  });
+  if (!ref) {
+    return cfg;
+  }
+  const hasPasswordEnvCandidate = Boolean(
+    env.BOT_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
+  );
+  if (hasPasswordEnvCandidate) {
+    return cfg;
+  }
+  const mode = cfg.gateway?.auth?.mode;
+  if (mode === "token" || mode === "none" || mode === "trusted-proxy") {
+    return cfg;
+  }
+  if (mode !== "password") {
+    const hasTokenCandidate =
+      Boolean(env.BOT_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim()) ||
+      Boolean(cfg.gateway?.auth?.token?.trim());
+    if (hasTokenCandidate) {
+      return cfg;
+    }
+  }
+  const resolved = await resolveSecretRefValues([ref], {
+    config: cfg,
+    env,
+  });
+  const value = resolved.get(secretRefKey(ref));
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error("gateway.auth.password resolved to an empty or non-string value.");
+  }
+  return {
+    ...cfg,
+    gateway: {
+      ...cfg.gateway,
+      auth: {
+        ...cfg.gateway?.auth,
+        password: value.trim(),
+      },
+    },
+  };
+}
+
 async function resolveGatewayUrl(
   cfg: BotConfig,
   opts: {
@@ -361,12 +409,13 @@ export async function resolvePairingSetupFromConfig(
   options: ResolvePairingSetupOptions = {},
 ): Promise<PairingSetupResolution> {
   const env = options.env ?? process.env;
-  const auth = resolveAuth(cfg, env);
+  const cfgForAuth = await resolveGatewayPasswordSecretRef(cfg, env);
+  const auth = resolveAuth(cfgForAuth, env);
   if (auth.error) {
     return { ok: false, error: auth.error };
   }
 
-  const urlResult = await resolveGatewayUrl(cfg, {
+  const urlResult = await resolveGatewayUrl(cfgForAuth, {
     env,
     publicUrl: options.publicUrl,
     preferRemoteUrl: options.preferRemoteUrl,

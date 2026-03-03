@@ -154,17 +154,9 @@ export class AcpGatewayAgent implements Agent {
 
     const sessionId = randomUUID();
     const meta = parseSessionMeta(params._meta);
-    const sessionKey = await resolveSessionKey({
+    const sessionKey = await this.resolveSessionKeyFromMeta({
       meta,
       fallbackKey: `acp:${sessionId}`,
-      gateway: this.gateway,
-      opts: this.opts,
-    });
-    await resetSessionIfNeeded({
-      meta,
-      sessionKey,
-      gateway: this.gateway,
-      opts: this.opts,
     });
 
     const session = this.sessionStore.createSession({
@@ -186,17 +178,9 @@ export class AcpGatewayAgent implements Agent {
     }
 
     const meta = parseSessionMeta(params._meta);
-    const sessionKey = await resolveSessionKey({
+    const sessionKey = await this.resolveSessionKeyFromMeta({
       meta,
       fallbackKey: params.sessionId,
-      gateway: this.gateway,
-      opts: this.opts,
-    });
-    await resetSessionIfNeeded({
-      meta,
-      sessionKey,
-      gateway: this.gateway,
-      opts: this.opts,
     });
 
     const session = this.sessionStore.createSession({
@@ -332,6 +316,25 @@ export class AcpGatewayAgent implements Agent {
     }
   }
 
+  private async resolveSessionKeyFromMeta(params: {
+    meta: ReturnType<typeof parseSessionMeta>;
+    fallbackKey: string;
+  }): Promise<string> {
+    const sessionKey = await resolveSessionKey({
+      meta: params.meta,
+      fallbackKey: params.fallbackKey,
+      gateway: this.gateway,
+      opts: this.opts,
+    });
+    await resetSessionIfNeeded({
+      meta: params.meta,
+      sessionKey,
+      gateway: this.gateway,
+      opts: this.opts,
+    });
+    return sessionKey;
+  }
+
   private async handleAgentEvent(evt: EventFrame): Promise<void> {
     const payload = evt.payload as Record<string, unknown> | undefined;
     if (!payload) {
@@ -424,7 +427,9 @@ export class AcpGatewayAgent implements Agent {
     }
 
     if (state === "final") {
-      this.finishPrompt(pending.sessionId, pending, "end_turn");
+      const rawStopReason = payload.stopReason as string | undefined;
+      const stopReason: StopReason = rawStopReason === "max_tokens" ? "max_tokens" : "end_turn";
+      this.finishPrompt(pending.sessionId, pending, stopReason);
       return;
     }
     if (state === "aborted") {

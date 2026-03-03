@@ -180,6 +180,24 @@ describe("session store lock (Promise chain mutex)", () => {
     expect((store[key] as Record<string, unknown>).counter).toBe(N);
   });
 
+  it("skips session store disk writes when payload is unchanged", async () => {
+    const key = "agent:main:no-op-save";
+    const { storePath } = await makeTmpStore({
+      [key]: { sessionId: "s-noop", updatedAt: Date.now() },
+    });
+
+    const writeSpy = vi.spyOn(jsonFiles, "writeTextAtomic");
+    await updateSessionStore(
+      storePath,
+      async () => {
+        // Intentionally no-op mutation.
+      },
+      { skipMaintenance: true },
+    );
+    expect(writeSpy).not.toHaveBeenCalled();
+    writeSpy.mockRestore();
+  });
+
   it("multiple consecutive errors do not permanently poison the queue", async () => {
     const key = "agent:main:multi-err";
     const { storePath } = await makeTmpStore({

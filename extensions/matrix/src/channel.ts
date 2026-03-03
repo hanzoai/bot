@@ -1,6 +1,7 @@
 import {
   applyAccountNameToChannelSection,
   buildChannelConfigSchema,
+  buildProbeChannelStatusSummary,
   DEFAULT_ACCOUNT_ID,
   deleteAccountFromConfigSection,
   formatPairingApproveHint,
@@ -319,7 +320,7 @@ export const matrixPlugin: ChannelPlugin<ResolvedMatrixAccount> = {
         return "Matrix requires --homeserver";
       }
       const accessToken = input.accessToken?.trim();
-      const password = input.password?.trim();
+      const password = normalizeSecretInputString(input.password);
       const userId = input.userId?.trim();
       if (!accessToken && !password) {
         return "Matrix requires --access-token or --password";
@@ -357,7 +358,7 @@ export const matrixPlugin: ChannelPlugin<ResolvedMatrixAccount> = {
         homeserver: input.homeserver?.trim(),
         userId: input.userId?.trim(),
         accessToken: input.accessToken?.trim(),
-        password: input.password?.trim(),
+        password: normalizeSecretInputString(input.password),
         deviceName: input.deviceName?.trim(),
         initialSyncLimit: input.initialSyncLimit,
       });
@@ -387,16 +388,8 @@ export const matrixPlugin: ChannelPlugin<ResolvedMatrixAccount> = {
           },
         ];
       }),
-    buildChannelSummary: ({ snapshot }) => ({
-      configured: snapshot.configured ?? false,
-      baseUrl: snapshot.baseUrl ?? null,
-      running: snapshot.running ?? false,
-      lastStartAt: snapshot.lastStartAt ?? null,
-      lastStopAt: snapshot.lastStopAt ?? null,
-      lastError: snapshot.lastError ?? null,
-      probe: snapshot.probe,
-      lastProbeAt: snapshot.lastProbeAt ?? null,
-    }),
+    buildChannelSummary: ({ snapshot }) =>
+      buildProbeChannelStatusSummary(snapshot, { baseUrl: snapshot.baseUrl ?? null }),
     probeAccount: async ({ account, timeoutMs, cfg }) => {
       try {
         const auth = await resolveMatrixAuth({

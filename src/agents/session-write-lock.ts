@@ -8,6 +8,10 @@ type LockFilePayload = {
   createdAt: string;
 };
 
+function isValidLockNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0;
+}
+
 type HeldLock = {
   count: number;
   handle: fs.FileHandle;

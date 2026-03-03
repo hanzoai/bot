@@ -18,6 +18,36 @@ function normalizeUploadPaths(paths: string[]): string[] {
   return result.paths;
 }
 
+async function runBrowserPostAction<T>(params: {
+  parent: BrowserParentOpts;
+  profile: string | undefined;
+  path: string;
+  body: Record<string, unknown>;
+  timeoutMs: number;
+  describeSuccess: (result: T) => string;
+}): Promise<void> {
+  try {
+    const result = await callBrowserRequest<T>(
+      params.parent,
+      {
+        method: "POST",
+        path: params.path,
+        query: params.profile ? { profile: params.profile } : undefined,
+        body: params.body,
+      },
+      { timeoutMs: params.timeoutMs },
+    );
+    if (params.parent?.json) {
+      defaultRuntime.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    defaultRuntime.log(params.describeSuccess(result));
+  } catch (err) {
+    defaultRuntime.error(danger(String(err)));
+    defaultRuntime.exit(1);
+  }
+}
+
 export function registerBrowserFilesAndDownloadsCommands(
   browser: Command,
   parentOpts: (cmd: Command) => BrowserParentOpts,

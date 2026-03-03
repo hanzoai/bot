@@ -11,7 +11,10 @@ export async function resolveRemoteEmbeddingBearerClient(params: {
   defaultBaseUrl: string;
 }): Promise<{ baseUrl: string; headers: Record<string, string>; ssrfPolicy?: SsrFPolicy }> {
   const remote = params.options.remote;
-  const remoteApiKey = remote?.apiKey?.trim();
+  const remoteApiKey = normalizeResolvedSecretInputString({
+    value: remote?.apiKey,
+    path: "agents.*.memorySearch.remote.apiKey",
+  });
   const remoteBaseUrl = remote?.baseUrl?.trim();
   const providerConfig = params.options.config.models?.providers?.[params.provider];
   const apiKey = remoteApiKey

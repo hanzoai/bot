@@ -1,5 +1,5 @@
 ---
-summary: "Zalo Personal plugin: QR login + messaging via zca-cli (plugin install + channel config + CLI + tool)"
+summary: "Zalo Personal plugin: QR login + messaging via native zca-js (plugin install + channel config + tool)"
 read_when:
   - You want Zalo Personal (unofficial) support in Hanzo Bot
   - You are configuring or developing the zalouser plugin
@@ -22,6 +22,8 @@ This plugin runs **inside the Gateway process**.
 
 If you use a remote Gateway, install/configure it on the **machine running the Gateway**, then restart the Gateway.
 
+No external `zca`/`openzca` CLI binary is required.
+
 ## Install
 
 ### Option A: install from npm
@@ -40,14 +42,6 @@ cd ./extensions/zalouser && pnpm install
 ```
 
 Restart the Gateway afterwards.
-
-## Prerequisite: zca-cli
-
-The Gateway machine must have `zca` on `PATH`:
-
-```bash
-zca --version
-```
 
 ## Config
 
@@ -79,3 +73,5 @@ hanzo-bot directory peers list --channel zalouser --query "name"
 Tool name: `zalouser`
 
 Actions: `send`, `image`, `link`, `friends`, `groups`, `me`, `status`
+
+Channel message actions also support `react` for message reactions.

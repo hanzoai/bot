@@ -67,6 +67,7 @@ export const slackPlugin: ChannelPlugin<ResolvedSlackAccount> = {
   id: "slack",
   meta: {
     ...meta,
+    preferSessionLookupForAnnounceTarget: true,
   },
   onboarding: slackOnboardingAdapter,
   pairing: {
@@ -336,12 +337,13 @@ export const slackPlugin: ChannelPlugin<ResolvedSlackAccount> = {
     chunker: null,
     textChunkLimit: 4000,
     sendText: async ({ to, text, accountId, deps, replyToId, threadId, cfg }) => {
-      const send = deps?.sendSlack ?? getSlackRuntime().channel.slack.sendMessageSlack;
-      const account = resolveSlackAccount({ cfg, accountId });
-      const token = getTokenForOperation(account, "write");
-      const botToken = account.botToken?.trim();
-      const tokenOverride = token && token !== botToken ? token : undefined;
-      const threadTsValue = replyToId ?? threadId;
+      const { send, threadTsValue, tokenOverride } = resolveSlackSendContext({
+        cfg,
+        accountId: accountId ?? undefined,
+        deps,
+        replyToId,
+        threadId,
+      });
       const result = await send(to, text, {
         threadTs: threadTsValue != null ? String(threadTsValue) : undefined,
         accountId: accountId ?? undefined,
@@ -350,12 +352,13 @@ export const slackPlugin: ChannelPlugin<ResolvedSlackAccount> = {
       return { channel: "slack", ...result };
     },
     sendMedia: async ({ to, text, mediaUrl, accountId, deps, replyToId, threadId, cfg }) => {
-      const send = deps?.sendSlack ?? getSlackRuntime().channel.slack.sendMessageSlack;
-      const account = resolveSlackAccount({ cfg, accountId });
-      const token = getTokenForOperation(account, "write");
-      const botToken = account.botToken?.trim();
-      const tokenOverride = token && token !== botToken ? token : undefined;
-      const threadTsValue = replyToId ?? threadId;
+      const { send, threadTsValue, tokenOverride } = resolveSlackSendContext({
+        cfg,
+        accountId: accountId ?? undefined,
+        deps,
+        replyToId,
+        threadId,
+      });
       const result = await send(to, text, {
         mediaUrl,
         threadTs: threadTsValue != null ? String(threadTsValue) : undefined,

@@ -72,6 +72,11 @@ afterEach(() => {
 });
 
 describe("registerPreActionHooks", () => {
+  let program: Command;
+  let preActionHook:
+    | ((thisCommand: Command, actionCommand: Command) => Promise<void> | void)
+    | null = null;
+
   function buildProgram() {
     const program = new Command().name("hanzo-bot");
     program.command("status").action(async () => {});
@@ -87,19 +92,46 @@ describe("registerPreActionHooks", () => {
     program
       .command("message")
       .command("send")
-      .action(async () => {});
+      .option("--json")
+      .action(() => {});
+    const config = program.command("config");
+    config
+      .command("set")
+      .argument("<path>")
+      .argument("<value>")
+      .option("--json")
+      .action(() => {});
+    config
+      .command("validate")
+      .option("--json")
+      .action(() => {});
     registerPreActionHooks(program, "9.9.9-test");
     return program;
   }
 
-  async function runCommand(params: { parseArgv: string[]; processArgv?: string[] }) {
-    const program = buildProgram();
-    process.argv = params.processArgv ?? [...params.parseArgv];
-    await program.parseAsync(params.parseArgv, { from: "user" });
+  function resolveActionCommand(parseArgv: string[]): Command {
+    let current = program;
+    for (const segment of parseArgv) {
+      const next = current.commands.find((command) => command.name() === segment);
+      if (!next) {
+        break;
+      }
+      current = next;
+    }
+    return current;
   }
 
-  it("emits banner, resolves config, and enables verbose from --debug", async () => {
-    await runCommand({
+  async function runPreAction(params: { parseArgv: string[]; processArgv?: string[] }) {
+    process.argv = params.processArgv ?? [...params.parseArgv];
+    const actionCommand = resolveActionCommand(params.parseArgv);
+    if (!preActionHook) {
+      throw new Error("missing preAction hook");
+    }
+    await preActionHook(program, actionCommand);
+  }
+
+  it("handles debug mode and plugin-required command preaction", async () => {
+    await runPreAction({
       parseArgv: ["status"],
       processArgv: ["node", "hanzo-bot", "status", "--debug"],
     });
@@ -114,8 +146,8 @@ describe("registerPreActionHooks", () => {
     expect(process.title).toBe("bot-status");
   });
 
-  it("loads plugin registry for plugin-required commands", async () => {
-    await runCommand({
+    vi.clearAllMocks();
+    await runPreAction({
       parseArgv: ["message", "send"],
       processArgv: ["node", "hanzo-bot", "message", "send"],
     });
@@ -182,7 +214,6 @@ describe("registerPreActionHooks", () => {
     expect(emitCliBannerMock).not.toHaveBeenCalled();
     expect(setVerboseMock).not.toHaveBeenCalled();
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
-  });
 
   it("hides banner when BOT_HIDE_BANNER is truthy", async () => {
     process.env.BOT_HIDE_BANNER = "1";
@@ -193,5 +224,59 @@ describe("registerPreActionHooks", () => {
 
     expect(emitCliBannerMock).not.toHaveBeenCalled();
     expect(ensureConfigReadyMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("applies --json stdout suppression only for explicit JSON output commands", async () => {
+    await runPreAction({
+      parseArgv: ["update", "status", "--json"],
+      processArgv: ["node", "@hanzo/bot", "update", "status", "--json"],
+    });
+
+    expect(ensureConfigReadyMock).toHaveBeenCalledWith({
+      runtime: runtimeMock,
+      commandPath: ["update", "status"],
+      suppressDoctorStdout: true,
+    });
+
+    vi.clearAllMocks();
+    await runPreAction({
+      parseArgv: ["config", "set", "gateway.auth.mode", "{bad", "--json"],
+      processArgv: ["node", "@hanzo/bot", "config", "set", "gateway.auth.mode", "{bad", "--json"],
+    });
+
+    expect(ensureConfigReadyMock).toHaveBeenCalledWith({
+      runtime: runtimeMock,
+      commandPath: ["config", "set"],
+    });
+  });
+
+  it("bypasses config guard for config validate", async () => {
+    await runPreAction({
+      parseArgv: ["config", "validate"],
+      processArgv: ["node", "@hanzo/bot", "config", "validate"],
+    });
+
+    expect(ensureConfigReadyMock).not.toHaveBeenCalled();
+  });
+
+  it("bypasses config guard for config validate when root option values are present", async () => {
+    await runPreAction({
+      parseArgv: ["config", "validate"],
+      processArgv: ["node", "@hanzo/bot", "--profile", "work", "config", "validate"],
+    });
+
+    expect(ensureConfigReadyMock).not.toHaveBeenCalled();
+  });
+
+  beforeAll(() => {
+    program = buildProgram();
+    const hooks = (
+      program as unknown as {
+        _lifeCycleHooks?: {
+          preAction?: Array<(thisCommand: Command, actionCommand: Command) => Promise<void> | void>;
+        };
+      }
+    )._lifeCycleHooks?.preAction;
+    preActionHook = hooks?.[0] ?? null;
   });
 });

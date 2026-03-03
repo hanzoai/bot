@@ -1,6 +1,42 @@
 import { describe, expect, it } from "vitest";
 import { MissingEnvVarError, resolveConfigEnvVars } from "./env-substitution.js";
 
+type SubstitutionScenario = {
+  name: string;
+  config: unknown;
+  env: Record<string, string>;
+  expected: unknown;
+};
+
+type MissingEnvScenario = {
+  name: string;
+  config: unknown;
+  env: Record<string, string>;
+  varName: string;
+  configPath: string;
+};
+
+function expectResolvedScenarios(scenarios: SubstitutionScenario[]) {
+  for (const scenario of scenarios) {
+    const result = resolveConfigEnvVars(scenario.config, scenario.env);
+    expect(result, scenario.name).toEqual(scenario.expected);
+  }
+}
+
+function expectMissingScenarios(scenarios: MissingEnvScenario[]) {
+  for (const scenario of scenarios) {
+    try {
+      resolveConfigEnvVars(scenario.config, scenario.env);
+      expect.fail(`${scenario.name}: expected MissingEnvVarError`);
+    } catch (err) {
+      expect(err, scenario.name).toBeInstanceOf(MissingEnvVarError);
+      const error = err as MissingEnvVarError;
+      expect(error.varName, scenario.name).toBe(scenario.varName);
+      expect(error.configPath, scenario.name).toBe(scenario.configPath);
+    }
+  }
+}
+
 describe("resolveConfigEnvVars", () => {
   describe("basic substitution", () => {
     it("substitutes a single env var", () => {

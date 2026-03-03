@@ -8,6 +8,53 @@ import {
 import { resolveSlackChannelConfig } from "./channel-config.js";
 import { normalizeSlackChannelType, type SlackMonitorContext } from "./context.js";
 
+type ResolvedAllowFromLists = {
+  allowFrom: string[];
+  allowFromLower: string[];
+};
+
+type SlackAllowFromCacheState = {
+  baseSignature?: string;
+  base?: ResolvedAllowFromLists;
+  pairingKey?: string;
+  pairing?: ResolvedAllowFromLists;
+  pairingExpiresAtMs?: number;
+  pairingPending?: Promise<ResolvedAllowFromLists>;
+};
+
+let slackAllowFromCache = new WeakMap<SlackMonitorContext, SlackAllowFromCacheState>();
+const DEFAULT_PAIRING_ALLOW_FROM_CACHE_TTL_MS = 5000;
+
+function getPairingAllowFromCacheTtlMs(): number {
+  const raw = process.env.BOT_SLACK_PAIRING_ALLOWFROM_CACHE_TTL_MS?.trim();
+  if (!raw) {
+    return DEFAULT_PAIRING_ALLOW_FROM_CACHE_TTL_MS;
+  }
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) {
+    return DEFAULT_PAIRING_ALLOW_FROM_CACHE_TTL_MS;
+  }
+  return Math.max(0, Math.floor(parsed));
+}
+
+function getAllowFromCacheState(ctx: SlackMonitorContext): SlackAllowFromCacheState {
+  const existing = slackAllowFromCache.get(ctx);
+  if (existing) {
+    return existing;
+  }
+  const next: SlackAllowFromCacheState = {};
+  slackAllowFromCache.set(ctx, next);
+  return next;
+}
+
+function buildBaseAllowFrom(ctx: SlackMonitorContext): ResolvedAllowFromLists {
+  const allowFrom = normalizeAllowList(ctx.allowFrom);
+  return {
+    allowFrom,
+    allowFromLower: normalizeAllowListLower(allowFrom),
+  };
+}
+
 export async function resolveSlackEffectiveAllowFrom(
   ctx: SlackMonitorContext,
   options?: { includePairingStore?: boolean },
@@ -154,6 +201,7 @@ export async function authorizeSlackSystemEventSender(params: {
       channelId,
       channelName,
       channels: params.ctx.channelsConfig,
+      channelKeys: params.ctx.channelsConfigKeys,
       defaultRequireMention: params.ctx.defaultRequireMention,
     });
     const channelUsersAllowlistConfigured =

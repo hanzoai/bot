@@ -4,7 +4,6 @@ import {
   browserAct,
   browserArmDialog,
   browserArmFileChooser,
-  browserConsoleMessages,
   browserNavigate,
   browserPdfSave,
   browserScreenshotAction,
@@ -14,18 +13,21 @@ import {
   browserFocusTab,
   browserOpenTab,
   browserProfiles,
-  browserSnapshot,
   browserStart,
   browserStatus,
   browserStop,
-  browserTabs,
 } from "../../browser/client.js";
 import { resolveBrowserConfig } from "../../browser/config.js";
 import { DEFAULT_AI_SNAPSHOT_MAX_CHARS } from "../../browser/constants.js";
 import { DEFAULT_UPLOAD_DIR, resolvePathsWithinRoot } from "../../browser/paths.js";
 import { applyBrowserProxyPaths, persistBrowserProxyFiles } from "../../browser/proxy-files.js";
 import { loadConfig } from "../../config/config.js";
-import { wrapExternalContent } from "../../security/external-content.js";
+import {
+  executeActAction,
+  executeConsoleAction,
+  executeSnapshotAction,
+  executeTabsAction,
+} from "./browser-tool.actions.js";
 import { BrowserToolSchema } from "./browser-tool.schema.js";
 import { type AnyAgentTool, imageResultFromFile, jsonResult, readStringParam } from "./common.js";
 import { callGatewayTool } from "./gateway.js";
@@ -806,8 +808,8 @@ export function createBrowserTool(opts?: {
           );
         }
         case "act": {
-          const request = params.request as Record<string, unknown> | undefined;
-          if (!request || typeof request !== "object") {
+          const request = readActRequestParam(params);
+          if (!request) {
             throw new Error("request required");
           }
           try {

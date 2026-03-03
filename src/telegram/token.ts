@@ -65,14 +65,17 @@ export function resolveTelegramToken(
     return { token: "", source: "none" };
   }
 
-  const accountToken = accountCfg?.botToken?.trim();
+  const accountToken = normalizeResolvedSecretInputString({
+    value: accountCfg?.botToken,
+    path: `channels.telegram.accounts.${accountId}.botToken`,
+  });
   if (accountToken) {
     return { token: accountToken, source: "config" };
   }
 
   const allowEnv = accountId === DEFAULT_ACCOUNT_ID;
   const tokenFile = telegramCfg?.tokenFile?.trim();
-  if (tokenFile && allowEnv) {
+  if (tokenFile) {
     if (!fs.existsSync(tokenFile)) {
       opts.logMissingFile?.(`channels.telegram.tokenFile not found: ${tokenFile}`);
       return { token: "", source: "none" };
@@ -88,8 +91,11 @@ export function resolveTelegramToken(
     }
   }
 
-  const configToken = telegramCfg?.botToken?.trim();
-  if (configToken && allowEnv) {
+  const configToken = normalizeResolvedSecretInputString({
+    value: telegramCfg?.botToken,
+    path: "channels.telegram.botToken",
+  });
+  if (configToken) {
     return { token: configToken, source: "config" };
   }
 

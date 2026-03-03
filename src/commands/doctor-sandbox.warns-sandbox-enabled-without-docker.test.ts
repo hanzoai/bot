@@ -11,9 +11,18 @@ vi.mock("../process/exec.js", () => ({
   runCommandWithTimeout: vi.fn(),
 }));
 
+vi.mock("../agents/sandbox.js", () => ({
+  DEFAULT_SANDBOX_BROWSER_IMAGE: "browser-image",
+  DEFAULT_SANDBOX_COMMON_IMAGE: "common-image",
+  DEFAULT_SANDBOX_IMAGE: "default-image",
+  resolveSandboxScope: vi.fn(() => "shared"),
+}));
+
 vi.mock("../terminal/note.js", () => ({
   note,
 }));
+
+const { maybeRepairSandboxImages } = await import("./doctor-sandbox.js");
 
 describe("maybeRepairSandboxImages", () => {
   const mockRuntime: RuntimeEnv = {
@@ -38,14 +47,27 @@ describe("maybeRepairSandboxImages", () => {
       agents: {
         defaults: {
           sandbox: {
-            mode: "non-main",
+            mode,
           },
         },
       },
     };
+  }
 
-    const { maybeRepairSandboxImages } = await import("./doctor-sandbox.js");
-    await maybeRepairSandboxImages(config, mockRuntime, mockPrompter);
+  async function runSandboxRepair(params: {
+    mode: "off" | "all" | "non-main";
+    dockerAvailable: boolean;
+  }) {
+    if (params.dockerAvailable) {
+      runExec.mockResolvedValue({ stdout: "24.0.0", stderr: "" });
+    } else {
+      runExec.mockRejectedValue(new Error("Docker not installed"));
+    }
+    await maybeRepairSandboxImages(createSandboxConfig(params.mode), mockRuntime, mockPrompter);
+  }
+
+  it("warns when sandbox mode is enabled but Docker is not available", async () => {
+    await runSandboxRepair({ mode: "non-main", dockerAvailable: false });
 
     // The warning should clearly indicate sandbox is enabled but won't work
     expect(note).toHaveBeenCalled();

@@ -25,6 +25,7 @@ export function resolveAuthProfileOrder(params: {
 }): string[] {
   const { cfg, store, provider, preferredProfile } = params;
   const providerKey = normalizeProviderId(provider);
+  const providerAuthKey = normalizeProviderIdForAuth(provider);
   const now = Date.now();
 
   // Clear any cooldowns that have expired since the last check so profiles
@@ -58,12 +59,12 @@ export function resolveAuthProfileOrder(params: {
   const explicitOrder = storedOrder ?? configuredOrder;
   const explicitProfiles = cfg?.auth?.profiles
     ? Object.entries(cfg.auth.profiles)
-        .filter(([, profile]) => normalizeProviderId(profile.provider) === providerKey)
+        .filter(([, profile]) => normalizeProviderIdForAuth(profile.provider) === providerAuthKey)
         .map(([profileId]) => profileId)
     : [];
   const baseOrder =
     explicitOrder ??
-    (explicitProfiles.length > 0 ? explicitProfiles : listProfilesForProvider(store, providerKey));
+    (explicitProfiles.length > 0 ? explicitProfiles : listProfilesForProvider(store, provider));
   if (baseOrder.length === 0) {
     return [];
   }
@@ -73,12 +74,12 @@ export function resolveAuthProfileOrder(params: {
     if (!cred) {
       return false;
     }
-    if (normalizeProviderId(cred.provider) !== providerKey) {
+    if (normalizeProviderIdForAuth(cred.provider) !== providerAuthKey) {
       return false;
     }
     const profileConfig = cfg?.auth?.profiles?.[profileId];
     if (profileConfig) {
-      if (normalizeProviderId(profileConfig.provider) !== providerKey) {
+      if (normalizeProviderIdForAuth(profileConfig.provider) !== providerAuthKey) {
         return false;
       }
       if (profileConfig.mode !== cred.type) {

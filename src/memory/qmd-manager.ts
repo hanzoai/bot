@@ -14,7 +14,12 @@ import type {
 } from "./types.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { resolveStateDir } from "../config/paths.js";
+import { writeFileWithinRoot } from "../infra/fs-safe.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
+import {
+  materializeWindowsSpawnProgram,
+  resolveWindowsSpawnProgram,
+} from "../plugin-sdk/windows-spawn.js";
 import { isFileMissingError, statRegularFile } from "./fs-utils.js";
 import { deriveQmdScopeChannel, deriveQmdScopeChatType, isQmdScopeAllowed } from "./qmd-scope.js";
 import {
@@ -64,6 +69,23 @@ function resolveWindowsCommandShim(command: string): string {
     return `${trimmed}.cmd`;
   }
   return command;
+}
+
+function resolveSpawnInvocation(params: {
+  command: string;
+  args: string[];
+  env: NodeJS.ProcessEnv;
+  packageName: string;
+}) {
+  const program = resolveWindowsSpawnProgram({
+    command: resolveWindowsCommandShim(params.command),
+    platform: process.platform,
+    env: params.env,
+    execPath: process.execPath,
+    packageName: params.packageName,
+    allowShellFallback: true,
+  });
+  return materializeWindowsSpawnProgram(program, params.args);
 }
 
 function hasHanScript(value: string): boolean {
@@ -166,6 +188,7 @@ export class QmdMemoryManager implements MemorySearchManager {
   private readonly xdgCacheHome: string;
   private readonly indexPath: string;
   private readonly env: NodeJS.ProcessEnv;
+  private readonly managedCollectionNames: string[];
   private readonly collectionRoots = new Map<string, CollectionRoot>();
   private readonly sources = new Set<MemorySource>();
   private readonly docPathCache = new Map<
@@ -213,6 +236,9 @@ export class QmdMemoryManager implements MemorySearchManager {
     this.env = {
       ...process.env,
       XDG_CONFIG_HOME: this.xdgConfigHome,
+      // workaround for upstream bug https://github.com/tobi/qmd/issues/132
+      // QMD doesn't respect XDG_CONFIG_HOME:
+      QMD_CONFIG_DIR: this.xdgConfigHome,
       XDG_CACHE_HOME: this.xdgCacheHome,
       NO_COLOR: "1",
     };
@@ -236,6 +262,7 @@ export class QmdMemoryManager implements MemorySearchManager {
         },
       ];
     }
+    this.managedCollectionNames = this.computeManagedCollectionNames();
   }
 
   private async initialize(mode: QmdManagerMode): Promise<void> {
@@ -1063,9 +1090,17 @@ export class QmdMemoryManager implements MemorySearchManager {
     opts?: { timeoutMs?: number; discardOutput?: boolean },
   ): Promise<{ stdout: string; stderr: string }> {
     return await new Promise((resolve, reject) => {
-      const child = spawn(resolveWindowsCommandShim(this.qmd.command), args, {
+      const spawnInvocation = resolveSpawnInvocation({
+        command: this.qmd.command,
+        args,
+        env: this.env,
+        packageName: "qmd",
+      });
+      const child = spawn(spawnInvocation.command, spawnInvocation.argv, {
         env: this.env,
         cwd: this.workspaceDir,
+        shell: spawnInvocation.shell,
+        windowsHide: spawnInvocation.windowsHide,
       });
       let stdout = "";
       let stderr = "";
@@ -1161,10 +1196,18 @@ export class QmdMemoryManager implements MemorySearchManager {
     opts?: { timeoutMs?: number },
   ): Promise<{ stdout: string; stderr: string }> {
     return await new Promise((resolve, reject) => {
-      const child = spawn(resolveWindowsCommandShim("mcporter"), args, {
+      const spawnInvocation = resolveSpawnInvocation({
+        command: "mcporter",
+        args,
+        env: this.env,
+        packageName: "mcporter",
+      });
+      const child = spawn(spawnInvocation.command, spawnInvocation.argv, {
         // Keep mcporter and direct qmd commands on the same agent-scoped XDG state.
         env: this.env,
         cwd: this.workspaceDir,
+        shell: spawnInvocation.shell,
+        windowsHide: spawnInvocation.windowsHide,
       });
       let stdout = "";
       let stderr = "";
@@ -1370,11 +1413,17 @@ export class QmdMemoryManager implements MemorySearchManager {
       if (cutoff && entry.mtimeMs < cutoff) {
         continue;
       }
-      const target = path.join(exportDir, `${path.basename(sessionFile, ".jsonl")}.md`);
+      const targetName = `${path.basename(sessionFile, ".jsonl")}.md`;
+      const target = path.join(exportDir, targetName);
       tracked.add(sessionFile);
       const state = this.exportedSessionState.get(sessionFile);
       if (!state || state.hash !== entry.hash || state.mtimeMs !== entry.mtimeMs) {
-        await fs.writeFile(target, this.renderSessionMarkdown(entry), "utf-8");
+        await writeFileWithinRoot({
+          rootDir: exportDir,
+          relativePath: targetName,
+          data: this.renderSessionMarkdown(entry),
+          encoding: "utf-8",
+        });
       }
       this.exportedSessionState.set(sessionFile, {
         hash: entry.hash,
@@ -1869,6 +1918,10 @@ ${body}
   }
 
   private listManagedCollectionNames(): string[] {
+    return this.managedCollectionNames;
+  }
+
+  private computeManagedCollectionNames(): string[] {
     const seen = new Set<string>();
     const names: string[] = [];
     for (const collection of this.qmd.collections) {

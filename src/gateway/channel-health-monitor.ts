@@ -5,9 +5,9 @@ import { createSubsystemLogger } from "../logging/subsystem.js";
 const log = createSubsystemLogger("gateway/health-monitor");
 
 const DEFAULT_CHECK_INTERVAL_MS = 5 * 60_000;
-const DEFAULT_STARTUP_GRACE_MS = 60_000;
+const DEFAULT_MONITOR_STARTUP_GRACE_MS = 60_000;
 const DEFAULT_COOLDOWN_CYCLES = 2;
-const DEFAULT_MAX_RESTARTS_PER_HOUR = 3;
+const DEFAULT_MAX_RESTARTS_PER_HOUR = 10;
 const ONE_HOUR_MS = 60 * 60_000;
 
 /**
@@ -21,7 +21,13 @@ const DEFAULT_STALE_EVENT_THRESHOLD_MS = 30 * 60_000;
 export type ChannelHealthMonitorDeps = {
   channelManager: ChannelManager;
   checkIntervalMs?: number;
+  /** @deprecated use timing.monitorStartupGraceMs */
   startupGraceMs?: number;
+  /** @deprecated use timing.channelConnectGraceMs */
+  channelStartupGraceMs?: number;
+  /** @deprecated use timing.staleEventThresholdMs */
+  staleEventThresholdMs?: number;
+  timing?: Partial<ChannelHealthTimingPolicy>;
   cooldownCycles?: number;
   maxRestartsPerHour?: number;
   staleEventThresholdMs?: number;
@@ -84,12 +90,12 @@ export function startChannelHealthMonitor(deps: ChannelHealthMonitorDeps): Chann
   const {
     channelManager,
     checkIntervalMs = DEFAULT_CHECK_INTERVAL_MS,
-    startupGraceMs = DEFAULT_STARTUP_GRACE_MS,
     cooldownCycles = DEFAULT_COOLDOWN_CYCLES,
     maxRestartsPerHour = DEFAULT_MAX_RESTARTS_PER_HOUR,
     staleEventThresholdMs = DEFAULT_STALE_EVENT_THRESHOLD_MS,
     abortSignal,
   } = deps;
+  const timing = resolveTimingPolicy(deps);
 
   const cooldownMs = cooldownCycles * checkIntervalMs;
   const restartRecords = new Map<string, RestartRecord>();
@@ -112,7 +118,7 @@ export function startChannelHealthMonitor(deps: ChannelHealthMonitorDeps): Chann
 
     try {
       const now = Date.now();
-      if (now - startedAt < startupGraceMs) {
+      if (now - startedAt < timing.monitorStartupGraceMs) {
         return;
       }
 
@@ -124,9 +130,6 @@ export function startChannelHealthMonitor(deps: ChannelHealthMonitorDeps): Chann
         }
         for (const [accountId, status] of Object.entries(accounts)) {
           if (!status) {
-            continue;
-          }
-          if (!isManagedAccount(status)) {
             continue;
           }
           if (channelManager.isManuallyStopped(channelId as ChannelId, accountId)) {
@@ -208,7 +211,7 @@ export function startChannelHealthMonitor(deps: ChannelHealthMonitorDeps): Chann
       timer.unref();
     }
     log.info?.(
-      `started (interval: ${Math.round(checkIntervalMs / 1000)}s, grace: ${Math.round(startupGraceMs / 1000)}s)`,
+      `started (interval: ${Math.round(checkIntervalMs / 1000)}s, startup-grace: ${Math.round(timing.monitorStartupGraceMs / 1000)}s, channel-connect-grace: ${Math.round(timing.channelConnectGraceMs / 1000)}s)`,
     );
   }
 

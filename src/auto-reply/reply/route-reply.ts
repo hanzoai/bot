@@ -35,6 +35,10 @@ export type RouteReplyParams = {
   abortSignal?: AbortSignal;
   /** Mirror reply into session transcript (default: true when sessionKey is set). */
   mirror?: boolean;
+  /** Whether this message is being sent in a group/channel context */
+  isGroup?: boolean;
+  /** Group or channel identifier for correlation with received events */
+  groupId?: string;
 };
 
 export type RouteReplyResult = {
@@ -135,6 +139,8 @@ export async function routeReply(params: RouteReplyParams): Promise<RouteReplyRe
               agentId: resolvedAgentId,
               text,
               mediaUrls,
+              ...(params.isGroup != null ? { isGroup: params.isGroup } : {}),
+              ...(params.groupId ? { groupId: params.groupId } : {}),
             }
           : undefined,
     });

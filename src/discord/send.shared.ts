@@ -58,6 +58,7 @@ function normalizeReactionEmoji(raw: string) {
 
 function parseRecipient(raw: string): DiscordRecipient {
   const target = parseDiscordTarget(raw, {
+    defaultKind: "channel",
     ambiguousMessage: `Ambiguous Discord recipient "${raw.trim()}". Use "user:${raw.trim()}" for DMs or "channel:${raw.trim()}" for channel messages.`,
   });
   if (!target) {
@@ -420,7 +421,7 @@ async function sendDiscordMedia(
   chunkMode?: ChunkMode,
   silent?: boolean,
 ) {
-  const media = await loadWebMedia(mediaUrl, { localRoots: mediaLocalRoots });
+  const media = await loadWebMedia(mediaUrl, buildOutboundMediaLoadOptions({ mediaLocalRoots }));
   const chunks = text ? buildDiscordTextChunks(text, { maxLinesPerMessage, chunkMode }) : [];
   const caption = chunks[0] ?? "";
   const messageReference = replyTo ? { message_id: replyTo, fail_if_not_exists: false } : undefined;

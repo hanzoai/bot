@@ -142,17 +142,10 @@ export function resolveNodeIdFromList(
   query?: string,
   allowDefault = false,
 ): string {
-  const q = String(query ?? "").trim();
-  if (!q) {
-    if (allowDefault) {
-      const picked = pickDefaultNode(nodes);
-      if (picked) {
-        return picked.nodeId;
-      }
-    }
-    throw new Error("node required");
-  }
-  return resolveNodeIdFromCandidates(nodes, q);
+  return resolveNodeIdFromNodeList(nodes, query, {
+    allowDefault,
+    pickDefaultNode: pickDefaultNode,
+  });
 }
 
 export async function resolveNodeId(
@@ -160,6 +153,17 @@ export async function resolveNodeId(
   query?: string,
   allowDefault = false,
 ) {
+  return (await resolveNode(opts, query, allowDefault)).nodeId;
+}
+
+export async function resolveNode(
+  opts: GatewayCallOptions,
+  query?: string,
+  allowDefault = false,
+): Promise<NodeListNode> {
   const nodes = await loadNodes(opts);
-  return resolveNodeIdFromList(nodes, query, allowDefault);
+  return resolveNodeFromNodeList(nodes, query, {
+    allowDefault,
+    pickDefaultNode: pickDefaultNode,
+  });
 }

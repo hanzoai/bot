@@ -124,6 +124,9 @@ export async function createGatewayRuntimeState(params: {
     registry: params.pluginRegistry,
     log: params.logPlugins,
   });
+  const shouldEnforcePluginGatewayAuth = (pathContext: PluginRoutePathContext): boolean => {
+    return shouldEnforceGatewayAuthForPluginPath(params.pluginRegistry, pathContext);
+  };
 
   const vncProxy = createVncProxy({ nodeRegistry: params.nodeRegistry });
   const gatewayScheme = params.gatewayTls?.enabled ? "https" : "http";
@@ -170,6 +173,7 @@ export async function createGatewayRuntimeState(params: {
       openResponsesConfig: params.openResponsesConfig,
       handleHooksRequest,
       handlePluginRequest,
+      shouldEnforcePluginGatewayAuth,
       resolvedAuth: params.resolvedAuth,
       rateLimiter: params.rateLimiter,
       tlsOptions: params.gatewayTls?.enabled ? params.gatewayTls.tlsOptions : undefined,

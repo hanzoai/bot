@@ -50,20 +50,6 @@ export function listKnownProfileNames(state: BrowserServerState): string[] {
 }
 
 /**
- * Normalize a CDP WebSocket URL to use the correct base URL.
- */
-function normalizeWsUrl(raw: string | undefined, cdpBaseUrl: string): string | undefined {
-  if (!raw) {
-    return undefined;
-  }
-  try {
-    return normalizeCdpWsUrl(raw, cdpBaseUrl);
-  } catch {
-    return raw;
-  }
-}
-
-/**
  * Create a profile-scoped context for browser operations.
  */
 function createProfileContext(
@@ -93,21 +79,11 @@ function createProfileContext(
     profileState.running = running;
   };
 
-  const listTabs = async (): Promise<BrowserTab[]> => {
-    // For remote profiles, use Playwright's persistent connection to avoid ephemeral sessions
-    if (!profile.cdpIsLoopback) {
-      const mod = await getPwAiModule({ mode: "strict" });
-      const listPagesViaPlaywright = (mod as Partial<PwAiModule> | null)?.listPagesViaPlaywright;
-      if (typeof listPagesViaPlaywright === "function") {
-        const pages = await listPagesViaPlaywright({ cdpUrl: profile.cdpUrl });
-        return pages.map((p) => ({
-          targetId: p.targetId,
-          title: p.title,
-          url: p.url,
-          type: p.type,
-        }));
-      }
-    }
+  const { listTabs, openTab } = createProfileTabOps({
+    profile,
+    state,
+    getProfileState,
+  });
 
     const raw = await fetchJson<
       Array<{

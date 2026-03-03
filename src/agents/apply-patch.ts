@@ -261,7 +261,7 @@ function resolvePatchFileOps(options: ApplyPatchOptions): PatchFileOps {
         await fs.writeFile(filePath, content, "utf8");
         return;
       }
-      const relative = toRelativeWorkspacePath(options.cwd, filePath);
+      const relative = toRelativeSandboxPath(options.cwd, filePath);
       await writeFileWithinRoot({
         rootDir: options.cwd,
         relativePath: relative,
@@ -318,25 +318,11 @@ async function resolvePatchPath(
           allowFinalHardlinkForUnlink: aliasPolicy.allowFinalHardlinkForUnlink,
         })
       ).resolved
-    : resolvePathFromCwd(filePath, options.cwd);
+    : resolvePathFromInput(filePath, options.cwd);
   return {
     resolved,
     display: toDisplayPath(resolved, options.cwd),
   };
-}
-
-function resolvePathFromCwd(filePath: string, cwd: string): string {
-  return path.normalize(resolveSandboxInputPath(filePath, cwd));
-}
-
-function toRelativeWorkspacePath(workspaceRoot: string, absolutePath: string): string {
-  const rootResolved = path.resolve(workspaceRoot);
-  const resolved = path.resolve(absolutePath);
-  const relative = path.relative(rootResolved, resolved);
-  if (!relative || relative === "." || relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error(`Path escapes sandbox root (${workspaceRoot}): ${absolutePath}`);
-  }
-  return relative;
 }
 
 function assertBoundaryRead(

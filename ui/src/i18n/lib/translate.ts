@@ -10,8 +10,8 @@ export function isSupportedLocale(value: string | null | undefined): value is Lo
 }
 
 class I18nManager {
-  private locale: Locale = "en";
-  private translations: Record<Locale, TranslationMap> = { en } as Record<Locale, TranslationMap>;
+  private locale: Locale = DEFAULT_LOCALE;
+  private translations: Partial<Record<Locale, TranslationMap>> = { [DEFAULT_LOCALE]: en };
   private subscribers: Set<Subscriber> = new Set();
 
   constructor() {
@@ -64,7 +64,7 @@ class I18nManager {
         } else {
           return;
         }
-        this.translations[locale] = module[locale.replace("-", "_")];
+        this.translations[locale] = translation;
       } catch (e) {
         console.error(`Failed to load locale: ${locale}`, e);
         return;
@@ -91,7 +91,7 @@ class I18nManager {
 
   public t(key: string, params?: Record<string, string>): string {
     const keys = key.split(".");
-    let value: unknown = this.translations[this.locale] || this.translations["en"];
+    let value: unknown = this.translations[this.locale] || this.translations[DEFAULT_LOCALE];
 
     for (const k of keys) {
       if (value && typeof value === "object") {
@@ -102,9 +102,9 @@ class I18nManager {
       }
     }
 
-    // Fallback to English
-    if (value === undefined && this.locale !== "en") {
-      value = this.translations["en"];
+    // Fallback to English.
+    if (value === undefined && this.locale !== DEFAULT_LOCALE) {
+      value = this.translations[DEFAULT_LOCALE];
       for (const k of keys) {
         if (value && typeof value === "object") {
           value = (value as Record<string, unknown>)[k];

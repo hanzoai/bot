@@ -11,9 +11,13 @@ const spawnState = vi.hoisted(() => ({
   spawn: vi.fn(),
 }));
 
-vi.mock("node:child_process", () => ({
-  spawn: (...args: unknown[]) => spawnState.spawn(...args),
-}));
+vi.mock("node:child_process", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:child_process")>();
+  return {
+    ...actual,
+    spawn: (...args: unknown[]) => spawnState.spawn(...args),
+  };
+});
 
 let createFlowTool: typeof import("./flow-tool.js").createFlowTool;
 
@@ -28,7 +32,6 @@ function fakeApi(overrides: Partial<BotPluginApi> = {}): BotPluginApi {
     runtime: { version: "test" } as any,
     logger: { info() {}, warn() {}, error() {}, debug() {} },
     registerTool() {},
-    registerHttpHandler() {},
     registerChannel() {},
     registerGatewayMethod() {},
     registerCli() {},

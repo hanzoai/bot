@@ -38,8 +38,7 @@ async function readState(statePath: string): Promise<UpdateCheckState> {
 }
 
 async function writeState(statePath: string, state: UpdateCheckState): Promise<void> {
-  await fs.mkdir(path.dirname(statePath), { recursive: true });
-  await fs.writeFile(statePath, JSON.stringify(state, null, 2), "utf-8");
+  await writeJsonAtomic(statePath, state);
 }
 
 export async function runGatewayUpdateCheck(params: {

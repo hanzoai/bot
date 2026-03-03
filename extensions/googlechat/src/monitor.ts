@@ -58,6 +58,14 @@ type WebhookTarget = {
 };
 
 const webhookTargets = new Map<string, WebhookTarget[]>();
+const webhookInFlightLimiter = createWebhookInFlightLimiter();
+const googleChatWebhookRequestHandler = createGoogleChatWebhookRequestHandler({
+  webhookTargets,
+  webhookInFlightLimiter,
+  processEvent: async (event, target) => {
+    await processGoogleChatEvent(event, target);
+  },
+});
 
 function logVerbose(core: GoogleChatCoreRuntime, runtime: GoogleChatRuntimeEnv, message: string) {
   if (core.logging.shouldLogVerbose()) {
@@ -65,33 +73,27 @@ function logVerbose(core: GoogleChatCoreRuntime, runtime: GoogleChatRuntimeEnv, 
   }
 }
 
-const warnedDeprecatedUsersEmailAllowFrom = new Set<string>();
-function warnDeprecatedUsersEmailEntries(
-  core: GoogleChatCoreRuntime,
-  runtime: GoogleChatRuntimeEnv,
-  entries: string[],
-) {
-  const deprecated = entries.map((v) => String(v).trim()).filter((v) => /^users\/.+@.+/i.test(v));
-  if (deprecated.length === 0) {
-    return;
-  }
-  const key = deprecated
-    .map((v) => v.toLowerCase())
-    .sort()
-    .join(",");
-  if (warnedDeprecatedUsersEmailAllowFrom.has(key)) {
-    return;
-  }
-  warnedDeprecatedUsersEmailAllowFrom.add(key);
-  logVerbose(
-    core,
-    runtime,
-    `Deprecated allowFrom entry detected: "users/<email>" is no longer treated as an email allowlist. Use raw email (alice@example.com) or immutable user id (users/<id>). entries=${deprecated.join(", ")}`,
-  );
-}
-
 export function registerGoogleChatWebhookTarget(target: WebhookTarget): () => void {
-  return registerWebhookTarget(webhookTargets, target).unregister;
+  return registerWebhookTargetWithPluginRoute({
+    targetsByPath: webhookTargets,
+    target,
+    route: {
+      auth: "plugin",
+      match: "exact",
+      pluginId: "googlechat",
+      source: "googlechat-webhook",
+      accountId: target.account.accountId,
+      log: target.runtime.log,
+      handler: async (req, res) => {
+        const handled = await handleGoogleChatWebhookRequest(req, res);
+        if (!handled && !res.headersSent) {
+          res.statusCode = 404;
+          res.setHeader("Content-Type", "text/plain; charset=utf-8");
+          res.end("Not Found");
+        }
+      },
+    },
+  }).unregister;
 }
 
 function normalizeAudienceType(value?: string | null): GoogleChatAudienceType | undefined {
@@ -594,9 +596,11 @@ async function processMessageWithPipeline(params: {
     channel: "googlechat",
     accountId: account.accountId,
     peer: {
-      kind: isGroup ? "group" : "direct",
+      kind: isGroup ? ("group" as const) : ("direct" as const),
       id: spaceId,
     },
+    runtime: core.channel,
+    sessionStore: config.session?.store,
   });
 
   let mediaPath: string | undefined;
@@ -613,24 +617,12 @@ async function processMessageWithPipeline(params: {
   const fromLabel = isGroup
     ? space.displayName || `space:${spaceId}`
     : senderName || `user:${senderId}`;
-  const storePath = core.channel.session.resolveStorePath(config.session?.store, {
-    agentId: route.agentId,
-  });
-  const envelopeOptions = core.channel.reply.resolveEnvelopeFormatOptions(config);
-  const previousTimestamp = core.channel.session.readSessionUpdatedAt({
-    storePath,
-    sessionKey: route.sessionKey,
-  });
-  const body = core.channel.reply.formatAgentEnvelope({
+  const { storePath, body } = buildEnvelope({
     channel: "Google Chat",
     from: fromLabel,
     timestamp: event.eventTime ? Date.parse(event.eventTime) : undefined,
-    previousTimestamp,
-    envelope: envelopeOptions,
     body: rawBody,
   });
-
-  const groupSystemPrompt = groupConfigResolved.entry?.systemPrompt?.trim() || undefined;
 
   const ctxPayload = core.channel.reply.finalizeInboundContext({
     Body: body,
@@ -910,7 +902,7 @@ export function monitorGoogleChatProvider(options: GoogleChatMonitorOptions): ()
   const audience = options.account.config.audience?.trim();
   const mediaMaxMb = options.account.config.mediaMaxMb ?? 20;
 
-  const unregister = registerGoogleChatWebhookTarget({
+  const unregisterTarget = registerGoogleChatWebhookTarget({
     account: options.account,
     config: options.config,
     runtime: options.runtime,
@@ -922,7 +914,9 @@ export function monitorGoogleChatProvider(options: GoogleChatMonitorOptions): ()
     mediaMaxMb,
   });
 
-  return unregister;
+  return () => {
+    unregisterTarget();
+  };
 }
 
 export async function startGoogleChatMonitor(

@@ -41,7 +41,7 @@ import { isLoopbackAddress, isTrustedProxyAddress, resolveGatewayClientIp } from
 import { resolveHostName } from "../../net.js";
 import { resolveNodeCommandAllowlist } from "../../node-command-policy.js";
 import { checkBrowserOrigin } from "../../origin-check.js";
-import { GATEWAY_CLIENT_IDS } from "../../protocol/client-info.js";
+import { GATEWAY_CLIENT_IDS, GATEWAY_CLIENT_MODES } from "../../protocol/client-info.js";
 import {
   ConnectErrorDetailCodes,
   resolveAuthConnectErrorDetailCode,
@@ -106,6 +106,7 @@ export function attachGatewayWsMessageHandler(params: {
   setHandshakeState: (state: "pending" | "connected" | "failed") => void;
   setCloseCause: (cause: string, meta?: Record<string, unknown>) => void;
   setLastFrameMeta: (meta: { type?: string; method?: string; id?: string }) => void;
+  originCheckMetrics: WsOriginCheckMetrics;
   logGateway: SubsystemLogger;
   logHealth: SubsystemLogger;
   logWsControl: SubsystemLogger;
@@ -138,6 +139,7 @@ export function attachGatewayWsMessageHandler(params: {
     setHandshakeState,
     setCloseCause,
     setLastFrameMeta,
+    originCheckMetrics,
     logGateway,
     logHealth,
     logWsControl,
@@ -348,6 +350,17 @@ export function attachGatewayWsMessageHandler(params: {
             });
             close(1008, truncateCloseReason(errorMessage));
             return;
+          }
+          if (originCheck.matchedBy === "host-header-fallback") {
+            originCheckMetrics.hostHeaderFallbackAccepted += 1;
+            logWsControl.warn(
+              `security warning: websocket origin accepted via Host-header fallback conn=${connId} count=${originCheckMetrics.hostHeaderFallbackAccepted} host=${requestHost ?? "n/a"} origin=${requestOrigin ?? "n/a"}`,
+            );
+            if (hostHeaderOriginFallbackEnabled) {
+              logGateway.warn(
+                "security metric: gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback accepted a websocket connect request",
+              );
+            }
           }
         }
 

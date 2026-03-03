@@ -4,7 +4,7 @@ import type { GatewayIamConfig } from "../config/config.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import type { ResolvedGatewayAuth } from "./auth.js";
 import { createDefaultDeps } from "../cli/deps.js";
-import { agentCommand } from "../commands/agent.js";
+import { agentCommandFromIngress } from "../commands/agent.js";
 import { emitAgentEvent, onAgentEvent } from "../infra/agent-events.js";
 import { logWarn } from "../logger.js";
 import { defaultRuntime } from "../runtime.js";
@@ -129,14 +129,6 @@ function buildAgentPrompt(messagesUnknown: unknown): {
     message,
     extraSystemPrompt: systemParts.length > 0 ? systemParts.join("\n\n") : undefined,
   };
-}
-
-function resolveOpenAiSessionKey(params: {
-  req: IncomingMessage;
-  agentId: string;
-  user?: string | undefined;
-}): string {
-  return resolveSessionKey({ ...params, prefix: "openai" });
 }
 
 function coerceRequest(val: unknown): OpenAiChatCompletionRequest {

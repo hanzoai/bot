@@ -4,7 +4,9 @@
   "description": "Hanzo Bot Zalo Personal Account plugin via zca-cli",
   "type": "module",
   "dependencies": {
-    "@sinclair/typebox": "0.34.48"
+    "@sinclair/typebox": "0.34.48",
+    "zca-js": "2.1.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@hanzo/bot": "workspace:*"

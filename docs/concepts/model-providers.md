@@ -137,14 +137,20 @@ Moonshot uses OpenAI-compatible endpoints, so configure it as a custom provider:
 
 Kimi K2 model IDs:
 
-{/_moonshot-kimi-k2-model-refs:start_/ && null}
+<!-- markdownlint-disable MD037 -->
+
+{/_ moonshot-kimi-k2-model-refs:start _/ && null}
+
+<!-- markdownlint-enable MD037 -->
 
 - `moonshot/kimi-k2.5`
 - `moonshot/kimi-k2-0905-preview`
 - `moonshot/kimi-k2-turbo-preview`
 - `moonshot/kimi-k2-thinking`
 - `moonshot/kimi-k2-thinking-turbo`
-  {/_moonshot-kimi-k2-model-refs:end_/ && null}
+  <!-- markdownlint-disable MD037 -->
+  {/_ moonshot-kimi-k2-model-refs:end _/ && null}
+  <!-- markdownlint-enable MD037 -->
 
 ```json5
 {
@@ -211,7 +217,7 @@ Synthetic provides Anthropic-compatible models behind the `synthetic` provider:
 ```json5
 {
   agents: {
-    defaults: { model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.1" } },
+    defaults: { model: { primary: "synthetic/hf:MiniMaxAI/MiniMax-M2.5" } },
   },
   models: {
     mode: "merge",
@@ -220,7 +226,7 @@ Synthetic provides Anthropic-compatible models behind the `synthetic` provider:
         baseUrl: "https://api.synthetic.new/anthropic",
         apiKey: "${SYNTHETIC_API_KEY}",
         api: "anthropic-messages",
-        models: [{ id: "hf:MiniMaxAI/MiniMax-M2.1", name: "MiniMax M2.1" }],
+        models: [{ id: "hf:MiniMaxAI/MiniMax-M2.5", name: "MiniMax M2.5" }],
       },
     },
   },
@@ -294,8 +300,8 @@ Example (OpenAI‑compatible):
 {
   agents: {
     defaults: {
-      model: { primary: "lmstudio/minimax-m2.1-gs32" },
-      models: { "lmstudio/minimax-m2.1-gs32": { alias: "Minimax" } },
+      model: { primary: "lmstudio/minimax-m2.5-gs32" },
+      models: { "lmstudio/minimax-m2.5-gs32": { alias: "Minimax" } },
     },
   },
   models: {
@@ -306,8 +312,8 @@ Example (OpenAI‑compatible):
         api: "openai-completions",
         models: [
           {
-            id: "minimax-m2.1-gs32",
-            name: "MiniMax M2.1",
+            id: "minimax-m2.5-gs32",
+            name: "MiniMax M2.5",
             reasoning: false,
             input: ["text"],
             cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -331,6 +337,9 @@ Notes:
   - `contextWindow: 200000`
   - `maxTokens: 8192`
 - Recommended: set explicit values that match your proxy/model limits.
+- For `api: "openai-completions"` on non-native endpoints (any non-empty `baseUrl` whose host is not `api.openai.com`), Bot forces `compat.supportsDeveloperRole: false` to avoid provider 400 errors for unsupported `developer` roles.
+- If `baseUrl` is empty/omitted, Bot keeps the default OpenAI behavior (which resolves to `api.openai.com`).
+- For safety, an explicit `compat.supportsDeveloperRole: true` is still overridden on non-native `openai-completions` endpoints.
 
 ## CLI examples
 

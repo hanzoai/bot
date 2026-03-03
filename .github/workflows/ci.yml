@@ -39,6 +39,7 @@ jobs:
       run_node: ${{ steps.scope.outputs.run_node }}
       run_macos: ${{ steps.scope.outputs.run_macos }}
       run_android: ${{ steps.scope.outputs.run_android }}
+      run_windows: ${{ steps.scope.outputs.run_windows }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -126,7 +127,7 @@ jobs:
 
   # Build dist once for Node-relevant changes and share it with downstream jobs.
   build-artifacts:
-    needs: [docs-scope, changed-scope, check]
+    needs: [docs-scope, changed-scope]
     if: needs.docs-scope.outputs.docs_only != 'true' && (github.event_name == 'push' || needs.changed-scope.outputs.run_node == 'true')
     runs-on: hanzo-k8s
     steps:
@@ -139,6 +140,7 @@ jobs:
         uses: ./.github/actions/setup-node-env
         with:
           install-bun: "false"
+          use-sticky-disk: "true"
 
       - name: Build dist
         run: pnpm build
@@ -165,6 +167,7 @@ jobs:
         uses: ./.github/actions/setup-node-env
         with:
           install-bun: "false"
+          use-sticky-disk: "true"
 
       - name: Download dist artifact
         uses: actions/download-artifact@v4
@@ -176,7 +179,7 @@ jobs:
         run: pnpm release:check
 
   checks:
-    needs: [docs-scope, changed-scope, check]
+    needs: [docs-scope, changed-scope]
     if: needs.docs-scope.outputs.docs_only != 'true' && (github.event_name == 'push' || needs.changed-scope.outputs.run_node == 'true')
     runs-on: hanzo-k8s
     strategy:
@@ -326,31 +329,22 @@ jobs:
             Write-Warning "Failed to apply Defender exclusions, continuing. $($_.Exception.Message)"
           }
 
-      - name: Download dist artifact (lint lane)
-        if: matrix.task == 'lint'
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-build
-          path: dist/
-
-      - name: Verify dist artifact (lint lane)
-        if: matrix.task == 'lint'
-        run: |
-          set -euo pipefail
-          test -s dist/index.js
-          test -s dist/plugin-sdk/index.js
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          check-latest: true
+          check-latest: false
 
       - name: Setup pnpm + cache store
         uses: ./.github/actions/setup-pnpm-store-cache
         with:
           pnpm-version: "10.23.0"
           cache-key-suffix: "node22"
+          # Sticky disk mount currently retries/fails on every shard and adds ~50s
+          # before install while still yielding zero pnpm store reuse.
+          use-sticky-disk: "false"
+          use-restore-keys: "false"
+          use-actions-cache: "false"
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -375,7 +369,7 @@ jobs:
           which node
           node -v
           pnpm -v
-          pnpm install --frozen-lockfile --ignore-scripts=false --config.engine-strict=false --config.enable-pre-post-scripts=true || pnpm install --frozen-lockfile --ignore-scripts=false --config.engine-strict=false --config.enable-pre-post-scripts=true
+          pnpm install --frozen-lockfile --prefer-offline --ignore-scripts=false --config.engine-strict=false --config.enable-pre-post-scripts=true || pnpm install --frozen-lockfile --prefer-offline --ignore-scripts=false --config.engine-strict=false --config.enable-pre-post-scripts=true
 
       - name: Run ${{ matrix.task }} (${{ matrix.runtime }})
         continue-on-error: ${{ matrix.task == 'test' }}
@@ -619,7 +613,7 @@ jobs:
           PY
 
   android:
-    needs: [docs-scope, changed-scope, check]
+    needs: [docs-scope, changed-scope]
     if: needs.docs-scope.outputs.docs_only != 'true' && (github.event_name == 'push' || needs.changed-scope.outputs.run_android == 'true')
     runs-on: ubuntu-latest
     strategy:

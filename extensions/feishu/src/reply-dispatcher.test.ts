@@ -132,6 +132,23 @@ describe("createFeishuReplyDispatcher streaming behavior", () => {
     expect(sendMarkdownCardFeishuMock).not.toHaveBeenCalled();
   });
 
+  it("suppresses internal block payload delivery", async () => {
+    createFeishuReplyDispatcher({
+      cfg: {} as never,
+      agentId: "agent",
+      runtime: {} as never,
+      chatId: "oc_chat",
+    });
+
+    const options = createReplyDispatcherWithTypingMock.mock.calls[0]?.[0];
+    await options.deliver({ text: "internal reasoning chunk" }, { kind: "block" });
+
+    expect(streamingInstances).toHaveLength(0);
+    expect(sendMessageFeishuMock).not.toHaveBeenCalled();
+    expect(sendMarkdownCardFeishuMock).not.toHaveBeenCalled();
+    expect(sendMediaFeishuMock).not.toHaveBeenCalled();
+  });
+
   it("uses streaming session for auto mode markdown payloads", async () => {
     createFeishuReplyDispatcher({
       cfg: {} as never,
@@ -142,7 +159,8 @@ describe("createFeishuReplyDispatcher streaming behavior", () => {
     });
 
     const options = createReplyDispatcherWithTypingMock.mock.calls[0]?.[0];
-    await options.deliver({ text: "```ts\nconst x = 1\n```" }, { kind: "final" });
+    await options.deliver({ text: "```md\npartial answer\n```" }, { kind: "block" });
+    await options.onIdle?.();
 
     expect(streamingInstances).toHaveLength(1);
     expect(streamingInstances[0].start).toHaveBeenCalledTimes(1);
@@ -152,6 +170,27 @@ describe("createFeishuReplyDispatcher streaming behavior", () => {
       rootId: "om_root_topic",
     });
     expect(streamingInstances[0].close).toHaveBeenCalledTimes(1);
+    expect(streamingInstances[0].close).toHaveBeenCalledWith("```md\npartial answer\n```");
+  });
+
+  it("sends media-only payloads as attachments", async () => {
+    createFeishuReplyDispatcher({
+      cfg: {} as never,
+      agentId: "agent",
+      runtime: {} as never,
+      chatId: "oc_chat",
+    });
+
+    const options = createReplyDispatcherWithTypingMock.mock.calls[0]?.[0];
+    await options.deliver({ mediaUrl: "https://example.com/a.png" }, { kind: "final" });
+
+    expect(sendMediaFeishuMock).toHaveBeenCalledTimes(1);
+    expect(sendMediaFeishuMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "oc_chat",
+        mediaUrl: "https://example.com/a.png",
+      }),
+    );
     expect(sendMessageFeishuMock).not.toHaveBeenCalled();
     expect(sendMarkdownCardFeishuMock).not.toHaveBeenCalled();
   });

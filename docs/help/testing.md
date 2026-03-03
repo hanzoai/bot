@@ -280,7 +280,7 @@ This is the “common models” run we expect to keep working:
 - Google (Gemini API): `google/gemini-3-pro-preview` and `google/gemini-3-flash-preview` (avoid older Gemini 2.x models)
 - Google (Antigravity): `google-antigravity/claude-opus-4-5-thinking` and `google-antigravity/gemini-3-flash`
 - Z.AI (GLM): `zai/glm-4.7`
-- MiniMax: `minimax/minimax-m2.1`
+- MiniMax: `minimax/minimax-m2.5`
 
 Run gateway smoke with tools + image:
 `BOT_LIVE_GATEWAY_MODELS="openai/gpt-5.2,openai-codex/gpt-5.3-codex,anthropic/claude-opus-4-6,google/gemini-3-pro-preview,google/gemini-3-flash-preview,google-antigravity/claude-opus-4-6-thinking,google-antigravity/gemini-3-flash,zai/glm-4.7,minimax/minimax-m2.1" pnpm test:live src/gateway/gateway-models.profiles.live.test.ts`
@@ -293,7 +293,7 @@ Pick at least one per provider family:
 - Anthropic: `anthropic/claude-opus-4-6` (or `anthropic/claude-sonnet-4-5`)
 - Google: `google/gemini-3-flash-preview` (or `google/gemini-3-pro-preview`)
 - Z.AI (GLM): `zai/glm-4.7`
-- MiniMax: `minimax/minimax-m2.1`
+- MiniMax: `minimax/minimax-m2.5`
 
 Optional additional coverage (nice to have):
 

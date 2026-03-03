@@ -23,7 +23,7 @@ import Testing
                 ("thing", 1.1, 0.1),
             ])
         let cmd = VoiceWakeManager.extractCommand(
-            from: transcript,
+            from: botTranscript,
             segments: segments,
             triggers: ["  hanzo-bot  "],
             minPostTriggerGap: 0.3)
@@ -41,7 +41,7 @@ import Testing
                 ("thing", 0.5, 0.1),
             ])
         let cmd = VoiceWakeManager.extractCommand(
-            from: transcript,
+            from: botTranscript,
             segments: segments,
             triggers: ["hanzo-bot"],
             minPostTriggerGap: 0.3)
@@ -67,7 +67,7 @@ import Testing
                 ("thing", 1.1, 0.1),
             ])
         let cmd = VoiceWakeManager.extractCommand(
-            from: transcript,
+            from: botTranscript,
             segments: segments,
             triggers: ["", "   ", "hanzo-bot"],
             minPostTriggerGap: 0.3)

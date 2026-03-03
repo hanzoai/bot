@@ -58,6 +58,11 @@ export function buildInboundUserContextPrefix(ctx: TemplateContext): string {
   const blocks: string[] = [];
   const chatType = normalizeChatType(ctx.ChatType);
   const isDirect = !chatType || chatType === "direct";
+  const directChannelValue = resolveInboundChannel(ctx);
+  const includeDirectConversationInfo = Boolean(
+    directChannelValue && directChannelValue !== "webchat",
+  );
+  const shouldIncludeConversationInfo = !isDirect || includeDirectConversationInfo;
 
   const conversationInfo = {
     conversation_label: isDirect ? undefined : safeTrim(ctx.ConversationLabel),
@@ -65,6 +70,7 @@ export function buildInboundUserContextPrefix(ctx: TemplateContext): string {
     group_channel: safeTrim(ctx.GroupChannel),
     group_space: safeTrim(ctx.GroupSpace),
     thread_label: safeTrim(ctx.ThreadLabel),
+    topic_id: ctx.MessageThreadId != null ? String(ctx.MessageThreadId) : undefined,
     is_forum: ctx.IsForum === true ? true : undefined,
     was_mentioned: ctx.WasMentioned === true ? true : undefined,
   };
@@ -79,20 +85,20 @@ export function buildInboundUserContextPrefix(ctx: TemplateContext): string {
     );
   }
 
-  const senderInfo = isDirect
-    ? undefined
-    : {
-        label: resolveSenderLabel({
-          name: safeTrim(ctx.SenderName),
-          username: safeTrim(ctx.SenderUsername),
-          tag: safeTrim(ctx.SenderTag),
-          e164: safeTrim(ctx.SenderE164),
-        }),
-        name: safeTrim(ctx.SenderName),
-        username: safeTrim(ctx.SenderUsername),
-        tag: safeTrim(ctx.SenderTag),
-        e164: safeTrim(ctx.SenderE164),
-      };
+  const senderInfo = {
+    label: resolveSenderLabel({
+      name: safeTrim(ctx.SenderName),
+      username: safeTrim(ctx.SenderUsername),
+      tag: safeTrim(ctx.SenderTag),
+      e164: safeTrim(ctx.SenderE164),
+      id: safeTrim(ctx.SenderId),
+    }),
+    id: safeTrim(ctx.SenderId),
+    name: safeTrim(ctx.SenderName),
+    username: safeTrim(ctx.SenderUsername),
+    tag: safeTrim(ctx.SenderTag),
+    e164: safeTrim(ctx.SenderE164),
+  };
   if (senderInfo?.label) {
     blocks.push(
       ["Sender (untrusted metadata):", "```json", JSON.stringify(senderInfo, null, 2), "```"].join(

@@ -27,14 +27,6 @@ function readZalouserAccountStatus(value: ChannelAccountSnapshot): ZalouserAccou
   };
 }
 
-function isMissingZca(lastError?: string): boolean {
-  if (!lastError) {
-    return false;
-  }
-  const lower = lastError.toLowerCase();
-  return lower.includes("zca") && (lower.includes("not found") || lower.includes("enoent"));
-}
-
 export function collectZalouserStatusIssues(
   accounts: ChannelAccountSnapshot[],
 ): ChannelStatusIssue[] {
@@ -51,7 +43,6 @@ export function collectZalouserStatusIssues(
     }
 
     const configured = account.configured === true;
-    const lastError = asString(account.lastError)?.trim();
 
     if (!configured) {
       if (isMissingZca(lastError)) {

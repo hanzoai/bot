@@ -20,6 +20,12 @@ async function makeTempRoot() {
   return root;
 }
 
+async function makeRootWithEmptyCfg() {
+  const root = await makeTempRoot();
+  const cfg: BotConfig = {};
+  return { root, cfg };
+}
+
 afterEach(async () => {
   resetAutoMigrateLegacyStateForTest();
   resetAutoMigrateLegacyStateDirForTest();
@@ -127,6 +133,26 @@ function expectTargetAlreadyExistsWarning(result: StateDirMigrationResult, targe
   expect(result.warnings).toEqual([
     `State dir migration skipped: target already exists (${targetDir}). Remove or merge manually.`,
   ]);
+}
+
+function expectUnmigratedWithoutWarnings(result: StateDirMigrationResult) {
+  expect(result.migrated).toBe(false);
+  expect(result.warnings).toEqual([]);
+}
+
+function writeLegacyAgentFiles(root: string, files: Record<string, string>) {
+  const legacyAgentDir = path.join(root, "agent");
+  fs.mkdirSync(legacyAgentDir, { recursive: true });
+  for (const [fileName, content] of Object.entries(files)) {
+    fs.writeFileSync(path.join(legacyAgentDir, fileName), content, "utf-8");
+  }
+  return legacyAgentDir;
+}
+
+function ensureCredentialsDir(root: string) {
+  const oauthDir = path.join(root, "credentials");
+  fs.mkdirSync(oauthDir, { recursive: true });
+  return oauthDir;
 }
 
 describe("doctor legacy state migrations", () => {
@@ -469,9 +495,7 @@ describe("doctor legacy state migrations", () => {
     fs.symlinkSync(path.join(targetDir, "agent"), path.join(legacyDir, "agent"), DIR_LINK_TYPE);
 
     const result = await runStateDirMigration(root);
-
-    expect(result.migrated).toBe(false);
-    expect(result.warnings).toEqual([]);
+    expectUnmigratedWithoutWarnings(result);
   });
 
   it("warns when legacy state dir is empty and target already exists", async () => {
@@ -504,9 +528,7 @@ describe("doctor legacy state migrations", () => {
     );
 
     const result = await runStateDirMigration(root);
-
-    expect(result.migrated).toBe(false);
-    expect(result.warnings).toEqual([]);
+    expectUnmigratedWithoutWarnings(result);
   });
 
   it("warns when legacy state dir symlink points outside the target tree", async () => {

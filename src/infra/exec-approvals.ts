@@ -11,8 +11,7 @@ export type ExecHost = "sandbox" | "gateway" | "node";
 export type ExecSecurity = "deny" | "allowlist" | "full";
 export type ExecAsk = "off" | "on-miss" | "always";
 
-export type SystemRunApprovalBindingV1 = {
-  version: 1;
+export type SystemRunApprovalBinding = {
   argv: string[];
   cwd: string | null;
   agentId: string | null;
@@ -20,8 +19,7 @@ export type SystemRunApprovalBindingV1 = {
   envHash: string | null;
 };
 
-export type SystemRunApprovalPlanV2 = {
-  version: 2;
+export type SystemRunApprovalPlan = {
   argv: string[];
   cwd: string | null;
   rawCommand: string | null;

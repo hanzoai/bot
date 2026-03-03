@@ -156,6 +156,13 @@ describe("memory search config", () => {
     expect(resolved?.model).toBe("mistral-embed");
   });
 
+  it("includes remote defaults and model default for ollama without overrides", () => {
+    const cfg = configWithDefaultProvider("ollama");
+    const resolved = resolveMemorySearchConfig(cfg, "main");
+    expectDefaultRemoteBatch(resolved);
+    expect(resolved?.model).toBe("nomic-embed-text");
+  });
+
   it("defaults session delta thresholds", () => {
     const cfg = asConfig({
       agents: {

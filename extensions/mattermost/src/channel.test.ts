@@ -4,6 +4,14 @@ import { describe, expect, it } from "vitest";
 import { mattermostPlugin } from "./channel.js";
 
 describe("mattermostPlugin", () => {
+  beforeEach(() => {
+    sendMessageMattermostMock.mockReset();
+    sendMessageMattermostMock.mockResolvedValue({
+      messageId: "post-1",
+      channelId: "channel-1",
+    });
+  });
+
   describe("messaging", () => {
     it("keeps @username targets", () => {
       const normalize = mattermostPlugin.messaging?.normalizeTarget;

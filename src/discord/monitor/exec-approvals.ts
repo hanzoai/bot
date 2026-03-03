@@ -33,7 +33,6 @@ import { createDiscordClient, stripUndefinedFields } from "../send.shared.js";
 import { DiscordUiContainer } from "../ui.js";
 
 const EXEC_APPROVAL_KEY = "execapproval";
-
 export type { ExecApprovalRequest, ExecApprovalResolved };
 
 /** Extract Discord channel ID from a session key like "agent:main:discord:channel:123456789" */

@@ -30,6 +30,7 @@ import {
 } from "../subagents-utils.js";
 
 export { extractAssistantText, stripToolMessages };
+export { isDiscordSurface, resolveDiscordAccountId };
 
 export const COMMAND = "/subagents";
 export const COMMAND_KILL = "/kill";
@@ -266,24 +267,6 @@ export type FocusTargetResolution = {
   agentId: string;
   label?: string;
 };
-
-export function isDiscordSurface(params: SubagentsCommandParams): boolean {
-  const channel =
-    params.ctx.OriginatingChannel ??
-    params.command.channel ??
-    params.ctx.Surface ??
-    params.ctx.Provider;
-  return (
-    String(channel ?? "")
-      .trim()
-      .toLowerCase() === "discord"
-  );
-}
-
-export function resolveDiscordAccountId(params: SubagentsCommandParams): string {
-  const accountId = typeof params.ctx.AccountId === "string" ? params.ctx.AccountId.trim() : "";
-  return accountId || "default";
-}
 
 export function resolveDiscordChannelIdForFocus(
   params: SubagentsCommandParams,

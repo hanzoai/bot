@@ -91,6 +91,43 @@ describe("DiscordMessageListener", () => {
     await handlerPromise;
   });
 
+  it("queues subsequent events until prior message handling completes", async () => {
+    const first = createDeferred();
+    const second = createDeferred();
+    let runCount = 0;
+    const handler = vi.fn(async () => {
+      runCount += 1;
+      if (runCount === 1) {
+        await first.promise;
+        return;
+      }
+      await second.promise;
+    });
+    const listener = new DiscordMessageListener(handler);
+
+    await expect(
+      listener.handle(
+        {} as unknown as import("./monitor/listeners.js").DiscordMessageEvent,
+        {} as unknown as import("@buape/carbon").Client,
+      ),
+    ).resolves.toBeUndefined();
+    await expect(
+      listener.handle(
+        {} as unknown as import("./monitor/listeners.js").DiscordMessageEvent,
+        {} as unknown as import("@buape/carbon").Client,
+      ),
+    ).resolves.toBeUndefined();
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    first.resolve();
+    await vi.waitFor(() => {
+      expect(handler).toHaveBeenCalledTimes(2);
+    });
+
+    second.resolve();
+    await Promise.resolve();
+  });
+
   it("logs handler failures", async () => {
     const logger = {
       warn: vi.fn(),

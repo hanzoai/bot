@@ -7,6 +7,7 @@ import { resolveFreshSessionTotalTokens, type SessionEntry } from "../../config/
 import { SILENT_REPLY_TOKEN } from "../tokens.js";
 
 export const DEFAULT_MEMORY_FLUSH_SOFT_TOKENS = 4000;
+export const DEFAULT_MEMORY_FLUSH_FORCE_TRANSCRIPT_BYTES = 2 * 1024 * 1024;
 
 export const DEFAULT_MEMORY_FLUSH_PROMPT = [
   "Pre-compaction memory flush.",
@@ -58,6 +59,11 @@ export function resolveMemoryFlushPromptForRun(params: {
 export type MemoryFlushSettings = {
   enabled: boolean;
   softThresholdTokens: number;
+  /**
+   * Force a pre-compaction memory flush when the session transcript reaches this
+   * size. Set to 0 to disable byte-size based triggering.
+   */
+  forceFlushTranscriptBytes: number;
   prompt: string;
   systemPrompt: string;
   reserveTokensFloor: number;
@@ -79,6 +85,9 @@ export function resolveMemoryFlushSettings(cfg?: BotConfig): MemoryFlushSettings
   }
   const softThresholdTokens =
     normalizeNonNegativeInt(defaults?.softThresholdTokens) ?? DEFAULT_MEMORY_FLUSH_SOFT_TOKENS;
+  const forceFlushTranscriptBytes =
+    parseNonNegativeByteSize(defaults?.forceFlushTranscriptBytes) ??
+    DEFAULT_MEMORY_FLUSH_FORCE_TRANSCRIPT_BYTES;
   const prompt = defaults?.prompt?.trim() || DEFAULT_MEMORY_FLUSH_PROMPT;
   const systemPrompt = defaults?.systemPrompt?.trim() || DEFAULT_MEMORY_FLUSH_SYSTEM_PROMPT;
   const reserveTokensFloor =
@@ -88,6 +97,7 @@ export function resolveMemoryFlushSettings(cfg?: BotConfig): MemoryFlushSettings
   return {
     enabled,
     softThresholdTokens,
+    forceFlushTranscriptBytes,
     prompt: ensureNoReplyHint(prompt),
     systemPrompt: ensureNoReplyHint(systemPrompt),
     reserveTokensFloor,
@@ -157,4 +167,17 @@ export function shouldRunMemoryFlush(params: {
   }
 
   return true;
+}
+
+/**
+ * Returns true when a memory flush has already been performed for the current
+ * compaction cycle. This prevents repeated flush runs within the same cycle —
+ * important for both the token-based and transcript-size–based trigger paths.
+ */
+export function hasAlreadyFlushedForCurrentCompaction(
+  entry: Pick<SessionEntry, "compactionCount" | "memoryFlushCompactionCount">,
+): boolean {
+  const compactionCount = entry.compactionCount ?? 0;
+  const lastFlushAt = entry.memoryFlushCompactionCount;
+  return typeof lastFlushAt === "number" && lastFlushAt === compactionCount;
 }

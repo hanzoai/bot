@@ -50,7 +50,7 @@ const fetchRemoteMediaMock = vi.fn(
   },
 );
 
-const runtimeStub = {
+const runtimeStub: PluginRuntime = createPluginRuntimeMock({
   media: {
     detectMime: (...args: unknown[]) => detectMimeMock(...args),
   },
@@ -61,7 +61,7 @@ const runtimeStub = {
         fetchRemoteMediaMock(...(args as Parameters<typeof fetchRemoteMediaMock>)),
     },
   },
-} as unknown as PluginRuntime;
+});
 
 describe("msteams attachments", () => {
   const load = async () => {

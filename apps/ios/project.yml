@@ -8,6 +8,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
+    ENABLE_APP_INTENTS_METADATA_GENERATION: NO
 
 packages:
   BotKit:
@@ -76,6 +77,7 @@ targets:
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
         ENABLE_APPINTENTS_METADATA: NO
+        ENABLE_APP_INTENTS_METADATA_GENERATION: NO
     info:
       path: Sources/Info.plist
       properties:

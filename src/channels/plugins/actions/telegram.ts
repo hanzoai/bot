@@ -122,8 +122,7 @@ export const telegramMessageActions: ChannelMessageActionAdapter = {
     }
 
     if (action === "react") {
-      const messageId =
-        readStringOrNumberParam(params, "messageId") ?? toolContext?.currentMessageId;
+      const messageId = resolveReactionMessageId({ args: params, toolContext });
       const emoji = readStringParam(params, "emoji", { allowEmpty: true });
       const remove = typeof params.remove === "boolean" ? params.remove : undefined;
       return await handleTelegramAction(

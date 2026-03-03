@@ -5,6 +5,7 @@ import {
 } from "../config/types.secrets.js";
 
 const FILE_SECRET_REF_SEGMENT_PATTERN = /^(?:[^~]|~0|~1)*$/;
+export const SECRET_PROVIDER_ALIAS_PATTERN = /^[a-z][a-z0-9_-]{0,63}$/;
 
 export const SINGLE_VALUE_FILE_REF_ID = "value";
 
@@ -66,4 +67,8 @@ export function isValidFileSecretRefId(value: string): boolean {
     .slice(1)
     .split("/")
     .every((segment) => FILE_SECRET_REF_SEGMENT_PATTERN.test(segment));
+}
+
+export function isValidSecretProviderAlias(value: string): boolean {
+  return SECRET_PROVIDER_ALIAS_PATTERN.test(value);
 }
