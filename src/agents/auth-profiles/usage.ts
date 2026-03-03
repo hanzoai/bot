@@ -138,16 +138,9 @@ export async function markAuthProfileUsed(params: {
       if (!freshStore.profiles[profileId]) {
         return false;
       }
-      freshStore.usageStats = freshStore.usageStats ?? {};
-      freshStore.usageStats[profileId] = {
-        ...freshStore.usageStats[profileId],
-        lastUsed: Date.now(),
-        errorCount: 0,
-        cooldownUntil: undefined,
-        disabledUntil: undefined,
-        disabledReason: undefined,
-        failureCounts: undefined,
-      };
+      updateUsageStatsEntry(freshStore, profileId, (existing) =>
+        resetUsageStats(existing, { lastUsed: Date.now() }),
+      );
       return true;
     },
   });
@@ -159,16 +152,9 @@ export async function markAuthProfileUsed(params: {
     return;
   }
 
-  store.usageStats = store.usageStats ?? {};
-  store.usageStats[profileId] = {
-    ...store.usageStats[profileId],
-    lastUsed: Date.now(),
-    errorCount: 0,
-    cooldownUntil: undefined,
-    disabledUntil: undefined,
-    disabledReason: undefined,
-    failureCounts: undefined,
-  };
+  updateUsageStatsEntry(store, profileId, (existing) =>
+    resetUsageStats(existing, { lastUsed: Date.now() }),
+  );
   saveAuthProfileStore(store, agentDir);
 }
 
@@ -454,9 +440,6 @@ export async function markAuthProfileFailure(params: {
       if (!profile) {
         return false;
       }
-      freshStore.usageStats = freshStore.usageStats ?? {};
-      const existing = freshStore.usageStats[profileId] ?? {};
-
       const now = Date.now();
       const providerKey = normalizeProviderId(profile.provider);
       const cfgResolved = resolveAuthCooldownConfig({
@@ -464,12 +447,14 @@ export async function markAuthProfileFailure(params: {
         providerId: providerKey,
       });
 
-      freshStore.usageStats[profileId] = computeNextProfileUsageStats({
-        existing,
-        now,
-        reason,
-        cfgResolved,
-      });
+      updateUsageStatsEntry(freshStore, profileId, (existing) =>
+        computeNextProfileUsageStats({
+          existing: existing ?? {},
+          now,
+          reason,
+          cfgResolved,
+        }),
+      );
       return true;
     },
   });
@@ -481,8 +466,6 @@ export async function markAuthProfileFailure(params: {
     return;
   }
 
-  store.usageStats = store.usageStats ?? {};
-  const existing = store.usageStats[profileId] ?? {};
   const now = Date.now();
   const providerKey = normalizeProviderId(store.profiles[profileId]?.provider ?? "");
   const cfgResolved = resolveAuthCooldownConfig({
@@ -490,12 +473,14 @@ export async function markAuthProfileFailure(params: {
     providerId: providerKey,
   });
 
-  store.usageStats[profileId] = computeNextProfileUsageStats({
-    existing,
-    now,
-    reason,
-    cfgResolved,
-  });
+  updateUsageStatsEntry(store, profileId, (existing) =>
+    computeNextProfileUsageStats({
+      existing: existing ?? {},
+      now,
+      reason,
+      cfgResolved,
+    }),
+  );
   saveAuthProfileStore(store, agentDir);
 }
 

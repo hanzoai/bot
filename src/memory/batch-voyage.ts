@@ -41,6 +41,29 @@ export const VOYAGE_BATCH_ENDPOINT = "/v1/embeddings";
 const VOYAGE_BATCH_COMPLETION_WINDOW = "12h";
 const VOYAGE_BATCH_MAX_REQUESTS = 50000;
 
+async function assertVoyageResponseOk(res: Response, context: string): Promise<void> {
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`${context}: ${res.status} ${text}`);
+  }
+}
+
+function buildVoyageBatchRequest<T>(params: {
+  client: VoyageEmbeddingClient;
+  path: string;
+  onResponse: (res: Response) => Promise<T>;
+}) {
+  const baseUrl = normalizeBatchBaseUrl(params.client);
+  return {
+    url: `${baseUrl}/${params.path}`,
+    ssrfPolicy: params.client.ssrfPolicy,
+    init: {
+      headers: buildBatchHeaders(params.client, { json: true }),
+    },
+    onResponse: params.onResponse,
+  };
+}
+
 async function submitVoyageBatch(params: {
   client: VoyageEmbeddingClient;
   requests: VoyageBatchRequest[];

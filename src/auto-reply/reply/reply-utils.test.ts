@@ -114,6 +114,48 @@ describe("normalizeReplyPayload", () => {
     expect(normalized).toBeNull();
     expect(reasons).toEqual(["empty"]);
   });
+
+  it("strips NO_REPLY from mixed emoji message (#30916)", () => {
+    const result = normalizeReplyPayload({ text: "😄 NO_REPLY" });
+    expect(result).not.toBeNull();
+    expect(result!.text).toContain("😄");
+    expect(result!.text).not.toContain("NO_REPLY");
+  });
+
+  it("strips NO_REPLY appended after substantive text (#30916)", () => {
+    const result = normalizeReplyPayload({
+      text: "File's there. Not urgent.\n\nNO_REPLY",
+    });
+    expect(result).not.toBeNull();
+    expect(result!.text).toContain("File's there");
+    expect(result!.text).not.toContain("NO_REPLY");
+  });
+
+  it("keeps NO_REPLY when used as leading substantive text", () => {
+    const result = normalizeReplyPayload({ text: "NO_REPLY -- nope" });
+    expect(result).not.toBeNull();
+    expect(result!.text).toBe("NO_REPLY -- nope");
+  });
+
+  it("suppresses message when stripping NO_REPLY leaves nothing", () => {
+    const reasons: string[] = [];
+    const result = normalizeReplyPayload(
+      { text: "  NO_REPLY  " },
+      { onSkip: (reason) => reasons.push(reason) },
+    );
+    expect(result).toBeNull();
+    expect(reasons).toEqual(["silent"]);
+  });
+
+  it("strips NO_REPLY but keeps media payload", () => {
+    const result = normalizeReplyPayload({
+      text: "NO_REPLY",
+      mediaUrl: "https://example.com/img.png",
+    });
+    expect(result).not.toBeNull();
+    expect(result!.text).toBe("");
+    expect(result!.mediaUrl).toBe("https://example.com/img.png");
+  });
 });
 
 describe("typing controller", () => {
@@ -422,15 +464,31 @@ describe("block reply coalescer", () => {
     vi.useRealTimers();
   });
 
-  it("coalesces chunks within the idle window", async () => {
-    vi.useFakeTimers();
+  function createBlockCoalescerHarness(config: {
+    minChars: number;
+    maxChars: number;
+    idleMs: number;
+    joiner: string;
+    flushOnEnqueue?: boolean;
+  }) {
     const flushes: string[] = [];
     const coalescer = createBlockReplyCoalescer({
-      config: { minChars: 1, maxChars: 200, idleMs: 100, joiner: " " },
+      config,
       shouldAbort: () => false,
       onFlush: (payload) => {
         flushes.push(payload.text ?? "");
       },
+    });
+    return { flushes, coalescer };
+  }
+
+  it("coalesces chunks within the idle window", async () => {
+    vi.useFakeTimers();
+    const { flushes, coalescer } = createBlockCoalescerHarness({
+      minChars: 1,
+      maxChars: 200,
+      idleMs: 100,
+      joiner: " ",
     });
 
     coalescer.enqueue({ text: "Hello" });
@@ -443,13 +501,11 @@ describe("block reply coalescer", () => {
 
   it("waits until minChars before idle flush", async () => {
     vi.useFakeTimers();
-    const flushes: string[] = [];
-    const coalescer = createBlockReplyCoalescer({
-      config: { minChars: 10, maxChars: 200, idleMs: 50, joiner: " " },
-      shouldAbort: () => false,
-      onFlush: (payload) => {
-        flushes.push(payload.text ?? "");
-      },
+    const { flushes, coalescer } = createBlockCoalescerHarness({
+      minChars: 10,
+      maxChars: 200,
+      idleMs: 50,
+      joiner: " ",
     });
 
     coalescer.enqueue({ text: "short" });
@@ -483,13 +539,11 @@ describe("block reply coalescer", () => {
 
   it("still accumulates when flushOnEnqueue is not set (default)", async () => {
     vi.useFakeTimers();
-    const flushes: string[] = [];
-    const coalescer = createBlockReplyCoalescer({
-      config: { minChars: 1, maxChars: 2000, idleMs: 100, joiner: "\n\n" },
-      shouldAbort: () => false,
-      onFlush: (payload) => {
-        flushes.push(payload.text ?? "");
-      },
+    const { flushes, coalescer } = createBlockCoalescerHarness({
+      minChars: 1,
+      maxChars: 2000,
+      idleMs: 100,
+      joiner: "\n\n",
     });
 
     coalescer.enqueue({ text: "First paragraph" });

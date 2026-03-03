@@ -302,19 +302,7 @@ final class CanvasWindowController: NSWindowController, WKNavigationDelegate, NS
     }
 
     func eval(javaScript: String) async throws -> String {
-        try await withCheckedThrowingContinuation { cont in
-            self.webView.evaluateJavaScript(javaScript) { result, error in
-                if let error {
-                    cont.resume(throwing: error)
-                    return
-                }
-                if let result {
-                    cont.resume(returning: String(describing: result))
-                } else {
-                    cont.resume(returning: "")
-                }
-            }
-        }
+        try await WebViewJavaScriptSupport.evaluateToString(webView: self.webView, javaScript: javaScript)
     }
 
     func snapshot(to outPath: String?) async throws -> String {

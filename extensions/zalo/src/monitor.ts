@@ -89,6 +89,12 @@ export function registerZaloWebhookTarget(target: WebhookTarget): () => void {
   return registerWebhookTarget(webhookTargets, target).unregister;
 }
 
+export {
+  clearZaloWebhookSecurityStateForTest,
+  getZaloWebhookRateLimitStateSizeForTest,
+  getZaloWebhookStatusCounterSizeForTest,
+};
+
 export async function handleZaloWebhookRequest(
   req: IncomingMessage,
   res: ServerResponse,
@@ -391,9 +397,21 @@ async function processMessageWithPipeline(params: {
   const dmPolicy = account.config.dmPolicy ?? "pairing";
   const configAllowFrom = (account.config.allowFrom ?? []).map((v) => String(v));
   const rawBody = text?.trim() || (mediaPath ? "<media:image>" : "");
-  const { senderAllowedForCommands, commandAuthorized } = await resolveSenderCommandAuthorization({
-    cfg: config,
-    rawBody,
+  const { senderAllowedForCommands, commandAuthorized } =
+    await resolveSenderCommandAuthorizationWithRuntime({
+      cfg: config,
+      rawBody,
+      isGroup,
+      dmPolicy,
+      configuredAllowFrom: configAllowFrom,
+      configuredGroupAllowFrom: groupAllowFrom,
+      senderId,
+      isSenderAllowed: isZaloSenderAllowed,
+      readAllowFromStore: pairing.readAllowFromStore,
+      runtime: core.channel.commands,
+    });
+
+  const directDmOutcome = resolveDirectDmAuthorizationOutcome({
     isGroup,
     dmPolicy,
     configuredAllowFrom: configAllowFrom,
@@ -406,6 +424,16 @@ async function processMessageWithPipeline(params: {
     resolveCommandAuthorizedFromAuthorizers: (params) =>
       core.channel.commands.resolveCommandAuthorizedFromAuthorizers(params),
   });
+  if (directDmOutcome === "disabled") {
+    logVerbose(core, runtime, `Blocked zalo DM from ${senderId} (dmPolicy=disabled)`);
+    return;
+  }
+  if (directDmOutcome === "unauthorized") {
+    if (dmPolicy === "pairing") {
+      const { code, created } = await pairing.upsertPairingRequest({
+        id: senderId,
+        meta: { name: senderName ?? undefined },
+      });
 
   if (!isGroup) {
     if (dmPolicy === "disabled") {
@@ -455,20 +483,31 @@ async function processMessageWithPipeline(params: {
             runtime,
             `Blocked unauthorized zalo sender ${senderId} (dmPolicy=${dmPolicy})`,
           );
+          statusSink?.({ lastOutboundAt: Date.now() });
+        } catch (err) {
+          logVerbose(core, runtime, `zalo pairing reply failed for ${senderId}: ${String(err)}`);
         }
-        return;
       }
+    } else {
+      logVerbose(
+        core,
+        runtime,
+        `Blocked unauthorized zalo sender ${senderId} (dmPolicy=${dmPolicy})`,
+      );
     }
+    return;
   }
 
-  const route = core.channel.routing.resolveAgentRoute({
+  const { route, buildEnvelope } = resolveInboundRouteEnvelopeBuilderWithRuntime({
     cfg: config,
     channel: "zalo",
     accountId: account.accountId,
     peer: {
-      kind: isGroup ? "group" : "direct",
+      kind: isGroup ? ("group" as const) : ("direct" as const),
       id: chatId,
     },
+    runtime: core.channel,
+    sessionStore: config.session?.store,
   });
 
   if (
@@ -481,20 +520,10 @@ async function processMessageWithPipeline(params: {
   }
 
   const fromLabel = isGroup ? `group:${chatId}` : senderName || `user:${senderId}`;
-  const storePath = core.channel.session.resolveStorePath(config.session?.store, {
-    agentId: route.agentId,
-  });
-  const envelopeOptions = core.channel.reply.resolveEnvelopeFormatOptions(config);
-  const previousTimestamp = core.channel.session.readSessionUpdatedAt({
-    storePath,
-    sessionKey: route.sessionKey,
-  });
-  const body = core.channel.reply.formatAgentEnvelope({
+  const { storePath, body } = buildEnvelope({
     channel: "Zalo",
     from: fromLabel,
     timestamp: date ? date * 1000 : undefined,
-    previousTimestamp,
-    envelope: envelopeOptions,
     body: rawBody,
   });
 
