@@ -1,11 +1,11 @@
-import { lookup } from "node:dns/promises";
+import type { SsrFPolicy } from "bot/plugin-sdk";
 import {
   buildHostnameAllowlistPolicyFromSuffixAllowlist,
   isHttpsUrlAllowedByHostnameSuffixAllowlist,
   isPrivateIpAddress,
   normalizeHostnameSuffixAllowlist,
 } from "bot/plugin-sdk";
-import type { SsrFPolicy } from "bot/plugin-sdk";
+import { lookup } from "node:dns/promises";
 import type { MSTeamsAttachmentLike } from "./types.js";
 
 type InlineImageCandidate =

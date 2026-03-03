@@ -1,3 +1,5 @@
+import type { BotConfig } from "../../config/config.js";
+import type { FinalizedMsgContext, MsgContext } from "../templating.js";
 import { getAcpSessionManager } from "../../acp/control-plane/manager.js";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { abortEmbeddedPiRun } from "../../agents/pi-embedded.js";
@@ -9,7 +11,6 @@ import {
   resolveInternalSessionKey,
   resolveMainSessionAlias,
 } from "../../agents/tools/sessions-helpers.js";
-import type { BotConfig } from "../../config/config.js";
 import {
   loadSessionStore,
   resolveStorePath,
@@ -20,7 +21,6 @@ import { logVerbose } from "../../globals.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 import { resolveCommandAuthorization } from "../command-auth.js";
 import { normalizeCommandBody, type CommandNormalizeOptions } from "../commands-registry.js";
-import type { FinalizedMsgContext, MsgContext } from "../templating.js";
 import {
   applyAbortCutoffToSessionEntry,
   resolveAbortCutoffFromContext,
@@ -192,10 +192,7 @@ function resolveAbortTargetKey(ctx: MsgContext): string | undefined {
   return sessionKey || undefined;
 }
 
-function normalizeRequesterSessionKey(
-  cfg: BotConfig,
-  key: string | undefined,
-): string | undefined {
+function normalizeRequesterSessionKey(cfg: BotConfig, key: string | undefined): string | undefined {
   const cleaned = key?.trim();
   if (!cleaned) {
     return undefined;
