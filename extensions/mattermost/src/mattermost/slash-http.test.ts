@@ -1,6 +1,6 @@
+import type { BotConfig, RuntimeEnv } from "bot/plugin-sdk";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { PassThrough } from "node:stream";
-import type { BotConfig, RuntimeEnv } from "bot/plugin-sdk";
 import { describe, expect, it } from "vitest";
 import type { ResolvedMattermostAccount } from "./accounts.js";
 import { createSlashCommandHttpHandler } from "./slash-http.js";

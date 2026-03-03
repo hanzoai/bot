@@ -5,8 +5,8 @@
  * validates the token, and routes the command through the standard inbound pipeline.
  */
 
-import type { IncomingMessage, ServerResponse } from "node:http";
 import type { BotConfig, ReplyPayload, RuntimeEnv } from "bot/plugin-sdk";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import {
   createReplyPrefixOptions,
   createTypingCallbacks,

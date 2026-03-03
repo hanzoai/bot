@@ -309,9 +309,7 @@ describe("docker-setup.sh", () => {
         .split("\n")
         .filter(
           (line) =>
-            line.includes("compose") &&
-            line.includes(" up -d") &&
-            line.includes("bot-gateway"),
+            line.includes("compose") && line.includes(" up -d") && line.includes("bot-gateway"),
         );
       expect(gatewayStarts).toHaveLength(2);
       expect(log).toContain(

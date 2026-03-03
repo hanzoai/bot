@@ -4,6 +4,23 @@ import { buildSlackThreadingToolContext } from "./threading-tool-context.js";
 
 const emptyCfg = {} as BotConfig;
 
+function resolveReplyToModeWithConfig(params: {
+  slackConfig: Record<string, unknown>;
+  context: Record<string, unknown>;
+}) {
+  const cfg = {
+    channels: {
+      slack: params.slackConfig,
+    },
+  } as BotConfig;
+  const result = buildSlackThreadingToolContext({
+    cfg,
+    accountId: null,
+    context: params.context as never,
+  });
+  return result.replyToMode;
+}
+
 describe("buildSlackThreadingToolContext", () => {
   it("uses top-level replyToMode by default", () => {
     const cfg = {
@@ -26,14 +43,9 @@ describe("buildSlackThreadingToolContext", () => {
           replyToMode: "off",
           replyToModeByChatType: { direct: "all" },
         },
-      },
-    } as BotConfig;
-    const result = buildSlackThreadingToolContext({
-      cfg,
-      accountId: null,
-      context: { ChatType: "direct" },
-    });
-    expect(result.replyToMode).toBe("all");
+        context: { ChatType: "direct" },
+      }),
+    ).toBe("all");
   });
 
   it("uses top-level replyToMode for channels when no channel override is set", () => {
@@ -43,14 +55,9 @@ describe("buildSlackThreadingToolContext", () => {
           replyToMode: "off",
           replyToModeByChatType: { direct: "all" },
         },
-      },
-    } as BotConfig;
-    const result = buildSlackThreadingToolContext({
-      cfg,
-      accountId: null,
-      context: { ChatType: "channel" },
-    });
-    expect(result.replyToMode).toBe("off");
+        context: { ChatType: "channel" },
+      }),
+    ).toBe("off");
   });
 
   it("falls back to top-level when no chat-type override is set", () => {
@@ -110,64 +117,6 @@ describe("buildSlackThreadingToolContext", () => {
         },
       }),
     ).toBe("off");
-  });
-
-  it("keeps configured channel behavior when not in a thread", () => {
-    const cfg = {
-      channels: {
-        slack: {
-          replyToMode: "off",
-          replyToModeByChatType: { channel: "first" },
-        },
-      },
-    } as BotConfig;
-    const result = buildSlackThreadingToolContext({
-      cfg,
-      accountId: null,
-      context: { ChatType: "channel", ThreadLabel: "label-only" },
-    });
-    expect(result.replyToMode).toBe("all");
-  });
-
-  it("uses all mode when MessageThreadId is present", () => {
-    const cfg = {
-      channels: {
-        slack: {
-          replyToMode: "all",
-          replyToModeByChatType: { direct: "off" },
-        },
-      },
-    } as BotConfig;
-    const result = buildSlackThreadingToolContext({
-      cfg,
-      accountId: null,
-      context: {
-        ChatType: "direct",
-        ThreadLabel: "thread-label",
-        MessageThreadId: "1771999998.834199",
-      },
-    });
-    expect(result.replyToMode).toBe("all");
-  });
-
-  it("does not force all mode from ThreadLabel alone", () => {
-    const cfg = {
-      channels: {
-        slack: {
-          replyToMode: "all",
-          replyToModeByChatType: { direct: "off" },
-        },
-      },
-    } as BotConfig;
-    const result = buildSlackThreadingToolContext({
-      cfg,
-      accountId: null,
-      context: {
-        ChatType: "direct",
-        ThreadLabel: "label-without-real-thread",
-      },
-    });
-    expect(result.replyToMode).toBe("off");
   });
 
   it("keeps configured channel behavior when not in a thread", () => {
