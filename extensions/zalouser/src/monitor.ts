@@ -18,6 +18,7 @@ import {
   summarizeMapping,
   warnMissingProviderGroupPolicyFallbackOnce,
 } from "bot/plugin-sdk";
+import type { ResolvedZalouserAccount, ZaloInboundMessage } from "./types.js";
 import {
   buildZalouserGroupCandidates,
   findZalouserGroupEntry,
@@ -31,7 +32,6 @@ import {
   sendSeenZalouser,
   sendTypingZalouser,
 } from "./send.js";
-import type { ResolvedZalouserAccount, ZaloInboundMessage } from "./types.js";
 import {
   listZaloFriends,
   listZaloGroups,

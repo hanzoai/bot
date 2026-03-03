@@ -1,4 +1,11 @@
 import type { Skill } from "@mariozechner/pi-coding-agent";
+import type {
+  BotSkillMetadata,
+  ParsedSkillFrontmatter,
+  SkillEntry,
+  SkillInstallSpec,
+  SkillInvocationPolicy,
+} from "./types.js";
 import { validateRegistryNpmSpec } from "../../infra/npm-registry-spec.js";
 import { parseFrontmatterBlock } from "../../markdown/frontmatter.js";
 import {
@@ -11,13 +18,6 @@ import {
   resolveBotManifestOs,
   resolveBotManifestRequires,
 } from "../../shared/frontmatter.js";
-import type {
-  BotSkillMetadata,
-  ParsedSkillFrontmatter,
-  SkillEntry,
-  SkillInstallSpec,
-  SkillInvocationPolicy,
-} from "./types.js";
 
 export function parseFrontmatter(content: string): ParsedSkillFrontmatter {
   return parseFrontmatterBlock(content);
