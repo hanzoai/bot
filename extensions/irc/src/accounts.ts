@@ -1,10 +1,10 @@
-import { readFileSync } from "node:fs";
 import { normalizeResolvedSecretInputString } from "bot/plugin-sdk";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeOptionalAccountId,
 } from "bot/plugin-sdk/account-id";
+import { readFileSync } from "node:fs";
 import type { CoreConfig, IrcAccountConfig, IrcNickServConfig } from "./types.js";
 
 const TRUTHY_ENV = new Set(["true", "1", "yes", "on"]);
