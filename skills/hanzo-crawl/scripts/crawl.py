@@ -41,6 +41,10 @@ def build_request_body(args: argparse.Namespace) -> dict:
         body["wait_for"] = args.wait_for
     if args.screenshot:
         body["screenshot"] = True
+    # Security note: js_code allows arbitrary JavaScript execution on the crawled
+    # page inside the Crawl4AI headless browser. This is a known SSRF vector --
+    # the caller could use it to reach internal network endpoints. Input
+    # validation and network policy enforcement are handled at the gateway level.
     if args.js_code:
         body["js_code"] = [args.js_code]
     if args.magic:
@@ -91,6 +95,9 @@ def crawl(args: argparse.Namespace) -> dict:
         or "https://crawl.hanzo.ai"
     ).rstrip("/")
     token = args.token or os.environ.get("HANZO_API_KEY", "")
+    if not token:
+        print("Error: HANZO_API_KEY environment variable or --token flag is required.", file=sys.stderr)
+        sys.exit(1)
 
     url = f"{base_url}/crawl"
     body = build_request_body(args)
