@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import {
   listConfiguredAccountIds as listConfiguredAccountIdsFromSection,
   resolveAccountWithDefaultFallback,
@@ -8,8 +7,9 @@ import {
   normalizeAccountId,
   normalizeOptionalAccountId,
 } from "bot/plugin-sdk/account-id";
-import { normalizeResolvedSecretInputString } from "./secret-input.js";
+import { readFileSync } from "node:fs";
 import type { CoreConfig, NextcloudTalkAccountConfig } from "./types.js";
+import { normalizeResolvedSecretInputString } from "./secret-input.js";
 
 function isTruthyEnvValue(value?: string): boolean {
   const normalized = (value ?? "").trim().toLowerCase();
