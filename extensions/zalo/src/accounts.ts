@@ -4,8 +4,8 @@ import {
   normalizeAccountId,
   normalizeOptionalAccountId,
 } from "bot/plugin-sdk/account-id";
-import { resolveZaloToken } from "./token.js";
 import type { ResolvedZaloAccount, ZaloAccountConfig, ZaloConfig } from "./types.js";
+import { resolveZaloToken } from "./token.js";
 
 export type { ResolvedZaloAccount };
 
@@ -41,10 +41,7 @@ export function resolveDefaultZaloAccountId(cfg: BotConfig): string {
   return ids[0] ?? DEFAULT_ACCOUNT_ID;
 }
 
-function resolveAccountConfig(
-  cfg: BotConfig,
-  accountId: string,
-): ZaloAccountConfig | undefined {
+function resolveAccountConfig(cfg: BotConfig, accountId: string): ZaloAccountConfig | undefined {
   const accounts = (cfg.channels?.zalo as ZaloConfig | undefined)?.accounts;
   if (!accounts || typeof accounts !== "object") {
     return undefined;

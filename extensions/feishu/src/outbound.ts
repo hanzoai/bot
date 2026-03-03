@@ -1,6 +1,6 @@
+import type { ChannelOutboundAdapter } from "bot/plugin-sdk";
 import fs from "fs";
 import path from "path";
-import type { ChannelOutboundAdapter } from "bot/plugin-sdk";
 import { resolveFeishuAccount } from "./accounts.js";
 import { sendMediaFeishu } from "./media.js";
 import { getFeishuRuntime } from "./runtime.js";

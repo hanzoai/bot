@@ -1,3 +1,13 @@
+import type { GatewayAuthChoice, SecretInputMode } from "../commands/onboard-types.js";
+import type { GatewayBindMode, GatewayTailscaleMode, BotConfig } from "../config/config.js";
+import type { SecretInput } from "../config/types.secrets.js";
+import type { RuntimeEnv } from "../runtime.js";
+import type {
+  GatewayWizardSettings,
+  QuickstartGatewayDefaults,
+  WizardFlow,
+} from "./onboarding.types.js";
+import type { WizardPrompter } from "./prompts.js";
 import {
   promptSecretRefForOnboarding,
   resolveSecretInputModeForEnvSelection,
@@ -7,10 +17,7 @@ import {
   randomToken,
   validateGatewayPasswordInput,
 } from "../commands/onboard-helpers.js";
-import type { GatewayAuthChoice, SecretInputMode } from "../commands/onboard-types.js";
-import type { GatewayBindMode, GatewayTailscaleMode, BotConfig } from "../config/config.js";
 import { ensureControlUiAllowedOriginsForNonLoopbackBind } from "../config/gateway-control-ui-origins.js";
-import type { SecretInput } from "../config/types.secrets.js";
 import {
   maybeAddTailnetOriginToControlUiAllowedOrigins,
   TAILSCALE_DOCS_LINES,
@@ -19,14 +26,7 @@ import {
 } from "../gateway/gateway-config-prompts.shared.js";
 import { DEFAULT_DANGEROUS_NODE_COMMANDS } from "../gateway/node-command-policy.js";
 import { findTailscaleBinary } from "../infra/tailscale.js";
-import type { RuntimeEnv } from "../runtime.js";
 import { validateIPv4AddressInput } from "../shared/net/ipv4.js";
-import type {
-  GatewayWizardSettings,
-  QuickstartGatewayDefaults,
-  WizardFlow,
-} from "./onboarding.types.js";
-import type { WizardPrompter } from "./prompts.js";
 
 type ConfigureGatewayOptions = {
   flow: WizardFlow;
@@ -155,8 +155,7 @@ export async function configureGatewayForOnboarding(
   if (authMode === "token") {
     if (flow === "quickstart") {
       gatewayToken =
-        (quickstartGateway.token ??
-          normalizeGatewayTokenInput(process.env.BOT_GATEWAY_TOKEN)) ||
+        (quickstartGateway.token ?? normalizeGatewayTokenInput(process.env.BOT_GATEWAY_TOKEN)) ||
         randomToken();
     } else {
       const tokenInput = await prompter.text({

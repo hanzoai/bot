@@ -4,15 +4,15 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import * as querystring from "node:querystring";
 import {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   requestBodyErrorToText,
 } from "bot/plugin-sdk";
+import * as querystring from "node:querystring";
+import type { SynologyWebhookPayload, ResolvedSynologyChatAccount } from "./types.js";
 import { sendMessage, resolveChatUserId } from "./client.js";
 import { validateToken, authorizeUserForDm, sanitizeInput, RateLimiter } from "./security.js";
-import type { SynologyWebhookPayload, ResolvedSynologyChatAccount } from "./types.js";
 
 // One rate limiter per account, created lazily
 const rateLimiters = new Map<string, RateLimiter>();
