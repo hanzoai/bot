@@ -1,8 +1,8 @@
+import { runPluginCommandWithTimeout, type RuntimeEnv } from "bot/plugin-sdk";
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { runPluginCommandWithTimeout, type RuntimeEnv } from "bot/plugin-sdk";
 
 const MATRIX_SDK_PACKAGE = "@vector-im/matrix-bot-sdk";
 const MATRIX_CRYPTO_DOWNLOAD_HELPER = "@matrix-org/matrix-sdk-crypto-nodejs/download-lib.js";
