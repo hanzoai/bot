@@ -122,12 +122,6 @@ describe("form-utils preserves numeric types", () => {
     const cloned = cloneConfigObject(form);
     setPathValue(cloned, ["gateway", "auth", "token"], "new-token");
     const first = getFirstXaiModel(cloned);
-
-    const model = cloned.models as Record<string, unknown>;
-    const providers = model.providers as Record<string, unknown>;
-    const xai = providers.xai as Record<string, unknown>;
-    const models = xai.models as Array<Record<string, unknown>>;
-    const first = models[0];
     const cost = first.cost as Record<string, unknown>;
 
     expect(typeof first.maxTokens).toBe("number");

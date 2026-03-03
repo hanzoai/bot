@@ -8,6 +8,7 @@ import type {
 import type { ExecApprovalsFile, ExecApprovalsSnapshot } from "../controllers/exec-approvals.ts";
 import { formatRelativeTimestamp, formatList } from "../format.ts";
 import { renderExecApprovals, resolveExecApprovalsState } from "./nodes-exec-approvals.ts";
+import { type NodeTargetOption, resolveConfigAgents } from "./nodes-shared.ts";
 
 const BILLING_URL = "https://billing.hanzo.ai";
 
