@@ -1,14 +1,30 @@
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
-import { describe, expect, it, vi } from "vitest";
-import { withTempHome } from "./home-env.test-harness.js";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createConfigIO } from "./io.js";
 
 describe("config io write", () => {
+  let fixtureRoot = "";
+  let homeCaseId = 0;
   const silentLogger = {
     warn: () => {},
     error: () => {},
   };
+
+  async function withSuiteHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
+    const home = path.join(fixtureRoot, `case-${homeCaseId++}`);
+    await fs.mkdir(home, { recursive: true });
+    return fn(home);
+  }
+
+  beforeAll(async () => {
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-config-io-"));
+  });
+
+  afterAll(async () => {
+    await fs.rm(fixtureRoot, { recursive: true, force: true });
+  });
 
   async function writeConfigAndCreateIo(params: {
     home: string;

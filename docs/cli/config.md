@@ -47,4 +47,18 @@ hanzo-bot config set gateway.port 19001 --json
 hanzo-bot config set channels.whatsapp.groups '["*"]' --json
 ```
 
+## Subcommands
+
+- `config file`: Print the active config file path (resolved from `BOT_CONFIG_PATH` or default location).
+
 Restart the gateway after edits.
+
+## Validate
+
+Validate the current config against the active schema without starting the
+gateway.
+
+```bash
+bot config validate
+bot config validate --json
+```

@@ -26,6 +26,23 @@ async function withRelayServer(
   }
 }
 
+function handleNonVersionRequest(req: IncomingMessage, res: ServerResponse): boolean {
+  if (req.url?.startsWith("/json/version")) {
+    return false;
+  }
+  res.writeHead(404);
+  res.end("not found");
+  return true;
+}
+
+async function probeRelay(baseUrl: string, relayAuthToken: string): Promise<boolean> {
+  return await probeAuthenticatedBotRelay({
+    baseUrl,
+    relayAuthHeader: "x-bot-relay-token",
+    relayAuthToken,
+  });
+}
+
 describe("extension-relay-auth", () => {
   const TEST_GATEWAY_TOKEN = "test-gateway-token";
   let prevGatewayToken: string | undefined;
@@ -63,9 +80,7 @@ describe("extension-relay-auth", () => {
     let seenToken: string | undefined;
     await withRelayServer(
       (req, res) => {
-        if (!req.url?.startsWith("/json/version")) {
-          res.writeHead(404);
-          res.end("not found");
+        if (handleNonVersionRequest(req, res)) {
           return;
         }
         const header = req.headers["x-hanzo-bot-relay-token"];
@@ -89,9 +104,7 @@ describe("extension-relay-auth", () => {
   it("rejects unauthenticated probe responses", async () => {
     await withRelayServer(
       (req, res) => {
-        if (!req.url?.startsWith("/json/version")) {
-          res.writeHead(404);
-          res.end("not found");
+        if (handleNonVersionRequest(req, res)) {
           return;
         }
         res.writeHead(401);
@@ -111,9 +124,7 @@ describe("extension-relay-auth", () => {
   it("rejects probe responses with wrong browser identity", async () => {
     await withRelayServer(
       (req, res) => {
-        if (!req.url?.startsWith("/json/version")) {
-          res.writeHead(404);
-          res.end("not found");
+        if (handleNonVersionRequest(req, res)) {
           return;
         }
         res.writeHead(200, { "Content-Type": "application/json" });

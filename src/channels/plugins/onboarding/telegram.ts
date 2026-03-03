@@ -67,7 +67,7 @@ async function promptTelegramAllowFrom(params: {
   const existingAllowFrom = resolved.config.allowFrom ?? [];
   await noteTelegramUserIdHelp(prompter);
 
-  const token = resolved.token;
+  const token = params.tokenOverride?.trim() || resolved.token;
   if (!token) {
     await prompter.note("Telegram token missing; username lookup is unavailable.", "Telegram");
   }
@@ -204,9 +204,14 @@ const dmPolicy: ChannelOnboardingDmPolicy = {
 export const telegramOnboardingAdapter: ChannelOnboardingAdapter = {
   channel,
   getStatus: async ({ cfg }) => {
-    const configured = listTelegramAccountIds(cfg).some((accountId) =>
-      Boolean(resolveTelegramAccount({ cfg, accountId }).token),
-    );
+    const configured = listTelegramAccountIds(cfg).some((accountId) => {
+      const account = resolveTelegramAccount({ cfg, accountId });
+      return (
+        Boolean(account.token) ||
+        Boolean(account.config.tokenFile?.trim()) ||
+        hasConfiguredSecretInput(account.config.botToken)
+      );
+    });
     return {
       channel,
       configured,
@@ -218,6 +223,7 @@ export const telegramOnboardingAdapter: ChannelOnboardingAdapter = {
   configure: async ({
     cfg,
     prompter,
+    options,
     accountOverrides,
     shouldPromptAccountIds,
     forceAllowFrom,
@@ -243,7 +249,10 @@ export const telegramOnboardingAdapter: ChannelOnboardingAdapter = {
       cfg: next,
       accountId: telegramAccountId,
     });
-    const accountConfigured = Boolean(resolvedAccount.token);
+    const hasConfiguredBotToken = hasConfiguredSecretInput(resolvedAccount.config.botToken);
+    const hasConfigToken =
+      hasConfiguredBotToken || Boolean(resolvedAccount.config.tokenFile?.trim());
+    const accountConfigured = Boolean(resolvedAccount.token) || hasConfigToken;
     const allowEnv = telegramAccountId === DEFAULT_ACCOUNT_ID;
     const canUseEnv = allowEnv && Boolean(process.env.TELEGRAM_BOT_TOKEN?.trim());
     const hasConfigToken = Boolean(
@@ -340,6 +349,7 @@ export const telegramOnboardingAdapter: ChannelOnboardingAdapter = {
         cfg: next,
         prompter,
         accountId: telegramAccountId,
+        tokenOverride: resolvedTokenForAllowFrom,
       });
     }
 

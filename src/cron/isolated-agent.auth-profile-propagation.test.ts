@@ -3,8 +3,14 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { runEmbeddedPiAgent } from "../agents/pi-embedded.js";
+import { createCliDeps } from "./isolated-agent.delivery.test-helpers.js";
 import { runCronIsolatedAgentTurn } from "./isolated-agent.js";
-import { makeCfg, makeJob, withTempCronHome } from "./isolated-agent.test-harness.js";
+import {
+  makeCfg,
+  makeJob,
+  withTempCronHome,
+  writeSessionStore,
+} from "./isolated-agent.test-harness.js";
 import { setupIsolatedAgentTurnMocks } from "./isolated-agent.test-setup.js";
 
 describe("runCronIsolatedAgentTurn auth profile propagation (#20624)", () => {
@@ -79,14 +85,7 @@ describe("runCronIsolatedAgentTurn auth profile propagation (#20624)", () => {
 
       const res = await runCronIsolatedAgentTurn({
         cfg,
-        deps: {
-          sendMessageSlack: vi.fn(),
-          sendMessageWhatsApp: vi.fn(),
-          sendMessageTelegram: vi.fn(),
-          sendMessageDiscord: vi.fn(),
-          sendMessageSignal: vi.fn(),
-          sendMessageIMessage: vi.fn(),
-        },
+        deps: createCliDeps(),
         job: makeJob({ kind: "agentTurn", message: "check status", deliver: false }),
         message: "check status",
         sessionKey: "cron:job-1",
@@ -102,15 +101,6 @@ describe("runCronIsolatedAgentTurn auth profile propagation (#20624)", () => {
         authProfileIdSource?: string;
       };
 
-      console.log(`authProfileId passed to runEmbeddedPiAgent: ${callArgs?.authProfileId}`);
-      console.log(`authProfileIdSource passed: ${callArgs?.authProfileIdSource}`);
-
-      if (!callArgs?.authProfileId) {
-        console.log("❌ BUG CONFIRMED: isolated cron session does NOT pass authProfileId");
-        console.log("   This causes 401 errors when using providers that require auth profiles");
-      }
-
-      // This assertion will FAIL on main — proving the bug
       expect(callArgs?.authProfileId).toBe("openrouter:default");
     });
   });

@@ -2,9 +2,13 @@ import type { SlackActionMiddlewareArgs } from "@slack/bolt";
 import type { Block, KnownBlock } from "@slack/web-api";
 import type { SlackMonitorContext } from "../context.js";
 import { enqueueSystemEvent } from "../../../infra/system-events.js";
-import { parseSlackModalPrivateMetadata } from "../../modal-metadata.js";
 import { authorizeSlackSystemEventSender } from "../auth.js";
 import { escapeSlackMrkdwn } from "../mrkdwn.js";
+import {
+  registerModalLifecycleHandler,
+  type ModalInputSummary,
+  type RegisterSlackModalHandler,
+} from "./interactions.modal.js";
 
 // Prefix for Bot-generated action IDs to scope our handler
 const BOT_ACTION_PREFIX = "bot:";
@@ -68,57 +72,144 @@ type InteractionSummary = InteractionSelectionFields & {
   threadTs?: string;
 };
 
-type ModalInputSummary = InteractionSelectionFields & {
-  blockId: string;
-  actionId: string;
-};
+function truncateInteractionString(
+  value: string,
+  max = SLACK_INTERACTION_STRING_MAX_CHARS,
+): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= max) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, max - 1)}…`;
+}
 
-type SlackModalBody = {
-  user?: { id?: string };
-  team?: { id?: string };
-  view?: {
-    id?: string;
-    callback_id?: string;
-    private_metadata?: string;
-    root_view_id?: string;
-    previous_view_id?: string;
-    external_id?: string;
-    hash?: string;
-    state?: { values?: unknown };
+function sanitizeSlackInteractionPayloadValue(value: unknown, key?: string): unknown {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (key && SLACK_INTERACTION_REDACTED_KEYS.has(key)) {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      return undefined;
+    }
+    return REDACTED_INTERACTION_VALUE;
+  }
+  if (typeof value === "string") {
+    return truncateInteractionString(value);
+  }
+  if (Array.isArray(value)) {
+    const sanitized = value
+      .slice(0, SLACK_INTERACTION_ARRAY_MAX_ITEMS)
+      .map((entry) => sanitizeSlackInteractionPayloadValue(entry))
+      .filter((entry) => entry !== undefined);
+    if (value.length > SLACK_INTERACTION_ARRAY_MAX_ITEMS) {
+      sanitized.push(`…+${value.length - SLACK_INTERACTION_ARRAY_MAX_ITEMS} more`);
+    }
+    return sanitized;
+  }
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+  const output: Record<string, unknown> = {};
+  for (const [entryKey, entryValue] of Object.entries(value as Record<string, unknown>)) {
+    const sanitized = sanitizeSlackInteractionPayloadValue(entryValue, entryKey);
+    if (sanitized === undefined) {
+      continue;
+    }
+    if (typeof sanitized === "string" && sanitized.length === 0) {
+      continue;
+    }
+    if (Array.isArray(sanitized) && sanitized.length === 0) {
+      continue;
+    }
+    output[entryKey] = sanitized;
+  }
+  return output;
+}
+
+function buildCompactSlackInteractionPayload(
+  payload: Record<string, unknown>,
+): Record<string, unknown> {
+  const rawInputs = Array.isArray(payload.inputs) ? payload.inputs : [];
+  const compactInputs = rawInputs
+    .slice(0, SLACK_INTERACTION_COMPACT_INPUTS_MAX_ITEMS)
+    .flatMap((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return [];
+      }
+      const typed = entry as Record<string, unknown>;
+      return [
+        {
+          actionId: typed.actionId,
+          blockId: typed.blockId,
+          actionType: typed.actionType,
+          inputKind: typed.inputKind,
+          selectedValues: typed.selectedValues,
+          selectedLabels: typed.selectedLabels,
+          inputValue: typed.inputValue,
+          inputNumber: typed.inputNumber,
+          selectedDate: typed.selectedDate,
+          selectedTime: typed.selectedTime,
+          selectedDateTime: typed.selectedDateTime,
+          richTextPreview: typed.richTextPreview,
+        },
+      ];
+    });
+
+  return {
+    interactionType: payload.interactionType,
+    actionId: payload.actionId,
+    callbackId: payload.callbackId,
+    actionType: payload.actionType,
+    userId: payload.userId,
+    teamId: payload.teamId,
+    channelId: payload.channelId ?? payload.routedChannelId,
+    messageTs: payload.messageTs,
+    threadTs: payload.threadTs,
+    viewId: payload.viewId,
+    isCleared: payload.isCleared,
+    selectedValues: payload.selectedValues,
+    selectedLabels: payload.selectedLabels,
+    selectedDate: payload.selectedDate,
+    selectedTime: payload.selectedTime,
+    selectedDateTime: payload.selectedDateTime,
+    workflowId: payload.workflowId,
+    routedChannelType: payload.routedChannelType,
+    inputs: compactInputs.length > 0 ? compactInputs : undefined,
+    inputsOmitted:
+      rawInputs.length > SLACK_INTERACTION_COMPACT_INPUTS_MAX_ITEMS
+        ? rawInputs.length - SLACK_INTERACTION_COMPACT_INPUTS_MAX_ITEMS
+        : undefined,
+    payloadTruncated: true,
   };
-  is_cleared?: boolean;
-};
+}
 
-type SlackModalEventBase = {
-  callbackId: string;
-  userId: string;
-  expectedUserId?: string;
-  viewId?: string;
-  sessionRouting: ReturnType<typeof resolveModalSessionRouting>;
-  payload: {
-    actionId: string;
-    callbackId: string;
-    viewId?: string;
-    userId: string;
-    teamId?: string;
-    rootViewId?: string;
-    previousViewId?: string;
-    externalId?: string;
-    viewHash?: string;
-    isStackedView?: boolean;
-    privateMetadata?: string;
-    routedChannelId?: string;
-    routedChannelType?: string;
-    inputs: ModalInputSummary[];
-  };
-};
+function formatSlackInteractionSystemEvent(payload: Record<string, unknown>): string {
+  const toEventText = (value: Record<string, unknown>): string =>
+    `${SLACK_INTERACTION_EVENT_PREFIX}${JSON.stringify(value)}`;
 
-type SlackModalInteractionKind = "view_submission" | "view_closed";
-type SlackModalEventHandlerArgs = { ack: () => Promise<void>; body: unknown };
-type RegisterSlackModalHandler = (
-  matcher: RegExp,
-  handler: (args: SlackModalEventHandlerArgs) => Promise<void>,
-) => void;
+  const sanitizedPayload =
+    (sanitizeSlackInteractionPayloadValue(payload) as Record<string, unknown> | undefined) ?? {};
+  let eventText = toEventText(sanitizedPayload);
+  if (eventText.length <= SLACK_INTERACTION_EVENT_MAX_CHARS) {
+    return eventText;
+  }
+
+  const compactPayload = sanitizeSlackInteractionPayloadValue(
+    buildCompactSlackInteractionPayload(sanitizedPayload),
+  ) as Record<string, unknown>;
+  eventText = toEventText(compactPayload);
+  if (eventText.length <= SLACK_INTERACTION_EVENT_MAX_CHARS) {
+    return eventText;
+  }
+
+  return toEventText({
+    interactionType: sanitizedPayload.interactionType,
+    actionId: sanitizedPayload.actionId ?? "unknown",
+    userId: sanitizedPayload.userId,
+    channelId: sanitizedPayload.channelId ?? sanitizedPayload.routedChannelId,
+    payloadTruncated: true,
+  });
+}
 
 function truncateInteractionString(
   value: string,
@@ -886,6 +977,8 @@ export function registerSlackInteractionEvents(params: { ctx: SlackMonitorContex
     ctx,
     interactionType: "view_submission",
     contextPrefix: "slack:interaction:view",
+    summarizeViewState,
+    formatSystemEvent: formatSlackInteractionSystemEvent,
   });
 
   const viewClosed = (
@@ -904,5 +997,7 @@ export function registerSlackInteractionEvents(params: { ctx: SlackMonitorContex
     ctx,
     interactionType: "view_closed",
     contextPrefix: "slack:interaction:view-closed",
+    summarizeViewState,
+    formatSystemEvent: formatSlackInteractionSystemEvent,
   });
 }

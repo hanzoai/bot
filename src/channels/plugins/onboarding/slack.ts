@@ -324,7 +324,11 @@ export const slackOnboardingAdapter: ChannelOnboardingAdapter = {
   getStatus: async ({ cfg }) => {
     const configured = listSlackAccountIds(cfg).some((accountId) => {
       const account = resolveSlackAccount({ cfg, accountId });
-      return Boolean(account.botToken && account.appToken);
+      const hasBotToken =
+        Boolean(account.botToken) || hasConfiguredSecretInput(account.config.botToken);
+      const hasAppToken =
+        Boolean(account.appToken) || hasConfiguredSecretInput(account.config.appToken);
+      return hasBotToken && hasAppToken;
     });
     return {
       channel,
@@ -354,18 +358,17 @@ export const slackOnboardingAdapter: ChannelOnboardingAdapter = {
       cfg: next,
       accountId: slackAccountId,
     });
-    const accountConfigured = Boolean(resolvedAccount.botToken && resolvedAccount.appToken);
+    const hasConfiguredBotToken = hasConfiguredSecretInput(resolvedAccount.config.botToken);
+    const hasConfiguredAppToken = hasConfiguredSecretInput(resolvedAccount.config.appToken);
+    const hasConfigTokens = hasConfiguredBotToken && hasConfiguredAppToken;
+    const accountConfigured =
+      Boolean(resolvedAccount.botToken && resolvedAccount.appToken) || hasConfigTokens;
     const allowEnv = slackAccountId === DEFAULT_ACCOUNT_ID;
-    const canUseEnv =
-      allowEnv &&
-      Boolean(process.env.SLACK_BOT_TOKEN?.trim()) &&
-      Boolean(process.env.SLACK_APP_TOKEN?.trim());
-    const hasConfigTokens = Boolean(
-      resolvedAccount.config.botToken && resolvedAccount.config.appToken,
-    );
-
-    let botToken: string | null = null;
-    let appToken: string | null = null;
+    const canUseBotEnv =
+      allowEnv && !hasConfiguredBotToken && Boolean(process.env.SLACK_BOT_TOKEN?.trim());
+    const canUseAppEnv =
+      allowEnv && !hasConfiguredAppToken && Boolean(process.env.SLACK_APP_TOKEN?.trim());
+    let resolvedBotTokenForAllowlist = resolvedAccount.botToken;
     const slackBotName = String(
       await prompter.text({
         message: "Slack bot display name (used for manifest)",

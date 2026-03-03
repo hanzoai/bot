@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { BotConfig } from "../config/config.js";
 import { captureEnv } from "../test-utils/env.js";
 
 const loadConfig = vi.fn();
@@ -17,6 +18,7 @@ type StartMode = "hello" | "close" | "silent";
 let startMode: StartMode = "hello";
 let closeCode = 1006;
 let closeReason = "";
+let helloMethods: string[] | undefined = ["health", "secrets.resolve"];
 
 vi.mock("../config/config.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../config/config.js")>();
@@ -60,7 +62,11 @@ vi.mock("./client.js", () => ({
     }
     start() {
       if (startMode === "hello") {
-        void lastClientOptions?.onHelloOk?.();
+        void lastClientOptions?.onHelloOk?.({
+          features: {
+            methods: helloMethods,
+          },
+        });
       } else if (startMode === "close") {
         lastClientOptions?.onClose?.(closeCode, closeReason);
       }
@@ -72,6 +78,13 @@ vi.mock("./client.js", () => ({
 const { buildGatewayConnectionDetails, callGateway } = await import("./call.js");
 
 describe("callGateway url resolution", () => {
+  const envSnapshot = captureEnv([
+    "BOT_ALLOW_INSECURE_PRIVATE_WS",
+    "BOT_GATEWAY_URL",
+    "BOT_GATEWAY_TOKEN",
+    "CLAWDBOT_GATEWAY_TOKEN",
+  ]);
+
   beforeEach(() => {
     loadConfig.mockReset();
     resolveGatewayPort.mockReset();
@@ -329,6 +342,17 @@ describe("callGateway error details", () => {
       }),
     ).rejects.toThrow("gateway remote mode misconfigured");
   });
+
+  it("fails before request when a required gateway method is missing", async () => {
+    setLocalLoopbackGatewayConfig();
+    helloMethods = ["health"];
+    await expect(
+      callGateway({
+        method: "secrets.resolve",
+        requiredMethods: ["secrets.resolve"],
+      }),
+    ).rejects.toThrow(/does not support required method "secrets\.resolve"/i);
+  });
 });
 
 describe("callGateway url override auth requirements", () => {
@@ -365,6 +389,18 @@ describe("callGateway url override auth requirements", () => {
     await expect(
       callGateway({ method: "health", url: "wss://override.example/ws" }),
     ).rejects.toThrow("explicit credentials");
+  });
+
+  it("throws when env URL override is set without env credentials", async () => {
+    process.env.BOT_GATEWAY_URL = "wss://override.example/ws";
+    loadConfig.mockReturnValue({
+      gateway: {
+        mode: "local",
+        auth: { token: "local-token", password: "local-password" },
+      },
+    });
+
+    await expect(callGateway({ method: "health" })).rejects.toThrow("explicit credentials");
   });
 });
 

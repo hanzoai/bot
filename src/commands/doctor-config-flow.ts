@@ -17,6 +17,7 @@ import {
 } from "../config/config.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import { parseToolsBySenderTypedKey } from "../config/types.tools.js";
+import { BotSchema } from "../config/zod-schema.js";
 import { resolveCommandResolutionFromArgv } from "../infra/exec-command-resolution.js";
 import {
   listInterpreterLikeSafeBins,
@@ -1301,7 +1302,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
   }
   const warnings = snapshot.warnings ?? [];
   if (warnings.length > 0) {
-    const lines = warnings.map((issue) => `- ${issue.path}: ${issue.message}`).join("\n");
+    const lines = formatConfigIssueLines(warnings, "-").join("\n");
     note(lines, "Config warnings");
   }
 

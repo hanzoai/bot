@@ -153,10 +153,14 @@ Parameters:
 - `model?` (optional; overrides the sub-agent model; invalid values error)
 - `runTimeoutSeconds?` (default 0; when set, aborts the sub-agent run after N seconds)
 - `cleanup?` (`delete|keep`, default `keep`)
+- `sandbox?` (`inherit|require`, default `inherit`; `require` rejects spawn unless the target child runtime is sandboxed)
+- `attachments?` (optional array of inline files; subagent runtime only, ACP rejects). Each entry: `{ name, content, encoding?: "utf8" | "base64", mimeType? }`. Files are materialized into the child workspace at `.hanzo/bot/attachments/<uuid>/`. Returns a receipt with sha256 per file.
+- `attachAs?` (optional; `{ mountPath? }` hint reserved for future mount implementations)
 
 Allowlist:
 
 - `agents.list[].subagents.allowAgents`: list of agent ids allowed via `agentId` (`["*"]` to allow any). Default: only the requester agent.
+- Sandbox inheritance guard: if the requester session is sandboxed, `sessions_spawn` rejects targets that would run unsandboxed.
 
 Discovery:
 

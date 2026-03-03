@@ -1222,7 +1222,7 @@ describe("applyAuthChoice", () => {
         profileId: "minimax-portal:default",
         baseUrl: "https://api.minimax.io/anthropic",
         api: "anthropic-messages",
-        defaultModel: "minimax-portal/MiniMax-M2.1",
+        defaultModel: "minimax-portal/MiniMax-M2.5",
         apiKey: "minimax-oauth",
         selectValue: "oauth",
       },

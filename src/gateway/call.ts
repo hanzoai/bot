@@ -6,10 +6,13 @@ import {
   resolveGatewayPort,
   resolveStateDir,
 } from "../config/config.js";
+import { hasConfiguredSecretInput, resolveSecretInputRef } from "../config/types.secrets.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import { resolveSecretReferenceValue } from "../infra/secrets/kms.js";
 import { pickPrimaryTailnetIPv4 } from "../infra/tailnet.js";
 import { loadGatewayTlsRuntime } from "../infra/tls/gateway.js";
+import { secretRefKey } from "../secrets/ref-contract.js";
+import { resolveSecretRefValues } from "../secrets/resolve.js";
 import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
@@ -38,6 +41,7 @@ export type CallGatewayOptions = {
   instanceId?: string;
   minProtocol?: number;
   maxProtocol?: number;
+  requiredMethods?: string[];
   /**
    * Overrides the config path shown in connection error details.
    * Does not affect config loading; callers still control auth via opts.token/password/env/config.
@@ -72,14 +76,30 @@ export function resolveExplicitGatewayAuth(opts?: ExplicitGatewayAuth): Explicit
 
 export function ensureExplicitGatewayAuth(params: {
   urlOverride?: string;
-  auth: ExplicitGatewayAuth;
+  urlOverrideSource?: "cli" | "env";
+  explicitAuth?: ExplicitGatewayAuth;
+  resolvedAuth?: ExplicitGatewayAuth;
   errorHint: string;
   configPath?: string;
 }): void {
   if (!params.urlOverride) {
     return;
   }
-  if (params.auth.token || params.auth.password) {
+  // URL overrides are untrusted redirects and can move WebSocket traffic off the intended host.
+  // Never allow an override to silently reuse implicit credentials or device token fallback.
+  const explicitToken = params.explicitAuth?.token;
+  const explicitPassword = params.explicitAuth?.password;
+  if (params.urlOverrideSource === "cli" && (explicitToken || explicitPassword)) {
+    return;
+  }
+  const hasResolvedAuth =
+    params.resolvedAuth?.token ||
+    params.resolvedAuth?.password ||
+    explicitToken ||
+    explicitPassword;
+  // Env overrides are supported for deployment ergonomics, but only when explicit auth is available.
+  // This avoids implicit device-token fallback against attacker-controlled WSS endpoints.
+  if (params.urlOverrideSource === "env" && hasResolvedAuth) {
     return;
   }
   const message = [
@@ -118,12 +138,21 @@ export function buildGatewayConnectionDetails(
     typeof options.url === "string" && options.url.trim().length > 0
       ? options.url.trim()
       : undefined;
+  const envUrlOverride = cliUrlOverride
+    ? undefined
+    : (trimToUndefined(process.env.BOT_GATEWAY_URL) ??
+      trimToUndefined(process.env.CLAWDBOT_GATEWAY_URL));
+  const urlOverride = cliUrlOverride ?? envUrlOverride;
   const remoteUrl =
     typeof remote?.url === "string" && remote.url.trim().length > 0 ? remote.url.trim() : undefined;
   const remoteMisconfigured = isRemoteMode && !urlOverride && !remoteUrl;
+  const urlSourceHint =
+    options.urlSource ?? (cliUrlOverride ? "cli" : envUrlOverride ? "env" : undefined);
   const url = urlOverride || remoteUrl || localUrl;
   const urlSource = urlOverride
-    ? "cli --url"
+    ? urlSourceHint === "env"
+      ? "env BOT_GATEWAY_URL"
+      : "cli --url"
     : remoteUrl
       ? "config gateway.remote.url"
       : remoteMisconfigured
@@ -294,8 +323,13 @@ export async function callGateway<T = Record<string, unknown>>(
       deviceIdentity: loadOrCreateDeviceIdentity(),
       minProtocol: opts.minProtocol ?? PROTOCOL_VERSION,
       maxProtocol: opts.maxProtocol ?? PROTOCOL_VERSION,
-      onHelloOk: async () => {
+      onHelloOk: async (hello) => {
         try {
+          ensureGatewaySupportsRequiredMethods({
+            requiredMethods: opts.requiredMethods,
+            methods: hello.features?.methods,
+            attemptedMethod: opts.method,
+          });
           const result = await client.request<T>(opts.method, opts.params, {
             expectFinal: opts.expectFinal,
           });
