@@ -1,5 +1,5 @@
-import { upsertChannelPairingRequest } from "../../pairing/pairing-store.js";
 import type { DiscordDmCommandAccess } from "./dm-command-auth.js";
+import { upsertChannelPairingRequest } from "../../pairing/pairing-store.js";
 
 export async function handleDiscordDmCommandDecision(params: {
   dmAccess: DiscordDmCommandAccess;
