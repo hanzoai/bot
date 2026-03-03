@@ -110,7 +110,7 @@ function validatePluginConfig(params: {
   if (result.ok) {
     return { ok: true, value: params.value as Record<string, unknown> | undefined };
   }
-  return { ok: false, errors: result.errors };
+  return { ok: false, errors: result.errors.map((error) => error.text) };
 }
 
 function resolvePluginModuleExport(moduleExport: unknown): {
@@ -165,7 +165,7 @@ function createPluginRecord(params: {
     cliCommands: [],
     services: [],
     commands: [],
-    httpHandlers: 0,
+    httpRoutes: 0,
     hookCount: 0,
     configSchema: params.configSchema,
     configUiHints: undefined,
@@ -192,7 +192,7 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
   if (cacheEnabled) {
     const cached = registryCache.get(cacheKey);
     if (cached) {
-      setActivePluginRegistry(cached, cacheKey);
+      activatePluginRegistry(cached, cacheKey);
       return cached;
     }
   }
@@ -295,6 +295,18 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
     record.kind = manifestRecord.kind;
     record.configUiHints = manifestRecord.configUiHints;
     record.configJsonSchema = manifestRecord.configSchema;
+    const pushPluginLoadError = (message: string) => {
+      record.status = "error";
+      record.error = message;
+      registry.plugins.push(record);
+      seenIds.set(pluginId, candidate.origin);
+      registry.diagnostics.push({
+        level: "error",
+        pluginId: record.id,
+        source: record.source,
+        message: record.error,
+      });
+    };
 
     if (!enableState.enabled) {
       record.status = "disabled";
@@ -305,16 +317,7 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
     }
 
     if (!manifestRecord.configSchema) {
-      record.status = "error";
-      record.error = "missing config schema";
-      registry.plugins.push(record);
-      seenIds.set(pluginId, candidate.origin);
-      registry.diagnostics.push({
-        level: "error",
-        pluginId: record.id,
-        source: record.source,
-        message: record.error,
-      });
+      pushPluginLoadError("missing config schema");
       continue;
     }
 
@@ -396,16 +399,7 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
 
     if (!validatedConfig.ok) {
       logger.error(`[plugins] ${record.id} invalid config: ${validatedConfig.errors?.join(", ")}`);
-      record.status = "error";
-      record.error = `invalid config: ${validatedConfig.errors?.join(", ")}`;
-      registry.plugins.push(record);
-      seenIds.set(pluginId, candidate.origin);
-      registry.diagnostics.push({
-        level: "error",
-        pluginId: record.id,
-        source: record.source,
-        message: record.error,
-      });
+      pushPluginLoadError(`invalid config: ${validatedConfig.errors?.join(", ")}`);
       continue;
     }
 
@@ -417,16 +411,7 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
 
     if (typeof register !== "function") {
       logger.error(`[plugins] ${record.id} missing register/activate export`);
-      record.status = "error";
-      record.error = "plugin export missing register/activate";
-      registry.plugins.push(record);
-      seenIds.set(pluginId, candidate.origin);
-      registry.diagnostics.push({
-        level: "error",
-        pluginId: record.id,
-        source: record.source,
-        message: record.error,
-      });
+      pushPluginLoadError("plugin export missing register/activate");
       continue;
     }
 
@@ -474,7 +459,6 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
   if (cacheEnabled) {
     registryCache.set(cacheKey, registry);
   }
-  setActivePluginRegistry(registry, cacheKey);
-  initializeGlobalHookRunner(registry);
+  activatePluginRegistry(registry, cacheKey);
   return registry;
 }

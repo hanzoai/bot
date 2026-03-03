@@ -17,7 +17,6 @@ import { deliverOutboundPayloads } from "./outbound/deliver.js";
 import { resolveSessionDeliveryTarget } from "./outbound/targets.js";
 
 const log = createSubsystemLogger("gateway/exec-approvals");
-
 export type { ExecApprovalRequest, ExecApprovalResolved };
 
 type ForwardTarget = ExecApprovalForwardTarget & { source: "session" | "target" };

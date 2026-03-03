@@ -94,7 +94,17 @@ const SUBSYSTEM_COLOR_OVERRIDES: Record<string, (typeof SUBSYSTEM_COLORS)[number
 };
 const SUBSYSTEM_PREFIXES_TO_DROP = ["gateway", "channels", "providers"] as const;
 const SUBSYSTEM_MAX_SEGMENTS = 2;
-const CHANNEL_SUBSYSTEM_PREFIXES = new Set<string>(CHAT_CHANNEL_ORDER);
+// Keep local to avoid importing channel registry into hot logging paths.
+const CHANNEL_SUBSYSTEM_PREFIXES = new Set<string>([
+  "telegram",
+  "whatsapp",
+  "discord",
+  "irc",
+  "googlechat",
+  "slack",
+  "signal",
+  "imessage",
+]);
 
 function pickSubsystemColor(color: ChalkInstance, subsystem: string): ChalkInstance {
   const override = SUBSYSTEM_COLOR_OVERRIDES[subsystem];
@@ -270,6 +280,13 @@ export function createSubsystemLogger(subsystem: string): SubsystemLogger {
   };
   const emit = (level: LogLevel, message: string, meta?: Record<string, unknown>) => {
     const consoleSettings = getConsoleSettings();
+    const consoleEnabled =
+      shouldLogToConsole(level, { level: consoleSettings.level }) &&
+      shouldLogSubsystemToConsole(subsystem);
+    const fileEnabled = isFileLogLevelEnabled(level);
+    if (!consoleEnabled && !fileEnabled) {
+      return;
+    }
     let consoleMessageOverride: string | undefined;
     let fileMeta = meta;
     if (meta && Object.keys(meta).length > 0) {
@@ -281,11 +298,10 @@ export function createSubsystemLogger(subsystem: string): SubsystemLogger {
       }
       fileMeta = Object.keys(rest).length > 0 ? rest : undefined;
     }
-    logToFile(getFileLogger(), level, message, fileMeta);
-    if (!shouldLogToConsole(level, { level: consoleSettings.level })) {
-      return;
+    if (fileEnabled) {
+      logToFile(getFileLogger(), level, message, fileMeta);
     }
-    if (!shouldLogSubsystemToConsole(subsystem)) {
+    if (!consoleEnabled) {
       return;
     }
     const consoleMessage = consoleMessageOverride ?? message;
@@ -332,8 +348,10 @@ export function createSubsystemLogger(subsystem: string): SubsystemLogger {
     error: (message, meta) => emit("error", message, meta),
     fatal: (message, meta) => emit("fatal", message, meta),
     raw: (message) => {
-      logToFile(getFileLogger(), "info", message, { raw: true });
-      if (shouldLogSubsystemToConsole(subsystem)) {
+      if (isFileEnabled("info")) {
+        logToFile(getFileLogger(), "info", message, { raw: true });
+      }
+      if (isConsoleEnabled("info")) {
         if (
           !isVerbose() &&
           subsystem === "agent/embedded" &&

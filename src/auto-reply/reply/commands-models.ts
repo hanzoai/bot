@@ -328,10 +328,18 @@ export const handleModelsCommand: CommandHandler = async (params, allowTextComma
   if (!allowTextCommands) {
     return null;
   }
+  const commandBodyNormalized = params.command.commandBodyNormalized.trim();
+  if (!commandBodyNormalized.startsWith("/models")) {
+    return null;
+  }
+  const unauthorized = rejectUnauthorizedCommand(params, "/models");
+  if (unauthorized) {
+    return unauthorized;
+  }
 
   const reply = await resolveModelsCommandReply({
     cfg: params.cfg,
-    commandBodyNormalized: params.command.commandBodyNormalized,
+    commandBodyNormalized,
     surface: params.ctx.Surface,
     currentModel: params.model ? `${params.provider}/${params.model}` : undefined,
   });

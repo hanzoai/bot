@@ -297,6 +297,43 @@ describe("handleDiscordMessageAction", () => {
       expect.any(Object),
     );
   });
+
+  it("falls back to toolContext.currentMessageId for reactions when messageId is omitted", async () => {
+    await handleDiscordMessageAction({
+      action: "react",
+      params: {
+        channelId: "123",
+        emoji: "ok",
+      },
+      cfg: {} as BotConfig,
+      toolContext: { currentMessageId: "9001" },
+    });
+
+    const call = handleDiscordAction.mock.calls.at(-1);
+    expect(call?.[0]).toEqual(
+      expect.objectContaining({
+        action: "react",
+        channelId: "123",
+        messageId: "9001",
+        emoji: "ok",
+      }),
+    );
+  });
+
+  it("rejects reactions when neither messageId nor toolContext.currentMessageId is provided", async () => {
+    await expect(
+      handleDiscordMessageAction({
+        action: "react",
+        params: {
+          channelId: "123",
+          emoji: "ok",
+        },
+        cfg: {} as BotConfig,
+      }),
+    ).rejects.toThrow(/messageId required/i);
+
+    expect(handleDiscordAction).not.toHaveBeenCalled();
+  });
 });
 
 describe("telegramMessageActions", () => {
@@ -556,6 +593,33 @@ describe("signalMessageActions", () => {
       123,
       "🔥",
       { accountId: undefined },
+    );
+  });
+
+  it("falls back to toolContext.currentMessageId for reactions when messageId is omitted", async () => {
+    sendReactionSignal.mockClear();
+    await runSignalAction(
+      "react",
+      { to: "+15559999999", emoji: "🔥" },
+      { toolContext: { currentMessageId: "1737630212345" } },
+    );
+    expect(sendReactionSignal).toHaveBeenCalledTimes(1);
+    expect(sendReactionSignal).toHaveBeenCalledWith(
+      "+15559999999",
+      1737630212345,
+      "🔥",
+      expect.objectContaining({}),
+    );
+  });
+
+  it("rejects reaction when neither messageId nor toolContext.currentMessageId is provided", async () => {
+    const cfg = {
+      channels: { signal: { account: "+15550001111" } },
+    } as BotConfig;
+    await expectSignalActionRejected(
+      { to: "+15559999999", emoji: "✅" },
+      /messageId.*required/,
+      cfg,
     );
   });
 

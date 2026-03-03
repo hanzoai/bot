@@ -1,6 +1,7 @@
 import AppKit
 import BotChatUI
 import Foundation
+import BotChatUI
 import Testing
 @testable import HanzoBot
 
@@ -28,7 +29,9 @@ struct WebChatSwiftUISmokeTests {
             return try JSONDecoder().decode(HanzoBotChatSendResponse.self, from: Data(json.utf8))
         }
 
-        func requestHealth(timeoutMs _: Int) async throws -> Bool { true }
+        func requestHealth(timeoutMs _: Int) async throws -> Bool {
+            true
+        }
 
         func events() -> AsyncStream<HanzoBotChatTransportEvent> {
             AsyncStream { continuation in

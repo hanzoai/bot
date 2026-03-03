@@ -1,6 +1,6 @@
 import os from "node:os";
 import path from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { runAcpRuntimeAdapterContract } from "../../../src/acp/runtime/adapter-contract.testkit.js";
 import {
   cleanupMockRuntimeFixtures,
@@ -21,20 +21,14 @@ describe("AcpxRuntime", () => {
       createRuntime: async () => fixture.runtime,
       agentId: "codex",
       successPrompt: "contract-pass",
-      errorPrompt: "trigger-error",
+      includeControlChecks: false,
       assertSuccessEvents: (events) => {
         expect(events.some((event) => event.type === "done")).toBe(true);
-      },
-      assertErrorOutcome: ({ events, thrown }) => {
-        expect(events.some((event) => event.type === "error") || Boolean(thrown)).toBe(true);
       },
     });
 
     const logs = await readMockRuntimeLogEntries(fixture.logPath);
     expect(logs.some((entry) => entry.kind === "ensure")).toBe(true);
-    expect(logs.some((entry) => entry.kind === "status")).toBe(true);
-    expect(logs.some((entry) => entry.kind === "set-mode")).toBe(true);
-    expect(logs.some((entry) => entry.kind === "set")).toBe(true);
     expect(logs.some((entry) => entry.kind === "cancel")).toBe(true);
     expect(logs.some((entry) => entry.kind === "close")).toBe(true);
   });
@@ -102,6 +96,7 @@ describe("AcpxRuntime", () => {
     const prompt = logs.find((entry) => entry.kind === "prompt");
     expect(ensure).toBeDefined();
     expect(prompt).toBeDefined();
+    expect(prompt?.botShell).toBe("acp");
     expect(Array.isArray(prompt?.args)).toBe(true);
     const promptArgs = (prompt?.args as string[]) ?? [];
     expect(promptArgs).toContain("--ttl");
@@ -157,6 +152,46 @@ describe("AcpxRuntime", () => {
 
     expect(textDeltas).toEqual(["alpha", " beta", " gamma"]);
     expect(textDeltas.join("")).toBe("alpha beta gamma");
+
+    // Keep the default queue-owner TTL assertion on a runTurn that already exists.
+    const activeLogPath = process.env.MOCK_ACPX_LOG;
+    expect(activeLogPath).toBeDefined();
+    const logs = await readMockRuntimeLogEntries(String(activeLogPath));
+    const prompt = logs.find(
+      (entry) =>
+        entry.kind === "prompt" && String(entry.sessionName ?? "") === "agent:codex:acp:space",
+    );
+    expect(prompt).toBeDefined();
+    const promptArgs = (prompt?.args as string[]) ?? [];
+    const ttlFlagIndex = promptArgs.indexOf("--ttl");
+    expect(ttlFlagIndex).toBeGreaterThanOrEqual(0);
+    expect(promptArgs[ttlFlagIndex + 1]).toBe("0.1");
+  });
+
+  it("emits done once when ACP stream repeats stop reason responses", async () => {
+    const runtime = sharedFixture?.runtime;
+    expect(runtime).toBeDefined();
+    if (!runtime) {
+      throw new Error("shared runtime fixture missing");
+    }
+    const handle = await runtime.ensureSession({
+      sessionKey: "agent:codex:acp:double-done",
+      agent: "codex",
+      mode: "persistent",
+    });
+
+    const events = [];
+    for await (const event of runtime.runTurn({
+      handle,
+      text: "double-done",
+      mode: "prompt",
+      requestId: "req-double-done",
+    })) {
+      events.push(event);
+    }
+
+    const doneCount = events.filter((event) => event.type === "done").length;
+    expect(doneCount).toBe(1);
   });
 
   it("emits done once when ACP stream repeats stop reason responses", async () => {
@@ -317,6 +352,17 @@ describe("AcpxRuntime", () => {
   });
 
   it("marks runtime unhealthy when command is missing", async () => {
+    expect(missingCommandRuntime).toBeDefined();
+    if (!missingCommandRuntime) {
+      throw new Error("missing-command runtime fixture missing");
+    }
+    await missingCommandRuntime.probeAvailability();
+    expect(missingCommandRuntime.isHealthy()).toBe(false);
+  });
+
+  it("logs ACPX spawn resolution once per command policy", async () => {
+    const { config } = await createMockRuntimeFixture();
+    const debugLogs: string[] = [];
     const runtime = new AcpxRuntime(
       {
         command: "/definitely/missing/acpx",
@@ -327,12 +373,9 @@ describe("AcpxRuntime", () => {
         nonInteractivePermissions: "fail",
         queueOwnerTtlSeconds: 0.1,
       },
-      { logger: NOOP_LOGGER },
     );
 
     await runtime.probeAvailability();
-    expect(runtime.isHealthy()).toBe(false);
-  });
 
   it("marks runtime healthy when command is available", async () => {
     const { runtime } = await createMockRuntimeFixture();

@@ -2,6 +2,36 @@ import BotKit
 import Foundation
 import Testing
 
+private func setupCode(from payload: String) -> String {
+    Data(payload.utf8)
+        .base64EncodedString()
+        .replacingOccurrences(of: "+", with: "-")
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: "=", with: "")
+}
+
+private func agentAction(
+    message: String,
+    sessionKey: String? = nil,
+    thinking: String? = nil,
+    deliver: Bool = false,
+    to: String? = nil,
+    channel: String? = nil,
+    timeoutSeconds: Int? = nil,
+    key: String? = nil) -> DeepLinkRoute
+{
+    .agent(
+        .init(
+            message: message,
+            sessionKey: sessionKey,
+            thinking: thinking,
+            deliver: deliver,
+            to: to,
+            channel: channel,
+            timeoutSeconds: timeoutSeconds,
+            key: key))
+}
+
 @Suite struct DeepLinkParserTests {
     @Test func parseRejectsUnknownHost() {
         let url = URL(string: "hanzo-bot://nope?message=hi")!
@@ -87,13 +117,7 @@ import Testing
 
     @Test func parseGatewaySetupCodeParsesBase64UrlPayload() {
         let payload = #"{"url":"wss://gateway.example.com:443","token":"tok","password":"pw"}"#
-        let encoded = Data(payload.utf8)
-            .base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-
-        let link = GatewayConnectDeepLink.fromSetupCode(encoded)
+        let link = GatewayConnectDeepLink.fromSetupCode(setupCode(from: payload))
 
         #expect(link == .init(
             host: "gateway.example.com",
@@ -109,13 +133,7 @@ import Testing
 
     @Test func parseGatewaySetupCodeDefaultsTo443ForWssWithoutPort() {
         let payload = #"{"url":"wss://gateway.example.com","token":"tok"}"#
-        let encoded = Data(payload.utf8)
-            .base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-
-        let link = GatewayConnectDeepLink.fromSetupCode(encoded)
+        let link = GatewayConnectDeepLink.fromSetupCode(setupCode(from: payload))
 
         #expect(link == .init(
             host: "gateway.example.com",

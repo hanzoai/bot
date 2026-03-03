@@ -52,6 +52,14 @@ class CanvasController {
     return (q * 100.0).toInt().coerceIn(1, 100)
   }
 
+  private fun Bitmap.scaleForMaxWidth(maxWidth: Int?): Bitmap {
+    if (maxWidth == null || maxWidth <= 0 || width <= maxWidth) {
+      return this
+    }
+    val scaledHeight = (height.toDouble() * (maxWidth.toDouble() / width.toDouble())).toInt().coerceAtLeast(1)
+    return scale(maxWidth, scaledHeight)
+  }
+
   fun attach(webView: WebView) {
     this.webView = webView
     reload()
@@ -163,13 +171,7 @@ class CanvasController {
     withContext(Dispatchers.Main) {
       val wv = webView ?: throw IllegalStateException("no webview")
       val bmp = wv.captureBitmap()
-      val scaled =
-        if (maxWidth != null && maxWidth > 0 && bmp.width > maxWidth) {
-          val h = (bmp.height.toDouble() * (maxWidth.toDouble() / bmp.width.toDouble())).toInt().coerceAtLeast(1)
-          bmp.scale(maxWidth, h)
-        } else {
-          bmp
-        }
+      val scaled = bmp.scaleForMaxWidth(maxWidth)
 
       val out = ByteArrayOutputStream()
       scaled.compress(Bitmap.CompressFormat.PNG, 100, out)
@@ -180,13 +182,7 @@ class CanvasController {
     withContext(Dispatchers.Main) {
       val wv = webView ?: throw IllegalStateException("no webview")
       val bmp = wv.captureBitmap()
-      val scaled =
-        if (maxWidth != null && maxWidth > 0 && bmp.width > maxWidth) {
-          val h = (bmp.height.toDouble() * (maxWidth.toDouble() / bmp.width.toDouble())).toInt().coerceAtLeast(1)
-          bmp.scale(maxWidth, h)
-        } else {
-          bmp
-        }
+      val scaled = bmp.scaleForMaxWidth(maxWidth)
 
       val out = ByteArrayOutputStream()
       val (compressFormat, compressQuality) =
