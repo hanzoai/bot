@@ -126,6 +126,10 @@ describe("applyPatch", () => {
   });
 
   it("rejects symlink escape attempts by default", async () => {
+    // File symlinks require SeCreateSymbolicLinkPrivilege on Windows.
+    if (process.platform === "win32") {
+      return;
+    }
     await withTempDir(async (dir) => {
       const outside = path.join(path.dirname(dir), "outside-target.txt");
       const linkPath = path.join(dir, "link.txt");
@@ -147,6 +151,10 @@ describe("applyPatch", () => {
   });
 
   it("allows symlinks that resolve within cwd by default", async () => {
+    // File symlinks require SeCreateSymbolicLinkPrivilege on Windows.
+    if (process.platform === "win32") {
+      return;
+    }
     await withTempDir(async (dir) => {
       const target = path.join(dir, "target.txt");
       const linkPath = path.join(dir, "link.txt");
@@ -174,7 +182,9 @@ describe("applyPatch", () => {
       await fs.writeFile(outsideFile, "victim\n", "utf8");
 
       const linkDir = path.join(dir, "linkdir");
-      await fs.symlink(outsideDir, linkDir);
+      // Use 'junction' on Windows — junctions target directories without
+      // requiring SeCreateSymbolicLinkPrivilege.
+      await fs.symlink(outsideDir, linkDir, process.platform === "win32" ? "junction" : undefined);
 
       const patch = `*** Begin Patch
 *** Delete File: linkdir/victim.txt
@@ -225,7 +235,13 @@ describe("applyPatch", () => {
         await fs.writeFile(outsideTarget, "keep\n", "utf8");
 
         const linkDir = path.join(dir, "link");
-        await fs.symlink(outsideDir, linkDir);
+        // Use 'junction' on Windows — junctions target directories without
+        // requiring SeCreateSymbolicLinkPrivilege.
+        await fs.symlink(
+          outsideDir,
+          linkDir,
+          process.platform === "win32" ? "junction" : undefined,
+        );
 
         const patch = `*** Begin Patch
 *** Delete File: link

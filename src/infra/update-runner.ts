@@ -8,7 +8,9 @@ import {
 } from "./control-ui-assets.js";
 import { detectPackageManager as detectPackageManagerImpl } from "./detect-package-manager.js";
 import { readPackageName, readPackageVersion } from "./package-json.js";
+import { normalizePackageTagInput } from "./package-tag.js";
 import { trimLogTail } from "./restart-sentinel.js";
+import { resolveStableNodePath } from "./stable-node-path.js";
 import {
   channelToNpmTag,
   DEFAULT_PACKAGE_CHANNEL,
