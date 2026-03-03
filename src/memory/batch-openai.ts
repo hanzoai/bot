@@ -1,3 +1,4 @@
+import type { OpenAiEmbeddingClient } from "./embeddings-openai.js";
 import {
   applyEmbeddingBatchOutputLine,
   buildBatchHeaders,
@@ -14,7 +15,6 @@ import {
   uploadBatchJsonlFile,
   withRemoteHttpResponse,
 } from "./batch-embedding-common.js";
-import type { OpenAiEmbeddingClient } from "./embeddings-openai.js";
 
 export type OpenAiBatchRequest = {
   custom_id: string;

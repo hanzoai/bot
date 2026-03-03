@@ -1,4 +1,3 @@
-import os from "node:os";
 import type { BotPluginApi } from "bot/plugin-sdk";
 import {
   approveDevicePairing,
@@ -7,6 +6,7 @@ import {
   runPluginCommandWithTimeout,
   resolveTailnetHostWithRunner,
 } from "bot/plugin-sdk";
+import os from "node:os";
 import qrcode from "qrcode-terminal";
 
 function renderQrAscii(data: string): Promise<string> {
@@ -435,9 +435,7 @@ export default function register(api: BotPluginApi) {
             if (send) {
               await send(
                 target,
-                ["Scan this QR code with the Bot iOS app:", "", "```", qrAscii, "```"].join(
-                  "\n",
-                ),
+                ["Scan this QR code with the Bot iOS app:", "", "```", qrAscii, "```"].join("\n"),
                 {
                   ...(ctx.messageThreadId != null ? { messageThreadId: ctx.messageThreadId } : {}),
                   ...(ctx.accountId ? { accountId: ctx.accountId } : {}),

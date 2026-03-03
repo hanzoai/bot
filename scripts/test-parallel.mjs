@@ -202,8 +202,7 @@ if (shardIndexOverride !== null && shardIndexOverride > shardCount) {
   process.exit(2);
 }
 const windowsCiArgs = isWindowsCi ? ["--dangerouslyIgnoreUnhandledErrors"] : [];
-const silentArgs =
-  process.env.BOT_TEST_SHOW_PASSED_LOGS === "1" ? [] : ["--silent=passed-only"];
+const silentArgs = process.env.BOT_TEST_SHOW_PASSED_LOGS === "1" ? [] : ["--silent=passed-only"];
 const rawPassthroughArgs = process.argv.slice(2);
 const passthroughArgs =
   rawPassthroughArgs[0] === "--" ? rawPassthroughArgs.slice(1) : rawPassthroughArgs;
