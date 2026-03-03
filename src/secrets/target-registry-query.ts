@@ -1,4 +1,9 @@
 import type { BotConfig } from "../config/config.js";
+import type {
+  DiscoveredConfigSecretTarget,
+  ResolvedPlanTarget,
+  SecretTargetRegistryEntry,
+} from "./target-registry-types.js";
 import { getPath } from "./path-utils.js";
 import { SECRET_TARGET_REGISTRY } from "./target-registry-data.js";
 import {
@@ -8,11 +13,6 @@ import {
   matchPathTokens,
   type CompiledTargetRegistryEntry,
 } from "./target-registry-pattern.js";
-import type {
-  DiscoveredConfigSecretTarget,
-  ResolvedPlanTarget,
-  SecretTargetRegistryEntry,
-} from "./target-registry-types.js";
 
 const COMPILED_SECRET_TARGET_REGISTRY = SECRET_TARGET_REGISTRY.map(compileTargetRegistryEntry);
 const BOT_COMPILED_SECRET_TARGETS = COMPILED_SECRET_TARGET_REGISTRY.filter(
@@ -172,9 +172,7 @@ export function resolvePlanTargetAgainstRegistry(candidate: {
   return null;
 }
 
-export function discoverConfigSecretTargets(
-  config: BotConfig,
-): DiscoveredConfigSecretTarget[] {
+export function discoverConfigSecretTargets(config: BotConfig): DiscoveredConfigSecretTarget[] {
   return discoverConfigSecretTargetsByIds(config);
 }
 
@@ -196,9 +194,7 @@ export function discoverConfigSecretTargetsByIds(
   const discoveryEntries =
     allowedTargetIds === null
       ? BOT_COMPILED_SECRET_TARGETS
-      : Array.from(allowedTargetIds).flatMap(
-          (targetId) => BOT_TARGETS_BY_ID.get(targetId) ?? [],
-        );
+      : Array.from(allowedTargetIds).flatMap((targetId) => BOT_TARGETS_BY_ID.get(targetId) ?? []);
 
   for (const entry of discoveryEntries) {
     const expanded = expandPathTokens(config, entry.pathTokens);

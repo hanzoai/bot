@@ -2,11 +2,11 @@ import type { Client } from "@buape/carbon";
 import type { GatewayPlugin } from "@buape/carbon/gateway";
 import type { RuntimeEnv } from "../../runtime.js";
 import type { DiscordVoiceManager } from "../voice/manager.js";
+import type { DiscordMonitorStatusSink } from "./status.js";
 import { danger } from "../../globals.js";
 import { attachDiscordGatewayLogging } from "../gateway-logging.js";
 import { getDiscordGatewayEmitter, waitForDiscordGatewayStop } from "../monitor.gateway.js";
 import { registerGateway, unregisterGateway } from "./gateway-registry.js";
-import type { DiscordMonitorStatusSink } from "./status.js";
 
 type ExecApprovalsHandler = {
   start: () => Promise<void>;
