@@ -1,3 +1,4 @@
+import JSON5 from "json5";
 import { describe, expect, it } from "vitest";
 import type { ConfigUiHints } from "./schema.js";
 import type { ConfigFileSnapshot } from "./types.bot.js";
@@ -10,6 +11,7 @@ import { __test__ } from "./schema.hints.js";
 import { BotSchema } from "./zod-schema.js";
 
 const { mapSensitivePaths } = __test__;
+const mainSchemaHints = mapSensitivePaths(BotSchema, "", {});
 
 function makeSnapshot(config: Record<string, unknown>, raw?: string): ConfigFileSnapshot {
   return {
