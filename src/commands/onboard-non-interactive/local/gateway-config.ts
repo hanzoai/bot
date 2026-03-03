@@ -49,7 +49,10 @@ export function applyNonInteractiveGatewayConfig(params: {
   }
 
   let nextConfig = params.nextConfig;
-  let gatewayToken = opts.gatewayToken?.trim() || undefined;
+  let gatewayToken =
+    normalizeGatewayTokenInput(opts.gatewayToken) ||
+    normalizeGatewayTokenInput(process.env.BOT_GATEWAY_TOKEN) ||
+    undefined;
 
   if (authMode === "token") {
     if (!gatewayToken) {

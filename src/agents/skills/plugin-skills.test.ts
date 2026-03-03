@@ -47,6 +47,46 @@ function buildRegistry(params: { acpxRoot: string; helperRoot: string }): Plugin
   };
 }
 
+function createSinglePluginRegistry(params: {
+  pluginRoot: string;
+  skills: string[];
+}): PluginManifestRegistry {
+  return {
+    diagnostics: [],
+    plugins: [
+      {
+        id: "helper",
+        name: "Helper",
+        channels: [],
+        providers: [],
+        skills: params.skills,
+        origin: "workspace",
+        rootDir: params.pluginRoot,
+        source: params.pluginRoot,
+        manifestPath: path.join(params.pluginRoot, "bot.plugin.json"),
+      },
+    ],
+  };
+}
+
+async function setupAcpxAndHelperRegistry() {
+  const workspaceDir = await tempDirs.make("bot-");
+  const acpxRoot = await tempDirs.make("bot-acpx-plugin-");
+  const helperRoot = await tempDirs.make("bot-helper-plugin-");
+  await fs.mkdir(path.join(acpxRoot, "skills"), { recursive: true });
+  await fs.mkdir(path.join(helperRoot, "skills"), { recursive: true });
+  hoisted.loadPluginManifestRegistry.mockReturnValue(buildRegistry({ acpxRoot, helperRoot }));
+  return { workspaceDir, acpxRoot, helperRoot };
+}
+
+async function setupPluginOutsideSkills() {
+  const workspaceDir = await tempDirs.make("bot-");
+  const pluginRoot = await tempDirs.make("bot-plugin-");
+  const outsideDir = await tempDirs.make("bot-outside-");
+  const outsideSkills = path.join(outsideDir, "skills");
+  return { workspaceDir, pluginRoot, outsideSkills };
+}
+
 afterEach(async () => {
   hoisted.loadPluginManifestRegistry.mockReset();
   await tempDirs.cleanup();
@@ -74,7 +114,7 @@ describe("resolvePluginSkillDirs", () => {
       } as BotConfig,
     });
 
-    expect(dirs).toEqual([path.resolve(acpxRoot, "skills"), path.resolve(helperRoot, "skills")]);
+    expect(dirs).toEqual(expectedDirs({ acpxRoot, helperRoot }));
   });
 
   it("skips acpx plugin skills when ACP is disabled", async () => {
@@ -85,9 +125,9 @@ describe("resolvePluginSkillDirs", () => {
     await fs.mkdir(path.join(helperRoot, "skills"), { recursive: true });
 
     hoisted.loadPluginManifestRegistry.mockReturnValue(
-      buildRegistry({
-        acpxRoot,
-        helperRoot,
+      createSinglePluginRegistry({
+        pluginRoot,
+        skills: ["./skills", escapePath],
       }),
     );
 
@@ -98,6 +138,31 @@ describe("resolvePluginSkillDirs", () => {
       } as BotConfig,
     });
 
-    expect(dirs).toEqual([path.resolve(helperRoot, "skills")]);
+    expect(dirs).toEqual([path.resolve(pluginRoot, "skills")]);
+  });
+
+  it("rejects plugin skill symlinks that resolve outside plugin root", async () => {
+    const { workspaceDir, pluginRoot, outsideSkills } = await setupPluginOutsideSkills();
+    const linkPath = path.join(pluginRoot, "skills-link");
+    await fs.mkdir(outsideSkills, { recursive: true });
+    await fs.symlink(
+      outsideSkills,
+      linkPath,
+      process.platform === "win32" ? ("junction" as const) : ("dir" as const),
+    );
+
+    hoisted.loadPluginManifestRegistry.mockReturnValue(
+      createSinglePluginRegistry({
+        pluginRoot,
+        skills: ["./skills-link"],
+      }),
+    );
+
+    const dirs = resolvePluginSkillDirs({
+      workspaceDir,
+      config: {} as BotConfig,
+    });
+
+    expect(dirs).toEqual([]);
   });
 });

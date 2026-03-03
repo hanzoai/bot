@@ -15,9 +15,12 @@ use the long‑lived token created by `claude setup-token`.
 See [/concepts/oauth](/concepts/oauth) for the full OAuth flow and storage
 layout.
 
-## Recommended Anthropic setup (API key)
+## Recommended setup (API key, any provider)
 
-If you’re using Anthropic directly, use an API key.
+If you’re running a long-lived gateway, start with an API key for your chosen
+provider.
+For Anthropic specifically, API key auth is the safe path and is recommended
+over subscription setup-token auth.
 
 1. Create an API key in the Anthropic Console.
 2. Put it on the **gateway host** (the machine running `hanzo-bot gateway`).
@@ -51,8 +54,8 @@ See [Help](/help) for details on env inheritance (`env.shellEnv`,
 
 ## Anthropic: setup-token (subscription auth)
 
-For Anthropic, the recommended path is an **API key**. If you’re using a Claude
-subscription, the setup-token flow is also supported. Run it on the **gateway host**:
+If you’re using a Claude subscription, the setup-token flow is supported. Run
+it on the **gateway host**:
 
 ```bash
 claude setup-token
@@ -77,6 +80,12 @@ This credential is only authorized for use with Claude Code and cannot be used f
 ```
 
 …use an Anthropic API key instead.
+
+<Warning>
+Anthropic setup-token support is technical compatibility only. Anthropic has blocked
+some subscription usage outside Claude Code in the past. Use it only if you decide
+the policy risk is acceptable, and verify Anthropic's current terms yourself.
+</Warning>
 
 Manual token entry (any provider; writes `auth-profiles.json` + updates config):
 
@@ -141,5 +150,5 @@ is missing, rerun `claude setup-token` and paste the token again.
 
 ## Requirements
 
-- Claude Max or Pro subscription (for `claude setup-token`)
+- Anthropic subscription account (for `claude setup-token`)
 - Claude Code CLI installed (`claude` command available)

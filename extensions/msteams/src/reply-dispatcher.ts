@@ -17,6 +17,7 @@ import {
   formatUnknownError,
 } from "./errors.js";
 import {
+  buildConversationReference,
   type MSTeamsAdapter,
   renderReplyPayloadsToMessages,
   sendMSTeamsMessages,
@@ -42,9 +43,35 @@ export function createMSTeamsReplyDispatcher(params: {
   sharePointSiteId?: string;
 }) {
   const core = getMSTeamsRuntime();
+
+  /**
+   * Send a typing indicator.
+   *
+   * First tries the live turn context (cheapest path).  When the context has
+   * been revoked (debounced messages) we fall back to proactive messaging via
+   * the stored conversation reference so the user still sees the "…" bubble.
+   */
   const sendTypingIndicator = async () => {
-    await params.context.sendActivity({ type: "typing" });
+    await withRevokedProxyFallback({
+      run: async () => {
+        await params.context.sendActivity({ type: "typing" });
+      },
+      onRevoked: async () => {
+        const baseRef = buildConversationReference(params.conversationRef);
+        await params.adapter.continueConversation(
+          params.appId,
+          { ...baseRef, activityId: undefined },
+          async (ctx) => {
+            await ctx.sendActivity({ type: "typing" });
+          },
+        );
+      },
+      onRevokedLog: () => {
+        params.log.debug?.("turn context revoked, sending typing via proactive messaging");
+      },
+    });
   };
+
   const typingCallbacks = createTypingCallbacks({
     start: sendTypingIndicator,
     onStartError: (err) => {
