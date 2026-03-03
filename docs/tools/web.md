@@ -75,8 +75,12 @@ Example: switch to Perplexity Sonar (direct API):
 2. In the dashboard, choose the **Data for Search** plan (not “Data for AI”) and generate an API key.
 3. Run `hanzo-bot configure --section web` to store the key in config (recommended), or set `BRAVE_API_KEY` in your environment.
 
-Brave provides a free tier plus paid plans; check the Brave API portal for the
+Brave provides paid plans; check the Brave API portal for the
 current limits and pricing.
+
+Brave Terms include restrictions on some AI-related uses of Search Results.
+Review the Brave Terms of Service and confirm your intended use is compliant.
+For legal questions, consult your counsel.
 
 ### Where to set the key (recommended)
 
@@ -149,6 +153,9 @@ Search the web using your configured provider.
 - API key for your chosen provider:
   - **Brave**: `BRAVE_API_KEY` or `tools.web.search.apiKey`
   - **Perplexity**: `OPENROUTER_API_KEY`, `PERPLEXITY_API_KEY`, or `tools.web.search.perplexity.apiKey`
+  - **Gemini**: `GEMINI_API_KEY` or `tools.web.search.gemini.apiKey`
+  - **Grok**: `XAI_API_KEY` or `tools.web.search.grok.apiKey`
+  - **Kimi**: `KIMI_API_KEY`, `MOONSHOT_API_KEY`, or `tools.web.search.kimi.apiKey`
 
 ### Config
 

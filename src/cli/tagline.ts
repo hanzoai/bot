@@ -77,20 +77,40 @@ const TAGLINES: string[] = [
   "End-to-end encrypted, drama-to-drama excluded.",
   "The only bot that stays out of your training set.",
   'WhatsApp automation without the "please accept our new privacy policy".',
-  "Chat APIs that don't require a Senate hearing.",
-  "Meta wishes they shipped this fast.",
-  "Because the right answer is usually a script.",
-  "Your messages, your servers, your control.",
-  "OpenAI-compatible, not OpenAI-dependent.",
   "iMessage green bubble energy, but for everyone.",
-  "Siri's competent cousin.",
-  "Works on Android. Crazy concept, we know.",
   "No $999 stand required.",
   "We ship features faster than Apple ships calculator updates.",
   "Your AI assistant, now without the $3,499 headset.",
-  "Think different. Actually think.",
   "Ah, the fruit tree company! 🍎",
   "Greetings, Professor Falken",
+  "I don't sleep, I just enter low-power mode and dream of clean diffs.",
+  "Your personal assistant, minus the passive-aggressive calendar reminders.",
+  "Built by lobsters, for humans. Don't question the hierarchy.",
+  "I've seen your commit messages. We'll work on that together.",
+  "More integrations than your therapist's intake form.",
+  "Running on your hardware, reading your logs, judging nothing (mostly).",
+  "The only open-source project where the mascot could eat the competition.",
+  "Self-hosted, self-updating, self-aware (just kidding... unless?).",
+  "I autocomplete your thoughts—just slower and with more API calls.",
+  "Somewhere between 'hello world' and 'oh god what have I built.'",
+  "Your .zshrc wishes it could do what I do.",
+  "I've read more man pages than any human should—so you don't have to.",
+  "Powered by open source, sustained by spite and good documentation.",
+  "I'm the middleware between your ambition and your attention span.",
+  "Finally, a use for that always-on Mac Mini under your desk.",
+  "Like having a senior engineer on call, except I don't bill hourly or sigh audibly.",
+  "Making 'I'll automate that later' happen now.",
+  "Your second brain, except this one actually remembers where you left things.",
+  "Half butler, half debugger, full crustacean.",
+  "I don't have opinions about tabs vs spaces. I have opinions about everything else.",
+  "Open source means you can see exactly how I judge your config.",
+  "I've survived more breaking changes than your last three relationships.",
+  "Runs on a Raspberry Pi. Dreams of a rack in Iceland.",
+  "The lobster in your shell. 🦞",
+  "Alexa, but with taste.",
+  "I'm not AI-powered, I'm AI-possessed. Big difference.",
+  "Deployed locally, trusted globally, debugged eternally.",
+  "You had me at 'bot gateway start.'",
   HOLIDAY_TAGLINES.newYear,
   HOLIDAY_TAGLINES.lunarNewYear,
   HOLIDAY_TAGLINES.christmas,
@@ -240,6 +260,7 @@ export interface TaglineOptions {
   env?: NodeJS.ProcessEnv;
   random?: () => number;
   now?: () => Date;
+  mode?: TaglineMode;
 }
 
 export function activeTaglines(options: TaglineOptions = {}): string[] {
@@ -252,6 +273,12 @@ export function activeTaglines(options: TaglineOptions = {}): string[] {
 }
 
 export function pickTagline(options: TaglineOptions = {}): string {
+  if (options.mode === "off") {
+    return "";
+  }
+  if (options.mode === "default") {
+    return DEFAULT_TAGLINE;
+  }
   const env = options.env ?? process.env;
   const override = env?.BOT_TAGLINE_INDEX;
   if (override !== undefined) {

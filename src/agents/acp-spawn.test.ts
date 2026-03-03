@@ -2,6 +2,28 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BotConfig } from "../config/config.js";
 import type { SessionBindingRecord } from "../infra/outbound/session-binding-service.js";
 
+function createDefaultSpawnConfig(): BotConfig {
+  return {
+    acp: {
+      enabled: true,
+      backend: "acpx",
+      allowedAgents: ["codex"],
+    },
+    session: {
+      mainKey: "main",
+      scope: "per-sender",
+    },
+    channels: {
+      discord: {
+        threadBindings: {
+          enabled: true,
+          spawnAcpSessions: true,
+        },
+      },
+    },
+  };
+}
+
 const hoisted = vi.hoisted(() => {
   const callGatewayMock = vi.fn();
   const sessionBindingCapabilitiesMock = vi.fn();
@@ -45,6 +67,27 @@ const hoisted = vi.hoisted(() => {
   };
 });
 
+function buildSessionBindingServiceMock() {
+  return {
+    touch: vi.fn(),
+    bind(input: unknown) {
+      return hoisted.sessionBindingBindMock(input);
+    },
+    unbind(input: unknown) {
+      return hoisted.sessionBindingUnbindMock(input);
+    },
+    getCapabilities(params: unknown) {
+      return hoisted.sessionBindingCapabilitiesMock(params);
+    },
+    resolveByConversation(ref: unknown) {
+      return hoisted.sessionBindingResolveByConversationMock(ref);
+    },
+    listBySession(targetSessionKey: string) {
+      return hoisted.sessionBindingListBySessionMock(targetSessionKey);
+    },
+  };
+}
+
 vi.mock("../config/config.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../config/config.js")>();
   return {
@@ -71,19 +114,20 @@ vi.mock("../infra/outbound/session-binding-service.js", async (importOriginal) =
     await importOriginal<typeof import("../infra/outbound/session-binding-service.js")>();
   return {
     ...actual,
-    getSessionBindingService: () => ({
-      bind: (input: unknown) => hoisted.sessionBindingBindMock(input),
-      getCapabilities: (params: unknown) => hoisted.sessionBindingCapabilitiesMock(params),
-      listBySession: (targetSessionKey: string) =>
-        hoisted.sessionBindingListBySessionMock(targetSessionKey),
-      resolveByConversation: (ref: unknown) => hoisted.sessionBindingResolveByConversationMock(ref),
-      touch: vi.fn(),
-      unbind: (input: unknown) => hoisted.sessionBindingUnbindMock(input),
-    }),
+    getSessionBindingService: () => buildSessionBindingServiceMock(),
   };
 });
 
 const { spawnAcpDirect } = await import("./acp-spawn.js");
+
+function createSessionBindingCapabilities() {
+  return {
+    adapterAvailable: true,
+    bindSupported: true,
+    unbindSupported: true,
+    placements: ["current", "child"] as const,
+  };
+}
 
 function createSessionBinding(overrides?: Partial<SessionBindingRecord>): SessionBindingRecord {
   return {
@@ -104,6 +148,18 @@ function createSessionBinding(overrides?: Partial<SessionBindingRecord>): Sessio
     },
     ...overrides,
   };
+}
+
+function expectResolvedIntroTextInBindMetadata(): void {
+  const callWithMetadata = hoisted.sessionBindingBindMock.mock.calls.find(
+    (call: unknown[]) =>
+      typeof (call[0] as { metadata?: { introText?: unknown } } | undefined)?.metadata
+        ?.introText === "string",
+  );
+  const introText =
+    (callWithMetadata?.[0] as { metadata?: { introText?: string } } | undefined)?.metadata
+      ?.introText ?? "";
+  expect(introText.includes("session ids: pending (available after the first reply)")).toBe(false);
 }
 
 describe("spawnAcpDirect", () => {
@@ -186,12 +242,9 @@ describe("spawnAcpDirect", () => {
       };
     });
 
-    hoisted.sessionBindingCapabilitiesMock.mockReset().mockReturnValue({
-      adapterAvailable: true,
-      bindSupported: true,
-      unbindSupported: true,
-      placements: ["current", "child"],
-    });
+    hoisted.sessionBindingCapabilitiesMock
+      .mockReset()
+      .mockReturnValue(createSessionBindingCapabilities());
     hoisted.sessionBindingBindMock
       .mockReset()
       .mockImplementation(
@@ -248,15 +301,7 @@ describe("spawnAcpDirect", () => {
         placement: "child",
       }),
     );
-    expect(hoisted.sessionBindingBindMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        metadata: expect.objectContaining({
-          introText: expect.not.stringContaining(
-            "session ids: pending (available after the first reply)",
-          ),
-        }),
-      }),
-    );
+    expectResolvedIntroTextInBindMetadata();
 
     const agentCall = hoisted.callGatewayMock.mock.calls
       .map((call: unknown[]) => call[0] as { method?: string; params?: Record<string, unknown> })
@@ -369,5 +414,49 @@ describe("spawnAcpDirect", () => {
 
     expect(result.status).toBe("error");
     expect(result.error).toContain("spawnAcpSessions=true");
+  });
+
+  it("forbids ACP spawn from sandboxed requester sessions", async () => {
+    hoisted.state.cfg = {
+      ...hoisted.state.cfg,
+      agents: {
+        defaults: {
+          sandbox: { mode: "all" },
+        },
+      },
+    };
+
+    const result = await spawnAcpDirect(
+      {
+        task: "hello",
+        agentId: "codex",
+      },
+      {
+        agentSessionKey: "agent:main:subagent:parent",
+      },
+    );
+
+    expect(result.status).toBe("forbidden");
+    expect(result.error).toContain("Sandboxed sessions cannot spawn ACP sessions");
+    expect(hoisted.callGatewayMock).not.toHaveBeenCalled();
+    expect(hoisted.initializeSessionMock).not.toHaveBeenCalled();
+  });
+
+  it('forbids sandbox="require" for runtime=acp', async () => {
+    const result = await spawnAcpDirect(
+      {
+        task: "hello",
+        agentId: "codex",
+        sandbox: "require",
+      },
+      {
+        agentSessionKey: "agent:main:main",
+      },
+    );
+
+    expect(result.status).toBe("forbidden");
+    expect(result.error).toContain('sandbox="require"');
+    expect(hoisted.callGatewayMock).not.toHaveBeenCalled();
+    expect(hoisted.initializeSessionMock).not.toHaveBeenCalled();
   });
 });

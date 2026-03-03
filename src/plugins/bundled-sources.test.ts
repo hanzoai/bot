@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { findBundledPluginByNpmSpec, resolveBundledPluginSources } from "./bundled-sources.js";
+import { findBundledPluginSource, resolveBundledPluginSources } from "./bundled-sources.js";
 
 const discoverBotPluginsMock = vi.fn();
 const loadPluginManifestMock = vi.fn();
@@ -92,6 +92,32 @@ describe("bundled plugin sources", () => {
 
     expect(resolved?.pluginId).toBe("feishu");
     expect(resolved?.localPath).toBe("/app/extensions/feishu");
+    expect(missing).toBeUndefined();
+  });
+
+  it("finds bundled source by plugin id", () => {
+    discoverBotPluginsMock.mockReturnValue({
+      candidates: [
+        {
+          origin: "bundled",
+          rootDir: "/app/extensions/diffs",
+          packageName: "@bot/diffs",
+          packageManifest: { install: { npmSpec: "@bot/diffs" } },
+        },
+      ],
+      diagnostics: [],
+    });
+    loadPluginManifestMock.mockReturnValue({ ok: true, manifest: { id: "diffs" } });
+
+    const resolved = findBundledPluginSource({
+      lookup: { kind: "pluginId", value: "diffs" },
+    });
+    const missing = findBundledPluginSource({
+      lookup: { kind: "pluginId", value: "not-found" },
+    });
+
+    expect(resolved?.pluginId).toBe("diffs");
+    expect(resolved?.localPath).toBe("/app/extensions/diffs");
     expect(missing).toBeUndefined();
   });
 });

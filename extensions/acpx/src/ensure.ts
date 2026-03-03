@@ -78,6 +78,7 @@ export async function checkAcpxVersion(params: {
   command: string;
   cwd?: string;
   expectedVersion?: string;
+  spawnOptions?: SpawnCommandOptions;
 }): Promise<AcpxVersionCheckResult> {
   const expectedVersion = params.expectedVersion?.trim() || undefined;
   const installCommand = buildAcpxLocalInstallCommand(expectedVersion ?? ACPX_PINNED_VERSION);
@@ -88,7 +89,21 @@ export async function checkAcpxVersion(params: {
     command: params.command,
     args: probeArgs,
     cwd,
-  });
+  };
+  let result: Awaited<ReturnType<typeof spawnAndCollect>>;
+  try {
+    result = params.spawnOptions
+      ? await spawnAndCollect(spawnParams, params.spawnOptions)
+      : await spawnAndCollect(spawnParams);
+  } catch (error) {
+    return {
+      ok: false,
+      reason: "execution-failed",
+      message: error instanceof Error ? error.message : String(error),
+      expectedVersion,
+      installCommand,
+    };
+  }
 
   if (result.error) {
     const spawnFailure = resolveSpawnFailure(result.error, cwd);
@@ -203,6 +218,7 @@ export async function ensureAcpx(params: {
       command: params.command,
       cwd: pluginRoot,
       expectedVersion,
+      spawnOptions: params.spawnOptions,
     });
     if (precheck.ok) {
       return;
@@ -240,6 +256,7 @@ export async function ensureAcpx(params: {
       command: params.command,
       cwd: pluginRoot,
       expectedVersion,
+      spawnOptions: params.spawnOptions,
     });
 
     if (!postcheck.ok) {

@@ -2,6 +2,19 @@ export type AcpRuntimePromptMode = "prompt" | "steer";
 
 export type AcpRuntimeSessionMode = "persistent" | "oneshot";
 
+export type AcpSessionUpdateTag =
+  | "agent_message_chunk"
+  | "agent_thought_chunk"
+  | "tool_call"
+  | "tool_call_update"
+  | "usage_update"
+  | "available_commands_update"
+  | "current_mode_update"
+  | "config_option_update"
+  | "session_info_update"
+  | "plan"
+  | (string & {});
+
 export type AcpRuntimeControl = "session/set_mode" | "session/set_config_option" | "session/status";
 
 export type AcpRuntimeHandle = {

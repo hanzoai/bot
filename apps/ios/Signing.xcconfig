@@ -2,14 +2,14 @@
 // Auto-selected local team overrides live in .local-signing.xcconfig (git-ignored).
 // Manual local overrides can go in LocalSigning.xcconfig (git-ignored).
 
-OPENCLAW_CODE_SIGN_STYLE = Manual
-OPENCLAW_DEVELOPMENT_TEAM = Y5PE65HELJ
+BOT_CODE_SIGN_STYLE = Manual
+BOT_DEVELOPMENT_TEAM = Y5PE65HELJ
 
-OPENCLAW_APP_BUNDLE_ID = ai.openclaw.ios
-OPENCLAW_SHARE_BUNDLE_ID = ai.openclaw.ios.share
+BOT_APP_BUNDLE_ID = ai.bot.ios
+BOT_SHARE_BUNDLE_ID = ai.bot.ios.share
 
-OPENCLAW_APP_PROFILE = ai.openclaw.ios Development
-OPENCLAW_SHARE_PROFILE = ai.openclaw.ios.share Development
+BOT_APP_PROFILE = ai.bot.ios Development
+BOT_SHARE_PROFILE = ai.bot.ios.share Development
 
 // Keep local includes after defaults: xcconfig is evaluated top-to-bottom,
 // so later assignments in local files override the defaults above.
