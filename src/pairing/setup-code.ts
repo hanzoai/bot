@@ -1,6 +1,6 @@
 import os from "node:os";
-import { resolveGatewayPort } from "../config/paths.js";
 import type { BotConfig } from "../config/types.js";
+import { resolveGatewayPort } from "../config/paths.js";
 import { normalizeSecretInputString, resolveSecretInputRef } from "../config/types.secrets.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
