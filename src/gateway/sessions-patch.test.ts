@@ -8,19 +8,21 @@ const KIMI_SUBAGENT_KEY = "agent:kimi:subagent:child";
 const MAIN_SESSION_KEY = "agent:main:main";
 const EMPTY_CFG = {} as BotConfig;
 
-async function applySubagentModelPatch(cfg: BotConfig) {
-  const res = await applySessionsPatchToStore({
-    cfg,
-    store: {},
-    storeKey: KIMI_SUBAGENT_KEY,
-    patch: {
-      key: KIMI_SUBAGENT_KEY,
-      model: SUBAGENT_MODEL,
-    },
-    loadGatewayModelCatalog: async () => [
-      { provider: "anthropic", id: "claude-sonnet-4-6", name: "sonnet" },
-      { provider: "synthetic", id: "hf:moonshotai/Kimi-K2.5", name: "kimi" },
-    ],
+type ApplySessionsPatchArgs = Parameters<typeof applySessionsPatchToStore>[0];
+
+async function runPatch(params: {
+  patch: ApplySessionsPatchArgs["patch"];
+  store?: Record<string, SessionEntry>;
+  cfg?: BotConfig;
+  storeKey?: string;
+  loadGatewayModelCatalog?: ApplySessionsPatchArgs["loadGatewayModelCatalog"];
+}) {
+  return applySessionsPatchToStore({
+    cfg: params.cfg ?? EMPTY_CFG,
+    store: params.store ?? {},
+    storeKey: params.storeKey ?? MAIN_SESSION_KEY,
+    patch: params.patch,
+    loadGatewayModelCatalog: params.loadGatewayModelCatalog,
   });
 }
 
@@ -89,125 +91,98 @@ function makeKimiSubagentCfg(params: {
   } as BotConfig;
 }
 
+function createAllowlistedAnthropicModelCfg(): BotConfig {
+  return {
+    agents: {
+      defaults: {
+        model: { primary: "openai/gpt-5.2" },
+        models: {
+          "anthropic/claude-sonnet-4-6": { alias: "sonnet" },
+        },
+      },
+    },
+  } as BotConfig;
+}
+
 describe("gateway sessions patch", () => {
   test("persists thinkingLevel=off (does not clear)", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", thinkingLevel: "off" },
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.thinkingLevel).toBe("off");
+    const entry = expectPatchOk(
+      await runPatch({
+        patch: { key: MAIN_SESSION_KEY, thinkingLevel: "off" },
+      }),
+    );
+    expect(entry.thinkingLevel).toBe("off");
   });
 
   test("clears thinkingLevel when patch sets null", async () => {
     const store: Record<string, SessionEntry> = {
       [MAIN_SESSION_KEY]: { thinkingLevel: "low" } as SessionEntry,
     };
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", thinkingLevel: null },
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.thinkingLevel).toBeUndefined();
+    const entry = expectPatchOk(
+      await runPatch({
+        store,
+        patch: { key: MAIN_SESSION_KEY, thinkingLevel: null },
+      }),
+    );
+    expect(entry.thinkingLevel).toBeUndefined();
   });
 
   test("persists reasoningLevel=off (does not clear)", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", reasoningLevel: "off" },
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.reasoningLevel).toBe("off");
+    const entry = expectPatchOk(
+      await runPatch({
+        patch: { key: MAIN_SESSION_KEY, reasoningLevel: "off" },
+      }),
+    );
+    expect(entry.reasoningLevel).toBe("off");
   });
 
   test("clears reasoningLevel when patch sets null", async () => {
     const store: Record<string, SessionEntry> = {
       [MAIN_SESSION_KEY]: { reasoningLevel: "stream" } as SessionEntry,
     };
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", reasoningLevel: null },
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.reasoningLevel).toBeUndefined();
+    const entry = expectPatchOk(
+      await runPatch({
+        store,
+        patch: { key: MAIN_SESSION_KEY, reasoningLevel: null },
+      }),
+    );
+    expect(entry.reasoningLevel).toBeUndefined();
   });
 
   test("persists elevatedLevel=off (does not clear)", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", elevatedLevel: "off" },
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.elevatedLevel).toBe("off");
+    const entry = expectPatchOk(
+      await runPatch({
+        patch: { key: MAIN_SESSION_KEY, elevatedLevel: "off" },
+      }),
+    );
+    expect(entry.elevatedLevel).toBe("off");
   });
 
   test("persists elevatedLevel=on", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", elevatedLevel: "on" },
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.elevatedLevel).toBe("on");
+    const entry = expectPatchOk(
+      await runPatch({
+        patch: { key: MAIN_SESSION_KEY, elevatedLevel: "on" },
+      }),
+    );
+    expect(entry.elevatedLevel).toBe("on");
   });
 
   test("clears elevatedLevel when patch sets null", async () => {
     const store: Record<string, SessionEntry> = {
       [MAIN_SESSION_KEY]: { elevatedLevel: "off" } as SessionEntry,
     };
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", elevatedLevel: null },
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.elevatedLevel).toBeUndefined();
+    const entry = expectPatchOk(
+      await runPatch({
+        store,
+        patch: { key: MAIN_SESSION_KEY, elevatedLevel: null },
+      }),
+    );
+    expect(entry.elevatedLevel).toBeUndefined();
   });
 
   test("rejects invalid elevatedLevel values", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", elevatedLevel: "maybe" },
+    const result = await runPatch({
+      patch: { key: MAIN_SESSION_KEY, elevatedLevel: "maybe" },
     });
     expectPatchError(result, "invalid elevatedLevel");
   });
@@ -224,75 +199,33 @@ describe("gateway sessions patch", () => {
         authProfileOverrideCompactionCount: 3,
       } as SessionEntry,
     };
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", model: "openai/gpt-5.2" },
-      loadGatewayModelCatalog: async () => [{ provider: "openai", id: "gpt-5.2", name: "gpt-5.2" }],
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.providerOverride).toBe("openai");
-    expect(res.entry.modelOverride).toBe("gpt-5.2");
-    expect(res.entry.authProfileOverride).toBeUndefined();
-    expect(res.entry.authProfileOverrideSource).toBeUndefined();
-    expect(res.entry.authProfileOverrideCompactionCount).toBeUndefined();
+    const entry = expectPatchOk(
+      await runPatch({
+        store,
+        patch: { key: MAIN_SESSION_KEY, model: "openai/gpt-5.2" },
+        loadGatewayModelCatalog: async () => [
+          { provider: "openai", id: "gpt-5.2", name: "gpt-5.2" },
+        ],
+      }),
+    );
+    expect(entry.providerOverride).toBe("openai");
+    expect(entry.modelOverride).toBe("gpt-5.2");
+    expect(entry.authProfileOverride).toBeUndefined();
+    expect(entry.authProfileOverrideSource).toBeUndefined();
+    expect(entry.authProfileOverrideCompactionCount).toBeUndefined();
   });
 
-  test("accepts explicit allowlisted provider/model refs from sessions.patch", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const cfg = {
-      agents: {
-        defaults: {
-          model: { primary: "openai/gpt-5.2" },
-          models: {
-            "anthropic/claude-sonnet-4-6": { alias: "sonnet" },
-          },
-        },
-      },
-    } as BotConfig;
-
-    const res = await applySessionsPatchToStore({
-      cfg,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", model: "anthropic/claude-sonnet-4-6" },
-      loadGatewayModelCatalog: async () => [
+  test.each([
+    {
+      name: "accepts explicit allowlisted provider/model refs from sessions.patch",
+      catalog: [
         { provider: "anthropic", id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6" },
         { provider: "anthropic", id: "claude-sonnet-4-5", name: "Claude Sonnet 4.5" },
       ],
-    });
-
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.providerOverride).toBe("anthropic");
-    expect(res.entry.modelOverride).toBe("claude-sonnet-4-6");
-  });
-
-  test("accepts explicit allowlisted refs absent from bundled catalog", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const cfg = {
-      agents: {
-        defaults: {
-          model: { primary: "openai/gpt-5.2" },
-          models: {
-            "anthropic/claude-sonnet-4-6": { alias: "sonnet" },
-          },
-        },
-      },
-    } as BotConfig;
-
-    const res = await applySessionsPatchToStore({
-      cfg,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", model: "anthropic/claude-sonnet-4-6" },
-      loadGatewayModelCatalog: async () => [
+    },
+    {
+      name: "accepts explicit allowlisted refs absent from bundled catalog",
+      catalog: [
         { provider: "anthropic", id: "claude-sonnet-4-5", name: "Claude Sonnet 4.5" },
         { provider: "openai", id: "gpt-5.2", name: "GPT-5.2" },
       ],
@@ -310,88 +243,61 @@ describe("gateway sessions patch", () => {
   });
 
   test("sets spawnDepth for subagent sessions", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:subagent:child",
-      patch: { key: "agent:main:subagent:child", spawnDepth: 2 },
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.spawnDepth).toBe(2);
+    const entry = expectPatchOk(
+      await runPatch({
+        storeKey: "agent:main:subagent:child",
+        patch: { key: "agent:main:subagent:child", spawnDepth: 2 },
+      }),
+    );
+    expect(entry.spawnDepth).toBe(2);
   });
 
   test("rejects spawnDepth on non-subagent sessions", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", spawnDepth: 1 },
+    const result = await runPatch({
+      patch: { key: MAIN_SESSION_KEY, spawnDepth: 1 },
     });
     expectPatchError(result, "spawnDepth is only supported");
   });
 
   test("normalizes exec/send/group patches", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: {
-        key: "agent:main:main",
-        execHost: " NODE ",
-        execSecurity: " ALLOWLIST ",
-        execAsk: " ON-MISS ",
-        execNode: " worker-1 ",
-        sendPolicy: "DENY" as unknown as "allow",
-        groupActivation: "Always" as unknown as "mention",
-      },
-    });
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.execHost).toBe("node");
-    expect(res.entry.execSecurity).toBe("allowlist");
-    expect(res.entry.execAsk).toBe("on-miss");
-    expect(res.entry.execNode).toBe("worker-1");
-    expect(res.entry.sendPolicy).toBe("deny");
-    expect(res.entry.groupActivation).toBe("always");
+    const entry = expectPatchOk(
+      await runPatch({
+        patch: {
+          key: MAIN_SESSION_KEY,
+          execHost: " NODE ",
+          execSecurity: " ALLOWLIST ",
+          execAsk: " ON-MISS ",
+          execNode: " worker-1 ",
+          sendPolicy: "DENY" as unknown as "allow",
+          groupActivation: "Always" as unknown as "mention",
+        },
+      }),
+    );
+    expect(entry.execHost).toBe("node");
+    expect(entry.execSecurity).toBe("allowlist");
+    expect(entry.execAsk).toBe("on-miss");
+    expect(entry.execNode).toBe("worker-1");
+    expect(entry.sendPolicy).toBe("deny");
+    expect(entry.groupActivation).toBe("always");
   });
 
   test("rejects invalid execHost values", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", execHost: "edge" },
+    const result = await runPatch({
+      patch: { key: MAIN_SESSION_KEY, execHost: "edge" },
     });
     expectPatchError(result, "invalid execHost");
   });
 
   test("rejects invalid sendPolicy values", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", sendPolicy: "ask" as unknown as "allow" },
+    const result = await runPatch({
+      patch: { key: MAIN_SESSION_KEY, sendPolicy: "ask" as unknown as "allow" },
     });
     expectPatchError(result, "invalid sendPolicy");
   });
 
   test("rejects invalid groupActivation values", async () => {
-    const store: Record<string, SessionEntry> = {};
-    const res = await applySessionsPatchToStore({
-      cfg: {} as BotConfig,
-      store,
-      storeKey: "agent:main:main",
-      patch: { key: "agent:main:main", groupActivation: "never" as unknown as "mention" },
+    const result = await runPatch({
+      patch: { key: MAIN_SESSION_KEY, groupActivation: "never" as unknown as "mention" },
     });
     expectPatchError(result, "invalid groupActivation");
   });
