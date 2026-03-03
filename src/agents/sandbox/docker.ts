@@ -24,13 +24,49 @@ function createAbortError(): Error {
   return err;
 }
 
+type DockerSpawnRuntime = {
+  platform: NodeJS.Platform;
+  env: NodeJS.ProcessEnv;
+  execPath: string;
+};
+
+const DEFAULT_DOCKER_SPAWN_RUNTIME: DockerSpawnRuntime = {
+  platform: process.platform,
+  env: process.env,
+  execPath: process.execPath,
+};
+
+export function resolveDockerSpawnInvocation(
+  args: string[],
+  runtime: DockerSpawnRuntime = DEFAULT_DOCKER_SPAWN_RUNTIME,
+): { command: string; args: string[]; shell?: boolean; windowsHide?: boolean } {
+  const program = resolveWindowsSpawnProgram({
+    command: "docker",
+    platform: runtime.platform,
+    env: runtime.env,
+    execPath: runtime.execPath,
+    packageName: "docker",
+    allowShellFallback: true,
+  });
+  const resolved = materializeWindowsSpawnProgram(program, args);
+  return {
+    command: resolved.command,
+    args: resolved.argv,
+    shell: resolved.shell,
+    windowsHide: resolved.windowsHide,
+  };
+}
+
 export function execDockerRaw(
   args: string[],
   opts?: ExecDockerRawOptions,
 ): Promise<ExecDockerRawResult> {
   return new Promise<ExecDockerRawResult>((resolve, reject) => {
-    const child = spawn("docker", args, {
+    const spawnInvocation = resolveDockerSpawnInvocation(args);
+    const child = spawn(spawnInvocation.command, spawnInvocation.args, {
       stdio: ["pipe", "pipe", "pipe"],
+      shell: spawnInvocation.shell,
+      windowsHide: spawnInvocation.windowsHide,
     });
     const stdoutChunks: Buffer[] = [];
     const stderrChunks: Buffer[] = [];
@@ -62,6 +98,21 @@ export function execDockerRaw(
     child.on("error", (error) => {
       if (signal) {
         signal.removeEventListener("abort", handleAbort);
+      }
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        (error as NodeJS.ErrnoException).code === "ENOENT"
+      ) {
+        const friendly = Object.assign(
+          new Error(
+            'Sandbox mode requires Docker, but the "docker" command was not found in PATH. Install Docker (and ensure "docker" is available), or set `agents.defaults.sandbox.mode=off` to disable sandboxing.',
+          ),
+          { code: "INVALID_CONFIG", cause: error },
+        );
+        reject(friendly);
+        return;
       }
       reject(error);
     });
@@ -108,10 +159,11 @@ import type { SandboxConfig, SandboxDockerConfig, SandboxWorkspaceAccess } from 
 import { formatCliCommand } from "../../cli/command-format.js";
 import { defaultRuntime } from "../../runtime.js";
 import { computeSandboxConfigHash } from "./config-hash.js";
-import { DEFAULT_SANDBOX_IMAGE, SANDBOX_AGENT_WORKSPACE_MOUNT } from "./constants.js";
+import { DEFAULT_SANDBOX_IMAGE } from "./constants.js";
 import { readRegistry, updateRegistry } from "./registry.js";
 import { resolveSandboxAgentId, resolveSandboxScopeKey, slugifySessionKey } from "./shared.js";
 import { validateSandboxSecurity } from "./validate-sandbox-security.js";
+import { appendWorkspaceMountArgs } from "./workspace-mounts.js";
 
 const HOT_CONTAINER_WINDOW_MS = 5 * 60 * 1000;
 
@@ -358,7 +410,7 @@ async function createSandboxContainer(params: {
   await execDocker(["start", name]);
 
   if (cfg.setupCommand?.trim()) {
-    await execDocker(["exec", "-i", name, "sh", "-lc", cfg.setupCommand]);
+    await execDocker(["exec", "-i", name, "/bin/sh", "-lc", cfg.setupCommand]);
   }
 }
 

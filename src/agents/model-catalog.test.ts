@@ -7,6 +7,25 @@ import {
   type PiSdkModule,
 } from "./model-catalog.test-harness.js";
 
+function mockPiDiscoveryModels(models: unknown[]) {
+  __setModelCatalogImportForTest(
+    async () =>
+      ({
+        discoverAuthStorage: () => ({}),
+        AuthStorage: class {},
+        ModelRegistry: class {
+          getAll() {
+            return models;
+          }
+        },
+      }) as unknown as PiSdkModule,
+  );
+}
+
+function mockSingleOpenAiCatalogModel() {
+  mockPiDiscoveryModels([{ id: "gpt-4.1", provider: "openai", name: "GPT-4.1" }]);
+}
+
 describe("loadModelCatalog", () => {
   installModelCatalogTestHooks();
 

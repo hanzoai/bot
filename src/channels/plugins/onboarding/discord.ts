@@ -263,9 +263,10 @@ const dmPolicy: ChannelOnboardingDmPolicy = {
 export const discordOnboardingAdapter: ChannelOnboardingAdapter = {
   channel,
   getStatus: async ({ cfg }) => {
-    const configured = listDiscordAccountIds(cfg).some((accountId) =>
-      Boolean(resolveDiscordAccount({ cfg, accountId }).token),
-    );
+    const configured = listDiscordAccountIds(cfg).some((accountId) => {
+      const account = resolveDiscordAccount({ cfg, accountId });
+      return Boolean(account.token) || hasConfiguredSecretInput(account.config.token);
+    });
     return {
       channel,
       configured,
@@ -296,7 +297,8 @@ export const discordOnboardingAdapter: ChannelOnboardingAdapter = {
       cfg: next,
       accountId: discordAccountId,
     });
-    const accountConfigured = Boolean(resolvedAccount.token);
+    const hasConfigToken = hasConfiguredSecretInput(resolvedAccount.config.token);
+    const accountConfigured = Boolean(resolvedAccount.token) || hasConfigToken;
     const allowEnv = discordAccountId === DEFAULT_ACCOUNT_ID;
     const canUseEnv = allowEnv && Boolean(process.env.DISCORD_BOT_TOKEN?.trim());
     const hasConfigToken = Boolean(resolvedAccount.config.token);

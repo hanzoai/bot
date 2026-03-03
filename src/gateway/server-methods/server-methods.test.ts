@@ -25,18 +25,36 @@ type HealthStatusHandlerParams = Parameters<
 >[0];
 
 describe("waitForAgentJob", () => {
-  it("maps lifecycle end events with aborted=true to timeout", async () => {
-    const runId = `run-timeout-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  async function runLifecycleScenario(params: {
+    runIdPrefix: string;
+    startedAt: number;
+    endedAt: number;
+    aborted?: boolean;
+  }) {
+    const runId = `${params.runIdPrefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const waitPromise = waitForAgentJob({ runId, timeoutMs: 1_000 });
 
-    emitAgentEvent({ runId, stream: "lifecycle", data: { phase: "start", startedAt: 100 } });
     emitAgentEvent({
       runId,
       stream: "lifecycle",
-      data: { phase: "end", endedAt: 200, aborted: true },
+      data: { phase: "start", startedAt: params.startedAt },
+    });
+    emitAgentEvent({
+      runId,
+      stream: "lifecycle",
+      data: { phase: "end", endedAt: params.endedAt, aborted: params.aborted },
     });
 
-    const snapshot = await waitPromise;
+    return waitPromise;
+  }
+
+  it("maps lifecycle end events with aborted=true to timeout", async () => {
+    const snapshot = await runLifecycleScenario({
+      runIdPrefix: "run-timeout",
+      startedAt: 100,
+      endedAt: 200,
+      aborted: true,
+    });
     expect(snapshot).not.toBeNull();
     expect(snapshot?.status).toBe("timeout");
     expect(snapshot?.startedAt).toBe(100);
@@ -44,13 +62,11 @@ describe("waitForAgentJob", () => {
   });
 
   it("keeps non-aborted lifecycle end events as ok", async () => {
-    const runId = `run-ok-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const waitPromise = waitForAgentJob({ runId, timeoutMs: 1_000 });
-
-    emitAgentEvent({ runId, stream: "lifecycle", data: { phase: "start", startedAt: 300 } });
-    emitAgentEvent({ runId, stream: "lifecycle", data: { phase: "end", endedAt: 400 } });
-
-    const snapshot = await waitPromise;
+    const snapshot = await runLifecycleScenario({
+      runIdPrefix: "run-ok",
+      startedAt: 300,
+      endedAt: 400,
+    });
     expect(snapshot).not.toBeNull();
     expect(snapshot?.status).toBe("ok");
     expect(snapshot?.startedAt).toBe(300);
@@ -274,6 +290,37 @@ describe("exec approval handlers", () => {
       ...defaultExecApprovalRequestParams,
       ...params.params,
     } as unknown as ExecApprovalRequestArgs["params"];
+    const hasExplicitPlan = !!params.params && Object.hasOwn(params.params, "systemRunPlan");
+    if (
+      !hasExplicitPlan &&
+      (requestParams as { host?: string }).host === "node" &&
+      Array.isArray((requestParams as { commandArgv?: unknown }).commandArgv)
+    ) {
+      const commandArgv = (requestParams as { commandArgv: unknown[] }).commandArgv.map((entry) =>
+        String(entry),
+      );
+      const cwdValue =
+        typeof (requestParams as { cwd?: unknown }).cwd === "string"
+          ? ((requestParams as { cwd: string }).cwd ?? null)
+          : null;
+      const commandText =
+        typeof (requestParams as { command?: unknown }).command === "string"
+          ? ((requestParams as { command: string }).command ?? null)
+          : null;
+      requestParams.systemRunPlan = {
+        argv: commandArgv,
+        cwd: cwdValue,
+        rawCommand: commandText,
+        agentId:
+          typeof (requestParams as { agentId?: unknown }).agentId === "string"
+            ? ((requestParams as { agentId: string }).agentId ?? null)
+            : null,
+        sessionKey:
+          typeof (requestParams as { sessionKey?: unknown }).sessionKey === "string"
+            ? ((requestParams as { sessionKey: string }).sessionKey ?? null)
+            : null,
+      };
+    }
     return params.handlers["exec.approval.request"]({
       params: requestParams,
       respond: params.respond,
@@ -313,6 +360,28 @@ describe("exec approval handlers", () => {
       hasExecApprovalClients: () => true,
     };
     return { handlers, broadcasts, respond, context };
+  }
+
+  function createForwardingExecApprovalFixture() {
+    const manager = new ExecApprovalManager();
+    const forwarder = {
+      handleRequested: vi.fn(async () => false),
+      handleResolved: vi.fn(async () => {}),
+      stop: vi.fn(),
+    };
+    const handlers = createExecApprovalHandlers(manager, { forwarder });
+    const respond = vi.fn();
+    const context = {
+      broadcast: (_event: string, _payload: unknown) => {},
+      hasExecApprovalClients: () => false,
+    };
+    return { manager, handlers, forwarder, respond, context };
+  }
+
+  async function drainApprovalRequestTicks() {
+    for (let idx = 0; idx < 20; idx += 1) {
+      await Promise.resolve();
+    }
   }
 
   describe("ExecApprovalRequestParams validation", () => {

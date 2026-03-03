@@ -1,7 +1,6 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
-import path from "node:path";
 
 // On Windows, `.cmd` launchers can fail with `spawn EINVAL` when invoked without a shell
 // (especially under GitHub Actions + Git Bash). Use `shell: true` and let the shell resolve pnpm.
@@ -89,28 +88,36 @@ const runs = [
           args: ["vitest", "run", "--config", "vitest.unit.config.ts"],
         },
       ]),
-  {
-    name: "extensions",
-    args: [
-      "vitest",
-      "run",
-      "--config",
-      "vitest.extensions.config.ts",
-      ...(useVmForks ? ["--pool=vmForks"] : []),
-    ],
-  },
-  {
-    name: "gateway",
-    args: [
-      "vitest",
-      "run",
-      "--config",
-      "vitest.gateway.config.ts",
-      // Gateway tests are sensitive to vmForks behavior (global state + env stubs).
-      // Keep them on process forks for determinism even when other suites use vmForks.
-      "--pool=forks",
-    ],
-  },
+  ...(includeExtensionsSuite
+    ? [
+        {
+          name: "extensions",
+          args: [
+            "vitest",
+            "run",
+            "--config",
+            "vitest.extensions.config.ts",
+            ...(useVmForks ? ["--pool=vmForks"] : []),
+          ],
+        },
+      ]
+    : []),
+  ...(includeGatewaySuite
+    ? [
+        {
+          name: "gateway",
+          args: [
+            "vitest",
+            "run",
+            "--config",
+            "vitest.gateway.config.ts",
+            // Gateway tests are sensitive to vmForks behavior (global state + env stubs).
+            // Keep them on process forks for determinism even when other suites use vmForks.
+            "--pool=forks",
+          ],
+        },
+      ]
+    : []),
 ];
 const shardOverride = Number.parseInt(process.env.BOT_TEST_SHARDS ?? "", 10);
 const shardCount = isWindowsCi
@@ -269,7 +276,6 @@ const runOnce = (entry, extraArgs = []) =>
           "--maxWorkers",
           String(maxWorkers),
           ...silentArgs,
-          ...reporterArgs,
           ...windowsCiArgs,
           ...extraArgs,
         ]

@@ -117,8 +117,16 @@ export function resolveLineAccount(params: {
     accountConfig,
   });
 
+  const {
+    accounts: _ignoredAccounts,
+    defaultAccount: _ignoredDefaultAccount,
+    ...lineBase
+  } = (lineConfig ?? {}) as LineConfig & {
+    accounts?: unknown;
+    defaultAccount?: unknown;
+  };
   const mergedConfig: LineConfig & LineAccountConfig = {
-    ...lineConfig,
+    ...lineBase,
     ...accountConfig,
   };
 
