@@ -45,7 +45,7 @@ import { checkBillingAllowance } from "./billing/billing-gate.js";
 import { reportUsage } from "./billing/usage-reporter.js";
 import { sendJson, setSseHeaders, writeDone } from "./http-common.js";
 import { handleGatewayPostJsonEndpoint } from "./http-endpoint-helpers.js";
-import { resolveAgentIdForRequest, resolveSessionKey } from "./http-utils.js";
+import { resolveGatewayRequestContext } from "./http-utils.js";
 import {
   CreateResponseBodySchema,
   type ContentPart,
@@ -236,14 +236,6 @@ export function buildAgentPrompt(input: string | ItemParam[]): {
   };
 }
 
-function resolveOpenResponsesSessionKey(params: {
-  req: IncomingMessage;
-  agentId: string;
-  user?: string | undefined;
-}): string {
-  return resolveSessionKey({ ...params, prefix: "openresponses" });
-}
-
 function createEmptyUsage(): Usage {
   return { input_tokens: 0, output_tokens: 0, total_tokens: 0 };
 }
@@ -282,6 +274,19 @@ function extractUsageFromResult(result: unknown): Usage {
       | { input?: number; output?: number; cacheRead?: number; cacheWrite?: number; total?: number }
       | undefined,
   );
+}
+
+type PendingToolCall = { id: string; name: string; arguments: string };
+
+function resolveStopReasonAndPendingToolCalls(meta: unknown): {
+  stopReason: string | undefined;
+  pendingToolCalls: PendingToolCall[] | undefined;
+} {
+  if (!meta || typeof meta !== "object") {
+    return { stopReason: undefined, pendingToolCalls: undefined };
+  }
+  const record = meta as { stopReason?: string; pendingToolCalls?: PendingToolCall[] };
+  return { stopReason: record.stopReason, pendingToolCalls: record.pendingToolCalls };
 }
 
 function createResponseResource(params: {
@@ -326,9 +331,10 @@ async function runResponsesAgentCommand(params: {
   streamParams: { maxTokens: number } | undefined;
   sessionKey: string;
   runId: string;
+  messageChannel: string;
   deps: ReturnType<typeof createDefaultDeps>;
 }) {
-  return agentCommand(
+  return agentCommandFromIngress(
     {
       message: params.message,
       images: params.images.length > 0 ? params.images : undefined,
@@ -338,8 +344,10 @@ async function runResponsesAgentCommand(params: {
       sessionKey: params.sessionKey,
       runId: params.runId,
       deliver: false,
-      messageChannel: "webchat",
+      messageChannel: params.messageChannel,
       bestEffortDeliver: false,
+      // HTTP API callers are authenticated operator clients for this gateway context.
+      senderIsOwner: true,
     },
     defaultRuntime,
     params.deps,
@@ -520,8 +528,14 @@ export async function handleOpenResponsesHttpRequest(
     });
     return true;
   }
-  const agentId = resolveAgentIdForRequest({ req, model });
-  const sessionKey = resolveOpenResponsesSessionKey({ req, agentId, user });
+  const { sessionKey, messageChannel } = resolveGatewayRequestContext({
+    req,
+    model,
+    user,
+    sessionPrefix: "openresponses",
+    defaultMessageChannel: "webchat",
+    useMessageChannelHeader: false,
+  });
 
   // Build prompt from input
   const prompt = buildAgentPrompt(payload.input);
@@ -567,19 +581,14 @@ export async function handleOpenResponsesHttpRequest(
         streamParams,
         sessionKey,
         runId: responseId,
+        messageChannel,
         deps,
       });
 
       const payloads = (result as { payloads?: Array<{ text?: string }> } | null)?.payloads;
       const usage = extractUsageFromResult(result);
       const meta = (result as { meta?: unknown } | null)?.meta;
-      const stopReason =
-        meta && typeof meta === "object" ? (meta as { stopReason?: string }).stopReason : undefined;
-      const pendingToolCalls =
-        meta && typeof meta === "object"
-          ? (meta as { pendingToolCalls?: Array<{ id: string; name: string; arguments: string }> })
-              .pendingToolCalls
-          : undefined;
+      const { stopReason, pendingToolCalls } = resolveStopReasonAndPendingToolCalls(meta);
 
       // Report usage to IAM billing (async, non-blocking)
       if (tenant && usage && (usage.input_tokens > 0 || usage.output_tokens > 0)) {
@@ -817,6 +826,7 @@ export async function handleOpenResponsesHttpRequest(
         streamParams,
         sessionKey,
         runId: responseId,
+        messageChannel,
         deps,
       });
 
@@ -852,18 +862,7 @@ export async function handleOpenResponsesHttpRequest(
         const resultAny = result as { payloads?: Array<{ text?: string }>; meta?: unknown };
         const payloads = resultAny.payloads;
         const meta = resultAny.meta;
-        const stopReason =
-          meta && typeof meta === "object"
-            ? (meta as { stopReason?: string }).stopReason
-            : undefined;
-        const pendingToolCalls =
-          meta && typeof meta === "object"
-            ? (
-                meta as {
-                  pendingToolCalls?: Array<{ id: string; name: string; arguments: string }>;
-                }
-              ).pendingToolCalls
-            : undefined;
+        const { stopReason, pendingToolCalls } = resolveStopReasonAndPendingToolCalls(meta);
 
         // If agent called a client tool, emit function_call instead of text
         if (stopReason === "tool_calls" && pendingToolCalls && pendingToolCalls.length > 0) {

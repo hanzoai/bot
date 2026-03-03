@@ -38,6 +38,27 @@ metadata: {"bot":{"install":[{"id":"deps","kind":"node","package":"example-packa
   return skillDir;
 }
 
+const workspaceSuite = createFixtureSuite("bot-skills-install-");
+let tempHome: TempHomeEnv;
+
+beforeAll(async () => {
+  tempHome = await createTempHomeEnv("bot-skills-install-home-");
+  await workspaceSuite.setup();
+});
+
+afterAll(async () => {
+  await workspaceSuite.cleanup();
+  await tempHome.restore();
+});
+
+async function withWorkspaceCase(
+  run: (params: { workspaceDir: string; stateDir: string }) => Promise<void>,
+): Promise<void> {
+  const workspaceDir = await workspaceSuite.createCaseDir("case");
+  const stateDir = setTempStateDir(workspaceDir);
+  await run({ workspaceDir, stateDir });
+}
+
 describe("installSkill code safety scanning", () => {
   beforeEach(() => {
     runCommandWithTimeoutMock.mockReset();
