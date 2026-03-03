@@ -95,14 +95,16 @@ export async function fetchRemoteMedia(options: FetchMediaOptions): Promise<Fetc
   let finalUrl = url;
   let release: (() => Promise<void>) | null = null;
   try {
-    const result = await fetchWithSsrFGuard({
-      url,
-      fetchImpl,
-      init: requestInit,
-      maxRedirects,
-      policy: ssrfPolicy,
-      lookupFn,
-    });
+    const result = await fetchWithSsrFGuard(
+      withStrictGuardedFetchMode({
+        url,
+        fetchImpl,
+        init: requestInit,
+        maxRedirects,
+        policy: ssrfPolicy,
+        lookupFn,
+      }),
+    );
     res = result.response;
     finalUrl = result.finalUrl;
     release = result.release;

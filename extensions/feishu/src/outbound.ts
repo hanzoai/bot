@@ -3,7 +3,61 @@ import fs from "fs";
 import path from "path";
 import { sendMediaFeishu } from "./media.js";
 import { getFeishuRuntime } from "./runtime.js";
-import { sendMessageFeishu } from "./send.js";
+import { sendMarkdownCardFeishu, sendMessageFeishu } from "./send.js";
+
+function normalizePossibleLocalImagePath(text: string | undefined): string | null {
+  const raw = text?.trim();
+  if (!raw) return null;
+
+  // Only auto-convert when the message is a pure path-like payload.
+  // Avoid converting regular sentences that merely contain a path.
+  const hasWhitespace = /\s/.test(raw);
+  if (hasWhitespace) return null;
+
+  // Ignore links/data URLs; those should stay in normal mediaUrl/text paths.
+  if (/^(https?:\/\/|data:|file:\/\/)/i.test(raw)) return null;
+
+  const ext = path.extname(raw).toLowerCase();
+  const isImageExt = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".ico", ".tiff"].includes(
+    ext,
+  );
+  if (!isImageExt) return null;
+
+  if (!path.isAbsolute(raw)) return null;
+  if (!fs.existsSync(raw)) return null;
+
+  // Fix race condition: wrap statSync in try-catch to handle file deletion
+  // between existsSync and statSync
+  try {
+    if (!fs.statSync(raw).isFile()) return null;
+  } catch {
+    // File may have been deleted or became inaccessible between checks
+    return null;
+  }
+
+  return raw;
+}
+
+function shouldUseCard(text: string): boolean {
+  return /```[\s\S]*?```/.test(text) || /\|.+\|[\r\n]+\|[-:| ]+\|/.test(text);
+}
+
+async function sendOutboundText(params: {
+  cfg: Parameters<typeof sendMessageFeishu>[0]["cfg"];
+  to: string;
+  text: string;
+  accountId?: string;
+}) {
+  const { cfg, to, text, accountId } = params;
+  const account = resolveFeishuAccount({ cfg, accountId });
+  const renderMode = account.config?.renderMode ?? "auto";
+
+  if (renderMode === "card" || (renderMode === "auto" && shouldUseCard(text))) {
+    return sendMarkdownCardFeishu({ cfg, to, text, accountId });
+  }
+
+  return sendMessageFeishu({ cfg, to, text, accountId });
+}
 
 function normalizePossibleLocalImagePath(text: string | undefined): string | null {
   const raw = text?.trim();
@@ -88,7 +142,7 @@ export const feishuOutbound: ChannelOutboundAdapter = {
         console.error(`[feishu] sendMediaFeishu failed:`, err);
         // Fallback to URL link if upload fails
         const fallbackText = `📎 ${mediaUrl}`;
-        const result = await sendMessageFeishu({
+        const result = await sendOutboundText({
           cfg,
           to,
           text: fallbackText,
@@ -99,7 +153,7 @@ export const feishuOutbound: ChannelOutboundAdapter = {
     }
 
     // No media URL, just return text result
-    const result = await sendMessageFeishu({
+    const result = await sendOutboundText({
       cfg,
       to,
       text: text ?? "",

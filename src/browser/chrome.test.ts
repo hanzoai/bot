@@ -1,18 +1,24 @@
 import fs from "node:fs";
 import fsp from "node:fs/promises";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { WebSocketServer } from "ws";
 import {
   decorateBotProfile,
   ensureProfileCleanExit,
   findChromeExecutableMac,
   findChromeExecutableWindows,
+  isChromeCdpReady,
   isChromeReachable,
   resolveBrowserExecutableForPlatform,
   stopBotChrome,
 } from "./chrome.js";
 import { DEFAULT_BOT_BROWSER_COLOR, DEFAULT_BOT_BROWSER_PROFILE_NAME } from "./constants.js";
+
+type StopChromeTarget = Parameters<typeof stopBotChrome>[0];
 
 async function readJson(filePath: string): Promise<Record<string, unknown>> {
   const raw = await fsp.readFile(filePath, "utf-8");

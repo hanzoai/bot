@@ -19,6 +19,31 @@ type CodexUsageResponse = {
   credits?: { balance?: number | string | null };
 };
 
+const WEEKLY_RESET_GAP_SECONDS = 3 * 24 * 60 * 60;
+
+function resolveSecondaryWindowLabel(params: {
+  windowHours: number;
+  secondaryResetAt?: number;
+  primaryResetAt?: number;
+}): string {
+  if (params.windowHours >= 168) {
+    return "Week";
+  }
+  if (params.windowHours < 24) {
+    return `${params.windowHours}h`;
+  }
+  // Codex occasionally reports a 24h secondary window while exposing a
+  // weekly reset cadence in reset timestamps. Prefer cadence in that case.
+  if (
+    typeof params.secondaryResetAt === "number" &&
+    typeof params.primaryResetAt === "number" &&
+    params.secondaryResetAt - params.primaryResetAt >= WEEKLY_RESET_GAP_SECONDS
+  ) {
+    return "Week";
+  }
+  return "Day";
+}
+
 export async function fetchCodexUsage(
   token: string,
   accountId: string | undefined,
