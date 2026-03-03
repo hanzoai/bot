@@ -41,7 +41,7 @@ class SystemHandlerTest {
   fun handleSystemNotify_returnsUnauthorizedWhenPostFailsPermission() {
     val handler = SystemHandler.forTesting(poster = ThrowingPoster(authorized = true, error = SecurityException("denied")))
 
-    val result = handler.handleSystemNotify("""{"title":"OpenClaw","body":"done"}""")
+    val result = handler.handleSystemNotify("""{"title":"Bot","body":"done"}""")
 
     assertFalse(result.ok)
     assertEquals("NOT_AUTHORIZED", result.error?.code)
@@ -51,7 +51,7 @@ class SystemHandlerTest {
   fun handleSystemNotify_returnsUnavailableWhenPostFailsUnexpectedly() {
     val handler = SystemHandler.forTesting(poster = ThrowingPoster(authorized = true, error = IllegalStateException("boom")))
 
-    val result = handler.handleSystemNotify("""{"title":"OpenClaw","body":"done"}""")
+    val result = handler.handleSystemNotify("""{"title":"Bot","body":"done"}""")
 
     assertFalse(result.ok)
     assertEquals("UNAVAILABLE", result.error?.code)
