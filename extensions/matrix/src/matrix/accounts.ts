@@ -3,8 +3,8 @@ import {
   normalizeAccountId,
   normalizeOptionalAccountId,
 } from "bot/plugin-sdk/account-id";
-import { hasConfiguredSecretInput } from "../secret-input.js";
 import type { CoreConfig, MatrixConfig } from "../types.js";
+import { hasConfiguredSecretInput } from "../secret-input.js";
 import { resolveMatrixConfigForAccount } from "./client.js";
 import { credentialsMatchConfig, loadMatrixCredentials } from "./credentials.js";
 
