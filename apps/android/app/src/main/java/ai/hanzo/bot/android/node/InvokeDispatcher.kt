@@ -125,7 +125,7 @@ class InvokeDispatcher(
       }
 
       // Camera commands
-      HanzoBotCameraCommand.List.rawValue -> cameraHandler.handleList(paramsJson)
+      HanzoBotCameraCommand.List.rawValue -> cameraHandler.handleList()
       HanzoBotCameraCommand.Snap.rawValue -> cameraHandler.handleSnap(paramsJson)
       HanzoBotCameraCommand.Clip.rawValue -> cameraHandler.handleClip(paramsJson)
 

@@ -109,7 +109,8 @@ describe("discord message actions", () => {
 
   it("shallow merge: account actions object replaces base entirely", () => {
     // Base has reactions: false, account has actions: { moderation: true }
-    // Shallow merge replaces the whole actions object, so reactions defaults to true
+    // Property-level merge: account moderation=true enables moderation actions,
+    // but base reactions=false still applies since account doesn't override it.
     const cfg = {
       channels: {
         discord: {
@@ -122,8 +123,9 @@ describe("discord message actions", () => {
     } as BotConfig;
     const actions = discordMessageActions.listActions?.({ cfg }) ?? [];
 
-    // vime's actions override replaces entire actions object; reactions defaults to true
-    expect(actions).toContain("react");
+    // base reactions: false still takes effect (account doesn't override reactions)
+    expect(actions).not.toContain("react");
+    // account moderation: true enables moderation actions
     expect(actions).toContain("timeout");
   });
 });
@@ -148,6 +150,7 @@ describe("handleDiscordMessageAction", () => {
         content: "hi",
       }),
       expect.any(Object),
+      { mediaLocalRoots: undefined },
     );
   });
 
@@ -172,6 +175,7 @@ describe("handleDiscordMessageAction", () => {
         embeds,
       }),
       expect.any(Object),
+      { mediaLocalRoots: undefined },
     );
   });
 
@@ -196,6 +200,7 @@ describe("handleDiscordMessageAction", () => {
         answers: ["Yes", "No"],
       }),
       expect.any(Object),
+      { mediaLocalRoots: undefined },
     );
   });
 
@@ -265,6 +270,7 @@ describe("handleDiscordMessageAction", () => {
         content: "Initial forum post body",
       }),
       expect.any(Object),
+      { mediaLocalRoots: undefined },
     );
   });
 
@@ -324,6 +330,7 @@ describe("telegramMessageActions", () => {
         asVoice: true,
       }),
       cfg,
+      { mediaLocalRoots: undefined },
     );
   });
 
@@ -349,6 +356,7 @@ describe("telegramMessageActions", () => {
         silent: true,
       }),
       cfg,
+      { mediaLocalRoots: undefined },
     );
   });
 
@@ -377,6 +385,7 @@ describe("telegramMessageActions", () => {
         accountId: undefined,
       },
       cfg,
+      { mediaLocalRoots: undefined },
     );
   });
 
