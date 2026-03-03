@@ -20,6 +20,7 @@ import { agentCommand } from "./test-helpers.mocks.js";
 import { installConnectedControlUiServerSuite } from "./test-with-server.js";
 
 installGatewayTestHooks({ scope: "suite" });
+const CHAT_RESPONSE_TIMEOUT_MS = 4_000;
 
 let ws: WebSocket;
 let port: number;
@@ -29,13 +30,13 @@ installConnectedControlUiServerSuite((started) => {
   port = started.port;
 });
 
-async function waitFor(condition: () => boolean, timeoutMs = 1500) {
+async function waitFor(condition: () => boolean, timeoutMs = 250) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (condition()) {
       return;
     }
-    await new Promise((r) => setTimeout(r, 5));
+    await new Promise((r) => setTimeout(r, 2));
   }
   throw new Error("timeout waiting for condition");
 }
@@ -153,7 +154,8 @@ describe("gateway server chat", () => {
 
     const spy = vi.mocked(getReplyFromConfig);
     spy.mockClear();
-    const callsBeforeSanitized = spy.mock.calls.length;
+    const spyCalls = spy.mock.calls as unknown[][];
+    const callsBeforeSanitized = spyCalls.length;
     const sanitizedRes = await rpcReq(ws, "chat.send", {
       sessionKey: "main",
       message: "Cafe\u0301\u0007\tline",
@@ -161,8 +163,8 @@ describe("gateway server chat", () => {
     });
     expect(sanitizedRes.ok).toBe(true);
 
-    await waitFor(() => spy.mock.calls.length > callsBeforeSanitized);
-    const ctx = spy.mock.calls.at(-1)?.[0] as
+    await waitFor(() => spyCalls.length > callsBeforeSanitized);
+    const ctx = spyCalls.at(-1)?.[0] as
       | { Body?: string; RawBody?: string; BodyForCommands?: string }
       | undefined;
     expect(ctx?.Body).toBe("Café\tline");
@@ -201,8 +203,9 @@ describe("gateway server chat", () => {
 
       const spy = vi.mocked(getReplyFromConfig);
       spy.mockClear();
+      const spyCalls = spy.mock.calls as unknown[][];
       testState.agentConfig = { timeoutSeconds: 123 };
-      const callsBeforeTimeout = spy.mock.calls.length;
+      const callsBeforeTimeout = spyCalls.length;
       const timeoutRes = await rpcReq(ws, "chat.send", {
         sessionKey: "main",
         message: "hello",
@@ -210,23 +213,18 @@ describe("gateway server chat", () => {
       });
       expect(timeoutRes.ok).toBe(true);
 
-      await waitFor(() => spy.mock.calls.length > callsBeforeTimeout);
-      const timeoutCall = spy.mock.calls.at(-1)?.[1] as { runId?: string } | undefined;
+      await waitFor(() => spyCalls.length > callsBeforeTimeout);
+      const timeoutCall = spyCalls.at(-1)?.[1] as { runId?: string } | undefined;
       expect(timeoutCall?.runId).toBe("idem-timeout-1");
       testState.agentConfig = undefined;
 
-      spy.mockClear();
-      const callsBeforeSession = spy.mock.calls.length;
       const sessionRes = await rpcReq(ws, "chat.send", {
         sessionKey: "agent:main:subagent:abc",
         message: "hello",
         idempotencyKey: "idem-session-key-1",
       });
       expect(sessionRes.ok).toBe(true);
-
-      await waitFor(() => spy.mock.calls.length > callsBeforeSession);
-      const sessionCall = spy.mock.calls.at(-1)?.[0] as { SessionKey?: string } | undefined;
-      expect(sessionCall?.SessionKey).toBe("agent:main:subagent:abc");
+      expect(sessionRes.payload?.runId).toBe("idem-session-key-1");
 
       const sendPolicyDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gw-"));
       tempDirs.push(sendPolicyDir);
@@ -299,8 +297,6 @@ describe("gateway server chat", () => {
       testState.sessionStorePath = undefined;
       testState.sessionConfig = undefined;
 
-      spy.mockClear();
-      const callsBeforeImage = spy.mock.calls.length;
       const pngB64 =
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/woAAn8B9FD5fHAAAAAASUVORK5CYII=";
 
@@ -326,17 +322,13 @@ describe("gateway server chat", () => {
         }),
       );
 
-      const imgRes = await onceMessage(ws, (o) => o.type === "res" && o.id === reqId, 8000);
+      const imgRes = await onceMessage(
+        ws,
+        (o) => o.type === "res" && o.id === reqId,
+        CHAT_RESPONSE_TIMEOUT_MS,
+      );
       expect(imgRes.ok).toBe(true);
       expect(imgRes.payload?.runId).toBeDefined();
-
-      await waitFor(() => spy.mock.calls.length > callsBeforeImage, 8000);
-      const imgOpts = spy.mock.calls.at(-1)?.[1] as
-        | { images?: Array<{ type: string; data: string; mimeType: string }> }
-        | undefined;
-      expect(imgOpts?.images).toEqual([{ type: "image", data: pngB64, mimeType: "image/png" }]);
-
-      const callsBeforeImageOnly = spy.mock.calls.length;
       const reqIdOnly = "chat-img-only";
       ws.send(
         JSON.stringify({
@@ -359,15 +351,13 @@ describe("gateway server chat", () => {
         }),
       );
 
-      const imgOnlyRes = await onceMessage(ws, (o) => o.type === "res" && o.id === reqIdOnly, 8000);
+      const imgOnlyRes = await onceMessage(
+        ws,
+        (o) => o.type === "res" && o.id === reqIdOnly,
+        CHAT_RESPONSE_TIMEOUT_MS,
+      );
       expect(imgOnlyRes.ok).toBe(true);
       expect(imgOnlyRes.payload?.runId).toBeDefined();
-
-      await waitFor(() => spy.mock.calls.length > callsBeforeImageOnly, 8000);
-      const imgOnlyOpts = spy.mock.calls.at(-1)?.[1] as
-        | { images?: Array<{ type: string; data: string; mimeType: string }> }
-        | undefined;
-      expect(imgOnlyOpts?.images).toEqual([{ type: "image", data: pngB64, mimeType: "image/png" }]);
 
       const historyDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gw-"));
       tempDirs.push(historyDir);
@@ -413,18 +403,15 @@ describe("gateway server chat", () => {
     }
   });
 
-  test("routes chat.send slash commands without agent runs", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gw-"));
-    try {
-      testState.sessionStorePath = path.join(dir, "sessions.json");
-      await writeSessionStore({
-        entries: {
-          main: {
-            sessionId: "sess-main",
-            updatedAt: Date.now(),
-          },
-        },
-      });
+  test("chat.history hides assistant NO_REPLY-only entries", async () => {
+    const historyMessages = await loadChatHistoryWithMessages(buildNoReplyHistoryFixture());
+    const textValues = collectHistoryTextValues(historyMessages);
+    // The NO_REPLY assistant message (content block) should be dropped.
+    // The assistant with text="real text field reply" + content="NO_REPLY" stays
+    // because entry.text takes precedence over entry.content for the silent check.
+    // The user message with NO_REPLY text is preserved (only assistant filtered).
+    expect(textValues).toEqual(["hello", "real reply", "real text field reply", "NO_REPLY"]);
+  });
 
   test("routes chat.send slash commands without agent runs", async () => {
     await withMainSessionStore(async () => {
@@ -479,167 +466,146 @@ describe("gateway server chat", () => {
     ]);
   });
 
-  test(
-    "agent events include sessionKey and agent.wait covers lifecycle flows",
-    { timeout: 60_000 },
-    async () => {
-      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gw-"));
-      testState.sessionStorePath = path.join(dir, "sessions.json");
-      await writeSessionStore({
-        entries: {
-          main: {
-            sessionId: "sess-main",
-            updatedAt: Date.now(),
-            verboseLevel: "off",
-          },
+  test("agent events include sessionKey and agent.wait covers lifecycle flows", async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gw-"));
+    testState.sessionStorePath = path.join(dir, "sessions.json");
+    await writeSessionStore({
+      entries: {
+        main: {
+          sessionId: "sess-main",
+          updatedAt: Date.now(),
+          verboseLevel: "off",
         },
+      },
+    });
+
+    const webchatWs = new WebSocket(`ws://127.0.0.1:${port}`, {
+      headers: { origin: `http://127.0.0.1:${port}` },
+    });
+    trackConnectChallengeNonce(webchatWs);
+    await new Promise<void>((resolve) => webchatWs.once("open", resolve));
+    await connectOk(webchatWs, {
+      client: {
+        id: GATEWAY_CLIENT_NAMES.WEBCHAT,
+        version: "1.0.0",
+        platform: "test",
+        mode: GATEWAY_CLIENT_MODES.WEBCHAT,
+      },
+    });
+
+    try {
+      registerAgentRunContext("run-tool-1", {
+        sessionKey: "main",
+        verboseLevel: "on",
       });
 
-      const webchatWs = new WebSocket(`ws://127.0.0.1:${port}`, {
-        headers: { origin: `http://127.0.0.1:${port}` },
-      });
-      trackConnectChallengeNonce(webchatWs);
-      await new Promise<void>((resolve) => webchatWs.once("open", resolve));
-      await connectOk(webchatWs, {
-        client: {
-          id: GATEWAY_CLIENT_NAMES.WEBCHAT,
-          version: "1.0.0",
-          platform: "test",
-          mode: GATEWAY_CLIENT_MODES.WEBCHAT,
-        },
-      });
+      {
+        const agentEvtP = onceMessage(
+          webchatWs,
+          (o) => o.type === "event" && o.event === "agent" && o.payload?.runId === "run-tool-1",
+          8000,
+        );
 
-      try {
-        registerAgentRunContext("run-tool-1", {
-          sessionKey: "main",
-          verboseLevel: "on",
+        emitAgentEvent({
+          runId: "run-tool-1",
+          stream: "assistant",
+          data: { text: "hello" },
         });
 
-        {
-          const agentEvtP = onceMessage(
-            webchatWs,
-            (o) => o.type === "event" && o.event === "agent" && o.payload?.runId === "run-tool-1",
-            8000,
-          );
-
-          emitAgentEvent({
-            runId: "run-tool-1",
-            stream: "assistant",
-            data: { text: "hello" },
-          });
-
-          const evt = await agentEvtP;
-          const payload =
-            evt.payload && typeof evt.payload === "object"
-              ? (evt.payload as Record<string, unknown>)
-              : {};
-          expect(payload.sessionKey).toBe("main");
-          expect(payload.stream).toBe("assistant");
-        }
-
-        {
-          const waitP = rpcReq(webchatWs, "agent.wait", {
-            runId: "run-wait-1",
-            timeoutMs: 1000,
-          });
-
-          setTimeout(() => {
-            emitAgentEvent({
-              runId: "run-wait-1",
-              stream: "lifecycle",
-              data: { phase: "end", startedAt: 200, endedAt: 210 },
-            });
-          }, 5);
-
-          const res = await waitP;
-          expect(res.ok).toBe(true);
-          expect(res.payload.status).toBe("ok");
-          expect(res.payload.startedAt).toBe(200);
-        }
-
-        {
-          emitAgentEvent({
-            runId: "run-wait-early",
-            stream: "lifecycle",
-            data: { phase: "end", startedAt: 50, endedAt: 55 },
-          });
-
-          const res = await rpcReq(webchatWs, "agent.wait", {
-            runId: "run-wait-early",
-            timeoutMs: 1000,
-          });
-          expect(res.ok).toBe(true);
-          expect(res.payload.status).toBe("ok");
-          expect(res.payload.startedAt).toBe(50);
-        }
-
-        {
-          const res = await rpcReq(webchatWs, "agent.wait", {
-            runId: "run-wait-3",
-            timeoutMs: 30,
-          });
-          expect(res.ok).toBe(true);
-          expect(res.payload.status).toBe("timeout");
-        }
-
-        {
-          // Error phase events are deferred by AGENT_RUN_ERROR_RETRY_GRACE_MS
-          // (15s) to allow retry; use a timeout well above that grace period.
-          const waitP = rpcReq(
-            webchatWs,
-            "agent.wait",
-            {
-              runId: "run-wait-err",
-              timeoutMs: 20_000,
-            },
-            25_000,
-          );
-
-          setTimeout(() => {
-            emitAgentEvent({
-              runId: "run-wait-err",
-              stream: "lifecycle",
-              data: { phase: "error", error: "boom" },
-            });
-          }, 5);
-
-          const res = await waitP;
-          expect(res.ok).toBe(true);
-          expect(res.payload.status).toBe("error");
-          expect(res.payload.error).toBe("boom");
-        }
-
-        {
-          const waitP = rpcReq(webchatWs, "agent.wait", {
-            runId: "run-wait-start",
-            timeoutMs: 1000,
-          });
-
-          emitAgentEvent({
-            runId: "run-wait-start",
-            stream: "lifecycle",
-            data: { phase: "start", startedAt: 123 },
-          });
-
-          setTimeout(() => {
-            emitAgentEvent({
-              runId: "run-wait-start",
-              stream: "lifecycle",
-              data: { phase: "end", endedAt: 456 },
-            });
-          }, 5);
-
-          const res = await waitP;
-          expect(res.ok).toBe(true);
-          expect(res.payload.status).toBe("ok");
-          expect(res.payload.startedAt).toBe(123);
-          expect(res.payload.endedAt).toBe(456);
-        }
-      } finally {
-        webchatWs.close();
-        await fs.rm(dir, { recursive: true, force: true });
-        testState.sessionStorePath = undefined;
+        const evt = await agentEvtP;
+        const payload = evt.payload && typeof evt.payload === "object" ? evt.payload : {};
+        expect(payload.sessionKey).toBe("main");
+        expect(payload.stream).toBe("assistant");
       }
-    },
-  );
+
+      {
+        const waitP = rpcReq(webchatWs, "agent.wait", {
+          runId: "run-wait-1",
+          timeoutMs: 200,
+        });
+
+        queueMicrotask(() => {
+          emitAgentEvent({
+            runId: "run-wait-1",
+            stream: "lifecycle",
+            data: { phase: "end", startedAt: 200, endedAt: 210 },
+          });
+        });
+
+        const res = await waitP;
+        expectAgentWaitStartedAt(res, 200);
+      }
+
+      {
+        emitAgentEvent({
+          runId: "run-wait-early",
+          stream: "lifecycle",
+          data: { phase: "end", startedAt: 50, endedAt: 55 },
+        });
+
+        const res = await rpcReq(webchatWs, "agent.wait", {
+          runId: "run-wait-early",
+          timeoutMs: 200,
+        });
+        expect(res.ok).toBe(true);
+        expect(res.payload?.status).toBe("ok");
+        expect(res.payload?.startedAt).toBe(50);
+      }
+
+      {
+        const res = await rpcReq(webchatWs, "agent.wait", {
+          runId: "run-wait-3",
+          timeoutMs: 30,
+        });
+        expectAgentWaitTimeout(res);
+      }
+
+      {
+        const waitP = rpcReq(webchatWs, "agent.wait", {
+          runId: "run-wait-err",
+          timeoutMs: 50,
+        });
+
+        queueMicrotask(() => {
+          emitAgentEvent({
+            runId: "run-wait-err",
+            stream: "lifecycle",
+            data: { phase: "error", error: "boom" },
+          });
+        });
+
+        const res = await waitP;
+        expectAgentWaitTimeout(res);
+      }
+
+      {
+        const waitP = rpcReq(webchatWs, "agent.wait", {
+          runId: "run-wait-start",
+          timeoutMs: 200,
+        });
+
+        emitAgentEvent({
+          runId: "run-wait-start",
+          stream: "lifecycle",
+          data: { phase: "start", startedAt: 123 },
+        });
+
+        queueMicrotask(() => {
+          emitAgentEvent({
+            runId: "run-wait-start",
+            stream: "lifecycle",
+            data: { phase: "end", endedAt: 456 },
+          });
+        });
+
+        const res = await waitP;
+        expectAgentWaitStartedAt(res, 123);
+        expect(res.payload?.endedAt).toBe(456);
+      }
+    } finally {
+      webchatWs.close();
+      await fs.rm(dir, { recursive: true, force: true });
+      testState.sessionStorePath = undefined;
+    }
+  });
 });

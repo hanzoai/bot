@@ -7,7 +7,14 @@ import type { MsgContext, TemplateContext } from "../templating.js";
 import { assertSandboxPath } from "../../agents/sandbox-paths.js";
 import { ensureSandboxWorkspaceForSession } from "../../agents/sandbox.js";
 import { logVerbose } from "../../globals.js";
-import { getMediaDir } from "../../media/store.js";
+import { copyFileWithinRoot, SafeOpenError } from "../../infra/fs-safe.js";
+import { normalizeScpRemoteHost } from "../../infra/scp-host.js";
+import { resolvePreferredBotTmpDir } from "../../infra/tmp-bot-dir.js";
+import {
+  isInboundPathAllowed,
+  resolveIMessageRemoteAttachmentRoots,
+} from "../../media/inbound-path-policy.js";
+import { getMediaDir, MEDIA_MAX_BYTES } from "../../media/store.js";
 import { CONFIG_DIR } from "../../utils.js";
 
 const STAGED_MEDIA_MAX_BYTES = MEDIA_MAX_BYTES;
@@ -253,63 +260,19 @@ function rewriteStagedMediaPaths(params: {
     return mapped ?? value;
   };
 
-  try {
-    // For sandbox: <workspace>/media/inbound, for remote cache: use dir directly
-    const destDir = sandbox
-      ? path.join(effectiveWorkspaceDir, "media", "inbound")
-      : effectiveWorkspaceDir;
-    await fs.mkdir(destDir, { recursive: true });
-
-    const usedNames = new Set<string>();
-    const staged = new Map<string, string>(); // absolute source -> relative sandbox path
-
-    for (const raw of rawPaths) {
-      const source = resolveAbsolutePath(raw);
-      if (!source) {
-        continue;
-      }
-      if (staged.has(source)) {
-        continue;
-      }
-
-      // Local paths must be restricted to the media directory.
-      if (!ctx.MediaRemoteHost) {
-        const mediaDir = getMediaDir();
-        try {
-          await assertSandboxPath({
-            filePath: source,
-            cwd: mediaDir,
-            root: mediaDir,
-          });
-        } catch {
-          logVerbose(`Blocking attempt to stage media from outside media directory: ${source}`);
-          continue;
-        }
-      }
-
-      const baseName = path.basename(source);
-      if (!baseName) {
-        continue;
-      }
-      const parsed = path.parse(baseName);
-      let fileName = baseName;
-      let suffix = 1;
-      while (usedNames.has(fileName)) {
-        fileName = `${parsed.name}-${suffix}${parsed.ext}`;
-        suffix += 1;
-      }
-      usedNames.add(fileName);
-
-      const dest = path.join(destDir, fileName);
-      if (ctx.MediaRemoteHost) {
-        // Always use SCP when remote host is configured - local paths refer to remote machine
-        await scpFile(ctx.MediaRemoteHost, source, dest);
-      } else {
-        await fs.copyFile(source, dest);
-      }
-      // For sandbox use relative path, for remote cache use absolute path
-      const stagedPath = sandbox ? path.posix.join("media", "inbound", fileName) : dest;
-      staged.set(source, stagedPath);
+  const nextMediaPaths = params.hasPathsArray
+    ? params.rawPaths.map((p) => rewriteIfStaged(p) ?? p)
+    : undefined;
+  if (nextMediaPaths) {
+    params.ctx.MediaPaths = nextMediaPaths;
+    params.sessionCtx.MediaPaths = nextMediaPaths;
+    params.ctx.MediaPath = nextMediaPaths[0];
+    params.sessionCtx.MediaPath = nextMediaPaths[0];
+  } else {
+    const rewritten = rewriteIfStaged(params.ctx.MediaPath);
+    if (rewritten && rewritten !== params.ctx.MediaPath) {
+      params.ctx.MediaPath = rewritten;
+      params.sessionCtx.MediaPath = rewritten;
     }
   }
 
@@ -326,6 +289,10 @@ function rewriteStagedMediaPaths(params: {
 }
 
 async function scpFile(remoteHost: string, remotePath: string, localPath: string): Promise<void> {
+  const safeRemoteHost = normalizeScpRemoteHost(remoteHost);
+  if (!safeRemoteHost) {
+    throw new Error("invalid remote host for SCP");
+  }
   return new Promise((resolve, reject) => {
     const child = spawn(
       "/usr/bin/scp",
@@ -333,8 +300,9 @@ async function scpFile(remoteHost: string, remotePath: string, localPath: string
         "-o",
         "BatchMode=yes",
         "-o",
-        "StrictHostKeyChecking=accept-new",
-        `${remoteHost}:${remotePath}`,
+        "StrictHostKeyChecking=yes",
+        "--",
+        `${safeRemoteHost}:${remotePath}`,
         localPath,
       ],
       { stdio: ["ignore", "ignore", "pipe"] },

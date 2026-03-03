@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { PluginRuntime } from "../plugins/runtime/types.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { type ChannelId, type ChannelPlugin } from "../channels/plugins/types.js";
 import {
@@ -8,7 +9,6 @@ import {
 } from "../logging/subsystem.js";
 import { createEmptyPluginRegistry, type PluginRegistry } from "../plugins/registry.js";
 import { getActivePluginRegistry, setActivePluginRegistry } from "../plugins/runtime.js";
-import type { PluginRuntime } from "../plugins/runtime/types.js";
 import { DEFAULT_ACCOUNT_ID } from "../routing/session-key.js";
 import { createChannelManager } from "./server-channels.js";
 

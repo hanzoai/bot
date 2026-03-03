@@ -147,8 +147,7 @@ export async function configureGatewayForOnboarding(
   if (authMode === "token") {
     if (flow === "quickstart") {
       gatewayToken =
-        (quickstartGateway.token ??
-          normalizeGatewayTokenInput(process.env.BOT_GATEWAY_TOKEN)) ||
+        (quickstartGateway.token ?? normalizeGatewayTokenInput(process.env.BOT_GATEWAY_TOKEN)) ||
         randomToken();
     } else {
       const tokenInput = await prompter.text({

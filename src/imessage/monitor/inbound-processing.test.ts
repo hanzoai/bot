@@ -61,9 +61,8 @@ describe("describeIMessageEchoDropLog", () => {
 
 describe("resolveIMessageInboundDecision command auth", () => {
   const cfg = {} as BotConfig;
-
-  it("does not auto-authorize DM commands in open mode without allowlists", () => {
-    const decision = resolveIMessageInboundDecision({
+  const resolveDmCommandDecision = (params: { messageId: number; storeAllowFrom: string[] }) =>
+    resolveIMessageInboundDecision({
       cfg,
       accountId: "default",
       message: {

@@ -23,7 +23,7 @@ import type {
 } from "../../auto-reply/commands-registry.js";
 import type { ReplyPayload } from "../../auto-reply/types.js";
 import type { BotConfig, loadConfig } from "../../config/config.js";
-import type { ThreadBindingManager } from "./thread-bindings.types.js";
+import type { ThreadBindingManager } from "./thread-bindings.js";
 import { resolveHumanDelayConfig } from "../../agents/identity.js";
 import { resolveChunkMode, resolveTextChunkLimit } from "../../auto-reply/chunk.js";
 import {
@@ -40,15 +40,15 @@ import { resolveStoredModelOverride } from "../../auto-reply/reply/model-selecti
 import { dispatchReplyWithDispatcher } from "../../auto-reply/reply/provider-dispatcher.js";
 import { resolveCommandAuthorizedFromAuthorizers } from "../../channels/command-gating.js";
 import { createReplyPrefixOptions } from "../../channels/reply-prefix.js";
+import { isDangerousNameMatchingEnabled } from "../../config/dangerous-name-matching.js";
+import { resolveOpenProviderRuntimeGroupPolicy } from "../../config/runtime-group-policy.js";
 import { loadSessionStore, resolveStorePath } from "../../config/sessions.js";
 import { logVerbose } from "../../globals.js";
+import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { getAgentScopedMediaLocalRoots } from "../../media/local-roots.js";
 import { buildPairingReply } from "../../pairing/pairing-messages.js";
-import {
-  readChannelAllowFromStore,
-  upsertChannelPairingRequest,
-} from "../../pairing/pairing-store.js";
 import { resolveAgentRoute } from "../../routing/resolve-route.js";
+import { resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
 import { buildUntrustedChannelMetadata } from "../../security/channel-metadata.js";
 import { chunkItems } from "../../utils/chunk-items.js";
 import { withTimeout } from "../../utils/with-timeout.js";
@@ -85,6 +85,7 @@ import { resolveDiscordSenderIdentity } from "./sender-identity.js";
 import { resolveDiscordThreadParentInfo } from "./threading.js";
 
 type DiscordConfig = NonNullable<BotConfig["channels"]>["discord"];
+const log = createSubsystemLogger("discord/native-command");
 
 function buildDiscordCommandOptions(params: {
   command: ChatCommandDefinition;
@@ -271,125 +272,8 @@ type DiscordCommandArgContext = {
   discordConfig: DiscordConfig;
   accountId: string;
   sessionPrefix: string;
-  threadBindings?: ThreadBindingManager;
+  threadBindings: ThreadBindingManager;
 };
-
-async function handleDiscordCommandArgInteraction(
-  interaction: ButtonInteraction,
-  data: ComponentData,
-  ctx: DiscordCommandArgContext,
-) {
-  const parsed = parseDiscordCommandArgData(data);
-  if (!parsed) {
-    await safeDiscordInteractionCall("command arg update", () =>
-      interaction.update({
-        content: "Sorry, that selection is no longer available.",
-        components: [],
-      }),
-    );
-    return;
-  }
-  if (interaction.user?.id && interaction.user.id !== parsed.userId) {
-    await safeDiscordInteractionCall("command arg ack", () => interaction.acknowledge());
-    return;
-  }
-  const commandDefinition =
-    findCommandByNativeName(parsed.command, "discord") ??
-    listChatCommands().find((entry) => entry.key === parsed.command);
-  if (!commandDefinition) {
-    await safeDiscordInteractionCall("command arg update", () =>
-      interaction.update({
-        content: "Sorry, that command is no longer available.",
-        components: [],
-      }),
-    );
-    return;
-  }
-  const argUpdateResult = await safeDiscordInteractionCall("command arg update", () =>
-    interaction.update({
-      content: `✅ Selected ${parsed.value}.`,
-      components: [],
-    }),
-  );
-  if (argUpdateResult === null) {
-    return;
-  }
-  const commandArgs = createCommandArgsWithValue({
-    argName: parsed.arg,
-    value: parsed.value,
-  });
-  const commandArgsWithRaw: CommandArgs = {
-    ...commandArgs,
-    raw: serializeCommandArgs(commandDefinition, commandArgs),
-  };
-  const prompt = buildCommandTextFromArgs(commandDefinition, commandArgsWithRaw);
-  await dispatchDiscordCommandInteraction({
-    interaction,
-    prompt,
-    command: commandDefinition,
-    commandArgs: commandArgsWithRaw,
-    cfg: ctx.cfg,
-    discordConfig: ctx.discordConfig,
-    accountId: ctx.accountId,
-    sessionPrefix: ctx.sessionPrefix,
-    preferFollowUp: true,
-  });
-}
-
-class DiscordCommandArgButton extends Button {
-  label: string;
-  customId: string;
-  style = ButtonStyle.Secondary;
-  private cfg: ReturnType<typeof loadConfig>;
-  private discordConfig: DiscordConfig;
-  private accountId: string;
-  private sessionPrefix: string;
-
-  constructor(params: {
-    label: string;
-    customId: string;
-    cfg: ReturnType<typeof loadConfig>;
-    discordConfig: DiscordConfig;
-    accountId: string;
-    sessionPrefix: string;
-  }) {
-    super();
-    this.label = params.label;
-    this.customId = params.customId;
-    this.cfg = params.cfg;
-    this.discordConfig = params.discordConfig;
-    this.accountId = params.accountId;
-    this.sessionPrefix = params.sessionPrefix;
-  }
-
-  async run(interaction: ButtonInteraction, data: ComponentData) {
-    await handleDiscordCommandArgInteraction(interaction, data, {
-      cfg: this.cfg,
-      discordConfig: this.discordConfig,
-      accountId: this.accountId,
-      sessionPrefix: this.sessionPrefix,
-    });
-  }
-}
-
-class DiscordCommandArgFallbackButton extends Button {
-  label = "cmdarg";
-  customId = "cmdarg:seed=1";
-  private ctx: DiscordCommandArgContext;
-
-  constructor(ctx: DiscordCommandArgContext) {
-    super();
-    this.ctx = ctx;
-  }
-
-  async run(interaction: ButtonInteraction, data: ComponentData) {
-    await handleDiscordCommandArgInteraction(interaction, data, this.ctx);
-  }
-}
-
-export function createDiscordCommandArgFallbackButton(params: DiscordCommandArgContext): Button {
-  return new DiscordCommandArgFallbackButton(params);
-}
 
 type DiscordModelPickerContext = DiscordCommandArgContext;
 
@@ -474,6 +358,7 @@ async function resolveDiscordModelPickerRoute(params: {
   interaction: CommandInteraction | ButtonInteraction | StringSelectMenuInteraction;
   cfg: ReturnType<typeof loadConfig>;
   accountId: string;
+  threadBindings: ThreadBindingManager;
 }) {
   const { interaction, cfg, accountId } = params;
   const channel = interaction.channel;
@@ -504,7 +389,7 @@ async function resolveDiscordModelPickerRoute(params: {
     threadParentId = parentInfo.id;
   }
 
-  return resolveAgentRoute({
+  const route = resolveAgentRoute({
     cfg,
     channel: "discord",
     accountId,
@@ -516,6 +401,19 @@ async function resolveDiscordModelPickerRoute(params: {
     },
     parentPeer: threadParentId ? { kind: "channel", id: threadParentId } : undefined,
   });
+
+  const threadBinding = isThreadChannel
+    ? params.threadBindings.getByThreadId(rawChannelId)
+    : undefined;
+  const boundSessionKey = threadBinding?.targetSessionKey?.trim();
+  const boundAgentId = boundSessionKey ? resolveAgentIdFromSessionKey(boundSessionKey) : undefined;
+  return boundSessionKey
+    ? {
+        ...route,
+        sessionKey: boundSessionKey,
+        agentId: boundAgentId ?? route.agentId,
+      }
+    : route;
 }
 
 function resolveDiscordModelPickerCurrentModel(params: {
@@ -557,6 +455,7 @@ async function replyWithDiscordModelPickerProviders(params: {
   command: DiscordModelPickerCommandContext;
   userId: string;
   accountId: string;
+  threadBindings: ThreadBindingManager;
   preferFollowUp: boolean;
 }) {
   const data = await loadDiscordModelPickerData(params.cfg);
@@ -564,6 +463,7 @@ async function replyWithDiscordModelPickerProviders(params: {
     interaction: params.interaction,
     cfg: params.cfg,
     accountId: params.accountId,
+    threadBindings: params.threadBindings,
   });
   const currentModel = resolveDiscordModelPickerCurrentModel({
     cfg: params.cfg,
@@ -724,6 +624,7 @@ async function handleDiscordModelPickerInteraction(
     interaction,
     cfg: ctx.cfg,
     accountId: ctx.accountId,
+    threadBindings: ctx.threadBindings,
   });
   const currentModelRef = resolveDiscordModelPickerCurrentModel({
     cfg: ctx.cfg,
@@ -948,6 +849,7 @@ async function handleDiscordModelPickerInteraction(
           accountId: ctx.accountId,
           sessionPrefix: ctx.sessionPrefix,
           preferFollowUp: true,
+          threadBindings: ctx.threadBindings,
           suppressReplies: true,
         }),
         12000,
@@ -957,7 +859,7 @@ async function handleDiscordModelPickerInteraction(
         await safeDiscordInteractionCall("model picker follow-up", () =>
           interaction.followUp({
             ...buildDiscordModelPickerNoticePayload(
-              `Model change to ${resolvedModelRef} is still processing. Check /status in a few seconds.`,
+              `⏳ Model change to ${resolvedModelRef} is still processing. Check /status in a few seconds.`,
             ),
             ephemeral: true,
           }),
@@ -968,7 +870,7 @@ async function handleDiscordModelPickerInteraction(
       await safeDiscordInteractionCall("model picker follow-up", () =>
         interaction.followUp({
           ...buildDiscordModelPickerNoticePayload(
-            `Failed to apply ${resolvedModelRef}. Try /model ${resolvedModelRef} directly.`,
+            `❌ Failed to apply ${resolvedModelRef}. Try /model ${resolvedModelRef} directly.`,
           ),
           ephemeral: true,
         }),
@@ -1001,8 +903,8 @@ async function handleDiscordModelPickerInteraction(
       interaction.followUp({
         ...buildDiscordModelPickerNoticePayload(
           persisted
-            ? `Model set to ${resolvedModelRef}.`
-            : `Tried to set ${resolvedModelRef}, but current model is ${effectiveModelRef}.`,
+            ? `✅ Model set to ${resolvedModelRef}.`
+            : `⚠️ Tried to set ${resolvedModelRef}, but current model is ${effectiveModelRef}.`,
         ),
         ephemeral: true,
       }),
@@ -1013,10 +915,132 @@ async function handleDiscordModelPickerInteraction(
   if (parsed.action === "cancel") {
     const displayModel = currentModelRef ?? "default";
     await safeDiscordInteractionCall("model picker update", () =>
-      interaction.update(buildDiscordModelPickerNoticePayload(`Model kept as ${displayModel}.`)),
+      interaction.update(buildDiscordModelPickerNoticePayload(`ℹ️ Model kept as ${displayModel}.`)),
     );
     return;
   }
+}
+
+async function handleDiscordCommandArgInteraction(
+  interaction: ButtonInteraction,
+  data: ComponentData,
+  ctx: DiscordCommandArgContext,
+) {
+  const parsed = parseDiscordCommandArgData(data);
+  if (!parsed) {
+    await safeDiscordInteractionCall("command arg update", () =>
+      interaction.update({
+        content: "Sorry, that selection is no longer available.",
+        components: [],
+      }),
+    );
+    return;
+  }
+  if (interaction.user?.id && interaction.user.id !== parsed.userId) {
+    await safeDiscordInteractionCall("command arg ack", () => interaction.acknowledge());
+    return;
+  }
+  const commandDefinition =
+    findCommandByNativeName(parsed.command, "discord") ??
+    listChatCommands().find((entry) => entry.key === parsed.command);
+  if (!commandDefinition) {
+    await safeDiscordInteractionCall("command arg update", () =>
+      interaction.update({
+        content: "Sorry, that command is no longer available.",
+        components: [],
+      }),
+    );
+    return;
+  }
+  const argUpdateResult = await safeDiscordInteractionCall("command arg update", () =>
+    interaction.update({
+      content: `✅ Selected ${parsed.value}.`,
+      components: [],
+    }),
+  );
+  if (argUpdateResult === null) {
+    return;
+  }
+  const commandArgs = createCommandArgsWithValue({
+    argName: parsed.arg,
+    value: parsed.value,
+  });
+  const commandArgsWithRaw: CommandArgs = {
+    ...commandArgs,
+    raw: serializeCommandArgs(commandDefinition, commandArgs),
+  };
+  const prompt = buildCommandTextFromArgs(commandDefinition, commandArgsWithRaw);
+  await dispatchDiscordCommandInteraction({
+    interaction,
+    prompt,
+    command: commandDefinition,
+    commandArgs: commandArgsWithRaw,
+    cfg: ctx.cfg,
+    discordConfig: ctx.discordConfig,
+    accountId: ctx.accountId,
+    sessionPrefix: ctx.sessionPrefix,
+    preferFollowUp: true,
+    threadBindings: ctx.threadBindings,
+  });
+}
+
+class DiscordCommandArgButton extends Button {
+  label: string;
+  customId: string;
+  style = ButtonStyle.Secondary;
+  private cfg: ReturnType<typeof loadConfig>;
+  private discordConfig: DiscordConfig;
+  private accountId: string;
+  private sessionPrefix: string;
+  private threadBindings: ThreadBindingManager;
+
+  constructor(params: {
+    label: string;
+    customId: string;
+    cfg: ReturnType<typeof loadConfig>;
+    discordConfig: DiscordConfig;
+    accountId: string;
+    sessionPrefix: string;
+    threadBindings: ThreadBindingManager;
+  }) {
+    super();
+    this.label = params.label;
+    this.customId = params.customId;
+    this.cfg = params.cfg;
+    this.discordConfig = params.discordConfig;
+    this.accountId = params.accountId;
+    this.sessionPrefix = params.sessionPrefix;
+    this.threadBindings = params.threadBindings;
+  }
+
+  async run(interaction: ButtonInteraction, data: ComponentData) {
+    await handleDiscordCommandArgInteraction(interaction, data, {
+      cfg: this.cfg,
+      discordConfig: this.discordConfig,
+      accountId: this.accountId,
+      sessionPrefix: this.sessionPrefix,
+      threadBindings: this.threadBindings,
+    });
+  }
+}
+
+class DiscordCommandArgFallbackButton extends Button {
+  label = "cmdarg";
+  customId = "cmdarg:seed=1";
+  private ctx: DiscordCommandArgContext;
+
+  constructor(ctx: DiscordCommandArgContext) {
+    super();
+    this.ctx = ctx;
+  }
+
+  async run(interaction: ButtonInteraction, data: ComponentData) {
+    await handleDiscordCommandArgInteraction(interaction, data, this.ctx);
+  }
+}
+
+export function createDiscordCommandArgFallbackButton(params: DiscordCommandArgContext): Button {
+  return new DiscordCommandArgFallbackButton(params);
 }
 
 class DiscordModelPickerFallbackButton extends Button {
@@ -1071,6 +1095,7 @@ function buildDiscordCommandArgMenu(params: {
   discordConfig: DiscordConfig;
   accountId: string;
   sessionPrefix: string;
+  threadBindings: ThreadBindingManager;
 }): { content: string; components: Row<Button>[] } {
   const { command, menu, interaction } = params;
   const commandLabel = command.nativeName ?? command.key;
@@ -1090,6 +1115,7 @@ function buildDiscordCommandArgMenu(params: {
           discordConfig: params.discordConfig,
           accountId: params.accountId,
           sessionPrefix: params.sessionPrefix,
+          threadBindings: params.threadBindings,
         }),
     );
     return new Row(buttons);
@@ -1106,9 +1132,17 @@ export function createDiscordNativeCommand(params: {
   accountId: string;
   sessionPrefix: string;
   ephemeralDefault: boolean;
-  threadBindings?: ThreadBindingManager;
+  threadBindings: ThreadBindingManager;
 }): Command {
-  const { command, cfg, discordConfig, accountId, sessionPrefix, ephemeralDefault } = params;
+  const {
+    command,
+    cfg,
+    discordConfig,
+    accountId,
+    sessionPrefix,
+    ephemeralDefault,
+    threadBindings,
+  } = params;
   const commandDefinition =
     findCommandByNativeName(command.name, "discord") ??
     ({
@@ -1169,6 +1203,7 @@ export function createDiscordNativeCommand(params: {
         accountId,
         sessionPrefix,
         preferFollowUp: false,
+        threadBindings,
       });
     }
   })();
@@ -1184,6 +1219,7 @@ async function dispatchDiscordCommandInteraction(params: {
   accountId: string;
   sessionPrefix: string;
   preferFollowUp: boolean;
+  threadBindings: ThreadBindingManager;
   suppressReplies?: boolean;
 }) {
   const {
@@ -1196,6 +1232,7 @@ async function dispatchDiscordCommandInteraction(params: {
     accountId,
     sessionPrefix,
     preferFollowUp,
+    threadBindings,
     suppressReplies,
   } = params;
   const respond = async (content: string, options?: { ephemeral?: boolean }) => {
@@ -1232,18 +1269,16 @@ async function dispatchDiscordCommandInteraction(params: {
   const memberRoleIds = Array.isArray(interaction.rawData.member?.roles)
     ? interaction.rawData.member.roles.map((roleId: string) => String(roleId))
     : [];
-  const ownerAllowList = normalizeDiscordAllowList(
-    discordConfig?.allowFrom ?? discordConfig?.dm?.allowFrom ?? [],
-    ["discord:", "user:", "pk:"],
-  );
-  const ownerOk =
-    ownerAllowList && user
-      ? allowListMatches(ownerAllowList, {
-          id: sender.id,
-          name: sender.name,
-          tag: sender.tag,
-        })
-      : false;
+  const allowNameMatching = isDangerousNameMatchingEnabled(discordConfig);
+  const { ownerAllowList, ownerAllowed: ownerOk } = resolveDiscordOwnerAccess({
+    allowFrom: discordConfig?.allowFrom ?? discordConfig?.dm?.allowFrom ?? [],
+    sender: {
+      id: sender.id,
+      name: sender.name,
+      tag: sender.tag,
+    },
+    allowNameMatching,
+  });
   const guildInfo = resolveDiscordGuildEntry({
     guild: interaction.guild ?? undefined,
     guildEntries: discordConfig?.guilds,
@@ -1292,8 +1327,13 @@ async function dispatchDiscordCommandInteraction(params: {
     const channelAllowlistConfigured =
       Boolean(guildInfo?.channels) && Object.keys(guildInfo?.channels ?? {}).length > 0;
     const channelAllowed = channelConfig?.allowed !== false;
+    const { groupPolicy } = resolveOpenProviderRuntimeGroupPolicy({
+      providerConfigPresent: cfg.channels?.discord !== undefined,
+      groupPolicy: discordConfig?.groupPolicy,
+      defaultGroupPolicy: cfg.channels?.defaults?.groupPolicy,
+    });
     const allowByPolicy = isDiscordGroupAllowedByPolicy({
-      groupPolicy: discordConfig?.groupPolicy ?? "open",
+      groupPolicy,
       guildAllowlisted: Boolean(guildInfo),
       channelAllowlistConfigured,
       channelAllowed,
@@ -1311,47 +1351,39 @@ async function dispatchDiscordCommandInteraction(params: {
       await respond("Discord DMs are disabled.");
       return;
     }
-    if (dmPolicy !== "open") {
-      const storeAllowFrom = await readChannelAllowFromStore(
-        "discord",
-        process.env,
+    const dmAccess = await resolveDiscordDmCommandAccess({
+      accountId,
+      dmPolicy,
+      configuredAllowFrom: discordConfig?.allowFrom ?? discordConfig?.dm?.allowFrom ?? [],
+      sender: {
+        id: sender.id,
+        name: sender.name,
+        tag: sender.tag,
+      },
+      allowNameMatching,
+      useAccessGroups,
+    });
+    commandAuthorized = dmAccess.commandAuthorized;
+    if (dmAccess.decision !== "allow") {
+      await handleDiscordDmCommandDecision({
+        dmAccess,
         accountId,
-      ).catch(() => []);
-      const effectiveAllowFrom = [
-        ...(discordConfig?.allowFrom ?? discordConfig?.dm?.allowFrom ?? []),
-        ...storeAllowFrom,
-      ];
-      const allowList = normalizeDiscordAllowList(effectiveAllowFrom, ["discord:", "user:", "pk:"]);
-      const permitted = allowList
-        ? allowListMatches(allowList, {
-            id: sender.id,
-            name: sender.name,
-            tag: sender.tag,
-          })
-        : false;
-      if (!permitted) {
-        commandAuthorized = false;
-        if (dmPolicy === "pairing") {
-          const { code, created } = await upsertChannelPairingRequest({
-            channel: "discord",
-            id: user.id,
-            accountId,
-            meta: {
-              tag: sender.tag,
-              name: sender.name,
-            },
-          });
-          if (created) {
-            await respond(
-              buildPairingReply({
-                channel: "discord",
-                idLine: `Your Discord user id: ${user.id}`,
-                code,
-              }),
-              { ephemeral: true },
-            );
-          }
-        } else {
+        sender: {
+          id: user.id,
+          tag: sender.tag,
+          name: sender.name,
+        },
+        onPairingCreated: async (code) => {
+          await respond(
+            buildPairingReply({
+              channel: "discord",
+              idLine: `Your Discord user id: ${user.id}`,
+              code,
+            }),
+            { ephemeral: true },
+          );
+        },
+        onUnauthorized: async () => {
           await respond("You are not authorized to use this command.", { ephemeral: true });
         },
       });
@@ -1364,6 +1396,7 @@ async function dispatchDiscordCommandInteraction(params: {
       guildInfo,
       memberRoleIds,
       sender,
+      allowNameMatching,
     });
     const authorizers = useAccessGroups
       ? [
@@ -1400,6 +1433,7 @@ async function dispatchDiscordCommandInteraction(params: {
       discordConfig,
       accountId,
       sessionPrefix,
+      threadBindings,
     });
     if (preferFollowUp) {
       await safeDiscordInteractionCall("interaction follow-up", () =>
@@ -1432,6 +1466,7 @@ async function dispatchDiscordCommandInteraction(params: {
       command: pickerCommandContext,
       userId: user.id,
       accountId,
+      threadBindings,
       preferFollowUp,
     });
     return;
@@ -1452,11 +1487,22 @@ async function dispatchDiscordCommandInteraction(params: {
     },
     parentPeer: threadParentId ? { kind: "channel", id: threadParentId } : undefined,
   });
+  const threadBinding = isThreadChannel ? threadBindings.getByThreadId(rawChannelId) : undefined;
+  const boundSessionKey = threadBinding?.targetSessionKey?.trim();
+  const boundAgentId = boundSessionKey ? resolveAgentIdFromSessionKey(boundSessionKey) : undefined;
+  const effectiveRoute = boundSessionKey
+    ? {
+        ...route,
+        sessionKey: boundSessionKey,
+        agentId: boundAgentId ?? route.agentId,
+      }
+    : route;
   const conversationLabel = isDirectMessage ? (user.globalName ?? user.username) : channelId;
   const ownerAllowFrom = resolveDiscordOwnerAllowFrom({
     channelConfig,
     guildInfo,
     sender: { id: sender.id, name: sender.name, tag: sender.tag },
+    allowNameMatching,
   });
   const ctxPayload = finalizeInboundContext({
     Body: prompt,
@@ -1470,9 +1516,9 @@ async function dispatchDiscordCommandInteraction(params: {
         ? `discord:group:${channelId}`
         : `discord:channel:${channelId}`,
     To: `slash:${user.id}`,
-    SessionKey: `agent:${route.agentId}:${sessionPrefix}:${user.id}`,
-    CommandTargetSessionKey: route.sessionKey,
-    AccountId: route.accountId,
+    SessionKey: boundSessionKey ?? `agent:${effectiveRoute.agentId}:${sessionPrefix}:${user.id}`,
+    CommandTargetSessionKey: boundSessionKey ?? effectiveRoute.sessionKey,
+    AccountId: effectiveRoute.accountId,
     ChatType: isDirectMessage ? "direct" : isGroupDm ? "group" : "channel",
     ConversationLabel: conversationLabel,
     GroupSubject: isGuild ? interaction.guild?.name : undefined,
@@ -1505,18 +1551,24 @@ async function dispatchDiscordCommandInteraction(params: {
     Surface: "discord" as const,
     WasMentioned: true,
     MessageSid: interactionId,
+    MessageThreadId: isThreadChannel ? channelId : undefined,
     Timestamp: Date.now(),
     CommandAuthorized: commandAuthorized,
     CommandSource: "native" as const,
+    // Native slash contexts use To=slash:<user> for interaction routing.
+    // For follow-up delivery (for example subagent completion announces),
+    // preserve the real Discord target separately.
+    OriginatingChannel: "discord" as const,
+    OriginatingTo: isDirectMessage ? `user:${user.id}` : `channel:${channelId}`,
   });
 
   const { onModelSelected, ...prefixOptions } = createReplyPrefixOptions({
     cfg,
-    agentId: route.agentId,
+    agentId: effectiveRoute.agentId,
     channel: "discord",
-    accountId: route.accountId,
+    accountId: effectiveRoute.accountId,
   });
-  const mediaLocalRoots = getAgentScopedMediaLocalRoots(cfg, route.agentId);
+  const mediaLocalRoots = getAgentScopedMediaLocalRoots(cfg, effectiveRoute.agentId);
 
   let didReply = false;
   await dispatchReplyWithDispatcher({
@@ -1524,7 +1576,7 @@ async function dispatchDiscordCommandInteraction(params: {
     cfg,
     dispatcherOptions: {
       ...prefixOptions,
-      humanDelay: resolveHumanDelayConfig(cfg, route.agentId),
+      humanDelay: resolveHumanDelayConfig(cfg, effectiveRoute.agentId),
       deliver: async (payload) => {
         if (suppressReplies) {
           return;
@@ -1551,7 +1603,8 @@ async function dispatchDiscordCommandInteraction(params: {
         didReply = true;
       },
       onError: (err, info) => {
-        console.error(`discord slash ${info.kind} reply failed`, err);
+        const message = err instanceof Error ? (err.stack ?? err.message) : String(err);
+        log.error(`discord slash ${info.kind} reply failed: ${message}`);
       },
     },
     replyOptions: {

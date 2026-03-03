@@ -1,16 +1,16 @@
-import crypto from "node:crypto";
-import { configureClient } from "@tloncorp/api";
 import type {
   ChannelOutboundAdapter,
   ChannelPlugin,
   ChannelSetupInput,
   BotConfig,
 } from "bot/plugin-sdk";
+import { configureClient } from "@tloncorp/api";
 import {
   applyAccountNameToChannelSection,
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
 } from "bot/plugin-sdk";
+import crypto from "node:crypto";
 import { buildTlonAccountFields } from "./account-fields.js";
 import { tlonChannelConfigSchema } from "./config-schema.js";
 import { monitorTlonProvider } from "./monitor/index.js";

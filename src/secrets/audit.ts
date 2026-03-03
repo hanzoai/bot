@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { normalizeProviderId } from "../agents/model-selection.js";
 import { resolveStateDir, type BotConfig } from "../config/config.js";
-import { coerceSecretRef, type SecretRef } from "../config/types.secrets.js";
+import { resolveSecretInputRef, type SecretRef } from "../config/types.secrets.js";
 import { resolveConfigDir, resolveUserPath } from "../utils.js";
 import { runTasksWithConcurrency } from "../utils/run-with-concurrency.js";
 import { iterateAuthProfileCredentials } from "./auth-profiles-scan.js";
@@ -182,51 +182,8 @@ function collectConfigSecrets(params: {
         expected: target.entry.expectedResolvedValue,
         provider: target.providerId,
       });
-      return;
-    }
-    if (isNonEmptyString(value) || (isRecord(value) && Object.keys(value).length > 0)) {
-      addFinding(params.collector, {
-        code: "PLAINTEXT_FOUND",
-        severity: "warn",
-        file: params.configPath,
-        jsonPath: pathLabel,
-        message: "Google Chat serviceAccount is stored as plaintext.",
-      });
-    }
-  };
-
-  collectGoogleChatValue(
-    googlechat.serviceAccount,
-    googlechat.serviceAccountRef,
-    "channels.googlechat.serviceAccount",
-  );
-  if (!isRecord(googlechat.accounts)) {
-    return;
-  }
-  for (const [accountId, accountValue] of Object.entries(googlechat.accounts)) {
-    if (!isRecord(accountValue)) {
-      continue;
-    }
-    collectGoogleChatValue(
-      accountValue.serviceAccount,
-      accountValue.serviceAccountRef,
-      `channels.googlechat.accounts.${accountId}.serviceAccount`,
-      accountId,
-    );
-  }
-}
-
-function collectAuthStorePaths(config: BotConfig, stateDir: string): string[] {
-  const paths = new Set<string>();
-  // Scope default auth store discovery to the provided stateDir instead of
-  // ambient process env, so audits do not include unrelated host-global stores.
-  paths.add(path.join(resolveUserPath(stateDir), "agents", "main", "agent", "auth-profiles.json"));
-
-  const agentsRoot = path.join(resolveUserPath(stateDir), "agents");
-  if (fs.existsSync(agentsRoot)) {
-    for (const entry of fs.readdirSync(agentsRoot, { withFileTypes: true })) {
-      if (!entry.isDirectory()) {
-        continue;
+      if (target.entry.trackProviderShadowing && target.providerId) {
+        collectProviderRefPath(params.collector, target.providerId, target.path);
       }
       continue;
     }
@@ -510,13 +467,10 @@ export async function runSecretsAudit(
   } = {},
 ): Promise<SecretsAuditReport> {
   const env = params.env ?? process.env;
-  const previousAuthStoreReadOnly = process.env.BOT_AUTH_STORE_READONLY;
-  process.env.BOT_AUTH_STORE_READONLY = "1";
-  try {
-    const io = createSecretsConfigIO({ env });
-    const snapshot = await io.readConfigFileSnapshot();
-    const configPath = resolveUserPath(snapshot.path);
-    const defaults = snapshot.valid ? snapshot.config.secrets?.defaults : undefined;
+  const io = createSecretsConfigIO({ env });
+  const snapshot = await io.readConfigFileSnapshot();
+  const configPath = resolveUserPath(snapshot.path);
+  const defaults = snapshot.valid ? snapshot.config.secrets?.defaults : undefined;
 
   const collector: AuditCollector = {
     findings: [],
@@ -526,9 +480,9 @@ export async function runSecretsAudit(
     filesScanned: new Set([configPath]),
   };
 
-    const stateDir = resolveStateDir(env, os.homedir);
-    const envPath = path.join(resolveConfigDir(env, os.homedir), ".env");
-    const config = snapshot.valid ? snapshot.config : ({} as BotConfig);
+  const stateDir = resolveStateDir(env, os.homedir);
+  const envPath = path.join(resolveConfigDir(env, os.homedir), ".env");
+  const config = snapshot.valid ? snapshot.config : ({} as BotConfig);
 
   if (snapshot.valid) {
     collectConfigSecrets({
@@ -536,31 +490,12 @@ export async function runSecretsAudit(
       configPath,
       collector,
     });
-    collectAuthJsonResidue({
-      stateDir,
-      collector,
-    });
-
-    const summary = summarizeFindings(collector.findings);
-    const status: SecretsAuditStatus =
-      summary.unresolvedRefCount > 0
-        ? "unresolved"
-        : collector.findings.length > 0
-          ? "findings"
-          : "clean";
-
-    return {
-      version: 1,
-      status,
-      filesScanned: [...collector.filesScanned].toSorted(),
-      summary,
-      findings: collector.findings,
-    };
-  } finally {
-    if (previousAuthStoreReadOnly === undefined) {
-      delete process.env.BOT_AUTH_STORE_READONLY;
-    } else {
-      process.env.BOT_AUTH_STORE_READONLY = previousAuthStoreReadOnly;
+    for (const authStorePath of listAuthProfileStorePaths(config, stateDir)) {
+      collectAuthStoreSecrets({
+        authStorePath,
+        collector,
+        defaults,
+      });
     }
     await collectUnresolvedRefFindings({
       collector,
@@ -612,20 +547,4 @@ export function resolveSecretsAuditExitCode(report: SecretsAuditReport, check: b
     return 1;
   }
   return 0;
-}
-
-export function applySecretsPlanTarget(config: BotConfig, pathLabel: string, value: unknown): void {
-  const segments = parseDotPath(pathLabel);
-  if (segments.length === 0) {
-    throw new Error("Invalid target path.");
-  }
-  let cursor: Record<string, unknown> = config as unknown as Record<string, unknown>;
-  for (const segment of segments.slice(0, -1)) {
-    const existing = cursor[segment];
-    if (!isRecord(existing)) {
-      cursor[segment] = {};
-    }
-    cursor = cursor[segment] as Record<string, unknown>;
-  }
-  cursor[segments[segments.length - 1]] = value;
 }

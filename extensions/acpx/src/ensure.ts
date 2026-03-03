@@ -2,9 +2,13 @@ import type { PluginLogger } from "bot/plugin-sdk";
 import fs from "node:fs";
 import path from "node:path";
 import { ACPX_PINNED_VERSION, ACPX_PLUGIN_ROOT, buildAcpxLocalInstallCommand } from "./config.js";
-import { resolveSpawnFailure, spawnAndCollect } from "./runtime-internals/process.js";
+import {
+  resolveSpawnFailure,
+  type SpawnCommandOptions,
+  spawnAndCollect,
+} from "./runtime-internals/process.js";
 
-const SEMVER_PATTERN = /\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/;
+const SEMVER_PATTERN = /\b\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?\b/;
 
 export type AcpxVersionCheckResult =
   | {
@@ -22,8 +26,7 @@ export type AcpxVersionCheckResult =
     };
 
 function extractVersion(stdout: string, stderr: string): string | null {
-  const combined = `${stdout}
-${stderr}`;
+  const combined = `${stdout}\n${stderr}`;
   const match = combined.match(SEMVER_PATTERN);
   return match?.[0] ?? null;
 }
@@ -37,8 +40,7 @@ function supportsPathResolution(command: string): boolean {
 }
 
 function isUnsupportedVersionProbe(stdout: string, stderr: string): boolean {
-  const combined = `${stdout}
-${stderr}`.toLowerCase();
+  const combined = `${stdout}\n${stderr}`.toLowerCase();
   return combined.includes("unknown option") && combined.includes("--version");
 }
 
@@ -74,6 +76,28 @@ function resolveVersionFromPackage(command: string, cwd: string): string | null 
   }
 }
 
+function resolveVersionCheckResult(params: {
+  expectedVersion?: string;
+  installedVersion: string;
+  installCommand: string;
+}): AcpxVersionCheckResult {
+  if (params.expectedVersion && params.installedVersion !== params.expectedVersion) {
+    return {
+      ok: false,
+      reason: "version-mismatch",
+      message: `acpx version mismatch: found ${params.installedVersion}, expected ${params.expectedVersion}`,
+      expectedVersion: params.expectedVersion,
+      installCommand: params.installCommand,
+      installedVersion: params.installedVersion,
+    };
+  }
+  return {
+    ok: true,
+    version: params.installedVersion,
+    expectedVersion: params.expectedVersion,
+  };
+}
+
 export async function checkAcpxVersion(params: {
   command: string;
   cwd?: string;
@@ -85,7 +109,7 @@ export async function checkAcpxVersion(params: {
   const cwd = params.cwd ?? ACPX_PLUGIN_ROOT;
   const hasExpectedVersion = isExpectedVersionConfigured(expectedVersion);
   const probeArgs = hasExpectedVersion ? ["--version"] : ["--help"];
-  const result = await spawnAndCollect({
+  const spawnParams = {
     command: params.command,
     args: probeArgs,
     cwd,
@@ -129,21 +153,7 @@ export async function checkAcpxVersion(params: {
     if (hasExpectedVersion && isUnsupportedVersionProbe(result.stdout, result.stderr)) {
       const installedVersion = resolveVersionFromPackage(params.command, cwd);
       if (installedVersion) {
-        if (expectedVersion && installedVersion !== expectedVersion) {
-          return {
-            ok: false,
-            reason: "version-mismatch",
-            message: `acpx version mismatch: found ${installedVersion}, expected ${expectedVersion}`,
-            expectedVersion,
-            installCommand,
-            installedVersion,
-          };
-        }
-        return {
-          ok: true,
-          version: installedVersion,
-          expectedVersion,
-        };
+        return resolveVersionCheckResult({ expectedVersion, installedVersion, installCommand });
       }
     }
     const stderr = result.stderr.trim();
@@ -177,22 +187,7 @@ export async function checkAcpxVersion(params: {
     };
   }
 
-  if (expectedVersion && installedVersion !== expectedVersion) {
-    return {
-      ok: false,
-      reason: "version-mismatch",
-      message: `acpx version mismatch: found ${installedVersion}, expected ${expectedVersion}`,
-      expectedVersion,
-      installCommand,
-      installedVersion,
-    };
-  }
-
-  return {
-    ok: true,
-    version: installedVersion,
-    expectedVersion,
-  };
+  return resolveVersionCheckResult({ expectedVersion, installedVersion, installCommand });
 }
 
 let pendingEnsure: Promise<void> | null = null;
@@ -203,6 +198,7 @@ export async function ensureAcpx(params: {
   pluginRoot?: string;
   expectedVersion?: string;
   allowInstall?: boolean;
+  spawnOptions?: SpawnCommandOptions;
 }): Promise<void> {
   if (pendingEnsure) {
     return await pendingEnsure;

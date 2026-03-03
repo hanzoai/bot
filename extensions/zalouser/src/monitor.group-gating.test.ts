@@ -1,8 +1,8 @@
 import type { BotConfig, PluginRuntime, RuntimeEnv } from "bot/plugin-sdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ResolvedZalouserAccount, ZaloInboundMessage } from "./types.js";
 import { __testing } from "./monitor.js";
 import { setZalouserRuntime } from "./runtime.js";
-import type { ResolvedZalouserAccount, ZaloInboundMessage } from "./types.js";
 
 const sendMessageZalouserMock = vi.hoisted(() => vi.fn(async () => {}));
 const sendTypingZalouserMock = vi.hoisted(() => vi.fn(async () => {}));
