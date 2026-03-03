@@ -1,5 +1,5 @@
-import { randomBytes, randomUUID } from "node:crypto";
 import { generatePkceVerifierChallenge, toFormUrlEncoded } from "bot/plugin-sdk";
+import { randomBytes, randomUUID } from "node:crypto";
 
 export type MiniMaxRegion = "cn" | "global";
 
