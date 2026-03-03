@@ -264,7 +264,7 @@ describe("image tool implicit imageModel config", () => {
       vi.stubEnv("OPENAI_API_KEY", "openai-test");
       vi.stubEnv("ANTHROPIC_API_KEY", "anthropic-test");
       const cfg: BotConfig = {
-        agents: { defaults: { model: { primary: "minimax/MiniMax-M2.1" } } },
+        agents: { defaults: { model: { primary: "minimax/MiniMax-M2.5" } } },
       };
       expect(resolveImageModelConfigForTool({ cfg, agentDir })).toEqual(
         createDefaultImageFallbackExpectation("minimax/MiniMax-VL-01"),
@@ -433,11 +433,7 @@ describe("image tool implicit imageModel config", () => {
   });
 
   it("exposes an Anthropic-safe image schema without union keywords", async () => {
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-image-"));
-    try {
-      const cfg = createMinimaxImageConfig();
-      const tool = requireImageTool(createImageTool({ config: cfg, agentDir }));
-
+    await withMinimaxImageToolFromTempAgentDir(async (tool) => {
       const violations = findSchemaUnionKeywords(tool.parameters, "image.parameters");
       expect(violations).toEqual([]);
 
@@ -457,11 +453,7 @@ describe("image tool implicit imageModel config", () => {
   });
 
   it("keeps an Anthropic-safe image schema snapshot", async () => {
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-image-"));
-    try {
-      const cfg = createMinimaxImageConfig();
-      const tool = requireImageTool(createImageTool({ config: cfg, agentDir }));
-
+    await withMinimaxImageToolFromTempAgentDir(async (tool) => {
       expect(JSON.parse(JSON.stringify(tool.parameters))).toEqual({
         type: "object",
         properties: {
@@ -483,8 +475,7 @@ describe("image tool implicit imageModel config", () => {
   it("allows workspace images outside default local media roots", async () => {
     await withTempWorkspacePng(async ({ workspaceDir, imagePath }) => {
       const fetch = stubMinimaxOkFetch();
-      const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-image-"));
-      try {
+      await withTempAgentDir(async (agentDir) => {
         const cfg = createMinimaxImageConfig();
 
         const withoutWorkspace = createRequiredImageTool({ config: cfg, agentDir });
@@ -504,11 +495,42 @@ describe("image tool implicit imageModel config", () => {
     });
   });
 
+  it("respects fsPolicy.workspaceOnly for non-sandbox image paths", async () => {
+    await withTempWorkspacePng(async ({ workspaceDir, imagePath }) => {
+      const fetch = stubMinimaxOkFetch();
+      await withTempAgentDir(async (agentDir) => {
+        const cfg = createMinimaxImageConfig();
+
+        const tool = createRequiredImageTool({
+          config: cfg,
+          agentDir,
+          workspaceDir,
+          fsPolicy: { workspaceOnly: true },
+        });
+
+        // File inside workspace is allowed.
+        await expectImageToolExecOk(tool, imagePath);
+        expect(fetch).toHaveBeenCalledTimes(1);
+
+        // File outside workspace is rejected even without sandbox.
+        const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-outside-"));
+        const outsideImage = path.join(outsideDir, "secret.png");
+        await fs.writeFile(outsideImage, Buffer.from(ONE_PIXEL_PNG_B64, "base64"));
+        try {
+          await expect(
+            tool.execute("t2", { prompt: "Describe.", image: outsideImage }),
+          ).rejects.toThrow(/not under an allowed directory/i);
+        } finally {
+          await fs.rm(outsideDir, { recursive: true, force: true });
+        }
+      });
+    });
+  });
+
   it("allows workspace images via createBotCodingTools default workspace root", async () => {
     await withTempWorkspacePng(async ({ imagePath }) => {
       const fetch = stubMinimaxOkFetch();
-      const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-image-"));
-      try {
+      await withTempAgentDir(async (agentDir) => {
         const cfg = createMinimaxImageConfig();
 
         const tools = createBotCodingTools({ config: cfg, agentDir });
@@ -522,19 +544,15 @@ describe("image tool implicit imageModel config", () => {
   });
 
   it("sandboxes image paths like the read tool", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-image-sandbox-"));
-    const agentDir = path.join(stateDir, "agent");
-    const sandboxRoot = path.join(stateDir, "sandbox");
-    await fs.mkdir(agentDir, { recursive: true });
-    await fs.mkdir(sandboxRoot, { recursive: true });
-    await fs.writeFile(path.join(sandboxRoot, "img.png"), "fake", "utf8");
-    const sandbox = { root: sandboxRoot, bridge: createHostSandboxFsBridge(sandboxRoot) };
+    await withTempSandboxState(async ({ agentDir, sandboxRoot }) => {
+      await fs.writeFile(path.join(sandboxRoot, "img.png"), "fake", "utf8");
+      const sandbox = { root: sandboxRoot, bridge: createHostSandboxFsBridge(sandboxRoot) };
 
-    vi.stubEnv("OPENAI_API_KEY", "openai-test");
-    const cfg: BotConfig = {
-      agents: { defaults: { model: { primary: "minimax/MiniMax-M2.1" } } },
-    };
-    const tool = requireImageTool(createImageTool({ config: cfg, agentDir, sandbox }));
+      vi.stubEnv("OPENAI_API_KEY", "openai-test");
+      const cfg: BotConfig = {
+        agents: { defaults: { model: { primary: "minimax/MiniMax-M2.5" } } },
+      };
+      const tool = createRequiredImageTool({ config: cfg, agentDir, sandbox });
 
       await expect(tool.execute("t1", { image: "https://example.com/a.png" })).rejects.toThrow(
         /Sandboxed image tool does not allow remote URLs/i,
@@ -547,21 +565,18 @@ describe("image tool implicit imageModel config", () => {
   });
 
   it("applies tools.fs.workspaceOnly to image paths in sandbox mode", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-image-sandbox-"));
-    const agentDir = path.join(stateDir, "agent");
-    const sandboxRoot = path.join(stateDir, "sandbox");
-    await fs.mkdir(agentDir, { recursive: true });
-    await fs.mkdir(sandboxRoot, { recursive: true });
-    await fs.writeFile(path.join(agentDir, "secret.png"), Buffer.from(ONE_PIXEL_PNG_B64, "base64"));
+    await withTempSandboxState(async ({ agentDir, sandboxRoot }) => {
+      await fs.writeFile(
+        path.join(agentDir, "secret.png"),
+        Buffer.from(ONE_PIXEL_PNG_B64, "base64"),
+      );
+      const sandbox = createUnsafeMountedSandbox({ sandboxRoot, agentRoot: agentDir });
+      const fetch = stubMinimaxOkFetch();
+      const cfg: BotConfig = {
+        ...createMinimaxImageConfig(),
+        tools: { fs: { workspaceOnly: true } },
+      };
 
-    const sandbox = createUnsafeMountedSandbox({ sandboxRoot, agentRoot: agentDir });
-    const fetch = stubMinimaxOkFetch();
-    const cfg: BotConfig = {
-      ...createMinimaxImageConfig(),
-      tools: { fs: { workspaceOnly: true } },
-    };
-
-    try {
       const tools = createBotCodingTools({
         config: cfg,
         agentDir,
@@ -588,35 +603,35 @@ describe("image tool implicit imageModel config", () => {
   });
 
   it("rewrites inbound absolute paths into sandbox media/inbound", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-image-sandbox-"));
-    const agentDir = path.join(stateDir, "agent");
-    const sandboxRoot = path.join(stateDir, "sandbox");
-    await fs.mkdir(agentDir, { recursive: true });
-    await fs.mkdir(path.join(sandboxRoot, "media", "inbound"), {
-      recursive: true,
-    });
-    const pngB64 =
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/woAAn8B9FD5fHAAAAAASUVORK5CYII=";
-    await fs.writeFile(
-      path.join(sandboxRoot, "media", "inbound", "photo.png"),
-      Buffer.from(pngB64, "base64"),
-    );
+    await withTempSandboxState(async ({ agentDir, sandboxRoot }) => {
+      await fs.mkdir(path.join(sandboxRoot, "media", "inbound"), {
+        recursive: true,
+      });
+      await fs.writeFile(
+        path.join(sandboxRoot, "media", "inbound", "photo.png"),
+        Buffer.from(ONE_PIXEL_PNG_B64, "base64"),
+      );
 
       const fetch = stubMinimaxOkFetch();
 
-    const cfg: BotConfig = {
-      agents: {
-        defaults: {
-          model: { primary: "minimax/MiniMax-M2.1" },
-          imageModel: { primary: "minimax/MiniMax-VL-01" },
+      const cfg: BotConfig = {
+        agents: {
+          defaults: {
+            model: { primary: "minimax/MiniMax-M2.5" },
+            imageModel: { primary: "minimax/MiniMax-VL-01" },
+          },
         },
       };
       const sandbox = { root: sandboxRoot, bridge: createHostSandboxFsBridge(sandboxRoot) };
       const tool = createRequiredImageTool({ config: cfg, agentDir, sandbox });
 
-    const res = await tool.execute("t1", {
-      prompt: "Describe the image.",
-      image: "@/Users/steipete/.hanzo/bot/media/inbound/photo.png",
+      const res = await tool.execute("t1", {
+        prompt: "Describe the image.",
+        image: "@/Users/steipete/.hanzo/bot/media/inbound/photo.png",
+      });
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect((res.details as { rewrittenFrom?: string }).rewrittenFrom).toContain("photo.png");
     });
   });
 });
@@ -661,7 +676,7 @@ describe("image tool MiniMax VLM routing", () => {
     const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-minimax-vlm-"));
     vi.stubEnv("MINIMAX_API_KEY", "minimax-test");
     const cfg: BotConfig = {
-      agents: { defaults: { model: { primary: "minimax/MiniMax-M2.1" } } },
+      agents: { defaults: { model: { primary: "minimax/MiniMax-M2.5" } } },
     };
     const tool = createRequiredImageTool({ config: cfg, agentDir });
     return { fetch, tool };

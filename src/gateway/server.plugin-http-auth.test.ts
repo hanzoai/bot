@@ -79,46 +79,9 @@ describe("gateway plugin HTTP auth boundary", () => {
         expect.any(String),
       );
 
-    await withTempConfig({
-      cfg: { gateway: { trustedProxies: [] } },
-      prefix: "bot-plugin-http-security-headers-test-",
-      run: async () => {
-        const withoutHsts = createGatewayHttpServer({
-          canvasHost: null,
-          clients: new Set(),
-          controlUiEnabled: false,
-          controlUiBasePath: "/__control__",
-          openAiChatCompletionsEnabled: false,
-          openResponsesEnabled: false,
-          handleHooksRequest: async () => false,
-          resolvedAuth,
-        });
-        const withoutHstsResponse = createResponse();
-        await dispatchRequest(
-          withoutHsts,
-          createRequest({ path: "/missing" }),
-          withoutHstsResponse.res,
-        );
-        expect(withoutHstsResponse.setHeader).toHaveBeenCalledWith(
-          "X-Content-Type-Options",
-          "nosniff",
-        );
-        expect(withoutHstsResponse.setHeader).toHaveBeenCalledWith(
-          "Referrer-Policy",
-          "no-referrer",
-        );
-        expect(withoutHstsResponse.setHeader).not.toHaveBeenCalledWith(
-          "Strict-Transport-Security",
-          expect.any(String),
-        );
-
-        const withHsts = createGatewayHttpServer({
-          canvasHost: null,
-          clients: new Set(),
-          controlUiEnabled: false,
-          controlUiBasePath: "/__control__",
-          openAiChatCompletionsEnabled: false,
-          openResponsesEnabled: false,
+      const withHsts = createTestGatewayServer({
+        resolvedAuth: AUTH_NONE,
+        overrides: {
           strictTransportSecurityHeader: "max-age=31536000; includeSubDomains",
         },
       });
@@ -165,31 +128,72 @@ describe("gateway plugin HTTP auth boundary", () => {
       return false;
     });
 
-    await withTempConfig({
-      cfg: { gateway: { trustedProxies: [] } },
+    await withGatewayServer({
+      prefix: "bot-plugin-http-probes-shadow-test-",
+      resolvedAuth: AUTH_NONE,
+      overrides: { handlePluginRequest },
+      run: async (server) => {
+        const response = await sendRequest(server, { path: "/healthz" });
+        expect(response.res.statusCode).toBe(200);
+        expect(response.getBody()).toBe(JSON.stringify({ ok: true, route: "plugin-health" }));
+        expect(handlePluginRequest).toHaveBeenCalledTimes(1);
+      },
+    });
+  });
+
+  test("rejects non-GET/HEAD methods on probe routes", async () => {
+    await withGatewayServer({
+      prefix: "bot-plugin-http-probes-method-test-",
+      resolvedAuth: AUTH_NONE,
+      run: async (server) => {
+        const postResponse = await sendRequest(server, { path: "/healthz", method: "POST" });
+        expect(postResponse.res.statusCode).toBe(405);
+        expect(postResponse.setHeader).toHaveBeenCalledWith("Allow", "GET, HEAD");
+        expect(postResponse.getBody()).toBe("Method Not Allowed");
+
+        const headResponse = await sendRequest(server, { path: "/readyz", method: "HEAD" });
+        expect(headResponse.res.statusCode).toBe(200);
+        expect(headResponse.getBody()).toBe("");
+      },
+    });
+  });
+
+  test("requires gateway auth for protected plugin route space and allows authenticated pass-through", async () => {
+    const handlePluginRequest = vi.fn(async (req: IncomingMessage, res: ServerResponse) => {
+      const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
+      if (pathname === "/api/channels") {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.end(JSON.stringify({ ok: true, route: "channel-root" }));
+        return true;
+      }
+      if (pathname === "/api/channels/nostr/default/profile") {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.end(JSON.stringify({ ok: true, route: "channel" }));
+        return true;
+      }
+      if (pathname === "/plugin/public") {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+        res.end(JSON.stringify({ ok: true, route: "public" }));
+        return true;
+      }
+      return false;
+    });
+
+    await withGatewayServer({
       prefix: "bot-plugin-http-auth-test-",
-      run: async () => {
-        const handlePluginRequest = vi.fn(async (req: IncomingMessage, res: ServerResponse) => {
-          const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
-          if (pathname === "/api/channels") {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ ok: true, route: "channel-root" }));
-            return true;
-          }
-          if (pathname === "/api/channels/nostr/default/profile") {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ ok: true, route: "channel" }));
-            return true;
-          }
-          if (pathname === "/plugin/public") {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ ok: true, route: "public" }));
-            return true;
-          }
-          return false;
+      resolvedAuth: AUTH_TOKEN,
+      overrides: {
+        handlePluginRequest,
+        shouldEnforcePluginGatewayAuth: (pathContext) =>
+          isProtectedPluginRoutePath(pathContext.pathname) ||
+          pathContext.pathname === "/plugin/public",
+      },
+      run: async (server) => {
+        const unauthenticated = await sendRequest(server, {
+          path: "/api/channels/nostr/default/profile",
         });
         expectUnauthorizedResponse(unauthenticated);
         expect(handlePluginRequest).not.toHaveBeenCalled();
@@ -491,40 +495,7 @@ describe("gateway plugin HTTP auth boundary", () => {
   });
 
   test("requires gateway auth for canonicalized /api/channels variants", async () => {
-    const resolvedAuth: ResolvedGatewayAuth = {
-      mode: "token",
-      token: "test-token",
-      password: undefined,
-      allowTailscale: false,
-    };
-
-    await withTempConfig({
-      cfg: { gateway: { trustedProxies: [] } },
-      prefix: "bot-plugin-http-auth-canonicalized-test-",
-      run: async () => {
-        const handlePluginRequest = vi.fn(async (req: IncomingMessage, res: ServerResponse) => {
-          const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
-          const canonicalPath = canonicalizePluginPath(pathname);
-          if (canonicalPath === "/api/channels/nostr/default/profile") {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ ok: true, route: "channel-canonicalized" }));
-            return true;
-          }
-          return false;
-        });
-
-        const server = createGatewayHttpServer({
-          canvasHost: null,
-          clients: new Set(),
-          controlUiEnabled: false,
-          controlUiBasePath: "/__control__",
-          openAiChatCompletionsEnabled: false,
-          openResponsesEnabled: false,
-          handleHooksRequest: async () => false,
-          handlePluginRequest,
-          resolvedAuth,
-        });
+    const handlePluginRequest = createCanonicalizedChannelPluginHandler();
 
     await withPluginGatewayServer({
       prefix: "bot-plugin-http-auth-canonicalized-test-",
@@ -547,20 +518,14 @@ describe("gateway plugin HTTP auth boundary", () => {
   test("rejects unauthenticated plugin-channel fuzz corpus variants", async () => {
     const handlePluginRequest = createCanonicalizedChannelPluginHandler();
 
-    await withTempConfig({
-      cfg: { gateway: { trustedProxies: [] } },
+    await withPluginGatewayServer({
       prefix: "bot-plugin-http-auth-fuzz-corpus-test-",
-      run: async () => {
-        const handlePluginRequest = vi.fn(async (req: IncomingMessage, res: ServerResponse) => {
-          const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
-          const canonicalPath = canonicalizePluginPath(pathname);
-          if (canonicalPath === "/api/channels/nostr/default/profile") {
-            res.statusCode = 200;
-            res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ ok: true, route: "channel-canonicalized" }));
-            return true;
-          }
-          return false;
+      resolvedAuth: AUTH_TOKEN,
+      overrides: createProtectedPluginAuthOverrides(handlePluginRequest),
+      run: async (server) => {
+        await expectUnauthorizedVariants({
+          server,
+          variants: buildChannelPathFuzzCorpus(),
         });
         expect(handlePluginRequest).not.toHaveBeenCalled();
       },
@@ -599,33 +564,7 @@ describe("gateway plugin HTTP auth boundary", () => {
           overrides: { handleHooksRequest },
         });
 
-      await withTempConfig({
-        cfg: { gateway: { trustedProxies: [] } },
-        prefix: "bot-plugin-http-hooks-bindhost-",
-        run: async () => {
-          const handleHooksRequest = createHooksRequestHandler({
-            getHooksConfig: () => createHooksConfig(),
-            bindHost,
-            port: 18789,
-            logHooks: {
-              warn: vi.fn(),
-              debug: vi.fn(),
-              info: vi.fn(),
-              error: vi.fn(),
-            } as unknown as ReturnType<typeof createSubsystemLogger>,
-            dispatchWakeHook: () => {},
-            dispatchAgentHook: () => "run-1",
-          });
-          const server = createGatewayHttpServer({
-            canvasHost: null,
-            clients: new Set(),
-            controlUiEnabled: false,
-            controlUiBasePath: "/__control__",
-            openAiChatCompletionsEnabled: false,
-            openResponsesEnabled: false,
-            handleHooksRequest,
-            resolvedAuth,
-          });
+        const response = await sendRequest(server, { path: "/" });
 
         expect(response.res.statusCode).toBe(404);
         expect(response.getBody()).toBe("Not Found");
@@ -641,33 +580,7 @@ describe("gateway plugin HTTP auth boundary", () => {
         overrides: { handleHooksRequest },
       });
 
-    await withTempConfig({
-      cfg: { gateway: { trustedProxies: [] } },
-      prefix: "bot-plugin-http-hooks-query-token-",
-      run: async () => {
-        const handleHooksRequest = createHooksRequestHandler({
-          getHooksConfig: () => createHooksConfig(),
-          bindHost: "::",
-          port: 18789,
-          logHooks: {
-            warn: vi.fn(),
-            debug: vi.fn(),
-            info: vi.fn(),
-            error: vi.fn(),
-          } as unknown as ReturnType<typeof createSubsystemLogger>,
-          dispatchWakeHook: () => {},
-          dispatchAgentHook: () => "run-1",
-        });
-        const server = createGatewayHttpServer({
-          canvasHost: null,
-          clients: new Set(),
-          controlUiEnabled: false,
-          controlUiBasePath: "/__control__",
-          openAiChatCompletionsEnabled: false,
-          openResponsesEnabled: false,
-          handleHooksRequest,
-          resolvedAuth,
-        });
+      const response = await sendRequest(server, { path: "/hooks/wake?token=bad" });
 
       expect(response.res.statusCode).toBe(400);
       expect(response.getBody()).toContain("Hook token must be provided");

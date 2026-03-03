@@ -122,11 +122,7 @@ describe("acquireSessionWriteLock", () => {
   });
 
   it("keeps the lock file until the last release", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lock-"));
-    try {
-      const sessionFile = path.join(root, "sessions.json");
-      const lockPath = `${sessionFile}.lock`;
-
+    await withTempSessionLockFile(async ({ sessionFile, lockPath }) => {
       const lockA = await acquireSessionWriteLock({ sessionFile, timeoutMs: 500 });
       const lockB = await acquireSessionWriteLock({ sessionFile, timeoutMs: 500 });
 
@@ -172,10 +168,7 @@ describe("acquireSessionWriteLock", () => {
   });
 
   it("reclaims malformed lock files once they are old enough", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lock-"));
-    try {
-      const sessionFile = path.join(root, "sessions.json");
-      const lockPath = `${sessionFile}.lock`;
+    await withTempSessionLockFile(async ({ sessionFile, lockPath }) => {
       await fs.writeFile(lockPath, "{}", "utf8");
       const staleDate = new Date(Date.now() - 2 * 60_000);
       await fs.utimes(lockPath, staleDate, staleDate);
@@ -387,10 +380,7 @@ describe("acquireSessionWriteLock", () => {
   });
 
   it("cleans up locks on exit", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lock-"));
-    try {
-      const sessionFile = path.join(root, "sessions.json");
-      const lockPath = `${sessionFile}.lock`;
+    await withTempSessionLockFile(async ({ sessionFile, lockPath }) => {
       await acquireSessionWriteLock({ sessionFile, timeoutMs: 500 });
 
       process.emit("exit", 0);
