@@ -382,6 +382,11 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
 
+    api_key = resolve_api_key(args)
+    if not api_key:
+        print("Error: HANZO_API_KEY environment variable or --api-key flag is required.", file=sys.stderr)
+        sys.exit(1)
+
     command = args.command
 
     if command == "collection":
