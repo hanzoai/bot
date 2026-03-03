@@ -1,7 +1,6 @@
 import type { BotPluginApi } from "bot/plugin-sdk";
 import { emptyPluginConfigSchema } from "bot/plugin-sdk";
 import { bluebubblesPlugin } from "./src/channel.js";
-import { handleBlueBubblesWebhookRequest } from "./src/monitor.js";
 import { setBlueBubblesRuntime } from "./src/runtime.js";
 
 const plugin = {
@@ -12,7 +11,6 @@ const plugin = {
   register(api: BotPluginApi) {
     setBlueBubblesRuntime(api.runtime);
     api.registerChannel({ plugin: bluebubblesPlugin });
-    api.registerHttpHandler(handleBlueBubblesWebhookRequest);
   },
 };
 

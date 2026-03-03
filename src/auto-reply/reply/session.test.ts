@@ -8,7 +8,7 @@ import { saveSessionStore } from "../../config/sessions.js";
 import { formatZonedTimestamp } from "../../infra/format-time/format-datetime.ts";
 import { enqueueSystemEvent, resetSystemEventsForTest } from "../../infra/system-events.js";
 import { applyResetModelOverride } from "./session-reset-model.js";
-import { prependSystemEvents } from "./session-updates.js";
+import { buildQueuedSystemPrompt } from "./session-updates.js";
 import { persistSessionUsageUpdate } from "./session-usage.js";
 import { initSessionState } from "./session.js";
 
@@ -19,7 +19,7 @@ vi.mock("../../agents/session-write-lock.js", () => ({
 
 vi.mock("../../agents/model-catalog.js", () => ({
   loadModelCatalog: vi.fn(async () => [
-    { provider: "minimax", id: "m2.1", name: "M2.1" },
+    { provider: "minimax", id: "m2.5", name: "M2.5" },
     { provider: "openai", id: "gpt-4o-mini", name: "GPT-4o mini" },
   ]),
 }));
@@ -50,6 +50,14 @@ async function makeStorePath(prefix: string): Promise<string> {
 
 const createStorePath = makeStorePath;
 
+async function writeSessionStoreFast(
+  storePath: string,
+  store: Record<string, SessionEntry | Record<string, unknown>>,
+): Promise<void> {
+  await fs.mkdir(path.dirname(storePath), { recursive: true });
+  await fs.writeFile(storePath, JSON.stringify(store), "utf-8");
+}
+
 describe("initSessionState thread forking", () => {
   it("forks a new session from the parent session file", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -73,15 +81,22 @@ describe("initSessionState thread forking", () => {
       timestamp: new Date().toISOString(),
       message: { role: "user", content: "Parent prompt" },
     };
+    const assistantMessage = {
+      type: "message",
+      id: "m2",
+      parentId: "m1",
+      timestamp: new Date().toISOString(),
+      message: { role: "assistant", content: "Parent reply" },
+    };
     await fs.writeFile(
       parentSessionFile,
-      `${JSON.stringify(header)}\n${JSON.stringify(message)}\n`,
+      `${JSON.stringify(header)}\n${JSON.stringify(message)}\n${JSON.stringify(assistantMessage)}\n`,
       "utf-8",
     );
 
     const storePath = path.join(root, "sessions.json");
     const parentSessionKey = "agent:main:slack:channel:c1";
-    await saveSessionStore(storePath, {
+    await writeSessionStoreFast(storePath, {
       [parentSessionKey]: {
         sessionId: parentSessionId,
         sessionFile: parentSessionFile,
@@ -254,7 +269,7 @@ describe("initSessionState RawBody", () => {
     vi.stubEnv("BOT_STATE_DIR", stateDir);
     try {
       await fs.mkdir(path.dirname(storePath), { recursive: true });
-      await saveSessionStore(storePath, {
+      await writeSessionStoreFast(storePath, {
         [sessionKey]: {
           sessionId,
           sessionFile,
@@ -300,7 +315,7 @@ describe("initSessionState reset policy", () => {
     const sessionKey = "agent:main:whatsapp:dm:s1";
     const existingSessionId = "daily-session-id";
 
-    await saveSessionStore(storePath, {
+    await writeSessionStoreFast(storePath, {
       [sessionKey]: {
         sessionId: existingSessionId,
         updatedAt: new Date(2026, 0, 18, 3, 0, 0).getTime(),
@@ -325,7 +340,7 @@ describe("initSessionState reset policy", () => {
     const sessionKey = "agent:main:whatsapp:dm:s-edge";
     const existingSessionId = "daily-edge-session";
 
-    await saveSessionStore(storePath, {
+    await writeSessionStoreFast(storePath, {
       [sessionKey]: {
         sessionId: existingSessionId,
         updatedAt: new Date(2026, 0, 17, 3, 30, 0).getTime(),
@@ -350,7 +365,7 @@ describe("initSessionState reset policy", () => {
     const sessionKey = "agent:main:whatsapp:dm:s2";
     const existingSessionId = "idle-session-id";
 
-    await saveSessionStore(storePath, {
+    await writeSessionStoreFast(storePath, {
       [sessionKey]: {
         sessionId: existingSessionId,
         updatedAt: new Date(2026, 0, 18, 4, 45, 0).getTime(),
@@ -380,7 +395,7 @@ describe("initSessionState reset policy", () => {
     const sessionKey = "agent:main:slack:channel:c1:thread:123";
     const existingSessionId = "thread-session-id";
 
-    await saveSessionStore(storePath, {
+    await writeSessionStoreFast(storePath, {
       [sessionKey]: {
         sessionId: existingSessionId,
         updatedAt: new Date(2026, 0, 18, 3, 0, 0).getTime(),
@@ -411,7 +426,7 @@ describe("initSessionState reset policy", () => {
     const sessionKey = "agent:main:discord:channel:c1";
     const existingSessionId = "thread-nosuffix";
 
-    await saveSessionStore(storePath, {
+    await writeSessionStoreFast(storePath, {
       [sessionKey]: {
         sessionId: existingSessionId,
         updatedAt: new Date(2026, 0, 18, 3, 0, 0).getTime(),
@@ -441,7 +456,7 @@ describe("initSessionState reset policy", () => {
     const sessionKey = "agent:main:whatsapp:dm:s4";
     const existingSessionId = "type-default-session";
 
-    await saveSessionStore(storePath, {
+    await writeSessionStoreFast(storePath, {
       [sessionKey]: {
         sessionId: existingSessionId,
         updatedAt: new Date(2026, 0, 18, 3, 0, 0).getTime(),
@@ -471,7 +486,7 @@ describe("initSessionState reset policy", () => {
     const sessionKey = "agent:main:whatsapp:dm:s3";
     const existingSessionId = "legacy-session-id";
 
-    await saveSessionStore(storePath, {
+    await writeSessionStoreFast(storePath, {
       [sessionKey]: {
         sessionId: existingSessionId,
         updatedAt: new Date(2026, 0, 18, 3, 30, 0).getTime(),
@@ -503,7 +518,7 @@ describe("initSessionState channel reset overrides", () => {
     const sessionId = "session-override";
     const updatedAt = Date.now() - (10080 - 1) * 60_000;
 
-    await saveSessionStore(storePath, {
+    await writeSessionStoreFast(storePath, {
       [sessionKey]: {
         sessionId,
         updatedAt,
@@ -540,7 +555,7 @@ describe("initSessionState reset triggers in WhatsApp groups", () => {
     sessionKey: string;
     sessionId: string;
   }): Promise<void> {
-    await saveSessionStore(params.storePath, {
+    await writeSessionStoreFast(params.storePath, {
       [params.sessionKey]: {
         sessionId: params.sessionId,
         updatedAt: Date.now(),
@@ -773,7 +788,7 @@ describe("initSessionState reset triggers in Slack channels", () => {
     sessionKey: string;
     sessionId: string;
   }): Promise<void> {
-    await saveSessionStore(params.storePath, {
+    await writeSessionStoreFast(params.storePath, {
       [params.sessionKey]: {
         sessionId: params.sessionId,
         updatedAt: Date.now(),
@@ -889,7 +904,7 @@ describe("applyResetModelOverride", () => {
     });
 
     expect(sessionEntry.providerOverride).toBe("minimax");
-    expect(sessionEntry.modelOverride).toBe("m2.1");
+    expect(sessionEntry.modelOverride).toBe("m2.5");
     expect(sessionCtx.BodyStripped).toBe("summarize");
   });
 
@@ -964,7 +979,7 @@ describe("initSessionState preserves behavior overrides across /new and /reset",
     sessionId: string;
     overrides: Record<string, unknown>;
   }): Promise<void> {
-    await saveSessionStore(params.storePath, {
+    await writeSessionStoreFast(params.storePath, {
       [params.sessionKey]: {
         sessionId: params.sessionId,
         updatedAt: Date.now(),
@@ -1159,7 +1174,7 @@ describe("initSessionState preserves behavior overrides across /new and /reset",
   });
 });
 
-describe("prependSystemEvents", () => {
+describe("buildQueuedSystemPrompt", () => {
   it("adds a local timestamp to queued system events by default", async () => {
     vi.useFakeTimers();
     try {
@@ -1174,11 +1189,11 @@ describe("prependSystemEvents", () => {
         sessionKey: "agent:main:main",
         isMainSession: false,
         isNewSession: false,
-        prefixedBodyBase: "User: hi",
       });
 
       expect(expectedTimestamp).toBeDefined();
-      expect(result).toContain(`System: [${expectedTimestamp}] Model switched.`);
+      expect(result).toContain("Runtime System Events (gateway-generated)");
+      expect(result).toContain(`- [${expectedTimestamp}] Model switched.`);
     } finally {
       resetSystemEventsForTest();
       vi.useRealTimers();
@@ -1225,6 +1240,40 @@ describe("persistSessionUsageUpdate", () => {
     expect(stored[sessionKey].totalTokensFresh).toBe(true);
     expect(stored[sessionKey].inputTokens).toBe(180_000);
     expect(stored[sessionKey].outputTokens).toBe(10_000);
+  });
+
+  it("uses lastCallUsage cache counters when available", async () => {
+    const storePath = await createStorePath("bot-usage-cache-");
+    const sessionKey = "main";
+    await seedSessionStore({
+      storePath,
+      sessionKey,
+      entry: { sessionId: "s1", updatedAt: Date.now() },
+    });
+
+    await persistSessionUsageUpdate({
+      storePath,
+      sessionKey,
+      usage: {
+        input: 100_000,
+        output: 8_000,
+        cacheRead: 260_000,
+        cacheWrite: 90_000,
+      },
+      lastCallUsage: {
+        input: 12_000,
+        output: 1_000,
+        cacheRead: 18_000,
+        cacheWrite: 4_000,
+      },
+      contextTokensUsed: 200_000,
+    });
+
+    const stored = JSON.parse(await fs.readFile(storePath, "utf-8"));
+    expect(stored[sessionKey].inputTokens).toBe(100_000);
+    expect(stored[sessionKey].outputTokens).toBe(8_000);
+    expect(stored[sessionKey].cacheRead).toBe(18_000);
+    expect(stored[sessionKey].cacheWrite).toBe(4_000);
   });
 
   it("marks totalTokens as unknown when no fresh context snapshot is available", async () => {

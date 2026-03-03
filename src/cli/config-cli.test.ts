@@ -63,10 +63,6 @@ describe("config cli", () => {
     vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   describe("config set - issue #6070", () => {
     it("preserves existing config keys when setting a new value", async () => {
       const resolved: BotConfig = {
@@ -182,6 +178,29 @@ describe("config cli", () => {
       expect(written.gateway).toEqual(resolved.gateway);
       expect(written.tools?.profile).toBe("coding");
       expect(written.logging).toEqual(resolved.logging);
+    });
+  });
+
+  describe("config file", () => {
+    it("prints the active config file path", async () => {
+      const resolved: BotConfig = { gateway: { port: 18789 } };
+      setSnapshot(resolved, resolved);
+
+      await runConfigCommand(["config", "file"]);
+
+      expect(mockLog).toHaveBeenCalledWith("/tmp/bot.json");
+      expect(mockWriteConfigFile).not.toHaveBeenCalled();
+    });
+
+    it("handles config file path with home directory", async () => {
+      const resolved: BotConfig = { gateway: { port: 18789 } };
+      const snapshot = buildSnapshot({ resolved, config: resolved });
+      snapshot.path = "/home/user/.hanzoai/bot.json";
+      mockReadConfigFileSnapshot.mockResolvedValueOnce(snapshot);
+
+      await runConfigCommand(["config", "file"]);
+
+      expect(mockLog).toHaveBeenCalledWith("/home/user/.hanzoai/bot.json");
     });
   });
 });
