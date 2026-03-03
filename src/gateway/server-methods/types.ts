@@ -10,6 +10,7 @@ import type { ChatAbortControllerEntry } from "../chat-abort.js";
 import type { ExecApprovalManager } from "../exec-approval-manager.js";
 import type { NodeRegistry } from "../node-registry.js";
 import type { ConnectParams, ErrorShape, RequestFrame } from "../protocol/index.js";
+import type { RequestRateLimiter } from "../request-rate-limit.js";
 import type { GatewayBroadcastFn, GatewayBroadcastToConnIdsFn } from "../server-broadcast.js";
 import type { ChannelRuntimeSnapshot } from "../server-channels.js";
 import type { DedupeEntry } from "../server-shared.js";
@@ -41,6 +42,8 @@ export type RespondFn = (
 export type GatewayRequestContext = {
   /** IAM config for billing enforcement (null/undefined when not in IAM mode). */
   iamConfig?: GatewayIamConfig | null;
+  /** Token-bucket rate limiter for billable request throughput. */
+  requestRateLimiter?: RequestRateLimiter;
   deps: ReturnType<typeof createDefaultDeps>;
   cron: CronService;
   cronStorePath: string;
