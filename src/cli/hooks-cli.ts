@@ -635,15 +635,7 @@ export function registerHooksCli(program: Command): void {
         process.exit(1);
       }
 
-      const looksLikePath =
-        raw.startsWith(".") ||
-        raw.startsWith("~") ||
-        path.isAbsolute(raw) ||
-        raw.endsWith(".zip") ||
-        raw.endsWith(".tgz") ||
-        raw.endsWith(".tar.gz") ||
-        raw.endsWith(".tar");
-      if (looksLikePath) {
+      if (looksLikeLocalInstallSpec(raw, [".zip", ".tgz", ".tar.gz", ".tar"])) {
         defaultRuntime.error(`Path not found: ${resolved}`);
         process.exit(1);
       }

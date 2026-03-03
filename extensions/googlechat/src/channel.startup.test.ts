@@ -68,24 +68,20 @@ describe("googlechatPlugin gateway.startAccount", () => {
     const patches: ChannelAccountSnapshot[] = [];
     const abort = new AbortController();
     const task = googlechatPlugin.gateway!.startAccount!(
-      createStartAccountCtx({
+      createStartAccountContext({
         account,
         abortSignal: abort.signal,
         statusPatchSink: (next) => patches.push({ ...next }),
       }),
     );
-
-    await new Promise((resolve) => setTimeout(resolve, 20));
-
     let settled = false;
     void task.then(() => {
       settled = true;
     });
-
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await vi.waitFor(() => {
+      expect(hoisted.startGoogleChatMonitor).toHaveBeenCalledOnce();
+    });
     expect(settled).toBe(false);
-
-    expect(hoisted.startGoogleChatMonitor).toHaveBeenCalledOnce();
     expect(unregister).not.toHaveBeenCalled();
 
     abort.abort();

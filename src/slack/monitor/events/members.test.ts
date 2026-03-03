@@ -1,25 +1,24 @@
 import { describe, expect, it, vi } from "vitest";
 import { registerSlackMemberEvents } from "./members.js";
 import {
-  createSlackSystemEventTestHarness,
-  type SlackSystemEventTestOverrides,
+  createSlackSystemEventTestHarness as initSlackHarness,
+  type SlackSystemEventTestOverrides as MemberOverrides,
 } from "./system-event-test-harness.js";
 
-const enqueueSystemEventMock = vi.fn();
-const readAllowFromStoreMock = vi.fn();
+const memberMocks = vi.hoisted(() => ({
+  enqueue: vi.fn(),
+  readAllow: vi.fn(),
+}));
 
 vi.mock("../../../infra/system-events.js", () => ({
-  enqueueSystemEvent: (...args: unknown[]) => enqueueSystemEventMock(...args),
+  enqueueSystemEvent: memberMocks.enqueue,
 }));
 
 vi.mock("../../../pairing/pairing-store.js", () => ({
-  readChannelAllowFromStore: (...args: unknown[]) => readAllowFromStoreMock(...args),
+  readChannelAllowFromStore: memberMocks.readAllow,
 }));
 
-type SlackMemberHandler = (args: {
-  event: Record<string, unknown>;
-  body: unknown;
-}) => Promise<void>;
+type MemberHandler = (args: { event: Record<string, unknown>; body: unknown }) => Promise<void>;
 
 function createMembersContext(params?: {
   overrides?: SlackSystemEventTestOverrides;
@@ -38,13 +37,46 @@ function createMembersContext(params?: {
   };
 }
 
-function makeMemberEvent(overrides?: { user?: string; channel?: string }) {
+function makeMemberEvent(overrides?: { channel?: string; user?: string }) {
   return {
     type: "member_joined_channel",
     user: overrides?.user ?? "U1",
     channel: overrides?.channel ?? "D1",
     event_ts: "123.456",
   };
+}
+
+function getMemberHandlers(params: {
+  overrides?: MemberOverrides;
+  trackEvent?: () => void;
+  shouldDropMismatchedSlackEvent?: (body: unknown) => boolean;
+}) {
+  const harness = initSlackHarness(params.overrides);
+  if (params.shouldDropMismatchedSlackEvent) {
+    harness.ctx.shouldDropMismatchedSlackEvent = params.shouldDropMismatchedSlackEvent;
+  }
+  registerSlackMemberEvents({ ctx: harness.ctx, trackEvent: params.trackEvent });
+  return {
+    joined: harness.getHandler("member_joined_channel") as MemberHandler | null,
+    left: harness.getHandler("member_left_channel") as MemberHandler | null,
+  };
+}
+
+async function runMemberCase(args: MemberCaseArgs = {}): Promise<void> {
+  memberMocks.enqueue.mockClear();
+  memberMocks.readAllow.mockReset().mockResolvedValue([]);
+  const handlers = getMemberHandlers({
+    overrides: args.overrides,
+    trackEvent: args.trackEvent,
+    shouldDropMismatchedSlackEvent: args.shouldDropMismatchedSlackEvent,
+  });
+  const key = args.handler ?? "joined";
+  const handler = handlers[key];
+  expect(handler).toBeTruthy();
+  await handler!({
+    event: (args.event ?? makeMemberEvent()) as Record<string, unknown>,
+    body: args.body ?? {},
+  });
 }
 
 describe("registerSlackMemberEvents", () => {
@@ -109,10 +141,33 @@ describe("registerSlackMemberEvents", () => {
         ...makeMemberEvent({ user: "U1" }),
         type: "member_left_channel",
       },
-      body: {},
-    });
-
-    expect(enqueueSystemEventMock).toHaveBeenCalledTimes(1);
+      calls: 0,
+    },
+    {
+      name: "allows DM member events for authorized senders in allowlist mode",
+      args: {
+        handler: "left" as const,
+        overrides: { dmPolicy: "allowlist", allowFrom: ["U1"] },
+        event: { ...makeMemberEvent({ user: "U1" }), type: "member_left_channel" },
+      },
+      calls: 1,
+    },
+    {
+      name: "blocks channel member events for users outside channel users allowlist",
+      args: {
+        overrides: {
+          dmPolicy: "open",
+          channelType: "channel",
+          channelUsers: ["U_OWNER"],
+        },
+        event: makeMemberEvent({ channel: "C1", user: "U_ATTACKER" }),
+      },
+      calls: 0,
+    },
+  ];
+  it.each(cases)("$name", async ({ args, calls }) => {
+    await runMemberCase(args);
+    expect(memberMocks.enqueue).toHaveBeenCalledTimes(calls);
   });
 
   it("blocks channel member events for users outside channel users allowlist", async () => {
@@ -133,7 +188,14 @@ describe("registerSlackMemberEvents", () => {
       body: {},
     });
 
-    expect(enqueueSystemEventMock).not.toHaveBeenCalled();
+    expect(trackEvent).not.toHaveBeenCalled();
+  });
+
+  it("tracks accepted member events", async () => {
+    const trackEvent = vi.fn();
+    await runMemberCase({ trackEvent });
+
+    expect(trackEvent).toHaveBeenCalledTimes(1);
   });
 
   it("does not track mismatched events", async () => {
