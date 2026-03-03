@@ -20,9 +20,9 @@ describe("buildSlackThreadingToolContext", () => {
   });
 
   it("uses chat-type replyToMode overrides for direct messages when configured", () => {
-    const cfg = {
-      channels: {
-        slack: {
+    expect(
+      resolveReplyToModeWithConfig({
+        slackConfig: {
           replyToMode: "off",
           replyToModeByChatType: { direct: "all" },
         },
@@ -37,9 +37,9 @@ describe("buildSlackThreadingToolContext", () => {
   });
 
   it("uses top-level replyToMode for channels when no channel override is set", () => {
-    const cfg = {
-      channels: {
-        slack: {
+    expect(
+      resolveReplyToModeWithConfig({
+        slackConfig: {
           replyToMode: "off",
           replyToModeByChatType: { direct: "all" },
         },
@@ -70,18 +70,61 @@ describe("buildSlackThreadingToolContext", () => {
   });
 
   it("uses legacy dm.replyToMode for direct messages when no chat-type override exists", () => {
+    expect(
+      resolveReplyToModeWithConfig({
+        slackConfig: {
+          replyToMode: "off",
+          dm: { replyToMode: "all" },
+        },
+        context: { ChatType: "direct" },
+      }),
+    ).toBe("all");
+  });
+
+  it("uses all mode when MessageThreadId is present", () => {
+    expect(
+      resolveReplyToModeWithConfig({
+        slackConfig: {
+          replyToMode: "all",
+          replyToModeByChatType: { direct: "off" },
+        },
+        context: {
+          ChatType: "direct",
+          ThreadLabel: "thread-label",
+          MessageThreadId: "1771999998.834199",
+        },
+      }),
+    ).toBe("all");
+  });
+
+  it("does not force all mode from ThreadLabel alone", () => {
+    expect(
+      resolveReplyToModeWithConfig({
+        slackConfig: {
+          replyToMode: "all",
+          replyToModeByChatType: { direct: "off" },
+        },
+        context: {
+          ChatType: "direct",
+          ThreadLabel: "label-without-real-thread",
+        },
+      }),
+    ).toBe("off");
+  });
+
+  it("keeps configured channel behavior when not in a thread", () => {
     const cfg = {
       channels: {
         slack: {
           replyToMode: "off",
-          dm: { replyToMode: "all" },
+          replyToModeByChatType: { channel: "first" },
         },
       },
     } as BotConfig;
     const result = buildSlackThreadingToolContext({
       cfg,
       accountId: null,
-      context: { ChatType: "direct" },
+      context: { ChatType: "channel", ThreadLabel: "label-only" },
     });
     expect(result.replyToMode).toBe("all");
   });

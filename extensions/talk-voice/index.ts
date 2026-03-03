@@ -84,7 +84,7 @@ export default function register(api: BotPluginApi) {
       const action = (tokens[0] ?? "status").toLowerCase();
 
       const cfg = api.runtime.config.loadConfig();
-      const apiKey = (cfg.talk?.apiKey ?? "").trim();
+      const apiKey = asTrimmedString(cfg.talk?.apiKey);
       if (!apiKey) {
         return {
           text:

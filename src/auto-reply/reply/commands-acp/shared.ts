@@ -10,6 +10,7 @@ import { toAcpRuntimeErrorText } from "../../../acp/runtime/error-text.js";
 import { DISCORD_THREAD_BINDING_CHANNEL } from "../../../channels/thread-bindings-policy.js";
 import { normalizeAgentId } from "../../../routing/session-key.js";
 import { resolveAcpCommandChannel, resolveAcpCommandThreadId } from "./context.js";
+export { resolveAcpInstallCommandHint, resolveConfiguredAcpBackendId } from "./install-hints.js";
 
 export const COMMAND = "/acp";
 export const ACP_SPAWN_USAGE =
