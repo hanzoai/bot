@@ -51,6 +51,7 @@ import { createAuthRateLimiter, type AuthRateLimiter } from "./auth-rate-limit.j
 import { startGatewayConfigReloader } from "./config-reload.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
 import { NodeRegistry } from "./node-registry.js";
+import { createRequestRateLimiter } from "./request-rate-limit.js";
 import { createChannelManager } from "./server-channels.js";
 import { createAgentEventHandler } from "./server-chat.js";
 import { createGatewayCloseHandler } from "./server-close.js";
@@ -296,6 +297,12 @@ export async function startGatewayServer(
   const browserAuthRateLimiter: AuthRateLimiter | undefined = rateLimitConfig
     ? createAuthRateLimiter({ ...rateLimitConfig, exemptLoopback: false })
     : undefined;
+
+  // Request throughput rate limiter: token-bucket per user for billable methods.
+  // Always created (with sensible defaults) so rate limiting is active by default.
+  const requestRateLimiter = createRequestRateLimiter(
+    cfgAtStart.gateway?.requestRateLimit ?? undefined,
+  );
 
   let controlUiRootState: ControlUiRootState | undefined;
   if (controlUiRootOverride) {
@@ -573,6 +580,7 @@ export async function startGatewayServer(
     broadcast,
     context: {
       iamConfig: resolvedAuth.iam,
+      requestRateLimiter,
       deps,
       cron,
       cronStorePath,
@@ -772,6 +780,7 @@ export async function startGatewayServer(
       }
       skillsChangeUnsub();
       authRateLimiter?.dispose();
+      requestRateLimiter.shutdown();
       vncProxy.close();
       if (tunnelResult) {
         await tunnelResult.stop().catch((err) => {
