@@ -8,6 +8,7 @@ import type {
 import { formatCliCommand } from "../cli/command-format.js";
 import { readConfigFileSnapshot, resolveGatewayPort, writeConfigFile } from "../config/config.js";
 import { logConfigUpdated } from "../config/logging.js";
+import { normalizeSecretInputString } from "../config/types.secrets.js";
 import { ensureControlUiAssetsBuilt } from "../infra/control-ui-assets.js";
 import { defaultRuntime } from "../runtime.js";
 import { note } from "../terminal/note.js";
@@ -251,7 +252,7 @@ export async function runConfigureWizard(
     const remoteProbe = remoteUrl
       ? await probeGatewayReachable({
           url: remoteUrl,
-          token: baseConfig.gateway?.remote?.token,
+          token: normalizeSecretInputString(baseConfig.gateway?.remote?.token),
         })
       : null;
 

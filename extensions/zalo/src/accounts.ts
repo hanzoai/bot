@@ -23,8 +23,12 @@ export function listZaloAccountIds(cfg: BotConfig): string[] {
 
 export function resolveDefaultZaloAccountId(cfg: BotConfig): string {
   const zaloConfig = cfg.channels?.zalo as ZaloConfig | undefined;
-  if (zaloConfig?.defaultAccount?.trim()) {
-    return zaloConfig.defaultAccount.trim();
+  const preferred = normalizeOptionalAccountId(zaloConfig?.defaultAccount);
+  if (
+    preferred &&
+    listZaloAccountIds(cfg).some((accountId) => normalizeAccountId(accountId) === preferred)
+  ) {
+    return preferred;
   }
   const ids = listZaloAccountIds(cfg);
   if (ids.includes(DEFAULT_ACCOUNT_ID)) {
@@ -51,6 +55,7 @@ function mergeZaloAccountConfig(cfg: BotConfig, accountId: string): ZaloAccountC
 export function resolveZaloAccount(params: {
   cfg: BotConfig;
   accountId?: string | null;
+  allowUnresolvedSecretRef?: boolean;
 }): ResolvedZaloAccount {
   const accountId = normalizeAccountId(params.accountId);
   const baseEnabled = (params.cfg.channels?.zalo as ZaloConfig | undefined)?.enabled !== false;
@@ -60,6 +65,7 @@ export function resolveZaloAccount(params: {
   const tokenResolution = resolveZaloToken(
     params.cfg.channels?.zalo as ZaloConfig | undefined,
     accountId,
+    { allowUnresolvedSecretRef: params.allowUnresolvedSecretRef },
   );
 
   return {

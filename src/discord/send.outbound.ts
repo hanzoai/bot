@@ -17,6 +17,7 @@ import { maxBytesForKind } from "../media/constants.js";
 import { extensionForMime } from "../media/mime.js";
 import { loadWebMediaRaw } from "../web/media.js";
 import { resolveDiscordAccount } from "./accounts.js";
+import { rewriteDiscordKnownMentions } from "./mentions.js";
 import {
   buildDiscordMessagePayload,
   buildDiscordSendError,
@@ -90,6 +91,9 @@ export async function sendMessageDiscord(
   });
   const chunkMode = resolveChunkMode(cfg, "discord", accountInfo.accountId);
   const textWithTables = convertMarkdownTables(text ?? "", tableMode);
+  const textWithMentions = rewriteDiscordKnownMentions(textWithTables, {
+    accountId: accountInfo.accountId,
+  });
   const { token, rest, request } = createDiscordClient(opts, cfg);
   const recipient = await parseAndResolveRecipient(to, opts.accountId);
   const { channelId } = await resolveChannelId(rest, recipient, request);
@@ -105,7 +109,7 @@ export async function sendMessageDiscord(
 
   if (isForumLikeType(channelType)) {
     const threadName = deriveForumThreadName(textWithTables);
-    const chunks = buildDiscordTextChunks(textWithTables, {
+    const chunks = buildDiscordTextChunks(textWithMentions, {
       maxLinesPerMessage: accountInfo.config.maxLinesPerMessage,
       chunkMode,
     });
@@ -222,7 +226,7 @@ export async function sendMessageDiscord(
       result = await sendDiscordMedia(
         rest,
         channelId,
-        textWithTables,
+        textWithMentions,
         opts.mediaUrl,
         opts.mediaLocalRoots,
         opts.replyTo,
@@ -237,7 +241,7 @@ export async function sendMessageDiscord(
       result = await sendDiscordText(
         rest,
         channelId,
-        textWithTables,
+        textWithMentions,
         opts.replyTo,
         request,
         accountInfo.config.maxLinesPerMessage,
@@ -277,12 +281,17 @@ export async function sendStickerDiscord(
   const recipient = await parseAndResolveRecipient(to, opts.accountId);
   const { channelId } = await resolveChannelId(rest, recipient, request);
   const content = opts.content?.trim();
+  const rewrittenContent = content
+    ? rewriteDiscordKnownMentions(content, {
+        accountId: opts.accountId,
+      })
+    : undefined;
   const stickers = normalizeStickerIds(stickerIds);
   const res = (await request(
     () =>
       rest.post(Routes.channelMessages(channelId), {
         body: {
-          content: content || undefined,
+          content: rewrittenContent || undefined,
           sticker_ids: stickers,
         },
       }) as Promise<{ id: string; channel_id: string }>,
@@ -304,6 +313,11 @@ export async function sendPollDiscord(
   const recipient = await parseAndResolveRecipient(to, opts.accountId);
   const { channelId } = await resolveChannelId(rest, recipient, request);
   const content = opts.content?.trim();
+  const rewrittenContent = content
+    ? rewriteDiscordKnownMentions(content, {
+        accountId: opts.accountId,
+      })
+    : undefined;
   if (poll.durationSeconds !== undefined) {
     throw new Error("Discord polls do not support durationSeconds; use durationHours");
   }
@@ -313,7 +327,7 @@ export async function sendPollDiscord(
     () =>
       rest.post(Routes.channelMessages(channelId), {
         body: {
-          content: content || undefined,
+          content: rewrittenContent || undefined,
           poll: payload,
           ...(flags ? { flags } : {}),
         },
@@ -404,6 +418,7 @@ export async function sendVoiceMessageDiscord(
       opts.replyTo,
       request,
       opts.silent,
+      token,
     );
 
     recordChannelActivity({
@@ -427,19 +442,8 @@ export async function sendVoiceMessageDiscord(
     }
     throw err;
   } finally {
-    // Clean up temporary OGG file if we created one
-    if (oggCleanup && oggPath) {
-      try {
-        await fs.unlink(oggPath);
-      } catch {
-        // Ignore cleanup errors
-      }
-    }
-    try {
-      await fs.unlink(localInputPath);
-    } catch {
-      // Ignore cleanup errors
-    }
+    await unlinkIfExists(oggCleanup ? oggPath : null);
+    await unlinkIfExists(localInputPath);
   }
 }
 

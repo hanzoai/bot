@@ -9,18 +9,15 @@ struct SkillsSettingsSmokeTests {
         let model = SkillsSettingsModel()
         model.statusMessage = "Loaded"
         model.skills = [
-            SkillStatus(
+            makeSkillStatus(
                 name: "Needs Setup",
                 description: "Missing bins and env",
                 source: "hanzo-bot-managed",
                 filePath: "/tmp/skills/needs-setup",
-                baseDir: "/tmp/skills",
                 skillKey: "needs-setup",
                 primaryEnv: "API_KEY",
                 emoji: "🧰",
                 homepage: "https://example.com/needs-setup",
-                always: false,
-                disabled: false,
                 eligible: false,
                 requirements: SkillRequirements(
                     bins: ["python3"],
@@ -36,43 +33,29 @@ struct SkillsSettingsSmokeTests {
                 install: [
                     SkillInstallOption(id: "brew", kind: "brew", label: "brew install python", bins: ["python3"]),
                 ]),
-            SkillStatus(
+            makeSkillStatus(
                 name: "Ready Skill",
                 description: "All set",
                 source: "hanzo-bot-bundled",
                 filePath: "/tmp/skills/ready",
-                baseDir: "/tmp/skills",
                 skillKey: "ready",
-                primaryEnv: nil,
                 emoji: "✅",
                 homepage: "https://example.com/ready",
-                always: false,
-                disabled: false,
                 eligible: true,
-                requirements: SkillRequirements(bins: [], env: [], config: []),
-                missing: SkillMissing(bins: [], env: [], config: []),
                 configChecks: [
                     SkillStatusConfigCheck(path: "skills.ready", value: AnyCodable(true), satisfied: true),
                     SkillStatusConfigCheck(path: "skills.limit", value: AnyCodable(5), satisfied: true),
                 ],
                 install: []),
-            SkillStatus(
+            makeSkillStatus(
                 name: "Disabled Skill",
                 description: "Disabled in config",
                 source: "hanzo-bot-extra",
                 filePath: "/tmp/skills/disabled",
-                baseDir: "/tmp/skills",
                 skillKey: "disabled",
-                primaryEnv: nil,
                 emoji: "🚫",
-                homepage: nil,
-                always: false,
                 disabled: true,
-                eligible: false,
-                requirements: SkillRequirements(bins: [], env: [], config: []),
-                missing: SkillMissing(bins: [], env: [], config: []),
-                configChecks: [],
-                install: []),
+                eligible: false),
         ]
 
         let state = AppState(preview: true)
@@ -87,23 +70,14 @@ struct SkillsSettingsSmokeTests {
     @Test func skillsSettingsBuildsBodyWithLocalMode() {
         let model = SkillsSettingsModel()
         model.skills = [
-            SkillStatus(
+            makeSkillStatus(
                 name: "Local Skill",
                 description: "Local ready",
                 source: "hanzo-bot-workspace",
                 filePath: "/tmp/skills/local",
-                baseDir: "/tmp/skills",
                 skillKey: "local",
-                primaryEnv: nil,
                 emoji: "🏠",
-                homepage: nil,
-                always: false,
-                disabled: false,
-                eligible: true,
-                requirements: SkillRequirements(bins: [], env: [], config: []),
-                missing: SkillMissing(bins: [], env: [], config: []),
-                configChecks: [],
-                install: []),
+                eligible: true),
         ]
 
         let state = AppState(preview: true)

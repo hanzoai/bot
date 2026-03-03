@@ -14,7 +14,7 @@ struct NixModeStableSuiteTests {
 
         suite.set(true, forKey: key)
 
-        let standard = UserDefaults(suiteName: "NixModeStableSuiteTests.\(UUID().uuidString)")!
+        let standard = try #require(UserDefaults(suiteName: "NixModeStableSuiteTests.\(UUID().uuidString)"))
         #expect(!standard.bool(forKey: key))
 
         let resolved = ProcessInfo.resolveNixMode(
@@ -34,7 +34,7 @@ struct NixModeStableSuiteTests {
         }
 
         suite.set(true, forKey: key)
-        let standard = UserDefaults(suiteName: "NixModeStableSuiteTests.\(UUID().uuidString)")!
+        let standard = try #require(UserDefaults(suiteName: "NixModeStableSuiteTests.\(UUID().uuidString)"))
 
         let resolved = ProcessInfo.resolveNixMode(
             environment: [:],

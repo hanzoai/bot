@@ -49,6 +49,39 @@ function createForwarder(params: {
   return { deliver, forwarder };
 }
 
+async function expectSessionFilterRequestResult(params: {
+  sessionFilter: string[];
+  sessionKey: string;
+  expectedAccepted: boolean;
+  expectedDeliveryCount: number;
+}) {
+  const cfg = {
+    approvals: {
+      exec: {
+        enabled: true,
+        mode: "session",
+        sessionFilter: params.sessionFilter,
+      },
+    },
+  } as BotConfig;
+
+  const { deliver, forwarder } = createForwarder({
+    cfg,
+    resolveSessionTarget: () => ({ channel: "slack", to: "U1" }),
+  });
+
+  const request = {
+    ...baseRequest,
+    request: {
+      ...baseRequest.request,
+      sessionKey: params.sessionKey,
+    },
+  };
+
+  await expect(forwarder.handleRequested(request)).resolves.toBe(params.expectedAccepted);
+  expect(deliver).toHaveBeenCalledTimes(params.expectedDeliveryCount);
+}
+
 describe("exec approval forwarder", () => {
   it("forwards to session target and resolves", async () => {
     vi.useFakeTimers();
@@ -121,6 +154,7 @@ describe("exec approval forwarder", () => {
       cfg,
       resolveSessionTarget: () => ({ channel: "discord", to: "channel:123" }),
     });
+  });
 
     await forwarder.handleRequested(baseRequest);
 
