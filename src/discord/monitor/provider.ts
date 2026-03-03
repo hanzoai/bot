@@ -1,4 +1,3 @@
-import { inspect } from "node:util";
 import {
   Client,
   ReadyListener,
@@ -10,9 +9,12 @@ import {
 import { GatewayCloseCodes, type GatewayPlugin } from "@buape/carbon/gateway";
 import { VoicePlugin } from "@buape/carbon/voice";
 import { Routes } from "discord-api-types/v10";
+import { inspect } from "node:util";
+import type { HistoryEntry } from "../../auto-reply/reply/history.js";
+import type { BotConfig, ReplyToMode } from "../../config/config.js";
+import type { DiscordMonitorStatusSink } from "./status.js";
 import { resolveTextChunkLimit } from "../../auto-reply/chunk.js";
 import { listNativeCommandSpecsForConfig } from "../../auto-reply/commands-registry.js";
-import type { HistoryEntry } from "../../auto-reply/reply/history.js";
 import { listSkillCommandsForAgents } from "../../auto-reply/skill-commands.js";
 import {
   resolveThreadBindingIdleTimeoutMs,
@@ -24,7 +26,6 @@ import {
   resolveNativeCommandsEnabled,
   resolveNativeSkillsEnabled,
 } from "../../config/commands.js";
-import type { BotConfig, ReplyToMode } from "../../config/config.js";
 import { loadConfig } from "../../config/config.js";
 import { isDangerousNameMatchingEnabled } from "../../config/dangerous-name-matching.js";
 import {
@@ -76,7 +77,6 @@ import { resolveDiscordPresenceUpdate } from "./presence.js";
 import { resolveDiscordAllowlistConfig } from "./provider.allowlist.js";
 import { runDiscordGatewayLifecycle } from "./provider.lifecycle.js";
 import { resolveDiscordRestFetch } from "./rest-fetch.js";
-import type { DiscordMonitorStatusSink } from "./status.js";
 import {
   createNoopThreadBindingManager,
   createThreadBindingManager,
