@@ -69,6 +69,46 @@ function parseIMessageAllowFromInput(raw: string): string[] {
     .filter(Boolean);
 }
 
+/**
+ * Parse and validate a raw iMessage allowFrom input string.
+ * Returns `{ entries }` on success or `{ entries: [], error }` when
+ * a validation error is found.
+ */
+export function parseIMessageAllowFromEntries(raw: string): {
+  entries: string[];
+  error?: string;
+} {
+  const parts = parseIMessageAllowFromInput(raw);
+  for (const part of parts) {
+    if (part === "*") {
+      continue;
+    }
+    if (part.toLowerCase().startsWith("chat_id:")) {
+      const id = part.slice("chat_id:".length).trim();
+      if (!/^\d+$/.test(id)) {
+        return { entries: [], error: `Invalid chat_id: ${part}` };
+      }
+      continue;
+    }
+    if (part.toLowerCase().startsWith("chat_guid:")) {
+      if (!part.slice("chat_guid:".length).trim()) {
+        return { entries: [], error: "Invalid chat_guid entry" };
+      }
+      continue;
+    }
+    if (part.toLowerCase().startsWith("chat_identifier:")) {
+      if (!part.slice("chat_identifier:".length).trim()) {
+        return { entries: [], error: "Invalid chat_identifier entry" };
+      }
+      continue;
+    }
+    if (!normalizeIMessageHandle(part)) {
+      return { entries: [], error: `Invalid handle: ${part}` };
+    }
+  }
+  return { entries: parts };
+}
+
 async function promptIMessageAllowFrom(params: {
   cfg: BotConfig;
   prompter: WizardPrompter;
@@ -102,35 +142,8 @@ async function promptIMessageAllowFrom(params: {
       if (!raw) {
         return "Required";
       }
-      const parts = parseIMessageAllowFromInput(raw);
-      for (const part of parts) {
-        if (part === "*") {
-          continue;
-        }
-        if (part.toLowerCase().startsWith("chat_id:")) {
-          const id = part.slice("chat_id:".length).trim();
-          if (!/^\d+$/.test(id)) {
-            return `Invalid chat_id: ${part}`;
-          }
-          continue;
-        }
-        if (part.toLowerCase().startsWith("chat_guid:")) {
-          if (!part.slice("chat_guid:".length).trim()) {
-            return "Invalid chat_guid entry";
-          }
-          continue;
-        }
-        if (part.toLowerCase().startsWith("chat_identifier:")) {
-          if (!part.slice("chat_identifier:".length).trim()) {
-            return "Invalid chat_identifier entry";
-          }
-          continue;
-        }
-        if (!normalizeIMessageHandle(part)) {
-          return `Invalid handle: ${part}`;
-        }
-      }
-      return undefined;
+      const result = parseIMessageAllowFromEntries(raw);
+      return result.error;
     },
   });
   const parts = parseIMessageAllowFromInput(String(entry));
