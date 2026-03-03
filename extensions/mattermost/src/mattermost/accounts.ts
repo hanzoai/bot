@@ -4,8 +4,8 @@ import {
   normalizeAccountId,
   normalizeOptionalAccountId,
 } from "bot/plugin-sdk/account-id";
-import { normalizeResolvedSecretInputString, normalizeSecretInputString } from "../secret-input.js";
 import type { MattermostAccountConfig, MattermostChatMode } from "../types.js";
+import { normalizeResolvedSecretInputString, normalizeSecretInputString } from "../secret-input.js";
 import { normalizeMattermostBaseUrl } from "./client.js";
 
 export type MattermostTokenSource = "env" | "config" | "none";
@@ -70,10 +70,7 @@ function resolveAccountConfig(
   return accounts[accountId] as MattermostAccountConfig | undefined;
 }
 
-function mergeMattermostAccountConfig(
-  cfg: BotConfig,
-  accountId: string,
-): MattermostAccountConfig {
+function mergeMattermostAccountConfig(cfg: BotConfig, accountId: string): MattermostAccountConfig {
   const {
     accounts: _ignored,
     defaultAccount: _ignoredDefaultAccount,

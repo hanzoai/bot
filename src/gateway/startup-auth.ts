@@ -1,9 +1,5 @@
 import crypto from "node:crypto";
-import type {
-  GatewayAuthConfig,
-  GatewayTailscaleConfig,
-  BotConfig,
-} from "../config/config.js";
+import type { GatewayAuthConfig, GatewayTailscaleConfig, BotConfig } from "../config/config.js";
 import { writeConfigFile } from "../config/config.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
