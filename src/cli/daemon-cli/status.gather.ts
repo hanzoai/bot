@@ -1,6 +1,7 @@
 import type { GatewayBindMode, GatewayControlUiConfig } from "../../config/types.js";
 import type { FindExtraGatewayServicesOptions } from "../../daemon/inspect.js";
 import type { ServiceConfigAudit } from "../../daemon/service-audit.js";
+import type { GatewayServiceRuntime } from "../../daemon/service-runtime.js";
 import type { GatewayRpcOpts } from "./types.js";
 import {
   createConfigIO,
@@ -11,7 +12,6 @@ import {
 import { readLastGatewayErrorLine } from "../../daemon/diagnostics.js";
 import { findExtraGatewayServices } from "../../daemon/inspect.js";
 import { auditGatewayServiceConfig } from "../../daemon/service-audit.js";
-import type { GatewayServiceRuntime } from "../../daemon/service-runtime.js";
 import { resolveGatewayService } from "../../daemon/service.js";
 import { resolveGatewayBindHost } from "../../gateway/net.js";
 import {
