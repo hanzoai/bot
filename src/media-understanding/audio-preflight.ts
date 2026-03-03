@@ -4,11 +4,7 @@ import type { MediaUnderstandingProvider } from "./types.js";
 import { logVerbose, shouldLogVerbose } from "../globals.js";
 import { isAudioAttachment } from "./attachments.js";
 import { runAudioTranscription } from "./audio-transcription-runner.js";
-import {
-  type ActiveMediaModel,
-  normalizeMediaAttachments,
-  runCapability,
-} from "./runner.js";
+import { type ActiveMediaModel, normalizeMediaAttachments, runCapability } from "./runner.js";
 
 /**
  * Transcribes the first audio attachment BEFORE mention checking.

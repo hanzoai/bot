@@ -1,4 +1,3 @@
-import * as http from "http";
 import * as Lark from "@larksuiteoapi/node-sdk";
 import {
   createFixedWindowRateLimiter,
@@ -7,6 +6,7 @@ import {
   WEBHOOK_ANOMALY_COUNTER_DEFAULTS as WEBHOOK_ANOMALY_COUNTER_DEFAULTS_FROM_SDK,
   WEBHOOK_RATE_LIMIT_DEFAULTS as WEBHOOK_RATE_LIMIT_DEFAULTS_FROM_SDK,
 } from "bot/plugin-sdk";
+import * as http from "http";
 
 export const wsClients = new Map<string, Lark.WSClient>();
 export const httpServers = new Map<string, http.Server>();
