@@ -1,5 +1,5 @@
-import { isSecretRef } from "bot/plugin-sdk";
 import type { BotConfig } from "bot/plugin-sdk";
+import { isSecretRef } from "bot/plugin-sdk";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
@@ -65,10 +65,7 @@ function resolveAccountConfig(
   return accounts[accountId];
 }
 
-function mergeGoogleChatAccountConfig(
-  cfg: BotConfig,
-  accountId: string,
-): GoogleChatAccountConfig {
+function mergeGoogleChatAccountConfig(cfg: BotConfig, accountId: string): GoogleChatAccountConfig {
   const raw = cfg.channels?.["googlechat"] ?? {};
   const { accounts: _ignored, defaultAccount: _ignored2, ...base } = raw;
   const account = resolveAccountConfig(cfg, accountId) ?? {};

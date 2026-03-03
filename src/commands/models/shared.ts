@@ -1,3 +1,4 @@
+import type { AgentModelConfig } from "../../config/types.agents-shared.js";
 import { listAgentIds } from "../../agents/agent-scope.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../../agents/defaults.js";
 import {
@@ -7,14 +8,9 @@ import {
   resolveModelRefFromString,
 } from "../../agents/model-selection.js";
 import { formatCliCommand } from "../../cli/command-format.js";
-import {
-  type BotConfig,
-  readConfigFileSnapshot,
-  writeConfigFile,
-} from "../../config/config.js";
+import { type BotConfig, readConfigFileSnapshot, writeConfigFile } from "../../config/config.js";
 import { formatConfigIssueLines } from "../../config/issue-format.js";
 import { toAgentModelListLike } from "../../config/model-input.js";
-import type { AgentModelConfig } from "../../config/types.agents-shared.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 
 export const ensureFlagCompatibility = (opts: { json?: boolean; plain?: boolean }) => {
@@ -71,9 +67,7 @@ export async function loadValidConfigOrThrow(): Promise<BotConfig> {
   return snapshot.config;
 }
 
-export async function updateConfig(
-  mutator: (cfg: BotConfig) => BotConfig,
-): Promise<BotConfig> {
+export async function updateConfig(mutator: (cfg: BotConfig) => BotConfig): Promise<BotConfig> {
   const config = await loadValidConfigOrThrow();
   const next = mutator(config);
   await writeConfigFile(next);
