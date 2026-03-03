@@ -5,15 +5,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const probeFeishuMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@larksuiteoapi/node-sdk", () => ({
-  adaptDefault: vi.fn(
-    () => (_req: unknown, res: { statusCode?: number; end: (s: string) => void }) => {
-      res.statusCode = 200;
-      res.end("ok");
-    },
-  ),
-}));
-
 vi.mock("./probe.js", () => ({
   probeFeishu: probeFeishuMock,
 }));
