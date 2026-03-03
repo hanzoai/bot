@@ -46,11 +46,7 @@ def resolve_base_url(args: argparse.Namespace) -> str:
 
 
 def resolve_api_key(args: argparse.Namespace) -> str:
-    key = args.api_key or os.environ.get("HANZO_API_KEY", "")
-    if not key:
-        print("Error: No API key provided. Set HANZO_API_KEY or use --api-key.", file=sys.stderr)
-        sys.exit(1)
-    return key
+    return args.api_key or os.environ.get("HANZO_API_KEY", "")
 
 
 def qdrant_request(base_url: str, api_key: str, method: str, path: str,
@@ -58,15 +54,18 @@ def qdrant_request(base_url: str, api_key: str, method: str, path: str,
     url = f"{base_url}{path}"
     data = json.dumps(body).encode("utf-8") if body is not None else None
 
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "hanzo-bot/1.0",
+    }
+    if api_key:
+        headers["api-key"] = api_key
+
     req = urllib.request.Request(
         url,
         data=data,
-        headers={
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "hanzo-bot/1.0",
-            "api-key": api_key,
-        },
+        headers=headers,
         method=method,
     )
 

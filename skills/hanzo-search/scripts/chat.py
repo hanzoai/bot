@@ -50,9 +50,12 @@ def chat_streaming(args: argparse.Namespace) -> None:
         or os.environ.get("HANZO_SEARCH_BASE_URL")
         or "https://search.hanzo.ai"
     ).rstrip("/")
-    token = args.token or os.environ.get("HANZO_API_KEY", "")
+    token = (args.token
+             or os.environ.get("MEILI_MASTER_KEY", "")
+             or os.environ.get("HANZO_SEARCH_KEY", "")
+             or os.environ.get("HANZO_API_KEY", ""))
     if not token:
-        print("Error: No API token provided. Set HANZO_API_KEY or use --token.", file=sys.stderr)
+        print("Error: No API token. Set MEILI_MASTER_KEY, HANZO_SEARCH_KEY, or use --token.", file=sys.stderr)
         sys.exit(1)
 
     url = f"{base_url}/api/chat-docs"

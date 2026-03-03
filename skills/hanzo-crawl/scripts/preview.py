@@ -28,29 +28,24 @@ def preview(args: argparse.Namespace) -> dict:
         or "https://crawl.hanzo.ai"
     ).rstrip("/")
     token = args.token or os.environ.get("HANZO_API_KEY", "")
-    if not token:
-        print("Error: No API token provided. Set HANZO_API_KEY or use --token.", file=sys.stderr)
-        sys.exit(1)
 
     url = f"{base_url}/md"
     body = {"url": args.url}
     data = json.dumps(body).encode("utf-8")
 
-    req = urllib.request.Request(
-        url,
-        data=data,
-        headers={
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "hanzo-bot/1.0",
-            "Authorization": f"Bearer {token}",
-        },
-        method="POST",
-    )
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "hanzo-bot/1.0",
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
 
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
-            return json.loads(resp.read().decode("utf-8"))
+            return json.loads(resp.read().decode("utf-8", errors="replace"), strict=False)
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8", errors="replace") if e.fp else ""
         print(f"Error: HTTP {e.code} from Crawl4AI markdown API", file=sys.stderr)
