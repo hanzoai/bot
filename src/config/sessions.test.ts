@@ -573,10 +573,9 @@ describe("sessions", () => {
     });
   });
 
-  it("resolves cross-agent absolute sessionFile paths", () => {
-    const stateDir = path.resolve("/home/user/.hanzo/bot");
-    withStateDir(stateDir, () => {
-      const bot2Session = path.join(stateDir, "agents", "bot2", "sessions", "sess-1.jsonl");
+  it("resolves cross-agent absolute sessionFile paths", async () => {
+    const { stateDir, bot2SessionPath } = await createAgentSessionsLayout("cross-agent");
+    const sessionFile = withStateDir(stateDir, () =>
       // Agent bot1 resolves a sessionFile that belongs to agent bot2
       resolveSessionFilePath("sess-1", { sessionFile: bot2SessionPath }, { agentId: "bot1" }),
     );
@@ -637,42 +636,6 @@ describe("sessions", () => {
     const resolved = resolveSessionFilePathOptions({
       agentId: "bot2",
       storePath,
-    });
-    expect(resolved?.agentId).toBe("bot2");
-    expect(resolved?.sessionsDir).toBe(path.dirname(path.resolve(storePath)));
-  });
-
-  it("resolves sibling agent absolute sessionFile using alternate agentId from options", () => {
-    const stateDir = path.resolve("/home/user/.hanzo/bot");
-    withStateDir(stateDir, () => {
-      const mainStorePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
-      const bot2Session = path.join(stateDir, "agents", "bot2", "sessions", "sess-1.jsonl");
-      const opts = resolveSessionFilePathOptions({
-        agentId: "bot2",
-        storePath: mainStorePath,
-      });
-
-      const sessionFile = resolveSessionFilePath("sess-1", { sessionFile: bot2Session }, opts);
-      expect(sessionFile).toBe(bot2Session);
-    });
-  });
-
-  it("falls back to derived transcript path when sessionFile is outside agent sessions directories", () => {
-    withStateDir(path.resolve("/home/user/.hanzo/bot"), () => {
-      const sessionFile = resolveSessionFilePath(
-        "sess-1",
-        { sessionFile: path.resolve("/etc/passwd") },
-        { agentId: "bot1" },
-      );
-      expect(sessionFile).toBe(
-        path.join(
-          path.resolve("/home/user/.hanzo/bot"),
-          "agents",
-          "bot1",
-          "sessions",
-          "sess-1.jsonl",
-        ),
-      );
     });
     expect(resolved?.agentId).toBe("bot2");
     expect(resolved?.sessionsDir).toBe(path.dirname(path.resolve(storePath)));

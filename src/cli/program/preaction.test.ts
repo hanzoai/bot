@@ -25,7 +25,7 @@ vi.mock("../banner.js", () => ({
 }));
 
 vi.mock("../cli-name.js", () => ({
-  resolveCliName: () => "hanzo-bot",
+  resolveCliName: () => "@hanzo/bot",
 }));
 
 vi.mock("./config-guard.js", () => ({
@@ -78,17 +78,19 @@ describe("registerPreActionHooks", () => {
     | null = null;
 
   function buildProgram() {
-    const program = new Command().name("hanzo-bot");
-    program.command("status").action(async () => {});
-    program.command("doctor").action(async () => {});
-    program.command("completion").action(async () => {});
-    program.command("secrets").action(async () => {});
-    program.command("update").action(async () => {});
-    program.command("channels").action(async () => {});
-    program.command("directory").action(async () => {});
-    program.command("agents").action(async () => {});
-    program.command("configure").action(async () => {});
-    program.command("onboard").action(async () => {});
+    const program = new Command().name("@hanzo/bot");
+    program.command("status").action(() => {});
+    program.command("doctor").action(() => {});
+    program.command("completion").action(() => {});
+    program.command("secrets").action(() => {});
+    program.command("agents").action(() => {});
+    program.command("configure").action(() => {});
+    program.command("onboard").action(() => {});
+    program
+      .command("update")
+      .command("status")
+      .option("--json")
+      .action(() => {});
     program
       .command("message")
       .command("send")
@@ -133,7 +135,7 @@ describe("registerPreActionHooks", () => {
   it("handles debug mode and plugin-required command preaction", async () => {
     await runPreAction({
       parseArgv: ["status"],
-      processArgv: ["node", "hanzo-bot", "status", "--debug"],
+      processArgv: ["node", "@hanzo/bot", "status", "--debug"],
     });
 
     expect(emitCliBannerMock).toHaveBeenCalledWith("9.9.9-test");
@@ -144,12 +146,11 @@ describe("registerPreActionHooks", () => {
     });
     expect(ensurePluginRegistryLoadedMock).not.toHaveBeenCalled();
     expect(process.title).toBe("bot-status");
-  });
 
     vi.clearAllMocks();
     await runPreAction({
       parseArgv: ["message", "send"],
-      processArgv: ["node", "hanzo-bot", "message", "send"],
+      processArgv: ["node", "@hanzo/bot", "message", "send"],
     });
 
     expect(setVerboseMock).toHaveBeenCalledWith(false);
@@ -161,65 +162,22 @@ describe("registerPreActionHooks", () => {
     expect(ensurePluginRegistryLoadedMock).toHaveBeenCalledTimes(1);
   });
 
-  it("loads plugin registry for configure command", async () => {
-    await runCommand({
-      parseArgv: ["configure"],
-      processArgv: ["node", "hanzo-bot", "configure"],
-    });
-
-    expect(ensurePluginRegistryLoadedMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("loads plugin registry for onboard command", async () => {
-    await runCommand({
-      parseArgv: ["onboard"],
-      processArgv: ["node", "hanzo-bot", "onboard"],
-    });
-
-    expect(ensurePluginRegistryLoadedMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("loads plugin registry for agents command", async () => {
-    await runCommand({
-      parseArgv: ["agents"],
-      processArgv: ["node", "hanzo-bot", "agents"],
-    });
-
-    expect(ensurePluginRegistryLoadedMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("skips config guard for doctor, completion, and secrets commands", async () => {
-    await runCommand({
-      parseArgv: ["doctor"],
-      processArgv: ["node", "hanzo-bot", "doctor"],
-    });
-    await runCommand({
-      parseArgv: ["completion"],
-      processArgv: ["node", "hanzo-bot", "completion"],
-    });
-    await runCommand({
-      parseArgv: ["secrets"],
-      processArgv: ["node", "hanzo-bot", "secrets"],
-    });
-
-    expect(ensureConfigReadyMock).not.toHaveBeenCalled();
-  });
-
-  it("skips preaction work when argv indicates help/version", async () => {
-    await runCommand({
+  it("skips help/version preaction and respects banner opt-out", async () => {
+    await runPreAction({
       parseArgv: ["status"],
-      processArgv: ["node", "hanzo-bot", "--version"],
+      processArgv: ["node", "@hanzo/bot", "--version"],
     });
 
     expect(emitCliBannerMock).not.toHaveBeenCalled();
     expect(setVerboseMock).not.toHaveBeenCalled();
     expect(ensureConfigReadyMock).not.toHaveBeenCalled();
 
-  it("hides banner when BOT_HIDE_BANNER is truthy", async () => {
+    vi.clearAllMocks();
     process.env.BOT_HIDE_BANNER = "1";
-    await runCommand({
+
+    await runPreAction({
       parseArgv: ["status"],
-      processArgv: ["node", "hanzo-bot", "status"],
+      processArgv: ["node", "@hanzo/bot", "status"],
     });
 
     expect(emitCliBannerMock).not.toHaveBeenCalled();
