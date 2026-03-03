@@ -1,3 +1,4 @@
+import { fetchWithSsrFGuard } from "bot/plugin-sdk";
 import { randomUUID } from "node:crypto";
 import { createWriteStream } from "node:fs";
 import { mkdir } from "node:fs/promises";
@@ -5,7 +6,6 @@ import { homedir } from "node:os";
 import * as path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { fetchWithSsrFGuard } from "bot/plugin-sdk";
 import { getDefaultSsrFPolicy } from "../urbit/context.js";
 
 // Default to Bot workspace media directory
