@@ -30,6 +30,20 @@ export function mockAgentPayloads(
   });
 }
 
+export function expectDirectTelegramDelivery(
+  deps: CliDeps,
+  params: { chatId: string; text: string; messageThreadId?: number },
+) {
+  expect(deps.sendMessageTelegram).toHaveBeenCalledTimes(1);
+  expect(deps.sendMessageTelegram).toHaveBeenCalledWith(
+    params.chatId,
+    params.text,
+    expect.objectContaining(
+      params.messageThreadId === undefined ? {} : { messageThreadId: params.messageThreadId },
+    ),
+  );
+}
+
 export async function runTelegramAnnounceTurn(params: {
   home: string;
   storePath: string;

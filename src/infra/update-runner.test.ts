@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { pathExists } from "../utils.js";
+import { resolveStableNodePath } from "./stable-node-path.js";
 import { runGatewayUpdate } from "./update-runner.js";
 
 type CommandResult = { stdout?: string; stderr?: string; code?: number };
@@ -47,7 +48,7 @@ describe("runGatewayUpdate", () => {
     // Shared fixtureRoot cleaned up in afterAll.
   });
 
-  function createStableTagRunner(params: {
+  async function createStableTagRunner(params: {
     stableTag: string;
     uiIndexPath: string;
     onDoctor?: () => Promise<void>;
@@ -178,6 +179,7 @@ describe("runGatewayUpdate", () => {
     await setupUiIndex();
     const stableTag = "v1.0.1-1";
     const betaTag = "v1.0.0-beta.2";
+    const doctorNodePath = await resolveStableNodePath(process.execPath);
     const { runner, calls } = createRunner({
       [`git -C ${tempDir} rev-parse --show-toplevel`]: { stdout: tempDir },
       [`git -C ${tempDir} rev-parse HEAD`]: { stdout: "abc123" },
@@ -357,9 +359,8 @@ describe("runGatewayUpdate", () => {
       if (key === "npm i -g bot@latest") {
         stalePresentAtInstall = await pathExists(staleDir);
         return { stdout: "ok", stderr: "", code: 0 };
-      }
-      return { stdout: "", stderr: "", code: 0 };
-    };
+      },
+    });
 
     const result = await runGatewayUpdate({
       cwd: pkgRoot,
@@ -473,7 +474,7 @@ describe("runGatewayUpdate", () => {
     const uiIndexPath = await setupUiIndex();
 
     const stableTag = "v1.0.1-1";
-    const { runCommand, calls, doctorKey, getUiBuildCount } = createStableTagRunner({
+    const { runCommand, calls, doctorKey, getUiBuildCount } = await createStableTagRunner({
       stableTag,
       uiIndexPath,
       onUiBuild: async (count) => {
@@ -501,7 +502,7 @@ describe("runGatewayUpdate", () => {
     const uiIndexPath = await setupUiIndex();
 
     const stableTag = "v1.0.1-1";
-    const { runCommand } = createStableTagRunner({
+    const { runCommand } = await createStableTagRunner({
       stableTag,
       uiIndexPath,
       onUiBuild: async (count) => {

@@ -1,5 +1,6 @@
 import BotKit
 import Foundation
+import BotKit
 import Testing
 @testable import HanzoBot
 @testable import BotIPC
