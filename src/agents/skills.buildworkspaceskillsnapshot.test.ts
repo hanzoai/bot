@@ -1,19 +1,52 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withEnv } from "../test-utils/env.js";
-import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
+import { createFixtureSuite } from "../test-utils/fixture-suite.js";
 import { writeSkill } from "./skills.e2e-test-helpers.js";
 import { buildWorkspaceSkillSnapshot, buildWorkspaceSkillsPrompt } from "./skills.js";
 
-const tempDirs = createTrackedTempDirs();
+const fixtureSuite = createFixtureSuite("bot-skills-snapshot-suite-");
+let truncationWorkspaceTemplateDir = "";
+let nestedRepoTemplateDir = "";
 
-afterEach(async () => {
-  await tempDirs.cleanup();
+beforeAll(async () => {
+  await fixtureSuite.setup();
+  truncationWorkspaceTemplateDir = await fixtureSuite.createCaseDir(
+    "template-truncation-workspace",
+  );
+  for (let i = 0; i < 8; i += 1) {
+    const name = `skill-${String(i).padStart(2, "0")}`;
+    await writeSkill({
+      dir: path.join(truncationWorkspaceTemplateDir, "skills", name),
+      name,
+      description: "x".repeat(800),
+    });
+  }
+
+  nestedRepoTemplateDir = await fixtureSuite.createCaseDir("template-skills-repo");
+  for (let i = 0; i < 8; i += 1) {
+    const name = `repo-skill-${String(i).padStart(2, "0")}`;
+    await writeSkill({
+      dir: path.join(nestedRepoTemplateDir, "skills", name),
+      name,
+      description: `Desc ${i}`,
+    });
+  }
+});
+
+afterAll(async () => {
+  await fixtureSuite.cleanup();
 });
 
 function withWorkspaceHome<T>(workspaceDir: string, cb: () => T): T {
   return withEnv({ HOME: workspaceDir, PATH: "" }, cb);
+}
+
+async function cloneTemplateDir(templateDir: string, prefix: string): Promise<string> {
+  const cloned = await fixtureSuite.createCaseDir(prefix);
+  await fs.cp(templateDir, cloned, { recursive: true });
+  return cloned;
 }
 
 describe("buildWorkspaceSkillSnapshot", () => {

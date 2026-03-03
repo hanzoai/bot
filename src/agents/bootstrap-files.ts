@@ -12,6 +12,9 @@ import {
   type WorkspaceBootstrapFile,
 } from "./workspace.js";
 
+export type BootstrapContextMode = "full" | "lightweight";
+export type BootstrapContextRunKind = "default" | "heartbeat" | "cron";
+
 export function makeBootstrapWarn(params: {
   sessionLabel: string;
   warn?: (message: string) => void;
@@ -52,6 +55,8 @@ export async function resolveBootstrapContextForRun(params: {
   sessionId?: string;
   agentId?: string;
   warn?: (message: string) => void;
+  contextMode?: BootstrapContextMode;
+  runKind?: BootstrapContextRunKind;
 }): Promise<{
   bootstrapFiles: WorkspaceBootstrapFile[];
   contextFiles: EmbeddedContextFile[];

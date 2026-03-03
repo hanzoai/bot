@@ -56,6 +56,21 @@ describe("nodes camera helpers", () => {
     expect(p).toBe(path.join("/tmp", "hanzo-bot-camera-snap-front-id1.jpg"));
   });
 
+  it("rejects camera clip url payloads without node remoteIp", async () => {
+    stubFetchResponse(new Response("url-clip", { status: 200 }));
+    await expect(
+      writeCameraClipPayloadToFile({
+        payload: {
+          format: "mp4",
+          url: "https://198.51.100.42/clip.mp4",
+          durationMs: 200,
+          hasAudio: false,
+        },
+        facing: "back",
+      }),
+    ).rejects.toThrow(/node remoteip/i);
+  });
+
   it("writes base64 to file", async () => {
     const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-test-"));
     const out = path.join(dir, "x.bin");

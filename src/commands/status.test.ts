@@ -82,6 +82,66 @@ async function withUnknownUsageStore(run: () => Promise<void>) {
   }
 }
 
+function getRuntimeLogs() {
+  return runtimeLogMock.mock.calls.map((call: unknown[]) => String(call[0]));
+}
+
+function getJoinedRuntimeLogs() {
+  return getRuntimeLogs().join("\n");
+}
+
+async function runStatusAndGetLogs(args: Parameters<typeof statusCommand>[0] = {}) {
+  runtimeLogMock.mockClear();
+  await statusCommand(args, runtime as never);
+  return getRuntimeLogs();
+}
+
+async function runStatusAndGetJoinedLogs(args: Parameters<typeof statusCommand>[0] = {}) {
+  await runStatusAndGetLogs(args);
+  return getJoinedRuntimeLogs();
+}
+
+type ProbeGatewayResult = {
+  ok: boolean;
+  url: string;
+  connectLatencyMs: number | null;
+  error: string | null;
+  close: { code: number; reason: string } | null;
+  health: unknown;
+  status: unknown;
+  presence: unknown;
+  configSnapshot: unknown;
+};
+
+function mockProbeGatewayResult(overrides: Partial<ProbeGatewayResult>) {
+  mocks.probeGateway.mockResolvedValueOnce({
+    ok: false,
+    url: "ws://127.0.0.1:18789",
+    connectLatencyMs: null,
+    error: "timeout",
+    close: null,
+    health: null,
+    status: null,
+    presence: null,
+    configSnapshot: null,
+    ...overrides,
+  });
+}
+
+async function withEnvVar<T>(key: string, value: string, run: () => Promise<T>): Promise<T> {
+  const prevValue = process.env[key];
+  process.env[key] = value;
+  try {
+    return await run();
+  } finally {
+    if (prevValue === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = prevValue;
+    }
+  }
+}
+
 const mocks = vi.hoisted(() => ({
   loadSessionStore: vi.fn().mockReturnValue({
     "+1000": createDefaultSessionStoreEntry(),
@@ -405,14 +465,11 @@ describe("statusCommand", () => {
     try {
       mocks.probeGateway.mockResolvedValueOnce({
         ok: true,
-        url: "ws://127.0.0.1:18789",
         connectLatencyMs: 123,
         error: null,
-        close: null,
         health: {},
         status: {},
         presence: [],
-        configSnapshot: null,
       });
       (runtime.log as vi.Mock).mockClear();
       await statusCommand({}, runtime as never);
@@ -428,16 +485,13 @@ describe("statusCommand", () => {
   });
 
   it("surfaces channel runtime errors from the gateway", async () => {
-    mocks.probeGateway.mockResolvedValueOnce({
+    mockProbeGatewayResult({
       ok: true,
-      url: "ws://127.0.0.1:18789",
       connectLatencyMs: 10,
       error: null,
-      close: null,
       health: {},
       status: {},
       presence: [],
-      configSnapshot: null,
     });
     mocks.callGateway.mockResolvedValueOnce({
       channelAccounts: {

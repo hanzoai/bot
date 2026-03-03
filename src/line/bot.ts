@@ -47,6 +47,7 @@ export function createLineBot(opts: LineBotOptions): LineBot {
     (async () => {
       logVerbose("line: no message handler configured");
     });
+  const replayCache = createLineWebhookReplayCache();
 
   const handleWebhook = async (body: WebhookRequestBody): Promise<void> => {
     if (!body.events || body.events.length === 0) {
@@ -59,6 +60,7 @@ export function createLineBot(opts: LineBotOptions): LineBot {
       runtime,
       mediaMaxBytes,
       processMessage,
+      replayCache,
     });
   };
 

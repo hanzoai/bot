@@ -513,18 +513,12 @@ export async function runWithImageModelFallback<T>(params: {
 
   for (let i = 0; i < candidates.length; i += 1) {
     const candidate = candidates[i];
-    try {
-      const result = await params.run(candidate.provider, candidate.model);
-      return {
-        result,
-        provider: candidate.provider,
-        model: candidate.model,
-        attempts,
-      };
-    } catch (err) {
-      if (shouldRethrowAbort(err)) {
-        throw err;
-      }
+    const attemptRun = await runFallbackAttempt({ run: params.run, ...candidate, attempts });
+    if ("success" in attemptRun) {
+      return attemptRun.success;
+    }
+    {
+      const err = attemptRun.error;
       lastError = err;
       attempts.push({
         provider: candidate.provider,

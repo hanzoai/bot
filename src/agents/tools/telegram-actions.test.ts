@@ -100,7 +100,7 @@ describe("handleTelegramAction", () => {
         messageId: "456",
         emoji: "",
       },
-      cfg,
+      reactionConfig("minimal"),
     );
     expect(reactMessageTelegram).toHaveBeenCalledWith(
       "123",
@@ -529,9 +529,8 @@ describe("handleTelegramAction", () => {
             },
           ],
         ],
-      },
-      cfg,
-    );
+      ],
+    });
     expect(sendMessageTelegram).toHaveBeenCalledWith(
       "@testchannel",
       "Choose",
@@ -592,13 +591,9 @@ describe("readTelegramButtons", () => {
 
 describe("handleTelegramAction per-account gating", () => {
   it("allows sticker when account config enables it", async () => {
-    const cfg = {
-      channels: {
-        telegram: {
-          accounts: {
-            media: { botToken: "tok-media", actions: { sticker: true } },
-          },
-        },
+    const cfg = accountTelegramConfig({
+      accounts: {
+        media: { botToken: "tok-media", actions: { sticker: true } },
       },
     } as BotConfig;
 
@@ -634,14 +629,10 @@ describe("handleTelegramAction per-account gating", () => {
 
   it("uses account-merged config, not top-level config", async () => {
     // Top-level has no sticker enabled, but the account does
-    const cfg = {
-      channels: {
-        telegram: {
-          botToken: "tok-base",
-          accounts: {
-            media: { botToken: "tok-media", actions: { sticker: true } },
-          },
-        },
+    const cfg = accountTelegramConfig({
+      topLevelBotToken: "tok-base",
+      accounts: {
+        media: { botToken: "tok-media", actions: { sticker: true } },
       },
     } as BotConfig;
 

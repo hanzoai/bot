@@ -95,6 +95,8 @@ Defaults:
   5. Otherwise memory search stays disabled until configured.
 - Local mode uses node-llama-cpp and may require `pnpm approve-builds`.
 - Uses sqlite-vec (when available) to accelerate vector search inside SQLite.
+- `memorySearch.provider = "ollama"` is also supported for local/self-hosted
+  Ollama embeddings (`/api/embeddings`), but it is not auto-selected.
 
 Remote embeddings **require** an API key for the embedding provider. Bot
 resolves keys from auth profiles, `models.providers.*.apiKey`, or environment

@@ -20,6 +20,8 @@ export type ResolvedBrowserConfig = {
   enabled: boolean;
   evaluateEnabled: boolean;
   controlPort: number;
+  cdpPortRangeStart: number;
+  cdpPortRangeEnd: number;
   cdpProtocol: "http" | "https";
   cdpHost: string;
   cdpIsLoopback: boolean;
@@ -154,6 +156,13 @@ export function resolveBrowserConfig(
   );
 
   const derivedCdpRange = deriveDefaultBrowserCdpPortRange(controlPort);
+  const cdpRangeSpan = derivedCdpRange.end - derivedCdpRange.start;
+  const cdpPortRangeStart = resolveCdpPortRangeStart(
+    cfg?.cdpPortRangeStart,
+    derivedCdpRange.start,
+    cdpRangeSpan,
+  );
+  const cdpPortRangeEnd = cdpPortRangeStart + cdpRangeSpan;
 
   const rawCdpUrl = (cfg?.cdpUrl ?? "").trim();
   let cdpInfo:
@@ -189,10 +198,11 @@ export function resolveBrowserConfig(
   // Use legacy cdpUrl port for backward compatibility when no profiles configured
   const legacyCdpPort = rawCdpUrl ? cdpInfo.port : undefined;
   const profiles = ensureDefaultChromeExtensionProfile(
-    ensureDefaultProfile(cfg?.profiles, defaultColor, legacyCdpPort, derivedCdpRange.start),
+    ensureDefaultProfile(cfg?.profiles, defaultColor, legacyCdpPort, cdpPortRangeStart),
     controlPort,
   );
   const cdpProtocol = cdpInfo.parsed.protocol === "https:" ? "https" : "http";
+
   const defaultProfile =
     defaultProfileFromConfig ??
     (profiles[DEFAULT_BROWSER_DEFAULT_PROFILE_NAME]
@@ -207,6 +217,8 @@ export function resolveBrowserConfig(
     enabled,
     evaluateEnabled,
     controlPort,
+    cdpPortRangeStart,
+    cdpPortRangeEnd,
     cdpProtocol,
     cdpHost: cdpInfo.parsed.hostname,
     cdpIsLoopback: isLoopbackHost(cdpInfo.parsed.hostname),
@@ -262,6 +274,7 @@ export function resolveProfile(
     cdpIsLoopback: isLoopbackHost(cdpHost),
     color: profile.color,
     driver,
+    attachOnly: profile.attachOnly ?? resolved.attachOnly,
   };
 }
 

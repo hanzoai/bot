@@ -17,20 +17,9 @@ import { buildSystemPromptParams } from "../system-prompt-params.js";
 import { buildAgentSystemPrompt } from "../system-prompt.js";
 export { buildCliSupervisorScopeKey, resolveCliNoOutputTimeoutMs } from "./reliability.js";
 
-const CLI_RUN_QUEUE = new Map<string, Promise<unknown>>();
+const CLI_RUN_QUEUE = new KeyedAsyncQueue();
 export function enqueueCliRun<T>(key: string, task: () => Promise<T>): Promise<T> {
-  const prior = CLI_RUN_QUEUE.get(key) ?? Promise.resolve();
-  const chained = prior.catch(() => undefined).then(task);
-  // Keep queue continuity even when a run rejects, without emitting unhandled rejections.
-  const tracked = chained
-    .catch(() => undefined)
-    .finally(() => {
-      if (CLI_RUN_QUEUE.get(key) === tracked) {
-        CLI_RUN_QUEUE.delete(key);
-      }
-    });
-  CLI_RUN_QUEUE.set(key, tracked);
-  return chained;
+  return CLI_RUN_QUEUE.enqueue(key, task);
 }
 
 type CliUsage = {

@@ -2,6 +2,8 @@ import type { ChannelAccountSnapshot, ChannelPlugin } from "../channels/plugins/
 import {
   buildChannelAccountSnapshot,
   formatChannelAllowFrom,
+  resolveChannelAccountConfigured,
+  resolveChannelAccountEnabled,
 } from "../channels/account-summary.js";
 import { listChannelPlugins } from "../channels/plugins/index.js";
 import { type BotConfig, loadConfig } from "../config/config.js";
@@ -133,8 +135,12 @@ export async function buildChannelSummary(
 
     for (const accountId of resolvedAccountIds) {
       const account = plugin.config.resolveAccount(effective, accountId);
-      const enabled = resolveAccountEnabled(plugin, account, effective);
-      const configured = await resolveAccountConfigured(plugin, account, effective);
+      const enabled = resolveChannelAccountEnabled({ plugin, account, cfg: effective });
+      const configured = await resolveChannelAccountConfigured({
+        plugin,
+        account,
+        cfg: effective,
+      });
       const snapshot = buildChannelAccountSnapshot({
         plugin,
         account,

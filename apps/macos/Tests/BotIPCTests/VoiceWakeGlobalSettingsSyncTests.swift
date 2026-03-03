@@ -1,5 +1,6 @@
 import HanzoBotProtocol
 import Foundation
+import BotProtocol
 import Testing
 @testable import HanzoBot
 
@@ -18,6 +19,19 @@ import Testing
             payload: payload,
             seq: nil,
             stateversion: nil)
+    }
+
+    private func applyTriggersAndCapturePrevious(_ triggers: [String]) async -> [String] {
+        let previous = await MainActor.run { AppStateStore.shared.swabbleTriggerWords }
+        await MainActor.run {
+            AppStateStore.shared.applyGlobalVoiceWakeTriggers(triggers)
+        }
+        return previous
+    }
+
+    @Test func appliesVoiceWakeChangedEventToAppState() async {
+        let previous = await applyTriggersAndCapturePrevious(["before"])
+        let evt = voiceWakeChangedEvent(payload: BotProtocol.AnyCodable(["triggers": ["@hanzo/bot", "computer"]]))
 
         await VoiceWakeGlobalSettingsSync.shared.handle(push: .event(evt))
 

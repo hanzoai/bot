@@ -200,7 +200,7 @@ Run `bot doctor` to surface risky/misconfigured DM policies.
 ## How it works (short)
 
 ```
-WhatsApp / Telegram / Slack / Discord / Google Chat / Signal / iMessage / BlueBubbles / Microsoft Teams / Matrix / Zalo / Zalo Personal / WebChat
+WhatsApp / Telegram / Slack / Discord / Google Chat / Signal / iMessage / BlueBubbles / IRC / Microsoft Teams / Matrix / Feishu / LINE / Mattermost / Nextcloud Talk / Nostr / Synology Chat / Tlon / Twitch / Zalo / Zalo Personal / WebChat
                │
                ▼
 ┌───────────────────────────────┐
@@ -325,7 +325,7 @@ Note: signed builds required for macOS permissions to stick across rebuilds (see
 
 ### iOS node (optional)
 
-- Pairs as a node via the Bridge.
+- Pairs as a node over the Gateway WebSocket (device pairing).
 - Voice trigger forwarding + Canvas surface.
 - Controlled via `bot nodes …`.
 

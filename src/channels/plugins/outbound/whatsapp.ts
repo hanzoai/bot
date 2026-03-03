@@ -12,6 +12,8 @@ export const whatsappOutbound: ChannelOutboundAdapter = {
   pollMaxOptions: 12,
   resolveTarget: ({ to, allowFrom, mode }) =>
     resolveWhatsAppOutboundTarget({ to, allowFrom, mode }),
+  sendPayload: async (ctx) =>
+    await sendTextMediaPayload({ channel: "whatsapp", ctx, adapter: whatsappOutbound }),
   sendText: async ({ to, text, accountId, deps, gifPlayback }) => {
     const send =
       deps?.sendWhatsApp ?? (await import("../../../web/outbound.js")).sendMessageWhatsApp;

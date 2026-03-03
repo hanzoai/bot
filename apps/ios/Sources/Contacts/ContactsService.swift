@@ -127,6 +127,18 @@ final class ContactsService: ContactsServicing {
         }
     }
 
+    private static func authorizedStore() async throws -> CNContactStore {
+        let store = CNContactStore()
+        let status = CNContactStore.authorizationStatus(for: .contacts)
+        let authorized = await Self.ensureAuthorization(store: store, status: status)
+        guard authorized else {
+            throw NSError(domain: "Contacts", code: 1, userInfo: [
+                NSLocalizedDescriptionKey: "CONTACTS_PERMISSION_REQUIRED: grant Contacts permission",
+            ])
+        }
+        return store
+    }
+
     private static func normalizeStrings(_ values: [String]?, lowercased: Bool = false) -> [String] {
         (values ?? [])
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }

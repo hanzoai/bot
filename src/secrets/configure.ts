@@ -4,27 +4,29 @@ import { isDeepStrictEqual } from "node:util";
 import type { BotConfig } from "../config/config.js";
 import type { SecretProviderConfig, SecretRef, SecretRefSource } from "../config/types.secrets.js";
 import { isSafeExecutableValue } from "../infra/exec-safety.js";
+import { normalizeAgentId } from "../routing/session-key.js";
 import { runSecretsApply, type SecretsApplyResult } from "./apply.js";
 import { createSecretsConfigIO } from "./config-io.js";
-import { type SecretsApplyPlan } from "./plan.js";
-import { resolveDefaultSecretProviderAlias } from "./ref-contract.js";
+import {
+  buildConfigureCandidatesForScope,
+  buildSecretsConfigurePlan,
+  collectConfigureProviderChanges,
+  hasConfigurePlanChanges,
+  type ConfigureCandidate,
+} from "./configure-plan.js";
+import type { SecretsApplyPlan } from "./plan.js";
+import { PROVIDER_ENV_VARS } from "./provider-env-vars.js";
+import { isValidSecretProviderAlias, resolveDefaultSecretProviderAlias } from "./ref-contract.js";
+import { resolveSecretRefValue } from "./resolve.js";
+import { assertExpectedResolvedSecretValue } from "./secret-value.js";
 import { isRecord } from "./shared.js";
-
-type ConfigureCandidate = {
-  type: "models.providers.apiKey" | "skills.entries.apiKey" | "channels.googlechat.serviceAccount";
-  path: string;
-  pathSegments: string[];
-  label: string;
-  providerId?: string;
-  accountId?: string;
-};
+import { readJsonObjectIfExists } from "./storage-scan.js";
 
 export type SecretsConfigureResult = {
   plan: SecretsApplyPlan;
   preflight: SecretsApplyResult;
 };
 
-const PROVIDER_ALIAS_PATTERN = /^[a-z][a-z0-9_-]{0,63}$/;
 const ENV_NAME_PATTERN = /^[A-Z][A-Z0-9_]{0,127}$/;
 const WINDOWS_ABS_PATH_PATTERN = /^[A-Za-z]:[\\/]/;
 const WINDOWS_UNC_PATH_PATTERN = /^\\\\[^\\]+\\[^\\]+/;
@@ -213,6 +215,220 @@ function assertNoCancel<T>(value: T | symbol, message: string): T {
   return value;
 }
 
+const AUTH_PROFILE_ID_PATTERN = /^[A-Za-z0-9:_-]{1,128}$/;
+
+function validateEnvNameCsv(value: string): string | undefined {
+  const entries = parseCsv(value);
+  for (const entry of entries) {
+    if (!ENV_NAME_PATTERN.test(entry)) {
+      return `Invalid env name: ${entry}`;
+    }
+  }
+  return undefined;
+}
+
+async function promptEnvNameCsv(params: {
+  message: string;
+  initialValue: string;
+}): Promise<string[]> {
+  const raw = assertNoCancel(
+    await text({
+      message: params.message,
+      initialValue: params.initialValue,
+      validate: (value) => validateEnvNameCsv(String(value ?? "")),
+    }),
+    "Secrets configure cancelled.",
+  );
+  return parseCsv(String(raw ?? ""));
+}
+
+async function promptOptionalPositiveInt(params: {
+  message: string;
+  initialValue?: number;
+  max: number;
+}): Promise<number | undefined> {
+  const raw = assertNoCancel(
+    await text({
+      message: params.message,
+      initialValue: params.initialValue === undefined ? "" : String(params.initialValue),
+      validate: (value) => {
+        const trimmed = String(value ?? "").trim();
+        if (!trimmed) {
+          return undefined;
+        }
+        const parsed = parseOptionalPositiveInt(trimmed, params.max);
+        if (parsed === undefined) {
+          return `Must be an integer between 1 and ${params.max}`;
+        }
+        return undefined;
+      },
+    }),
+    "Secrets configure cancelled.",
+  );
+  const parsed = parseOptionalPositiveInt(String(raw ?? ""), params.max);
+  return parsed;
+}
+
+function configureCandidateKey(candidate: {
+  configFile: "bot.json" | "auth-profiles.json";
+  path: string;
+  agentId?: string;
+}): string {
+  if (candidate.configFile === "auth-profiles.json") {
+    return `auth-profiles:${String(candidate.agentId ?? "").trim()}:${candidate.path}`;
+  }
+  return `bot:${candidate.path}`;
+}
+
+function hasSourceChoice(
+  sourceChoices: Array<{ value: SecretRefSource; label: string }>,
+  source: SecretRefSource,
+): boolean {
+  return sourceChoices.some((entry) => entry.value === source);
+}
+
+function resolveCandidateProviderHint(candidate: ConfigureCandidate): string | undefined {
+  if (typeof candidate.authProfileProvider === "string" && candidate.authProfileProvider.trim()) {
+    return candidate.authProfileProvider.trim().toLowerCase();
+  }
+  if (typeof candidate.providerId === "string" && candidate.providerId.trim()) {
+    return candidate.providerId.trim().toLowerCase();
+  }
+  return undefined;
+}
+
+function resolveSuggestedEnvSecretId(candidate: ConfigureCandidate): string | undefined {
+  const hintedProvider = resolveCandidateProviderHint(candidate);
+  if (!hintedProvider) {
+    return undefined;
+  }
+  const envCandidates = PROVIDER_ENV_VARS[hintedProvider];
+  if (!Array.isArray(envCandidates) || envCandidates.length === 0) {
+    return undefined;
+  }
+  return envCandidates[0];
+}
+
+function resolveConfigureAgentId(config: BotConfig, explicitAgentId?: string): string {
+  const knownAgentIds = new Set(listAgentIds(config));
+  if (!explicitAgentId) {
+    return resolveDefaultAgentId(config);
+  }
+  const normalized = normalizeAgentId(explicitAgentId);
+  if (knownAgentIds.has(normalized)) {
+    return normalized;
+  }
+  const known = [...knownAgentIds].toSorted().join(", ");
+  throw new Error(
+    `Unknown agent id "${explicitAgentId}". Known agents: ${known || "none configured"}.`,
+  );
+}
+
+function normalizeAuthStoreForConfigure(
+  raw: Record<string, unknown> | null,
+  storePath: string,
+): AuthProfileStore {
+  if (!raw) {
+    return {
+      version: AUTH_STORE_VERSION,
+      profiles: {},
+    };
+  }
+  if (!isRecord(raw.profiles)) {
+    throw new Error(
+      `Cannot run interactive secrets configure because ${storePath} is invalid (missing "profiles" object).`,
+    );
+  }
+  const version = typeof raw.version === "number" && Number.isFinite(raw.version) ? raw.version : 1;
+  return {
+    version,
+    profiles: raw.profiles as AuthProfileStore["profiles"],
+    ...(isRecord(raw.order) ? { order: raw.order as AuthProfileStore["order"] } : {}),
+    ...(isRecord(raw.lastGood) ? { lastGood: raw.lastGood as AuthProfileStore["lastGood"] } : {}),
+    ...(isRecord(raw.usageStats)
+      ? { usageStats: raw.usageStats as AuthProfileStore["usageStats"] }
+      : {}),
+  };
+}
+
+function loadAuthProfileStoreForConfigure(params: {
+  config: BotConfig;
+  agentId: string;
+}): AuthProfileStore {
+  const agentDir = resolveAgentDir(params.config, params.agentId);
+  const storePath = resolveAuthStorePath(agentDir);
+  const parsed = readJsonObjectIfExists(storePath);
+  if (parsed.error) {
+    throw new Error(
+      `Cannot run interactive secrets configure because ${storePath} could not be read: ${parsed.error}`,
+    );
+  }
+  return normalizeAuthStoreForConfigure(parsed.value, storePath);
+}
+
+async function promptNewAuthProfileCandidate(agentId: string): Promise<ConfigureCandidate> {
+  const profileId = assertNoCancel(
+    await text({
+      message: "Auth profile id",
+      validate: (value) => {
+        const trimmed = String(value ?? "").trim();
+        if (!trimmed) {
+          return "Required";
+        }
+        if (!AUTH_PROFILE_ID_PATTERN.test(trimmed)) {
+          return 'Use letters/numbers/":"/"_"/"-" only.';
+        }
+        return undefined;
+      },
+    }),
+    "Secrets configure cancelled.",
+  );
+
+  const credentialType = assertNoCancel(
+    await select({
+      message: "Auth profile credential type",
+      options: [
+        { value: "api_key", label: "api_key (key/keyRef)" },
+        { value: "token", label: "token (token/tokenRef)" },
+      ],
+    }),
+    "Secrets configure cancelled.",
+  );
+
+  const provider = assertNoCancel(
+    await text({
+      message: "Provider id",
+      validate: (value) => (String(value ?? "").trim().length > 0 ? undefined : "Required"),
+    }),
+    "Secrets configure cancelled.",
+  );
+
+  const profileIdTrimmed = String(profileId).trim();
+  const providerTrimmed = String(provider).trim();
+  if (credentialType === "token") {
+    return {
+      type: "auth-profiles.token.token",
+      path: `profiles.${profileIdTrimmed}.token`,
+      pathSegments: ["profiles", profileIdTrimmed, "token"],
+      label: `profiles.${profileIdTrimmed}.token (auth profile, agent ${agentId})`,
+      configFile: "auth-profiles.json",
+      agentId,
+      authProfileProvider: providerTrimmed,
+      expectedResolvedValue: "string",
+    };
+  }
+  return {
+    type: "auth-profiles.api_key.key",
+    path: `profiles.${profileIdTrimmed}.key`,
+    pathSegments: ["profiles", profileIdTrimmed, "key"],
+    label: `profiles.${profileIdTrimmed}.key (auth profile, agent ${agentId})`,
+    configFile: "auth-profiles.json",
+    agentId,
+    authProfileProvider: providerTrimmed,
+    expectedResolvedValue: "string",
+  };
+}
+
 async function promptProviderAlias(params: { existingAliases: Set<string> }): Promise<string> {
   const alias = assertNoCancel(
     await text({
@@ -223,7 +439,7 @@ async function promptProviderAlias(params: { existingAliases: Set<string> }): Pr
         if (!trimmed) {
           return "Required";
         }
-        if (!PROVIDER_ALIAS_PATTERN.test(trimmed)) {
+        if (!isValidSecretProviderAlias(trimmed)) {
           return "Must match /^[a-z][a-z0-9_-]{0,63}$/";
         }
         if (params.existingAliases.has(trimmed)) {
@@ -256,23 +472,10 @@ async function promptProviderSource(initial?: SecretRefSource): Promise<SecretRe
 async function promptEnvProvider(
   base?: Extract<SecretProviderConfig, { source: "env" }>,
 ): Promise<Extract<SecretProviderConfig, { source: "env" }>> {
-  const allowlistRaw = assertNoCancel(
-    await text({
-      message: "Env allowlist (comma-separated, blank for unrestricted)",
-      initialValue: base?.allowlist?.join(",") ?? "",
-      validate: (value) => {
-        const entries = parseCsv(String(value ?? ""));
-        for (const entry of entries) {
-          if (!ENV_NAME_PATTERN.test(entry)) {
-            return `Invalid env name: ${entry}`;
-          }
-        }
-        return undefined;
-      },
-    }),
-    "Secrets configure cancelled.",
-  );
-  const allowlist = parseCsv(String(allowlistRaw ?? ""));
+  const allowlist = await promptEnvNameCsv({
+    message: "Env allowlist (comma-separated, blank for unrestricted)",
+    initialValue: base?.allowlist?.join(",") ?? "",
+  });
   return {
     source: "env",
     ...(allowlist.length > 0 ? { allowlist } : {}),
@@ -312,43 +515,16 @@ async function promptFileProvider(
     "Secrets configure cancelled.",
   );
 
-  const timeoutMsRaw = assertNoCancel(
-    await text({
-      message: "Timeout ms (blank for default)",
-      initialValue: base?.timeoutMs ? String(base.timeoutMs) : "",
-      validate: (value) => {
-        const trimmed = String(value ?? "").trim();
-        if (!trimmed) {
-          return undefined;
-        }
-        if (parseOptionalPositiveInt(trimmed, 120000) === undefined) {
-          return "Must be an integer between 1 and 120000";
-        }
-        return undefined;
-      },
-    }),
-    "Secrets configure cancelled.",
-  );
-  const maxBytesRaw = assertNoCancel(
-    await text({
-      message: "Max bytes (blank for default)",
-      initialValue: base?.maxBytes ? String(base.maxBytes) : "",
-      validate: (value) => {
-        const trimmed = String(value ?? "").trim();
-        if (!trimmed) {
-          return undefined;
-        }
-        if (parseOptionalPositiveInt(trimmed, 20 * 1024 * 1024) === undefined) {
-          return "Must be an integer between 1 and 20971520";
-        }
-        return undefined;
-      },
-    }),
-    "Secrets configure cancelled.",
-  );
-
-  const timeoutMs = parseOptionalPositiveInt(String(timeoutMsRaw ?? ""), 120000);
-  const maxBytes = parseOptionalPositiveInt(String(maxBytesRaw ?? ""), 20 * 1024 * 1024);
+  const timeoutMs = await promptOptionalPositiveInt({
+    message: "Timeout ms (blank for default)",
+    initialValue: base?.timeoutMs,
+    max: 120000,
+  });
+  const maxBytes = await promptOptionalPositiveInt({
+    message: "Max bytes (blank for default)",
+    initialValue: base?.maxBytes,
+    max: 20 * 1024 * 1024,
+  });
 
   return {
     source: "file",
@@ -418,59 +594,23 @@ async function promptExecProvider(
     "Secrets configure cancelled.",
   );
 
-  const timeoutMsRaw = assertNoCancel(
-    await text({
-      message: "Timeout ms (blank for default)",
-      initialValue: base?.timeoutMs ? String(base.timeoutMs) : "",
-      validate: (value) => {
-        const trimmed = String(value ?? "").trim();
-        if (!trimmed) {
-          return undefined;
-        }
-        if (parseOptionalPositiveInt(trimmed, 120000) === undefined) {
-          return "Must be an integer between 1 and 120000";
-        }
-        return undefined;
-      },
-    }),
-    "Secrets configure cancelled.",
-  );
+  const timeoutMs = await promptOptionalPositiveInt({
+    message: "Timeout ms (blank for default)",
+    initialValue: base?.timeoutMs,
+    max: 120000,
+  });
 
-  const noOutputTimeoutMsRaw = assertNoCancel(
-    await text({
-      message: "No-output timeout ms (blank for default)",
-      initialValue: base?.noOutputTimeoutMs ? String(base.noOutputTimeoutMs) : "",
-      validate: (value) => {
-        const trimmed = String(value ?? "").trim();
-        if (!trimmed) {
-          return undefined;
-        }
-        if (parseOptionalPositiveInt(trimmed, 120000) === undefined) {
-          return "Must be an integer between 1 and 120000";
-        }
-        return undefined;
-      },
-    }),
-    "Secrets configure cancelled.",
-  );
+  const noOutputTimeoutMs = await promptOptionalPositiveInt({
+    message: "No-output timeout ms (blank for default)",
+    initialValue: base?.noOutputTimeoutMs,
+    max: 120000,
+  });
 
-  const maxOutputBytesRaw = assertNoCancel(
-    await text({
-      message: "Max output bytes (blank for default)",
-      initialValue: base?.maxOutputBytes ? String(base.maxOutputBytes) : "",
-      validate: (value) => {
-        const trimmed = String(value ?? "").trim();
-        if (!trimmed) {
-          return undefined;
-        }
-        if (parseOptionalPositiveInt(trimmed, 20 * 1024 * 1024) === undefined) {
-          return "Must be an integer between 1 and 20971520";
-        }
-        return undefined;
-      },
-    }),
-    "Secrets configure cancelled.",
-  );
+  const maxOutputBytes = await promptOptionalPositiveInt({
+    message: "Max output bytes (blank for default)",
+    initialValue: base?.maxOutputBytes,
+    max: 20 * 1024 * 1024,
+  });
 
   const jsonOnly = assertNoCancel(
     await confirm({
@@ -480,22 +620,10 @@ async function promptExecProvider(
     "Secrets configure cancelled.",
   );
 
-  const passEnvRaw = assertNoCancel(
-    await text({
-      message: "Pass-through env vars (comma-separated, blank for none)",
-      initialValue: base?.passEnv?.join(",") ?? "",
-      validate: (value) => {
-        const entries = parseCsv(String(value ?? ""));
-        for (const entry of entries) {
-          if (!ENV_NAME_PATTERN.test(entry)) {
-            return `Invalid env name: ${entry}`;
-          }
-        }
-        return undefined;
-      },
-    }),
-    "Secrets configure cancelled.",
-  );
+  const passEnv = await promptEnvNameCsv({
+    message: "Pass-through env vars (comma-separated, blank for none)",
+    initialValue: base?.passEnv?.join(",") ?? "",
+  });
 
   const trustedDirsRaw = assertNoCancel(
     await text({
@@ -530,13 +658,6 @@ async function promptExecProvider(
   );
 
   const args = await parseArgsInput(String(argsRaw ?? ""));
-  const timeoutMs = parseOptionalPositiveInt(String(timeoutMsRaw ?? ""), 120000);
-  const noOutputTimeoutMs = parseOptionalPositiveInt(String(noOutputTimeoutMsRaw ?? ""), 120000);
-  const maxOutputBytes = parseOptionalPositiveInt(
-    String(maxOutputBytesRaw ?? ""),
-    20 * 1024 * 1024,
-  );
-  const passEnv = parseCsv(String(passEnvRaw ?? ""));
   const trustedDirs = parseCsv(String(trustedDirsRaw ?? ""));
 
   return {
@@ -711,6 +832,7 @@ export async function runSecretsConfigureInteractive(
     env?: NodeJS.ProcessEnv;
     providersOnly?: boolean;
     skipProviderSetup?: boolean;
+    agentId?: string;
   } = {},
 ): Promise<SecretsConfigureResult> {
   if (!process.stdin.isTTY) {
@@ -732,26 +854,62 @@ export async function runSecretsConfigureInteractive(
     await configureProvidersInteractive(stagedConfig);
   }
 
-  const providerChanges = collectProviderPlanChanges({
+  const providerChanges = collectConfigureProviderChanges({
     original: snapshot.config,
     next: stagedConfig,
   });
 
   const selectedByPath = new Map<string, ConfigureCandidate & { ref: SecretRef }>();
   if (!params.providersOnly) {
-    const candidates = buildCandidates(stagedConfig);
+    const configureAgentId = resolveConfigureAgentId(snapshot.config, params.agentId);
+    const authStore = loadAuthProfileStoreForConfigure({
+      config: snapshot.config,
+      agentId: configureAgentId,
+    });
+    const candidates = buildConfigureCandidatesForScope({
+      config: stagedConfig,
+      authoredBotConfig: snapshot.resolved,
+      authProfiles: {
+        agentId: configureAgentId,
+        store: authStore,
+      },
+    });
     if (candidates.length === 0) {
       throw new Error("No configurable secret-bearing fields found in bot.json.");
     }
 
     const sourceChoices = toSourceChoices(stagedConfig);
+    const hasDerivedCandidates = candidates.some((candidate) => candidate.isDerived === true);
+    let showDerivedCandidates = false;
 
     while (true) {
-      const options = candidates.map((candidate) => ({
-        value: candidate.path,
+      const visibleCandidates = showDerivedCandidates
+        ? candidates
+        : candidates.filter((candidate) => candidate.isDerived !== true);
+      const options = visibleCandidates.map((candidate) => ({
+        value: configureCandidateKey(candidate),
         label: candidate.label,
-        hint: candidate.path,
+        hint: [
+          candidate.configFile === "auth-profiles.json" ? "auth-profiles.json" : "bot.json",
+          candidate.isDerived === true ? "derived" : undefined,
+        ]
+          .filter(Boolean)
+          .join(" | "),
       }));
+      options.push({
+        value: "__create_auth_profile__",
+        label: "Create auth profile mapping",
+        hint: `Add a new auth-profiles target for agent ${configureAgentId}`,
+      });
+      if (hasDerivedCandidates) {
+        options.push({
+          value: "__toggle_derived__",
+          label: showDerivedCandidates ? "Hide derived targets" : "Show derived targets",
+          hint: showDerivedCandidates
+            ? "Show only fields authored directly in config"
+            : "Include normalized/derived aliases",
+        });
+      }
       if (selectedByPath.size > 0) {
         options.unshift({
           value: "__done__",
@@ -771,16 +929,41 @@ export async function runSecretsConfigureInteractive(
       if (selectedPath === "__done__") {
         break;
       }
+      if (selectedPath === "__create_auth_profile__") {
+        const createdCandidate = await promptNewAuthProfileCandidate(configureAgentId);
+        const key = configureCandidateKey(createdCandidate);
+        const existingIndex = candidates.findIndex((entry) => configureCandidateKey(entry) === key);
+        if (existingIndex >= 0) {
+          candidates[existingIndex] = createdCandidate;
+        } else {
+          candidates.push(createdCandidate);
+        }
+        continue;
+      }
+      if (selectedPath === "__toggle_derived__") {
+        showDerivedCandidates = !showDerivedCandidates;
+        continue;
+      }
 
-      const candidate = candidates.find((entry) => entry.path === selectedPath);
+      const candidate = visibleCandidates.find(
+        (entry) => configureCandidateKey(entry) === selectedPath,
+      );
       if (!candidate) {
         throw new Error(`Unknown configure target: ${selectedPath}`);
       }
+      const candidateKey = configureCandidateKey(candidate);
+      const priorSelection = selectedByPath.get(candidateKey);
+      const existingRef = priorSelection?.ref ?? candidate.existingRef;
+      const sourceInitialValue =
+        existingRef && hasSourceChoice(sourceChoices, existingRef.source)
+          ? existingRef.source
+          : undefined;
 
       const source = assertNoCancel(
         await select({
           message: "Secret source",
           options: sourceChoices,
+          initialValue: sourceInitialValue,
         }),
         "Secrets configure cancelled.",
       ) as SecretRefSource;
@@ -788,16 +971,18 @@ export async function runSecretsConfigureInteractive(
       const defaultAlias = resolveDefaultSecretProviderAlias(stagedConfig, source, {
         preferFirstProviderForSource: true,
       });
+      const providerInitialValue =
+        existingRef?.source === source ? existingRef.provider : defaultAlias;
       const provider = assertNoCancel(
         await text({
           message: "Provider alias",
-          initialValue: defaultAlias,
+          initialValue: providerInitialValue,
           validate: (value) => {
             const trimmed = String(value ?? "").trim();
             if (!trimmed) {
               return "Required";
             }
-            if (!PROVIDER_ALIAS_PATTERN.test(trimmed)) {
+            if (!isValidSecretProviderAlias(trimmed)) {
               return "Must match /^[a-z][a-z0-9_-]{0,63}$/";
             }
             return undefined;
@@ -805,24 +990,50 @@ export async function runSecretsConfigureInteractive(
         }),
         "Secrets configure cancelled.",
       );
+      const providerAlias = String(provider).trim();
+      const suggestedIdFromExistingRef =
+        existingRef?.source === source ? existingRef.id : undefined;
+      let suggestedId = suggestedIdFromExistingRef;
+      if (!suggestedId && source === "env") {
+        suggestedId = resolveSuggestedEnvSecretId(candidate);
+      }
+      if (!suggestedId && source === "file") {
+        const configuredProvider = stagedConfig.secrets?.providers?.[providerAlias];
+        if (configuredProvider?.source === "file" && configuredProvider.mode === "singleValue") {
+          suggestedId = "value";
+        }
+      }
       const id = assertNoCancel(
         await text({
           message: "Secret id",
+          initialValue: suggestedId,
           validate: (value) => (String(value ?? "").trim().length > 0 ? undefined : "Required"),
         }),
         "Secrets configure cancelled.",
       );
       const ref: SecretRef = {
         source,
-        provider: String(provider).trim(),
+        provider: providerAlias,
         id: String(id).trim(),
       };
+      const resolved = await resolveSecretRefValue(ref, {
+        config: stagedConfig,
+        env,
+      });
+      assertExpectedResolvedSecretValue({
+        value: resolved,
+        expected: candidate.expectedResolvedValue,
+        errorMessage:
+          candidate.expectedResolvedValue === "string"
+            ? `Ref ${ref.source}:${ref.provider}:${ref.id} did not resolve to a non-empty string.`
+            : `Ref ${ref.source}:${ref.provider}:${ref.id} did not resolve to a supported value type.`,
+      });
 
       const next = {
         ...candidate,
         ref,
       };
-      selectedByPath.set(candidate.path, next);
+      selectedByPath.set(candidateKey, next);
 
       const addMore = assertNoCancel(
         await confirm({
@@ -837,11 +1048,7 @@ export async function runSecretsConfigureInteractive(
     }
   }
 
-  if (
-    selectedByPath.size === 0 &&
-    Object.keys(providerChanges.upserts).length === 0 &&
-    providerChanges.deletes.length === 0
-  ) {
+  if (!hasConfigurePlanChanges({ selectedTargets: selectedByPath, providerChanges })) {
     throw new Error("No secrets changes were selected.");
   }
 

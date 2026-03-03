@@ -56,6 +56,18 @@ describe("createAccountListHelpers", () => {
   });
 
   describe("resolveDefaultAccountId", () => {
+    it("prefers configured defaultAccount when it matches a configured account id", () => {
+      expect(resolveDefaultAccountId(cfg({ alpha: {}, beta: {} }, "beta"))).toBe("beta");
+    });
+
+    it("normalizes configured defaultAccount before matching", () => {
+      expect(resolveDefaultAccountId(cfg({ "router-d": {} }, "Router D"))).toBe("router-d");
+    });
+
+    it("falls back when configured defaultAccount is missing", () => {
+      expect(resolveDefaultAccountId(cfg({ beta: {}, alpha: {} }, "missing"))).toBe("alpha");
+    });
+
     it('returns "default" when present', () => {
       expect(resolveDefaultAccountId(cfg({ default: {}, other: {} }))).toBe("default");
     });

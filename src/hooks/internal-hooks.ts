@@ -166,15 +166,47 @@ export function createInternalHookEvent(
   };
 }
 
-export function isAgentBootstrapEvent(event: InternalHookEvent): event is AgentBootstrapHookEvent {
-  if (event.type !== "agent" || event.action !== "bootstrap") {
-    return false;
-  }
-  const context = event.context as Partial<AgentBootstrapHookContext> | null;
+function isHookEventTypeAndAction(
+  event: InternalHookEvent,
+  type: InternalHookEventType,
+  action: string,
+): boolean {
+  return event.type === type && event.action === action;
+}
+
+function getHookContext<T extends Record<string, unknown>>(
+  event: InternalHookEvent,
+): Partial<T> | null {
+  const context = event.context as Partial<T> | null;
   if (!context || typeof context !== "object") {
+    return null;
+  }
+  return context;
+}
+
+function hasStringContextField<T extends Record<string, unknown>>(
+  context: Partial<T>,
+  key: keyof T,
+): boolean {
+  return typeof context[key] === "string";
+}
+
+function hasBooleanContextField<T extends Record<string, unknown>>(
+  context: Partial<T>,
+  key: keyof T,
+): boolean {
+  return typeof context[key] === "boolean";
+}
+
+export function isAgentBootstrapEvent(event: InternalHookEvent): event is AgentBootstrapHookEvent {
+  if (!isHookEventTypeAndAction(event, "agent", "bootstrap")) {
     return false;
   }
-  if (typeof context.workspaceDir !== "string") {
+  const context = getHookContext<AgentBootstrapHookContext>(event);
+  if (!context) {
+    return false;
+  }
+  if (!hasStringContextField(context, "workspaceDir")) {
     return false;
   }
   return Array.isArray(context.bootstrapFiles);

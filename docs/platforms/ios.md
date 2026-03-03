@@ -103,6 +103,6 @@ bot nodes invoke --node "iOS Node" --command canvas.snapshot --params '{"maxWidt
 
 ## Related docs
 
-- [Pairing](/gateway/pairing)
+- [Pairing](/channels/pairing)
 - [Discovery](/gateway/discovery)
 - [Bonjour](/gateway/bonjour)

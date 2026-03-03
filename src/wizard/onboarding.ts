@@ -272,6 +272,29 @@ export async function runOnboardingWizard(
 
   const localPort = resolveGatewayPort(baseConfig);
   const localUrl = `ws://127.0.0.1:${localPort}`;
+  let localGatewayPassword =
+    process.env.BOT_GATEWAY_PASSWORD ??
+    normalizeSecretInputString(baseConfig.gateway?.auth?.password);
+  try {
+    const resolvedGatewayPassword = await resolveOnboardingSecretInputString({
+      config: baseConfig,
+      value: baseConfig.gateway?.auth?.password,
+      path: "gateway.auth.password",
+      env: process.env,
+    });
+    if (resolvedGatewayPassword) {
+      localGatewayPassword = resolvedGatewayPassword;
+    }
+  } catch (error) {
+    await prompter.note(
+      [
+        "Could not resolve gateway.auth.password SecretRef for onboarding probe.",
+        error instanceof Error ? error.message : String(error),
+      ].join("\n"),
+      "Gateway auth",
+    );
+  }
+
   const localProbe = await onboardHelpers.probeGatewayReachable({
     url: localUrl,
     token: baseConfig.gateway?.auth?.token ?? process.env.BOT_GATEWAY_TOKEN,
@@ -281,7 +304,7 @@ export async function runOnboardingWizard(
   const remoteProbe = remoteUrl
     ? await onboardHelpers.probeGatewayReachable({
         url: remoteUrl,
-        token: baseConfig.gateway?.remote?.token,
+        token: normalizeSecretInputString(baseConfig.gateway?.remote?.token),
       })
     : null;
 
@@ -314,7 +337,9 @@ export async function runOnboardingWizard(
   if (mode === "remote") {
     const { promptRemoteGatewayConfig } = await import("../commands/onboard-remote.js");
     const { logConfigUpdated } = await import("../config/logging.js");
-    let nextConfig = await promptRemoteGatewayConfig(baseConfig, prompter);
+    let nextConfig = await promptRemoteGatewayConfig(baseConfig, prompter, {
+      secretInputMode: opts.secretInputMode,
+    });
     nextConfig = onboardHelpers.applyWizardMetadata(nextConfig, { command: "onboard", mode });
     await writeConfigFile(nextConfig);
     logConfigUpdated(runtime);
@@ -404,6 +429,7 @@ export async function runOnboardingWizard(
     nextConfig,
     localPort,
     quickstartGateway,
+    secretInputMode: opts.secretInputMode,
     prompter,
     runtime,
   });
@@ -427,6 +453,7 @@ export async function runOnboardingWizard(
       skipDmPolicyPrompt: flow === "quickstart",
       skipConfirm: flow === "quickstart",
       quickstartDefaults: flow === "quickstart",
+      secretInputMode: opts.secretInputMode,
     });
   }
 

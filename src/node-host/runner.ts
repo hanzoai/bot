@@ -1,7 +1,6 @@
-import fs from "node:fs";
-import path from "node:path";
 import { resolveBrowserConfig } from "../browser/config.js";
-import { loadConfig } from "../config/config.js";
+import { loadConfig, type BotConfig } from "../config/config.js";
+import { normalizeSecretInputString, resolveSecretInputRef } from "../config/types.secrets.js";
 import { GatewayClient } from "../gateway/client.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import { type SkillBinTrustEntry } from "../infra/exec-approvals.js";
@@ -99,6 +98,85 @@ function ensureNodePathEnv(): string {
   }
   process.env.PATH = DEFAULT_NODE_PATH;
   return DEFAULT_NODE_PATH;
+}
+
+async function resolveNodeHostSecretInputString(params: {
+  config: BotConfig;
+  value: unknown;
+  path: string;
+  env: NodeJS.ProcessEnv;
+}): Promise<string | undefined> {
+  const defaults = params.config.secrets?.defaults;
+  const { ref } = resolveSecretInputRef({
+    value: params.value,
+    defaults,
+  });
+  if (!ref) {
+    return normalizeSecretInputString(params.value);
+  }
+  let resolved: Map<string, unknown>;
+  try {
+    resolved = await resolveSecretRefValues([ref], {
+      config: params.config,
+      env: params.env,
+    });
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`${params.path} secret reference could not be resolved: ${detail}`, {
+      cause: error,
+    });
+  }
+  const resolvedValue = normalizeSecretInputString(resolved.get(secretRefKey(ref)));
+  if (!resolvedValue) {
+    throw new Error(`${params.path} resolved to an empty or non-string value.`);
+  }
+  return resolvedValue;
+}
+
+export async function resolveNodeHostGatewayCredentials(params: {
+  config: BotConfig;
+  env?: NodeJS.ProcessEnv;
+}): Promise<{ token?: string; password?: string }> {
+  const env = params.env ?? process.env;
+  const isRemoteMode = params.config.gateway?.mode === "remote";
+  const authMode = params.config.gateway?.auth?.mode;
+  const tokenPath = isRemoteMode ? "gateway.remote.token" : "gateway.auth.token";
+  const passwordPath = isRemoteMode ? "gateway.remote.password" : "gateway.auth.password";
+  const configuredToken = isRemoteMode
+    ? params.config.gateway?.remote?.token
+    : params.config.gateway?.auth?.token;
+  const configuredPassword = isRemoteMode
+    ? params.config.gateway?.remote?.password
+    : params.config.gateway?.auth?.password;
+
+  const token =
+    normalizeSecretInputString(env.BOT_GATEWAY_TOKEN) ??
+    (await resolveNodeHostSecretInputString({
+      config: params.config,
+      value: configuredToken,
+      path: tokenPath,
+      env,
+    }));
+  const tokenCanWin = Boolean(token);
+  const localPasswordCanWin =
+    authMode === "password" ||
+    (authMode !== "token" && authMode !== "none" && authMode !== "trusted-proxy" && !tokenCanWin);
+  const shouldResolveConfiguredPassword =
+    !normalizeSecretInputString(env.BOT_GATEWAY_PASSWORD) &&
+    !tokenCanWin &&
+    (isRemoteMode || localPasswordCanWin);
+  const password =
+    normalizeSecretInputString(env.BOT_GATEWAY_PASSWORD) ??
+    (shouldResolveConfiguredPassword
+      ? await resolveNodeHostSecretInputString({
+          config: params.config,
+          value: configuredPassword,
+          path: passwordPath,
+          env,
+        })
+      : normalizeSecretInputString(configuredPassword));
+
+  return { token, password };
 }
 
 export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {

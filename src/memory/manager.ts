@@ -181,6 +181,7 @@ export class MemoryIndexManager implements MemorySearchManager {
     this.gemini = params.providerResult.gemini;
     this.voyage = params.providerResult.voyage;
     this.mistral = params.providerResult.mistral;
+    this.ollama = params.providerResult.ollama;
     this.sources = new Set(params.settings.sources);
     this.db = this.openDatabase();
     this.providerKey = this.computeProviderKey();
@@ -259,7 +260,7 @@ export class MemoryIndexManager implements MemorySearchManager {
       ? await this.searchVector(queryVec, candidates).catch(() => [])
       : [];
 
-    if (!hybrid.enabled) {
+    if (!hybrid.enabled || !this.fts.enabled || !this.fts.available) {
       return vectorResults.filter((entry) => entry.score >= minScore).slice(0, maxResults);
     }
 

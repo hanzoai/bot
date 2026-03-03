@@ -22,6 +22,20 @@ function shouldUseCard(text: string): boolean {
   return /```[\s\S]*?```/.test(text) || /\|.+\|[\r\n]+\|[-:| ]+\|/.test(text);
 }
 
+/** Maximum age (ms) for a message to receive a typing indicator reaction.
+ * Messages older than this are likely replays after context compaction (#30418). */
+const TYPING_INDICATOR_MAX_AGE_MS = 2 * 60_000;
+const MS_EPOCH_MIN = 1_000_000_000_000;
+
+function normalizeEpochMs(timestamp: number | undefined): number | undefined {
+  if (!Number.isFinite(timestamp) || timestamp === undefined || timestamp <= 0) {
+    return undefined;
+  }
+  // Defensive normalization: some payloads use seconds, others milliseconds.
+  // Values below 1e12 are treated as epoch-seconds.
+  return timestamp < MS_EPOCH_MIN ? timestamp * 1000 : timestamp;
+}
+
 export type CreateFeishuReplyDispatcherParams = {
   cfg: BotConfig;
   agentId: string;
@@ -34,6 +48,9 @@ export type CreateFeishuReplyDispatcherParams = {
   rootId?: string;
   mentionTargets?: MentionTarget[];
   accountId?: string;
+  /** Epoch ms when the inbound message was created. Used to suppress typing
+   *  indicators on old/replayed messages after context compaction (#30418). */
+  messageCreateTimeMs?: number;
 };
 
 export function createFeishuReplyDispatcher(params: CreateFeishuReplyDispatcherParams) {
@@ -99,13 +116,57 @@ export function createFeishuReplyDispatcher(params: CreateFeishuReplyDispatcherP
   const chunkMode = core.channel.text.resolveChunkMode(cfg, "feishu");
   const tableMode = core.channel.text.resolveMarkdownTableMode({ cfg, channel: "feishu" });
   const renderMode = account.config?.renderMode ?? "auto";
-  const streamingEnabled = account.config?.streaming !== false && renderMode !== "raw";
+  // Card streaming may miss thread affinity in topic contexts; use direct replies there.
+  const streamingEnabled =
+    !threadReplyMode && account.config?.streaming !== false && renderMode !== "raw";
 
   let streaming: FeishuStreamingSession | null = null;
   let streamText = "";
   let lastPartial = "";
   let partialUpdateQueue: Promise<void> = Promise.resolve();
   let streamingStartPromise: Promise<void> | null = null;
+
+  const mergeStreamingText = (nextText: string) => {
+    if (!streamText) {
+      streamText = nextText;
+      return;
+    }
+    if (nextText.startsWith(streamText)) {
+      // Handle cumulative partial payloads where nextText already includes prior text.
+      streamText = nextText;
+      return;
+    }
+    if (streamText.endsWith(nextText)) {
+      return;
+    }
+    streamText += nextText;
+  };
+
+  const queueStreamingUpdate = (
+    nextText: string,
+    options?: {
+      dedupeWithLastPartial?: boolean;
+    },
+  ) => {
+    if (!nextText) {
+      return;
+    }
+    if (options?.dedupeWithLastPartial && nextText === lastPartial) {
+      return;
+    }
+    if (options?.dedupeWithLastPartial) {
+      lastPartial = nextText;
+    }
+    mergeStreamingText(nextText);
+    partialUpdateQueue = partialUpdateQueue.then(async () => {
+      if (streamingStartPromise) {
+        await streamingStartPromise;
+      }
+      if (streaming?.isActive()) {
+        await streaming.update(streamText);
+      }
+    });
+  };
 
   const startStreaming = () => {
     if (!streamingEnabled || streamingStartPromise || streaming) {
@@ -286,19 +347,10 @@ export function createFeishuReplyDispatcher(params: CreateFeishuReplyDispatcherP
       onModelSelected: prefixContext.onModelSelected,
       onPartialReply: streamingEnabled
         ? (payload: ReplyPayload) => {
-            if (!payload.text || payload.text === lastPartial) {
+            if (!payload.text) {
               return;
             }
-            lastPartial = payload.text;
-            streamText = payload.text;
-            partialUpdateQueue = partialUpdateQueue.then(async () => {
-              if (streamingStartPromise) {
-                await streamingStartPromise;
-              }
-              if (streaming?.isActive()) {
-                await streaming.update(streamText);
-              }
-            });
+            queueStreamingUpdate(payload.text, { dedupeWithLastPartial: true });
           }
         : undefined,
     },

@@ -355,7 +355,7 @@ export function applySingleTokenPromptResult(params: {
   tokenPatchKey: "token" | "botToken";
   tokenResult: {
     useEnv: boolean;
-    token: string | null;
+    token: SecretInput | null;
   };
 }): BotConfig {
   let next = params.cfg;
@@ -417,6 +417,87 @@ export async function promptSingleChannelToken(params: {
   }
 
   return { useEnv: false, token: await promptToken() };
+}
+
+export type SingleChannelSecretInputPromptResult =
+  | { action: "keep" }
+  | { action: "use-env" }
+  | { action: "set"; value: SecretInput; resolvedValue: string };
+
+export async function promptSingleChannelSecretInput(params: {
+  cfg: BotConfig;
+  prompter: Pick<WizardPrompter, "confirm" | "text" | "select" | "note">;
+  providerHint: string;
+  credentialLabel: string;
+  secretInputMode?: "plaintext" | "ref";
+  accountConfigured: boolean;
+  canUseEnv: boolean;
+  hasConfigToken: boolean;
+  envPrompt: string;
+  keepPrompt: string;
+  inputPrompt: string;
+  preferredEnvVar?: string;
+}): Promise<SingleChannelSecretInputPromptResult> {
+  const selectedMode = await resolveSecretInputModeForEnvSelection({
+    prompter: params.prompter as WizardPrompter,
+    explicitMode: params.secretInputMode,
+    copy: {
+      modeMessage: `How do you want to provide this ${params.credentialLabel}?`,
+      plaintextLabel: `Enter ${params.credentialLabel}`,
+      plaintextHint: "Stores the credential directly in Bot config",
+      refLabel: "Use external secret provider",
+      refHint: "Stores a reference to env or configured external secret providers",
+    },
+  });
+
+  if (selectedMode === "plaintext") {
+    const plainResult = await promptSingleChannelToken({
+      prompter: params.prompter,
+      accountConfigured: params.accountConfigured,
+      canUseEnv: params.canUseEnv,
+      hasConfigToken: params.hasConfigToken,
+      envPrompt: params.envPrompt,
+      keepPrompt: params.keepPrompt,
+      inputPrompt: params.inputPrompt,
+    });
+    if (plainResult.useEnv) {
+      return { action: "use-env" };
+    }
+    if (plainResult.token) {
+      return { action: "set", value: plainResult.token, resolvedValue: plainResult.token };
+    }
+    return { action: "keep" };
+  }
+
+  if (params.hasConfigToken && params.accountConfigured) {
+    const keep = await params.prompter.confirm({
+      message: params.keepPrompt,
+      initialValue: true,
+    });
+    if (keep) {
+      return { action: "keep" };
+    }
+  }
+
+  const resolved = await promptSecretRefForOnboarding({
+    provider: params.providerHint,
+    config: params.cfg,
+    prompter: params.prompter as WizardPrompter,
+    preferredEnvVar: params.preferredEnvVar,
+    copy: {
+      sourceMessage: `Where is this ${params.credentialLabel} stored?`,
+      envVarPlaceholder: params.preferredEnvVar ?? "BOT_SECRET",
+      envVarFormatError:
+        'Use an env var name like "BOT_SECRET" (uppercase letters, numbers, underscores).',
+      noProvidersMessage:
+        "No file/exec secret providers are configured yet. Add one under secrets.providers, or select Environment variable.",
+    },
+  });
+  return {
+    action: "set",
+    value: resolved.ref,
+    resolvedValue: resolved.resolvedValue,
+  };
 }
 
 type ParsedAllowFromResult = { entries: string[]; error?: string };

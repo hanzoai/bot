@@ -4,6 +4,15 @@ import type { BotConfig } from "../config/config.js";
 import { resolveAgentRoute } from "./resolve-route.js";
 
 describe("resolveAgentRoute", () => {
+  const resolveDiscordGuildRoute = (cfg: BotConfig) =>
+    resolveAgentRoute({
+      cfg,
+      channel: "discord",
+      accountId: "default",
+      peer: { kind: "channel", id: "c1" },
+      guildId: "g1",
+    });
+
   test("defaults to main/default when no bindings exist", () => {
     const cfg: BotConfig = {};
     const route = resolveAgentRoute({
@@ -129,13 +138,7 @@ describe("resolveAgentRoute", () => {
         },
       ],
     };
-    const route = resolveAgentRoute({
-      cfg,
-      channel: "discord",
-      accountId: "default",
-      peer: { kind: "channel", id: "c1" },
-      guildId: "g1",
-    });
+    const route = resolveDiscordGuildRoute(cfg);
     expect(route.agentId).toBe("chan");
     expect(route.sessionKey).toBe("agent:chan:discord:channel:c1");
     expect(route.matchedBy).toBe("binding.peer");
@@ -169,13 +172,7 @@ describe("resolveAgentRoute", () => {
         },
       ],
     };
-    const route = resolveAgentRoute({
-      cfg,
-      channel: "discord",
-      accountId: "default",
-      peer: { kind: "channel", id: "c1" },
-      guildId: "g1",
-    });
+    const route = resolveDiscordGuildRoute(cfg);
     expect(route.agentId).toBe("guild");
     expect(route.matchedBy).toBe("binding.guild");
   });

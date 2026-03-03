@@ -476,6 +476,7 @@ hanzo-bot pairing list feishu
 {
   channels: {
     feishu: {
+      defaultAccount: "main",
       accounts: {
         main: {
           appId: "cli_xxx",
@@ -493,6 +494,8 @@ hanzo-bot pairing list feishu
   },
 }
 ```
+
+`defaultAccount` controls which Feishu account is used when outbound APIs do not specify an `accountId` explicitly.
 
 ### Message limits
 

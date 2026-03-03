@@ -1,7 +1,15 @@
-import { ConsoleLogger, LogService } from "@vector-im/matrix-bot-sdk";
+import { loadMatrixSdk } from "../sdk-runtime.js";
 
 let matrixSdkLoggingConfigured = false;
-const matrixSdkBaseLogger = new ConsoleLogger();
+let matrixSdkBaseLogger:
+  | {
+      trace: (module: string, ...messageOrObject: unknown[]) => void;
+      debug: (module: string, ...messageOrObject: unknown[]) => void;
+      info: (module: string, ...messageOrObject: unknown[]) => void;
+      warn: (module: string, ...messageOrObject: unknown[]) => void;
+      error: (module: string, ...messageOrObject: unknown[]) => void;
+    }
+  | undefined;
 
 function shouldSuppressMatrixHttpNotFound(module: string, messageOrObject: unknown[]): boolean {
   if (module !== "MatrixHttpClient") {
@@ -19,6 +27,8 @@ export function ensureMatrixSdkLoggingConfigured(): void {
   if (matrixSdkLoggingConfigured) {
     return;
   }
+  const { ConsoleLogger, LogService } = loadMatrixSdk();
+  matrixSdkBaseLogger = new ConsoleLogger();
   matrixSdkLoggingConfigured = true;
 
   LogService.setLogger({
@@ -34,7 +44,7 @@ export function ensureMatrixSdkLoggingConfigured(): void {
       if (shouldSuppressMatrixHttpNotFound(module, messageOrObject)) {
         return;
       }
-      matrixSdkBaseLogger.error(module, ...messageOrObject);
+      matrixSdkBaseLogger?.error(module, ...messageOrObject);
     },
   });
 }

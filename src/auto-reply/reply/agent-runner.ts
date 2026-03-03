@@ -40,6 +40,11 @@ import {
 } from "./agent-runner-helpers.js";
 import { runMemoryFlushIfNeeded } from "./agent-runner-memory.js";
 import { buildReplyPayloads } from "./agent-runner-payloads.js";
+import {
+  appendUnscheduledReminderNote,
+  hasSessionRelatedCronJobs,
+  hasUnbackedReminderCommitment,
+} from "./agent-runner-reminder-guard.js";
 import { appendUsageLine, formatResponseUsageLine } from "./agent-runner-utils.js";
 import { createAudioAsVoiceBuffer, createBlockReplyPipeline } from "./block-reply-pipeline.js";
 import { resolveEffectiveBlockStreamingConfig } from "./block-streaming.js";
@@ -540,8 +545,17 @@ export async function runReplyAgent(params: {
         typeof payload.text === "string" &&
         hasUnbackedReminderCommitment(payload.text),
     );
-    const guardedReplyPayloads =
+    // Suppress the guard note when an existing cron job (created in a prior
+    // turn) already covers the commitment — avoids false positives (#32228).
+    const coveredByExistingCron =
       hasReminderCommitment && successfulCronAdds === 0
+        ? await hasSessionRelatedCronJobs({
+            cronStorePath: cfg.cron?.store,
+            sessionKey,
+          })
+        : false;
+    const guardedReplyPayloads =
+      hasReminderCommitment && successfulCronAdds === 0 && !coveredByExistingCron
         ? appendUnscheduledReminderNote(replyPayloads)
         : replyPayloads;
 
@@ -687,7 +701,7 @@ export async function runReplyAgent(params: {
       // Inject post-compaction workspace context for the next agent turn
       if (sessionKey) {
         const workspaceDir = process.cwd();
-        readPostCompactionContext(workspaceDir)
+        readPostCompactionContext(workspaceDir, cfg)
           .then((contextContent) => {
             if (contextContent) {
               enqueueSystemEvent(contextContent, { sessionKey });
@@ -715,6 +729,11 @@ export async function runReplyAgent(params: {
       queueKey,
       runFollowupTurn,
     );
+  } catch (error) {
+    // Keep the followup queue moving even when an unexpected exception escapes
+    // the run path; the caller still receives the original error.
+    finalizeWithFollowup(undefined, queueKey, runFollowupTurn);
+    throw error;
   } finally {
     blockReplyPipeline?.stop();
     typing.markRunComplete();

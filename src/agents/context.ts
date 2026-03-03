@@ -61,21 +61,31 @@ export function applyConfiguredContextWindows(params: {
 }
 
 const MODEL_CACHE = new Map<string, number>();
-const loadPromise = (async () => {
-  let cfg: ReturnType<typeof loadConfig> | undefined;
-  try {
-    cfg = loadConfig();
-  } catch {
-    // If config can't be loaded, leave cache empty.
-    return;
-  }
+let loadPromise: Promise<void> | null = null;
+let configuredConfig: BotConfig | undefined;
+let configLoadFailures = 0;
+let nextConfigLoadAttemptAtMs = 0;
 
   try {
     await ensureBotModelsJson(cfg);
   } catch {
     // Continue with best-effort discovery/overrides.
   }
+  return tokens;
+}
 
+function shouldSkipEagerContextWindowWarmup(argv: string[] = process.argv): boolean {
+  const [primary, secondary] = getCommandPathFromArgv(argv);
+  return primary === "config" && secondary === "validate";
+}
+
+function primeConfiguredContextWindows(): BotConfig | undefined {
+  if (configuredConfig) {
+    return configuredConfig;
+  }
+  if (Date.now() < nextConfigLoadAttemptAtMs) {
+    return undefined;
+  }
   try {
     const { discoverAuthStorage, discoverModels } = await import("./pi-model-discovery.js");
     const agentDir = resolveBotAgentDir();
@@ -87,19 +97,64 @@ const loadPromise = (async () => {
         : modelRegistry.getAll();
     applyDiscoveredContextWindows({
       cache: MODEL_CACHE,
-      models,
+      modelsConfig: cfg.models as ModelsConfig | undefined,
     });
+    configuredConfig = cfg;
+    configLoadFailures = 0;
+    nextConfigLoadAttemptAtMs = 0;
+    return cfg;
   } catch {
-    // If model discovery fails, continue with config overrides only.
+    configLoadFailures += 1;
+    const backoffMs = computeBackoff(CONFIG_LOAD_RETRY_POLICY, configLoadFailures);
+    nextConfigLoadAttemptAtMs = Date.now() + backoffMs;
+    // If config can't be loaded, leave cache empty and retry after backoff.
+    return undefined;
+  }
+}
+
+function ensureContextWindowCacheLoaded(): Promise<void> {
+  if (loadPromise) {
+    return loadPromise;
   }
 
-  applyConfiguredContextWindows({
-    cache: MODEL_CACHE,
-    modelsConfig: cfg.models as ModelsConfig | undefined,
+  const cfg = primeConfiguredContextWindows();
+  if (!cfg) {
+    return Promise.resolve();
+  }
+
+  loadPromise = (async () => {
+    try {
+      await ensureBotModelsJson(cfg);
+    } catch {
+      // Continue with best-effort discovery/overrides.
+    }
+
+    try {
+      const { discoverAuthStorage, discoverModels } = await import("./pi-model-discovery.js");
+      const agentDir = resolveBotAgentDir();
+      const authStorage = discoverAuthStorage(agentDir);
+      const modelRegistry = discoverModels(authStorage, agentDir) as unknown as ModelRegistryLike;
+      const models =
+        typeof modelRegistry.getAvailable === "function"
+          ? modelRegistry.getAvailable()
+          : modelRegistry.getAll();
+      applyDiscoveredContextWindows({
+        cache: MODEL_CACHE,
+        models,
+      });
+    } catch {
+      // If model discovery fails, continue with config overrides only.
+    }
+
+    applyConfiguredContextWindows({
+      cache: MODEL_CACHE,
+      modelsConfig: cfg.models as ModelsConfig | undefined,
+    });
+  })().catch(() => {
+    // Keep lookup best-effort.
   });
-})().catch(() => {
-  // Keep lookup best-effort.
-});
+  return loadPromise;
+}
 
 // Anthropic 1M extended context window (opus/sonnet models only).
 export const ANTHROPIC_CONTEXT_1M_TOKENS = 1_000_000;
@@ -160,6 +215,6 @@ export function lookupContextTokens(modelId?: string): number | undefined {
     return undefined;
   }
   // Best-effort: kick off loading, but don't block.
-  void loadPromise;
+  void ensureContextWindowCacheLoaded();
   return MODEL_CACHE.get(modelId);
 }

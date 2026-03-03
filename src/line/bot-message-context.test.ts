@@ -52,6 +52,7 @@ describe("buildLineMessageContext", () => {
       allMedia: [],
       cfg,
       account,
+      commandAuthorized: true,
     });
 
     expect(context.ctxPayload.OriginatingTo).toBe("line:group:group-1");
@@ -74,6 +75,7 @@ describe("buildLineMessageContext", () => {
       event,
       cfg,
       account,
+      commandAuthorized: true,
     });
 
     expect(context?.ctxPayload.OriginatingTo).toBe("line:group:group-2");

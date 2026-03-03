@@ -34,6 +34,13 @@ import { resolveSlackSlashCommandConfig } from "./commands.js";
 import { createSlackMonitorContext } from "./context.js";
 import { registerSlackMonitorEvents } from "./events.js";
 import { createSlackMessageHandler } from "./message-handler.js";
+import {
+  formatUnknownError,
+  getSocketEmitter,
+  isNonRecoverableSlackAuthError,
+  SLACK_SOCKET_RECONNECT_POLICY,
+  waitForSlackSocketDisconnect,
+} from "./reconnect-policy.js";
 import { registerSlackMonitorSlashCommands } from "./slash.js";
 
 const slackBoltModule = SlackBolt as typeof import("@slack/bolt") & {
@@ -186,7 +193,10 @@ export async function monitorSlackProvider(opts: MonitorSlackOpts = {}) {
 
   const slackMode = opts.mode ?? account.config.mode ?? "socket";
   const slackWebhookPath = normalizeSlackWebhookPath(account.config.webhookPath);
-  const signingSecret = account.config.signingSecret?.trim();
+  const signingSecret = normalizeResolvedSecretInputString({
+    value: account.config.signingSecret,
+    path: `channels.slack.accounts.${account.accountId}.signingSecret`,
+  });
   const botToken = resolveSlackBotToken(opts.botToken ?? account.botToken);
   const appToken = resolveSlackAppToken(opts.appToken ?? account.appToken);
   if (!botToken || (slackMode !== "http" && !appToken)) {
@@ -540,6 +550,8 @@ export async function monitorSlackProvider(opts: MonitorSlackOpts = {}) {
     await app.stop().catch(() => undefined);
   }
 }
+
+export { isNonRecoverableSlackAuthError } from "./reconnect-policy.js";
 
 export const __testing = {
   resolveSlackRuntimeGroupPolicy: resolveOpenProviderRuntimeGroupPolicy,

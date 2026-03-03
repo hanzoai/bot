@@ -73,7 +73,7 @@ hanzo-bot models status
 
 Hanzo Bot’s interactive login flows are implemented in `@mariozechner/pi-ai` and wired into the wizards/commands.
 
-### Anthropic (Claude Pro/Max) setup-token
+### Anthropic setup-token
 
 Flow shape:
 
@@ -84,6 +84,8 @@ Flow shape:
 The wizard path is `hanzo-bot onboard` → auth choice `setup-token` (Anthropic).
 
 ### OpenAI Codex (ChatGPT OAuth)
+
+OpenAI Codex OAuth is explicitly supported for use outside the Codex CLI, including Bot workflows.
 
 Flow shape (PKCE):
 

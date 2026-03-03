@@ -62,7 +62,21 @@ function mergeMattermostAccountConfig(cfg: BotConfig, accountId: string): Matter
   const { accounts: _ignored, ...base } = (cfg.channels?.mattermost ??
     {}) as MattermostAccountConfig & { accounts?: unknown };
   const account = resolveAccountConfig(cfg, accountId) ?? {};
-  return { ...base, ...account };
+
+  // Shallow merging is fine for most keys, but `commands` should be merged
+  // so that account-specific overrides (callbackPath/callbackUrl) do not
+  // accidentally reset global settings like `native: true`.
+  const mergedCommands = {
+    ...(base.commands ?? {}),
+    ...(account.commands ?? {}),
+  };
+
+  const merged = { ...base, ...account };
+  if (Object.keys(mergedCommands).length > 0) {
+    merged.commands = mergedCommands;
+  }
+
+  return merged;
 }
 
 function resolveMattermostRequireMention(config: MattermostAccountConfig): boolean | undefined {
@@ -81,6 +95,7 @@ function resolveMattermostRequireMention(config: MattermostAccountConfig): boole
 export function resolveMattermostAccount(params: {
   cfg: BotConfig;
   accountId?: string | null;
+  allowUnresolvedSecretRef?: boolean;
 }): ResolvedMattermostAccount {
   const accountId = normalizeAccountId(params.accountId);
   const baseEnabled = params.cfg.channels?.mattermost?.enabled !== false;
@@ -91,7 +106,12 @@ export function resolveMattermostAccount(params: {
   const allowEnv = accountId === DEFAULT_ACCOUNT_ID;
   const envToken = allowEnv ? process.env.MATTERMOST_BOT_TOKEN?.trim() : undefined;
   const envUrl = allowEnv ? process.env.MATTERMOST_URL?.trim() : undefined;
-  const configToken = merged.botToken?.trim();
+  const configToken = params.allowUnresolvedSecretRef
+    ? normalizeSecretInputString(merged.botToken)
+    : normalizeResolvedSecretInputString({
+        value: merged.botToken,
+        path: `channels.mattermost.accounts.${accountId}.botToken`,
+      });
   const configUrl = merged.baseUrl?.trim();
   const botToken = configToken || envToken;
   const baseUrl = normalizeMattermostBaseUrl(configUrl || envUrl);

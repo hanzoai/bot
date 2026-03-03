@@ -85,16 +85,6 @@ function buildConfig(enableNoVnc: boolean): SandboxConfig {
   };
 }
 
-function envEntriesFromDockerArgs(args: string[]): string[] {
-  const values: string[] = [];
-  for (let i = 0; i < args.length; i += 1) {
-    if (args[i] === "-e" && typeof args[i + 1] === "string") {
-      values.push(args[i + 1]);
-    }
-  }
-  return values;
-}
-
 describe("ensureSandboxBrowser create args", () => {
   beforeEach(() => {
     BROWSER_BRIDGES.clear();
@@ -151,9 +141,7 @@ describe("ensureSandboxBrowser create args", () => {
       cfg: buildConfig(true),
     });
 
-    const createArgs = dockerMocks.execDocker.mock.calls.find(
-      (call: unknown[]) => Array.isArray(call[0]) && call[0][0] === "create",
-    )?.[0] as string[] | undefined;
+    const createArgs = findDockerArgsCall(dockerMocks.execDocker.mock.calls, "create");
 
     expect(createArgs).toBeDefined();
     expect(createArgs).toContain("127.0.0.1::6080");
@@ -175,5 +163,40 @@ describe("ensureSandboxBrowser create args", () => {
     const envEntries = envEntriesFromDockerArgs(createArgs ?? []);
     expect(envEntries.some((entry) => entry.startsWith("BOT_BROWSER_NOVNC_PASSWORD="))).toBe(false);
     expect(result?.noVncUrl).toBeUndefined();
+  });
+
+  it("mounts the main workspace read-only when workspaceAccess is none", async () => {
+    const cfg = buildConfig(false);
+    cfg.workspaceAccess = "none";
+
+    await ensureSandboxBrowser({
+      scopeKey: "session:test",
+      workspaceDir: "/tmp/workspace",
+      agentWorkspaceDir: "/tmp/workspace",
+      cfg,
+    });
+
+    const createArgs = findDockerArgsCall(dockerMocks.execDocker.mock.calls, "create");
+
+    expect(createArgs).toBeDefined();
+    expect(createArgs).toContain("/tmp/workspace:/workspace:ro");
+  });
+
+  it("keeps the main workspace writable when workspaceAccess is rw", async () => {
+    const cfg = buildConfig(false);
+    cfg.workspaceAccess = "rw";
+
+    await ensureSandboxBrowser({
+      scopeKey: "session:test",
+      workspaceDir: "/tmp/workspace",
+      agentWorkspaceDir: "/tmp/workspace",
+      cfg,
+    });
+
+    const createArgs = findDockerArgsCall(dockerMocks.execDocker.mock.calls, "create");
+
+    expect(createArgs).toBeDefined();
+    expect(createArgs).toContain("/tmp/workspace:/workspace");
+    expect(createArgs).not.toContain("/tmp/workspace:/workspace:ro");
   });
 });

@@ -138,6 +138,9 @@ export function resolveConfigPathCandidate(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = envHomedir(env),
 ): string {
+  if (env.BOT_TEST_FAST === "1") {
+    return resolveCanonicalConfigPath(env, resolveStateDir(env, homedir));
+  }
   const candidates = resolveDefaultConfigCandidates(env, homedir);
   const existing = candidates.find((candidate) => {
     try {

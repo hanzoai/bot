@@ -1,5 +1,10 @@
 import type { ConfigFileSnapshot } from "./types.bot.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
+import {
+  replaceSensitiveValuesInRaw,
+  shouldFallbackToStructuredRawRedaction,
+} from "./redact-snapshot.raw.js";
+import { isSecretRefShape, redactSecretRefId } from "./redact-snapshot.secret-ref.js";
 import { isSensitiveConfigPath, type ConfigUiHints } from "./schema.hints.js";
 
 const log = createSubsystemLogger("config/redaction");
@@ -246,12 +251,23 @@ function redactObjectGuessing(
  */
 function redactRawText(raw: string, config: unknown, hints?: ConfigUiHints): string {
   const sensitiveValues = collectSensitiveValues(config, hints);
-  sensitiveValues.sort((a, b) => b.length - a.length);
-  let result = raw;
-  for (const value of sensitiveValues) {
-    result = result.replaceAll(value, REDACTED_SENTINEL);
+  return replaceSensitiveValuesInRaw({
+    raw,
+    sensitiveValues,
+    redactedSentinel: REDACTED_SENTINEL,
+  });
+}
+
+let suppressRestoreWarnings = false;
+
+function withRestoreWarningsSuppressed<T>(fn: () => T): T {
+  const prev = suppressRestoreWarnings;
+  suppressRestoreWarnings = true;
+  try {
+    return fn();
+  } finally {
+    suppressRestoreWarnings = prev;
   }
-  return result;
 }
 
 /**
@@ -298,8 +314,21 @@ export function redactConfigSnapshot(
   // readConfigFileSnapshot() does when it creates the snapshot.
 
   const redactedConfig = redactObject(snapshot.config, uiHints) as ConfigFileSnapshot["config"];
-  const redactedRaw = snapshot.raw ? redactRawText(snapshot.raw, snapshot.config, uiHints) : null;
   const redactedParsed = snapshot.parsed ? redactObject(snapshot.parsed, uiHints) : snapshot.parsed;
+  let redactedRaw = snapshot.raw ? redactRawText(snapshot.raw, snapshot.config, uiHints) : null;
+  if (
+    redactedRaw &&
+    shouldFallbackToStructuredRawRedaction({
+      redactedRaw,
+      originalConfig: snapshot.config,
+      restoreParsed: (parsed) =>
+        withRestoreWarningsSuppressed(() =>
+          restoreRedactedValues(parsed, snapshot.config, uiHints),
+        ),
+    })
+  ) {
+    redactedRaw = JSON5.stringify(redactedParsed ?? redactedConfig, null, 2);
+  }
   // Also redact the resolved config (contains values after ${ENV} substitution)
   const redactedResolved = redactConfigObject(snapshot.resolved, uiHints);
 
@@ -381,7 +410,9 @@ function restoreOriginalValueOrThrow(params: {
   if (params.key in params.original) {
     return params.original[params.key];
   }
-  log.warn(`Cannot un-redact config key ${params.path} as it doesn't have any value`);
+  if (!suppressRestoreWarnings) {
+    log.warn(`Cannot un-redact config key ${params.path} as it doesn't have any value`);
+  }
   throw new RedactionError(params.path);
 }
 

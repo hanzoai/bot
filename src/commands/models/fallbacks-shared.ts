@@ -47,7 +47,7 @@ export async function listFallbacksCommand(
   runtime: RuntimeEnv,
 ) {
   ensureFlagCompatibility(opts);
-  const cfg = loadConfig();
+  const cfg = await loadModelsConfig({ commandName: `models ${params.key} list`, runtime });
   const fallbacks = getFallbacks(cfg, params.key);
 
   if (opts.json) {

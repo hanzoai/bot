@@ -1,4 +1,5 @@
 import type { ChannelId } from "../channels/plugins/types.js";
+import type { CronJobBase } from "./types-shared.js";
 
 export type CronSchedule =
   | { kind: "at"; at: string }
@@ -25,6 +26,15 @@ export type CronDelivery = {
   /** Explicit channel account id for multi-account setups (e.g. multiple Telegram bots). */
   accountId?: string;
   bestEffort?: boolean;
+  /** Separate destination for failure notifications. */
+  failureDestination?: CronFailureDestination;
+};
+
+export type CronFailureDestination = {
+  channel?: CronMessageChannel;
+  to?: string;
+  accountId?: string;
+  mode?: "announce" | "webhook";
 };
 
 export type CronDeliveryPatch = Partial<CronDelivery>;

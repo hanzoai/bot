@@ -22,24 +22,23 @@ describe("system events (session routing)", () => {
     expect(peekSystemEvents(mainKey)).toEqual([]);
     expect(peekSystemEvents("discord:group:123")).toEqual(["Discord reaction added: ✅"]);
 
-    const main = await prependSystemEvents({
+    const main = await buildQueuedSystemPrompt({
       cfg,
       sessionKey: mainKey,
       isMainSession: true,
       isNewSession: false,
-      prefixedBodyBase: "hello",
     });
-    expect(main).toBe("hello");
+    expect(main).toBeUndefined();
     expect(peekSystemEvents("discord:group:123")).toEqual(["Discord reaction added: ✅"]);
 
-    const discord = await prependSystemEvents({
+    const discord = await buildQueuedSystemPrompt({
       cfg,
       sessionKey: "discord:group:123",
       isMainSession: false,
       isNewSession: false,
-      prefixedBodyBase: "hi",
     });
-    expect(discord).toMatch(/^System: \[[^\]]+\] Discord reaction added: ✅\n\nhi$/);
+    expect(discord).toContain("Runtime System Events (gateway-generated)");
+    expect(discord).toMatch(/-\s\[[^\]]+\] Discord reaction added: ✅/);
     expect(peekSystemEvents("discord:group:123")).toEqual([]);
   });
 

@@ -1,5 +1,6 @@
 import BotIPC
 import Foundation
+import BotIPC
 import Testing
 
 @Suite struct CanvasIPCTests {

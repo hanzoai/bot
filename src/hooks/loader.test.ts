@@ -50,6 +50,20 @@ describe("loader", () => {
   });
 
   describe("loadInternalHooks", () => {
+    const createLegacyHandlerConfig = () =>
+      createEnabledHooksConfig([
+        {
+          event: "command:new",
+          module: "legacy-handler.js",
+        },
+      ]);
+
+    const expectNoCommandHookRegistration = async (cfg: BotConfig) => {
+      const count = await loadInternalHooks(cfg, tmpDir);
+      expect(count).toBe(0);
+      expect(getRegisteredEventKeys()).not.toContain("command:new");
+    };
+
     it("should return 0 when hooks are not enabled", async () => {
       const cfg: BotConfig = {
         hooks: {

@@ -3,7 +3,7 @@ import CoreLocation
 import Foundation
 
 @MainActor
-final class LocationService: NSObject, CLLocationManagerDelegate {
+final class LocationService: NSObject, CLLocationManagerDelegate, LocationServiceCommon {
     enum Error: Swift.Error {
         case timeout
         case unavailable
@@ -17,10 +17,18 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     private var significantLocationCallback: (@Sendable (CLLocation) -> Void)?
     private var isMonitoringSignificantChanges = false
 
+    var locationManager: CLLocationManager {
+        self.manager
+    }
+
+    var locationRequestContinuation: CheckedContinuation<CLLocation, Swift.Error>? {
+        get { self.locationContinuation }
+        set { self.locationContinuation = newValue }
+    }
+
     override init() {
         super.init()
-        self.manager.delegate = self
-        self.manager.desiredAccuracy = kCLLocationAccuracyBest
+        self.configureLocationManager()
     }
 
     func authorizationStatus() -> CLAuthorizationStatus {
@@ -62,26 +70,16 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     {
-        let now = Date()
-        if let maxAgeMs,
-           let cached = self.manager.location,
-           now.timeIntervalSince(cached.timestamp) * 1000 <= Double(maxAgeMs)
-        {
-            return cached
-        }
-
-        self.manager.desiredAccuracy = Self.accuracyValue(desiredAccuracy)
-        let timeout = max(0, timeoutMs ?? 10000)
-        return try await self.withTimeout(timeoutMs: timeout) {
-            try await self.requestLocation()
-        }
-    }
-
-    private func requestLocation() async throws -> CLLocation {
-        try await withCheckedThrowingContinuation { cont in
-            self.locationContinuation = cont
-            self.manager.requestLocation()
-        }
+        _ = params
+        return try await LocationCurrentRequest.resolve(
+            manager: self.manager,
+            desiredAccuracy: desiredAccuracy,
+            maxAgeMs: maxAgeMs,
+            timeoutMs: timeoutMs,
+            request: { try await self.requestLocationOnce() },
+            withTimeout: { timeoutMs, operation in
+                try await self.withTimeout(timeoutMs: timeoutMs, operation: operation)
+            })
     }
 
     private func awaitAuthorizationChange() async -> CLAuthorizationStatus {
@@ -114,7 +112,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate {
     {
         self.stopLocationUpdates()
 
-        self.manager.desiredAccuracy = Self.accuracyValue(desiredAccuracy)
+        self.manager.desiredAccuracy = LocationCurrentRequest.accuracyValue(desiredAccuracy)
         self.manager.pausesLocationUpdatesAutomatically = true
         self.manager.allowsBackgroundLocationUpdates = true
 

@@ -4,8 +4,9 @@ import Testing
 
 @Suite(.serialized)
 struct ExecApprovalsStoreRefactorTests {
-    @Test
-    func ensureFileSkipsRewriteWhenUnchanged() async throws {
+    private func withTempStateDir(
+        _ body: @escaping @Sendable (URL) async throws -> Void) async throws
+    {
         let stateDir = FileManager().temporaryDirectory
             .appendingPathComponent("bot-state-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager().removeItem(at: stateDir) }
@@ -55,12 +56,29 @@ struct ExecApprovalsStoreRefactorTests {
             let rejected = ExecApprovalsStore.updateAllowlist(
                 agentId: "main",
                 allowlist: [
-                    ExecAllowlistEntry(pattern: "echo", lastUsedAt: nil, lastUsedCommand: nil, lastResolvedPath: " /usr/bin/echo "),
+                    ExecAllowlistEntry(
+                        pattern: "echo",
+                        lastUsedAt: nil,
+                        lastUsedCommand: nil,
+                        lastResolvedPath: " /usr/bin/echo "),
                 ])
             #expect(rejected.isEmpty)
 
             let resolved = ExecApprovalsStore.resolve(agentId: "main")
             #expect(resolved.allowlist.map(\.pattern) == ["/usr/bin/echo"])
+        }
+    }
+
+    @Test
+    func ensureFileHardensStateDirectoryPermissions() async throws {
+        try await self.withTempStateDir { stateDir in
+            try FileManager().createDirectory(at: stateDir, withIntermediateDirectories: true)
+            try FileManager().setAttributes([.posixPermissions: 0o755], ofItemAtPath: stateDir.path)
+
+            _ = ExecApprovalsStore.ensureFile()
+            let attrs = try FileManager().attributesOfItem(atPath: stateDir.path)
+            let permissions = (attrs[.posixPermissions] as? NSNumber)?.intValue ?? -1
+            #expect(permissions & 0o777 == 0o700)
         }
     }
 

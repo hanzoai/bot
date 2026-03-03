@@ -1,11 +1,34 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { findRoutedCommand } from "./routes.js";
+
+const runConfigGetMock = vi.hoisted(() => vi.fn(async () => {}));
+const runConfigUnsetMock = vi.hoisted(() => vi.fn(async () => {}));
+const modelsListCommandMock = vi.hoisted(() => vi.fn(async () => {}));
+const modelsStatusCommandMock = vi.hoisted(() => vi.fn(async () => {}));
+
+vi.mock("../config-cli.js", () => ({
+  runConfigGet: runConfigGetMock,
+  runConfigUnset: runConfigUnsetMock,
+}));
+
+vi.mock("../../commands/models.js", () => ({
+  modelsListCommand: modelsListCommandMock,
+  modelsStatusCommand: modelsStatusCommandMock,
+}));
 
 describe("program routes", () => {
   it("matches status route and preserves plugin loading", () => {
     const route = findRoutedCommand(["status"]);
     expect(route).not.toBeNull();
     expect(route?.loadPlugins).toBe(true);
+  });
+
+  it("matches health route and preloads plugins only for text output", () => {
+    const route = expectRoute(["health"]);
+    expect(typeof route?.loadPlugins).toBe("function");
+    const shouldLoad = route?.loadPlugins as (argv: string[]) => boolean;
+    expect(shouldLoad(["node", "@hanzo/bot", "health"])).toBe(true);
+    expect(shouldLoad(["node", "@hanzo/bot", "health", "--json"])).toBe(false);
   });
 
   it("returns false when status timeout flag value is missing", async () => {

@@ -8,6 +8,8 @@ import type { BotConfig } from "../../config/config.js";
 import {
   buildChannelAccountSnapshot,
   formatChannelAllowFrom,
+  resolveChannelAccountConfigured,
+  resolveChannelAccountEnabled,
 } from "../../channels/account-summary.js";
 import { resolveChannelDefaultAccountId } from "../../channels/plugins/helpers.js";
 import { listChannelPlugins } from "../../channels/plugins/index.js";
@@ -318,8 +320,13 @@ export async function buildChannelsTable(
     const accounts: ChannelAccountRow[] = [];
     for (const accountId of resolvedAccountIds) {
       const account = plugin.config.resolveAccount(cfg, accountId);
-      const enabled = resolveAccountEnabled(plugin, account, cfg);
-      const configured = await resolveAccountConfigured(plugin, account, cfg);
+      const enabled = resolveChannelAccountEnabled({ plugin, account, cfg });
+      const configured = await resolveChannelAccountConfigured({
+        plugin,
+        account,
+        cfg,
+        readAccountConfiguredField: true,
+      });
       const snapshot = buildChannelAccountSnapshot({
         plugin,
         cfg,

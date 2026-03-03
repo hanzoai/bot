@@ -11,8 +11,15 @@ export type TlonResolvedAccount = {
   allowPrivateNetwork: boolean | null;
   groupChannels: string[];
   dmAllowlist: string[];
+  /** Ships allowed to invite us to groups (security: prevent malicious group invites) */
+  groupInviteAllowlist: string[];
   autoDiscoverChannels: boolean | null;
   showModelSignature: boolean | null;
+  autoAcceptDmInvites: boolean | null;
+  autoAcceptGroupInvites: boolean | null;
+  defaultAuthorizedShips: string[];
+  /** Ship that receives approval requests for DMs, channel mentions, and group invites */
+  ownerShip: string | null;
 };
 
 export function resolveTlonAccount(cfg: BotConfig, accountId?: string | null): TlonResolvedAccount {
@@ -26,8 +33,12 @@ export function resolveTlonAccount(cfg: BotConfig, accountId?: string | null): T
         allowPrivateNetwork?: boolean;
         groupChannels?: string[];
         dmAllowlist?: string[];
+        groupInviteAllowlist?: string[];
         autoDiscoverChannels?: boolean;
         showModelSignature?: boolean;
+        autoAcceptDmInvites?: boolean;
+        autoAcceptGroupInvites?: boolean;
+        ownerShip?: string;
         accounts?: Record<string, Record<string, unknown>>;
       }
     | undefined;
@@ -44,8 +55,13 @@ export function resolveTlonAccount(cfg: BotConfig, accountId?: string | null): T
       allowPrivateNetwork: null,
       groupChannels: [],
       dmAllowlist: [],
+      groupInviteAllowlist: [],
       autoDiscoverChannels: null,
       showModelSignature: null,
+      autoAcceptDmInvites: null,
+      autoAcceptGroupInvites: null,
+      defaultAuthorizedShips: [],
+      ownerShip: null,
     };
   }
 
@@ -60,12 +76,25 @@ export function resolveTlonAccount(cfg: BotConfig, accountId?: string | null): T
     | null;
   const groupChannels = (account?.groupChannels ?? base.groupChannels ?? []) as string[];
   const dmAllowlist = (account?.dmAllowlist ?? base.dmAllowlist ?? []) as string[];
+  const groupInviteAllowlist = (account?.groupInviteAllowlist ??
+    base.groupInviteAllowlist ??
+    []) as string[];
   const autoDiscoverChannels = (account?.autoDiscoverChannels ??
     base.autoDiscoverChannels ??
     null) as boolean | null;
   const showModelSignature = (account?.showModelSignature ?? base.showModelSignature ?? null) as
     | boolean
     | null;
+  const autoAcceptDmInvites = (account?.autoAcceptDmInvites ?? base.autoAcceptDmInvites ?? null) as
+    | boolean
+    | null;
+  const autoAcceptGroupInvites = (account?.autoAcceptGroupInvites ??
+    base.autoAcceptGroupInvites ??
+    null) as boolean | null;
+  const ownerShip = (account?.ownerShip ?? base.ownerShip ?? null) as string | null;
+  const defaultAuthorizedShips = ((account as Record<string, unknown>)?.defaultAuthorizedShips ??
+    (base as Record<string, unknown>)?.defaultAuthorizedShips ??
+    []) as string[];
   const configured = Boolean(ship && url && code);
 
   return {
@@ -79,8 +108,13 @@ export function resolveTlonAccount(cfg: BotConfig, accountId?: string | null): T
     allowPrivateNetwork,
     groupChannels,
     dmAllowlist,
+    groupInviteAllowlist,
     autoDiscoverChannels,
     showModelSignature,
+    autoAcceptDmInvites,
+    autoAcceptGroupInvites,
+    defaultAuthorizedShips,
+    ownerShip,
   };
 }
 

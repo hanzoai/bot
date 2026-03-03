@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { removeAckReactionAfterReply, shouldAckReaction } from "bot/plugin-sdk";
 import { EventEmitter } from "node:events";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createPluginRuntimeMock } from "../../test-utils/plugin-runtime-mock.js";
 import type { ResolvedBlueBubblesAccount } from "./accounts.js";
 import {
   handleBlueBubblesWebhookRequest,
@@ -45,8 +46,11 @@ const mockReadAllowFromStore = vi.fn().mockResolvedValue([]);
 const mockUpsertPairingRequest = vi.fn().mockResolvedValue({ code: "TESTCODE", created: true });
 const mockResolveAgentRoute = vi.fn(() => ({
   agentId: "main",
+  channel: "bluebubbles",
   accountId: "default",
   sessionKey: "agent:main:bluebubbles:dm:+15551234567",
+  mainSessionKey: "agent:main:main",
+  matchedBy: "default",
 }));
 const mockBuildMentionRegexes = vi.fn(() => [/\bbert\b/i]);
 const mockMatchesMentionPatterns = vi.fn((text: string, regexes: RegExp[]) =>
@@ -58,25 +62,20 @@ const mockDispatchReplyWithBufferedBlockDispatcher = vi.fn(async () => undefined
 const mockHasControlCommand = vi.fn(() => false);
 const mockResolveCommandAuthorizedFromAuthorizers = vi.fn(() => false);
 const mockSaveMediaBuffer = vi.fn().mockResolvedValue({
+  id: "test-media.jpg",
   path: "/tmp/test-media.jpg",
+  size: Buffer.byteLength("test"),
   contentType: "image/jpeg",
 });
 const mockResolveStorePath = vi.fn(() => "/tmp/sessions.json");
 const mockReadSessionUpdatedAt = vi.fn(() => undefined);
-const mockResolveEnvelopeFormatOptions = vi.fn(() => ({
-  template: "channel+name+time",
-}));
+const mockResolveEnvelopeFormatOptions = vi.fn(() => ({}));
 const mockFormatAgentEnvelope = vi.fn((opts: { body: string }) => opts.body);
 const mockFormatInboundEnvelope = vi.fn((opts: { body: string }) => opts.body);
 const mockChunkMarkdownText = vi.fn((text: string) => [text]);
 
 function createMockRuntime(): PluginRuntime {
-  return {
-    version: "1.0.0",
-    config: {
-      loadConfig: vi.fn(() => ({})) as unknown as PluginRuntime["config"]["loadConfig"],
-      writeConfigFile: vi.fn() as unknown as PluginRuntime["config"]["writeConfigFile"],
-    },
+  return createPluginRuntimeMock({
     system: {
       enqueueSystemEvent:
         mockEnqueueSystemEvent as unknown as PluginRuntime["system"]["enqueueSystemEvent"],
@@ -140,30 +139,17 @@ function createMockRuntime(): PluginRuntime {
           mockResolveAgentRoute as unknown as PluginRuntime["channel"]["routing"]["resolveAgentRoute"],
       },
       pairing: {
-        buildPairingReply:
-          mockBuildPairingReply as unknown as PluginRuntime["channel"]["pairing"]["buildPairingReply"],
-        readAllowFromStore:
-          mockReadAllowFromStore as unknown as PluginRuntime["channel"]["pairing"]["readAllowFromStore"],
-        upsertPairingRequest:
-          mockUpsertPairingRequest as unknown as PluginRuntime["channel"]["pairing"]["upsertPairingRequest"],
+        buildPairingReply: mockBuildPairingReply,
+        readAllowFromStore: mockReadAllowFromStore,
+        upsertPairingRequest: mockUpsertPairingRequest,
       },
       media: {
-        fetchRemoteMedia:
-          vi.fn() as unknown as PluginRuntime["channel"]["media"]["fetchRemoteMedia"],
         saveMediaBuffer:
           mockSaveMediaBuffer as unknown as PluginRuntime["channel"]["media"]["saveMediaBuffer"],
       },
       session: {
-        resolveStorePath:
-          mockResolveStorePath as unknown as PluginRuntime["channel"]["session"]["resolveStorePath"],
-        readSessionUpdatedAt:
-          mockReadSessionUpdatedAt as unknown as PluginRuntime["channel"]["session"]["readSessionUpdatedAt"],
-        recordInboundSession:
-          vi.fn() as unknown as PluginRuntime["channel"]["session"]["recordInboundSession"],
-        recordSessionMetaFromInbound:
-          vi.fn() as unknown as PluginRuntime["channel"]["session"]["recordSessionMetaFromInbound"],
-        updateLastRoute:
-          vi.fn() as unknown as PluginRuntime["channel"]["session"]["updateLastRoute"],
+        resolveStorePath: mockResolveStorePath,
+        readSessionUpdatedAt: mockReadSessionUpdatedAt,
       },
       mentions: {
         buildMentionRegexes:
@@ -178,32 +164,10 @@ function createMockRuntime(): PluginRuntime {
       groups: {
         resolveGroupPolicy:
           mockResolveGroupPolicy as unknown as PluginRuntime["channel"]["groups"]["resolveGroupPolicy"],
-        resolveRequireMention:
-          mockResolveRequireMention as unknown as PluginRuntime["channel"]["groups"]["resolveRequireMention"],
-      },
-      debounce: {
-        // Create a pass-through debouncer that immediately calls onFlush
-        createInboundDebouncer: vi.fn(
-          (params: { onFlush: (items: unknown[]) => Promise<void> }) => ({
-            enqueue: async (item: unknown) => {
-              await params.onFlush([item]);
-            },
-            flushKey: vi.fn(),
-          }),
-        ) as unknown as PluginRuntime["channel"]["debounce"]["createInboundDebouncer"],
-        resolveInboundDebounceMs: vi.fn(
-          () => 0,
-        ) as unknown as PluginRuntime["channel"]["debounce"]["resolveInboundDebounceMs"],
+        resolveRequireMention: mockResolveRequireMention,
       },
       commands: {
-        resolveCommandAuthorizedFromAuthorizers:
-          mockResolveCommandAuthorizedFromAuthorizers as unknown as PluginRuntime["channel"]["commands"]["resolveCommandAuthorizedFromAuthorizers"],
-        isControlCommandMessage:
-          vi.fn() as unknown as PluginRuntime["channel"]["commands"]["isControlCommandMessage"],
-        shouldComputeCommandAuthorized:
-          vi.fn() as unknown as PluginRuntime["channel"]["commands"]["shouldComputeCommandAuthorized"],
-        shouldHandleTextCommands:
-          vi.fn() as unknown as PluginRuntime["channel"]["commands"]["shouldHandleTextCommands"],
+        resolveCommandAuthorizedFromAuthorizers: mockResolveCommandAuthorizedFromAuthorizers,
       },
       discord: {} as PluginRuntime["channel"]["discord"],
       slack: {} as PluginRuntime["channel"]["slack"],
@@ -2268,6 +2232,7 @@ describe("BlueBubbles webhook monitor", () => {
 
       mockDispatchReplyWithBufferedBlockDispatcher.mockImplementationOnce(async (params) => {
         await params.dispatcherOptions.onReplyStart?.();
+        return EMPTY_DISPATCH_RESULT;
       });
 
       const req = createMockRequest("POST", "/bluebubbles-webhook", payload);
@@ -2318,6 +2283,7 @@ describe("BlueBubbles webhook monitor", () => {
         await params.dispatcherOptions.onReplyStart?.();
         await params.dispatcherOptions.deliver({ text: "replying now" }, { kind: "final" });
         await params.dispatcherOptions.onIdle?.();
+        return EMPTY_DISPATCH_RESULT;
       });
 
       const req = createMockRequest("POST", "/bluebubbles-webhook", payload);
@@ -2363,7 +2329,9 @@ describe("BlueBubbles webhook monitor", () => {
         },
       };
 
-      mockDispatchReplyWithBufferedBlockDispatcher.mockImplementationOnce(async () => undefined);
+      mockDispatchReplyWithBufferedBlockDispatcher.mockImplementationOnce(
+        async () => EMPTY_DISPATCH_RESULT,
+      );
 
       const req = createMockRequest("POST", "/bluebubbles-webhook", payload);
       const res = createMockResponse();
@@ -2385,6 +2353,7 @@ describe("BlueBubbles webhook monitor", () => {
 
       mockDispatchReplyWithBufferedBlockDispatcher.mockImplementationOnce(async (params) => {
         await params.dispatcherOptions.deliver({ text: "replying now" }, { kind: "final" });
+        return EMPTY_DISPATCH_RESULT;
       });
 
       const account = createMockAccount();

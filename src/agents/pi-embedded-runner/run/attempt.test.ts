@@ -11,6 +11,21 @@ import {
   wrapStreamFnTrimToolCallNames,
 } from "./attempt.js";
 
+function createOllamaProviderConfig(injectNumCtxForOpenAICompat: boolean): BotConfig {
+  return {
+    models: {
+      providers: {
+        ollama: {
+          baseUrl: "http://127.0.0.1:11434/v1",
+          api: "openai-completions",
+          injectNumCtxForOpenAICompat,
+          models: [],
+        },
+      },
+    },
+  };
+}
+
 describe("resolvePromptBuildHookResult", () => {
   function createLegacyOnlyHookRunner() {
     return {

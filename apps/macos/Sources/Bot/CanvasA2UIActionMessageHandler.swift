@@ -109,21 +109,7 @@ final class CanvasA2UIActionMessageHandler: NSObject, WKScriptMessageHandler {
     }
 
     static func isLocalNetworkCanvasURL(_ url: URL) -> Bool {
-        guard let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" else {
-            return false
-        }
-        guard let host = url.host?.trimmingCharacters(in: .whitespacesAndNewlines), !host.isEmpty else {
-            return false
-        }
-        if host == "localhost" { return true }
-        if host.hasSuffix(".local") { return true }
-        if host.hasSuffix(".ts.net") { return true }
-        if host.hasSuffix(".tailscale.net") { return true }
-        if !host.contains("."), !host.contains(":") { return true }
-        if let ipv4 = Self.parseIPv4(host) {
-            return Self.isLocalNetworkIPv4(ipv4)
-        }
-        return false
+        LocalNetworkURLSupport.isLocalNetworkHTTPURL(url)
     }
 
     static func parseIPv4(_ host: String) -> (UInt8, UInt8, UInt8, UInt8)? {

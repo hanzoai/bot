@@ -75,17 +75,3 @@ import Testing
         #expect(WakeWordGate.match(transcript: transcript, segments: segments, config: config)?.command == "do thing")
     }
 }
-
-private func makeSegments(
-    transcript: String,
-    words: [(String, TimeInterval, TimeInterval)])
--> [WakeWordSegment] {
-    var searchStart = transcript.startIndex
-    var output: [WakeWordSegment] = []
-    for (word, start, duration) in words {
-        let range = transcript.range(of: word, range: searchStart..<transcript.endIndex)
-        output.append(WakeWordSegment(text: word, start: start, duration: duration, range: range))
-        if let range { searchStart = range.upperBound }
-    }
-    return output
-}

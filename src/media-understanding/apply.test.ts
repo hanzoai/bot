@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -85,6 +86,7 @@ async function createTempMediaFile(params: { fileName: string; content: Buffer |
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-media-"));
   const mediaPath = path.join(dir, params.fileName);
   await fs.writeFile(mediaPath, params.content);
+  tempMediaFileCache.set(cacheKey, mediaPath);
   return mediaPath;
 }
 
@@ -96,7 +98,7 @@ async function createAudioCtx(params?: {
 }) {
   const mediaPath = await createTempMediaFile({
     fileName: params?.fileName ?? "note.ogg",
-    content: params?.content ?? Buffer.from([0, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8]),
+    content: params?.content ?? createSafeAudioFixtureBuffer(2048),
   });
   return {
     Body: params?.body ?? "<media:audio>",
@@ -132,7 +134,7 @@ describe("applyMediaUnderstanding", () => {
     mockedResolveApiKey.mockClear();
     mockedFetchRemoteMedia.mockReset();
     mockedFetchRemoteMedia.mockResolvedValue({
-      buffer: Buffer.from([0, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+      buffer: createSafeAudioFixtureBuffer(2048),
       contentType: "audio/ogg",
       fileName: "note.ogg",
     });
@@ -162,7 +164,7 @@ describe("applyMediaUnderstanding", () => {
     const ctx = await createAudioCtx({
       fileName: "data.mp3",
       mediaType: "audio/mpeg",
-      content: '"a","b"\n"1","2"',
+      content: `"a","b"\n"1","2"\n${"x".repeat(2048)}`,
     });
     const result = await applyMediaUnderstanding({
       ctx,
@@ -181,6 +183,7 @@ describe("applyMediaUnderstanding", () => {
     const ctx = await createAudioCtx({
       body: "<media:audio> /capture status",
     });
+    ctx.CommandAuthorized = false;
     const result = await applyMediaUnderstanding({
       ctx,
       cfg: createGroqAudioConfig(),
@@ -194,6 +197,7 @@ describe("applyMediaUnderstanding", () => {
       body: "[Audio]\nUser text:\n/capture status\nTranscript:\ntranscribed text",
       commandBody: "/capture status",
     });
+    expect(ctx.CommandAuthorized).toBe(false);
   });
 
   it("handles URL-only attachments for audio transcription", async () => {
@@ -234,6 +238,83 @@ describe("applyMediaUnderstanding", () => {
     expect(result.appliedAudio).toBe(true);
     expect(ctx.Transcript).toBe("remote transcript");
     expect(ctx.Body).toBe("[Audio]\nTranscript:\nremote transcript");
+  });
+
+  it("transcribes WhatsApp audio with parameterized MIME despite casing/whitespace", async () => {
+    const ctx = await createAudioCtx({
+      fileName: "voice-note",
+      mediaType: " Audio/Ogg; codecs=opus ",
+    });
+    ctx.Surface = "whatsapp";
+
+    const cfg: BotConfig = {
+      tools: {
+        media: {
+          audio: {
+            enabled: true,
+            maxBytes: 1024 * 1024,
+            scope: {
+              default: "deny",
+              rules: [{ action: "allow", match: { channel: "whatsapp" } }],
+            },
+            models: [{ provider: "groq" }],
+          },
+        },
+      },
+    };
+
+    const result = await applyMediaUnderstanding({
+      ctx,
+      cfg,
+      providers: createGroqProviders("whatsapp transcript"),
+    });
+
+    expect(result.appliedAudio).toBe(true);
+    expect(ctx.Transcript).toBe("whatsapp transcript");
+    expect(ctx.Body).toBe("[Audio]\nTranscript:\nwhatsapp transcript");
+  });
+
+  it("skips URL-only audio when remote file is too small", async () => {
+    // Override the default mock to return a tiny buffer (below MIN_AUDIO_FILE_BYTES)
+    mockedFetchRemoteMedia.mockResolvedValueOnce({
+      buffer: Buffer.alloc(100),
+      contentType: "audio/ogg",
+      fileName: "tiny.ogg",
+    });
+
+    const ctx: MsgContext = {
+      Body: "<media:audio>",
+      MediaUrl: "https://example.com/tiny.ogg",
+      MediaType: "audio/ogg",
+      ChatType: "dm",
+    };
+    const transcribeAudio = vi.fn(async () => ({ text: "should-not-run" }));
+    const cfg: BotConfig = {
+      tools: {
+        media: {
+          audio: {
+            enabled: true,
+            maxBytes: 1024 * 1024,
+            scope: {
+              default: "deny",
+              rules: [{ action: "allow", match: { chatType: "direct" } }],
+            },
+            models: [{ provider: "groq" }],
+          },
+        },
+      },
+    };
+
+    const result = await applyMediaUnderstanding({
+      ctx,
+      cfg,
+      providers: {
+        groq: { id: "groq", transcribeAudio },
+      },
+    });
+
+    expect(transcribeAudio).not.toHaveBeenCalled();
+    expect(result.appliedAudio).toBe(false);
   });
 
   it("skips audio transcription when attachment exceeds maxBytes", async () => {
@@ -288,8 +369,7 @@ describe("applyMediaUnderstanding", () => {
       },
     };
 
-    const execModule = await import("../process/exec.js");
-    vi.mocked(execModule.runExec).mockResolvedValue({
+    mockedRunExec.mockResolvedValue({
       stdout: "cli transcript\n",
       stderr: "",
     });
@@ -340,8 +420,7 @@ describe("applyMediaUnderstanding", () => {
       },
     };
 
-    const execModule = await import("../process/exec.js");
-    vi.mocked(execModule.runExec).mockResolvedValue({
+    mockedRunExec.mockResolvedValue({
       stdout: "image description\n",
       stderr: "",
     });
@@ -385,8 +464,7 @@ describe("applyMediaUnderstanding", () => {
       },
     };
 
-    const execModule = await import("../process/exec.js");
-    vi.mocked(execModule.runExec).mockResolvedValue({
+    mockedRunExec.mockResolvedValue({
       stdout: "shared description\n",
       stderr: "",
     });
@@ -487,7 +565,7 @@ describe("applyMediaUnderstanding", () => {
     const audioPath = path.join(dir, "note.ogg");
     const videoPath = path.join(dir, "clip.mp4");
     await fs.writeFile(imagePath, "image-bytes");
-    await fs.writeFile(audioPath, Buffer.from([200, 201, 202, 203, 204, 205, 206, 207, 208]));
+    await fs.writeFile(audioPath, createSafeAudioFixtureBuffer(2048));
     await fs.writeFile(videoPath, "video-bytes");
 
     const ctx: MsgContext = {

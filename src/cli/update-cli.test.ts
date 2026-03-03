@@ -64,6 +64,19 @@ vi.mock("../process/exec.js", () => ({
   runCommandWithTimeout: vi.fn(),
 }));
 
+vi.mock("../utils.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../utils.js")>();
+  return {
+    ...actual,
+    pathExists: (...args: unknown[]) => pathExists(...args),
+  };
+});
+
+vi.mock("../plugins/update.js", () => ({
+  syncPluginsForUpdateChannel: (...args: unknown[]) => syncPluginsForUpdateChannel(...args),
+  updateNpmInstalledPlugins: (...args: unknown[]) => updateNpmInstalledPlugins(...args),
+}));
+
 vi.mock("./update-cli/shared.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./update-cli/shared.js")>();
   return {
@@ -100,8 +113,7 @@ const { checkUpdateStatus, fetchNpmTagVersion, resolveNpmChannelTag } =
 const { runCommandWithTimeout } = await import("../process/exec.js");
 const { runDaemonRestart } = await import("./daemon-cli.js");
 const { defaultRuntime } = await import("../runtime.js");
-const { updateCommand, registerUpdateCli, updateStatusCommand, updateWizardCommand } =
-  await import("./update-cli.js");
+const { updateCommand, updateStatusCommand, updateWizardCommand } = await import("./update-cli.js");
 
 describe("update-cli", () => {
   let fixtureRoot = "";

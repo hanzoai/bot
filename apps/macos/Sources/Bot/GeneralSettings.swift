@@ -260,17 +260,7 @@ struct GeneralSettings: View {
                 TextField("user@host[:22]", text: self.$state.remoteTarget)
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: .infinity)
-                Button {
-                    Task { await self.testRemote() }
-                } label: {
-                    if self.remoteStatus == .checking {
-                        ProgressView().controlSize(.small)
-                    } else {
-                        Text("Test remote")
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(self.remoteStatus == .checking || !canTest)
+                self.remoteTestButton(disabled: !canTest)
             }
             if let validationMessage {
                 Text(validationMessage)
@@ -290,24 +280,28 @@ struct GeneralSettings: View {
                 TextField("wss://gateway.example.ts.net", text: self.$state.remoteUrl)
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: .infinity)
-                Button {
-                    Task { await self.testRemote() }
-                } label: {
-                    if self.remoteStatus == .checking {
-                        ProgressView().controlSize(.small)
-                    } else {
-                        Text("Test remote")
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(self.remoteStatus == .checking || self.state.remoteUrl
-                    .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                self.remoteTestButton(
+                    disabled: self.state.remoteUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
             Text("Direct mode requires a ws:// or wss:// URL (Tailscale Serve uses wss://<magicdns>).")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .padding(.leading, self.remoteLabelWidth + 10)
         }
+    }
+
+    private func remoteTestButton(disabled: Bool) -> some View {
+        Button {
+            Task { await self.testRemote() }
+        } label: {
+            if self.remoteStatus == .checking {
+                ProgressView().controlSize(.small)
+            } else {
+                Text("Test remote")
+            }
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(self.remoteStatus == .checking || disabled)
     }
 
     private var controlStatusLine: String {

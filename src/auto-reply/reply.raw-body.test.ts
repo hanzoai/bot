@@ -2,20 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTempHomeHarness, makeReplyConfig } from "./reply.test-harness.js";
 
 const agentMocks = vi.hoisted(() => ({
-  runEmbeddedPiAgent: vi.fn(),
   loadModelCatalog: vi.fn(),
   webAuthExists: vi.fn().mockResolvedValue(true),
   getWebAuthAgeMs: vi.fn().mockReturnValue(120_000),
   readWebSelfId: vi.fn().mockReturnValue({ e164: "+1999" }),
-}));
-
-vi.mock("../agents/pi-embedded.js", () => ({
-  abortEmbeddedPiRun: vi.fn().mockReturnValue(false),
-  runEmbeddedPiAgent: agentMocks.runEmbeddedPiAgent,
-  queueEmbeddedPiMessage: vi.fn().mockReturnValue(false),
-  resolveEmbeddedSessionLane: (key: string) => `session:${key.trim() || "main"}`,
-  isEmbeddedPiRunActive: vi.fn().mockReturnValue(false),
-  isEmbeddedPiRunStreaming: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock("../agents/model-catalog.js", () => ({
@@ -48,7 +38,7 @@ describe("RawBody directive parsing", () => {
 
   it("handles directives and history in the prompt", async () => {
     await withTempHome(async (home) => {
-      agentMocks.runEmbeddedPiAgent.mockResolvedValue({
+      runEmbeddedPiAgentMock.mockResolvedValue({
         payloads: [{ text: "ok" }],
         meta: {
           durationMs: 1,
@@ -74,10 +64,10 @@ describe("RawBody directive parsing", () => {
 
       const text = Array.isArray(res) ? res[0]?.text : res?.text;
       expect(text).toBe("ok");
-      expect(agentMocks.runEmbeddedPiAgent).toHaveBeenCalledOnce();
+      expect(runEmbeddedPiAgentMock).toHaveBeenCalledOnce();
       const prompt =
-        (agentMocks.runEmbeddedPiAgent.mock.calls[0]?.[0] as { prompt?: string } | undefined)
-          ?.prompt ?? "";
+        (runEmbeddedPiAgentMock.mock.calls[0]?.[0] as { prompt?: string } | undefined)?.prompt ??
+        "";
       expect(prompt).toContain("Chat history since last reply (untrusted, for context):");
       expect(prompt).toContain('"sender": "Peter"');
       expect(prompt).toContain('"body": "hello"');

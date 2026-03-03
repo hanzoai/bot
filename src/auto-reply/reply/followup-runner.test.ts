@@ -199,10 +199,13 @@ describe("createFollowupRunner messaging tool dedupe", () => {
   it("drops payloads already sent via messaging tool", async () => {
     const onBlockReply = vi.fn(async () => {});
     runEmbeddedPiAgentMock.mockResolvedValueOnce({
-      payloads: [{ text: "hello world!" }],
-      messagingToolSentTexts: ["hello world!"],
       meta: {},
+      ...params.agentResult,
     });
+    const runner = createMessagingDedupeRunner(onBlockReply, params.runnerOverrides);
+    await runner(params.queued ?? baseQueuedRun());
+    return { onBlockReply };
+  }
 
     const runner = createFollowupRunner({
       opts: { onBlockReply },
@@ -211,17 +214,20 @@ describe("createFollowupRunner messaging tool dedupe", () => {
       defaultModel: "anthropic/claude-opus-4-5",
     });
 
-    await runner(baseQueuedRun());
+  it("drops payloads already sent via messaging tool", async () => {
+    const { onBlockReply } = await runMessagingCase({
+      agentResult: {
+        payloads: [{ text: "hello world!" }],
+        messagingToolSentTexts: ["hello world!"],
+      },
+    });
 
     expect(onBlockReply).not.toHaveBeenCalled();
   });
 
   it("delivers payloads when not duplicates", async () => {
-    const onBlockReply = vi.fn(async () => {});
-    runEmbeddedPiAgentMock.mockResolvedValueOnce({
-      payloads: [{ text: "hello world!" }],
-      messagingToolSentTexts: ["different message"],
-      meta: {},
+    const { onBlockReply } = await runMessagingCase({
+      agentResult: makeTextReplyDedupeResult(),
     });
 
     const runner = createFollowupRunner({
@@ -237,12 +243,12 @@ describe("createFollowupRunner messaging tool dedupe", () => {
   });
 
   it("suppresses replies when a messaging tool sent via the same provider + target", async () => {
-    const onBlockReply = vi.fn(async () => {});
-    runEmbeddedPiAgentMock.mockResolvedValueOnce({
-      payloads: [{ text: "hello world!" }],
-      messagingToolSentTexts: ["different message"],
-      messagingToolSentTargets: [{ tool: "slack", provider: "slack", to: "channel:C1" }],
-      meta: {},
+    const { onBlockReply } = await runMessagingCase({
+      agentResult: {
+        ...makeTextReplyDedupeResult(),
+        messagingToolSentTargets: [{ tool: "slack", provider: "slack", to: "channel:C1" }],
+      },
+      queued: baseQueuedRun("slack"),
     });
 
     const runner = createFollowupRunner({
@@ -258,11 +264,11 @@ describe("createFollowupRunner messaging tool dedupe", () => {
   });
 
   it("drops media URL from payload when messaging tool already sent it", async () => {
-    const onBlockReply = vi.fn(async () => {});
-    runEmbeddedPiAgentMock.mockResolvedValueOnce({
-      payloads: [{ mediaUrl: "/tmp/img.png" }],
-      messagingToolSentMediaUrls: ["/tmp/img.png"],
-      meta: {},
+    const { onBlockReply } = await runMessagingCase({
+      agentResult: {
+        payloads: [{ mediaUrl: "/tmp/img.png" }],
+        messagingToolSentMediaUrls: ["/tmp/img.png"],
+      },
     });
 
     const runner = createFollowupRunner({
@@ -279,11 +285,11 @@ describe("createFollowupRunner messaging tool dedupe", () => {
   });
 
   it("delivers media payload when not a duplicate", async () => {
-    const onBlockReply = vi.fn(async () => {});
-    runEmbeddedPiAgentMock.mockResolvedValueOnce({
-      payloads: [{ mediaUrl: "/tmp/img.png" }],
-      messagingToolSentMediaUrls: ["/tmp/other.png"],
-      meta: {},
+    const { onBlockReply } = await runMessagingCase({
+      agentResult: {
+        payloads: [{ mediaUrl: "/tmp/img.png" }],
+        messagingToolSentMediaUrls: ["/tmp/other.png"],
+      },
     });
 
     const runner = createFollowupRunner({
@@ -308,19 +314,26 @@ describe("createFollowupRunner messaging tool dedupe", () => {
     const sessionStore: Record<string, SessionEntry> = { [sessionKey]: sessionEntry };
     await saveSessionStore(storePath, sessionStore);
 
-    const onBlockReply = vi.fn(async () => {});
-    runEmbeddedPiAgentMock.mockResolvedValueOnce({
-      payloads: [{ text: "hello world!" }],
-      messagingToolSentTexts: ["different message"],
-      messagingToolSentTargets: [{ tool: "slack", provider: "slack", to: "channel:C1" }],
-      meta: {
-        agentMeta: {
-          usage: { input: 1_000, output: 50 },
-          lastCallUsage: { input: 400, output: 20 },
-          model: "claude-opus-4-5",
-          provider: "anthropic",
+    const { onBlockReply } = await runMessagingCase({
+      agentResult: {
+        ...makeTextReplyDedupeResult(),
+        messagingToolSentTargets: [{ tool: "slack", provider: "slack", to: "channel:C1" }],
+        meta: {
+          agentMeta: {
+            usage: { input: 1_000, output: 50 },
+            lastCallUsage: { input: 400, output: 20 },
+            model: "claude-opus-4-5",
+            provider: "anthropic",
+          },
         },
       },
+      runnerOverrides: {
+        sessionEntry,
+        sessionStore,
+        sessionKey,
+        storePath,
+      },
+      queued: baseQueuedRun("slack"),
     });
 
     const runner = createFollowupRunner({

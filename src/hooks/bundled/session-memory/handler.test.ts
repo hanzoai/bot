@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { BotConfig } from "../../../config/config.js";
@@ -12,9 +13,28 @@ vi.mock("../../llm-slug-generator.js", () => ({
 }));
 
 let handler: HookHandler;
+let suiteWorkspaceRoot = "";
+let workspaceCaseCounter = 0;
+
+async function createCaseWorkspace(prefix = "case"): Promise<string> {
+  const dir = path.join(suiteWorkspaceRoot, `${prefix}-${workspaceCaseCounter}`);
+  workspaceCaseCounter += 1;
+  await fs.mkdir(dir, { recursive: true });
+  return dir;
+}
 
 beforeAll(async () => {
   ({ default: handler } = await import("./handler.js"));
+  suiteWorkspaceRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-session-memory-"));
+});
+
+afterAll(async () => {
+  if (!suiteWorkspaceRoot) {
+    return;
+  }
+  await fs.rm(suiteWorkspaceRoot, { recursive: true, force: true });
+  suiteWorkspaceRoot = "";
+  workspaceCaseCounter = 0;
 });
 
 /**

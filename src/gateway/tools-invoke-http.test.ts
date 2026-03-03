@@ -107,6 +107,25 @@ vi.mock("../agents/bot-tools.js", () => {
         return { ok: true };
       },
     },
+    {
+      name: "diffs_compat_test",
+      parameters: {
+        type: "object",
+        properties: {
+          mode: { type: "string" },
+          fileFormat: { type: "string" },
+        },
+        additionalProperties: false,
+      },
+      execute: async (_toolCallId: string, args: unknown) => {
+        const input = (args ?? {}) as Record<string, unknown>;
+        return {
+          ok: true,
+          observedFormat: input.format,
+          observedFileFormat: input.fileFormat,
+        };
+      },
+    },
   ];
 
   return {
@@ -212,10 +231,13 @@ const invokeTool = async (params: {
   headers?: Record<string, string>;
   sessionKey?: string;
 }) => {
-  const body: Record<string, unknown> = {
-    tool: params.tool,
-    args: params.args ?? {},
-  };
+  const body: Record<string, unknown> = withOptionalSessionKey(
+    {
+      tool: params.tool,
+      args: params.args ?? {},
+    },
+    params.sessionKey,
+  );
   if (params.action) {
     body.action = params.action;
   }
@@ -369,12 +391,7 @@ describe("POST /tools/invoke", () => {
   });
 
   it("denies sessions_send via HTTP gateway", async () => {
-    cfg = {
-      ...cfg,
-      agents: {
-        list: [{ id: "main", default: true, tools: { allow: ["sessions_send"] } }],
-      },
-    };
+    setMainAllowedTools({ allow: ["sessions_send"] });
 
     const token = resolveGatewayToken();
 
@@ -389,12 +406,7 @@ describe("POST /tools/invoke", () => {
   });
 
   it("denies gateway tool via HTTP", async () => {
-    cfg = {
-      ...cfg,
-      agents: {
-        list: [{ id: "main", default: true, tools: { allow: ["gateway"] } }],
-      },
-    };
+    setMainAllowedTools({ allow: ["gateway"] });
 
     const token = resolveGatewayToken();
 
@@ -409,13 +421,7 @@ describe("POST /tools/invoke", () => {
   });
 
   it("allows gateway tool via HTTP when explicitly enabled in gateway.tools.allow", async () => {
-    cfg = {
-      ...cfg,
-      agents: {
-        list: [{ id: "main", default: true, tools: { allow: ["gateway"] } }],
-      },
-      gateway: { tools: { allow: ["gateway"] } },
-    };
+    setMainAllowedTools({ allow: ["gateway"], gatewayAllow: ["gateway"] });
 
     const token = resolveGatewayToken();
 
@@ -434,13 +440,11 @@ describe("POST /tools/invoke", () => {
   });
 
   it("treats gateway.tools.deny as higher priority than gateway.tools.allow", async () => {
-    cfg = {
-      ...cfg,
-      agents: {
-        list: [{ id: "main", default: true, tools: { allow: ["gateway"] } }],
-      },
-      gateway: { tools: { allow: ["gateway"], deny: ["gateway"] } },
-    };
+    setMainAllowedTools({
+      allow: ["gateway"],
+      gatewayAllow: ["gateway"],
+      gatewayDeny: ["gateway"],
+    });
 
     const token = resolveGatewayToken();
 
@@ -528,5 +532,19 @@ describe("POST /tools/invoke", () => {
     expect(crashBody.ok).toBe(false);
     expect(crashBody.error?.type).toBe("tool_error");
     expect(crashBody.error?.message).toBe("tool execution failed");
+  });
+
+  it("passes deprecated format alias through invoke payloads even when schema omits it", async () => {
+    setMainAllowedTools({ allow: ["diffs_compat_test"] });
+
+    const res = await invokeToolAuthed({
+      tool: "diffs_compat_test",
+      args: { mode: "file", format: "pdf" },
+      sessionKey: "main",
+    });
+
+    const body = await expectOkInvokeResponse(res);
+    expect(body.result?.observedFormat).toBe("pdf");
+    expect(body.result?.observedFileFormat).toBeUndefined();
   });
 });

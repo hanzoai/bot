@@ -46,6 +46,19 @@ function clearSupervisorHints() {
   }
 }
 
+function expectLaunchdKickstartSupervised(params?: { launchJobLabel?: string }) {
+  setPlatform("darwin");
+  if (params?.launchJobLabel) {
+    process.env.LAUNCH_JOB_LABEL = params.launchJobLabel;
+  }
+  process.env.BOT_LAUNCHD_LABEL = "ai.bot.gateway";
+  triggerBotRestartMock.mockReturnValue({ ok: true, method: "launchctl" });
+  const result = restartGatewayProcessWithFreshPid();
+  expect(result.mode).toBe("supervised");
+  expect(triggerBotRestartMock).toHaveBeenCalledOnce();
+  expect(spawnMock).not.toHaveBeenCalled();
+}
+
 describe("restartGatewayProcessWithFreshPid", () => {
   it("returns disabled when BOT_NO_RESPAWN is set", () => {
     process.env.BOT_NO_RESPAWN = "1";

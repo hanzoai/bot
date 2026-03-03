@@ -16,6 +16,7 @@ function mergeAccountConfig(base: MatrixConfig, account: MatrixConfig): MatrixCo
   }
   // Don't propagate the accounts map into the merged per-account config
   delete (merged as Record<string, unknown>).accounts;
+  delete (merged as Record<string, unknown>).defaultAccount;
   return merged;
 }
 
@@ -54,6 +55,13 @@ export function listMatrixAccountIds(cfg: CoreConfig): string[] {
 }
 
 export function resolveDefaultMatrixAccountId(cfg: CoreConfig): string {
+  const preferred = normalizeOptionalAccountId(cfg.channels?.matrix?.defaultAccount);
+  if (
+    preferred &&
+    listMatrixAccountIds(cfg).some((accountId) => normalizeAccountId(accountId) === preferred)
+  ) {
+    return preferred;
+  }
   const ids = listMatrixAccountIds(cfg);
   if (ids.includes(DEFAULT_ACCOUNT_ID)) {
     return DEFAULT_ACCOUNT_ID;
@@ -94,7 +102,7 @@ export function resolveMatrixAccount(params: {
   const hasUserId = Boolean(resolved.userId);
   const hasAccessToken = Boolean(resolved.accessToken);
   const hasPassword = Boolean(resolved.password);
-  const hasPasswordAuth = hasUserId && hasPassword;
+  const hasPasswordAuth = hasUserId && (hasPassword || hasConfiguredSecretInput(base.password));
   const stored = loadMatrixCredentials(process.env, accountId);
   const hasStored =
     stored && resolved.homeserver

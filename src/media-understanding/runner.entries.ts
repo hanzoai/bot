@@ -23,6 +23,7 @@ import {
   CLI_OUTPUT_MAX_BUFFER,
   DEFAULT_AUDIO_MODELS,
   DEFAULT_TIMEOUT_SECONDS,
+  MIN_AUDIO_FILE_BYTES,
 } from "./defaults.js";
 import { MediaUnderstandingSkipError } from "./errors.js";
 import { fileExists } from "./fs.js";
@@ -130,6 +131,19 @@ function resolveWhisperCppOutputPath(args: string[]): string | null {
   return `${outputBase}.txt`;
 }
 
+function resolveParakeetOutputPath(args: string[], mediaPath: string): string | null {
+  const outputDir = findArgValue(args, ["--output-dir"]);
+  const outputFormat = findArgValue(args, ["--output-format"]);
+  if (!outputDir) {
+    return null;
+  }
+  if (outputFormat && outputFormat !== "txt") {
+    return null;
+  }
+  const base = path.parse(mediaPath).name;
+  return path.join(outputDir, `${base}.txt`);
+}
+
 async function resolveCliOutput(params: {
   command: string;
   args: string[];
@@ -142,7 +156,9 @@ async function resolveCliOutput(params: {
       ? resolveWhisperCppOutputPath(params.args)
       : commandId === "whisper"
         ? resolveWhisperOutputPath(params.args, params.mediaPath)
-        : null;
+        : commandId === "parakeet-mlx"
+          ? resolveParakeetOutputPath(params.args, params.mediaPath)
+          : null;
   if (fileOutput && (await fileExists(fileOutput))) {
     try {
       const content = await fs.readFile(fileOutput, "utf8");
@@ -295,22 +311,36 @@ function resolveEntryRunOptions(params: {
 }
 
 export function formatDecisionSummary(decision: MediaUnderstandingDecision): string {
-  const total = decision.attachments.length;
-  const success = decision.attachments.filter(
-    (entry) => entry.chosen?.outcome === "success",
-  ).length;
-  const chosen = decision.attachments.find((entry) => entry.chosen)?.chosen;
-  const provider = chosen?.provider?.trim();
-  const model = chosen?.model?.trim();
+  const attachments = Array.isArray(decision.attachments) ? decision.attachments : [];
+  const total = attachments.length;
+  const success = attachments.filter((entry) => entry?.chosen?.outcome === "success").length;
+  const chosen = attachments.find((entry) => entry?.chosen)?.chosen;
+  const provider = typeof chosen?.provider === "string" ? chosen.provider.trim() : undefined;
+  const model = typeof chosen?.model === "string" ? chosen.model.trim() : undefined;
   const modelLabel = provider ? (model ? `${provider}/${model}` : provider) : undefined;
-  const reason = decision.attachments
-    .flatMap((entry) => entry.attempts.map((attempt) => attempt.reason).filter(Boolean))
-    .find(Boolean);
+  const reason = attachments
+    .flatMap((entry) => {
+      const attempts = Array.isArray(entry?.attempts) ? entry.attempts : [];
+      return attempts
+        .map((attempt) => (typeof attempt?.reason === "string" ? attempt.reason : undefined))
+        .filter((value): value is string => Boolean(value));
+    })
+    .find((value) => value.trim().length > 0);
   const shortReason = reason ? reason.split(":")[0]?.trim() : undefined;
   const countLabel = total > 0 ? ` (${success}/${total})` : "";
   const viaLabel = modelLabel ? ` via ${modelLabel}` : "";
   const reasonLabel = shortReason ? ` reason=${shortReason}` : "";
   return `${decision.capability}: ${decision.outcome}${countLabel}${viaLabel}${reasonLabel}`;
+}
+
+function assertMinAudioSize(params: { size: number; attachmentIndex: number }): void {
+  if (params.size >= MIN_AUDIO_FILE_BYTES) {
+    return;
+  }
+  throw new MediaUnderstandingSkipError(
+    "tooSmall",
+    `Audio attachment ${params.attachmentIndex + 1} is too small (${params.size} bytes, minimum ${MIN_AUDIO_FILE_BYTES})`,
+  );
 }
 
 export async function runProviderEntry(params: {
@@ -351,33 +381,21 @@ export async function runProviderEntry(params: {
       timeoutMs,
     });
     const provider = getMediaUnderstandingProvider(providerId, params.providerRegistry);
-    const result = provider?.describeImage
-      ? await provider.describeImage({
-          buffer: media.buffer,
-          fileName: media.fileName,
-          mime: media.mime,
-          model: modelId,
-          provider: providerId,
-          prompt,
-          timeoutMs,
-          profile: entry.profile,
-          preferredProfile: entry.preferredProfile,
-          agentDir: params.agentDir,
-          cfg: params.cfg,
-        })
-      : await describeImageWithModel({
-          buffer: media.buffer,
-          fileName: media.fileName,
-          mime: media.mime,
-          model: modelId,
-          provider: providerId,
-          prompt,
-          timeoutMs,
-          profile: entry.profile,
-          preferredProfile: entry.preferredProfile,
-          agentDir: params.agentDir,
-          cfg: params.cfg,
-        });
+    const imageInput = {
+      buffer: media.buffer,
+      fileName: media.fileName,
+      mime: media.mime,
+      model: modelId,
+      provider: providerId,
+      prompt,
+      timeoutMs,
+      profile: entry.profile,
+      preferredProfile: entry.preferredProfile,
+      agentDir: params.agentDir,
+      cfg: params.cfg,
+    };
+    const describeImage = provider?.describeImage ?? describeImageWithModel;
+    const result = await describeImage(imageInput);
     return {
       kind: "image.description",
       attachmentIndex: params.attachmentIndex,
@@ -391,6 +409,10 @@ export async function runProviderEntry(params: {
   if (!provider) {
     throw new Error(`Media provider not available: ${providerId}`);
   }
+
+  // Resolve proxy-aware fetch from env vars (HTTPS_PROXY, HTTP_PROXY, etc.)
+  // so provider HTTP calls are routed through the proxy when configured.
+  const fetchFn = resolveProxyFetchFromEnv();
 
   if (capability === "audio") {
     if (!provider.transcribeAudio) {

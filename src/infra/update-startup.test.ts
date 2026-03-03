@@ -116,6 +116,9 @@ describe("update-startup", () => {
       installKind: "package",
       packageManager: "npm",
     } satisfies UpdateCheckResult);
+  }
+
+  function mockNpmChannelTag(tag: string, version: string) {
     vi.mocked(resolveNpmChannelTag).mockResolvedValue({
       tag: "latest",
       version: "2.0.0",

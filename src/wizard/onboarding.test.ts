@@ -75,6 +75,7 @@ const isSystemdUserServiceAvailable = vi.hoisted(() => vi.fn(async () => true));
 const ensureControlUiAssetsBuilt = vi.hoisted(() => vi.fn(async () => ({ ok: true })));
 const runTui = vi.hoisted(() => vi.fn(async () => {}));
 const setupOnboardingShellCompletion = vi.hoisted(() => vi.fn(async () => {}));
+const probeGatewayReachable = vi.hoisted(() => vi.fn(async () => ({ ok: true })));
 
 vi.mock("../commands/onboard-channels.js", () => ({
   setupChannels,
@@ -138,7 +139,7 @@ vi.mock("../commands/onboard-helpers.js", () => ({
   detectBrowserOpenSupport: vi.fn(async () => ({ ok: false })),
   openUrl: vi.fn(async () => true),
   printWizardHeader: vi.fn(),
-  probeGatewayReachable: vi.fn(async () => ({ ok: true })),
+  probeGatewayReachable,
   waitForGatewayReachable: vi.fn(async () => {}),
   formatControlUiSshHint: vi.fn(() => "ssh hint"),
   resolveControlUiLinks: vi.fn(() => ({
@@ -387,5 +388,102 @@ describe("runOnboardingWizard", () => {
         process.env.BRAVE_API_KEY = prevBraveKey;
       }
     }
+  });
+
+  it("resolves gateway.auth.password SecretRef for local onboarding probe", async () => {
+    const previous = process.env.BOT_GATEWAY_PASSWORD;
+    process.env.BOT_GATEWAY_PASSWORD = "gateway-ref-password";
+    probeGatewayReachable.mockClear();
+    readConfigFileSnapshot.mockResolvedValueOnce({
+      path: "/tmp/.hanzoai/bot.json",
+      exists: true,
+      raw: "{}",
+      parsed: {},
+      resolved: {},
+      valid: true,
+      config: {
+        gateway: {
+          auth: {
+            mode: "password",
+            password: {
+              source: "env",
+              provider: "default",
+              id: "BOT_GATEWAY_PASSWORD",
+            },
+          },
+        },
+      },
+      issues: [],
+      warnings: [],
+      legacyIssues: [],
+    });
+    const select = vi.fn(async (opts: WizardSelectParams<unknown>) => {
+      if (opts.message === "Config handling") {
+        return "keep";
+      }
+      return "quickstart";
+    }) as unknown as WizardPrompter["select"];
+    const prompter = buildWizardPrompter({ select });
+    const runtime = createRuntime();
+
+    try {
+      await runOnboardingWizard(
+        {
+          acceptRisk: true,
+          flow: "quickstart",
+          mode: "local",
+          authChoice: "skip",
+          installDaemon: false,
+          skipProviders: true,
+          skipSkills: true,
+          skipHealth: true,
+          skipUi: true,
+        },
+        runtime,
+        prompter,
+      );
+    } finally {
+      if (previous === undefined) {
+        delete process.env.BOT_GATEWAY_PASSWORD;
+      } else {
+        process.env.BOT_GATEWAY_PASSWORD = previous;
+      }
+    }
+
+    expect(probeGatewayReachable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: "ws://127.0.0.1:18789",
+        password: "gateway-ref-password",
+      }),
+    );
+  });
+
+  it("passes secretInputMode through to local gateway config step", async () => {
+    configureGatewayForOnboarding.mockClear();
+    const prompter = buildWizardPrompter({});
+    const runtime = createRuntime();
+
+    await runOnboardingWizard(
+      {
+        acceptRisk: true,
+        flow: "quickstart",
+        mode: "local",
+        authChoice: "skip",
+        installDaemon: false,
+        skipProviders: true,
+        skipSkills: true,
+        skipHealth: true,
+        skipUi: true,
+        secretInputMode: "ref",
+      },
+      runtime,
+      prompter,
+    );
+
+    expect(configureGatewayForOnboarding).toHaveBeenCalledWith(
+      expect.objectContaining({
+        secretInputMode: "ref",
+      }),
+    );
   });
 });

@@ -1,6 +1,7 @@
 import BotKit
 import CoreLocation
 import Foundation
+import BotKit
 import Testing
 @testable import HanzoBot
 
@@ -65,8 +66,14 @@ struct MacNodeRuntimeTests {
                 return (path: url.path, hasAudio: false)
             }
 
-            func locationAuthorizationStatus() -> CLAuthorizationStatus { .authorizedAlways }
-            func locationAccuracyAuthorization() -> CLAccuracyAuthorization { .fullAccuracy }
+            func locationAuthorizationStatus() -> CLAuthorizationStatus {
+                .authorizedAlways
+            }
+
+            func locationAccuracyAuthorization() -> CLAccuracyAuthorization {
+                .fullAccuracy
+            }
+
             func currentLocation(
                 desiredAccuracy: HanzoBotLocationAccuracy,
                 maxAgeMs: Int?,

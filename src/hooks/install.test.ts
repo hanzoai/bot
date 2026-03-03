@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -8,6 +8,7 @@ import { isAddressInUseError } from "./gmail-watcher.js";
 
 const fixtureRoot = path.join(os.tmpdir(), `bot-hook-install-${randomUUID()}`);
 let tempDirIndex = 0;
+const sharedArchivePathByName = new Map<string, string>();
 
 const fixturesDir = path.resolve(process.cwd(), "test", "fixtures", "hooks-install");
 const zipHooksBuffer = fs.readFileSync(path.join(fixturesDir, "zip-hooks.zip"));
@@ -23,9 +24,8 @@ vi.mock("../process/exec.js", () => ({
 }));
 
 function makeTempDir() {
-  fs.mkdirSync(fixtureRoot, { recursive: true });
   const dir = path.join(fixtureRoot, `case-${tempDirIndex++}`);
-  fs.mkdirSync(dir, { recursive: true });
+  fs.mkdirSync(dir);
   return dir;
 }
 
@@ -45,11 +45,21 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+beforeAll(() => {
+  fs.mkdirSync(fixtureRoot, { recursive: true });
+  fs.mkdirSync(sharedArchiveDir, { recursive: true });
+});
+
 function writeArchiveFixture(params: { fileName: string; contents: Buffer }) {
   const stateDir = makeTempDir();
-  const workDir = makeTempDir();
-  const archivePath = path.join(workDir, params.fileName);
-  fs.writeFileSync(archivePath, params.contents);
+  const archiveHash = createHash("sha256").update(params.contents).digest("hex").slice(0, 12);
+  const archiveKey = `${params.fileName}:${archiveHash}`;
+  let archivePath = sharedArchivePathByName.get(archiveKey);
+  if (!archivePath) {
+    archivePath = path.join(sharedArchiveDir, `${archiveHash}-${params.fileName}`);
+    fs.writeFileSync(archivePath, params.contents);
+    sharedArchivePathByName.set(archiveKey, archivePath);
+  }
   return {
     stateDir,
     archivePath,
@@ -74,10 +84,9 @@ describe("installHooksFromArchive", () => {
       expectedHook: "tar-hook",
     },
   ])("installs hook packs from $name archives", async (tc) => {
-    const fixture = writeArchiveFixture({ fileName: tc.fileName, contents: tc.contents });
-    const result = await installHooksFromArchive({
-      archivePath: fixture.archivePath,
-      hooksDir: fixture.hooksDir,
+    const { fixture, result } = await installArchiveFixture({
+      fileName: tc.fileName,
+      contents: tc.contents,
     });
 
     expect(result.ok).toBe(true);
@@ -106,10 +115,9 @@ describe("installHooksFromArchive", () => {
       expectedDetail: "escapes destination",
     },
   ])("rejects $name archives with traversal entries", async (tc) => {
-    const fixture = writeArchiveFixture({ fileName: tc.fileName, contents: tc.contents });
-    const result = await installHooksFromArchive({
-      archivePath: fixture.archivePath,
-      hooksDir: fixture.hooksDir,
+    const { result } = await installArchiveFixture({
+      fileName: tc.fileName,
+      contents: tc.contents,
     });
 
     expect(result.ok).toBe(false);
@@ -130,10 +138,9 @@ describe("installHooksFromArchive", () => {
       contents: tarReservedIdBuffer,
     },
   ])("rejects hook packs with $name", async (tc) => {
-    const fixture = writeArchiveFixture({ fileName: "hooks.tar", contents: tc.contents });
-    const result = await installHooksFromArchive({
-      archivePath: fixture.archivePath,
-      hooksDir: fixture.hooksDir,
+    const { result } = await installArchiveFixture({
+      fileName: "hooks.tar",
+      contents: tc.contents,
     });
 
     expect(result.ok).toBe(false);

@@ -28,10 +28,7 @@ describe("web monitor inbox", () => {
           messageTimestamp: 1_700_000_100,
         },
       ],
-    };
-
-    sock.ev.emit("messages.upsert", upsert);
-    await new Promise((resolve) => setImmediate(resolve));
+    });
 
     expect(onMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -104,10 +101,7 @@ describe("web monitor inbox", () => {
           pushName: "Tester",
         },
       ],
-    };
-
-    sock.ev.emit("messages.upsert", upsert);
-    await new Promise((resolve) => setImmediate(resolve));
+    });
 
     const content = fsSync.readFileSync(logPath, "utf-8");
     expect(content).toMatch(/web-inbound/);
@@ -132,10 +126,7 @@ describe("web monitor inbox", () => {
           message: { conversation: "group ping" },
         },
       ],
-    };
-
-    sock.ev.emit("messages.upsert", upsert);
-    await new Promise((resolve) => setImmediate(resolve));
+    });
 
     expect(sock.readMessages).toHaveBeenCalledWith([
       {
@@ -172,10 +163,7 @@ describe("web monitor inbox", () => {
           messageTimestamp: 1_700_000_000,
         },
       ],
-    };
-
-    sock.ev.emit("messages.upsert", upsert);
-    await new Promise((resolve) => setImmediate(resolve));
+    });
 
     expect(onMessage).toHaveBeenCalledWith(
       expect.objectContaining({

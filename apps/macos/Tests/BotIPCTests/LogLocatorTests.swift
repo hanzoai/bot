@@ -4,7 +4,7 @@ import Testing
 @testable import HanzoBot
 
 @Suite struct LogLocatorTests {
-    @Test func launchdGatewayLogPathEnsuresTmpDirExists() throws {
+    @Test func launchdGatewayLogPathEnsuresTmpDirExists() {
         let fm = FileManager()
         let baseDir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         let logDir = baseDir.appendingPathComponent("hanzo-bot-tests-\(UUID().uuidString)")

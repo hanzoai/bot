@@ -54,6 +54,37 @@ function createSafeBinJqCase(params: { command: string; seedFileName?: string })
   return { dir, segment: res.segments[0] };
 }
 
+function analyzeEnvWrapperAllowlist(params: { argv: string[]; envPath: string; cwd: string }) {
+  const analysis = analyzeArgvCommand({
+    argv: params.argv,
+    cwd: params.cwd,
+    env: makePathEnv(params.envPath),
+  });
+  const allowlistEval = evaluateExecAllowlist({
+    analysis,
+    allowlist: [{ pattern: params.envPath }],
+    safeBins: normalizeSafeBins([]),
+    cwd: params.cwd,
+  });
+  return { analysis, allowlistEval };
+}
+
+function createPathExecutableFixture(params?: { executable?: string }): {
+  exeName: string;
+  exePath: string;
+  binDir: string;
+} {
+  const dir = makeTempDir();
+  const binDir = path.join(dir, "bin");
+  fs.mkdirSync(binDir, { recursive: true });
+  const baseName = params?.executable ?? "rg";
+  const exeName = process.platform === "win32" ? `${baseName}.exe` : baseName;
+  const exePath = path.join(binDir, exeName);
+  fs.writeFileSync(exePath, "");
+  fs.chmodSync(exePath, 0o755);
+  return { exeName, exePath, binDir };
+}
+
 describe("exec approvals allowlist matching", () => {
   it("ignores basename-only patterns", () => {
     const resolution = {
@@ -438,6 +469,36 @@ describe("exec approvals safe bins", () => {
 });
 
 describe("exec approvals allowlist evaluation", () => {
+  function evaluateAutoAllowSkills(params: {
+    analysis: {
+      ok: boolean;
+      segments: Array<{
+        raw: string;
+        argv: string[];
+        resolution: {
+          rawExecutable: string;
+          executableName: string;
+          resolvedPath?: string;
+        };
+      }>;
+    };
+    resolvedPath: string;
+  }) {
+    return evaluateExecAllowlist({
+      analysis: params.analysis,
+      allowlist: [],
+      safeBins: new Set(),
+      skillBins: [{ name: "skill-bin", resolvedPath: params.resolvedPath }],
+      autoAllowSkills: true,
+      cwd: "/tmp",
+    });
+  }
+
+  function expectAutoAllowSkillsMiss(result: ReturnType<typeof evaluateExecAllowlist>): void {
+    expect(result.allowlistSatisfied).toBe(false);
+    expect(result.segmentSatisfiedBy).toEqual([null]);
+  }
+
   it("satisfies allowlist on exact match", () => {
     const analysis = {
       ok: true,
@@ -509,7 +570,7 @@ describe("exec approvals allowlist evaluation", () => {
         },
       ],
     };
-    const result = evaluateExecAllowlist({
+    const result = evaluateAutoAllowSkills({
       analysis,
       allowlist: [],
       safeBins: new Set(),

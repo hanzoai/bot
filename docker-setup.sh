@@ -97,6 +97,14 @@ YAML
   fi
 }
 
+# When sandbox is requested, ensure Docker CLI build arg is set for local builds.
+# Docker socket mount is deferred until sandbox prerequisites are verified.
+if [[ -n "$SANDBOX_ENABLED" ]]; then
+  if [[ -z "${BOT_INSTALL_DOCKER_CLI:-}" ]]; then
+    export BOT_INSTALL_DOCKER_CLI=1
+  fi
+fi
+
 VALID_MOUNTS=()
 if [[ -n "$EXTRA_MOUNTS" ]]; then
   IFS=',' read -r -a mounts <<<"$EXTRA_MOUNTS"
@@ -121,6 +129,9 @@ fi
 for compose_file in "${COMPOSE_FILES[@]}"; do
   COMPOSE_ARGS+=("-f" "$compose_file")
 done
+# Keep a base compose arg set without sandbox overlay so rollback paths can
+# force a known-safe gateway service definition (no docker.sock mount).
+BASE_COMPOSE_ARGS=("${COMPOSE_ARGS[@]}")
 COMPOSE_HINT="docker compose"
 for compose_file in "${COMPOSE_FILES[@]}"; do
   COMPOSE_HINT+=" -f ${compose_file}"
@@ -182,6 +193,22 @@ docker build \
   -t "$IMAGE_NAME" \
   -f "$ROOT_DIR/Dockerfile" \
   "$ROOT_DIR"
+
+# Ensure bind-mounted data directories are writable by the container's `node`
+# user (uid 1000). Host-created dirs inherit the host user's uid which may
+# differ, causing EACCES when the container tries to mkdir/write.
+# Running a brief root container to chown is the portable Docker idiom --
+# it works regardless of the host uid and doesn't require host-side root.
+echo ""
+echo "==> Fixing data-directory permissions"
+# Use -xdev to restrict chown to the config-dir mount only — without it,
+# the recursive chown would cross into the workspace bind mount and rewrite
+# ownership of all user project files on Linux hosts.
+# After fixing the config dir, only the Bot metadata subdirectory
+# (.hanzo/bot/) inside the workspace gets chowned, not the user's project files.
+docker compose "${COMPOSE_ARGS[@]}" run --rm --user root --entrypoint sh bot-cli -c \
+  'find /home/node/.bot -xdev -exec chown node:node {} +; \
+   [ -d /home/node/.hanzo/bot/workspace/.bot ] && chown -R node:node /home/node/.hanzo/bot/workspace/.bot || true'
 
 echo ""
 echo "==> Onboarding (interactive)"

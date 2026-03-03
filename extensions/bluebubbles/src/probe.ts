@@ -35,8 +35,8 @@ export async function fetchBlueBubblesServerInfo(params: {
   accountId?: string;
   timeoutMs?: number;
 }): Promise<BlueBubblesServerInfo | null> {
-  const baseUrl = params.baseUrl?.trim();
-  const password = params.password?.trim();
+  const baseUrl = normalizeSecretInputString(params.baseUrl);
+  const password = normalizeSecretInputString(params.password);
   if (!baseUrl || !password) {
     return null;
   }
@@ -138,8 +138,8 @@ export async function probeBlueBubbles(params: {
   password?: string | null;
   timeoutMs?: number;
 }): Promise<BlueBubblesProbe> {
-  const baseUrl = params.baseUrl?.trim();
-  const password = params.password?.trim();
+  const baseUrl = normalizeSecretInputString(params.baseUrl);
+  const password = normalizeSecretInputString(params.password);
   if (!baseUrl) {
     return { ok: false, error: "serverUrl not configured" };
   }

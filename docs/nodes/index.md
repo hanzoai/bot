@@ -1,5 +1,5 @@
 ---
-summary: "Nodes: pairing, capabilities, permissions, and CLI helpers for canvas/camera/screen/system"
+summary: "Nodes: pairing, capabilities, permissions, and CLI helpers for canvas/camera/screen/device/notifications/system"
 read_when:
   - Pairing iOS/Android nodes to a gateway
   - Using node canvas/camera for agent context
@@ -9,7 +9,7 @@ title: "Nodes"
 
 # Nodes
 
-A **node** is a companion device (macOS/iOS/Android/headless) that connects to the Gateway **WebSocket** (same port as operators) with `role: "node"` and exposes a command surface (e.g. `canvas.*`, `camera.*`, `system.*`) via `node.invoke`. Protocol details: [Gateway protocol](/gateway/protocol).
+A **node** is a companion device (macOS/iOS/Android/headless) that connects to the Gateway **WebSocket** (same port as operators) with `role: "node"` and exposes a command surface (e.g. `canvas.*`, `camera.*`, `device.*`, `notifications.*`, `system.*`) via `node.invoke`. Protocol details: [Gateway protocol](/gateway/protocol).
 
 Legacy transport: [Bridge protocol](/gateway/bridge-protocol) (TCP JSONL; deprecated/removed for current nodes).
 
@@ -261,6 +261,33 @@ Notes:
 - The permission prompt must be accepted on the Android device before the capability is advertised.
 - Wi-Fi-only devices without telephony will not advertise `sms.send`.
 
+## Android device + personal data commands
+
+Android nodes can advertise additional command families when the corresponding capabilities are enabled.
+
+Available families:
+
+- `device.status`, `device.info`, `device.permissions`, `device.health`
+- `notifications.list`, `notifications.actions`
+- `photos.latest`
+- `contacts.search`, `contacts.add`
+- `calendar.events`, `calendar.add`
+- `motion.activity`, `motion.pedometer`
+- `app.update`
+
+Example invokes:
+
+```bash
+bot nodes invoke --node <idOrNameOrIp> --command device.status --params '{}'
+bot nodes invoke --node <idOrNameOrIp> --command notifications.list --params '{}'
+bot nodes invoke --node <idOrNameOrIp> --command photos.latest --params '{"limit":1}'
+```
+
+Notes:
+
+- Motion commands are capability-gated by available sensors.
+- `app.update` is permission + policy gated by the node runtime.
+
 ## System commands (node host / mac node)
 
 The macOS node exposes `system.run`, `system.notify`, and `system.execApprovals.get/set`.
@@ -277,6 +304,7 @@ Notes:
 
 - `system.run` returns stdout/stderr/exit code in the payload.
 - `system.notify` respects notification permission state on the macOS app.
+- Unrecognized node `platform` / `deviceFamily` metadata uses a conservative default allowlist that excludes `system.run` and `system.which`. If you intentionally need those commands for an unknown platform, add them explicitly via `gateway.nodes.allowCommands`.
 - `system.run` supports `--cwd`, `--env KEY=VAL`, `--command-timeout`, and `--needs-screen-recording`.
 - `system.notify` supports `--priority <passive|active|timeSensitive>` and `--delivery <system|overlay|auto>`.
 - Node hosts ignore `PATH` overrides. If you need extra PATH entries, configure the node host service environment (or install tools in standard locations) instead of passing `PATH` via `--env`.

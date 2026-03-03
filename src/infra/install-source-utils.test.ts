@@ -56,6 +56,31 @@ async function runPack(spec: string, cwd: string, timeoutMs = 1000) {
   });
 }
 
+async function expectPackFallsBackToDetectedArchive(params: { stdout: string }) {
+  const cwd = await createTempDir("bot-install-source-utils-");
+  const archivePath = path.join(cwd, "bot-plugin-1.2.3.tgz");
+  await fs.writeFile(archivePath, "", "utf-8");
+  runCommandWithTimeoutMock.mockResolvedValue({
+    stdout: params.stdout,
+    stderr: "",
+    code: 0,
+    signal: null,
+    killed: false,
+  });
+
+  const result = await packNpmSpecToArchive({
+    spec: "bot-plugin@1.2.3",
+    timeoutMs: 5000,
+    cwd,
+  });
+
+  expect(result).toEqual({
+    ok: true,
+    archivePath,
+    metadata: {},
+  });
+}
+
 beforeEach(() => {
   runCommandWithTimeoutMock.mockClear();
 });

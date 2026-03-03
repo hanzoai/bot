@@ -54,6 +54,43 @@ function resolveMemoryPluginStatus(cfg: ReturnType<typeof loadConfig>): MemoryPl
   return { enabled: true, slot: raw || "memory-core" };
 }
 
+async function resolveGatewayProbeSnapshot(params: {
+  cfg: ReturnType<typeof loadConfig>;
+  opts: { timeoutMs?: number; all?: boolean };
+}): Promise<GatewayProbeSnapshot> {
+  const gatewayConnection = buildGatewayConnectionDetails();
+  const isRemoteMode = params.cfg.gateway?.mode === "remote";
+  const remoteUrlRaw =
+    typeof params.cfg.gateway?.remote?.url === "string" ? params.cfg.gateway.remote.url : "";
+  const remoteUrlMissing = isRemoteMode && !remoteUrlRaw.trim();
+  const gatewayMode = isRemoteMode ? "remote" : "local";
+  const gatewayProbe = remoteUrlMissing
+    ? null
+    : await probeGateway({
+        url: gatewayConnection.url,
+        auth: resolveGatewayProbeAuth(params.cfg),
+        timeoutMs: Math.min(params.opts.all ? 5000 : 2500, params.opts.timeoutMs ?? 10_000),
+      }).catch(() => null);
+  return { gatewayConnection, remoteUrlMissing, gatewayMode, gatewayProbe };
+}
+
+async function resolveChannelsStatus(params: {
+  gatewayReachable: boolean;
+  opts: { timeoutMs?: number; all?: boolean };
+}) {
+  if (!params.gatewayReachable) {
+    return null;
+  }
+  return await callGateway({
+    method: "channels.status",
+    params: {
+      probe: false,
+      timeoutMs: Math.min(8000, params.opts.timeoutMs ?? 10_000),
+    },
+    timeoutMs: Math.min(params.opts.all ? 5000 : 2500, params.opts.timeoutMs ?? 10_000),
+  }).catch(() => null);
+}
+
 export type StatusScanResult = {
   cfg: ReturnType<typeof loadConfig>;
   osSummary: ReturnType<typeof resolveOsSummary>;
@@ -208,7 +245,12 @@ export async function scanStatus(
     },
     async (progress) => {
       progress.setLabel("Loading config…");
-      const cfg = loadConfig();
+      const loadedRaw = loadConfig();
+      const { resolvedConfig: cfg } = await resolveCommandSecretRefsViaGateway({
+        config: loadedRaw,
+        commandName: "status",
+        targetIds: getStatusCommandSecretTargetIds(),
+      });
       const osSummary = resolveOsSummary();
       const tailscaleMode = cfg.gateway?.tailscale?.mode ?? "off";
       const tailscaleDnsPromise =
@@ -246,19 +288,8 @@ export async function scanStatus(
       progress.tick();
 
       progress.setLabel("Probing gateway…");
-      const gatewayConnection = buildGatewayConnectionDetails();
-      const isRemoteMode = cfg.gateway?.mode === "remote";
-      const remoteUrlRaw =
-        typeof cfg.gateway?.remote?.url === "string" ? cfg.gateway.remote.url : "";
-      const remoteUrlMissing = isRemoteMode && !remoteUrlRaw.trim();
-      const gatewayMode = isRemoteMode ? "remote" : "local";
-      const gatewayProbe = remoteUrlMissing
-        ? null
-        : await probeGateway({
-            url: gatewayConnection.url,
-            auth: resolveGatewayProbeAuth(cfg),
-            timeoutMs: Math.min(opts.all ? 5000 : 2500, opts.timeoutMs ?? 10_000),
-          }).catch(() => null);
+      const { gatewayConnection, remoteUrlMissing, gatewayMode, gatewayProbe } =
+        await resolveGatewayProbeSnapshot({ cfg, opts });
       const gatewayReachable = gatewayProbe?.ok === true;
       const gatewaySelf = gatewayProbe?.presence
         ? pickGatewaySelfPresence(gatewayProbe.presence)
@@ -266,16 +297,7 @@ export async function scanStatus(
       progress.tick();
 
       progress.setLabel("Querying channel status…");
-      const channelsStatus = gatewayReachable
-        ? await callGateway({
-            method: "channels.status",
-            params: {
-              probe: false,
-              timeoutMs: Math.min(8000, opts.timeoutMs ?? 10_000),
-            },
-            timeoutMs: Math.min(opts.all ? 5000 : 2500, opts.timeoutMs ?? 10_000),
-          }).catch(() => null)
-        : null;
+      const channelsStatus = await resolveChannelsStatus({ gatewayReachable, opts });
       const channelIssues = channelsStatus ? collectChannelStatusIssues(channelsStatus) : [];
       progress.tick();
 
@@ -289,25 +311,7 @@ export async function scanStatus(
 
       progress.setLabel("Checking memory…");
       const memoryPlugin = resolveMemoryPluginStatus(cfg);
-      const memory = await (async (): Promise<MemoryStatusSnapshot | null> => {
-        if (!memoryPlugin.enabled) {
-          return null;
-        }
-        if (memoryPlugin.slot !== "memory-core") {
-          return null;
-        }
-        const agentId = agentStatus.defaultId ?? "main";
-        const { manager } = await getMemorySearchManager({ cfg, agentId, purpose: "status" });
-        if (!manager) {
-          return null;
-        }
-        try {
-          await manager.probeVectorAvailability();
-        } catch {}
-        const status = manager.status();
-        await manager.close?.().catch(() => {});
-        return { agentId, ...status };
-      })();
+      const memory = await resolveMemoryStatusSnapshot({ cfg, agentStatus, memoryPlugin });
       progress.tick();
 
       progress.setLabel("Reading sessions…");
