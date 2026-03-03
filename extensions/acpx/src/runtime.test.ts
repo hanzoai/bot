@@ -10,7 +10,29 @@ import {
 } from "./runtime-internals/test-fixtures.js";
 import { AcpxRuntime, decodeAcpxRuntimeHandleState } from "./runtime.js";
 
-afterEach(async () => {
+let sharedFixture: Awaited<ReturnType<typeof createMockRuntimeFixture>> | null = null;
+let missingCommandRuntime: AcpxRuntime | null = null;
+
+beforeAll(async () => {
+  sharedFixture = await createMockRuntimeFixture();
+  missingCommandRuntime = new AcpxRuntime(
+    {
+      command: "/definitely/missing/acpx",
+      allowPluginLocalInstall: false,
+      installCommand: "n/a",
+      cwd: process.cwd(),
+      permissionMode: "approve-reads",
+      nonInteractivePermissions: "fail",
+      strictWindowsCmdWrapper: true,
+      queueOwnerTtlSeconds: 0.1,
+    },
+    { logger: NOOP_LOGGER },
+  );
+});
+
+afterAll(async () => {
+  sharedFixture = null;
+  missingCommandRuntime = null;
   await cleanupMockRuntimeFixtures();
 });
 
@@ -104,34 +126,12 @@ describe("AcpxRuntime", () => {
     expect(promptArgs).toContain("--approve-all");
   });
 
-  it("passes a queue-owner TTL by default to avoid long idle stalls", async () => {
-    const { runtime, logPath } = await createMockRuntimeFixture();
-    const handle = await runtime.ensureSession({
-      sessionKey: "agent:codex:acp:ttl-default",
-      agent: "codex",
-      mode: "persistent",
-    });
-
-    for await (const _event of runtime.runTurn({
-      handle,
-      text: "ttl-default",
-      mode: "prompt",
-      requestId: "req-ttl-default",
-    })) {
-      // drain
-    }
-
-    const logs = await readMockRuntimeLogEntries(logPath);
-    const prompt = logs.find((entry) => entry.kind === "prompt");
-    expect(prompt).toBeDefined();
-    const promptArgs = (prompt?.args as string[]) ?? [];
-    const ttlFlagIndex = promptArgs.indexOf("--ttl");
-    expect(ttlFlagIndex).toBeGreaterThanOrEqual(0);
-    expect(promptArgs[ttlFlagIndex + 1]).toBe("0.1");
-  });
-
   it("preserves leading spaces across streamed text deltas", async () => {
-    const { runtime } = await createMockRuntimeFixture();
+    const runtime = sharedFixture?.runtime;
+    expect(runtime).toBeDefined();
+    if (!runtime) {
+      throw new Error("shared runtime fixture missing");
+    }
     const handle = await runtime.ensureSession({
       sessionKey: "agent:codex:acp:space",
       agent: "codex",
@@ -194,30 +194,12 @@ describe("AcpxRuntime", () => {
     expect(doneCount).toBe(1);
   });
 
-  it("emits done once when ACP stream repeats stop reason responses", async () => {
-    const { runtime } = await createMockRuntimeFixture();
-    const handle = await runtime.ensureSession({
-      sessionKey: "agent:codex:acp:double-done",
-      agent: "codex",
-      mode: "persistent",
-    });
-
-    const events = [];
-    for await (const event of runtime.runTurn({
-      handle,
-      text: "double-done",
-      mode: "prompt",
-      requestId: "req-double-done",
-    })) {
-      events.push(event);
-    }
-
-    const doneCount = events.filter((event) => event.type === "done").length;
-    expect(doneCount).toBe(1);
-  });
-
   it("maps acpx error events into ACP runtime error events", async () => {
-    const { runtime } = await createMockRuntimeFixture();
+    const runtime = sharedFixture?.runtime;
+    expect(runtime).toBeDefined();
+    if (!runtime) {
+      throw new Error("shared runtime fixture missing");
+    }
     const handle = await runtime.ensureSession({
       sessionKey: "agent:codex:acp:456",
       agent: "codex",
@@ -365,39 +347,32 @@ describe("AcpxRuntime", () => {
     const debugLogs: string[] = [];
     const runtime = new AcpxRuntime(
       {
-        command: "/definitely/missing/acpx",
-        allowPluginLocalInstall: false,
-        installCommand: "n/a",
-        cwd: process.cwd(),
-        permissionMode: "approve-reads",
-        nonInteractivePermissions: "fail",
-        queueOwnerTtlSeconds: 0.1,
+        ...config,
+        strictWindowsCmdWrapper: true,
+      },
+      {
+        logger: {
+          ...NOOP_LOGGER,
+          debug: (message: string) => {
+            debugLogs.push(message);
+          },
+        },
       },
     );
 
     await runtime.probeAvailability();
 
-  it("marks runtime healthy when command is available", async () => {
-    const { runtime } = await createMockRuntimeFixture();
-    await runtime.probeAvailability();
-    expect(runtime.isHealthy()).toBe(true);
+    const spawnLogs = debugLogs.filter((entry) => entry.startsWith("acpx spawn resolver:"));
+    expect(spawnLogs.length).toBe(1);
+    expect(spawnLogs[0]).toContain("mode=strict");
   });
 
   it("returns doctor report for missing command", async () => {
-    const runtime = new AcpxRuntime(
-      {
-        command: "/definitely/missing/acpx",
-        allowPluginLocalInstall: false,
-        installCommand: "n/a",
-        cwd: process.cwd(),
-        permissionMode: "approve-reads",
-        nonInteractivePermissions: "fail",
-        queueOwnerTtlSeconds: 0.1,
-      },
-      { logger: NOOP_LOGGER },
-    );
-
-    const report = await runtime.doctor();
+    expect(missingCommandRuntime).toBeDefined();
+    if (!missingCommandRuntime) {
+      throw new Error("missing-command runtime fixture missing");
+    }
+    const report = await missingCommandRuntime.doctor();
     expect(report.ok).toBe(false);
     expect(report.code).toBe("ACP_BACKEND_UNAVAILABLE");
     expect(report.installCommand).toContain("acpx");

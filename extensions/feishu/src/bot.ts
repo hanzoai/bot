@@ -1,4 +1,4 @@
-import type { BotConfig, RuntimeEnv } from "bot/plugin-sdk";
+import type { ClawdbotConfig, RuntimeEnv } from "bot/plugin-sdk";
 import {
   buildAgentMediaPayload,
   buildPendingHistoryContextFromMap,
@@ -450,7 +450,11 @@ function formatSubMessageContent(content: string, contentType: string): string {
   }
 }
 
-function checkBotMentioned(event: FeishuMessageEvent, botOpenId?: string): boolean {
+function checkBotMentioned(
+  event: FeishuMessageEvent,
+  botOpenId?: string,
+  botName?: string,
+): boolean {
   if (!botOpenId) return false;
   // Check for @all (@_all in Feishu) — treat as mentioning every bot
   const rawContent = event.message.content ?? "";
@@ -569,7 +573,7 @@ function inferPlaceholder(messageType: string): string {
  * Similar to Discord's resolveMediaList().
  */
 async function resolveFeishuMediaList(params: {
-  cfg: BotConfig;
+  cfg: ClawdbotConfig;
   messageId: string;
   messageType: string;
   content: string;
@@ -767,8 +771,16 @@ export function parseFeishuMessageEvent(
   botName?: string,
 ): FeishuMessageContext {
   const rawContent = parseMessageContent(event.message.content, event.message.message_type);
-  const mentionedBot = checkBotMentioned(event, botOpenId);
-  const content = stripBotMention(rawContent, event.message.mentions);
+  const mentionedBot = checkBotMentioned(event, botOpenId, botName);
+  const hasAnyMention = (event.message.mentions?.length ?? 0) > 0;
+  // In p2p, the bot mention is a pure addressing prefix with no semantic value;
+  // strip it so slash commands like @Bot /help still have a leading /.
+  // Non-bot mentions (e.g. mention-forward targets) are still normalized to <at> tags.
+  const content = normalizeMentions(
+    rawContent,
+    event.message.mentions,
+    event.message.chat_type === "p2p" ? botOpenId : undefined,
+  );
   const senderOpenId = event.sender.sender_id.open_id?.trim();
   const senderUserId = event.sender.sender_id.user_id?.trim();
   const senderFallbackId = senderOpenId || senderUserId || "";
@@ -847,7 +859,7 @@ export function buildFeishuAgentBody(params: {
 }
 
 export async function handleFeishuMessage(params: {
-  cfg: BotConfig;
+  cfg: ClawdbotConfig;
   event: FeishuMessageEvent;
   botOpenId?: string;
   botName?: string;
@@ -1022,6 +1034,7 @@ export async function handleFeishuMessage(params: {
         groupPolicy: "allowlist",
         allowFrom: effectiveSenderAllowFrom,
         senderId: ctx.senderOpenId,
+        senderIds: [senderUserId],
         senderName: ctx.senderName,
       });
       if (!senderAllowed) {
@@ -1081,6 +1094,7 @@ export async function handleFeishuMessage(params: {
     const dmAllowed = resolveFeishuAllowlistMatch({
       allowFrom: effectiveDmAllowFrom,
       senderId: ctx.senderOpenId,
+      senderIds: [senderUserId],
       senderName: ctx.senderName,
     }).allowed;
 
@@ -1123,6 +1137,7 @@ export async function handleFeishuMessage(params: {
     const senderAllowedForCommands = resolveFeishuAllowlistMatch({
       allowFrom: commandAllowFrom,
       senderId: ctx.senderOpenId,
+      senderIds: [senderUserId],
       senderName: ctx.senderName,
     }).allowed;
     const commandAuthorized = shouldComputeCommandAuthorized
@@ -1142,49 +1157,10 @@ export async function handleFeishuMessage(params: {
     const parentPeer = isGroup ? (groupSession?.parentPeer ?? null) : null;
     const replyInThread = isGroup ? (groupSession?.replyInThread ?? false) : false;
 
-    // Resolve peer ID for session routing.
-    // Default is one session per group chat; this can be customized with groupSessionScope.
-    let peerId = isGroup ? ctx.chatId : ctx.senderOpenId;
-    let groupSessionScope: "group" | "group_sender" | "group_topic" | "group_topic_sender" =
-      "group";
-    let topicRootForSession: string | null = null;
-    const replyInThread =
-      isGroup &&
-      (groupConfig?.replyInThread ?? feishuCfg?.replyInThread ?? "disabled") === "enabled";
-
-    if (isGroup) {
-      const legacyTopicSessionMode =
-        groupConfig?.topicSessionMode ?? feishuCfg?.topicSessionMode ?? "disabled";
-      groupSessionScope =
-        groupConfig?.groupSessionScope ??
-        feishuCfg?.groupSessionScope ??
-        (legacyTopicSessionMode === "enabled" ? "group_topic" : "group");
-
-      // When topic-scoped sessions are enabled and replyInThread is on, the first
-      // bot reply creates the thread rooted at the current message ID.
-      if (groupSessionScope === "group_topic" || groupSessionScope === "group_topic_sender") {
-        topicRootForSession = ctx.rootId ?? (replyInThread ? ctx.messageId : null);
-      }
-
-      switch (groupSessionScope) {
-        case "group_sender":
-          peerId = `${ctx.chatId}:sender:${ctx.senderOpenId}`;
-          break;
-        case "group_topic":
-          peerId = topicRootForSession ? `${ctx.chatId}:topic:${topicRootForSession}` : ctx.chatId;
-          break;
-        case "group_topic_sender":
-          peerId = topicRootForSession
-            ? `${ctx.chatId}:topic:${topicRootForSession}:sender:${ctx.senderOpenId}`
-            : `${ctx.chatId}:sender:${ctx.senderOpenId}`;
-          break;
-        case "group":
-        default:
-          peerId = ctx.chatId;
-          break;
-      }
-
-      log(`feishu[${account.accountId}]: group session scope=${groupSessionScope}, peer=${peerId}`);
+    if (isGroup && groupSession) {
+      log(
+        `feishu[${account.accountId}]: group session scope=${groupSession.groupSessionScope}, peer=${peerId}`,
+      );
     }
 
     let route = core.channel.routing.resolveAgentRoute({
@@ -1195,16 +1171,7 @@ export async function handleFeishuMessage(params: {
         kind: isGroup ? "group" : "direct",
         id: peerId,
       },
-      // Add parentPeer for binding inheritance in topic-scoped modes.
-      parentPeer:
-        isGroup &&
-        topicRootForSession &&
-        (groupSessionScope === "group_topic" || groupSessionScope === "group_topic_sender")
-          ? {
-              kind: "group",
-              id: ctx.chatId,
-            }
-          : null,
+      parentPeer,
     });
 
     // Dynamic agent creation for DM users
@@ -1331,69 +1298,39 @@ export async function handleFeishuMessage(params: {
           }))
         : undefined;
 
-    const ctxPayload = core.channel.reply.finalizeInboundContext({
-      Body: combinedBody,
-      BodyForAgent: messageBody,
-      InboundHistory: inboundHistory,
-      // Quote/reply message support: use standard ReplyToId for parent,
-      // and pass root_id for thread reconstruction.
-      ReplyToId: ctx.parentId,
-      RootMessageId: ctx.rootId,
-      RawBody: ctx.content,
-      CommandBody: ctx.content,
-      From: feishuFrom,
-      To: feishuTo,
-      SessionKey: route.sessionKey,
-      AccountId: route.accountId,
-      ChatType: isGroup ? "group" : "direct",
-      GroupSubject: isGroup ? ctx.chatId : undefined,
-      SenderName: ctx.senderName ?? ctx.senderOpenId,
-      SenderId: ctx.senderOpenId,
-      Provider: "feishu" as const,
-      Surface: "feishu" as const,
-      MessageSid: ctx.messageId,
-      ReplyToBody: quotedContent ?? undefined,
-      Timestamp: Date.now(),
-      WasMentioned: ctx.mentionedBot,
-      CommandAuthorized: commandAuthorized,
-      OriginatingChannel: "feishu" as const,
-      OriginatingTo: feishuTo,
-      ...mediaPayload,
-    });
-
-    const { dispatcher, replyOptions, markDispatchIdle } = createFeishuReplyDispatcher({
-      cfg,
-      agentId: route.agentId,
-      runtime: runtime as RuntimeEnv,
-      chatId: ctx.chatId,
-      replyToMessageId: ctx.messageId,
-      skipReplyToInMessages: !isGroup,
-      replyInThread,
-      rootId: ctx.rootId,
-      mentionTargets: ctx.mentionTargets,
-      accountId: account.accountId,
-    });
-
-    log(`feishu[${account.accountId}]: dispatching to agent (session=${route.sessionKey})`);
-    const { queuedFinal, counts } = await core.channel.reply.withReplyDispatcher({
-      dispatcher,
-      onSettled: () => {
-        markDispatchIdle();
-      },
-      run: () =>
-        core.channel.reply.dispatchReplyFromConfig({
-          ctx: ctxPayload,
-          cfg,
-          dispatcher,
-          replyOptions,
-        }),
-    });
-
-    if (isGroup && historyKey && chatHistories) {
-      clearHistoryEntriesIfEnabled({
-        historyMap: chatHistories,
-        historyKey,
-        limit: historyLimit,
+    // --- Shared context builder for dispatch ---
+    const buildCtxPayloadForAgent = (
+      agentSessionKey: string,
+      agentAccountId: string,
+      wasMentioned: boolean,
+    ) =>
+      core.channel.reply.finalizeInboundContext({
+        Body: combinedBody,
+        BodyForAgent: messageBody,
+        InboundHistory: inboundHistory,
+        ReplyToId: ctx.parentId,
+        RootMessageId: ctx.rootId,
+        RawBody: ctx.content,
+        CommandBody: ctx.content,
+        From: feishuFrom,
+        To: feishuTo,
+        SessionKey: agentSessionKey,
+        AccountId: agentAccountId,
+        ChatType: isGroup ? "group" : "direct",
+        GroupSubject: isGroup ? ctx.chatId : undefined,
+        SenderName: ctx.senderName ?? ctx.senderOpenId,
+        SenderId: ctx.senderOpenId,
+        Provider: "feishu" as const,
+        Surface: "feishu" as const,
+        MessageSid: ctx.messageId,
+        ReplyToBody: quotedContent ?? undefined,
+        Timestamp: Date.now(),
+        WasMentioned: wasMentioned,
+        CommandAuthorized: commandAuthorized,
+        OriginatingChannel: "feishu" as const,
+        OriginatingTo: feishuTo,
+        GroupSystemPrompt: isGroup ? groupConfig?.systemPrompt?.trim() || undefined : undefined,
+        ...mediaPayload,
       });
 
     // Parse message create_time (Feishu uses millisecond epoch string).
