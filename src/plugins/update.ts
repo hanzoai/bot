@@ -224,7 +224,12 @@ export async function updateNpmInstalledPlugins(params: {
         outcomes.push({
           pluginId,
           status: "error",
-          message: `Failed to check ${pluginId}: ${probe.error}`,
+          message: formatNpmInstallFailure({
+            pluginId,
+            spec: record.spec,
+            phase: "check",
+            result: probe,
+          }),
         });
         continue;
       }
@@ -271,7 +276,12 @@ export async function updateNpmInstalledPlugins(params: {
       outcomes.push({
         pluginId,
         status: "error",
-        message: `Failed to update ${pluginId}: ${result.error}`,
+        message: formatNpmInstallFailure({
+          pluginId,
+          spec: record.spec,
+          phase: "update",
+          result: result,
+        }),
       });
       continue;
     }

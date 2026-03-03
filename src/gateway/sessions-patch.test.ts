@@ -5,6 +5,8 @@ import { applySessionsPatchToStore } from "./sessions-patch.js";
 
 const SUBAGENT_MODEL = "synthetic/hf:moonshotai/Kimi-K2.5";
 const KIMI_SUBAGENT_KEY = "agent:kimi:subagent:child";
+const MAIN_SESSION_KEY = "agent:main:main";
+const EMPTY_CFG = {} as BotConfig;
 
 async function applySubagentModelPatch(cfg: BotConfig) {
   const res = await applySessionsPatchToStore({
@@ -20,11 +22,44 @@ async function applySubagentModelPatch(cfg: BotConfig) {
       { provider: "synthetic", id: "hf:moonshotai/Kimi-K2.5", name: "kimi" },
     ],
   });
-  expect(res.ok).toBe(true);
-  if (!res.ok) {
-    throw new Error(res.error.message);
+}
+
+function expectPatchOk(
+  result: Awaited<ReturnType<typeof applySessionsPatchToStore>>,
+): SessionEntry {
+  expect(result.ok).toBe(true);
+  if (!result.ok) {
+    throw new Error(result.error.message);
   }
-  return res.entry;
+  return result.entry;
+}
+
+function expectPatchError(
+  result: Awaited<ReturnType<typeof applySessionsPatchToStore>>,
+  message: string,
+): void {
+  expect(result.ok).toBe(false);
+  if (result.ok) {
+    throw new Error(`Expected patch failure containing: ${message}`);
+  }
+  expect(result.error.message).toContain(message);
+}
+
+async function applySubagentModelPatch(cfg: BotConfig) {
+  return expectPatchOk(
+    await runPatch({
+      cfg,
+      storeKey: KIMI_SUBAGENT_KEY,
+      patch: {
+        key: KIMI_SUBAGENT_KEY,
+        model: SUBAGENT_MODEL,
+      },
+      loadGatewayModelCatalog: async () => [
+        { provider: "anthropic", id: "claude-sonnet-4-6", name: "sonnet" },
+        { provider: "synthetic", id: "hf:moonshotai/Kimi-K2.5", name: "kimi" },
+      ],
+    }),
+  );
 }
 
 function makeKimiSubagentCfg(params: {
@@ -72,7 +107,7 @@ describe("gateway sessions patch", () => {
 
   test("clears thinkingLevel when patch sets null", async () => {
     const store: Record<string, SessionEntry> = {
-      "agent:main:main": { thinkingLevel: "low" } as SessionEntry,
+      [MAIN_SESSION_KEY]: { thinkingLevel: "low" } as SessionEntry,
     };
     const res = await applySessionsPatchToStore({
       cfg: {} as BotConfig,
@@ -104,7 +139,7 @@ describe("gateway sessions patch", () => {
 
   test("clears reasoningLevel when patch sets null", async () => {
     const store: Record<string, SessionEntry> = {
-      "agent:main:main": { reasoningLevel: "stream" } as SessionEntry,
+      [MAIN_SESSION_KEY]: { reasoningLevel: "stream" } as SessionEntry,
     };
     const res = await applySessionsPatchToStore({
       cfg: {} as BotConfig,
@@ -151,7 +186,7 @@ describe("gateway sessions patch", () => {
 
   test("clears elevatedLevel when patch sets null", async () => {
     const store: Record<string, SessionEntry> = {
-      "agent:main:main": { elevatedLevel: "off" } as SessionEntry,
+      [MAIN_SESSION_KEY]: { elevatedLevel: "off" } as SessionEntry,
     };
     const res = await applySessionsPatchToStore({
       cfg: {} as BotConfig,
@@ -174,11 +209,7 @@ describe("gateway sessions patch", () => {
       storeKey: "agent:main:main",
       patch: { key: "agent:main:main", elevatedLevel: "maybe" },
     });
-    expect(res.ok).toBe(false);
-    if (res.ok) {
-      return;
-    }
-    expect(res.error.message).toContain("invalid elevatedLevel");
+    expectPatchError(result, "invalid elevatedLevel");
   });
 
   test("clears auth overrides when model patch changes", async () => {
@@ -265,14 +296,17 @@ describe("gateway sessions patch", () => {
         { provider: "anthropic", id: "claude-sonnet-4-5", name: "Claude Sonnet 4.5" },
         { provider: "openai", id: "gpt-5.2", name: "GPT-5.2" },
       ],
-    });
-
-    expect(res.ok).toBe(true);
-    if (!res.ok) {
-      return;
-    }
-    expect(res.entry.providerOverride).toBe("anthropic");
-    expect(res.entry.modelOverride).toBe("claude-sonnet-4-6");
+    },
+  ])("$name", async ({ catalog }) => {
+    const entry = expectPatchOk(
+      await runPatch({
+        cfg: createAllowlistedAnthropicModelCfg(),
+        patch: { key: MAIN_SESSION_KEY, model: "anthropic/claude-sonnet-4-6" },
+        loadGatewayModelCatalog: async () => catalog,
+      }),
+    );
+    expect(entry.providerOverride).toBe("anthropic");
+    expect(entry.modelOverride).toBe("claude-sonnet-4-6");
   });
 
   test("sets spawnDepth for subagent sessions", async () => {
@@ -298,11 +332,7 @@ describe("gateway sessions patch", () => {
       storeKey: "agent:main:main",
       patch: { key: "agent:main:main", spawnDepth: 1 },
     });
-    expect(res.ok).toBe(false);
-    if (res.ok) {
-      return;
-    }
-    expect(res.error.message).toContain("spawnDepth is only supported");
+    expectPatchError(result, "spawnDepth is only supported");
   });
 
   test("normalizes exec/send/group patches", async () => {
@@ -341,11 +371,7 @@ describe("gateway sessions patch", () => {
       storeKey: "agent:main:main",
       patch: { key: "agent:main:main", execHost: "edge" },
     });
-    expect(res.ok).toBe(false);
-    if (res.ok) {
-      return;
-    }
-    expect(res.error.message).toContain("invalid execHost");
+    expectPatchError(result, "invalid execHost");
   });
 
   test("rejects invalid sendPolicy values", async () => {
@@ -356,11 +382,7 @@ describe("gateway sessions patch", () => {
       storeKey: "agent:main:main",
       patch: { key: "agent:main:main", sendPolicy: "ask" as unknown as "allow" },
     });
-    expect(res.ok).toBe(false);
-    if (res.ok) {
-      return;
-    }
-    expect(res.error.message).toContain("invalid sendPolicy");
+    expectPatchError(result, "invalid sendPolicy");
   });
 
   test("rejects invalid groupActivation values", async () => {
@@ -371,11 +393,7 @@ describe("gateway sessions patch", () => {
       storeKey: "agent:main:main",
       patch: { key: "agent:main:main", groupActivation: "never" as unknown as "mention" },
     });
-    expect(res.ok).toBe(false);
-    if (res.ok) {
-      return;
-    }
-    expect(res.error.message).toContain("invalid groupActivation");
+    expectPatchError(result, "invalid groupActivation");
   });
 
   test("allows target agent own model for subagent session even when missing from global allowlist", async () => {

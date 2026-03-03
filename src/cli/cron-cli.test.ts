@@ -150,7 +150,55 @@ async function expectCronEditWithScheduleLookupExit(
   ).rejects.toThrow("__exit__:1");
 }
 
+async function runCronRunAndCaptureExit(params: { ran: boolean; args?: string[] }) {
+  resetGatewayMock();
+  callGatewayFromCli.mockImplementation(
+    async (method: string, _opts: unknown, callParams?: unknown) => {
+      if (method === "cron.status") {
+        return { enabled: true };
+      }
+      if (method === "cron.run") {
+        return { ok: true, params: callParams, ran: params.ran };
+      }
+      return { ok: true, params: callParams };
+    },
+  );
+
+  const runtimeModule = await import("../runtime.js");
+  const runtime = runtimeModule.defaultRuntime as { exit: (code: number) => void };
+  const originalExit = runtime.exit;
+  const exitSpy = vi.fn();
+  runtime.exit = exitSpy;
+  try {
+    const program = buildProgram();
+    await program.parseAsync(params.args ?? ["cron", "run", "job-1"], { from: "user" });
+  } finally {
+    runtime.exit = originalExit;
+  }
+  const runCall = callGatewayFromCli.mock.calls.find((call) => call[0] === "cron.run");
+  return {
+    exitSpy,
+    runOpts: (runCall?.[1] ?? {}) as { timeout?: string },
+  };
+}
+
 describe("cron cli", () => {
+  it.each([
+    {
+      name: "exits 0 for cron run when job executes successfully",
+      ran: true,
+      expectedExitCode: 0,
+    },
+    {
+      name: "exits 1 for cron run when job does not execute",
+      ran: false,
+      expectedExitCode: 1,
+    },
+  ])("$name", async ({ ran, expectedExitCode }) => {
+    const { exitSpy } = await runCronRunAndCaptureExit({ ran });
+    expect(exitSpy).toHaveBeenCalledWith(expectedExitCode);
+  });
+
   it("trims model and thinking on cron add", { timeout: CRON_CLI_TEST_TIMEOUT_MS }, async () => {
     await runCronCommand([
       "cron",
@@ -315,6 +363,22 @@ describe("cron cli", () => {
     expect(params?.agentId).toBe("ops");
   });
 
+  it("sets lightContext on cron add when --light-context is passed", async () => {
+    const params = await runCronAddAndGetParams([
+      "--name",
+      "Light context",
+      "--cron",
+      "* * * * *",
+      "--session",
+      "isolated",
+      "--message",
+      "hello",
+      "--light-context",
+    ]);
+
+    expect(params?.payload?.lightContext).toBe(true);
+  });
+
   it.each([
     {
       label: "omits empty model and thinking",
@@ -355,6 +419,14 @@ describe("cron cli", () => {
     expect(patch?.patch?.payload?.kind).toBe("agentTurn");
     expect(patch?.patch?.payload?.model).toBe("opus");
     expect(patch?.patch?.payload?.thinking).toBe("low");
+  });
+
+  it("sets and clears lightContext on cron edit", async () => {
+    const setPatch = await runCronEditAndGetPatch(["--light-context", "--message", "hello"]);
+    expect(setPatch?.patch?.payload?.lightContext).toBe(true);
+
+    const clearPatch = await runCronEditAndGetPatch(["--no-light-context", "--message", "hello"]);
+    expect(clearPatch?.patch?.payload?.lightContext).toBe(false);
   });
 
   it("updates delivery settings without requiring --message", async () => {

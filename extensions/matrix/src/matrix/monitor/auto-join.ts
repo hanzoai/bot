@@ -26,6 +26,7 @@ export function registerMatrixAutoJoin(params: {
 
   if (autoJoin === "always") {
     // Use the built-in autojoin mixin for "always" mode
+    const { AutojoinRoomsMixin } = loadMatrixSdk();
     AutojoinRoomsMixin.setupOnClient(client);
     logVerbose("matrix: auto-join enabled for all invites");
     return;

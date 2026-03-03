@@ -65,6 +65,20 @@ async function runStateIntegrity(cfg: BotConfig) {
   return confirmSkipInNonInteractive;
 }
 
+function writeSessionStore(
+  cfg: BotConfig,
+  sessions: Record<string, { sessionId: string; updatedAt: number }>,
+) {
+  setupSessionState(cfg, process.env, process.env.HOME ?? "");
+  const storePath = resolveStorePath(cfg.session?.store, { agentId: "main" });
+  fs.writeFileSync(storePath, JSON.stringify(sessions, null, 2));
+}
+
+async function runStateIntegrityText(cfg: BotConfig): Promise<string> {
+  await noteStateIntegrity(cfg, { confirmSkipInNonInteractive: vi.fn(async () => false) });
+  return stateIntegrityText();
+}
+
 describe("doctor state integrity oauth dir checks", () => {
   let envSnapshot: EnvSnapshot;
   let tempHome = "";

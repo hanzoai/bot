@@ -8,6 +8,7 @@ import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 import { readLoggingConfig } from "./config.js";
 import { type LogLevel, levelToMinLevel, normalizeLogLevel } from "./levels.js";
 import { loggingState } from "./state.js";
+import { formatLocalIsoWithOffset } from "./timestamps.js";
 
 export const DEFAULT_LOG_DIR = resolvePreferredBotTmpDir();
 export const DEFAULT_LOG_FILE = path.join(DEFAULT_LOG_DIR, "bot.log"); // legacy single-file path
@@ -37,6 +38,11 @@ export type LogTransport = (logObj: LogTransportRecord) => void;
 
 const externalTransports = new Set<LogTransport>();
 
+function shouldSkipLoadConfigFallback(argv: string[] = process.argv): boolean {
+  const [primary, secondary] = getCommandPathWithRootOptions(argv, 2);
+  return primary === "config" && secondary === "validate";
+}
+
 function attachExternalTransport(logger: TsLogger<LogObj>, transport: LogTransport): void {
   logger.attachTransport((logObj: LogObj) => {
     if (!externalTransports.has(transport)) {
@@ -50,10 +56,19 @@ function attachExternalTransport(logger: TsLogger<LogObj>, transport: LogTranspo
   });
 }
 
+function canUseSilentVitestFileLogFastPath(envLevel: LogLevel | undefined): boolean {
+  return (
+    process.env.VITEST === "true" &&
+    process.env.BOT_TEST_FILE_LOG !== "1" &&
+    !envLevel &&
+    !loggingState.overrideSettings
+  );
+}
+
 function resolveSettings(): ResolvedSettings {
   let cfg: BotConfig["logging"] | undefined =
     (loggingState.overrideSettings as LoggerSettings | null) ?? readLoggingConfig();
-  if (!cfg) {
+  if (!cfg && !shouldSkipLoadConfigFallback()) {
     try {
       const loaded = requireConfig("../config/config.js") as {
         loadConfig?: () => BotConfig;
@@ -89,6 +104,20 @@ export function isFileLogLevelEnabled(level: LogLevel): boolean {
 }
 
 function buildLogger(settings: ResolvedSettings): TsLogger<LogObj> {
+  const logger = new TsLogger<LogObj>({
+    name: "@hanzo/bot",
+    minLevel: levelToMinLevel(settings.level),
+    type: "hidden", // no ansi formatting
+  });
+
+  // Silent logging does not write files; skip all filesystem setup in this path.
+  if (settings.level === "silent") {
+    for (const transport of externalTransports) {
+      attachExternalTransport(logger, transport);
+    }
+    return logger;
+  }
+
   fs.mkdirSync(path.dirname(settings.file), { recursive: true });
   // Clean up stale rolling logs when using a dated log filename.
   if (isRollingPath(settings.file)) {
@@ -102,7 +131,7 @@ function buildLogger(settings: ResolvedSettings): TsLogger<LogObj> {
 
   logger.attachTransport((logObj: LogObj) => {
     try {
-      const time = logObj.date?.toISOString?.() ?? new Date().toISOString();
+      const time = formatLocalIsoWithOffset(logObj.date ?? new Date());
       const line = JSON.stringify({ ...logObj, time });
       fs.appendFileSync(settings.file, `${line}\n`, { encoding: "utf8" });
     } catch {
@@ -203,6 +232,10 @@ export function registerLogTransport(transport: LogTransport): () => void {
     externalTransports.delete(transport);
   };
 }
+
+export const __test__ = {
+  shouldSkipLoadConfigFallback,
+};
 
 function formatLocalDate(date: Date): string {
   const year = date.getFullYear();

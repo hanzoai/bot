@@ -65,11 +65,8 @@ final class GatewayDiscoveryModel {
                     self.statesByDomain[domain] = state
                     self.updateStatusText()
                     self.appendDebugLog("state[\(domain)]: \(Self.prettyState(state))")
-                }
-            }
-
-            browser.browseResultsChangedHandler = { [weak self] results, _ in
-                Task { @MainActor in
+                },
+                onResults: { [weak self] results in
                     guard let self else { return }
                     self.gatewaysByDomain[domain] = results.compactMap { result -> DiscoveredGateway? in
                         switch result.endpoint {
@@ -98,10 +95,8 @@ final class GatewayDiscoveryModel {
                         }
                     }
                     .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-
                     self.recomputeGateways()
-                }
-            }
+                })
 
             self.browsers[domain] = browser
             browser.start(queue: DispatchQueue(label: "ai.hanzo.bot.ios.gateway-discovery.\(domain)"))

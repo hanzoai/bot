@@ -10,6 +10,7 @@ title: "OpenAI"
 
 OpenAI provides developer APIs for GPT models. Codex supports **ChatGPT sign-in** for subscription
 access or **API key** sign-in for usage-based access. Codex cloud requires ChatGPT sign-in.
+OpenAI explicitly supports subscription OAuth usage in external tools/workflows like Bot.
 
 ## Option A: OpenAI API key (OpenAI Platform)
 
@@ -29,7 +30,7 @@ hanzo-bot onboard --openai-api-key "$OPENAI_API_KEY"
 ```json5
 {
   env: { OPENAI_API_KEY: "sk-..." },
-  agents: { defaults: { model: { primary: "openai/gpt-5.1-codex" } } },
+  agents: { defaults: { model: { primary: "openai/gpt-5.2" } } },
 }
 ```
 
@@ -56,15 +57,22 @@ hanzo-bot models auth login --provider openai-codex
 }
 ```
 
-### Codex transport default
+### Transport default
 
 Hanzo Bot uses `pi-ai` for model streaming. For `openai-codex/*` models you can set
 `agents.defaults.models.<provider/model>.params.transport` to select transport:
 
-- Default is `"auto"` (WebSocket-first, then SSE fallback).
 - `"sse"`: force SSE
 - `"websocket"`: force WebSocket
 - `"auto"`: try WebSocket, then fall back to SSE
+
+For `openai/*` (Responses API), Bot also enables WebSocket warm-up by
+default (`openaiWsWarmup: true`) when WebSocket transport is used.
+
+Related OpenAI docs:
+
+- [Realtime API with WebSocket](https://platform.openai.com/docs/guides/realtime-websocket)
+- [Streaming API responses (SSE)](https://platform.openai.com/docs/guides/streaming-responses)
 
 ```json5
 {

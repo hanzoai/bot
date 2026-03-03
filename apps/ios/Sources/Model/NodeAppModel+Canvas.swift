@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import BotKit
 import os
 
 extension NodeAppModel {
@@ -11,7 +12,7 @@ extension NodeAppModel {
         guard let raw = await self.gatewaySession.currentCanvasHostUrl() else { return nil }
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, let base = URL(string: trimmed) else { return nil }
-        if let host = base.host, Self.isLoopbackHost(host) {
+        if let host = base.host, LoopbackHost.isLoopback(host) {
             return nil
         }
         return base.appendingPathComponent("__hanzo-bot__/a2ui/").absoluteString + "?platform=ios"

@@ -5,15 +5,7 @@ import { createAcpTestConfig as createCfg } from "./test-fixtures/acp-runtime.js
 
 describe("createAcpReplyProjector", () => {
   it("coalesces text deltas into bounded block chunks", async () => {
-    const deliveries: Array<{ kind: string; text?: string }> = [];
-    const projector = createAcpReplyProjector({
-      cfg: createCfg(),
-      shouldSendToolSummaries: true,
-      deliver: async (kind, payload) => {
-        deliveries.push({ kind, text: payload.text });
-        return true;
-      },
-    });
+    const { deliveries, projector } = createProjectorHarness();
 
     await projector.onEvent({
       type: "text_delta",

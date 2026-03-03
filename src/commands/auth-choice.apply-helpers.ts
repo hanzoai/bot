@@ -30,6 +30,25 @@ function isValidFileSecretRefId(value: string): boolean {
     .every((segment) => FILE_SECRET_REF_SEGMENT_RE.test(segment));
 }
 
+export type SecretInputModePromptCopy = {
+  modeMessage?: string;
+  plaintextLabel?: string;
+  plaintextHint?: string;
+  refLabel?: string;
+  refHint?: string;
+};
+
+export type SecretRefOnboardingPromptCopy = {
+  sourceMessage?: string;
+  envVarMessage?: string;
+  envVarPlaceholder?: string;
+  envVarFormatError?: string;
+  envVarMissingError?: (envVar: string) => string;
+  noProvidersMessage?: string;
+  envValidatedMessage?: (envVar: string) => string;
+  providerValidatedMessage?: (provider: string, id: string, source: "file" | "exec") => string;
+};
+
 function formatErrorMessage(error: unknown): string {
   if (error instanceof Error && typeof error.message === "string" && error.message.trim()) {
     return error.message;
@@ -77,11 +96,12 @@ function resolveRefFallbackInput(params: {
   );
 }
 
-async function resolveApiKeyRefForOnboarding(params: {
+export async function promptSecretRefForOnboarding(params: {
   provider: string;
   config: BotConfig;
   prompter: WizardPrompter;
   preferredEnvVar?: string;
+  copy?: SecretRefOnboardingPromptCopy;
 }): Promise<{ ref: SecretRef; resolvedValue: string }> {
   const defaultEnvVar =
     params.preferredEnvVar ?? resolveDefaultProviderEnvVar(params.provider) ?? "";
@@ -110,16 +130,22 @@ async function resolveApiKeyRefForOnboarding(params: {
 
     if (source === "env") {
       const envVarRaw = await params.prompter.text({
-        message: "Environment variable name",
+        message: params.copy?.envVarMessage ?? "Environment variable name",
         initialValue: defaultEnvVar || undefined,
-        placeholder: "OPENAI_API_KEY",
+        placeholder: params.copy?.envVarPlaceholder ?? "OPENAI_API_KEY",
         validate: (value) => {
           const candidate = value.trim();
           if (!ENV_SECRET_REF_ID_RE.test(candidate)) {
-            return 'Use an env var name like "OPENAI_API_KEY" (uppercase letters, numbers, underscores).';
+            return (
+              params.copy?.envVarFormatError ??
+              'Use an env var name like "OPENAI_API_KEY" (uppercase letters, numbers, underscores).'
+            );
           }
           if (!process.env[candidate]?.trim()) {
-            return `Environment variable "${candidate}" is missing or empty in this session.`;
+            return (
+              params.copy?.envVarMissingError?.(candidate) ??
+              `Environment variable "${candidate}" is missing or empty in this session.`
+            );
           }
           return undefined;
         },
@@ -246,6 +272,24 @@ export function createAuthChoiceDefaultModelApplier(
   };
 }
 
+export function createAuthChoiceDefaultModelApplierForMutableState(
+  params: ApplyAuthChoiceParams,
+  getConfig: () => ApplyAuthChoiceParams["config"],
+  setConfig: (config: ApplyAuthChoiceParams["config"]) => void,
+  getAgentModelOverride: () => string | undefined,
+  setAgentModelOverride: (model: string | undefined) => void,
+): ReturnType<typeof createAuthChoiceDefaultModelApplier> {
+  return createAuthChoiceDefaultModelApplier(
+    params,
+    createAuthChoiceModelStateBridge({
+      getConfig,
+      setConfig,
+      getAgentModelOverride,
+      setAgentModelOverride,
+    }),
+  );
+}
+
 export function normalizeTokenProviderInput(
   tokenProvider: string | null | undefined,
 ): string | undefined {
@@ -270,6 +314,7 @@ export function normalizeSecretInputModeInput(
 export async function resolveSecretInputModeForEnvSelection(params: {
   prompter: WizardPrompter;
   explicitMode?: SecretInputMode;
+  copy?: SecretInputModePromptCopy;
 }): Promise<SecretInputMode> {
   if (params.explicitMode) {
     return params.explicitMode;
@@ -280,7 +325,7 @@ export async function resolveSecretInputModeForEnvSelection(params: {
     return "plaintext";
   }
   const selected = await params.prompter.select<SecretInputMode>({
-    message: "How do you want to provide this API key?",
+    message: params.copy?.modeMessage ?? "How do you want to provide this API key?",
     initialValue: "plaintext",
     options: [
       {
@@ -390,7 +435,7 @@ export async function ensureApiKeyFromEnvOrPrompt(params: {
       await params.setCredential(fallback.input, selectedMode);
       return fallback.resolvedValue;
     }
-    const resolved = await resolveApiKeyRefForOnboarding({
+    const resolved = await promptSecretRefForOnboarding({
       provider: params.provider,
       config: params.config,
       prompter: params.prompter,

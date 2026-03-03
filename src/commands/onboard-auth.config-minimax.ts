@@ -24,9 +24,9 @@ export function applyMinimaxProviderConfig(cfg: BotConfig): BotConfig {
     ...models["anthropic/claude-opus-4-6"],
     alias: models["anthropic/claude-opus-4-6"]?.alias ?? "Opus",
   };
-  models["lmstudio/minimax-m2.1-gs32"] = {
-    ...models["lmstudio/minimax-m2.1-gs32"],
-    alias: models["lmstudio/minimax-m2.1-gs32"]?.alias ?? "Minimax",
+  models["lmstudio/minimax-m2.5-gs32"] = {
+    ...models["lmstudio/minimax-m2.5-gs32"],
+    alias: models["lmstudio/minimax-m2.5-gs32"]?.alias ?? "Minimax",
   };
 
   const providers = { ...cfg.models?.providers };
@@ -37,8 +37,8 @@ export function applyMinimaxProviderConfig(cfg: BotConfig): BotConfig {
       api: "openai-responses",
       models: [
         buildMinimaxModelDefinition({
-          id: "minimax-m2.1-gs32",
-          name: "MiniMax M2.1 GS32",
+          id: "minimax-m2.5-gs32",
+          name: "MiniMax M2.5 GS32",
           reasoning: false,
           cost: MINIMAX_LM_STUDIO_COST,
           contextWindow: 196608,
@@ -85,7 +85,7 @@ export function applyMinimaxHostedProviderConfig(
 
 export function applyMinimaxConfig(cfg: BotConfig): BotConfig {
   const next = applyMinimaxProviderConfig(cfg);
-  return applyAgentDefaultModelPrimary(next, "lmstudio/minimax-m2.1-gs32");
+  return applyAgentDefaultModelPrimary(next, "lmstudio/minimax-m2.5-gs32");
 }
 
 export function applyMinimaxHostedConfig(cfg: BotConfig, params?: { baseUrl?: string }): BotConfig {
