@@ -35,6 +35,36 @@ async function withStateDir<T>(stateDir: string, fn: () => Promise<T>) {
   }
 }
 
+async function discoverWithStateDir(
+  stateDir: string,
+  params: Parameters<typeof discoverBotPlugins>[0],
+) {
+  return await withStateDir(stateDir, async () => {
+    return discoverBotPlugins(params);
+  });
+}
+
+function writePluginPackageManifest(params: {
+  packageDir: string;
+  packageName: string;
+  extensions: string[];
+}) {
+  fs.writeFileSync(
+    path.join(params.packageDir, "package.json"),
+    JSON.stringify({
+      name: params.packageName,
+      bot: { extensions: params.extensions },
+    }),
+    "utf-8",
+  );
+}
+
+function expectEscapesPackageDiagnostic(diagnostics: Array<{ message: string }>) {
+  expect(diagnostics.some((entry) => entry.message.includes("escapes package directory"))).toBe(
+    true,
+  );
+}
+
 afterEach(() => {
   for (const dir of tempDirs.splice(0)) {
     try {

@@ -11,10 +11,10 @@ describe("browser config", () => {
     expect(resolved.cdpHost).toBe("127.0.0.1");
     expect(resolved.cdpProtocol).toBe("http");
     const profile = resolveProfile(resolved, resolved.defaultProfile);
-    expect(profile?.name).toBe("chrome");
-    expect(profile?.driver).toBe("extension");
-    expect(profile?.cdpPort).toBe(18792);
-    expect(profile?.cdpUrl).toBe("http://127.0.0.1:18792");
+    expect(profile?.name).toBe("@hanzo/bot");
+    expect(profile?.driver).toBe("@hanzo/bot");
+    expect(profile?.cdpPort).toBe(18800);
+    expect(profile?.cdpUrl).toBe("http://127.0.0.1:18800");
 
     const bot = resolveProfile(resolved, "bot");
     expect(bot?.driver).toBe("bot");
@@ -70,6 +70,22 @@ describe("browser config", () => {
     }
   });
 
+  it("supports overriding the local CDP auto-allocation range start", () => {
+    const resolved = resolveBrowserConfig({
+      cdpPortRangeStart: 19000,
+    });
+    const bot = resolveProfile(resolved, "@hanzo/bot");
+    expect(resolved.cdpPortRangeStart).toBe(19000);
+    expect(bot?.cdpPort).toBe(19000);
+    expect(bot?.cdpUrl).toBe("http://127.0.0.1:19000");
+  });
+
+  it("rejects cdpPortRangeStart values that overflow the CDP range window", () => {
+    expect(() => resolveBrowserConfig({ cdpPortRangeStart: 65535 })).toThrow(
+      /cdpPortRangeStart .* too high/i,
+    );
+  });
+
   it("normalizes hex colors", () => {
     const resolved = resolveBrowserConfig({
       color: "ff4500",
@@ -122,6 +138,30 @@ describe("browser config", () => {
     expect(remote?.cdpUrl).toBe("http://10.0.0.42:9222");
     expect(remote?.cdpHost).toBe("10.0.0.42");
     expect(remote?.cdpIsLoopback).toBe(false);
+  });
+
+  it("inherits attachOnly from global browser config when profile override is not set", () => {
+    const resolved = resolveBrowserConfig({
+      attachOnly: true,
+      profiles: {
+        remote: { cdpUrl: "http://127.0.0.1:9222", color: "#0066CC" },
+      },
+    });
+
+    const remote = resolveProfile(resolved, "remote");
+    expect(remote?.attachOnly).toBe(true);
+  });
+
+  it("allows profile attachOnly to override global browser attachOnly", () => {
+    const resolved = resolveBrowserConfig({
+      attachOnly: false,
+      profiles: {
+        remote: { cdpUrl: "http://127.0.0.1:9222", attachOnly: true, color: "#0066CC" },
+      },
+    });
+
+    const remote = resolveProfile(resolved, "remote");
+    expect(remote?.attachOnly).toBe(true);
   });
 
   it("uses base protocol for profiles with only cdpPort", () => {

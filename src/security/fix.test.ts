@@ -55,6 +55,25 @@ describe("security fix", () => {
     };
   };
 
+  const expectTightenedStateAndConfigPerms = async (stateDir: string, configPath: string) => {
+    const stateMode = (await fs.stat(stateDir)).mode & 0o777;
+    expectPerms(stateMode, 0o700);
+
+    const configMode = (await fs.stat(configPath)).mode & 0o777;
+    expectPerms(configMode, 0o600);
+  };
+
+  const runWhatsAppFixScenario = async (params: {
+    stateDir: string;
+    configPath: string;
+    whatsapp: Record<string, unknown>;
+    allowFromStore: string[];
+  }) => {
+    await writeWhatsAppConfig(params.configPath, params.whatsapp);
+    await writeWhatsAppAllowFromStore(params.stateDir, params.allowFromStore);
+    return runFixAndReadChannels(params.stateDir, params.configPath);
+  };
+
   const writeWhatsAppAllowFromStore = async (stateDir: string, allowFrom: string[]) => {
     const credsDir = path.join(stateDir, "credentials");
     await fs.mkdir(credsDir, { recursive: true });
@@ -109,11 +128,7 @@ describe("security fix", () => {
       ]),
     );
 
-    const stateMode = (await fs.stat(stateDir)).mode & 0o777;
-    expectPerms(stateMode, 0o700);
-
-    const configMode = (await fs.stat(configPath)).mode & 0o777;
-    expectPerms(configMode, 0o600);
+    await expectTightenedStateAndConfigPerms(stateDir, configPath);
 
     const parsed = await readParsedConfig(configPath);
     const channels = parsed.channels as Record<string, Record<string, unknown>>;
@@ -134,10 +149,8 @@ describe("security fix", () => {
       accounts: {
         a1: { groupPolicy: "open" },
       },
+      allowFromStore: ["+15550001111"],
     });
-
-    await writeWhatsAppAllowFromStore(stateDir, ["+15550001111"]);
-    const { res, channels } = await runFixAndReadChannels(stateDir, configPath);
     expect(res.ok).toBe(true);
 
     const whatsapp = channels.whatsapp;
@@ -155,9 +168,6 @@ describe("security fix", () => {
       groupPolicy: "open",
       allowFrom: ["+15552223333"],
     });
-
-    await writeWhatsAppAllowFromStore(stateDir, ["+15550001111"]);
-    const { res, channels } = await runFixAndReadChannels(stateDir, configPath);
     expect(res.ok).toBe(true);
 
     expect(channels.whatsapp.groupPolicy).toBe("allowlist");
@@ -177,11 +187,7 @@ describe("security fix", () => {
     const res = await fixSecurityFootguns({ env, stateDir, configPath });
     expect(res.ok).toBe(false);
 
-    const stateMode = (await fs.stat(stateDir)).mode & 0o777;
-    expectPerms(stateMode, 0o700);
-
-    const configMode = (await fs.stat(configPath)).mode & 0o777;
-    expectPerms(configMode, 0o600);
+    await expectTightenedStateAndConfigPerms(stateDir, configPath);
   });
 
   it("tightens perms for credentials + agent auth/sessions + include files", async () => {

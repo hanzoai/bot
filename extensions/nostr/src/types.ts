@@ -6,6 +6,7 @@ import { DEFAULT_RELAYS } from "./nostr-bus.js";
 export interface NostrAccountConfig {
   enabled?: boolean;
   name?: string;
+  defaultAccount?: string;
   privateKey?: string;
   relays?: string[];
   dmPolicy?: "pairing" | "allowlist" | "open" | "disabled";
@@ -25,7 +26,12 @@ export interface ResolvedNostrAccount {
   config: NostrAccountConfig;
 }
 
-const DEFAULT_ACCOUNT_ID = "default";
+function resolveConfiguredDefaultNostrAccountId(cfg: BotConfig): string | undefined {
+  const nostrCfg = (cfg.channels as Record<string, unknown> | undefined)?.nostr as
+    | NostrAccountConfig
+    | undefined;
+  return normalizeOptionalAccountId(nostrCfg?.defaultAccount);
+}
 
 /**
  * List all configured Nostr account IDs
@@ -37,7 +43,7 @@ export function listNostrAccountIds(cfg: BotConfig): string[] {
 
   // If privateKey is configured at top level, we have a default account
   if (nostrCfg?.privateKey) {
-    return [DEFAULT_ACCOUNT_ID];
+    return [resolveConfiguredDefaultNostrAccountId(cfg) ?? DEFAULT_ACCOUNT_ID];
   }
 
   return [];
@@ -61,7 +67,7 @@ export function resolveNostrAccount(opts: {
   cfg: BotConfig;
   accountId?: string | null;
 }): ResolvedNostrAccount {
-  const accountId = opts.accountId ?? DEFAULT_ACCOUNT_ID;
+  const accountId = normalizeAccountId(opts.accountId ?? resolveDefaultNostrAccountId(opts.cfg));
   const nostrCfg = (opts.cfg.channels as Record<string, unknown> | undefined)?.nostr as
     | NostrAccountConfig
     | undefined;

@@ -1,7 +1,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { clearPluginManifestRegistryCache } from "../plugins/manifest-registry.js";
 import { validateConfigObjectWithPlugins } from "./config.js";
 
 async function writePluginFixture(params: {
@@ -44,24 +45,72 @@ describe("config plugin validation", () => {
     return validateConfigObjectWithPlugins(raw);
   };
 
-  afterAll(async () => {
-    await fs.rm(fixtureRoot, { recursive: true, force: true });
+  const validateInSuite = (raw: unknown) => validateConfigObjectWithPlugins(raw);
+
+  beforeAll(async () => {
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-config-plugin-validation-"));
+    suiteHome = path.join(fixtureRoot, "home");
+    await fs.mkdir(suiteHome, { recursive: true });
+    badPluginDir = path.join(suiteHome, "bad-plugin");
+    enumPluginDir = path.join(suiteHome, "enum-plugin");
+    bluebubblesPluginDir = path.join(suiteHome, "bluebubbles-plugin");
+    await writePluginFixture({
+      dir: badPluginDir,
+      id: "bad-plugin",
+      schema: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          value: { type: "boolean" },
+        },
+        required: ["value"],
+      },
+    });
+    await writePluginFixture({
+      dir: enumPluginDir,
+      id: "enum-plugin",
+      schema: {
+        type: "object",
+        properties: {
+          fileFormat: {
+            type: "string",
+            enum: ["markdown", "html"],
+          },
+        },
+        required: ["fileFormat"],
+      },
+    });
+    await writePluginFixture({
+      dir: bluebubblesPluginDir,
+      id: "bluebubbles-plugin",
+      channels: ["bluebubbles"],
+      schema: { type: "object" },
+    });
+    process.env.BOT_STATE_DIR = path.join(suiteHome, ".bot");
+    process.env.BOT_PLUGIN_MANIFEST_CACHE_MS = "10000";
+    clearPluginManifestRegistryCache();
+    // Warm the plugin manifest cache once so path-based validations can reuse
+    // parsed manifests across test cases.
+    validateInSuite({
+      plugins: {
+        enabled: false,
+        load: { paths: [badPluginDir, bluebubblesPluginDir] },
+      },
+    });
   });
 
-  it("rejects missing plugin load paths", async () => {
-    const home = await createCaseHome();
-    const missingPath = path.join(home, "missing-plugin");
-    const res = validateInHome(home, {
-      agents: { list: [{ id: "pi" }] },
-      plugins: { enabled: false, load: { paths: [missingPath] } },
-    });
-    expect(res.ok).toBe(false);
-    if (!res.ok) {
-      const hasIssue = res.issues.some(
-        (issue) =>
-          issue.path === "plugins.load.paths" && issue.message.includes("plugin path not found"),
-      );
-      expect(hasIssue).toBe(true);
+  afterAll(async () => {
+    await fs.rm(fixtureRoot, { recursive: true, force: true });
+    clearPluginManifestRegistryCache();
+    if (envSnapshot.BOT_STATE_DIR === undefined) {
+      delete process.env.BOT_STATE_DIR;
+    } else {
+      process.env.BOT_STATE_DIR = envSnapshot.BOT_STATE_DIR;
+    }
+    if (envSnapshot.BOT_PLUGIN_MANIFEST_CACHE_MS === undefined) {
+      delete process.env.BOT_PLUGIN_MANIFEST_CACHE_MS;
+    } else {
+      process.env.BOT_PLUGIN_MANIFEST_CACHE_MS = envSnapshot.BOT_PLUGIN_MANIFEST_CACHE_MS;
     }
   });
 
@@ -69,7 +118,14 @@ describe("config plugin validation", () => {
     const home = await createCaseHome();
     const res = validateInHome(home, {
       agents: { list: [{ id: "pi" }] },
-      plugins: { enabled: false, entries: { "missing-plugin": { enabled: true } } },
+      plugins: {
+        enabled: false,
+        load: { paths: [missingPath] },
+        entries: { "missing-plugin": { enabled: true } },
+        allow: ["missing-allow"],
+        deny: ["missing-deny"],
+        slots: { memory: "missing-slot" },
+      },
     });
     expect(res.ok).toBe(false);
     if (!res.ok) {
@@ -104,26 +160,11 @@ describe("config plugin validation", () => {
   });
 
   it("surfaces plugin config diagnostics", async () => {
-    const home = await createCaseHome();
-    const pluginDir = path.join(home, "bad-plugin");
-    await writePluginFixture({
-      dir: pluginDir,
-      id: "bad-plugin",
-      schema: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          value: { type: "boolean" },
-        },
-        required: ["value"],
-      },
-    });
-
-    const res = validateInHome(home, {
+    const res = validateInSuite({
       agents: { list: [{ id: "pi" }] },
       plugins: {
         enabled: true,
-        load: { paths: [pluginDir] },
+        load: { paths: [badPluginDir] },
         entries: { "bad-plugin": { config: { value: "nope" } } },
       },
     });
@@ -131,43 +172,48 @@ describe("config plugin validation", () => {
     if (!res.ok) {
       const hasIssue = res.issues.some(
         (issue) =>
-          issue.path === "plugins.entries.bad-plugin.config" &&
+          issue.path.startsWith("plugins.entries.bad-plugin.config") &&
           issue.message.includes("invalid config"),
       );
       expect(hasIssue).toBe(true);
     }
   });
 
-  it("accepts known plugin ids", async () => {
-    const home = await createCaseHome();
-    const res = validateInHome(home, {
+  it("surfaces allowed enum values for plugin config diagnostics", async () => {
+    const res = validateInSuite({
       agents: { list: [{ id: "pi" }] },
-      plugins: { enabled: false, entries: { discord: { enabled: true } } },
+      plugins: {
+        enabled: true,
+        load: { paths: [enumPluginDir] },
+        entries: { "enum-plugin": { config: { fileFormat: "txt" } } },
+      },
     });
-    expect(res.ok).toBe(true);
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      const issue = res.issues.find(
+        (entry) => entry.path === "plugins.entries.enum-plugin.config.fileFormat",
+      );
+      expect(issue).toBeDefined();
+      expect(issue?.message).toContain('allowed: "markdown", "html"');
+      expect(issue?.allowedValues).toEqual(["markdown", "html"]);
+      expect(issue?.allowedValuesHiddenCount).toBe(0);
+    }
   });
 
   it("accepts plugin heartbeat targets", async () => {
-    const home = await createCaseHome();
-    const pluginDir = path.join(home, "bluebubbles-plugin");
-    await writePluginFixture({
-      dir: pluginDir,
-      id: "bluebubbles-plugin",
-      channels: ["bluebubbles"],
-      schema: { type: "object" },
-    });
-
-    const res = validateInHome(home, {
+    const res = validateInSuite({
       agents: { defaults: { heartbeat: { target: "bluebubbles" } }, list: [{ id: "pi" }] },
-      plugins: { enabled: false, load: { paths: [pluginDir] } },
+      plugins: { enabled: false, load: { paths: [bluebubblesPluginDir] } },
     });
     expect(res.ok).toBe(true);
   });
 
   it("rejects unknown heartbeat targets", async () => {
-    const home = await createCaseHome();
-    const res = validateInHome(home, {
-      agents: { defaults: { heartbeat: { target: "not-a-channel" } }, list: [{ id: "pi" }] },
+    const res = validateInSuite({
+      agents: {
+        defaults: { heartbeat: { target: "not-a-channel" } },
+        list: [{ id: "pi" }],
+      },
     });
     expect(res.ok).toBe(false);
     if (!res.ok) {

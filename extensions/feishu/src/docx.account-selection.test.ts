@@ -21,8 +21,8 @@ vi.mock("@larksuiteoapi/node-sdk", () => {
 });
 
 describe("feishu_doc account selection", () => {
-  test("uses agentAccountId context when params omit accountId", async () => {
-    const cfg = {
+  function createDocEnabledConfig(): BotPluginApi["config"] {
+    return {
       channels: {
         feishu: {
           enabled: true,
