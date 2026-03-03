@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { ensureAuthProfileStore } from "../agents/auth-profiles.js";
+import { ensureAuthProfileStore, type AuthProfileStore } from "../agents/auth-profiles.js";
 import { loadConfig, type BotConfig } from "../config/config.js";
 import {
   activateSecretsRuntimeSnapshot,
@@ -41,7 +41,16 @@ describe("secrets runtime snapshot", () => {
   });
 
   it("resolves env refs for config and auth profiles", async () => {
-    const config: BotConfig = {
+    const config = asConfig({
+      agents: {
+        defaults: {
+          memorySearch: {
+            remote: {
+              apiKey: { source: "env", provider: "default", id: "MEMORY_REMOTE_API_KEY" },
+            },
+          },
+        },
+      },
       models: {
         providers: {
           openai: {
@@ -130,9 +139,8 @@ describe("secrets runtime snapshot", () => {
         WEB_SEARCH_API_KEY: "web-search-ref",
       },
       agentDirs: ["/tmp/bot-agent-main"],
-      loadAuthStore: () => ({
-        version: 1,
-        profiles: {
+      loadAuthStore: () =>
+        loadAuthStoreWithProfiles({
           "openai:default": {
             type: "api_key",
             provider: "openai",
@@ -402,7 +410,7 @@ describe("secrets runtime snapshot", () => {
       );
       await fs.chmod(secretsPath, 0o600);
 
-      const config: BotConfig = {
+      const config = asConfig({
         secrets: {
           providers: {
             default: {
@@ -463,7 +471,7 @@ describe("secrets runtime snapshot", () => {
             models: {
               ...createOpenAiFileModelsConfig(),
             },
-          },
+          }),
           agentDirs: ["/tmp/bot-agent-main"],
           loadAuthStore: () => ({ version: 1, profiles: {} }),
         }),
@@ -488,9 +496,8 @@ describe("secrets runtime snapshot", () => {
       }),
       env: { OPENAI_API_KEY: "sk-runtime" },
       agentDirs: ["/tmp/bot-agent-main"],
-      loadAuthStore: () => ({
-        version: 1,
-        profiles: {
+      loadAuthStore: () =>
+        loadAuthStoreWithProfiles({
           "openai:default": {
             type: "api_key",
             provider: "openai",
@@ -1831,7 +1838,7 @@ describe("secrets runtime snapshot", () => {
 
   it("does not write inherited auth stores during runtime secret activation", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-secrets-runtime-"));
-    const stateDir = path.join(root, ".hanzo/bot");
+    const stateDir = path.join(root, ".bot");
     const mainAgentDir = path.join(stateDir, "agents", "main", "agent");
     const workerStorePath = path.join(stateDir, "agents", "worker", "agent", "auth-profiles.json");
     const prevStateDir = process.env.BOT_STATE_DIR;
