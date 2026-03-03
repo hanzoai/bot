@@ -29,7 +29,7 @@ import urllib.error
 
 def build_request_body(args: argparse.Namespace) -> dict:
     body: dict = {
-        "urls": args.url,
+        "urls": [args.url],
         "word_count_threshold": args.word_count_threshold,
     }
 
@@ -51,7 +51,7 @@ def build_request_body(args: argparse.Namespace) -> dict:
 
 def poll_task(base_url: str, token: str, task_id: str, timeout: int = 300) -> dict:
     """Poll a Crawl4AI async task until completion or timeout."""
-    url = f"{base_url}/task/{task_id}"
+    url = f"{base_url}/crawl/job/{task_id}"
     headers = {
         "Accept": "application/json",
         "User-Agent": "hanzo-bot/1.0",
@@ -91,29 +91,25 @@ def crawl(args: argparse.Namespace) -> dict:
         or "https://crawl.hanzo.ai"
     ).rstrip("/")
     token = args.token or os.environ.get("HANZO_API_KEY", "")
-    if not token:
-        print("Error: No API token provided. Set HANZO_API_KEY or use --token.", file=sys.stderr)
-        sys.exit(1)
 
     url = f"{base_url}/crawl"
     body = build_request_body(args)
     data = json.dumps(body).encode("utf-8")
 
-    req = urllib.request.Request(
-        url,
-        data=data,
-        headers={
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "hanzo-bot/1.0",
-            "Authorization": f"Bearer {token}",
-        },
-        method="POST",
-    )
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "hanzo-bot/1.0",
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
 
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
+            raw = resp.read().decode("utf-8", errors="replace")
+            result = json.loads(raw, strict=False)
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8", errors="replace") if e.fp else ""
         print(f"Error: HTTP {e.code} from Crawl4AI API", file=sys.stderr)
@@ -134,56 +130,83 @@ def crawl(args: argparse.Namespace) -> dict:
     return result
 
 
+def format_result_item(crawl_result: dict) -> list[str]:
+    """Format a single crawl result item."""
+    lines = []
+    page_url = crawl_result.get("url", "")
+    if page_url:
+        lines.append(f"URL: {page_url}")
+
+    success = crawl_result.get("success", False)
+    lines.append(f"Success: {success}")
+
+    markdown = crawl_result.get("markdown", "")
+    if isinstance(markdown, dict):
+        markdown = markdown.get("raw_markdown", markdown.get("markdown", str(markdown)))
+    markdown = str(markdown) if markdown else ""
+    if markdown:
+        content_len = len(markdown)
+        lines.append(f"Content length: {content_len} chars")
+        lines.append("")
+        lines.append("--- Content (markdown) ---")
+        lines.append(markdown[:2000])
+        if content_len > 2000:
+            lines.append(f"\n... ({content_len - 2000} chars truncated)")
+
+    links = crawl_result.get("links", {})
+    internal = links.get("internal", [])
+    external = links.get("external", [])
+    if internal or external:
+        lines.append("")
+        lines.append(f"--- Links (internal: {len(internal)}, external: {len(external)}) ---")
+        for link in internal[:15]:
+            href = link.get("href", "")
+            text = link.get("text", "").strip()
+            lines.append(f"  [{text}]({href})" if text else f"  {href}")
+        if len(internal) > 15:
+            lines.append(f"  ... and {len(internal) - 15} more internal")
+        for link in external[:5]:
+            href = link.get("href", "")
+            text = link.get("text", "").strip()
+            lines.append(f"  [ext] [{text}]({href})" if text else f"  [ext] {href}")
+        if len(external) > 5:
+            lines.append(f"  ... and {len(external) - 5} more external")
+
+    error = crawl_result.get("error_message", "")
+    if error:
+        lines.append(f"\nError: {error}")
+
+    return lines
+
+
 def format_text(result: dict) -> str:
     lines = []
-    status = result.get("status", "unknown")
-    task_id = result.get("task_id", "")
+    success = result.get("success", "unknown")
+    lines.append(f"Success: {success}")
 
-    lines.append(f"Task: {task_id}")
-    lines.append(f"Status: {status}")
+    processing_time = result.get("server_processing_time_s", 0)
+    if processing_time:
+        lines.append(f"Processing time: {processing_time:.2f}s")
 
-    # Handle the result field which contains the crawl output.
-    crawl_result = result.get("result", result)
-    if isinstance(crawl_result, dict):
-        page_url = crawl_result.get("url", "")
-        if page_url:
-            lines.append(f"URL: {page_url}")
-
-        success = crawl_result.get("success", False)
-        lines.append(f"Success: {success}")
-
-        markdown = crawl_result.get("markdown", "")
-        if markdown:
-            content_len = len(markdown)
-            lines.append(f"Content length: {content_len} chars")
-            lines.append("")
-            lines.append("--- Content (markdown) ---")
-            lines.append(markdown[:2000])
-            if content_len > 2000:
-                lines.append(f"\n... ({content_len - 2000} chars truncated)")
-
-        links = crawl_result.get("links", {})
-        internal = links.get("internal", [])
-        external = links.get("external", [])
-        if internal or external:
-            lines.append("")
-            lines.append(f"--- Links (internal: {len(internal)}, external: {len(external)}) ---")
-            for link in internal[:15]:
-                href = link.get("href", "")
-                text = link.get("text", "").strip()
-                lines.append(f"  [{text}]({href})" if text else f"  {href}")
-            if len(internal) > 15:
-                lines.append(f"  ... and {len(internal) - 15} more internal")
-            for link in external[:5]:
-                href = link.get("href", "")
-                text = link.get("text", "").strip()
-                lines.append(f"  [ext] [{text}]({href})" if text else f"  [ext] {href}")
-            if len(external) > 5:
-                lines.append(f"  ... and {len(external) - 5} more external")
-
-        error = crawl_result.get("error_message", "")
-        if error:
-            lines.append(f"\nError: {error}")
+    # Crawl4AI returns results as an array under "results".
+    results = result.get("results", [])
+    if results:
+        lines.append(f"Pages: {len(results)}")
+        for i, item in enumerate(results):
+            if len(results) > 1:
+                lines.append(f"\n--- Page {i + 1} ---")
+            lines.extend(format_result_item(item))
+    elif "result" in result:
+        # Async task response wraps in "result".
+        crawl_result = result["result"]
+        if isinstance(crawl_result, dict):
+            task_id = result.get("task_id", "")
+            if task_id:
+                lines.insert(0, f"Task: {task_id}")
+            lines.extend(format_result_item(crawl_result))
+    else:
+        # Fallback: treat the whole response as a single result.
+        lines.extend(format_result_item(result))
 
     return "\n".join(lines)
 
