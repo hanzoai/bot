@@ -19,6 +19,74 @@ function writeManifest(dir: string, manifest: Record<string, unknown>) {
   fs.writeFileSync(path.join(dir, "bot.plugin.json"), JSON.stringify(manifest), "utf-8");
 }
 
+function prepareLinkedManifestFixture(params: { id: string; mode: "symlink" | "hardlink" }): {
+  rootDir: string;
+  linked: boolean;
+} {
+  const rootDir = makeTempDir();
+  const outsideDir = makeTempDir();
+  const outsideManifest = path.join(outsideDir, "bot.plugin.json");
+  const linkedManifest = path.join(rootDir, "bot.plugin.json");
+  fs.writeFileSync(path.join(rootDir, "index.ts"), "export default function () {}", "utf-8");
+  fs.writeFileSync(
+    outsideManifest,
+    JSON.stringify({ id: params.id, configSchema: { type: "object" } }),
+    "utf-8",
+  );
+
+  try {
+    if (params.mode === "symlink") {
+      fs.symlinkSync(outsideManifest, linkedManifest);
+    } else {
+      fs.linkSync(outsideManifest, linkedManifest);
+    }
+    return { rootDir, linked: true };
+  } catch (err) {
+    if (params.mode === "symlink") {
+      return { rootDir, linked: false };
+    }
+    if ((err as NodeJS.ErrnoException).code === "EXDEV") {
+      return { rootDir, linked: false };
+    }
+    throw err;
+  }
+}
+
+function loadSingleCandidateRegistry(params: {
+  idHint: string;
+  rootDir: string;
+  origin: "bundled" | "global" | "workspace" | "config";
+}) {
+  return loadRegistry([
+    createPluginCandidate({
+      idHint: params.idHint,
+      rootDir: params.rootDir,
+      origin: params.origin,
+    }),
+  ]);
+}
+
+function hasUnsafeManifestDiagnostic(registry: ReturnType<typeof loadPluginManifestRegistry>) {
+  return registry.diagnostics.some((diag) => diag.message.includes("unsafe plugin manifest path"));
+}
+
+function expectUnsafeWorkspaceManifestRejected(params: {
+  id: string;
+  mode: "symlink" | "hardlink";
+}) {
+  const fixture = prepareLinkedManifestFixture({ id: params.id, mode: params.mode });
+  if (!fixture.linked) {
+    return;
+  }
+  const registry = loadSingleCandidateRegistry({
+    idHint: params.id,
+    rootDir: fixture.rootDir,
+    origin: "workspace",
+  });
+  expect(registry.plugins).toHaveLength(0);
+  expect(hasUnsafeManifestDiagnostic(registry)).toBe(true);
+}
+
 afterEach(() => {
   while (tempDirs.length > 0) {
     const dir = tempDirs.pop();

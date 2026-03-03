@@ -92,7 +92,7 @@ Service commands accept `--json` for machine-readable output.
 
 ## Pairing
 
-The first connection creates a pending node pair request on the Gateway.
+The first connection creates a pending device pairing request (`role: node`) on the Gateway.
 Approve it via:
 
 ```bash

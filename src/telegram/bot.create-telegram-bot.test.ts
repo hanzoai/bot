@@ -38,10 +38,10 @@ const upsertChannelPairingRequest = getUpsertChannelPairingRequestMock();
 const ORIGINAL_TZ = process.env.TZ;
 
 describe("createTelegramBot", () => {
-  beforeEach(() => {
+  beforeAll(() => {
     process.env.TZ = "UTC";
   });
-  afterEach(() => {
+  afterAll(() => {
     process.env.TZ = ORIGINAL_TZ;
   });
 

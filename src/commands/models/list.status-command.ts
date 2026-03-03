@@ -26,7 +26,7 @@ import {
 } from "../../agents/model-selection.js";
 import { formatCliCommand } from "../../cli/command-format.js";
 import { withProgressTotals } from "../../cli/progress.js";
-import { CONFIG_PATH, loadConfig } from "../../config/config.js";
+import { CONFIG_PATH } from "../../config/config.js";
 import {
   formatUsageWindowSummary,
   loadProviderUsageSummary,
@@ -46,6 +46,7 @@ import {
   sortProbeResults,
   type AuthProbeSummary,
 } from "./list.probe.js";
+import { loadModelsConfig } from "./load-config.js";
 import {
   DEFAULT_MODEL,
   DEFAULT_PROVIDER,
@@ -72,7 +73,7 @@ export async function modelsStatusCommand(
   if (opts.plain && opts.probe) {
     throw new Error("--probe cannot be used with --plain output.");
   }
-  const cfg = loadConfig();
+  const cfg = await loadModelsConfig({ commandName: "models status", runtime });
   const agentId = resolveKnownAgentId({ cfg, rawAgentId: opts.agent });
   const agentDir = agentId ? resolveAgentDir(cfg, agentId) : resolveBotAgentDir();
   const agentModelPrimary = agentId ? resolveAgentModelPrimary(cfg, agentId) : undefined;
