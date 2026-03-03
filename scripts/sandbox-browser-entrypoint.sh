@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+dedupe_chrome_args() {
+  local -A seen_args=()
+  local -a unique_args=()
+
+  for arg in "${CHROME_ARGS[@]}"; do
+    if [[ -n "${seen_args["$arg"]:+x}" ]]; then
+      continue
+    fi
+    seen_args["$arg"]=1
+    unique_args+=("$arg")
+  done
+
+  CHROME_ARGS=("${unique_args[@]}")
+}
+
 export DISPLAY=:1
 export HOME=/tmp/bot-home
 export XDG_CONFIG_HOME="${HOME}/.config"
@@ -19,7 +34,6 @@ Xvfb :1 -screen 0 1280x800x24 -ac -nolisten tcp &
 if [[ "${HEADLESS}" == "1" ]]; then
   CHROME_ARGS=(
     "--headless=new"
-    "--disable-gpu"
   )
 else
   CHROME_ARGS=()
@@ -42,6 +56,7 @@ CHROME_ARGS+=(
   "--disable-features=TranslateUI"
   "--disable-breakpad"
   "--disable-crash-reporter"
+  "--no-zygote"
   "--metrics-recording-only"
   "--no-sandbox"
 )

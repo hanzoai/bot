@@ -12,6 +12,7 @@ import { createDedupeCache } from "../../infra/dedupe.js";
 import { getChildLogger } from "../../logging.js";
 import { normalizeAllowList, normalizeAllowListLower, normalizeSlackSlug } from "./allow-list.js";
 import { resolveSlackChannelConfig } from "./channel-config.js";
+import { normalizeSlackChannelType } from "./channel-type.js";
 import { isSlackChannelAllowedByPolicy } from "./policy.js";
 
 export function inferSlackChannelType(
@@ -72,6 +73,7 @@ export type SlackMonitorContext = {
   groupDmChannels: string[];
   defaultRequireMention: boolean;
   channelsConfig?: SlackChannelConfigEntries;
+  channelsConfigKeys: string[];
   groupPolicy: GroupPolicy;
   /** Break-glass override: allow mutable name matching in allowlists. */
   allowNameMatching: boolean;
@@ -166,7 +168,10 @@ export function createSlackMonitorContext(params: {
 
   const allowFrom = normalizeAllowList(params.allowFrom);
   const groupDmChannels = normalizeAllowList(params.groupDmChannels);
+  const groupDmChannelsLower = normalizeAllowListLower(groupDmChannels);
   const defaultRequireMention = params.defaultRequireMention ?? true;
+  const hasChannelAllowlistConfig = Object.keys(params.channelsConfig ?? {}).length > 0;
+  const channelsConfigKeys = Object.keys(params.channelsConfig ?? {});
 
   const markMessageSeen = (channelId: string | undefined, ts?: string) => {
     if (!channelId || !ts) {
@@ -304,7 +309,6 @@ export function createSlackMonitorContext(params: {
     }
 
     if (isGroupDm && groupDmChannels.length > 0) {
-      const allowList = normalizeAllowListLower(groupDmChannels);
       const candidates = [
         p.channelId,
         p.channelName ? `#${p.channelName}` : undefined,
@@ -314,7 +318,8 @@ export function createSlackMonitorContext(params: {
         .filter((value): value is string => Boolean(value))
         .map((value) => value.toLowerCase());
       const permitted =
-        allowList.includes("*") || candidates.some((candidate) => allowList.includes(candidate));
+        groupDmChannelsLower.includes("*") ||
+        candidates.some((candidate) => groupDmChannelsLower.includes(candidate));
       if (!permitted) {
         return false;
       }
@@ -325,12 +330,12 @@ export function createSlackMonitorContext(params: {
         channelId: p.channelId,
         channelName: p.channelName,
         channels: params.channelsConfig,
+        channelKeys: channelsConfigKeys,
         defaultRequireMention,
       });
       const channelMatchMeta = formatAllowlistMatchMeta(channelConfig);
       const channelAllowed = channelConfig?.allowed !== false;
-      const channelAllowlistConfigured =
-        Boolean(params.channelsConfig) && Object.keys(params.channelsConfig ?? {}).length > 0;
+      const channelAllowlistConfigured = hasChannelAllowlistConfig;
       if (
         !isSlackChannelAllowedByPolicy({
           groupPolicy: params.groupPolicy,
@@ -407,6 +412,7 @@ export function createSlackMonitorContext(params: {
     groupDmChannels,
     defaultRequireMention,
     channelsConfig: params.channelsConfig,
+    channelsConfigKeys,
     groupPolicy: params.groupPolicy,
     allowNameMatching: params.allowNameMatching,
     useAccessGroups: params.useAccessGroups,

@@ -1,5 +1,6 @@
 import HanzoBotProtocol
 import Foundation
+import BotProtocol
 import Testing
 
 @Suite struct GatewayFrameDecodeTests {

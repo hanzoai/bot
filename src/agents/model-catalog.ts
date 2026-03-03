@@ -2,13 +2,15 @@ import { type BotConfig, loadConfig } from "../config/config.js";
 import { resolveBotAgentDir } from "./agent-paths.js";
 import { ensureBotModelsJson } from "./models-config.js";
 
+export type ModelInputType = "text" | "image" | "document";
+
 export type ModelCatalogEntry = {
   id: string;
   name: string;
   provider: string;
   contextWindow?: number;
   reasoning?: boolean;
-  input?: Array<"text" | "image">;
+  input?: ModelInputType[];
 };
 
 type DiscoveredModel = {
@@ -17,7 +19,7 @@ type DiscoveredModel = {
   provider: string;
   contextWindow?: number;
   reasoning?: boolean;
-  input?: Array<"text" | "image">;
+  input?: ModelInputType[];
 };
 
 type PiSdkModule = typeof import("./pi-model-discovery.js");
@@ -156,6 +158,13 @@ export async function loadModelCatalog(params?: {
  */
 export function modelSupportsVision(entry: ModelCatalogEntry | undefined): boolean {
   return entry?.input?.includes("image") ?? false;
+}
+
+/**
+ * Check if a model supports native document/PDF input based on its catalog entry.
+ */
+export function modelSupportsDocument(entry: ModelCatalogEntry | undefined): boolean {
+  return entry?.input?.includes("document") ?? false;
 }
 
 /**
