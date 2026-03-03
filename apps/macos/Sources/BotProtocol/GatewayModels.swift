@@ -1019,7 +1019,8 @@ public struct PushTestResult: Codable, Sendable {
     }
 }
 
-public struct SecretsReloadParams: Codable, Sendable {}
+public struct SecretsReloadParams: Codable, Sendable {
+}
 
 public struct SecretsResolveParams: Codable, Sendable {
     public let commandname: String
@@ -1027,12 +1028,11 @@ public struct SecretsResolveParams: Codable, Sendable {
 
     public init(
         commandname: String,
-        targetids: [String])
-    {
+        targetids: [String]
+    ) {
         self.commandname = commandname
         self.targetids = targetids
     }
-
     private enum CodingKeys: String, CodingKey {
         case commandname = "commandName"
         case targetids = "targetIds"
@@ -1047,13 +1047,12 @@ public struct SecretsResolveAssignment: Codable, Sendable {
     public init(
         path: String?,
         pathsegments: [String],
-        value: AnyCodable)
-    {
+        value: AnyCodable
+    ) {
         self.path = path
         self.pathsegments = pathsegments
         self.value = value
     }
-
     private enum CodingKeys: String, CodingKey {
         case path
         case pathsegments = "pathSegments"
@@ -1071,14 +1070,13 @@ public struct SecretsResolveResult: Codable, Sendable {
         ok: Bool?,
         assignments: [SecretsResolveAssignment]?,
         diagnostics: [String]?,
-        inactiverefpaths: [String]?)
-    {
+        inactiverefpaths: [String]?
+    ) {
         self.ok = ok
         self.assignments = assignments
         self.diagnostics = diagnostics
         self.inactiverefpaths = inactiverefpaths
     }
-
     private enum CodingKeys: String, CodingKey {
         case ok
         case assignments

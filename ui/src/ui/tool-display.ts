@@ -6,7 +6,7 @@ import {
   resolveToolVerbAndDetailForArgs,
   type ToolDisplaySpec as ToolDisplaySpecBase,
 } from "../../../src/agents/tool-display-common.js";
-import rawConfig from "./tool-display.json" with { type: "json" };
+import SHARED_TOOL_DISPLAY_JSON from "../../../src/agents/tool-display.json" with { type: "json" };
 
 type ToolDisplaySpec = ToolDisplaySpecBase & {
   icon?: string;

@@ -5,6 +5,11 @@ import type {
 } from "../controllers/exec-approvals.ts";
 import type { NodesProps } from "./nodes.ts";
 import { clampText, formatRelativeTimestamp } from "../format.ts";
+import {
+  type NodeTargetOption,
+  resolveConfigAgents as resolveSharedConfigAgents,
+  resolveNodeTargets,
+} from "./nodes-shared.ts";
 
 type ExecSecurity = "deny" | "allowlist" | "full";
 type ExecAsk = "off" | "on-miss" | "always";
