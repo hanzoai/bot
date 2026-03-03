@@ -400,25 +400,6 @@ class NodeRuntime(context: Context) {
     MicCaptureManager(
       context = appContext,
       scope = scope,
-<<<<<<< HEAD:apps/android/app/src/main/java/ai/hanzo/bot/android/NodeRuntime.kt
-      sendToGateway = { message ->
-        val sessionKey = resolveMainSessionKey()
-        val runId = java.util.UUID.randomUUID().toString()
-        val params = buildJsonObject {
-          put("message", JsonPrimitive(message))
-          put("sessionKey", JsonPrimitive(sessionKey))
-          put("thinking", JsonPrimitive(chatThinkingLevel.value))
-          put("idempotencyKey", JsonPrimitive(runId))
-        }
-        val res = operatorSession.request("chat.send", params.toString())
-        val parsed = try {
-          val obj = json.parseToJsonElement(res).asObjectOrNull()
-          (obj?.get("runId") as? JsonPrimitive)?.content?.trim()?.takeIf { it.isNotEmpty() }
-        } catch (_: Throwable) {
-          null
-        }
-        parsed ?: runId
-=======
       sendToGateway = { message, onRunIdKnown ->
         val idempotencyKey = UUID.randomUUID().toString()
         // Notify MicCaptureManager of the idempotency key *before* the network
@@ -434,7 +415,6 @@ class NodeRuntime(context: Context) {
           }
         val response = operatorSession.request("chat.send", params.toString())
         parseChatSendRunId(response) ?: idempotencyKey
->>>>>>> 587790e84 (fix(android): talk mode stability — thread safety, TTS fallback, mic cooldown):apps/android/app/src/main/java/ai/bot/android/NodeRuntime.kt
       },
       speakAssistantReply = { text ->
         // Skip if TalkModeManager is handling TTS (ttsOnAllResponses) to avoid
@@ -446,8 +426,6 @@ class NodeRuntime(context: Context) {
     )
   }
 
-<<<<<<< HEAD:apps/android/app/src/main/java/ai/hanzo/bot/android/NodeRuntime.kt
-=======
   val micStatusText: StateFlow<String>
     get() = micCapture.statusText
 
@@ -485,17 +463,13 @@ class NodeRuntime(context: Context) {
     )
   }
 
->>>>>>> 68db055f1 (feat(android): wire TalkModeManager into NodeRuntime for voice screen TTS):apps/android/app/src/main/java/ai/bot/android/NodeRuntime.kt
   private fun applyMainSessionKey(candidate: String?) {
     val trimmed = normalizeMainKey(candidate) ?: return
     if (isCanonicalMainSessionKey(_mainSessionKey.value)) return
     if (_mainSessionKey.value == trimmed) return
     _mainSessionKey.value = trimmed
-<<<<<<< HEAD:apps/android/app/src/main/java/ai/hanzo/bot/android/NodeRuntime.kt
     voiceReplySpeaker.setMainSessionKey(trimmed)
-=======
     talkMode.setMainSessionKey(trimmed)
->>>>>>> 68db055f1 (feat(android): wire TalkModeManager into NodeRuntime for voice screen TTS):apps/android/app/src/main/java/ai/bot/android/NodeRuntime.kt
     chat.applyMainSessionKey(trimmed)
   }
 
@@ -605,24 +579,13 @@ class NodeRuntime(context: Context) {
     }
 
     scope.launch {
-<<<<<<< HEAD:apps/android/app/src/main/java/ai/hanzo/bot/android/NodeRuntime.kt
       talkEnabled.collect { enabled ->
         voiceReplySpeaker.setEnabled(enabled)
-=======
-      prefs.loadGatewayToken()
-    }
-
-    scope.launch {
-      prefs.talkEnabled.collect { enabled ->
-        // MicCaptureManager handles STT + send to gateway.
-        // TalkModeManager plays TTS on assistant responses.
         micCapture.setMicEnabled(enabled)
         if (enabled) {
-          // Mic on = user is on voice screen and wants TTS responses.
           talkMode.ttsOnAllResponses = true
           scope.launch { talkMode.ensureChatSubscribed() }
         }
->>>>>>> 68db055f1 (feat(android): wire TalkModeManager into NodeRuntime for voice screen TTS):apps/android/app/src/main/java/ai/bot/android/NodeRuntime.kt
         externalAudioCaptureActive.value = enabled
       }
     }
@@ -730,7 +693,6 @@ class NodeRuntime(context: Context) {
     prefs.setCanvasDebugStatusEnabled(value)
   }
 
-<<<<<<< HEAD:apps/android/app/src/main/java/ai/hanzo/bot/android/NodeRuntime.kt
   fun setWakeWords(words: List<String>) {
     prefs.setWakeWords(words)
     gatewayEventHandler.scheduleWakeWordsSyncIfNeeded()
@@ -758,29 +720,6 @@ class NodeRuntime(context: Context) {
 
   fun setOnboardingCompleted(value: Boolean) {
     prefs.setOnboardingCompleted(value)
-=======
-  fun setVoiceScreenActive(active: Boolean) {
-    if (!active) {
-      // User left voice screen — stop mic and TTS
-      talkMode.ttsOnAllResponses = false
-      talkMode.stopTts()
-      micCapture.setMicEnabled(false)
-      prefs.setTalkEnabled(false)
-    }
-    // Don't re-enable on active=true; mic toggle drives that
-  }
-
-  fun setMicEnabled(value: Boolean) {
-    prefs.setTalkEnabled(value)
-    if (value) {
-      // Tapping mic on interrupts any active TTS (barge-in)
-      talkMode.stopTts()
-      talkMode.ttsOnAllResponses = true
-      scope.launch { talkMode.ensureChatSubscribed() }
-    }
-    micCapture.setMicEnabled(value)
-    externalAudioCaptureActive.value = value
->>>>>>> 68db055f1 (feat(android): wire TalkModeManager into NodeRuntime for voice screen TTS):apps/android/app/src/main/java/ai/bot/android/NodeRuntime.kt
   }
 
   val speakerEnabled: StateFlow<Boolean>
@@ -1008,14 +947,15 @@ class NodeRuntime(context: Context) {
   }
 
   private fun handleGatewayEvent(event: String, payloadJson: String?) {
-<<<<<<< HEAD:apps/android/app/src/main/java/ai/hanzo/bot/android/NodeRuntime.kt
     if (event == "voicewake.changed") {
       gatewayEventHandler.handleVoiceWakeChangedEvent(payloadJson)
       return
-=======
-    micCapture.handleGatewayEvent(event, payloadJson)
+    }
+
+    voiceReplySpeaker.handleGatewayEvent(event, payloadJson)
     talkMode.handleGatewayEvent(event, payloadJson)
     chat.handleGatewayEvent(event, payloadJson)
+    micCapture.handleGatewayEvent(event, payloadJson)
   }
 
   private fun parseChatSendRunId(response: String): String? {
@@ -1024,12 +964,7 @@ class NodeRuntime(context: Context) {
       root["runId"].asStringOrNull()
     } catch (_: Throwable) {
       null
->>>>>>> 68db055f1 (feat(android): wire TalkModeManager into NodeRuntime for voice screen TTS):apps/android/app/src/main/java/ai/bot/android/NodeRuntime.kt
     }
-
-    voiceReplySpeaker.handleGatewayEvent(event, payloadJson)
-    chat.handleGatewayEvent(event, payloadJson)
-    micCapture.handleGatewayEvent(event, payloadJson)
   }
 
   private suspend fun refreshBrandingFromGateway() {
