@@ -6,6 +6,7 @@ import type { UpdateStepProgress, UpdateStepResult } from "../../infra/update-ru
 import { resolveStateDir } from "../../config/paths.js";
 import { resolveBotPackageRoot } from "../../infra/bot-root.js";
 import { readPackageName, readPackageVersion } from "../../infra/package-json.js";
+import { normalizePackageTagInput } from "../../infra/package-tag.js";
 import { trimLogTail } from "../../infra/restart-sentinel.js";
 import { parseSemver } from "../../infra/runtime-guard.js";
 import { fetchNpmTagVersion } from "../../infra/update-check.js";

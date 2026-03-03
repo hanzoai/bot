@@ -290,7 +290,7 @@ function resolveSearchConfig(cfg?: BotConfig): WebSearchConfig {
   if (!search || typeof search !== "object") {
     return undefined;
   }
-  return search as WebSearchConfig;
+  return search;
 }
 
 function resolveSearchEnabled(params: { search?: WebSearchConfig; sandboxed?: boolean }): boolean {
@@ -304,10 +304,14 @@ function resolveSearchEnabled(params: { search?: WebSearchConfig; sandboxed?: bo
 }
 
 function resolveSearchApiKey(search?: WebSearchConfig): string | undefined {
-  const fromConfig =
-    search && "apiKey" in search && typeof search.apiKey === "string"
-      ? normalizeSecretInput(search.apiKey)
-      : "";
+  const fromConfigRaw =
+    search && "apiKey" in search
+      ? normalizeResolvedSecretInputString({
+          value: search.apiKey,
+          path: "tools.web.search.apiKey",
+        })
+      : undefined;
+  const fromConfig = normalizeSecretInput(fromConfigRaw);
   const fromEnv = normalizeSecretInput(process.env.BRAVE_API_KEY);
   return fromConfig || fromEnv || undefined;
 }

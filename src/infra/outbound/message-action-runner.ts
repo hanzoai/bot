@@ -216,8 +216,12 @@ async function resolveChannel(cfg: BotConfig, params: Record<string, unknown>) {
   const channelHint = readStringParam(params, "channel");
   const selection = await resolveMessageChannelSelection({
     cfg,
-    channel: channelHint,
+    channel: readStringParam(params, "channel"),
+    fallbackChannel: toolContext?.currentChannelProvider,
   });
+  if (selection.source === "tool-context-fallback") {
+    params.channel = selection.channel;
+  }
   return selection.channel;
 }
 
@@ -312,7 +316,7 @@ async function handleBroadcastAction(
   }
   const targetChannels =
     channelHint && channelHint.trim().toLowerCase() !== "all"
-      ? [await resolveChannel(input.cfg, { channel: channelHint })]
+      ? [await resolveChannel(input.cfg, { channel: channelHint }, input.toolContext)]
       : configured;
   const results: Array<{
     channel: ChannelId;
@@ -689,7 +693,7 @@ export async function runMessageAction(
   input: RunMessageActionParams,
 ): Promise<MessageActionRunResult> {
   const cfg = input.cfg;
-  const params = { ...input.params };
+  let params = { ...input.params };
   const resolvedAgentId =
     input.agentId ??
     (input.sessionKey
@@ -702,6 +706,11 @@ export async function runMessageAction(
   if (action === "broadcast") {
     return handleBroadcastAction(input, params);
   }
+  params = normalizeMessageActionInput({
+    action,
+    args: params,
+    toolContext: input.toolContext,
+  });
 
   const explicitTarget = typeof params.target === "string" ? params.target.trim() : "";
   const hasLegacyTarget =

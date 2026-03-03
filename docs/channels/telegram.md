@@ -242,7 +242,7 @@ curl "https://api.telegram.org/bot<bot_token>/getUpdates"
 
     `maxChars` is clamped by `channels.telegram.textChunkLimit`.
 
-    This works in direct chats and groups/topics.
+    Telegram enabled `sendMessageDraft` for all bots in Bot API 9.5 (March 1, 2026).
 
     For text-only replies, Bot keeps the same preview message and performs a final edit in place (no second message).
 
