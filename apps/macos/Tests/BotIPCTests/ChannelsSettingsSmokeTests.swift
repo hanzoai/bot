@@ -9,19 +9,7 @@ private typealias SnapshotAnyCodable = HanzoBot.AnyCodable
 @MainActor
 struct ChannelsSettingsSmokeTests {
     @Test func channelsSettingsBuildsBodyWithSnapshot() {
-        let store = ChannelsStore(isPreview: true)
-        store.snapshot = ChannelsStatusSnapshot(
-            ts: 1_700_000_000_000,
-            channelOrder: ["whatsapp", "telegram", "signal", "imessage"],
-            channelLabels: [
-                "whatsapp": "WhatsApp",
-                "telegram": "Telegram",
-                "signal": "Signal",
-                "imessage": "iMessage",
-            ],
-            channelDetailLabels: nil,
-            channelSystemImages: nil,
-            channelMeta: nil,
+        let store = makeChannelsStore(
             channels: [
                 "whatsapp": SnapshotAnyCodable([
                     "configured": true,
@@ -77,13 +65,6 @@ struct ChannelsSettingsSmokeTests {
                     "probe": ["ok": false, "error": "imsg not found (imsg)"],
                     "lastProbeAt": 1_700_000_050_000,
                 ]),
-            ],
-            channelAccounts: [:],
-            channelDefaultAccountId: [
-                "whatsapp": "default",
-                "telegram": "default",
-                "signal": "default",
-                "imessage": "default",
             ])
 
         store.whatsappLoginMessage = "Scan QR"
@@ -95,19 +76,7 @@ struct ChannelsSettingsSmokeTests {
     }
 
     @Test func channelsSettingsBuildsBodyWithoutSnapshot() {
-        let store = ChannelsStore(isPreview: true)
-        store.snapshot = ChannelsStatusSnapshot(
-            ts: 1_700_000_000_000,
-            channelOrder: ["whatsapp", "telegram", "signal", "imessage"],
-            channelLabels: [
-                "whatsapp": "WhatsApp",
-                "telegram": "Telegram",
-                "signal": "Signal",
-                "imessage": "iMessage",
-            ],
-            channelDetailLabels: nil,
-            channelSystemImages: nil,
-            channelMeta: nil,
+        let store = makeChannelsStore(
             channels: [
                 "whatsapp": SnapshotAnyCodable([
                     "configured": false,
@@ -149,13 +118,6 @@ struct ChannelsSettingsSmokeTests {
                     "probe": ["ok": false, "error": "imsg not found (imsg)"],
                     "lastProbeAt": 1_700_000_200_000,
                 ]),
-            ],
-            channelAccounts: [:],
-            channelDefaultAccountId: [
-                "whatsapp": "default",
-                "telegram": "default",
-                "signal": "default",
-                "imessage": "default",
             ])
 
         let view = ChannelsSettings(store: store)

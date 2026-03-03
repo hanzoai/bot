@@ -95,3 +95,86 @@ describe("resolveTelegramAccount", () => {
     }
   });
 });
+
+describe("resolveTelegramAccount groups inheritance (#30673)", () => {
+  const createMultiAccountGroupsConfig = (): BotConfig => ({
+    channels: {
+      telegram: {
+        groups: { "-100123": { requireMention: false } },
+        accounts: {
+          default: { botToken: "123:default" },
+          dev: { botToken: "456:dev" },
+        },
+      },
+    },
+  });
+
+  const createDefaultAccountGroupsConfig = (includeDevAccount: boolean): BotConfig => ({
+    channels: {
+      telegram: {
+        groups: { "-100999": { requireMention: true } },
+        accounts: {
+          default: {
+            botToken: "123:default",
+            groups: { "-100123": { requireMention: false } },
+          },
+          ...(includeDevAccount ? { dev: { botToken: "456:dev" } } : {}),
+        },
+      },
+    },
+  });
+
+  it("inherits channel-level groups in single-account setup", () => {
+    const resolved = resolveTelegramAccount({
+      cfg: {
+        channels: {
+          telegram: {
+            groups: { "-100123": { requireMention: false } },
+            accounts: {
+              default: { botToken: "123:default" },
+            },
+          },
+        },
+      },
+      accountId: "default",
+    });
+
+    expect(resolved.config.groups).toEqual({ "-100123": { requireMention: false } });
+  });
+
+  it("does NOT inherit channel-level groups to secondary account in multi-account setup", () => {
+    const resolved = resolveTelegramAccount({
+      cfg: createMultiAccountGroupsConfig(),
+      accountId: "dev",
+    });
+
+    expect(resolved.config.groups).toBeUndefined();
+  });
+
+  it("does NOT inherit channel-level groups to default account in multi-account setup", () => {
+    const resolved = resolveTelegramAccount({
+      cfg: createMultiAccountGroupsConfig(),
+      accountId: "default",
+    });
+
+    expect(resolved.config.groups).toBeUndefined();
+  });
+
+  it("uses account-level groups even in multi-account setup", () => {
+    const resolved = resolveTelegramAccount({
+      cfg: createDefaultAccountGroupsConfig(true),
+      accountId: "default",
+    });
+
+    expect(resolved.config.groups).toEqual({ "-100123": { requireMention: false } });
+  });
+
+  it("account-level groups takes priority over channel-level in single-account setup", () => {
+    const resolved = resolveTelegramAccount({
+      cfg: createDefaultAccountGroupsConfig(false),
+      accountId: "default",
+    });
+
+    expect(resolved.config.groups).toEqual({ "-100123": { requireMention: false } });
+  });
+});
