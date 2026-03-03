@@ -6,75 +6,39 @@ Hanzo Bot extension for Zalo Personal Account messaging via [zca-cli](https://zc
 
 ## Features
 
-- **Channel Plugin Integration**: Appears in onboarding wizard with QR login
-- **Gateway Integration**: Real-time message listening via the gateway
-- **Multi-Account Support**: Manage multiple Zalo personal accounts
-- **CLI Commands**: Full command-line interface for messaging
-- **Agent Tool**: AI agent integration for automated messaging
+- Channel plugin integration with onboarding + QR login
+- In-process listener/sender via `zca-js` (no external CLI)
+- Multi-account support
+- Agent tool integration (`zalouser`)
+- DM/group policy support
 
 ## Prerequisites
 
-Install `zca` CLI and ensure it's in your PATH:
+- Bot Gateway
+- Zalo mobile app (for QR login)
 
-**macOS / Linux:**
+No external `zca`, `openzca`, or `zca-cli` binary is required.
 
-```bash
-curl -fsSL https://get.zca-cli.dev/install.sh | bash
+## Install
 
-# Or with custom install directory
-ZCA_INSTALL_DIR=~/.local/bin curl -fsSL https://get.zca-cli.dev/install.sh | bash
-
-# Install specific version
-curl -fsSL https://get.zca-cli.dev/install.sh | bash -s v1.0.0
-
-# Uninstall
-curl -fsSL https://get.zca-cli.dev/install.sh | bash -s uninstall
-```
-
-**Windows (PowerShell):**
-
-```powershell
-irm https://get.zca-cli.dev/install.ps1 | iex
-
-# Or with custom install directory
-$env:ZCA_INSTALL_DIR = "C:\Tools\zca"; irm https://get.zca-cli.dev/install.ps1 | iex
-
-# Install specific version
-iex "& { $(irm https://get.zca-cli.dev/install.ps1) } -Version v1.0.0"
-
-# Uninstall
-iex "& { $(irm https://get.zca-cli.dev/install.ps1) } -Uninstall"
-```
-
-### Manual Download
-
-Download binary directly:
-
-**macOS / Linux:**
+### Option A: npm
 
 ```bash
-curl -fsSL https://get.zca-cli.dev/latest/zca-darwin-arm64 -o zca && chmod +x zca
+bot plugins install @bot/zalouser
 ```
 
-**Windows (PowerShell):**
+### Option B: local source checkout
 
-```powershell
-Invoke-WebRequest -Uri https://get.zca-cli.dev/latest/zca-windows-x64.exe -OutFile zca.exe
+```bash
+bot plugins install ./extensions/zalouser
+cd ./extensions/zalouser && pnpm install
 ```
 
-Available binaries:
+Restart the Gateway after install.
 
-- `zca-darwin-arm64` - macOS Apple Silicon
-- `zca-darwin-x64` - macOS Intel
-- `zca-linux-arm64` - Linux ARM64
-- `zca-linux-x64` - Linux x86_64
-- `zca-windows-x64.exe` - Windows
+## Quick start
 
-See [zca-cli](https://zca-cli.dev) for manual download (binaries for macOS/Linux/Windows) or building from source.
-
-## Quick Start
-
-### Option 1: Onboarding Wizard (Recommended)
+### Login (QR)
 
 ```bash
 hanzo-bot onboard
@@ -82,7 +46,7 @@ hanzo-bot onboard
 # Follow QR code login flow
 ```
 
-### Option 2: Login (QR, on the Gateway machine)
+Scan the QR code with the Zalo app on your phone.
 
 ```bash
 hanzo-bot channels login --channel zalouser
@@ -106,7 +70,24 @@ channels:
     dmPolicy: pairing # pairing | allowlist | open | disabled
 ```
 
-For multi-account:
+### Send a message
+
+```bash
+bot message send --channel zalouser --target <threadId> --message "Hello from Bot"
+```
+
+## Configuration
+
+Basic:
+
+```yaml
+channels:
+  zalouser:
+    enabled: true
+    dmPolicy: pairing
+```
+
+Multi-account:
 
 ```yaml
 channels:
@@ -122,9 +103,7 @@ channels:
         profile: work
 ```
 
-## Commands
-
-### Authentication
+## Useful commands
 
 ```bash
 hanzo-bot channels login --channel zalouser              # Login via QR
@@ -133,7 +112,7 @@ hanzo-bot channels status --probe
 hanzo-bot channels logout --channel zalouser
 ```
 
-### Directory (IDs, contacts, groups)
+## Agent tool
 
 ```bash
 hanzo-bot directory self --channel zalouser
@@ -216,10 +195,10 @@ Available actions: `send`, `image`, `link`, `friends`, `groups`, `me`, `status`
 
 ## Troubleshooting
 
-- **Login Issues:** Run `zca auth logout` then `zca auth login`
-- **API Errors:** Try `zca auth cache-refresh` or re-login
-- **File Uploads:** Check size (max 100MB) and path accessibility
+- Login not persisted: `bot channels logout --channel zalouser && bot channels login --channel zalouser`
+- Probe status: `bot channels status --probe`
+- Name resolution issues (allowlist/groups): use numeric IDs or exact Zalo names
 
 ## Credits
 
-Built on [zca-cli](https://zca-cli.dev) which uses [zca-js](https://github.com/RFS-ADRENO/zca-js).
+Built on [zca-js](https://github.com/RFS-ADRENO/zca-js).

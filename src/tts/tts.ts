@@ -265,7 +265,10 @@ export function resolveTtsConfig(cfg: BotConfig): ResolvedTtsConfig {
     summaryModel: raw.summaryModel?.trim() || undefined,
     modelOverrides: resolveModelOverridePolicy(raw.modelOverrides),
     elevenlabs: {
-      apiKey: raw.elevenlabs?.apiKey,
+      apiKey: normalizeResolvedSecretInputString({
+        value: raw.elevenlabs?.apiKey,
+        path: "messages.tts.elevenlabs.apiKey",
+      }),
       baseUrl: raw.elevenlabs?.baseUrl?.trim() || DEFAULT_ELEVENLABS_BASE_URL,
       voiceId: raw.elevenlabs?.voiceId ?? DEFAULT_ELEVENLABS_VOICE_ID,
       modelId: raw.elevenlabs?.modelId ?? DEFAULT_ELEVENLABS_MODEL_ID,
@@ -286,7 +289,10 @@ export function resolveTtsConfig(cfg: BotConfig): ResolvedTtsConfig {
       },
     },
     openai: {
-      apiKey: raw.openai?.apiKey,
+      apiKey: normalizeResolvedSecretInputString({
+        value: raw.openai?.apiKey,
+        path: "messages.tts.openai.apiKey",
+      }),
       model: raw.openai?.model ?? DEFAULT_OPENAI_MODEL,
       voice: raw.openai?.voice ?? DEFAULT_OPENAI_VOICE,
     },
@@ -532,6 +538,13 @@ function formatTtsProviderError(provider: TtsProvider, err: unknown): string {
   return `${provider}: ${error.message}`;
 }
 
+function buildTtsFailureResult(errors: string[]): { success: false; error: string } {
+  return {
+    success: false,
+    error: `TTS conversion failed: ${errors.join("; ") || "no providers available"}`,
+  };
+}
+
 export async function textToSpeech(params: {
   text: string;
   cfg: BotConfig;
@@ -696,10 +709,7 @@ export async function textToSpeech(params: {
     }
   }
 
-  return {
-    success: false,
-    error: `TTS conversion failed: ${errors.join("; ") || "no providers available"}`,
-  };
+  return buildTtsFailureResult(errors);
 }
 
 export async function textToSpeechTelephony(params: {
@@ -785,10 +795,7 @@ export async function textToSpeechTelephony(params: {
     }
   }
 
-  return {
-    success: false,
-    error: `TTS conversion failed: ${errors.join("; ") || "no providers available"}`,
-  };
+  return buildTtsFailureResult(errors);
 }
 
 export async function maybeApplyTtsToPayload(params: {

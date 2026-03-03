@@ -9,6 +9,17 @@ import { runSecurityAudit } from "./audit.js";
 import * as skillScanner from "./skill-scanner.js";
 
 const isWindows = process.platform === "win32";
+const windowsAuditEnv = {
+  USERNAME: "Tester",
+  USERDOMAIN: "DESKTOP-TEST",
+};
+const execDockerRawUnavailable: NonNullable<SecurityAuditOptions["execDockerRawFn"]> = async () => {
+  return {
+    stdout: Buffer.alloc(0),
+    stderr: Buffer.from("docker unavailable"),
+    code: 1,
+  };
+};
 
 function stubChannelPlugin(params: {
   id: "discord" | "slack" | "telegram";
@@ -329,8 +340,9 @@ describe("security audit", () => {
       stateDir,
       configPath,
       platform: "win32",
-      env: { ...process.env, USERNAME: "Tester", USERDOMAIN: "DESKTOP-TEST" },
+      env: windowsAuditEnv,
       execIcacls,
+      execDockerRawFn: execDockerRawUnavailable,
     });
 
     const forbidden = new Set([
@@ -375,8 +387,9 @@ describe("security audit", () => {
       stateDir,
       configPath,
       platform: "win32",
-      env: { ...process.env, USERNAME: "Tester", USERDOMAIN: "DESKTOP-TEST" },
+      env: windowsAuditEnv,
       execIcacls,
+      execDockerRawFn: execDockerRawUnavailable,
     });
 
     expect(
@@ -651,6 +664,27 @@ describe("security audit", () => {
     });
 
     expect(res.findings.some((f) => f.checkId === "browser.control_no_auth")).toBe(false);
+  });
+
+  it("does not flag browser control auth when gateway password uses SecretRef", async () => {
+    const cfg: BotConfig = {
+      gateway: {
+        controlUi: { enabled: false },
+        auth: {
+          password: {
+            source: "env",
+            provider: "default",
+            id: "BOT_GATEWAY_PASSWORD",
+          },
+        },
+      },
+      browser: {
+        enabled: true,
+      },
+    };
+
+    const res = await audit(cfg, { env: {} });
+    expectNoFinding(res, "browser.control_no_auth");
   });
 
   it("warns when remote CDP uses HTTP", async () => {
@@ -1479,37 +1513,39 @@ describe("security audit", () => {
               };
             }
             return {
-              stdout: `${target} NT AUTHORITY\\SYSTEM:(F)\n ${user}:(F)\n`,
+              stdout: `${target} NT AUTHORITY\\SYSTEM:(F)\n BUILTIN\\Users:(W)\n ${user}:(F)\n`,
               stderr: "",
             };
           }
-        : undefined;
-      const res = await runSecurityAudit({
-        config: cfg,
-        includeFilesystem: true,
-        includeChannelSecurity: false,
-        stateDir,
-        configPath,
-        platform: isWindows ? "win32" : undefined,
-        env: isWindows
-          ? { ...process.env, USERNAME: "Tester", USERDOMAIN: "DESKTOP-TEST" }
-          : undefined,
-        execIcacls,
-      });
+          return {
+            stdout: `${target} NT AUTHORITY\\SYSTEM:(F)\n ${user}:(F)\n`,
+            stderr: "",
+          };
+        }
+      : undefined;
+    const res = await runSecurityAudit({
+      config: cfg,
+      includeFilesystem: true,
+      includeChannelSecurity: false,
+      stateDir,
+      configPath,
+      platform: isWindows ? "win32" : undefined,
+      env: isWindows
+        ? { ...process.env, USERNAME: "Tester", USERDOMAIN: "DESKTOP-TEST" }
+        : undefined,
+      execIcacls,
+      execDockerRawFn: execDockerRawUnavailable,
+    });
 
-      const expectedCheckId = isWindows
-        ? "fs.config_include.perms_writable"
-        : "fs.config_include.perms_world_readable";
+    const expectedCheckId = isWindows
+      ? "fs.config_include.perms_writable"
+      : "fs.config_include.perms_world_readable";
 
-      expect(res.findings).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ checkId: expectedCheckId, severity: "critical" }),
-        ]),
-      );
-    } finally {
-      // Clean up temp directory with world-writable file
-      await fs.rm(tmp, { recursive: true, force: true });
-    }
+    expect(res.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ checkId: expectedCheckId, severity: "critical" }),
+      ]),
+    );
   });
 
   it("flags extensions without plugins.allow", async () => {
@@ -1521,12 +1557,7 @@ describe("security audit", () => {
     delete process.env.TELEGRAM_BOT_TOKEN;
     delete process.env.SLACK_BOT_TOKEN;
     delete process.env.SLACK_APP_TOKEN;
-    const tmp = await makeTmpDir("extensions-no-allowlist");
-    const stateDir = path.join(tmp, "state");
-    await fs.mkdir(path.join(stateDir, "extensions", "some-plugin"), {
-      recursive: true,
-      mode: 0o700,
-    });
+    const stateDir = sharedExtensionsStateDir;
 
     try {
       const cfg: BotConfig = {};
@@ -1568,12 +1599,7 @@ describe("security audit", () => {
   });
 
   it("flags enabled extensions when tool policy can expose plugin tools", async () => {
-    const tmp = await makeTmpDir("plugins-reachable");
-    const stateDir = path.join(tmp, "state");
-    await fs.mkdir(path.join(stateDir, "extensions", "some-plugin"), {
-      recursive: true,
-      mode: 0o700,
-    });
+    const stateDir = sharedExtensionsStateDir;
 
     const cfg: BotConfig = {
       plugins: { allow: ["some-plugin"] },
@@ -1597,12 +1623,7 @@ describe("security audit", () => {
   });
 
   it("does not flag plugin tool reachability when profile is restrictive", async () => {
-    const tmp = await makeTmpDir("plugins-restrictive");
-    const stateDir = path.join(tmp, "state");
-    await fs.mkdir(path.join(stateDir, "extensions", "some-plugin"), {
-      recursive: true,
-      mode: 0o700,
-    });
+    const stateDir = sharedExtensionsStateDir;
 
     const cfg: BotConfig = {
       plugins: { allow: ["some-plugin"] },
@@ -1624,12 +1645,7 @@ describe("security audit", () => {
   it("flags unallowlisted extensions as critical when native skill commands are exposed", async () => {
     const prevDiscordToken = process.env.DISCORD_BOT_TOKEN;
     delete process.env.DISCORD_BOT_TOKEN;
-    const tmp = await makeTmpDir("extensions-critical");
-    const stateDir = path.join(tmp, "state");
-    await fs.mkdir(path.join(stateDir, "extensions", "some-plugin"), {
-      recursive: true,
-      mode: 0o700,
-    });
+    const stateDir = sharedExtensionsStateDir;
 
     try {
       const cfg: BotConfig = {
@@ -1684,7 +1700,8 @@ describe("security audit", () => {
       includeFilesystem: true,
       includeChannelSecurity: false,
       deep: false,
-      stateDir: tmpDir,
+      stateDir: sharedCodeSafetyStateDir,
+      execDockerRawFn: execDockerRawUnavailable,
     });
     expect(nonDeepRes.findings.some((f) => f.checkId === "plugins.code_safety")).toBe(false);
 
@@ -1705,10 +1722,13 @@ describe("security audit", () => {
   });
 
   it("reports detailed code-safety issues for both plugins and skills", async () => {
-    const tmpDir = await makeTmpDir("audit-scanner-plugin-skill");
-    const workspaceDir = path.join(tmpDir, "workspace");
-    const pluginDir = path.join(tmpDir, "extensions", "evil-plugin");
-    const skillDir = path.join(workspaceDir, "skills", "evil-skill");
+    const cfg: BotConfig = {
+      agents: { defaults: { workspace: sharedCodeSafetyWorkspaceDir } },
+    };
+    const [pluginFindings, skillFindings] = await Promise.all([
+      collectPluginsCodeSafetyFindings({ stateDir: sharedCodeSafetyStateDir }),
+      collectInstalledSkillsCodeSafetyFindings({ cfg, stateDir: sharedCodeSafetyStateDir }),
+    ]);
 
     await fs.mkdir(path.join(pluginDir, ".hidden"), { recursive: true });
     await fs.writeFile(
@@ -1757,7 +1777,7 @@ description: test skill
     expect(pluginFinding?.detail).toContain("dangerous-exec");
     expect(pluginFinding?.detail).toMatch(/\.hidden[\\/]+index\.js:\d+/);
 
-    const skillFinding = deepRes.findings.find(
+    const skillFinding = skillFindings.find(
       (finding) => finding.checkId === "skills.code_safety" && finding.severity === "critical",
     );
     expect(skillFinding).toBeDefined();

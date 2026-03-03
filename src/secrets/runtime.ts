@@ -11,19 +11,21 @@ import {
   setRuntimeConfigSnapshot,
   type BotConfig,
 } from "../config/config.js";
-import { coerceSecretRef, type SecretRef } from "../config/types.secrets.js";
 import { resolveUserPath } from "../utils.js";
-import { secretRefKey } from "./ref-contract.js";
-import { resolveSecretRefValues, type SecretRefResolveCache } from "./resolve.js";
-import { isNonEmptyString, isRecord } from "./shared.js";
+import {
+  collectCommandSecretAssignmentsFromSnapshot,
+  type CommandSecretAssignment,
+} from "./command-config.js";
+import { resolveSecretRefValues } from "./resolve.js";
+import { collectAuthStoreAssignments } from "./runtime-auth-collectors.js";
+import { collectConfigAssignments } from "./runtime-config-collectors.js";
+import {
+  applyResolvedAssignments,
+  createResolverContext,
+  type SecretResolverWarning,
+} from "./runtime-shared.js";
 
-type SecretResolverWarningCode = "SECRETS_REF_OVERRIDES_PLAINTEXT";
-
-export type SecretResolverWarning = {
-  code: SecretResolverWarningCode;
-  path: string;
-  message: string;
-};
+export type { SecretResolverWarning } from "./runtime-shared.js";
 
 export type PreparedSecretsRuntimeSnapshot = {
   sourceConfig: BotConfig;
@@ -534,13 +536,10 @@ export async function prepareSecretsRuntimeSnapshot(params: {
 }): Promise<PreparedSecretsRuntimeSnapshot> {
   const sourceConfig = structuredClone(params.config);
   const resolvedConfig = structuredClone(params.config);
-  const context: ResolverContext = {
+  const context = createResolverContext({
     sourceConfig,
     env: params.env ?? process.env,
-    cache: {},
-    warnings: [],
-    assignments: [],
-  };
+  });
 
   collectConfigAssignments({
     config: resolvedConfig,
@@ -570,7 +569,7 @@ export async function prepareSecretsRuntimeSnapshot(params: {
       env: context.env,
       cache: context.cache,
     });
-    applyAssignments({
+    applyResolvedAssignments({
       assignments: context.assignments,
       resolved,
     });
@@ -593,6 +592,37 @@ export function activateSecretsRuntimeSnapshot(snapshot: PreparedSecretsRuntimeS
 
 export function getActiveSecretsRuntimeSnapshot(): PreparedSecretsRuntimeSnapshot | null {
   return activeSnapshot ? cloneSnapshot(activeSnapshot) : null;
+}
+
+export function resolveCommandSecretsFromActiveRuntimeSnapshot(params: {
+  commandName: string;
+  targetIds: ReadonlySet<string>;
+}): { assignments: CommandSecretAssignment[]; diagnostics: string[]; inactiveRefPaths: string[] } {
+  if (!activeSnapshot) {
+    throw new Error("Secrets runtime snapshot is not active.");
+  }
+  if (params.targetIds.size === 0) {
+    return { assignments: [], diagnostics: [], inactiveRefPaths: [] };
+  }
+  const inactiveRefPaths = [
+    ...new Set(
+      activeSnapshot.warnings
+        .filter((warning) => warning.code === "SECRETS_REF_IGNORED_INACTIVE_SURFACE")
+        .map((warning) => warning.path),
+    ),
+  ];
+  const resolved = collectCommandSecretAssignmentsFromSnapshot({
+    sourceConfig: activeSnapshot.sourceConfig,
+    resolvedConfig: activeSnapshot.config,
+    commandName: params.commandName,
+    targetIds: params.targetIds,
+    inactiveRefPaths: new Set(inactiveRefPaths),
+  });
+  return {
+    assignments: resolved.assignments,
+    diagnostics: resolved.diagnostics,
+    inactiveRefPaths,
+  };
 }
 
 export function clearSecretsRuntimeSnapshot(): void {

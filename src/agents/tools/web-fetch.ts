@@ -114,7 +114,7 @@ function resolveFetchConfig(cfg?: BotConfig): WebFetchConfig {
   if (!fetch || typeof fetch !== "object") {
     return undefined;
   }
-  return fetch as WebFetchConfig;
+  return fetch;
 }
 
 function resolveFetchEnabled(params: { fetch?: WebFetchConfig; sandboxed?: boolean }): boolean {

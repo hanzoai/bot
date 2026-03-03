@@ -1,51 +1,17 @@
 #!/usr/bin/env node
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import ts from "typescript";
+import { runCallsiteGuard } from "./lib/callsite-guard.mjs";
+import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.mjs";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourceRoots = [
-  path.join(repoRoot, "src", "channels"),
-  path.join(repoRoot, "src", "infra", "outbound"),
-  path.join(repoRoot, "src", "line"),
-  path.join(repoRoot, "src", "media-understanding"),
-  path.join(repoRoot, "extensions"),
+  "src/channels",
+  "src/infra/outbound",
+  "src/line",
+  "src/media-understanding",
+  "extensions",
 ];
-const allowedCallsites = new Set([path.join(repoRoot, "extensions", "feishu", "src", "dedup.ts")]);
-
-function isTestLikeFile(filePath) {
-  return (
-    filePath.endsWith(".test.ts") ||
-    filePath.endsWith(".test-utils.ts") ||
-    filePath.endsWith(".test-harness.ts") ||
-    filePath.endsWith(".e2e-harness.ts")
-  );
-}
-
-async function collectTypeScriptFiles(dir) {
-  const entries = await fs.readdir(dir, { withFileTypes: true });
-  const out = [];
-  for (const entry of entries) {
-    const entryPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      out.push(...(await collectTypeScriptFiles(entryPath)));
-      continue;
-    }
-    if (!entry.isFile()) {
-      continue;
-    }
-    if (!entryPath.endsWith(".ts")) {
-      continue;
-    }
-    if (isTestLikeFile(entryPath)) {
-      continue;
-    }
-    out.push(entryPath);
-  }
-  return out;
-}
+const allowedRelativePaths = new Set(["extensions/feishu/src/dedup.ts"]);
 
 function collectOsTmpdirImports(sourceFile) {
   const osModuleSpecifiers = new Set(["node:os", "os"]);
@@ -81,25 +47,6 @@ function collectOsTmpdirImports(sourceFile) {
   return { osNamespaceOrDefault, namedTmpdir };
 }
 
-function unwrapExpression(expression) {
-  let current = expression;
-  while (true) {
-    if (ts.isParenthesizedExpression(current)) {
-      current = current.expression;
-      continue;
-    }
-    if (ts.isAsExpression(current) || ts.isTypeAssertionExpression(current)) {
-      current = current.expression;
-      continue;
-    }
-    if (ts.isNonNullExpression(current)) {
-      current = current.expression;
-      continue;
-    }
-    return current;
-  }
-}
-
 export function findMessagingTmpdirCallLines(content, fileName = "source.ts") {
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
   const { osNamespaceOrDefault, namedTmpdir } = collectOsTmpdirImports(sourceFile);
@@ -114,11 +61,9 @@ export function findMessagingTmpdirCallLines(content, fileName = "source.ts") {
         ts.isIdentifier(callee.expression) &&
         osNamespaceOrDefault.has(callee.expression.text)
       ) {
-        const line = sourceFile.getLineAndCharacterOfPosition(callee.getStart(sourceFile)).line + 1;
-        lines.push(line);
+        lines.push(toLine(sourceFile, callee));
       } else if (ts.isIdentifier(callee) && namedTmpdir.has(callee.text)) {
-        const line = sourceFile.getLineAndCharacterOfPosition(callee.getStart(sourceFile)).line + 1;
-        lines.push(line);
+        lines.push(toLine(sourceFile, callee));
       }
     }
     ts.forEachChild(node, visit);
@@ -172,3 +117,5 @@ if (isDirectExecution) {
     process.exit(1);
   });
 }
+
+runAsScript(import.meta.url, main);
