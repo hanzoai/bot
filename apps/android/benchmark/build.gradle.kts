@@ -4,13 +4,8 @@ plugins {
 }
 
 android {
-<<<<<<< HEAD
-  namespace = "ai.hanzo.bot.android.benchmark"
-  compileSdk = 36
-=======
-    namespace = "ai.openclaw.android.benchmark"
+    namespace = "ai.hanzo.bot.android.benchmark"
     compileSdk = 36
->>>>>>> 9c2f7e2a9 (style(android): format gradle kotlin scripts)
 
     defaultConfig {
         minSdk = 31

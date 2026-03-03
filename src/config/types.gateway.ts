@@ -184,6 +184,20 @@ export type GatewayAuthRateLimitConfig = {
   exemptLoopback?: boolean;
 };
 
+/**
+ * Token-bucket rate limiting for request throughput.
+ * Applied per-user (or per-connection when user ID is unavailable)
+ * to billable gateway methods (agent, agent.wait, chat.send).
+ */
+export type RequestRateLimitConfig = {
+  /** Requests per minute per user.  @default 60 (starter tier) */
+  requestsPerMinute?: number;
+  /** Burst allowance — tokens available immediately.  @default 15 */
+  burstSize?: number;
+  /** Interval in ms for pruning stale rate-limit buckets.  @default 60000 */
+  cleanupIntervalMs?: number;
+};
+
 export type GatewayTailscaleMode = "off" | "serve" | "funnel";
 
 export type GatewayTailscaleConfig = {
@@ -417,6 +431,8 @@ export type GatewayConfig = {
   tools?: GatewayToolsConfig;
   /** P2P marketplace configuration for idle compute sharing. */
   marketplace?: MarketplaceConfig;
+  /** Token-bucket rate limiting for request throughput (billable methods). */
+  requestRateLimit?: RequestRateLimitConfig;
 };
 
 /** Marketplace (P2P idle compute sharing) configuration. */

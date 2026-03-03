@@ -2,6 +2,7 @@ import type { GatewayRequestHandlers, GatewayRequestOptions } from "./server-met
 import { checkBillingAllowance } from "./billing/billing-gate.js";
 import { consumeControlPlaneWriteBudget } from "./control-plane-rate-limit.js";
 import { ErrorCodes, errorShape } from "./protocol/index.js";
+import { billingTierToRateLimitTier } from "./request-rate-limit.js";
 import { agentHandlers } from "./server-methods/agent.js";
 import { agentsHandlers } from "./server-methods/agents.js";
 import { browserHandlers } from "./server-methods/browser.js";
@@ -271,6 +272,29 @@ export async function handleGatewayRequest(
         retryable: true,
         retryAfterMs: budget.retryAfterMs,
       });
+      return;
+    }
+  }
+
+  // Request throughput rate limit: enforce per-user token-bucket limits
+  // on billable methods to prevent abuse and ensure fair resource sharing.
+  if (BILLABLE_METHODS.has(req.method) && context.requestRateLimiter) {
+    const rateLimitKey =
+      client?.tenant?.userId ?? client?.connId ?? client?.clientIp ?? "anonymous";
+    const tierName = billingTierToRateLimitTier(client?.billingTier);
+    const rl = context.requestRateLimiter.tryConsume(rateLimitKey, tierName);
+    if (!rl.allowed) {
+      context.logGateway.warn(
+        `request rate limit exceeded for ${rateLimitKey} (method=${req.method}, tier=${tierName}, retryAfterMs=${rl.retryAfterMs})`,
+      );
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.RATE_LIMITED, "request rate limit exceeded; try again shortly", {
+          retryable: true,
+          retryAfterMs: rl.retryAfterMs,
+        }),
+      );
       return;
     }
   }
