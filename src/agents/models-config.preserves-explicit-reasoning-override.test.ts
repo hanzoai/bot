@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { BotConfig } from "../config/config.js";
-import { resolveBotAgentDir } from "./agent-paths.js";
 import {
   installModelsConfigTestHooks,
   withModelsTempHome as withTempHome,
 } from "./models-config.e2e-harness.js";
 import { ensureBotModelsJson } from "./models-config.js";
+import { readGeneratedModelsJson } from "./models-config.test-utils.js";
 
 installModelsConfigTestHooks();
 
@@ -54,9 +54,7 @@ describe("models-config: explicit reasoning override", () => {
     // MiniMax-M2.5 has reasoning:true in the built-in catalog.
     // User explicitly sets reasoning:false to avoid message-ordering conflicts.
     await withTempHome(async () => {
-      const prevKey = process.env.MINIMAX_API_KEY;
-      process.env.MINIMAX_API_KEY = "sk-minimax-test";
-      try {
+      await withMinimaxApiKey(async () => {
         const cfg: BotConfig = {
           models: {
             providers: {
@@ -78,11 +76,7 @@ describe("models-config: explicit reasoning override", () => {
           },
         };
 
-        await ensureBotModelsJson(cfg);
-
-        const raw = await fs.readFile(path.join(resolveBotAgentDir(), "models.json"), "utf8");
-        const parsed = JSON.parse(raw) as ModelsJson;
-        const m25 = parsed.providers.minimax?.models?.find((m) => m.id === "MiniMax-M2.5");
+        const m25 = await generateAndReadMinimaxModel(cfg);
         expect(m25).toBeDefined();
         // Must honour the explicit false — built-in true must NOT win.
         expect(m25?.reasoning).toBe(false);
@@ -116,11 +110,7 @@ describe("models-config: explicit reasoning override", () => {
           },
         };
 
-        await ensureBotModelsJson(cfg);
-
-        const raw = await fs.readFile(path.join(resolveBotAgentDir(), "models.json"), "utf8");
-        const parsed = JSON.parse(raw) as ModelsJson;
-        const m25 = parsed.providers.minimax?.models?.find((m) => m.id === "MiniMax-M2.5");
+        const m25 = await generateAndReadMinimaxModel(cfg);
         expect(m25).toBeDefined();
         // Built-in catalog has reasoning:true — should be applied as default.
         expect(m25?.reasoning).toBe(true);

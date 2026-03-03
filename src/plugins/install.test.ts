@@ -1,5 +1,3 @@
-import JSZip from "jszip";
-import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -69,9 +67,9 @@ function ensureSuiteTempRoot() {
 }
 
 function makeTempDir() {
-  const dir = path.join(os.tmpdir(), `bot-plugin-install-${randomUUID()}`);
-  fs.mkdirSync(dir, { recursive: true });
-  tempDirs.push(dir);
+  const dir = path.join(ensureSuiteTempRoot(), `case-${String(tempDirCounter)}`);
+  tempDirCounter += 1;
+  fs.mkdirSync(dir);
   return dir;
 }
 
@@ -106,79 +104,27 @@ async function packToArchive({
   return dest;
 }
 
-function writePluginPackage(params: {
-  pkgDir: string;
-  name: string;
-  version: string;
-  extensions: string[];
-}) {
-  fs.mkdirSync(path.join(params.pkgDir, "dist"), { recursive: true });
-  fs.writeFileSync(
-    path.join(params.pkgDir, "package.json"),
-    JSON.stringify(
-      {
-        name: params.name,
-        version: params.version,
-        bot: { extensions: params.extensions },
-      },
-      null,
-      2,
-    ),
-    "utf-8",
-  );
-  fs.writeFileSync(path.join(params.pkgDir, "dist", "index.js"), "export {};", "utf-8");
+function readVoiceCallArchiveBuffer(version: string): Buffer {
+  return fs.readFileSync(path.join(pluginFixturesDir, `voice-call-${version}.tgz`));
 }
 
 function getArchiveFixturePath(params: {
   cacheKey: string;
   outName: string;
-  version: string;
-}) {
-  const pkgDir = path.join(params.workDir, "package");
-  writePluginPackage({
-    pkgDir,
-    name: "@bot/voice-call",
-    version: params.version,
-    extensions: ["./dist/index.js"],
-  });
-  const archivePath = await packToArchive({
-    pkgDir,
-    outDir: params.workDir,
-    outName: params.outName,
-  });
-  return { pkgDir, archivePath };
-}
-
-async function createVoiceCallArchiveBuffer(version: string): Promise<Buffer> {
-  const workDir = makeTempDir();
-  const { archivePath } = await createVoiceCallArchive({
-    workDir,
-    outName: `plugin-${version}.tgz`,
-    version,
-  });
-  return fs.readFileSync(archivePath);
-}
-
-function writeArchiveBuffer(params: { outName: string; buffer: Buffer }): string {
-  const workDir = makeTempDir();
-  const archivePath = path.join(workDir, params.outName);
+  buffer: Buffer;
+}): string {
+  const hit = archiveFixturePathCache.get(params.cacheKey);
+  if (hit) {
+    return hit;
+  }
+  const archivePath = path.join(ensureSuiteFixtureRoot(), params.outName);
   fs.writeFileSync(archivePath, params.buffer);
   archiveFixturePathCache.set(params.cacheKey, archivePath);
   return archivePath;
 }
 
-async function createZipperArchiveBuffer(): Promise<Buffer> {
-  const zip = new JSZip();
-  zip.file(
-    "package/package.json",
-    JSON.stringify({
-      name: "@bot/zipper",
-      version: "0.0.1",
-      bot: { extensions: ["./dist/index.js"] },
-    }),
-  );
-  zip.file("package/dist/index.js", "export {};");
-  return zip.generateAsync({ type: "nodebuffer" });
+function readZipperArchiveBuffer(): Buffer {
+  return fs.readFileSync(path.join(pluginFixturesDir, "zipper-0.0.1.zip"));
 }
 
 const VOICE_CALL_ARCHIVE_V1_BUFFER = readVoiceCallArchiveBuffer("0.0.1");
@@ -239,22 +185,19 @@ function setupPluginInstallDirs() {
 }
 
 function setupInstallPluginFromDirFixture(params?: { devDependencies?: Record<string, string> }) {
-  const workDir = makeTempDir();
-  const stateDir = makeTempDir();
-  const pluginDir = path.join(workDir, "plugin");
-  fs.mkdirSync(path.join(pluginDir, "dist"), { recursive: true });
-  fs.writeFileSync(
-    path.join(pluginDir, "package.json"),
-    JSON.stringify({
-      name: "@bot/test-plugin",
-      version: "0.0.1",
-      bot: { extensions: ["./dist/index.js"] },
-      dependencies: { "left-pad": "1.3.0" },
-      ...(params?.devDependencies ? { devDependencies: params.devDependencies } : {}),
-    }),
-    "utf-8",
-  );
-  fs.writeFileSync(path.join(pluginDir, "dist", "index.js"), "export {};", "utf-8");
+  const caseDir = makeTempDir();
+  const stateDir = path.join(caseDir, "state");
+  const pluginDir = path.join(caseDir, "plugin");
+  fs.mkdirSync(stateDir, { recursive: true });
+  fs.cpSync(installPluginFromDirTemplateDir, pluginDir, { recursive: true });
+  if (params?.devDependencies) {
+    const packageJsonPath = path.join(pluginDir, "package.json");
+    const manifest = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8")) as {
+      devDependencies?: Record<string, string>;
+    };
+    manifest.devDependencies = params.devDependencies;
+    fs.writeFileSync(packageJsonPath, JSON.stringify(manifest), "utf-8");
+  }
   return { pluginDir, extensionsDir: path.join(stateDir, "extensions") };
 }
 
@@ -562,6 +505,42 @@ describe("installPluginFromArchive", () => {
       return;
     }
     expect(result.error).toContain("bot.extensions");
+    expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_BOT_EXTENSIONS);
+  });
+
+  it("rejects legacy plugin package shape when bot.extensions is missing", async () => {
+    const { pluginDir, extensionsDir } = setupPluginInstallDirs();
+    fs.writeFileSync(
+      path.join(pluginDir, "package.json"),
+      JSON.stringify({
+        name: "@bot/legacy-entry-fallback",
+        version: "0.0.1",
+      }),
+      "utf-8",
+    );
+    fs.writeFileSync(
+      path.join(pluginDir, "bot.plugin.json"),
+      JSON.stringify({
+        id: "legacy-entry-fallback",
+        configSchema: { type: "object", properties: {} },
+      }),
+      "utf-8",
+    );
+    fs.writeFileSync(path.join(pluginDir, "index.ts"), "export {};\n", "utf-8");
+
+    const result = await installPluginFromDir({
+      dirPath: pluginDir,
+      extensionsDir,
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain("package.json missing bot.extensions");
+      expect(result.error).toContain("update the plugin package");
+      expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_BOT_EXTENSIONS);
+      return;
+    }
+    expect.unreachable("expected install to fail without bot.extensions");
   });
 
   it("warns when plugin contains dangerous code patterns", async () => {
@@ -699,26 +678,9 @@ describe("installPluginFromDir", () => {
   });
 
   it("uses bot.plugin.json id as install key when it differs from package name", async () => {
-    const { pluginDir, extensionsDir } = setupPluginInstallDirs();
-    fs.mkdirSync(path.join(pluginDir, "dist"), { recursive: true });
-    fs.writeFileSync(
-      path.join(pluginDir, "package.json"),
-      JSON.stringify({
-        name: "@bot/cognee-bot",
-        version: "0.0.1",
-        bot: { extensions: ["./dist/index.js"] },
-      }),
-      "utf-8",
-    );
-    fs.writeFileSync(path.join(pluginDir, "dist", "index.js"), "export {};", "utf-8");
-    fs.writeFileSync(
-      path.join(pluginDir, "bot.plugin.json"),
-      JSON.stringify({
-        id: "memory-cognee",
-        configSchema: { type: "object", properties: {} },
-      }),
-      "utf-8",
-    );
+    const { pluginDir, extensionsDir } = setupManifestInstallFixture({
+      manifestId: "memory-cognee",
+    });
 
     const infoMessages: string[] = [];
     const res = await installPluginFromDir({
@@ -738,26 +700,9 @@ describe("installPluginFromDir", () => {
   });
 
   it("normalizes scoped manifest ids to unscoped install keys", async () => {
-    const { pluginDir, extensionsDir } = setupPluginInstallDirs();
-    fs.mkdirSync(path.join(pluginDir, "dist"), { recursive: true });
-    fs.writeFileSync(
-      path.join(pluginDir, "package.json"),
-      JSON.stringify({
-        name: "@bot/cognee-bot",
-        version: "0.0.1",
-        bot: { extensions: ["./dist/index.js"] },
-      }),
-      "utf-8",
-    );
-    fs.writeFileSync(path.join(pluginDir, "dist", "index.js"), "export {};", "utf-8");
-    fs.writeFileSync(
-      path.join(pluginDir, "bot.plugin.json"),
-      JSON.stringify({
-        id: "@team/memory-cognee",
-        configSchema: { type: "object", properties: {} },
-      }),
-      "utf-8",
-    );
+    const { pluginDir, extensionsDir } = setupManifestInstallFixture({
+      manifestId: "@team/memory-cognee",
+    });
 
     const res = await installPluginFromDir({
       dirPath: pluginDir,
