@@ -90,4 +90,17 @@ describe("computeJobNextRunAtMs top-of-hour staggering", () => {
 
     expect(next).toBe(Date.parse("2026-02-07T07:00:00.000Z"));
   });
+
+  it("caches stable stagger offsets per job/window", () => {
+    const now = Date.parse("2026-02-06T10:05:00.000Z");
+    const job = createCronJob({ id: "hourly-job-cache", expr: "0 * * * *", tz: "UTC" });
+    const hashSpy = vi.spyOn(crypto, "createHash");
+
+    const first = computeJobNextRunAtMs(job, now);
+    const second = computeJobNextRunAtMs(job, now);
+
+    expect(second).toBe(first);
+    expect(hashSpy).toHaveBeenCalledTimes(1);
+    hashSpy.mockRestore();
+  });
 });

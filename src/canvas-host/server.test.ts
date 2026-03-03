@@ -61,6 +61,25 @@ describe("canvas host", () => {
     return dir;
   };
 
+  const startFixtureCanvasHost = async (
+    rootDir: string,
+    overrides: Partial<Parameters<typeof startCanvasHost>[0]> = {},
+  ) =>
+    await startCanvasHost({
+      runtime: quietRuntime,
+      rootDir,
+      port: 0,
+      listenHost: "127.0.0.1",
+      allowInTests: true,
+      ...overrides,
+    });
+
+  const fetchCanvasHtml = async (port: number) => {
+    const res = await fetch(`http://127.0.0.1:${port}${CANVAS_HOST_PATH}/`);
+    const html = await res.text();
+    return { res, html };
+  };
+
   beforeAll(async () => {
     fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-canvas-fixtures-"));
   });
@@ -80,17 +99,10 @@ describe("canvas host", () => {
   it("creates a default index.html when missing", async () => {
     const dir = await createCaseDir();
 
-    const server = await startCanvasHost({
-      runtime: quietRuntime,
-      rootDir: dir,
-      port: 0,
-      listenHost: "127.0.0.1",
-      allowInTests: true,
-    });
+    const server = await startFixtureCanvasHost(dir);
 
     try {
-      const res = await fetch(`http://127.0.0.1:${server.port}${CANVAS_HOST_PATH}/`);
-      const html = await res.text();
+      const { res, html } = await fetchCanvasHtml(server.port);
       expect(res.status).toBe(200);
       expect(html).toContain("Interactive test page");
       expect(html).toContain("botSendUserAction");
@@ -104,18 +116,10 @@ describe("canvas host", () => {
     const dir = await createCaseDir();
     await fs.writeFile(path.join(dir, "index.html"), "<html><body>no-reload</body></html>", "utf8");
 
-    const server = await startCanvasHost({
-      runtime: quietRuntime,
-      rootDir: dir,
-      port: 0,
-      listenHost: "127.0.0.1",
-      allowInTests: true,
-      liveReload: false,
-    });
+    const server = await startFixtureCanvasHost(dir, { liveReload: false });
 
     try {
-      const res = await fetch(`http://127.0.0.1:${server.port}${CANVAS_HOST_PATH}/`);
-      const html = await res.text();
+      const { res, html } = await fetchCanvasHtml(server.port);
       expect(res.status).toBe(200);
       expect(html).toContain("no-reload");
       expect(html).not.toContain(CANVAS_WS_PATH);
@@ -267,13 +271,7 @@ describe("canvas host", () => {
     await fs.symlink(path.join(process.cwd(), "package.json"), linkPath);
     createdLink = true;
 
-    const server = await startCanvasHost({
-      runtime: quietRuntime,
-      rootDir: dir,
-      port: 0,
-      listenHost: "127.0.0.1",
-      allowInTests: true,
-    });
+    const server = await startFixtureCanvasHost(dir);
 
     try {
       const res = await fetch(`http://127.0.0.1:${server.port}/__bot__/a2ui/`);
