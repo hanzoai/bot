@@ -53,8 +53,7 @@ export function buildSecretRefCredentialMatrix(): SecretRefCredentialMatrixDocum
     version: 1,
     matrixId: "strictly-user-supplied-credentials",
     pathSyntax: 'Dot path with "*" for map keys and "[]" for arrays.',
-    scope:
-      "Credentials that are strictly user-supplied and not minted/rotated by Bot runtime.",
+    scope: "Credentials that are strictly user-supplied and not minted/rotated by Bot runtime.",
     excludedMutableOrRuntimeManaged: [...EXCLUDED_MUTABLE_OR_RUNTIME_MANAGED],
     entries,
   };

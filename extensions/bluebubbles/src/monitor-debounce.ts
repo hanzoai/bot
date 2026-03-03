@@ -94,10 +94,7 @@ function combineDebounceEntries(entries: BlueBubblesDebounceEntry[]): Normalized
   };
 }
 
-function resolveBlueBubblesDebounceMs(
-  config: BotConfig,
-  core: BlueBubblesCoreRuntime,
-): number {
+function resolveBlueBubblesDebounceMs(config: BotConfig, core: BlueBubblesCoreRuntime): number {
   const inbound = config.messages?.inbound;
   const hasExplicitDebounce =
     typeof inbound?.debounceMs === "number" || typeof inbound?.byChannel?.bluebubbles === "number";
