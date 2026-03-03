@@ -1,21 +1,18 @@
+import type { BotConfig, GatewayBindMode, GatewayControlUiConfig } from "../../config/types.js";
+import type { FindExtraGatewayServicesOptions } from "../../daemon/inspect.js";
+import type { ServiceConfigAudit } from "../../daemon/service-audit.js";
+import type { GatewayServiceRuntime } from "../../daemon/service-runtime.js";
+import type { GatewayRpcOpts } from "./types.js";
 import {
   createConfigIO,
   resolveConfigPath,
   resolveGatewayPort,
   resolveStateDir,
 } from "../../config/config.js";
-import type {
-  BotConfig,
-  GatewayBindMode,
-  GatewayControlUiConfig,
-} from "../../config/types.js";
 import { normalizeSecretInputString, resolveSecretInputRef } from "../../config/types.secrets.js";
 import { readLastGatewayErrorLine } from "../../daemon/diagnostics.js";
-import type { FindExtraGatewayServicesOptions } from "../../daemon/inspect.js";
 import { findExtraGatewayServices } from "../../daemon/inspect.js";
-import type { ServiceConfigAudit } from "../../daemon/service-audit.js";
 import { auditGatewayServiceConfig } from "../../daemon/service-audit.js";
-import type { GatewayServiceRuntime } from "../../daemon/service-runtime.js";
 import { resolveGatewayService } from "../../daemon/service.js";
 import { resolveGatewayBindHost } from "../../gateway/net.js";
 import {
@@ -30,7 +27,6 @@ import { secretRefKey } from "../../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../../secrets/resolve.js";
 import { probeGatewayStatus } from "./probe.js";
 import { normalizeListenerAddress, parsePortFromArgs, pickProbeHostForBind } from "./shared.js";
-import type { GatewayRpcOpts } from "./types.js";
 
 type ConfigSummary = {
   path: string;
@@ -295,9 +291,7 @@ export async function gatherDaemonStatus(
     ? await probeGatewayStatus({
         url: probeUrl,
         token:
-          opts.rpc.token ||
-          mergedDaemonEnv.BOT_GATEWAY_TOKEN ||
-          daemonCfg.gateway?.auth?.token,
+          opts.rpc.token || mergedDaemonEnv.BOT_GATEWAY_TOKEN || daemonCfg.gateway?.auth?.token,
         password: daemonProbePassword,
         tlsFingerprint:
           shouldUseLocalTlsRuntime && tlsRuntime?.enabled
