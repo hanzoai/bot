@@ -803,7 +803,7 @@ export function isImageSizeError(errorMessage?: string): boolean {
 }
 
 export function isCloudCodeAssistFormatError(raw: string): boolean {
-  return !isImageDimensionErrorMessage(raw) && matchesErrorPatterns(raw, ERROR_PATTERNS.format);
+  return !isImageDimensionErrorMessage(raw) && matchesFormatErrorPattern(raw);
 }
 
 export function isAuthAssistantError(msg: AssistantMessage | undefined): boolean {

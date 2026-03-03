@@ -1251,6 +1251,8 @@ export function registerFeishuDocTools(api: BotPluginApi) {
     api.registerTool(
       (ctx) => {
         const defaultAccountId = ctx.agentAccountId;
+        const trustedRequesterOpenId =
+          ctx.messageChannel === "feishu" ? ctx.requesterSenderId?.trim() || undefined : undefined;
         return {
           name: "feishu_doc",
           label: "Feishu Doc",
