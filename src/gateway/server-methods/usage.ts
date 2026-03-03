@@ -6,6 +6,11 @@ import type {
   SessionMessageCounts,
   SessionModelUsage,
 } from "../../infra/session-cost-usage.js";
+import type {
+  SessionUsageEntry,
+  SessionsUsageAggregates,
+  SessionsUsageResult,
+} from "../../shared/usage-types.js";
 import type { GatewayRequestHandlers, RespondFn } from "./types.js";
 import { loadConfig } from "../../config/config.js";
 import {
@@ -26,11 +31,6 @@ import {
   mergeUsageDailyLatency,
   mergeUsageLatency,
 } from "../../shared/usage-aggregates.js";
-import type {
-  SessionUsageEntry,
-  SessionsUsageAggregates,
-  SessionsUsageResult,
-} from "../../shared/usage-types.js";
 import {
   ErrorCodes,
   errorShape,

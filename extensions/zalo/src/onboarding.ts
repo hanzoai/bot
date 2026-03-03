@@ -2,13 +2,17 @@ import type {
   ChannelOnboardingAdapter,
   ChannelOnboardingDmPolicy,
   BotConfig,
+  SecretInput,
   WizardPrompter,
 } from "bot/plugin-sdk";
 import {
   addWildcardAllowFrom,
   DEFAULT_ACCOUNT_ID,
+  hasConfiguredSecretInput,
+  mergeAllowFromEntries,
   normalizeAccountId,
   promptAccountId,
+  promptSingleChannelSecretInput,
 } from "bot/plugin-sdk";
 import { listZaloAccountIds, resolveDefaultZaloAccountId, resolveZaloAccount } from "./accounts.js";
 
@@ -144,11 +148,7 @@ async function promptZaloAllowFrom(params: {
     },
   });
   const normalized = String(entry).trim();
-  const merged = [
-    ...existingAllowFrom.map((item) => String(item).trim()).filter(Boolean),
-    normalized,
-  ];
-  const unique = [...new Set(merged)];
+  const unique = mergeAllowFromEntries(existingAllowFrom, [normalized]);
 
   if (accountId === DEFAULT_ACCOUNT_ID) {
     return {
@@ -293,35 +293,8 @@ export const zaloOnboardingAdapter: ChannelOnboardingAdapter = {
             ...next.channels?.zalo,
             enabled: true,
           },
-        } as BotConfig;
-      } else {
-        token = String(
-          await prompter.text({
-            message: "Enter Zalo bot token",
-            validate: (value) => (value?.trim() ? undefined : "Required"),
-          }),
-        ).trim();
-      }
-    } else if (hasConfigToken) {
-      const keep = await prompter.confirm({
-        message: "Zalo token already configured. Keep it?",
-        initialValue: true,
-      });
-      if (!keep) {
-        token = String(
-          await prompter.text({
-            message: "Enter Zalo bot token",
-            validate: (value) => (value?.trim() ? undefined : "Required"),
-          }),
-        ).trim();
-      }
-    } else {
-      token = String(
-        await prompter.text({
-          message: "Enter Zalo bot token",
-          validate: (value) => (value?.trim() ? undefined : "Required"),
-        }),
-      ).trim();
+        },
+      } as BotConfig;
     }
 
     if (token) {

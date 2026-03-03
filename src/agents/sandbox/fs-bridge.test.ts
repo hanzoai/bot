@@ -7,7 +7,16 @@ vi.mock("./docker.js", () => ({
   execDockerRaw: vi.fn(),
 }));
 
+vi.mock("../../infra/boundary-file-read.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../infra/boundary-file-read.js")>();
+  return {
+    ...actual,
+    openBoundaryFile: vi.fn(actual.openBoundaryFile),
+  };
+});
+
 import type { SandboxContext } from "./types.js";
+import { openBoundaryFile } from "../../infra/boundary-file-read.js";
 import { execDockerRaw } from "./docker.js";
 import { createSandboxFsBridge } from "./fs-bridge.js";
 import { createSandboxTestContext } from "./test-fixtures.js";
@@ -48,12 +57,12 @@ function dockerExecResult(stdout: string) {
 function createSandbox(overrides?: Partial<SandboxContext>): SandboxContext {
   return createSandboxTestContext({
     overrides: {
-      containerName: "bot-sbx-test",
+      containerName: "moltbot-sbx-test",
       ...overrides,
     },
     dockerOverrides: {
-      image: "bot-sandbox:bookworm-slim",
-      containerPrefix: "bot-sbx-",
+      image: "moltbot-sandbox:bookworm-slim",
+      containerPrefix: "moltbot-sbx-",
     },
   });
 }
@@ -204,7 +213,7 @@ describe("sandbox fs bridge shell compatibility", () => {
 
     const args = mockedExecDockerRaw.mock.calls.at(-1)?.[0] ?? [];
     expect(args).toEqual(
-      expect.arrayContaining(["bot-sbx-test", "sh", "-c", 'set -eu; cat -- "$1"']),
+      expect.arrayContaining(["moltbot-sbx-test", "sh", "-c", 'set -eu; cat -- "$1"']),
     );
     expect(getDockerPathArg(args)).toBe("/workspace-two/README.md");
   });
@@ -224,15 +233,8 @@ describe("sandbox fs bridge shell compatibility", () => {
     expect(mockedExecDockerRaw).not.toHaveBeenCalled();
   });
 
-  it("rejects pre-existing host symlink escapes before docker exec", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-fs-bridge-"));
-    const workspaceDir = path.join(stateDir, "workspace");
-    const outsideDir = path.join(stateDir, "outside");
-    const outsideFile = path.join(outsideDir, "secret.txt");
-    await fs.mkdir(workspaceDir, { recursive: true });
-    await fs.mkdir(outsideDir, { recursive: true });
-    await fs.writeFile(outsideFile, "classified");
-    await fs.symlink(outsideFile, path.join(workspaceDir, "link.txt"));
+  it("writes via temp file + atomic rename (never direct truncation)", async () => {
+    const bridge = createSandboxFsBridge({ sandbox: createSandbox() });
 
     await bridge.writeFile({ filePath: "b.txt", data: "hello" });
 
@@ -316,15 +318,9 @@ describe("sandbox fs bridge shell compatibility", () => {
     if (process.platform === "win32") {
       return;
     }
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-fs-bridge-hardlink-"));
-    const workspaceDir = path.join(stateDir, "workspace");
-    const outsideDir = path.join(stateDir, "outside");
-    const outsideFile = path.join(outsideDir, "secret.txt");
-    await fs.mkdir(workspaceDir, { recursive: true });
-    await fs.mkdir(outsideDir, { recursive: true });
-    await fs.writeFile(outsideFile, "classified");
-    const hardlinkPath = path.join(workspaceDir, "link.txt");
-    try {
+    await withTempDir("bot-fs-bridge-hardlink-", async (stateDir) => {
+      const { workspaceDir, outsideFile } = await createHostEscapeFixture(stateDir);
+      const hardlinkPath = path.join(workspaceDir, "link.txt");
       try {
         await fs.link(outsideFile, hardlinkPath);
       } catch (err) {

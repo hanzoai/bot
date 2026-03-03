@@ -20,22 +20,14 @@ vi.mock("../../../pairing/pairing-store.js", () => ({
 
 type MemberHandler = (args: { event: Record<string, unknown>; body: unknown }) => Promise<void>;
 
-function createMembersContext(params?: {
-  overrides?: SlackSystemEventTestOverrides;
+type MemberCaseArgs = {
+  event?: Record<string, unknown>;
+  body?: unknown;
+  overrides?: MemberOverrides;
+  handler?: "joined" | "left";
   trackEvent?: () => void;
   shouldDropMismatchedSlackEvent?: (body: unknown) => boolean;
-}) {
-  const harness = createSlackSystemEventTestHarness(params?.overrides);
-  if (params?.shouldDropMismatchedSlackEvent) {
-    harness.ctx.shouldDropMismatchedSlackEvent = params.shouldDropMismatchedSlackEvent;
-  }
-  registerSlackMemberEvents({ ctx: harness.ctx, trackEvent: params?.trackEvent });
-  return {
-    getJoinedHandler: () =>
-      harness.getHandler("member_joined_channel") as SlackMemberHandler | null,
-    getLeftHandler: () => harness.getHandler("member_left_channel") as SlackMemberHandler | null,
-  };
-}
+};
 
 function makeMemberEvent(overrides?: { channel?: string; user?: string }) {
   return {
@@ -80,66 +72,22 @@ async function runMemberCase(args: MemberCaseArgs = {}): Promise<void> {
 }
 
 describe("registerSlackMemberEvents", () => {
-  it("enqueues DM member events when dmPolicy is open", async () => {
-    enqueueSystemEventMock.mockClear();
-    readAllowFromStoreMock.mockReset().mockResolvedValue([]);
-    const { getJoinedHandler } = createMembersContext({ overrides: { dmPolicy: "open" } });
-    const joinedHandler = getJoinedHandler();
-    expect(joinedHandler).toBeTruthy();
-
-    await joinedHandler!({
-      event: makeMemberEvent(),
-      body: {},
-    });
-
-    expect(enqueueSystemEventMock).toHaveBeenCalledTimes(1);
-  });
-
-  it("blocks DM member events when dmPolicy is disabled", async () => {
-    enqueueSystemEventMock.mockClear();
-    readAllowFromStoreMock.mockReset().mockResolvedValue([]);
-    const { getJoinedHandler } = createMembersContext({ overrides: { dmPolicy: "disabled" } });
-    const joinedHandler = getJoinedHandler();
-    expect(joinedHandler).toBeTruthy();
-
-    await joinedHandler!({
-      event: makeMemberEvent(),
-      body: {},
-    });
-
-    expect(enqueueSystemEventMock).not.toHaveBeenCalled();
-  });
-
-  it("blocks DM member events for unauthorized senders in allowlist mode", async () => {
-    enqueueSystemEventMock.mockClear();
-    readAllowFromStoreMock.mockReset().mockResolvedValue([]);
-    const { getJoinedHandler } = createMembersContext({
-      overrides: { dmPolicy: "allowlist", allowFrom: ["U2"] },
-    });
-    const joinedHandler = getJoinedHandler();
-    expect(joinedHandler).toBeTruthy();
-
-    await joinedHandler!({
-      event: makeMemberEvent({ user: "U1" }),
-      body: {},
-    });
-
-    expect(enqueueSystemEventMock).not.toHaveBeenCalled();
-  });
-
-  it("allows DM member events for authorized senders in allowlist mode", async () => {
-    enqueueSystemEventMock.mockClear();
-    readAllowFromStoreMock.mockReset().mockResolvedValue([]);
-    const { getLeftHandler } = createMembersContext({
-      overrides: { dmPolicy: "allowlist", allowFrom: ["U1"] },
-    });
-    const leftHandler = getLeftHandler();
-    expect(leftHandler).toBeTruthy();
-
-    await leftHandler!({
-      event: {
-        ...makeMemberEvent({ user: "U1" }),
-        type: "member_left_channel",
+  const cases: Array<{ name: string; args: MemberCaseArgs; calls: number }> = [
+    {
+      name: "enqueues DM member events when dmPolicy is open",
+      args: { overrides: { dmPolicy: "open" } },
+      calls: 1,
+    },
+    {
+      name: "blocks DM member events when dmPolicy is disabled",
+      args: { overrides: { dmPolicy: "disabled" } },
+      calls: 0,
+    },
+    {
+      name: "blocks DM member events for unauthorized senders in allowlist mode",
+      args: {
+        overrides: { dmPolicy: "allowlist", allowFrom: ["U2"] },
+        event: makeMemberEvent({ user: "U1" }),
       },
       calls: 0,
     },
@@ -170,45 +118,11 @@ describe("registerSlackMemberEvents", () => {
     expect(memberMocks.enqueue).toHaveBeenCalledTimes(calls);
   });
 
-  it("blocks channel member events for users outside channel users allowlist", async () => {
-    enqueueSystemEventMock.mockClear();
-    readAllowFromStoreMock.mockReset().mockResolvedValue([]);
-    const { getJoinedHandler } = createMembersContext({
-      overrides: {
-        dmPolicy: "open",
-        channelType: "channel",
-        channelUsers: ["U_OWNER"],
-      },
-    });
-    const joinedHandler = getJoinedHandler();
-    expect(joinedHandler).toBeTruthy();
-
-    await joinedHandler!({
-      event: makeMemberEvent({ channel: "C1", user: "U_ATTACKER" }),
-      body: {},
-    });
-
-    expect(trackEvent).not.toHaveBeenCalled();
-  });
-
-  it("tracks accepted member events", async () => {
-    const trackEvent = vi.fn();
-    await runMemberCase({ trackEvent });
-
-    expect(trackEvent).toHaveBeenCalledTimes(1);
-  });
-
   it("does not track mismatched events", async () => {
     const trackEvent = vi.fn();
-    const { getJoinedHandler } = createMembersContext({
+    await runMemberCase({
       trackEvent,
       shouldDropMismatchedSlackEvent: () => true,
-    });
-    const joinedHandler = getJoinedHandler();
-    expect(joinedHandler).toBeTruthy();
-
-    await joinedHandler!({
-      event: makeMemberEvent(),
       body: { api_app_id: "A_OTHER" },
     });
 
@@ -217,14 +131,7 @@ describe("registerSlackMemberEvents", () => {
 
   it("tracks accepted member events", async () => {
     const trackEvent = vi.fn();
-    const { getJoinedHandler } = createMembersContext({ trackEvent });
-    const joinedHandler = getJoinedHandler();
-    expect(joinedHandler).toBeTruthy();
-
-    await joinedHandler!({
-      event: makeMemberEvent(),
-      body: {},
-    });
+    await runMemberCase({ trackEvent });
 
     expect(trackEvent).toHaveBeenCalledTimes(1);
   });

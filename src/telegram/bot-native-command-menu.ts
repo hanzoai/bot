@@ -1,8 +1,8 @@
+import type { Bot } from "grammy";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { Bot } from "grammy";
 import type { RuntimeEnv } from "../runtime.js";
 import {
   normalizeTelegramCommandName,

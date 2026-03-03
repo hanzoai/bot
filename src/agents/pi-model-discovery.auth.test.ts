@@ -9,6 +9,15 @@ async function createAgentDir(): Promise<string> {
   return await fs.mkdtemp(path.join(os.tmpdir(), "bot-pi-auth-storage-"));
 }
 
+async function withAgentDir(run: (agentDir: string) => Promise<void>): Promise<void> {
+  const agentDir = await createAgentDir();
+  try {
+    await run(agentDir);
+  } finally {
+    await fs.rm(agentDir, { recursive: true, force: true });
+  }
+}
+
 async function pathExists(pathname: string): Promise<boolean> {
   try {
     await fs.stat(pathname);
@@ -118,45 +127,25 @@ describe("discoverAuthStorage", () => {
   });
 
   it("preserves legacy auth.json when auth store is forced read-only", async () => {
-    const agentDir = await createAgentDir();
-    const previous = process.env.BOT_AUTH_STORE_READONLY;
-    process.env.BOT_AUTH_STORE_READONLY = "1";
-    try {
-      saveAuthProfileStore(
-        {
-          version: 1,
-          profiles: {
-            "openrouter:default": {
-              type: "api_key",
-              provider: "openrouter",
-              key: "sk-or-v1-runtime",
-            },
-          },
-        },
-        agentDir,
-      );
-      await fs.writeFile(
-        path.join(agentDir, "auth.json"),
-        JSON.stringify(
-          {
-            openrouter: { type: "api_key", key: "legacy-static-key" },
-          },
-          null,
-          2,
-        ),
-      );
+    await withAgentDir(async (agentDir) => {
+      const previous = process.env.BOT_AUTH_STORE_READONLY;
+      process.env.BOT_AUTH_STORE_READONLY = "1";
+      try {
+        writeRuntimeOpenRouterProfile(agentDir);
+        await writeLegacyAuthJson(agentDir, {
+          openrouter: { type: "api_key", key: "legacy-static-key" },
+        });
 
         discoverAuthStorage(agentDir);
 
-      const parsed = JSON.parse(await fs.readFile(path.join(agentDir, "auth.json"), "utf8")) as {
-        [key: string]: unknown;
-      };
-      expect(parsed.openrouter).toMatchObject({ type: "api_key", key: "legacy-static-key" });
-    } finally {
-      if (previous === undefined) {
-        delete process.env.BOT_AUTH_STORE_READONLY;
-      } else {
-        process.env.BOT_AUTH_STORE_READONLY = previous;
+        const parsed = await readLegacyAuthJson(agentDir);
+        expect(parsed.openrouter).toMatchObject({ type: "api_key", key: "legacy-static-key" });
+      } finally {
+        if (previous === undefined) {
+          delete process.env.BOT_AUTH_STORE_READONLY;
+        } else {
+          process.env.BOT_AUTH_STORE_READONLY = previous;
+        }
       }
     });
   });

@@ -1,13 +1,10 @@
 import type { BotConfig } from "../config/config.js";
-import { coerceSecretRef, hasConfiguredSecretInput } from "../config/types.secrets.js";
 import type { SecretDefaults } from "./runtime-shared.js";
+import { coerceSecretRef, hasConfiguredSecretInput } from "../config/types.secrets.js";
 import { isRecord } from "./shared.js";
 
 const GATEWAY_TOKEN_ENV_KEYS = ["BOT_GATEWAY_TOKEN", "CLAWDBOT_GATEWAY_TOKEN"] as const;
-const GATEWAY_PASSWORD_ENV_KEYS = [
-  "BOT_GATEWAY_PASSWORD",
-  "CLAWDBOT_GATEWAY_PASSWORD",
-] as const;
+const GATEWAY_PASSWORD_ENV_KEYS = ["BOT_GATEWAY_PASSWORD", "CLAWDBOT_GATEWAY_PASSWORD"] as const;
 
 export const GATEWAY_AUTH_SURFACE_PATHS = [
   "gateway.auth.password",

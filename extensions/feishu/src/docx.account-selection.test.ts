@@ -33,6 +33,10 @@ describe("feishu_doc account selection", () => {
         },
       },
     } as BotPluginApi["config"];
+  }
+
+  test("uses agentAccountId context when params omit accountId", async () => {
+    const cfg = createDocEnabledConfig();
 
     const { api, resolveTool } = createToolFactoryHarness(cfg);
     registerFeishuDocTools(api);
@@ -49,17 +53,7 @@ describe("feishu_doc account selection", () => {
   });
 
   test("explicit accountId param overrides agentAccountId context", async () => {
-    const cfg = {
-      channels: {
-        feishu: {
-          enabled: true,
-          accounts: {
-            a: { appId: "app-a", appSecret: "sec-a", tools: { doc: true } },
-            b: { appId: "app-b", appSecret: "sec-b", tools: { doc: true } },
-          },
-        },
-      },
-    } as BotPluginApi["config"];
+    const cfg = createDocEnabledConfig();
 
     const { api, resolveTool } = createToolFactoryHarness(cfg);
     registerFeishuDocTools(api);

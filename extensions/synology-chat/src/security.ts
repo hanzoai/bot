@@ -2,8 +2,8 @@
  * Security module: token validation, rate limiting, input sanitization, user allowlist.
  */
 
-import * as crypto from "node:crypto";
 import { createFixedWindowRateLimiter, type FixedWindowRateLimiter } from "bot/plugin-sdk";
+import * as crypto from "node:crypto";
 
 export type DmAuthorizationResult =
   | { allowed: true }

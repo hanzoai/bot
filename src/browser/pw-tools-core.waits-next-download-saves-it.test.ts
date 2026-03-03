@@ -38,15 +38,8 @@ describe("pw-tools-core", () => {
     downloadUrl: string;
     suggestedFilename: string;
   }) {
-    let downloadHandler: ((download: unknown) => void) | undefined;
-    const on = vi.fn((event: string, handler: (download: unknown) => void) => {
-      if (event === "download") {
-        downloadHandler = handler;
-      }
-    });
-    const off = vi.fn();
+    const harness = createDownloadEventHarness();
     const saveAs = vi.fn(async () => {});
-    setPwToolsCoreCurrentPage({ on, off });
 
     const p = mod.waitForDownloadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
@@ -55,18 +48,18 @@ describe("pw-tools-core", () => {
     });
 
     await Promise.resolve();
-    downloadHandler?.({
+    harness.trigger({
       url: () => params.downloadUrl,
       suggestedFilename: () => params.suggestedFilename,
       saveAs,
     });
 
     const res = await p;
-    const outPath = vi.mocked(saveAs).mock.calls[0]?.[0];
+    const outPath = (vi.mocked(saveAs).mock.calls as unknown as Array<[string]>)[0]?.[0];
     return { res, outPath };
   }
 
-  it("waits for the next download and saves it", async () => {
+  function createDownloadEventHarness() {
     let downloadHandler: ((download: unknown) => void) | undefined;
     const on = vi.fn((event: string, handler: (download: unknown) => void) => {
       if (event === "download") {
@@ -74,38 +67,65 @@ describe("pw-tools-core", () => {
       }
     });
     const off = vi.fn();
+    setPwToolsCoreCurrentPage({ on, off });
+    return {
+      trigger: (download: unknown) => {
+        downloadHandler?.(download);
+      },
+      expectArmed: () => {
+        expect(downloadHandler).toBeDefined();
+      },
+    };
+  }
+
+  async function expectAtomicDownloadSave(params: {
+    saveAs: ReturnType<typeof vi.fn>;
+    targetPath: string;
+    tempDir: string;
+    content: string;
+  }) {
+    const savedPath = params.saveAs.mock.calls[0]?.[0];
+    expect(typeof savedPath).toBe("string");
+    expect(savedPath).not.toBe(params.targetPath);
+    expect(path.dirname(String(savedPath))).toBe(params.tempDir);
+    expect(path.basename(String(savedPath))).toContain(".bot-output-");
+    expect(path.basename(String(savedPath))).toContain(".part");
+    expect(await fs.readFile(params.targetPath, "utf8")).toBe(params.content);
+  }
 
   it("waits for the next download and atomically finalizes explicit output paths", async () => {
     await withTempDir(async (tempDir) => {
       const harness = createDownloadEventHarness();
       const targetPath = path.join(tempDir, "file.bin");
 
-    setPwToolsCoreCurrentPage({ on, off });
+      const saveAs = vi.fn(async (outPath: string) => {
+        await fs.writeFile(outPath, "file-content", "utf8");
+      });
+      const download = {
+        url: () => "https://example.com/file.bin",
+        suggestedFilename: () => "file.bin",
+        saveAs,
+      };
 
-    const targetPath = path.resolve("/tmp/file.bin");
-    const p = mod.waitForDownloadViaPlaywright({
-      cdpUrl: "http://127.0.0.1:18792",
-      targetId: "T1",
-      path: targetPath,
-      timeoutMs: 1000,
+      const p = mod.waitForDownloadViaPlaywright({
+        cdpUrl: "http://127.0.0.1:18792",
+        targetId: "T1",
+        path: targetPath,
+        timeoutMs: 1000,
+      });
+
+      await Promise.resolve();
+      harness.expectArmed();
+      harness.trigger(download);
+
+      const res = await p;
+      await expectAtomicDownloadSave({ saveAs, targetPath, tempDir, content: "file-content" });
+      expect(res.path).toBe(targetPath);
     });
-
-    await Promise.resolve();
-    expect(downloadHandler).toBeDefined();
-    downloadHandler?.(download);
-
-    const res = await p;
-    expect(saveAs).toHaveBeenCalledWith(targetPath);
-    expect(res.path).toBe(targetPath);
   });
-  it("clicks a ref and saves the resulting download", async () => {
-    let downloadHandler: ((download: unknown) => void) | undefined;
-    const on = vi.fn((event: string, handler: (download: unknown) => void) => {
-      if (event === "download") {
-        downloadHandler = handler;
-      }
-    });
-    const off = vi.fn();
+  it("clicks a ref and atomically finalizes explicit download paths", async () => {
+    await withTempDir(async (tempDir) => {
+      const harness = createDownloadEventHarness();
 
       const click = vi.fn(async () => {});
       setPwToolsCoreCurrentRefLocator({ click });
@@ -119,26 +139,25 @@ describe("pw-tools-core", () => {
         saveAs,
       };
 
-    setPwToolsCoreCurrentPage({ on, off });
+      const targetPath = path.join(tempDir, "report.pdf");
+      const p = mod.downloadViaPlaywright({
+        cdpUrl: "http://127.0.0.1:18792",
+        targetId: "T1",
+        ref: "e12",
+        path: targetPath,
+        timeoutMs: 1000,
+      });
 
-    const targetPath = path.resolve("/tmp/report.pdf");
-    const p = mod.downloadViaPlaywright({
-      cdpUrl: "http://127.0.0.1:18792",
-      targetId: "T1",
-      ref: "e12",
-      path: targetPath,
-      timeoutMs: 1000,
+      await Promise.resolve();
+      harness.expectArmed();
+      expect(click).toHaveBeenCalledWith({ timeout: 1000 });
+
+      harness.trigger(download);
+
+      const res = await p;
+      await expectAtomicDownloadSave({ saveAs, targetPath, tempDir, content: "report-content" });
+      expect(res.path).toBe(targetPath);
     });
-
-    await Promise.resolve();
-    expect(downloadHandler).toBeDefined();
-    expect(click).toHaveBeenCalledWith({ timeout: 1000 });
-
-    downloadHandler?.(download);
-
-    const res = await p;
-    expect(saveAs).toHaveBeenCalledWith(targetPath);
-    expect(res.path).toBe(targetPath);
   });
 
   it.runIf(process.platform !== "win32")(
@@ -184,7 +203,9 @@ describe("pw-tools-core", () => {
       suggestedFilename: "file.bin",
     });
     expect(typeof outPath).toBe("string");
-    const expectedRootedDownloadsDir = path.join(path.sep, "tmp", "bot-preferred", "downloads");
+    const expectedRootedDownloadsDir = path.resolve(
+      path.join(path.sep, "tmp", "bot-preferred", "downloads"),
+    );
     const expectedDownloadsTail = `${path.join("tmp", "bot-preferred", "downloads")}${path.sep}`;
     expect(path.dirname(String(outPath))).toBe(expectedRootedDownloadsDir);
     expect(path.basename(String(outPath))).toMatch(/-file\.bin$/);
@@ -200,7 +221,7 @@ describe("pw-tools-core", () => {
     });
     expect(typeof outPath).toBe("string");
     expect(path.dirname(String(outPath))).toBe(
-      path.join(path.sep, "tmp", "bot-preferred", "downloads"),
+      path.resolve(path.join(path.sep, "tmp", "bot-preferred", "downloads")),
     );
     expect(path.basename(String(outPath))).toMatch(/-passwd$/);
     expect(path.normalize(res.path)).toContain(

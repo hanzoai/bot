@@ -1,3 +1,4 @@
+import type { BotConfig } from "bot/plugin-sdk";
 import {
   GROUP_POLICY_BLOCKED_LABEL,
   createScopedPairingAccess,
@@ -8,11 +9,10 @@ import {
   resolveMentionGatingWithBypass,
   warnMissingProviderGroupPolicyFallbackOnce,
 } from "bot/plugin-sdk";
-import type { BotConfig } from "bot/plugin-sdk";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
-import { sendGoogleChatMessage } from "./api.js";
 import type { GoogleChatCoreRuntime } from "./monitor-types.js";
 import type { GoogleChatAnnotation, GoogleChatMessage, GoogleChatSpace } from "./types.js";
+import { sendGoogleChatMessage } from "./api.js";
 
 function normalizeUserId(raw?: string | null): string {
   const trimmed = raw?.trim() ?? "";

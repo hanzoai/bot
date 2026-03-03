@@ -1,6 +1,6 @@
+import type { RequestPermissionRequest } from "@agentclientprotocol/sdk";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { RequestPermissionRequest } from "@agentclientprotocol/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
@@ -222,11 +222,9 @@ describe("resolvePermissionRequest", () => {
           status: "pending",
           rawInput: { path: "docs/security.md" },
         },
-      }),
-      { prompt, log: () => {}, cwd: "/tmp/bot-acp-cwd" },
-    );
-    expect(prompt).not.toHaveBeenCalled();
-    expect(res).toEqual({ outcome: { outcome: "selected", optionId: "allow" } });
+      },
+      cwd: "/tmp/bot-acp-cwd",
+    });
   });
 
   it("auto-approves read when rawInput file URL resolves inside cwd", async () => {
@@ -238,11 +236,9 @@ describe("resolvePermissionRequest", () => {
           status: "pending",
           rawInput: { path: "file:///tmp/bot-acp-cwd/docs/security.md" },
         },
-      }),
-      { prompt, log: () => {}, cwd: "/tmp/bot-acp-cwd" },
-    );
-    expect(prompt).not.toHaveBeenCalled();
-    expect(res).toEqual({ outcome: { outcome: "selected", optionId: "allow" } });
+      },
+      cwd: "/tmp/bot-acp-cwd",
+    });
   });
 
   it("prompts for read when rawInput path escapes cwd via traversal", async () => {

@@ -62,9 +62,7 @@ function buildFixturePaths(rootDir: string) {
 }
 
 async function createApplyFixture(): Promise<ApplyFixture> {
-  const paths = buildFixturePaths(
-    await fs.mkdtemp(path.join(os.tmpdir(), "bot-secrets-apply-")),
-  );
+  const paths = buildFixturePaths(await fs.mkdtemp(path.join(os.tmpdir(), "bot-secrets-apply-")));
   await fs.mkdir(path.dirname(paths.configPath), { recursive: true });
   await fs.mkdir(path.dirname(paths.authStorePath), { recursive: true });
   return {

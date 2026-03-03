@@ -1,8 +1,8 @@
 import type { BotConfig } from "../config/types.bot.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { listAgentIds, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { resolveStorePath } from "../config/sessions.js";
 import { normalizeAgentId } from "../routing/session-key.js";
-import type { RuntimeEnv } from "../runtime.js";
 
 export type SessionStoreSelectionOptions = {
   store?: string;
