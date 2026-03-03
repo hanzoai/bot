@@ -39,11 +39,8 @@ describe("maybeRepairSandboxImages", () => {
     vi.clearAllMocks();
   });
 
-  it("warns when sandbox mode is enabled but Docker is not available", async () => {
-    // Simulate Docker not available (command fails)
-    runExec.mockRejectedValue(new Error("Docker not installed"));
-
-    const config: BotConfig = {
+  function createSandboxConfig(mode: "off" | "all" | "non-main"): BotConfig {
+    return {
       agents: {
         defaults: {
           sandbox: {
@@ -81,20 +78,7 @@ describe("maybeRepairSandboxImages", () => {
   });
 
   it("warns when sandbox mode is 'all' but Docker is not available", async () => {
-    runExec.mockRejectedValue(new Error("Docker not installed"));
-
-    const config: BotConfig = {
-      agents: {
-        defaults: {
-          sandbox: {
-            mode: "all",
-          },
-        },
-      },
-    };
-
-    const { maybeRepairSandboxImages } = await import("./doctor-sandbox.js");
-    await maybeRepairSandboxImages(config, mockRuntime, mockPrompter);
+    await runSandboxRepair({ mode: "all", dockerAvailable: false });
 
     expect(note).toHaveBeenCalled();
     const noteCall = note.mock.calls[0];
@@ -105,41 +89,14 @@ describe("maybeRepairSandboxImages", () => {
   });
 
   it("does not warn when sandbox mode is off", async () => {
-    runExec.mockRejectedValue(new Error("Docker not installed"));
-
-    const config: BotConfig = {
-      agents: {
-        defaults: {
-          sandbox: {
-            mode: "off",
-          },
-        },
-      },
-    };
-
-    const { maybeRepairSandboxImages } = await import("./doctor-sandbox.js");
-    await maybeRepairSandboxImages(config, mockRuntime, mockPrompter);
+    await runSandboxRepair({ mode: "off", dockerAvailable: false });
 
     // No warning needed when sandbox is off
     expect(note).not.toHaveBeenCalled();
   });
 
   it("does not warn when Docker is available", async () => {
-    // Simulate Docker available
-    runExec.mockResolvedValue({ stdout: "24.0.0", stderr: "" });
-
-    const config: BotConfig = {
-      agents: {
-        defaults: {
-          sandbox: {
-            mode: "non-main",
-          },
-        },
-      },
-    };
-
-    const { maybeRepairSandboxImages } = await import("./doctor-sandbox.js");
-    await maybeRepairSandboxImages(config, mockRuntime, mockPrompter);
+    await runSandboxRepair({ mode: "non-main", dockerAvailable: true });
 
     // May have other notes about images, but not the Docker unavailable warning
     const dockerUnavailableWarning = note.mock.calls.find(
