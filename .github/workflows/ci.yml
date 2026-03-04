@@ -207,13 +207,12 @@ jobs:
       - name: Configure Node test resources
         if: matrix.task == 'test' && matrix.runtime == 'node'
         run: |
-          # `pnpm test` runs `scripts/test-parallel.mjs`, which spawns vitest
-          # groups with BOT_TEST_WORKERS worker processes each.
-          # Tests need >2 GB live heap per worker (OOM at 2048 MB limit).
-          # Use serial profile (1 worker/group) + default 4096 MB heap:
-          # 2 parallel groups × (parent + 1 worker) ≈ 10 GB peak, fits 14 GB pod.
-          # History: 2w×2048=OOM, 2w×1536=OOM, 1w×2048=OOM, 1w×1024=OOM.
-          echo "BOT_TEST_PROFILE=serial" >> "$GITHUB_ENV"
+          # vmForks accumulates memory across test files within each worker,
+          # causing OOM even at 4096 MB (workers hit 4 GB live heap).
+          # Disable vmForks → process forks: each test file runs in its own
+          # short-lived process, so memory never accumulates. Same approach
+          # as Windows CI. Default 4096 MB heap is more than enough per file.
+          echo "BOT_TEST_VM_FORKS=0" >> "$GITHUB_ENV"
 
       - name: Run ${{ matrix.task }} (${{ matrix.runtime }})
         continue-on-error: ${{ matrix.runtime == 'bun' }}
