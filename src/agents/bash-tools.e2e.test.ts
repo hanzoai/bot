@@ -311,7 +311,7 @@ describe("exec tool backgrounding", () => {
       action: "poll",
       sessionId: sessionA,
     });
-    expect(pollB.details.status).toBe("failed");
+    expect((pollB.details as { status: string }).status).toBe("failed");
   });
 });
 
