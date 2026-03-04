@@ -42,11 +42,10 @@ describe("gateway chat.inject transcript writes", () => {
     const { chatHandlers } = await import("./chat.js");
 
     const respond = vi.fn();
-    type InjectCtx = Pick<GatewayRequestContext, "broadcast" | "nodeSendToSession">;
-    const context: InjectCtx = {
-      broadcast: vi.fn() as unknown as InjectCtx["broadcast"],
-      nodeSendToSession: vi.fn() as unknown as InjectCtx["nodeSendToSession"],
-    };
+    const context = {
+      broadcast: vi.fn(),
+      nodeSendToSession: vi.fn(),
+    } as unknown as GatewayRequestContext;
     await chatHandlers["chat.inject"]({
       params: { sessionKey: "k1", message: "hello" },
       respond,
