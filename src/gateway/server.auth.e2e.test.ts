@@ -123,10 +123,11 @@ async function sendRawConnectReq(
       },
     }),
   );
-  return onceMessage<{ ok: boolean; payload?: unknown; error?: { message?: string } }>(
-    ws,
-    isConnectResMessage(params.id),
-  );
+  return onceMessage(ws, isConnectResMessage(params.id)) as Promise<{
+    ok: boolean;
+    payload?: unknown;
+    error?: { message?: string };
+  }>;
 }
 
 async function startRateLimitedTokenServerWithPairedDeviceToken() {
@@ -278,6 +279,7 @@ describe("gateway server auth/connect", () => {
         scopes: [],
         signedAtMs,
         token,
+        nonce: "",
       });
       const device = {
         id: identity.deviceId,
@@ -330,6 +332,7 @@ describe("gateway server auth/connect", () => {
         scopes: ["operator.admin"],
         signedAtMs,
         token,
+        nonce: "",
       });
       const device = {
         id: identity.deviceId,
@@ -350,7 +353,7 @@ describe("gateway server auth/connect", () => {
 
     test("sends connect challenge on open", async () => {
       const ws = new WebSocket(`ws://127.0.0.1:${port}`);
-      const evtPromise = onceMessage<{ payload?: unknown }>(
+      const evtPromise = onceMessage(
         ws,
         (o) => o.type === "event" && o.event === "connect.challenge",
       );
@@ -378,10 +381,7 @@ describe("gateway server auth/connect", () => {
     test("rejects non-connect first request", async () => {
       const ws = await openWs(port);
       ws.send(JSON.stringify({ type: "req", id: "h1", method: "health" }));
-      const res = await onceMessage<{ ok: boolean; error?: unknown }>(
-        ws,
-        (o) => o.type === "res" && o.id === "h1",
-      );
+      const res = await onceMessage(ws, (o) => o.type === "res" && o.id === "h1");
       expect(res.ok).toBe(false);
       await new Promise<void>((resolve) => ws.once("close", () => resolve()));
     });
@@ -627,7 +627,7 @@ describe("gateway server auth/connect", () => {
             "x-forwarded-for": "203.0.113.10",
           },
         });
-        const challengePromise = onceMessage<{ payload?: unknown }>(
+        const challengePromise = onceMessage(
           ws,
           (o) => o.type === "event" && o.event === "connect.challenge",
         );
@@ -783,6 +783,7 @@ describe("gateway server auth/connect", () => {
         scopes,
         signedAtMs,
         token: "secret",
+        nonce: "",
       });
       return {
         id: identity.deviceId,
