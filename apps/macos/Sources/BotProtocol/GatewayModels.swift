@@ -10,8 +10,6 @@ public enum ErrorCode: String, Codable, Sendable {
     case agentTimeout = "AGENT_TIMEOUT"
     case invalidRequest = "INVALID_REQUEST"
     case unavailable = "UNAVAILABLE"
-    case billingError = "BILLING_ERROR"
-    case rateLimited = "RATE_LIMITED"
 }
 
 public struct ConnectParams: Codable, Sendable {
@@ -26,7 +24,6 @@ public struct ConnectParams: Codable, Sendable {
     public let scopes: [String]?
     public let device: [String: AnyCodable]?
     public let auth: [String: AnyCodable]?
-    public let tenant: [String: AnyCodable]?
     public let locale: String?
     public let useragent: String?
 
@@ -42,7 +39,6 @@ public struct ConnectParams: Codable, Sendable {
         scopes: [String]?,
         device: [String: AnyCodable]?,
         auth: [String: AnyCodable]?,
-        tenant: [String: AnyCodable]?,
         locale: String?,
         useragent: String?
     ) {
@@ -57,7 +53,6 @@ public struct ConnectParams: Codable, Sendable {
         self.scopes = scopes
         self.device = device
         self.auth = auth
-        self.tenant = tenant
         self.locale = locale
         self.useragent = useragent
     }
@@ -73,7 +68,6 @@ public struct ConnectParams: Codable, Sendable {
         case scopes
         case device
         case auth
-        case tenant
         case locale
         case useragent = "userAgent"
     }
@@ -816,16 +810,6 @@ public struct NodeRenameParams: Codable, Sendable {
 }
 
 public struct NodeListParams: Codable, Sendable {
-    public let connectedonly: Bool?
-
-    public init(
-        connectedonly: Bool?
-    ) {
-        self.connectedonly = connectedonly
-    }
-    private enum CodingKeys: String, CodingKey {
-        case connectedonly = "connectedOnly"
-    }
 }
 
 public struct NodeDescribeParams: Codable, Sendable {
