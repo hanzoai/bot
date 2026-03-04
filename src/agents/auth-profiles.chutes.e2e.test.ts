@@ -4,11 +4,12 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { captureEnv } from "../test-utils/env.js";
 import {
+  type AuthProfileCredential,
   type AuthProfileStore,
   ensureAuthProfileStore,
   resolveApiKeyForProfile,
 } from "./auth-profiles.js";
-import { CHUTES_TOKEN_ENDPOINT, type ChutesStoredOAuth } from "./chutes-oauth.js";
+import { CHUTES_TOKEN_ENDPOINT } from "./chutes-oauth.js";
 
 describe("auth-profiles (chutes)", () => {
   let envSnapshot: ReturnType<typeof captureEnv> | undefined;
@@ -49,7 +50,7 @@ describe("auth-profiles (chutes)", () => {
           refresh: "rt_old",
           expires: Date.now() - 60_000,
           clientId: "cid_test",
-        } as unknown as ChutesStoredOAuth,
+        } as unknown as AuthProfileCredential,
       },
     };
     await fs.writeFile(authProfilePath, `${JSON.stringify(store)}\n`);
