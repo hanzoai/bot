@@ -690,6 +690,7 @@ const plugin = {
     // ── HTTP Route: /hooks/ci — receives CI failure webhooks ─────────
     api.registerHttpRoute({
       path: "/hooks/ci",
+      auth: "plugin",
       handler: async (req, res) => {
         // Auth: reject if token is missing or mismatched
         const token =
