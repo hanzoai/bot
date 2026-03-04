@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import ts from "typescript";
-import { runCallsiteGuard } from "./lib/callsite-guard.mjs";
 import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.mjs";
 
 const sourceRoots = [
@@ -11,8 +10,6 @@ const sourceRoots = [
   "src/media-understanding",
   "extensions",
 ];
-const allowedRelativePaths = new Set(["extensions/feishu/src/dedup.ts"]);
-
 function collectOsTmpdirImports(sourceFile) {
   const osModuleSpecifiers = new Set(["node:os", "os"]);
   const osNamespaceOrDefault = new Set();
