@@ -3,7 +3,7 @@ import { chmodSync } from "node:fs";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 const SCRIPT = path.join(process.cwd(), "scripts", "ios-team-id.sh");
 const BASH_BIN = process.platform === "win32" ? "bash" : "/bin/bash";
@@ -13,7 +13,6 @@ const BASE_LANG = process.env.LANG ?? "C";
 let fixtureRoot = "";
 let sharedBinDir = "";
 let sharedHomeDir = "";
-let sharedHomeBinDir = "";
 let sharedFakePythonPath = "";
 const runScriptCache = new Map<string, { ok: boolean; stdout: string; stderr: string }>();
 type TeamCandidate = {
