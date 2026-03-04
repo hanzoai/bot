@@ -3,6 +3,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { VoiceCallProvider } from "./providers/base.js";
 import type {
+  GetCallStatusInput,
+  GetCallStatusResult,
   HangupCallInput,
   InitiateCallInput,
   InitiateCallResult,
@@ -38,6 +40,9 @@ class FakeProvider implements VoiceCallProvider {
   }
   async startListening(_input: StartListeningInput): Promise<void> {}
   async stopListening(_input: StopListeningInput): Promise<void> {}
+  async getCallStatus(_input: GetCallStatusInput): Promise<GetCallStatusResult> {
+    return { status: "completed", isTerminal: true };
+  }
 }
 
 describe("CallManager", () => {
