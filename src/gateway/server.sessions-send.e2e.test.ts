@@ -37,8 +37,8 @@ afterAll(async () => {
 
 describe("sessions_send gateway loopback", () => {
   it("returns reply when lifecycle ends before agent.wait", async () => {
-    const spy = vi.mocked(agentCommand);
-    spy.mockImplementation(async (opts) => {
+    const spy = vi.mocked(agentCommand) as unknown as ReturnType<typeof vi.fn>;
+    spy.mockImplementation(async (opts: unknown) => {
       const params = opts as {
         sessionId?: string;
         runId?: string;
@@ -99,7 +99,7 @@ describe("sessions_send gateway loopback", () => {
     expect(details.reply).toBe("pong");
     expect(details.sessionKey).toBe("main");
 
-    const firstCall = spy.mock.calls[0]?.[0] as
+    const firstCall = (spy.mock.calls as unknown[][])[0]?.[0] as
       | { lane?: string; inputProvenance?: { kind?: string; sourceTool?: string } }
       | undefined;
     expect(firstCall?.lane).toBe("nested");
@@ -124,8 +124,8 @@ describe("sessions_send label lookup", () => {
       "utf-8",
     );
 
-    const spy = vi.mocked(agentCommand);
-    spy.mockImplementation(async (opts) => {
+    const spy = vi.mocked(agentCommand) as unknown as ReturnType<typeof vi.fn>;
+    spy.mockImplementation(async (opts: unknown) => {
       const params = opts as {
         sessionId?: string;
         runId?: string;
