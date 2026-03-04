@@ -693,7 +693,8 @@ class GatewaySession(
     val fallbackPort = if (tls) endpoint.port else (endpoint.canvasPort ?: endpoint.port)
     val formattedHost = if (fallbackHost.contains(":")) "[${fallbackHost}]" else fallbackHost
     val portSuffix = if ((fallbackScheme == "https" && fallbackPort == 443) || (fallbackScheme == "http" && fallbackPort == 80)) "" else ":$fallbackPort"
-    return "$fallbackScheme://$formattedHost$portSuffix"
+    val path = parsed?.rawPath.orEmpty()
+    return "$fallbackScheme://$formattedHost$portSuffix$path"
   }
 
   private fun isLoopbackHost(raw: String?): Boolean {
