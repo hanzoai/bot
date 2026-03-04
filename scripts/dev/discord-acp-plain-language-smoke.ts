@@ -480,7 +480,7 @@ function toRecentMessageRow(message: DiscordMessage) {
   };
 }
 
-async function loadParentRecentMessages(params: {
+async function _loadParentRecentMessages(params: {
   args: Args;
   readAuthHeader: string;
 }): Promise<DiscordMessage[]> {

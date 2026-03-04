@@ -83,7 +83,7 @@ function setTempHome(base: string) {
   process.env.HOMEPATH = match[2] || "\\";
 }
 
-async function allocateTempHomeBase(prefix: string): Promise<string> {
+async function _allocateTempHomeBase(prefix: string): Promise<string> {
   let state = SHARED_HOME_ROOTS.get(prefix);
   if (!state) {
     state = {
