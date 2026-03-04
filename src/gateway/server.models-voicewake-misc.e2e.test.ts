@@ -52,13 +52,16 @@ const whatsappOutbound: ChannelOutboundAdapter = {
     if (!deps?.sendWhatsApp) {
       throw new Error("Missing sendWhatsApp dep");
     }
-    return { channel: "whatsapp", ...(await deps.sendWhatsApp(to, text, {})) };
+    return { channel: "whatsapp", ...(await deps.sendWhatsApp(to, text, { verbose: false })) };
   },
   sendMedia: async ({ deps, to, text, mediaUrl }) => {
     if (!deps?.sendWhatsApp) {
       throw new Error("Missing sendWhatsApp dep");
     }
-    return { channel: "whatsapp", ...(await deps.sendWhatsApp(to, text, { mediaUrl })) };
+    return {
+      channel: "whatsapp",
+      ...(await deps.sendWhatsApp(to, text, { verbose: false, mediaUrl })),
+    };
   },
 };
 
@@ -134,11 +137,10 @@ describe("gateway server models + voicewake", () => {
       expect(initial.ok).toBe(true);
       expect(initial.payload?.triggers).toEqual(["bot", "claude", "computer"]);
 
-      const changedP = onceMessage<{
-        type: "event";
-        event: string;
-        payload?: unknown;
-      }>(ws, (o) => o.type === "event" && o.event === "voicewake.changed");
+      const changedP = onceMessage(
+        ws,
+        (o) => o.type === "event" && o.event === "voicewake.changed",
+      );
 
       const setRes = await rpcReq<{ triggers: string[] }>(ws, "voicewake.set", {
         triggers: ["  hi  ", "", "there"],
