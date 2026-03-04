@@ -26,7 +26,7 @@ describe("gateway chat.inject transcript writes", () => {
     );
 
     vi.doMock("../session-utils.js", async (importOriginal) => {
-      const original = await importOriginal();
+      const original: Record<string, unknown> = await importOriginal();
       return {
         ...original,
         loadSessionEntry: () => ({
