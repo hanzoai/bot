@@ -150,6 +150,7 @@ describe("image tool implicit imageModel config", () => {
       models: {
         providers: {
           acme: {
+            baseUrl: "https://acme.test/v1",
             models: [
               {
                 id: "text-1",
@@ -211,6 +212,7 @@ describe("image tool implicit imageModel config", () => {
       models: {
         providers: {
           acme: {
+            baseUrl: "https://acme.test/v1",
             models: [
               {
                 id: "vision-1",
