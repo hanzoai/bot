@@ -16,12 +16,11 @@ import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import okhttp3.mockwebserver.Dispatcher
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
+import mockwebserver3.Dispatcher
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import mockwebserver3.RecordedRequest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -51,6 +50,7 @@ private data class NodeHarness(
 private data class InvokeScenarioResult(
   val request: GatewaySession.InvokeRequest,
   val resultParams: JsonObject,
+  val serverPort: Int,
 )
 
 @RunWith(RobolectricTestRunner::class)
@@ -63,7 +63,7 @@ class GatewaySessionInvokeTest {
       runInvokeScenario(
         invokeEventFrame =
           """{"type":"event","event":"node.invoke.request","payload":{"id":"invoke-1","nodeId":"node-1","command":"debug.ping","params":{"ping":"pong"},"timeoutMs":5000}}""",
-        onHandshake = { request -> handshakeOrigin.compareAndSet(null, request.getHeader("Origin")) },
+        onHandshake = { request -> handshakeOrigin.compareAndSet(null, request.headers["Origin"]) },
       ) {
         GatewaySession.InvokeResult.ok("""{"handled":true}""")
       }
@@ -72,7 +72,7 @@ class GatewaySessionInvokeTest {
     assertEquals("node-1", result.request.nodeId)
     assertEquals("debug.ping", result.request.command)
     assertEquals("""{"ping":"pong"}""", result.request.paramsJson)
-    assertNull(handshakeOrigin.get())
+    assertEquals("http://127.0.0.1:${result.serverPort}", handshakeOrigin.get())
     assertEquals("invoke-1", result.resultParams["id"]?.jsonPrimitive?.content)
     assertEquals("node-1", result.resultParams["nodeId"]?.jsonPrimitive?.content)
     assertEquals(true, result.resultParams["ok"]?.jsonPrimitive?.content?.toBooleanStrict())
@@ -253,7 +253,7 @@ class GatewaySessionInvokeTest {
   private suspend fun shutdownHarness(harness: NodeHarness, server: MockWebServer) {
     harness.session.disconnect()
     harness.sessionJob.cancelAndJoin()
-    server.shutdown()
+    server.close()
   }
 
   private suspend fun runInvokeScenario(
@@ -300,7 +300,7 @@ class GatewaySessionInvokeTest {
       val request = withTimeout(TEST_TIMEOUT_MS) { invokeRequest.await() }
       val resultParamsJson = withTimeout(TEST_TIMEOUT_MS) { invokeResultParams.await() }
       val resultParams = json.parseToJsonElement(resultParamsJson).jsonObject
-      return InvokeScenarioResult(request = request, resultParams = resultParams)
+      return InvokeScenarioResult(request = request, resultParams = resultParams, serverPort = server.port)
     } finally {
       shutdownHarness(harness, server)
     }
@@ -321,7 +321,7 @@ class GatewaySessionInvokeTest {
         object : Dispatcher() {
           override fun dispatch(request: RecordedRequest): MockResponse {
             onHandshake?.invoke(request)
-            return MockResponse().withWebSocketUpgrade(
+            return MockResponse.Builder().webSocketUpgrade(
               object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
                   webSocket.send(CONNECT_CHALLENGE_FRAME)
@@ -335,7 +335,7 @@ class GatewaySessionInvokeTest {
                   onRequestFrame(webSocket, id, method, frame)
                 }
               },
-            )
+            ).build()
           }
         }
       start()
