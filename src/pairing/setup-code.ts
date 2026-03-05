@@ -155,7 +155,7 @@ function resolveAuth(cfg: BotConfig, env: NodeJS.ProcessEnv): ResolveAuthResult 
   const token =
     env.BOT_GATEWAY_TOKEN?.trim() ||
     env.CLAWDBOT_GATEWAY_TOKEN?.trim() ||
-    cfg.gateway?.auth?.token?.trim();
+    normalizeSecretInputString(cfg.gateway?.auth?.token);
   const password =
     env.BOT_GATEWAY_PASSWORD?.trim() ||
     env.CLAWDBOT_GATEWAY_PASSWORD?.trim() ||
@@ -207,7 +207,7 @@ async function resolveGatewayPasswordSecretRef(
   if (mode !== "password") {
     const hasTokenCandidate =
       Boolean(env.BOT_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim()) ||
-      Boolean(cfg.gateway?.auth?.token?.trim());
+      Boolean(normalizeSecretInputString(cfg.gateway?.auth?.token));
     if (hasTokenCandidate) {
       return cfg;
     }
