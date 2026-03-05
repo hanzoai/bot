@@ -13,8 +13,10 @@ type ResolvePreferredBotTmpDirOptions = {
     uid?: number;
   };
   mkdirSync?: (path: string, opts: { recursive: boolean; mode?: number }) => void;
+  chmodSync?: (path: string, mode: number) => void;
   getuid?: () => number | undefined;
   tmpdir?: () => string;
+  warn?: (message: string) => void;
 };
 
 type MaybeNodeError = { code?: string };
@@ -32,6 +34,8 @@ export function resolvePreferredBotTmpDir(options: ResolvePreferredBotTmpDirOpti
   const accessSync = options.accessSync ?? fs.accessSync;
   const lstatSync = options.lstatSync ?? fs.lstatSync;
   const mkdirSync = options.mkdirSync ?? fs.mkdirSync;
+  const chmodSync = options.chmodSync ?? fs.chmodSync;
+  const warn = options.warn ?? (() => {});
   const getuid =
     options.getuid ??
     (() => {
@@ -58,45 +62,83 @@ export function resolvePreferredBotTmpDir(options: ResolvePreferredBotTmpDirOpti
     return true;
   };
 
-  const fallback = (): string => {
+  const isGroupOrOtherWritable = (mode: number): boolean => {
+    return (mode & 0o022) !== 0;
+  };
+
+  const repairPermissions = (dirPath: string, st: { mode?: number }): void => {
+    if (typeof st.mode === "number" && isGroupOrOtherWritable(st.mode)) {
+      chmodSync(dirPath, 0o700);
+      warn(`tightened permissions on temp dir ${dirPath}`);
+    }
+  };
+
+  const fallbackPath = (): string => {
     const base = tmpdir();
     const suffix = uid === undefined ? "bot" : `bot-${uid}`;
     return path.join(base, suffix);
   };
 
+  const ensureFallbackDir = (dirPath: string): string => {
+    try {
+      const st = lstatSync(dirPath);
+      if (st.isSymbolicLink()) {
+        throw new Error(`Unsafe fallback OpenClaw temp dir: ${dirPath} is a symlink`);
+      }
+      if (!st.isDirectory()) {
+        throw new Error(`Unsafe fallback OpenClaw temp dir: ${dirPath} is not a directory`);
+      }
+      if (typeof st.uid === "number" && uid !== undefined && st.uid !== uid) {
+        throw new Error(`Unsafe fallback OpenClaw temp dir: ${dirPath} not owned by current user`);
+      }
+      repairPermissions(dirPath, st);
+      return dirPath;
+    } catch (err) {
+      if (!isNodeErrorWithCode(err, "ENOENT")) {
+        throw err;
+      }
+    }
+    mkdirSync(dirPath, { recursive: true, mode: 0o700 });
+    const st = lstatSync(dirPath);
+    if (st.isSymbolicLink()) {
+      throw new Error(`Unsafe fallback OpenClaw temp dir: ${dirPath} is a symlink`);
+    }
+    repairPermissions(dirPath, st);
+    return dirPath;
+  };
+
   try {
     const preferred = lstatSync(POSIX_BOT_TMP_DIR);
     if (!preferred.isDirectory() || preferred.isSymbolicLink()) {
-      return fallback();
+      return ensureFallbackDir(fallbackPath());
     }
     accessSync(POSIX_BOT_TMP_DIR, fs.constants.W_OK | fs.constants.X_OK);
     if (!isSecureDirForUser(preferred)) {
-      return fallback();
+      return ensureFallbackDir(fallbackPath());
     }
     return POSIX_BOT_TMP_DIR;
   } catch (err) {
     if (!isNodeErrorWithCode(err, "ENOENT")) {
-      return fallback();
+      return ensureFallbackDir(fallbackPath());
     }
   }
 
   try {
     accessSync("/tmp", fs.constants.W_OK | fs.constants.X_OK);
-    // Create with a safe default; subsequent callers expect it exists.
     mkdirSync(POSIX_BOT_TMP_DIR, { recursive: true, mode: 0o700 });
     try {
       const preferred = lstatSync(POSIX_BOT_TMP_DIR);
       if (!preferred.isDirectory() || preferred.isSymbolicLink()) {
-        return fallback();
+        return ensureFallbackDir(fallbackPath());
       }
       if (!isSecureDirForUser(preferred)) {
-        return fallback();
+        return ensureFallbackDir(fallbackPath());
       }
     } catch {
-      return fallback();
+      return ensureFallbackDir(fallbackPath());
     }
     return POSIX_BOT_TMP_DIR;
   } catch {
-    return fallback();
+    return ensureFallbackDir(fallbackPath());
   }
 }

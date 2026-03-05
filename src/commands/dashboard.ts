@@ -1,5 +1,6 @@
 import type { RuntimeEnv } from "../runtime.js";
 import { readConfigFileSnapshot, resolveGatewayPort } from "../config/config.js";
+import { normalizeSecretInputString } from "../config/types.secrets.js";
 import { copyToClipboard } from "../infra/clipboard.js";
 import { defaultRuntime } from "../runtime.js";
 import {
@@ -23,7 +24,8 @@ export async function dashboardCommand(
   const bind = cfg.gateway?.bind ?? "loopback";
   const basePath = cfg.gateway?.controlUi?.basePath;
   const customBindHost = cfg.gateway?.customBindHost;
-  const token = cfg.gateway?.auth?.token ?? process.env.BOT_GATEWAY_TOKEN ?? "";
+  const token =
+    normalizeSecretInputString(cfg.gateway?.auth?.token) ?? process.env.BOT_GATEWAY_TOKEN ?? "";
 
   // LAN URLs fail secure-context checks in browsers.
   // Coerce only lan->loopback and preserve other bind modes.

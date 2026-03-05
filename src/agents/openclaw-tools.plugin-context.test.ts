@@ -11,11 +11,11 @@ vi.mock("../plugins/tools.js", () => ({
   resolvePluginTools: resolvePluginToolsMock,
 }));
 
-import { createOpenClawTools } from "./openclaw-tools.js";
+import { createBotTools } from "./bot-tools.js";
 
-describe("createOpenClawTools plugin context", () => {
+describe("createBotTools plugin context", () => {
   it("forwards trusted requester sender identity to plugin tool context", () => {
-    createOpenClawTools({
+    createBotTools({
       config: {} as never,
       requesterSenderId: "trusted-sender",
       senderIsOwner: true,
@@ -32,7 +32,7 @@ describe("createOpenClawTools plugin context", () => {
   });
 
   it("forwards ephemeral sessionId to plugin tool context", () => {
-    createOpenClawTools({
+    createBotTools({
       config: {} as never,
       agentSessionKey: "agent:main:telegram:direct:12345",
       sessionId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",

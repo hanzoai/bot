@@ -1,6 +1,7 @@
 import type { BotConfig, ConfigFileSnapshot } from "../../config/types.js";
 import type { GatewayProbeResult } from "../../gateway/probe.js";
 import { resolveGatewayPort } from "../../config/config.js";
+import { isSecretRef } from "../../config/types.secrets.js";
 import { pickPrimaryTailnetIPv4 } from "../../infra/tailnet.js";
 import { colorize, theme } from "../../terminal/theme.js";
 import { pickGatewaySelfPresence } from "../gateway-presence.js";
@@ -144,11 +145,18 @@ export function sanitizeSshTarget(value: unknown): string | null {
   return trimmed.replace(/^ssh\\s+/, "");
 }
 
+function formatSecretRefDiagnostic(
+  path: string,
+  ref: { source: string; provider: string; id: string },
+): string {
+  return `${path} SecretRef is unresolved (${ref.source}:${ref.provider}:${ref.id}).`;
+}
+
 export function resolveAuthForTarget(
   cfg: BotConfig,
   target: GatewayStatusTarget,
   overrides: { token?: string; password?: string },
-): { token?: string; password?: string } {
+): { token?: string; password?: string; diagnostics?: string[] } {
   const tokenOverride = overrides.token?.trim() ? overrides.token.trim() : undefined;
   const passwordOverride = overrides.password?.trim() ? overrides.password.trim() : undefined;
   if (tokenOverride || passwordOverride) {
@@ -156,26 +164,36 @@ export function resolveAuthForTarget(
   }
 
   if (target.kind === "configRemote" || target.kind === "sshTunnel") {
-    const token =
-      typeof cfg.gateway?.remote?.token === "string" ? cfg.gateway.remote.token.trim() : "";
+    const diagnostics: string[] = [];
+    const remoteTokenRaw = cfg.gateway?.remote?.token;
+    const token = typeof remoteTokenRaw === "string" ? remoteTokenRaw.trim() : "";
+    if (!token && isSecretRef(remoteTokenRaw)) {
+      diagnostics.push(formatSecretRefDiagnostic("gateway.remote.token", remoteTokenRaw));
+    }
     const remotePassword = (cfg.gateway?.remote as { password?: unknown } | undefined)?.password;
     const password = typeof remotePassword === "string" ? remotePassword.trim() : "";
     return {
       token: token.length > 0 ? token : undefined,
       password: password.length > 0 ? password : undefined,
+      ...(diagnostics.length > 0 ? { diagnostics } : {}),
     };
   }
 
+  const diagnostics: string[] = [];
   const envToken = process.env.BOT_GATEWAY_TOKEN?.trim() || "";
   const envPassword = process.env.BOT_GATEWAY_PASSWORD?.trim() || "";
-  const cfgToken =
-    typeof cfg.gateway?.auth?.token === "string" ? cfg.gateway.auth.token.trim() : "";
+  const cfgTokenRaw = cfg.gateway?.auth?.token;
+  const cfgToken = typeof cfgTokenRaw === "string" ? cfgTokenRaw.trim() : "";
+  if (!cfgToken && !envToken && isSecretRef(cfgTokenRaw)) {
+    diagnostics.push(formatSecretRefDiagnostic("gateway.auth.token", cfgTokenRaw));
+  }
   const cfgPassword =
     typeof cfg.gateway?.auth?.password === "string" ? cfg.gateway.auth.password.trim() : "";
 
   return {
     token: envToken || cfgToken || undefined,
     password: envPassword || cfgPassword || undefined,
+    ...(diagnostics.length > 0 ? { diagnostics } : {}),
   };
 }
 
