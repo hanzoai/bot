@@ -106,7 +106,7 @@ export type GatewayControlUiConfig = {
   dangerouslyDisableDeviceAuth?: boolean;
 };
 
-export type GatewayAuthMode = "none" | "token" | "password" | "trusted-proxy";
+export type GatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
 
 export type GatewayIamConfig = {
   /** IAM server URL (e.g. "https://iam.hanzo.ai"). */
