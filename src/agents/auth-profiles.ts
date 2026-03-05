@@ -3,6 +3,7 @@ export type {
   AuthCredentialReasonCode,
   TokenExpiryState,
 } from "./auth-profiles/credential-state.js";
+export { resolveAuthProfileEligibility } from "./auth-profiles/credential-state.js";
 export { resolveAuthProfileDisplayLabel } from "./auth-profiles/display.js";
 export { formatAuthDoctorHint } from "./auth-profiles/doctor.js";
 export { resolveApiKeyForProfile } from "./auth-profiles/oauth.js";

@@ -40,9 +40,10 @@ describe("issue #13992 regression - cron jobs skip execution", () => {
     expect(job.state.nextRunAtMs).toBe(pastDue);
   });
 
-  it("should recompute past-due nextRunAtMs with recomputeExpired when slot already executed", () => {
-    // NOTE: in onTimer this recovery branch is used only when due scan found no
-    // runnable jobs; this unit test validates the maintenance helper contract.
+  it("should NOT recompute past-due nextRunAtMs even when slot was already executed", () => {
+    // Maintenance never overwrites existing nextRunAtMs values, even when a
+    // past-due slot was already executed (lastRunAtMs > nextRunAtMs). The
+    // recomputeExpired option was removed; only missing nextRunAtMs is filled.
     const now = Date.now();
     const pastDue = now - 60_000;
 
@@ -63,13 +64,13 @@ describe("issue #13992 regression - cron jobs skip execution", () => {
     };
 
     const state = createMockCronStateForJobs({ jobs: [job], nowMs: now });
-    recomputeNextRunsForMaintenance(state, { recomputeExpired: true });
+    recomputeNextRunsForMaintenance(state);
 
-    expect(typeof job.state.nextRunAtMs).toBe("number");
-    expect((job.state.nextRunAtMs ?? 0) > now).toBe(true);
+    // Maintenance does not touch existing nextRunAtMs values
+    expect(job.state.nextRunAtMs).toBe(pastDue);
   });
 
-  it("should NOT recompute past-due nextRunAtMs for running jobs even with recomputeExpired", () => {
+  it("should NOT recompute past-due nextRunAtMs for running jobs", () => {
     const now = Date.now();
     const pastDue = now - 60_000;
 
@@ -90,7 +91,7 @@ describe("issue #13992 regression - cron jobs skip execution", () => {
     };
 
     const state = createMockCronStateForJobs({ jobs: [job], nowMs: now });
-    recomputeNextRunsForMaintenance(state, { recomputeExpired: true });
+    recomputeNextRunsForMaintenance(state);
 
     expect(job.state.nextRunAtMs).toBe(pastDue);
   });
@@ -194,7 +195,9 @@ describe("issue #13992 regression - cron jobs skip execution", () => {
     expect(malformedJob.state.lastError).toMatch(/^schedule error:/);
   });
 
-  it("recomputes expired slots already executed but keeps never-executed stale slots", () => {
+  it("does not recompute past-due nextRunAtMs for any jobs, regardless of execution state", () => {
+    // Maintenance never modifies existing nextRunAtMs values. Both already-executed
+    // and never-executed jobs retain their past-due nextRunAtMs.
     const now = Date.now();
     const pastDue = now - 60_000;
     const alreadyExecuted: CronJob = {
@@ -233,9 +236,9 @@ describe("issue #13992 regression - cron jobs skip execution", () => {
       jobs: [alreadyExecuted, neverExecuted],
       nowMs: now,
     });
-    recomputeNextRunsForMaintenance(state, { recomputeExpired: true });
+    recomputeNextRunsForMaintenance(state);
 
-    expect((alreadyExecuted.state.nextRunAtMs ?? 0) > now).toBe(true);
+    expect(alreadyExecuted.state.nextRunAtMs).toBe(pastDue);
     expect(neverExecuted.state.nextRunAtMs).toBe(pastDue);
   });
 
@@ -262,7 +265,7 @@ describe("issue #13992 regression - cron jobs skip execution", () => {
     };
 
     const state = createMockCronStateForJobs({ jobs: [job], nowMs: now });
-    recomputeNextRunsForMaintenance(state, { recomputeExpired: true, nowMs: now });
+    recomputeNextRunsForMaintenance(state);
 
     expect(job.state.runningAtMs).toBeUndefined();
     expect(job.state.nextRunAtMs).toBe(pastDue);

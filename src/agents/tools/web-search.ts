@@ -772,7 +772,26 @@ function normalizeBraveLanguageParams(params: { search_lang?: string; ui_lang?: 
   return { search_lang, ui_lang };
 }
 
-function normalizeFreshness(value: string | undefined): string | undefined {
+const PERPLEXITY_FRESHNESS_VALUES = new Set(["day", "week", "month", "year"]);
+
+const PERPLEXITY_TO_BRAVE: Record<string, string> = {
+  day: "pd",
+  week: "pw",
+  month: "pm",
+  year: "py",
+};
+
+const BRAVE_TO_PERPLEXITY: Record<string, string> = {
+  pd: "day",
+  pw: "week",
+  pm: "month",
+  py: "year",
+};
+
+function normalizeFreshness(
+  value: string | undefined,
+  provider?: "brave" | "perplexity",
+): string | undefined {
   if (!value) {
     return undefined;
   }
@@ -782,12 +801,26 @@ function normalizeFreshness(value: string | undefined): string | undefined {
   }
 
   const lower = trimmed.toLowerCase();
+  const target = provider ?? "brave";
+
+  // Input is a Brave shortcut (pd/pw/pm/py)
   if (BRAVE_FRESHNESS_SHORTCUTS.has(lower)) {
-    return lower;
+    return target === "perplexity" ? (BRAVE_TO_PERPLEXITY[lower] ?? undefined) : lower;
   }
 
+  // Input is a Perplexity value (day/week/month/year)
+  if (PERPLEXITY_FRESHNESS_VALUES.has(lower)) {
+    return target === "brave" ? (PERPLEXITY_TO_BRAVE[lower] ?? undefined) : lower;
+  }
+
+  // Date range only valid for Brave
   const match = trimmed.match(BRAVE_FRESHNESS_RANGE);
   if (!match) {
+    return undefined;
+  }
+
+  // Date ranges are not valid for Perplexity
+  if (target === "perplexity") {
     return undefined;
   }
 
@@ -832,6 +865,42 @@ function isValidIsoDate(value: string): boolean {
   return (
     date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
   );
+}
+
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const PERPLEXITY_DATE_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+
+/**
+ * Normalize a date string to ISO format (YYYY-MM-DD).
+ * Accepts ISO (2024-01-15) and Perplexity (1/15/2024) formats.
+ */
+function normalizeToIsoDate(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (ISO_DATE_RE.test(trimmed) && isValidIsoDate(trimmed)) {
+    return trimmed;
+  }
+  const match = trimmed.match(PERPLEXITY_DATE_RE);
+  if (!match) {
+    return undefined;
+  }
+  const [, monthStr, dayStr, yearStr] = match;
+  const iso = `${yearStr}-${monthStr.padStart(2, "0")}-${dayStr.padStart(2, "0")}`;
+  return isValidIsoDate(iso) ? iso : undefined;
+}
+
+/**
+ * Convert an ISO date (YYYY-MM-DD) to Perplexity format (M/D/YYYY).
+ * Returns undefined if the input is not valid ISO.
+ */
+function isoToPerplexityDate(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!ISO_DATE_RE.test(trimmed) || !isValidIsoDate(trimmed)) {
+    return undefined;
+  }
+  const [yearStr, monthStr, dayStr] = trimmed.split("-");
+  const month = Number.parseInt(monthStr, 10);
+  const day = Number.parseInt(dayStr, 10);
+  return `${month}/${day}/${yearStr}`;
 }
 
 function resolveSiteName(url: string | undefined): string | undefined {
@@ -1516,6 +1585,8 @@ export const __testing = {
   resolvePerplexityRequestModel,
   normalizeBraveLanguageParams,
   normalizeFreshness,
+  normalizeToIsoDate,
+  isoToPerplexityDate,
   freshnessToPerplexityRecency,
   resolveGrokApiKey,
   resolveGrokModel,
@@ -1526,4 +1597,5 @@ export const __testing = {
   resolveKimiBaseUrl,
   extractKimiCitations,
   resolveRedirectUrl: resolveCitationRedirectUrl,
+  SEARCH_CACHE,
 } as const;

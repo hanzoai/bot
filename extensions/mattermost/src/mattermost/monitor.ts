@@ -70,6 +70,85 @@ import {
   getSlashCommandState,
 } from "./slash-state.js";
 
+// ── Mention gate types and logic (extracted for testability) ───────────
+
+export type MattermostRequireMentionResolverInput = {
+  cfg: BotConfig;
+  accountId: string;
+  groupId?: string;
+  requireMentionOverride?: boolean;
+};
+
+export type MattermostMentionGateInput = {
+  kind: "direct" | "channel";
+  cfg: BotConfig;
+  accountId: string;
+  channelId: string;
+  threadRootId?: string;
+  requireMentionOverride?: boolean;
+  resolveRequireMention: (params: MattermostRequireMentionResolverInput) => boolean;
+  wasMentioned: boolean;
+  isControlCommand: boolean;
+  commandAuthorized: boolean;
+  oncharEnabled: boolean;
+  oncharTriggered: boolean;
+  canDetectMention: boolean;
+};
+
+export type MattermostMentionGateResult = {
+  shouldRequireMention: boolean;
+  dropReason: string | null;
+};
+
+/**
+ * Evaluate whether an inbound Mattermost message should be dropped
+ * based on mention-gating rules. Returns the resolved mention requirement
+ * and a drop reason (null if the message should be processed).
+ */
+export function evaluateMattermostMentionGate(
+  input: MattermostMentionGateInput,
+): MattermostMentionGateResult {
+  const {
+    kind,
+    cfg,
+    accountId,
+    channelId,
+    requireMentionOverride,
+    resolveRequireMention,
+    wasMentioned,
+    isControlCommand,
+    commandAuthorized,
+    oncharEnabled,
+    oncharTriggered,
+    canDetectMention,
+  } = input;
+
+  const shouldRequireMention =
+    kind !== "direct" &&
+    resolveRequireMention({
+      cfg,
+      accountId,
+      groupId: channelId,
+      requireMentionOverride,
+    });
+
+  const shouldBypassMention =
+    isControlCommand && shouldRequireMention && !wasMentioned && commandAuthorized;
+  const effectiveWasMentioned = wasMentioned || shouldBypassMention || oncharTriggered;
+
+  if (oncharEnabled && !oncharTriggered && !wasMentioned && !isControlCommand) {
+    return { shouldRequireMention, dropReason: "onchar-not-triggered" };
+  }
+
+  if (kind !== "direct" && shouldRequireMention && canDetectMention) {
+    if (!effectiveWasMentioned) {
+      return { shouldRequireMention, dropReason: "missing-mention" };
+    }
+  }
+
+  return { shouldRequireMention, dropReason: null };
+}
+
 export type MonitorMattermostOpts = {
   botToken?: string;
   baseUrl?: string;

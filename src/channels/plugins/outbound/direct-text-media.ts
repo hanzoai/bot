@@ -5,7 +5,7 @@ import { chunkText } from "../../../auto-reply/chunk.js";
 import { resolveChannelMediaMaxBytes } from "../media-limits.js";
 
 type DirectSendOptions = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   replyToId?: string | null;
   mediaUrl?: string;

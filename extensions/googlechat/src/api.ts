@@ -1,6 +1,5 @@
-import { fetchWithSsrFGuard } from "bot/plugin-sdk";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/googlechat";
 import crypto from "node:crypto";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/googlechat";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import type { GoogleChatReaction } from "./types.js";
 import { getGoogleChatAccessToken } from "./auth.js";

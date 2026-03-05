@@ -17,6 +17,8 @@ export type ControlUiBootstrapConfig = {
   iam?: ControlUiBootstrapIamConfig;
   /** Pre-authenticated token forwarded from HTTP Bearer auth. */
   token?: string;
+  /** Gateway server version reported to control UI clients. */
+  serverVersion?: string;
   /** Billing top-up URL. */
   billingUrl?: string;
   /** Whether the P2P marketplace is enabled on this gateway. */

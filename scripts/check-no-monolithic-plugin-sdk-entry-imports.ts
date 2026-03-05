@@ -84,13 +84,13 @@ function main() {
   }
 
   if (offenders.length > 0) {
-    console.error("Bundled plugin source files must not import monolithic openclaw/plugin-sdk.");
+    console.error("Bundled plugin source files must not import monolithic bot/plugin-sdk.");
     for (const file of offenders.toSorted()) {
       const relative = path.relative(process.cwd(), file) || file;
       console.error(`- ${relative}`);
     }
     console.error(
-      "Use openclaw/plugin-sdk/<channel> for channel plugins, /core for startup surfaces, or /compat for broader internals.",
+      "Use bot/plugin-sdk/<channel> for channel plugins, /core for startup surfaces, or /compat for broader internals.",
     );
     process.exit(1);
   }
