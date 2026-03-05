@@ -134,7 +134,7 @@ describe("ensureBrowserControlAuth", () => {
   });
 
   it("fails when gateway.auth.token SecretRef is unresolved", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       gateway: {
         auth: {
           mode: "token",
