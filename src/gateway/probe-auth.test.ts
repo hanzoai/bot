@@ -1,31 +1,29 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
-import { resolveGatewayProbeAuthSafe } from "./probe-auth.js";
+import type { BotConfig } from "../config/config.js";
+import { resolveGatewayProbeAuth } from "./probe-auth.js";
 
-describe("resolveGatewayProbeAuthSafe", () => {
+describe("resolveGatewayProbeAuth", () => {
   it("returns probe auth credentials when available", () => {
-    const result = resolveGatewayProbeAuthSafe({
+    const result = resolveGatewayProbeAuth({
       cfg: {
         gateway: {
           auth: {
             token: "token-value",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       mode: "local",
       env: {} as NodeJS.ProcessEnv,
     });
 
     expect(result).toEqual({
-      auth: {
-        token: "token-value",
-        password: undefined,
-      },
+      token: "token-value",
+      password: undefined,
     });
   });
 
-  it("returns warning and empty auth when token SecretRef is unresolved", () => {
-    const result = resolveGatewayProbeAuthSafe({
+  it("returns empty credentials when token SecretRef is unresolved", () => {
+    const result = resolveGatewayProbeAuth({
       cfg: {
         gateway: {
           auth: {
@@ -38,18 +36,19 @@ describe("resolveGatewayProbeAuthSafe", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       mode: "local",
       env: {} as NodeJS.ProcessEnv,
     });
 
-    expect(result.auth).toEqual({});
-    expect(result.warning).toContain("gateway.auth.token");
-    expect(result.warning).toContain("unresolved");
+    // SecretRef objects are non-strings, so trimToUndefined returns undefined.
+    // In local mode with no env fallback, credentials resolve to empty.
+    expect(result.token).toBeUndefined();
+    expect(result.password).toBeUndefined();
   });
 
   it("ignores unresolved local token SecretRef in remote mode when remote-only auth is requested", () => {
-    const result = resolveGatewayProbeAuthSafe({
+    const result = resolveGatewayProbeAuth({
       cfg: {
         gateway: {
           mode: "remote",
@@ -66,16 +65,14 @@ describe("resolveGatewayProbeAuthSafe", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       mode: "remote",
       env: {} as NodeJS.ProcessEnv,
     });
 
     expect(result).toEqual({
-      auth: {
-        token: undefined,
-        password: undefined,
-      },
+      token: undefined,
+      password: undefined,
     });
   });
 });
