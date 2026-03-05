@@ -33,14 +33,35 @@ function firstDefined(values: Array<string | undefined>): string | undefined {
   return undefined;
 }
 
+const GATEWAY_SECRET_REF_UNAVAILABLE_MARKER =
+  "is configured as a secret reference but is unavailable in this command path.";
+
 function throwUnresolvedGatewaySecretInput(path: string): never {
   throw new Error(
     [
-      `${path} is configured as a secret reference but is unavailable in this command path.`,
+      `${path} ${GATEWAY_SECRET_REF_UNAVAILABLE_MARKER}`,
       "Fix: set BOT_GATEWAY_TOKEN/BOT_GATEWAY_PASSWORD, pass explicit --token/--password,",
       "or run a gateway command path that resolves secret references before credential selection.",
     ].join("\n"),
   );
+}
+
+/**
+ * Check if an error was thrown by the gateway credential resolver because a
+ * SecretRef could not be resolved in the current command path.
+ * Optionally narrow to a specific config path (e.g. "gateway.auth.token").
+ */
+export function isGatewaySecretRefUnavailableError(err: unknown, path?: string): boolean {
+  if (!(err instanceof Error)) {
+    return false;
+  }
+  if (!err.message.includes(GATEWAY_SECRET_REF_UNAVAILABLE_MARKER)) {
+    return false;
+  }
+  if (path && !err.message.includes(path)) {
+    return false;
+  }
+  return true;
 }
 
 function readGatewayTokenEnv(
