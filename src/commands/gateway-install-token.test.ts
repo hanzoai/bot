@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 
 const readConfigFileSnapshotMock = vi.hoisted(() => vi.fn());
 const writeConfigFileMock = vi.hoisted(() => vi.fn());
@@ -85,7 +85,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { token: "config-token" } },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 
@@ -107,7 +107,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token", token: tokenRef } },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: { OPENCLAW_GATEWAY_TOKEN: "resolved-token" } as NodeJS.ProcessEnv,
     });
 
@@ -126,7 +126,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token", token: "${MISSING_GATEWAY_TOKEN}" } },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 
@@ -143,7 +143,7 @@ describe("resolveGatewayInstallToken", () => {
             password: "password-value",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
       persistGeneratedToken: true,
@@ -161,7 +161,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token" } },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
     });
@@ -178,7 +178,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token" } },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
       persistGeneratedToken: true,
@@ -217,7 +217,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token" } },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
       persistGeneratedToken: true,
@@ -245,7 +245,7 @@ describe("resolveGatewayInstallToken", () => {
             default: { source: "env" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
       persistGeneratedToken: true,
@@ -270,7 +270,7 @@ describe("resolveGatewayInstallToken", () => {
             token: tokenRef,
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 
