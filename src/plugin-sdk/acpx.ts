@@ -16,10 +16,10 @@ export type {
   AcpSessionUpdateTag,
 } from "../acp/runtime/types.js";
 export type {
-  OpenClawPluginApi,
-  OpenClawPluginConfigSchema,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  BotPluginApi,
+  BotPluginConfigSchema,
+  BotPluginService,
+  BotPluginServiceContext,
   PluginLogger,
 } from "../plugins/types.js";
 export type {
