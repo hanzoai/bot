@@ -7,6 +7,7 @@ import type { BotConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { DoctorOptions, DoctorPrompter } from "./doctor-prompter.js";
 import { resolveGatewayPort, resolveIsNixMode } from "../config/paths.js";
+import { normalizeSecretInputString } from "../config/types.secrets.js";
 import {
   findExtraGatewayServices,
   renderGatewayServiceCleanupHints,
@@ -56,7 +57,7 @@ function normalizeExecutablePath(value: string): string {
 }
 
 function resolveGatewayAuthToken(cfg: BotConfig, env: NodeJS.ProcessEnv): string | undefined {
-  const configToken = cfg.gateway?.auth?.token?.trim();
+  const configToken = normalizeSecretInputString(cfg.gateway?.auth?.token);
   if (configToken) {
     return configToken;
   }

@@ -347,3 +347,36 @@ export function applySnapshot(host: GatewayHost, hello: GatewayHelloOk) {
   }
   host.updateAvailable = snapshot?.updateAvailable ?? null;
 }
+
+/**
+ * Resolve whether the gateway's server version should be forwarded as the
+ * control-UI client version.  Same-origin connections (including relative
+ * websocket URLs) use the server version so the gateway can serve matching
+ * static assets.  Cross-origin connections omit the version because the
+ * server's assets may not match the remote client build.
+ */
+export function resolveControlUiClientVersion(params: {
+  gatewayUrl: string;
+  serverVersion: string | null;
+  pageUrl: string;
+}): string | undefined {
+  const { gatewayUrl, serverVersion, pageUrl } = params;
+  if (!serverVersion) {
+    return undefined;
+  }
+
+  // Relative URLs (e.g. "/ws") are always same-origin.
+  if (gatewayUrl.startsWith("/")) {
+    return serverVersion;
+  }
+
+  try {
+    const pageOrigin = new URL(pageUrl).origin;
+    // Normalise ws(s):// to http(s):// so origin comparison works.
+    const normalised = gatewayUrl.replace(/^ws(s?):\/\//, "http$1://");
+    const gatewayOrigin = new URL(normalised).origin;
+    return gatewayOrigin === pageOrigin ? serverVersion : undefined;
+  } catch {
+    return undefined;
+  }
+}

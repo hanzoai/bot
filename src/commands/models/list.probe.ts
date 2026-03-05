@@ -1,5 +1,9 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
+import type {
+  AuthCredentialReasonCode,
+  AuthProfileCredential,
+} from "../../agents/auth-profiles.js";
 import type { BotConfig } from "../../config/config.js";
 import { resolveBotAgentDir } from "../../agents/agent-paths.js";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
@@ -7,6 +11,7 @@ import {
   ensureAuthProfileStore,
   listProfilesForProvider,
   resolveAuthProfileDisplayLabel,
+  resolveAuthProfileEligibility,
   resolveAuthProfileOrder,
 } from "../../agents/auth-profiles.js";
 import { describeFailoverError } from "../../agents/failover-error.js";
@@ -23,6 +28,8 @@ import {
   resolveSessionTranscriptPath,
   resolveSessionTranscriptsDirForAgent,
 } from "../../config/sessions/paths.js";
+import { isSecretRef, type SecretRef } from "../../config/types.secrets.js";
+import { resolveSecretRefString } from "../../secrets/resolve.js";
 import { redactSecrets } from "../status-all/format.js";
 import { DEFAULT_PROVIDER, formatMs } from "./shared.js";
 
@@ -48,6 +55,8 @@ export type AuthProbeResult = {
   status: AuthProbeStatus;
   error?: string;
   latencyMs?: number;
+  /** Machine-readable reason code when the profile was excluded or ineligible. */
+  reasonCode?: AuthCredentialReasonCode | "excluded_by_auth_order" | "unresolved_ref";
 };
 
 type AuthProbeTarget = {
@@ -139,7 +148,29 @@ function selectProbeModel(params: {
   return null;
 }
 
-function buildProbeTargets(params: {
+function extractProfileSecretRef(profile: AuthProfileCredential | undefined): SecretRef | null {
+  if (!profile) {
+    return null;
+  }
+  if (profile.type === "token" && isSecretRef(profile.tokenRef)) {
+    return profile.tokenRef;
+  }
+  if (profile.type === "api_key" && isSecretRef(profile.keyRef)) {
+    return profile.keyRef;
+  }
+  return null;
+}
+
+function formatIneligibleError(reasonCode: string, refLabel?: string): string {
+  const lines = ["Auth profile credentials are missing or expired."];
+  if (refLabel) {
+    lines.push(`SecretRef: ${refLabel}`);
+  }
+  lines.push(`[${reasonCode}]`);
+  return lines.join("\n");
+}
+
+export async function buildProbeTargets(params: {
   cfg: BotConfig;
   providers: string[];
   modelCandidates: string[];
@@ -151,132 +182,159 @@ function buildProbeTargets(params: {
   const providerFilterKey = providerFilter ? normalizeProviderId(providerFilter) : null;
   const profileFilter = new Set((options.profileIds ?? []).map((id) => id.trim()).filter(Boolean));
 
-  return loadModelCatalog({ config: cfg }).then((catalog) => {
-    const candidates = buildCandidateMap(modelCandidates);
-    const targets: AuthProbeTarget[] = [];
-    const results: AuthProbeResult[] = [];
+  const catalog = await loadModelCatalog({ config: cfg });
+  const candidates = buildCandidateMap(modelCandidates);
+  const targets: AuthProbeTarget[] = [];
+  const results: AuthProbeResult[] = [];
 
-    for (const provider of providers) {
-      const providerKey = normalizeProviderId(provider);
-      if (providerFilterKey && providerKey !== providerFilterKey) {
-        continue;
-      }
+  for (const provider of providers) {
+    const providerKey = normalizeProviderId(provider);
+    if (providerFilterKey && providerKey !== providerFilterKey) {
+      continue;
+    }
 
-      const model = selectProbeModel({
-        provider: providerKey,
-        candidates,
-        catalog,
-      });
+    const model = selectProbeModel({
+      provider: providerKey,
+      candidates,
+      catalog,
+    });
 
-      const profileIds = listProfilesForProvider(store, providerKey);
-      const explicitOrder = (() => {
-        return (
-          findNormalizedProviderValue(store.order, providerKey) ??
-          findNormalizedProviderValue(cfg?.auth?.order, providerKey)
-        );
-      })();
-      const allowedProfiles =
-        explicitOrder && explicitOrder.length > 0
-          ? new Set(resolveAuthProfileOrder({ cfg, store, provider: providerKey }))
-          : null;
-      const filteredProfiles = profileFilter.size
-        ? profileIds.filter((id) => profileFilter.has(id))
-        : profileIds;
+    const profileIds = listProfilesForProvider(store, providerKey);
+    const explicitOrder = (() => {
+      return (
+        findNormalizedProviderValue(store.order, providerKey) ??
+        findNormalizedProviderValue(cfg?.auth?.order, providerKey)
+      );
+    })();
+    const allowedProfiles =
+      explicitOrder && explicitOrder.length > 0
+        ? new Set(resolveAuthProfileOrder({ cfg, store, provider: providerKey }))
+        : null;
+    const filteredProfiles = profileFilter.size
+      ? profileIds.filter((id) => profileFilter.has(id))
+      : profileIds;
 
-      if (filteredProfiles.length > 0) {
-        for (const profileId of filteredProfiles) {
-          const profile = store.profiles[profileId];
-          const mode = profile?.type;
-          const label = resolveAuthProfileDisplayLabel({ cfg, store, profileId });
-          if (explicitOrder && !explicitOrder.includes(profileId)) {
-            results.push({
-              provider: providerKey,
-              model: model ? `${model.provider}/${model.model}` : undefined,
-              profileId,
-              label,
-              source: "profile",
-              mode,
-              status: "unknown",
-              error: "Excluded by auth.order for this provider.",
-            });
-            continue;
-          }
-          if (allowedProfiles && !allowedProfiles.has(profileId)) {
-            results.push({
-              provider: providerKey,
-              model: model ? `${model.provider}/${model.model}` : undefined,
-              profileId,
-              label,
-              source: "profile",
-              mode,
-              status: "unknown",
-              error: "Auth profile credentials are missing or expired.",
-            });
-            continue;
-          }
-          if (!model) {
-            results.push({
-              provider: providerKey,
-              model: undefined,
-              profileId,
-              label,
-              source: "profile",
-              mode,
-              status: "no_model",
-              error: "No model available for probe",
-            });
-            continue;
-          }
-          targets.push({
+    if (filteredProfiles.length > 0) {
+      for (const profileId of filteredProfiles) {
+        const profile = store.profiles[profileId];
+        const mode = profile?.type;
+        const label = resolveAuthProfileDisplayLabel({ cfg, store, profileId });
+        if (explicitOrder && !explicitOrder.includes(profileId)) {
+          results.push({
             provider: providerKey,
-            model,
+            model: model ? `${model.provider}/${model.model}` : undefined,
             profileId,
             label,
             source: "profile",
             mode,
+            status: "unknown",
+            reasonCode: "excluded_by_auth_order",
+            error: "Excluded by auth.order for this provider.",
           });
+          continue;
         }
-        continue;
-      }
+        if (allowedProfiles && !allowedProfiles.has(profileId)) {
+          const eligibility = profile
+            ? resolveAuthProfileEligibility(profile)
+            : { eligible: false, reasonCode: "missing_credential" as const };
+          results.push({
+            provider: providerKey,
+            model: model ? `${model.provider}/${model.model}` : undefined,
+            profileId,
+            label,
+            source: "profile",
+            mode,
+            status: "unknown",
+            reasonCode: eligibility.reasonCode,
+            error: formatIneligibleError(eligibility.reasonCode),
+          });
+          continue;
+        }
 
-      if (profileFilter.size > 0) {
-        continue;
-      }
+        // Profile is eligible; verify SecretRef resolution if ref-only.
+        const secretRef = extractProfileSecretRef(profile);
+        if (secretRef) {
+          try {
+            await resolveSecretRefString(secretRef, { config: cfg });
+          } catch {
+            const refLabel = `${secretRef.source}:${secretRef.provider}:${secretRef.id}`;
+            results.push({
+              provider: providerKey,
+              model: model ? `${model.provider}/${model.model}` : undefined,
+              profileId,
+              label,
+              source: "profile",
+              mode,
+              status: "unknown",
+              reasonCode: "unresolved_ref",
+              error: formatIneligibleError("unresolved_ref", refLabel),
+            });
+            continue;
+          }
+        }
 
-      const envKey = resolveEnvApiKey(providerKey);
-      const customKey = getCustomProviderApiKey(cfg, providerKey);
-      if (!envKey && !customKey) {
-        continue;
-      }
-
-      const label = envKey ? "env" : "models.json";
-      const source = envKey ? "env" : "models.json";
-      const mode = envKey?.source.includes("OAUTH_TOKEN") ? "oauth" : "api_key";
-
-      if (!model) {
-        results.push({
+        if (!model) {
+          results.push({
+            provider: providerKey,
+            model: undefined,
+            profileId,
+            label,
+            source: "profile",
+            mode,
+            status: "no_model",
+            error: "No model available for probe",
+          });
+          continue;
+        }
+        targets.push({
           provider: providerKey,
-          model: undefined,
+          model,
+          profileId,
           label,
-          source,
+          source: "profile",
           mode,
-          status: "no_model",
-          error: "No model available for probe",
         });
-        continue;
       }
+      continue;
+    }
 
-      targets.push({
+    if (profileFilter.size > 0) {
+      continue;
+    }
+
+    const envKey = resolveEnvApiKey(providerKey);
+    const customKey = getCustomProviderApiKey(cfg, providerKey);
+    if (!envKey && !customKey) {
+      continue;
+    }
+
+    const label = envKey ? "env" : "models.json";
+    const source = envKey ? "env" : "models.json";
+    const mode = envKey?.source.includes("OAUTH_TOKEN") ? "oauth" : "api_key";
+
+    if (!model) {
+      results.push({
         provider: providerKey,
-        model,
+        model: undefined,
         label,
         source,
         mode,
+        status: "no_model",
+        error: "No model available for probe",
       });
+      continue;
     }
 
-    return { targets, results };
-  });
+    targets.push({
+      provider: providerKey,
+      model,
+      label,
+      source,
+      mode,
+    });
+  }
+
+  return { targets, results };
 }
 
 async function probeTarget(params: {

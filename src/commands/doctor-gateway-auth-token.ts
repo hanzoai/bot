@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 export { shouldRequireGatewayTokenForInstall } from "../gateway/auth-install-policy.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
@@ -11,7 +11,7 @@ function readGatewayTokenEnv(env: NodeJS.ProcessEnv): string | undefined {
 }
 
 export async function resolveGatewayAuthTokenForService(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv,
 ): Promise<{ token?: string; unavailableReason?: string }> {
   const { ref } = resolveSecretInputRef({

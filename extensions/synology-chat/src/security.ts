@@ -4,10 +4,6 @@
 
 import { createFixedWindowRateLimiter, type FixedWindowRateLimiter } from "bot/plugin-sdk";
 import * as crypto from "node:crypto";
-import {
-  createFixedWindowRateLimiter,
-  type FixedWindowRateLimiter,
-} from "openclaw/plugin-sdk/synology-chat";
 
 export type DmAuthorizationResult =
   | { allowed: true }

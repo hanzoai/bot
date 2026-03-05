@@ -1,7 +1,9 @@
 import type { BotConfig, GatewayAuthConfig } from "../config/config.js";
+import type { SecretInput } from "../config/types.secrets.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import { ensureAuthProfileStore } from "../agents/auth-profiles.js";
+import { isSecretRef } from "../config/types.secrets.js";
 import { promptAuthChoiceGrouped } from "./auth-choice-prompt.js";
 import { applyAuthChoice, resolvePreferredProviderForAuthChoice } from "./auth-choice.js";
 import {
@@ -39,7 +41,7 @@ const ANTHROPIC_OAUTH_MODEL_KEYS = [
 export function buildGatewayAuthConfig(params: {
   existing?: GatewayAuthConfig;
   mode: GatewayAuthChoice;
-  token?: string;
+  token?: SecretInput;
   password?: string;
   trustedProxy?: {
     userHeader: string;
@@ -54,6 +56,10 @@ export function buildGatewayAuthConfig(params: {
   }
 
   if (params.mode === "token") {
+    // Preserve SecretRef tokens (e.g. env refs) without sanitizing.
+    if (isSecretRef(params.token)) {
+      return { ...base, mode: "token", token: params.token };
+    }
     // Keep token mode always valid: treat empty/undefined/"undefined"/"null" as missing and generate a token.
     const token = sanitizeTokenValue(params.token) ?? randomToken();
     return { ...base, mode: "token", token };

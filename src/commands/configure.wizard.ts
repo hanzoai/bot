@@ -61,7 +61,8 @@ async function runGatewayHealthCheck(params: {
   });
   const remoteUrl = params.cfg.gateway?.remote?.url?.trim();
   const wsUrl = params.cfg.gateway?.mode === "remote" && remoteUrl ? remoteUrl : localLinks.wsUrl;
-  const token = params.cfg.gateway?.auth?.token ?? process.env.BOT_GATEWAY_TOKEN;
+  const token =
+    normalizeSecretInputString(params.cfg.gateway?.auth?.token) ?? process.env.BOT_GATEWAY_TOKEN;
   const password =
     normalizeSecretInputString(params.cfg.gateway?.auth?.password) ??
     process.env.BOT_GATEWAY_PASSWORD;
@@ -249,7 +250,9 @@ export async function runConfigureWizard(
     const localUrl = "ws://127.0.0.1:18789";
     const localProbe = await probeGatewayReachable({
       url: localUrl,
-      token: baseConfig.gateway?.auth?.token ?? process.env.BOT_GATEWAY_TOKEN,
+      token:
+        normalizeSecretInputString(baseConfig.gateway?.auth?.token) ??
+        process.env.BOT_GATEWAY_TOKEN,
       password:
         normalizeSecretInputString(baseConfig.gateway?.auth?.password) ??
         process.env.BOT_GATEWAY_PASSWORD,
@@ -316,7 +319,7 @@ export async function runConfigureWizard(
       baseConfig.agents?.defaults?.workspace ??
       DEFAULT_WORKSPACE;
     let gatewayPort = resolveGatewayPort(baseConfig);
-    let gatewayToken: string | undefined =
+    let _gatewayToken: string | undefined =
       normalizeSecretInputString(nextConfig.gateway?.auth?.token) ??
       normalizeSecretInputString(baseConfig.gateway?.auth?.token) ??
       process.env.BOT_GATEWAY_TOKEN;
@@ -428,7 +431,7 @@ export async function runConfigureWizard(
         const gateway = await promptGatewayConfig(nextConfig, runtime);
         nextConfig = gateway.config;
         gatewayPort = gateway.port;
-        gatewayToken = gateway.token;
+        _gatewayToken = gateway.token;
       }
 
       if (selected.includes("channels")) {
@@ -447,7 +450,7 @@ export async function runConfigureWizard(
           await promptDaemonPort();
         }
 
-        await maybeInstallDaemon({ runtime, port: gatewayPort, gatewayToken });
+        await maybeInstallDaemon({ runtime, port: gatewayPort });
       }
 
       if (selected.includes("health")) {
@@ -483,7 +486,7 @@ export async function runConfigureWizard(
           const gateway = await promptGatewayConfig(nextConfig, runtime);
           nextConfig = gateway.config;
           gatewayPort = gateway.port;
-          gatewayToken = gateway.token;
+          _gatewayToken = gateway.token;
           didConfigureGateway = true;
           await persistConfig();
         }
@@ -506,7 +509,6 @@ export async function runConfigureWizard(
           await maybeInstallDaemon({
             runtime,
             port: gatewayPort,
-            gatewayToken,
           });
         }
 
@@ -545,7 +547,8 @@ export async function runConfigureWizard(
     const oldPassword =
       normalizeSecretInputString(baseConfig.gateway?.auth?.password) ??
       process.env.BOT_GATEWAY_PASSWORD;
-    const token = nextConfig.gateway?.auth?.token ?? process.env.BOT_GATEWAY_TOKEN;
+    const token =
+      normalizeSecretInputString(nextConfig.gateway?.auth?.token) ?? process.env.BOT_GATEWAY_TOKEN;
 
     let gatewayProbe = await probeGatewayReachable({
       url: links.wsUrl,

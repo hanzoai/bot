@@ -41,27 +41,19 @@ describe("systemd availability", () => {
     await expect(isSystemdUserServiceAvailable()).resolves.toBe(false);
   });
 
-  it("falls back to machine user scope when --user bus is unavailable", async () => {
-    execFileMock
-      .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        expect(args).toEqual(["--user", "status"]);
-        const err = new Error(
-          "Failed to connect to user scope bus via local transport",
-        ) as Error & {
-          stderr?: string;
-          code?: number;
-        };
-        err.stderr =
-          "Failed to connect to user scope bus via local transport: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined";
-        err.code = 1;
-        cb(err, "", "");
-      })
-      .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        expect(args).toEqual(["--machine", "debian@", "--user", "status"]);
-        cb(null, "", "");
-      });
+  it("returns false when --user bus connection fails", async () => {
+    execFileMock.mockImplementation((_cmd, _args, _opts, cb) => {
+      const err = new Error("Failed to connect to user scope bus via local transport") as Error & {
+        stderr?: string;
+        code?: number;
+      };
+      err.stderr =
+        "Failed to connect to user scope bus via local transport: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined";
+      err.code = 1;
+      cb(err, "", "");
+    });
 
-    await expect(isSystemdUserServiceAvailable({ USER: "debian" })).resolves.toBe(true);
+    await expect(isSystemdUserServiceAvailable()).resolves.toBe(false);
   });
 });
 

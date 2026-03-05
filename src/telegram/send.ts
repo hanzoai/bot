@@ -66,6 +66,8 @@ type TelegramSendOpts = {
   messageThreadId?: number;
   /** Inline keyboard buttons (reply markup). */
   buttons?: TelegramInlineButtons;
+  /** Pre-loaded config; falls back to loadConfig() when omitted. */
+  cfg?: ReturnType<typeof loadConfig>;
 };
 
 type TelegramSendResult = {

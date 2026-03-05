@@ -1,9 +1,9 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { collectConfigServiceEnvVars } from "../config/env-vars.js";
 import { hasConfiguredSecretInput } from "../config/types.secrets.js";
 
 export function shouldRequireGatewayTokenForInstall(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   _env: NodeJS.ProcessEnv,
 ): boolean {
   const mode = cfg.gateway?.auth?.mode;

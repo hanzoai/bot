@@ -1,6 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { TelegramTopicConfig } from "../config/types.js";
 import { loadConfig } from "../config/config.js";
 import { buildTelegramMessageContextForTest } from "./bot-message-context.test-harness.js";
+
+/**
+ * Build a topic config mock.  Per-topic agentId routing was refactored into
+ * agent bindings; the field no longer exists on TelegramTopicConfig.  These
+ * mocks supply valid TelegramTopicConfig objects for type safety.
+ */
+function topicMock(overrides?: Partial<TelegramTopicConfig>): TelegramTopicConfig {
+  return { enabled: true, ...overrides };
+}
 
 const { defaultRouteConfig } = vi.hoisted(() => ({
   defaultRouteConfig: {
@@ -44,7 +54,7 @@ describe("buildTelegramMessageContext per-topic agentId routing", () => {
       resolveGroupActivation: () => true,
       resolveTelegramGroupConfig: () => ({
         groupConfig: { requireMention: false },
-        topicConfig: { systemPrompt: "Be nice" },
+        topicConfig: topicMock({ systemPrompt: "Be nice" }),
       }),
     });
 
@@ -71,7 +81,7 @@ describe("buildTelegramMessageContext per-topic agentId routing", () => {
       resolveGroupActivation: () => true,
       resolveTelegramGroupConfig: () => ({
         groupConfig: { requireMention: false },
-        topicConfig: { agentId: "zu", systemPrompt: "I am Zu" },
+        topicConfig: topicMock({ systemPrompt: "I am Zu" }),
       }),
     });
 
@@ -81,7 +91,7 @@ describe("buildTelegramMessageContext per-topic agentId routing", () => {
   });
 
   it("different topics route to different agents", async () => {
-    const buildForTopic = async (threadId: number, agentId: string) =>
+    const buildForTopic = async (threadId: number) =>
       await buildTelegramMessageContextForTest({
         message: {
           message_id: 1,
@@ -100,13 +110,13 @@ describe("buildTelegramMessageContext per-topic agentId routing", () => {
         resolveGroupActivation: () => true,
         resolveTelegramGroupConfig: () => ({
           groupConfig: { requireMention: false },
-          topicConfig: { agentId },
+          topicConfig: topicMock(),
         }),
       });
 
-    const ctxA = await buildForTopic(1, "main");
-    const ctxB = await buildForTopic(3, "zu");
-    const ctxC = await buildForTopic(5, "q");
+    const ctxA = await buildForTopic(1);
+    const ctxB = await buildForTopic(3);
+    const ctxC = await buildForTopic(5);
 
     expect(ctxA?.ctxPayload?.SessionKey).toContain("agent:main:");
     expect(ctxB?.ctxPayload?.SessionKey).toContain("agent:zu:");
@@ -135,7 +145,7 @@ describe("buildTelegramMessageContext per-topic agentId routing", () => {
       resolveGroupActivation: () => true,
       resolveTelegramGroupConfig: () => ({
         groupConfig: { requireMention: false },
-        topicConfig: { agentId: "   ", systemPrompt: "Be nice" },
+        topicConfig: topicMock({ systemPrompt: "Be nice" }),
       }),
     });
 
@@ -170,7 +180,7 @@ describe("buildTelegramMessageContext per-topic agentId routing", () => {
       resolveGroupActivation: () => true,
       resolveTelegramGroupConfig: () => ({
         groupConfig: { requireMention: false },
-        topicConfig: { agentId: "ghost" },
+        topicConfig: topicMock(),
       }),
     });
 
@@ -195,7 +205,7 @@ describe("buildTelegramMessageContext per-topic agentId routing", () => {
       resolveGroupActivation: () => true,
       resolveTelegramGroupConfig: () => ({
         groupConfig: { requireMention: false },
-        topicConfig: { agentId: "support", systemPrompt: "I am support" },
+        topicConfig: topicMock({ systemPrompt: "I am support" }),
       }),
     });
 

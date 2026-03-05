@@ -206,7 +206,7 @@ describe("maybeRepairGatewayServiceConfig", () => {
     });
     mocks.install.mockResolvedValue(undefined);
 
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       gateway: {
         auth: {
           mode: "token",

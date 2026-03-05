@@ -135,8 +135,7 @@ describe("deliverDiscordReply", () => {
     expect(sendMessageDiscordMock).not.toHaveBeenCalled();
   });
 
-  it("passes mediaLocalRoots through media sends", async () => {
-    const mediaLocalRoots = ["/tmp/workspace-agent"] as const;
+  it("sends multiple media URLs across separate sends", async () => {
     await deliverDiscordReply({
       replies: [
         {
@@ -148,7 +147,6 @@ describe("deliverDiscordReply", () => {
       token: "token",
       runtime,
       textLimit: 2000,
-      mediaLocalRoots,
     });
 
     expect(sendMessageDiscordMock).toHaveBeenCalledTimes(2);
@@ -159,7 +157,6 @@ describe("deliverDiscordReply", () => {
       expect.objectContaining({
         token: "token",
         mediaUrl: "https://example.com/first.png",
-        mediaLocalRoots,
       }),
     );
     expect(sendMessageDiscordMock).toHaveBeenNthCalledWith(
@@ -169,7 +166,6 @@ describe("deliverDiscordReply", () => {
       expect.objectContaining({
         token: "token",
         mediaUrl: "https://example.com/second.png",
-        mediaLocalRoots,
       }),
     );
   });

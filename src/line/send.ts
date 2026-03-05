@@ -1,5 +1,5 @@
 import { messagingApi } from "@line/bot-sdk";
-import type { BotConfig as OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { LineSendResult } from "./types.js";
 import { loadConfig } from "../config/config.js";
 import { logVerbose } from "../globals.js";
@@ -26,7 +26,7 @@ const userProfileCache = new Map<
 const PROFILE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 interface LineSendOpts {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   channelAccessToken?: string;
   accountId?: string;
   verbose?: boolean;
