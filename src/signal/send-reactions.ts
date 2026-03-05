@@ -2,14 +2,14 @@
  * Signal reactions via signal-cli JSON-RPC API
  */
 
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { loadConfig } from "../config/config.js";
 import { resolveSignalAccount } from "./accounts.js";
 import { signalRpcRequest } from "./client.js";
 import { resolveSignalRpcContext } from "./rpc-context.js";
 
 export type SignalReactionOpts = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   baseUrl?: string;
   account?: string;
   accountId?: string;
