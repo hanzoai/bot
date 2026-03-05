@@ -26,7 +26,7 @@ import {
 import { getSlashCommands } from "./commands.js";
 import { ChatLog } from "./components/chat-log.js";
 import { CustomEditor } from "./components/custom-editor.js";
-import { GatewayChatClient } from "./gateway-chat.js";
+import { GatewayChatClient, type GatewayEvent } from "./gateway-chat.js";
 import { editorTheme, theme } from "./theme/theme.js";
 import { createCommandHandlers } from "./tui-command-handlers.js";
 import { createEventHandlers } from "./tui-event-handlers.js";
@@ -471,7 +471,7 @@ export async function runTui(opts: TuiOptions) {
     localRunIds.clear();
   };
 
-  const client = await GatewayChatClient.connect({
+  const client = new GatewayChatClient({
     url: opts.url,
     token: opts.token,
     password: opts.password,
@@ -889,7 +889,7 @@ export async function runTui(opts: TuiOptions) {
     void loadHistory();
   };
 
-  client.onEvent = (evt) => {
+  client.onEvent = (evt: GatewayEvent) => {
     if (evt.event === "chat") {
       handleChatEvent(evt.payload);
     }
@@ -919,7 +919,7 @@ export async function runTui(opts: TuiOptions) {
     })();
   };
 
-  client.onDisconnected = (reason) => {
+  client.onDisconnected = (reason: string) => {
     isConnected = false;
     wasDisconnected = true;
     historyLoaded = false;
@@ -934,7 +934,7 @@ export async function runTui(opts: TuiOptions) {
     tui.requestRender();
   };
 
-  client.onGap = (info) => {
+  client.onGap = (info: { expected: number; received: number }) => {
     setConnectionStatus(`event gap: expected ${info.expected}, got ${info.received}`, 5000);
     tui.requestRender();
   };
