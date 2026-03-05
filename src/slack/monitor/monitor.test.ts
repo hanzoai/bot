@@ -227,7 +227,6 @@ describe("resolveSlackSystemEventSessionKey", () => {
       ctx.resolveSlackSystemEventSessionKey({
         channelId: "D123",
         channelType: "im",
-        senderId: "U123",
       }),
     ).toBe("agent:ops-dm:main");
   });
