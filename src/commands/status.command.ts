@@ -4,6 +4,7 @@ import { formatCliCommand } from "../cli/command-format.js";
 import { withProgress } from "../cli/progress.js";
 import { loadConfig, resolveGatewayPort } from "../config/config.js";
 import { buildGatewayConnectionDetails, callGateway } from "../gateway/call.js";
+import { resolveGatewayProbeAuth } from "../gateway/probe-auth.js";
 import { info } from "../globals.js";
 import { formatTimeAgo } from "../infra/format-time/format-relative.ts";
 import { formatUsageReportLines, loadProviderUsageSummary } from "../infra/provider-usage.js";
@@ -117,8 +118,6 @@ export async function statusCommand(
     gatewayConnection,
     remoteUrlMissing,
     gatewayMode,
-    gatewayProbeAuth,
-    gatewayProbeAuthWarning,
     gatewayProbe,
     gatewayReachable,
     gatewaySelf,
@@ -129,6 +128,14 @@ export async function statusCommand(
     memory,
     memoryPlugin,
   } = scan;
+
+  // Derive probe auth from config (same approach as status-all).
+  const isRemoteMode = gatewayMode === "remote";
+  const gatewayProbeAuth = resolveGatewayProbeAuth({
+    cfg,
+    mode: isRemoteMode && !remoteUrlMissing ? "remote" : "local",
+  });
+  const gatewayProbeAuthWarning: string | null = null;
 
   const usage = opts.usage
     ? await withProgress(
