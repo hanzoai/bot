@@ -1,6 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import type {
   GatewayAuthConfig,
+  GatewayIamConfig,
   GatewayTailscaleMode,
   GatewayTrustedProxyConfig,
 } from "../config/config.js";
@@ -19,7 +20,7 @@ import {
   resolveClientIp,
 } from "./net.js";
 
-export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy";
+export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
 export type ResolvedGatewayAuthModeSource =
   | "override"
   | "config"
@@ -34,6 +35,7 @@ export type ResolvedGatewayAuth = {
   password?: string;
   allowTailscale: boolean;
   trustedProxy?: GatewayTrustedProxyConfig;
+  iam?: GatewayIamConfig;
 };
 
 export type GatewayAuthResult = {
@@ -241,6 +243,9 @@ export function resolveGatewayAuth(params: {
     if (authOverride.trustedProxy !== undefined) {
       authConfig.trustedProxy = authOverride.trustedProxy;
     }
+    if (authOverride.iam !== undefined) {
+      authConfig.iam = authOverride.iam;
+    }
   }
   const env = params.env ?? process.env;
   const resolvedCredentials = resolveGatewayCredentialsFromValues({
@@ -254,6 +259,7 @@ export function resolveGatewayAuth(params: {
   const token = resolvedCredentials.token;
   const password = resolvedCredentials.password;
   const trustedProxy = authConfig.trustedProxy;
+  const iam = authConfig.iam;
 
   let mode: ResolvedGatewayAuth["mode"];
   let modeSource: ResolvedGatewayAuth["modeSource"];
@@ -285,6 +291,7 @@ export function resolveGatewayAuth(params: {
     password,
     allowTailscale,
     trustedProxy,
+    iam,
   };
 }
 
@@ -309,6 +316,23 @@ export function assertGatewayAuthConfigured(auth: ResolvedGatewayAuth): void {
     if (!auth.trustedProxy.userHeader || auth.trustedProxy.userHeader.trim() === "") {
       throw new Error(
         "gateway auth mode is trusted-proxy, but trustedProxy.userHeader is empty (set gateway.auth.trustedProxy.userHeader)",
+      );
+    }
+  }
+  if (auth.mode === "iam") {
+    if (!auth.iam) {
+      throw new Error(
+        "gateway auth mode is iam, but no iam config was provided (set gateway.auth.iam)",
+      );
+    }
+    if (!auth.iam.serverUrl || auth.iam.serverUrl.trim() === "") {
+      throw new Error(
+        "gateway auth mode is iam, but iam.serverUrl is empty (set gateway.auth.iam.serverUrl)",
+      );
+    }
+    if (!auth.iam.clientId || auth.iam.clientId.trim() === "") {
+      throw new Error(
+        "gateway auth mode is iam, but iam.clientId is empty (set gateway.auth.iam.clientId)",
       );
     }
   }
