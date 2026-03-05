@@ -59,7 +59,7 @@ describe("resolveCliBackendConfig claude-cli defaults", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const resolved = resolveCliBackendConfig("claude-cli", cfg);
 
@@ -91,7 +91,7 @@ describe("resolveCliBackendConfig claude-cli defaults", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const resolved = resolveCliBackendConfig("claude-cli", cfg);
 
@@ -123,7 +123,7 @@ describe("resolveCliBackendConfig claude-cli defaults", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const resolved = resolveCliBackendConfig("claude-cli", cfg);
 

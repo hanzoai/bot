@@ -70,7 +70,7 @@ describe("noteSecurityWarnings gateway exposure", () => {
           token: { source: "env", provider: "default", id: "OPENCLAW_GATEWAY_TOKEN" },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     await noteSecurityWarnings(cfg);
     const message = lastMessage();
     expect(message).toContain("WARNING");
