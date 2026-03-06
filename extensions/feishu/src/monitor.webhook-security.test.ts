@@ -1,4 +1,4 @@
-import type { ClawdbotConfig } from "bot/plugin-sdk";
+import type { ClawdbotConfig } from "@hanzo/bot/plugin-sdk/feishu";
 import type { AddressInfo } from "node:net";
 import { createServer } from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";

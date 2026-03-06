@@ -276,7 +276,7 @@ describe("gateway canvas host auth", () => {
           await expectWsRejected(`ws://${host}:${listener.port}${activeWsPath}`, {});
         },
       });
-    }, "bot-canvas-auth-test-");
+    }, "openclaw-canvas-auth-test-");
   }, 60_000);
 
   test("denies canvas auth when trusted proxy omits forwarded client headers", async () => {

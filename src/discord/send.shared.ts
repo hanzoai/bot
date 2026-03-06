@@ -11,7 +11,7 @@ import { PollLayoutType } from "discord-api-types/payloads/v10";
 import { Routes, type APIChannel, type APIEmbed } from "discord-api-types/v10";
 import type { ChunkMode } from "../auto-reply/chunk.js";
 import type { RetryRunner } from "../infra/retry-policy.js";
-import { loadConfig } from "../config/config.js";
+import { loadConfig, type BotConfig } from "../config/config.js";
 import { buildOutboundMediaLoadOptions } from "../media/load-options.js";
 import { normalizePollDurationHours, normalizePollInput, type PollInput } from "../polls.js";
 import { loadWebMedia } from "../web/media.js";
@@ -80,9 +80,10 @@ function parseRecipient(raw: string): DiscordRecipient {
 export async function parseAndResolveRecipient(
   raw: string,
   accountId?: string,
+  cfg?: BotConfig,
 ): Promise<DiscordRecipient> {
-  const cfg = loadConfig();
-  const accountInfo = resolveDiscordAccount({ cfg, accountId });
+  const resolvedCfg = cfg ?? loadConfig();
+  const accountInfo = resolveDiscordAccount({ cfg: resolvedCfg, accountId });
 
   // First try to resolve using directory lookup (handles usernames)
   const trimmed = raw.trim();
@@ -93,7 +94,7 @@ export async function parseAndResolveRecipient(
   const resolved = await resolveDiscordTarget(
     raw,
     {
-      cfg,
+      cfg: resolvedCfg,
       accountId: accountInfo.accountId,
     },
     parseOptions,

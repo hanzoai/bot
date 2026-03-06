@@ -1,9 +1,8 @@
 import type { BotConfig, GatewayAuthConfig } from "../config/config.js";
-import type { SecretInput } from "../config/types.secrets.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import { ensureAuthProfileStore } from "../agents/auth-profiles.js";
-import { isSecretRef } from "../config/types.secrets.js";
+import { isSecretRef, type SecretInput } from "../config/types.secrets.js";
 import { promptAuthChoiceGrouped } from "./auth-choice-prompt.js";
 import { applyAuthChoice, resolvePreferredProviderForAuthChoice } from "./auth-choice.js";
 import {
@@ -19,7 +18,7 @@ import { randomToken } from "./onboard-helpers.js";
 type GatewayAuthChoice = "token" | "password" | "trusted-proxy";
 
 /** Reject undefined, empty, and common JS string-coercion artifacts for token auth. */
-function sanitizeTokenValue(value: string | undefined): string | undefined {
+function sanitizeTokenValue(value: unknown): string | undefined {
   if (typeof value !== "string") {
     return undefined;
   }
@@ -56,7 +55,6 @@ export function buildGatewayAuthConfig(params: {
   }
 
   if (params.mode === "token") {
-    // Preserve SecretRef tokens (e.g. env refs) without sanitizing.
     if (isSecretRef(params.token)) {
       return { ...base, mode: "token", token: params.token };
     }

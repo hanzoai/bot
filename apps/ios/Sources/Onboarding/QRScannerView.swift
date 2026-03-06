@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import BotKit
+=======
+import OpenClawKit
+>>>>>>> upstream/main
 import SwiftUI
 import VisionKit
 
@@ -72,7 +76,11 @@ struct QRScannerView: UIViewControllerRepresentable {
                     return
                 }
 
+<<<<<<< HEAD
                 // Fall back to deep link URL format (bot://gateway?...).
+=======
+                // Fall back to deep link URL format (openclaw://gateway?...).
+>>>>>>> upstream/main
                 if let url = URL(string: payload),
                    let route = DeepLinkParser.parse(url),
                    case let .gateway(link) = route

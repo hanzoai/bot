@@ -1,4 +1,4 @@
-import type { PluginRuntime } from "bot/plugin-sdk";
+import type { PluginRuntime } from "@hanzo/bot/plugin-sdk/matrix";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setMatrixRuntime } from "../../runtime.js";
 import { downloadMatrixMedia } from "./media.js";

@@ -6,7 +6,7 @@ import {
   storeDeviceAuthTokenInStore,
 } from "../../../src/shared/device-auth-store.js";
 
-const STORAGE_KEY = "bot.device.auth.v1";
+const STORAGE_KEY = "openclaw.device.auth.v1";
 
 function readStore(): DeviceAuthStore | null {
   try {

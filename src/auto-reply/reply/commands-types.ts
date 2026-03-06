@@ -26,6 +26,7 @@ export type CommandContext = {
 
 export type HandleCommandsParams = {
   ctx: MsgContext;
+  rootCtx?: MsgContext;
   cfg: BotConfig;
   command: CommandContext;
   agentId?: string;

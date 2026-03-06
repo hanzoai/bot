@@ -33,7 +33,7 @@ function makeBrowserState(): BrowserServerState {
           cdpPort: 18792,
           color: "#00AA00",
         },
-        bot: { cdpPort: 18800, color: "#FF4500" },
+        openclaw: { cdpPort: 18800, color: "#FF4500" },
       },
     },
     profiles: new Map(),

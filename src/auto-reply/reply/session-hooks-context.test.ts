@@ -54,7 +54,7 @@ describe("session hook context wiring", () => {
 
   it("passes sessionKey to session_start hook context", async () => {
     const sessionKey = "agent:main:telegram:direct:123";
-    const storePath = await createStorePath("bot-session-hook-start");
+    const storePath = await createStorePath("openclaw-session-hook-start");
     await writeStore(storePath, {});
     const cfg = { session: { store: storePath } } as BotConfig;
 
@@ -73,7 +73,7 @@ describe("session hook context wiring", () => {
 
   it("passes sessionKey to session_end hook context on reset", async () => {
     const sessionKey = "agent:main:telegram:direct:123";
-    const storePath = await createStorePath("bot-session-hook-end");
+    const storePath = await createStorePath("openclaw-session-hook-end");
     await writeStore(storePath, {
       [sessionKey]: {
         sessionId: "old-session",

@@ -7,7 +7,7 @@ import { createCronServiceState } from "./service/state.js";
 import { armTimer, onTimer } from "./service/timer.js";
 
 const noopLogger = createNoopLogger();
-const { makeStorePath } = createCronStoreHarness({ prefix: "bot-cron-tight-loop-" });
+const { makeStorePath } = createCronStoreHarness({ prefix: "openclaw-cron-tight-loop-" });
 
 /**
  * Create a cron job that is past-due AND has a stuck `runningAtMs` marker.
