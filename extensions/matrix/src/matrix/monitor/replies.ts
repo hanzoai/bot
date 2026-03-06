@@ -1,5 +1,5 @@
+import type { MarkdownTableMode, ReplyPayload, RuntimeEnv } from "@hanzo/bot/plugin-sdk/matrix";
 import type { MatrixClient } from "@vector-im/matrix-bot-sdk";
-import type { MarkdownTableMode, ReplyPayload, RuntimeEnv } from "bot/plugin-sdk";
 import { getMatrixRuntime } from "../../runtime.js";
 import { sendMessageMatrix } from "../send.js";
 

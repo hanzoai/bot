@@ -24,23 +24,23 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function localBotProfile(): Parameters<typeof createProfileResetOps>[0]["profile"] {
+function localOpenClawProfile(): Parameters<typeof createProfileResetOps>[0]["profile"] {
   return {
-    name: "@hanzo/bot",
+    name: "openclaw",
     cdpUrl: "http://127.0.0.1:18800",
     cdpHost: "127.0.0.1",
     cdpIsLoopback: true,
     cdpPort: 18800,
     color: "#f60",
-    driver: "@hanzo/bot",
+    driver: "openclaw",
     attachOnly: false,
   };
 }
 
-function createLocalBotResetOps(
+function createLocalOpenClawResetOps(
   params: Omit<Parameters<typeof createProfileResetOps>[0], "profile">,
 ) {
-  return createProfileResetOps({ profile: localBotProfile(), ...params });
+  return createProfileResetOps({ profile: localOpenClawProfile(), ...params });
 }
 
 function createStatelessResetOps(profile: Parameters<typeof createProfileResetOps>[0]["profile"]) {
@@ -49,14 +49,14 @@ function createStatelessResetOps(profile: Parameters<typeof createProfileResetOp
     getProfileState: () => ({ profile: {} as never, running: null }),
     stopRunningBrowser: vi.fn(async () => ({ stopped: false })),
     isHttpReachable: vi.fn(async () => false),
-    resolveBotUserDataDir: (name: string) => `/tmp/${name}`,
+    resolveOpenClawUserDataDir: (name: string) => `/tmp/${name}`,
   });
 }
 
 describe("createProfileResetOps", () => {
   it("stops extension relay for extension profiles", async () => {
     const ops = createStatelessResetOps({
-      ...localBotProfile(),
+      ...localOpenClawProfile(),
       name: "chrome",
       driver: "extension",
     });
@@ -73,7 +73,7 @@ describe("createProfileResetOps", () => {
 
   it("rejects remote non-extension profiles", async () => {
     const ops = createStatelessResetOps({
-      ...localBotProfile(),
+      ...localOpenClawProfile(),
       name: "remote",
       cdpUrl: "https://browserless.example/chrome",
       cdpHost: "browserless.example",
@@ -86,8 +86,8 @@ describe("createProfileResetOps", () => {
   });
 
   it("stops local browser, closes playwright connection, and trashes profile dir", async () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-reset-"));
-    const profileDir = path.join(tempRoot, "@hanzo/bot");
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-reset-"));
+    const profileDir = path.join(tempRoot, "openclaw");
     fs.mkdirSync(profileDir, { recursive: true });
 
     const stopRunningBrowser = vi.fn(async () => ({ stopped: true }));
@@ -97,11 +97,11 @@ describe("createProfileResetOps", () => {
       running: { pid: 1 } as never,
     }));
 
-    const ops = createLocalBotResetOps({
+    const ops = createLocalOpenClawResetOps({
       getProfileState,
       stopRunningBrowser,
       isHttpReachable,
-      resolveBotUserDataDir: () => profileDir,
+      resolveOpenClawUserDataDir: () => profileDir,
     });
 
     const result = await ops.resetProfile();
@@ -117,16 +117,16 @@ describe("createProfileResetOps", () => {
   });
 
   it("forces playwright disconnect when loopback cdp is occupied by non-owned process", async () => {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-reset-no-own-"));
-    const profileDir = path.join(tempRoot, "@hanzo/bot");
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-reset-no-own-"));
+    const profileDir = path.join(tempRoot, "openclaw");
     fs.mkdirSync(profileDir, { recursive: true });
 
     const stopRunningBrowser = vi.fn(async () => ({ stopped: false }));
-    const ops = createLocalBotResetOps({
+    const ops = createLocalOpenClawResetOps({
       getProfileState: () => ({ profile: {} as never, running: null }),
       stopRunningBrowser,
       isHttpReachable: vi.fn(async () => true),
-      resolveBotUserDataDir: () => profileDir,
+      resolveOpenClawUserDataDir: () => profileDir,
     });
 
     await ops.resetProfile();

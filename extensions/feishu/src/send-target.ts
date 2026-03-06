@@ -1,4 +1,4 @@
-import type { ClawdbotConfig } from "bot/plugin-sdk";
+import type { ClawdbotConfig } from "@hanzo/bot/plugin-sdk/feishu";
 import { resolveFeishuAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import { resolveReceiveIdType, normalizeFeishuTarget } from "./targets.js";

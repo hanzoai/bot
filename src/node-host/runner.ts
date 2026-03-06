@@ -11,7 +11,7 @@ import {
   NODE_EXEC_APPROVALS_COMMANDS,
   NODE_SYSTEM_RUN_COMMANDS,
 } from "../infra/node-commands.js";
-import { ensureBotCliOnPath } from "../infra/path-env.js";
+import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
@@ -27,7 +27,6 @@ import {
 export { buildNodeInvokeResultParams };
 
 type NodeHostRunOptions = {
-  gatewayUrl?: string;
   gatewayHost: string;
   gatewayPort: number;
   gatewayTls?: boolean;
@@ -103,7 +102,7 @@ class SkillBinsCache implements SkillBinsProvider {
 }
 
 function ensureNodePathEnv(): string {
-  ensureBotCliOnPath({ pathEnv: process.env.PATH ?? "" });
+  ensureOpenClawCliOnPath({ pathEnv: process.env.PATH ?? "" });
   const current = process.env.PATH ?? "";
   if (current.trim()) {
     return current;
@@ -162,7 +161,7 @@ export async function resolveNodeHostGatewayCredentials(params: {
     : params.config.gateway?.auth?.password;
 
   const token =
-    normalizeSecretInputString(env.BOT_GATEWAY_TOKEN) ??
+    normalizeSecretInputString(env.OPENCLAW_GATEWAY_TOKEN) ??
     (await resolveNodeHostSecretInputString({
       config: params.config,
       value: configuredToken,
@@ -174,11 +173,11 @@ export async function resolveNodeHostGatewayCredentials(params: {
     authMode === "password" ||
     (authMode !== "token" && authMode !== "none" && authMode !== "trusted-proxy" && !tokenCanWin);
   const shouldResolveConfiguredPassword =
-    !normalizeSecretInputString(env.BOT_GATEWAY_PASSWORD) &&
+    !normalizeSecretInputString(env.OPENCLAW_GATEWAY_PASSWORD) &&
     !tokenCanWin &&
     (isRemoteMode || localPasswordCanWin);
   const password =
-    normalizeSecretInputString(env.BOT_GATEWAY_PASSWORD) ??
+    normalizeSecretInputString(env.OPENCLAW_GATEWAY_PASSWORD) ??
     (shouldResolveConfiguredPassword
       ? await resolveNodeHostSecretInputString({
           config: params.config,
@@ -219,9 +218,10 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     env: process.env,
   });
 
-  const url = opts.gatewayUrl
-    ? opts.gatewayUrl
-    : `${gateway.tls ? "wss" : "ws"}://${gateway.host ?? "127.0.0.1"}:${gateway.port ?? 18789}`;
+  const host = gateway.host ?? "127.0.0.1";
+  const port = gateway.port ?? 18789;
+  const scheme = gateway.tls ? "wss" : "ws";
+  const url = `${scheme}://${host}:${port}`;
   const pathEnv = ensureNodePathEnv();
   // eslint-disable-next-line no-console
   console.log(`node host PATH: ${pathEnv}`);
@@ -276,20 +276,5 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   }, pathEnv);
 
   client.start();
-
-  // Keep the process alive. The GatewayClient reconnect timer no longer uses
-  // .unref(), but an explicit keepalive interval guarantees the event loop
-  // never drains during transient disconnections or backoff delays.
-  const keepalive = setInterval(() => {}, 60_000);
-
-  // Graceful shutdown: clean up on SIGTERM/SIGINT.
-  const shutdown = () => {
-    clearInterval(keepalive);
-    client.stop();
-    process.exit(0);
-  };
-  process.once("SIGTERM", shutdown);
-  process.once("SIGINT", shutdown);
-
   await new Promise(() => {});
 }

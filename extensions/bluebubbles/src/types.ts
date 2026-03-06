@@ -1,6 +1,6 @@
-import type { DmPolicy, GroupPolicy } from "bot/plugin-sdk";
+import type { DmPolicy, GroupPolicy } from "@hanzo/bot/plugin-sdk/bluebubbles";
 
-export type { DmPolicy, GroupPolicy } from "bot/plugin-sdk";
+export type { DmPolicy, GroupPolicy } from "@hanzo/bot/plugin-sdk/bluebubbles";
 
 export type BlueBubblesGroupConfig = {
   /** If true, only respond in this group when mentioned. */

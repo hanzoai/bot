@@ -5,7 +5,7 @@ const mocks = vi.hoisted(() => ({
   loadBotPlugins: vi.fn(),
 }));
 
-const TEST_WORKSPACE_ROOT = "/tmp/bot-test-workspace";
+const TEST_WORKSPACE_ROOT = "/tmp/openclaw-test-workspace";
 
 function normalizeChannel(value?: string) {
   return value?.trim().toLowerCase() ?? undefined;
