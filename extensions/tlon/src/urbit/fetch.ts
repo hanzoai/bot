@@ -1,5 +1,5 @@
-import type { LookupFn, SsrFPolicy } from "bot/plugin-sdk";
-import { fetchWithSsrFGuard } from "bot/plugin-sdk";
+import type { LookupFn, SsrFPolicy } from "@hanzo/bot/plugin-sdk/tlon";
+import { fetchWithSsrFGuard } from "@hanzo/bot/plugin-sdk/tlon";
 import { validateUrbitBaseUrl } from "./base-url.js";
 import { UrbitUrlError } from "./errors.js";
 

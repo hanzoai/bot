@@ -1,6 +1,6 @@
 import type { BotConfig } from "../config/config.js";
 import type { PluginRegistry } from "./registry.js";
-import type { BotPluginServiceContext, PluginLogger } from "./types.js";
+import type { OpenClawPluginServiceContext, PluginLogger } from "./types.js";
 import { STATE_DIR } from "../config/paths.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 
@@ -18,7 +18,7 @@ function createPluginLogger(): PluginLogger {
 function createServiceContext(params: {
   config: BotConfig;
   workspaceDir?: string;
-}): BotPluginServiceContext {
+}): OpenClawPluginServiceContext {
   return {
     config: params.config,
     workspaceDir: params.workspaceDir,

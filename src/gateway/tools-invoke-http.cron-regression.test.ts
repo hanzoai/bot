@@ -34,7 +34,7 @@ vi.mock("../plugins/tools.js", () => ({
   getPluginToolMeta: noPluginToolMeta,
 }));
 
-vi.mock("../agents/bot-tools.js", () => {
+vi.mock("../agents/openclaw-tools.js", () => {
   const tools = [
     {
       name: "cron",

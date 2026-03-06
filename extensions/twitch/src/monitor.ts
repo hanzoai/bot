@@ -5,8 +5,8 @@
  * resolves agent routes, and handles replies.
  */
 
-import type { ReplyPayload, BotConfig } from "bot/plugin-sdk";
-import { createReplyPrefixOptions } from "bot/plugin-sdk";
+import type { ReplyPayload, BotConfig } from "@hanzo/bot/plugin-sdk/twitch";
+import { createReplyPrefixOptions } from "@hanzo/bot/plugin-sdk/twitch";
 import type { TwitchAccountConfig, TwitchChatMessage } from "./types.js";
 import { checkTwitchAccessControl } from "./access-control.js";
 import { getOrCreateClientManager } from "./client-manager-registry.js";

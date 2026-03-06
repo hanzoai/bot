@@ -1,5 +1,5 @@
-import { fetchWithSsrFGuard } from "bot/plugin-sdk";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "@hanzo/bot/plugin-sdk/account-id";
+import { fetchWithSsrFGuard } from "@hanzo/bot/plugin-sdk/matrix";
 import type { CoreConfig } from "../../types.js";
 import type { MatrixAuth, MatrixResolvedConfig } from "./types.js";
 import { getMatrixRuntime } from "../../runtime.js";
@@ -195,7 +195,7 @@ export async function resolveMatrixAuth(params?: {
         type: "m.login.password",
         identifier: { type: "m.id.user", user: resolved.userId },
         password: resolved.password,
-        initial_device_display_name: resolved.deviceName ?? "Bot Gateway",
+        initial_device_display_name: resolved.deviceName ?? "OpenClaw Gateway",
       }),
     },
     auditContext: "matrix.login",

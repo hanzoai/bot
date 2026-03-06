@@ -1,4 +1,8 @@
-import type { MarkdownTableMode, BotConfig, OutboundReplyPayload } from "bot/plugin-sdk";
+import type {
+  MarkdownTableMode,
+  BotConfig,
+  OutboundReplyPayload,
+} from "@hanzo/bot/plugin-sdk/zalo";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import {
   createScopedPairingAccess,
@@ -11,7 +15,7 @@ import {
   sendMediaWithLeadingCaption,
   resolveWebhookPath,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/zalo";
 import type { ResolvedZaloAccount } from "./accounts.js";
 import {
   ZaloApiError,

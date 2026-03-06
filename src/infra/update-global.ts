@@ -10,7 +10,7 @@ export type CommandRunner = (
   options: { timeoutMs: number; cwd?: string; env?: NodeJS.ProcessEnv },
 ) => Promise<{ stdout: string; stderr: string; code: number | null }>;
 
-const PRIMARY_PACKAGE_NAME = "@hanzo/bot";
+const PRIMARY_PACKAGE_NAME = "openclaw";
 const ALL_PACKAGE_NAMES = [PRIMARY_PACKAGE_NAME] as const;
 const GLOBAL_RENAME_PREFIX = ".";
 const NPM_GLOBAL_INSTALL_QUIET_FLAGS = ["--no-fund", "--no-audit", "--loglevel=error"] as const;
@@ -159,13 +159,10 @@ export async function cleanupGlobalRenameDirs(params: {
 }): Promise<{ removed: string[] }> {
   const removed: string[] = [];
   const root = params.globalRoot.trim();
-  const rawName = params.packageName.trim();
-  if (!root || !rawName) {
+  const name = params.packageName.trim();
+  if (!root || !name) {
     return { removed };
   }
-  // For scoped packages like @hanzo/bot, npm renames the base directory (bot)
-  // inside the scope directory (@hanzo/), so use only the basename portion.
-  const name = rawName.includes("/") ? rawName.split("/").pop()! : rawName;
   const prefix = `${GLOBAL_RENAME_PREFIX}${name}-`;
   let entries: string[] = [];
   try {

@@ -1,4 +1,4 @@
-# Hanzo Bot docs i18n assets
+# OpenClaw docs i18n assets
 
 This folder stores **generated** and **config** files for documentation translations.
 

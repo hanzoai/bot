@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/twitch";
 import { afterEach, beforeEach, vi } from "vitest";
 
 export const BASE_TWITCH_TEST_ACCOUNT = {
