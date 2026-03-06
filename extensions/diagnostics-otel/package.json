@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-diagnostics-otel",
-  "version": "2026.3.1",
+  "version": "2026.3.5",
   "description": "Hanzo Bot diagnostics OpenTelemetry exporter",
   "type": "module",
   "dependencies": {
