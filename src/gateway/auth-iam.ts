@@ -71,20 +71,56 @@ export function getIamClient(config: GatewayIamConfig): IamClient {
 }
 
 // ---------------------------------------------------------------------------
+// JWKS URL rewriting (bypass Cloudflare/WAF on external JWKS endpoint)
+// ---------------------------------------------------------------------------
+
+/**
+ * When `jwksUrl` is configured, the OIDC discovery response's `jwks_uri` points
+ * to the external URL (e.g. `https://hanzo.id/.well-known/jwks`) which may be
+ * blocked by Cloudflare. We intercept `fetch` calls to rewrite the JWKS URL
+ * to the internal K8s service URL during token validation.
+ */
+function withJwksRewrite<T>(
+  jwksUrl: string,
+  externalHost: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const originalFetch = globalThis.fetch;
+  const externalJwksUrl = `${externalHost.replace(/\/+$/, "")}/.well-known/jwks`;
+
+  globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    if (url === externalJwksUrl || url.endsWith("/.well-known/jwks")) {
+      return originalFetch(jwksUrl, init);
+    }
+    return originalFetch(input, init);
+  };
+
+  return fn().finally(() => {
+    globalThis.fetch = originalFetch;
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Token validation
 // ---------------------------------------------------------------------------
 
 /**
  * Validate a JWT access token against IAM JWKS and extract user claims.
  *
- * Uses the @hanzo/iam SDK which performs OIDC discovery, JWKS key fetch,
- * and jose-based JWT verification (signature, issuer, audience, expiry).
+ * When `config.jwksUrl` is set, rewrites the JWKS fetch URL to bypass
+ * Cloudflare/WAF blocking. Otherwise uses the @hanzo/iam SDK directly.
  */
 export async function validateIamToken(
   token: string,
   config: GatewayIamConfig,
 ): Promise<GatewayIamAuthResult> {
-  let sdkResult = await validateToken(token, toIamConfig(config));
+  const validate = () => validateToken(token, toIamConfig(config));
+
+  // When jwksUrl is configured, intercept JWKS fetches to use the internal URL.
+  let sdkResult = config.jwksUrl
+    ? await withJwksRewrite(config.jwksUrl, config.serverUrl, validate)
+    : await validate();
 
   // The @hanzo/iam SDK's audience retry checks for "audience" in the jose
   // error message, but jose actually says '"aud" claim check failed'.
