@@ -96,10 +96,10 @@ export { ACP_ERROR_CODES, AcpRuntimeError } from "../acp/runtime/errors.js";
 export type { AcpRuntimeErrorCode } from "../acp/runtime/errors.js";
 export type {
   AnyAgentTool,
-  BotPluginConfigSchema,
+  OpenClawPluginConfigSchema,
   BotPluginApi,
-  BotPluginService,
-  BotPluginServiceContext,
+  OpenClawPluginService,
+  OpenClawPluginServiceContext,
   PluginLogger,
   ProviderAuthContext,
   ProviderAuthResult,
@@ -109,7 +109,19 @@ export type {
   GatewayRequestHandlerOptions,
   RespondFn,
 } from "../gateway/server-methods/types.js";
-export type { PluginRuntime, RuntimeLogger } from "../plugins/runtime/types.js";
+export type {
+  PluginRuntime,
+  RuntimeLogger,
+  SubagentRunParams,
+  SubagentRunResult,
+  SubagentWaitParams,
+  SubagentWaitResult,
+  SubagentGetSessionMessagesParams,
+  SubagentGetSessionMessagesResult,
+  SubagentGetSessionParams,
+  SubagentGetSessionResult,
+  SubagentDeleteSessionParams,
+} from "../plugins/runtime/types.js";
 export { normalizePluginHttpPath } from "../plugins/http-path.js";
 export { registerPluginHttpRoute } from "../plugins/http-registry.js";
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
@@ -308,7 +320,7 @@ export type {
   WindowsSpawnProgram,
   WindowsSpawnResolution,
 } from "./windows-spawn.js";
-export { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
+export { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
 export {
   runPluginCommandWithTimeout,
   type PluginCommandRunOptions,
@@ -398,7 +410,7 @@ export type { ScopeTokenProvider } from "./fetch-auth.js";
 export { rawDataToString } from "../infra/ws.js";
 export { isWSLSync, isWSL2Sync, isWSLEnv } from "../infra/wsl.js";
 export { isTruthyEnvValue } from "../infra/env.js";
-export { resolveToolsBySender } from "../config/group-policy.js";
+export { resolveChannelGroupRequireMention, resolveToolsBySender } from "../config/group-policy.js";
 export {
   buildPendingHistoryContextFromMap,
   clearHistoryEntries,
@@ -694,6 +706,21 @@ export type { ProcessedLineMessage } from "../line/markdown-to-line.js";
 
 // Media utilities
 export { loadWebMedia, type WebMediaResult } from "../web/media.js";
+
+// Context engine
+export type {
+  ContextEngine,
+  ContextEngineInfo,
+  AssembleResult,
+  CompactResult,
+  IngestResult,
+  IngestBatchResult,
+  BootstrapResult,
+  SubagentSpawnPreparation,
+  SubagentEndReason,
+} from "../context-engine/types.js";
+export { registerContextEngine } from "../context-engine/registry.js";
+export type { ContextEngineFactory } from "../context-engine/registry.js";
 
 // Security utilities
 export { redactSensitiveText } from "../logging/redact.js";

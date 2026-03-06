@@ -1,4 +1,8 @@
-import type { ChannelAccountSnapshot, ChannelGatewayContext, BotConfig } from "bot/plugin-sdk";
+import type {
+  ChannelAccountSnapshot,
+  ChannelGatewayContext,
+  BotConfig,
+} from "@hanzo/bot/plugin-sdk/test-utils";
 import { vi } from "vitest";
 import { createRuntimeEnv } from "./runtime-env.js";
 

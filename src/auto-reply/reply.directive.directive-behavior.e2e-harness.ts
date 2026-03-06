@@ -1,6 +1,5 @@
 import path from "node:path";
 import { afterEach, beforeEach, expect, vi } from "vitest";
-import type { BotConfig } from "../config/config.js";
 import { withTempHome as withTempHomeBase } from "../../test/helpers/temp-home.js";
 import { loadModelCatalog } from "../agents/model-catalog.js";
 import { runEmbeddedPiAgent } from "../agents/pi-embedded.js";
@@ -58,10 +57,10 @@ export async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise
     },
     {
       env: {
-        BOT_AGENT_DIR: (home) => path.join(home, ".bot", "agent"),
-        PI_CODING_AGENT_DIR: (home) => path.join(home, ".bot", "agent"),
+        OPENCLAW_AGENT_DIR: (home) => path.join(home, ".openclaw", "agent"),
+        PI_CODING_AGENT_DIR: (home) => path.join(home, ".openclaw", "agent"),
       },
-      prefix: "bot-reply-",
+      prefix: "openclaw-reply-",
     },
   );
 }
@@ -78,7 +77,7 @@ export function makeWhatsAppDirectiveConfig(
   return {
     agents: {
       defaults: {
-        workspace: path.join(home, "@hanzo/bot"),
+        workspace: path.join(home, "openclaw"),
         ...defaults,
       },
     },
@@ -149,7 +148,7 @@ export function makeRestrictedElevatedDisabledConfig(home: string) {
     agents: {
       defaults: {
         model: "anthropic/claude-opus-4-5",
-        workspace: path.join(home, "@hanzo/bot"),
+        workspace: path.join(home, "openclaw"),
       },
       list: [
         {
@@ -167,5 +166,5 @@ export function makeRestrictedElevatedDisabledConfig(home: string) {
     },
     channels: { whatsapp: { allowFrom: ["+1222"] } },
     session: { store: path.join(home, "sessions.json") },
-  } as BotConfig;
+  } as const;
 }

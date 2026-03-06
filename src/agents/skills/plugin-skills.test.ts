@@ -30,7 +30,7 @@ function buildRegistry(params: { acpxRoot: string; helperRoot: string }): Plugin
         origin: "workspace",
         rootDir: params.acpxRoot,
         source: params.acpxRoot,
-        manifestPath: path.join(params.acpxRoot, "bot.plugin.json"),
+        manifestPath: path.join(params.acpxRoot, "openclaw.plugin.json"),
       },
       {
         id: "helper",
@@ -41,7 +41,7 @@ function buildRegistry(params: { acpxRoot: string; helperRoot: string }): Plugin
         origin: "workspace",
         rootDir: params.helperRoot,
         source: params.helperRoot,
-        manifestPath: path.join(params.helperRoot, "bot.plugin.json"),
+        manifestPath: path.join(params.helperRoot, "openclaw.plugin.json"),
       },
     ],
   };
@@ -63,16 +63,16 @@ function createSinglePluginRegistry(params: {
         origin: "workspace",
         rootDir: params.pluginRoot,
         source: params.pluginRoot,
-        manifestPath: path.join(params.pluginRoot, "bot.plugin.json"),
+        manifestPath: path.join(params.pluginRoot, "openclaw.plugin.json"),
       },
     ],
   };
 }
 
 async function setupAcpxAndHelperRegistry() {
-  const workspaceDir = await tempDirs.make("bot-");
-  const acpxRoot = await tempDirs.make("bot-acpx-plugin-");
-  const helperRoot = await tempDirs.make("bot-helper-plugin-");
+  const workspaceDir = await tempDirs.make("openclaw-");
+  const acpxRoot = await tempDirs.make("openclaw-acpx-plugin-");
+  const helperRoot = await tempDirs.make("openclaw-helper-plugin-");
   await fs.mkdir(path.join(acpxRoot, "skills"), { recursive: true });
   await fs.mkdir(path.join(helperRoot, "skills"), { recursive: true });
   hoisted.loadPluginManifestRegistry.mockReturnValue(buildRegistry({ acpxRoot, helperRoot }));
@@ -80,9 +80,9 @@ async function setupAcpxAndHelperRegistry() {
 }
 
 async function setupPluginOutsideSkills() {
-  const workspaceDir = await tempDirs.make("bot-");
-  const pluginRoot = await tempDirs.make("bot-plugin-");
-  const outsideDir = await tempDirs.make("bot-outside-");
+  const workspaceDir = await tempDirs.make("openclaw-");
+  const pluginRoot = await tempDirs.make("openclaw-plugin-");
+  const outsideDir = await tempDirs.make("openclaw-outside-");
   const outsideSkills = path.join(outsideDir, "skills");
   return { workspaceDir, pluginRoot, outsideSkills };
 }

@@ -18,10 +18,10 @@ describe("lookupContextTokens", () => {
       }),
     }));
     vi.doMock("./models-config.js", () => ({
-      ensureBotModelsJson: vi.fn(async () => {}),
+      ensureOpenClawModelsJson: vi.fn(async () => {}),
     }));
     vi.doMock("./agent-paths.js", () => ({
-      resolveBotAgentDir: () => "/tmp/bot-agent",
+      resolveOpenClawAgentDir: () => "/tmp/openclaw-agent",
     }));
     vi.doMock("./pi-model-discovery.js", () => ({
       discoverAuthStorage: vi.fn(() => ({})),
@@ -40,10 +40,10 @@ describe("lookupContextTokens", () => {
       loadConfig: loadConfigMock,
     }));
     vi.doMock("./models-config.js", () => ({
-      ensureBotModelsJson: vi.fn(async () => {}),
+      ensureOpenClawModelsJson: vi.fn(async () => {}),
     }));
     vi.doMock("./agent-paths.js", () => ({
-      resolveBotAgentDir: () => "/tmp/bot-agent",
+      resolveOpenClawAgentDir: () => "/tmp/openclaw-agent",
     }));
     vi.doMock("./pi-model-discovery.js", () => ({
       discoverAuthStorage: vi.fn(() => ({})),
@@ -53,7 +53,7 @@ describe("lookupContextTokens", () => {
     }));
 
     const argvSnapshot = process.argv;
-    process.argv = ["node", "@hanzo/bot", "--profile", "--", "config", "validate"];
+    process.argv = ["node", "openclaw", "--profile", "--", "config", "validate"];
     try {
       await import("./context.js");
       expect(loadConfigMock).toHaveBeenCalledTimes(1);
@@ -83,10 +83,10 @@ describe("lookupContextTokens", () => {
       loadConfig: loadConfigMock,
     }));
     vi.doMock("./models-config.js", () => ({
-      ensureBotModelsJson: vi.fn(async () => {}),
+      ensureOpenClawModelsJson: vi.fn(async () => {}),
     }));
     vi.doMock("./agent-paths.js", () => ({
-      resolveBotAgentDir: () => "/tmp/bot-agent",
+      resolveOpenClawAgentDir: () => "/tmp/openclaw-agent",
     }));
     vi.doMock("./pi-model-discovery.js", () => ({
       discoverAuthStorage: vi.fn(() => ({})),
@@ -96,7 +96,7 @@ describe("lookupContextTokens", () => {
     }));
 
     const argvSnapshot = process.argv;
-    process.argv = ["node", "@hanzo/bot", "config", "validate"];
+    process.argv = ["node", "openclaw", "config", "validate"];
     try {
       const { lookupContextTokens } = await import("./context.js");
       expect(lookupContextTokens("openrouter/claude-sonnet")).toBeUndefined();

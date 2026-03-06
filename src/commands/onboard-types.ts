@@ -50,7 +50,6 @@ export type AuthChoice =
   | "byteplus-api-key"
   | "qianfan-api-key"
   | "custom-api-key"
-  | "hanzo-cloud"
   | "skip";
 export type AuthChoiceGroupId =
   | "openai"

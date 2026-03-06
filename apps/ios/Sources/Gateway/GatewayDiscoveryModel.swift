@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import BotKit
+=======
+import OpenClawKit
+>>>>>>> upstream/main
 import Foundation
 import Network
 import Observation
@@ -52,6 +56,7 @@ final class GatewayDiscoveryModel {
         if !self.browsers.isEmpty { return }
         self.appendDebugLog("start()")
 
+<<<<<<< HEAD
         for domain in HanzoBotBonjour.gatewayServiceDomains {
             let params = NWParameters.tcp
             params.includePeerToPeer = true
@@ -61,6 +66,14 @@ final class GatewayDiscoveryModel {
 
             browser.stateUpdateHandler = { [weak self] state in
                 Task { @MainActor in
+=======
+        for domain in OpenClawBonjour.gatewayServiceDomains {
+            let browser = GatewayDiscoveryBrowserSupport.makeBrowser(
+                serviceType: OpenClawBonjour.gatewayServiceType,
+                domain: domain,
+                queueLabelPrefix: "ai.openclaw.ios.gateway-discovery",
+                onState: { [weak self] state in
+>>>>>>> upstream/main
                     guard let self else { return }
                     self.statesByDomain[domain] = state
                     self.updateStatusText()
@@ -99,7 +112,10 @@ final class GatewayDiscoveryModel {
                 })
 
             self.browsers[domain] = browser
+<<<<<<< HEAD
             browser.start(queue: DispatchQueue(label: "ai.hanzo.bot.ios.gateway-discovery.\(domain)"))
+=======
+>>>>>>> upstream/main
         }
     }
 
@@ -163,7 +179,11 @@ final class GatewayDiscoveryModel {
 
     private static func prettifyInstanceName(_ decodedName: String) -> String {
         let normalized = decodedName.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+<<<<<<< HEAD
         let stripped = normalized.replacingOccurrences(of: " (HanzoBot)", with: "")
+=======
+        let stripped = normalized.replacingOccurrences(of: " (OpenClaw)", with: "")
+>>>>>>> upstream/main
             .replacingOccurrences(of: #"\s+\(\d+\)$"#, with: "", options: .regularExpression)
         return stripped.trimmingCharacters(in: .whitespacesAndNewlines)
     }

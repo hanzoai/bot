@@ -1,23 +1,23 @@
 ---
-summary: "CLI reference for `hanzo-bot qr` (generate iOS pairing QR + setup code)"
+summary: "CLI reference for `openclaw qr` (generate iOS pairing QR + setup code)"
 read_when:
   - You want to pair the iOS app with a gateway quickly
   - You need setup-code output for remote/manual sharing
 title: "qr"
 ---
 
-# `hanzo-bot qr`
+# `openclaw qr`
 
 Generate an iOS pairing QR and setup code from your current Gateway configuration.
 
 ## Usage
 
 ```bash
-hanzo-bot qr
-hanzo-bot qr --setup-code-only
-hanzo-bot qr --json
-hanzo-bot qr --remote
-hanzo-bot qr --url wss://gateway.example/ws --token '<token>'
+openclaw qr
+openclaw qr --setup-code-only
+openclaw qr --json
+openclaw qr --remote
+openclaw qr --url wss://gateway.example/ws --token '<token>'
 ```
 
 ## Options
@@ -35,8 +35,11 @@ hanzo-bot qr --url wss://gateway.example/ws --token '<token>'
 
 - `--token` and `--password` are mutually exclusive.
 - With `--remote`, if effectively active remote credentials are configured as SecretRefs and you do not pass `--token` or `--password`, the command resolves them from the active gateway snapshot. If gateway is unavailable, the command fails fast.
-- Without `--remote`, local `gateway.auth.password` SecretRefs are resolved when password auth can win (explicit `gateway.auth.mode="password"` or inferred password mode with no winning token from auth/env), and no CLI auth override is passed.
+- Without `--remote`, local gateway auth SecretRefs are resolved when no CLI auth override is passed:
+  - `gateway.auth.token` resolves when token auth can win (explicit `gateway.auth.mode="token"` or inferred mode where no password source wins).
+  - `gateway.auth.password` resolves when password auth can win (explicit `gateway.auth.mode="password"` or inferred mode with no winning token from auth/env).
+- If both `gateway.auth.token` and `gateway.auth.password` are configured (including SecretRefs) and `gateway.auth.mode` is unset, setup-code resolution fails until mode is set explicitly.
 - Gateway version skew note: this command path requires a gateway that supports `secrets.resolve`; older gateways return an unknown-method error.
 - After scanning, approve device pairing with:
-  - `hanzo-bot devices list`
-  - `hanzo-bot devices approve <requestId>`
+  - `openclaw devices list`
+  - `openclaw devices approve <requestId>`

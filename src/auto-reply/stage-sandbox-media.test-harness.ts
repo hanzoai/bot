@@ -32,7 +32,7 @@ export function createSandboxMediaStageConfig(home: string): BotConfig {
     agents: {
       defaults: {
         model: "anthropic/claude-opus-4-5",
-        workspace: join(home, "@hanzo/bot"),
+        workspace: join(home, "openclaw"),
         sandbox: {
           mode: "non-main",
           workspaceRoot: join(home, "sandboxes"),

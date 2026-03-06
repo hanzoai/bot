@@ -1,4 +1,4 @@
-import type { BaseProbeResult } from "bot/plugin-sdk";
+import type { BaseProbeResult } from "@hanzo/bot/plugin-sdk/irc";
 import type {
   BlockStreamingCoalesceConfig,
   DmConfig,
@@ -8,7 +8,7 @@ import type {
   GroupToolPolicyConfig,
   MarkdownConfig,
   BotConfig,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/irc";
 
 export type IrcChannelConfig = {
   requireMention?: boolean;

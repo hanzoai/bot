@@ -1,4 +1,4 @@
-import type { BotPluginApi, BotPluginToolContext } from "bot/plugin-sdk/lobster";
+import type { BotPluginApi, OpenClawPluginToolContext } from "@hanzo/bot/plugin-sdk/lobster";
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -46,13 +46,14 @@ function fakeApi(overrides: Partial<BotPluginApi> = {}): BotPluginApi {
     registerHook() {},
     registerHttpRoute() {},
     registerCommand() {},
+    registerContextEngine() {},
     on() {},
     resolvePath: (p) => p,
     ...overrides,
   };
 }
 
-function fakeCtx(overrides: Partial<BotPluginToolContext> = {}): BotPluginToolContext {
+function fakeCtx(overrides: Partial<OpenClawPluginToolContext> = {}): OpenClawPluginToolContext {
   return {
     config: {},
     workspaceDir: "/tmp",
@@ -297,7 +298,7 @@ describe("lobster plugin tool", () => {
 
   it("can be gated off in sandboxed contexts", async () => {
     const api = fakeApi();
-    const factoryTool = (ctx: BotPluginToolContext) => {
+    const factoryTool = (ctx: OpenClawPluginToolContext) => {
       if (ctx.sandboxed) {
         return null;
       }

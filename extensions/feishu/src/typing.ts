@@ -1,4 +1,4 @@
-import type { ClawdbotConfig, RuntimeEnv } from "bot/plugin-sdk";
+import type { ClawdbotConfig, RuntimeEnv } from "@hanzo/bot/plugin-sdk/feishu";
 import { resolveFeishuAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import { getFeishuRuntime } from "./runtime.js";

@@ -1,13 +1,13 @@
 {
-  "name": "@hanzo/bot-mattermost",
-  "version": "2026.3.5",
-  "private": true,
-  "description": "Hanzo Bot Mattermost channel plugin",
+  "name": "@openclaw/mattermost",
+  "version": "2026.3.6",
+  "description": "OpenClaw Mattermost channel plugin",
   "type": "module",
-  "devDependencies": {
-    "@hanzo/bot": "workspace:*"
+  "dependencies": {
+    "ws": "^8.19.0",
+    "zod": "^4.3.6"
   },
-  "bot": {
+  "openclaw": {
     "extensions": [
       "./index.ts"
     ],
@@ -21,7 +21,7 @@
       "order": 65
     },
     "install": {
-      "npmSpec": "@hanzo/bot-mattermost",
+      "npmSpec": "@openclaw/mattermost",
       "localPath": "extensions/mattermost",
       "defaultChoice": "npm"
     }
