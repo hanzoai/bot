@@ -267,6 +267,18 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
 
+  extensions/ci-fix-loop:
+    devDependencies:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
+
+  extensions/continuous-learning:
+    devDependencies:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
+
   extensions/copilot-proxy: {}
 
   extensions/diagnostics-otel:
@@ -333,6 +345,18 @@ importers:
       zod:
         specifier: ^4.3.6
         version: 4.3.6
+
+  extensions/flow:
+    devDependencies:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
+
+  extensions/google-antigravity-auth:
+    devDependencies:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
 
   extensions/google-gemini-cli-auth: {}
 
@@ -446,6 +470,12 @@ importers:
 
   extensions/open-prose: {}
 
+  extensions/self-improvement:
+    devDependencies:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
+
   extensions/signal: {}
 
   extensions/slack: {}
@@ -529,15 +559,21 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
 
+  packages/bot:
+    dependencies:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
+
   packages/clawdbot:
     dependencies:
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   packages/moltbot:
     dependencies:
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
