@@ -44,9 +44,10 @@ hanzo-bot channels logout --channel whatsapp
 
 ## Troubleshooting
 
-- Run `hanzo-bot status --deep` for a broad probe.
-- Use `hanzo-bot doctor` for guided fixes.
-- `hanzo-bot channels list` prints `Claude: HTTP 403 ... user:profile` → usage snapshot needs the `user:profile` scope. Use `--no-usage`, or provide a claude.ai session key (`CLAUDE_WEB_SESSION_KEY` / `CLAUDE_WEB_COOKIE`), or re-auth via Claude Code CLI.
+- Run `bot status --deep` for a broad probe.
+- Use `bot doctor` for guided fixes.
+- `bot channels list` prints `Claude: HTTP 403 ... user:profile` → usage snapshot needs the `user:profile` scope. Use `--no-usage`, or provide a claude.ai session key (`CLAUDE_WEB_SESSION_KEY` / `CLAUDE_WEB_COOKIE`), or re-auth via Claude Code CLI.
+- `bot channels status` falls back to config-only summaries when the gateway is unreachable. If a supported channel credential is configured via SecretRef but unavailable in the current command path, it reports that account as configured with degraded notes instead of showing it as not configured.
 
 ## Capabilities probe
 
@@ -77,3 +78,4 @@ Notes:
 
 - Use `--kind user|group|auto` to force the target type.
 - Resolution prefers active matches when multiple entries share the same name.
+- `channels resolve` is read-only. If a selected account is configured via SecretRef but that credential is unavailable in the current command path, the command returns degraded unresolved results with notes instead of aborting the entire run.
