@@ -644,6 +644,7 @@ export const BotSchema = z
             iam: z
               .object({
                 serverUrl: z.string(),
+                jwksUrl: z.string().optional(),
                 clientId: z.string(),
                 clientSecret: z.string().optional().register(sensitive),
                 orgName: z.string().optional(),
