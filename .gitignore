@@ -84,14 +84,10 @@ USER.md
 # Agent credentials and memory (NEVER COMMIT)
 /memory/
 .agent/*.json
-!.agent/workflows/
 /local/
 package-lock.json
 .claude/worktrees/
 .claude/settings.local.json
-.agents/
-.agents
-.agent/
 skills-lock.json
 
 # Local iOS signing overrides
@@ -115,3 +111,4 @@ dist/protocol.schema.json
 # Synthing
 **/.stfolder/
 apps/android/.kotlin/
+.git-rewrite/
