@@ -469,7 +469,7 @@ export async function runMemoryFlushIfNeeded(params: {
   try {
     await runWithModelFallback({
       ...resolveModelFallbackOptions(params.followupRun.run),
-      run: (provider, model) => {
+      run: async (provider, model, runOptions) => {
         const { authProfile, embeddedContext, senderContext } = buildEmbeddedRunContexts({
           run: params.followupRun.run,
           sessionCtx: params.sessionCtx,
@@ -482,6 +482,7 @@ export async function runMemoryFlushIfNeeded(params: {
           model,
           runId: flushRunId,
           authProfile,
+          allowRateLimitCooldownProbe: runOptions?.allowRateLimitCooldownProbe,
         });
         return runEmbeddedPiAgent({
           ...embeddedContext,

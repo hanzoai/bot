@@ -44,7 +44,67 @@ const KIMI_WEB_SEARCH_TOOL = {
 const SEARCH_CACHE = new Map<string, CacheEntry<Record<string, unknown>>>();
 const BRAVE_FRESHNESS_SHORTCUTS = new Set(["pd", "pw", "pm", "py"]);
 const BRAVE_FRESHNESS_RANGE = /^(\d{4}-\d{2}-\d{2})to(\d{4}-\d{2}-\d{2})$/;
-const BRAVE_SEARCH_LANG_CODE = /^[a-z]{2}$/i;
+const BRAVE_SEARCH_LANG_CODES = new Set([
+  "ar",
+  "eu",
+  "bn",
+  "bg",
+  "ca",
+  "zh-hans",
+  "zh-hant",
+  "hr",
+  "cs",
+  "da",
+  "nl",
+  "en",
+  "en-gb",
+  "et",
+  "fi",
+  "fr",
+  "gl",
+  "de",
+  "el",
+  "gu",
+  "he",
+  "hi",
+  "hu",
+  "is",
+  "it",
+  "jp",
+  "kn",
+  "ko",
+  "lv",
+  "lt",
+  "ms",
+  "ml",
+  "mr",
+  "nb",
+  "pl",
+  "pt-br",
+  "pt-pt",
+  "pa",
+  "ro",
+  "ru",
+  "sr",
+  "sk",
+  "sl",
+  "es",
+  "sv",
+  "ta",
+  "te",
+  "th",
+  "tr",
+  "uk",
+  "vi",
+]);
+const BRAVE_SEARCH_LANG_ALIASES: Record<string, string> = {
+  ja: "jp",
+  zh: "zh-hans",
+  "zh-cn": "zh-hans",
+  "zh-hk": "zh-hant",
+  "zh-sg": "zh-hans",
+  "zh-tw": "zh-hant",
+};
 const BRAVE_UI_LANG_LOCALE = /^([a-z]{2})-([a-z]{2})$/i;
 
 const WebSearchSchema = Type.Object({
@@ -81,6 +141,117 @@ const WebSearchSchema = Type.Object({
     }),
   ),
 });
+
+const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+const PERPLEXITY_DATE_PATTERN = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+
+function isoToPerplexityDate(iso: string): string | undefined {
+  const match = iso.match(ISO_DATE_PATTERN);
+  if (!match) {
+    return undefined;
+  }
+  const [, year, month, day] = match;
+  return `${parseInt(month, 10)}/${parseInt(day, 10)}/${year}`;
+}
+
+function normalizeToIsoDate(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (ISO_DATE_PATTERN.test(trimmed)) {
+    return isValidIsoDate(trimmed) ? trimmed : undefined;
+  }
+  const match = trimmed.match(PERPLEXITY_DATE_PATTERN);
+  if (match) {
+    const [, month, day, year] = match;
+    const iso = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    return isValidIsoDate(iso) ? iso : undefined;
+  }
+  return undefined;
+}
+
+function _createWebSearchSchema(provider: (typeof SEARCH_PROVIDERS)[number]) {
+  const baseSchema = {
+    query: Type.String({ description: "Search query string." }),
+    count: Type.Optional(
+      Type.Number({
+        description: "Number of results to return (1-10).",
+        minimum: 1,
+        maximum: MAX_SEARCH_COUNT,
+      }),
+    ),
+    country: Type.Optional(
+      Type.String({
+        description:
+          "2-letter country code for region-specific results (e.g., 'DE', 'US', 'ALL'). Default: 'US'.",
+      }),
+    ),
+    language: Type.Optional(
+      Type.String({
+        description: "ISO 639-1 language code for results (e.g., 'en', 'de', 'fr').",
+      }),
+    ),
+    freshness: Type.Optional(
+      Type.String({
+        description: "Filter by time: 'day' (24h), 'week', 'month', or 'year'.",
+      }),
+    ),
+    date_after: Type.Optional(
+      Type.String({
+        description: "Only results published after this date (YYYY-MM-DD).",
+      }),
+    ),
+    date_before: Type.Optional(
+      Type.String({
+        description: "Only results published before this date (YYYY-MM-DD).",
+      }),
+    ),
+  } as const;
+
+  if (provider === "brave") {
+    return Type.Object({
+      ...baseSchema,
+      search_lang: Type.Optional(
+        Type.String({
+          description:
+            "Brave language code for search results (e.g., 'en', 'de', 'en-gb', 'zh-hans', 'zh-hant', 'pt-br').",
+        }),
+      ),
+      ui_lang: Type.Optional(
+        Type.String({
+          description:
+            "Locale code for UI elements in language-region format (e.g., 'en-US', 'de-DE', 'fr-FR', 'tr-TR'). Must include region subtag.",
+        }),
+      ),
+    });
+  }
+
+  if (provider === "perplexity") {
+    return Type.Object({
+      ...baseSchema,
+      domain_filter: Type.Optional(
+        Type.Array(Type.String(), {
+          description:
+            "Domain filter (max 20). Allowlist: ['nature.com'] or denylist: ['-reddit.com']. Cannot mix.",
+        }),
+      ),
+      max_tokens: Type.Optional(
+        Type.Number({
+          description: "Total content budget across all results (default: 25000, max: 1000000).",
+          minimum: 1,
+          maximum: 1000000,
+        }),
+      ),
+      max_tokens_per_page: Type.Optional(
+        Type.Number({
+          description: "Max tokens extracted per page (default: 2048).",
+          minimum: 1,
+        }),
+      ),
+    });
+  }
+
+  // grok, gemini, kimi, etc.
+  return Type.Object(baseSchema);
+}
 
 type WebSearchConfig = NonNullable<BotConfig["tools"]>["web"] extends infer Web
   ? Web extends { search?: infer Search }
@@ -721,10 +892,14 @@ function normalizeBraveSearchLang(value: string | undefined): string | undefined
     return undefined;
   }
   const trimmed = value.trim();
-  if (!trimmed || !BRAVE_SEARCH_LANG_CODE.test(trimmed)) {
+  if (!trimmed) {
     return undefined;
   }
-  return trimmed.toLowerCase();
+  const canonical = BRAVE_SEARCH_LANG_ALIASES[trimmed.toLowerCase()] ?? trimmed.toLowerCase();
+  if (!BRAVE_SEARCH_LANG_CODES.has(canonical)) {
+    return undefined;
+  }
+  return canonical;
 }
 
 function normalizeBraveUiLang(value: string | undefined): string | undefined {
@@ -1519,8 +1694,8 @@ export function createWebSearchTool(options?: {
         return jsonResult({
           error: "invalid_search_lang",
           message:
-            "search_lang must be a 2-letter ISO language code like 'en' (not a locale like 'en-US').",
-          docs: "https://docs.hanzo.bot/tools/web",
+            "search_lang must be a Brave-supported language code like 'en', 'en-gb', 'zh-hans', or 'zh-hant'.",
+          docs: "https://docs.bot.ai/tools/web",
         });
       }
       if (normalizedBraveLanguageParams.invalidField === "ui_lang") {
