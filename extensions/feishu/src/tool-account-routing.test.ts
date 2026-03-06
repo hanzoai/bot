@@ -1,4 +1,4 @@
-import type { BotPluginApi } from "bot/plugin-sdk";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/feishu";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { registerFeishuBitableTools } from "./bitable.js";
 import { registerFeishuDriveTools } from "./drive.js";

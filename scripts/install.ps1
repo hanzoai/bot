@@ -1,11 +1,11 @@
-# Bot Installer for Windows (PowerShell)
-# Usage: iwr -useb https://hanzo.bot/install.ps1 | iex
-# Or: & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -NoOnboard
+# OpenClaw Installer for Windows (PowerShell)
+# Usage: iwr -useb https://openclaw.ai/install.ps1 | iex
+# Or: & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
 
 param(
     [string]$InstallMethod = "npm",
     [string]$Tag = "latest",
-    [string]$GitDir = "$env:USERPROFILE\bot",
+    [string]$GitDir = "$env:USERPROFILE\openclaw",
     [switch]$NoOnboard,
     [switch]$NoGitUpdate,
     [switch]$DryRun
@@ -34,8 +34,8 @@ function Write-Host {
 
 function Write-Banner {
     Write-Host ""
-    Write-Host "${ACCENT}  🦞 Bot Installer$NC" -Level info
-    Write-Host "${MUTED}  All your chats, one Bot.$NC" -Level info
+    Write-Host "${ACCENT}  🦞 OpenClaw Installer$NC" -Level info
+    Write-Host "${MUTED}  All your chats, one OpenClaw.$NC" -Level info
     Write-Host ""
 }
 
@@ -199,15 +199,15 @@ function Ensure-Git {
     return Install-Git
 }
 
-function Install-BotNpm {
+function Install-OpenClawNpm {
     param([string]$Version = "latest")
     
-    Write-Host "Installing Bot (bot@$Version)..." -Level info
+    Write-Host "Installing OpenClaw (openclaw@$Version)..." -Level info
     
     try {
         # Use -ExecutionPolicy Bypass to handle restricted execution policy
-        npm install -g bot@$Version --no-fund --no-audit 2>&1
-        Write-Host "Bot installed" -Level success
+        npm install -g openclaw@$Version --no-fund --no-audit 2>&1
+        Write-Host "OpenClaw installed" -Level success
         return $true
     } catch {
         Write-Host "npm install failed: $_" -Level error
@@ -215,14 +215,14 @@ function Install-BotNpm {
     }
 }
 
-function Install-BotGit {
+function Install-OpenClawGit {
     param([string]$RepoDir, [switch]$Update)
     
-    Write-Host "Installing Bot from git..." -Level info
+    Write-Host "Installing OpenClaw from git..." -Level info
     
     if (!(Test-Path $RepoDir)) {
         Write-Host "  Cloning repository..." -Level info
-        git clone https://github.com/hanzoai/bot.git $RepoDir 2>&1
+        git clone https://github.com/openclaw/openclaw.git $RepoDir 2>&1
     } elseif ($Update) {
         Write-Host "  Updating repository..." -Level info
         git -C $RepoDir pull --rebase 2>&1
@@ -250,10 +250,10 @@ function Install-BotGit {
     
     @"
 @echo off
-node "%~dp0..\bot\dist\entry.js" %*
-"@ | Out-File -FilePath "$wrapperDir\bot.cmd" -Encoding ASCII -Force
+node "%~dp0..\openclaw\dist\entry.js" %*
+"@ | Out-File -FilePath "$wrapperDir\openclaw.cmd" -Encoding ASCII -Force
     
-    Write-Host "Bot installed" -Level success
+    Write-Host "OpenClaw installed" -Level success
     return $true
 }
 
@@ -290,9 +290,9 @@ function Main {
         }
         
         if ($DryRun) {
-            Write-Host "[DRY RUN] Would install Bot from git to $GitDir" -Level info
+            Write-Host "[DRY RUN] Would install OpenClaw from git to $GitDir" -Level info
         } else {
-            Install-BotGit -RepoDir $GitDir -Update:(-not $NoGitUpdate)
+            Install-OpenClawGit -RepoDir $GitDir -Update:(-not $NoGitUpdate)
         }
     } else {
         # npm method
@@ -301,9 +301,9 @@ function Main {
         }
         
         if ($DryRun) {
-            Write-Host "[DRY RUN] Would install Bot via npm (tag: $Tag)" -Level info
+            Write-Host "[DRY RUN] Would install OpenClaw via npm (tag: $Tag)" -Level info
         } else {
-            if (!(Install-BotNpm -Version $Tag)) {
+            if (!(Install-OpenClawNpm -Version $Tag)) {
                 exit 1
             }
         }
@@ -319,11 +319,11 @@ function Main {
     
     if (!$NoOnboard -and !$DryRun) {
         Write-Host ""
-        Write-Host "Run 'bot onboard' to complete setup" -Level info
+        Write-Host "Run 'openclaw onboard' to complete setup" -Level info
     }
     
     Write-Host ""
-    Write-Host "🦞 Bot installed successfully!" -Level success
+    Write-Host "🦞 OpenClaw installed successfully!" -Level success
 }
 
 Main

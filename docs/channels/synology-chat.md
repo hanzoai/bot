@@ -1,7 +1,7 @@
 ---
-summary: "Synology Chat webhook setup and Bot config"
+summary: "Synology Chat webhook setup and OpenClaw config"
 read_when:
-  - Setting up Synology Chat with Bot
+  - Setting up Synology Chat with OpenClaw
   - Debugging Synology Chat webhook routing
 title: "Synology Chat"
 ---
@@ -19,7 +19,7 @@ Synology Chat is plugin-based and not part of the default core channel install.
 Install from a local checkout:
 
 ```bash
-hanzo-bot plugins install ./extensions/synology-chat
+openclaw plugins install ./extensions/synology-chat
 ```
 
 Details: [Plugins](/tools/plugin)
@@ -30,10 +30,10 @@ Details: [Plugins](/tools/plugin)
 2. In Synology Chat integrations:
    - Create an incoming webhook and copy its URL.
    - Create an outgoing webhook with your secret token.
-3. Point the outgoing webhook URL to your Bot gateway:
+3. Point the outgoing webhook URL to your OpenClaw gateway:
    - `https://gateway-host/webhook/synology` by default.
    - Or your custom `channels.synology-chat.webhookPath`.
-4. Configure `channels.synology-chat` in Bot.
+4. Configure `channels.synology-chat` in OpenClaw.
 5. Restart gateway and send a DM to the Synology Chat bot.
 
 Minimal config:
@@ -64,7 +64,7 @@ For the default account, you can use env vars:
 - `SYNOLOGY_NAS_HOST`
 - `SYNOLOGY_ALLOWED_USER_IDS` (comma-separated)
 - `SYNOLOGY_RATE_LIMIT`
-- `BOT_BOT_NAME`
+- `OPENCLAW_BOT_NAME`
 
 Config values override env vars.
 
@@ -76,8 +76,8 @@ Config values override env vars.
 - `dmPolicy: "open"` allows any sender.
 - `dmPolicy: "disabled"` blocks DMs.
 - Pairing approvals work with:
-  - `hanzo-bot pairing list synology-chat`
-  - `hanzo-bot pairing approve synology-chat <CODE>`
+  - `openclaw pairing list synology-chat`
+  - `openclaw pairing approve synology-chat <CODE>`
 
 ## Outbound delivery
 
@@ -86,8 +86,8 @@ Use numeric Synology Chat user IDs as targets.
 Examples:
 
 ```bash
-hanzo-bot message send --channel synology-chat --target 123456 --text "Hello from Bot"
-hanzo-bot message send --channel synology-chat --target synology-chat:123456 --text "Hello again"
+openclaw message send --channel synology-chat --target 123456 --text "Hello from OpenClaw"
+openclaw message send --channel synology-chat --target synology-chat:123456 --text "Hello again"
 ```
 
 Media sends are supported by URL-based file delivery.

@@ -5,11 +5,12 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { MsgContext } from "../../auto-reply/templating.js";
 import type { GatewayRequestContext } from "./types.js";
-import { GATEWAY_CLIENT_CAPS } from "../protocol/client-info.js";
+import { GATEWAY_CLIENT_CAPS, GATEWAY_CLIENT_MODES } from "../protocol/client-info.js";
 
 const mockState = vi.hoisted(() => ({
   transcriptPath: "",
   sessionId: "sess-1",
+  mainSessionKey: "main",
   finalText: "[[reply_to_current]]",
   triggerAgentRunStart: false,
   agentRunId: "run-agent-1",
@@ -30,15 +31,19 @@ vi.mock("../session-utils.js", async (importOriginal) => {
   const original = await importOriginal<typeof import("../session-utils.js")>();
   return {
     ...original,
-    loadSessionEntry: () => ({
-      cfg: {},
+    loadSessionEntry: (rawKey: string) => ({
+      cfg: {
+        session: {
+          mainKey: mockState.mainSessionKey,
+        },
+      },
       storePath: path.join(path.dirname(mockState.transcriptPath), "sessions.json"),
       entry: {
         sessionId: mockState.sessionId,
         sessionFile: mockState.transcriptPath,
         ...mockState.sessionEntry,
       },
-      canonicalKey: "main",
+      canonicalKey: rawKey || "main",
     }),
   };
 });
@@ -147,15 +152,26 @@ async function runNonStreamingChatSend(params: {
   respond: ReturnType<typeof vi.fn>;
   idempotencyKey: string;
   message?: string;
+  sessionKey?: string;
+  deliver?: boolean;
   client?: unknown;
   expectBroadcast?: boolean;
 }) {
+  const sendParams: {
+    sessionKey: string;
+    message: string;
+    idempotencyKey: string;
+    deliver?: boolean;
+  } = {
+    sessionKey: params.sessionKey ?? "main",
+    message: params.message ?? "hello",
+    idempotencyKey: params.idempotencyKey,
+  };
+  if (typeof params.deliver === "boolean") {
+    sendParams.deliver = params.deliver;
+  }
   await chatHandlers["chat.send"]({
-    params: {
-      sessionKey: "main",
-      message: params.message ?? "hello",
-      idempotencyKey: params.idempotencyKey,
-    },
+    params: sendParams,
     respond: params.respond as unknown as Parameters<
       (typeof chatHandlers)["chat.send"]
     >[0]["respond"],
@@ -189,6 +205,7 @@ async function runNonStreamingChatSend(params: {
 describe("chat directive tag stripping for non-streaming final payloads", () => {
   afterEach(() => {
     mockState.finalText = "[[reply_to_current]]";
+    mockState.mainSessionKey = "main";
     mockState.triggerAgentRunStart = false;
     mockState.agentRunId = "run-agent-1";
     mockState.sessionEntry = {};
@@ -196,7 +213,7 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
   });
 
   it("registers tool-event recipients for clients advertising tool-events capability", async () => {
-    createTranscriptFixture("bot-chat-send-tool-events-");
+    createTranscriptFixture("openclaw-chat-send-tool-events-");
     mockState.finalText = "ok";
     mockState.triggerAgentRunStart = true;
     mockState.agentRunId = "run-current";
@@ -235,7 +252,7 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
   });
 
   it("does not register tool-event recipients without tool-events capability", async () => {
-    createTranscriptFixture("bot-chat-send-tool-events-off-");
+    createTranscriptFixture("openclaw-chat-send-tool-events-off-");
     mockState.finalText = "ok";
     mockState.triggerAgentRunStart = true;
     mockState.agentRunId = "run-no-cap";
@@ -258,7 +275,7 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
   });
 
   it("chat.inject keeps message defined when directive tag is the only content", async () => {
-    createTranscriptFixture("bot-chat-inject-directive-only-");
+    createTranscriptFixture("openclaw-chat-inject-directive-only-");
     const respond = vi.fn();
     const context = createChatContext();
 
@@ -287,7 +304,7 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
   });
 
   it("chat.send non-streaming final keeps message defined for directive-only assistant text", async () => {
-    createTranscriptFixture("bot-chat-send-directive-only-");
+    createTranscriptFixture("openclaw-chat-send-directive-only-");
     mockState.finalText = "[[reply_to_current]]";
     const respond = vi.fn();
     const context = createChatContext();
@@ -309,7 +326,7 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
   });
 
   it("chat.inject strips external untrusted wrapper metadata from final payload text", async () => {
-    createTranscriptFixture("bot-chat-inject-untrusted-meta-");
+    createTranscriptFixture("openclaw-chat-inject-untrusted-meta-");
     const respond = vi.fn();
     const context = createChatContext();
 
@@ -332,7 +349,7 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
   });
 
   it("chat.send non-streaming final strips external untrusted wrapper metadata from final payload text", async () => {
-    createTranscriptFixture("bot-chat-send-untrusted-meta-");
+    createTranscriptFixture("openclaw-chat-send-untrusted-meta-");
     mockState.finalText = `hello\n\n${UNTRUSTED_CONTEXT_SUFFIX}`;
     const respond = vi.fn();
     const context = createChatContext();
@@ -346,7 +363,7 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
   });
 
   it("chat.send inherits originating routing metadata from session delivery context", async () => {
-    createTranscriptFixture("bot-chat-send-origin-routing-");
+    createTranscriptFixture("openclaw-chat-send-origin-routing-");
     mockState.finalText = "ok";
     mockState.sessionEntry = {
       deliveryContext: {
@@ -367,6 +384,8 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
       context,
       respond,
       idempotencyKey: "idem-origin-routing",
+      sessionKey: "agent:main:telegram:direct:6812765697",
+      deliver: true,
       expectBroadcast: false,
     });
 
@@ -382,7 +401,7 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
   });
 
   it("chat.send inherits Feishu routing metadata from session delivery context", async () => {
-    createTranscriptFixture("bot-chat-send-feishu-origin-routing-");
+    createTranscriptFixture("openclaw-chat-send-feishu-origin-routing-");
     mockState.finalText = "ok";
     mockState.sessionEntry = {
       deliveryContext: {
@@ -401,6 +420,8 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
       context,
       respond,
       idempotencyKey: "idem-feishu-origin-routing",
+      sessionKey: "agent:main:feishu:direct:ou_feishu_direct_123",
+      deliver: true,
       expectBroadcast: false,
     });
 
