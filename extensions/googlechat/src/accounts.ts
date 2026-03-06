@@ -1,10 +1,10 @@
-import type { BotConfig } from "bot/plugin-sdk";
-import { isSecretRef } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/googlechat";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeOptionalAccountId,
-} from "bot/plugin-sdk/account-id";
+} from "@hanzo/bot/plugin-sdk/account-id";
+import { isSecretRef } from "@hanzo/bot/plugin-sdk/googlechat";
 import type { GoogleChatAccountConfig } from "./types.config.js";
 
 export type GoogleChatCredentialSource = "file" | "inline" | "env" | "none";

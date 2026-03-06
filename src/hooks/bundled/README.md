@@ -1,21 +1,21 @@
 # Bundled Hooks
 
-This directory contains hooks that ship with Bot. These hooks are automatically discovered and can be enabled/disabled via CLI or configuration.
+This directory contains hooks that ship with OpenClaw. These hooks are automatically discovered and can be enabled/disabled via CLI or configuration.
 
 ## Available Hooks
 
 ### 💾 session-memory
 
-Automatically saves session context to memory when you issue `/new`.
+Automatically saves session context to memory when you issue `/new` or `/reset`.
 
-**Events**: `command:new`
+**Events**: `command:new`, `command:reset`
 **What it does**: Creates a dated memory file with LLM-generated slug based on conversation content.
-**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.bot/workspace`)
+**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.openclaw/workspace`)
 
 **Enable**:
 
 ```bash
-bot hooks enable session-memory
+openclaw hooks enable session-memory
 ```
 
 ### 📎 bootstrap-extra-files
@@ -29,7 +29,7 @@ Injects extra bootstrap files (for example monorepo `AGENTS.md`/`TOOLS.md`) duri
 **Enable**:
 
 ```bash
-bot hooks enable bootstrap-extra-files
+openclaw hooks enable bootstrap-extra-files
 ```
 
 ### 📝 command-logger
@@ -38,12 +38,12 @@ Logs all command events to a centralized audit file.
 
 **Events**: `command` (all commands)
 **What it does**: Appends JSONL entries to command log file.
-**Output**: `~/.bot/logs/commands.log`
+**Output**: `~/.openclaw/logs/commands.log`
 
 **Enable**:
 
 ```bash
-bot hooks enable command-logger
+openclaw hooks enable command-logger
 ```
 
 ### 🚀 boot-md
@@ -57,7 +57,7 @@ Runs `BOOT.md` whenever the gateway starts (after channels start).
 **Enable**:
 
 ```bash
-bot hooks enable boot-md
+openclaw hooks enable boot-md
 ```
 
 ## Hook Structure
@@ -81,8 +81,9 @@ session-memory/
 ---
 name: my-hook
 description: "Short description"
-homepage: https://docs.hanzo.bot/automation/hooks#my-hook
-metadata: { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
+homepage: https://docs.openclaw.ai/automation/hooks#my-hook
+metadata:
+  { "openclaw": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
 ---
 # Hook Title
 
@@ -106,7 +107,7 @@ Documentation goes here...
 To create your own hooks, place them in:
 
 - **Workspace hooks**: `<workspace>/hooks/` (highest precedence)
-- **Managed hooks**: `~/.bot/hooks/` (shared across workspaces)
+- **Managed hooks**: `~/.openclaw/hooks/` (shared across workspaces)
 
 Custom hooks follow the same structure as bundled hooks.
 
@@ -115,31 +116,31 @@ Custom hooks follow the same structure as bundled hooks.
 List all hooks:
 
 ```bash
-bot hooks list
+openclaw hooks list
 ```
 
 Show hook details:
 
 ```bash
-bot hooks info session-memory
+openclaw hooks info session-memory
 ```
 
 Check hook status:
 
 ```bash
-bot hooks check
+openclaw hooks check
 ```
 
 Enable/disable:
 
 ```bash
-bot hooks enable session-memory
-bot hooks disable command-logger
+openclaw hooks enable session-memory
+openclaw hooks disable command-logger
 ```
 
 ## Configuration
 
-Hooks can be configured in `~/.bot/bot.json`:
+Hooks can be configured in `~/.openclaw/openclaw.json`:
 
 ```json
 {
@@ -212,11 +213,11 @@ export default myHandler;
 Test your hooks by:
 
 1. Place hook in workspace hooks directory
-2. Restart gateway: `pkill -9 -f 'bot.*gateway' && pnpm bot gateway`
-3. Enable the hook: `bot hooks enable my-hook`
+2. Restart gateway: `pkill -9 -f 'openclaw.*gateway' && pnpm openclaw gateway`
+3. Enable the hook: `openclaw hooks enable my-hook`
 4. Trigger the event (e.g., send `/new` command)
 5. Check gateway logs for hook execution
 
 ## Documentation
 
-Full documentation: https://docs.hanzo.bot/automation/hooks
+Full documentation: https://docs.openclaw.ai/automation/hooks

@@ -8,7 +8,7 @@ title: "Skills Config"
 
 # Skills Config
 
-All skills-related configuration lives under `skills` in `~/.hanzo/bot/bot.json`.
+All skills-related configuration lives under `skills` in `~/.openclaw/openclaw.json`.
 
 ```json5
 {
@@ -26,7 +26,7 @@ All skills-related configuration lives under `skills` in `~/.hanzo/bot/bot.json`
     entries: {
       "nano-banana-pro": {
         enabled: true,
-        apiKey: "GEMINI_KEY_HERE",
+        apiKey: { source: "env", provider: "default", id: "GEMINI_API_KEY" }, // or plaintext string
         env: {
           GEMINI_API_KEY: "GEMINI_KEY_HERE",
         },
@@ -56,11 +56,12 @@ Per-skill fields:
 - `enabled`: set `false` to disable a skill even if it’s bundled/installed.
 - `env`: environment variables injected for the agent run (only if not already set).
 - `apiKey`: optional convenience for skills that declare a primary env var.
+  Supports plaintext string or SecretRef object (`{ source, provider, id }`).
 
 ## Notes
 
 - Keys under `entries` map to the skill name by default. If a skill defines
-  `metadata.bot.skillKey`, use that key instead.
+  `metadata.openclaw.skillKey`, use that key instead.
 - Changes to skills are picked up on the next agent turn when the watcher is enabled.
 
 ### Sandboxed skills + env vars

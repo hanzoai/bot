@@ -138,7 +138,7 @@ describe("secrets runtime snapshot", () => {
         SLACK_WORK_APP_TOKEN_REF: "slack-work-app-ref",
         WEB_SEARCH_API_KEY: "web-search-ref",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () =>
         loadAuthStoreWithProfiles({
           "openai:default": {
@@ -210,7 +210,7 @@ describe("secrets runtime snapshot", () => {
     const snapshot = await prepareSecretsRuntimeSnapshot({
       config,
       env: { MY_TOKEN: "resolved-token-value" },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () =>
         loadAuthStoreWithProfiles({
           "custom:inline-token": {
@@ -237,7 +237,7 @@ describe("secrets runtime snapshot", () => {
     const snapshot = await prepareSecretsRuntimeSnapshot({
       config,
       env: { MY_KEY: "resolved-key-value" },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () =>
         loadAuthStoreWithProfiles({
           "custom:inline-key": {
@@ -267,7 +267,7 @@ describe("secrets runtime snapshot", () => {
         PRIMARY_KEY: "primary-key-value",
         SHADOW_KEY: "shadow-key-value",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () =>
         loadAuthStoreWithProfiles({
           "custom:explicit-keyref": {
@@ -307,7 +307,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         WEB_SEARCH_API_KEY: "web-search-ref",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -346,7 +346,7 @@ describe("secrets runtime snapshot", () => {
         WEB_SEARCH_API_KEY: "web-search-ref",
         WEB_SEARCH_GEMINI_API_KEY: "web-search-gemini-ref",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -376,7 +376,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         WEB_SEARCH_GEMINI_API_KEY: "web-search-gemini-ref",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -390,7 +390,7 @@ describe("secrets runtime snapshot", () => {
     if (process.platform === "win32") {
       return;
     }
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-secrets-file-provider-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-secrets-file-provider-"));
     const secretsPath = path.join(root, "secrets.json");
     try {
       await fs.writeFile(
@@ -436,7 +436,7 @@ describe("secrets runtime snapshot", () => {
 
       const snapshot = await prepareSecretsRuntimeSnapshot({
         config,
-        agentDirs: ["/tmp/bot-agent-main"],
+        agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
       });
 
@@ -450,7 +450,7 @@ describe("secrets runtime snapshot", () => {
     if (process.platform === "win32") {
       return;
     }
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-secrets-file-provider-bad-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-secrets-file-provider-bad-"));
     const secretsPath = path.join(root, "secrets.json");
     try {
       await fs.writeFile(secretsPath, JSON.stringify(["not-an-object"]), "utf8");
@@ -472,7 +472,7 @@ describe("secrets runtime snapshot", () => {
               ...createOpenAiFileModelsConfig(),
             },
           }),
-          agentDirs: ["/tmp/bot-agent-main"],
+          agentDirs: ["/tmp/openclaw-agent-main"],
           loadAuthStore: () => ({ version: 1, profiles: {} }),
         }),
       ).rejects.toThrow("payload is not a JSON object");
@@ -495,7 +495,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: { OPENAI_API_KEY: "sk-runtime" },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () =>
         loadAuthStoreWithProfiles({
           "openai:default": {
@@ -509,7 +509,7 @@ describe("secrets runtime snapshot", () => {
     activateSecretsRuntimeSnapshot(prepared);
 
     expect(loadConfig().models?.providers?.openai?.apiKey).toBe("sk-runtime");
-    const store = ensureAuthProfileStore("/tmp/bot-agent-main");
+    const store = ensureAuthProfileStore("/tmp/openclaw-agent-main");
     expect(store.profiles["openai:default"]).toMatchObject({
       type: "api_key",
       key: "sk-runtime",
@@ -569,7 +569,7 @@ describe("secrets runtime snapshot", () => {
     const snapshot = await prepareSecretsRuntimeSnapshot({
       config,
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -613,7 +613,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -644,12 +644,77 @@ describe("secrets runtime snapshot", () => {
       env: {
         GATEWAY_PASSWORD_REF: "resolved-gateway-password",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
     expect(snapshot.config.gateway?.auth?.password).toBe("resolved-gateway-password");
     expect(snapshot.warnings.map((warning) => warning.path)).not.toContain("gateway.auth.password");
+  });
+
+  it("treats gateway.auth.token ref as active when token mode is explicit", async () => {
+    const snapshot = await prepareSecretsRuntimeSnapshot({
+      config: asConfig({
+        gateway: {
+          auth: {
+            mode: "token",
+            token: { source: "env", provider: "default", id: "GATEWAY_TOKEN_REF" },
+          },
+        },
+      }),
+      env: {
+        GATEWAY_TOKEN_REF: "resolved-gateway-token",
+      },
+      agentDirs: ["/tmp/openclaw-agent-main"],
+      loadAuthStore: () => ({ version: 1, profiles: {} }),
+    });
+
+    expect(snapshot.config.gateway?.auth?.token).toBe("resolved-gateway-token");
+    expect(snapshot.warnings.map((warning) => warning.path)).not.toContain("gateway.auth.token");
+  });
+
+  it("treats gateway.auth.token ref as inactive when password mode is explicit", async () => {
+    const snapshot = await prepareSecretsRuntimeSnapshot({
+      config: asConfig({
+        gateway: {
+          auth: {
+            mode: "password",
+            token: { source: "env", provider: "default", id: "GATEWAY_TOKEN_REF" },
+            password: "password-123",
+          },
+        },
+      }),
+      env: {
+        GATEWAY_TOKEN_REF: "resolved-gateway-token",
+      },
+      agentDirs: ["/tmp/openclaw-agent-main"],
+      loadAuthStore: () => ({ version: 1, profiles: {} }),
+    });
+
+    expect(snapshot.config.gateway?.auth?.token).toEqual({
+      source: "env",
+      provider: "default",
+      id: "GATEWAY_TOKEN_REF",
+    });
+    expect(snapshot.warnings.map((warning) => warning.path)).toContain("gateway.auth.token");
+  });
+
+  it("fails when gateway.auth.token ref is active and unresolved", async () => {
+    await expect(
+      prepareSecretsRuntimeSnapshot({
+        config: asConfig({
+          gateway: {
+            auth: {
+              mode: "token",
+              token: { source: "env", provider: "default", id: "MISSING_GATEWAY_TOKEN_REF" },
+            },
+          },
+        }),
+        env: {},
+        agentDirs: ["/tmp/openclaw-agent-main"],
+        loadAuthStore: () => ({ version: 1, profiles: {} }),
+      }),
+    ).rejects.toThrow(/MISSING_GATEWAY_TOKEN_REF/i);
   });
 
   it("treats gateway.auth.password ref as inactive when auth mode is trusted-proxy", async () => {
@@ -665,7 +730,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         GATEWAY_PASSWORD_REF: "resolved-gateway-password",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -693,7 +758,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         REMOTE_GATEWAY_TOKEN: "remote-token",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -722,7 +787,7 @@ describe("secrets runtime snapshot", () => {
           },
         }),
         env: {},
-        agentDirs: ["/tmp/bot-agent-main"],
+        agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
       });
 
@@ -759,7 +824,7 @@ describe("secrets runtime snapshot", () => {
         REMOTE_TOKEN: "resolved-remote-token",
         REMOTE_PASSWORD: "resolved-remote-password",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -783,7 +848,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         REMOTE_PASSWORD: "resolved-remote-password",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -806,7 +871,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         ZALO_BOT_TOKEN: "resolved-zalo-token",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -833,7 +898,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         ZALO_WORK_BOT_TOKEN: "resolved-zalo-work-token",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -862,7 +927,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         ZALO_TOP_LEVEL_TOKEN: "resolved-zalo-top-level-token",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -889,7 +954,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         ZALO_DEFAULT_TOKEN: "resolved-zalo-default-token",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -918,7 +983,7 @@ describe("secrets runtime snapshot", () => {
         NEXTCLOUD_BOT_SECRET: "resolved-nextcloud-bot-secret",
         NEXTCLOUD_API_PASSWORD: "resolved-nextcloud-api-password",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -960,7 +1025,7 @@ describe("secrets runtime snapshot", () => {
         NEXTCLOUD_WORK_BOT_SECRET: "resolved-nextcloud-work-bot-secret",
         NEXTCLOUD_WORK_API_PASSWORD: "resolved-nextcloud-work-api-password",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -995,7 +1060,7 @@ describe("secrets runtime snapshot", () => {
         REMOTE_GATEWAY_TOKEN: "tailscale-remote-token",
         REMOTE_GATEWAY_PASSWORD: "tailscale-remote-password",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1033,7 +1098,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1067,7 +1132,7 @@ describe("secrets runtime snapshot", () => {
           },
         }),
         env: {},
-        agentDirs: ["/tmp/bot-agent-main"],
+        agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
       }),
     ).rejects.toThrow('Environment variable "MISSING_ENABLED_TELEGRAM_TOKEN" is missing or empty.');
@@ -1093,7 +1158,7 @@ describe("secrets runtime snapshot", () => {
           },
         }),
         env: {},
-        agentDirs: ["/tmp/bot-agent-main"],
+        agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
       }),
     ).rejects.toThrow('Environment variable "MISSING_ENABLED_TELEGRAM_TOKEN" is missing or empty.');
@@ -1128,7 +1193,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         TELEGRAM_WORK_TOKEN: "telegram-work-token",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1165,7 +1230,7 @@ describe("secrets runtime snapshot", () => {
           },
         }),
         env: {},
-        agentDirs: ["/tmp/bot-agent-main"],
+        agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
       }),
     ).rejects.toThrow(
@@ -1192,7 +1257,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1221,7 +1286,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1255,7 +1320,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1291,7 +1356,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         TELEGRAM_BASE_TOKEN: "telegram-base-token",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1324,7 +1389,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1355,7 +1420,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1390,7 +1455,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1430,7 +1495,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1475,7 +1540,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         GOOGLECHAT_WORK_SERVICE_ACCOUNT: "work-service-account-json",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1512,7 +1577,7 @@ describe("secrets runtime snapshot", () => {
           },
         }),
         env: {},
-        agentDirs: ["/tmp/bot-agent-main"],
+        agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
       }),
     ).rejects.toThrow('Environment variable "MISSING_DISCORD_BASE_TOKEN" is missing or empty.');
@@ -1538,7 +1603,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1567,7 +1632,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1619,7 +1684,7 @@ describe("secrets runtime snapshot", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1704,7 +1769,7 @@ describe("secrets runtime snapshot", () => {
         DISCORD_BASE_PK_TOKEN: "base-pk-token",
         DISCORD_ENABLED_OVERRIDE_TTS_OPENAI: "enabled-override-tts-openai",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1776,7 +1841,7 @@ describe("secrets runtime snapshot", () => {
       env: {
         DISCORD_ENABLED_ONLY_TTS_OPENAI: "enabled-only-tts-openai",
       },
-      agentDirs: ["/tmp/bot-agent-main"],
+      agentDirs: ["/tmp/openclaw-agent-main"],
       loadAuthStore: () => ({ version: 1, profiles: {} }),
     });
 
@@ -1828,7 +1893,7 @@ describe("secrets runtime snapshot", () => {
         env: {
           DISCORD_BASE_TTS_OK: "base-tts-openai",
         },
-        agentDirs: ["/tmp/bot-agent-main"],
+        agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
       }),
     ).rejects.toThrow(
@@ -1837,11 +1902,11 @@ describe("secrets runtime snapshot", () => {
   });
 
   it("does not write inherited auth stores during runtime secret activation", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-secrets-runtime-"));
-    const stateDir = path.join(root, ".bot");
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-secrets-runtime-"));
+    const stateDir = path.join(root, ".openclaw");
     const mainAgentDir = path.join(stateDir, "agents", "main", "agent");
     const workerStorePath = path.join(stateDir, "agents", "worker", "agent", "auth-profiles.json");
-    const prevStateDir = process.env.BOT_STATE_DIR;
+    const prevStateDir = process.env.OPENCLAW_STATE_DIR;
 
     try {
       await fs.mkdir(mainAgentDir, { recursive: true });
@@ -1858,7 +1923,7 @@ describe("secrets runtime snapshot", () => {
         }),
         "utf8",
       );
-      process.env.BOT_STATE_DIR = stateDir;
+      process.env.OPENCLAW_STATE_DIR = stateDir;
 
       await prepareSecretsRuntimeSnapshot({
         config: {
@@ -1872,9 +1937,9 @@ describe("secrets runtime snapshot", () => {
       await expect(fs.access(workerStorePath)).rejects.toMatchObject({ code: "ENOENT" });
     } finally {
       if (prevStateDir === undefined) {
-        delete process.env.BOT_STATE_DIR;
+        delete process.env.OPENCLAW_STATE_DIR;
       } else {
-        process.env.BOT_STATE_DIR = prevStateDir;
+        process.env.OPENCLAW_STATE_DIR = prevStateDir;
       }
       await fs.rm(root, { recursive: true, force: true });
     }
