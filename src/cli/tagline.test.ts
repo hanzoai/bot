@@ -10,10 +10,10 @@ describe("pickTagline", () => {
     expect(pickTagline({ mode: "default" })).toBe(DEFAULT_TAGLINE);
   });
 
-  it("keeps BOT_TAGLINE_INDEX behavior in random mode", () => {
+  it("keeps OPENCLAW_TAGLINE_INDEX behavior in random mode", () => {
     const value = pickTagline({
       mode: "random",
-      env: { BOT_TAGLINE_INDEX: "0" } as NodeJS.ProcessEnv,
+      env: { OPENCLAW_TAGLINE_INDEX: "0" } as NodeJS.ProcessEnv,
     });
     expect(value.length).toBeGreaterThan(0);
     expect(value).not.toBe(DEFAULT_TAGLINE);

@@ -1,5 +1,5 @@
-import type { ChannelPlugin, BotPluginApi } from "bot/plugin-sdk";
-import { emptyPluginConfigSchema } from "bot/plugin-sdk";
+import type { ChannelPlugin, BotPluginApi } from "@hanzo/bot/plugin-sdk/irc";
+import { emptyPluginConfigSchema } from "@hanzo/bot/plugin-sdk/irc";
 import { ircPlugin } from "./src/channel.js";
 import { setIrcRuntime } from "./src/runtime.js";
 

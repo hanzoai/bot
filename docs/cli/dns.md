@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `hanzo-bot dns` (wide-area discovery helpers)"
+summary: "CLI reference for `openclaw dns` (wide-area discovery helpers)"
 read_when:
   - You want wide-area discovery (DNS-SD) via Tailscale + CoreDNS
-  - You’re setting up split DNS for a custom discovery domain (example: bot.internal)
+  - You’re setting up split DNS for a custom discovery domain (example: openclaw.internal)
 title: "dns"
 ---
 
-# `hanzo-bot dns`
+# `openclaw dns`
 
 DNS helpers for wide-area discovery (Tailscale + CoreDNS). Currently focused on macOS + Homebrew CoreDNS.
 
@@ -18,6 +18,6 @@ Related:
 ## Setup
 
 ```bash
-hanzo-bot dns setup
-hanzo-bot dns setup --apply
+openclaw dns setup
+openclaw dns setup --apply
 ```

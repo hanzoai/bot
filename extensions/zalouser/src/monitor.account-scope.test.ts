@@ -1,4 +1,4 @@
-import type { BotConfig, PluginRuntime, RuntimeEnv } from "bot/plugin-sdk";
+import type { BotConfig, PluginRuntime, RuntimeEnv } from "@hanzo/bot/plugin-sdk/zalouser";
 import { describe, expect, it, vi } from "vitest";
 import type { ResolvedZalouserAccount, ZaloInboundMessage } from "./types.js";
 import { __testing } from "./monitor.js";

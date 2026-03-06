@@ -5,7 +5,7 @@
  * validates the token, and routes the command through the standard inbound pipeline.
  */
 
-import type { BotConfig, ReplyPayload, RuntimeEnv } from "bot/plugin-sdk";
+import type { BotConfig, ReplyPayload, RuntimeEnv } from "@hanzo/bot/plugin-sdk/mattermost";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import {
   createReplyPrefixOptions,
@@ -13,7 +13,7 @@ import {
   isDangerousNameMatchingEnabled,
   logTypingFailure,
   resolveControlCommandGate,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/mattermost";
 import type { ResolvedMattermostAccount } from "../mattermost/accounts.js";
 import { getMattermostRuntime } from "../runtime.js";
 import {

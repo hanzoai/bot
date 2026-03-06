@@ -15,8 +15,8 @@ import { resolveCronDeliveryPlan } from "../delivery.js";
 import { shouldEnqueueCronMainSummary } from "../heartbeat-policy.js";
 import { sweepCronRunSessions } from "../session-reaper.js";
 import {
-  computeJobNextRunAtMs,
   computeJobPreviousRunAtMs,
+  computeJobNextRunAtMs,
   nextWakeAtMs,
   recomputeNextRunsForMaintenance,
   recordScheduleComputeError,
@@ -287,7 +287,21 @@ export function applyJobResult(
     startedAt: number;
     endedAt: number;
   },
+  opts?: {
+    // Preserve recurring "every" anchors for manual force runs.
+    preserveSchedule?: boolean;
+  },
 ): boolean {
+  const prevLastRunAtMs = job.state.lastRunAtMs;
+  const computeNextWithPreservedLastRun = (nowMs: number) => {
+    const saved = job.state.lastRunAtMs;
+    job.state.lastRunAtMs = prevLastRunAtMs;
+    try {
+      return computeJobNextRunAtMs(job, nowMs);
+    } finally {
+      job.state.lastRunAtMs = saved;
+    }
+  };
   job.state.runningAtMs = undefined;
   job.state.lastRunAtMs = result.startedAt;
   job.state.lastRunStatus = result.status;
@@ -385,7 +399,10 @@ export function applyJobResult(
       const backoff = errorBackoffMs(job.state.consecutiveErrors ?? 1);
       let normalNext: number | undefined;
       try {
-        normalNext = computeJobNextRunAtMs(job, result.endedAt);
+        normalNext =
+          opts?.preserveSchedule && job.schedule.kind === "every"
+            ? computeNextWithPreservedLastRun(result.endedAt)
+            : computeJobNextRunAtMs(job, result.endedAt);
       } catch (err) {
         // If the schedule expression/timezone throws (croner edge cases),
         // record the schedule error (auto-disables after repeated failures)
@@ -408,7 +425,10 @@ export function applyJobResult(
     } else if (job.enabled) {
       let naturalNext: number | undefined;
       try {
-        naturalNext = computeJobNextRunAtMs(job, result.endedAt);
+        naturalNext =
+          opts?.preserveSchedule && job.schedule.kind === "every"
+            ? computeNextWithPreservedLastRun(result.endedAt)
+            : computeJobNextRunAtMs(job, result.endedAt);
       } catch (err) {
         // If the schedule expression/timezone throws (croner edge cases),
         // record the schedule error (auto-disables after repeated failures)
@@ -541,7 +561,7 @@ export async function onTimer(state: CronServiceState) {
     // We use MAX_TIMER_DELAY_MS as a fixed re-check interval to avoid a
     // zero-delay hot-loop when past-due jobs are waiting for the current
     // execution to finish.
-    // See: https://github.com/hanzoai/bot/issues/12025
+    // See: https://github.com/openclaw/openclaw/issues/12025
     armRunningRecheckTimer(state);
     return;
   }
@@ -552,13 +572,17 @@ export async function onTimer(state: CronServiceState) {
   try {
     const dueJobs = await locked(state, async () => {
       await ensureLoaded(state, { forceReload: true, skipRecompute: true });
-      const due = findDueJobs(state);
+      const dueCheckNow = state.deps.nowMs();
+      const due = collectRunnableJobs(state, dueCheckNow);
 
       if (due.length === 0) {
         // Use maintenance-only recompute to avoid advancing past-due nextRunAtMs
         // values without execution. This prevents jobs from being silently skipped
         // when the timer wakes up but findDueJobs returns empty (see #13992).
-        const changed = recomputeNextRunsForMaintenance(state);
+        const changed = recomputeNextRunsForMaintenance(state, {
+          recomputeExpired: true,
+          nowMs: dueCheckNow,
+        });
         if (changed) {
           await persist(state);
         }
@@ -686,14 +710,6 @@ export async function onTimer(state: CronServiceState) {
     state.running = false;
     armTimer(state);
   }
-}
-
-function findDueJobs(state: CronServiceState): CronJob[] {
-  if (!state.store) {
-    return [];
-  }
-  const now = state.deps.nowMs();
-  return collectRunnableJobs(state, now);
 }
 
 function isRunnableJob(params: {
@@ -976,7 +992,7 @@ export async function executeJobCore(
           // Cron-triggered heartbeats should deliver to the last active channel.
           // Without this override, heartbeat target defaults to "none" (since
           // e2362d35) and cron main-session responses are silently swallowed.
-          // See: https://github.com/hanzoai/bot/issues/28508
+          // See: https://github.com/openclaw/openclaw/issues/28508
           heartbeat: { target: "last" },
         });
         if (
@@ -1043,11 +1059,11 @@ export async function executeJobCore(
   // delivery was requested and we are confident no outbound delivery path
   // ran. If delivery was attempted but final ack is uncertain, suppress the
   // main summary to avoid duplicate user-facing sends.
-  // See: https://github.com/hanzoai/bot/issues/15692
+  // See: https://github.com/openclaw/openclaw/issues/15692
   //
   // Also suppress heartbeat-only summaries (e.g. "HEARTBEAT_OK") — these
   // are internal ack tokens that should never leak into user conversations.
-  // See: https://github.com/hanzoai/bot/issues/32013
+  // See: https://github.com/openclaw/openclaw/issues/32013
   const summaryText = res.summary?.trim();
   const deliveryPlan = resolveCronDeliveryPlan(job);
   const suppressMainSummary =
