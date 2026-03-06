@@ -1,4 +1,4 @@
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "@hanzo/bot/plugin-sdk/account-id";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";

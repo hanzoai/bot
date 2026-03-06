@@ -21,22 +21,22 @@ describe("noteSecurityWarnings gateway exposure", () => {
   beforeEach(() => {
     note.mockClear();
     pluginRegistry.list = [];
-    prevToken = process.env.BOT_GATEWAY_TOKEN;
-    prevPassword = process.env.BOT_GATEWAY_PASSWORD;
-    delete process.env.BOT_GATEWAY_TOKEN;
-    delete process.env.BOT_GATEWAY_PASSWORD;
+    prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
+    prevPassword = process.env.OPENCLAW_GATEWAY_PASSWORD;
+    delete process.env.OPENCLAW_GATEWAY_TOKEN;
+    delete process.env.OPENCLAW_GATEWAY_PASSWORD;
   });
 
   afterEach(() => {
     if (prevToken === undefined) {
-      delete process.env.BOT_GATEWAY_TOKEN;
+      delete process.env.OPENCLAW_GATEWAY_TOKEN;
     } else {
-      process.env.BOT_GATEWAY_TOKEN = prevToken;
+      process.env.OPENCLAW_GATEWAY_TOKEN = prevToken;
     }
     if (prevPassword === undefined) {
-      delete process.env.BOT_GATEWAY_PASSWORD;
+      delete process.env.OPENCLAW_GATEWAY_PASSWORD;
     } else {
-      process.env.BOT_GATEWAY_PASSWORD = prevPassword;
+      process.env.OPENCLAW_GATEWAY_PASSWORD = prevPassword;
     }
   });
 
@@ -53,7 +53,7 @@ describe("noteSecurityWarnings gateway exposure", () => {
   });
 
   it("uses env token to avoid critical warning", async () => {
-    process.env.BOT_GATEWAY_TOKEN = "token-123";
+    process.env.OPENCLAW_GATEWAY_TOKEN = "token-123";
     const cfg = { gateway: { bind: "lan" } } as BotConfig;
     await noteSecurityWarnings(cfg);
     const message = lastMessage();
@@ -133,7 +133,7 @@ describe("noteSecurityWarnings gateway exposure", () => {
     const message = lastMessage();
     expect(message).toContain("disables approval forwarding only");
     expect(message).toContain("exec-approvals.json");
-    expect(message).toContain("bot approvals get --gateway");
+    expect(message).toContain("openclaw approvals get --gateway");
   });
 
   it("warns when heartbeat delivery relies on implicit directPolicy defaults", async () => {

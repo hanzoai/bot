@@ -40,7 +40,15 @@ describe("sendWebhookMessageDiscord activity", () => {
   });
 
   it("records outbound channel activity for webhook sends", async () => {
+    const cfg = {
+      channels: {
+        discord: {
+          token: "resolved-token",
+        },
+      },
+    };
     const result = await sendWebhookMessageDiscord("hello world", {
+      cfg,
       webhookId: "wh-1",
       webhookToken: "tok-1",
       accountId: "runtime",

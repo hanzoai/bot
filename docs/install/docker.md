@@ -1,5 +1,5 @@
 ---
-summary: "Optional Docker-based setup and onboarding for Hanzo Bot"
+summary: "Optional Docker-based setup and onboarding for OpenClaw"
 read_when:
   - You want a containerized gateway instead of local installs
   - You are validating the Docker flow
@@ -12,13 +12,13 @@ Docker is **optional**. Use it only if you want a containerized gateway or to va
 
 ## Is Docker right for me?
 
-- **Yes**: you want an isolated, throwaway gateway environment or to run Hanzo Bot on a host without local installs.
+- **Yes**: you want an isolated, throwaway gateway environment or to run OpenClaw on a host without local installs.
 - **No**: you’re running on your own machine and just want the fastest dev loop. Use the normal install flow instead.
 - **Sandboxing note**: agent sandboxing uses Docker too, but it does **not** require the full gateway to run in Docker. See [Sandboxing](/gateway/sandboxing).
 
 This guide covers:
 
-- Containerized Gateway (full Hanzo Bot in Docker)
+- Containerized Gateway (full OpenClaw in Docker)
 - Per-session Agent Sandbox (host gateway + Docker-isolated agent tools)
 
 Sandboxing details: [Sandboxing](/gateway/sandboxing)
@@ -26,7 +26,11 @@ Sandboxing details: [Sandboxing](/gateway/sandboxing)
 ## Requirements
 
 - Docker Desktop (or Docker Engine) + Docker Compose v2
+- At least 2 GB RAM for image build (`pnpm install` may be OOM-killed on 1 GB hosts with exit 137)
 - Enough disk for images + logs
+- If running on a VPS/public host, review
+  [Security hardening for network exposure](/gateway/security#04-network-exposure-bind--port--firewall),
+  especially Docker `DOCKER-USER` firewall policy.
 
 ## Containerized Gateway (Docker Compose)
 
@@ -46,7 +50,7 @@ From repo root:
 
 This script:
 
-- builds the gateway image locally (or pulls a remote image if `BOT_IMAGE` is set)
+- builds the gateway image locally (or pulls a remote image if `OPENCLAW_IMAGE` is set)
 - runs the onboarding wizard
 - prints optional provider setup hints
 - starts the gateway via Docker Compose
@@ -54,20 +58,90 @@ This script:
 
 Optional env vars:
 
-- `BOT_DOCKER_APT_PACKAGES` — install extra apt packages during build
-- `BOT_EXTRA_MOUNTS` — add extra host bind mounts
-- `BOT_HOME_VOLUME` — persist `/home/node` in a named volume
+- `OPENCLAW_IMAGE` — use a remote image instead of building locally (e.g. `ghcr.io/openclaw/openclaw:latest`)
+- `OPENCLAW_DOCKER_APT_PACKAGES` — install extra apt packages during build
+- `OPENCLAW_EXTRA_MOUNTS` — add extra host bind mounts
+- `OPENCLAW_HOME_VOLUME` — persist `/home/node` in a named volume
+- `OPENCLAW_SANDBOX` — opt in to Docker gateway sandbox bootstrap. Only explicit truthy values enable it: `1`, `true`, `yes`, `on`
+- `OPENCLAW_INSTALL_DOCKER_CLI` — build arg passthrough for local image builds (`1` installs Docker CLI in the image). `docker-setup.sh` sets this automatically when `OPENCLAW_SANDBOX=1` for local builds.
+- `OPENCLAW_DOCKER_SOCKET` — override Docker socket path (default: `DOCKER_HOST=unix://...` path, else `/var/run/docker.sock`)
+- `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` — break-glass: allow trusted private-network
+  `ws://` targets for CLI/onboarding client paths (default is loopback-only)
+- `OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS=0` — disable container browser hardening flags
+  `--disable-3d-apis`, `--disable-software-rasterizer`, `--disable-gpu` when you need
+  WebGL/3D compatibility.
+- `OPENCLAW_BROWSER_DISABLE_EXTENSIONS=0` — keep extensions enabled when browser
+  flows require them (default keeps extensions disabled in sandbox browser).
+- `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT=<N>` — set Chromium renderer process
+  limit; set to `0` to skip the flag and use Chromium default behavior.
 
 After it finishes:
 
 - Open `http://127.0.0.1:18789/` in your browser.
 - Paste the token into the Control UI (Settings → token).
-- Need the URL again? Run `docker compose run --rm bot-cli dashboard --no-open`.
+- Need the URL again? Run `docker compose run --rm openclaw-cli dashboard --no-open`.
+
+### Enable agent sandbox for Docker gateway (opt-in)
+
+`docker-setup.sh` can also bootstrap `agents.defaults.sandbox.*` for Docker
+deployments.
+
+Enable with:
+
+```bash
+export OPENCLAW_SANDBOX=1
+./docker-setup.sh
+```
+
+Custom socket path (for example rootless Docker):
+
+```bash
+export OPENCLAW_SANDBOX=1
+export OPENCLAW_DOCKER_SOCKET=/run/user/1000/docker.sock
+./docker-setup.sh
+```
+
+Notes:
+
+- The script mounts `docker.sock` only after sandbox prerequisites pass.
+- If sandbox setup cannot be completed, the script resets
+  `agents.defaults.sandbox.mode` to `off` to avoid stale/broken sandbox config
+  on reruns.
+- If `Dockerfile.sandbox` is missing, the script prints a warning and continues;
+  build `openclaw-sandbox:bookworm-slim` with `scripts/sandbox-setup.sh` if
+  needed.
+- For non-local `OPENCLAW_IMAGE` values, the image must already contain Docker
+  CLI support for sandbox execution.
+
+### Automation/CI (non-interactive, no TTY noise)
+
+For scripts and CI, disable Compose pseudo-TTY allocation with `-T`:
+
+```bash
+docker compose run -T --rm openclaw-cli gateway probe
+docker compose run -T --rm openclaw-cli devices list --json
+```
+
+If your automation exports no Claude session vars, leaving them unset now resolves to
+empty values by default in `docker-compose.yml` to avoid repeated "variable is not set"
+warnings.
+
+### Shared-network security note (CLI + gateway)
+
+`openclaw-cli` uses `network_mode: "service:openclaw-gateway"` so CLI commands can
+reliably reach the gateway over `127.0.0.1` in Docker.
+
+Treat this as a shared trust boundary: loopback binding is not isolation between these two
+containers. If you need stronger separation, run commands from a separate container/host
+network path instead of the bundled `openclaw-cli` service.
+
+To reduce impact if the CLI process is compromised, the compose config drops
+`NET_RAW`/`NET_ADMIN` and enables `no-new-privileges` on `openclaw-cli`.
 
 It writes config/workspace on the host:
 
-- `~/.hanzo/bot/`
-- `~/.hanzo/bot/workspace`
+- `~/.openclaw/`
+- `~/.openclaw/workspace`
 
 Running on a VPS? See [Hetzner (Docker VPS)](/install/hetzner).
 
@@ -75,9 +149,9 @@ Running on a VPS? See [Hetzner (Docker VPS)](/install/hetzner).
 
 Official pre-built images are published at:
 
-- [GitHub Container Registry package](https://github.com/hanzoai/bot/pkgs/container/bot)
+- [GitHub Container Registry package](https://github.com/openclaw/openclaw/pkgs/container/openclaw)
 
-Use image name `ghcr.io/hanzoai/bot` (not similarly named Docker Hub
+Use image name `ghcr.io/openclaw/openclaw` (not similarly named Docker Hub
 images).
 
 Common tags:
@@ -96,12 +170,12 @@ The docker image now publishes OCI base-image annotations (sha256 is an example)
 
 - `org.opencontainers.image.base.name=docker.io/library/node:22-bookworm`
 - `org.opencontainers.image.base.digest=sha256:cd7bcd2e7a1e6f72052feb023c7f6b722205d3fcab7bbcbd2d1bfdab10b1e935`
-- `org.opencontainers.image.source=https://github.com/hanzoai/bot`
-- `org.opencontainers.image.url=https://hanzo.bot`
-- `org.opencontainers.image.documentation=https://docs.hanzo.bot/install/docker`
+- `org.opencontainers.image.source=https://github.com/openclaw/openclaw`
+- `org.opencontainers.image.url=https://openclaw.ai`
+- `org.opencontainers.image.documentation=https://docs.openclaw.ai/install/docker`
 - `org.opencontainers.image.licenses=MIT`
-- `org.opencontainers.image.title=Bot`
-- `org.opencontainers.image.description=Bot gateway and CLI runtime container image`
+- `org.opencontainers.image.title=OpenClaw`
+- `org.opencontainers.image.description=OpenClaw gateway and CLI runtime container image`
 - `org.opencontainers.image.revision=<git-sha>`
 - `org.opencontainers.image.version=<tag-or-main>`
 - `org.opencontainers.image.created=<rfc3339 timestamp>`
@@ -112,49 +186,49 @@ Release context: this repository's tagged history already uses Bookworm in
 `v2026.2.22` and earlier 2026 tags (for example `v2026.2.21`, `v2026.2.9`).
 
 By default the setup script builds the image from source. To pull a pre-built
-image instead, set `BOT_IMAGE` before running the script:
+image instead, set `OPENCLAW_IMAGE` before running the script:
 
 ```bash
-export BOT_IMAGE="ghcr.io/hanzoai/bot:latest"
+export OPENCLAW_IMAGE="ghcr.io/openclaw/openclaw:latest"
 ./docker-setup.sh
 ```
 
-The script detects that `BOT_IMAGE` is not the default `bot:local` and
+The script detects that `OPENCLAW_IMAGE` is not the default `openclaw:local` and
 runs `docker pull` instead of `docker build`. Everything else (onboarding,
 gateway start, token generation) works the same way.
 
 `docker-setup.sh` still runs from the repository root because it uses the local
-`docker-compose.yml` and helper files. `BOT_IMAGE` skips local image build
+`docker-compose.yml` and helper files. `OPENCLAW_IMAGE` skips local image build
 time; it does not replace the compose/setup workflow.
 
 ### Shell Helpers (optional)
 
-For easier day-to-day Docker management, install `BotDock`:
+For easier day-to-day Docker management, install `ClawDock`:
 
 ```bash
-mkdir -p ~/.bot && curl -sL https://raw.githubusercontent.com/hanzoai/bot/main/scripts/shell-helpers/bot-helpers.sh -o ~/.hanzo/bot/bot-helpers.sh
+mkdir -p ~/.clawdock && curl -sL https://raw.githubusercontent.com/openclaw/openclaw/main/scripts/shell-helpers/clawdock-helpers.sh -o ~/.clawdock/clawdock-helpers.sh
 ```
 
 **Add to your shell config (zsh):**
 
 ```bash
-echo 'source ~/.hanzo/bot/bot-helpers.sh' >> ~/.zshrc && source ~/.zshrc
+echo 'source ~/.clawdock/clawdock-helpers.sh' >> ~/.zshrc && source ~/.zshrc
 ```
 
-Then use `bot-start`, `bot-stop`, `bot-dashboard`, etc. Run `bot-help` for all commands.
+Then use `clawdock-start`, `clawdock-stop`, `clawdock-dashboard`, etc. Run `clawdock-help` for all commands.
 
-See [`BotDock` Helper README](https://github.com/hanzoai/bot/blob/main/scripts/shell-helpers/README.md) for details.
+See [`ClawDock` Helper README](https://github.com/openclaw/openclaw/blob/main/scripts/shell-helpers/README.md) for details.
 
 ### Manual flow (compose)
 
 ```bash
-docker build -t bot:local -f Dockerfile .
-docker compose run --rm bot-cli onboard
-docker compose up -d bot-gateway
+docker build -t openclaw:local -f Dockerfile .
+docker compose run --rm openclaw-cli onboard
+docker compose up -d openclaw-gateway
 ```
 
 Note: run `docker compose ...` from the repo root. If you enabled
-`BOT_EXTRA_MOUNTS` or `BOT_HOME_VOLUME`, the setup script writes
+`OPENCLAW_EXTRA_MOUNTS` or `OPENCLAW_HOME_VOLUME`, the setup script writes
 `docker-compose.extra.yml`; include it when running Compose elsewhere:
 
 ```bash
@@ -167,9 +241,9 @@ If you see “unauthorized” or “disconnected (1008): pairing required”, fe
 fresh dashboard link and approve the browser device:
 
 ```bash
-docker compose run --rm bot-cli dashboard --no-open
-docker compose run --rm bot-cli devices list
-docker compose run --rm bot-cli devices approve <requestId>
+docker compose run --rm openclaw-cli dashboard --no-open
+docker compose run --rm openclaw-cli devices list
+docker compose run --rm openclaw-cli devices approve <requestId>
 ```
 
 More detail: [Dashboard](/web/dashboard), [Devices](/cli/devices).
@@ -177,71 +251,73 @@ More detail: [Dashboard](/web/dashboard), [Devices](/cli/devices).
 ### Extra mounts (optional)
 
 If you want to mount additional host directories into the containers, set
-`BOT_EXTRA_MOUNTS` before running `docker-setup.sh`. This accepts a
+`OPENCLAW_EXTRA_MOUNTS` before running `docker-setup.sh`. This accepts a
 comma-separated list of Docker bind mounts and applies them to both
-`bot-gateway` and `bot-cli` by generating `docker-compose.extra.yml`.
+`openclaw-gateway` and `openclaw-cli` by generating `docker-compose.extra.yml`.
 
 Example:
 
 ```bash
-export BOT_EXTRA_MOUNTS="$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
+export OPENCLAW_EXTRA_MOUNTS="$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
 ./docker-setup.sh
 ```
 
 Notes:
 
 - Paths must be shared with Docker Desktop on macOS/Windows.
-- If you edit `BOT_EXTRA_MOUNTS`, rerun `docker-setup.sh` to regenerate the
+- Each entry must be `source:target[:options]` with no spaces, tabs, or newlines.
+- If you edit `OPENCLAW_EXTRA_MOUNTS`, rerun `docker-setup.sh` to regenerate the
   extra compose file.
 - `docker-compose.extra.yml` is generated. Don’t hand-edit it.
 
 ### Persist the entire container home (optional)
 
 If you want `/home/node` to persist across container recreation, set a named
-volume via `BOT_HOME_VOLUME`. This creates a Docker volume and mounts it at
+volume via `OPENCLAW_HOME_VOLUME`. This creates a Docker volume and mounts it at
 `/home/node`, while keeping the standard config/workspace bind mounts. Use a
 named volume here (not a bind path); for bind mounts, use
-`BOT_EXTRA_MOUNTS`.
+`OPENCLAW_EXTRA_MOUNTS`.
 
 Example:
 
 ```bash
-export BOT_HOME_VOLUME="bot_home"
+export OPENCLAW_HOME_VOLUME="openclaw_home"
 ./docker-setup.sh
 ```
 
 You can combine this with extra mounts:
 
 ```bash
-export BOT_HOME_VOLUME="bot_home"
-export BOT_EXTRA_MOUNTS="$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
+export OPENCLAW_HOME_VOLUME="openclaw_home"
+export OPENCLAW_EXTRA_MOUNTS="$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
 ./docker-setup.sh
 ```
 
 Notes:
 
-- If you change `BOT_HOME_VOLUME`, rerun `docker-setup.sh` to regenerate the
+- Named volumes must match `^[A-Za-z0-9][A-Za-z0-9_.-]*$`.
+- If you change `OPENCLAW_HOME_VOLUME`, rerun `docker-setup.sh` to regenerate the
   extra compose file.
 - The named volume persists until removed with `docker volume rm <name>`.
 
 ### Install extra apt packages (optional)
 
 If you need system packages inside the image (for example, build tools or media
-libraries), set `BOT_DOCKER_APT_PACKAGES` before running `docker-setup.sh`.
+libraries), set `OPENCLAW_DOCKER_APT_PACKAGES` before running `docker-setup.sh`.
 This installs the packages during the image build, so they persist even if the
 container is deleted.
 
 Example:
 
 ```bash
-export BOT_DOCKER_APT_PACKAGES="ffmpeg build-essential"
+export OPENCLAW_DOCKER_APT_PACKAGES="ffmpeg build-essential"
 ./docker-setup.sh
 ```
 
 Notes:
 
 - This accepts a space-separated list of apt package names.
-- If you change `BOT_DOCKER_APT_PACKAGES`, rerun `docker-setup.sh` to rebuild
+- If you change `OPENCLAW_DOCKER_APT_PACKAGES`, rerun `docker-setup.sh` to rebuild
   the image.
 
 ### Power-user / full-featured container (opt-in)
@@ -258,43 +334,43 @@ If you want a more full-featured container, use these opt-in knobs:
 1. **Persist `/home/node`** so browser downloads and tool caches survive:
 
 ```bash
-export BOT_HOME_VOLUME="bot_home"
+export OPENCLAW_HOME_VOLUME="openclaw_home"
 ./docker-setup.sh
 ```
 
 2. **Bake system deps into the image** (repeatable + persistent):
 
 ```bash
-export BOT_DOCKER_APT_PACKAGES="git curl jq"
+export OPENCLAW_DOCKER_APT_PACKAGES="git curl jq"
 ./docker-setup.sh
 ```
 
 3. **Install Playwright browsers without `npx`** (avoids npm override conflicts):
 
 ```bash
-docker compose run --rm bot-cli \
+docker compose run --rm openclaw-cli \
   node /app/node_modules/playwright-core/cli.js install chromium
 ```
 
 If you need Playwright to install system deps, rebuild the image with
-`BOT_DOCKER_APT_PACKAGES` instead of using `--with-deps` at runtime.
+`OPENCLAW_DOCKER_APT_PACKAGES` instead of using `--with-deps` at runtime.
 
 4. **Persist Playwright browser downloads**:
 
 - Set `PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright` in
   `docker-compose.yml`.
-- Ensure `/home/node` persists via `BOT_HOME_VOLUME`, or mount
-  `/home/node/.cache/ms-playwright` via `BOT_EXTRA_MOUNTS`.
+- Ensure `/home/node` persists via `OPENCLAW_HOME_VOLUME`, or mount
+  `/home/node/.cache/ms-playwright` via `OPENCLAW_EXTRA_MOUNTS`.
 
 ### Permissions + EACCES
 
 The image runs as `node` (uid 1000). If you see permission errors on
-`/home/node/.bot`, make sure your host bind mounts are owned by uid 1000.
+`/home/node/.openclaw`, make sure your host bind mounts are owned by uid 1000.
 
 Example (Linux host):
 
 ```bash
-sudo chown -R 1000:1000 /path/to/bot-config /path/to/bot-workspace
+sudo chown -R 1000:1000 /path/to/openclaw-config /path/to/openclaw-workspace
 ```
 
 If you choose to run as root for convenience, you accept the security tradeoff.
@@ -339,19 +415,19 @@ Use the CLI container to configure channels, then restart the gateway if needed.
 WhatsApp (QR):
 
 ```bash
-docker compose run --rm bot-cli channels login
+docker compose run --rm openclaw-cli channels login
 ```
 
 Telegram (bot token):
 
 ```bash
-docker compose run --rm bot-cli channels add --channel telegram --token "<token>"
+docker compose run --rm openclaw-cli channels add --channel telegram --token "<token>"
 ```
 
 Discord (bot token):
 
 ```bash
-docker compose run --rm bot-cli channels add --channel discord --token "<token>"
+docker compose run --rm openclaw-cli channels add --channel discord --token "<token>"
 ```
 
 Docs: [WhatsApp](/channels/whatsapp), [Telegram](/channels/telegram), [Discord](/channels/discord)
@@ -368,7 +444,22 @@ URL you land on and paste it back into the wizard to finish auth.
 Container probe endpoints (no auth required):
 
 ```bash
-docker compose exec bot-gateway node dist/index.js health --token "$BOT_GATEWAY_TOKEN"
+curl -fsS http://127.0.0.1:18789/healthz
+curl -fsS http://127.0.0.1:18789/readyz
+```
+
+Aliases: `/health` and `/ready`.
+
+The Docker image includes a built-in `HEALTHCHECK` that pings `/healthz` in the
+background. In plain terms: Docker keeps checking if OpenClaw is still
+responsive. If checks keep failing, Docker marks the container as `unhealthy`,
+and orchestration systems (Docker Compose restart policy, Swarm, Kubernetes,
+etc.) can automatically restart or replace it.
+
+Authenticated deep health snapshot (gateway + channels):
+
+```bash
+docker compose exec openclaw-gateway node dist/index.js health --token "$OPENCLAW_GATEWAY_TOKEN"
 ```
 
 ### E2E smoke test (Docker)
@@ -385,7 +476,7 @@ pnpm test:docker:qr
 
 ### LAN vs loopback (Docker Compose)
 
-`docker-setup.sh` defaults `BOT_GATEWAY_BIND=lan` so host access to
+`docker-setup.sh` defaults `OPENCLAW_GATEWAY_BIND=lan` so host access to
 `http://127.0.0.1:18789` works with Docker port publishing.
 
 - `lan` (default): host browser + host CLI can reach the published gateway port.
@@ -403,16 +494,16 @@ If you see `Gateway target: ws://172.x.x.x:18789` or repeated `pairing required`
 errors from Docker CLI commands, run:
 
 ```bash
-docker compose run --rm bot-cli config set gateway.mode local
-docker compose run --rm bot-cli config set gateway.bind lan
-docker compose run --rm bot-cli devices list --url ws://127.0.0.1:18789
+docker compose run --rm openclaw-cli config set gateway.mode local
+docker compose run --rm openclaw-cli config set gateway.bind lan
+docker compose run --rm openclaw-cli devices list --url ws://127.0.0.1:18789
 ```
 
 ### Notes
 
-- Gateway bind defaults to `lan` for container use (`BOT_GATEWAY_BIND`).
+- Gateway bind defaults to `lan` for container use (`OPENCLAW_GATEWAY_BIND`).
 - Dockerfile CMD uses `--allow-unconfigured`; mounted config with `gateway.mode` not `local` will still start. Override CMD to enforce the guard.
-- The gateway container is the source of truth for sessions (`~/.hanzo/bot/agents/<agentId>/sessions/`).
+- The gateway container is the source of truth for sessions (`~/.openclaw/agents/<agentId>/sessions/`).
 
 ## Agent Sandbox (host gateway + Docker tools)
 
@@ -448,13 +539,15 @@ precedence, and troubleshooting.
 
 ### Default behavior
 
-- Image: `bot-sandbox:bookworm-slim`
+- Image: `openclaw-sandbox:bookworm-slim`
 - One container per agent
-- Agent workspace access: `workspaceAccess: "none"` (default) uses `~/.hanzo/bot/sandboxes`
+- Agent workspace access: `workspaceAccess: "none"` (default) uses `~/.openclaw/sandboxes`
   - `"ro"` keeps the sandbox workspace at `/workspace` and mounts the agent workspace read-only at `/agent` (disables `write`/`edit`/`apply_patch`)
   - `"rw"` mounts the agent workspace read/write at `/workspace`
 - Auto-prune: idle > 24h OR age > 7d
 - Network: `none` by default (explicitly opt-in if you need egress)
+  - `host` is blocked.
+  - `container:<id>` is blocked by default (namespace-join risk).
 - Default allow: `exec`, `process`, `read`, `write`, `edit`, `sessions_list`, `sessions_history`, `sessions_send`, `sessions_spawn`, `session_status`
 - Default deny: `browser`, `canvas`, `nodes`, `cron`, `discord`, `gateway`
 
@@ -463,11 +556,14 @@ precedence, and troubleshooting.
 If you plan to install packages in `setupCommand`, note:
 
 - Default `docker.network` is `"none"` (no egress).
+- `docker.network: "host"` is blocked.
+- `docker.network: "container:<id>"` is blocked by default.
+- Break-glass override: `agents.defaults.sandbox.docker.dangerouslyAllowContainerNamespaceJoin: true`.
 - `readOnlyRoot: true` blocks package installs.
 - `user` must be root for `apt-get` (omit `user` or set `user: "0:0"`).
-  Hanzo Bot auto-recreates containers when `setupCommand` (or docker config) changes
+  OpenClaw auto-recreates containers when `setupCommand` (or docker config) changes
   unless the container was **recently used** (within ~5 minutes). Hot containers
-  log a warning with the exact `hanzo-bot sandbox recreate ...` command.
+  log a warning with the exact `openclaw sandbox recreate ...` command.
 
 ```json5
 {
@@ -477,9 +573,9 @@ If you plan to install packages in `setupCommand`, note:
         mode: "non-main", // off | non-main | all
         scope: "agent", // session | agent | shared (agent is default)
         workspaceAccess: "none", // none | ro | rw
-        workspaceRoot: "~/.hanzo/bot/sandboxes",
+        workspaceRoot: "~/.openclaw/sandboxes",
         docker: {
-          image: "bot-sandbox:bookworm-slim",
+          image: "openclaw-sandbox:bookworm-slim",
           workdir: "/workspace",
           readOnlyRoot: true,
           tmpfs: ["/tmp", "/var/tmp", "/run"],
@@ -497,7 +593,7 @@ If you plan to install packages in `setupCommand`, note:
             nproc: 256,
           },
           seccompProfile: "/path/to/seccomp.json",
-          apparmorProfile: "bot-sandbox",
+          apparmorProfile: "openclaw-sandbox",
           dns: ["1.1.1.1", "8.8.8.8"],
           extraHosts: ["internal.service:10.0.0.5"],
         },
@@ -532,7 +628,8 @@ If you plan to install packages in `setupCommand`, note:
 
 Hardening knobs live under `agents.defaults.sandbox.docker`:
 `network`, `user`, `pidsLimit`, `memory`, `memorySwap`, `cpus`, `ulimits`,
-`seccompProfile`, `apparmorProfile`, `dns`, `extraHosts`.
+`seccompProfile`, `apparmorProfile`, `dns`, `extraHosts`,
+`dangerouslyAllowContainerNamespaceJoin` (break-glass only).
 
 Multi-agent: override `agents.defaults.sandbox.{docker,browser,prune}.*` per agent via `agents.list[].sandbox.{docker,browser,prune}.*`
 (ignored when `agents.defaults.sandbox.scope` / `agents.list[].sandbox.scope` is `"shared"`).
@@ -543,7 +640,7 @@ Multi-agent: override `agents.defaults.sandbox.{docker,browser,prune}.*` per age
 scripts/sandbox-setup.sh
 ```
 
-This builds `bot-sandbox:bookworm-slim` using `Dockerfile.sandbox`.
+This builds `openclaw-sandbox:bookworm-slim` using `Dockerfile.sandbox`.
 
 ### Sandbox common image (optional)
 
@@ -553,13 +650,13 @@ If you want a sandbox image with common build tooling (Node, Go, Rust, etc.), bu
 scripts/sandbox-common-setup.sh
 ```
 
-This builds `bot-sandbox-common:bookworm-slim`. To use it:
+This builds `openclaw-sandbox-common:bookworm-slim`. To use it:
 
 ```json5
 {
   agents: {
     defaults: {
-      sandbox: { docker: { image: "bot-sandbox-common:bookworm-slim" } },
+      sandbox: { docker: { image: "openclaw-sandbox-common:bookworm-slim" } },
     },
   },
 }
@@ -573,7 +670,7 @@ To run the browser tool inside the sandbox, build the browser image:
 scripts/sandbox-browser-setup.sh
 ```
 
-This builds `bot-sandbox-browser:bookworm-slim` using
+This builds `openclaw-sandbox-browser:bookworm-slim` using
 `Dockerfile.sandbox-browser`. The container runs Chromium with CDP enabled and
 an optional noVNC observer (headful via Xvfb).
 
@@ -582,6 +679,41 @@ Notes:
 - Headful (Xvfb) reduces bot blocking vs headless.
 - Headless can still be used by setting `agents.defaults.sandbox.browser.headless=true`.
 - No full desktop environment (GNOME) is needed; Xvfb provides the display.
+- Browser containers default to a dedicated Docker network (`openclaw-sandbox-browser`) instead of global `bridge`.
+- Optional `agents.defaults.sandbox.browser.cdpSourceRange` restricts container-edge CDP ingress by CIDR (for example `172.21.0.1/32`).
+- noVNC observer access is password-protected by default; OpenClaw provides a short-lived observer token URL that serves a local bootstrap page and keeps the password in URL fragment (instead of URL query).
+- Browser container startup defaults are conservative for shared/container workloads, including:
+  - `--remote-debugging-address=127.0.0.1`
+  - `--remote-debugging-port=<derived from OPENCLAW_BROWSER_CDP_PORT>`
+  - `--user-data-dir=${HOME}/.chrome`
+  - `--no-first-run`
+  - `--no-default-browser-check`
+  - `--disable-3d-apis`
+  - `--disable-software-rasterizer`
+  - `--disable-gpu`
+  - `--disable-dev-shm-usage`
+  - `--disable-background-networking`
+  - `--disable-features=TranslateUI`
+  - `--disable-breakpad`
+  - `--disable-crash-reporter`
+  - `--metrics-recording-only`
+  - `--renderer-process-limit=2`
+  - `--no-zygote`
+  - `--disable-extensions`
+  - If `agents.defaults.sandbox.browser.noSandbox` is set, `--no-sandbox` and
+    `--disable-setuid-sandbox` are also appended.
+  - The three graphics hardening flags above are optional. If your workload needs
+    WebGL/3D, set `OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS=0` to run without
+    `--disable-3d-apis`, `--disable-software-rasterizer`, and `--disable-gpu`.
+  - Extension behavior is controlled by `--disable-extensions` and can be disabled
+    (enables extensions) via `OPENCLAW_BROWSER_DISABLE_EXTENSIONS=0` for
+    extension-dependent pages or extensions-heavy workflows.
+  - `--renderer-process-limit=2` is also configurable with
+    `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT`; set `0` to let Chromium choose its
+    default process limit when browser concurrency needs tuning.
+
+Defaults are applied by default in the bundled image. If you need different
+Chromium flags, use a custom browser image and provide your own entrypoint.
 
 Use config:
 
@@ -603,7 +735,7 @@ Custom browser image:
 {
   agents: {
     defaults: {
-      sandbox: { browser: { image: "my-bot-browser" } },
+      sandbox: { browser: { image: "my-openclaw-browser" } },
     },
   },
 }
@@ -623,14 +755,14 @@ Prune rules (`agents.defaults.sandbox.prune`) apply to browser containers too.
 Build your own image and point config to it:
 
 ```bash
-docker build -t my-bot-sbx -f Dockerfile.sandbox .
+docker build -t my-openclaw-sbx -f Dockerfile.sandbox .
 ```
 
 ```json5
 {
   agents: {
     defaults: {
-      sandbox: { docker: { image: "my-bot-sbx" } },
+      sandbox: { docker: { image: "my-openclaw-sbx" } },
     },
   },
 }
@@ -664,11 +796,11 @@ Example:
 
 ## Troubleshooting
 
-- Image missing: build with [`scripts/sandbox-setup.sh`](https://github.com/hanzoai/bot/blob/main/scripts/sandbox-setup.sh) or set `agents.defaults.sandbox.docker.image`.
+- Image missing: build with [`scripts/sandbox-setup.sh`](https://github.com/openclaw/openclaw/blob/main/scripts/sandbox-setup.sh) or set `agents.defaults.sandbox.docker.image`.
 - Container not running: it will auto-create per session on demand.
 - Permission errors in sandbox: set `docker.user` to a UID:GID that matches your
   mounted workspace ownership (or chown the workspace folder).
-- Custom tools not found: Hanzo Bot runs commands with `sh -lc` (login shell), which
+- Custom tools not found: OpenClaw runs commands with `sh -lc` (login shell), which
   sources `/etc/profile` and may reset PATH. Set `docker.env.PATH` to prepend your
   custom tool paths (e.g., `/custom/bin:/usr/local/share/npm-global/bin`), or add
   a script under `/etc/profile.d/` in your Dockerfile.

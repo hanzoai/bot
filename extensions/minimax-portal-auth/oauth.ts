@@ -1,4 +1,7 @@
-import { generatePkceVerifierChallenge, toFormUrlEncoded } from "bot/plugin-sdk";
+import {
+  generatePkceVerifierChallenge,
+  toFormUrlEncoded,
+} from "@hanzo/bot/plugin-sdk/minimax-portal-auth";
 import { randomBytes, randomUUID } from "node:crypto";
 
 export type MiniMaxRegion = "cn" | "global";

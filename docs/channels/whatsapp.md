@@ -44,13 +44,13 @@ Status: production-ready via WhatsApp Web (Baileys). Gateway owns linked session
   <Step title="Link WhatsApp (QR)">
 
 ```bash
-bot channels login --channel whatsapp
+openclaw channels login --channel whatsapp
 ```
 
     For a specific account:
 
 ```bash
-bot channels login --channel whatsapp --account work
+openclaw channels login --channel whatsapp --account work
 ```
 
   </Step>
@@ -58,7 +58,7 @@ bot channels login --channel whatsapp --account work
   <Step title="Start the gateway">
 
 ```bash
-bot gateway
+openclaw gateway
 ```
 
   </Step>
@@ -66,8 +66,8 @@ bot gateway
   <Step title="Approve first pairing request (if using pairing mode)">
 
 ```bash
-bot pairing list whatsapp
-bot pairing approve whatsapp <CODE>
+openclaw pairing list whatsapp
+openclaw pairing approve whatsapp <CODE>
 ```
 
     Pairing requests expire after 1 hour. Pending requests are capped at 3 per channel.
@@ -76,7 +76,7 @@ bot pairing approve whatsapp <CODE>
 </Steps>
 
 <Note>
-Bot recommends running WhatsApp on a separate number when possible. (The channel metadata and onboarding flow are optimized for that setup, but personal-number setups are also supported.)
+OpenClaw recommends running WhatsApp on a separate number when possible. (The channel metadata and onboarding flow are optimized for that setup, but personal-number setups are also supported.)
 </Note>
 
 ## Deployment patterns
@@ -85,7 +85,7 @@ Bot recommends running WhatsApp on a separate number when possible. (The channel
   <Accordion title="Dedicated number (recommended)">
     This is the cleanest operational mode:
 
-    - separate WhatsApp identity for Bot
+    - separate WhatsApp identity for OpenClaw
     - clearer DM allowlists and routing boundaries
     - lower chance of self-chat confusion
 
@@ -116,7 +116,7 @@ Bot recommends running WhatsApp on a separate number when possible. (The channel
   </Accordion>
 
   <Accordion title="WhatsApp Web-only channel scope">
-    The messaging platform channel is WhatsApp Web-based (`Baileys`) in current Bot channel architecture.
+    The messaging platform channel is WhatsApp Web-based (`Baileys`) in current OpenClaw channel architecture.
 
     There is no separate Twilio WhatsApp messaging channel in the built-in chat-channel registry.
 
@@ -169,8 +169,9 @@ Bot recommends running WhatsApp on a separate number when possible. (The channel
     Sender allowlist fallback:
 
     - if `groupAllowFrom` is unset, runtime falls back to `allowFrom` when available
+    - sender allowlists are evaluated before mention/reply activation
 
-    Note: if no `channels.whatsapp` block exists at all, runtime group-policy fallback is effectively `open`.
+    Note: if no `channels.whatsapp` block exists at all, runtime group-policy fallback is `allowlist` (with a warning log), even if `channels.defaults.groupPolicy` is set.
 
   </Tab>
 
@@ -182,6 +183,11 @@ Bot recommends running WhatsApp on a separate number when possible. (The channel
     - explicit WhatsApp mentions of the bot identity
     - configured mention regex patterns (`agents.list[].groupChat.mentionPatterns`, fallback `messages.groupChat.mentionPatterns`)
     - implicit reply-to-bot detection (reply sender matches bot identity)
+
+    Security note:
+
+    - quote/reply only satisfies mention gating; it does **not** grant sender authorization
+    - with `groupPolicy: "allowlist"`, non-allowlisted senders are still blocked even if they reply to an allowlisted user's message
 
     Session-level activation command:
 
@@ -199,7 +205,7 @@ When the linked self number is also present in `allowFrom`, WhatsApp self-chat s
 
 - skip read receipts for self-chat turns
 - ignore mention-JID auto-trigger behavior that would otherwise ping yourself
-- if `messages.responsePrefix` is unset, self-chat replies default to `[{identity.name}]` or `[bot]`
+- if `messages.responsePrefix` is unset, self-chat replies default to `[{identity.name}]` or `[openclaw]`
 
 ## Message normalization and context
 
@@ -343,13 +349,13 @@ Behavior notes:
   </Accordion>
 
   <Accordion title="Credential paths and legacy compatibility">
-    - current auth path: `~/.bot/credentials/whatsapp/<accountId>/creds.json`
+    - current auth path: `~/.openclaw/credentials/whatsapp/<accountId>/creds.json`
     - backup file: `creds.json.bak`
-    - legacy default auth in `~/.bot/credentials/` is still recognized/migrated for default-account flows
+    - legacy default auth in `~/.openclaw/credentials/` is still recognized/migrated for default-account flows
   </Accordion>
 
   <Accordion title="Logout behavior">
-    `bot channels logout --channel whatsapp [--account <id>]` clears WhatsApp auth state for that account.
+    `openclaw channels logout --channel whatsapp [--account <id>]` clears WhatsApp auth state for that account.
 
     In legacy auth directories, `oauth.json` is preserved while Baileys auth files are removed.
 
@@ -373,8 +379,8 @@ Behavior notes:
     Fix:
 
     ```bash
-    bot channels login --channel whatsapp
-    bot channels status
+    openclaw channels login --channel whatsapp
+    openclaw channels status
     ```
 
   </Accordion>
@@ -385,8 +391,8 @@ Behavior notes:
     Fix:
 
     ```bash
-    bot doctor
-    bot logs --follow
+    openclaw doctor
+    openclaw logs --follow
     ```
 
     If needed, re-link with `channels login`.
@@ -407,6 +413,7 @@ Behavior notes:
     - `groupAllowFrom` / `allowFrom`
     - `groups` allowlist entries
     - mention gating (`requireMention` + mention patterns)
+    - duplicate keys in `openclaw.json` (JSON5): later entries override earlier ones, so keep a single `groupPolicy` per scope
 
   </Accordion>
 
@@ -433,4 +440,5 @@ High-signal WhatsApp fields:
 
 - [Pairing](/channels/pairing)
 - [Channel routing](/channels/channel-routing)
+- [Multi-agent routing](/concepts/multi-agent)
 - [Troubleshooting](/channels/troubleshooting)
