@@ -122,6 +122,14 @@ export type GatewayIamConfig = {
   /** OAuth2 scopes to request (defaults to ["openid", "profile", "email"]). */
   scopes?: string[];
   /**
+   * Override JWKS URI for JWT validation.
+   * When set, bypasses OIDC discovery for JWKS and uses this URL directly.
+   * Useful when the external JWKS endpoint is behind a CDN/WAF that blocks
+   * server-to-server requests (e.g. Cloudflare challenge pages).
+   * Example: "http://iam.hanzo.svc.cluster.local/.well-known/jwks"
+   */
+  jwksUrl?: string;
+  /**
    * Email addresses with super-admin privileges.
    * Super admins bypass billing checks and can credit their own account for testing.
    */
