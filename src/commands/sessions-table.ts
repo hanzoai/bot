@@ -1,5 +1,5 @@
 import type { SessionEntry } from "../config/sessions.js";
-import type { BotConfig } from "../config/types.bot.js";
+import type { BotConfig } from "../config/types.openclaw.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../agents/defaults.js";
 import { resolveConfiguredModelRef } from "../agents/model-selection.js";
 import { resolveSessionModelRef } from "../gateway/session-utils.js";

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import BotKit
+=======
+import OpenClawKit
+>>>>>>> upstream/main
 import Foundation
 import Testing
 
@@ -28,7 +32,11 @@ import Testing
         let url = ShareToAgentDeepLink.buildURL(from: payload)
         let parsed = url.flatMap { DeepLinkParser.parse($0) }
         guard case let .agent(agent)? = parsed else {
+<<<<<<< HEAD
             Issue.record("Expected bot://agent deep link")
+=======
+            Issue.record("Expected openclaw://agent deep link")
+>>>>>>> upstream/main
             return
         }
 

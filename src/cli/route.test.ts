@@ -32,8 +32,8 @@ describe("tryRouteCli", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    originalDisableRouteFirst = process.env.BOT_DISABLE_ROUTE_FIRST;
-    delete process.env.BOT_DISABLE_ROUTE_FIRST;
+    originalDisableRouteFirst = process.env.OPENCLAW_DISABLE_ROUTE_FIRST;
+    delete process.env.OPENCLAW_DISABLE_ROUTE_FIRST;
     vi.resetModules();
     ({ tryRouteCli } = await import("./route.js"));
     findRoutedCommandMock.mockReturnValue({
@@ -44,14 +44,14 @@ describe("tryRouteCli", () => {
 
   afterEach(() => {
     if (originalDisableRouteFirst === undefined) {
-      delete process.env.BOT_DISABLE_ROUTE_FIRST;
+      delete process.env.OPENCLAW_DISABLE_ROUTE_FIRST;
     } else {
-      process.env.BOT_DISABLE_ROUTE_FIRST = originalDisableRouteFirst;
+      process.env.OPENCLAW_DISABLE_ROUTE_FIRST = originalDisableRouteFirst;
     }
   });
 
   it("passes suppressDoctorStdout=true for routed --json commands", async () => {
-    await expect(tryRouteCli(["node", "@hanzo/bot", "status", "--json"])).resolves.toBe(true);
+    await expect(tryRouteCli(["node", "openclaw", "status", "--json"])).resolves.toBe(true);
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -62,7 +62,7 @@ describe("tryRouteCli", () => {
   });
 
   it("does not pass suppressDoctorStdout for routed non-json commands", async () => {
-    await expect(tryRouteCli(["node", "@hanzo/bot", "status"])).resolves.toBe(true);
+    await expect(tryRouteCli(["node", "openclaw", "status"])).resolves.toBe(true);
 
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({
       runtime: expect.any(Object),
@@ -71,9 +71,9 @@ describe("tryRouteCli", () => {
   });
 
   it("routes status when root options precede the command", async () => {
-    await expect(
-      tryRouteCli(["node", "@hanzo/bot", "--log-level", "debug", "status"]),
-    ).resolves.toBe(true);
+    await expect(tryRouteCli(["node", "openclaw", "--log-level", "debug", "status"])).resolves.toBe(
+      true,
+    );
 
     expect(findRoutedCommandMock).toHaveBeenCalledWith(["status"]);
     expect(ensureConfigReadyMock).toHaveBeenCalledWith({

@@ -355,7 +355,7 @@ async function listSandboxBrowserContainers(
 ): Promise<string[] | null> {
   try {
     const result = await execDockerRawFn(
-      ["ps", "-a", "--filter", "label=bot.sandboxBrowser=1", "--format", "{{.Names}}"],
+      ["ps", "-a", "--filter", "label=openclaw.sandboxBrowser=1", "--format", "{{.Names}}"],
       { allowFailure: true },
     );
     if (result.code !== 0) {
@@ -380,7 +380,7 @@ async function readSandboxBrowserHashLabels(params: {
       [
         "inspect",
         "-f",
-        '{{ index .Config.Labels "bot.configHash" }}\t{{ index .Config.Labels "bot.browserConfigEpoch" }}',
+        '{{ index .Config.Labels "openclaw.configHash" }}\t{{ index .Config.Labels "openclaw.browserConfigEpoch" }}',
         params.containerName,
       ],
       { allowFailure: true },
@@ -490,7 +490,7 @@ export async function collectSandboxBrowserHashLabelFindings(params?: {
       detail:
         `Containers: ${missingHash.join(", ")}. ` +
         "These browser containers predate hash-based drift checks and may miss security remediations until recreated.",
-      remediation: `${formatCliCommand("bot sandbox recreate --browser --all")} (add --force to skip prompt).`,
+      remediation: `${formatCliCommand("openclaw sandbox recreate --browser --all")} (add --force to skip prompt).`,
     });
   }
 
@@ -501,8 +501,8 @@ export async function collectSandboxBrowserHashLabelFindings(params?: {
       title: "Sandbox browser container hash epoch is stale",
       detail:
         `Containers: ${staleEpoch.join(", ")}. ` +
-        `Expected bot.browserConfigEpoch=${SANDBOX_BROWSER_SECURITY_HASH_EPOCH}.`,
-      remediation: `${formatCliCommand("bot sandbox recreate --browser --all")} (add --force to skip prompt).`,
+        `Expected openclaw.browserConfigEpoch=${SANDBOX_BROWSER_SECURITY_HASH_EPOCH}.`,
+      remediation: `${formatCliCommand("openclaw sandbox recreate --browser --all")} (add --force to skip prompt).`,
     });
   }
 
@@ -515,7 +515,7 @@ export async function collectSandboxBrowserHashLabelFindings(params?: {
         `Containers: ${nonLoopbackPublished.join(", ")}. ` +
         "Sandbox browser observer/control ports should stay loopback-only to avoid unintended remote access.",
       remediation:
-        `${formatCliCommand("bot sandbox recreate --browser --all")} (add --force to skip prompt), ` +
+        `${formatCliCommand("openclaw sandbox recreate --browser --all")} (add --force to skip prompt), ` +
         "then verify published ports are bound to 127.0.0.1.",
     });
   }
@@ -651,7 +651,7 @@ export async function collectPluginsTrustFindings(params: {
           sandboxMode,
           agentId: context.agentId,
         });
-        const broadPolicy = isToolAllowedByPolicies("__bot_plugin_probe__", policies);
+        const broadPolicy = isToolAllowedByPolicies("__openclaw_plugin_probe__", policies);
         const explicitPluginAllow =
           !restrictiveProfile &&
           (hasExplicitPluginAllow({
@@ -749,7 +749,7 @@ export async function collectPluginsTrustFindings(params: {
         title: "Plugin install records drift from installed package versions",
         detail: `Detected plugin install metadata drift:\n${pluginVersionDrift.map((entry) => `- ${entry}`).join("\n")}`,
         remediation:
-          "Run `bot plugins update --all` (or reinstall affected plugins) to refresh install metadata.",
+          "Run `openclaw plugins update --all` (or reinstall affected plugins) to refresh install metadata.",
       });
     }
   }
@@ -812,7 +812,7 @@ export async function collectPluginsTrustFindings(params: {
         title: "Hook install records drift from installed package versions",
         detail: `Detected hook install metadata drift:\n${hookVersionDrift.map((entry) => `- ${entry}`).join("\n")}`,
         remediation:
-          "Run `bot hooks update --all` (or reinstall affected hooks) to refresh install metadata.",
+          "Run `openclaw hooks update --all` (or reinstall affected hooks) to refresh install metadata.",
       });
     }
   }
@@ -1150,7 +1150,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: "Plugin extensions directory scan failed",
         detail: `Static code scan could not list extensions directory: ${String(err)}`,
         remediation:
-          "Check file permissions and plugin layout, then rerun `bot security audit --deep`.",
+          "Check file permissions and plugin layout, then rerun `openclaw security audit --deep`.",
       });
     },
   });
@@ -1186,7 +1186,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: `Plugin "${pluginName}" has extension entry path traversal`,
         detail: `Found extension entries that escape the plugin directory:\n${escapedEntries.map((entry) => `  - ${entry}`).join("\n")}`,
         remediation:
-          "Update the plugin manifest so all bot.extensions entries stay inside the plugin directory.",
+          "Update the plugin manifest so all openclaw.extensions entries stay inside the plugin directory.",
       });
     }
 
@@ -1201,7 +1201,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: `Plugin "${pluginName}" code scan failed`,
         detail: `Static code scan could not complete: ${String(err)}`,
         remediation:
-          "Check file permissions and plugin layout, then rerun `bot security audit --deep`.",
+          "Check file permissions and plugin layout, then rerun `openclaw security audit --deep`.",
       });
       return null;
     });
@@ -1219,7 +1219,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: `Plugin "${pluginName}" contains dangerous code patterns`,
         detail: `Found ${summary.critical} critical issue(s) in ${summary.scannedFiles} scanned file(s):\n${details}`,
         remediation:
-          "Review the plugin source code carefully before use. If untrusted, remove the plugin from your Bot extensions state directory.",
+          "Review the plugin source code carefully before use. If untrusted, remove the plugin from your OpenClaw extensions state directory.",
       });
     } else if (summary.warn > 0) {
       const warnFindings = summary.findings.filter((f) => f.severity === "warn");
@@ -1251,7 +1251,7 @@ export async function collectInstalledSkillsCodeSafetyFindings(params: {
   for (const workspaceDir of workspaceDirs) {
     const entries = loadWorkspaceSkillEntries(workspaceDir, { config: params.cfg });
     for (const entry of entries) {
-      if (entry.skill.source === "bot-bundled") {
+      if (entry.skill.source === "openclaw-bundled") {
         continue;
       }
 
@@ -1276,7 +1276,7 @@ export async function collectInstalledSkillsCodeSafetyFindings(params: {
           title: `Skill "${skillName}" code scan failed`,
           detail: `Static code scan could not complete for ${skillDir}: ${String(err)}`,
           remediation:
-            "Check file permissions and skill layout, then rerun `bot security audit --deep`.",
+            "Check file permissions and skill layout, then rerun `openclaw security audit --deep`.",
         });
         return null;
       });

@@ -2,7 +2,7 @@ import {
   applyWindowsSpawnProgramPolicy,
   materializeWindowsSpawnProgram,
   resolveWindowsSpawnProgramCandidate,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/lobster";
 
 type SpawnTarget = {
   command: string;

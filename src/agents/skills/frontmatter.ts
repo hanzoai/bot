@@ -1,6 +1,6 @@
 import type { Skill } from "@mariozechner/pi-coding-agent";
 import type {
-  BotSkillMetadata,
+  OpenClawSkillMetadata,
   ParsedSkillFrontmatter,
   SkillEntry,
   SkillInstallSpec,
@@ -11,12 +11,12 @@ import { parseFrontmatterBlock } from "../../markdown/frontmatter.js";
 import {
   getFrontmatterString,
   normalizeStringList,
-  parseBotManifestInstallBase,
+  parseOpenClawManifestInstallBase,
   parseFrontmatterBool,
-  resolveBotManifestBlock,
-  resolveBotManifestInstall,
-  resolveBotManifestOs,
-  resolveBotManifestRequires,
+  resolveOpenClawManifestBlock,
+  resolveOpenClawManifestInstall,
+  resolveOpenClawManifestOs,
+  resolveOpenClawManifestRequires,
 } from "../../shared/frontmatter.js";
 
 export function parseFrontmatter(content: string): ParsedSkillFrontmatter {
@@ -108,7 +108,7 @@ function normalizeSafeDownloadUrl(raw: unknown): string | undefined {
 }
 
 function parseInstallSpec(input: unknown): SkillInstallSpec | undefined {
-  const parsed = parseBotManifestInstallBase(input, ["brew", "node", "go", "uv", "download"]);
+  const parsed = parseOpenClawManifestInstallBase(input, ["brew", "node", "go", "uv", "download"]);
   if (!parsed) {
     return undefined;
   }
@@ -189,16 +189,16 @@ function parseInstallSpec(input: unknown): SkillInstallSpec | undefined {
   return spec;
 }
 
-export function resolveBotMetadata(
+export function resolveOpenClawMetadata(
   frontmatter: ParsedSkillFrontmatter,
-): BotSkillMetadata | undefined {
-  const metadataObj = resolveBotManifestBlock({ frontmatter });
+): OpenClawSkillMetadata | undefined {
+  const metadataObj = resolveOpenClawManifestBlock({ frontmatter });
   if (!metadataObj) {
     return undefined;
   }
-  const requires = resolveBotManifestRequires(metadataObj);
-  const install = resolveBotManifestInstall(metadataObj, parseInstallSpec);
-  const osRaw = resolveBotManifestOs(metadataObj);
+  const requires = resolveOpenClawManifestRequires(metadataObj);
+  const install = resolveOpenClawManifestInstall(metadataObj, parseInstallSpec);
+  const osRaw = resolveOpenClawManifestOs(metadataObj);
   return {
     always: typeof metadataObj.always === "boolean" ? metadataObj.always : undefined,
     emoji: typeof metadataObj.emoji === "string" ? metadataObj.emoji : undefined,

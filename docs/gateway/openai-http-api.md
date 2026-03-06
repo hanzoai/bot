@@ -7,14 +7,14 @@ title: "OpenAI Chat Completions"
 
 # OpenAI Chat Completions (HTTP)
 
-Bot’s Gateway can serve a small OpenAI-compatible Chat Completions endpoint.
+OpenClaw’s Gateway can serve a small OpenAI-compatible Chat Completions endpoint.
 
 This endpoint is **disabled by default**. Enable it in config first.
 
 - `POST /v1/chat/completions`
 - Same port as the Gateway (WS + HTTP multiplex): `http://<gateway-host>:<port>/v1/chat/completions`
 
-Under the hood, requests are executed as a normal Gateway agent run (same codepath as `bot agent`), so routing/permissions/config match your Gateway.
+Under the hood, requests are executed as a normal Gateway agent run (same codepath as `openclaw agent`), so routing/permissions/config match your Gateway.
 
 ## Authentication
 
@@ -24,8 +24,8 @@ Uses the Gateway auth configuration. Send a bearer token:
 
 Notes:
 
-- When `gateway.auth.mode="token"`, use `gateway.auth.token` (or `BOT_GATEWAY_TOKEN`).
-- When `gateway.auth.mode="password"`, use `gateway.auth.password` (or `BOT_GATEWAY_PASSWORD`).
+- When `gateway.auth.mode="token"`, use `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`).
+- When `gateway.auth.mode="password"`, use `gateway.auth.password` (or `OPENCLAW_GATEWAY_PASSWORD`).
 - If `gateway.auth.rateLimit` is configured and too many auth failures occur, the endpoint returns `429` with `Retry-After`.
 
 ## Security boundary (important)
@@ -44,16 +44,16 @@ See [Security](/gateway/security) and [Remote access](/gateway/remote).
 
 No custom headers required: encode the agent id in the OpenAI `model` field:
 
-- `model: "bot:<agentId>"` (example: `"bot:main"`, `"bot:beta"`)
+- `model: "openclaw:<agentId>"` (example: `"openclaw:main"`, `"openclaw:beta"`)
 - `model: "agent:<agentId>"` (alias)
 
-Or target a specific Bot agent by header:
+Or target a specific OpenClaw agent by header:
 
-- `x-bot-agent-id: <agentId>` (default: `main`)
+- `x-openclaw-agent-id: <agentId>` (default: `main`)
 
 Advanced:
 
-- `x-bot-session-key: <sessionKey>` to fully control session routing.
+- `x-openclaw-session-key: <sessionKey>` to fully control session routing.
 
 ## Enabling the endpoint
 
@@ -109,9 +109,9 @@ Non-streaming:
 curl -sS http://127.0.0.1:18789/v1/chat/completions \
   -H 'Authorization: Bearer YOUR_TOKEN' \
   -H 'Content-Type: application/json' \
-  -H 'x-bot-agent-id: main' \
+  -H 'x-openclaw-agent-id: main' \
   -d '{
-    "model": "bot",
+    "model": "openclaw",
     "messages": [{"role":"user","content":"hi"}]
   }'
 ```
@@ -122,9 +122,9 @@ Streaming:
 curl -N http://127.0.0.1:18789/v1/chat/completions \
   -H 'Authorization: Bearer YOUR_TOKEN' \
   -H 'Content-Type: application/json' \
-  -H 'x-bot-agent-id: main' \
+  -H 'x-openclaw-agent-id: main' \
   -d '{
-    "model": "bot",
+    "model": "openclaw",
     "stream": true,
     "messages": [{"role":"user","content":"hi"}]
   }'
