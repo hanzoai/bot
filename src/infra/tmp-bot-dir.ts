@@ -83,13 +83,13 @@ export function resolvePreferredBotTmpDir(options: ResolvePreferredBotTmpDirOpti
     try {
       const st = lstatSync(dirPath);
       if (st.isSymbolicLink()) {
-        throw new Error(`Unsafe fallback OpenClaw temp dir: ${dirPath} is a symlink`);
+        throw new Error(`Unsafe fallback Bot temp dir: ${dirPath} is a symlink`);
       }
       if (!st.isDirectory()) {
-        throw new Error(`Unsafe fallback OpenClaw temp dir: ${dirPath} is not a directory`);
+        throw new Error(`Unsafe fallback Bot temp dir: ${dirPath} is not a directory`);
       }
       if (typeof st.uid === "number" && uid !== undefined && st.uid !== uid) {
-        throw new Error(`Unsafe fallback OpenClaw temp dir: ${dirPath} not owned by current user`);
+        throw new Error(`Unsafe fallback Bot temp dir: ${dirPath} not owned by current user`);
       }
       repairPermissions(dirPath, st);
       return dirPath;
@@ -101,7 +101,7 @@ export function resolvePreferredBotTmpDir(options: ResolvePreferredBotTmpDirOpti
     mkdirSync(dirPath, { recursive: true, mode: 0o700 });
     const st = lstatSync(dirPath);
     if (st.isSymbolicLink()) {
-      throw new Error(`Unsafe fallback OpenClaw temp dir: ${dirPath} is a symlink`);
+      throw new Error(`Unsafe fallback Bot temp dir: ${dirPath} is a symlink`);
     }
     repairPermissions(dirPath, st);
     return dirPath;

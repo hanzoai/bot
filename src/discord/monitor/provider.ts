@@ -470,8 +470,9 @@ export async function monitorDiscordProvider(opts: MonitorDiscordOpts = {}) {
     if (voiceEnabled) {
       clientPlugins.push(new VoicePlugin());
     }
-    // Pass eventQueue config to Carbon so the listener timeout can be tuned.
-    // Default listenerTimeout is 120s (Carbon defaults to 30s which is too short for LLM calls).
+    // Pass eventQueue config to Carbon so the gateway listener budget can be tuned.
+    // Default listenerTimeout is 120s (Carbon defaults to 30s, which is too short for some
+    // Discord normalization/enqueue work).
     const eventQueueOpts = {
       listenerTimeout: 120_000,
       ...discordCfg.eventQueue,
@@ -540,6 +541,9 @@ export async function monitorDiscordProvider(opts: MonitorDiscordOpts = {}) {
       accountId: account.accountId,
       token,
       runtime,
+      setStatus: opts.setStatus,
+      abortSignal: opts.abortSignal,
+      workerRunTimeoutMs: discordCfg.inboundWorker?.runTimeoutMs,
       botUserId,
       guildHistories,
       historyLimit,
