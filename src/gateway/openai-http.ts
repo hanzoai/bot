@@ -400,13 +400,13 @@ function coerceRequest(val: unknown): OpenAiChatCompletionRequest {
 function resolveAgentResponseText(result: unknown): string {
   const payloads = (result as { payloads?: Array<{ text?: string }> } | null)?.payloads;
   if (!Array.isArray(payloads) || payloads.length === 0) {
-    return "No response from Bot.";
+    return "No response from OpenClaw.";
   }
   const content = payloads
     .map((p) => (typeof p.text === "string" ? p.text : ""))
     .filter(Boolean)
     .join("\n\n");
-  return content || "No response from Bot.";
+  return content || "No response from OpenClaw.";
 }
 
 export async function handleOpenAiHttpRequest(
@@ -432,7 +432,7 @@ export async function handleOpenAiHttpRequest(
 
   const payload = coerceRequest(handled.body);
   const stream = Boolean(payload.stream);
-  const model = typeof payload.model === "string" ? payload.model : "@hanzo/bot";
+  const model = typeof payload.model === "string" ? payload.model : "openclaw";
   const user = typeof payload.user === "string" ? payload.user : undefined;
 
   const { sessionKey, messageChannel } = resolveGatewayRequestContext({

@@ -4,7 +4,11 @@
   <base-config cleartextTrafficPermitted="true" tools:ignore="InsecureBaseConfiguration" />
   <!-- Allow HTTP for tailnet/local dev endpoints (e.g. canvas/background web). -->
   <domain-config cleartextTrafficPermitted="true">
+<<<<<<< HEAD
     <domain includeSubdomains="true">hanzo-bot.local</domain>
+=======
+    <domain includeSubdomains="true">openclaw.local</domain>
+>>>>>>> upstream/main
   </domain-config>
   <domain-config cleartextTrafficPermitted="true">
     <domain includeSubdomains="true">ts.net</domain>

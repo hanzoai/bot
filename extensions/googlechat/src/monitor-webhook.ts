@@ -5,7 +5,7 @@ import {
   resolveWebhookTargetWithAuthOrReject,
   resolveWebhookTargets,
   type WebhookInFlightLimiter,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/googlechat";
 import type { WebhookTarget } from "./monitor-types.js";
 import type {
   GoogleChatEvent,

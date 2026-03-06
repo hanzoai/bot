@@ -137,8 +137,8 @@ export async function runDaemonRestart(opts: DaemonLifecycleOptions = {}): Promi
       }
 
       fail(`Gateway restart timed out after ${restartWaitSeconds}s waiting for health checks.`, [
-        formatCliCommand("bot gateway status --deep"),
-        formatCliCommand("bot doctor"),
+        formatCliCommand("openclaw gateway status --deep"),
+        formatCliCommand("openclaw doctor"),
       ]);
     },
   });

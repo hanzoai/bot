@@ -5,6 +5,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import * as compactionModule from "../compaction.js";
 import { castAgentMessage } from "../test-helpers/agent-message-fixtures.js";
 import {
   getCompactionSafeguardRuntime,
@@ -12,11 +13,23 @@ import {
 } from "./compaction-safeguard-runtime.js";
 import compactionSafeguardExtension, { __testing } from "./compaction-safeguard.js";
 
+vi.mock("../compaction.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof compactionModule>();
+  return {
+    ...actual,
+    summarizeInStages: vi.fn(actual.summarizeInStages),
+  };
+});
+
+const mockSummarizeInStages = vi.mocked(compactionModule.summarizeInStages);
+
 const {
   collectToolFailures,
   formatToolFailuresSection,
   splitPreservedRecentTurns,
   formatPreservedTurnsSection,
+  buildCompactionStructureInstructions,
+  buildStructuredFallbackSummary,
   appendSummarySection,
   resolveRecentTurnsPreserve,
   resolveQualityGuardMaxRetries,
@@ -1502,7 +1515,7 @@ describe("compaction-safeguard double-compaction guard", () => {
 async function expectWorkspaceSummaryEmptyForAgentsAlias(
   createAlias: (outsidePath: string, agentsPath: string) => void,
 ) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-compaction-summary-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-compaction-summary-"));
   const prevCwd = process.cwd();
   try {
     const outside = path.join(root, "outside-secret.txt");

@@ -1,4 +1,4 @@
-import type { MSTeamsConfig } from "bot/plugin-sdk";
+import type { MSTeamsConfig } from "@hanzo/bot/plugin-sdk/msteams";
 import { GRAPH_ROOT } from "./attachments/shared.js";
 import { loadMSTeamsSdkWithAuth } from "./sdk.js";
 import { readAccessToken } from "./token-response.js";

@@ -25,27 +25,27 @@ function isBatchSafe(value: string): boolean {
 }
 
 function resolveSystemdUnit(env: NodeJS.ProcessEnv): string {
-  const override = env.BOT_SYSTEMD_UNIT?.trim();
+  const override = env.OPENCLAW_SYSTEMD_UNIT?.trim();
   if (override) {
     return override.endsWith(".service") ? override : `${override}.service`;
   }
-  return `${resolveGatewaySystemdServiceName(env.BOT_PROFILE)}.service`;
+  return `${resolveGatewaySystemdServiceName(env.OPENCLAW_PROFILE)}.service`;
 }
 
 function resolveLaunchdLabel(env: NodeJS.ProcessEnv): string {
-  const override = env.BOT_LAUNCHD_LABEL?.trim();
+  const override = env.OPENCLAW_LAUNCHD_LABEL?.trim();
   if (override) {
     return override;
   }
-  return resolveGatewayLaunchAgentLabel(env.BOT_PROFILE);
+  return resolveGatewayLaunchAgentLabel(env.OPENCLAW_PROFILE);
 }
 
 function resolveWindowsTaskName(env: NodeJS.ProcessEnv): string {
-  const override = env.BOT_WINDOWS_TASK_NAME?.trim();
+  const override = env.OPENCLAW_WINDOWS_TASK_NAME?.trim();
   if (override) {
     return override;
   }
-  return resolveGatewayWindowsTaskName(env.BOT_PROFILE);
+  return resolveGatewayWindowsTaskName(env.OPENCLAW_PROFILE);
 }
 
 /**
@@ -69,7 +69,7 @@ export async function prepareRestartScript(
     if (platform === "linux") {
       const unitName = resolveSystemdUnit(env);
       const escaped = shellEscape(unitName);
-      filename = `bot-restart-${timestamp}.sh`;
+      filename = `openclaw-restart-${timestamp}.sh`;
       scriptContent = `#!/bin/sh
 # Standalone restart script — survives parent process termination.
 # Wait briefly to ensure file locks are released after update.
@@ -83,12 +83,22 @@ rm -f "$0"
       const escaped = shellEscape(label);
       // Fallback to 501 if getuid is not available (though it should be on macOS)
       const uid = process.getuid ? process.getuid() : 501;
-      filename = `bot-restart-${timestamp}.sh`;
+      // Resolve HOME at generation time via env/process.env to match launchd.ts,
+      // and shell-escape the label in the plist filename to prevent injection.
+      const home = env.HOME?.trim() || process.env.HOME || os.homedir();
+      const plistPath = path.join(home, "Library", "LaunchAgents", `${label}.plist`);
+      const escapedPlistPath = shellEscape(plistPath);
+      filename = `openclaw-restart-${timestamp}.sh`;
       scriptContent = `#!/bin/sh
 # Standalone restart script — survives parent process termination.
 # Wait briefly to ensure file locks are released after update.
 sleep 1
-launchctl kickstart -k 'gui/${uid}/${escaped}'
+# Try kickstart first (works when the service is still registered).
+# If it fails (e.g. after bootout), re-register via bootstrap then kickstart.
+if ! launchctl kickstart -k 'gui/${uid}/${escaped}' 2>/dev/null; then
+  launchctl bootstrap 'gui/${uid}' '${escapedPlistPath}' 2>/dev/null
+  launchctl kickstart -k 'gui/${uid}/${escaped}' 2>/dev/null || true
+fi
 # Self-cleanup
 rm -f "$0"
 `;
@@ -99,7 +109,7 @@ rm -f "$0"
       }
       const port =
         Number.isFinite(gatewayPort) && gatewayPort > 0 ? gatewayPort : DEFAULT_GATEWAY_PORT;
-      filename = `bot-restart-${timestamp}.bat`;
+      filename = `openclaw-restart-${timestamp}.bat`;
       scriptContent = `@echo off
 REM Standalone restart script — survives parent process termination.
 REM Wait briefly to ensure file locks are released after update.

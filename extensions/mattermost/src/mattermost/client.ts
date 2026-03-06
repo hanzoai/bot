@@ -138,6 +138,16 @@ export async function fetchMattermostChannel(
   return await client.request<MattermostChannel>(`/channels/${channelId}`);
 }
 
+export async function fetchMattermostChannelByName(
+  client: MattermostClient,
+  teamId: string,
+  channelName: string,
+): Promise<MattermostChannel> {
+  return await client.request<MattermostChannel>(
+    `/teams/${teamId}/channels/name/${encodeURIComponent(channelName)}`,
+  );
+}
+
 export async function sendMattermostTyping(
   client: MattermostClient,
   params: { channelId: string; parentId?: string },
@@ -194,6 +204,19 @@ export async function createMattermostPost(
   });
 }
 
+export type MattermostTeam = {
+  id: string;
+  name?: string | null;
+  display_name?: string | null;
+};
+
+export async function fetchMattermostUserTeams(
+  client: MattermostClient,
+  userId: string,
+): Promise<MattermostTeam[]> {
+  return await client.request<MattermostTeam[]>(`/users/${userId}/teams`);
+}
+
 export async function updateMattermostPost(
   client: MattermostClient,
   postId: string,
@@ -213,19 +236,6 @@ export async function updateMattermostPost(
     method: "PUT",
     body: JSON.stringify(payload),
   });
-}
-
-export type MattermostTeam = {
-  id: string;
-  name?: string | null;
-  display_name?: string | null;
-};
-
-export async function fetchMattermostUserTeams(
-  client: MattermostClient,
-  userId: string,
-): Promise<MattermostTeam[]> {
-  return await client.request<MattermostTeam[]>(`/users/${userId}/teams`);
 }
 
 export async function uploadMattermostFile(

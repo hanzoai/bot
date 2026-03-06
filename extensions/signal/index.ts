@@ -1,5 +1,5 @@
-import type { BotPluginApi } from "bot/plugin-sdk";
-import { emptyPluginConfigSchema } from "bot/plugin-sdk";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/signal";
+import { emptyPluginConfigSchema } from "@hanzo/bot/plugin-sdk/signal";
 import { signalPlugin } from "./src/channel.js";
 import { setSignalRuntime } from "./src/runtime.js";
 

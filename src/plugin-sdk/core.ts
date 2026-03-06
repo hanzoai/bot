@@ -1,7 +1,7 @@
 export type {
   AnyAgentTool,
   BotPluginApi,
-  BotPluginService,
+  OpenClawPluginService,
   ProviderAuthContext,
   ProviderAuthResult,
 } from "../plugins/types.js";
@@ -24,7 +24,7 @@ export {
   type PluginCommandRunOptions,
   type PluginCommandRunResult,
 } from "./run-command.js";
-export { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
+export { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
 
 export { resolveGatewayBindUrl } from "../shared/gateway-bind-url.js";
 export type { GatewayBindUrlResult } from "../shared/gateway-bind-url.js";
