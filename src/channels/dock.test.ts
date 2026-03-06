@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BotConfig } from "../config/config.js";
+import { withEnv } from "../test-utils/env.js";
 import { getChannelDock } from "./dock.js";
 
 function emptyConfig(): BotConfig {
@@ -69,7 +70,7 @@ describe("channels dock", () => {
           },
         },
       },
-    } as BotConfig;
+    } as unknown as BotConfig;
 
     const accountDefault = ircDock?.config?.resolveDefaultTo?.({ cfg, accountId: "work" });
     const rootDefault = ircDock?.config?.resolveDefaultTo?.({ cfg, accountId: "missing" });
@@ -98,5 +99,74 @@ describe("channels dock", () => {
     });
 
     expect(formatted).toEqual(["user", "foo", "plain"]);
+  });
+
+  it("telegram dock config readers preserve omitted-account fallback semantics", () => {
+    withEnv({ TELEGRAM_BOT_TOKEN: "tok-env" }, () => {
+      const telegramDock = getChannelDock("telegram");
+      const cfg = {
+        channels: {
+          telegram: {
+            allowFrom: ["top-owner"],
+            defaultTo: "@top-target",
+            accounts: {
+              work: {
+                botToken: "tok-work",
+                allowFrom: ["work-owner"],
+                defaultTo: "@work-target",
+              },
+            },
+          },
+        },
+      } as unknown as BotConfig;
+
+      expect(telegramDock?.config?.resolveAllowFrom?.({ cfg })).toEqual(["top-owner"]);
+      expect(telegramDock?.config?.resolveDefaultTo?.({ cfg })).toBe("@top-target");
+    });
+  });
+
+  it("slack dock config readers stay read-only when tokens are unresolved SecretRefs", () => {
+    const slackDock = getChannelDock("slack");
+    const cfg = {
+      channels: {
+        slack: {
+          botToken: {
+            source: "env",
+            provider: "default",
+            id: "SLACK_BOT_TOKEN",
+          },
+          appToken: {
+            source: "env",
+            provider: "default",
+            id: "SLACK_APP_TOKEN",
+          },
+          defaultTo: "channel:C111",
+          dm: { allowFrom: ["U123"] },
+          channels: {
+            C111: { requireMention: false },
+          },
+          replyToMode: "all",
+        },
+      },
+    } as unknown as BotConfig;
+
+    expect(slackDock?.config?.resolveAllowFrom?.({ cfg, accountId: "default" })).toEqual(["U123"]);
+    expect(slackDock?.config?.resolveDefaultTo?.({ cfg, accountId: "default" })).toBe(
+      "channel:C111",
+    );
+    expect(
+      slackDock?.threading?.resolveReplyToMode?.({
+        cfg,
+        accountId: "default",
+        chatType: "channel",
+      }),
+    ).toBe("all");
+    expect(
+      slackDock?.groups?.resolveRequireMention?.({
+        cfg,
+        accountId: "default",
+        groupId: "C111",
+      }),
+    ).toBe(false);
   });
 });
