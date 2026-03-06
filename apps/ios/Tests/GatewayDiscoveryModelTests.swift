@@ -1,5 +1,9 @@
 import Testing
+<<<<<<< HEAD
 @testable import HanzoBot
+=======
+@testable import OpenClaw
+>>>>>>> upstream/main
 
 @Suite(.serialized) struct GatewayDiscoveryModelTests {
     @Test @MainActor func debugLoggingCapturesLifecycleAndResets() {

@@ -1,4 +1,8 @@
-import type { ChannelDirectoryEntry, BotConfig, RuntimeEnv } from "bot/plugin-sdk/mattermost";
+import type {
+  ChannelDirectoryEntry,
+  BotConfig,
+  RuntimeEnv,
+} from "@hanzo/bot/plugin-sdk/mattermost";
 import { listMattermostAccountIds, resolveMattermostAccount } from "./accounts.js";
 import {
   createMattermostClient,

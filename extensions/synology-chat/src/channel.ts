@@ -1,5 +1,5 @@
 /**
- * Synology Chat Channel Plugin for Bot.
+ * Synology Chat Channel Plugin for OpenClaw.
  *
  * Implements the ChannelPlugin interface following the LINE pattern.
  */
@@ -9,7 +9,7 @@ import {
   setAccountEnabledInConfigSection,
   registerPluginHttpRoute,
   buildChannelConfigSchema,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/synology-chat";
 import { z } from "zod";
 import type { ResolvedSynologyChatAccount } from "./types.js";
 import { listAccountIds, resolveAccount } from "./accounts.js";
@@ -49,7 +49,7 @@ export function createSynologyChatPlugin() {
       selectionLabel: "Synology Chat (Webhook)",
       detailLabel: "Synology Chat (Webhook)",
       docsPath: "/channels/synology-chat",
-      blurb: "Connect your Synology NAS Chat to Bot",
+      blurb: "Connect your Synology NAS Chat to OpenClaw",
       order: 90,
     },
 
@@ -104,7 +104,7 @@ export function createSynologyChatPlugin() {
         if (!account.incomingUrl) return;
         await sendMessage(
           account.incomingUrl,
-          "Bot: your access has been approved.",
+          "OpenClaw: your access has been approved.",
           id,
           account.allowInsecureSsl,
         );
@@ -132,7 +132,7 @@ export function createSynologyChatPlugin() {
           allowFrom: account.allowedUserIds ?? [],
           policyPath: `${basePath}dmPolicy`,
           allowFromPath: basePath,
-          approveHint: "bot pairing approve synology-chat <code>",
+          approveHint: "openclaw pairing approve synology-chat <code>",
           normalizeEntry: (raw: string) => raw.toLowerCase().trim(),
         };
       },

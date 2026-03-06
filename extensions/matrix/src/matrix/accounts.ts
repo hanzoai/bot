@@ -2,7 +2,7 @@ import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeOptionalAccountId,
-} from "bot/plugin-sdk/account-id";
+} from "@hanzo/bot/plugin-sdk/account-id";
 import type { CoreConfig, MatrixConfig } from "../types.js";
 import { hasConfiguredSecretInput } from "../secret-input.js";
 import { resolveMatrixConfigForAccount } from "./client.js";

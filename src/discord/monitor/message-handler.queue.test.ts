@@ -373,7 +373,7 @@ describe("createDiscordMessageHandler queue behavior", () => {
     expect(setStatus.mock.calls.length).toBe(callsBeforeAbort);
   });
 
-  it("stops status publishing after lifecycle abort (deactivation via signal)", async () => {
+  it("stops status publishing after handler deactivation", async () => {
     preflightDiscordMessageMock.mockReset();
     processDiscordMessageMock.mockReset();
 
@@ -387,10 +387,7 @@ describe("createDiscordMessageHandler queue behavior", () => {
     );
 
     const setStatus = vi.fn();
-    const abortController = new AbortController();
-    const handler = createDiscordMessageHandler(
-      createHandlerParams({ setStatus, abortSignal: abortController.signal }),
-    );
+    const handler = createDiscordMessageHandler(createHandlerParams({ setStatus }));
 
     await expect(handler(createMessageData("m-1") as never, {} as never)).resolves.toBeUndefined();
 
@@ -398,14 +395,45 @@ describe("createDiscordMessageHandler queue behavior", () => {
       expect(processDiscordMessageMock).toHaveBeenCalledTimes(1);
     });
 
-    const callsBeforeAbort = setStatus.mock.calls.length;
-    abortController.abort();
+    const callsBeforeDeactivate = setStatus.mock.calls.length;
+    handler.deactivate();
 
     runInFlight.resolve();
     await runInFlight.promise;
     await Promise.resolve();
 
-    expect(setStatus.mock.calls.length).toBe(callsBeforeAbort);
+    expect(setStatus.mock.calls.length).toBe(callsBeforeDeactivate);
+  });
+
+  it("skips queued runs that have not started yet after deactivation", async () => {
+    preflightDiscordMessageMock.mockReset();
+    processDiscordMessageMock.mockReset();
+
+    const firstRun = createDeferred();
+    processDiscordMessageMock
+      .mockImplementationOnce(async () => {
+        await firstRun.promise;
+      })
+      .mockImplementationOnce(async () => undefined);
+    preflightDiscordMessageMock.mockImplementation(
+      async (params: { data: { channel_id: string } }) =>
+        createPreflightContext(params.data.channel_id),
+    );
+
+    const handler = createDiscordMessageHandler(createHandlerParams());
+    await expect(handler(createMessageData("m-1") as never, {} as never)).resolves.toBeUndefined();
+    await vi.waitFor(() => {
+      expect(processDiscordMessageMock).toHaveBeenCalledTimes(1);
+    });
+
+    await expect(handler(createMessageData("m-2") as never, {} as never)).resolves.toBeUndefined();
+    handler.deactivate();
+
+    firstRun.resolve();
+    await firstRun.promise;
+    await Promise.resolve();
+
+    expect(processDiscordMessageMock).toHaveBeenCalledTimes(1);
   });
 
   it("preserves non-debounced message ordering by awaiting debouncer enqueue", async () => {

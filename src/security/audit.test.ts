@@ -170,7 +170,7 @@ describe("security audit", () => {
     const tmp = await makeTmpDir(label);
     const stateDir = path.join(tmp, "state");
     await fs.mkdir(stateDir, { recursive: true, mode: 0o700 });
-    const configPath = path.join(stateDir, "bot.json");
+    const configPath = path.join(stateDir, "openclaw.json");
     await fs.writeFile(configPath, "{}\n", "utf-8");
     if (!isWindows) {
       await fs.chmod(configPath, 0o600);
@@ -182,7 +182,7 @@ describe("security audit", () => {
     const credentialsDir = path.join(sharedChannelSecurityStateDir, "credentials");
     await fs.rm(credentialsDir, { recursive: true, force: true }).catch(() => undefined);
     await fs.mkdir(credentialsDir, { recursive: true, mode: 0o700 });
-    await withEnvAsync({ BOT_STATE_DIR: sharedChannelSecurityStateDir }, () =>
+    await withEnvAsync({ OPENCLAW_STATE_DIR: sharedChannelSecurityStateDir }, () =>
       fn(sharedChannelSecurityStateDir),
     );
   };
@@ -198,7 +198,7 @@ describe("security audit", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify({
         name: "evil-plugin",
-        bot: { extensions: [".hidden/index.js"] },
+        openclaw: { extensions: [".hidden/index.js"] },
       }),
     );
     await fs.writeFile(
@@ -228,7 +228,7 @@ description: test skill
   };
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-security-audit-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-security-audit-"));
     channelSecurityRoot = path.join(fixtureRoot, "channel-security");
     await fs.mkdir(channelSecurityRoot, { recursive: true, mode: 0o700 });
     sharedChannelSecurityStateDir = path.join(channelSecurityRoot, "state-shared");
@@ -276,10 +276,10 @@ description: test skill
 
   it("flags non-loopback bind without auth as critical", async () => {
     // Clear env tokens so resolveGatewayAuth defaults to mode=none
-    const prevToken = process.env.BOT_GATEWAY_TOKEN;
-    const prevPassword = process.env.BOT_GATEWAY_PASSWORD;
-    delete process.env.BOT_GATEWAY_TOKEN;
-    delete process.env.BOT_GATEWAY_PASSWORD;
+    const prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
+    const prevPassword = process.env.OPENCLAW_GATEWAY_PASSWORD;
+    delete process.env.OPENCLAW_GATEWAY_TOKEN;
+    delete process.env.OPENCLAW_GATEWAY_PASSWORD;
 
     try {
       const cfg: BotConfig = {
@@ -295,14 +295,14 @@ description: test skill
     } finally {
       // Restore env
       if (prevToken === undefined) {
-        delete process.env.BOT_GATEWAY_TOKEN;
+        delete process.env.OPENCLAW_GATEWAY_TOKEN;
       } else {
-        process.env.BOT_GATEWAY_TOKEN = prevToken;
+        process.env.OPENCLAW_GATEWAY_TOKEN = prevToken;
       }
       if (prevPassword === undefined) {
-        delete process.env.BOT_GATEWAY_PASSWORD;
+        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
       } else {
-        process.env.BOT_GATEWAY_PASSWORD = prevPassword;
+        process.env.OPENCLAW_GATEWAY_PASSWORD = prevPassword;
       }
     }
   });
@@ -315,7 +315,7 @@ description: test skill
           password: {
             source: "env",
             provider: "default",
-            id: "BOT_GATEWAY_PASSWORD",
+            id: "OPENCLAW_GATEWAY_PASSWORD",
           },
         },
       },
@@ -546,7 +546,7 @@ description: test skill
     const riskyGlobalTrustedDirs =
       process.platform === "win32"
         ? [String.raw`C:\Users\ci-user\bin`, String.raw`C:\Users\ci-user\.local\bin`]
-        : ["/usr/local/bin", "/tmp/bot-safe-bins"];
+        : ["/usr/local/bin", "/tmp/openclaw-safe-bins"];
     const cfg: BotConfig = {
       tools: {
         exec: {
@@ -646,7 +646,7 @@ description: test skill
     const tmp = await makeTmpDir("win");
     const stateDir = path.join(tmp, "state");
     await fs.mkdir(stateDir, { recursive: true });
-    const configPath = path.join(stateDir, "bot.json");
+    const configPath = path.join(stateDir, "openclaw.json");
     await fs.writeFile(configPath, "{}\n", "utf-8");
 
     const user = "DESKTOP-TEST\\Tester";
@@ -684,7 +684,7 @@ description: test skill
     const tmp = await makeTmpDir("win-open");
     const stateDir = path.join(tmp, "state");
     await fs.mkdir(stateDir, { recursive: true });
-    const configPath = path.join(stateDir, "bot.json");
+    const configPath = path.join(stateDir, "openclaw.json");
     await fs.writeFile(configPath, "{}\n", "utf-8");
 
     const user = "DESKTOP-TEST\\Tester";
@@ -727,19 +727,19 @@ description: test skill
     const execDockerRawFn = (async (args: string[]) => {
       if (args[0] === "ps") {
         return {
-          stdout: Buffer.from("bot-sbx-browser-old\nbot-sbx-browser-missing-hash\n"),
+          stdout: Buffer.from("openclaw-sbx-browser-old\nopenclaw-sbx-browser-missing-hash\n"),
           stderr: Buffer.alloc(0),
           code: 0,
         };
       }
-      if (args[0] === "inspect" && args.at(-1) === "bot-sbx-browser-old") {
+      if (args[0] === "inspect" && args.at(-1) === "openclaw-sbx-browser-old") {
         return {
           stdout: Buffer.from("abc123\tepoch-v0\n"),
           stderr: Buffer.alloc(0),
           code: 0,
         };
       }
-      if (args[0] === "inspect" && args.at(-1) === "bot-sbx-browser-missing-hash") {
+      if (args[0] === "inspect" && args.at(-1) === "openclaw-sbx-browser-missing-hash") {
         return {
           stdout: Buffer.from("<no value>\t<no value>\n"),
           stderr: Buffer.alloc(0),
@@ -767,7 +767,7 @@ description: test skill
     const staleEpoch = res.findings.find(
       (f) => f.checkId === "sandbox.browser_container.hash_epoch_stale",
     );
-    expect(staleEpoch?.detail).toContain("bot-sbx-browser-old");
+    expect(staleEpoch?.detail).toContain("openclaw-sbx-browser-old");
   });
 
   it("skips sandbox browser hash label checks when docker inspect is unavailable", async () => {
@@ -798,19 +798,19 @@ description: test skill
     const execDockerRawFn = (async (args: string[]) => {
       if (args[0] === "ps") {
         return {
-          stdout: Buffer.from("bot-sbx-browser-exposed\n"),
+          stdout: Buffer.from("openclaw-sbx-browser-exposed\n"),
           stderr: Buffer.alloc(0),
           code: 0,
         };
       }
-      if (args[0] === "inspect" && args.at(-1) === "bot-sbx-browser-exposed") {
+      if (args[0] === "inspect" && args.at(-1) === "openclaw-sbx-browser-exposed") {
         return {
           stdout: Buffer.from("hash123\t2026-02-21-novnc-auth-default\n"),
           stderr: Buffer.alloc(0),
           code: 0,
         };
       }
-      if (args[0] === "port" && args.at(-1) === "bot-sbx-browser-exposed") {
+      if (args[0] === "port" && args.at(-1) === "openclaw-sbx-browser-exposed") {
         return {
           stdout: Buffer.from("6080/tcp -> 0.0.0.0:49101\n9222/tcp -> 127.0.0.1:49100\n"),
           stderr: Buffer.alloc(0),
@@ -847,11 +847,11 @@ description: test skill
     const stateDir = path.join(tmp, "state");
     await fs.mkdir(stateDir, { recursive: true, mode: 0o700 });
 
-    const targetConfigPath = path.join(tmp, "managed-bot.json");
+    const targetConfigPath = path.join(tmp, "managed-openclaw.json");
     await fs.writeFile(targetConfigPath, "{}\n", "utf-8");
     await fs.chmod(targetConfigPath, 0o444);
 
-    const configPath = path.join(stateDir, "bot.json");
+    const configPath = path.join(stateDir, "openclaw.json");
     await fs.symlink(targetConfigPath, configPath);
 
     const res = await runSecurityAudit({
@@ -888,7 +888,7 @@ description: test skill
     await fs.writeFile(outsideSkillPath, "# outside\n", "utf-8");
     await fs.symlink(outsideSkillPath, path.join(workspaceDir, "skills", "leak", "SKILL.md"));
 
-    const configPath = path.join(stateDir, "bot.json");
+    const configPath = path.join(stateDir, "openclaw.json");
     await fs.writeFile(configPath, "{}\n", "utf-8");
     await fs.chmod(configPath, 0o600);
 
@@ -918,7 +918,7 @@ description: test skill
       "utf-8",
     );
 
-    const configPath = path.join(stateDir, "bot.json");
+    const configPath = path.join(stateDir, "openclaw.json");
     await fs.writeFile(configPath, "{}\n", "utf-8");
     if (!isWindows) {
       await fs.chmod(configPath, 0o600);
@@ -1160,6 +1160,45 @@ description: test skill
     expect(finding?.severity).toBe("warn");
     expect(finding?.detail).toContain("system.*");
     expect(finding?.detail).toContain("system.runx");
+    expect(finding?.detail).toContain("did you mean");
+    expect(finding?.detail).toContain("system.run");
+  });
+
+  it("suggests prefix-matching commands for unknown denyCommands entries", async () => {
+    const cfg: BotConfig = {
+      gateway: {
+        nodes: {
+          denyCommands: ["system.run.prep"],
+        },
+      },
+    };
+
+    const res = await audit(cfg);
+    const finding = res.findings.find(
+      (f) => f.checkId === "gateway.nodes.deny_commands_ineffective",
+    );
+    expect(finding?.severity).toBe("warn");
+    expect(finding?.detail).toContain("system.run.prep");
+    expect(finding?.detail).toContain("did you mean");
+    expect(finding?.detail).toContain("system.run.prepare");
+  });
+
+  it("keeps unknown denyCommands entries without suggestions when no close command exists", async () => {
+    const cfg: BotConfig = {
+      gateway: {
+        nodes: {
+          denyCommands: ["zzzzzzzzzzzzzz"],
+        },
+      },
+    };
+
+    const res = await audit(cfg);
+    const finding = res.findings.find(
+      (f) => f.checkId === "gateway.nodes.deny_commands_ineffective",
+    );
+    expect(finding?.severity).toBe("warn");
+    expect(finding?.detail).toContain("zzzzzzzzzzzzzz");
+    expect(finding?.detail).not.toContain("did you mean");
   });
 
   it("scores dangerous gateway.nodes.allowCommands by exposure", async () => {
@@ -1291,7 +1330,7 @@ description: test skill
           password: {
             source: "env",
             provider: "default",
-            id: "BOT_GATEWAY_PASSWORD",
+            id: "OPENCLAW_GATEWAY_PASSWORD",
           },
         },
       },
@@ -2124,7 +2163,7 @@ description: test skill
         "channels.discord.guilds.123.channels.general.users:security-team",
       );
       expect(finding?.detail).toContain(
-        "~/.hanzo/bot/credentials/discord-allowFrom.json:team.owner",
+        "~/.openclaw/credentials/discord-allowFrom.json:team.owner",
       );
       expect(finding?.detail).not.toContain("<@123456789012345678>");
     });
@@ -2201,6 +2240,51 @@ description: test skill
           }),
         ]),
       );
+    });
+  });
+
+  it("does not treat prototype properties as explicit Discord account config paths", async () => {
+    await withChannelSecurityStateDir(async () => {
+      const cfg: BotConfig = {
+        channels: {
+          discord: {
+            enabled: true,
+            token: "t",
+            dangerouslyAllowNameMatching: true,
+            allowFrom: ["Alice#1234"],
+            accounts: {},
+          },
+        },
+      };
+
+      const pluginWithProtoDefaultAccount: ChannelPlugin = {
+        ...discordPlugin,
+        config: {
+          ...discordPlugin.config,
+          listAccountIds: () => [],
+          defaultAccountId: () => "toString",
+        },
+      };
+
+      const res = await runSecurityAudit({
+        config: cfg,
+        includeFilesystem: false,
+        includeChannelSecurity: true,
+        plugins: [pluginWithProtoDefaultAccount],
+      });
+
+      const dangerousMatchingFinding = res.findings.find(
+        (entry) => entry.checkId === "channels.discord.allowFrom.dangerous_name_matching_enabled",
+      );
+      expect(dangerousMatchingFinding).toBeDefined();
+      expect(dangerousMatchingFinding?.title).not.toContain("(account: toString)");
+
+      const nameBasedFinding = res.findings.find(
+        (entry) => entry.checkId === "channels.discord.allowFrom.name_based_entries",
+      );
+      expect(nameBasedFinding).toBeDefined();
+      expect(nameBasedFinding?.detail).toContain("channels.discord.allowFrom:Alice#1234");
+      expect(nameBasedFinding?.detail).not.toContain("channels.discord.accounts.toString");
     });
   });
 
@@ -2544,8 +2628,8 @@ description: test skill
   });
 
   it("flags hooks token reuse of the gateway env token as critical", async () => {
-    const prevToken = process.env.BOT_GATEWAY_TOKEN;
-    process.env.BOT_GATEWAY_TOKEN = "shared-gateway-token-1234567890";
+    const prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
+    process.env.OPENCLAW_GATEWAY_TOKEN = "shared-gateway-token-1234567890";
     const cfg: BotConfig = {
       hooks: { enabled: true, token: "shared-gateway-token-1234567890" },
     };
@@ -2555,9 +2639,9 @@ description: test skill
       expectFinding(res, "hooks.token_reuse_gateway_token", "critical");
     } finally {
       if (prevToken === undefined) {
-        delete process.env.BOT_GATEWAY_TOKEN;
+        delete process.env.OPENCLAW_GATEWAY_TOKEN;
       } else {
-        process.env.BOT_GATEWAY_TOKEN = prevToken;
+        process.env.OPENCLAW_GATEWAY_TOKEN = prevToken;
       }
     }
   });
@@ -2696,8 +2780,8 @@ description: test skill
     const cfg: BotConfig = {};
 
     const res = await audit(cfg, {
-      stateDir: "/Users/test/Dropbox/.bot",
-      configPath: "/Users/test/Dropbox/.hanzoai/bot.json",
+      stateDir: "/Users/test/Dropbox/.openclaw",
+      configPath: "/Users/test/Dropbox/.openclaw/openclaw.json",
     });
 
     expectFinding(res, "fs.synced_dir", "warn");
@@ -2718,7 +2802,7 @@ description: test skill
       await fs.chmod(includePath, 0o644);
     }
 
-    const configPath = path.join(stateDir, "bot.json");
+    const configPath = path.join(stateDir, "openclaw.json");
     await fs.writeFile(configPath, `{ "$include": "./extra.json5" }\n`, "utf-8");
     await fs.chmod(configPath, 0o600);
 
@@ -2782,7 +2866,7 @@ description: test skill
         includeFilesystem: true,
         includeChannelSecurity: false,
         stateDir,
-        configPath: path.join(stateDir, "bot.json"),
+        configPath: path.join(stateDir, "openclaw.json"),
         execDockerRawFn: execDockerRawUnavailable,
       });
 
@@ -2821,7 +2905,7 @@ description: test skill
         installs: {
           "voice-call": {
             source: "npm",
-            spec: "@bot/voice-call",
+            spec: "@openclaw/voice-call",
           },
         },
       },
@@ -2830,7 +2914,7 @@ description: test skill
           installs: {
             "test-hooks": {
               source: "npm",
-              spec: "@bot/test-hooks",
+              spec: "@openclaw/test-hooks",
             },
           },
         },
@@ -2842,7 +2926,7 @@ description: test skill
       includeFilesystem: true,
       includeChannelSecurity: false,
       stateDir: sharedInstallMetadataStateDir,
-      configPath: path.join(sharedInstallMetadataStateDir, "bot.json"),
+      configPath: path.join(sharedInstallMetadataStateDir, "openclaw.json"),
       execDockerRawFn: execDockerRawUnavailable,
     });
 
@@ -2858,7 +2942,7 @@ description: test skill
         installs: {
           "voice-call": {
             source: "npm",
-            spec: "@bot/voice-call@1.2.3",
+            spec: "@openclaw/voice-call@1.2.3",
             integrity: "sha512-plugin",
           },
         },
@@ -2868,7 +2952,7 @@ description: test skill
           installs: {
             "test-hooks": {
               source: "npm",
-              spec: "@bot/test-hooks@1.2.3",
+              spec: "@openclaw/test-hooks@1.2.3",
               integrity: "sha512-hook",
             },
           },
@@ -2881,7 +2965,7 @@ description: test skill
       includeFilesystem: true,
       includeChannelSecurity: false,
       stateDir: sharedInstallMetadataStateDir,
-      configPath: path.join(sharedInstallMetadataStateDir, "bot.json"),
+      configPath: path.join(sharedInstallMetadataStateDir, "openclaw.json"),
       execDockerRawFn: execDockerRawUnavailable,
     });
 
@@ -2900,12 +2984,12 @@ description: test skill
     await fs.mkdir(hookDir, { recursive: true });
     await fs.writeFile(
       path.join(pluginDir, "package.json"),
-      JSON.stringify({ name: "@bot/voice-call", version: "9.9.9" }),
+      JSON.stringify({ name: "@openclaw/voice-call", version: "9.9.9" }),
       "utf-8",
     );
     await fs.writeFile(
       path.join(hookDir, "package.json"),
-      JSON.stringify({ name: "@bot/test-hooks", version: "8.8.8" }),
+      JSON.stringify({ name: "@openclaw/test-hooks", version: "8.8.8" }),
       "utf-8",
     );
 
@@ -2914,7 +2998,7 @@ description: test skill
         installs: {
           "voice-call": {
             source: "npm",
-            spec: "@bot/voice-call@1.2.3",
+            spec: "@openclaw/voice-call@1.2.3",
             integrity: "sha512-plugin",
             resolvedVersion: "1.2.3",
           },
@@ -2925,7 +3009,7 @@ description: test skill
           installs: {
             "test-hooks": {
               source: "npm",
-              spec: "@bot/test-hooks@1.2.3",
+              spec: "@openclaw/test-hooks@1.2.3",
               integrity: "sha512-hook",
               resolvedVersion: "1.2.3",
             },
@@ -2939,7 +3023,7 @@ description: test skill
       includeFilesystem: true,
       includeChannelSecurity: false,
       stateDir,
-      configPath: path.join(stateDir, "bot.json"),
+      configPath: path.join(stateDir, "openclaw.json"),
       execDockerRawFn: execDockerRawUnavailable,
     });
 
@@ -2958,7 +3042,7 @@ description: test skill
       includeFilesystem: true,
       includeChannelSecurity: false,
       stateDir,
-      configPath: path.join(stateDir, "bot.json"),
+      configPath: path.join(stateDir, "openclaw.json"),
       execDockerRawFn: execDockerRawUnavailable,
     });
 
@@ -2984,7 +3068,7 @@ description: test skill
       includeFilesystem: true,
       includeChannelSecurity: false,
       stateDir,
-      configPath: path.join(stateDir, "bot.json"),
+      configPath: path.join(stateDir, "openclaw.json"),
       execDockerRawFn: execDockerRawUnavailable,
     });
 
@@ -3009,7 +3093,7 @@ description: test skill
         includeFilesystem: true,
         includeChannelSecurity: false,
         stateDir,
-        configPath: path.join(stateDir, "bot.json"),
+        configPath: path.join(stateDir, "openclaw.json"),
         execDockerRawFn: execDockerRawUnavailable,
       });
 
@@ -3053,7 +3137,7 @@ description: test skill
         includeFilesystem: true,
         includeChannelSecurity: false,
         stateDir,
-        configPath: path.join(stateDir, "bot.json"),
+        configPath: path.join(stateDir, "openclaw.json"),
         execDockerRawFn: execDockerRawUnavailable,
       });
 
@@ -3121,7 +3205,7 @@ description: test skill
       path.join(pluginDir, "package.json"),
       JSON.stringify({
         name: "escape-plugin",
-        bot: { extensions: ["../outside.js"] },
+        openclaw: { extensions: ["../outside.js"] },
       }),
     );
     await fs.writeFile(path.join(pluginDir, "index.js"), "export {};");
@@ -3143,7 +3227,7 @@ description: test skill
         path.join(pluginDir, "package.json"),
         JSON.stringify({
           name: "scanfail-plugin",
-          bot: { extensions: ["index.js"] },
+          openclaw: { extensions: ["index.js"] },
         }),
       );
       await fs.writeFile(path.join(pluginDir, "index.js"), "export {};");
@@ -3293,10 +3377,10 @@ description: test skill
     const makeProbeEnv = (env?: { token?: string; password?: string }) => {
       const probeEnv: NodeJS.ProcessEnv = {};
       if (env?.token !== undefined) {
-        probeEnv.BOT_GATEWAY_TOKEN = env.token;
+        probeEnv.OPENCLAW_GATEWAY_TOKEN = env.token;
       }
       if (env?.password !== undefined) {
-        probeEnv.BOT_GATEWAY_PASSWORD = env.password;
+        probeEnv.OPENCLAW_GATEWAY_PASSWORD = env.password;
       }
       return probeEnv;
     };
@@ -3416,6 +3500,36 @@ description: test skill
           expect(getAuth()?.password, testCase.name).toBe(testCase.expectedPassword);
         }),
       );
+    });
+
+    it("adds warning finding when probe auth SecretRef is unavailable", async () => {
+      const cfg: BotConfig = {
+        gateway: {
+          mode: "local",
+          auth: {
+            mode: "token",
+            token: { source: "env", provider: "default", id: "MISSING_GATEWAY_TOKEN" },
+          },
+        },
+        secrets: {
+          providers: {
+            default: { source: "env" },
+          },
+        },
+      };
+
+      const res = await audit(cfg, {
+        deep: true,
+        deepTimeoutMs: 50,
+        probeGatewayFn: async (opts) => successfulProbeResult(opts.url),
+        env: {},
+      });
+
+      const warning = res.findings.find(
+        (finding) => finding.checkId === "gateway.probe_auth_secretref_unavailable",
+      );
+      expect(warning?.severity).toBe("warn");
+      expect(warning?.detail).toContain("gateway.auth.token");
     });
   });
 });
