@@ -20,11 +20,12 @@ concurrency:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DOCKER_HOST: tcp://localhost:2375
 
 jobs:
   # Build amd64 image
   build-amd64:
-    runs-on: hanzo-k8s
+    runs-on: hanzo-build
     permissions:
       packages: write
       contents: read
@@ -182,7 +183,7 @@ jobs:
 
   # Create multi-platform manifest
   create-manifest:
-    runs-on: hanzo-k8s
+    runs-on: hanzo-build
     permissions:
       packages: write
       contents: read
