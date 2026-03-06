@@ -1,10 +1,18 @@
 import Foundation
 import Testing
+<<<<<<< HEAD
 @testable import HanzoBot
 
 @Suite struct VoiceWakePreferencesTests {
     @Test func sanitizeTriggerWordsTrimsAndDropsEmpty() {
         #expect(VoiceWakePreferences.sanitizeTriggerWords([" hanzo-bot ", "", " \nclaude\t"]) == ["hanzo-bot", "claude"])
+=======
+@testable import OpenClaw
+
+@Suite struct VoiceWakePreferencesTests {
+    @Test func sanitizeTriggerWordsTrimsAndDropsEmpty() {
+        #expect(VoiceWakePreferences.sanitizeTriggerWords([" openclaw ", "", " \nclaude\t"]) == ["openclaw", "claude"])
+>>>>>>> upstream/main
     }
 
     @Test func sanitizeTriggerWordsFallsBackToDefaultsWhenEmpty() {
@@ -24,7 +32,11 @@ import Testing
     }
 
     @Test func displayStringUsesSanitizedWords() {
+<<<<<<< HEAD
         #expect(VoiceWakePreferences.displayString(for: ["", " "]) == "hanzo-bot, claude")
+=======
+        #expect(VoiceWakePreferences.displayString(for: ["", " "]) == "openclaw, claude")
+>>>>>>> upstream/main
     }
 
     @Test func loadAndSaveTriggerWordsRoundTrip() {

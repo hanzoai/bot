@@ -5,7 +5,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
+<<<<<<< HEAD
 	<string>HanzoBotTests</string>
+=======
+	<string>OpenClawTests</string>
+>>>>>>> upstream/main
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -17,8 +21,14 @@
 	<key>CFBundlePackageType</key>
 			<string>BNDL</string>
 			<key>CFBundleShortVersionString</key>
+<<<<<<< HEAD
 			<string>2026.3.5</string>
 			<key>CFBundleVersion</key>
 			<string>20260305</string>
+=======
+			<string>2026.3.2</string>
+			<key>CFBundleVersion</key>
+			<string>20260301</string>
+>>>>>>> upstream/main
 		</dict>
 	</plist>

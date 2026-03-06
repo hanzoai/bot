@@ -9,8 +9,8 @@ import type {
   AcpRuntimeStatus,
   AcpRuntimeTurnInput,
   PluginLogger,
-} from "bot/plugin-sdk";
-import { AcpRuntimeError } from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/acpx";
+import { AcpRuntimeError } from "@hanzo/bot/plugin-sdk/acpx";
 import { createInterface } from "node:readline";
 import { type ResolvedAcpxPluginConfig } from "./config.js";
 import { checkAcpxVersion } from "./ensure.js";
@@ -199,7 +199,7 @@ export class AcpxRuntime implements AcpRuntime {
     const cwd = asTrimmedString(input.cwd) || this.config.cwd;
     const mode = input.mode;
 
-    const events = await this.runControlCommand({
+    let events = await this.runControlCommand({
       args: this.buildControlArgs({
         cwd,
         command: [agent, "sessions", "ensure", "--name", sessionName],
@@ -207,12 +207,36 @@ export class AcpxRuntime implements AcpRuntime {
       cwd,
       fallbackCode: "ACP_SESSION_INIT_FAILED",
     });
-    const ensuredEvent = events.find(
+    let ensuredEvent = events.find(
       (event) =>
         asOptionalString(event.agentSessionId) ||
         asOptionalString(event.acpxSessionId) ||
         asOptionalString(event.acpxRecordId),
     );
+
+    if (!ensuredEvent) {
+      events = await this.runControlCommand({
+        args: this.buildControlArgs({
+          cwd,
+          command: [agent, "sessions", "new", "--name", sessionName],
+        }),
+        cwd,
+        fallbackCode: "ACP_SESSION_INIT_FAILED",
+      });
+      ensuredEvent = events.find(
+        (event) =>
+          asOptionalString(event.agentSessionId) ||
+          asOptionalString(event.acpxSessionId) ||
+          asOptionalString(event.acpxRecordId),
+      );
+      if (!ensuredEvent) {
+        throw new AcpRuntimeError(
+          "ACP_SESSION_INIT_FAILED",
+          `ACP session init failed: neither 'sessions ensure' nor 'sessions new' returned valid session identifiers for ${sessionName}.`,
+        );
+      }
+    }
+
     const acpxRecordId = ensuredEvent ? asOptionalString(ensuredEvent.acpxRecordId) : undefined;
     const agentSessionId = ensuredEvent ? asOptionalString(ensuredEvent.agentSessionId) : undefined;
     const backendSessionId = ensuredEvent
@@ -352,7 +376,10 @@ export class AcpxRuntime implements AcpRuntime {
     return ACPX_CAPABILITIES;
   }
 
-  async getStatus(input: { handle: AcpRuntimeHandle }): Promise<AcpRuntimeStatus> {
+  async getStatus(input: {
+    handle: AcpRuntimeHandle;
+    signal?: AbortSignal;
+  }): Promise<AcpRuntimeStatus> {
     const state = this.resolveHandleState(input.handle);
     const events = await this.runControlCommand({
       args: this.buildControlArgs({
@@ -362,6 +389,7 @@ export class AcpxRuntime implements AcpRuntime {
       cwd: state.cwd,
       fallbackCode: "ACP_TURN_FAILED",
       ignoreNoSession: true,
+      signal: input.signal,
     });
     const detail = events.find((event) => !toAcpxErrorEvent(event)) ?? events[0];
     if (!detail) {
@@ -585,6 +613,7 @@ export class AcpxRuntime implements AcpRuntime {
     cwd: string;
     fallbackCode: AcpRuntimeErrorCode;
     ignoreNoSession?: boolean;
+    signal?: AbortSignal;
   }): Promise<AcpxJsonObject[]> {
     const result = await spawnAndCollect(
       {
@@ -593,6 +622,9 @@ export class AcpxRuntime implements AcpRuntime {
         cwd: params.cwd,
       },
       this.spawnCommandOptions,
+      {
+        signal: params.signal,
+      },
     );
 
     if (result.error) {

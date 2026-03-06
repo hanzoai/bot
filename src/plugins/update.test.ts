@@ -89,7 +89,7 @@ describe("updateNpmInstalledPlugins", () => {
     installPluginFromNpmSpecMock.mockResolvedValue({
       ok: false,
       code: "npm_package_not_found",
-      error: "Package not found on npm: @bot/missing.",
+      error: "Package not found on npm: @openclaw/missing.",
     });
 
     const { updateNpmInstalledPlugins } = await import("./update.js");
@@ -99,7 +99,7 @@ describe("updateNpmInstalledPlugins", () => {
           installs: {
             missing: {
               source: "npm",
-              spec: "@bot/missing",
+              spec: "@openclaw/missing",
               installPath: "/tmp/missing",
             },
           },
@@ -113,7 +113,7 @@ describe("updateNpmInstalledPlugins", () => {
       {
         pluginId: "missing",
         status: "error",
-        message: "Failed to check missing: npm package not found for @bot/missing.",
+        message: "Failed to check missing: npm package not found for @openclaw/missing.",
       },
     ]);
   });

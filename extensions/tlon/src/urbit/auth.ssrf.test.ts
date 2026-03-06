@@ -1,5 +1,5 @@
-import type { LookupFn } from "bot/plugin-sdk";
-import { SsrFBlockedError } from "bot/plugin-sdk";
+import type { LookupFn } from "@hanzo/bot/plugin-sdk/tlon";
+import { SsrFBlockedError } from "@hanzo/bot/plugin-sdk/tlon";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { authenticate } from "./auth.js";
 
