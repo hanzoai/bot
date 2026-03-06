@@ -1,7 +1,7 @@
 ---
 summary: "Contract for `secrets apply` plans: target validation, path matching, and `auth-profiles.json` target scope"
 read_when:
-  - Generating or reviewing `hanzo-bot secrets apply` plan files
+  - Generating or reviewing `openclaw secrets apply` plans
   - Debugging `Invalid plan target path` errors
   - Understanding target type and path validation behavior
 title: "Secrets Apply Plan Contract"
@@ -9,13 +9,13 @@ title: "Secrets Apply Plan Contract"
 
 # Secrets apply plan contract
 
-This page defines the strict contract enforced by `hanzo-bot secrets apply`.
+This page defines the strict contract enforced by `openclaw secrets apply`.
 
 If a target does not match these rules, apply fails before mutating configuration.
 
 ## Plan file shape
 
-`hanzo-bot secrets apply --from <plan.json>` expects a `targets` array of plan targets:
+`openclaw secrets apply --from <plan.json>` expects a `targets` array of plan targets:
 
 ```json5
 {
@@ -84,19 +84,19 @@ No writes are committed for an invalid plan.
 ## Runtime and audit scope notes
 
 - Ref-only `auth-profiles.json` entries (`keyRef`/`tokenRef`) are included in runtime resolution and audit coverage.
-- `secrets apply` writes supported `bot.json` targets, supported `auth-profiles.json` targets, and optional scrub targets.
+- `secrets apply` writes supported `openclaw.json` targets, supported `auth-profiles.json` targets, and optional scrub targets.
 
 ## Operator checks
 
 ```bash
 # Validate plan without writes
-hanzo-bot secrets apply --from /tmp/bot-secrets-plan.json --dry-run
+openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run
 
 # Then apply for real
-hanzo-bot secrets apply --from /tmp/bot-secrets-plan.json
+openclaw secrets apply --from /tmp/openclaw-secrets-plan.json
 ```
 
-If apply fails with an invalid target path message, regenerate the plan with `hanzo-bot secrets configure` or fix the target path to one of the allowed shapes above.
+If apply fails with an invalid target path message, regenerate the plan with `openclaw secrets configure` or fix the target path to a supported shape above.
 
 ## Related docs
 

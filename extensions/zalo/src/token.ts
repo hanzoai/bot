@@ -1,5 +1,5 @@
-import type { BaseTokenResolution } from "bot/plugin-sdk";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
+import type { BaseTokenResolution } from "@hanzo/bot/plugin-sdk/zalo";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "@hanzo/bot/plugin-sdk/account-id";
 import { readFileSync } from "node:fs";
 import type { ZaloConfig } from "./types.js";
 import { normalizeResolvedSecretInputString, normalizeSecretInputString } from "./secret-input.js";

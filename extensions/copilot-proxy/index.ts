@@ -3,7 +3,7 @@ import {
   type BotPluginApi,
   type ProviderAuthContext,
   type ProviderAuthResult,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/copilot-proxy";
 
 const DEFAULT_BASE_URL = "http://localhost:3000/v1";
 const DEFAULT_API_KEY = "n/a";

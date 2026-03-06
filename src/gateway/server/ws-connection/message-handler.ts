@@ -128,15 +128,13 @@ function resolveHandshakeBrowserSecurityContext(params: {
 
 function shouldAllowSilentLocalPairing(params: {
   isLocalClient: boolean;
-  isTrustedProxyRequest: boolean;
   hasBrowserOriginHeader: boolean;
   isControlUi: boolean;
   isWebchat: boolean;
   reason: "not-paired" | "role-upgrade" | "scope-upgrade" | "metadata-upgrade";
 }): boolean {
-  const isLocal = params.isLocalClient || params.isTrustedProxyRequest;
   return (
-    isLocal &&
+    params.isLocalClient &&
     (!params.hasBrowserOriginHeader || params.isControlUi || params.isWebchat) &&
     (params.reason === "not-paired" || params.reason === "scope-upgrade")
   );
@@ -507,7 +505,6 @@ export function attachGatewayWsMessageHandler(params: {
             allowedOrigins: configSnapshot.gateway?.controlUi?.allowedOrigins,
             allowHostHeaderOriginFallback: hostHeaderOriginFallbackEnabled,
             isLocalClient,
-            isTrustedProxyRequest: remoteIsTrustedProxy,
           });
           if (!originCheck.ok) {
             const errorMessage =
@@ -696,11 +693,11 @@ export function attachGatewayWsMessageHandler(params: {
             return;
           }
           const providedNonce = typeof device.nonce === "string" ? device.nonce.trim() : "";
-          if (!providedNonce && !hostIsLocalish) {
+          if (!providedNonce) {
             rejectDeviceAuthInvalid("device-nonce-missing", "device nonce required");
             return;
           }
-          if (providedNonce && providedNonce !== connectNonce) {
+          if (providedNonce !== connectNonce) {
             rejectDeviceAuthInvalid("device-nonce-mismatch", "device nonce mismatch");
             return;
           }
@@ -813,23 +810,16 @@ export function attachGatewayWsMessageHandler(params: {
           ) => {
             const allowSilentLocalPairing = shouldAllowSilentLocalPairing({
               isLocalClient,
-              isTrustedProxyRequest: remoteIsTrustedProxy,
               hasBrowserOriginHeader,
               isControlUi,
               isWebchat,
               reason,
             });
-            // Token-authenticated remote devices with valid shared-secret auth
-            // should also be auto-approved for initial pairing, role upgrades,
-            // and scope upgrades.
-            const allowSilentTokenPairing =
-              sharedAuthOk &&
-              (reason === "not-paired" || reason === "role-upgrade" || reason === "scope-upgrade");
             const pairing = await requestDevicePairing({
               deviceId: device.id,
               publicKey: devicePublicKey,
               ...clientPairingMetadata,
-              silent: allowSilentLocalPairing || allowSilentTokenPairing,
+              silent: allowSilentLocalPairing,
             });
             const context = buildRequestContext();
             if (pairing.request.silent === true) {

@@ -1,5 +1,9 @@
 import Foundation
+<<<<<<< HEAD
 import BotKit
+=======
+import OpenClawKit
+>>>>>>> upstream/main
 
 // NetService-based resolver for Bonjour services.
 // Used to resolve the service endpoint (SRV + A/AAAA) without trusting TXT for routing.

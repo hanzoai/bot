@@ -1,4 +1,4 @@
-import { KeyedAsyncQueue } from "bot/plugin-sdk/keyed-async-queue";
+import { KeyedAsyncQueue } from "@hanzo/bot/plugin-sdk/keyed-async-queue";
 
 export const DEFAULT_SEND_GAP_MS = 150;
 

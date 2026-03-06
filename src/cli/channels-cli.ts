@@ -76,16 +76,16 @@ export function registerChannelsCli(program: Command) {
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["bot channels list", "List configured channels and auth profiles."],
-          ["bot channels status --probe", "Run channel status checks and probes."],
+          ["openclaw channels list", "List configured channels and auth profiles."],
+          ["openclaw channels status --probe", "Run channel status checks and probes."],
           [
-            "bot channels add --channel telegram --token <token>",
+            "openclaw channels add --channel telegram --token <token>",
             "Add or update a channel account non-interactively.",
           ],
-          ["bot channels login --channel whatsapp", "Link a WhatsApp Web account."],
+          ["openclaw channels login --channel whatsapp", "Link a WhatsApp Web account."],
         ])}\n\n${theme.muted("Docs:")} ${formatDocsLink(
           "/cli/channels",
-          "docs.hanzo.bot/cli/channels",
+          "docs.openclaw.ai/cli/channels",
         )}\n`,
     );
 

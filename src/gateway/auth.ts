@@ -1,14 +1,12 @@
 import type { IncomingMessage } from "node:http";
 import type {
   GatewayAuthConfig,
-  GatewayIamConfig,
   GatewayTailscaleMode,
   GatewayTrustedProxyConfig,
 } from "../config/config.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { readTailscaleWhoisIdentity, type TailscaleWhoisIdentity } from "../infra/tailscale.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
-import { validateIamToken } from "./auth-iam.js";
 import {
   AUTH_RATE_LIMIT_SCOPE_SHARED_SECRET,
   type AuthRateLimiter,
@@ -22,7 +20,7 @@ import {
   resolveClientIp,
 } from "./net.js";
 
-export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
+export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy";
 export type ResolvedGatewayAuthModeSource =
   | "override"
   | "config"
@@ -37,12 +35,11 @@ export type ResolvedGatewayAuth = {
   password?: string;
   allowTailscale: boolean;
   trustedProxy?: GatewayTrustedProxyConfig;
-  iam?: GatewayIamConfig;
 };
 
 export type GatewayAuthResult = {
   ok: boolean;
-  method?: "none" | "token" | "password" | "tailscale" | "device-token" | "trusted-proxy" | "iam";
+  method?: "none" | "token" | "password" | "tailscale" | "device-token" | "trusted-proxy";
   user?: string;
   reason?: string;
   /** Present when the request was blocked by the rate limiter. */
@@ -245,9 +242,6 @@ export function resolveGatewayAuth(params: {
     if (authOverride.trustedProxy !== undefined) {
       authConfig.trustedProxy = authOverride.trustedProxy;
     }
-    if (authOverride.iam !== undefined) {
-      authConfig.iam = authOverride.iam;
-    }
   }
   const env = params.env ?? process.env;
   const tokenRef = resolveSecretInputRef({ value: authConfig.token }).ref;
@@ -263,7 +257,6 @@ export function resolveGatewayAuth(params: {
   const token = resolvedCredentials.token;
   const password = resolvedCredentials.password;
   const trustedProxy = authConfig.trustedProxy;
-  const iam = authConfig.iam;
 
   let mode: ResolvedGatewayAuth["mode"];
   let modeSource: ResolvedGatewayAuth["modeSource"];
@@ -295,7 +288,6 @@ export function resolveGatewayAuth(params: {
     password,
     allowTailscale,
     trustedProxy,
-    iam,
   };
 }
 
@@ -305,7 +297,7 @@ export function assertGatewayAuthConfigured(auth: ResolvedGatewayAuth): void {
       return;
     }
     throw new Error(
-      "gateway auth mode is token, but no token was configured (set gateway.auth.token or BOT_GATEWAY_TOKEN)",
+      "gateway auth mode is token, but no token was configured (set gateway.auth.token or OPENCLAW_GATEWAY_TOKEN)",
     );
   }
   if (auth.mode === "password" && !auth.password) {
@@ -320,23 +312,6 @@ export function assertGatewayAuthConfigured(auth: ResolvedGatewayAuth): void {
     if (!auth.trustedProxy.userHeader || auth.trustedProxy.userHeader.trim() === "") {
       throw new Error(
         "gateway auth mode is trusted-proxy, but trustedProxy.userHeader is empty (set gateway.auth.trustedProxy.userHeader)",
-      );
-    }
-  }
-  if (auth.mode === "iam") {
-    if (!auth.iam) {
-      throw new Error(
-        "gateway auth mode is iam, but no iam config was provided (set gateway.auth.iam)",
-      );
-    }
-    if (!auth.iam.serverUrl || auth.iam.serverUrl.trim() === "") {
-      throw new Error(
-        "gateway auth mode is iam, but iam.serverUrl is empty (set gateway.auth.iam.serverUrl)",
-      );
-    }
-    if (!auth.iam.clientId || auth.iam.clientId.trim() === "") {
-      throw new Error(
-        "gateway auth mode is iam, but iam.clientId is empty (set gateway.auth.iam.clientId)",
       );
     }
   }
@@ -490,48 +465,6 @@ export async function authorizeGatewayConnect(
     }
     limiter?.reset(ip, rateLimitScope);
     return { ok: true, method: "password" };
-  }
-
-  if (auth.mode === "iam") {
-    if (!auth.iam) {
-      return { ok: false, reason: "iam_config_missing" };
-    }
-    const rawToken = connectAuth?.token;
-    if (!rawToken) {
-      limiter?.recordFailure(ip, rateLimitScope);
-      return { ok: false, reason: "iam_token_missing" };
-    }
-
-    // Try IAM JWT validation first.
-    let iamReason: string | undefined;
-    try {
-      const iamResult = await validateIamToken(rawToken, auth.iam);
-      if (iamResult.ok) {
-        limiter?.reset(ip, rateLimitScope);
-        return { ok: true, method: "iam", user: iamResult.email ?? iamResult.userId };
-      }
-      iamReason = iamResult.reason;
-    } catch {
-      iamReason = "discovery_failed";
-    }
-
-    // Fallback: accept shared gateway token (BOT_GATEWAY_TOKEN) even in IAM mode.
-    // This allows node hosts and CLI clients to connect with a pre-shared secret
-    // when they don't have a valid IAM JWT (e.g. after cert rotation).
-    if (auth.token && connectAuth?.token && safeEqualSecret(connectAuth.token, auth.token)) {
-      limiter?.reset(ip, rateLimitScope);
-      return { ok: true, method: "token" };
-    }
-
-    // Also accept password fallback in IAM mode.
-    const password = connectAuth?.password;
-    if (auth.password && password && safeEqualSecret(password, auth.password)) {
-      limiter?.reset(ip, rateLimitScope);
-      return { ok: true, method: "password" };
-    }
-
-    limiter?.recordFailure(ip, rateLimitScope);
-    return { ok: false, reason: `iam_${iamReason ?? "validation_failed"}` };
   }
 
   limiter?.recordFailure(ip, rateLimitScope);

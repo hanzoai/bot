@@ -113,16 +113,3 @@ export type ResolvedZalouserAccount = {
   authenticated: boolean;
   config: ZalouserAccountConfig;
 };
-
-export type ZcaResult = {
-  ok: boolean;
-  stdout: string;
-  stderr: string;
-  exitCode: number;
-};
-
-export type ZcaRunOptions = {
-  profile?: string;
-  cwd?: string;
-  timeout?: number;
-};

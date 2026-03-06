@@ -1,5 +1,5 @@
-import type { BotConfig } from "bot/plugin-sdk";
-import { stripMarkdown } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/bluebubbles";
+import { stripMarkdown } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import crypto from "node:crypto";
 import { resolveBlueBubblesAccount } from "./accounts.js";
 import {

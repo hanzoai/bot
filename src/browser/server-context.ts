@@ -9,7 +9,7 @@ import type {
   ProfileStatus,
 } from "./server-context.types.js";
 import { SsrFBlockedError } from "../infra/net/ssrf.js";
-import { isChromeReachable, resolveBotUserDataDir } from "./chrome.js";
+import { isChromeReachable, resolveOpenClawUserDataDir } from "./chrome.js";
 import { resolveProfile } from "./config.js";
 import { InvalidBrowserNavigationUrlError } from "./navigation-guard.js";
 import {
@@ -96,7 +96,7 @@ function createProfileContext(
     getProfileState,
     stopRunningBrowser,
     isHttpReachable,
-    resolveBotUserDataDir,
+    resolveOpenClawUserDataDir,
   });
 
   return {

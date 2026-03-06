@@ -9,25 +9,25 @@ sidebarTitle: "Onboarding: CLI"
 
 # Onboarding Wizard (CLI)
 
-The onboarding wizard is the **recommended** way to set up Hanzo Bot on macOS,
+The onboarding wizard is the **recommended** way to set up OpenClaw on macOS,
 Linux, or Windows (via WSL2; strongly recommended).
 It configures a local Gateway or a remote Gateway connection, plus channels, skills,
 and workspace defaults in one guided flow.
 
 ```bash
-hanzo-bot onboard
+openclaw onboard
 ```
 
 <Info>
 Fastest first chat: open the Control UI (no channel setup needed). Run
-`hanzo-bot dashboard` and chat in the browser. Docs: [Dashboard](/web/dashboard).
+`openclaw dashboard` and chat in the browser. Docs: [Dashboard](/web/dashboard).
 </Info>
 
 To reconfigure later:
 
 ```bash
-hanzo-bot configure
-hanzo-bot agents add <name>
+openclaw configure
+openclaw agents add <name>
 ```
 
 <Note>
@@ -36,7 +36,7 @@ hanzo-bot agents add <name>
 
 <Tip>
 Recommended: set up a Brave Search API key so the agent can use `web_search`
-(`web_fetch` works without a key). Easiest path: `hanzo-bot configure --section web`
+(`web_fetch` works without a key). Easiest path: `openclaw configure --section web`
 which stores `tools.web.search.apiKey`. Docs: [Web tools](/tools/web).
 </Tip>
 
@@ -50,6 +50,8 @@ The wizard starts with **QuickStart** (defaults) vs **Advanced** (full control).
     - Workspace default (or existing workspace)
     - Gateway port **18789**
     - Gateway auth **Token** (auto‑generated, even on loopback)
+    - Tool policy default for new local setups: `tools.profile: "messaging"` (existing explicit profile is preserved)
+    - DM isolation default: local onboarding writes `session.dmScope: "per-channel-peer"` when unset. Details: [CLI Onboarding Reference](/start/wizard-cli-reference#outputs-and-internals)
     - Tailscale exposure **Off**
     - Telegram + WhatsApp DMs default to **allowlist** (you'll be prompted for your phone number)
   </Tab>
@@ -67,17 +69,23 @@ The wizard starts with **QuickStart** (defaults) vs **Advanced** (full control).
    Security note: if this agent will run tools or process webhook/hooks content, prefer the strongest latest-generation model available and keep tool policy strict. Weaker/older tiers are easier to prompt-inject.
    For non-interactive runs, `--secret-input-mode ref` stores env-backed refs in auth profiles instead of plaintext API key values.
    In non-interactive `ref` mode, the provider env var must be set; passing inline key flags without that env var fails fast.
-   In interactive runs, choosing secret reference mode lets you point at either an environment variable or an encrypted `sops` file pointer, with a fast preflight validation before saving.
-2. **Workspace** — Location for agent files (default `~/.hanzo/bot/workspace`). Seeds bootstrap files.
+   In interactive runs, choosing secret reference mode lets you point at either an environment variable or a configured provider ref (`file` or `exec`), with a fast preflight validation before saving.
+2. **Workspace** — Location for agent files (default `~/.openclaw/workspace`). Seeds bootstrap files.
 3. **Gateway** — Port, bind address, auth mode, Tailscale exposure.
+   In interactive token mode, choose default plaintext token storage or opt into SecretRef.
+   Non-interactive token SecretRef path: `--gateway-token-ref-env <ENV_VAR>`.
 4. **Channels** — WhatsApp, Telegram, Discord, Google Chat, Mattermost, Signal, BlueBubbles, or iMessage.
 5. **Daemon** — Installs a LaunchAgent (macOS) or systemd user unit (Linux/WSL2).
+   If token auth requires a token and `gateway.auth.token` is SecretRef-managed, daemon install validates it but does not persist the resolved token into supervisor service environment metadata.
+   If token auth requires a token and the configured token SecretRef is unresolved, daemon install is blocked with actionable guidance.
+   If both `gateway.auth.token` and `gateway.auth.password` are configured and `gateway.auth.mode` is unset, daemon install is blocked until mode is set explicitly.
 6. **Health check** — Starts the Gateway and verifies it's running.
 7. **Skills** — Installs recommended skills and optional dependencies.
 
 <Note>
 Re-running the wizard does **not** wipe anything unless you explicitly choose **Reset** (or pass `--reset`).
-If the config is invalid or contains legacy keys, the wizard asks you to run `hanzo-bot doctor` first.
+CLI `--reset` defaults to config, credentials, and sessions; use `--reset-scope full` to include workspace.
+If the config is invalid or contains legacy keys, the wizard asks you to run `openclaw doctor` first.
 </Note>
 
 **Remote mode** only configures the local client to connect to a Gateway elsewhere.
@@ -85,7 +93,7 @@ It does **not** install or change anything on the remote host.
 
 ## Add another agent
 
-Use `hanzo-bot agents add <name>` to create a separate agent with its own workspace,
+Use `openclaw agents add <name>` to create a separate agent with its own workspace,
 sessions, and auth profiles. Running without `--workspace` launches the wizard.
 
 What it sets:
@@ -96,7 +104,7 @@ What it sets:
 
 Notes:
 
-- Default workspaces follow `~/.hanzo/bot/workspace-<agentId>`.
+- Default workspaces follow `~/.openclaw/workspace-<agentId>`.
 - Add `bindings` to route inbound messages (the wizard can do this).
 - Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
 
@@ -108,7 +116,7 @@ RPC API, and a full list of config fields the wizard writes, see the
 
 ## Related docs
 
-- CLI command reference: [`hanzo-bot onboard`](/cli/onboard)
+- CLI command reference: [`openclaw onboard`](/cli/onboard)
 - Onboarding overview: [Onboarding Overview](/start/onboarding-overview)
 - macOS app onboarding: [Onboarding](/start/onboarding)
 - Agent first-run ritual: [Agent Bootstrapping](/start/bootstrapping)

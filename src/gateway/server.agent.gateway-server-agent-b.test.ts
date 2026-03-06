@@ -141,7 +141,7 @@ async function sendAgentWsRequestAndWaitFinal(
 }
 
 async function useTempSessionStorePath() {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gw-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gw-"));
   testState.sessionStorePath = path.join(dir, "sessions.json");
 }
 

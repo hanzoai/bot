@@ -61,7 +61,7 @@ describe("runCapability proxy fetch passthrough", () => {
   it("passes fetchFn to audio provider when HTTPS_PROXY is set", async () => {
     vi.stubEnv("HTTPS_PROXY", "http://proxy.test:8080");
     const seenFetchFn = await runAudioCapabilityWithFetchCapture({
-      fixturePrefix: "bot-audio-proxy",
+      fixturePrefix: "openclaw-audio-proxy",
       outputText: "transcribed",
     });
     expect(seenFetchFn).toBeDefined();
@@ -71,7 +71,7 @@ describe("runCapability proxy fetch passthrough", () => {
   it("passes fetchFn to video provider when HTTPS_PROXY is set", async () => {
     vi.stubEnv("HTTPS_PROXY", "http://proxy.test:8080");
 
-    await withVideoFixture("bot-video-proxy", async ({ ctx, media, cache }) => {
+    await withVideoFixture("openclaw-video-proxy", async ({ ctx, media, cache }) => {
       let seenFetchFn: typeof fetch | undefined;
 
       const result = await runCapability({
@@ -125,7 +125,7 @@ describe("runCapability proxy fetch passthrough", () => {
     vi.stubEnv("http_proxy", "");
 
     const seenFetchFn = await runAudioCapabilityWithFetchCapture({
-      fixturePrefix: "bot-audio-no-proxy",
+      fixturePrefix: "openclaw-audio-no-proxy",
       outputText: "ok",
     });
     expect(seenFetchFn).toBeUndefined();

@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `hanzo-bot directory` (self, peers, groups)"
+summary: "CLI reference for `openclaw directory` (self, peers, groups)"
 read_when:
   - You want to look up contacts/groups/self ids for a channel
   - You are developing a channel directory adapter
 title: "directory"
 ---
 
-# `hanzo-bot directory`
+# `openclaw directory`
 
 Directory lookups for channels that support it (contacts/peers, groups, and “me”).
 
@@ -18,15 +18,15 @@ Directory lookups for channels that support it (contacts/peers, groups, and “m
 
 ## Notes
 
-- `directory` is meant to help you find IDs you can paste into other commands (especially `hanzo-bot message send --target ...`).
+- `directory` is meant to help you find IDs you can paste into other commands (especially `openclaw message send --target ...`).
 - For many channels, results are config-backed (allowlists / configured groups) rather than a live provider directory.
 - Default output is `id` (and sometimes `name`) separated by a tab; use `--json` for scripting.
 
 ## Using results with `message send`
 
 ```bash
-hanzo-bot directory peers list --channel slack --query "U0"
-hanzo-bot message send --channel slack --target user:U012ABCDEF --message "hello"
+openclaw directory peers list --channel slack --query "U0"
+openclaw message send --channel slack --target user:U012ABCDEF --message "hello"
 ```
 
 ## ID formats (by channel)
@@ -43,21 +43,21 @@ hanzo-bot message send --channel slack --target user:U012ABCDEF --message "hello
 ## Self (“me”)
 
 ```bash
-hanzo-bot directory self --channel zalouser
+openclaw directory self --channel zalouser
 ```
 
 ## Peers (contacts/users)
 
 ```bash
-hanzo-bot directory peers list --channel zalouser
-hanzo-bot directory peers list --channel zalouser --query "name"
-hanzo-bot directory peers list --channel zalouser --limit 50
+openclaw directory peers list --channel zalouser
+openclaw directory peers list --channel zalouser --query "name"
+openclaw directory peers list --channel zalouser --limit 50
 ```
 
 ## Groups
 
 ```bash
-hanzo-bot directory groups list --channel zalouser
-hanzo-bot directory groups list --channel zalouser --query "work"
-hanzo-bot directory groups members --channel zalouser --group-id <id>
+openclaw directory groups list --channel zalouser
+openclaw directory groups list --channel zalouser --query "work"
+openclaw directory groups members --channel zalouser --group-id <id>
 ```

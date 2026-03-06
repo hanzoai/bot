@@ -1,3 +1,7 @@
 <resources>
+<<<<<<< HEAD
     <string name="app_name">HanzoBot Node</string>
+=======
+    <string name="app_name">OpenClaw Node</string>
+>>>>>>> upstream/main
 </resources>

@@ -7,11 +7,11 @@ import {
   withModelsTempHome as withTempHome,
   withTempEnv,
 } from "./models-config.e2e-harness.js";
-import { ensureBotModelsJson } from "./models-config.js";
+import { ensureOpenClawModelsJson } from "./models-config.js";
 
 installModelsConfigTestHooks();
 
-const TEST_ENV_VAR = "BOT_MODELS_CONFIG_TEST_ENV";
+const TEST_ENV_VAR = "OPENCLAW_MODELS_CONFIG_TEST_ENV";
 
 describe("models-config", () => {
   it("applies config env.vars entries while ensuring models.json", async () => {
@@ -23,7 +23,7 @@ describe("models-config", () => {
           env: { vars: { [TEST_ENV_VAR]: "from-config" } },
         };
 
-        await ensureBotModelsJson(cfg);
+        await ensureOpenClawModelsJson(cfg);
 
         expect(process.env[TEST_ENV_VAR]).toBe("from-config");
       });
@@ -39,7 +39,7 @@ describe("models-config", () => {
           env: { vars: { [TEST_ENV_VAR]: "from-config" } },
         };
 
-        await ensureBotModelsJson(cfg);
+        await ensureOpenClawModelsJson(cfg);
 
         expect(process.env[TEST_ENV_VAR]).toBe("from-host");
       });

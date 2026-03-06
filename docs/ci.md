@@ -1,6 +1,10 @@
 ---
 title: CI Pipeline
-description: How the Hanzo Bot CI pipeline works
+description: How the OpenClaw CI pipeline works
+summary: "CI job graph, scope gates, and local command equivalents"
+read_when:
+  - You need to understand why a CI job did or did not run
+  - You are debugging failing GitHub Actions checks
 ---
 
 # CI Pipeline
@@ -36,12 +40,11 @@ Scope logic lives in `scripts/ci-changed-scope.mjs` and is covered by unit tests
 
 ## Runners
 
-| Runner                          | Jobs                          |
-| ------------------------------- | ----------------------------- |
-| `blacksmith-4vcpu-ubuntu-2404`  | Most Linux jobs               |
-| `blacksmith-4vcpu-windows-2025` | `checks-windows`              |
-| `macos-latest`                  | `macos`, `ios`                |
-| `ubuntu-latest`                 | Scope detection (lightweight) |
+| Runner                           | Jobs                                       |
+| -------------------------------- | ------------------------------------------ |
+| `blacksmith-16vcpu-ubuntu-2404`  | Most Linux jobs, including scope detection |
+| `blacksmith-32vcpu-windows-2025` | `checks-windows`                           |
+| `macos-latest`                   | `macos`, `ios`                             |
 
 ## Local Equivalents
 

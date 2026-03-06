@@ -1,5 +1,5 @@
 import type { IconName } from "./icons.ts";
-import SHARED_TOOL_DISPLAY_JSON from "../../../apps/shared/BotKit/Sources/BotKit/Resources/tool-display.json" with { type: "json" };
+import SHARED_TOOL_DISPLAY_JSON from "../../../apps/shared/OpenClawKit/Sources/OpenClawKit/Resources/tool-display.json" with { type: "json" };
 import {
   defaultTitle,
   formatToolDetailText,

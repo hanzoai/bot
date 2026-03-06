@@ -6,7 +6,7 @@ import "./test-helpers/fast-coding-tools.js";
 import type { BotConfig } from "../config/config.js";
 import type { SandboxDockerConfig } from "./sandbox.js";
 import type { SandboxFsBridge } from "./sandbox/fs-bridge.js";
-import { createBotCodingTools } from "./pi-tools.js";
+import { createOpenClawCodingTools } from "./pi-tools.js";
 import { createRestrictedAgentSandboxConfig } from "./test-helpers/sandbox-agent-config-fixtures.js";
 
 type ToolWithExecute = {
@@ -46,7 +46,7 @@ describe("Agent-specific tool filtering", () => {
       patch: string;
     }) => Promise<void>,
   ) {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-pi-tools-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pi-tools-"));
     const escapedPath = path.join(
       path.dirname(workspaceDir),
       `escaped-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}.txt`,
@@ -66,7 +66,7 @@ describe("Agent-specific tool filtering", () => {
         },
       };
 
-      const tools = createBotCodingTools({
+      const tools = createOpenClawCodingTools({
         config: cfg,
         sessionKey: "agent:main:main",
         workspaceDir,
@@ -97,7 +97,7 @@ describe("Agent-specific tool filtering", () => {
   }
 
   function createMainSessionTools(cfg: BotConfig) {
-    return createBotCodingTools({
+    return createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test",
@@ -115,7 +115,7 @@ describe("Agent-specific tool filtering", () => {
         list: [
           {
             id: "main",
-            workspace: "~/bot",
+            workspace: "~/openclaw",
             ...(params.agentTools ? { tools: params.agentTools } : {}),
           },
         ],
@@ -198,7 +198,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test",
@@ -243,7 +243,7 @@ describe("Agent-specific tool filtering", () => {
         list: [
           {
             id: "restricted",
-            workspace: "~/bot-restricted",
+            workspace: "~/openclaw-restricted",
             tools: {
               allow: ["read"], // Agent override: only read
               deny: ["exec", "write", "edit"],
@@ -253,7 +253,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:restricted:main",
       workspaceDir: "/tmp/test-restricted",
@@ -278,7 +278,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-provider",
@@ -302,7 +302,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-provider-profile",
@@ -321,12 +321,12 @@ describe("Agent-specific tool filtering", () => {
         list: [
           {
             id: "main",
-            workspace: "~/bot",
+            workspace: "~/openclaw",
             // No tools restriction - all tools available
           },
           {
             id: "family",
-            workspace: "~/bot-family",
+            workspace: "~/openclaw-family",
             tools: {
               allow: ["read"],
               deny: ["exec", "write", "edit", "process"],
@@ -337,7 +337,7 @@ describe("Agent-specific tool filtering", () => {
     };
 
     // main agent: all tools
-    const mainTools = createBotCodingTools({
+    const mainTools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main",
@@ -350,7 +350,7 @@ describe("Agent-specific tool filtering", () => {
     expect(mainToolNames).not.toContain("apply_patch");
 
     // family agent: restricted
-    const familyTools = createBotCodingTools({
+    const familyTools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:family:whatsapp:group:123",
       workspaceDir: "/tmp/test-family",
@@ -380,7 +380,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const trustedTools = createBotCodingTools({
+    const trustedTools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:trusted",
       messageProvider: "whatsapp",
@@ -391,7 +391,7 @@ describe("Agent-specific tool filtering", () => {
     expect(trustedNames).toContain("read");
     expect(trustedNames).toContain("exec");
 
-    const defaultTools = createBotCodingTools({
+    const defaultTools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:unknown",
       messageProvider: "whatsapp",
@@ -419,7 +419,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const aliceTools = createBotCodingTools({
+    const aliceTools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:family",
       senderId: "alice",
@@ -430,7 +430,7 @@ describe("Agent-specific tool filtering", () => {
     expect(aliceNames).toContain("read");
     expect(aliceNames).toContain("exec");
 
-    const bobTools = createBotCodingTools({
+    const bobTools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:family",
       senderId: "bob",
@@ -460,7 +460,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const adminTools = createBotCodingTools({
+    const adminTools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:locked",
       senderId: "admin",
@@ -485,7 +485,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:telegram:group:123:topic:456",
       messageProvider: "telegram",
@@ -510,7 +510,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:subagent:test",
       spawnedBy: "agent:main:whatsapp:group:trusted",
@@ -531,7 +531,7 @@ describe("Agent-specific tool filtering", () => {
         list: [
           {
             id: "work",
-            workspace: "~/bot-work",
+            workspace: "~/openclaw-work",
             tools: {
               deny: ["exec", "process"], // Agent deny (override)
             },
@@ -540,7 +540,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:work:slack:dm:user123",
       workspaceDir: "/tmp/test-work",
@@ -567,7 +567,7 @@ describe("Agent-specific tool filtering", () => {
       },
     });
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:restricted:main",
       workspaceDir: "/tmp/test-restricted",
@@ -618,7 +618,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main",
@@ -637,7 +637,7 @@ describe("Agent-specific tool filtering", () => {
   });
 
   it("keeps sandbox as the implicit exec host default without forcing gateway approvals", async () => {
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: {},
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main-implicit-sandbox",
@@ -661,7 +661,7 @@ describe("Agent-specific tool filtering", () => {
   });
 
   it("fails closed when exec host=sandbox is requested without sandbox runtime", async () => {
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: {},
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main-fail-closed",
@@ -683,7 +683,7 @@ describe("Agent-specific tool filtering", () => {
       { id: "helper" },
     ]);
 
-    const mainTools = createBotCodingTools({
+    const mainTools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main-exec-defaults",
@@ -704,7 +704,7 @@ describe("Agent-specific tool filtering", () => {
       }),
     ).rejects.toThrow("exec host not allowed");
 
-    const helperTools = createBotCodingTools({
+    const helperTools = createOpenClawCodingTools({
       config: cfg,
       sessionKey: "agent:helper:main",
       workspaceDir: "/tmp/test-helper-exec-defaults",
@@ -730,7 +730,7 @@ describe("Agent-specific tool filtering", () => {
   it("applies explicit agentId exec defaults when sessionKey is opaque", async () => {
     const cfg = createExecHostDefaultsConfig([{ id: "main", execHost: "gateway" }]);
 
-    const tools = createBotCodingTools({
+    const tools = createOpenClawCodingTools({
       config: cfg,
       agentId: "main",
       sessionKey: "run-opaque-123",

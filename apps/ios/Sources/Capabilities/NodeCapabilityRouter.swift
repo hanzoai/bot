@@ -1,5 +1,9 @@
 import Foundation
+<<<<<<< HEAD
 import BotKit
+=======
+import OpenClawKit
+>>>>>>> upstream/main
 
 @MainActor
 final class NodeCapabilityRouter {

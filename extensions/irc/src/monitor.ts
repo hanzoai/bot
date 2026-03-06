@@ -1,4 +1,4 @@
-import { createLoggerBackedRuntime, type RuntimeEnv } from "bot/plugin-sdk";
+import { createLoggerBackedRuntime, type RuntimeEnv } from "@hanzo/bot/plugin-sdk/irc";
 import type { CoreConfig, IrcInboundMessage } from "./types.js";
 import { resolveIrcAccount } from "./accounts.js";
 import { connectIrcClient, type IrcClient } from "./client.js";

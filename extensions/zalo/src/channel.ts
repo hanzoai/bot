@@ -1,4 +1,9 @@
-import type { ChannelAccountSnapshot, ChannelDock, ChannelPlugin, BotConfig } from "bot/plugin-sdk";
+import type {
+  ChannelAccountSnapshot,
+  ChannelDock,
+  ChannelPlugin,
+  BotConfig,
+} from "@hanzo/bot/plugin-sdk/zalo";
 import {
   applyAccountNameToChannelSection,
   buildChannelConfigSchema,
@@ -15,7 +20,7 @@ import {
   resolveOpenProviderRuntimeGroupPolicy,
   resolveChannelAccountConfigBasePath,
   setAccountEnabledInConfigSection,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/zalo";
 import {
   listZaloAccountIds,
   resolveDefaultZaloAccountId,

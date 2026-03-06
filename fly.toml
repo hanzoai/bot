@@ -1,7 +1,13 @@
+<<<<<<<
+HEAD = 
 # Bot Fly.io deployment configuration
 # See https://fly.io/docs/reference/configuration/
 
-app = "hanzo-bot"
+=======app = "hanzo-bot"
+# OpenClaw Fly.io deployment configuration
+# See https://fly.io/docs/reference/configuration/
+
+>>>>>>>upstream/mainapp = "openclaw"
 primary_region = "iad" # change to your closest region
 
 [build]
@@ -9,9 +15,13 @@ dockerfile = "Dockerfile"
 
 [env]
 NODE_ENV = "production"
-# Fly uses x86, but keep this for consistency
+<<<<<<<# Fly uses x86, but keep this for consistency
+
+=======>>>>>>>upstream/mainHEAD = 
 BOT_PREFER_PNPM = "1"
 BOT_STATE_DIR = "/data"
+OPENCLAW_PREFER_PNPM = "1"
+OPENCLAW_STATE_DIR = "/data"
 NODE_OPTIONS = "--max-old-space-size=1536"
 
 [processes]
@@ -30,5 +40,8 @@ size = "shared-cpu-2x"
 memory = "2048mb"
 
 [mounts]
+<<<<<<<
+=======>>>>>>>upstream/mainHEAD = 
 source = "bot_data"
+source = "openclaw_data"
 destination = "/data"
