@@ -1,4 +1,4 @@
-import type { DmPolicy, GroupPolicy, SecretInput } from "bot/plugin-sdk";
+import type { DmPolicy, GroupPolicy, SecretInput } from "@hanzo/bot/plugin-sdk/matrix";
 export type { DmPolicy, GroupPolicy };
 
 export type ReplyToMode = "off" | "first" | "all";

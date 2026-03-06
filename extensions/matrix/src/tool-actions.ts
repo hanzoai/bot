@@ -5,7 +5,7 @@ import {
   readNumberParam,
   readReactionParams,
   readStringParam,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/matrix";
 import type { CoreConfig } from "./types.js";
 import {
   deleteMatrixMessage,

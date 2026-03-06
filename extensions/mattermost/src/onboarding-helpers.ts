@@ -1,1 +1,1 @@
-export { promptAccountId } from "bot/plugin-sdk";
+export { promptAccountId } from "@hanzo/bot/plugin-sdk/mattermost";

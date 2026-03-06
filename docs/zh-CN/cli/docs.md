@@ -1,7 +1,7 @@
 ---
 read_when:
-  - 你想从终端搜索实时 Hanzo Bot 文档
-summary: "`hanzo-bot docs` 的 CLI 参考（搜索实时文档索引）"
+  - 你想从终端搜索实时 OpenClaw 文档
+summary: "`openclaw docs` 的 CLI 参考（搜索实时文档索引）"
 title: docs
 x-i18n:
   generated_at: "2026-02-03T07:44:50Z"
@@ -12,11 +12,11 @@ x-i18n:
   workflow: 15
 ---
 
-# `hanzo-bot docs`
+# `openclaw docs`
 
 搜索实时文档索引。
 
 ```bash
-hanzo-bot docs browser extension
-hanzo-bot docs sandbox allowHostControl
+openclaw docs browser extension
+openclaw docs sandbox allowHostControl
 ```

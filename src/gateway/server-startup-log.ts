@@ -38,7 +38,7 @@ export function logGatewayStartup(params: {
   if (enabledDangerousFlags.length > 0) {
     const warning =
       `security warning: dangerous config flags enabled: ${enabledDangerousFlags.join(", ")}. ` +
-      "Run `bot security audit`.";
+      "Run `openclaw security audit`.";
     params.log.warn(warning);
   }
 }

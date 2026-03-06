@@ -1,7 +1,7 @@
 ---
-summary: "Use OpenAI via API keys or Codex subscription in Hanzo Bot"
+summary: "Use OpenAI via API keys or Codex subscription in OpenClaw"
 read_when:
-  - You want to use OpenAI models in Hanzo Bot
+  - You want to use OpenAI models in OpenClaw
   - You want Codex subscription auth instead of API keys
 title: "OpenAI"
 ---
@@ -10,7 +10,7 @@ title: "OpenAI"
 
 OpenAI provides developer APIs for GPT models. Codex supports **ChatGPT sign-in** for subscription
 access or **API key** sign-in for usage-based access. Codex cloud requires ChatGPT sign-in.
-OpenAI explicitly supports subscription OAuth usage in external tools/workflows like Bot.
+OpenAI explicitly supports subscription OAuth usage in external tools/workflows like OpenClaw.
 
 ## Option A: OpenAI API key (OpenAI Platform)
 
@@ -20,9 +20,9 @@ Get your API key from the OpenAI dashboard.
 ### CLI setup
 
 ```bash
-hanzo-bot onboard --auth-choice openai-api-key
+openclaw onboard --auth-choice openai-api-key
 # or non-interactive
-hanzo-bot onboard --openai-api-key "$OPENAI_API_KEY"
+openclaw onboard --openai-api-key "$OPENAI_API_KEY"
 ```
 
 ### Config snippet
@@ -35,7 +35,7 @@ hanzo-bot onboard --openai-api-key "$OPENAI_API_KEY"
 ```
 
 OpenAI's current API model docs list `gpt-5.4` and `gpt-5.4-pro` for direct
-OpenAI API usage. Bot forwards both through the `openai/*` Responses path.
+OpenAI API usage. OpenClaw forwards both through the `openai/*` Responses path.
 
 ## Option B: OpenAI Code (Codex) subscription
 
@@ -46,10 +46,10 @@ Codex cloud requires ChatGPT sign-in, while the Codex CLI supports ChatGPT or AP
 
 ```bash
 # Run Codex OAuth in the wizard
-hanzo-bot onboard --auth-choice openai-codex
+openclaw onboard --auth-choice openai-codex
 
 # Or run OAuth directly
-hanzo-bot models auth login --provider openai-codex
+openclaw models auth login --provider openai-codex
 ```
 
 ### Config snippet (Codex subscription)
@@ -60,19 +60,22 @@ hanzo-bot models auth login --provider openai-codex
 }
 ```
 
-OpenAI's current Codex docs list `gpt-5.4` as the current Codex model. Bot
+OpenAI's current Codex docs list `gpt-5.4` as the current Codex model. OpenClaw
 maps that to `openai-codex/gpt-5.4` for ChatGPT/Codex OAuth usage.
 
 ### Transport default
 
-Hanzo Bot uses `pi-ai` for model streaming. For `openai-codex/*` models you can set
-`agents.defaults.models.<provider/model>.params.transport` to select transport:
+OpenClaw uses `pi-ai` for model streaming. For both `openai/*` and
+`openai-codex/*`, default transport is `"auto"` (WebSocket-first, then SSE
+fallback).
+
+You can set `agents.defaults.models.<provider/model>.params.transport`:
 
 - `"sse"`: force SSE
 - `"websocket"`: force WebSocket
 - `"auto"`: try WebSocket, then fall back to SSE
 
-For `openai/*` (Responses API), Bot also enables WebSocket warm-up by
+For `openai/*` (Responses API), OpenClaw also enables WebSocket warm-up by
 default (`openaiWsWarmup: true`) when WebSocket transport is used.
 
 Related OpenAI docs:
@@ -99,7 +102,7 @@ Related OpenAI docs:
 
 ### OpenAI WebSocket warm-up
 
-OpenAI docs describe warm-up as optional. Bot enables it by default for
+OpenAI docs describe warm-up as optional. OpenClaw enables it by default for
 `openai/*` to reduce first-turn latency when using WebSocket transport.
 
 ### Disable warm-up
@@ -141,7 +144,7 @@ OpenAI docs describe warm-up as optional. Bot enables it by default for
 ### OpenAI priority processing
 
 OpenAI's API exposes priority processing via `service_tier=priority`. In
-Bot, set `agents.defaults.models["openai/<model>"].params.serviceTier` to
+OpenClaw, set `agents.defaults.models["openai/<model>"].params.serviceTier` to
 pass that field through on direct `openai/*` Responses requests.
 
 ```json5
@@ -165,7 +168,7 @@ Supported values are `auto`, `default`, `flex`, and `priority`.
 ### OpenAI Responses server-side compaction
 
 For direct OpenAI Responses models (`openai/*` using `api: "openai-responses"` with
-`baseUrl` on `api.openai.com`), Hanzo Bot now auto-enables OpenAI server-side
+`baseUrl` on `api.openai.com`), OpenClaw now auto-enables OpenAI server-side
 compaction payload hints:
 
 - Forces `store: true` (unless model compat sets `supportsStore: false`)

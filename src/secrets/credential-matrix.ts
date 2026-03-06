@@ -2,7 +2,7 @@ import { listSecretTargetRegistryEntries } from "./target-registry.js";
 
 type CredentialMatrixEntry = {
   id: string;
-  configFile: "bot.json" | "auth-profiles.json";
+  configFile: "openclaw.json" | "auth-profiles.json";
   path: string;
   refPath?: string;
   when?: { type: "api_key" | "token" };
@@ -15,7 +15,7 @@ export type SecretRefCredentialMatrixDocument = {
   version: 1;
   matrixId: "strictly-user-supplied-credentials";
   pathSyntax: 'Dot path with "*" for map keys and "[]" for arrays.';
-  scope: "Credentials that are strictly user-supplied and not minted/rotated by Bot runtime.";
+  scope: "Credentials that are strictly user-supplied and not minted/rotated by OpenClaw runtime.";
   excludedMutableOrRuntimeManaged: string[];
   entries: CredentialMatrixEntry[];
 };
@@ -24,7 +24,6 @@ const EXCLUDED_MUTABLE_OR_RUNTIME_MANAGED = [
   "commands.ownerDisplaySecret",
   "channels.matrix.accessToken",
   "channels.matrix.accounts.*.accessToken",
-  "gateway.auth.token",
   "hooks.token",
   "hooks.gmail.pushToken",
   "hooks.mappings[].sessionKey",
@@ -53,7 +52,8 @@ export function buildSecretRefCredentialMatrix(): SecretRefCredentialMatrixDocum
     version: 1,
     matrixId: "strictly-user-supplied-credentials",
     pathSyntax: 'Dot path with "*" for map keys and "[]" for arrays.',
-    scope: "Credentials that are strictly user-supplied and not minted/rotated by Bot runtime.",
+    scope:
+      "Credentials that are strictly user-supplied and not minted/rotated by OpenClaw runtime.",
     excludedMutableOrRuntimeManaged: [...EXCLUDED_MUTABLE_OR_RUNTIME_MANAGED],
     entries,
   };

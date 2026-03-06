@@ -1,4 +1,4 @@
-import type { AcpRuntimeEvent, AcpSessionUpdateTag } from "bot/plugin-sdk";
+import type { AcpRuntimeEvent, AcpSessionUpdateTag } from "@hanzo/bot/plugin-sdk/acpx";
 import {
   asOptionalBoolean,
   asOptionalString,

@@ -22,11 +22,11 @@ vi.mock("../web/session.js", () => ({
 
 import { getReplyFromConfig } from "./reply.js";
 
-const { withTempHome } = createTempHomeHarness({ prefix: "bot-rawbody-" });
+const { withTempHome } = createTempHomeHarness({ prefix: "openclaw-rawbody-" });
 
 describe("RawBody directive parsing", () => {
   beforeEach(() => {
-    vi.stubEnv("BOT_TEST_FAST", "1");
+    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
     runEmbeddedPiAgentMock.mockClear();
     agentMocks.loadModelCatalog.mockClear();
     agentMocks.loadModelCatalog.mockResolvedValue([

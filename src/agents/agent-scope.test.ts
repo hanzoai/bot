@@ -29,7 +29,7 @@ describe("resolveAgentConfig", () => {
   it("should return undefined when agent id does not exist", () => {
     const cfg: BotConfig = {
       agents: {
-        list: [{ id: "main", workspace: "~/bot" }],
+        list: [{ id: "main", workspace: "~/openclaw" }],
       },
     };
     const result = resolveAgentConfig(cfg, "nonexistent");
@@ -43,8 +43,8 @@ describe("resolveAgentConfig", () => {
           {
             id: "main",
             name: "Main Agent",
-            workspace: "~/bot",
-            agentDir: "~/.hanzo/bot/agents/main",
+            workspace: "~/openclaw",
+            agentDir: "~/.openclaw/agents/main",
             model: "anthropic/claude-opus-4",
           },
         ],
@@ -53,8 +53,8 @@ describe("resolveAgentConfig", () => {
     const result = resolveAgentConfig(cfg, "main");
     expect(result).toEqual({
       name: "Main Agent",
-      workspace: "~/bot",
-      agentDir: "~/.hanzo/bot/agents/main",
+      workspace: "~/openclaw",
+      agentDir: "~/.openclaw/agents/main",
       model: "anthropic/claude-opus-4",
       identity: undefined,
       groupChat: undefined,
@@ -322,7 +322,7 @@ describe("resolveAgentConfig", () => {
         list: [
           {
             id: "work",
-            workspace: "~/bot-work",
+            workspace: "~/openclaw-work",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -350,7 +350,7 @@ describe("resolveAgentConfig", () => {
         list: [
           {
             id: "restricted",
-            workspace: "~/bot-restricted",
+            workspace: "~/openclaw-restricted",
             tools: {
               allow: ["read"],
               deny: ["exec", "write", "edit"],
@@ -380,7 +380,7 @@ describe("resolveAgentConfig", () => {
         list: [
           {
             id: "family",
-            workspace: "~/bot-family",
+            workspace: "~/openclaw-family",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -401,30 +401,30 @@ describe("resolveAgentConfig", () => {
   it("should normalize agent id", () => {
     const cfg: BotConfig = {
       agents: {
-        list: [{ id: "main", workspace: "~/bot" }],
+        list: [{ id: "main", workspace: "~/openclaw" }],
       },
     };
     // Should normalize to "main" (default)
     const result = resolveAgentConfig(cfg, "");
     expect(result).toBeDefined();
-    expect(result?.workspace).toBe("~/bot");
+    expect(result?.workspace).toBe("~/openclaw");
   });
 
-  it("uses BOT_HOME for default agent workspace", () => {
-    const home = path.join(path.sep, "srv", "bot-home");
-    vi.stubEnv("BOT_HOME", home);
+  it("uses OPENCLAW_HOME for default agent workspace", () => {
+    const home = path.join(path.sep, "srv", "openclaw-home");
+    vi.stubEnv("OPENCLAW_HOME", home);
 
     const workspace = resolveAgentWorkspaceDir({} as BotConfig, "main");
-    expect(workspace).toBe(path.join(path.resolve(home), ".bot", "workspace"));
+    expect(workspace).toBe(path.join(path.resolve(home), ".openclaw", "workspace"));
   });
 
-  it("uses BOT_HOME for default agentDir", () => {
-    const home = path.join(path.sep, "srv", "bot-home");
-    vi.stubEnv("BOT_HOME", home);
-    // Clear state dir so it falls back to BOT_HOME
-    vi.stubEnv("BOT_STATE_DIR", "");
+  it("uses OPENCLAW_HOME for default agentDir", () => {
+    const home = path.join(path.sep, "srv", "openclaw-home");
+    vi.stubEnv("OPENCLAW_HOME", home);
+    // Clear state dir so it falls back to OPENCLAW_HOME
+    vi.stubEnv("OPENCLAW_STATE_DIR", "");
 
     const agentDir = resolveAgentDir({} as BotConfig, "main");
-    expect(agentDir).toBe(path.join(path.resolve(home), ".bot", "agents", "main", "agent"));
+    expect(agentDir).toBe(path.join(path.resolve(home), ".openclaw", "agents", "main", "agent"));
   });
 });

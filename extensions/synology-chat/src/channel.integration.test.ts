@@ -11,8 +11,8 @@ type RegisteredRoute = {
 const registerPluginHttpRouteMock = vi.fn<(params: RegisteredRoute) => () => void>(() => vi.fn());
 const dispatchReplyWithBufferedBlockDispatcher = vi.fn().mockResolvedValue({ counts: {} });
 
-vi.mock("bot/plugin-sdk", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("bot/plugin-sdk")>();
+vi.mock("@hanzo/bot/plugin-sdk/synology-chat", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@hanzo/bot/plugin-sdk/synology-chat")>();
   return {
     ...actual,
     DEFAULT_ACCOUNT_ID: "default",

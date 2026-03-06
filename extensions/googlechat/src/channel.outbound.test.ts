@@ -1,4 +1,4 @@
-import type { BotConfig, PluginRuntime } from "bot/plugin-sdk/googlechat";
+import type { BotConfig, PluginRuntime } from "@hanzo/bot/plugin-sdk/googlechat";
 import { describe, expect, it, vi } from "vitest";
 
 const uploadGoogleChatAttachmentMock = vi.hoisted(() => vi.fn());

@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk/msteams";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/msteams";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({

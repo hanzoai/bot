@@ -1,4 +1,4 @@
-import type { BotConfig, RuntimeEnv } from "bot/plugin-sdk";
+import type { BotConfig, RuntimeEnv } from "@hanzo/bot/plugin-sdk/msteams";
 import type { MSTeamsConversationStore } from "./conversation-store.js";
 import type { MSTeamsAdapter } from "./messenger.js";
 import type { MSTeamsMonitorLogger } from "./monitor-types.js";

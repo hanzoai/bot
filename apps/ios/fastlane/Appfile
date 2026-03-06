@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 app_identifier("ai.hanzo.bot.ios")
+=======
+app_identifier("ai.openclaw.ios")
+>>>>>>> upstream/main
 
 # Auth is expected via App Store Connect API key.
 # Provide either:

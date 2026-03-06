@@ -23,15 +23,15 @@ describe("config irc", () => {
       channels: {
         irc: {
           host: "irc.libera.chat",
-          nick: "bot-bot",
-          channels: ["#bot"],
+          nick: "openclaw-bot",
+          channels: ["#openclaw"],
         },
       },
     });
 
     const config = expectValidConfig(res);
     expect(config.channels?.irc?.host).toBe("irc.libera.chat");
-    expect(config.channels?.irc?.nick).toBe("bot-bot");
+    expect(config.channels?.irc?.nick).toBe("openclaw-bot");
   });
 
   it('rejects irc.dmPolicy="open" without allowFrom "*"', () => {

@@ -4,9 +4,9 @@ import { normalizeSecretInputString, resolveSecretInputRef } from "../config/typ
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
 
-const RELAY_TOKEN_CONTEXT = "bot-extension-relay-v1";
+const RELAY_TOKEN_CONTEXT = "openclaw-extension-relay-v1";
 const DEFAULT_RELAY_PROBE_TIMEOUT_MS = 500;
-const BOT_RELAY_BROWSER = "Bot/extension-relay";
+const OPENCLAW_RELAY_BROWSER = "OpenClaw/extension-relay";
 
 class SecretRefUnavailableError extends Error {
   readonly isSecretRefUnavailable = true;
@@ -22,7 +22,7 @@ function trimToUndefined(value: unknown): string | undefined {
 
 async function resolveGatewayAuthToken(): Promise<string | null> {
   const envToken =
-    process.env.BOT_GATEWAY_TOKEN?.trim() || process.env.CLAWDBOT_GATEWAY_TOKEN?.trim();
+    process.env.OPENCLAW_GATEWAY_TOKEN?.trim() || process.env.CLAWDBOT_GATEWAY_TOKEN?.trim();
   if (envToken) {
     return envToken;
   }
@@ -71,7 +71,7 @@ export async function resolveRelayAcceptedTokensForPort(port: number): Promise<s
   const gatewayToken = await resolveGatewayAuthToken();
   if (!gatewayToken) {
     throw new Error(
-      "extension relay requires gateway auth token (set gateway.auth.token or BOT_GATEWAY_TOKEN)",
+      "extension relay requires gateway auth token (set gateway.auth.token or OPENCLAW_GATEWAY_TOKEN)",
     );
   }
   const relayToken = deriveRelayAuthToken(gatewayToken, port);
@@ -85,7 +85,7 @@ export async function resolveRelayAuthTokenForPort(port: number): Promise<string
   return (await resolveRelayAcceptedTokensForPort(port))[0];
 }
 
-export async function probeAuthenticatedBotRelay(params: {
+export async function probeAuthenticatedOpenClawRelay(params: {
   baseUrl: string;
   relayAuthHeader: string;
   relayAuthToken: string;
@@ -104,7 +104,7 @@ export async function probeAuthenticatedBotRelay(params: {
     }
     const body = (await res.json()) as { Browser?: unknown };
     const browserName = typeof body?.Browser === "string" ? body.Browser.trim() : "";
-    return browserName === BOT_RELAY_BROWSER;
+    return browserName === OPENCLAW_RELAY_BROWSER;
   } catch {
     return false;
   } finally {

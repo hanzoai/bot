@@ -1,4 +1,4 @@
-import { MarkdownConfigSchema } from "bot/plugin-sdk";
+import { MarkdownConfigSchema } from "@hanzo/bot/plugin-sdk/twitch";
 import { z } from "zod";
 
 /**

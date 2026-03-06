@@ -83,7 +83,7 @@ vi.mock("../pi-settings.js", () => ({
 }));
 
 vi.mock("../models-config.js", () => ({
-  ensureBotModelsJson: vi.fn(async () => {}),
+  ensureOpenClawModelsJson: vi.fn(async () => {}),
 }));
 
 vi.mock("../model-auth.js", () => ({
@@ -110,7 +110,7 @@ vi.mock("../bootstrap-files.js", () => ({
 }));
 
 vi.mock("../docs-path.js", () => ({
-  resolveBotDocsPath: vi.fn(async () => undefined),
+  resolveOpenClawDocsPath: vi.fn(async () => undefined),
 }));
 
 vi.mock("../channel-tools.js", () => ({
@@ -119,7 +119,7 @@ vi.mock("../channel-tools.js", () => ({
 }));
 
 vi.mock("../pi-tools.js", () => ({
-  createBotCodingTools: vi.fn(() => []),
+  createOpenClawCodingTools: vi.fn(() => []),
 }));
 
 vi.mock("./google.js", () => ({
@@ -157,7 +157,7 @@ vi.mock("../skills.js", () => ({
 }));
 
 vi.mock("../agent-paths.js", () => ({
-  resolveBotAgentDir: vi.fn(() => "/tmp"),
+  resolveOpenClawAgentDir: vi.fn(() => "/tmp"),
 }));
 
 vi.mock("../agent-scope.js", () => ({

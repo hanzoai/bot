@@ -8,21 +8,37 @@ plugins {
 }
 
 android {
+<<<<<<< HEAD
     namespace = "ai.hanzo.bot.android"
+=======
+    namespace = "ai.openclaw.android"
+>>>>>>> upstream/main
     compileSdk = 36
 
     sourceSets {
         getByName("main") {
+<<<<<<< HEAD
             assets.directories.add("../../shared/BotKit/Sources/BotKit/Resources")
+=======
+            assets.directories.add("../../shared/OpenClawKit/Sources/OpenClawKit/Resources")
+>>>>>>> upstream/main
         }
     }
 
     defaultConfig {
+<<<<<<< HEAD
         applicationId = "ai.hanzo.bot.android"
         minSdk = 31
         targetSdk = 36
         versionCode = 202603050
         versionName = "2026.3.5"
+=======
+        applicationId = "ai.openclaw.android"
+        minSdk = 31
+        targetSdk = 36
+        versionCode = 202603010
+        versionName = "2026.3.2"
+>>>>>>> upstream/main
         ndk {
             // Support all major ABIs — native libs are tiny (~47 KB per ABI)
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
@@ -66,6 +82,10 @@ android {
     lint {
         disable +=
             setOf(
+<<<<<<< HEAD
+=======
+                "AndroidGradlePluginVersion",
+>>>>>>> upstream/main
                 "GradleDependency",
                 "IconLauncherShape",
                 "NewerVersionAvailable",
@@ -86,7 +106,11 @@ androidComponents {
                 val versionName = output.versionName.orNull ?: "0"
                 val buildType = variant.buildType
 
+<<<<<<< HEAD
                 val outputFileName = "hanzo-bot-$versionName-$buildType.apk"
+=======
+                val outputFileName = "openclaw-$versionName-$buildType.apk"
+>>>>>>> upstream/main
                 output.outputFileName = outputFileName
             }
     }
@@ -157,7 +181,11 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:6.1.3")
     testImplementation("io.kotest:kotest-assertions-core-jvm:6.1.3")
+<<<<<<< HEAD
     testImplementation("com.squareup.okhttp3:mockwebserver3:5.3.2")
+=======
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
+>>>>>>> upstream/main
     testImplementation("org.robolectric:robolectric:4.16.1")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.0.2")
 }

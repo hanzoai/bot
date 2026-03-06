@@ -1,4 +1,4 @@
-import type { BotPluginApi } from "bot/plugin-sdk";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/talk-voice";
 
 type ElevenLabsVoice = {
   voice_id: string;

@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk/matrix";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/matrix";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({

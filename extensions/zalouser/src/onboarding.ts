@@ -3,7 +3,7 @@ import type {
   ChannelOnboardingDmPolicy,
   BotConfig,
   WizardPrompter,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/zalouser";
 import {
   addWildcardAllowFrom,
   DEFAULT_ACCOUNT_ID,
@@ -12,8 +12,8 @@ import {
   normalizeAccountId,
   promptAccountId,
   promptChannelAccessConfig,
-  resolvePreferredBotTmpDir,
-} from "bot/plugin-sdk";
+  resolvePreferredOpenClawTmpDir,
+} from "@hanzo/bot/plugin-sdk/zalouser";
 import fsp from "node:fs/promises";
 import path from "node:path";
 import {
@@ -97,7 +97,7 @@ async function noteZalouserHelp(prompter: WizardPrompter): Promise<void> {
       "",
       "This plugin uses zca-js directly (no external CLI dependency).",
       "",
-      "Docs: https://docs.hanzo.bot/channels/zalouser",
+      "Docs: https://docs.openclaw.ai/channels/zalouser",
     ].join("\n"),
     "Zalo Personal Setup",
   );
@@ -114,7 +114,10 @@ async function writeQrDataUrlToTempFile(
     return null;
   }
   const safeProfile = profile.replace(/[^a-zA-Z0-9_-]+/g, "-") || "default";
-  const filePath = path.join(resolvePreferredBotTmpDir(), `bot-zalouser-qr-${safeProfile}.png`);
+  const filePath = path.join(
+    resolvePreferredOpenClawTmpDir(),
+    `openclaw-zalouser-qr-${safeProfile}.png`,
+  );
   await fsp.writeFile(filePath, Buffer.from(base64, "base64"));
   return filePath;
 }

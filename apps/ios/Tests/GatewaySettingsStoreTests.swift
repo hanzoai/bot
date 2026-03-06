@@ -1,17 +1,45 @@
 import Foundation
 import Testing
+<<<<<<< HEAD
 @testable import HanzoBot
+=======
+@testable import OpenClaw
+>>>>>>> upstream/main
 
 private struct KeychainEntry: Hashable {
     let service: String
     let account: String
 }
 
+<<<<<<< HEAD
 private let gatewayService = "ai.hanzo.bot.gateway"
 private let nodeService = "ai.hanzo.bot.node"
 private let instanceIdEntry = KeychainEntry(service: nodeService, account: "instanceId")
 private let preferredGatewayEntry = KeychainEntry(service: gatewayService, account: "preferredStableID")
 private let lastGatewayEntry = KeychainEntry(service: gatewayService, account: "lastDiscoveredStableID")
+=======
+private let gatewayService = "ai.openclaw.gateway"
+private let nodeService = "ai.openclaw.node"
+private let talkService = "ai.openclaw.talk"
+private let instanceIdEntry = KeychainEntry(service: nodeService, account: "instanceId")
+private let preferredGatewayEntry = KeychainEntry(service: gatewayService, account: "preferredStableID")
+private let lastGatewayEntry = KeychainEntry(service: gatewayService, account: "lastDiscoveredStableID")
+private let talkAcmeProviderEntry = KeychainEntry(service: talkService, account: "provider.apiKey.acme")
+private let bootstrapDefaultsKeys = [
+    "node.instanceId",
+    "gateway.preferredStableID",
+    "gateway.lastDiscoveredStableID",
+]
+private let bootstrapKeychainEntries = [instanceIdEntry, preferredGatewayEntry, lastGatewayEntry]
+private let lastGatewayDefaultsKeys = [
+    "gateway.last.kind",
+    "gateway.last.host",
+    "gateway.last.port",
+    "gateway.last.tls",
+    "gateway.last.stableID",
+]
+private let lastGatewayKeychainEntry = KeychainEntry(service: gatewayService, account: "lastConnection")
+>>>>>>> upstream/main
 
 private func snapshotDefaults(_ keys: [String]) -> [String: Any?] {
     let defaults = UserDefaults.standard
@@ -171,4 +199,20 @@ private func withLastGatewaySnapshot(_ body: () -> Void) {
             #expect(defaults.object(forKey: "gateway.last.host") == nil)
         }
     }
+<<<<<<< HEAD
+=======
+
+    @Test func talkProviderApiKey_genericRoundTrip() {
+        let keychainSnapshot = snapshotKeychain([talkAcmeProviderEntry])
+        defer { restoreKeychain(keychainSnapshot) }
+
+        _ = KeychainStore.delete(service: talkService, account: talkAcmeProviderEntry.account)
+
+        GatewaySettingsStore.saveTalkProviderApiKey("acme-key", provider: "acme")
+        #expect(GatewaySettingsStore.loadTalkProviderApiKey(provider: "acme") == "acme-key")
+
+        GatewaySettingsStore.saveTalkProviderApiKey(nil, provider: "acme")
+        #expect(GatewaySettingsStore.loadTalkProviderApiKey(provider: "acme") == nil)
+    }
+>>>>>>> upstream/main
 }

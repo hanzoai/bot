@@ -1,4 +1,4 @@
-import type { BotConfig, PluginRuntime } from "bot/plugin-sdk";
+import type { BotConfig, PluginRuntime } from "@hanzo/bot/plugin-sdk/googlechat";
 import type { IncomingMessage } from "node:http";
 import { EventEmitter } from "node:events";
 import { afterEach, describe, expect, it, vi } from "vitest";
