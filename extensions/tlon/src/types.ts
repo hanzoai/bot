@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/tlon";
 
 export type TlonResolvedAccount = {
   accountId: string;

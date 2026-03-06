@@ -1,13 +1,11 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
-import type {
-  AuthCredentialReasonCode,
-  AuthProfileCredential,
-} from "../../agents/auth-profiles.js";
 import type { BotConfig } from "../../config/config.js";
-import { resolveBotAgentDir } from "../../agents/agent-paths.js";
+import { resolveOpenClawAgentDir } from "../../agents/agent-paths.js";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import {
+  type AuthProfileCredential,
+  type AuthProfileEligibilityReasonCode,
   ensureAuthProfileStore,
   listProfilesForProvider,
   resolveAuthProfileDisplayLabel,
@@ -28,8 +26,8 @@ import {
   resolveSessionTranscriptPath,
   resolveSessionTranscriptsDirForAgent,
 } from "../../config/sessions/paths.js";
-import { isSecretRef, type SecretRef } from "../../config/types.secrets.js";
-import { resolveSecretRefString } from "../../secrets/resolve.js";
+import { coerceSecretRef, normalizeSecretInputString } from "../../config/types.secrets.js";
+import { type SecretRefResolveCache, resolveSecretRefString } from "../../secrets/resolve.js";
 import { redactSecrets } from "../status-all/format.js";
 import { DEFAULT_PROVIDER, formatMs } from "./shared.js";
 
@@ -45,6 +43,15 @@ export type AuthProbeStatus =
   | "unknown"
   | "no_model";
 
+export type AuthProbeReasonCode =
+  | "excluded_by_auth_order"
+  | "missing_credential"
+  | "expired"
+  | "invalid_expires"
+  | "unresolved_ref"
+  | "ineligible_profile"
+  | "no_model";
+
 export type AuthProbeResult = {
   provider: string;
   model?: string;
@@ -53,10 +60,9 @@ export type AuthProbeResult = {
   source: "profile" | "env" | "models.json";
   mode?: string;
   status: AuthProbeStatus;
+  reasonCode?: AuthProbeReasonCode;
   error?: string;
   latencyMs?: number;
-  /** Machine-readable reason code when the profile was excluded or ineligible. */
-  reasonCode?: AuthCredentialReasonCode | "excluded_by_auth_order" | "unresolved_ref";
 };
 
 type AuthProbeTarget = {
@@ -148,26 +154,88 @@ function selectProbeModel(params: {
   return null;
 }
 
-function extractProfileSecretRef(profile: AuthProfileCredential | undefined): SecretRef | null {
-  if (!profile) {
-    return null;
+function mapEligibilityReasonToProbeReasonCode(
+  reasonCode: AuthProfileEligibilityReasonCode,
+): AuthProbeReasonCode {
+  if (reasonCode === "missing_credential") {
+    return "missing_credential";
   }
-  if (profile.type === "token" && isSecretRef(profile.tokenRef)) {
-    return profile.tokenRef;
+  if (reasonCode === "expired") {
+    return "expired";
   }
-  if (profile.type === "api_key" && isSecretRef(profile.keyRef)) {
-    return profile.keyRef;
+  if (reasonCode === "invalid_expires") {
+    return "invalid_expires";
+  }
+  if (reasonCode === "unresolved_ref") {
+    return "unresolved_ref";
+  }
+  return "ineligible_profile";
+}
+
+function formatMissingCredentialProbeError(reasonCode: AuthProbeReasonCode): string {
+  const legacyLine = "Auth profile credentials are missing or expired.";
+  if (reasonCode === "expired") {
+    return `${legacyLine}\n↳ Auth reason [expired]: token credentials are expired.`;
+  }
+  if (reasonCode === "invalid_expires") {
+    return `${legacyLine}\n↳ Auth reason [invalid_expires]: token expires must be a positive Unix ms timestamp.`;
+  }
+  if (reasonCode === "missing_credential") {
+    return `${legacyLine}\n↳ Auth reason [missing_credential]: no inline credential or SecretRef is configured.`;
+  }
+  if (reasonCode === "unresolved_ref") {
+    return `${legacyLine}\n↳ Auth reason [unresolved_ref]: configured SecretRef could not be resolved.`;
+  }
+  return `${legacyLine}\n↳ Auth reason [ineligible_profile]: profile is incompatible with provider config.`;
+}
+
+function resolveProbeSecretRef(profile: AuthProfileCredential, cfg: BotConfig) {
+  const defaults = cfg.secrets?.defaults;
+  if (profile.type === "api_key") {
+    if (normalizeSecretInputString(profile.key) !== undefined) {
+      return null;
+    }
+    return coerceSecretRef(profile.keyRef, defaults);
+  }
+  if (profile.type === "token") {
+    if (normalizeSecretInputString(profile.token) !== undefined) {
+      return null;
+    }
+    return coerceSecretRef(profile.tokenRef, defaults);
   }
   return null;
 }
 
-function formatIneligibleError(reasonCode: string, refLabel?: string): string {
-  const lines = ["Auth profile credentials are missing or expired."];
-  if (refLabel) {
-    lines.push(`SecretRef: ${refLabel}`);
+function formatUnresolvedRefProbeError(refLabel: string): string {
+  const legacyLine = "Auth profile credentials are missing or expired.";
+  return `${legacyLine}\n↳ Auth reason [unresolved_ref]: could not resolve SecretRef "${refLabel}".`;
+}
+
+async function maybeResolveUnresolvedRefIssue(params: {
+  cfg: BotConfig;
+  profile?: AuthProfileCredential;
+  cache: SecretRefResolveCache;
+}): Promise<{ reasonCode: "unresolved_ref"; error: string } | null> {
+  if (!params.profile) {
+    return null;
   }
-  lines.push(`[${reasonCode}]`);
-  return lines.join("\n");
+  const ref = resolveProbeSecretRef(params.profile, params.cfg);
+  if (!ref) {
+    return null;
+  }
+  try {
+    await resolveSecretRefString(ref, {
+      config: params.cfg,
+      env: process.env,
+      cache: params.cache,
+    });
+    return null;
+  } catch {
+    return {
+      reasonCode: "unresolved_ref",
+      error: formatUnresolvedRefProbeError(`${ref.source}:${ref.provider}:${ref.id}`),
+    };
+  }
 }
 
 export async function buildProbeTargets(params: {
@@ -181,7 +249,7 @@ export async function buildProbeTargets(params: {
   const providerFilter = options.provider?.trim();
   const providerFilterKey = providerFilter ? normalizeProviderId(providerFilter) : null;
   const profileFilter = new Set((options.profileIds ?? []).map((id) => id.trim()).filter(Boolean));
-
+  const refResolveCache: SecretRefResolveCache = {};
   const catalog = await loadModelCatalog({ config: cfg });
   const candidates = buildCandidateMap(modelCandidates);
   const targets: AuthProbeTarget[] = [];
@@ -222,8 +290,8 @@ export async function buildProbeTargets(params: {
         if (explicitOrder && !explicitOrder.includes(profileId)) {
           results.push({
             provider: providerKey,
-            model: model ? `${model.provider}/${model.model}` : undefined,
             profileId,
+            model: model ? `${model.provider}/${model.model}` : undefined,
             label,
             source: "profile",
             mode,
@@ -234,9 +302,13 @@ export async function buildProbeTargets(params: {
           continue;
         }
         if (allowedProfiles && !allowedProfiles.has(profileId)) {
-          const eligibility = profile
-            ? resolveAuthProfileEligibility(profile)
-            : { eligible: false, reasonCode: "missing_credential" as const };
+          const eligibility = resolveAuthProfileEligibility({
+            cfg,
+            store,
+            provider: providerKey,
+            profileId,
+          });
+          const reasonCode = mapEligibilityReasonToProbeReasonCode(eligibility.reasonCode);
           results.push({
             provider: providerKey,
             model: model ? `${model.provider}/${model.model}` : undefined,
@@ -245,34 +317,30 @@ export async function buildProbeTargets(params: {
             source: "profile",
             mode,
             status: "unknown",
-            reasonCode: eligibility.reasonCode,
-            error: formatIneligibleError(eligibility.reasonCode),
+            reasonCode,
+            error: formatMissingCredentialProbeError(reasonCode),
           });
           continue;
         }
-
-        // Profile is eligible; verify SecretRef resolution if ref-only.
-        const secretRef = extractProfileSecretRef(profile);
-        if (secretRef) {
-          try {
-            await resolveSecretRefString(secretRef, { config: cfg });
-          } catch {
-            const refLabel = `${secretRef.source}:${secretRef.provider}:${secretRef.id}`;
-            results.push({
-              provider: providerKey,
-              model: model ? `${model.provider}/${model.model}` : undefined,
-              profileId,
-              label,
-              source: "profile",
-              mode,
-              status: "unknown",
-              reasonCode: "unresolved_ref",
-              error: formatIneligibleError("unresolved_ref", refLabel),
-            });
-            continue;
-          }
+        const unresolvedRefIssue = await maybeResolveUnresolvedRefIssue({
+          cfg,
+          profile,
+          cache: refResolveCache,
+        });
+        if (unresolvedRefIssue) {
+          results.push({
+            provider: providerKey,
+            model: model ? `${model.provider}/${model.model}` : undefined,
+            profileId,
+            label,
+            source: "profile",
+            mode,
+            status: "unknown",
+            reasonCode: unresolvedRefIssue.reasonCode,
+            error: unresolvedRefIssue.error,
+          });
+          continue;
         }
-
         if (!model) {
           results.push({
             provider: providerKey,
@@ -282,6 +350,7 @@ export async function buildProbeTargets(params: {
             source: "profile",
             mode,
             status: "no_model",
+            reasonCode: "no_model",
             error: "No model available for probe",
           });
           continue;
@@ -320,6 +389,7 @@ export async function buildProbeTargets(params: {
         source,
         mode,
         status: "no_model",
+        reasonCode: "no_model",
         error: "No model available for probe",
       });
       continue;
@@ -357,6 +427,7 @@ async function probeTarget(params: {
       source: target.source,
       mode: target.mode,
       status: "no_model",
+      reasonCode: "no_model",
       error: "No model available for probe",
     };
   }
@@ -425,7 +496,7 @@ async function runTargetsWithConcurrency(params: {
   const concurrency = Math.max(1, Math.min(targets.length || 1, params.concurrency));
 
   const agentId = resolveDefaultAgentId(cfg);
-  const agentDir = resolveBotAgentDir();
+  const agentDir = resolveOpenClawAgentDir();
   const workspaceDir = resolveAgentWorkspaceDir(cfg, agentId) ?? resolveDefaultAgentWorkspaceDir();
   const sessionDir = resolveSessionTranscriptsDirForAgent(agentId);
 

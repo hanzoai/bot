@@ -1,4 +1,4 @@
-import { loadOutboundMediaFromUrl } from "bot/plugin-sdk";
+import { loadOutboundMediaFromUrl } from "@hanzo/bot/plugin-sdk/zalouser";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import fsp from "node:fs/promises";

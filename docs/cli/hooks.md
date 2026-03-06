@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `bot hooks` (agent hooks)"
+summary: "CLI reference for `openclaw hooks` (agent hooks)"
 read_when:
   - You want to manage agent hooks
   - You want to install or update hooks
 title: "hooks"
 ---
 
-# `bot hooks`
+# `openclaw hooks`
 
 Manage agent hooks (event-driven automations for commands like `/new`, `/reset`, and gateway startup).
 
@@ -18,7 +18,7 @@ Related:
 ## List All Hooks
 
 ```bash
-bot hooks list
+openclaw hooks list
 ```
 
 List all discovered hooks from workspace, managed, and bundled directories.
@@ -44,7 +44,7 @@ Ready:
 **Example (verbose):**
 
 ```bash
-bot hooks list --verbose
+openclaw hooks list --verbose
 ```
 
 Shows missing requirements for ineligible hooks.
@@ -52,7 +52,7 @@ Shows missing requirements for ineligible hooks.
 **Example (JSON):**
 
 ```bash
-bot hooks list --json
+openclaw hooks list --json
 ```
 
 Returns structured JSON for programmatic use.
@@ -60,7 +60,7 @@ Returns structured JSON for programmatic use.
 ## Get Hook Information
 
 ```bash
-bot hooks info <name>
+openclaw hooks info <name>
 ```
 
 Show detailed information about a specific hook.
@@ -76,7 +76,7 @@ Show detailed information about a specific hook.
 **Example:**
 
 ```bash
-bot hooks info session-memory
+openclaw hooks info session-memory
 ```
 
 **Output:**
@@ -87,10 +87,10 @@ bot hooks info session-memory
 Save session context to memory when /new command is issued
 
 Details:
-  Source: bot-bundled
-  Path: /path/to/bot/hooks/bundled/session-memory/HOOK.md
-  Handler: /path/to/bot/hooks/bundled/session-memory/handler.ts
-  Homepage: https://docs.hanzo.bot/automation/hooks#session-memory
+  Source: openclaw-bundled
+  Path: /path/to/openclaw/hooks/bundled/session-memory/HOOK.md
+  Handler: /path/to/openclaw/hooks/bundled/session-memory/handler.ts
+  Homepage: https://docs.openclaw.ai/automation/hooks#session-memory
   Events: command:new
 
 Requirements:
@@ -100,7 +100,7 @@ Requirements:
 ## Check Hooks Eligibility
 
 ```bash
-bot hooks check
+openclaw hooks check
 ```
 
 Show summary of hook eligibility status (how many are ready vs. not ready).
@@ -122,12 +122,12 @@ Not ready: 0
 ## Enable a Hook
 
 ```bash
-bot hooks enable <name>
+openclaw hooks enable <name>
 ```
 
-Enable a specific hook by adding it to your config (`~/.bot/config.json`).
+Enable a specific hook by adding it to your config (`~/.openclaw/config.json`).
 
-**Note:** Hooks managed by plugins show `plugin:<id>` in `bot hooks list` and
+**Note:** Hooks managed by plugins show `plugin:<id>` in `openclaw hooks list` and
 can’t be enabled/disabled here. Enable/disable the plugin instead.
 
 **Arguments:**
@@ -137,7 +137,7 @@ can’t be enabled/disabled here. Enable/disable the plugin instead.
 **Example:**
 
 ```bash
-bot hooks enable session-memory
+openclaw hooks enable session-memory
 ```
 
 **Output:**
@@ -159,7 +159,7 @@ bot hooks enable session-memory
 ## Disable a Hook
 
 ```bash
-bot hooks disable <name>
+openclaw hooks disable <name>
 ```
 
 Disable a specific hook by updating your config.
@@ -171,7 +171,7 @@ Disable a specific hook by updating your config.
 **Example:**
 
 ```bash
-bot hooks disable command-logger
+openclaw hooks disable command-logger
 ```
 
 **Output:**
@@ -187,7 +187,8 @@ bot hooks disable command-logger
 ## Install Hooks
 
 ```bash
-bot hooks install <path-or-spec>
+openclaw hooks install <path-or-spec>
+openclaw hooks install <npm-spec> --pin
 ```
 
 Install a hook pack from a local folder/archive or npm.
@@ -197,13 +198,14 @@ specs are rejected. Dependency installs run with `--ignore-scripts` for safety.
 
 **What it does:**
 
-- Copies the hook pack into `~/.bot/hooks/<id>`
+- Copies the hook pack into `~/.openclaw/hooks/<id>`
 - Enables the installed hooks in `hooks.internal.entries.*`
 - Records the install under `hooks.internal.installs`
 
 **Options:**
 
 - `-l, --link`: Link a local directory instead of copying (adds it to `hooks.internal.load.extraDirs`)
+- `--pin`: Record npm installs as exact resolved `name@version` in `hooks.internal.installs`
 
 **Supported archives:** `.zip`, `.tgz`, `.tar.gz`, `.tar`
 
@@ -211,23 +213,23 @@ specs are rejected. Dependency installs run with `--ignore-scripts` for safety.
 
 ```bash
 # Local directory
-bot hooks install ./my-hook-pack
+openclaw hooks install ./my-hook-pack
 
 # Local archive
-bot hooks install ./my-hook-pack.zip
+openclaw hooks install ./my-hook-pack.zip
 
 # NPM package
-bot hooks install @bot/my-hook-pack
+openclaw hooks install @openclaw/my-hook-pack
 
 # Link a local directory without copying
-bot hooks install -l ./my-hook-pack
+openclaw hooks install -l ./my-hook-pack
 ```
 
 ## Update Hooks
 
 ```bash
-bot hooks update <id>
-bot hooks update --all
+openclaw hooks update <id>
+openclaw hooks update --all
 ```
 
 Update installed hook packs (npm installs only).
@@ -236,6 +238,10 @@ Update installed hook packs (npm installs only).
 
 - `--all`: Update all tracked hook packs
 - `--dry-run`: Show what would change without writing
+
+When a stored integrity hash exists and the fetched artifact hash changes,
+OpenClaw prints a warning and asks for confirmation before proceeding. Use
+global `--yes` to bypass prompts in CI/non-interactive runs.
 
 ## Bundled Hooks
 
@@ -246,10 +252,10 @@ Saves session context to memory when you issue `/new`.
 **Enable:**
 
 ```bash
-bot hooks enable session-memory
+openclaw hooks enable session-memory
 ```
 
-**Output:** `~/.bot/workspace/memory/YYYY-MM-DD-slug.md`
+**Output:** `~/.openclaw/workspace/memory/YYYY-MM-DD-slug.md`
 
 **See:** [session-memory documentation](/automation/hooks#session-memory)
 
@@ -260,7 +266,7 @@ Injects additional bootstrap files (for example monorepo-local `AGENTS.md` / `TO
 **Enable:**
 
 ```bash
-bot hooks enable bootstrap-extra-files
+openclaw hooks enable bootstrap-extra-files
 ```
 
 **See:** [bootstrap-extra-files documentation](/automation/hooks#bootstrap-extra-files)
@@ -272,22 +278,22 @@ Logs all command events to a centralized audit file.
 **Enable:**
 
 ```bash
-bot hooks enable command-logger
+openclaw hooks enable command-logger
 ```
 
-**Output:** `~/.bot/logs/commands.log`
+**Output:** `~/.openclaw/logs/commands.log`
 
 **View logs:**
 
 ```bash
 # Recent commands
-tail -n 20 ~/.bot/logs/commands.log
+tail -n 20 ~/.openclaw/logs/commands.log
 
 # Pretty-print
-cat ~/.bot/logs/commands.log | jq .
+cat ~/.openclaw/logs/commands.log | jq .
 
 # Filter by action
-grep '"action":"new"' ~/.bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.openclaw/logs/commands.log | jq .
 ```
 
 **See:** [command-logger documentation](/automation/hooks#command-logger)
@@ -301,7 +307,7 @@ Runs `BOOT.md` when the gateway starts (after channels start).
 **Enable**:
 
 ```bash
-bot hooks enable boot-md
+openclaw hooks enable boot-md
 ```
 
 **See:** [boot-md documentation](/automation/hooks#boot-md)

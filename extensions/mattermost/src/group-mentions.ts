@@ -1,18 +1,23 @@
-import type { ChannelGroupContext } from "bot/plugin-sdk";
+import type { ChannelGroupContext } from "@hanzo/bot/plugin-sdk/mattermost";
+import { resolveChannelGroupRequireMention } from "@hanzo/bot/plugin-sdk/compat";
 import { resolveMattermostAccount } from "./mattermost/accounts.js";
 
 export function resolveMattermostGroupRequireMention(
   params: ChannelGroupContext & { requireMentionOverride?: boolean },
 ): boolean | undefined {
-  if (typeof params.requireMentionOverride === "boolean") {
-    return params.requireMentionOverride;
-  }
   const account = resolveMattermostAccount({
     cfg: params.cfg,
     accountId: params.accountId,
   });
-  if (typeof account.requireMention === "boolean") {
-    return account.requireMention;
-  }
-  return true;
+  const requireMentionOverride =
+    typeof params.requireMentionOverride === "boolean"
+      ? params.requireMentionOverride
+      : account.requireMention;
+  return resolveChannelGroupRequireMention({
+    cfg: params.cfg,
+    channel: "mattermost",
+    groupId: params.groupId,
+    accountId: params.accountId,
+    requireMentionOverride,
+  });
 }

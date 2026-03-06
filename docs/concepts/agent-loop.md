@@ -5,13 +5,13 @@ read_when:
 title: "Agent Loop"
 ---
 
-# Agent Loop (Hanzo Bot)
+# Agent Loop (OpenClaw)
 
 An agentic loop is the full “real” run of an agent: intake → context assembly → model inference →
 tool execution → streaming replies → persistence. It’s the authoritative path that turns a message
 into actions and a final reply, while keeping session state consistent.
 
-In Hanzo Bot, a loop is a single, serialized run per session that emits lifecycle and stream events
+In OpenClaw, a loop is a single, serialized run per session that emits lifecycle and stream events
 as the model thinks, calls tools, and streams output. This doc explains how that authentic loop is
 wired end-to-end.
 
@@ -34,7 +34,7 @@ wired end-to-end.
    - subscribes to pi events and streams assistant/tool deltas
    - enforces timeout -> aborts run if exceeded
    - returns payloads + usage metadata
-4. `subscribeEmbeddedPiSession` bridges pi-agent-core events to Hanzo Bot `agent` stream:
+4. `subscribeEmbeddedPiSession` bridges pi-agent-core events to OpenClaw `agent` stream:
    - tool events => `stream: "tool"`
    - assistant deltas => `stream: "assistant"`
    - lifecycle events => `stream: "lifecycle"` (`phase: "start" | "end" | "error"`)
@@ -58,13 +58,13 @@ wired end-to-end.
 
 ## Prompt assembly + system prompt
 
-- System prompt is built from Hanzo Bot’s base prompt, skills prompt, bootstrap context, and per-run overrides.
+- System prompt is built from OpenClaw’s base prompt, skills prompt, bootstrap context, and per-run overrides.
 - Model-specific limits and compaction reserve tokens are enforced.
 - See [System prompt](/concepts/system-prompt) for what the model sees.
 
 ## Hook points (where you can intercept)
 
-Hanzo Bot has two hook systems:
+OpenClaw has two hook systems:
 
 - **Internal hooks** (Gateway hooks): event-driven scripts for commands and lifecycle events.
 - **Plugin hooks**: extension points inside the agent/tool lifecycle and gateway pipeline.
@@ -81,7 +81,9 @@ See [Hooks](/automation/hooks) for setup and examples.
 
 These run inside the agent loop or gateway pipeline:
 
-- **`before_agent_start`**: inject context or override system prompt before the run starts.
+- **`before_model_resolve`**: runs pre-session (no `messages`) to deterministically override provider/model before model resolution.
+- **`before_prompt_build`**: runs after session load (with `messages`) to inject `prependContext`, `systemPrompt`, `prependSystemContext`, or `appendSystemContext` before prompt submission. Use `prependContext` for per-turn dynamic text and system-context fields for stable guidance that should sit in system prompt space.
+- **`before_agent_start`**: legacy compatibility hook that may run in either phase; prefer the explicit hooks above.
 - **`agent_end`**: inspect the final message list and run metadata after completion.
 - **`before_compaction` / `after_compaction`**: observe or annotate compaction cycles.
 - **`before_tool_call` / `after_tool_call`**: intercept tool params/results.

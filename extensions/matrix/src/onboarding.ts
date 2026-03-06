@@ -1,4 +1,4 @@
-import type { DmPolicy } from "bot/plugin-sdk";
+import type { DmPolicy } from "@hanzo/bot/plugin-sdk/matrix";
 import {
   addWildcardAllowFrom,
   formatResolvedUnresolvedNote,
@@ -11,7 +11,7 @@ import {
   type ChannelOnboardingAdapter,
   type ChannelOnboardingDmPolicy,
   type WizardPrompter,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/matrix";
 import type { CoreConfig } from "./types.js";
 import { listMatrixDirectoryGroupsLive } from "./directory-live.js";
 import { resolveMatrixAccount } from "./matrix/accounts.js";
@@ -352,7 +352,7 @@ export const matrixOnboardingAdapter: ChannelOnboardingAdapter = {
     const deviceName = String(
       await prompter.text({
         message: "Matrix device name (optional)",
-        initialValue: existing.deviceName ?? "Bot Gateway",
+        initialValue: existing.deviceName ?? "OpenClaw Gateway",
       }),
     ).trim();
 

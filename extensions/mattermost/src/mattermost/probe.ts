@@ -1,4 +1,4 @@
-import type { BaseProbeResult } from "bot/plugin-sdk";
+import type { BaseProbeResult } from "@hanzo/bot/plugin-sdk/mattermost";
 import { normalizeMattermostBaseUrl, readMattermostError, type MattermostUser } from "./client.js";
 
 export type MattermostProbe = BaseProbeResult & {

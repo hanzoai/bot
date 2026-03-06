@@ -1,6 +1,7 @@
 import type { Client } from "@buape/carbon";
 import type { DiscordMessageEvent, DiscordMessageHandler } from "./listeners.js";
 import type { DiscordMessagePreflightParams } from "./message-handler.preflight.types.js";
+import type { DiscordMonitorStatusSink } from "./status.js";
 import {
   createChannelInboundDebouncer,
   shouldDebounceTextInbound,
@@ -31,7 +32,7 @@ export type DiscordMessageHandlerWithLifecycle = DiscordMessageHandler & {
 
 export function createDiscordMessageHandler(
   params: DiscordMessageHandlerParams,
-): DiscordMessageHandler {
+): DiscordMessageHandlerWithLifecycle {
   const { groupPolicy } = resolveOpenProviderRuntimeGroupPolicy({
     providerConfigPresent: params.cfg.channels?.discord !== undefined,
     groupPolicy: params.discordConfig?.groupPolicy,
@@ -51,6 +52,7 @@ export function createDiscordMessageHandler(
   const { debouncer } = createChannelInboundDebouncer<{
     data: DiscordMessageEvent;
     client: Client;
+    abortSignal?: AbortSignal;
   }>({
     cfg: params.cfg,
     channel: "discord",
@@ -89,11 +91,16 @@ export function createDiscordMessageHandler(
       if (!last) {
         return;
       }
+      const abortSignal = last.abortSignal;
+      if (abortSignal?.aborted) {
+        return;
+      }
       if (entries.length === 1) {
         const ctx = await preflightDiscordMessage({
           ...params,
           ackReactionScope,
           groupPolicy,
+          abortSignal,
           data: last.data,
           client: last.client,
         });
@@ -125,6 +132,7 @@ export function createDiscordMessageHandler(
         ...params,
         ackReactionScope,
         groupPolicy,
+        abortSignal,
         data: syntheticData,
         client: last.client,
       });
@@ -151,9 +159,22 @@ export function createDiscordMessageHandler(
     },
   });
 
-  return async (data, client) => {
+  const handler: DiscordMessageHandlerWithLifecycle = async (data, client, options) => {
     try {
-      await debouncer.enqueue({ data, client });
+      if (options?.abortSignal?.aborted) {
+        return;
+      }
+      // Filter bot-own messages before they enter the debounce queue.
+      // The same check exists in preflightDiscordMessage(), but by that point
+      // the message has already consumed debounce capacity and blocked
+      // legitimate user messages. On active servers this causes cumulative
+      // slowdown (see #15874).
+      const msgAuthorId = data.message?.author?.id ?? data.author?.id;
+      if (params.botUserId && msgAuthorId === params.botUserId) {
+        return;
+      }
+
+      await debouncer.enqueue({ data, client, abortSignal: options?.abortSignal });
     } catch (err) {
       params.runtime.error?.(danger(`handler failed: ${String(err)}`));
     }

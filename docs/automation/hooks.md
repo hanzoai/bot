@@ -8,14 +8,14 @@ title: "Hooks"
 
 # Hooks
 
-Hooks provide an extensible event-driven system for automating actions in response to agent commands and events. Hooks are automatically discovered from directories and can be managed via CLI commands, similar to how skills work in Bot.
+Hooks provide an extensible event-driven system for automating actions in response to agent commands and events. Hooks are automatically discovered from directories and can be managed via CLI commands, similar to how skills work in OpenClaw.
 
 ## Getting Oriented
 
 Hooks are small scripts that run when something happens. There are two kinds:
 
 - **Hooks** (this page): run inside the Gateway when agent events fire, like `/new`, `/reset`, `/stop`, or lifecycle events.
-- **Webhooks**: external HTTP webhooks that let other systems trigger work in Bot. See [Webhook Hooks](/automation/webhook) or use `bot webhooks` for Gmail helper commands.
+- **Webhooks**: external HTTP webhooks that let other systems trigger work in OpenClaw. See [Webhook Hooks](/automation/webhook) or use `openclaw webhooks` for Gmail helper commands.
 
 Hooks can also be bundled inside plugins; see [Plugins](/tools/plugin#plugin-hooks).
 
@@ -35,54 +35,54 @@ The hooks system allows you to:
 - Save session context to memory when `/new` is issued
 - Log all commands for auditing
 - Trigger custom automations on agent lifecycle events
-- Extend Bot's behavior without modifying core code
+- Extend OpenClaw's behavior without modifying core code
 
 ## Getting Started
 
 ### Bundled Hooks
 
-Bot ships with four bundled hooks that are automatically discovered:
+OpenClaw ships with four bundled hooks that are automatically discovered:
 
-- **💾 session-memory**: Saves session context to your agent workspace (default `~/.bot/workspace/memory/`) when you issue `/new`
+- **💾 session-memory**: Saves session context to your agent workspace (default `~/.openclaw/workspace/memory/`) when you issue `/new`
 - **📎 bootstrap-extra-files**: Injects additional workspace bootstrap files from configured glob/path patterns during `agent:bootstrap`
-- **📝 command-logger**: Logs all command events to `~/.bot/logs/commands.log`
+- **📝 command-logger**: Logs all command events to `~/.openclaw/logs/commands.log`
 - **🚀 boot-md**: Runs `BOOT.md` when the gateway starts (requires internal hooks enabled)
 
 List available hooks:
 
 ```bash
-bot hooks list
+openclaw hooks list
 ```
 
 Enable a hook:
 
 ```bash
-bot hooks enable session-memory
+openclaw hooks enable session-memory
 ```
 
 Check hook status:
 
 ```bash
-bot hooks check
+openclaw hooks check
 ```
 
 Get detailed information:
 
 ```bash
-bot hooks info session-memory
+openclaw hooks info session-memory
 ```
 
 ### Onboarding
 
-During onboarding (`bot onboard`), you'll be prompted to enable recommended hooks. The wizard automatically discovers eligible hooks and presents them for selection.
+During onboarding (`openclaw onboard`), you'll be prompted to enable recommended hooks. The wizard automatically discovers eligible hooks and presents them for selection.
 
 ## Hook Discovery
 
 Hooks are automatically discovered from three directories (in order of precedence):
 
 1. **Workspace hooks**: `<workspace>/hooks/` (per-agent, highest precedence)
-2. **Managed hooks**: `~/.bot/hooks/` (user-installed, shared across workspaces)
-3. **Bundled hooks**: `<bot>/dist/hooks/bundled/` (shipped with Bot)
+2. **Managed hooks**: `~/.openclaw/hooks/` (user-installed, shared across workspaces)
+3. **Bundled hooks**: `<openclaw>/dist/hooks/bundled/` (shipped with OpenClaw)
 
 Managed hook directories can be either a **single hook** or a **hook pack** (package directory).
 
@@ -96,11 +96,11 @@ my-hook/
 
 ## Hook Packs (npm/archives)
 
-Hook packs are standard npm packages that export one or more hooks via `bot.hooks` in
+Hook packs are standard npm packages that export one or more hooks via `openclaw.hooks` in
 `package.json`. Install them with:
 
 ```bash
-bot hooks install <path-or-spec>
+openclaw hooks install <path-or-spec>
 ```
 
 Npm specs are registry-only (package name + optional version/tag). Git/URL/file specs are rejected.
@@ -111,16 +111,18 @@ Example `package.json`:
 {
   "name": "@acme/my-hooks",
   "version": "0.1.0",
-  "bot": {
+  "openclaw": {
     "hooks": ["./hooks/my-hook", "./hooks/other-hook"]
   }
 }
 ```
 
 Each entry points to a hook directory containing `HOOK.md` and `handler.ts` (or `index.ts`).
-Hook packs can ship dependencies; they will be installed under `~/.bot/hooks/<id>`.
+Hook packs can ship dependencies; they will be installed under `~/.openclaw/hooks/<id>`.
+Each `openclaw.hooks` entry must stay inside the package directory after symlink
+resolution; entries that escape are rejected.
 
-Security note: `bot hooks install` installs dependencies with `npm install --ignore-scripts`
+Security note: `openclaw hooks install` installs dependencies with `npm install --ignore-scripts`
 (no lifecycle scripts). Keep hook pack dependency trees "pure JS/TS" and avoid packages that rely
 on `postinstall` builds.
 
@@ -134,8 +136,9 @@ The `HOOK.md` file contains metadata in YAML frontmatter plus Markdown documenta
 ---
 name: my-hook
 description: "Short description of what this hook does"
-homepage: https://docs.hanzo.bot/automation/hooks#my-hook
-metadata: { "bot": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
+homepage: https://docs.openclaw.ai/automation/hooks#my-hook
+metadata:
+  { "openclaw": { "emoji": "🔗", "events": ["command:new"], "requires": { "bins": ["node"] } } }
 ---
 
 # My Hook
@@ -159,7 +162,7 @@ No configuration needed.
 
 ### Metadata Fields
 
-The `metadata.bot` object supports:
+The `metadata.openclaw` object supports:
 
 - **`emoji`**: Display emoji for CLI (e.g., `"💾"`)
 - **`events`**: Array of events to listen for (e.g., `["command:new", "command:reset"]`)
@@ -179,9 +182,7 @@ The `metadata.bot` object supports:
 The `handler.ts` file exports a `HookHandler` function:
 
 ```typescript
-import type { HookHandler } from "../../src/hooks/hooks.js";
-
-const myHandler: HookHandler = async (event) => {
+const myHandler = async (event) => {
   // Only trigger on 'new' command
   if (event.type !== "command" || event.action !== "new") {
     return;
@@ -206,12 +207,13 @@ Each event includes:
 
 ```typescript
 {
-  type: 'command' | 'session' | 'agent' | 'gateway',
-  action: string,              // e.g., 'new', 'reset', 'stop'
+  type: 'command' | 'session' | 'agent' | 'gateway' | 'message',
+  action: string,              // e.g., 'new', 'reset', 'stop', 'received', 'sent'
   sessionKey: string,          // Session identifier
   timestamp: Date,             // When the event occurred
   messages: string[],          // Push messages here to send to user
   context: {
+    // Command events:
     sessionEntry?: SessionEntry,
     sessionId?: string,
     sessionFile?: string,
@@ -219,7 +221,13 @@ Each event includes:
     senderId?: string,
     workspaceDir?: string,
     bootstrapFiles?: WorkspaceBootstrapFile[],
-    cfg?: BotConfig
+    cfg?: OpenClawConfig,
+    // Message events (see Message Events section for full details):
+    from?: string,             // message:received
+    to?: string,               // message:sent
+    content?: string,
+    channelId?: string,
+    success?: boolean,         // message:sent
   }
 }
 ```
@@ -253,9 +261,101 @@ Triggered when the gateway starts:
 
 - **`gateway:startup`**: After channels start and hooks are loaded
 
+### Message Events
+
+Triggered when messages are received or sent:
+
+- **`message`**: All message events (general listener)
+- **`message:received`**: When an inbound message is received from any channel. Fires early in processing before media understanding. Content may contain raw placeholders like `<media:audio>` for media attachments that haven't been processed yet.
+- **`message:transcribed`**: When a message has been fully processed, including audio transcription and link understanding. At this point, `transcript` contains the full transcript text for audio messages. Use this hook when you need access to transcribed audio content.
+- **`message:preprocessed`**: Fires for every message after all media + link understanding completes, giving hooks access to the fully enriched body (transcripts, image descriptions, link summaries) before the agent sees it.
+- **`message:sent`**: When an outbound message is successfully sent
+
+#### Message Event Context
+
+Message events include rich context about the message:
+
+```typescript
+// message:received context
+{
+  from: string,           // Sender identifier (phone number, user ID, etc.)
+  content: string,        // Message content
+  timestamp?: number,     // Unix timestamp when received
+  channelId: string,      // Channel (e.g., "whatsapp", "telegram", "discord")
+  accountId?: string,     // Provider account ID for multi-account setups
+  conversationId?: string, // Chat/conversation ID
+  messageId?: string,     // Message ID from the provider
+  metadata?: {            // Additional provider-specific data
+    to?: string,
+    provider?: string,
+    surface?: string,
+    threadId?: string,
+    senderId?: string,
+    senderName?: string,
+    senderUsername?: string,
+    senderE164?: string,
+  }
+}
+
+// message:sent context
+{
+  to: string,             // Recipient identifier
+  content: string,        // Message content that was sent
+  success: boolean,       // Whether the send succeeded
+  error?: string,         // Error message if sending failed
+  channelId: string,      // Channel (e.g., "whatsapp", "telegram", "discord")
+  accountId?: string,     // Provider account ID
+  conversationId?: string, // Chat/conversation ID
+  messageId?: string,     // Message ID returned by the provider
+  isGroup?: boolean,      // Whether this outbound message belongs to a group/channel context
+  groupId?: string,       // Group/channel identifier for correlation with message:received
+}
+
+// message:transcribed context
+{
+  body?: string,          // Raw inbound body before enrichment
+  bodyForAgent?: string,  // Enriched body visible to the agent
+  transcript: string,     // Audio transcript text
+  channelId: string,      // Channel (e.g., "telegram", "whatsapp")
+  conversationId?: string,
+  messageId?: string,
+}
+
+// message:preprocessed context
+{
+  body?: string,          // Raw inbound body
+  bodyForAgent?: string,  // Final enriched body after media/link understanding
+  transcript?: string,    // Transcript when audio was present
+  channelId: string,      // Channel (e.g., "telegram", "whatsapp")
+  conversationId?: string,
+  messageId?: string,
+  isGroup?: boolean,
+  groupId?: string,
+}
+```
+
+#### Example: Message Logger Hook
+
+```typescript
+const isMessageReceivedEvent = (event: { type: string; action: string }) =>
+  event.type === "message" && event.action === "received";
+const isMessageSentEvent = (event: { type: string; action: string }) =>
+  event.type === "message" && event.action === "sent";
+
+const handler = async (event) => {
+  if (isMessageReceivedEvent(event as { type: string; action: string })) {
+    console.log(`[message-logger] Received from ${event.context.from}: ${event.context.content}`);
+  } else if (isMessageSentEvent(event as { type: string; action: string })) {
+    console.log(`[message-logger] Sent to ${event.context.to}: ${event.context.content}`);
+  }
+};
+
+export default handler;
+```
+
 ### Tool Result Hooks (Plugin API)
 
-These hooks are not event-stream listeners; they let plugins synchronously adjust tool results before Bot persists them.
+These hooks are not event-stream listeners; they let plugins synchronously adjust tool results before OpenClaw persists them.
 
 - **`tool_result_persist`**: transform tool results before they are written to the session transcript. Must be synchronous; return the updated tool result payload or `undefined` to keep it as-is. See [Agent Loop](/concepts/agent-loop).
 
@@ -273,21 +373,19 @@ Planned event types:
 - **`session:start`**: When a new session begins
 - **`session:end`**: When a session ends
 - **`agent:error`**: When an agent encounters an error
-- **`message:sent`**: When a message is sent
-- **`message:received`**: When a message is received
 
 ## Creating Custom Hooks
 
 ### 1. Choose Location
 
 - **Workspace hooks** (`<workspace>/hooks/`): Per-agent, highest precedence
-- **Managed hooks** (`~/.bot/hooks/`): Shared across workspaces
+- **Managed hooks** (`~/.openclaw/hooks/`): Shared across workspaces
 
 ### 2. Create Directory Structure
 
 ```bash
-mkdir -p ~/.bot/hooks/my-hook
-cd ~/.bot/hooks/my-hook
+mkdir -p ~/.openclaw/hooks/my-hook
+cd ~/.openclaw/hooks/my-hook
 ```
 
 ### 3. Create HOOK.md
@@ -296,7 +394,7 @@ cd ~/.bot/hooks/my-hook
 ---
 name: my-hook
 description: "Does something useful"
-metadata: { "bot": { "emoji": "🎯", "events": ["command:new"] } }
+metadata: { "openclaw": { "emoji": "🎯", "events": ["command:new"] } }
 ---
 
 # My Custom Hook
@@ -307,9 +405,7 @@ This hook does something useful when you issue `/new`.
 ### 4. Create handler.ts
 
 ```typescript
-import type { HookHandler } from "../../src/hooks/hooks.js";
-
-const handler: HookHandler = async (event) => {
+const handler = async (event) => {
   if (event.type !== "command" || event.action !== "new") {
     return;
   }
@@ -325,10 +421,10 @@ export default handler;
 
 ```bash
 # Verify hook is discovered
-bot hooks list
+openclaw hooks list
 
 # Enable it
-bot hooks enable my-hook
+openclaw hooks enable my-hook
 
 # Restart your gateway process (menu bar app restart on macOS, or restart your dev process)
 
@@ -424,46 +520,46 @@ Note: `module` must be a workspace-relative path. Absolute paths and traversal o
 
 ```bash
 # List all hooks
-bot hooks list
+openclaw hooks list
 
 # Show only eligible hooks
-bot hooks list --eligible
+openclaw hooks list --eligible
 
 # Verbose output (show missing requirements)
-bot hooks list --verbose
+openclaw hooks list --verbose
 
 # JSON output
-bot hooks list --json
+openclaw hooks list --json
 ```
 
 ### Hook Information
 
 ```bash
 # Show detailed info about a hook
-bot hooks info session-memory
+openclaw hooks info session-memory
 
 # JSON output
-bot hooks info session-memory --json
+openclaw hooks info session-memory --json
 ```
 
 ### Check Eligibility
 
 ```bash
 # Show eligibility summary
-bot hooks check
+openclaw hooks check
 
 # JSON output
-bot hooks check --json
+openclaw hooks check --json
 ```
 
 ### Enable/Disable
 
 ```bash
 # Enable a hook
-bot hooks enable session-memory
+openclaw hooks enable session-memory
 
 # Disable a hook
-bot hooks disable command-logger
+openclaw hooks disable command-logger
 ```
 
 ## Bundled hook reference
@@ -476,7 +572,7 @@ Saves session context to memory when you issue `/new`.
 
 **Requirements**: `workspace.dir` must be configured
 
-**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.bot/workspace`)
+**Output**: `<workspace>/memory/YYYY-MM-DD-slug.md` (defaults to `~/.openclaw/workspace`)
 
 **What it does**:
 
@@ -504,7 +600,7 @@ Saves session context to memory when you issue `/new`.
 **Enable**:
 
 ```bash
-bot hooks enable session-memory
+openclaw hooks enable session-memory
 ```
 
 ### bootstrap-extra-files
@@ -545,7 +641,7 @@ Injects additional bootstrap files (for example monorepo-local `AGENTS.md` / `TO
 **Enable**:
 
 ```bash
-bot hooks enable bootstrap-extra-files
+openclaw hooks enable bootstrap-extra-files
 ```
 
 ### command-logger
@@ -556,7 +652,7 @@ Logs all command events to a centralized audit file.
 
 **Requirements**: None
 
-**Output**: `~/.bot/logs/commands.log`
+**Output**: `~/.openclaw/logs/commands.log`
 
 **What it does**:
 
@@ -575,19 +671,19 @@ Logs all command events to a centralized audit file.
 
 ```bash
 # View recent commands
-tail -n 20 ~/.bot/logs/commands.log
+tail -n 20 ~/.openclaw/logs/commands.log
 
 # Pretty-print with jq
-cat ~/.bot/logs/commands.log | jq .
+cat ~/.openclaw/logs/commands.log | jq .
 
 # Filter by action
-grep '"action":"new"' ~/.bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.openclaw/logs/commands.log | jq .
 ```
 
 **Enable**:
 
 ```bash
-bot hooks enable command-logger
+openclaw hooks enable command-logger
 ```
 
 ### boot-md
@@ -608,7 +704,7 @@ Internal hooks must be enabled for this to run.
 **Enable**:
 
 ```bash
-bot hooks enable boot-md
+openclaw hooks enable boot-md
 ```
 
 ## Best Practices
@@ -665,13 +761,13 @@ const handler: HookHandler = async (event) => {
 Specify exact events in metadata when possible:
 
 ```yaml
-metadata: { "bot": { "events": ["command:new"] } } # Specific
+metadata: { "openclaw": { "events": ["command:new"] } } # Specific
 ```
 
 Rather than:
 
 ```yaml
-metadata: { "bot": { "events": ["command"] } } # General - more overhead
+metadata: { "openclaw": { "events": ["command"] } } # General - more overhead
 ```
 
 ## Debugging
@@ -692,7 +788,7 @@ Registered hook: boot-md -> gateway:startup
 List all discovered hooks:
 
 ```bash
-bot hooks list --verbose
+openclaw hooks list --verbose
 ```
 
 ### Check Registration
@@ -711,7 +807,7 @@ const handler: HookHandler = async (event) => {
 Check why a hook isn't eligible:
 
 ```bash
-bot hooks info my-hook
+openclaw hooks info my-hook
 ```
 
 Look for missing requirements in the output.
@@ -724,10 +820,10 @@ Monitor gateway logs to see hook execution:
 
 ```bash
 # macOS
-./scripts/botlog.sh -f
+./scripts/clawlog.sh -f
 
 # Other platforms
-tail -f ~/.bot/gateway.log
+tail -f ~/.openclaw/gateway.log
 ```
 
 ### Test Hooks Directly
@@ -736,13 +832,17 @@ Test your handlers in isolation:
 
 ```typescript
 import { test } from "vitest";
-import { createHookEvent } from "./src/hooks/hooks.js";
 import myHandler from "./hooks/my-hook/handler.js";
 
 test("my handler works", async () => {
-  const event = createHookEvent("command", "new", "test-session", {
-    foo: "bar",
-  });
+  const event = {
+    type: "command",
+    action: "new",
+    sessionKey: "test-session",
+    timestamp: new Date(),
+    messages: [],
+    context: { foo: "bar" },
+  };
 
   await myHandler(event);
 
@@ -803,21 +903,21 @@ Session reset
 1. Check directory structure:
 
    ```bash
-   ls -la ~/.bot/hooks/my-hook/
+   ls -la ~/.openclaw/hooks/my-hook/
    # Should show: HOOK.md, handler.ts
    ```
 
 2. Verify HOOK.md format:
 
    ```bash
-   cat ~/.bot/hooks/my-hook/HOOK.md
+   cat ~/.openclaw/hooks/my-hook/HOOK.md
    # Should have YAML frontmatter with name and metadata
    ```
 
 3. List all discovered hooks:
 
    ```bash
-   bot hooks list
+   openclaw hooks list
    ```
 
 ### Hook Not Eligible
@@ -825,7 +925,7 @@ Session reset
 Check requirements:
 
 ```bash
-bot hooks info my-hook
+openclaw hooks info my-hook
 ```
 
 Look for missing:
@@ -840,7 +940,7 @@ Look for missing:
 1. Verify hook is enabled:
 
    ```bash
-   bot hooks list
+   openclaw hooks list
    # Should show ✓ next to enabled hooks
    ```
 
@@ -849,7 +949,7 @@ Look for missing:
 3. Check gateway logs for errors:
 
    ```bash
-   ./scripts/botlog.sh | grep hook
+   ./scripts/clawlog.sh | grep hook
    ```
 
 ### Handler Errors
@@ -888,8 +988,8 @@ node -e "import('./path/to/handler.ts').then(console.log)"
 1. Create hook directory:
 
    ```bash
-   mkdir -p ~/.bot/hooks/my-hook
-   mv ./hooks/handlers/my-handler.ts ~/.bot/hooks/my-hook/handler.ts
+   mkdir -p ~/.openclaw/hooks/my-hook
+   mv ./hooks/handlers/my-handler.ts ~/.openclaw/hooks/my-hook/handler.ts
    ```
 
 2. Create HOOK.md:
@@ -898,7 +998,7 @@ node -e "import('./path/to/handler.ts').then(console.log)"
    ---
    name: my-hook
    description: "My custom hook"
-   metadata: { "bot": { "emoji": "🎯", "events": ["command:new"] } }
+   metadata: { "openclaw": { "emoji": "🎯", "events": ["command:new"] } }
    ---
 
    # My Hook
@@ -924,7 +1024,7 @@ node -e "import('./path/to/handler.ts').then(console.log)"
 4. Verify and restart your gateway process:
 
    ```bash
-   bot hooks list
+   openclaw hooks list
    # Should show: 🎯 my-hook ✓
    ```
 
@@ -939,6 +1039,6 @@ node -e "import('./path/to/handler.ts').then(console.log)"
 ## See Also
 
 - [CLI Reference: hooks](/cli/hooks)
-- [Bundled Hooks README](https://github.com/hanzoai/bot/tree/main/src/hooks/bundled)
+- [Bundled Hooks README](https://github.com/openclaw/openclaw/tree/main/src/hooks/bundled)
 - [Webhook Hooks](/automation/webhook)
 - [Configuration](/gateway/configuration#hooks)

@@ -15,7 +15,7 @@ vi.mock("../media/image-ops.js", () => ({
 }));
 
 import "./test-helpers/fast-core-tools.js";
-import { createBotTools } from "./bot-tools.js";
+import { createBotTools } from "./openclaw-tools.js";
 
 const NODE_ID = "mac-1";
 const BASE_RUN_INPUT = { action: "run", node: NODE_ID, command: ["echo", "hi"] } as const;
@@ -72,12 +72,8 @@ function mockNodeList(params?: { commands?: string[]; remoteIp?: string }) {
   };
 }
 
-type ContentBlock = { type: string; mimeType?: string; text?: string; [key: string]: unknown };
-
 function expectSingleImage(result: NodesToolResult, params?: { mimeType?: string }) {
-  const images = ((result.content ?? []) as ContentBlock[]).filter(
-    (block: ContentBlock) => block.type === "image",
-  );
+  const images = (result.content ?? []).filter((block) => block.type === "image");
   expect(images).toHaveLength(1);
   if (params?.mimeType) {
     expect(images[0]?.mimeType).toBe(params.mimeType);
@@ -85,9 +81,7 @@ function expectSingleImage(result: NodesToolResult, params?: { mimeType?: string
 }
 
 function expectNoImages(result: NodesToolResult) {
-  const images = ((result.content ?? []) as ContentBlock[]).filter(
-    (block: ContentBlock) => block.type === "image",
-  );
+  const images = (result.content ?? []).filter((block) => block.type === "image");
   expect(images).toHaveLength(0);
 }
 

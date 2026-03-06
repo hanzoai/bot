@@ -2,9 +2,15 @@ import Foundation
 import os
 
 enum GatewaySettingsStore {
+<<<<<<< HEAD
     private static let gatewayService = "ai.bot.gateway"
     private static let nodeService = "ai.bot.node"
     private static let talkService = "ai.bot.talk"
+=======
+    private static let gatewayService = "ai.openclaw.gateway"
+    private static let nodeService = "ai.openclaw.node"
+    private static let talkService = "ai.openclaw.talk"
+>>>>>>> upstream/main
 
     private static let instanceIdDefaultsKey = "node.instanceId"
     private static let preferredGatewayStableIDDefaultsKey = "gateway.preferredStableID"
@@ -25,7 +31,12 @@ enum GatewaySettingsStore {
     private static let instanceIdAccount = "instanceId"
     private static let preferredGatewayStableIDAccount = "preferredStableID"
     private static let lastDiscoveredGatewayStableIDAccount = "lastDiscoveredStableID"
+<<<<<<< HEAD
     private static let talkElevenLabsApiKeyAccount = "elevenlabs.apiKey"
+=======
+    private static let lastGatewayConnectionAccount = "lastConnection"
+    private static let talkProviderApiKeyAccountPrefix = "provider.apiKey."
+>>>>>>> upstream/main
 
     static func bootstrapPersistence() {
         self.ensureStableInstanceID()
@@ -145,15 +156,34 @@ enum GatewaySettingsStore {
         case discovered
     }
 
+<<<<<<< HEAD
     static func loadTalkElevenLabsApiKey() -> String? {
         let value = KeychainStore.loadString(
             service: self.talkService,
             account: self.talkElevenLabsApiKeyAccount)?
+=======
+    /// JSON-serializable envelope stored as a single Keychain entry.
+    private struct LastGatewayConnectionData: Codable {
+        var kind: LastGatewayKind
+        var stableID: String
+        var useTLS: Bool
+        var host: String?
+        var port: Int?
+    }
+
+    static func loadTalkProviderApiKey(provider: String) -> String? {
+        guard let providerId = self.normalizedTalkProviderID(provider) else { return nil }
+        let account = self.talkProviderApiKeyAccount(providerId: providerId)
+        let value = KeychainStore.loadString(
+            service: self.talkService,
+            account: account)?
+>>>>>>> upstream/main
             .trimmingCharacters(in: .whitespacesAndNewlines)
         if value?.isEmpty == false { return value }
         return nil
     }
 
+<<<<<<< HEAD
     static func saveTalkElevenLabsApiKey(_ apiKey: String?) {
         let trimmed = apiKey?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if trimmed.isEmpty {
@@ -164,6 +194,17 @@ enum GatewaySettingsStore {
             trimmed,
             service: self.talkService,
             account: self.talkElevenLabsApiKeyAccount)
+=======
+    static func saveTalkProviderApiKey(_ apiKey: String?, provider: String) {
+        guard let providerId = self.normalizedTalkProviderID(provider) else { return }
+        let account = self.talkProviderApiKeyAccount(providerId: providerId)
+        let trimmed = apiKey?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if trimmed.isEmpty {
+            _ = KeychainStore.delete(service: self.talkService, account: account)
+            return
+        }
+        _ = KeychainStore.saveString(trimmed, service: self.talkService, account: account)
+>>>>>>> upstream/main
     }
 
     static func saveLastGatewayConnectionManual(host: String, port: Int, useTLS: Bool, stableID: String) {
@@ -324,6 +365,18 @@ enum GatewaySettingsStore {
         "gateway-password.\(instanceId)"
     }
 
+<<<<<<< HEAD
+=======
+    private static func talkProviderApiKeyAccount(providerId: String) -> String {
+        self.talkProviderApiKeyAccountPrefix + providerId
+    }
+
+    private static func normalizedTalkProviderID(_ provider: String) -> String? {
+        let trimmed = provider.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+>>>>>>> upstream/main
     private static func ensureStableInstanceID() {
         let defaults = UserDefaults.standard
 
@@ -386,8 +439,13 @@ enum GatewaySettingsStore {
 }
 
 enum GatewayDiagnostics {
+<<<<<<< HEAD
     private static let logger = Logger(subsystem: "ai.hanzo.ios", category: "GatewayDiag")
     private static let queue = DispatchQueue(label: "ai.bot.gateway.diagnostics")
+=======
+    private static let logger = Logger(subsystem: "ai.openclaw.ios", category: "GatewayDiag")
+    private static let queue = DispatchQueue(label: "ai.openclaw.gateway.diagnostics")
+>>>>>>> upstream/main
     private static let maxLogBytes: Int64 = 512 * 1024
     private static let keepLogBytes: Int64 = 256 * 1024
     private static let logSizeCheckEveryWrites = 50
@@ -399,8 +457,13 @@ enum GatewayDiagnostics {
     }()
 
     private static var fileURL: URL? {
+<<<<<<< HEAD
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?
             .appendingPathComponent("bot-gateway.log")
+=======
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("openclaw-gateway.log")
+>>>>>>> upstream/main
     }
 
     private static func truncateLogIfNeeded(url: URL) {

@@ -1,5 +1,5 @@
 import { messagingApi } from "@line/bot-sdk";
-import type { BotConfig } from "../config/config.js";
+import type { BotConfig } from "../config/types.openclaw.js";
 import type { LineSendResult } from "./types.js";
 import { loadConfig } from "../config/config.js";
 import { logVerbose } from "../globals.js";

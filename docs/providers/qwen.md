@@ -1,7 +1,7 @@
 ---
-summary: "Use Qwen OAuth (free tier) in Hanzo Bot"
+summary: "Use Qwen OAuth (free tier) in OpenClaw"
 read_when:
-  - You want to use Qwen with Hanzo Bot
+  - You want to use Qwen with OpenClaw
   - You want free-tier OAuth access to Qwen Coder
 title: "Qwen"
 ---
@@ -14,7 +14,7 @@ Qwen provides a free-tier OAuth flow for Qwen Coder and Qwen Vision models
 ## Enable the plugin
 
 ```bash
-hanzo-bot plugins enable qwen-portal-auth
+openclaw plugins enable qwen-portal-auth
 ```
 
 Restart the Gateway after enabling.
@@ -22,7 +22,7 @@ Restart the Gateway after enabling.
 ## Authenticate
 
 ```bash
-hanzo-bot models auth login --provider qwen-portal --set-default
+openclaw models auth login --provider qwen-portal --set-default
 ```
 
 This runs the Qwen device-code OAuth flow and writes a provider entry to your
@@ -36,12 +36,12 @@ This runs the Qwen device-code OAuth flow and writes a provider entry to your
 Switch models with:
 
 ```bash
-hanzo-bot models set qwen-portal/coder-model
+openclaw models set qwen-portal/coder-model
 ```
 
 ## Reuse Qwen Code CLI login
 
-If you already logged in with the Qwen Code CLI, Hanzo Bot will sync credentials
+If you already logged in with the Qwen Code CLI, OpenClaw will sync credentials
 from `~/.qwen/oauth_creds.json` when it loads the auth store. You still need a
 `models.providers.qwen-portal` entry (use the login command above to create one).
 

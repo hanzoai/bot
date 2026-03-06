@@ -1,12 +1,12 @@
 /**
- * Twitch channel plugin for Bot.
+ * Twitch channel plugin for OpenClaw.
  *
  * Main plugin export combining all adapters (outbound, actions, status, gateway).
  * This is the primary entry point for the Twitch channel integration.
  */
 
-import type { BotConfig } from "bot/plugin-sdk";
-import { buildChannelConfigSchema } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/twitch";
+import { buildChannelConfigSchema } from "@hanzo/bot/plugin-sdk/twitch";
 import type {
   ChannelAccountSnapshot,
   ChannelCapabilities,
@@ -33,7 +33,7 @@ import { isAccountConfigured } from "./utils/twitch.js";
  * Twitch channel plugin.
  *
  * Implements the ChannelPlugin interface to provide Twitch chat integration
- * for Bot. Supports message sending, receiving, access control, and
+ * for OpenClaw. Supports message sending, receiving, access control, and
  * status monitoring.
  */
 export const twitchPlugin: ChannelPlugin<TwitchAccountConfig> = {

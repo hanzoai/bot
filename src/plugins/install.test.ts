@@ -36,7 +36,7 @@ const DYNAMIC_ARCHIVE_TEMPLATE_PRESETS = [
     packageJson: {
       name: "@evil/..",
       version: "0.0.1",
-      bot: { extensions: ["./dist/index.js"] },
+      openclaw: { extensions: ["./dist/index.js"] },
     } as Record<string, unknown>,
   },
   {
@@ -45,14 +45,14 @@ const DYNAMIC_ARCHIVE_TEMPLATE_PRESETS = [
     packageJson: {
       name: "@evil/.",
       version: "0.0.1",
-      bot: { extensions: ["./dist/index.js"] },
+      openclaw: { extensions: ["./dist/index.js"] },
     } as Record<string, unknown>,
   },
   {
     outName: "bad.tgz",
     withDistIndex: false,
     packageJson: {
-      name: "@bot/nope",
+      name: "@openclaw/nope",
       version: "0.0.1",
     } as Record<string, unknown>,
   },
@@ -62,7 +62,7 @@ function ensureSuiteTempRoot() {
   if (suiteTempRoot) {
     return suiteTempRoot;
   }
-  suiteTempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-plugin-install-"));
+  suiteTempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-install-"));
   return suiteTempRoot;
 }
 
@@ -221,7 +221,7 @@ function setupManifestInstallFixture(params: { manifestId: string }) {
   fs.mkdirSync(stateDir, { recursive: true });
   fs.cpSync(manifestInstallTemplateDir, pluginDir, { recursive: true });
   fs.writeFileSync(
-    path.join(pluginDir, "bot.plugin.json"),
+    path.join(pluginDir, "openclaw.plugin.json"),
     JSON.stringify({
       id: params.manifestId,
       configSchema: { type: "object", properties: {} },
@@ -239,7 +239,7 @@ async function expectArchiveInstallReservedSegmentRejection(params: {
     packageJson: {
       name: params.packageName,
       version: "0.0.1",
-      bot: { extensions: ["./dist/index.js"] },
+      openclaw: { extensions: ["./dist/index.js"] },
     },
     outName: params.outName,
     withDistIndex: true,
@@ -342,9 +342,9 @@ beforeAll(async () => {
   fs.writeFileSync(
     path.join(installPluginFromDirTemplateDir, "package.json"),
     JSON.stringify({
-      name: "@bot/test-plugin",
+      name: "@openclaw/test-plugin",
       version: "0.0.1",
-      bot: { extensions: ["./dist/index.js"] },
+      openclaw: { extensions: ["./dist/index.js"] },
       dependencies: { "left-pad": "1.3.0" },
     }),
     "utf-8",
@@ -360,9 +360,9 @@ beforeAll(async () => {
   fs.writeFileSync(
     path.join(manifestInstallTemplateDir, "package.json"),
     JSON.stringify({
-      name: "@bot/cognee-bot",
+      name: "@openclaw/cognee-openclaw",
       version: "0.0.1",
-      bot: { extensions: ["./dist/index.js"] },
+      openclaw: { extensions: ["./dist/index.js"] },
     }),
     "utf-8",
   );
@@ -372,7 +372,7 @@ beforeAll(async () => {
     "utf-8",
   );
   fs.writeFileSync(
-    path.join(manifestInstallTemplateDir, "bot.plugin.json"),
+    path.join(manifestInstallTemplateDir, "openclaw.plugin.json"),
     JSON.stringify({
       id: "manifest-template",
       configSchema: { type: "object", properties: {} },
@@ -394,7 +394,7 @@ beforeEach(() => {
 });
 
 describe("installPluginFromArchive", () => {
-  it("installs into ~/.hanzo/bot/extensions and uses unscoped id", async () => {
+  it("installs into ~/.openclaw/extensions and uses unscoped id", async () => {
     const { stateDir, archivePath, extensionsDir } = await setupVoiceCallArchiveInstall({
       outName: "plugin.tgz",
       version: "0.0.1",
@@ -495,31 +495,31 @@ describe("installPluginFromArchive", () => {
     });
   });
 
-  it("rejects packages without bot.extensions", async () => {
+  it("rejects packages without openclaw.extensions", async () => {
     const result = await installArchivePackageAndReturnResult({
-      packageJson: { name: "@bot/nope", version: "0.0.1" },
+      packageJson: { name: "@openclaw/nope", version: "0.0.1" },
       outName: "bad.tgz",
     });
     expect(result.ok).toBe(false);
     if (result.ok) {
       return;
     }
-    expect(result.error).toContain("bot.extensions");
-    expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_BOT_EXTENSIONS);
+    expect(result.error).toContain("openclaw.extensions");
+    expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_OPENCLAW_EXTENSIONS);
   });
 
-  it("rejects legacy plugin package shape when bot.extensions is missing", async () => {
+  it("rejects legacy plugin package shape when openclaw.extensions is missing", async () => {
     const { pluginDir, extensionsDir } = setupPluginInstallDirs();
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@bot/legacy-entry-fallback",
+        name: "@openclaw/legacy-entry-fallback",
         version: "0.0.1",
       }),
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "bot.plugin.json"),
+      path.join(pluginDir, "openclaw.plugin.json"),
       JSON.stringify({
         id: "legacy-entry-fallback",
         configSchema: { type: "object", properties: {} },
@@ -535,12 +535,12 @@ describe("installPluginFromArchive", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error).toContain("package.json missing bot.extensions");
+      expect(result.error).toContain("package.json missing openclaw.extensions");
       expect(result.error).toContain("update the plugin package");
-      expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_BOT_EXTENSIONS);
+      expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_OPENCLAW_EXTENSIONS);
       return;
     }
-    expect.unreachable("expected install to fail without bot.extensions");
+    expect.unreachable("expected install to fail without openclaw.extensions");
   });
 
   it("warns when plugin contains dangerous code patterns", async () => {
@@ -551,7 +551,7 @@ describe("installPluginFromArchive", () => {
       JSON.stringify({
         name: "dangerous-plugin",
         version: "1.0.0",
-        bot: { extensions: ["index.js"] },
+        openclaw: { extensions: ["index.js"] },
       }),
     );
     fs.writeFileSync(
@@ -574,7 +574,7 @@ describe("installPluginFromArchive", () => {
       JSON.stringify({
         name: "hidden-entry-plugin",
         version: "1.0.0",
-        bot: { extensions: [".hidden/index.js"] },
+        openclaw: { extensions: [".hidden/index.js"] },
       }),
     );
     fs.writeFileSync(
@@ -601,7 +601,7 @@ describe("installPluginFromArchive", () => {
       JSON.stringify({
         name: "scan-fail-plugin",
         version: "1.0.0",
-        bot: { extensions: ["index.js"] },
+        openclaw: { extensions: ["index.js"] },
       }),
     );
     fs.writeFileSync(path.join(pluginDir, "index.js"), "export {};");
@@ -644,7 +644,7 @@ describe("installPluginFromDir", () => {
   it("strips workspace devDependencies before npm install", async () => {
     const { pluginDir, extensionsDir } = setupInstallPluginFromDirFixture({
       devDependencies: {
-        bot: "workspace:*",
+        openclaw: "workspace:*",
         vitest: "^3.0.0",
       },
     });
@@ -673,11 +673,11 @@ describe("installPluginFromDir", () => {
     ) as {
       devDependencies?: Record<string, string>;
     };
-    expect(manifest.devDependencies?.bot).toBeUndefined();
+    expect(manifest.devDependencies?.openclaw).toBeUndefined();
     expect(manifest.devDependencies?.vitest).toBe("^3.0.0");
   });
 
-  it("uses bot.plugin.json id as install key when it differs from package name", async () => {
+  it("uses openclaw.plugin.json id as install key when it differs from package name", async () => {
     const { pluginDir, extensionsDir } = setupManifestInstallFixture({
       manifestId: "memory-cognee",
     });
@@ -693,7 +693,7 @@ describe("installPluginFromDir", () => {
     expect(
       infoMessages.some((msg) =>
         msg.includes(
-          'Plugin manifest id "memory-cognee" differs from npm package name "cognee-bot"',
+          'Plugin manifest id "memory-cognee" differs from npm package name "cognee-openclaw"',
         ),
       ),
     ).toBe(true);
@@ -766,8 +766,8 @@ describe("installPluginFromNpmSpec", () => {
           code: 0,
           stdout: JSON.stringify([
             {
-              id: "@bot/voice-call@0.0.1",
-              name: "@bot/voice-call",
+              id: "@openclaw/voice-call@0.0.1",
+              name: "@openclaw/voice-call",
               version: "0.0.1",
               filename: packedName,
               integrity: "sha512-plugin-test",
@@ -784,7 +784,7 @@ describe("installPluginFromNpmSpec", () => {
     });
 
     const result = await installPluginFromNpmSpec({
-      spec: "@bot/voice-call@0.0.1",
+      spec: "@openclaw/voice-call@0.0.1",
       extensionsDir,
       logger: { info: () => {}, warn: () => {} },
     });
@@ -792,12 +792,12 @@ describe("installPluginFromNpmSpec", () => {
     if (!result.ok) {
       return;
     }
-    expect(result.npmResolution?.resolvedSpec).toBe("@bot/voice-call@0.0.1");
+    expect(result.npmResolution?.resolvedSpec).toBe("@openclaw/voice-call@0.0.1");
     expect(result.npmResolution?.integrity).toBe("sha512-plugin-test");
 
     expectSingleNpmPackIgnoreScriptsCall({
       calls: run.mock.calls,
-      expectedSpec: "@bot/voice-call@0.0.1",
+      expectedSpec: "@openclaw/voice-call@0.0.1",
     });
 
     expect(packTmpDir).not.toBe("");
@@ -816,8 +816,8 @@ describe("installPluginFromNpmSpec", () => {
   it("aborts when integrity drift callback rejects the fetched artifact", async () => {
     const run = vi.mocked(runCommandWithTimeout);
     mockNpmPackMetadataResult(run, {
-      id: "@bot/voice-call@0.0.1",
-      name: "@bot/voice-call",
+      id: "@openclaw/voice-call@0.0.1",
+      name: "@openclaw/voice-call",
       version: "0.0.1",
       filename: "voice-call-0.0.1.tgz",
       integrity: "sha512-new",
@@ -826,7 +826,7 @@ describe("installPluginFromNpmSpec", () => {
 
     const onIntegrityDrift = vi.fn(async () => false);
     const result = await installPluginFromNpmSpec({
-      spec: "@bot/voice-call@0.0.1",
+      spec: "@openclaw/voice-call@0.0.1",
       expectedIntegrity: "sha512-old",
       onIntegrityDrift,
     });
@@ -850,7 +850,7 @@ describe("installPluginFromNpmSpec", () => {
     });
 
     const result = await installPluginFromNpmSpec({
-      spec: "@bot/not-found",
+      spec: "@openclaw/not-found",
       logger: { info: () => {}, warn: () => {} },
     });
     expect(result.ok).toBe(false);

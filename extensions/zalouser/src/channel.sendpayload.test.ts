@@ -1,4 +1,4 @@
-import type { ReplyPayload } from "bot/plugin-sdk";
+import type { ReplyPayload } from "@hanzo/bot/plugin-sdk/zalouser";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { zalouserPlugin } from "./channel.js";
 

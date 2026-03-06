@@ -4,7 +4,7 @@ import {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   requestBodyErrorToText,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/nextcloud-talk";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import os from "node:os";
 import type {
