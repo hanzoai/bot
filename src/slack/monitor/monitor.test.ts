@@ -109,7 +109,7 @@ const baseParams = () => ({
   replyToMode: "off" as const,
   slashCommand: {
     enabled: false,
-    name: "@hanzo/bot",
+    name: "openclaw",
     sessionPrefix: "slack:slash",
     ephemeral: true,
   },
@@ -227,6 +227,7 @@ describe("resolveSlackSystemEventSessionKey", () => {
       ctx.resolveSlackSystemEventSessionKey({
         channelId: "D123",
         channelType: "im",
+        senderId: "U123",
       }),
     ).toBe("agent:ops-dm:main");
   });

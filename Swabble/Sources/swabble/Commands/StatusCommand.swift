@@ -18,7 +18,11 @@ struct StatusCommand: ParsableCommand {
 
     mutating func run() async throws {
         let cfg = try? ConfigLoader.load(at: configURL)
+<<<<<<< HEAD
         let wake = cfg?.wake.word ?? "hanzo"
+=======
+        let wake = cfg?.wake.word ?? "clawd"
+>>>>>>> upstream/main
         let wakeEnabled = cfg?.wake.enabled ?? false
         let latest = await TranscriptsStore.shared.latest().suffix(3)
         print("wake: \(wakeEnabled ? wake : "disabled")")

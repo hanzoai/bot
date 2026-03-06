@@ -1,4 +1,4 @@
-import { SILENT_REPLY_TOKEN, type PluginRuntime } from "bot/plugin-sdk";
+import { SILENT_REPLY_TOKEN, type PluginRuntime } from "@hanzo/bot/plugin-sdk/msteams";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -17,7 +17,7 @@ vi.mock("./graph-upload.js", async () => {
   };
 });
 
-import { resolvePreferredBotTmpDir } from "../../../src/infra/tmp-bot-dir.js";
+import { resolvePreferredOpenClawTmpDir } from "../../../src/infra/tmp-openclaw-dir.js";
 import {
   type MSTeamsAdapter,
   renderReplyPayloadsToMessages,
@@ -190,7 +190,7 @@ describe("msteams messenger", () => {
     });
 
     it("preserves parsed mentions when appending OneDrive fallback file links", async () => {
-      const tmpDir = await mkdtemp(path.join(resolvePreferredBotTmpDir(), "msteams-mention-"));
+      const tmpDir = await mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), "msteams-mention-"));
       const localFile = path.join(tmpDir, "note.txt");
       await writeFile(localFile, "hello");
 

@@ -3,14 +3,14 @@ import type { ModelRegistry } from "@mariozechner/pi-coding-agent";
 import type { AuthProfileStore } from "../../agents/auth-profiles.js";
 import type { BotConfig } from "../../config/config.js";
 import type { ModelRow } from "./list.types.js";
-import { resolveBotAgentDir } from "../../agents/agent-paths.js";
+import { resolveOpenClawAgentDir } from "../../agents/agent-paths.js";
 import { listProfilesForProvider } from "../../agents/auth-profiles.js";
 import {
   getCustomProviderApiKey,
   resolveAwsSdkEnvVarName,
   resolveEnvApiKey,
 } from "../../agents/model-auth.js";
-import { ensureBotModelsJson } from "../../agents/models-config.js";
+import { ensureOpenClawModelsJson } from "../../agents/models-config.js";
 import { discoverAuthStorage, discoverModels } from "../../agents/pi-model-discovery.js";
 import {
   formatErrorWithStack,
@@ -91,8 +91,8 @@ function loadAvailableModels(registry: ModelRegistry): Model<Api>[] {
 }
 
 export async function loadModelRegistry(cfg: BotConfig) {
-  await ensureBotModelsJson(cfg);
-  const agentDir = resolveBotAgentDir();
+  await ensureOpenClawModelsJson(cfg);
+  const agentDir = resolveOpenClawAgentDir();
   const authStorage = discoverAuthStorage(agentDir);
   const registry = discoverModels(authStorage, agentDir);
   const models = registry.getAll();

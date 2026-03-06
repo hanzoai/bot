@@ -1,9 +1,16 @@
 import EventKit
 import Foundation
+<<<<<<< HEAD
 import BotKit
 
 final class RemindersService: RemindersServicing {
     func list(params: HanzoBotRemindersListParams) async throws -> HanzoBotRemindersListPayload {
+=======
+import OpenClawKit
+
+final class RemindersService: RemindersServicing {
+    func list(params: OpenClawRemindersListParams) async throws -> OpenClawRemindersListPayload {
+>>>>>>> upstream/main
         let store = EKEventStore()
         let status = EKEventStore.authorizationStatus(for: .reminder)
         let authorized = EventKitAuthorization.allowsRead(status: status)
@@ -17,7 +24,11 @@ final class RemindersService: RemindersServicing {
         let statusFilter = params.status ?? .incomplete
 
         let predicate = store.predicateForReminders(in: nil)
+<<<<<<< HEAD
         let payload = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<[HanzoBotReminderPayload], Error>) in
+=======
+        let payload: [OpenClawReminderPayload] = try await withCheckedThrowingContinuation { cont in
+>>>>>>> upstream/main
             store.fetchReminders(matching: predicate) { items in
                 let formatter = ISO8601DateFormatter()
                 let filtered = (items ?? []).filter { reminder in
@@ -33,7 +44,11 @@ final class RemindersService: RemindersServicing {
                 let selected = Array(filtered.prefix(limit))
                 let payload = selected.map { reminder in
                     let due = reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) }
+<<<<<<< HEAD
                     return HanzoBotReminderPayload(
+=======
+                    return OpenClawReminderPayload(
+>>>>>>> upstream/main
                         identifier: reminder.calendarItemIdentifier,
                         title: reminder.title,
                         dueISO: due.map { formatter.string(from: $0) },
@@ -44,10 +59,17 @@ final class RemindersService: RemindersServicing {
             }
         }
 
+<<<<<<< HEAD
         return HanzoBotRemindersListPayload(reminders: payload)
     }
 
     func add(params: HanzoBotRemindersAddParams) async throws -> HanzoBotRemindersAddPayload {
+=======
+        return OpenClawRemindersListPayload(reminders: payload)
+    }
+
+    func add(params: OpenClawRemindersAddParams) async throws -> OpenClawRemindersAddPayload {
+>>>>>>> upstream/main
         let store = EKEventStore()
         let status = EKEventStore.authorizationStatus(for: .reminder)
         let authorized = EventKitAuthorization.allowsWrite(status: status)
@@ -90,14 +112,22 @@ final class RemindersService: RemindersServicing {
 
         let formatter = ISO8601DateFormatter()
         let due = reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) }
+<<<<<<< HEAD
         let payload = HanzoBotReminderPayload(
+=======
+        let payload = OpenClawReminderPayload(
+>>>>>>> upstream/main
             identifier: reminder.calendarItemIdentifier,
             title: reminder.title,
             dueISO: due.map { formatter.string(from: $0) },
             completed: reminder.isCompleted,
             listName: reminder.calendar.title)
 
+<<<<<<< HEAD
         return HanzoBotRemindersAddPayload(reminder: payload)
+=======
+        return OpenClawRemindersAddPayload(reminder: payload)
+>>>>>>> upstream/main
     }
 
     private static func resolveList(

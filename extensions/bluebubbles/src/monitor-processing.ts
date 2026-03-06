@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import {
   DM_GROUP_ACCESS_REASON,
   createScopedPairingAccess,
@@ -14,7 +14,7 @@ import {
   resolveControlCommandGate,
   stripMarkdown,
   type HistoryEntry,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/bluebubbles";
 import type {
   BlueBubblesCoreRuntime,
   BlueBubblesRuntimeEnv,

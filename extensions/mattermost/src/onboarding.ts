@@ -1,3 +1,4 @@
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "@hanzo/bot/plugin-sdk/account-id";
 import {
   hasConfiguredSecretInput,
   promptSingleChannelSecretInput,
@@ -5,8 +6,7 @@ import {
   type BotConfig,
   type SecretInput,
   type WizardPrompter,
-} from "bot/plugin-sdk";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
+} from "@hanzo/bot/plugin-sdk/mattermost";
 import {
   listMattermostAccountIds,
   resolveDefaultMattermostAccountId,
@@ -23,7 +23,7 @@ async function noteMattermostSetup(prompter: WizardPrompter): Promise<void> {
       "2) Create a bot + copy its token",
       "3) Use your server base URL (e.g., https://chat.example.com)",
       "Tip: the bot must be a member of any channel you want it to monitor.",
-      "Docs: https://docs.hanzo.bot/channels/mattermost",
+      "Docs: https://docs.openclaw.ai/channels/mattermost",
     ].join("\n"),
     "Mattermost bot token",
   );
