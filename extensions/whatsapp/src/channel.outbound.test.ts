@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk/whatsapp";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/whatsapp";
 import { describe, expect, it, vi } from "vitest";
 
 const hoisted = vi.hoisted(() => ({

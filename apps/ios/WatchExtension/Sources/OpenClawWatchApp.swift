@@ -1,7 +1,11 @@
 import SwiftUI
 
 @main
+<<<<<<< HEAD
 struct BotWatchApp: App {
+=======
+struct OpenClawWatchApp: App {
+>>>>>>> upstream/main
     @State private var inboxStore = WatchInboxStore()
     @State private var receiver: WatchConnectivityReceiver?
 

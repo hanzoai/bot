@@ -1,4 +1,4 @@
-import type { PluginRuntime } from "bot/plugin-sdk";
+import type { PluginRuntime } from "@hanzo/bot/plugin-sdk/bluebubbles";
 
 let runtime: PluginRuntime | null = null;
 type LegacyRuntimeLogShape = { log?: (message: string) => void };

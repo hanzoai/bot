@@ -1,4 +1,4 @@
-import type { BotConfig, PluginRuntime } from "bot/plugin-sdk";
+import type { BotConfig, PluginRuntime } from "@hanzo/bot/plugin-sdk/discord";
 import { describe, expect, it, vi } from "vitest";
 import { discordPlugin } from "./channel.js";
 import { setDiscordRuntime } from "./runtime.js";

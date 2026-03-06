@@ -1,4 +1,4 @@
-import { fetchWithSsrFGuard, type SsrFPolicy } from "bot/plugin-sdk";
+import { fetchWithSsrFGuard, type SsrFPolicy } from "@hanzo/bot/plugin-sdk/msteams";
 import type {
   MSTeamsAccessTokenProvider,
   MSTeamsAttachmentLike,

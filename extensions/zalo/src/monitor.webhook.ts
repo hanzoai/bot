@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/zalo";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import {
   createDedupeCache,
@@ -14,7 +14,7 @@ import {
   resolveWebhookTargets,
   WEBHOOK_ANOMALY_COUNTER_DEFAULTS,
   WEBHOOK_RATE_LIMIT_DEFAULTS,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/zalo";
 import { timingSafeEqual } from "node:crypto";
 import type { ResolvedZaloAccount } from "./accounts.js";
 import type { ZaloFetch, ZaloUpdate } from "./api.js";

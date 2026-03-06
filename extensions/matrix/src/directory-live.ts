@@ -1,4 +1,4 @@
-import type { ChannelDirectoryEntry } from "bot/plugin-sdk";
+import type { ChannelDirectoryEntry } from "@hanzo/bot/plugin-sdk/matrix";
 import { resolveMatrixAuth } from "./matrix/client.js";
 
 type MatrixUserResult = {

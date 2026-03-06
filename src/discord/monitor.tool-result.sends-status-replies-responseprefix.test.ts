@@ -30,10 +30,10 @@ const BASE_CFG: Config = {
   agents: {
     defaults: {
       model: { primary: "anthropic/claude-opus-4-5" },
-      workspace: "/tmp/bot",
+      workspace: "/tmp/openclaw",
     },
   },
-  session: { store: "/tmp/bot-sessions.json" },
+  session: { store: "/tmp/openclaw-sessions.json" },
 };
 
 const CATEGORY_GUILD_CFG = {

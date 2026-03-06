@@ -2,7 +2,7 @@ import {
   emptyPluginConfigSchema,
   type BotPluginApi,
   type ProviderAuthContext,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/qwen-portal-auth";
 import { loginQwenPortalOAuth } from "./oauth.js";
 
 const PROVIDER_ID = "qwen-portal";

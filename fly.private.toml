@@ -1,4 +1,7 @@
-# Bot Fly.io PRIVATE deployment configuration
+<<<<<<<
+HEAD = 
+=======>>>>>>>upstream/main# Bot Fly.io PRIVATE deployment configuration
+# OpenClaw Fly.io PRIVATE deployment configuration
 # Use this template for hardened deployments with no public IP exposure.
 #
 # This config is suitable when:
@@ -9,16 +12,23 @@
 #
 # See https://fly.io/docs/reference/configuration/
 
+<<<<<<<
+=======>>>>>>>upstream/mainHEAD = 
 app = "my-bot" # change to your app name
+app = "my-openclaw" # change to your app name
 primary_region = "iad" # change to your closest region
 
 [build]
 dockerfile = "Dockerfile"
 
 [env]
-NODE_ENV = "production"
+<<<<<<<
+=======>>>>>>>upstream/mainNODE_ENV = "production"
+HEAD = 
 BOT_PREFER_PNPM = "1"
 BOT_STATE_DIR = "/data"
+OPENCLAW_PREFER_PNPM = "1"
+OPENCLAW_STATE_DIR = "/data"
 NODE_OPTIONS = "--max-old-space-size=1536"
 
 [processes]
@@ -35,5 +45,8 @@ size = "shared-cpu-2x"
 memory = "2048mb"
 
 [mounts]
+<<<<<<<
+=======>>>>>>>upstream/mainHEAD = 
 source = "bot_data"
+source = "openclaw_data"
 destination = "/data"

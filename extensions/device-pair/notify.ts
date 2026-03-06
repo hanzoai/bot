@@ -1,5 +1,5 @@
-import type { BotPluginApi } from "bot/plugin-sdk/device-pair";
-import { listDevicePairing } from "bot/plugin-sdk/device-pair";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/device-pair";
+import { listDevicePairing } from "@hanzo/bot/plugin-sdk/device-pair";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 

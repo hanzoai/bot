@@ -28,7 +28,7 @@ async function expectLocalAvatarPath(
 const tempRoots: string[] = [];
 
 async function createTempAvatarRoot() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-avatar-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-avatar-"));
   tempRoots.push(root);
   return root;
 }

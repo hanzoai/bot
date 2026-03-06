@@ -53,10 +53,14 @@ Separate from transcript hygiene, session files are repaired (if needed) before 
 Image payloads are always sanitized to prevent provider-side rejection due to size
 limits (downscale/recompress oversized base64 images).
 
+This also helps control image-driven token pressure for vision-capable models.
+Lower max dimensions generally reduce token usage; higher dimensions preserve detail.
+
 Implementation:
 
 - `sanitizeSessionMessagesImages` in `src/agents/pi-embedded-helpers/images.ts`
 - `sanitizeContentBlocksImages` in `src/agents/tool-images.ts`
+- Max image side is configurable via `agents.defaults.imageMaxDimensionPx` (default: `1200`).
 
 ---
 
@@ -76,7 +80,7 @@ Implementation:
 ## Global rule: inter-session input provenance
 
 When an agent sends a prompt into another session via `sessions_send` (including
-agent-to-agent reply/announce steps), Bot persists the created user turn with:
+agent-to-agent reply/announce steps), OpenClaw persists the created user turn with:
 
 - `message.provenance.kind = "inter_session"`
 
@@ -84,7 +88,7 @@ This metadata is written at transcript append time and does not change role
 (`role: "user"` remains for provider compatibility). Transcript readers can use
 this to avoid treating routed internal prompts as end-user-authored instructions.
 
-During context rebuild, Bot also prepends a short `[Inter-session message]`
+During context rebuild, OpenClaw also prepends a short `[Inter-session message]`
 marker to those user turns in-memory so the model can distinguish them from
 external end-user instructions.
 
@@ -95,7 +99,7 @@ external end-user instructions.
 **OpenAI / OpenAI Codex**
 
 - Image sanitization only.
-- On model switch into OpenAI Responses/Codex, drop orphaned reasoning signatures (standalone reasoning items without a following content block).
+- Drop orphaned reasoning signatures (standalone reasoning items without a following content block) for OpenAI Responses/Codex transcripts.
 - No tool call id sanitization.
 - No tool result pairing repair.
 - No turn validation or reordering.
@@ -131,7 +135,7 @@ external end-user instructions.
 
 ## Historical behavior (pre-2026.1.22)
 
-Before the 2026.1.22 release, Hanzo Bot applied multiple layers of transcript hygiene:
+Before the 2026.1.22 release, OpenClaw applied multiple layers of transcript hygiene:
 
 - A **transcript-sanitize extension** ran on every context build and could:
   - Repair tool use/result pairing.

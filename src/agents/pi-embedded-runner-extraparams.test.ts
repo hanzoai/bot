@@ -720,8 +720,8 @@ describe("applyExtraParamsToAgent", () => {
 
     expect(calls).toHaveLength(1);
     expect(calls[0]?.headers).toEqual({
-      "HTTP-Referer": "https://hanzo.bot",
-      "X-Title": "Bot",
+      "HTTP-Referer": "https://openclaw.ai",
+      "X-Title": "OpenClaw",
       "X-Custom": "1",
     });
   });

@@ -4,7 +4,7 @@ import {
   installModelsConfigTestHooks,
   withModelsTempHome as withTempHome,
 } from "./models-config.e2e-harness.js";
-import { ensureBotModelsJson } from "./models-config.js";
+import { ensureOpenClawModelsJson } from "./models-config.js";
 import { readGeneratedModelsJson } from "./models-config.test-utils.js";
 
 installModelsConfigTestHooks();
@@ -44,7 +44,7 @@ async function withMinimaxApiKey(run: () => Promise<void>) {
 }
 
 async function generateAndReadMinimaxModel(cfg: BotConfig): Promise<ModelEntry | undefined> {
-  await ensureBotModelsJson(cfg);
+  await ensureOpenClawModelsJson(cfg);
   const parsed = await readGeneratedModelsJson<ModelsJson>();
   return parsed.providers.minimax?.models?.find((model) => model.id === MINIMAX_MODEL_ID);
 }

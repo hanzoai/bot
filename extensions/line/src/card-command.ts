@@ -1,4 +1,4 @@
-import type { LineChannelData, BotPluginApi, ReplyPayload } from "bot/plugin-sdk";
+import type { LineChannelData, BotPluginApi, ReplyPayload } from "@hanzo/bot/plugin-sdk/line";
 import {
   createActionCard,
   createImageCard,
@@ -7,7 +7,7 @@ import {
   createReceiptCard,
   type CardAction,
   type ListItem,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/line";
 
 const CARD_USAGE = `Usage: /card <type> "title" "body" [options]
 

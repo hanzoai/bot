@@ -4,7 +4,7 @@ import type {
   DmPolicy,
   GroupPolicy,
   SecretInput,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/nextcloud-talk";
 
 export type { DmPolicy, GroupPolicy };
 

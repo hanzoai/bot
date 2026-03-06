@@ -7,7 +7,7 @@ import type { BotConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { DoctorOptions, DoctorPrompter } from "./doctor-prompter.js";
 import { resolveGatewayPort, resolveIsNixMode } from "../config/paths.js";
-import { normalizeSecretInputString } from "../config/types.secrets.js";
+import { resolveSecretInputRef } from "../config/types.secrets.js";
 import {
   findExtraGatewayServices,
   renderGatewayServiceCleanupHints,
@@ -24,6 +24,8 @@ import { uninstallLegacySystemdUnits } from "../daemon/systemd.js";
 import { note } from "../terminal/note.js";
 import { buildGatewayInstallPlan } from "./daemon-install-helpers.js";
 import { DEFAULT_GATEWAY_DAEMON_RUNTIME, type GatewayDaemonRuntime } from "./daemon-runtime.js";
+import { resolveGatewayAuthTokenForService } from "./doctor-gateway-auth-token.js";
+import { resolveGatewayInstallToken } from "./gateway-install-token.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -54,16 +56,6 @@ function findGatewayEntrypoint(programArguments?: string[]): string | null {
 
 function normalizeExecutablePath(value: string): string {
   return path.resolve(value);
-}
-
-function resolveGatewayAuthToken(cfg: BotConfig, env: NodeJS.ProcessEnv): string | undefined {
-  const configToken = normalizeSecretInputString(cfg.gateway?.auth?.token);
-  if (configToken) {
-    return configToken;
-  }
-  const envToken = env.BOT_GATEWAY_TOKEN ?? env.CLAWDBOT_GATEWAY_TOKEN;
-  const trimmedEnvToken = envToken?.trim();
-  return trimmedEnvToken || undefined;
 }
 
 function extractDetailPath(detail: string, prefix: string): string | null {
@@ -220,12 +212,35 @@ export async function maybeRepairGatewayServiceConfig(
     return;
   }
 
-  const expectedGatewayToken = resolveGatewayAuthToken(cfg, process.env);
+  const tokenRefConfigured = Boolean(
+    resolveSecretInputRef({
+      value: cfg.gateway?.auth?.token,
+      defaults: cfg.secrets?.defaults,
+    }).ref,
+  );
+  const gatewayTokenResolution = await resolveGatewayAuthTokenForService(cfg, process.env);
+  if (gatewayTokenResolution.unavailableReason) {
+    note(
+      `Unable to verify gateway service token drift: ${gatewayTokenResolution.unavailableReason}`,
+      "Gateway service config",
+    );
+  }
+  const expectedGatewayToken = tokenRefConfigured ? undefined : gatewayTokenResolution.token;
   const audit = await auditGatewayServiceConfig({
     env: process.env,
     command,
     expectedGatewayToken,
   });
+  const serviceToken = command.environment?.OPENCLAW_GATEWAY_TOKEN?.trim();
+  if (tokenRefConfigured && serviceToken) {
+    audit.issues.push({
+      code: SERVICE_AUDIT_CODES.gatewayTokenMismatch,
+      message:
+        "Gateway service OPENCLAW_GATEWAY_TOKEN should be unset when gateway.auth.token is SecretRef-managed",
+      detail: "service token is stale",
+      level: "recommended",
+    });
+  }
   const needsNodeRuntime = needsNodeRuntimeMigration(audit.issues);
   const systemNodeInfo = needsNodeRuntime
     ? await resolveSystemNodeInfo({ env: process.env })
@@ -244,10 +259,24 @@ export async function maybeRepairGatewayServiceConfig(
 
   const port = resolveGatewayPort(cfg, process.env);
   const runtimeChoice = detectGatewayRuntime(command.programArguments);
+  const installTokenResolution = await resolveGatewayInstallToken({
+    config: cfg,
+    env: process.env,
+  });
+  for (const warning of installTokenResolution.warnings) {
+    note(warning, "Gateway service config");
+  }
+  if (installTokenResolution.unavailableReason) {
+    note(
+      `Unable to verify gateway service token drift: ${installTokenResolution.unavailableReason}`,
+      "Gateway service config",
+    );
+    return;
+  }
   const { programArguments, workingDirectory, environment } = await buildGatewayInstallPlan({
     env: process.env,
     port,
-    token: expectedGatewayToken,
+    token: installTokenResolution.token,
     runtime: needsNodeRuntime && systemNodePath ? "node" : runtimeChoice,
     nodePath: systemNodePath ?? undefined,
     warn: (message, title) => note(message, title),
@@ -363,7 +392,7 @@ export async function maybeScanExtraGatewayServices(
         note(failed.map((line) => `- ${line}`).join("\n"), "Legacy gateway cleanup skipped");
       }
       if (removed.length > 0) {
-        runtime.log("Legacy gateway services removed. Installing Bot gateway next.");
+        runtime.log("Legacy gateway services removed. Installing OpenClaw gateway next.");
       }
     }
   }

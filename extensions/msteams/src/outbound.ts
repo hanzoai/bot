@@ -1,4 +1,4 @@
-import type { ChannelOutboundAdapter } from "bot/plugin-sdk";
+import type { ChannelOutboundAdapter } from "@hanzo/bot/plugin-sdk/msteams";
 import { createMSTeamsPollStoreFs } from "./polls.js";
 import { getMSTeamsRuntime } from "./runtime.js";
 import { sendMessageMSTeams, sendPollMSTeams } from "./send.js";

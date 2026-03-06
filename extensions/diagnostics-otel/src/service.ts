@@ -1,5 +1,13 @@
+import type {
+  DiagnosticEventPayload,
+  OpenClawPluginService,
+} from "@hanzo/bot/plugin-sdk/diagnostics-otel";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
-import type { DiagnosticEventPayload, BotPluginService } from "bot/plugin-sdk";
+import {
+  onDiagnosticEvent,
+  redactSensitiveText,
+  registerLogTransport,
+} from "@hanzo/bot/plugin-sdk/diagnostics-otel";
 import { metrics, trace, SpanStatusCode } from "@opentelemetry/api";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
@@ -10,9 +18,8 @@ import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { ParentBasedSampler, TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
-import { onDiagnosticEvent, redactSensitiveText, registerLogTransport } from "bot/plugin-sdk";
 
-const DEFAULT_SERVICE_NAME = "@hanzo/bot";
+const DEFAULT_SERVICE_NAME = "openclaw";
 
 function normalizeEndpoint(endpoint?: string): string | undefined {
   const trimmed = endpoint?.trim();
@@ -62,7 +69,7 @@ function redactOtelAttributes(attributes: Record<string, string | number | boole
   return redactedAttributes;
 }
 
-export function createDiagnosticsOtelService(): BotPluginService {
+export function createDiagnosticsOtelService(): OpenClawPluginService {
   let sdk: NodeSDK | null = null;
   let logProvider: LoggerProvider | null = null;
   let stopLogTransport: (() => void) | null = null;
@@ -157,78 +164,78 @@ export function createDiagnosticsOtelService(): BotPluginService {
         FATAL: 21 as SeverityNumber,
       };
 
-      const meter = metrics.getMeter("@hanzo/bot");
-      const tracer = trace.getTracer("@hanzo/bot");
+      const meter = metrics.getMeter("openclaw");
+      const tracer = trace.getTracer("openclaw");
 
-      const tokensCounter = meter.createCounter("bot.tokens", {
+      const tokensCounter = meter.createCounter("openclaw.tokens", {
         unit: "1",
         description: "Token usage by type",
       });
-      const costCounter = meter.createCounter("bot.cost.usd", {
+      const costCounter = meter.createCounter("openclaw.cost.usd", {
         unit: "1",
         description: "Estimated model cost (USD)",
       });
-      const durationHistogram = meter.createHistogram("bot.run.duration_ms", {
+      const durationHistogram = meter.createHistogram("openclaw.run.duration_ms", {
         unit: "ms",
         description: "Agent run duration",
       });
-      const contextHistogram = meter.createHistogram("bot.context.tokens", {
+      const contextHistogram = meter.createHistogram("openclaw.context.tokens", {
         unit: "1",
         description: "Context window size and usage",
       });
-      const webhookReceivedCounter = meter.createCounter("bot.webhook.received", {
+      const webhookReceivedCounter = meter.createCounter("openclaw.webhook.received", {
         unit: "1",
         description: "Webhook requests received",
       });
-      const webhookErrorCounter = meter.createCounter("bot.webhook.error", {
+      const webhookErrorCounter = meter.createCounter("openclaw.webhook.error", {
         unit: "1",
         description: "Webhook processing errors",
       });
-      const webhookDurationHistogram = meter.createHistogram("bot.webhook.duration_ms", {
+      const webhookDurationHistogram = meter.createHistogram("openclaw.webhook.duration_ms", {
         unit: "ms",
         description: "Webhook processing duration",
       });
-      const messageQueuedCounter = meter.createCounter("bot.message.queued", {
+      const messageQueuedCounter = meter.createCounter("openclaw.message.queued", {
         unit: "1",
         description: "Messages queued for processing",
       });
-      const messageProcessedCounter = meter.createCounter("bot.message.processed", {
+      const messageProcessedCounter = meter.createCounter("openclaw.message.processed", {
         unit: "1",
         description: "Messages processed by outcome",
       });
-      const messageDurationHistogram = meter.createHistogram("bot.message.duration_ms", {
+      const messageDurationHistogram = meter.createHistogram("openclaw.message.duration_ms", {
         unit: "ms",
         description: "Message processing duration",
       });
-      const queueDepthHistogram = meter.createHistogram("bot.queue.depth", {
+      const queueDepthHistogram = meter.createHistogram("openclaw.queue.depth", {
         unit: "1",
         description: "Queue depth on enqueue/dequeue",
       });
-      const queueWaitHistogram = meter.createHistogram("bot.queue.wait_ms", {
+      const queueWaitHistogram = meter.createHistogram("openclaw.queue.wait_ms", {
         unit: "ms",
         description: "Queue wait time before execution",
       });
-      const laneEnqueueCounter = meter.createCounter("bot.queue.lane.enqueue", {
+      const laneEnqueueCounter = meter.createCounter("openclaw.queue.lane.enqueue", {
         unit: "1",
         description: "Command queue lane enqueue events",
       });
-      const laneDequeueCounter = meter.createCounter("bot.queue.lane.dequeue", {
+      const laneDequeueCounter = meter.createCounter("openclaw.queue.lane.dequeue", {
         unit: "1",
         description: "Command queue lane dequeue events",
       });
-      const sessionStateCounter = meter.createCounter("bot.session.state", {
+      const sessionStateCounter = meter.createCounter("openclaw.session.state", {
         unit: "1",
         description: "Session state transitions",
       });
-      const sessionStuckCounter = meter.createCounter("bot.session.stuck", {
+      const sessionStuckCounter = meter.createCounter("openclaw.session.stuck", {
         unit: "1",
         description: "Sessions stuck in processing",
       });
-      const sessionStuckAgeHistogram = meter.createHistogram("bot.session.stuck_age_ms", {
+      const sessionStuckAgeHistogram = meter.createHistogram("openclaw.session.stuck_age_ms", {
         unit: "ms",
         description: "Age of stuck sessions",
       });
-      const runAttemptCounter = meter.createCounter("bot.run.attempt", {
+      const runAttemptCounter = meter.createCounter("openclaw.run.attempt", {
         unit: "1",
         description: "Run attempts",
       });
@@ -248,7 +255,7 @@ export function createDiagnosticsOtelService(): BotPluginService {
           resource,
           processors: [logProcessor],
         });
-        const otelLogger = logProvider.getLogger("@hanzo/bot");
+        const otelLogger = logProvider.getLogger("openclaw");
 
         stopLogTransport = registerLogTransport((logObj) => {
           try {
@@ -307,13 +314,13 @@ export function createDiagnosticsOtelService(): BotPluginService {
             }
 
             const attributes: Record<string, string | number | boolean> = {
-              "bot.log.level": logLevelName,
+              "openclaw.log.level": logLevelName,
             };
             if (meta?.name) {
-              attributes["bot.logger"] = meta.name;
+              attributes["openclaw.logger"] = meta.name;
             }
             if (meta?.parentNames?.length) {
-              attributes["bot.logger.parents"] = meta.parentNames.join(".");
+              attributes["openclaw.logger.parents"] = meta.parentNames.join(".");
             }
             if (bindings) {
               for (const [key, value] of Object.entries(bindings)) {
@@ -322,14 +329,14 @@ export function createDiagnosticsOtelService(): BotPluginService {
                   typeof value === "number" ||
                   typeof value === "boolean"
                 ) {
-                  attributes[`bot.${key}`] = value;
+                  attributes[`openclaw.${key}`] = value;
                 } else if (value != null) {
-                  attributes[`bot.${key}`] = safeStringify(value);
+                  attributes[`openclaw.${key}`] = safeStringify(value);
                 }
               }
             }
             if (numericArgs.length > 0) {
-              attributes["bot.log.args"] = safeStringify(numericArgs);
+              attributes["openclaw.log.args"] = safeStringify(numericArgs);
             }
             if (meta?.path?.filePath) {
               attributes["code.filepath"] = meta.path.filePath;
@@ -341,7 +348,7 @@ export function createDiagnosticsOtelService(): BotPluginService {
               attributes["code.function"] = meta.path.method;
             }
             if (meta?.path?.filePathWithLine) {
-              attributes["bot.code.location"] = meta.path.filePathWithLine;
+              attributes["openclaw.code.location"] = meta.path.filePathWithLine;
             }
 
             // OTLP can leave the host boundary, so redact string fields before export.
@@ -374,29 +381,29 @@ export function createDiagnosticsOtelService(): BotPluginService {
 
       const recordModelUsage = (evt: Extract<DiagnosticEventPayload, { type: "model.usage" }>) => {
         const attrs = {
-          "bot.channel": evt.channel ?? "unknown",
-          "bot.provider": evt.provider ?? "unknown",
-          "bot.model": evt.model ?? "unknown",
+          "openclaw.channel": evt.channel ?? "unknown",
+          "openclaw.provider": evt.provider ?? "unknown",
+          "openclaw.model": evt.model ?? "unknown",
         };
 
         const usage = evt.usage;
         if (usage.input) {
-          tokensCounter.add(usage.input, { ...attrs, "bot.token": "input" });
+          tokensCounter.add(usage.input, { ...attrs, "openclaw.token": "input" });
         }
         if (usage.output) {
-          tokensCounter.add(usage.output, { ...attrs, "bot.token": "output" });
+          tokensCounter.add(usage.output, { ...attrs, "openclaw.token": "output" });
         }
         if (usage.cacheRead) {
-          tokensCounter.add(usage.cacheRead, { ...attrs, "bot.token": "cache_read" });
+          tokensCounter.add(usage.cacheRead, { ...attrs, "openclaw.token": "cache_read" });
         }
         if (usage.cacheWrite) {
-          tokensCounter.add(usage.cacheWrite, { ...attrs, "bot.token": "cache_write" });
+          tokensCounter.add(usage.cacheWrite, { ...attrs, "openclaw.token": "cache_write" });
         }
         if (usage.promptTokens) {
-          tokensCounter.add(usage.promptTokens, { ...attrs, "bot.token": "prompt" });
+          tokensCounter.add(usage.promptTokens, { ...attrs, "openclaw.token": "prompt" });
         }
         if (usage.total) {
-          tokensCounter.add(usage.total, { ...attrs, "bot.token": "total" });
+          tokensCounter.add(usage.total, { ...attrs, "openclaw.token": "total" });
         }
 
         if (evt.costUsd) {
@@ -408,13 +415,13 @@ export function createDiagnosticsOtelService(): BotPluginService {
         if (evt.context?.limit) {
           contextHistogram.record(evt.context.limit, {
             ...attrs,
-            "bot.context": "limit",
+            "openclaw.context": "limit",
           });
         }
         if (evt.context?.used) {
           contextHistogram.record(evt.context.used, {
             ...attrs,
-            "bot.context": "used",
+            "openclaw.context": "used",
           });
         }
 
@@ -423,16 +430,16 @@ export function createDiagnosticsOtelService(): BotPluginService {
         }
         const spanAttrs: Record<string, string | number> = {
           ...attrs,
-          "bot.sessionKey": evt.sessionKey ?? "",
-          "bot.sessionId": evt.sessionId ?? "",
-          "bot.tokens.input": usage.input ?? 0,
-          "bot.tokens.output": usage.output ?? 0,
-          "bot.tokens.cache_read": usage.cacheRead ?? 0,
-          "bot.tokens.cache_write": usage.cacheWrite ?? 0,
-          "bot.tokens.total": usage.total ?? 0,
+          "openclaw.sessionKey": evt.sessionKey ?? "",
+          "openclaw.sessionId": evt.sessionId ?? "",
+          "openclaw.tokens.input": usage.input ?? 0,
+          "openclaw.tokens.output": usage.output ?? 0,
+          "openclaw.tokens.cache_read": usage.cacheRead ?? 0,
+          "openclaw.tokens.cache_write": usage.cacheWrite ?? 0,
+          "openclaw.tokens.total": usage.total ?? 0,
         };
 
-        const span = spanWithDuration("bot.model.usage", spanAttrs, evt.durationMs);
+        const span = spanWithDuration("openclaw.model.usage", spanAttrs, evt.durationMs);
         span.end();
       };
 
@@ -440,8 +447,8 @@ export function createDiagnosticsOtelService(): BotPluginService {
         evt: Extract<DiagnosticEventPayload, { type: "webhook.received" }>,
       ) => {
         const attrs = {
-          "bot.channel": evt.channel ?? "unknown",
-          "bot.webhook": evt.updateType ?? "unknown",
+          "openclaw.channel": evt.channel ?? "unknown",
+          "openclaw.webhook": evt.updateType ?? "unknown",
         };
         webhookReceivedCounter.add(1, attrs);
       };
@@ -450,8 +457,8 @@ export function createDiagnosticsOtelService(): BotPluginService {
         evt: Extract<DiagnosticEventPayload, { type: "webhook.processed" }>,
       ) => {
         const attrs = {
-          "bot.channel": evt.channel ?? "unknown",
-          "bot.webhook": evt.updateType ?? "unknown",
+          "openclaw.channel": evt.channel ?? "unknown",
+          "openclaw.webhook": evt.updateType ?? "unknown",
         };
         if (typeof evt.durationMs === "number") {
           webhookDurationHistogram.record(evt.durationMs, attrs);
@@ -461,9 +468,9 @@ export function createDiagnosticsOtelService(): BotPluginService {
         }
         const spanAttrs: Record<string, string | number> = { ...attrs };
         if (evt.chatId !== undefined) {
-          spanAttrs["bot.chatId"] = String(evt.chatId);
+          spanAttrs["openclaw.chatId"] = String(evt.chatId);
         }
-        const span = spanWithDuration("bot.webhook.processed", spanAttrs, evt.durationMs);
+        const span = spanWithDuration("openclaw.webhook.processed", spanAttrs, evt.durationMs);
         span.end();
       };
 
@@ -471,8 +478,8 @@ export function createDiagnosticsOtelService(): BotPluginService {
         evt: Extract<DiagnosticEventPayload, { type: "webhook.error" }>,
       ) => {
         const attrs = {
-          "bot.channel": evt.channel ?? "unknown",
-          "bot.webhook": evt.updateType ?? "unknown",
+          "openclaw.channel": evt.channel ?? "unknown",
+          "openclaw.webhook": evt.updateType ?? "unknown",
         };
         webhookErrorCounter.add(1, attrs);
         if (!tracesEnabled) {
@@ -481,12 +488,12 @@ export function createDiagnosticsOtelService(): BotPluginService {
         const redactedError = redactSensitiveText(evt.error);
         const spanAttrs: Record<string, string | number> = {
           ...attrs,
-          "bot.error": redactedError,
+          "openclaw.error": redactedError,
         };
         if (evt.chatId !== undefined) {
-          spanAttrs["bot.chatId"] = String(evt.chatId);
+          spanAttrs["openclaw.chatId"] = String(evt.chatId);
         }
-        const span = tracer.startSpan("bot.webhook.error", {
+        const span = tracer.startSpan("openclaw.webhook.error", {
           attributes: spanAttrs,
         });
         span.setStatus({ code: SpanStatusCode.ERROR, message: redactedError });
@@ -497,8 +504,8 @@ export function createDiagnosticsOtelService(): BotPluginService {
         evt: Extract<DiagnosticEventPayload, { type: "message.queued" }>,
       ) => {
         const attrs = {
-          "bot.channel": evt.channel ?? "unknown",
-          "bot.source": evt.source ?? "unknown",
+          "openclaw.channel": evt.channel ?? "unknown",
+          "openclaw.source": evt.source ?? "unknown",
         };
         messageQueuedCounter.add(1, attrs);
         if (typeof evt.queueDepth === "number") {
@@ -511,10 +518,10 @@ export function createDiagnosticsOtelService(): BotPluginService {
         evt: { sessionKey?: string; sessionId?: string },
       ) => {
         if (evt.sessionKey) {
-          spanAttrs["bot.sessionKey"] = evt.sessionKey;
+          spanAttrs["openclaw.sessionKey"] = evt.sessionKey;
         }
         if (evt.sessionId) {
-          spanAttrs["bot.sessionId"] = evt.sessionId;
+          spanAttrs["openclaw.sessionId"] = evt.sessionId;
         }
       };
 
@@ -522,8 +529,8 @@ export function createDiagnosticsOtelService(): BotPluginService {
         evt: Extract<DiagnosticEventPayload, { type: "message.processed" }>,
       ) => {
         const attrs = {
-          "bot.channel": evt.channel ?? "unknown",
-          "bot.outcome": evt.outcome ?? "unknown",
+          "openclaw.channel": evt.channel ?? "unknown",
+          "openclaw.outcome": evt.outcome ?? "unknown",
         };
         messageProcessedCounter.add(1, attrs);
         if (typeof evt.durationMs === "number") {
@@ -535,15 +542,15 @@ export function createDiagnosticsOtelService(): BotPluginService {
         const spanAttrs: Record<string, string | number> = { ...attrs };
         addSessionIdentityAttrs(spanAttrs, evt);
         if (evt.chatId !== undefined) {
-          spanAttrs["bot.chatId"] = String(evt.chatId);
+          spanAttrs["openclaw.chatId"] = String(evt.chatId);
         }
         if (evt.messageId !== undefined) {
-          spanAttrs["bot.messageId"] = String(evt.messageId);
+          spanAttrs["openclaw.messageId"] = String(evt.messageId);
         }
         if (evt.reason) {
-          spanAttrs["bot.reason"] = redactSensitiveText(evt.reason);
+          spanAttrs["openclaw.reason"] = redactSensitiveText(evt.reason);
         }
-        const span = spanWithDuration("bot.message.processed", spanAttrs, evt.durationMs);
+        const span = spanWithDuration("openclaw.message.processed", spanAttrs, evt.durationMs);
         if (evt.outcome === "error" && evt.error) {
           span.setStatus({ code: SpanStatusCode.ERROR, message: redactSensitiveText(evt.error) });
         }
@@ -553,7 +560,7 @@ export function createDiagnosticsOtelService(): BotPluginService {
       const recordLaneEnqueue = (
         evt: Extract<DiagnosticEventPayload, { type: "queue.lane.enqueue" }>,
       ) => {
-        const attrs = { "bot.lane": evt.lane };
+        const attrs = { "openclaw.lane": evt.lane };
         laneEnqueueCounter.add(1, attrs);
         queueDepthHistogram.record(evt.queueSize, attrs);
       };
@@ -561,7 +568,7 @@ export function createDiagnosticsOtelService(): BotPluginService {
       const recordLaneDequeue = (
         evt: Extract<DiagnosticEventPayload, { type: "queue.lane.dequeue" }>,
       ) => {
-        const attrs = { "bot.lane": evt.lane };
+        const attrs = { "openclaw.lane": evt.lane };
         laneDequeueCounter.add(1, attrs);
         queueDepthHistogram.record(evt.queueSize, attrs);
         if (typeof evt.waitMs === "number") {
@@ -572,9 +579,9 @@ export function createDiagnosticsOtelService(): BotPluginService {
       const recordSessionState = (
         evt: Extract<DiagnosticEventPayload, { type: "session.state" }>,
       ) => {
-        const attrs: Record<string, string> = { "bot.state": evt.state };
+        const attrs: Record<string, string> = { "openclaw.state": evt.state };
         if (evt.reason) {
-          attrs["bot.reason"] = redactSensitiveText(evt.reason);
+          attrs["openclaw.reason"] = redactSensitiveText(evt.reason);
         }
         sessionStateCounter.add(1, attrs);
       };
@@ -582,7 +589,7 @@ export function createDiagnosticsOtelService(): BotPluginService {
       const recordSessionStuck = (
         evt: Extract<DiagnosticEventPayload, { type: "session.stuck" }>,
       ) => {
-        const attrs: Record<string, string> = { "bot.state": evt.state };
+        const attrs: Record<string, string> = { "openclaw.state": evt.state };
         sessionStuckCounter.add(1, attrs);
         if (typeof evt.ageMs === "number") {
           sessionStuckAgeHistogram.record(evt.ageMs, attrs);
@@ -592,21 +599,21 @@ export function createDiagnosticsOtelService(): BotPluginService {
         }
         const spanAttrs: Record<string, string | number> = { ...attrs };
         addSessionIdentityAttrs(spanAttrs, evt);
-        spanAttrs["bot.queueDepth"] = evt.queueDepth ?? 0;
-        spanAttrs["bot.ageMs"] = evt.ageMs;
-        const span = tracer.startSpan("bot.session.stuck", { attributes: spanAttrs });
+        spanAttrs["openclaw.queueDepth"] = evt.queueDepth ?? 0;
+        spanAttrs["openclaw.ageMs"] = evt.ageMs;
+        const span = tracer.startSpan("openclaw.session.stuck", { attributes: spanAttrs });
         span.setStatus({ code: SpanStatusCode.ERROR, message: "session stuck" });
         span.end();
       };
 
       const recordRunAttempt = (evt: Extract<DiagnosticEventPayload, { type: "run.attempt" }>) => {
-        runAttemptCounter.add(1, { "bot.attempt": evt.attempt });
+        runAttemptCounter.add(1, { "openclaw.attempt": evt.attempt });
       };
 
       const recordHeartbeat = (
         evt: Extract<DiagnosticEventPayload, { type: "diagnostic.heartbeat" }>,
       ) => {
-        queueDepthHistogram.record(evt.queued, { "bot.channel": "heartbeat" });
+        queueDepthHistogram.record(evt.queued, { "openclaw.channel": "heartbeat" });
       };
 
       unsubscribe = onDiagnosticEvent((evt: DiagnosticEventPayload) => {
@@ -674,5 +681,5 @@ export function createDiagnosticsOtelService(): BotPluginService {
         sdk = null;
       }
     },
-  } satisfies BotPluginService;
+  } satisfies OpenClawPluginService;
 }

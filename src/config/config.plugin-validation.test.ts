@@ -25,7 +25,7 @@ async function writePluginFixture(params: {
     manifest.channels = params.channels;
   }
   await fs.writeFile(
-    path.join(params.dir, "bot.plugin.json"),
+    path.join(params.dir, "openclaw.plugin.json"),
     JSON.stringify(manifest, null, 2),
     "utf-8",
   );
@@ -38,14 +38,14 @@ describe("config plugin validation", () => {
   let enumPluginDir = "";
   let bluebubblesPluginDir = "";
   const envSnapshot = {
-    BOT_STATE_DIR: process.env.BOT_STATE_DIR,
-    BOT_PLUGIN_MANIFEST_CACHE_MS: process.env.BOT_PLUGIN_MANIFEST_CACHE_MS,
+    OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
+    OPENCLAW_PLUGIN_MANIFEST_CACHE_MS: process.env.OPENCLAW_PLUGIN_MANIFEST_CACHE_MS,
   };
 
   const validateInSuite = (raw: unknown) => validateConfigObjectWithPlugins(raw);
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-config-plugin-validation-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-config-plugin-validation-"));
     suiteHome = path.join(fixtureRoot, "home");
     await fs.mkdir(suiteHome, { recursive: true });
     badPluginDir = path.join(suiteHome, "bad-plugin");
@@ -83,8 +83,8 @@ describe("config plugin validation", () => {
       channels: ["bluebubbles"],
       schema: { type: "object" },
     });
-    process.env.BOT_STATE_DIR = path.join(suiteHome, ".bot");
-    process.env.BOT_PLUGIN_MANIFEST_CACHE_MS = "10000";
+    process.env.OPENCLAW_STATE_DIR = path.join(suiteHome, ".openclaw");
+    process.env.OPENCLAW_PLUGIN_MANIFEST_CACHE_MS = "10000";
     clearPluginManifestRegistryCache();
     // Warm the plugin manifest cache once so path-based validations can reuse
     // parsed manifests across test cases.
@@ -99,15 +99,15 @@ describe("config plugin validation", () => {
   afterAll(async () => {
     await fs.rm(fixtureRoot, { recursive: true, force: true });
     clearPluginManifestRegistryCache();
-    if (envSnapshot.BOT_STATE_DIR === undefined) {
-      delete process.env.BOT_STATE_DIR;
+    if (envSnapshot.OPENCLAW_STATE_DIR === undefined) {
+      delete process.env.OPENCLAW_STATE_DIR;
     } else {
-      process.env.BOT_STATE_DIR = envSnapshot.BOT_STATE_DIR;
+      process.env.OPENCLAW_STATE_DIR = envSnapshot.OPENCLAW_STATE_DIR;
     }
-    if (envSnapshot.BOT_PLUGIN_MANIFEST_CACHE_MS === undefined) {
-      delete process.env.BOT_PLUGIN_MANIFEST_CACHE_MS;
+    if (envSnapshot.OPENCLAW_PLUGIN_MANIFEST_CACHE_MS === undefined) {
+      delete process.env.OPENCLAW_PLUGIN_MANIFEST_CACHE_MS;
     } else {
-      process.env.BOT_PLUGIN_MANIFEST_CACHE_MS = envSnapshot.BOT_PLUGIN_MANIFEST_CACHE_MS;
+      process.env.OPENCLAW_PLUGIN_MANIFEST_CACHE_MS = envSnapshot.OPENCLAW_PLUGIN_MANIFEST_CACHE_MS;
     }
   });
 
@@ -148,7 +148,7 @@ describe("config plugin validation", () => {
   });
 
   it("warns for removed legacy plugin ids instead of failing validation", async () => {
-    const removedId = "legacy-auth-plugin-removed";
+    const removedId = "google-antigravity-auth";
     const res = validateInSuite({
       agents: { list: [{ id: "pi" }] },
       plugins: {
@@ -166,22 +166,22 @@ describe("config plugin validation", () => {
           {
             path: `plugins.entries.${removedId}`,
             message:
-              "plugin removed: legacy-auth-plugin-removed (stale config entry ignored; remove it from plugins config)",
+              "plugin removed: google-antigravity-auth (stale config entry ignored; remove it from plugins config)",
           },
           {
             path: "plugins.allow",
             message:
-              "plugin removed: legacy-auth-plugin-removed (stale config entry ignored; remove it from plugins config)",
+              "plugin removed: google-antigravity-auth (stale config entry ignored; remove it from plugins config)",
           },
           {
             path: "plugins.deny",
             message:
-              "plugin removed: legacy-auth-plugin-removed (stale config entry ignored; remove it from plugins config)",
+              "plugin removed: google-antigravity-auth (stale config entry ignored; remove it from plugins config)",
           },
           {
             path: "plugins.slots.memory",
             message:
-              "plugin removed: legacy-auth-plugin-removed (stale config entry ignored; remove it from plugins config)",
+              "plugin removed: google-antigravity-auth (stale config entry ignored; remove it from plugins config)",
           },
         ]),
       );

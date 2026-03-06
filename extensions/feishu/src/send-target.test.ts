@@ -1,4 +1,4 @@
-import type { ClawdbotConfig } from "bot/plugin-sdk";
+import type { ClawdbotConfig } from "@hanzo/bot/plugin-sdk/feishu";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveFeishuSendTarget } from "./send-target.js";
 

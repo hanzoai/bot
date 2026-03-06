@@ -8,7 +8,7 @@ import {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   requestBodyErrorToText,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/synology-chat";
 import * as querystring from "node:querystring";
 import type { SynologyWebhookPayload, ResolvedSynologyChatAccount } from "./types.js";
 import { sendMessage, resolveChatUserId } from "./client.js";
@@ -124,7 +124,7 @@ function extractTokenFromHeaders(req: IncomingMessage): string | undefined {
   const explicit =
     headerValue(req.headers["x-synology-token"]) ??
     headerValue(req.headers["x-webhook-token"]) ??
-    headerValue(req.headers["x-bot-token"]);
+    headerValue(req.headers["x-openclaw-token"]);
   if (explicit) return explicit;
 
   const auth = headerValue(req.headers.authorization);

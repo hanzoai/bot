@@ -1,4 +1,4 @@
-import type { PluginLogger } from "bot/plugin-sdk";
+import type { PluginLogger } from "@hanzo/bot/plugin-sdk/acpx";
 import fs from "node:fs";
 import path from "node:path";
 import { ACPX_PINNED_VERSION, ACPX_PLUGIN_ROOT, buildAcpxLocalInstallCommand } from "./config.js";

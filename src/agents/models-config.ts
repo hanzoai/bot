@@ -3,7 +3,7 @@ import path from "node:path";
 import { type BotConfig, loadConfig } from "../config/config.js";
 import { applyConfigEnvVars } from "../config/env-vars.js";
 import { isRecord } from "../utils.js";
-import { resolveBotAgentDir } from "./agent-paths.js";
+import { resolveOpenClawAgentDir } from "./agent-paths.js";
 import {
   normalizeProviders,
   type ProviderConfig,
@@ -148,7 +148,12 @@ function mergeWithExistingProviderSecrets(params: {
     mergedProviders[key] = entry;
   }
   for (const [key, newEntry] of Object.entries(nextProviders)) {
-    const existing = existingProviders[key];
+    const existing = existingProviders[key] as
+      | (NonNullable<ModelsConfig["providers"]>[string] & {
+          apiKey?: string;
+          baseUrl?: string;
+        })
+      | undefined;
     if (!existing) {
       mergedProviders[key] = newEntry;
       continue;
@@ -195,12 +200,12 @@ async function readRawFile(pathname: string): Promise<string> {
   }
 }
 
-export async function ensureBotModelsJson(
+export async function ensureOpenClawModelsJson(
   config?: BotConfig,
   agentDirOverride?: string,
 ): Promise<{ agentDir: string; wrote: boolean }> {
   const cfg = config ?? loadConfig();
-  const agentDir = agentDirOverride?.trim() ? agentDirOverride.trim() : resolveBotAgentDir();
+  const agentDir = agentDirOverride?.trim() ? agentDirOverride.trim() : resolveOpenClawAgentDir();
 
   // Ensure config env vars (e.g. AWS_PROFILE, AWS_ACCESS_KEY_ID) are
   // available in process.env before implicit provider discovery.  Some

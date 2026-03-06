@@ -40,12 +40,13 @@ export function createInboundSlackTestContext(params: {
     threadInheritParent: false,
     slashCommand: {
       enabled: false,
-      name: "@hanzo/bot",
+      name: "openclaw",
       sessionPrefix: "slack:slash",
       ephemeral: true,
     },
     textLimit: 4000,
     ackReactionScope: "group-mentions",
+    typingReaction: "",
     mediaMaxBytes: 1024,
     removeAckAfterReply: false,
   });

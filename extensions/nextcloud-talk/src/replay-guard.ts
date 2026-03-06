@@ -1,4 +1,4 @@
-import { createPersistentDedupe } from "bot/plugin-sdk";
+import { createPersistentDedupe } from "@hanzo/bot/plugin-sdk/nextcloud-talk";
 import path from "node:path";
 
 const DEFAULT_REPLAY_TTL_MS = 24 * 60 * 60 * 1000;

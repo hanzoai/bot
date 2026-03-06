@@ -49,7 +49,7 @@ async function promptWhatsAppOwnerAllowFrom(params: {
   const { prompter, existingAllowFrom } = params;
 
   await prompter.note(
-    "We need the sender/owner number so Bot can allowlist you.",
+    "We need the sender/owner number so OpenClaw can allowlist you.",
     "WhatsApp number",
   );
   const entry = await prompter.text({
@@ -159,7 +159,7 @@ async function promptWhatsAppAllowFrom(
     message: "WhatsApp phone setup",
     options: [
       { value: "personal", label: "This is my personal phone number" },
-      { value: "separate", label: "Separate phone just for Bot" },
+      { value: "separate", label: "Separate phone just for OpenClaw" },
     ],
   });
 
@@ -337,7 +337,7 @@ export const whatsappOnboardingAdapter: ChannelOnboardingAdapter = {
       }
     } else if (!linked) {
       await prompter.note(
-        `Run \`${formatCliCommand("bot channels login")}\` later to link WhatsApp.`,
+        `Run \`${formatCliCommand("openclaw channels login")}\` later to link WhatsApp.`,
         "WhatsApp",
       );
     }

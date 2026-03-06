@@ -1,4 +1,4 @@
-import type { ChannelAccountSnapshot, ChannelStatusIssue } from "bot/plugin-sdk";
+import type { ChannelAccountSnapshot, ChannelStatusIssue } from "@hanzo/bot/plugin-sdk/zalo";
 
 type ZaloAccountStatus = {
   accountId?: unknown;

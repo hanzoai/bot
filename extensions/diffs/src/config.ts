@@ -1,4 +1,4 @@
-import type { BotPluginConfigSchema } from "bot/plugin-sdk";
+import type { OpenClawPluginConfigSchema } from "@hanzo/bot/plugin-sdk/diffs";
 import {
   DIFF_IMAGE_QUALITY_PRESETS,
   DIFF_INDICATORS,
@@ -197,7 +197,7 @@ const DIFFS_PLUGIN_CONFIG_JSON_SCHEMA = {
   },
 } as const;
 
-export const diffsPluginConfigSchema: BotPluginConfigSchema = {
+export const diffsPluginConfigSchema: OpenClawPluginConfigSchema = {
   safeParse(value: unknown) {
     if (value === undefined) {
       return { success: true, data: undefined };

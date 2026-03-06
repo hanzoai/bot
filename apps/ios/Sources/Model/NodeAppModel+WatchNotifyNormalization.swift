@@ -1,8 +1,15 @@
 import Foundation
+<<<<<<< HEAD
 import BotKit
 
 extension NodeAppModel {
     static func normalizeWatchNotifyParams(_ params: BotWatchNotifyParams) -> BotWatchNotifyParams {
+=======
+import OpenClawKit
+
+extension NodeAppModel {
+    static func normalizeWatchNotifyParams(_ params: OpenClawWatchNotifyParams) -> OpenClawWatchNotifyParams {
+>>>>>>> upstream/main
         var normalized = params
         normalized.title = params.title.trimmingCharacters(in: .whitespacesAndNewlines)
         normalized.body = params.body.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -22,6 +29,7 @@ extension NodeAppModel {
     }
 
     static func normalizeWatchActions(
+<<<<<<< HEAD
         _ actions: [BotWatchAction]?,
         kind: String?,
         promptId: String?) -> [BotWatchAction]
@@ -31,6 +39,17 @@ extension NodeAppModel {
             let label = action.label.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !id.isEmpty, !label.isEmpty else { return nil }
             return BotWatchAction(
+=======
+        _ actions: [OpenClawWatchAction]?,
+        kind: String?,
+        promptId: String?) -> [OpenClawWatchAction]
+    {
+        let provided = (actions ?? []).compactMap { action -> OpenClawWatchAction? in
+            let id = action.id.trimmingCharacters(in: .whitespacesAndNewlines)
+            let label = action.label.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !id.isEmpty, !label.isEmpty else { return nil }
+            return OpenClawWatchAction(
+>>>>>>> upstream/main
                 id: id,
                 label: label,
                 style: self.trimmedOrNil(action.style))
@@ -47,24 +66,43 @@ extension NodeAppModel {
         let normalizedKind = kind?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
         if normalizedKind.contains("approval") || normalizedKind.contains("approve") {
             return [
+<<<<<<< HEAD
                 BotWatchAction(id: "approve", label: "Approve"),
                 BotWatchAction(id: "decline", label: "Decline", style: "destructive"),
                 BotWatchAction(id: "open_phone", label: "Open iPhone"),
                 BotWatchAction(id: "escalate", label: "Escalate"),
+=======
+                OpenClawWatchAction(id: "approve", label: "Approve"),
+                OpenClawWatchAction(id: "decline", label: "Decline", style: "destructive"),
+                OpenClawWatchAction(id: "open_phone", label: "Open iPhone"),
+                OpenClawWatchAction(id: "escalate", label: "Escalate"),
+>>>>>>> upstream/main
             ]
         }
 
         return [
+<<<<<<< HEAD
             BotWatchAction(id: "done", label: "Done"),
             BotWatchAction(id: "snooze_10m", label: "Snooze 10m"),
             BotWatchAction(id: "open_phone", label: "Open iPhone"),
             BotWatchAction(id: "escalate", label: "Escalate"),
+=======
+            OpenClawWatchAction(id: "done", label: "Done"),
+            OpenClawWatchAction(id: "snooze_10m", label: "Snooze 10m"),
+            OpenClawWatchAction(id: "open_phone", label: "Open iPhone"),
+            OpenClawWatchAction(id: "escalate", label: "Escalate"),
+>>>>>>> upstream/main
         ]
     }
 
     static func normalizedWatchRisk(
+<<<<<<< HEAD
         _ risk: BotWatchRisk?,
         priority: BotNotificationPriority?) -> BotWatchRisk?
+=======
+        _ risk: OpenClawWatchRisk?,
+        priority: OpenClawNotificationPriority?) -> OpenClawWatchRisk?
+>>>>>>> upstream/main
     {
         if let risk { return risk }
         switch priority {
@@ -80,8 +118,13 @@ extension NodeAppModel {
     }
 
     static func normalizedWatchPriority(
+<<<<<<< HEAD
         _ priority: BotNotificationPriority?,
         risk: BotWatchRisk?) -> BotNotificationPriority?
+=======
+        _ priority: OpenClawNotificationPriority?,
+        risk: OpenClawWatchRisk?) -> OpenClawNotificationPriority?
+>>>>>>> upstream/main
     {
         if let priority { return priority }
         switch risk {

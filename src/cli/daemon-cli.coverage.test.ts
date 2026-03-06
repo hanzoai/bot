@@ -26,8 +26,8 @@ const buildGatewayInstallPlan = vi.fn(
     programArguments: ["/bin/node", "cli", "gateway", "--port", String(params.port)],
     workingDirectory: process.cwd(),
     environment: {
-      BOT_GATEWAY_PORT: String(params.port),
-      ...(params.token ? { BOT_GATEWAY_TOKEN: params.token } : {}),
+      OPENCLAW_GATEWAY_PORT: String(params.port),
+      ...(params.token ? { OPENCLAW_GATEWAY_TOKEN: params.token } : {}),
     },
   }),
 );
@@ -113,15 +113,15 @@ describe("daemon-cli coverage", () => {
   beforeEach(() => {
     daemonProgram = createDaemonProgram();
     envSnapshot = captureEnv([
-      "BOT_STATE_DIR",
-      "BOT_CONFIG_PATH",
-      "BOT_GATEWAY_PORT",
-      "BOT_PROFILE",
+      "OPENCLAW_STATE_DIR",
+      "OPENCLAW_CONFIG_PATH",
+      "OPENCLAW_GATEWAY_PORT",
+      "OPENCLAW_PROFILE",
     ]);
-    process.env.BOT_STATE_DIR = "/tmp/bot-cli-state";
-    process.env.BOT_CONFIG_PATH = "/tmp/bot-cli-state/bot.json";
-    delete process.env.BOT_GATEWAY_PORT;
-    delete process.env.BOT_PROFILE;
+    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-cli-state";
+    process.env.OPENCLAW_CONFIG_PATH = "/tmp/openclaw-cli-state/openclaw.json";
+    delete process.env.OPENCLAW_GATEWAY_PORT;
+    delete process.env.OPENCLAW_PROFILE;
     serviceReadCommand.mockResolvedValue(null);
     buildGatewayInstallPlan.mockClear();
   });
@@ -150,10 +150,10 @@ describe("daemon-cli coverage", () => {
     serviceReadCommand.mockResolvedValueOnce({
       programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
       environment: {
-        BOT_PROFILE: "dev",
-        BOT_STATE_DIR: "/tmp/bot-daemon-state",
-        BOT_CONFIG_PATH: "/tmp/bot-daemon-state/bot.json",
-        BOT_GATEWAY_PORT: "19001",
+        OPENCLAW_PROFILE: "dev",
+        OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon-state",
+        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon-state/openclaw.json",
+        OPENCLAW_GATEWAY_PORT: "19001",
       },
       sourcePath: "/tmp/ai.bot.gateway.plist",
     });

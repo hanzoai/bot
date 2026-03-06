@@ -38,7 +38,7 @@ title: "Retry Policy"
 
 ## Configuration
 
-Set retry policy per provider in `~/.hanzo/bot/bot.json`:
+Set retry policy per provider in `~/.openclaw/openclaw.json`:
 
 ```json5
 {

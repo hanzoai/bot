@@ -1,5 +1,9 @@
 import Testing
+<<<<<<< HEAD
 @testable import HanzoBot
+=======
+@testable import OpenClaw
+>>>>>>> upstream/main
 
 @Suite(.serialized) struct ScreenRecordServiceTests {
     @Test func clampDefaultsAndBounds() {

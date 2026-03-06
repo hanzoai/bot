@@ -15,6 +15,7 @@ import type {
   PluginHookBeforePromptBuildResult,
   PluginHookRegistration,
 } from "./types.js";
+import { joinPresentTextSegments } from "../shared/text/join-segments.js";
 import { createHookRunner } from "./hooks.js";
 import { addTestHook, TEST_PLUGIN_AGENT_CTX } from "./hooks.test-helpers.js";
 import { createEmptyPluginRegistry, type PluginRegistry } from "./registry.js";
@@ -154,9 +155,10 @@ describe("model override pipeline wiring", () => {
         { prompt: "test", messages: [{ role: "user", content: "x" }] as unknown[] },
         stubCtx,
       );
-      const prependContext = [promptBuild?.prependContext, legacy?.prependContext]
-        .filter((value): value is string => Boolean(value))
-        .join("\n\n");
+      const prependContext = joinPresentTextSegments([
+        promptBuild?.prependContext,
+        legacy?.prependContext,
+      ]);
 
       expect(prependContext).toBe("new context\n\nlegacy context");
     });

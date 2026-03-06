@@ -31,17 +31,6 @@ function hasConfiguredSecretString(value: unknown): boolean {
   return normalizeSecretInputString(value) !== undefined;
 }
 
-/**
- * Public API for probing a profile's credential eligibility.
- * Delegates to evaluateStoredCredentialEligibility with the profile's credential fields.
- */
-export function resolveAuthProfileEligibility(profile: AuthProfileCredential): {
-  eligible: boolean;
-  reasonCode: AuthCredentialReasonCode;
-} {
-  return evaluateStoredCredentialEligibility({ credential: profile });
-}
-
 export function evaluateStoredCredentialEligibility(params: {
   credential: AuthProfileCredential;
   now?: number;

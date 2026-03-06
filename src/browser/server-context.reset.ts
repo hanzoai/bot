@@ -9,7 +9,7 @@ type ResetDeps = {
   getProfileState: () => ProfileRuntimeState;
   stopRunningBrowser: () => Promise<{ stopped: boolean }>;
   isHttpReachable: (timeoutMs?: number) => Promise<boolean>;
-  resolveBotUserDataDir: (profileName: string) => string;
+  resolveOpenClawUserDataDir: (profileName: string) => string;
 };
 
 type ResetOps = {
@@ -30,7 +30,7 @@ export function createProfileResetOps({
   getProfileState,
   stopRunningBrowser,
   isHttpReachable,
-  resolveBotUserDataDir,
+  resolveOpenClawUserDataDir,
 }: ResetDeps): ResetOps {
   const resetProfile = async () => {
     if (profile.driver === "extension") {
@@ -43,7 +43,7 @@ export function createProfileResetOps({
       );
     }
 
-    const userDataDir = resolveBotUserDataDir(profile.name);
+    const userDataDir = resolveOpenClawUserDataDir(profile.name);
     const profileState = getProfileState();
     const httpReachable = await isHttpReachable(300);
     if (httpReachable && !profileState.running) {

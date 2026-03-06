@@ -1,4 +1,4 @@
-import type { ChannelAccountSnapshot, ChannelStatusIssue } from "bot/plugin-sdk";
+import type { ChannelAccountSnapshot, ChannelStatusIssue } from "@hanzo/bot/plugin-sdk/zalouser";
 
 type ZalouserAccountStatus = {
   accountId?: unknown;
@@ -50,7 +50,7 @@ export function collectZalouserStatusIssues(
         accountId,
         kind: "auth",
         message: "Not authenticated (no saved Zalo session).",
-        fix: "Run: bot channels login --channel zalouser",
+        fix: "Run: openclaw channels login --channel zalouser",
       });
       continue;
     }

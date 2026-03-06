@@ -67,19 +67,18 @@ export function registerDefaultAuthTokenSuite(): void {
       await new Promise<void>((resolve) => ws.once("close", () => resolve()));
     }
 
-    async function expectStatusAndHealthMissingScope(ws: WebSocket): Promise<void> {
+    async function expectStatusMissingScopeButHealthAvailable(ws: WebSocket): Promise<void> {
       const status = await rpcReq(ws, "status");
       expect(status.ok).toBe(false);
       expect(status.error?.message).toContain("missing scope");
       const health = await rpcReq(ws, "health");
-      expect(health.ok).toBe(false);
-      expect(health.error?.message).toContain("missing scope");
+      expect(health.ok).toBe(true);
     }
 
     test("closes silent handshakes after timeout", async () => {
       vi.useRealTimers();
-      const prevHandshakeTimeout = process.env.BOT_TEST_HANDSHAKE_TIMEOUT_MS;
-      process.env.BOT_TEST_HANDSHAKE_TIMEOUT_MS = "20";
+      const prevHandshakeTimeout = process.env.OPENCLAW_TEST_HANDSHAKE_TIMEOUT_MS;
+      process.env.OPENCLAW_TEST_HANDSHAKE_TIMEOUT_MS = "20";
       try {
         const ws = await openWs(port);
         const handshakeTimeoutMs = getHandshakeTimeoutMs();
@@ -87,9 +86,9 @@ export function registerDefaultAuthTokenSuite(): void {
         expect(closed).toBe(true);
       } finally {
         if (prevHandshakeTimeout === undefined) {
-          delete process.env.BOT_TEST_HANDSHAKE_TIMEOUT_MS;
+          delete process.env.OPENCLAW_TEST_HANDSHAKE_TIMEOUT_MS;
         } else {
-          process.env.BOT_TEST_HANDSHAKE_TIMEOUT_MS = prevHandshakeTimeout;
+          process.env.OPENCLAW_TEST_HANDSHAKE_TIMEOUT_MS = prevHandshakeTimeout;
         }
       }
     });
@@ -118,24 +117,24 @@ export function registerDefaultAuthTokenSuite(): void {
       for (const testCase of [
         {
           env: {
-            BOT_VERSION: " ",
-            BOT_SERVICE_VERSION: "2.4.6-service",
+            OPENCLAW_VERSION: " ",
+            OPENCLAW_SERVICE_VERSION: "2.4.6-service",
             npm_package_version: "1.0.0-package",
           },
           expectedVersion: VERSION,
         },
         {
           env: {
-            BOT_VERSION: "9.9.9-cli",
-            BOT_SERVICE_VERSION: "2.4.6-service",
+            OPENCLAW_VERSION: "9.9.9-cli",
+            OPENCLAW_SERVICE_VERSION: "2.4.6-service",
             npm_package_version: "1.0.0-package",
           },
           expectedVersion: "9.9.9-cli",
         },
         {
           env: {
-            BOT_VERSION: " ",
-            BOT_SERVICE_VERSION: "\t",
+            OPENCLAW_VERSION: " ",
+            OPENCLAW_SERVICE_VERSION: "\t",
             npm_package_version: "1.0.0-package",
           },
           expectedVersion: VERSION,
@@ -203,12 +202,12 @@ export function registerDefaultAuthTokenSuite(): void {
       }
     });
 
-    test("does not grant admin when scopes are empty", async () => {
+    test("keeps health available but admin status restricted when scopes are empty", async () => {
       const ws = await openWs(port);
       try {
         const res = await connectReq(ws, { scopes: [] });
         expect(res.ok).toBe(true);
-        await expectStatusAndHealthMissingScope(ws);
+        await expectStatusMissingScopeButHealthAvailable(ws);
       } finally {
         ws.close();
       }
@@ -228,7 +227,7 @@ export function registerDefaultAuthTokenSuite(): void {
         scopes: [],
         clientId: GATEWAY_CLIENT_NAMES.TEST,
         clientMode: GATEWAY_CLIENT_MODES.TEST,
-        identityPath: path.join(os.tmpdir(), `bot-test-device-${randomUUID()}.json`),
+        identityPath: path.join(os.tmpdir(), `openclaw-test-device-${randomUUID()}.json`),
         nonce,
       });
 
@@ -253,7 +252,7 @@ export function registerDefaultAuthTokenSuite(): void {
       expect(presenceScopes).toEqual([]);
       expect(presenceScopes).not.toContain("operator.admin");
 
-      await expectStatusAndHealthMissingScope(ws);
+      await expectStatusMissingScopeButHealthAvailable(ws);
 
       ws.close();
     });

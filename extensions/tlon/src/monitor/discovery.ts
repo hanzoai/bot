@@ -1,4 +1,4 @@
-import type { RuntimeEnv } from "bot/plugin-sdk";
+import type { RuntimeEnv } from "@hanzo/bot/plugin-sdk/tlon";
 import type { Foreigns } from "../urbit/foreigns.js";
 import { formatChangesDate } from "./utils.js";
 

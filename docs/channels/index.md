@@ -1,14 +1,14 @@
 ---
-summary: "Messaging platforms Hanzo Bot can connect to"
+summary: "Messaging platforms OpenClaw can connect to"
 read_when:
-  - You want to choose a chat channel for Hanzo Bot
+  - You want to choose a chat channel for OpenClaw
   - You need a quick overview of supported messaging platforms
 title: "Chat Channels"
 ---
 
 # Chat Channels
 
-Hanzo Bot can talk to you on any chat app you already use. Each channel connects via the Gateway.
+OpenClaw can talk to you on any chat app you already use. Each channel connects via the Gateway.
 Text is supported everywhere; media and reactions vary by channel.
 
 ## Supported channels
@@ -18,7 +18,7 @@ Text is supported everywhere; media and reactions vary by channel.
 - [Feishu](/channels/feishu) — Feishu/Lark bot via WebSocket (plugin, installed separately).
 - [Google Chat](/channels/googlechat) — Google Chat API app via HTTP webhook.
 - [iMessage (legacy)](/channels/imessage) — Legacy macOS integration via imsg CLI (deprecated, use BlueBubbles for new setups).
-- [Microsoft Teams](/channels/msteams) — Bot Framework; enterprise support (plugin, installed separately).
+- [IRC](/channels/irc) — Classic IRC servers; channels + DMs with pairing/allowlist controls.
 - [LINE](/channels/line) — LINE Messaging API bot (plugin, installed separately).
 - [Matrix](/channels/matrix) — Matrix protocol (plugin, installed separately).
 - [Mattermost](/channels/mattermost) — Bot API + WebSocket; channels, groups, DMs (plugin, installed separately).
@@ -38,11 +38,10 @@ Text is supported everywhere; media and reactions vary by channel.
 
 ## Notes
 
-- Channels can run simultaneously; configure multiple and Hanzo Bot will route per chat.
+- Channels can run simultaneously; configure multiple and OpenClaw will route per chat.
 - Fastest setup is usually **Telegram** (simple bot token). WhatsApp requires QR pairing and
   stores more state on disk.
 - Group behavior varies by channel; see [Groups](/channels/groups).
 - DM pairing and allowlists are enforced for safety; see [Security](/gateway/security).
-- Telegram internals: [grammY notes](/channels/grammy).
 - Troubleshooting: [Channel troubleshooting](/channels/troubleshooting).
 - Model providers are documented separately; see [Model Providers](/providers/models).

@@ -10,7 +10,7 @@ import {
 import { createMemoryGetTool, createMemorySearchTool } from "./memory-tool.js";
 
 function asBotConfig(config: Partial<BotConfig>): BotConfig {
-  return config;
+  return config as BotConfig;
 }
 
 function createToolConfig() {

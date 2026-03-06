@@ -90,9 +90,9 @@ describe("registerQrCli", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubEnv("BOT_GATEWAY_TOKEN", "");
+    vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", "");
     vi.stubEnv("CLAWDBOT_GATEWAY_TOKEN", "");
-    vi.stubEnv("BOT_GATEWAY_PASSWORD", "");
+    vi.stubEnv("OPENCLAW_GATEWAY_PASSWORD", "");
     vi.stubEnv("CLAWDBOT_GATEWAY_PASSWORD", "");
   });
 
@@ -136,7 +136,7 @@ describe("registerQrCli", () => {
     expect(output).toContain("Pairing QR");
     expect(output).toContain("ASCII-QR");
     expect(output).toContain("Gateway:");
-    expect(output).toContain("bot devices approve <requestId>");
+    expect(output).toContain("openclaw devices approve <requestId>");
   });
 
   it("accepts --token override when config has no auth", async () => {
@@ -210,8 +210,8 @@ describe("registerQrCli", () => {
     expect(resolveCommandSecretRefsViaGateway).not.toHaveBeenCalled();
   });
 
-  it("uses BOT_GATEWAY_PASSWORD without resolving local password SecretRef", async () => {
-    vi.stubEnv("BOT_GATEWAY_PASSWORD", "password-from-env");
+  it("uses OPENCLAW_GATEWAY_PASSWORD without resolving local password SecretRef", async () => {
+    vi.stubEnv("OPENCLAW_GATEWAY_PASSWORD", "password-from-env");
     loadConfig.mockReturnValue({
       secrets: {
         providers: {
@@ -290,6 +290,30 @@ describe("registerQrCli", () => {
       password: "inferred-password",
     });
     expect(runtime.log).toHaveBeenCalledWith(expected);
+    expect(resolveCommandSecretRefsViaGateway).not.toHaveBeenCalled();
+  });
+
+  it("fails when token and password SecretRefs are both configured with inferred mode", async () => {
+    vi.stubEnv("QR_INFERRED_GATEWAY_TOKEN", "inferred-token");
+    loadConfig.mockReturnValue({
+      secrets: {
+        providers: {
+          default: { source: "env" },
+        },
+      },
+      gateway: {
+        bind: "custom",
+        customBindHost: "gateway.local",
+        auth: {
+          token: { source: "env", provider: "default", id: "QR_INFERRED_GATEWAY_TOKEN" },
+          password: { source: "env", provider: "default", id: "MISSING_LOCAL_GATEWAY_PASSWORD" },
+        },
+      },
+    });
+
+    await expectQrExit(["--setup-code-only"]);
+    const output = runtime.error.mock.calls.map((call) => String(call[0] ?? "")).join("\n");
+    expect(output).toContain("gateway.auth.mode is unset");
     expect(resolveCommandSecretRefsViaGateway).not.toHaveBeenCalled();
   });
 

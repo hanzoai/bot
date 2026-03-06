@@ -1,4 +1,8 @@
-import type { ChannelAccountSnapshot, ChannelPlugin, BotConfig } from "bot/plugin-sdk";
+import type {
+  ChannelAccountSnapshot,
+  ChannelPlugin,
+  BotConfig,
+} from "@hanzo/bot/plugin-sdk/bluebubbles";
 import {
   applyAccountNameToChannelSection,
   buildChannelConfigSchema,
@@ -13,7 +17,7 @@ import {
   resolveBlueBubblesGroupRequireMention,
   resolveBlueBubblesGroupToolPolicy,
   setAccountEnabledInConfigSection,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/bluebubbles";
 import {
   listBlueBubblesAccountIds,
   type ResolvedBlueBubblesAccount,

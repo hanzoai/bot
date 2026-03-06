@@ -1,14 +1,14 @@
 ---
 summary: "Windows (WSL2) support + companion app status"
 read_when:
-  - Installing Hanzo Bot on Windows
+  - Installing OpenClaw on Windows
   - Looking for Windows companion app status
 title: "Windows (WSL2)"
 ---
 
 # Windows (WSL2)
 
-Hanzo Bot on Windows is recommended **via WSL2** (Ubuntu recommended). The
+OpenClaw on Windows is recommended **via WSL2** (Ubuntu recommended). The
 CLI + Gateway run inside Linux, which keeps the runtime consistent and makes
 tooling far more compatible (Node/Bun/pnpm, Linux binaries, skills). Native
 Windows might be trickier. WSL2 gives you the full Linux experience — one command
@@ -32,19 +32,19 @@ Native Windows companion apps are planned.
 Inside WSL2:
 
 ```
-hanzo-bot onboard --install-daemon
+openclaw onboard --install-daemon
 ```
 
 Or:
 
 ```
-hanzo-bot gateway install
+openclaw gateway install
 ```
 
 Or:
 
 ```
-hanzo-bot configure
+openclaw configure
 ```
 
 Select **Gateway service** when prompted.
@@ -52,7 +52,7 @@ Select **Gateway service** when prompted.
 Repair/migrate:
 
 ```
-hanzo-bot doctor
+openclaw doctor
 ```
 
 ## Gateway auto-start before Windows login
@@ -139,7 +139,7 @@ Notes:
 
 - SSH from another machine targets the **Windows host IP** (example: `ssh user@windows-host -p 2222`).
 - Remote nodes must point at a **reachable** Gateway URL (not `127.0.0.1`); use
-  `hanzo-bot status --all` to confirm.
+  `openclaw status --all` to confirm.
 - Use `listenaddress=0.0.0.0` for LAN access; `127.0.0.1` keeps it local only.
 - If you want this automatic, register a Scheduled Task to run the refresh
   step at login.
@@ -182,17 +182,17 @@ Re-open Ubuntu, then verify:
 systemctl --user status
 ```
 
-### 3) Install Hanzo Bot (inside WSL)
+### 3) Install OpenClaw (inside WSL)
 
 Follow the Linux Getting Started flow inside WSL:
 
 ```bash
-git clone https://github.com/hanzoai/bot.git
-cd bot
+git clone https://github.com/openclaw/openclaw.git
+cd openclaw
 pnpm install
 pnpm ui:build # auto-installs UI deps on first run
 pnpm build
-hanzo-bot onboard
+openclaw onboard
 ```
 
 Full guide: [Getting Started](/start/getting-started)

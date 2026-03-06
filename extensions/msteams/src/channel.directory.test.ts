@@ -1,4 +1,4 @@
-import type { BotConfig, RuntimeEnv } from "bot/plugin-sdk";
+import type { BotConfig, RuntimeEnv } from "@hanzo/bot/plugin-sdk/msteams";
 import { describe, expect, it } from "vitest";
 import { msteamsPlugin } from "./channel.js";
 

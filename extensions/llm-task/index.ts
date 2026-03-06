@@ -1,4 +1,4 @@
-import type { AnyAgentTool, BotPluginApi } from "../../src/plugins/types.js";
+import type { AnyAgentTool, BotPluginApi } from "@hanzo/bot/plugin-sdk/llm-task";
 import { createLlmTaskTool } from "./src/llm-task-tool.js";
 
 export default function register(api: BotPluginApi) {

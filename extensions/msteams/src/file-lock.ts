@@ -1,1 +1,1 @@
-export { withFileLock } from "bot/plugin-sdk";
+export { withFileLock } from "@hanzo/bot/plugin-sdk/msteams";

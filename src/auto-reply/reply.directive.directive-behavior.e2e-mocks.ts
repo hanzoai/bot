@@ -1,15 +1,10 @@
 import { vi, type Mock } from "vitest";
 
-const { runEmbeddedPiAgentMock: _runMock, loadModelCatalogMock: _catMock } = vi.hoisted(() => ({
-  runEmbeddedPiAgentMock: vi.fn() as Mock,
-  loadModelCatalogMock: vi.fn() as Mock,
-}));
-
-export const runEmbeddedPiAgentMock: Mock = _runMock;
+export const runEmbeddedPiAgentMock: Mock = vi.fn();
 
 vi.mock("../agents/pi-embedded.js", () => ({
   abortEmbeddedPiRun: vi.fn().mockReturnValue(false),
-  runEmbeddedPiAgent: _runMock,
+  runEmbeddedPiAgent: (...args: unknown[]) => runEmbeddedPiAgentMock(...args),
   queueEmbeddedPiMessage: vi.fn().mockReturnValue(false),
   resolveEmbeddedSessionLane: (key: string) => `session:${key.trim() || "main"}`,
   isEmbeddedPiRunActive: vi.fn().mockReturnValue(false),
@@ -17,5 +12,5 @@ vi.mock("../agents/pi-embedded.js", () => ({
 }));
 
 vi.mock("../agents/model-catalog.js", () => ({
-  loadModelCatalog: _catMock,
+  loadModelCatalog: vi.fn(),
 }));

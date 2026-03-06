@@ -11,7 +11,7 @@ title: "Agent Workspace"
 The workspace is the agent's home. It is the only working directory used for
 file tools and for workspace context. Keep it private and treat it as memory.
 
-This is separate from `~/.bot/`, which stores config, credentials, and
+This is separate from `~/.openclaw/`, which stores config, credentials, and
 sessions.
 
 **Important:** the workspace is the **default cwd**, not a hard sandbox. Tools
@@ -19,24 +19,24 @@ resolve relative paths against the workspace, but absolute paths can still reach
 elsewhere on the host unless sandboxing is enabled. If you need isolation, use
 [`agents.defaults.sandbox`](/gateway/sandboxing) (and/or per‑agent sandbox config).
 When sandboxing is enabled and `workspaceAccess` is not `"rw"`, tools operate
-inside a sandbox workspace under `~/.bot/sandboxes`, not your host workspace.
+inside a sandbox workspace under `~/.openclaw/sandboxes`, not your host workspace.
 
 ## Default location
 
-- Default: `~/.bot/workspace`
-- If `BOT_PROFILE` is set and not `"default"`, the default becomes
-  `~/.bot/workspace-<profile>`.
-- Override in `~/.bot/bot.json`:
+- Default: `~/.openclaw/workspace`
+- If `OPENCLAW_PROFILE` is set and not `"default"`, the default becomes
+  `~/.openclaw/workspace-<profile>`.
+- Override in `~/.openclaw/openclaw.json`:
 
 ```json5
 {
   agent: {
-    workspace: "~/.bot/workspace",
+    workspace: "~/.openclaw/workspace",
   },
 }
 ```
 
-`bot onboard`, `bot configure`, or `bot setup` will create the
+`openclaw onboard`, `openclaw configure`, or `openclaw setup` will create the
 workspace and seed the bootstrap files if they are missing.
 Sandbox seed copies only accept regular in-workspace files; symlink/hardlink
 aliases that resolve outside the source workspace are ignored.
@@ -50,20 +50,20 @@ file creation:
 
 ## Extra workspace folders
 
-Older installs may have created `~/bot`. Keeping multiple workspace
+Older installs may have created `~/openclaw`. Keeping multiple workspace
 directories around can cause confusing auth or state drift, because only one
 workspace is active at a time.
 
 **Recommendation:** keep a single active workspace. If you no longer use the
-extra folders, archive or move them to Trash (for example `trash ~/bot`).
+extra folders, archive or move them to Trash (for example `trash ~/openclaw`).
 If you intentionally keep multiple workspaces, make sure
 `agents.defaults.workspace` points to the active one.
 
-`bot doctor` warns when it detects extra workspace directories.
+`openclaw doctor` warns when it detects extra workspace directories.
 
 ## Workspace file map (what each file means)
 
-These are the standard files Bot expects inside the workspace:
+These are the standard files OpenClaw expects inside the workspace:
 
 - `AGENTS.md`
   - Operating instructions for the agent and how it should use memory.
@@ -116,21 +116,21 @@ See [Memory](/concepts/memory) for the workflow and automatic memory flush.
 - `canvas/` (optional)
   - Canvas UI files for node displays (for example `canvas/index.html`).
 
-If any bootstrap file is missing, Bot injects a "missing file" marker into
+If any bootstrap file is missing, OpenClaw injects a "missing file" marker into
 the session and continues. Large bootstrap files are truncated when injected;
 adjust limits with `agents.defaults.bootstrapMaxChars` (default: 20000) and
 `agents.defaults.bootstrapTotalMaxChars` (default: 150000).
-`bot setup` can recreate missing defaults without overwriting existing
+`openclaw setup` can recreate missing defaults without overwriting existing
 files.
 
 ## What is NOT in the workspace
 
-These live under `~/.bot/` and should NOT be committed to the workspace repo:
+These live under `~/.openclaw/` and should NOT be committed to the workspace repo:
 
-- `~/.bot/bot.json` (config)
-- `~/.bot/credentials/` (OAuth tokens, API keys)
-- `~/.bot/agents/<agentId>/sessions/` (session transcripts + metadata)
-- `~/.bot/skills/` (managed skills)
+- `~/.openclaw/openclaw.json` (config)
+- `~/.openclaw/credentials/` (OAuth tokens, API keys)
+- `~/.openclaw/agents/<agentId>/sessions/` (session transcripts + metadata)
+- `~/.openclaw/skills/` (managed skills)
 
 If you need to migrate sessions or config, copy them separately and keep them
 out of version control.
@@ -149,7 +149,7 @@ If git is installed, brand-new workspaces are initialized automatically. If this
 workspace is not already a repo, run:
 
 ```bash
-cd ~/.bot/workspace
+cd ~/.openclaw/workspace
 git init
 git add AGENTS.md SOUL.md TOOLS.md IDENTITY.md USER.md HEARTBEAT.md memory/
 git commit -m "Add agent workspace"
@@ -174,7 +174,7 @@ Option B: GitHub CLI (`gh`)
 
 ```bash
 gh auth login
-gh repo create bot-workspace --private --source . --remote origin --push
+gh repo create openclaw-workspace --private --source . --remote origin --push
 ```
 
 Option C: GitLab web UI
@@ -204,11 +204,11 @@ git push
 Even in a private repo, avoid storing secrets in the workspace:
 
 - API keys, OAuth tokens, passwords, or private credentials.
-- Anything under `~/.bot/`.
+- Anything under `~/.openclaw/`.
 - Raw dumps of chats or sensitive attachments.
 
 If you must store sensitive references, use placeholders and keep the real
-secret elsewhere (password manager, environment variables, or `~/.bot/`).
+secret elsewhere (password manager, environment variables, or `~/.openclaw/`).
 
 Suggested `.gitignore` starter:
 
@@ -222,10 +222,10 @@ Suggested `.gitignore` starter:
 
 ## Moving the workspace to a new machine
 
-1. Clone the repo to the desired path (default `~/.bot/workspace`).
-2. Set `agents.defaults.workspace` to that path in `~/.bot/bot.json`.
-3. Run `bot setup --workspace <path>` to seed any missing files.
-4. If you need sessions, copy `~/.bot/agents/<agentId>/sessions/` from the
+1. Clone the repo to the desired path (default `~/.openclaw/workspace`).
+2. Set `agents.defaults.workspace` to that path in `~/.openclaw/openclaw.json`.
+3. Run `openclaw setup --workspace <path>` to seed any missing files.
+4. If you need sessions, copy `~/.openclaw/agents/<agentId>/sessions/` from the
    old machine separately.
 
 ## Advanced notes

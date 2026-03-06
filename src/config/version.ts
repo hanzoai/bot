@@ -1,4 +1,4 @@
-export type BotVersion = {
+export type OpenClawVersion = {
   major: number;
   minor: number;
   patch: number;
@@ -7,7 +7,7 @@ export type BotVersion = {
 
 const VERSION_RE = /^v?(\d+)\.(\d+)\.(\d+)(?:-(\d+))?/;
 
-export function parseBotVersion(raw: string | null | undefined): BotVersion | null {
+export function parseOpenClawVersion(raw: string | null | undefined): OpenClawVersion | null {
   if (!raw) {
     return null;
   }
@@ -24,12 +24,12 @@ export function parseBotVersion(raw: string | null | undefined): BotVersion | nu
   };
 }
 
-export function compareBotVersions(
+export function compareOpenClawVersions(
   a: string | null | undefined,
   b: string | null | undefined,
 ): number | null {
-  const parsedA = parseBotVersion(a);
-  const parsedB = parseBotVersion(b);
+  const parsedA = parseOpenClawVersion(a);
+  const parsedB = parseOpenClawVersion(b);
   if (!parsedA || !parsedB) {
     return null;
   }

@@ -1,7 +1,7 @@
 import type { Command } from "commander";
 import qrcode from "qrcode-terminal";
 import { loadConfig } from "../config/config.js";
-import { resolveSecretInputRef } from "../config/types.secrets.js";
+import { hasConfiguredSecretInput, resolveSecretInputRef } from "../config/types.secrets.js";
 import { resolvePairingSetupFromConfig, encodePairingSetupCode } from "../pairing/setup-code.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import { defaultRuntime } from "../runtime.js";
@@ -41,7 +41,7 @@ function readDevicePairPublicUrlFromConfig(cfg: ReturnType<typeof loadConfig>): 
 }
 
 function readGatewayTokenEnv(env: NodeJS.ProcessEnv): string | undefined {
-  const primary = typeof env.BOT_GATEWAY_TOKEN === "string" ? env.BOT_GATEWAY_TOKEN : "";
+  const primary = typeof env.OPENCLAW_GATEWAY_TOKEN === "string" ? env.OPENCLAW_GATEWAY_TOKEN : "";
   if (primary.trim().length > 0) {
     return primary.trim();
   }
@@ -53,7 +53,8 @@ function readGatewayTokenEnv(env: NodeJS.ProcessEnv): string | undefined {
 }
 
 function readGatewayPasswordEnv(env: NodeJS.ProcessEnv): string | undefined {
-  const primary = typeof env.BOT_GATEWAY_PASSWORD === "string" ? env.BOT_GATEWAY_PASSWORD : "";
+  const primary =
+    typeof env.OPENCLAW_GATEWAY_PASSWORD === "string" ? env.OPENCLAW_GATEWAY_PASSWORD : "";
   if (primary.trim().length > 0) {
     return primary.trim();
   }
@@ -80,11 +81,11 @@ function shouldResolveLocalGatewayPasswordSecret(
     return false;
   }
   const envToken = readGatewayTokenEnv(env);
-  const configToken =
-    typeof cfg.gateway?.auth?.token === "string" && cfg.gateway.auth.token.trim().length > 0
-      ? cfg.gateway.auth.token.trim()
-      : undefined;
-  return !envToken && !configToken;
+  const configTokenConfigured = hasConfiguredSecretInput(
+    cfg.gateway?.auth?.token,
+    cfg.secrets?.defaults,
+  );
+  return !envToken && !configTokenConfigured;
 }
 
 async function resolveLocalGatewayPasswordSecretIfNeeded(
@@ -133,7 +134,7 @@ export function registerQrCli(program: Command) {
     .description("Generate an iOS pairing QR code and setup code")
     .addHelpText(
       "after",
-      () => `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/qr", "docs.hanzo.bot/cli/qr")}\n`,
+      () => `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/qr", "docs.openclaw.ai/cli/qr")}\n`,
     )
     .option(
       "--remote",
@@ -274,7 +275,7 @@ export function registerQrCli(program: Command) {
 
         const lines: string[] = [
           theme.heading("Pairing QR"),
-          "Scan this with the Bot iOS app (Onboarding -> Scan QR).",
+          "Scan this with the OpenClaw iOS app (Onboarding -> Scan QR).",
           "",
         ];
 
@@ -290,8 +291,8 @@ export function registerQrCli(program: Command) {
           `${theme.muted("Source:")} ${resolved.urlSource}`,
           "",
           "Approve after scan with:",
-          `  ${theme.command("bot devices list")}`,
-          `  ${theme.command("bot devices approve <requestId>")}`,
+          `  ${theme.command("openclaw devices list")}`,
+          `  ${theme.command("openclaw devices approve <requestId>")}`,
         );
 
         defaultRuntime.log(lines.join("\n"));

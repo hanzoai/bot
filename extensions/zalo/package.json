@@ -1,16 +1,13 @@
 {
-  "name": "@hanzo/bot-zalo",
-  "version": "2026.3.5",
-  "description": "Hanzo Bot Zalo channel plugin",
+  "name": "@openclaw/zalo",
+  "version": "2026.3.6",
+  "description": "OpenClaw Zalo channel plugin",
   "type": "module",
   "dependencies": {
     "undici": "7.22.0",
     "zod": "^4.3.6"
   },
-  "devDependencies": {
-    "@hanzo/bot": "workspace:*"
-  },
-  "bot": {
+  "openclaw": {
     "extensions": [
       "./index.ts"
     ],
@@ -28,7 +25,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@hanzo/bot-zalo",
+      "npmSpec": "@openclaw/zalo",
       "localPath": "extensions/zalo",
       "defaultChoice": "npm"
     }

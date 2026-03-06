@@ -4,7 +4,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ANDROID_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 RESULTS_DIR="$ANDROID_DIR/benchmark/results"
+<<<<<<< HEAD
 CLASS_FILTER="ai.hanzo.bot.android.benchmark.StartupMacrobenchmark#coldStartup"
+=======
+CLASS_FILTER="ai.openclaw.android.benchmark.StartupMacrobenchmark#coldStartup"
+>>>>>>> upstream/main
 BASELINE_JSON=""
 
 usage() {
@@ -54,7 +58,11 @@ fi
 
 mkdir -p "$RESULTS_DIR"
 
+<<<<<<< HEAD
 run_log="$(mktemp -t bot-android-bench.XXXXXX.log)"
+=======
+run_log="$(mktemp -t openclaw-android-bench.XXXXXX.log)"
+>>>>>>> upstream/main
 trap 'rm -f "$run_log"' EXIT
 
 cd "$ANDROID_DIR"

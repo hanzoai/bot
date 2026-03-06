@@ -118,7 +118,7 @@ describe("AcpxRuntime", () => {
     const prompt = logs.find((entry) => entry.kind === "prompt");
     expect(ensure).toBeDefined();
     expect(prompt).toBeDefined();
-    expect(prompt?.botShell).toBe("acp");
+    expect(prompt?.openclawShell).toBe("acp");
     expect(Array.isArray(prompt?.args)).toBe(true);
     const promptArgs = (prompt?.args as string[]) ?? [];
     expect(promptArgs).toContain("--ttl");
@@ -350,7 +350,7 @@ describe("AcpxRuntime", () => {
 
   it("does not mark backend unhealthy when a per-session cwd is missing", async () => {
     const { runtime } = await createMockRuntimeFixture();
-    const missingCwd = path.join(os.tmpdir(), "bot-acpx-runtime-test-missing-cwd");
+    const missingCwd = path.join(os.tmpdir(), "openclaw-acpx-runtime-test-missing-cwd");
 
     await runtime.probeAvailability();
     expect(runtime.isHealthy()).toBe(true);
@@ -412,5 +412,52 @@ describe("AcpxRuntime", () => {
     expect(report.ok).toBe(false);
     expect(report.code).toBe("ACP_BACKEND_UNAVAILABLE");
     expect(report.installCommand).toContain("acpx");
+  });
+
+  it("falls back to 'sessions new' when 'sessions ensure' returns no session IDs", async () => {
+    process.env.MOCK_ACPX_ENSURE_EMPTY = "1";
+    try {
+      const { runtime, logPath } = await createMockRuntimeFixture();
+      const handle = await runtime.ensureSession({
+        sessionKey: "agent:claude:acp:fallback-test",
+        agent: "claude",
+        mode: "persistent",
+      });
+      expect(handle.backend).toBe("acpx");
+      expect(handle.acpxRecordId).toBe("rec-agent:claude:acp:fallback-test");
+      expect(handle.agentSessionId).toBe("inner-agent:claude:acp:fallback-test");
+
+      const logs = await readMockRuntimeLogEntries(logPath);
+      expect(logs.some((entry) => entry.kind === "ensure")).toBe(true);
+      expect(logs.some((entry) => entry.kind === "new")).toBe(true);
+    } finally {
+      delete process.env.MOCK_ACPX_ENSURE_EMPTY;
+    }
+  });
+
+  it("fails with ACP_SESSION_INIT_FAILED when both ensure and new omit session IDs", async () => {
+    process.env.MOCK_ACPX_ENSURE_EMPTY = "1";
+    process.env.MOCK_ACPX_NEW_EMPTY = "1";
+    try {
+      const { runtime, logPath } = await createMockRuntimeFixture();
+
+      await expect(
+        runtime.ensureSession({
+          sessionKey: "agent:claude:acp:fallback-fail",
+          agent: "claude",
+          mode: "persistent",
+        }),
+      ).rejects.toMatchObject({
+        code: "ACP_SESSION_INIT_FAILED",
+        message: expect.stringContaining("neither 'sessions ensure' nor 'sessions new'"),
+      });
+
+      const logs = await readMockRuntimeLogEntries(logPath);
+      expect(logs.some((entry) => entry.kind === "ensure")).toBe(true);
+      expect(logs.some((entry) => entry.kind === "new")).toBe(true);
+    } finally {
+      delete process.env.MOCK_ACPX_ENSURE_EMPTY;
+      delete process.env.MOCK_ACPX_NEW_EMPTY;
+    }
   });
 });

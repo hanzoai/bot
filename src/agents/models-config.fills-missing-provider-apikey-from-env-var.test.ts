@@ -3,13 +3,13 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { BotConfig } from "../config/config.js";
 import { validateConfigObject } from "../config/validation.js";
-import { resolveBotAgentDir } from "./agent-paths.js";
+import { resolveOpenClawAgentDir } from "./agent-paths.js";
 import {
   CUSTOM_PROXY_MODELS_CONFIG,
   installModelsConfigTestHooks,
   withModelsTempHome as withTempHome,
 } from "./models-config.e2e-harness.js";
-import { ensureBotModelsJson } from "./models-config.js";
+import { ensureOpenClawModelsJson } from "./models-config.js";
 import { readGeneratedModelsJson } from "./models-config.test-utils.js";
 
 installModelsConfigTestHooks();
@@ -31,7 +31,7 @@ async function withEnvVar(name: string, value: string, run: () => Promise<void>)
 }
 
 async function writeAgentModelsJson(content: unknown): Promise<void> {
-  const agentDir = resolveBotAgentDir();
+  const agentDir = resolveOpenClawAgentDir();
   await fs.mkdir(agentDir, { recursive: true });
   await fs.writeFile(
     path.join(agentDir, MODELS_JSON_NAME),
@@ -66,7 +66,7 @@ async function runCustomProviderMergeTest(seedProvider: {
   models: Array<{ id: string; name: string; input: string[] }>;
 }) {
   await writeAgentModelsJson({ providers: { custom: seedProvider } });
-  await ensureBotModelsJson({
+  await ensureOpenClawModelsJson({
     models: {
       mode: "merge",
       providers: {
@@ -122,7 +122,7 @@ describe("models-config", () => {
         throw new Error("expected config to validate");
       }
 
-      await ensureBotModelsJson(validated.config);
+      await ensureOpenClawModelsJson(validated.config);
 
       const parsed = await readGeneratedModelsJson<{
         providers: Record<string, { api?: string; models?: Array<{ id: string; api?: string }> }>;
@@ -158,7 +158,7 @@ describe("models-config", () => {
           },
         };
 
-        await ensureBotModelsJson(cfg);
+        await ensureOpenClawModelsJson(cfg);
 
         const parsed = await readGeneratedModelsJson<{
           providers: Record<string, { apiKey?: string; models?: Array<{ id: string }> }>;
@@ -193,7 +193,7 @@ describe("models-config", () => {
         },
       });
 
-      await ensureBotModelsJson(CUSTOM_PROXY_MODELS_CONFIG);
+      await ensureOpenClawModelsJson(CUSTOM_PROXY_MODELS_CONFIG);
 
       const parsed = await readGeneratedModelsJson<{
         providers: Record<string, { baseUrl?: string }>;
@@ -235,7 +235,7 @@ describe("models-config", () => {
       await withEnvVar("MOONSHOT_API_KEY", "sk-moonshot-test", async () => {
         const cfg = createMoonshotConfig({ contextWindow: 1024, maxTokens: 256 });
 
-        await ensureBotModelsJson(cfg);
+        await ensureOpenClawModelsJson(cfg);
 
         const parsed = await readGeneratedModelsJson<{
           providers: Record<
@@ -269,7 +269,7 @@ describe("models-config", () => {
       await withEnvVar("MOONSHOT_API_KEY", "sk-moonshot-test", async () => {
         const cfg = createMoonshotConfig({ contextWindow: 350000, maxTokens: 16384 });
 
-        await ensureBotModelsJson(cfg);
+        await ensureOpenClawModelsJson(cfg);
         const parsed = await readGeneratedModelsJson<{
           providers: Record<
             string,

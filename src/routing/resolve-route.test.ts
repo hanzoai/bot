@@ -352,7 +352,7 @@ describe("resolveAgentRoute", () => {
   test("defaultAgentId is used when no binding matches", () => {
     const cfg: BotConfig = {
       agents: {
-        list: [{ id: "home", default: true, workspace: "~/bot-home" }],
+        list: [{ id: "home", default: true, workspace: "~/openclaw-home" }],
       },
     };
     const route = resolveAgentRoute({

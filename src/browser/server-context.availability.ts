@@ -9,7 +9,12 @@ import {
   PROFILE_POST_RESTART_WS_TIMEOUT_MS,
   resolveCdpReachabilityTimeouts,
 } from "./cdp-timeouts.js";
-import { isChromeCdpReady, isChromeReachable, launchBotChrome, stopBotChrome } from "./chrome.js";
+import {
+  isChromeCdpReady,
+  isChromeReachable,
+  launchOpenClawChrome,
+  stopOpenClawChrome,
+} from "./chrome.js";
 import {
   ensureChromeExtensionRelayServer,
   stopChromeExtensionRelayServer,
@@ -76,7 +81,7 @@ export function createProfileAvailability({
   };
 
   const waitForCdpReadyAfterLaunch = async (): Promise<void> => {
-    // launchBotChrome() can return before Chrome is fully ready to serve /json/version + CDP WS.
+    // launchOpenClawChrome() can return before Chrome is fully ready to serve /json/version + CDP WS.
     // If a follow-up call races ahead, we can hit PortInUseError trying to launch again on the same port.
     const deadlineMs = Date.now() + CDP_READY_AFTER_LAUNCH_WINDOW_MS;
     while (Date.now() < deadlineMs) {
@@ -138,12 +143,12 @@ export function createProfileAvailability({
             : `Browser attachOnly is enabled and profile "${profile.name}" is not running.`,
         );
       }
-      const launched = await launchBotChrome(current.resolved, profile);
+      const launched = await launchOpenClawChrome(current.resolved, profile);
       attachRunning(launched);
       try {
         await waitForCdpReadyAfterLaunch();
       } catch (err) {
-        await stopBotChrome(launched).catch(() => {});
+        await stopOpenClawChrome(launched).catch(() => {});
         setProfileRunning(null);
         throw err;
       }
@@ -174,15 +179,15 @@ export function createProfileAvailability({
     // HTTP responds but WebSocket fails - port in use by something else.
     if (!profileState.running) {
       throw new Error(
-        `Port ${profile.cdpPort} is in use for profile "${profile.name}" but not by bot. ` +
+        `Port ${profile.cdpPort} is in use for profile "${profile.name}" but not by openclaw. ` +
           `Run action=reset-profile profile=${profile.name} to kill the process.`,
       );
     }
 
-    await stopBotChrome(profileState.running);
+    await stopOpenClawChrome(profileState.running);
     setProfileRunning(null);
 
-    const relaunched = await launchBotChrome(current.resolved, profile);
+    const relaunched = await launchOpenClawChrome(current.resolved, profile);
     attachRunning(relaunched);
 
     if (!(await isReachable(PROFILE_POST_RESTART_WS_TIMEOUT_MS))) {
@@ -203,7 +208,7 @@ export function createProfileAvailability({
     if (!profileState.running) {
       return { stopped: false };
     }
-    await stopBotChrome(profileState.running);
+    await stopOpenClawChrome(profileState.running);
     setProfileRunning(null);
     return { stopped: true };
   };

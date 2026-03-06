@@ -1,9 +1,16 @@
 import CoreMotion
 import Foundation
+<<<<<<< HEAD
 import BotKit
 
 final class MotionService: MotionServicing {
     func activities(params: HanzoBotMotionActivityParams) async throws -> HanzoBotMotionActivityPayload {
+=======
+import OpenClawKit
+
+final class MotionService: MotionServicing {
+    func activities(params: OpenClawMotionActivityParams) async throws -> OpenClawMotionActivityPayload {
+>>>>>>> upstream/main
         guard CMMotionActivityManager.isActivityAvailable() else {
             throw NSError(domain: "Motion", code: 1, userInfo: [
                 NSLocalizedDescriptionKey: "MOTION_UNAVAILABLE: activity not supported on this device",
@@ -20,7 +27,11 @@ final class MotionService: MotionServicing {
         let limit = max(1, min(params.limit ?? 200, 1000))
 
         let manager = CMMotionActivityManager()
+<<<<<<< HEAD
         let mapped = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<[HanzoBotMotionActivityEntry], Error>) in
+=======
+        let mapped: [OpenClawMotionActivityEntry] = try await withCheckedThrowingContinuation { cont in
+>>>>>>> upstream/main
             manager.queryActivityStarting(from: start, to: end, to: OperationQueue()) { activity, error in
                 if let error {
                     cont.resume(throwing: error)
@@ -28,7 +39,11 @@ final class MotionService: MotionServicing {
                     let formatter = ISO8601DateFormatter()
                     let sliced = Array((activity ?? []).suffix(limit))
                     let entries = sliced.map { entry in
+<<<<<<< HEAD
                         HanzoBotMotionActivityEntry(
+=======
+                        OpenClawMotionActivityEntry(
+>>>>>>> upstream/main
                             startISO: formatter.string(from: entry.startDate),
                             endISO: formatter.string(from: end),
                             confidence: Self.confidenceString(entry.confidence),
@@ -44,10 +59,17 @@ final class MotionService: MotionServicing {
             }
         }
 
+<<<<<<< HEAD
         return HanzoBotMotionActivityPayload(activities: mapped)
     }
 
     func pedometer(params: HanzoBotPedometerParams) async throws -> HanzoBotPedometerPayload {
+=======
+        return OpenClawMotionActivityPayload(activities: mapped)
+    }
+
+    func pedometer(params: OpenClawPedometerParams) async throws -> OpenClawPedometerPayload {
+>>>>>>> upstream/main
         guard CMPedometer.isStepCountingAvailable() else {
             throw NSError(domain: "Motion", code: 2, userInfo: [
                 NSLocalizedDescriptionKey: "PEDOMETER_UNAVAILABLE: step counting not supported",
@@ -62,13 +84,21 @@ final class MotionService: MotionServicing {
 
         let (start, end) = Self.resolveRange(startISO: params.startISO, endISO: params.endISO)
         let pedometer = CMPedometer()
+<<<<<<< HEAD
         let payload = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<HanzoBotPedometerPayload, Error>) in
+=======
+        let payload: OpenClawPedometerPayload = try await withCheckedThrowingContinuation { cont in
+>>>>>>> upstream/main
             pedometer.queryPedometerData(from: start, to: end) { data, error in
                 if let error {
                     cont.resume(throwing: error)
                 } else {
                     let formatter = ISO8601DateFormatter()
+<<<<<<< HEAD
                     let payload = HanzoBotPedometerPayload(
+=======
+                    let payload = OpenClawPedometerPayload(
+>>>>>>> upstream/main
                         startISO: formatter.string(from: start),
                         endISO: formatter.string(from: end),
                         steps: data?.numberOfSteps.intValue,

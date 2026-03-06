@@ -1,10 +1,10 @@
 import type {
   AcpRuntime,
-  BotPluginService,
-  BotPluginServiceContext,
+  OpenClawPluginService,
+  OpenClawPluginServiceContext,
   PluginLogger,
-} from "bot/plugin-sdk";
-import { registerAcpRuntimeBackend, unregisterAcpRuntimeBackend } from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/acpx";
+import { registerAcpRuntimeBackend, unregisterAcpRuntimeBackend } from "@hanzo/bot/plugin-sdk/acpx";
 import { resolveAcpxPluginConfig, type ResolvedAcpxPluginConfig } from "./config.js";
 import { ensureAcpx } from "./ensure.js";
 import { ACPX_BACKEND_ID, AcpxRuntime } from "./runtime.js";
@@ -34,13 +34,13 @@ function createDefaultRuntime(params: AcpxRuntimeFactoryParams): AcpxRuntimeLike
 
 export function createAcpxRuntimeService(
   params: CreateAcpxRuntimeServiceParams = {},
-): BotPluginService {
+): OpenClawPluginService {
   let runtime: AcpxRuntimeLike | null = null;
   let lifecycleRevision = 0;
 
   return {
     id: "acpx-runtime",
-    async start(ctx: BotPluginServiceContext): Promise<void> {
+    async start(ctx: OpenClawPluginServiceContext): Promise<void> {
       const pluginConfig = resolveAcpxPluginConfig({
         rawConfig: params.pluginConfig,
         workspaceDir: ctx.workspaceDir,
@@ -95,7 +95,7 @@ export function createAcpxRuntimeService(
         }
       })();
     },
-    async stop(_ctx: BotPluginServiceContext): Promise<void> {
+    async stop(_ctx: OpenClawPluginServiceContext): Promise<void> {
       lifecycleRevision += 1;
       unregisterAcpRuntimeBackend(ACPX_BACKEND_ID);
       runtime = null;

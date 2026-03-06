@@ -1,17 +1,17 @@
-# @bot/zalo
+# @openclaw/zalo
 
-Zalo channel plugin for Hanzo Bot (Bot API).
+Zalo channel plugin for OpenClaw (Bot API).
 
 ## Install (local checkout)
 
 ```bash
-hanzo-bot plugins install ./extensions/zalo
+openclaw plugins install ./extensions/zalo
 ```
 
 ## Install (npm)
 
 ```bash
-hanzo-bot plugins install @bot/zalo
+openclaw plugins install @openclaw/zalo
 ```
 
 Onboarding: select Zalo and confirm the install prompt to fetch the plugin automatically.

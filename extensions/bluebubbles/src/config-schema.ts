@@ -1,4 +1,4 @@
-import { MarkdownConfigSchema, ToolPolicySchema } from "bot/plugin-sdk";
+import { MarkdownConfigSchema, ToolPolicySchema } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import { z } from "zod";
 import { buildSecretInputSchema, hasConfiguredSecretInput } from "./secret-input.js";
 

@@ -102,7 +102,7 @@ function createWorkSetupCommandConfig(scope: "agent" | "shared"): BotConfig {
       list: [
         {
           id: "work",
-          workspace: "~/bot-work",
+          workspace: "~/openclaw-work",
           sandbox: {
             mode: "all",
             scope,
@@ -139,13 +139,13 @@ describe("Agent-specific sandbox config", () => {
           sandbox: {
             mode: "all",
             scope: "agent",
-            workspaceRoot: "~/.hanzo/bot/sandboxes",
+            workspaceRoot: "~/.openclaw/sandboxes",
           },
         },
         list: [
           {
             id: "isolated",
-            workspace: "~/bot-isolated",
+            workspace: "~/openclaw-isolated",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -174,14 +174,14 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "main",
-            workspace: "~/bot",
+            workspace: "~/openclaw",
             sandbox: {
               mode: "off",
             },
           },
           {
             id: "family",
-            workspace: "~/bot-family",
+            workspace: "~/openclaw-family",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -241,7 +241,7 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "main",
-            workspace: "~/bot",
+            workspace: "~/openclaw",
           },
         ],
       },
@@ -291,7 +291,7 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "work",
-            workspace: "~/bot-work",
+            workspace: "~/openclaw-work",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -324,7 +324,7 @@ describe("Agent-specific sandbox config", () => {
             list: [
               {
                 id: "main",
-                workspace: "~/bot",
+                workspace: "~/openclaw",
                 sandbox: {
                   mode: "off",
                 },
@@ -349,7 +349,7 @@ describe("Agent-specific sandbox config", () => {
             list: [
               {
                 id: "family",
-                workspace: "~/bot-family",
+                workspace: "~/openclaw-family",
                 sandbox: {
                   mode: "all",
                   scope: "agent",
@@ -385,7 +385,7 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "work",
-            workspace: "~/bot-work",
+            workspace: "~/openclaw-work",
             sandbox: {
               mode: "all",
               scope: "agent",

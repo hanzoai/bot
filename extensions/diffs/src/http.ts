@@ -1,4 +1,4 @@
-import type { PluginLogger } from "bot/plugin-sdk";
+import type { PluginLogger } from "@hanzo/bot/plugin-sdk/diffs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { DiffArtifactStore } from "./store.js";
 import { DIFF_ARTIFACT_ID_PATTERN, DIFF_ARTIFACT_TOKEN_PATTERN } from "./types.js";

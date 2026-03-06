@@ -146,13 +146,13 @@ describe("chrome extension relay server", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv([
-      "BOT_GATEWAY_TOKEN",
-      "BOT_EXTENSION_RELAY_RECONNECT_GRACE_MS",
-      "BOT_EXTENSION_RELAY_COMMAND_RECONNECT_WAIT_MS",
+      "OPENCLAW_GATEWAY_TOKEN",
+      "OPENCLAW_EXTENSION_RELAY_RECONNECT_GRACE_MS",
+      "OPENCLAW_EXTENSION_RELAY_COMMAND_RECONNECT_WAIT_MS",
     ]);
-    process.env.BOT_GATEWAY_TOKEN = TEST_GATEWAY_TOKEN;
-    delete process.env.BOT_EXTENSION_RELAY_RECONNECT_GRACE_MS;
-    delete process.env.BOT_EXTENSION_RELAY_COMMAND_RECONNECT_WAIT_MS;
+    process.env.OPENCLAW_GATEWAY_TOKEN = TEST_GATEWAY_TOKEN;
+    delete process.env.OPENCLAW_EXTENSION_RELAY_RECONNECT_GRACE_MS;
+    delete process.env.OPENCLAW_EXTENSION_RELAY_COMMAND_RECONNECT_WAIT_MS;
   });
 
   afterEach(async () => {
@@ -227,8 +227,8 @@ describe("chrome extension relay server", () => {
     const sharedUrl = await ensureSharedRelayServer();
 
     const headers = getChromeExtensionRelayAuthHeaders(sharedUrl);
-    expect(Object.keys(headers)).toContain("x-bot-relay-token");
-    expect(headers["x-bot-relay-token"]).not.toBe(TEST_GATEWAY_TOKEN);
+    expect(Object.keys(headers)).toContain("x-openclaw-relay-token");
+    expect(headers["x-openclaw-relay-token"]).not.toBe(TEST_GATEWAY_TOKEN);
   });
 
   it("rejects CDP access without relay auth token", async () => {
@@ -273,13 +273,15 @@ describe("chrome extension relay server", () => {
       headers: {
         Origin: origin,
         "Access-Control-Request-Method": "GET",
-        "Access-Control-Request-Headers": "x-bot-relay-token",
+        "Access-Control-Request-Headers": "x-openclaw-relay-token",
       },
     });
 
     expect(res.status).toBe(204);
     expect(res.headers.get("access-control-allow-origin")).toBe(origin);
-    expect(res.headers.get("access-control-allow-headers") ?? "").toContain("x-bot-relay-token");
+    expect(res.headers.get("access-control-allow-headers") ?? "").toContain(
+      "x-openclaw-relay-token",
+    );
   });
 
   it("rejects CORS preflight from non-extension origins", async () => {
@@ -514,7 +516,7 @@ describe("chrome extension relay server", () => {
   });
 
   it("closes CDP clients after reconnect grace when extension stays disconnected", async () => {
-    process.env.BOT_EXTENSION_RELAY_RECONNECT_GRACE_MS = "150";
+    process.env.OPENCLAW_EXTENSION_RELAY_RECONNECT_GRACE_MS = "150";
 
     const { port, ext } = await startRelayWithExtension();
     const cdp = new WebSocket(`ws://127.0.0.1:${port}/cdp`, {
@@ -527,7 +529,7 @@ describe("chrome extension relay server", () => {
   });
 
   it("stops advertising websocket endpoint after reconnect grace expires", async () => {
-    process.env.BOT_EXTENSION_RELAY_RECONNECT_GRACE_MS = "120";
+    process.env.OPENCLAW_EXTENSION_RELAY_RECONNECT_GRACE_MS = "120";
 
     const { ext } = await startRelayWithExtension();
     ext.send(
@@ -575,7 +577,9 @@ describe("chrome extension relay server", () => {
     const sharedUrl = await ensureSharedRelayServer();
     const sharedPort = new URL(sharedUrl).port;
 
-    const token = relayAuthHeaders(`ws://127.0.0.1:${sharedPort}/extension`)["x-bot-relay-token"];
+    const token = relayAuthHeaders(`ws://127.0.0.1:${sharedPort}/extension`)[
+      "x-openclaw-relay-token"
+    ];
     expect(token).toBeTruthy();
     const ext = new WebSocket(
       `ws://127.0.0.1:${sharedPort}/extension?token=${encodeURIComponent(String(token))}`,
@@ -587,7 +591,7 @@ describe("chrome extension relay server", () => {
   it("accepts /json endpoints with relay token query param", async () => {
     const sharedUrl = await ensureSharedRelayServer();
 
-    const token = relayAuthHeaders(sharedUrl)["x-bot-relay-token"];
+    const token = relayAuthHeaders(sharedUrl)["x-openclaw-relay-token"];
     expect(token).toBeTruthy();
     const versionRes = await fetch(
       `${sharedUrl}/json/version?token=${encodeURIComponent(String(token))}`,
@@ -600,7 +604,7 @@ describe("chrome extension relay server", () => {
     const sharedPort = new URL(sharedUrl).port;
 
     const versionRes = await fetch(`${sharedUrl}/json/version`, {
-      headers: { "x-bot-relay-token": TEST_GATEWAY_TOKEN },
+      headers: { "x-openclaw-relay-token": TEST_GATEWAY_TOKEN },
     });
     expect(versionRes.status).toBe(200);
 
@@ -940,7 +944,7 @@ describe("chrome extension relay server", () => {
     let probeToken: string | undefined;
     const fakeRelay = createServer((req, res) => {
       if (req.url?.startsWith("/json/version")) {
-        const header = req.headers["x-bot-relay-token"];
+        const header = req.headers["x-openclaw-relay-token"];
         probeToken = Array.isArray(header) ? header[0] : header;
         if (!probeToken) {
           res.writeHead(401);
@@ -948,7 +952,7 @@ describe("chrome extension relay server", () => {
           return;
         }
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ Browser: "Bot/extension-relay" }));
+        res.end(JSON.stringify({ Browser: "OpenClaw/extension-relay" }));
         return;
       }
       if (req.url?.startsWith("/extension/status")) {
@@ -982,7 +986,7 @@ describe("chrome extension relay server", () => {
   it(
     "restores tabs after extension reconnects and re-announces",
     async () => {
-      process.env.BOT_EXTENSION_RELAY_RECONNECT_GRACE_MS = "200";
+      process.env.OPENCLAW_EXTENSION_RELAY_RECONNECT_GRACE_MS = "200";
 
       const { port, ext: ext1 } = await startRelayWithExtension();
 
@@ -1067,7 +1071,7 @@ describe("chrome extension relay server", () => {
   it(
     "preserves tab across a fast extension reconnect within grace period",
     async () => {
-      process.env.BOT_EXTENSION_RELAY_RECONNECT_GRACE_MS = "2000";
+      process.env.OPENCLAW_EXTENSION_RELAY_RECONNECT_GRACE_MS = "2000";
 
       const { port, ext: ext1 } = await startRelayWithExtension();
 
@@ -1148,7 +1152,7 @@ describe("chrome extension relay server", () => {
     RELAY_TEST_TIMEOUT_MS,
   );
 
-  it("does not swallow EADDRINUSE when occupied port is not an bot relay", async () => {
+  it("does not swallow EADDRINUSE when occupied port is not an openclaw relay", async () => {
     const port = await getFreePort();
     const blocker = createServer((_, res) => {
       res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });

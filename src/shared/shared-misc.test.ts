@@ -4,7 +4,7 @@ import {
   getFrontmatterString,
   normalizeStringList,
   parseFrontmatterBool,
-  resolveBotManifestBlock,
+  resolveOpenClawManifestBlock,
 } from "./frontmatter.js";
 import { resolveNodeIdFromCandidates } from "./node-match.js";
 
@@ -66,18 +66,20 @@ describe("shared/frontmatter", () => {
     expect(parseFrontmatterBool(undefined, true)).toBe(true);
   });
 
-  test("resolveBotManifestBlock parses JSON5 metadata and picks bot block", () => {
+  test("resolveOpenClawManifestBlock parses JSON5 metadata and picks openclaw block", () => {
     const frontmatter = {
-      metadata: "{ bot: { foo: 1, bar: 'baz' } }",
+      metadata: "{ openclaw: { foo: 1, bar: 'baz' } }",
     };
-    expect(resolveBotManifestBlock({ frontmatter })).toEqual({ foo: 1, bar: "baz" });
+    expect(resolveOpenClawManifestBlock({ frontmatter })).toEqual({ foo: 1, bar: "baz" });
   });
 
-  test("resolveBotManifestBlock returns undefined for invalid input", () => {
-    expect(resolveBotManifestBlock({ frontmatter: {} })).toBeUndefined();
-    expect(resolveBotManifestBlock({ frontmatter: { metadata: "not-json5" } })).toBeUndefined();
+  test("resolveOpenClawManifestBlock returns undefined for invalid input", () => {
+    expect(resolveOpenClawManifestBlock({ frontmatter: {} })).toBeUndefined();
     expect(
-      resolveBotManifestBlock({ frontmatter: { metadata: "{ nope: { a: 1 } }" } }),
+      resolveOpenClawManifestBlock({ frontmatter: { metadata: "not-json5" } }),
+    ).toBeUndefined();
+    expect(
+      resolveOpenClawManifestBlock({ frontmatter: { metadata: "{ nope: { a: 1 } }" } }),
     ).toBeUndefined();
   });
 });

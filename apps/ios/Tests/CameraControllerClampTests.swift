@@ -1,5 +1,9 @@
 import Testing
+<<<<<<< HEAD
 @testable import HanzoBot
+=======
+@testable import OpenClaw
+>>>>>>> upstream/main
 
 @Suite struct CameraControllerClampTests {
     @Test func clampQualityDefaultsAndBounds() {

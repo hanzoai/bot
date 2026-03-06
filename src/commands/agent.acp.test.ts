@@ -23,7 +23,7 @@ const runtime: RuntimeEnv = {
 };
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
-  return withTempHomeBase(fn, { prefix: "bot-agent-acp-" });
+  return withTempHomeBase(fn, { prefix: "openclaw-agent-acp-" });
 }
 
 function createAcpEnabledConfig(home: string, storePath: string): BotConfig {
@@ -38,7 +38,7 @@ function createAcpEnabledConfig(home: string, storePath: string): BotConfig {
       defaults: {
         model: { primary: "openai/gpt-5.3-codex" },
         models: { "openai/gpt-5.3-codex": {} },
-        workspace: path.join(home, "@hanzo/bot"),
+        workspace: path.join(home, "openclaw"),
       },
     },
     session: { store: storePath, mainKey: "main" },

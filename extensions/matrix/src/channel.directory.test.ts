@@ -1,4 +1,4 @@
-import type { PluginRuntime, RuntimeEnv } from "bot/plugin-sdk";
+import type { PluginRuntime, RuntimeEnv } from "@hanzo/bot/plugin-sdk/matrix";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CoreConfig } from "./types.js";
 import { matrixPlugin } from "./channel.js";

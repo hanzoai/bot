@@ -1,6 +1,10 @@
 import Foundation
 import Photos
+<<<<<<< HEAD
 import BotKit
+=======
+import OpenClawKit
+>>>>>>> upstream/main
 import UIKit
 
 final class PhotoLibraryService: PhotosServicing {
@@ -13,7 +17,11 @@ final class PhotoLibraryService: PhotosServicing {
     private static let maxTotalBase64Chars = 340 * 1024
     private static let maxPerPhotoBase64Chars = 300 * 1024
 
+<<<<<<< HEAD
     func latest(params: HanzoBotPhotosLatestParams) async throws -> HanzoBotPhotosLatestPayload {
+=======
+    func latest(params: OpenClawPhotosLatestParams) async throws -> OpenClawPhotosLatestPayload {
+>>>>>>> upstream/main
         let status = await Self.ensureAuthorization()
         guard status == .authorized || status == .limited else {
             throw NSError(domain: "Photos", code: 1, userInfo: [
@@ -27,7 +35,11 @@ final class PhotoLibraryService: PhotosServicing {
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
         let assets = PHAsset.fetchAssets(with: .image, options: fetchOptions)
 
+<<<<<<< HEAD
         var results: [HanzoBotPhotoPayload] = []
+=======
+        var results: [OpenClawPhotoPayload] = []
+>>>>>>> upstream/main
         var remainingBudget = Self.maxTotalBase64Chars
         let maxWidth = params.maxWidth.flatMap { $0 > 0 ? $0 : nil } ?? 1600
         let quality = params.quality.map { max(0.1, min(1.0, $0)) } ?? 0.85
@@ -51,7 +63,11 @@ final class PhotoLibraryService: PhotosServicing {
             }
         }
 
+<<<<<<< HEAD
         return HanzoBotPhotosLatestPayload(photos: results)
+=======
+        return OpenClawPhotosLatestPayload(photos: results)
+>>>>>>> upstream/main
     }
 
     private static func ensureAuthorization() async -> PHAuthorizationStatus {
@@ -63,7 +79,11 @@ final class PhotoLibraryService: PhotosServicing {
         _ asset: PHAsset,
         maxWidth: Int,
         quality: Double,
+<<<<<<< HEAD
         formatter: ISO8601DateFormatter) throws -> HanzoBotPhotoPayload
+=======
+        formatter: ISO8601DateFormatter) throws -> OpenClawPhotoPayload
+>>>>>>> upstream/main
     {
         let manager = PHImageManager.default()
         let options = PHImageRequestOptions()
@@ -100,7 +120,11 @@ final class PhotoLibraryService: PhotosServicing {
             maxBase64Chars: maxPerPhotoBase64Chars)
 
         let created = asset.creationDate.map { formatter.string(from: $0) }
+<<<<<<< HEAD
         return HanzoBotPhotoPayload(
+=======
+        return OpenClawPhotoPayload(
+>>>>>>> upstream/main
             format: "jpeg",
             base64: data.base64EncodedString(),
             width: Int(finalImage.size.width),

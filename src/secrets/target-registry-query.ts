@@ -15,8 +15,8 @@ import {
 } from "./target-registry-pattern.js";
 
 const COMPILED_SECRET_TARGET_REGISTRY = SECRET_TARGET_REGISTRY.map(compileTargetRegistryEntry);
-const BOT_COMPILED_SECRET_TARGETS = COMPILED_SECRET_TARGET_REGISTRY.filter(
-  (entry) => entry.configFile === "bot.json",
+const OPENCLAW_COMPILED_SECRET_TARGETS = COMPILED_SECRET_TARGET_REGISTRY.filter(
+  (entry) => entry.configFile === "openclaw.json",
 );
 const AUTH_PROFILES_COMPILED_SECRET_TARGETS = COMPILED_SECRET_TARGET_REGISTRY.filter(
   (entry) => entry.configFile === "auth-profiles.json",
@@ -46,7 +46,7 @@ const KNOWN_TARGET_IDS = new Set(COMPILED_SECRET_TARGET_REGISTRY.map((entry) => 
 
 function buildConfigTargetIdIndex(): Map<string, CompiledTargetRegistryEntry[]> {
   const byId = new Map<string, CompiledTargetRegistryEntry[]>();
-  for (const entry of BOT_COMPILED_SECRET_TARGETS) {
+  for (const entry of OPENCLAW_COMPILED_SECRET_TARGETS) {
     const existing = byId.get(entry.id);
     if (existing) {
       existing.push(entry);
@@ -57,7 +57,7 @@ function buildConfigTargetIdIndex(): Map<string, CompiledTargetRegistryEntry[]> 
   return byId;
 }
 
-const BOT_TARGETS_BY_ID = buildConfigTargetIdIndex();
+const OPENCLAW_TARGETS_BY_ID = buildConfigTargetIdIndex();
 
 function buildAuthProfileTargetIdIndex(): Map<string, CompiledTargetRegistryEntry[]> {
   const byId = new Map<string, CompiledTargetRegistryEntry[]>();
@@ -193,8 +193,10 @@ export function discoverConfigSecretTargetsByIds(
 
   const discoveryEntries =
     allowedTargetIds === null
-      ? BOT_COMPILED_SECRET_TARGETS
-      : Array.from(allowedTargetIds).flatMap((targetId) => BOT_TARGETS_BY_ID.get(targetId) ?? []);
+      ? OPENCLAW_COMPILED_SECRET_TARGETS
+      : Array.from(allowedTargetIds).flatMap(
+          (targetId) => OPENCLAW_TARGETS_BY_ID.get(targetId) ?? [],
+        );
 
   for (const entry of discoveryEntries) {
     const expanded = expandPathTokens(config, entry.pathTokens);

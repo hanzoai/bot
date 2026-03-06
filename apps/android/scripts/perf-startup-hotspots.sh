@@ -4,7 +4,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ANDROID_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 
+<<<<<<< HEAD
 PACKAGE="ai.hanzo.bot.android"
+=======
+PACKAGE="ai.openclaw.android"
+>>>>>>> upstream/main
 ACTIVITY=".MainActivity"
 DURATION_SECONDS="10"
 OUTPUT_PERF_DATA=""
@@ -15,7 +19,11 @@ Usage:
   ./scripts/perf-startup-hotspots.sh [--package <pkg>] [--activity <activity>] [--duration <sec>] [--out <perf.data>]
 
 Captures startup CPU profile via simpleperf (app_profiler.py), then prints concise hotspot summaries.
+<<<<<<< HEAD
 Default package/activity target Bot Android startup.
+=======
+Default package/activity target OpenClaw Android startup.
+>>>>>>> upstream/main
 EOF
 }
 
@@ -60,7 +68,11 @@ if ! command -v adb >/dev/null 2>&1; then
 fi
 
 if [[ -z "$OUTPUT_PERF_DATA" ]]; then
+<<<<<<< HEAD
   OUTPUT_PERF_DATA="/tmp/bot-startup-$(date +%Y%m%d-%H%M%S).perf.data"
+=======
+  OUTPUT_PERF_DATA="/tmp/openclaw-startup-$(date +%Y%m%d-%H%M%S).perf.data"
+>>>>>>> upstream/main
 fi
 
 device_count="$(adb devices | awk 'NR>1 && $2=="device" {c+=1} END {print c+0}')"
@@ -90,7 +102,11 @@ app_profiler="$simpleperf_dir/app_profiler.py"
 report_py="$simpleperf_dir/report.py"
 ndk_path="$(cd -- "$simpleperf_dir/.." && pwd)"
 
+<<<<<<< HEAD
 tmp_dir="$(mktemp -d -t bot-android-hotspots.XXXXXX)"
+=======
+tmp_dir="$(mktemp -d -t openclaw-android-hotspots.XXXXXX)"
+>>>>>>> upstream/main
 trap 'rm -rf "$tmp_dir"' EXIT
 
 capture_log="$tmp_dir/capture.log"

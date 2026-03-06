@@ -1,5 +1,10 @@
 import CoreImage
+<<<<<<< HEAD
 import BotKit
+=======
+import Combine
+import OpenClawKit
+>>>>>>> upstream/main
 import PhotosUI
 import SwiftUI
 import UIKit
@@ -44,6 +49,10 @@ private enum OnboardingStep: Int, CaseIterable {
 struct OnboardingWizardView: View {
     @Environment(NodeAppModel.self) private var appModel: NodeAppModel
     @Environment(GatewayConnectionController.self) private var gatewayController: GatewayConnectionController
+<<<<<<< HEAD
+=======
+    @Environment(\.scenePhase) private var scenePhase
+>>>>>>> upstream/main
     @AppStorage("node.instanceId") private var instanceId: String = UUID().uuidString
     @AppStorage("gateway.discovery.domain") private var discoveryDomain: String = ""
     @AppStorage("onboarding.developerMode") private var developerModeEnabled: Bool = false
@@ -66,6 +75,11 @@ struct OnboardingWizardView: View {
     @State private var showQRScanner: Bool = false
     @State private var scannerError: String?
     @State private var selectedPhoto: PhotosPickerItem?
+<<<<<<< HEAD
+=======
+    @State private var lastPairingAutoResumeAttemptAt: Date?
+    private static let pairingAutoResumeTicker = Timer.publish(every: 2.0, on: .main, in: .common).autoconnect()
+>>>>>>> upstream/main
 
     let allowSkip: Bool
     let onClose: () -> Void
@@ -130,7 +144,14 @@ struct OnboardingWizardView: View {
                     Button("Done") {
                         UIApplication.shared.sendAction(
                             #selector(UIResponder.resignFirstResponder),
+<<<<<<< HEAD
                             to: nil, from: nil, for: nil)
+=======
+                            to: nil,
+                            from: nil,
+                            for: nil
+                        )
+>>>>>>> upstream/main
                     }
                 }
             }
@@ -269,6 +290,10 @@ struct OnboardingWizardView: View {
         }
         .onChange(of: self.appModel.gatewayServerName) { _, newValue in
             guard newValue != nil else { return }
+<<<<<<< HEAD
+=======
+            self.showQRScanner = false
+>>>>>>> upstream/main
             self.statusLine = "Connected."
             if !self.didMarkCompleted, let selectedMode {
                 OnboardingStateStore.markCompleted(mode: selectedMode)
@@ -276,6 +301,16 @@ struct OnboardingWizardView: View {
             }
             self.onClose()
         }
+<<<<<<< HEAD
+=======
+        .onChange(of: self.scenePhase) { _, newValue in
+            guard newValue == .active else { return }
+            self.attemptAutomaticPairingResumeIfNeeded()
+        }
+        .onReceive(Self.pairingAutoResumeTicker) { _ in
+            self.attemptAutomaticPairingResumeIfNeeded()
+        }
+>>>>>>> upstream/main
     }
 
     @ViewBuilder
@@ -292,7 +327,11 @@ struct OnboardingWizardView: View {
                 .font(.largeTitle.weight(.bold))
                 .padding(.bottom, 8)
 
+<<<<<<< HEAD
             Text("Connect to your Bot gateway")
+=======
+            Text("Connect to your OpenClaw gateway")
+>>>>>>> upstream/main
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -503,6 +542,7 @@ struct OnboardingWizardView: View {
 
             if self.issue.needsPairing {
                 Section {
+<<<<<<< HEAD
                     Button("Copy: bot devices list") {
                         UIPasteboard.general.string = "bot devices list"
                     }
@@ -520,11 +560,44 @@ struct OnboardingWizardView: View {
                     Text("Pairing Approval")
                 } footer: {
                     Text("Approve this device on the gateway, then tap \"Resume After Approval\" below.")
+=======
+                    Button {
+                        self.resumeAfterPairingApproval()
+                    } label: {
+                        Label("Resume After Approval", systemImage: "arrow.clockwise")
+                    }
+                    .disabled(self.connectingGatewayID != nil)
+                } header: {
+                    Text("Pairing Approval")
+                } footer: {
+                    let requestLine: String = {
+                        if let id = self.issue.requestId, !id.isEmpty {
+                            return "Request ID: \(id)"
+                        }
+                        return "Request ID: check `openclaw devices list`."
+                    }()
+                    Text(
+                        "Approve this device on the gateway.\n"
+                            + "1) `openclaw devices approve` (or `openclaw devices approve <requestId>`)\n"
+                            + "2) `/pair approve` in Telegram\n"
+                            + "\(requestLine)\n"
+                            + "OpenClaw will also retry automatically when you return to this app.")
+>>>>>>> upstream/main
                 }
             }
 
             Section {
                 Button {
+<<<<<<< HEAD
+=======
+                    self.openQRScannerFromOnboarding()
+                } label: {
+                    Label("Scan QR Code Again", systemImage: "qrcode.viewfinder")
+                }
+                .disabled(self.connectingGatewayID != nil)
+
+                Button {
+>>>>>>> upstream/main
                     Task { await self.retryLastAttempt() }
                 } label: {
                     if self.connectingGatewayID == "retry" {
@@ -535,6 +608,7 @@ struct OnboardingWizardView: View {
                     }
                 }
                 .disabled(self.connectingGatewayID != nil)
+<<<<<<< HEAD
 
                 Button {
                     self.resumeAfterPairingApproval()
@@ -549,6 +623,8 @@ struct OnboardingWizardView: View {
                     Label("Scan QR Code Again", systemImage: "qrcode.viewfinder")
                 }
                 .disabled(self.connectingGatewayID != nil)
+=======
+>>>>>>> upstream/main
             }
         }
     }
@@ -583,7 +659,11 @@ struct OnboardingWizardView: View {
             Button {
                 self.onClose()
             } label: {
+<<<<<<< HEAD
                 Text("Open Bot")
+=======
+                Text("Open OpenClaw")
+>>>>>>> upstream/main
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -661,16 +741,56 @@ struct OnboardingWizardView: View {
         // We intentionally stop reconnect churn while unpaired to avoid generating multiple pending requests.
         self.appModel.gatewayAutoReconnectEnabled = true
         self.appModel.gatewayPairingPaused = false
+<<<<<<< HEAD
+=======
+        self.appModel.gatewayPairingRequestId = nil
+        // Pairing state is sticky to prevent UI flip-flop during reconnect churn.
+        // Once the user explicitly resumes after approving, clear the sticky issue
+        // so new status/auth errors can surface instead of being masked as pairing.
+        self.issue = .none
+>>>>>>> upstream/main
         self.connectMessage = "Retrying after approval…"
         self.statusLine = "Retrying after approval…"
         Task { await self.retryLastAttempt() }
     }
 
+<<<<<<< HEAD
     private func detectQRCode(from data: Data) -> String? {
         guard let ciImage = CIImage(data: data) else { return nil }
         let detector = CIDetector(
             ofType: CIDetectorTypeQRCode, context: nil,
             options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])
+=======
+    private func resumeAfterPairingApprovalInBackground() {
+        // Keep the pairing issue sticky to avoid visual flicker while we probe for approval.
+        self.appModel.gatewayAutoReconnectEnabled = true
+        self.appModel.gatewayPairingPaused = false
+        self.appModel.gatewayPairingRequestId = nil
+        Task { await self.retryLastAttempt(silent: true) }
+    }
+
+    private func attemptAutomaticPairingResumeIfNeeded() {
+        guard self.scenePhase == .active else { return }
+        guard self.step == .auth else { return }
+        guard self.issue.needsPairing else { return }
+        guard self.connectingGatewayID == nil else { return }
+
+        let now = Date()
+        if let last = self.lastPairingAutoResumeAttemptAt, now.timeIntervalSince(last) < 6 {
+            return
+        }
+        self.lastPairingAutoResumeAttemptAt = now
+        self.resumeAfterPairingApprovalInBackground()
+    }
+
+    private func detectQRCode(from data: Data) -> String? {
+        guard let ciImage = CIImage(data: data) else { return nil }
+        let detector = CIDetector(
+            ofType: CIDetectorTypeQRCode,
+            context: nil,
+            options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]
+        )
+>>>>>>> upstream/main
         let features = detector?.features(in: ciImage) ?? []
         for feature in features {
             if let qr = feature as? CIQRCodeFeature, let message = qr.messageString {
@@ -700,12 +820,20 @@ struct OnboardingWizardView: View {
                     self.manualPort = port
                     self.manualTLS = useTLS
                 case .discovered:
+<<<<<<< HEAD
                     self.manualHost = "bot.local"
+=======
+                    self.manualHost = "openclaw.local"
+>>>>>>> upstream/main
                     self.manualPort = 18789
                     self.manualTLS = true
                 }
             } else {
+<<<<<<< HEAD
                 self.manualHost = "bot.local"
+=======
+                self.manualHost = "openclaw.local"
+>>>>>>> upstream/main
                 self.manualPort = 18789
                 self.manualTLS = true
             }
@@ -714,7 +842,11 @@ struct OnboardingWizardView: View {
         if self.selectedMode == nil {
             self.selectedMode = OnboardingStateStore.lastMode()
         }
+<<<<<<< HEAD
         if self.selectedMode == .developerLocal && self.manualHost == "bot.local" {
+=======
+        if self.selectedMode == .developerLocal && self.manualHost == "openclaw.local" {
+>>>>>>> upstream/main
             self.manualHost = "localhost"
             self.manualTLS = false
         }
@@ -769,6 +901,7 @@ struct OnboardingWizardView: View {
 
     private func applyModeDefaults(_ mode: OnboardingConnectionMode) {
         let host = self.manualHost.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+<<<<<<< HEAD
         let hostIsDefaultLike = host.isEmpty || host == "bot.local" || host == "localhost"
 
         switch mode {
@@ -778,6 +911,17 @@ struct OnboardingWizardView: View {
             if self.manualPort <= 0 || self.manualPort > 65535 { self.manualPort = 18789 }
         case .remoteDomain:
             if host == "bot.local" || host == "localhost" { self.manualHost = "" }
+=======
+        let hostIsDefaultLike = host.isEmpty || host == "openclaw.local" || host == "localhost"
+
+        switch mode {
+        case .homeNetwork:
+            if hostIsDefaultLike { self.manualHost = "openclaw.local" }
+            self.manualTLS = true
+            if self.manualPort <= 0 || self.manualPort > 65535 { self.manualPort = 18789 }
+        case .remoteDomain:
+            if host == "openclaw.local" || host == "localhost" { self.manualHost = "" }
+>>>>>>> upstream/main
             self.manualTLS = true
             if self.manualPort <= 0 || self.manualPort > 65535 { self.manualPort = 18789 }
         case .developerLocal:
@@ -805,11 +949,21 @@ struct OnboardingWizardView: View {
         await self.gatewayController.connectManual(host: host, port: self.manualPort, useTLS: self.manualTLS)
     }
 
+<<<<<<< HEAD
     private func retryLastAttempt() async {
         self.connectingGatewayID = "retry"
         self.issue = .none
         self.connectMessage = "Retrying…"
         self.statusLine = "Retrying last connection…"
+=======
+    private func retryLastAttempt(silent: Bool = false) async {
+        self.connectingGatewayID = silent ? "retry-auto" : "retry"
+        // Keep current auth/pairing issue sticky while retrying to avoid Step 3 UI flip-flop.
+        if !silent {
+            self.connectMessage = "Retrying…"
+            self.statusLine = "Retrying last connection…"
+        }
+>>>>>>> upstream/main
         defer { self.connectingGatewayID = nil }
         await self.gatewayController.connectLastKnown()
     }

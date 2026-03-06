@@ -6,7 +6,7 @@ import {
   readWebhookBodyOrReject,
   resolveWebhookTargetWithAuthOrRejectSync,
   resolveWebhookTargets,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/bluebubbles";
 import { timingSafeEqual } from "node:crypto";
 import { createBlueBubblesDebounceRegistry } from "./monitor-debounce.js";
 import { normalizeWebhookMessage, normalizeWebhookReaction } from "./monitor-normalize.js";

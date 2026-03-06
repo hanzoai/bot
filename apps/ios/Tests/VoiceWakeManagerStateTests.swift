@@ -1,7 +1,11 @@
 import Foundation
 import SwabbleKit
 import Testing
+<<<<<<< HEAD
 @testable import HanzoBot
+=======
+@testable import OpenClaw
+>>>>>>> upstream/main
 
 @Suite(.serialized) struct VoiceWakeManagerStateTests {
     @Test @MainActor func suspendAndResumeCycleUpdatesState() async {
@@ -35,7 +39,11 @@ import Testing
 
     @Test @MainActor func handleRecognitionCallbackDispatchesCommand() async {
         let manager = VoiceWakeManager()
+<<<<<<< HEAD
         manager.triggerWords = ["hanzo-bot"]
+=======
+        manager.triggerWords = ["openclaw"]
+>>>>>>> upstream/main
         manager.isEnabled = true
 
         actor CaptureBox {
@@ -47,11 +55,19 @@ import Testing
             await capture.set(cmd)
         }
 
+<<<<<<< HEAD
         let transcript = "hanzo-bot hello"
         let triggerRange = transcript.range(of: "hanzo-bot")!
         let helloRange = transcript.range(of: "hello")!
         let segments = [
             WakeWordSegment(text: "hanzo-bot", start: 0.0, duration: 0.2, range: triggerRange),
+=======
+        let transcript = "openclaw hello"
+        let triggerRange = transcript.range(of: "openclaw")!
+        let helloRange = transcript.range(of: "hello")!
+        let segments = [
+            WakeWordSegment(text: "openclaw", start: 0.0, duration: 0.2, range: triggerRange),
+>>>>>>> upstream/main
             WakeWordSegment(text: "hello", start: 0.8, duration: 0.2, range: helloRange),
         ]
 

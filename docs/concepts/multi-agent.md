@@ -15,12 +15,12 @@ An **agent** is a fully scoped brain with its own:
 
 - **Workspace** (files, AGENTS.md/SOUL.md/USER.md, local notes, persona rules).
 - **State directory** (`agentDir`) for auth profiles, model registry, and per-agent config.
-- **Session store** (chat history + routing state) under `~/.hanzo/bot/agents/<agentId>/sessions`.
+- **Session store** (chat history + routing state) under `~/.openclaw/agents/<agentId>/sessions`.
 
 Auth profiles are **per-agent**. Each agent reads from its own:
 
-```
-~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json
+```text
+~/.openclaw/agents/<agentId>/agent/auth-profiles.json
 ```
 
 Main agent credentials are **not** shared automatically. Never reuse `agentDir`
@@ -28,7 +28,7 @@ across agents (it causes auth/session collisions). If you want to share creds,
 copy `auth-profiles.json` into the other agent's `agentDir`.
 
 Skills are per-agent via each workspace’s `skills/` folder, with shared skills
-available from `~/.hanzo/bot/skills`. See [Skills: per-agent vs shared](/tools/skills#per-agent-vs-shared-skills).
+available from `~/.openclaw/skills`. See [Skills: per-agent vs shared](/tools/skills#per-agent-vs-shared-skills).
 
 The Gateway can host **one agent** (default) or **many agents** side-by-side.
 
@@ -39,27 +39,27 @@ reach other host locations unless sandboxing is enabled. See
 
 ## Paths (quick map)
 
-- Config: `~/.hanzo/bot/bot.json` (or `BOT_CONFIG_PATH`)
-- State dir: `~/.hanzo/bot` (or `BOT_STATE_DIR`)
-- Workspace: `~/.hanzo/bot/workspace` (or `~/.hanzo/bot/workspace-<agentId>`)
-- Agent dir: `~/.hanzo/bot/agents/<agentId>/agent` (or `agents.list[].agentDir`)
-- Sessions: `~/.hanzo/bot/agents/<agentId>/sessions`
+- Config: `~/.openclaw/openclaw.json` (or `OPENCLAW_CONFIG_PATH`)
+- State dir: `~/.openclaw` (or `OPENCLAW_STATE_DIR`)
+- Workspace: `~/.openclaw/workspace` (or `~/.openclaw/workspace-<agentId>`)
+- Agent dir: `~/.openclaw/agents/<agentId>/agent` (or `agents.list[].agentDir`)
+- Sessions: `~/.openclaw/agents/<agentId>/sessions`
 
 ### Single-agent mode (default)
 
-If you do nothing, Hanzo Bot runs a single agent:
+If you do nothing, OpenClaw runs a single agent:
 
 - `agentId` defaults to **`main`**.
 - Sessions are keyed as `agent:main:<mainKey>`.
-- Workspace defaults to `~/.hanzo/bot/workspace` (or `~/.hanzo/bot/workspace-<profile>` when `BOT_PROFILE` is set).
-- State defaults to `~/.hanzo/bot/agents/main/agent`.
+- Workspace defaults to `~/.openclaw/workspace` (or `~/.openclaw/workspace-<profile>` when `OPENCLAW_PROFILE` is set).
+- State defaults to `~/.openclaw/agents/main/agent`.
 
 ## Agent helper
 
 Use the agent wizard to add a new isolated agent:
 
 ```bash
-hanzo-bot agents add work
+openclaw agents add work
 ```
 
 Then add `bindings` (or let the wizard do it) to route inbound messages.
@@ -67,8 +67,57 @@ Then add `bindings` (or let the wizard do it) to route inbound messages.
 Verify with:
 
 ```bash
-hanzo-bot agents list --bindings
+openclaw agents list --bindings
 ```
+
+## Quick start
+
+<Steps>
+  <Step title="Create each agent workspace">
+
+Use the wizard or create workspaces manually:
+
+```bash
+openclaw agents add coding
+openclaw agents add social
+```
+
+Each agent gets its own workspace with `SOUL.md`, `AGENTS.md`, and optional `USER.md`, plus a dedicated `agentDir` and session store under `~/.openclaw/agents/<agentId>`.
+
+  </Step>
+
+  <Step title="Create channel accounts">
+
+Create one account per agent on your preferred channels:
+
+- Discord: one bot per agent, enable Message Content Intent, copy each token.
+- Telegram: one bot per agent via BotFather, copy each token.
+- WhatsApp: link each phone number per account.
+
+```bash
+openclaw channels login --channel whatsapp --account work
+```
+
+See channel guides: [Discord](/channels/discord), [Telegram](/channels/telegram), [WhatsApp](/channels/whatsapp).
+
+  </Step>
+
+  <Step title="Add agents, accounts, and bindings">
+
+Add agents under `agents.list`, channel accounts under `channels.<channel>.accounts`, and connect them with `bindings` (examples below).
+
+  </Step>
+
+  <Step title="Restart and verify">
+
+```bash
+openclaw gateway restart
+openclaw agents list --bindings
+openclaw channels status --probe
+```
+
+  </Step>
+</Steps>
 
 ## Multiple agents = multiple people, multiple personalities
 
@@ -92,8 +141,8 @@ Example:
 {
   agents: {
     list: [
-      { id: "alex", workspace: "~/.hanzo/bot/workspace-alex" },
-      { id: "mia", workspace: "~/.hanzo/bot/workspace-mia" },
+      { id: "alex", workspace: "~/.openclaw/workspace-alex" },
+      { id: "mia", workspace: "~/.openclaw/workspace-mia" },
     ],
   },
   bindings: [
@@ -133,7 +182,14 @@ Bindings are **deterministic** and **most-specific wins**:
 7. channel-level match (`accountId: "*"`)
 8. fallback to default agent (`agents.list[].default`, else first list entry, default: `main`)
 
+If multiple bindings match in the same tier, the first one in config order wins.
 If a binding sets multiple match fields (for example `peer` + `guildId`), all specified fields are required (`AND` semantics).
+
+Important account-scope detail:
+
+- A binding that omits `accountId` matches the default account only.
+- Use `accountId: "*"` for a channel-wide fallback across all accounts.
+- If you later add the same binding for the same agent with an explicit account id, OpenClaw upgrades the existing channel-only binding to account-scoped instead of duplicating it.
 
 ## Multiple accounts / phone numbers
 
@@ -142,7 +198,7 @@ each login. Each `accountId` can be routed to a different agent, so one server c
 multiple phone numbers without mixing sessions.
 
 If you want a channel-wide default account when `accountId` is omitted, set
-`channels.<channel>.defaultAccount` (optional). When unset, Bot falls back
+`channels.<channel>.defaultAccount` (optional). When unset, OpenClaw falls back
 to `default` if present, otherwise the first configured account id (sorted).
 
 Common channels supporting this pattern include:
@@ -158,9 +214,106 @@ Common channels supporting this pattern include:
 - `binding`: routes inbound messages to an `agentId` by `(channel, accountId, peer)` and optionally guild/team ids.
 - Direct chats collapse to `agent:<agentId>:<mainKey>` (per-agent “main”; `session.mainKey`).
 
-## Example: two WhatsApps → two agents
+## Platform examples
 
-`~/.hanzo/bot/bot.json` (JSON5):
+### Discord bots per agent
+
+Each Discord bot account maps to a unique `accountId`. Bind each account to an agent and keep allowlists per bot.
+
+```json5
+{
+  agents: {
+    list: [
+      { id: "main", workspace: "~/.openclaw/workspace-main" },
+      { id: "coding", workspace: "~/.openclaw/workspace-coding" },
+    ],
+  },
+  bindings: [
+    { agentId: "main", match: { channel: "discord", accountId: "default" } },
+    { agentId: "coding", match: { channel: "discord", accountId: "coding" } },
+  ],
+  channels: {
+    discord: {
+      groupPolicy: "allowlist",
+      accounts: {
+        default: {
+          token: "DISCORD_BOT_TOKEN_MAIN",
+          guilds: {
+            "123456789012345678": {
+              channels: {
+                "222222222222222222": { allow: true, requireMention: false },
+              },
+            },
+          },
+        },
+        coding: {
+          token: "DISCORD_BOT_TOKEN_CODING",
+          guilds: {
+            "123456789012345678": {
+              channels: {
+                "333333333333333333": { allow: true, requireMention: false },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+Notes:
+
+- Invite each bot to the guild and enable Message Content Intent.
+- Tokens live in `channels.discord.accounts.<id>.token` (default account can use `DISCORD_BOT_TOKEN`).
+
+### Telegram bots per agent
+
+```json5
+{
+  agents: {
+    list: [
+      { id: "main", workspace: "~/.openclaw/workspace-main" },
+      { id: "alerts", workspace: "~/.openclaw/workspace-alerts" },
+    ],
+  },
+  bindings: [
+    { agentId: "main", match: { channel: "telegram", accountId: "default" } },
+    { agentId: "alerts", match: { channel: "telegram", accountId: "alerts" } },
+  ],
+  channels: {
+    telegram: {
+      accounts: {
+        default: {
+          botToken: "123456:ABC...",
+          dmPolicy: "pairing",
+        },
+        alerts: {
+          botToken: "987654:XYZ...",
+          dmPolicy: "allowlist",
+          allowFrom: ["tg:123456789"],
+        },
+      },
+    },
+  },
+}
+```
+
+Notes:
+
+- Create one bot per agent with BotFather and copy each token.
+- Tokens live in `channels.telegram.accounts.<id>.botToken` (default account can use `TELEGRAM_BOT_TOKEN`).
+
+### WhatsApp numbers per agent
+
+Link each account before starting the gateway:
+
+```bash
+openclaw channels login --channel whatsapp --account personal
+openclaw channels login --channel whatsapp --account biz
+```
+
+`~/.openclaw/openclaw.json` (JSON5):
 
 ```js
 {
@@ -170,14 +323,14 @@ Common channels supporting this pattern include:
         id: "home",
         default: true,
         name: "Home",
-        workspace: "~/.hanzo/bot/workspace-home",
-        agentDir: "~/.hanzo/bot/agents/home/agent",
+        workspace: "~/.openclaw/workspace-home",
+        agentDir: "~/.openclaw/agents/home/agent",
       },
       {
         id: "work",
         name: "Work",
-        workspace: "~/.hanzo/bot/workspace-work",
-        agentDir: "~/.hanzo/bot/agents/work/agent",
+        workspace: "~/.openclaw/workspace-work",
+        agentDir: "~/.openclaw/agents/work/agent",
       },
     ],
   },
@@ -210,12 +363,12 @@ Common channels supporting this pattern include:
     whatsapp: {
       accounts: {
         personal: {
-          // Optional override. Default: ~/.hanzo/bot/credentials/whatsapp/personal
-          // authDir: "~/.hanzo/bot/credentials/whatsapp/personal",
+          // Optional override. Default: ~/.openclaw/credentials/whatsapp/personal
+          // authDir: "~/.openclaw/credentials/whatsapp/personal",
         },
         biz: {
-          // Optional override. Default: ~/.hanzo/bot/credentials/whatsapp/biz
-          // authDir: "~/.hanzo/bot/credentials/whatsapp/biz",
+          // Optional override. Default: ~/.openclaw/credentials/whatsapp/biz
+          // authDir: "~/.openclaw/credentials/whatsapp/biz",
         },
       },
     },
@@ -234,13 +387,13 @@ Split by channel: route WhatsApp to a fast everyday agent and Telegram to an Opu
       {
         id: "chat",
         name: "Everyday",
-        workspace: "~/.hanzo/bot/workspace-chat",
+        workspace: "~/.openclaw/workspace-chat",
         model: "anthropic/claude-sonnet-4-5",
       },
       {
         id: "opus",
         name: "Deep Work",
-        workspace: "~/.hanzo/bot/workspace-opus",
+        workspace: "~/.openclaw/workspace-opus",
         model: "anthropic/claude-opus-4-6",
       },
     ],
@@ -268,13 +421,13 @@ Keep WhatsApp on the fast agent, but route one DM to Opus:
       {
         id: "chat",
         name: "Everyday",
-        workspace: "~/.hanzo/bot/workspace-chat",
+        workspace: "~/.openclaw/workspace-chat",
         model: "anthropic/claude-sonnet-4-5",
       },
       {
         id: "opus",
         name: "Deep Work",
-        workspace: "~/.hanzo/bot/workspace-opus",
+        workspace: "~/.openclaw/workspace-opus",
         model: "anthropic/claude-opus-4-6",
       },
     ],
@@ -303,7 +456,7 @@ and a tighter tool policy:
       {
         id: "family",
         name: "Family",
-        workspace: "~/.hanzo/bot/workspace-family",
+        workspace: "~/.openclaw/workspace-family",
         identity: { name: "Family Bot" },
         groupChat: {
           mentionPatterns: ["@family", "@familybot", "@Family Bot"],
@@ -356,7 +509,7 @@ Starting with v2026.1.6, each agent can have its own sandbox and tool restrictio
     list: [
       {
         id: "personal",
-        workspace: "~/.hanzo/bot/workspace-personal",
+        workspace: "~/.openclaw/workspace-personal",
         sandbox: {
           mode: "off",  // No sandbox for personal agent
         },
@@ -364,7 +517,7 @@ Starting with v2026.1.6, each agent can have its own sandbox and tool restrictio
       },
       {
         id: "family",
-        workspace: "~/.hanzo/bot/workspace-family",
+        workspace: "~/.openclaw/workspace-family",
         sandbox: {
           mode: "all",     // Always sandboxed
           scope: "agent",  // One container per agent

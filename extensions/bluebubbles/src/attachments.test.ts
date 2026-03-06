@@ -1,4 +1,4 @@
-import type { PluginRuntime } from "bot/plugin-sdk";
+import type { PluginRuntime } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "./test-mocks.js";
 import type { BlueBubblesAttachment } from "./types.js";

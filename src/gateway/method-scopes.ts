@@ -63,6 +63,7 @@ const METHOD_SCOPE_GROUPS: Record<OperatorScope, readonly string[]> = {
     "skills.status",
     "voicewake.get",
     "sessions.list",
+    "sessions.get",
     "sessions.preview",
     "sessions.resolve",
     "sessions.usage",
@@ -77,13 +78,10 @@ const METHOD_SCOPE_GROUPS: Record<OperatorScope, readonly string[]> = {
     "node.describe",
     "chat.history",
     "config.get",
+    "config.schema.lookup",
     "talk.config",
     "agents.files.list",
     "agents.files.get",
-    "marketplace.status",
-    "marketplace.earnings",
-    "marketplace.config",
-    "marketplace.transactions",
   ],
   [WRITE_SCOPE]: [
     "send",
@@ -102,8 +100,6 @@ const METHOD_SCOPE_GROUPS: Record<OperatorScope, readonly string[]> = {
     "chat.abort",
     "browser.request",
     "push.test",
-    "marketplace.opt-in",
-    "marketplace.opt-out",
   ],
   [ADMIN_SCOPE]: [
     "channels.logout",
@@ -129,8 +125,6 @@ const METHOD_SCOPE_GROUPS: Record<OperatorScope, readonly string[]> = {
     "set-heartbeats",
     "system-event",
     "agents.files.set",
-    "node.billing.set",
-    "marketplace.process-payouts",
   ],
 };
 

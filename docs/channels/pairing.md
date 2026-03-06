@@ -3,13 +3,13 @@ summary: "Pairing overview: approve who can DM you + which nodes can join"
 read_when:
   - Setting up DM access control
   - Pairing a new iOS/Android node
-  - Reviewing Hanzo Bot security posture
+  - Reviewing OpenClaw security posture
 title: "Pairing"
 ---
 
 # Pairing
 
-“Pairing” is Hanzo Bot’s explicit **owner approval** step.
+“Pairing” is OpenClaw’s explicit **owner approval** step.
 It is used in two places:
 
 1. **DM pairing** (who is allowed to talk to the bot)
@@ -32,18 +32,25 @@ Pairing codes:
 ### Approve a sender
 
 ```bash
-hanzo-bot pairing list telegram
-hanzo-bot pairing approve telegram <CODE>
+openclaw pairing list telegram
+openclaw pairing approve telegram <CODE>
 ```
 
 Supported channels: `telegram`, `whatsapp`, `signal`, `imessage`, `discord`, `slack`, `feishu`.
 
 ### Where the state lives
 
-Stored under `~/.hanzo/bot/credentials/`:
+Stored under `~/.openclaw/credentials/`:
 
 - Pending requests: `<channel>-pairing.json`
-- Approved allowlist store: `<channel>-allowFrom.json`
+- Approved allowlist store:
+  - Default account: `<channel>-allowFrom.json`
+  - Non-default account: `<channel>-<accountId>-allowFrom.json`
+
+Account scoping behavior:
+
+- Non-default accounts read/write only their scoped allowlist file.
+- Default account uses the channel-scoped unscoped allowlist file.
 
 Treat these as sensitive (they gate access to your assistant).
 
@@ -58,7 +65,7 @@ If you use the `device-pair` plugin, you can do first-time device pairing entire
 
 1. In Telegram, message your bot: `/pair`
 2. The bot replies with two messages: an instruction message and a separate **setup code** message (easy to copy/paste in Telegram).
-3. On your phone, open the Hanzo Bot iOS app → Settings → Gateway.
+3. On your phone, open the OpenClaw iOS app → Settings → Gateway.
 4. Paste the setup code and connect.
 5. Back in Telegram: `/pair approve`
 
@@ -72,21 +79,21 @@ Treat the setup code like a password while it is valid.
 ### Approve a node device
 
 ```bash
-hanzo-bot devices list
-hanzo-bot devices approve <requestId>
-hanzo-bot devices reject <requestId>
+openclaw devices list
+openclaw devices approve <requestId>
+openclaw devices reject <requestId>
 ```
 
 ### Node pairing state storage
 
-Stored under `~/.hanzo/bot/devices/`:
+Stored under `~/.openclaw/devices/`:
 
 - `pending.json` (short-lived; pending requests expire)
 - `paired.json` (paired devices + tokens)
 
 ### Notes
 
-- The legacy `node.pair.*` API (CLI: `hanzo-bot nodes pending/approve`) is a
+- The legacy `node.pair.*` API (CLI: `openclaw nodes pending/approve`) is a
   separate gateway-owned pairing store. WS nodes still require device pairing.
 
 ## Related docs

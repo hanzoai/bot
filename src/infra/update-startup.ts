@@ -6,8 +6,8 @@ import { formatCliCommand } from "../cli/command-format.js";
 import { resolveStateDir } from "../config/paths.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import { VERSION } from "../version.js";
-import { resolveBotPackageRoot } from "./bot-root.js";
 import { writeJsonAtomic } from "./json-files.js";
+import { resolveOpenClawPackageRoot } from "./openclaw-root.js";
 import { normalizeUpdateChannel, DEFAULT_PACKAGE_CHANNEL } from "./update-channels.js";
 import { compareSemverStrings, resolveNpmChannelTag, checkUpdateStatus } from "./update-check.js";
 
@@ -76,15 +76,8 @@ function shouldSkipCheck(allowInTests: boolean): boolean {
   return false;
 }
 
-type UpdateAutoConfig = {
-  enabled?: boolean;
-  stableDelayHours?: number;
-  stableJitterHours?: number;
-  betaCheckIntervalHours?: number;
-};
-
 function resolveAutoUpdatePolicy(cfg: ReturnType<typeof loadConfig>): AutoUpdatePolicy {
-  const auto = (cfg.update as (typeof cfg.update & { auto?: UpdateAutoConfig }) | undefined)?.auto;
+  const auto = cfg.update?.auto;
   const stableDelayHours =
     typeof auto?.stableDelayHours === "number" && Number.isFinite(auto.stableDelayHours)
       ? Math.max(0, auto.stableDelayHours)
@@ -272,14 +265,14 @@ async function runAutoUpdateCommand(params: {
     }
   }
   if (argv.length === 0) {
-    argv.push("@hanzo/bot", ...baseArgs);
+    argv.push("openclaw", ...baseArgs);
   }
 
   try {
     const res = await runCommandWithTimeout(argv, {
       timeoutMs: params.timeoutMs,
       env: {
-        BOT_AUTO_UPDATE: "1",
+        OPENCLAW_AUTO_UPDATE: "1",
       },
     });
     return {
@@ -351,7 +344,7 @@ export async function runGatewayUpdateCheck(params: {
     }
   }
 
-  const root = await resolveBotPackageRoot({
+  const root = await resolveOpenClawPackageRoot({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
     cwd: process.cwd(),
@@ -407,7 +400,7 @@ export async function runGatewayUpdateCheck(params: {
       state.lastNotifiedVersion !== resolved.version || state.lastNotifiedTag !== tag;
     if (shouldRunUpdateHints && shouldNotify) {
       params.log.info(
-        `update available (${tag}): v${resolved.version} (current v${VERSION}). Run: ${formatCliCommand("bot update")}`,
+        `update available (${tag}): v${resolved.version} (current v${VERSION}). Run: ${formatCliCommand("openclaw update")}`,
       );
       nextState.lastNotifiedVersion = resolved.version;
       nextState.lastNotifiedTag = tag;

@@ -85,7 +85,7 @@ describe("heartbeat transcript pruning", () => {
         }
         expect(finalSize).toBeGreaterThanOrEqual(originalSize);
       },
-      { prefix: "bot-hb-prune-" },
+      { prefix: "openclaw-hb-prune-" },
     );
   }
 

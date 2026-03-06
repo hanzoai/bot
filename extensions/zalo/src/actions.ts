@@ -2,8 +2,8 @@ import type {
   ChannelMessageActionAdapter,
   ChannelMessageActionName,
   BotConfig,
-} from "bot/plugin-sdk";
-import { extractToolSend, jsonResult, readStringParam } from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/zalo";
+import { extractToolSend, jsonResult, readStringParam } from "@hanzo/bot/plugin-sdk/zalo";
 import { listEnabledZaloAccounts } from "./accounts.js";
 import { sendMessageZalo } from "./send.js";
 

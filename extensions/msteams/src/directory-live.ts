@@ -1,4 +1,4 @@
-import type { ChannelDirectoryEntry } from "bot/plugin-sdk";
+import type { ChannelDirectoryEntry } from "@hanzo/bot/plugin-sdk/msteams";
 import { searchGraphUsers } from "./graph-users.js";
 import {
   type GraphChannel,

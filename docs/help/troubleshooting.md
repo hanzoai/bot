@@ -1,7 +1,7 @@
 ---
-summary: "Symptom first troubleshooting hub for Hanzo Bot"
+summary: "Symptom first troubleshooting hub for OpenClaw"
 read_when:
-  - Hanzo Bot is not working and you need the fastest path to a fix
+  - OpenClaw is not working and you need the fastest path to a fix
   - You want a triage flow before diving into deep runbooks
 title: "Troubleshooting"
 ---
@@ -15,24 +15,24 @@ If you only have 2 minutes, use this page as a triage front door.
 Run this exact ladder in order:
 
 ```bash
-hanzo-bot status
-hanzo-bot status --all
-hanzo-bot gateway probe
-hanzo-bot gateway status
-hanzo-bot doctor
-hanzo-bot channels status --probe
-hanzo-bot logs --follow
+openclaw status
+openclaw status --all
+openclaw gateway probe
+openclaw gateway status
+openclaw doctor
+openclaw channels status --probe
+openclaw logs --follow
 ```
 
 Good output in one line:
 
-- `hanzo-bot status` → shows configured channels and no obvious auth errors.
-- `hanzo-bot status --all` → full report is present and shareable.
-- `hanzo-bot gateway probe` → expected gateway target is reachable.
-- `hanzo-bot gateway status` → `Runtime: running` and `RPC probe: ok`.
-- `hanzo-bot doctor` → no blocking config/service errors.
-- `hanzo-bot channels status --probe` → channels report `connected` or `ready`.
-- `hanzo-bot logs --follow` → steady activity, no repeating fatal errors.
+- `openclaw status` → shows configured channels and no obvious auth errors.
+- `openclaw status --all` → full report is present and shareable.
+- `openclaw gateway probe` → expected gateway target is reachable.
+- `openclaw gateway status` → `Runtime: running` and `RPC probe: ok`.
+- `openclaw doctor` → no blocking config/service errors.
+- `openclaw channels status --probe` → channels report `connected` or `ready`.
+- `openclaw logs --follow` → steady activity, no repeating fatal errors.
 
 ## Anthropic long context 429
 
@@ -69,7 +69,7 @@ Reference: [/tools/plugin#distribution-npm](/tools/plugin#distribution-npm)
 
 ```mermaid
 flowchart TD
-  A[Hanzo Bot is not working] --> B{What breaks first}
+  A[OpenClaw is not working] --> B{What breaks first}
   B --> C[No replies]
   B --> D[Dashboard or Control UI will not connect]
   B --> E[Gateway will not start or service not running]
@@ -90,11 +90,11 @@ flowchart TD
 <AccordionGroup>
   <Accordion title="No replies">
     ```bash
-    hanzo-bot status
-    hanzo-bot gateway status
-    hanzo-bot channels status --probe
-    hanzo-bot pairing list <channel>
-    hanzo-bot logs --follow
+    openclaw status
+    openclaw gateway status
+    openclaw channels status --probe
+    openclaw pairing list --channel <channel> [--account <id>]
+    openclaw logs --follow
     ```
 
     Good output looks like:
@@ -120,16 +120,16 @@ flowchart TD
 
   <Accordion title="Dashboard or Control UI will not connect">
     ```bash
-    hanzo-bot status
-    hanzo-bot gateway status
-    hanzo-bot logs --follow
-    hanzo-bot doctor
-    hanzo-bot channels status --probe
+    openclaw status
+    openclaw gateway status
+    openclaw logs --follow
+    openclaw doctor
+    openclaw channels status --probe
     ```
 
     Good output looks like:
 
-    - `Dashboard: http://...` is shown in `hanzo-bot gateway status`
+    - `Dashboard: http://...` is shown in `openclaw gateway status`
     - `RPC probe: ok`
     - No auth loop in logs
 
@@ -149,11 +149,11 @@ flowchart TD
 
   <Accordion title="Gateway will not start or service installed but not running">
     ```bash
-    hanzo-bot status
-    hanzo-bot gateway status
-    hanzo-bot logs --follow
-    hanzo-bot doctor
-    hanzo-bot channels status --probe
+    openclaw status
+    openclaw gateway status
+    openclaw logs --follow
+    openclaw doctor
+    openclaw channels status --probe
     ```
 
     Good output looks like:
@@ -178,11 +178,11 @@ flowchart TD
 
   <Accordion title="Channel connects but messages do not flow">
     ```bash
-    hanzo-bot status
-    hanzo-bot gateway status
-    hanzo-bot logs --follow
-    hanzo-bot doctor
-    hanzo-bot channels status --probe
+    openclaw status
+    openclaw gateway status
+    openclaw logs --follow
+    openclaw doctor
+    openclaw channels status --probe
     ```
 
     Good output looks like:
@@ -206,12 +206,12 @@ flowchart TD
 
   <Accordion title="Cron or heartbeat did not fire or did not deliver">
     ```bash
-    hanzo-bot status
-    hanzo-bot gateway status
-    hanzo-bot cron status
-    hanzo-bot cron list
-    hanzo-bot cron runs --id <jobId> --limit 20
-    hanzo-bot logs --follow
+    openclaw status
+    openclaw gateway status
+    openclaw cron status
+    openclaw cron list
+    openclaw cron runs --id <jobId> --limit 20
+    openclaw logs --follow
     ```
 
     Good output looks like:
@@ -237,11 +237,11 @@ flowchart TD
 
   <Accordion title="Node is paired but tool fails camera canvas screen exec">
     ```bash
-    hanzo-bot status
-    hanzo-bot gateway status
-    hanzo-bot nodes status
-    hanzo-bot nodes describe --node <idOrNameOrIp>
-    hanzo-bot logs --follow
+    openclaw status
+    openclaw gateway status
+    openclaw nodes status
+    openclaw nodes describe --node <idOrNameOrIp>
+    openclaw logs --follow
     ```
 
     Good output looks like:
@@ -267,17 +267,17 @@ flowchart TD
 
   <Accordion title="Browser tool fails">
     ```bash
-    hanzo-bot status
-    hanzo-bot gateway status
-    hanzo-bot browser status
-    hanzo-bot logs --follow
-    hanzo-bot doctor
+    openclaw status
+    openclaw gateway status
+    openclaw browser status
+    openclaw logs --follow
+    openclaw doctor
     ```
 
     Good output looks like:
 
     - Browser status shows `running: true` and a chosen browser/profile.
-    - `bot` profile starts or `chrome` relay has an attached tab.
+    - `openclaw` profile starts or `chrome` relay has an attached tab.
 
     Common log signatures:
 

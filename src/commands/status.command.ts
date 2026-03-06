@@ -4,7 +4,6 @@ import { formatCliCommand } from "../cli/command-format.js";
 import { withProgress } from "../cli/progress.js";
 import { resolveGatewayPort } from "../config/config.js";
 import { buildGatewayConnectionDetails, callGateway } from "../gateway/call.js";
-import { resolveGatewayProbeAuth } from "../gateway/probe-auth.js";
 import { info } from "../globals.js";
 import { formatTimeAgo } from "../infra/format-time/format-relative.ts";
 import { formatUsageReportLines, loadProviderUsageSummary } from "../infra/provider-usage.js";
@@ -118,6 +117,8 @@ export async function statusCommand(
     gatewayConnection,
     remoteUrlMissing,
     gatewayMode,
+    gatewayProbeAuth,
+    gatewayProbeAuthWarning,
     gatewayProbe,
     gatewayReachable,
     gatewaySelf,
@@ -129,14 +130,6 @@ export async function statusCommand(
     memory,
     memoryPlugin,
   } = scan;
-
-  // Derive probe auth from config (same approach as status-all).
-  const isRemoteMode = gatewayMode === "remote";
-  const gatewayProbeAuth = resolveGatewayProbeAuth({
-    cfg,
-    mode: isRemoteMode && !remoteUrlMissing ? "remote" : "local",
-  });
-  const gatewayProbeAuthWarning: string | null = null;
 
   const usage = opts.usage
     ? await withProgress(
@@ -447,7 +440,7 @@ export async function statusCommand(
     },
   ];
 
-  runtime.log(theme.heading("Bot status"));
+  runtime.log(theme.heading("OpenClaw status"));
   runtime.log("");
   runtime.log(theme.heading("Overview"));
   runtime.log(
@@ -467,12 +460,12 @@ export async function statusCommand(
     if (pairingRecovery.requestId) {
       runtime.log(
         theme.muted(
-          `Recovery: ${formatCliCommand(`bot devices approve ${pairingRecovery.requestId}`)}`,
+          `Recovery: ${formatCliCommand(`openclaw devices approve ${pairingRecovery.requestId}`)}`,
         ),
       );
     }
-    runtime.log(theme.muted(`Fallback: ${formatCliCommand("bot devices approve --latest")}`));
-    runtime.log(theme.muted(`Inspect: ${formatCliCommand("bot devices list")}`));
+    runtime.log(theme.muted(`Fallback: ${formatCliCommand("openclaw devices approve --latest")}`));
+    runtime.log(theme.muted(`Inspect: ${formatCliCommand("openclaw devices list")}`));
   }
 
   runtime.log("");
@@ -518,8 +511,8 @@ export async function statusCommand(
       runtime.log(theme.muted(`… +${sorted.length - shown.length} more`));
     }
   }
-  runtime.log(theme.muted(`Full report: ${formatCliCommand("bot security audit")}`));
-  runtime.log(theme.muted(`Deep probe: ${formatCliCommand("bot security audit --deep")}`));
+  runtime.log(theme.muted(`Full report: ${formatCliCommand("openclaw security audit")}`));
+  runtime.log(theme.muted(`Deep probe: ${formatCliCommand("openclaw security audit --deep")}`));
 
   runtime.log("");
   runtime.log(theme.heading("Channels"));
@@ -671,8 +664,8 @@ export async function statusCommand(
   }
 
   runtime.log("");
-  runtime.log("FAQ: https://docs.hanzo.bot/faq");
-  runtime.log("Troubleshooting: https://docs.hanzo.bot/troubleshooting");
+  runtime.log("FAQ: https://docs.openclaw.ai/faq");
+  runtime.log("Troubleshooting: https://docs.openclaw.ai/troubleshooting");
   runtime.log("");
   const updateHint = formatUpdateAvailableHint(update);
   if (updateHint) {
@@ -680,11 +673,11 @@ export async function statusCommand(
     runtime.log("");
   }
   runtime.log("Next steps:");
-  runtime.log(`  Need to share?      ${formatCliCommand("bot status --all")}`);
-  runtime.log(`  Need to debug live? ${formatCliCommand("bot logs --follow")}`);
+  runtime.log(`  Need to share?      ${formatCliCommand("openclaw status --all")}`);
+  runtime.log(`  Need to debug live? ${formatCliCommand("openclaw logs --follow")}`);
   if (gatewayReachable) {
-    runtime.log(`  Need to test channels? ${formatCliCommand("bot status --deep")}`);
+    runtime.log(`  Need to test channels? ${formatCliCommand("openclaw status --deep")}`);
   } else {
-    runtime.log(`  Fix reachability first: ${formatCliCommand("bot gateway probe")}`);
+    runtime.log(`  Fix reachability first: ${formatCliCommand("openclaw gateway probe")}`);
   }
 }

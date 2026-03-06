@@ -1,26 +1,37 @@
 ---
 name: coding-agent
-description: Run Codex CLI, Claude Code, OpenCode, or Pi Coding Agent via background process for programmatic control.
+description: 'Delegate coding tasks to Codex, Claude Code, or Pi agents via background process. Use when: (1) building/creating new features or apps, (2) reviewing PRs (spawn in temp dir), (3) refactoring large codebases, (4) iterative coding that needs file exploration. NOT for: simple one-liner fixes (just edit), reading code (use read tool), thread-bound ACP harness requests in chat (for example spawn/run Codex or Claude Code in a Discord thread; use sessions_spawn with runtime:"acp"), or any work in ~/clawd workspace (never spawn agents here). Claude Code: use --print --permission-mode bypassPermissions (no PTY). Codex/Pi/OpenCode: pty:true required.'
 metadata:
-  { "bot": { "emoji": "🧩", "requires": { "anyBins": ["claude", "codex", "opencode", "pi"] } } }
+  {
+    "openclaw": { "emoji": "🧩", "requires": { "anyBins": ["claude", "codex", "opencode", "pi"] } },
+  }
 ---
 
 # Coding Agent (bash-first)
 
 Use **bash** (with optional background mode) for all coding agent work. Simple and effective.
 
-## ⚠️ PTY Mode Required!
+## ⚠️ PTY Mode: Codex/Pi/OpenCode yes, Claude Code no
 
-Coding agents (Codex, Claude Code, Pi) are **interactive terminal applications** that need a pseudo-terminal (PTY) to work correctly. Without PTY, you'll get broken output, missing colors, or the agent may hang.
-
-**Always use `pty:true`** when running coding agents:
+For **Codex, Pi, and OpenCode**, PTY is still required (interactive terminal apps):
 
 ```bash
-# ✅ Correct - with PTY
+# ✅ Correct for Codex/Pi/OpenCode
 bash pty:true command:"codex exec 'Your prompt'"
+```
 
-# ❌ Wrong - no PTY, agent may break
-bash command:"codex exec 'Your prompt'"
+For **Claude Code** (`claude` CLI), use `--print --permission-mode bypassPermissions` instead.
+`--dangerously-skip-permissions` with PTY can exit after the confirmation dialog.
+`--print` mode keeps full tool access and avoids interactive confirmation:
+
+```bash
+# ✅ Correct for Claude Code (no PTY needed)
+cd /path/to/project && claude --permission-mode bypassPermissions --print 'Your task'
+
+# For background execution: use background:true on the exec tool
+
+# ❌ Wrong for Claude Code
+bash pty:true command:"claude --dangerously-skip-permissions 'task'"
 ```
 
 ### Bash Tool Parameters
@@ -118,7 +129,7 @@ bash pty:true workdir:~/project background:true command:"codex --yolo 'Refactor 
 
 ### Reviewing PRs
 
-**⚠️ CRITICAL: Never review PRs in Hanzo Bot's own project folder!**
+**⚠️ CRITICAL: Never review PRs in OpenClaw's own project folder!**
 Clone to temp folder or use git worktree.
 
 ```bash
@@ -156,11 +167,11 @@ gh pr comment <PR#> --body "<review content>"
 ## Claude Code
 
 ```bash
-# With PTY for proper terminal output
-bash pty:true workdir:~/project command:"claude 'Your task'"
+# Foreground
+bash workdir:~/project command:"claude --permission-mode bypassPermissions --print 'Your task'"
 
 # Background
-bash pty:true workdir:~/project background:true command:"claude 'Your task'"
+bash workdir:~/project background:true command:"claude --permission-mode bypassPermissions --print 'Your task'"
 ```
 
 ---
@@ -201,7 +212,7 @@ git worktree add -b fix/issue-99 /tmp/issue-99 main
 
 # 2. Launch Codex in each (background + PTY!)
 bash pty:true workdir:/tmp/issue-78 background:true command:"pnpm install && codex --yolo 'Fix issue #78: <description>. Commit and push.'"
-bash pty:true workdir:/tmp/issue-99 background:true command:"pnpm install && codex --yolo 'Fix issue #99: <description>. Commit and push.'"
+bash pty:true workdir:/tmp/issue-99 background:true command:"pnpm install && codex --yolo 'Fix issue #99 from the approved ticket summary. Implement only the in-scope edits and commit after review.'"
 
 # 3. Monitor progress
 process action:list
@@ -220,7 +231,9 @@ git worktree remove /tmp/issue-99
 
 ## ⚠️ Rules
 
-1. **Always use pty:true** - coding agents need a terminal!
+1. **Use the right execution mode per agent**:
+   - Codex/Pi/OpenCode: `pty:true`
+   - Claude Code: `--print --permission-mode bypassPermissions` (no PTY required)
 2. **Respect tool choice** - if user asks for Codex, use Codex.
    - Orchestrator mode: do NOT hand-code patches yourself.
    - If an agent fails/hangs, respawn it or ask the user for direction, but don't silently take over.
@@ -229,8 +242,8 @@ git worktree remove /tmp/issue-99
 5. **--full-auto for building** - auto-approves changes
 6. **vanilla for reviewing** - no special flags needed
 7. **Parallel is OK** - run many Codex processes at once for batch work
-8. **NEVER start Codex in ~/botd/** - it'll read your soul docs and get weird ideas about the org chart!
-9. **NEVER checkout branches in ~/Projects/bot/** - that's the LIVE Hanzo Bot instance!
+8. **NEVER start Codex in ~/.openclaw/** - it'll read your soul docs and get weird ideas about the org chart!
+9. **NEVER checkout branches in ~/Projects/openclaw/** - that's the LIVE OpenClaw instance!
 
 ---
 
@@ -252,13 +265,13 @@ This prevents the user from seeing only "Agent failed before reply" and having n
 
 ## Auto-Notify on Completion
 
-For long-running background tasks, append a wake trigger to your prompt so Hanzo Bot gets notified immediately when the agent finishes (instead of waiting for the next heartbeat):
+For long-running background tasks, append a wake trigger to your prompt so OpenClaw gets notified immediately when the agent finishes (instead of waiting for the next heartbeat):
 
 ```
 ... your task here.
 
 When completely finished, run this command to notify me:
-hanzo-bot system event --text "Done: [brief summary of what was built]" --mode now
+openclaw system event --text "Done: [brief summary of what was built]" --mode now
 ```
 
 **Example:**
@@ -266,7 +279,7 @@ hanzo-bot system event --text "Done: [brief summary of what was built]" --mode n
 ```bash
 bash pty:true workdir:~/project background:true command:"codex --yolo exec 'Build a REST API for todos.
 
-When completely finished, run: hanzo-bot system event --text \"Done: Built todos REST API with CRUD endpoints\" --mode now'"
+When completely finished, run: openclaw system event --text \"Done: Built todos REST API with CRUD endpoints\" --mode now'"
 ```
 
 This triggers an immediate wake event — Skippy gets pinged in seconds, not 10 minutes.
@@ -279,4 +292,4 @@ This triggers an immediate wake event — Skippy gets pinged in seconds, not 10 
 - **Git repo required:** Codex won't run outside a git directory. Use `mktemp -d && git init` for scratch work.
 - **exec is your friend:** `codex exec "prompt"` runs and exits cleanly - perfect for one-shots.
 - **submit vs write:** Use `submit` to send input + Enter, `write` for raw data without newline.
-- **Sass works:** Codex responds well to playful prompts. Asked it to write a haiku about being second fiddle, got: _"Second chair, I code / The bot sets the tempo right / Keys glow, I follow"_ 🤖
+- **Sass works:** Codex responds well to playful prompts. Asked it to write a haiku about being second fiddle to a space lobster, got: _"Second chair, I code / Space lobster sets the tempo / Keys glow, I follow"_ 🦞

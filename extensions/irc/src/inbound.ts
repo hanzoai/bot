@@ -16,7 +16,7 @@ import {
   type OutboundReplyPayload,
   type BotConfig,
   type RuntimeEnv,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/irc";
 import type { ResolvedIrcAccount } from "./accounts.js";
 import type { CoreConfig, IrcInboundMessage } from "./types.js";
 import { normalizeIrcAllowlist, resolveIrcAllowlistMatch } from "./normalize.js";

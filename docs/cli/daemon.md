@@ -1,26 +1,26 @@
 ---
-summary: "CLI reference for `hanzo-bot daemon` (legacy alias for gateway service management)"
+summary: "CLI reference for `openclaw daemon` (legacy alias for gateway service management)"
 read_when:
-  - You still use `hanzo-bot daemon ...` in scripts
+  - You still use `openclaw daemon ...` in scripts
   - You need service lifecycle commands (install/start/stop/restart/status)
 title: "daemon"
 ---
 
-# `hanzo-bot daemon`
+# `openclaw daemon`
 
 Legacy alias for Gateway service management commands.
 
-`hanzo-bot daemon ...` maps to the same service control surface as `hanzo-bot gateway ...` service commands.
+`openclaw daemon ...` maps to the same service control surface as `openclaw gateway ...` service commands.
 
 ## Usage
 
 ```bash
-hanzo-bot daemon status
-hanzo-bot daemon install
-hanzo-bot daemon start
-hanzo-bot daemon stop
-hanzo-bot daemon restart
-hanzo-bot daemon uninstall
+openclaw daemon status
+openclaw daemon install
+openclaw daemon start
+openclaw daemon stop
+openclaw daemon restart
+openclaw daemon uninstall
 ```
 
 ## Subcommands
@@ -47,4 +47,4 @@ Notes:
 
 ## Prefer
 
-Use [`hanzo-bot gateway`](/cli/gateway) for current docs and examples.
+Use [`openclaw gateway`](/cli/gateway) for current docs and examples.

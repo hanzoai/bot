@@ -1,5 +1,5 @@
 ---
-summary: "Chrome extension: let Hanzo Bot drive your existing Chrome tab"
+summary: "Chrome extension: let OpenClaw drive your existing Chrome tab"
 read_when:
   - You want the agent to drive an existing Chrome tab (toolbar button)
   - You need remote Gateway + local browser automation via Tailscale
@@ -9,7 +9,7 @@ title: "Chrome Extension"
 
 # Chrome extension (browser relay)
 
-The Hanzo Bot Chrome extension lets the agent control your **existing Chrome tabs** (your normal Chrome window) instead of launching a separate bot-managed Chrome profile.
+The OpenClaw Chrome extension lets the agent control your **existing Chrome tabs** (your normal Chrome window) instead of launching a separate openclaw-managed Chrome profile.
 
 Attach/detach happens via a **single Chrome toolbar button**.
 
@@ -21,20 +21,20 @@ There are three parts:
 - **Local relay server** (loopback CDP): bridges between the control server and the extension (`http://127.0.0.1:18792` by default)
 - **Chrome MV3 extension**: attaches to the active tab using `chrome.debugger` and pipes CDP messages to the relay
 
-Hanzo Bot then controls the attached tab through the normal `browser` tool surface (selecting the right profile).
+OpenClaw then controls the attached tab through the normal `browser` tool surface (selecting the right profile).
 
 ## Install / load (unpacked)
 
 1. Install the extension to a stable local path:
 
 ```bash
-hanzo-bot browser extension install
+openclaw browser extension install
 ```
 
 2. Print the installed extension directory path:
 
 ```bash
-hanzo-bot browser extension path
+openclaw browser extension path
 ```
 
 3. Chrome → `chrome://extensions`
@@ -46,35 +46,52 @@ hanzo-bot browser extension path
 
 ## Updates (no build step)
 
-The extension ships inside the Hanzo Bot release (npm package) as static files. There is no separate “build” step.
+The extension ships inside the OpenClaw release (npm package) as static files. There is no separate “build” step.
 
-After upgrading Hanzo Bot:
+After upgrading OpenClaw:
 
-- Re-run `hanzo-bot browser extension install` to refresh the installed files under your Hanzo Bot state directory.
+- Re-run `openclaw browser extension install` to refresh the installed files under your OpenClaw state directory.
 - Chrome → `chrome://extensions` → click “Reload” on the extension.
 
-## Use it (no extra config)
+## Use it (set gateway token once)
 
-Hanzo Bot ships with a built-in browser profile named `chrome` that targets the extension relay on the default port.
+OpenClaw ships with a built-in browser profile named `chrome` that targets the extension relay on the default port.
+
+Before first attach, open extension Options and set:
+
+- `Port` (default `18792`)
+- `Gateway token` (must match `gateway.auth.token` / `OPENCLAW_GATEWAY_TOKEN`)
 
 Use it:
 
-- CLI: `hanzo-bot browser --browser-profile chrome tabs`
+- CLI: `openclaw browser --browser-profile chrome tabs`
 - Agent tool: `browser` with `profile="chrome"`
 
 If you want a different name or a different relay port, create your own profile:
 
 ```bash
-hanzo-bot browser create-profile \
+openclaw browser create-profile \
   --name my-chrome \
   --driver extension \
   --cdp-url http://127.0.0.1:18792 \
   --color "#00AA00"
 ```
 
+### Custom Gateway ports
+
+If you're using a custom gateway port, the extension relay port is automatically derived:
+
+**Extension Relay Port = Gateway Port + 3**
+
+Example: if `gateway.port: 19001`, then:
+
+- Extension relay port: `19004` (gateway + 3)
+
+Configure the extension to use the derived relay port in the extension Options page.
+
 ## Attach / detach (toolbar button)
 
-- Open the tab you want Hanzo Bot to control.
+- Open the tab you want OpenClaw to control.
 - Click the extension icon.
   - Badge shows `ON` when attached.
 - Click again to detach.
@@ -87,14 +104,14 @@ hanzo-bot browser create-profile \
 
 ## Badge + common errors
 
-- `ON`: attached; Hanzo Bot can drive that tab.
+- `ON`: attached; OpenClaw can drive that tab.
 - `…`: connecting to the local relay.
-- `!`: relay not reachable (most common: browser relay server isn’t running on this machine).
+- `!`: relay not reachable/authenticated (most common: relay server not running, or gateway token missing/wrong).
 
 If you see `!`:
 
 - Make sure the Gateway is running locally (default setup), or run a node host on this machine if the Gateway runs elsewhere.
-- Open the extension Options page; it shows whether the relay is reachable.
+- Open the extension Options page; it validates relay reachability + gateway-token auth.
 
 ## Remote Gateway (use a node host)
 
@@ -138,7 +155,7 @@ Options:
 
 Then ensure the tool isn’t denied by tool policy, and (if needed) call `browser` with `target="host"`.
 
-Debugging: `hanzo-bot sandbox explain`
+Debugging: `openclaw sandbox explain`
 
 ## Remote access tips
 
@@ -147,9 +164,9 @@ Debugging: `hanzo-bot sandbox explain`
 
 ## How “extension path” works
 
-`hanzo-bot browser extension path` prints the **installed** on-disk directory containing the extension files.
+`openclaw browser extension path` prints the **installed** on-disk directory containing the extension files.
 
-The CLI intentionally does **not** print a `node_modules` path. Always run `hanzo-bot browser extension install` first to copy the extension to a stable location under your Hanzo Bot state directory.
+The CLI intentionally does **not** print a `node_modules` path. Always run `openclaw browser extension install` first to copy the extension to a stable location under your OpenClaw state directory.
 
 If you move or delete that install directory, Chrome will mark the extension as broken until you reload it from a valid path.
 
@@ -161,7 +178,7 @@ This is powerful and risky. Treat it like giving the model “hands on your brow
   - click/type/navigate in that tab
   - read page content
   - access whatever the tab’s logged-in session can access
-- **This is not isolated** like the dedicated bot-managed profile.
+- **This is not isolated** like the dedicated openclaw-managed profile.
   - If you attach to your daily-driver profile/tab, you’re granting access to that account state.
 
 Recommendations:
@@ -169,7 +186,7 @@ Recommendations:
 - Prefer a dedicated Chrome profile (separate from your personal browsing) for extension relay usage.
 - Keep the Gateway and any node hosts tailnet-only; rely on Gateway auth + node pairing.
 - Avoid exposing relay ports over LAN (`0.0.0.0`) and avoid Funnel (public).
-- The relay blocks non-extension origins and requires an internal auth token for CDP clients.
+- The relay blocks non-extension origins and requires gateway-token auth for both `/cdp` and `/extension`.
 
 Related:
 

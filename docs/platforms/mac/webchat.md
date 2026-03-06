@@ -17,14 +17,14 @@ agent (with a session switcher for other sessions).
 
 ## Launch & debugging
 
-- Manual: Bot menu → "Open Chat".
+- Manual: Lobster menu → “Open Chat”.
 - Auto‑open for testing:
 
   ```bash
-  dist/Hanzo Bot.app/Contents/MacOS/Hanzo Bot --webchat
+  dist/OpenClaw.app/Contents/MacOS/OpenClaw --webchat
   ```
 
-- Logs: `./scripts/botlog.sh` (subsystem `ai.hanzo.bot`, category `WebChatSwiftUI`).
+- Logs: `./scripts/clawlog.sh` (subsystem `ai.openclaw`, category `WebChatSwiftUI`).
 
 ## How it’s wired
 

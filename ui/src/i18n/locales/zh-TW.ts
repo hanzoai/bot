@@ -48,7 +48,7 @@ export const zh_TW: TranslationMap = {
     skills: "管理技能可用性和 API 密鑰注入。",
     nodes: "配對設備、功能和命令公開。",
     chat: "用於快速干預的直接網關聊天會話。",
-    config: "安全地編輯 ~/.hanzoai/bot.json。",
+    config: "安全地編輯 ~/.openclaw/openclaw.json。",
     debug: "網關快照、事件和手動 RPC 調用。",
     logs: "網關文件日志的實時追蹤。",
   },
@@ -97,7 +97,8 @@ export const zh_TW: TranslationMap = {
     },
     pairing: {
       hint: "此裝置需要閘道主機的配對批准。",
-      mobileHint: "在手機上？從桌面執行 bot dashboard --no-open 複製完整 URL（包括 #token=...）。",
+      mobileHint:
+        "在手機上？從桌面執行 openclaw dashboard --no-open 複製完整 URL（包括 #token=...）。",
     },
     insecure: {
       hint: "此頁面為 HTTP，因此瀏覽器阻止設備標識。請使用 HTTPS (Tailscale Serve) 或在網關主機上打開 {url}。",
@@ -120,5 +121,6 @@ export const zh_TW: TranslationMap = {
     zhTW: "繁體中文 (繁體中文)",
     ptBR: "Português (巴西葡萄牙語)",
     de: "Deutsch (德語)",
+    es: "Español (西班牙語)",
   },
 };

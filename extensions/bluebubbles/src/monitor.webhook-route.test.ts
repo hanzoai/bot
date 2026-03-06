@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import { afterEach, describe, expect, it } from "vitest";
 import type { WebhookTarget } from "./monitor-shared.js";
 import { createEmptyPluginRegistry } from "../../../src/plugins/registry.js";

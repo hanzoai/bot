@@ -12,7 +12,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-    runs-on: hanzo-k8s
+    runs-on: blacksmith-16vcpu-ubuntu-2404
     steps:
       - uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1
         id: app-token
@@ -38,7 +38,7 @@ jobs:
           stale-pr-label: stale
           exempt-issue-labels: enhancement,maintainer,pinned,security,no-stale
           exempt-pr-labels: maintainer,no-stale
-          operations-per-run: 500
+          operations-per-run: 10000
           exempt-all-assignees: true
           remove-stale-when-updated: true
           stale-issue-message: |
@@ -49,7 +49,7 @@ jobs:
             Please add updates or it will be closed.
           close-issue-message: |
             Closing due to inactivity.
-            If this is still an issue, please retry on the latest HanzoBot release and share updated details.
+            If this is still an issue, please retry on the latest OpenClaw release and share updated details.
             If you are absolutely sure it still happens on the latest release, open a new issue with fresh repro steps.
           close-issue-reason: not_planned
           close-pr-message: |

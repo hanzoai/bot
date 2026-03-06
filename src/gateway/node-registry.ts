@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import type { GatewayWsClient } from "./server/ws-types.js";
-import { marketplaceEventBus } from "./marketplace/event-bus.js";
 
 export type NodeSession = {
   nodeId: string;
@@ -19,16 +18,6 @@ export type NodeSession = {
   permissions?: Record<string, boolean>;
   pathEnv?: string;
   connectedAtMs: number;
-  /** Whether this node has opted into marketplace P2P sharing. */
-  marketplaceEnabled?: boolean;
-  /** Marketplace idle status: active, idle, or sharing. */
-  marketplaceStatus?: "active" | "idle" | "sharing";
-  /** Number of active marketplace proxy requests on this node. */
-  marketplaceActiveRequests?: number;
-  /** Maximum concurrent marketplace requests this node accepts. */
-  marketplaceMaxConcurrent?: number;
-  /** Seller's payout preference: USD or $AI token. */
-  marketplacePayoutPreference?: "usd" | "ai_token";
 };
 
 type PendingInvoke = {
@@ -84,19 +73,6 @@ export class NodeRegistry {
       pathEnv,
       connectedAtMs: Date.now(),
     };
-    // Detect marketplace capability from node's advertised caps.
-    if (caps.includes("marketplace")) {
-      session.marketplaceEnabled = true;
-      session.marketplaceStatus = "active";
-      session.marketplaceActiveRequests = 0;
-      session.marketplaceMaxConcurrent = 1;
-      // Notify the marketplace scheduler so it tracks this seller immediately.
-      marketplaceEventBus.emitIdleStatus({
-        nodeId,
-        status: "active",
-        maxConcurrent: 1,
-      });
-    }
     this.nodesById.set(nodeId, session);
     this.nodesByConn.set(client.connId, nodeId);
     return session;

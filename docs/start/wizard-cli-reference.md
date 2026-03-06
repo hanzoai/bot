@@ -1,7 +1,7 @@
 ---
 summary: "Complete reference for CLI onboarding flow, auth/model setup, outputs, and internals"
 read_when:
-  - You need detailed behavior for hanzo-bot onboard
+  - You need detailed behavior for openclaw onboard
   - You are debugging onboarding results or integrating onboarding clients
 title: "CLI Onboarding Reference"
 sidebarTitle: "CLI reference"
@@ -9,7 +9,7 @@ sidebarTitle: "CLI reference"
 
 # CLI Onboarding Reference
 
-This page is the full reference for `hanzo-bot onboard`.
+This page is the full reference for `openclaw onboard`.
 For the short guide, see [Onboarding Wizard (CLI)](/start/wizard).
 
 ## What the wizard does
@@ -31,9 +31,10 @@ It does not install or modify anything on the remote host.
 
 <Steps>
   <Step title="Existing config detection">
-    - If `~/.hanzo/bot/bot.json` exists, choose Keep, Modify, or Reset.
+    - If `~/.openclaw/openclaw.json` exists, choose Keep, Modify, or Reset.
     - Re-running the wizard does not wipe anything unless you explicitly choose Reset (or pass `--reset`).
-    - If config is invalid or contains legacy keys, the wizard stops and asks you to run `hanzo-bot doctor` before continuing.
+    - CLI `--reset` defaults to `config+creds+sessions`; use `--reset-scope full` to also remove workspace.
+    - If config is invalid or contains legacy keys, the wizard stops and asks you to run `openclaw doctor` before continuing.
     - Reset uses `trash` and offers scopes:
       - Config only
       - Config + credentials + sessions
@@ -43,7 +44,7 @@ It does not install or modify anything on the remote host.
     - Full option matrix is in [Auth and model options](#auth-and-model-options).
   </Step>
   <Step title="Workspace">
-    - Default `~/.hanzo/bot/workspace` (configurable).
+    - Default `~/.openclaw/workspace` (configurable).
     - Seeds workspace files needed for first-run bootstrap ritual.
     - Workspace layout: [Agent workspace](/concepts/agent-workspace).
   </Step>
@@ -70,7 +71,7 @@ It does not install or modify anything on the remote host.
     - [BlueBubbles](/channels/bluebubbles): recommended for iMessage; server URL + password + webhook
     - [iMessage](/channels/imessage): legacy `imsg` CLI path + DB access
     - DM security: default is pairing. First DM sends a code; approve via
-      `hanzo-bot pairing approve <channel> <code>` or use allowlists.
+      `openclaw pairing approve <channel> <code>` or use allowlists.
   </Step>
   <Step title="Daemon install">
     - macOS: LaunchAgent
@@ -81,8 +82,8 @@ It does not install or modify anything on the remote host.
     - Runtime selection: Node (recommended; required for WhatsApp and Telegram). Bun is not recommended.
   </Step>
   <Step title="Health check">
-    - Starts gateway (if needed) and runs `hanzo-bot health`.
-    - `hanzo-bot status --deep` adds gateway health probes to status output.
+    - Starts gateway (if needed) and runs `openclaw health`.
+    - `openclaw status --deep` adds gateway health probes to status output.
   </Step>
   <Step title="Skills">
     - Reads available skills and checks requirements.
@@ -146,8 +147,7 @@ What you set:
 
   </Accordion>
   <Accordion title="OpenAI API key">
-    Uses `OPENAI_API_KEY` if present or prompts for a key, then saves it to
-    `~/.hanzo/bot/.env` so launchd can read it.
+    Uses `OPENAI_API_KEY` if present or prompts for a key, then stores the credential in auth profiles.
 
     Sets `agents.defaults.model` to `openai/gpt-5.1-codex` when model is unset, `openai/*`, or `openai-codex/*`.
 
@@ -187,7 +187,7 @@ What you set:
 
     Interactive onboarding supports the same API key storage choices as other provider API key flows:
     - **Paste API key now** (plaintext)
-    - **Use secret reference** (env or encrypted `sops` file pointer, with preflight validation)
+    - **Use secret reference** (env ref or configured provider ref, with preflight validation)
 
     Non-interactive flags:
     - `--auth-choice custom-api-key`
@@ -210,24 +210,24 @@ Model behavior:
 
 Credential and profile paths:
 
-- OAuth credentials: `~/.hanzo/bot/credentials/oauth.json`
-- Auth profiles (API keys + OAuth): `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
+- OAuth credentials: `~/.openclaw/credentials/oauth.json`
+- Auth profiles (API keys + OAuth): `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`
 
 Credential storage mode:
 
 - Default onboarding behavior persists API keys as plaintext values in auth profiles.
 - `--secret-input-mode ref` enables reference mode instead of plaintext key storage.
   In interactive onboarding, you can choose either:
-  - environment variable ref (for example `keyRef: { source: "env", id: "OPENAI_API_KEY" }`)
-  - encrypted file ref via `sops` JSON pointer (for example `keyRef: { source: "file", id: "/providers/openai/apiKey" }`)
+  - environment variable ref (for example `keyRef: { source: "env", provider: "default", id: "OPENAI_API_KEY" }`)
+  - configured provider ref (`file` or `exec`) with provider alias + id
 - Interactive reference mode runs a fast preflight validation before saving.
   - Env refs: validates variable name + non-empty value in the current onboarding environment.
-  - File refs: validates `secrets.sources.file` + `sops` decrypt + JSON pointer resolution.
+  - Provider refs: validates provider config and resolves the requested id.
   - If preflight fails, onboarding shows the error and lets you retry.
 - In non-interactive mode, `--secret-input-mode ref` is env-backed only.
   - Set the provider env var in the onboarding process environment.
   - Inline key flags (for example `--openai-api-key`) require that env var to be set; otherwise onboarding fails fast.
-  - For custom providers, non-interactive `ref` mode stores `models.providers.<id>.apiKey` as `{ source: "env", id: "CUSTOM_API_KEY" }`.
+  - For custom providers, non-interactive `ref` mode stores `models.providers.<id>.apiKey` as `{ source: "env", provider: "default", id: "CUSTOM_API_KEY" }`.
   - In that custom-provider case, `--custom-api-key` requires `CUSTOM_API_KEY` to be set; otherwise onboarding fails fast.
 - Gateway auth credentials support plaintext and SecretRef choices in interactive onboarding:
   - Token mode: **Generate/store plaintext token** (default) or **Use SecretRef**.
@@ -237,18 +237,19 @@ Credential storage mode:
 
 <Note>
 Headless and server tip: complete OAuth on a machine with a browser, then copy
-`~/.hanzo/bot/credentials/oauth.json` (or `$BOT_STATE_DIR/credentials/oauth.json`)
+`~/.openclaw/credentials/oauth.json` (or `$OPENCLAW_STATE_DIR/credentials/oauth.json`)
 to the gateway host.
 </Note>
 
 ## Outputs and internals
 
-Typical fields in `~/.hanzo/bot/bot.json`:
+Typical fields in `~/.openclaw/openclaw.json`:
 
 - `agents.defaults.workspace`
 - `agents.defaults.model` / `models.providers` (if Minimax chosen)
 - `tools.profile` (local onboarding defaults to `"messaging"` when unset; existing explicit values are preserved)
 - `gateway.*` (mode, bind, auth, tailscale)
+- `session.dmScope` (local onboarding defaults this to `per-channel-peer` when unset; existing explicit values are preserved)
 - `channels.telegram.botToken`, `channels.discord.token`, `channels.signal.*`, `channels.imessage.*`
 - Channel allowlists (Slack, Discord, Matrix, Microsoft Teams) when you opt in during prompts (names resolve to IDs when possible)
 - `skills.install.nodeManager`
@@ -258,10 +259,10 @@ Typical fields in `~/.hanzo/bot/bot.json`:
 - `wizard.lastRunCommand`
 - `wizard.lastRunMode`
 
-`hanzo-bot agents add` writes `agents.list[]` and optional `bindings`.
+`openclaw agents add` writes `agents.list[]` and optional `bindings`.
 
-WhatsApp credentials go under `~/.hanzo/bot/credentials/whatsapp/<accountId>/`.
-Sessions are stored under `~/.hanzo/bot/agents/<agentId>/sessions/`.
+WhatsApp credentials go under `~/.openclaw/credentials/whatsapp/<accountId>/`.
+Sessions are stored under `~/.openclaw/agents/<agentId>/sessions/`.
 
 <Note>
 Some channels are delivered as plugins. When selected during onboarding, the wizard
@@ -280,7 +281,7 @@ Clients (macOS app and Control UI) can render steps without re-implementing onbo
 Signal setup behavior:
 
 - Downloads the appropriate release asset
-- Stores it under `~/.hanzo/bot/tools/signal-cli/<version>/`
+- Stores it under `~/.openclaw/tools/signal-cli/<version>/`
 - Writes `channels.signal.cliPath` in config
 - JVM builds require Java 21
 - Native builds are used when available
@@ -290,4 +291,4 @@ Signal setup behavior:
 
 - Onboarding hub: [Onboarding Wizard (CLI)](/start/wizard)
 - Automation and scripts: [CLI Automation](/start/wizard-cli-automation)
-- Command reference: [`hanzo-bot onboard`](/cli/onboard)
+- Command reference: [`openclaw onboard`](/cli/onboard)

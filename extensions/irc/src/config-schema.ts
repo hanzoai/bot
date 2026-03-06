@@ -7,7 +7,7 @@ import {
   ReplyRuntimeConfigSchemaShape,
   ToolPolicySchema,
   requireOpenAllowFrom,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/irc";
 import { z } from "zod";
 
 const IrcGroupSchema = z

@@ -1,4 +1,4 @@
-import type { BotPluginApi } from "bot/plugin-sdk";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/diffs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -14,7 +14,7 @@ describe("diffs tool", () => {
   let store: DiffArtifactStore;
 
   beforeEach(async () => {
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-diffs-tool-"));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-diffs-tool-"));
     store = new DiffArtifactStore({ rootDir });
   });
 
@@ -441,6 +441,7 @@ function createApi(): BotPluginApi {
     registerService() {},
     registerProvider() {},
     registerCommand() {},
+    registerContextEngine() {},
     resolvePath(input: string) {
       return input;
     },

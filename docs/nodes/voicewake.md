@@ -8,7 +8,7 @@ title: "Voice Wake"
 
 # Voice Wake (Global Wake Words)
 
-Hanzo Bot treats **wake words as a single global list** owned by the **Gateway**.
+OpenClaw treats **wake words as a single global list** owned by the **Gateway**.
 
 - There are **no per-node custom wake words**.
 - **Any node/app UI may edit** the list; changes are persisted by the Gateway and broadcast to everyone.
@@ -19,12 +19,12 @@ Hanzo Bot treats **wake words as a single global list** owned by the **Gateway**
 
 Wake words are stored on the gateway machine at:
 
-- `~/.hanzo/bot/settings/voicewake.json`
+- `~/.openclaw/settings/voicewake.json`
 
 Shape:
 
 ```json
-{ "triggers": ["bot", "claude", "computer"], "updatedAtMs": 1730000000000 }
+{ "triggers": ["openclaw", "claude", "computer"], "updatedAtMs": 1730000000000 }
 ```
 
 ## Protocol

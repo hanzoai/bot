@@ -1,4 +1,4 @@
-import type { RuntimeEnv, WizardPrompter } from "bot/plugin-sdk";
+import type { RuntimeEnv, WizardPrompter } from "@hanzo/bot/plugin-sdk/irc";
 import { describe, expect, it, vi } from "vitest";
 import type { CoreConfig } from "./types.js";
 import { ircOnboardingAdapter } from "./onboarding.js";
@@ -36,19 +36,19 @@ describe("irc onboarding", () => {
           return "6697";
         }
         if (message === "IRC nick") {
-          return "bot-bot";
+          return "openclaw-bot";
         }
         if (message === "IRC username") {
-          return "@hanzo/bot";
+          return "openclaw";
         }
         if (message === "IRC real name") {
-          return "Bot Bot";
+          return "OpenClaw Bot";
         }
         if (message.startsWith("Auto-join IRC channels")) {
-          return "#bot, #ops";
+          return "#openclaw, #ops";
         }
         if (message.startsWith("IRC channels allowlist")) {
-          return "#bot, #ops";
+          return "#openclaw, #ops";
         }
         throw new Error(`Unexpected prompt: ${message}`);
       }) as WizardPrompter["text"],
@@ -84,11 +84,11 @@ describe("irc onboarding", () => {
     expect(result.accountId).toBe("default");
     expect(result.cfg.channels?.irc?.enabled).toBe(true);
     expect(result.cfg.channels?.irc?.host).toBe("irc.libera.chat");
-    expect(result.cfg.channels?.irc?.nick).toBe("bot-bot");
+    expect(result.cfg.channels?.irc?.nick).toBe("openclaw-bot");
     expect(result.cfg.channels?.irc?.tls).toBe(true);
-    expect(result.cfg.channels?.irc?.channels).toEqual(["#bot", "#ops"]);
+    expect(result.cfg.channels?.irc?.channels).toEqual(["#openclaw", "#ops"]);
     expect(result.cfg.channels?.irc?.groupPolicy).toBe("allowlist");
-    expect(Object.keys(result.cfg.channels?.irc?.groups ?? {})).toEqual(["#bot", "#ops"]);
+    expect(Object.keys(result.cfg.channels?.irc?.groups ?? {})).toEqual(["#openclaw", "#ops"]);
   });
 
   it("writes DM allowFrom to top-level config for non-default account prompts", async () => {
@@ -111,7 +111,7 @@ describe("irc onboarding", () => {
           accounts: {
             work: {
               host: "irc.libera.chat",
-              nick: "bot-work",
+              nick: "openclaw-work",
             },
           },
         },

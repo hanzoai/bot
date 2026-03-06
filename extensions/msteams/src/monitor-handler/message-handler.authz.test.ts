@@ -1,4 +1,4 @@
-import type { BotConfig, PluginRuntime, RuntimeEnv } from "bot/plugin-sdk";
+import type { BotConfig, PluginRuntime, RuntimeEnv } from "@hanzo/bot/plugin-sdk/msteams";
 import { describe, expect, it, vi } from "vitest";
 import type { MSTeamsMessageHandlerDeps } from "../monitor-handler.js";
 import { setMSTeamsRuntime } from "../runtime.js";

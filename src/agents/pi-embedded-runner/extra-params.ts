@@ -6,8 +6,8 @@ import type { BotConfig } from "../../config/config.js";
 import { log } from "./logger.js";
 
 const OPENROUTER_APP_HEADERS: Record<string, string> = {
-  "HTTP-Referer": "https://hanzo.bot",
-  "X-Title": "Bot",
+  "HTTP-Referer": "https://openclaw.ai",
+  "X-Title": "OpenClaw",
 };
 const ANTHROPIC_CONTEXT_1M_BETA = "context-1m-2025-08-07";
 const ANTHROPIC_1M_MODEL_PREFIXES = ["claude-opus-4", "claude-sonnet-4"] as const;
@@ -579,7 +579,7 @@ function createOpenRouterSystemCacheWrapper(baseStreamFn: StreamFn | undefined):
 }
 
 /**
- * Map Bot's ThinkLevel to OpenRouter's reasoning.effort values.
+ * Map OpenClaw's ThinkLevel to OpenRouter's reasoning.effort values.
  * "off" maps to "none"; all other levels pass through as-is.
  */
 function mapThinkingLevelToOpenRouterReasoningEffort(
@@ -1112,12 +1112,12 @@ export function applyExtraParamsToAgent(
     // Omit the thinkingLevel so we never inject `reasoning.effort: "none"`,
     // which would cause a 400 on models where reasoning is mandatory.
     // Users who need reasoning control should target a specific model ID.
-    // See: hanzoai/bot#24851
+    // See: openclaw/openclaw#24851
     //
     // x-ai/grok models do not support OpenRouter's reasoning.effort parameter
     // and reject payloads containing it with "Invalid arguments passed to the
     // model." Skip reasoning injection for these models.
-    // See: hanzoai/bot#32039
+    // See: openclaw/openclaw#32039
     const skipReasoningInjection = modelId === "auto" || isOpenRouterReasoningUnsupported(modelId);
     const openRouterThinkingLevel = skipReasoningInjection ? undefined : thinkingLevel;
     agent.streamFn = createOpenRouterWrapper(agent.streamFn, openRouterThinkingLevel);

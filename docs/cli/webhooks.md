@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `hanzo-bot webhooks` (webhook helpers + Gmail Pub/Sub)"
+summary: "CLI reference for `openclaw webhooks` (webhook helpers + Gmail Pub/Sub)"
 read_when:
-  - You want to wire Gmail Pub/Sub events into Hanzo Bot
+  - You want to wire Gmail Pub/Sub events into OpenClaw
   - You want webhook helper commands
 title: "webhooks"
 ---
 
-# `hanzo-bot webhooks`
+# `openclaw webhooks`
 
 Webhook helpers and integrations (Gmail Pub/Sub, webhook helpers).
 
@@ -18,8 +18,8 @@ Related:
 ## Gmail
 
 ```bash
-hanzo-bot webhooks gmail setup --account you@example.com
-hanzo-bot webhooks gmail run
+openclaw webhooks gmail setup --account you@example.com
+openclaw webhooks gmail run
 ```
 
 See [Gmail Pub/Sub documentation](/automation/gmail-pubsub) for details.

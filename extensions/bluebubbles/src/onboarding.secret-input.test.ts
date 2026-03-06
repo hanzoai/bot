@@ -1,7 +1,7 @@
-import type { WizardPrompter } from "bot/plugin-sdk";
+import type { WizardPrompter } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("bot/plugin-sdk", () => ({
+vi.mock("@hanzo/bot/plugin-sdk/bluebubbles", () => ({
   DEFAULT_ACCOUNT_ID: "default",
   addWildcardAllowFrom: vi.fn(),
   formatDocsLink: (_url: string, fallback: string) => fallback,

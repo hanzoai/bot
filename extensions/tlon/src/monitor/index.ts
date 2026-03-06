@@ -1,5 +1,5 @@
-import type { RuntimeEnv, ReplyPayload, BotConfig } from "bot/plugin-sdk";
-import { createLoggerBackedRuntime, createReplyPrefixOptions } from "bot/plugin-sdk";
+import type { RuntimeEnv, ReplyPayload, BotConfig } from "@hanzo/bot/plugin-sdk/tlon";
+import { createLoggerBackedRuntime, createReplyPrefixOptions } from "@hanzo/bot/plugin-sdk/tlon";
 import type { Foreigns, DmInvite } from "../urbit/foreigns.js";
 import { getTlonRuntime } from "../runtime.js";
 import { createSettingsManager, type TlonSettingsStore } from "../settings.js";
@@ -960,7 +960,7 @@ export async function monitorTlonProvider(opts: MonitorTlonOpts = {}): Promise<v
         // Log warning
         runtime.log?.(
           `[tlon] ⚠️ SECURITY: Multiple users sharing DM session. ` +
-            `Configure "session.dmScope: per-channel-peer" in Bot config.`,
+            `Configure "session.dmScope: per-channel-peer" in OpenClaw config.`,
         );
 
         // Notify owner via DM (once per monitor session)
@@ -969,9 +969,9 @@ export async function monitorTlonProvider(opts: MonitorTlonOpts = {}): Promise<v
           const warningMsg =
             `⚠️ Security Warning: Multiple users are sharing a DM session with this bot. ` +
             `This can leak conversation context between users.\n\n` +
-            `Fix: Add to your Bot config:\n` +
+            `Fix: Add to your OpenClaw config:\n` +
             `session:\n  dmScope: "per-channel-peer"\n\n` +
-            `Docs: https://docs.hanzo.bot/concepts/session#secure-dm-mode`;
+            `Docs: https://docs.openclaw.ai/concepts/session#secure-dm-mode`;
 
           // Send async, don't block message processing
           sendDm({

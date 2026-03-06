@@ -3,13 +3,13 @@ import type {
   ChannelPlugin,
   ChannelSetupInput,
   BotConfig,
-} from "bot/plugin-sdk";
-import { configureClient } from "@tloncorp/api";
+} from "@hanzo/bot/plugin-sdk/tlon";
 import {
   applyAccountNameToChannelSection,
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/tlon";
+import { configureClient } from "@tloncorp/api";
 import crypto from "node:crypto";
 import { buildTlonAccountFields } from "./account-fields.js";
 import { tlonChannelConfigSchema } from "./config-schema.js";
@@ -497,7 +497,7 @@ export const tlonPlugin: ChannelPlugin = {
         lastError: runtime?.lastError ?? null,
         probe,
       };
-      return snapshot as import("bot/plugin-sdk").ChannelAccountSnapshot;
+      return snapshot as import("@hanzo/bot/plugin-sdk/tlon").ChannelAccountSnapshot;
     },
   },
   gateway: {
@@ -507,7 +507,7 @@ export const tlonPlugin: ChannelPlugin = {
         accountId: account.accountId,
         ship: account.ship,
         url: account.url,
-      } as import("bot/plugin-sdk").ChannelAccountSnapshot);
+      } as import("@hanzo/bot/plugin-sdk/tlon").ChannelAccountSnapshot);
       ctx.log?.info(`[${account.accountId}] starting Tlon provider for ${account.ship ?? "tlon"}`);
       return monitorTlonProvider({
         runtime: ctx.runtime,

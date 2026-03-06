@@ -1,5 +1,5 @@
 import type { EventLogEntry } from "./app-events.ts";
-import type { BotApp } from "./app.ts";
+import type { OpenClawApp } from "./app.ts";
 import type { ExecApprovalRequest } from "./controllers/exec-approval.ts";
 import type { Tab } from "./navigation.ts";
 import type { UiSettings } from "./storage.ts";
@@ -69,6 +69,7 @@ type GatewayHost = {
   assistantName: string;
   assistantAvatar: string | null;
   assistantAgentId: string | null;
+  serverVersion: string | null;
   sessionKey: string;
   chatRunId: string | null;
   refreshSessionsAfterChat: Set<string>;
@@ -83,6 +84,33 @@ type SessionDefaultsSnapshot = {
   mainSessionKey?: string;
   scope?: string;
 };
+
+export function resolveControlUiClientVersion(params: {
+  gatewayUrl: string;
+  serverVersion: string | null;
+  pageUrl?: string;
+}): string | undefined {
+  const serverVersion = params.serverVersion?.trim();
+  if (!serverVersion) {
+    return undefined;
+  }
+  const pageUrl =
+    params.pageUrl ?? (typeof window === "undefined" ? undefined : window.location.href);
+  if (!pageUrl) {
+    return undefined;
+  }
+  try {
+    const page = new URL(pageUrl);
+    const gateway = new URL(params.gatewayUrl, page);
+    const allowedProtocols = new Set(["ws:", "wss:", "http:", "https:"]);
+    if (!allowedProtocols.has(gateway.protocol) || gateway.host !== page.host) {
+      return undefined;
+    }
+    return serverVersion;
+  } catch {
+    return undefined;
+  }
+}
 
 function normalizeSessionKeyForDefaults(
   value: string | undefined,
@@ -145,11 +173,16 @@ export function connectGateway(host: GatewayHost) {
   host.execApprovalError = null;
 
   const previousClient = host.client;
+  const clientVersion = resolveControlUiClientVersion({
+    gatewayUrl: host.settings.gatewayUrl,
+    serverVersion: host.serverVersion,
+  });
   const client = new GatewayBrowserClient({
     url: host.settings.gatewayUrl,
     token: host.settings.token.trim() ? host.settings.token : undefined,
     password: host.password.trim() ? host.password : undefined,
-    clientName: "bot-control-ui",
+    clientName: "openclaw-control-ui",
+    clientVersion,
     mode: "webchat",
     instanceId: host.clientInstanceId,
     onHello: (hello) => {
@@ -167,11 +200,11 @@ export function connectGateway(host: GatewayHost) {
       (host as unknown as { chatStream: string | null }).chatStream = null;
       (host as unknown as { chatStreamStartedAt: number | null }).chatStreamStartedAt = null;
       resetToolStream(host as unknown as Parameters<typeof resetToolStream>[0]);
-      void loadAssistantIdentity(host as unknown as BotApp);
-      void loadAgents(host as unknown as BotApp);
-      void loadToolsCatalog(host as unknown as BotApp);
-      void loadNodes(host as unknown as BotApp, { quiet: true });
-      void loadDevices(host as unknown as BotApp, { quiet: true });
+      void loadAssistantIdentity(host as unknown as OpenClawApp);
+      void loadAgents(host as unknown as OpenClawApp);
+      void loadToolsCatalog(host as unknown as OpenClawApp);
+      void loadNodes(host as unknown as OpenClawApp, { quiet: true });
+      void loadDevices(host as unknown as OpenClawApp, { quiet: true });
       void refreshActiveTab(host as unknown as Parameters<typeof refreshActiveTab>[0]);
     },
     onClose: ({ code, reason, error }) => {
@@ -237,7 +270,7 @@ function handleTerminalChatEvent(
   }
   host.refreshSessionsAfterChat.delete(runId);
   if (state === "final") {
-    void loadSessions(host as unknown as BotApp, {
+    void loadSessions(host as unknown as OpenClawApp, {
       activeMinutes: CHAT_SESSIONS_ACTIVE_MINUTES,
     });
   }
@@ -250,10 +283,10 @@ function handleChatGatewayEvent(host: GatewayHost, payload: ChatEventPayload | u
       payload.sessionKey,
     );
   }
-  const state = handleChatEvent(host as unknown as BotApp, payload);
+  const state = handleChatEvent(host as unknown as OpenClawApp, payload);
   handleTerminalChatEvent(host, payload, state);
   if (state === "final" && shouldReloadHistoryForFinalEvent(payload)) {
-    void loadChatHistory(host as unknown as BotApp);
+    void loadChatHistory(host as unknown as OpenClawApp);
   }
 }
 
@@ -297,7 +330,7 @@ function handleGatewayEventUnsafe(host: GatewayHost, evt: GatewayEventFrame) {
   }
 
   if (evt.event === "device.pair.requested" || evt.event === "device.pair.resolved") {
-    void loadDevices(host as unknown as BotApp, { quiet: true });
+    void loadDevices(host as unknown as OpenClawApp, { quiet: true });
   }
 
   if (evt.event === "exec.approval.requested") {
@@ -346,37 +379,4 @@ export function applySnapshot(host: GatewayHost, hello: GatewayHelloOk) {
     applySessionDefaults(host, snapshot.sessionDefaults);
   }
   host.updateAvailable = snapshot?.updateAvailable ?? null;
-}
-
-/**
- * Resolve whether the gateway's server version should be forwarded as the
- * control-UI client version.  Same-origin connections (including relative
- * websocket URLs) use the server version so the gateway can serve matching
- * static assets.  Cross-origin connections omit the version because the
- * server's assets may not match the remote client build.
- */
-export function resolveControlUiClientVersion(params: {
-  gatewayUrl: string;
-  serverVersion: string | null;
-  pageUrl: string;
-}): string | undefined {
-  const { gatewayUrl, serverVersion, pageUrl } = params;
-  if (!serverVersion) {
-    return undefined;
-  }
-
-  // Relative URLs (e.g. "/ws") are always same-origin.
-  if (gatewayUrl.startsWith("/")) {
-    return serverVersion;
-  }
-
-  try {
-    const pageOrigin = new URL(pageUrl).origin;
-    // Normalise ws(s):// to http(s):// so origin comparison works.
-    const normalised = gatewayUrl.replace(/^ws(s?):\/\//, "http$1://");
-    const gatewayOrigin = new URL(normalised).origin;
-    return gatewayOrigin === pageOrigin ? serverVersion : undefined;
-  } catch {
-    return undefined;
-  }
 }

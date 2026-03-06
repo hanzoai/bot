@@ -1,8 +1,8 @@
+import { fetchWithSsrFGuard } from "@hanzo/bot/plugin-sdk/tlon";
 /**
  * Upload an image from a URL to Tlon storage.
  */
 import { uploadFile } from "@tloncorp/api";
-import { fetchWithSsrFGuard } from "bot/plugin-sdk";
 import { getDefaultSsrFPolicy } from "./context.js";
 
 /**

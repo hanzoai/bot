@@ -10,7 +10,7 @@ title: "API Usage and Costs"
 # API usage & costs
 
 This doc lists **features that can invoke API keys** and where their costs show up. It focuses on
-Hanzo Bot features that can generate provider usage or paid API calls.
+OpenClaw features that can generate provider usage or paid API calls.
 
 ## Where costs show up (chat + CLI)
 
@@ -26,14 +26,14 @@ Hanzo Bot features that can generate provider usage or paid API calls.
 
 **CLI usage windows (provider quotas)**
 
-- `hanzo-bot status --usage` and `hanzo-bot channels list` show provider **usage windows**
+- `openclaw status --usage` and `openclaw channels list` show provider **usage windows**
   (quota snapshots, not per-message costs).
 
 See [Token use & costs](/reference/token-use) for details and examples.
 
 ## How keys are discovered
 
-Hanzo Bot can pick up credentials from:
+OpenClaw can pick up credentials from:
 
 - **Auth profiles** (per-agent, stored in `auth-profiles.json`).
 - **Environment variables** (e.g. `OPENAI_API_KEY`, `BRAVE_API_KEY`, `FIRECRAWL_API_KEY`).
@@ -67,6 +67,8 @@ Semantic memory search uses **embedding APIs** when configured for remote provid
 - `memorySearch.provider = "openai"` → OpenAI embeddings
 - `memorySearch.provider = "gemini"` → Gemini embeddings
 - `memorySearch.provider = "voyage"` → Voyage embeddings
+- `memorySearch.provider = "mistral"` → Mistral embeddings
+- `memorySearch.provider = "ollama"` → Ollama embeddings (local/self-hosted; typically no hosted API billing)
 - Optional fallback to a remote provider if local embeddings fail
 
 You can keep it local with `memorySearch.provider = "local"` (no API usage).
@@ -97,8 +99,8 @@ See [Web tools](/tools/web).
 Some status commands call **provider usage endpoints** to display quota windows or auth health.
 These are typically low-volume calls but still hit provider APIs:
 
-- `hanzo-bot status --usage`
-- `hanzo-bot models status --json`
+- `openclaw status --usage`
+- `openclaw models status --json`
 
 See [Models CLI](/cli/models).
 
@@ -111,7 +113,7 @@ See [Session management + compaction](/reference/session-management-compaction).
 
 ### 8) Model scan / probe
 
-`hanzo-bot models scan` can probe OpenRouter models and uses `OPENROUTER_API_KEY` when
+`openclaw models scan` can probe OpenRouter models and uses `OPENROUTER_API_KEY` when
 probing is enabled.
 
 See [Models CLI](/cli/models).

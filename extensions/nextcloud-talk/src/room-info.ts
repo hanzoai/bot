@@ -1,5 +1,5 @@
-import type { RuntimeEnv } from "bot/plugin-sdk";
-import { fetchWithSsrFGuard } from "bot/plugin-sdk";
+import type { RuntimeEnv } from "@hanzo/bot/plugin-sdk/nextcloud-talk";
+import { fetchWithSsrFGuard } from "@hanzo/bot/plugin-sdk/nextcloud-talk";
 import { readFileSync } from "node:fs";
 import type { ResolvedNextcloudTalkAccount } from "./accounts.js";
 import { normalizeResolvedSecretInputString } from "./secret-input.js";

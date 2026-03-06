@@ -1,14 +1,14 @@
 ---
 summary: "Voice Call plugin: outbound + inbound calls via Twilio/Telnyx/Plivo (plugin install + config + CLI)"
 read_when:
-  - You want to place an outbound voice call from Hanzo Bot
+  - You want to place an outbound voice call from OpenClaw
   - You are configuring or developing the voice-call plugin
 title: "Voice Call Plugin"
 ---
 
 # Voice Call (plugin)
 
-Voice calls for Hanzo Bot via a plugin. Supports outbound notifications and
+Voice calls for OpenClaw via a plugin. Supports outbound notifications and
 multi-turn conversations with inbound policies.
 
 Current providers:
@@ -23,7 +23,7 @@ Quick mental model:
 - Install plugin
 - Restart Gateway
 - Configure under `plugins.entries.voice-call.config`
-- Use `hanzo-bot voicecall ...` or the `voice_call` tool
+- Use `openclaw voicecall ...` or the `voice_call` tool
 
 ## Where it runs (local vs remote)
 
@@ -36,7 +36,7 @@ If you use a remote Gateway, install/configure the plugin on the **machine runni
 ### Option A: install from npm (recommended)
 
 ```bash
-hanzo-bot plugins install @bot/voice-call
+openclaw plugins install @openclaw/voice-call
 ```
 
 Restart the Gateway afterwards.
@@ -44,7 +44,7 @@ Restart the Gateway afterwards.
 ### Option B: install from a local folder (dev, no copying)
 
 ```bash
-hanzo-bot plugins install ./extensions/voice-call
+openclaw plugins install ./extensions/voice-call
 cd ./extensions/voice-call && pnpm install
 ```
 
@@ -107,6 +107,10 @@ Set config under `plugins.entries.voice-call.config`:
           streaming: {
             enabled: true,
             streamPath: "/voice/stream",
+            preStartTimeoutMs: 5000,
+            maxPendingConnections: 32,
+            maxPendingConnectionsPerIp: 4,
+            maxConnections: 128,
           },
         },
       },
@@ -125,6 +129,40 @@ Notes:
 - If you use ngrok free tier, set `publicUrl` to the exact ngrok URL; signature verification is always enforced.
 - `tunnel.allowNgrokFreeTierLoopbackBypass: true` allows Twilio webhooks with invalid signatures **only** when `tunnel.provider="ngrok"` and `serve.bind` is loopback (ngrok local agent). Use for local dev only.
 - Ngrok free tier URLs can change or add interstitial behavior; if `publicUrl` drifts, Twilio signatures will fail. For production, prefer a stable domain or Tailscale funnel.
+- Streaming security defaults:
+  - `streaming.preStartTimeoutMs` closes sockets that never send a valid `start` frame.
+  - `streaming.maxPendingConnections` caps total unauthenticated pre-start sockets.
+  - `streaming.maxPendingConnectionsPerIp` caps unauthenticated pre-start sockets per source IP.
+  - `streaming.maxConnections` caps total open media stream sockets (pending + active).
+
+## Stale call reaper
+
+Use `staleCallReaperSeconds` to end calls that never receive a terminal webhook
+(for example, notify-mode calls that never complete). The default is `0`
+(disabled).
+
+Recommended ranges:
+
+- **Production:** `120`–`300` seconds for notify-style flows.
+- Keep this value **higher than `maxDurationSeconds`** so normal calls can
+  finish. A good starting point is `maxDurationSeconds + 30–60` seconds.
+
+Example:
+
+```json5
+{
+  plugins: {
+    entries: {
+      "voice-call": {
+        config: {
+          maxDurationSeconds: 300,
+          staleCallReaperSeconds: 360,
+        },
+      },
+    },
+  },
+}
+```
 
 ## Webhook Security
 
@@ -138,6 +176,12 @@ headers are trusted.
 
 `webhookSecurity.trustedProxyIPs` only trusts forwarded headers when the request
 remote IP matches the list.
+
+Webhook replay protection is enabled for Twilio and Plivo. Replayed valid webhook
+requests are acknowledged but skipped for side effects.
+
+Twilio conversation turns include a per-turn token in `<Gather>` callbacks, so
+stale/replayed speech callbacks cannot satisfy a newer pending transcript turn.
 
 Example with a stable public host:
 
@@ -261,13 +305,13 @@ Auto-responses use the agent system. Tune with:
 ## CLI
 
 ```bash
-hanzo-bot voicecall call --to "+15555550123" --message "Hello from Hanzo Bot"
-hanzo-bot voicecall continue --call-id <id> --message "Any questions?"
-hanzo-bot voicecall speak --call-id <id> --message "One moment"
-hanzo-bot voicecall end --call-id <id>
-hanzo-bot voicecall status --call-id <id>
-hanzo-bot voicecall tail
-hanzo-bot voicecall expose --mode funnel
+openclaw voicecall call --to "+15555550123" --message "Hello from OpenClaw"
+openclaw voicecall continue --call-id <id> --message "Any questions?"
+openclaw voicecall speak --call-id <id> --message "One moment"
+openclaw voicecall end --call-id <id>
+openclaw voicecall status --call-id <id>
+openclaw voicecall tail
+openclaw voicecall expose --mode funnel
 ```
 
 ## Agent tool

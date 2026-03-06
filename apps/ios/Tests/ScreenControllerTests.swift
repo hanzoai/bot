@@ -1,5 +1,6 @@
 import Testing
 import WebKit
+<<<<<<< HEAD
 @testable import HanzoBot
 
 @Suite struct ScreenControllerTests {
@@ -10,17 +11,50 @@ import WebKit
         #expect(screen.webView.backgroundColor == .black)
 
         let scrollView = screen.webView.scrollView
+=======
+@testable import OpenClaw
+
+@MainActor
+private func mountScreen(_ screen: ScreenController) throws -> (ScreenWebViewCoordinator, WKWebView) {
+    let coordinator = ScreenWebViewCoordinator(controller: screen)
+    _ = coordinator.makeContainerView()
+    let webView = try #require(coordinator.managedWebView)
+    return (coordinator, webView)
+}
+
+@Suite struct ScreenControllerTests {
+    @Test @MainActor func canvasModeConfiguresWebViewForTouch() throws {
+        let screen = ScreenController()
+        let (coordinator, webView) = try mountScreen(screen)
+        defer { coordinator.teardown() }
+
+        #expect(webView.isOpaque == true)
+        #expect(webView.backgroundColor == .black)
+
+        let scrollView = webView.scrollView
+>>>>>>> upstream/main
         #expect(scrollView.backgroundColor == .black)
         #expect(scrollView.contentInsetAdjustmentBehavior == .never)
         #expect(scrollView.isScrollEnabled == false)
         #expect(scrollView.bounces == false)
     }
 
+<<<<<<< HEAD
     @Test @MainActor func navigateEnablesScrollForWebPages() {
         let screen = ScreenController()
         screen.navigate(to: "https://example.com")
 
         let scrollView = screen.webView.scrollView
+=======
+    @Test @MainActor func navigateEnablesScrollForWebPages() throws {
+        let screen = ScreenController()
+        let (coordinator, webView) = try mountScreen(screen)
+        defer { coordinator.teardown() }
+
+        screen.navigate(to: "https://example.com")
+
+        let scrollView = webView.scrollView
+>>>>>>> upstream/main
         #expect(scrollView.isScrollEnabled == true)
         #expect(scrollView.bounces == true)
     }
@@ -34,6 +68,12 @@ import WebKit
 
     @Test @MainActor func evalExecutesJavaScript() async throws {
         let screen = ScreenController()
+<<<<<<< HEAD
+=======
+        let (coordinator, _) = try mountScreen(screen)
+        defer { coordinator.teardown() }
+
+>>>>>>> upstream/main
         let deadline = ContinuousClock().now.advanced(by: .seconds(3))
 
         while true {
@@ -53,7 +93,11 @@ import WebKit
     @Test @MainActor func localNetworkCanvasURLsAreAllowed() {
         let screen = ScreenController()
         #expect(screen.isLocalNetworkCanvasURL(URL(string: "http://localhost:18789/")!) == true)
+<<<<<<< HEAD
         #expect(screen.isLocalNetworkCanvasURL(URL(string: "http://hanzo-bot.local:18789/")!) == true)
+=======
+        #expect(screen.isLocalNetworkCanvasURL(URL(string: "http://openclaw.local:18789/")!) == true)
+>>>>>>> upstream/main
         #expect(screen.isLocalNetworkCanvasURL(URL(string: "http://peters-mac-studio-1:18789/")!) == true)
         #expect(screen.isLocalNetworkCanvasURL(URL(string: "https://peters-mac-studio-1.ts.net:18789/")!) == true)
         #expect(screen.isLocalNetworkCanvasURL(URL(string: "http://192.168.0.10:18789/")!) == true)

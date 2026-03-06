@@ -9,7 +9,11 @@ Sources/Device/DeviceStatusService.swift
 Sources/Device/NetworkStatusService.swift
 Sources/Chat/ChatSheet.swift
 Sources/Chat/IOSGatewayChatTransport.swift
+<<<<<<< HEAD
 Sources/BotApp.swift
+=======
+Sources/OpenClawApp.swift
+>>>>>>> upstream/main
 Sources/Location/LocationService.swift
 Sources/Model/NodeAppModel.swift
 Sources/Model/NodeAppModel+Canvas.swift
@@ -28,6 +32,7 @@ Sources/Status/VoiceWakeToast.swift
 Sources/Voice/VoiceTab.swift
 Sources/Voice/VoiceWakeManager.swift
 Sources/Voice/VoiceWakePreferences.swift
+<<<<<<< HEAD
 ../shared/BotKit/Sources/BotChatUI/ChatComposer.swift
 ../shared/BotKit/Sources/BotChatUI/ChatMarkdownRenderer.swift
 ../shared/BotKit/Sources/BotChatUI/ChatMarkdownPreprocessor.swift
@@ -59,6 +64,39 @@ Sources/Voice/VoiceWakePreferences.swift
 ../shared/BotKit/Sources/BotKit/StoragePaths.swift
 ../shared/BotKit/Sources/BotKit/SystemCommands.swift
 ../shared/BotKit/Sources/BotKit/TalkDirective.swift
+=======
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatComposer.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatMarkdownRenderer.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatMarkdownPreprocessor.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatMessageViews.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatModels.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatPayloadDecoding.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatSessions.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatSheets.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatTheme.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatTransport.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatView.swift
+../shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel.swift
+../shared/OpenClawKit/Sources/OpenClawKit/AnyCodable.swift
+../shared/OpenClawKit/Sources/OpenClawKit/BonjourEscapes.swift
+../shared/OpenClawKit/Sources/OpenClawKit/BonjourTypes.swift
+../shared/OpenClawKit/Sources/OpenClawKit/BridgeFrames.swift
+../shared/OpenClawKit/Sources/OpenClawKit/CameraCommands.swift
+../shared/OpenClawKit/Sources/OpenClawKit/CanvasA2UIAction.swift
+../shared/OpenClawKit/Sources/OpenClawKit/CanvasA2UICommands.swift
+../shared/OpenClawKit/Sources/OpenClawKit/CanvasA2UIJSONL.swift
+../shared/OpenClawKit/Sources/OpenClawKit/CanvasCommandParams.swift
+../shared/OpenClawKit/Sources/OpenClawKit/CanvasCommands.swift
+../shared/OpenClawKit/Sources/OpenClawKit/Capabilities.swift
+../shared/OpenClawKit/Sources/OpenClawKit/OpenClawKitResources.swift
+../shared/OpenClawKit/Sources/OpenClawKit/DeepLinks.swift
+../shared/OpenClawKit/Sources/OpenClawKit/JPEGTranscoder.swift
+../shared/OpenClawKit/Sources/OpenClawKit/NodeError.swift
+../shared/OpenClawKit/Sources/OpenClawKit/ScreenCommands.swift
+../shared/OpenClawKit/Sources/OpenClawKit/StoragePaths.swift
+../shared/OpenClawKit/Sources/OpenClawKit/SystemCommands.swift
+../shared/OpenClawKit/Sources/OpenClawKit/TalkDirective.swift
+>>>>>>> upstream/main
 ../../Swabble/Sources/SwabbleKit/WakeWordGate.swift
 Sources/Voice/TalkModeManager.swift
 Sources/Voice/TalkOrbOverlay.swift

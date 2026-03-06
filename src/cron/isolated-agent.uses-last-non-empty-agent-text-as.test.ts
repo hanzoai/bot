@@ -20,8 +20,8 @@ type HomeEnvSnapshot = {
   USERPROFILE: string | undefined;
   HOMEDRIVE: string | undefined;
   HOMEPATH: string | undefined;
-  BOT_HOME: string | undefined;
-  BOT_STATE_DIR: string | undefined;
+  OPENCLAW_HOME: string | undefined;
+  OPENCLAW_STATE_DIR: string | undefined;
 };
 
 let suiteTempHomeRoot = "";
@@ -33,8 +33,8 @@ function snapshotHomeEnv(): HomeEnvSnapshot {
     USERPROFILE: process.env.USERPROFILE,
     HOMEDRIVE: process.env.HOMEDRIVE,
     HOMEPATH: process.env.HOMEPATH,
-    BOT_HOME: process.env.BOT_HOME,
-    BOT_STATE_DIR: process.env.BOT_STATE_DIR,
+    OPENCLAW_HOME: process.env.OPENCLAW_HOME,
+    OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
   };
 }
 
@@ -51,18 +51,18 @@ function restoreHomeEnv(snapshot: HomeEnvSnapshot) {
   restoreValue("USERPROFILE");
   restoreValue("HOMEDRIVE");
   restoreValue("HOMEPATH");
-  restoreValue("BOT_HOME");
-  restoreValue("BOT_STATE_DIR");
+  restoreValue("OPENCLAW_HOME");
+  restoreValue("OPENCLAW_STATE_DIR");
 }
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
   const home = path.join(suiteTempHomeRoot, `case-${suiteTempHomeCaseId++}`);
-  await fs.mkdir(path.join(home, ".bot", "agents", "main", "sessions"), { recursive: true });
+  await fs.mkdir(path.join(home, ".openclaw", "agents", "main", "sessions"), { recursive: true });
   const snapshot = snapshotHomeEnv();
   process.env.HOME = home;
   process.env.USERPROFILE = home;
-  delete process.env.BOT_HOME;
-  process.env.BOT_STATE_DIR = path.join(home, ".bot");
+  delete process.env.OPENCLAW_HOME;
+  process.env.OPENCLAW_STATE_DIR = path.join(home, ".openclaw");
   if (process.platform === "win32") {
     const parsed = path.parse(home);
     if (parsed.root) {
@@ -225,7 +225,7 @@ async function runStoredOverrideAndExpectModel(params: {
 
 describe("runCronIsolatedAgentTurn", () => {
   beforeAll(async () => {
-    suiteTempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-cron-turn-suite-"));
+    suiteTempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-turn-suite-"));
   });
 
   afterAll(async () => {
@@ -338,7 +338,7 @@ describe("runCronIsolatedAgentTurn", () => {
       const call = vi.mocked(runEmbeddedPiAgent).mock.calls.at(-1)?.[0] as {
         agentDir?: string;
       };
-      expect(call?.agentDir).toBe(path.join(home, ".bot", "agents", "main", "agent"));
+      expect(call?.agentDir).toBe(path.join(home, ".openclaw", "agents", "main", "agent"));
     });
   });
 
@@ -366,7 +366,7 @@ describe("runCronIsolatedAgentTurn", () => {
 
       const cfg = makeCfg(
         home,
-        path.join(home, ".bot", "agents", "{agentId}", "sessions", "sessions.json"),
+        path.join(home, ".openclaw", "agents", "{agentId}", "sessions", "sessions.json"),
         {
           agents: {
             defaults: { workspace: path.join(home, "default-workspace") },

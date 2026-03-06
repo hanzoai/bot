@@ -21,8 +21,8 @@ const serviceReadRuntime = vi.fn(async (_env?: NodeJS.ProcessEnv) => ({ status: 
 const serviceReadCommand = vi.fn(async (_env?: NodeJS.ProcessEnv) => ({
   programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
   environment: {
-    BOT_STATE_DIR: "/tmp/bot-daemon",
-    BOT_CONFIG_PATH: "/tmp/bot-daemon/bot.json",
+    OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
+    OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
   },
 }));
 const resolveGatewayBindHost = vi.fn(
@@ -30,9 +30,11 @@ const resolveGatewayBindHost = vi.fn(
 );
 const pickPrimaryTailnetIPv4 = vi.fn(() => "100.64.0.9");
 const resolveGatewayPort = vi.fn((_cfg?: unknown, _env?: unknown) => 18789);
-const resolveStateDir = vi.fn((env: NodeJS.ProcessEnv) => env.BOT_STATE_DIR ?? "/tmp/bot-cli");
+const resolveStateDir = vi.fn(
+  (env: NodeJS.ProcessEnv) => env.OPENCLAW_STATE_DIR ?? "/tmp/openclaw-cli",
+);
 const resolveConfigPath = vi.fn((env: NodeJS.ProcessEnv, stateDir: string) => {
-  return env.BOT_CONFIG_PATH ?? `${stateDir}/bot.json`;
+  return env.OPENCLAW_CONFIG_PATH ?? `${stateDir}/openclaw.json`;
 });
 let daemonLoadedConfig: Record<string, unknown> = {
   gateway: {
@@ -49,7 +51,7 @@ let cliLoadedConfig: Record<string, unknown> = {
 
 vi.mock("../../config/config.js", () => ({
   createConfigIO: ({ configPath }: { configPath: string }) => {
-    const isDaemon = configPath.includes("/bot-daemon/");
+    const isDaemon = configPath.includes("/openclaw-daemon/");
     return {
       readConfigFileSnapshot: async () => ({
         path: configPath,
@@ -117,16 +119,18 @@ describe("gatherDaemonStatus", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv([
-      "BOT_STATE_DIR",
-      "BOT_CONFIG_PATH",
-      "BOT_GATEWAY_TOKEN",
-      "BOT_GATEWAY_PASSWORD",
+      "OPENCLAW_STATE_DIR",
+      "OPENCLAW_CONFIG_PATH",
+      "OPENCLAW_GATEWAY_TOKEN",
+      "OPENCLAW_GATEWAY_PASSWORD",
+      "DAEMON_GATEWAY_TOKEN",
       "DAEMON_GATEWAY_PASSWORD",
     ]);
-    process.env.BOT_STATE_DIR = "/tmp/bot-cli";
-    process.env.BOT_CONFIG_PATH = "/tmp/bot-cli/bot.json";
-    delete process.env.BOT_GATEWAY_TOKEN;
-    delete process.env.BOT_GATEWAY_PASSWORD;
+    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-cli";
+    process.env.OPENCLAW_CONFIG_PATH = "/tmp/openclaw-cli/openclaw.json";
+    delete process.env.OPENCLAW_GATEWAY_TOKEN;
+    delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+    delete process.env.DAEMON_GATEWAY_TOKEN;
     delete process.env.DAEMON_GATEWAY_PASSWORD;
     callGatewayStatusProbe.mockClear();
     loadGatewayTlsRuntime.mockClear();
@@ -212,6 +216,37 @@ describe("gatherDaemonStatus", () => {
     expect(callGatewayStatusProbe).toHaveBeenCalledWith(
       expect.objectContaining({
         password: "daemon-secretref-password",
+      }),
+    );
+  });
+
+  it("resolves daemon gateway auth token SecretRef values before probing", async () => {
+    daemonLoadedConfig = {
+      gateway: {
+        bind: "lan",
+        tls: { enabled: true },
+        auth: {
+          mode: "token",
+          token: "${DAEMON_GATEWAY_TOKEN}",
+        },
+      },
+      secrets: {
+        providers: {
+          default: { source: "env" },
+        },
+      },
+    };
+    process.env.DAEMON_GATEWAY_TOKEN = "daemon-secretref-token";
+
+    await gatherDaemonStatus({
+      rpc: {},
+      probe: true,
+      deep: false,
+    });
+
+    expect(callGatewayStatusProbe).toHaveBeenCalledWith(
+      expect.objectContaining({
+        token: "daemon-secretref-token",
       }),
     );
   });

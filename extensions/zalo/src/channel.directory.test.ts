@@ -1,4 +1,4 @@
-import type { BotConfig, RuntimeEnv } from "bot/plugin-sdk";
+import type { BotConfig, RuntimeEnv } from "@hanzo/bot/plugin-sdk/zalo";
 import { describe, expect, it } from "vitest";
 import { zaloPlugin } from "./channel.js";
 

@@ -1,4 +1,4 @@
-import type { BotConfig, PluginRuntime } from "bot/plugin-sdk";
+import type { BotConfig, PluginRuntime } from "@hanzo/bot/plugin-sdk/zalo";
 import type { AddressInfo } from "node:net";
 import { createServer, type RequestListener } from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";

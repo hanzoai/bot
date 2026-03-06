@@ -47,7 +47,7 @@ function readBundledChannelCatalogIds(): string[] {
     try {
       const raw = readFileSync(packageJsonPath, "utf8");
       const parsed = JSON.parse(raw) as {
-        bot?: {
+        openclaw?: {
           channel?: {
             id?: unknown;
             order?: unknown;
@@ -55,12 +55,12 @@ function readBundledChannelCatalogIds(): string[] {
           };
         };
       };
-      const id = parsed.bot?.channel?.id;
+      const id = parsed.openclaw?.channel?.id;
       if (typeof id !== "string" || !id.trim()) {
         continue;
       }
-      const orderRaw = parsed.bot?.channel?.order;
-      const labelRaw = parsed.bot?.channel?.label;
+      const orderRaw = parsed.openclaw?.channel?.order;
+      const labelRaw = parsed.openclaw?.channel?.label;
       entries.push({
         id: id.trim(),
         order: typeof orderRaw === "number" ? orderRaw : 999,

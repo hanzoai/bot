@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import crypto from "node:crypto";
 import path from "node:path";
 import { resolveBlueBubblesServerAccount } from "./account-resolve.js";

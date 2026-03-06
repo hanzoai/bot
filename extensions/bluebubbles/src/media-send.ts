@@ -1,4 +1,4 @@
-import { resolveChannelMediaMaxBytes, type BotConfig } from "bot/plugin-sdk";
+import { resolveChannelMediaMaxBytes, type BotConfig } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";

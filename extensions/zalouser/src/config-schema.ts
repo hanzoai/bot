@@ -1,4 +1,4 @@
-import { MarkdownConfigSchema, ToolPolicySchema } from "bot/plugin-sdk";
+import { MarkdownConfigSchema, ToolPolicySchema } from "@hanzo/bot/plugin-sdk/zalouser";
 import { z } from "zod";
 
 const allowFromEntry = z.union([z.string(), z.number()]);

@@ -1,4 +1,4 @@
-import { isBlockedHostnameOrIp } from "bot/plugin-sdk";
+import { isBlockedHostnameOrIp } from "@hanzo/bot/plugin-sdk/tlon";
 
 export type UrbitBaseUrlValidation =
   | { ok: true; baseUrl: string; hostname: string }

@@ -3,11 +3,11 @@ import path from "node:path";
 import { withTempHome as withTempHomeBase } from "../../test/helpers/temp-home.js";
 
 export async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
-  return withTempHomeBase(fn, { prefix: "bot-config-" });
+  return withTempHomeBase(fn, { prefix: "openclaw-config-" });
 }
 
 export async function writeBotConfig(home: string, config: unknown): Promise<string> {
-  const configPath = path.join(home, ".bot", "bot.json");
+  const configPath = path.join(home, ".openclaw", "openclaw.json");
   await fs.mkdir(path.dirname(configPath), { recursive: true });
   await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
   return configPath;

@@ -21,6 +21,7 @@ import {
   type GatewayClientMode,
   type GatewayClientName,
 } from "../utils/message-channel.js";
+import { VERSION } from "../version.js";
 import { buildDeviceAuthPayloadV3 } from "./device-auth.js";
 import { isSecureWebSocketUrl } from "./net.js";
 import {
@@ -96,7 +97,6 @@ export class GatewayClient {
   private lastTick: number | null = null;
   private tickIntervalMs = 30_000;
   private tickTimer: NodeJS.Timeout | null = null;
-  private pingTimer: NodeJS.Timeout | null = null;
 
   constructor(opts: GatewayClientOptions) {
     this.opts = {
@@ -115,7 +115,7 @@ export class GatewayClient {
       return;
     }
 
-    const allowPrivateWs = process.env.BOT_ALLOW_INSECURE_PRIVATE_WS === "1";
+    const allowPrivateWs = process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1";
     // Security check: block ALL plaintext ws:// to non-loopback addresses (CWE-319, CVSS 9.8)
     // This protects both credentials AND chat/conversation data from MITM attacks.
     // Device tokens may be loaded later in sendConnect(), so we block regardless of hasCredentials.
@@ -134,8 +134,8 @@ export class GatewayClient {
           "(ssh -N -L 18789:127.0.0.1:18789 user@gateway-host), or use Tailscale Serve/Funnel. " +
           (allowPrivateWs
             ? ""
-            : "Break-glass (trusted private networks only): set BOT_ALLOW_INSECURE_PRIVATE_WS=1. ") +
-          "Run `bot doctor --fix` for guidance.",
+            : "Break-glass (trusted private networks only): set OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1. ") +
+          "Run `openclaw doctor --fix` for guidance.",
       );
       this.opts.onConnectError?.(error);
       return;
@@ -227,10 +227,6 @@ export class GatewayClient {
       clearInterval(this.tickTimer);
       this.tickTimer = null;
     }
-    if (this.pingTimer) {
-      clearInterval(this.pingTimer);
-      this.pingTimer = null;
-    }
     this.ws?.close();
     this.ws = null;
     this.flushPendingErrors(new Error("gateway client stopped"));
@@ -307,7 +303,7 @@ export class GatewayClient {
       client: {
         id: this.opts.clientName ?? GATEWAY_CLIENT_NAMES.GATEWAY_CLIENT,
         displayName: this.opts.clientDisplayName,
-        version: this.opts.clientVersion ?? "dev",
+        version: this.opts.clientVersion ?? VERSION,
         platform,
         deviceFamily: this.opts.deviceFamily,
         mode: this.opts.mode ?? GATEWAY_CLIENT_MODES.BACKEND,
@@ -439,15 +435,9 @@ export class GatewayClient {
       clearInterval(this.tickTimer);
       this.tickTimer = null;
     }
-    if (this.pingTimer) {
-      clearInterval(this.pingTimer);
-      this.pingTimer = null;
-    }
     const delay = this.backoffMs;
     this.backoffMs = Math.min(this.backoffMs * 2, 30_000);
-    // Do NOT unref() — the reconnect timer must keep the process alive
-    // to ensure the node host reconnects after transient disconnections.
-    setTimeout(() => this.start(), delay);
+    setTimeout(() => this.start(), delay).unref();
   }
 
   private flushPendingErrors(err: Error) {
@@ -460,9 +450,6 @@ export class GatewayClient {
   private startTickWatch() {
     if (this.tickTimer) {
       clearInterval(this.tickTimer);
-    }
-    if (this.pingTimer) {
-      clearInterval(this.pingTimer);
     }
     const rawMinInterval = this.opts.tickWatchMinIntervalMs;
     const minInterval =
@@ -482,20 +469,6 @@ export class GatewayClient {
         this.ws?.close(4000, "tick timeout");
       }
     }, interval);
-
-    // WebSocket-level ping to keep the connection alive through proxies/NATs.
-    // Cloudflare and other reverse proxies may close idle WebSocket connections
-    // after 60-100 seconds. Pinging every 25 seconds prevents this.
-    this.pingTimer = setInterval(() => {
-      if (this.closed || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        return;
-      }
-      try {
-        this.ws.ping();
-      } catch {
-        // Ignore ping errors — tick watch will detect the stall.
-      }
-    }, 25_000);
   }
 
   private validateTlsFingerprint(): Error | null {

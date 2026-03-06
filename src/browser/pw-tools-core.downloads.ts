@@ -2,13 +2,9 @@ import type { Page } from "playwright-core";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
+import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
 import { writeViaSiblingTempPath } from "./output-atomic.js";
-import {
-  DEFAULT_DOWNLOAD_DIR,
-  DEFAULT_UPLOAD_DIR,
-  resolveStrictExistingPathsWithinRoot,
-} from "./paths.js";
+import { DEFAULT_UPLOAD_DIR, resolveStrictExistingPathsWithinRoot } from "./paths.js";
 import {
   ensurePageState,
   getPageForTargetId,
@@ -28,7 +24,7 @@ import { sanitizeUntrustedFileName } from "./safe-filename.js";
 function buildTempDownloadPath(fileName: string): string {
   const id = crypto.randomUUID();
   const safeName = sanitizeUntrustedFileName(fileName, "download.bin");
-  return path.join(resolvePreferredBotTmpDir(), "downloads", `${id}-${safeName}`);
+  return path.join(resolvePreferredOpenClawTmpDir(), "downloads", `${id}-${safeName}`);
 }
 
 function createPageDownloadWaiter(page: Page, timeoutMs: number) {
@@ -96,7 +92,7 @@ async function saveDownloadPayload(download: DownloadPayload, outPath: string) {
     await download.saveAs?.(resolvedOutPath);
   } else {
     await writeViaSiblingTempPath({
-      rootDir: DEFAULT_DOWNLOAD_DIR,
+      rootDir: path.dirname(resolvedOutPath),
       targetPath: resolvedOutPath,
       writeTemp: async (tempPath) => {
         await download.saveAs?.(tempPath);

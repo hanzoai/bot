@@ -8,44 +8,44 @@ title: "Doctor"
 
 # Doctor
 
-`hanzo-bot doctor` is the repair + migration tool for Hanzo Bot. It fixes stale
+`openclaw doctor` is the repair + migration tool for OpenClaw. It fixes stale
 config/state, checks health, and provides actionable repair steps.
 
 ## Quick start
 
 ```bash
-hanzo-bot doctor
+openclaw doctor
 ```
 
 ### Headless / automation
 
 ```bash
-hanzo-bot doctor --yes
+openclaw doctor --yes
 ```
 
 Accept defaults without prompting (including restart/service/sandbox repair steps when applicable).
 
 ```bash
-hanzo-bot doctor --repair
+openclaw doctor --repair
 ```
 
 Apply recommended repairs without prompting (repairs + restarts where safe).
 
 ```bash
-hanzo-bot doctor --repair --force
+openclaw doctor --repair --force
 ```
 
 Apply aggressive repairs too (overwrites custom supervisor configs).
 
 ```bash
-hanzo-bot doctor --non-interactive
+openclaw doctor --non-interactive
 ```
 
 Run without prompts and only apply safe migrations (config normalization + on-disk state moves). Skips restart/service/sandbox actions that require human confirmation.
 Legacy state migrations run automatically when detected.
 
 ```bash
-hanzo-bot doctor --deep
+openclaw doctor --deep
 ```
 
 Scan system services for extra gateway installs (launchd/systemd/schtasks).
@@ -53,7 +53,7 @@ Scan system services for extra gateway installs (launchd/systemd/schtasks).
 If you want to review changes before writing, open the config file first:
 
 ```bash
-cat ~/.hanzo/bot/bot.json
+cat ~/.openclaw/openclaw.json
 ```
 
 ## What it does (summary)
@@ -68,7 +68,7 @@ cat ~/.hanzo/bot/bot.json
 - State integrity and permissions checks (sessions, transcripts, state dir).
 - Config file permission checks (chmod 600) when running locally.
 - Model auth health: checks OAuth expiry, can refresh expiring tokens, and reports auth-profile cooldown/disabled states.
-- Extra workspace dir detection (`~/bot`).
+- Extra workspace dir detection (`~/openclaw`).
 - Sandbox image repair when sandboxing is enabled.
 - Legacy service migration and extra gateway detection.
 - Gateway runtime checks (service installed but not running; cached launchd label).
@@ -77,7 +77,7 @@ cat ~/.hanzo/bot/bot.json
 - Gateway runtime best-practice checks (Node vs Bun, version-manager paths).
 - Gateway port collision diagnostics (default `18789`).
 - Security warnings for open DM policies.
-- Gateway auth warnings when no `gateway.auth.token` is set (local mode; offers token generation).
+- Gateway auth checks for local token mode (offers token generation when no token source exists; does not overwrite token SecretRef configs).
 - systemd linger check on Linux.
 - Source install checks (pnpm workspace mismatch, missing UI assets, missing tsx binary).
 - Writes updated config + wizard metadata.
@@ -98,13 +98,13 @@ schema.
 ### 2) Legacy config key migrations
 
 When the config contains deprecated keys, other commands refuse to run and ask
-you to run `hanzo-bot doctor`.
+you to run `openclaw doctor`.
 
 Doctor will:
 
 - Explain which legacy keys were found.
 - Show the migration it applied.
-- Rewrite `~/.hanzo/bot/bot.json` with the updated schema.
+- Rewrite `~/.openclaw/openclaw.json` with the updated schema.
 
 The Gateway also auto-runs doctor migrations on startup when it detects a
 legacy config format, so stale configs are repaired without manual intervention.
@@ -121,10 +121,12 @@ Current migrations:
 - `routing.agentToAgent` → `tools.agentToAgent`
 - `routing.transcribeAudio` → `tools.media.audio.models`
 - `bindings[].match.accountID` → `bindings[].match.accountId`
+- For channels with named `accounts` but missing `accounts.default`, move account-scoped top-level single-account channel values into `channels.<channel>.accounts.default` when present
 - `identity` → `agents.list[].identity`
 - `agent.*` → `agents.defaults` + `tools.*` (tools/elevated/exec/sandbox/subagents)
 - `agent.model`/`allowedModels`/`modelAliases`/`modelFallbacks`/`imageModelFallbacks`
   → `agents.defaults.models` + `agents.defaults.model.primary/fallbacks` + `agents.defaults.imageModel.primary/fallbacks`
+- `browser.ssrfPolicy.allowPrivateNetwork` → `browser.ssrfPolicy.dangerouslyAllowPrivateNetwork`
 
 Doctor warnings also include account-default guidance for multi-account channels:
 
@@ -143,18 +145,18 @@ remove the override and restore per-model API routing + costs.
 Doctor can migrate older on-disk layouts into the current structure:
 
 - Sessions store + transcripts:
-  - from `~/.hanzo/bot/sessions/` to `~/.hanzo/bot/agents/<agentId>/sessions/`
+  - from `~/.openclaw/sessions/` to `~/.openclaw/agents/<agentId>/sessions/`
 - Agent dir:
-  - from `~/.hanzo/bot/agent/` to `~/.hanzo/bot/agents/<agentId>/agent/`
+  - from `~/.openclaw/agent/` to `~/.openclaw/agents/<agentId>/agent/`
 - WhatsApp auth state (Baileys):
-  - from legacy `~/.hanzo/bot/credentials/*.json` (except `oauth.json`)
-  - to `~/.hanzo/bot/credentials/whatsapp/<accountId>/...` (default account id: `default`)
+  - from legacy `~/.openclaw/credentials/*.json` (except `oauth.json`)
+  - to `~/.openclaw/credentials/whatsapp/<accountId>/...` (default account id: `default`)
 
 These migrations are best-effort and idempotent; doctor will emit warnings when
 it leaves any legacy folders behind as backups. The Gateway/CLI also auto-migrates
 the legacy sessions + agent dir on startup so history/auth/models land in the
 per-agent path without a manual doctor run. WhatsApp auth is intentionally only
-migrated via `hanzo-bot doctor`.
+migrated via `openclaw doctor`.
 
 ### 4) State integrity checks (session persistence, routing, and safety)
 
@@ -180,12 +182,12 @@ Doctor checks:
   transcript files.
 - **Main session “1-line JSONL”**: flags when the main transcript has only one
   line (history is not accumulating).
-- **Multiple state dirs**: warns when multiple `~/.hanzo/bot` folders exist across
-  home directories or when `BOT_STATE_DIR` points elsewhere (history can
+- **Multiple state dirs**: warns when multiple `~/.openclaw` folders exist across
+  home directories or when `OPENCLAW_STATE_DIR` points elsewhere (history can
   split between installs).
 - **Remote mode reminder**: if `gateway.mode=remote`, doctor reminds you to run
   it on the remote host (the state lives there).
-- **Config file permissions**: warns if `~/.hanzo/bot/bot.json` is
+- **Config file permissions**: warns if `~/.openclaw/openclaw.json` is
   group/world readable and offers to tighten to `600`.
 
 ### 5) Model auth health (OAuth expiry)
@@ -214,9 +216,9 @@ switch to legacy names if the current image is missing.
 ### 8) Gateway service migrations and cleanup hints
 
 Doctor detects legacy gateway services (launchd/systemd/schtasks) and
-offers to remove them and install the Hanzo Bot service using the current gateway
+offers to remove them and install the OpenClaw service using the current gateway
 port. It can also scan for extra gateway-like services and print cleanup hints.
-Profile-named Hanzo Bot gateway services are considered first-class and are not
+Profile-named OpenClaw gateway services are considered first-class and are not
 flagged as "extra."
 
 ### 9) Security warnings
@@ -236,9 +238,11 @@ workspace.
 
 ### 12) Gateway auth checks (local token)
 
-Doctor warns when `gateway.auth` is missing on a local gateway and offers to
-generate a token. Use `hanzo-bot doctor --generate-gateway-token` to force token
-creation in automation.
+Doctor checks local gateway token auth readiness.
+
+- If token mode needs a token and no token source exists, doctor offers to generate one.
+- If `gateway.auth.token` is SecretRef-managed but unavailable, doctor warns and does not overwrite it with plaintext.
+- `openclaw doctor --generate-gateway-token` forces generation only when no token SecretRef is configured.
 
 ### 12b) Read-only SecretRef-aware repairs
 
@@ -267,11 +271,14 @@ rewrite the service file/task to the current defaults.
 
 Notes:
 
-- `hanzo-bot doctor` prompts before rewriting supervisor config.
-- `hanzo-bot doctor --yes` accepts the default repair prompts.
-- `hanzo-bot doctor --repair` applies recommended fixes without prompts.
-- `hanzo-bot doctor --repair --force` overwrites custom supervisor configs.
-- You can always force a full rewrite via `hanzo-bot gateway install --force`.
+- `openclaw doctor` prompts before rewriting supervisor config.
+- `openclaw doctor --yes` accepts the default repair prompts.
+- `openclaw doctor --repair` applies recommended fixes without prompts.
+- `openclaw doctor --repair --force` overwrites custom supervisor configs.
+- If token auth requires a token and `gateway.auth.token` is SecretRef-managed, doctor service install/repair validates the SecretRef but does not persist resolved plaintext token values into supervisor service environment metadata.
+- If token auth requires a token and the configured token SecretRef is unresolved, doctor blocks the install/repair path with actionable guidance.
+- If both `gateway.auth.token` and `gateway.auth.password` are configured and `gateway.auth.mode` is unset, doctor blocks install/repair until mode is set explicitly.
+- You can always force a full rewrite via `openclaw gateway install --force`.
 
 ### 16) Gateway runtime + port diagnostics
 

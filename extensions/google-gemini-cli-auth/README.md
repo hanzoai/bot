@@ -1,13 +1,19 @@
-# Google Gemini CLI Auth (Hanzo Bot plugin)
+# Google Gemini CLI Auth (OpenClaw plugin)
 
 OAuth provider plugin for **Gemini CLI** (Google Code Assist).
+
+## Account safety caution
+
+- This plugin is an unofficial integration and is not endorsed by Google.
+- Some users have reported account restrictions or suspensions after using third-party Gemini CLI and Antigravity OAuth clients.
+- Use caution, review the applicable Google terms, and avoid using a mission-critical account.
 
 ## Enable
 
 Bundled plugins are disabled by default. Enable this one:
 
 ```bash
-hanzo-bot plugins enable google-gemini-cli-auth
+openclaw plugins enable google-gemini-cli-auth
 ```
 
 Restart the Gateway after enabling.
@@ -15,7 +21,7 @@ Restart the Gateway after enabling.
 ## Authenticate
 
 ```bash
-hanzo-bot models auth login --provider google-gemini-cli --set-default
+openclaw models auth login --provider google-gemini-cli --set-default
 ```
 
 ## Requirements
@@ -31,5 +37,5 @@ brew install gemini-cli
 
 Override auto-detected credentials with:
 
-- `BOT_GEMINI_OAUTH_CLIENT_ID` / `GEMINI_CLI_OAUTH_CLIENT_ID`
-- `BOT_GEMINI_OAUTH_CLIENT_SECRET` / `GEMINI_CLI_OAUTH_CLIENT_SECRET`
+- `OPENCLAW_GEMINI_OAUTH_CLIENT_ID` / `GEMINI_CLI_OAUTH_CLIENT_ID`
+- `OPENCLAW_GEMINI_OAUTH_CLIENT_SECRET` / `GEMINI_CLI_OAUTH_CLIENT_SECRET`

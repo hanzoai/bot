@@ -1,4 +1,4 @@
-import type { BaseProbeResult } from "bot/plugin-sdk";
+import type { BaseProbeResult } from "@hanzo/bot/plugin-sdk/feishu";
 import type {
   FeishuConfigSchema,
   FeishuGroupSchema,

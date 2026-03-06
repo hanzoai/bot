@@ -1,6 +1,10 @@
 import Foundation
 import Network
+<<<<<<< HEAD
 import BotKit
+=======
+import OpenClawKit
+>>>>>>> upstream/main
 import os
 
 extension NodeAppModel {
@@ -15,6 +19,7 @@ extension NodeAppModel {
         if let host = base.host, LoopbackHost.isLoopback(host) {
             return nil
         }
+<<<<<<< HEAD
         return base.appendingPathComponent("__hanzo-bot__/a2ui/").absoluteString + "?platform=ios"
     }
 
@@ -28,6 +33,9 @@ extension NodeAppModel {
             return true
         }
         return false
+=======
+        return base.appendingPathComponent("__openclaw__/a2ui/").absoluteString + "?platform=ios"
+>>>>>>> upstream/main
     }
 
     func showA2UIOnConnectIfNeeded() async {

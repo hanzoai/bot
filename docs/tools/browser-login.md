@@ -10,7 +10,7 @@ title: "Browser Login"
 
 ## Manual login (recommended)
 
-When a site requires login, **sign in manually** in the **host** browser profile (the hanzo-bot browser).
+When a site requires login, **sign in manually** in the **host** browser profile (the openclaw browser).
 
 Do **not** give the model your credentials. Automated logins often trigger anti‑bot defenses and can lock the account.
 
@@ -18,7 +18,7 @@ Back to the main browser docs: [Browser](/tools/browser).
 
 ## Which Chrome profile is used?
 
-Hanzo Bot controls a **dedicated Chrome profile** (named `bot`, orange‑tinted UI). This is separate from your daily browser profile.
+OpenClaw controls a **dedicated Chrome profile** (named `openclaw`, orange‑tinted UI). This is separate from your daily browser profile.
 
 Two easy ways to access it:
 
@@ -26,11 +26,11 @@ Two easy ways to access it:
 2. **Open it via CLI**:
 
 ```bash
-hanzo-bot browser start
-hanzo-bot browser open https://x.com
+openclaw browser start
+openclaw browser open https://x.com
 ```
 
-If you have multiple profiles, pass `--browser-profile <name>` (the default is `bot`).
+If you have multiple profiles, pass `--browser-profile <name>` (the default is `openclaw`).
 
 ## X/Twitter: recommended flow
 
@@ -61,7 +61,7 @@ If the agent is sandboxed, the browser tool defaults to the sandbox. To allow ho
 Then target the host browser:
 
 ```bash
-hanzo-bot browser open https://x.com --browser-profile hanzo-bot --target host
+openclaw browser open https://x.com --browser-profile openclaw --target host
 ```
 
 Or disable sandboxing for the agent that posts updates.

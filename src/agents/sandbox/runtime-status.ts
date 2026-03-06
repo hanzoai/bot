@@ -124,7 +124,9 @@ export function formatSandboxToolPolicyBlockedMessage(params: {
   if (runtime.mode === "non-main") {
     lines.push(`- Use main session key (direct): ${runtime.mainSessionKey}`);
   }
-  lines.push(`- See: ${formatCliCommand(`bot sandbox explain --session ${runtime.sessionKey}`)}`);
+  lines.push(
+    `- See: ${formatCliCommand(`openclaw sandbox explain --session ${runtime.sessionKey}`)}`,
+  );
 
   return lines.join("\n");
 }

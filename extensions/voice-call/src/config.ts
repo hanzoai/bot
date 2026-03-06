@@ -1,4 +1,9 @@
-import { TtsAutoSchema, TtsConfigSchema, TtsModeSchema, TtsProviderSchema } from "bot/plugin-sdk";
+import {
+  TtsAutoSchema,
+  TtsConfigSchema,
+  TtsModeSchema,
+  TtsProviderSchema,
+} from "@hanzo/bot/plugin-sdk/voice-call";
 import { z } from "zod";
 
 // -----------------------------------------------------------------------------

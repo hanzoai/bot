@@ -1,16 +1,16 @@
 export const GATEWAY_CLIENT_IDS = {
   WEBCHAT_UI: "webchat-ui",
-  CONTROL_UI: "bot-control-ui",
+  CONTROL_UI: "openclaw-control-ui",
   WEBCHAT: "webchat",
   CLI: "cli",
   GATEWAY_CLIENT: "gateway-client",
-  MACOS_APP: "bot-macos",
-  IOS_APP: "bot-ios",
-  ANDROID_APP: "bot-android",
+  MACOS_APP: "openclaw-macos",
+  IOS_APP: "openclaw-ios",
+  ANDROID_APP: "openclaw-android",
   NODE_HOST: "node-host",
   TEST: "test",
   FINGERPRINT: "fingerprint",
-  PROBE: "bot-probe",
+  PROBE: "openclaw-probe",
 } as const;
 
 export type GatewayClientId = (typeof GATEWAY_CLIENT_IDS)[keyof typeof GATEWAY_CLIENT_IDS];

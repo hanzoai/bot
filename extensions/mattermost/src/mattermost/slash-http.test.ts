@@ -1,4 +1,4 @@
-import type { BotConfig, RuntimeEnv } from "bot/plugin-sdk";
+import type { BotConfig, RuntimeEnv } from "@hanzo/bot/plugin-sdk/mattermost";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { PassThrough } from "node:stream";
 import { describe, expect, it } from "vitest";

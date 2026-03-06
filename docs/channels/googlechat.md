@@ -16,7 +16,7 @@ Status: ready for DMs + spaces via Google Chat API webhooks (HTTP only).
    - Enable the API if it is not already enabled.
 2. Create a **Service Account**:
    - Press **Create Credentials** > **Service Account**.
-   - Name it whatever you want (e.g., `bot-chat`).
+   - Name it whatever you want (e.g., `openclaw-chat`).
    - Leave permissions blank (press **Continue**).
    - Leave principals with access blank (press **Done**).
 3. Create and download the **JSON Key**:
@@ -24,17 +24,17 @@ Status: ready for DMs + spaces via Google Chat API webhooks (HTTP only).
    - Go to the **Keys** tab.
    - Click **Add Key** > **Create new key**.
    - Select **JSON** and press **Create**.
-4. Store the downloaded JSON file on your gateway host (e.g., `~/.hanzo/bot/googlechat-service-account.json`).
+4. Store the downloaded JSON file on your gateway host (e.g., `~/.openclaw/googlechat-service-account.json`).
 5. Create a Google Chat app in the [Google Cloud Console Chat Configuration](https://console.cloud.google.com/apis/api/chat.googleapis.com/hangouts-chat):
    - Fill in the **Application info**:
-     - **App name**: (e.g. `Hanzo Bot`)
-     - **Avatar URL**: (e.g. `https://hanzo.bot/logo.png`)
+     - **App name**: (e.g. `OpenClaw`)
+     - **Avatar URL**: (e.g. `https://openclaw.ai/logo.png`)
      - **Description**: (e.g. `Personal AI Assistant`)
    - Enable **Interactive features**.
    - Under **Functionality**, check **Join spaces and group conversations**.
    - Under **Connection settings**, select **HTTP endpoint URL**.
    - Under **Triggers**, select **Use a common HTTP endpoint URL for all triggers** and set it to your gateway's public URL followed by `/googlechat`.
-     - _Tip: Run `hanzo-bot status` to find your gateway's public URL._
+     - _Tip: Run `openclaw status` to find your gateway's public URL._
    - Under **Visibility**, check **Make this Chat app available to specific people and groups in &lt;Your Domain&gt;**.
    - Enter your email address (e.g. `user@example.com`) in the text box.
    - Click **Save** at the bottom.
@@ -43,7 +43,7 @@ Status: ready for DMs + spaces via Google Chat API webhooks (HTTP only).
    - Look for the **App status** section (usually near the top or bottom after saving).
    - Change the status to **Live - available to users**.
    - Click **Save** again.
-7. Configure Hanzo Bot with the service account path + webhook audience:
+7. Configure OpenClaw with the service account path + webhook audience:
    - Env: `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE=/path/to/service-account.json`
    - Or config: `channels.googlechat.serviceAccountFile: "/path/to/service-account.json"`.
 8. Set the webhook audience type + value (matches your Chat app config).
@@ -63,7 +63,7 @@ Once the gateway is running and your email is added to the visibility list:
 
 ## Public URL (Webhook-only)
 
-Google Chat webhooks require a public HTTPS endpoint. For security, **only expose the `/googlechat` path** to the internet. Keep the Hanzo Bot dashboard and other sensitive endpoints on your private network.
+Google Chat webhooks require a public HTTPS endpoint. For security, **only expose the `/googlechat` path** to the internet. Keep the OpenClaw dashboard and other sensitive endpoints on your private network.
 
 ### Option A: Tailscale Funnel (Recommended)
 
@@ -127,7 +127,7 @@ your-domain.com {
 }
 ```
 
-With this config, any request to `your-domain.com/` will be ignored or returned as 404, while `your-domain.com/googlechat` is safely routed to Hanzo Bot.
+With this config, any request to `your-domain.com/` will be ignored or returned as 404, while `your-domain.com/googlechat` is safely routed to OpenClaw.
 
 ### Option C: Cloudflare Tunnel
 
@@ -139,21 +139,24 @@ Configure your tunnel's ingress rules to only route the webhook path:
 ## How it works
 
 1. Google Chat sends webhook POSTs to the gateway. Each request includes an `Authorization: Bearer <token>` header.
-2. Hanzo Bot verifies the token against the configured `audienceType` + `audience`:
+   - OpenClaw verifies bearer auth before reading/parsing full webhook bodies when the header is present.
+   - Google Workspace Add-on requests that carry `authorizationEventObject.systemIdToken` in the body are supported via a stricter pre-auth body budget.
+2. OpenClaw verifies the token against the configured `audienceType` + `audience`:
    - `audienceType: "app-url"` → audience is your HTTPS webhook URL.
    - `audienceType: "project-number"` → audience is the Cloud project number.
 3. Messages are routed by space:
    - DMs use session key `agent:<agentId>:googlechat:dm:<spaceId>`.
    - Spaces use session key `agent:<agentId>:googlechat:group:<spaceId>`.
 4. DM access is pairing by default. Unknown senders receive a pairing code; approve with:
-   - `hanzo-bot pairing approve googlechat <code>`
+   - `openclaw pairing approve googlechat <code>`
 5. Group spaces require @-mention by default. Use `botUser` if mention detection needs the app’s user name.
 
 ## Targets
 
 Use these identifiers for delivery and allowlists:
 
-- Direct messages: `users/<userId>` (recommended) or raw email `name@example.com` (mutable principal).
+- Direct messages: `users/<userId>` (recommended).
+- Raw email `name@example.com` is mutable and only used for direct allowlist matching when `channels.googlechat.dangerouslyAllowNameMatching: true`.
 - Deprecated: `users/<email>` is treated as a user id, not an email allowlist.
 - Spaces: `spaces/<spaceId>`.
 
@@ -165,13 +168,14 @@ Use these identifiers for delivery and allowlists:
     googlechat: {
       enabled: true,
       serviceAccountFile: "/path/to/service-account.json",
+      // or serviceAccountRef: { source: "file", provider: "filemain", id: "/channels/googlechat/serviceAccount" }
       audienceType: "app-url",
       audience: "https://gateway.example.com/googlechat",
       webhookPath: "/googlechat",
       botUser: "users/1234567890", // optional; helps mention detection
       dm: {
         policy: "pairing",
-        allowFrom: ["users/1234567890", "name@example.com"],
+        allowFrom: ["users/1234567890"],
       },
       groupPolicy: "allowlist",
       groups: {
@@ -193,10 +197,14 @@ Use these identifiers for delivery and allowlists:
 Notes:
 
 - Service account credentials can also be passed inline with `serviceAccount` (JSON string).
+- `serviceAccountRef` is also supported (env/file SecretRef), including per-account refs under `channels.googlechat.accounts.<id>.serviceAccountRef`.
 - Default webhook path is `/googlechat` if `webhookPath` isn’t set.
+- `dangerouslyAllowNameMatching` re-enables mutable email principal matching for allowlists (break-glass compatibility mode).
 - Reactions are available via the `reactions` tool and `channels action` when `actions.reactions` is enabled.
 - `typingIndicator` supports `none`, `message` (default), and `reaction` (reaction requires user OAuth).
 - Attachments are downloaded through the Chat API and stored in the media pipeline (size capped by `mediaMaxMb`).
+
+Secrets reference details: [Secrets Management](/gateway/secrets).
 
 ## Troubleshooting
 
@@ -213,7 +221,7 @@ This means the webhook handler isn't registered. Common causes:
 1. **Channel not configured**: The `channels.googlechat` section is missing from your config. Verify with:
 
    ```bash
-   hanzo-bot config get channels.googlechat
+   openclaw config get channels.googlechat
    ```
 
    If it returns "Config path not found", add the configuration (see [Config highlights](#config-highlights)).
@@ -221,7 +229,7 @@ This means the webhook handler isn't registered. Common causes:
 2. **Plugin not enabled**: Check plugin status:
 
    ```bash
-   hanzo-bot plugins list | grep googlechat
+   openclaw plugins list | grep googlechat
    ```
 
    If it shows "disabled", add `plugins.entries.googlechat.enabled: true` to your config.
@@ -229,22 +237,22 @@ This means the webhook handler isn't registered. Common causes:
 3. **Gateway not restarted**: After adding config, restart the gateway:
 
    ```bash
-   hanzo-bot gateway restart
+   openclaw gateway restart
    ```
 
 Verify the channel is running:
 
 ```bash
-hanzo-bot channels status
+openclaw channels status
 # Should show: Google Chat default: enabled, configured, ...
 ```
 
 ### Other issues
 
-- Check `hanzo-bot channels status --probe` for auth errors or missing audience config.
+- Check `openclaw channels status --probe` for auth errors or missing audience config.
 - If no messages arrive, confirm the Chat app's webhook URL + event subscriptions.
 - If mention gating blocks replies, set `botUser` to the app's user resource name and verify `requireMention`.
-- Use `hanzo-bot logs --follow` while sending a test message to see if requests reach the gateway.
+- Use `openclaw logs --follow` while sending a test message to see if requests reach the gateway.
 
 Related docs:
 

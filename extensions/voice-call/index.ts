@@ -1,4 +1,4 @@
-import type { GatewayRequestHandlerOptions, BotPluginApi } from "bot/plugin-sdk";
+import type { GatewayRequestHandlerOptions, BotPluginApi } from "@hanzo/bot/plugin-sdk/voice-call";
 import { Type } from "@sinclair/typebox";
 import type { CoreConfig } from "./src/core-bridge.js";
 import { registerVoiceCallCli } from "./src/cli.js";

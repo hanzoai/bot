@@ -1,16 +1,16 @@
-# Hanzo Bot Chrome Extension (Browser Relay)
+# OpenClaw Chrome Extension (Browser Relay)
 
-Purpose: attach Hanzo Bot to an existing Chrome tab so the Gateway can automate it (via the local CDP relay server).
+Purpose: attach OpenClaw to an existing Chrome tab so the Gateway can automate it (via the local CDP relay server).
 
 ## Dev / load unpacked
 
-1. Build/run Hanzo Bot Gateway with browser control enabled.
+1. Build/run OpenClaw Gateway with browser control enabled.
 2. Ensure the relay server is reachable at `http://127.0.0.1:18792/` (default).
 3. Install the extension to a stable path:
 
    ```bash
-   hanzo-bot browser extension install
-   hanzo-bot browser extension path
+   openclaw browser extension install
+   openclaw browser extension path
    ```
 
 4. Chrome → `chrome://extensions` → enable “Developer mode”.
@@ -20,3 +20,4 @@ Purpose: attach Hanzo Bot to an existing Chrome tab so the Gateway can automate 
 ## Options
 
 - `Relay port`: defaults to `18792`.
+- `Gateway token`: required. Set this to `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`).

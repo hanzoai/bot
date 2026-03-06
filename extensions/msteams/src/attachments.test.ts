@@ -1,4 +1,4 @@
-import type { PluginRuntime, SsrFPolicy } from "bot/plugin-sdk";
+import type { PluginRuntime, SsrFPolicy } from "@hanzo/bot/plugin-sdk/msteams";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPluginRuntimeMock } from "../../test-utils/plugin-runtime-mock.js";
 import {

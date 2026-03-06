@@ -22,7 +22,7 @@ Troubleshooting: [/automation/troubleshooting](/automation/troubleshooting)
 ## TL;DR
 
 - Cron runs **inside the Gateway** (not inside the model).
-- Jobs persist under `~/.hanzo/bot/cron/` so restarts don’t lose schedules.
+- Jobs persist under `~/.openclaw/cron/` so restarts don’t lose schedules.
 - Two execution styles:
   - **Main session**: enqueue a system event, then run on the next heartbeat.
   - **Isolated**: run a dedicated agent turn in `cron:<jobId>`, with delivery (announce by default or none).
@@ -35,7 +35,7 @@ Troubleshooting: [/automation/troubleshooting](/automation/troubleshooting)
 Create a one-shot reminder, verify it exists, and run it immediately:
 
 ```bash
-hanzo-bot cron add \
+openclaw cron add \
   --name "Reminder" \
   --at "2026-02-01T16:00:00Z" \
   --session main \
@@ -43,15 +43,15 @@ hanzo-bot cron add \
   --wake now \
   --delete-after-run
 
-hanzo-bot cron list
-hanzo-bot cron run <job-id>
-hanzo-bot cron runs --id <job-id>
+openclaw cron list
+openclaw cron run <job-id>
+openclaw cron runs --id <job-id>
 ```
 
 Schedule a recurring isolated job with delivery:
 
 ```bash
-hanzo-bot cron add \
+openclaw cron add \
   --name "Morning brief" \
   --cron "0 7 * * *" \
   --tz "America/Los_Angeles" \
@@ -68,9 +68,9 @@ For the canonical JSON shapes and examples, see [JSON schema for tool calls](/au
 
 ## Where cron jobs are stored
 
-Cron jobs are persisted on the Gateway host at `~/.hanzo/bot/cron/jobs.json` by default.
+Cron jobs are persisted on the Gateway host at `~/.openclaw/cron/jobs.json` by default.
 The Gateway loads the file into memory and writes it back on changes, so manual edits
-are only safe when the Gateway is stopped. Prefer `hanzo-bot cron add/edit` or the cron
+are only safe when the Gateway is stopped. Prefer `openclaw cron add/edit` or the cron
 tool call API for changes.
 
 ## Beginner-friendly overview
@@ -115,10 +115,21 @@ Cron supports three schedule kinds:
 
 - `at`: one-shot timestamp via `schedule.at` (ISO 8601).
 - `every`: fixed interval (ms).
-- `cron`: 5-field cron expression with optional IANA timezone.
+- `cron`: 5-field cron expression (or 6-field with seconds) with optional IANA timezone.
 
 Cron expressions use `croner`. If a timezone is omitted, the Gateway host’s
 local timezone is used.
+
+To reduce top-of-hour load spikes across many gateways, OpenClaw applies a
+deterministic per-job stagger window of up to 5 minutes for recurring
+top-of-hour expressions (for example `0 * * * *`, `0 */2 * * *`). Fixed-hour
+expressions such as `0 7 * * *` remain exact.
+
+For any cron schedule, you can set an explicit stagger window with `schedule.staggerMs`
+(`0` keeps exact timing). CLI shortcuts:
+
+- `--stagger 30s` (or `1m`, `5m`) to set an explicit stagger window.
+- `--exact` to force `staggerMs = 0`.
 
 ### Main vs isolated execution
 
@@ -144,7 +155,7 @@ Key behaviors:
 - Default behavior: if `delivery` is omitted, isolated jobs announce a summary (`delivery.mode = "announce"`).
 - `delivery.mode` chooses what happens:
   - `announce`: deliver a summary to the target channel and post a brief summary to the main session.
-  - `webhook`: POST the finished event payload to `delivery.to`.
+  - `webhook`: POST the finished event payload to `delivery.to` when the finished event includes a summary.
   - `none`: internal only (no delivery, no main-session summary).
 - `wakeMode` controls when the main-session summary posts:
   - `now`: immediate heartbeat.
@@ -177,7 +188,7 @@ Delivery config:
 Announce delivery suppresses messaging tool sends for the run; use `delivery.channel`/`delivery.to`
 to target the chat instead. When `delivery.mode = "none"`, no summary is posted to the main session.
 
-If `delivery` is omitted for isolated jobs, Hanzo Bot defaults to `announce`.
+If `delivery` is omitted for isolated jobs, OpenClaw defaults to `announce`.
 
 #### Announce delivery flow
 
@@ -198,7 +209,7 @@ Behavior details:
 
 #### Webhook delivery flow
 
-When `delivery.mode = "webhook"`, cron posts the finished event payload to `delivery.to`.
+When `delivery.mode = "webhook"`, cron posts the finished event payload to `delivery.to` when the finished event includes a summary.
 
 Behavior details:
 
@@ -347,13 +358,14 @@ Notes:
 
 ## Storage & history
 
-- Job store: `~/.hanzo/bot/cron/jobs.json` (Gateway-managed JSON).
-- Run history: `~/.hanzo/bot/cron/runs/<jobId>.jsonl` (JSONL, auto-pruned).
+- Job store: `~/.openclaw/cron/jobs.json` (Gateway-managed JSON).
+- Run history: `~/.openclaw/cron/runs/<jobId>.jsonl` (JSONL, auto-pruned by size and line count).
+- Isolated cron run sessions in `sessions.json` are pruned by `cron.sessionRetention` (default `24h`; set `false` to disable).
 - Override store path: `cron.store` in config.
 
 ## Retry policy
 
-When a job fails, Bot classifies errors as **transient** (retryable) or **permanent** (disable immediately).
+When a job fails, OpenClaw classifies errors as **transient** (retryable) or **permanent** (disable immediately).
 
 ### Transient errors (retried)
 
@@ -389,7 +401,7 @@ Configure `cron.retry` to override these defaults (see [Configuration](/automati
 {
   cron: {
     enabled: true, // default true
-    store: "~/.hanzo/bot/cron/jobs.json",
+    store: "~/.openclaw/cron/jobs.json",
     maxConcurrentRuns: 1, // default 1
     // Optional: override retry policy for one-shot jobs
     retry: {
@@ -399,15 +411,26 @@ Configure `cron.retry` to override these defaults (see [Configuration](/automati
     },
     webhook: "https://example.invalid/legacy", // deprecated fallback for stored notify:true jobs
     webhookToken: "replace-with-dedicated-webhook-token", // optional bearer token for webhook mode
+    sessionRetention: "24h", // duration string or false
+    runLog: {
+      maxBytes: "2mb", // default 2_000_000 bytes
+      keepLines: 2000, // default 2000
+    },
   },
 }
 ```
+
+Run-log pruning behavior:
+
+- `cron.runLog.maxBytes`: max run-log file size before pruning.
+- `cron.runLog.keepLines`: when pruning, keep only the newest N lines.
+- Both apply to `cron/runs/<jobId>.jsonl` files.
 
 Webhook behavior:
 
 - Preferred: set `delivery.mode: "webhook"` with `delivery.to: "https://..."` per job.
 - Webhook URLs must be valid `http://` or `https://` URLs.
-- Payload is the cron finished event JSON.
+- When posted, payload is the cron finished event JSON.
 - If `cron.webhookToken` is set, auth header is `Authorization: Bearer <cron.webhookToken>`.
 - If `cron.webhookToken` is not set, no `Authorization` header is sent.
 - Deprecated fallback: stored legacy jobs with `notify: true` still use `cron.webhook` when present.
@@ -415,14 +438,93 @@ Webhook behavior:
 Disable cron entirely:
 
 - `cron.enabled: false` (config)
-- `BOT_SKIP_CRON=1` (env)
+- `OPENCLAW_SKIP_CRON=1` (env)
+
+## Maintenance
+
+Cron has two built-in maintenance paths: isolated run-session retention and run-log pruning.
+
+### Defaults
+
+- `cron.sessionRetention`: `24h` (set `false` to disable run-session pruning)
+- `cron.runLog.maxBytes`: `2_000_000` bytes
+- `cron.runLog.keepLines`: `2000`
+
+### How it works
+
+- Isolated runs create session entries (`...:cron:<jobId>:run:<uuid>`) and transcript files.
+- The reaper removes expired run-session entries older than `cron.sessionRetention`.
+- For removed run sessions no longer referenced by the session store, OpenClaw archives transcript files and purges old deleted archives on the same retention window.
+- After each run append, `cron/runs/<jobId>.jsonl` is size-checked:
+  - if file size exceeds `runLog.maxBytes`, it is trimmed to the newest `runLog.keepLines` lines.
+
+### Performance caveat for high volume schedulers
+
+High-frequency cron setups can generate large run-session and run-log footprints. Maintenance is built in, but loose limits can still create avoidable IO and cleanup work.
+
+What to watch:
+
+- long `cron.sessionRetention` windows with many isolated runs
+- high `cron.runLog.keepLines` combined with large `runLog.maxBytes`
+- many noisy recurring jobs writing to the same `cron/runs/<jobId>.jsonl`
+
+What to do:
+
+- keep `cron.sessionRetention` as short as your debugging/audit needs allow
+- keep run logs bounded with moderate `runLog.maxBytes` and `runLog.keepLines`
+- move noisy background jobs to isolated mode with delivery rules that avoid unnecessary chatter
+- review growth periodically with `openclaw cron runs` and adjust retention before logs become large
+
+### Customize examples
+
+Keep run sessions for a week and allow bigger run logs:
+
+```json5
+{
+  cron: {
+    sessionRetention: "7d",
+    runLog: {
+      maxBytes: "10mb",
+      keepLines: 5000,
+    },
+  },
+}
+```
+
+Disable isolated run-session pruning but keep run-log pruning:
+
+```json5
+{
+  cron: {
+    sessionRetention: false,
+    runLog: {
+      maxBytes: "5mb",
+      keepLines: 3000,
+    },
+  },
+}
+```
+
+Tune for high-volume cron usage (example):
+
+```json5
+{
+  cron: {
+    sessionRetention: "12h",
+    runLog: {
+      maxBytes: "3mb",
+      keepLines: 1500,
+    },
+  },
+}
+```
 
 ## CLI quickstart
 
 One-shot reminder (UTC ISO, auto-delete after success):
 
 ```bash
-hanzo-bot cron add \
+openclaw cron add \
   --name "Send reminder" \
   --at "2026-01-12T18:00:00Z" \
   --session main \
@@ -434,7 +536,7 @@ hanzo-bot cron add \
 One-shot reminder (main session, wake immediately):
 
 ```bash
-hanzo-bot cron add \
+openclaw cron add \
   --name "Calendar check" \
   --at "20m" \
   --session main \
@@ -445,7 +547,7 @@ hanzo-bot cron add \
 Recurring isolated job (announce to WhatsApp):
 
 ```bash
-hanzo-bot cron add \
+openclaw cron add \
   --name "Morning status" \
   --cron "0 7 * * *" \
   --tz "America/Los_Angeles" \
@@ -456,10 +558,23 @@ hanzo-bot cron add \
   --to "+15551234567"
 ```
 
+Recurring cron job with explicit 30-second stagger:
+
+```bash
+openclaw cron add \
+  --name "Minute watcher" \
+  --cron "0 * * * * *" \
+  --tz "UTC" \
+  --stagger 30s \
+  --session isolated \
+  --message "Run minute watcher checks." \
+  --announce
+```
+
 Recurring isolated job (deliver to a Telegram topic):
 
 ```bash
-hanzo-bot cron add \
+openclaw cron add \
   --name "Nightly summary (topic)" \
   --cron "0 22 * * *" \
   --tz "America/Los_Angeles" \
@@ -473,7 +588,7 @@ hanzo-bot cron add \
 Isolated job with model and thinking override:
 
 ```bash
-hanzo-bot cron add \
+openclaw cron add \
   --name "Deep analysis" \
   --cron "0 6 * * 1" \
   --tz "America/Los_Angeles" \
@@ -490,58 +605,64 @@ Agent selection (multi-agent setups):
 
 ```bash
 # Pin a job to agent "ops" (falls back to default if that agent is missing)
-hanzo-bot cron add --name "Ops sweep" --cron "0 6 * * *" --session isolated --message "Check ops queue" --agent ops
+openclaw cron add --name "Ops sweep" --cron "0 6 * * *" --session isolated --message "Check ops queue" --agent ops
 
 # Switch or clear the agent on an existing job
-hanzo-bot cron edit <jobId> --agent ops
-hanzo-bot cron edit <jobId> --clear-agent
+openclaw cron edit <jobId> --agent ops
+openclaw cron edit <jobId> --clear-agent
 ```
 
 Manual run (force is the default, use `--due` to only run when due):
 
 ```bash
-hanzo-bot cron run <jobId>
-hanzo-bot cron run <jobId> --due
+openclaw cron run <jobId>
+openclaw cron run <jobId> --due
 ```
 
 Edit an existing job (patch fields):
 
 ```bash
-hanzo-bot cron edit <jobId> \
+openclaw cron edit <jobId> \
   --message "Updated prompt" \
   --model "opus" \
   --thinking low
 ```
 
+Force an existing cron job to run exactly on schedule (no stagger):
+
+```bash
+openclaw cron edit <jobId> --exact
+```
+
 Run history:
 
 ```bash
-hanzo-bot cron runs --id <jobId> --limit 50
+openclaw cron runs --id <jobId> --limit 50
 ```
 
 Immediate system event without creating a job:
 
 ```bash
-hanzo-bot system event --mode now --text "Next heartbeat: check battery."
+openclaw system event --mode now --text "Next heartbeat: check battery."
 ```
 
 ## Gateway API surface
 
 - `cron.list`, `cron.status`, `cron.add`, `cron.update`, `cron.remove`
 - `cron.run` (force or due), `cron.runs`
-  For immediate system events without a job, use [`hanzo-bot system event`](/cli/system).
+  For immediate system events without a job, use [`openclaw system event`](/cli/system).
 
 ## Troubleshooting
 
 ### “Nothing runs”
 
-- Check cron is enabled: `cron.enabled` and `BOT_SKIP_CRON`.
+- Check cron is enabled: `cron.enabled` and `OPENCLAW_SKIP_CRON`.
 - Check the Gateway is running continuously (cron runs inside the Gateway process).
 - For `cron` schedules: confirm timezone (`--tz`) vs the host timezone.
 
 ### A recurring job keeps delaying after failures
 
-- Hanzo Bot applies exponential retry backoff for recurring jobs after consecutive errors:
+- OpenClaw applies exponential retry backoff for recurring jobs after consecutive errors:
   30s, 1m, 5m, 15m, then 60m between retries.
 - Backoff resets automatically after the next successful run.
 - One-shot (`at`) jobs retry transient errors (rate limit, network, server_error) up to 3 times with backoff; permanent errors disable immediately. See [Retry policy](/automation/cron-jobs#retry-policy).

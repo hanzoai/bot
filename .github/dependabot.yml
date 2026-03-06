@@ -65,9 +65,9 @@ updates:
           - patch
     open-pull-requests-limit: 5
 
-  # Swift Package Manager - shared BotKit
+  # Swift Package Manager - shared MoltbotKit
   - package-ecosystem: swift
-    directory: /apps/shared/BotKit
+    directory: /apps/shared/MoltbotKit
     schedule:
       interval: daily
     cooldown:

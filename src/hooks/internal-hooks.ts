@@ -1,5 +1,5 @@
 /**
- * Hook system for Bot agent events
+ * Hook system for OpenClaw agent events
  *
  * Provides an extensible event-driven hook system for agent events
  * like command processing, session lifecycle, etc.
@@ -211,9 +211,12 @@ export type InternalHookHandler = (event: InternalHookEvent) => Promise<void> | 
  * to silently fire with zero handlers.
  */
 const _g = globalThis as typeof globalThis & {
-  __bot_internal_hook_handlers__?: Map<string, InternalHookHandler[]>;
+  __openclaw_internal_hook_handlers__?: Map<string, InternalHookHandler[]>;
 };
-const handlers = (_g.__bot_internal_hook_handlers__ ??= new Map<string, InternalHookHandler[]>());
+const handlers = (_g.__openclaw_internal_hook_handlers__ ??= new Map<
+  string,
+  InternalHookHandler[]
+>());
 const log = createSubsystemLogger("internal-hooks");
 
 /**

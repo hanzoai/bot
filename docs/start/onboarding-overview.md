@@ -1,5 +1,5 @@
 ---
-summary: "Overview of Hanzo Bot onboarding options and flows"
+summary: "Overview of OpenClaw onboarding options and flows"
 read_when:
   - Choosing an onboarding path
   - Setting up a new environment
@@ -9,7 +9,7 @@ sidebarTitle: "Onboarding Overview"
 
 # Onboarding Overview
 
-Hanzo Bot supports multiple onboarding paths depending on where the Gateway runs
+OpenClaw supports multiple onboarding paths depending on where the Gateway runs
 and how you prefer to configure providers.
 
 ## Choose your onboarding path
@@ -22,18 +22,18 @@ and how you prefer to configure providers.
 Run the wizard in a terminal:
 
 ```bash
-hanzo-bot onboard
+openclaw onboard
 ```
 
 Use the CLI wizard when you want full control of the Gateway, workspace,
 channels, and skills. Docs:
 
 - [Onboarding Wizard (CLI)](/start/wizard)
-- [`hanzo-bot onboard` command](/cli/onboard)
+- [`openclaw onboard` command](/cli/onboard)
 
 ## macOS app onboarding
 
-Use the Hanzo Bot app when you want a fully guided setup on macOS. Docs:
+Use the OpenClaw app when you want a fully guided setup on macOS. Docs:
 
 - [Onboarding (macOS App)](/start/onboarding)
 

@@ -1,4 +1,8 @@
-import type { AnyAgentTool, BotPluginApi, BotPluginToolFactory } from "../../src/plugins/types.js";
+import type {
+  AnyAgentTool,
+  BotPluginApi,
+  OpenClawPluginToolFactory,
+} from "@hanzo/bot/plugin-sdk/lobster";
 import { createLobsterTool } from "./src/lobster-tool.js";
 
 export default function register(api: BotPluginApi) {
@@ -8,7 +12,7 @@ export default function register(api: BotPluginApi) {
         return null;
       }
       return createLobsterTool(api) as AnyAgentTool;
-    }) as BotPluginToolFactory,
+    }) as OpenClawPluginToolFactory,
     { optional: true },
   );
 }

@@ -1,4 +1,4 @@
-import { fetchWithSsrFGuard } from "bot/plugin-sdk";
+import { fetchWithSsrFGuard } from "@hanzo/bot/plugin-sdk/voice-call";
 
 type GuardedJsonApiRequestParams = {
   url: string;

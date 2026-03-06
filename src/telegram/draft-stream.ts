@@ -62,7 +62,7 @@ export type TelegramDraftStream = {
   lastDeliveredText?: () => string;
   clear: () => Promise<void>;
   stop: () => Promise<void>;
-  /** Materialize the current draft into a permanent message. Returns the message ID if successful. */
+  /** Convert the current draft preview into a permanent message (sendMessage). */
   materialize?: () => Promise<number | undefined>;
   /** Reset internal state so the next update creates a new message instead of editing. */
   forceNewMessage: () => void;
@@ -341,6 +341,9 @@ export function createTelegramDraftStream(params: {
   });
 
   const forceNewMessage = () => {
+    // Boundary rotation may call stop() to finalize the previous draft.
+    // Re-open the stream lifecycle for the next assistant segment.
+    streamState.final = false;
     generation += 1;
     streamMessageId = undefined;
     if (previewTransport === "draft") {
@@ -358,7 +361,7 @@ export function createTelegramDraftStream(params: {
    * For message transport: the message is already permanent (noop).
    * Returns the permanent message id, or undefined if nothing to materialize.
    */
-  const _materialize = async (): Promise<number | undefined> => {
+  const materialize = async (): Promise<number | undefined> => {
     await stop();
     // If using message transport, the streamMessageId is already a real message.
     if (previewTransport === "message" && typeof streamMessageId === "number") {
@@ -416,6 +419,7 @@ export function createTelegramDraftStream(params: {
     lastDeliveredText: () => lastDeliveredText,
     clear,
     stop,
+    materialize,
     forceNewMessage,
   };
 }

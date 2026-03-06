@@ -16,18 +16,18 @@ Start at [/help/troubleshooting](/help/troubleshooting) if you want the fast tri
 Run these first, in this order:
 
 ```bash
-hanzo-bot status
-hanzo-bot gateway status
-hanzo-bot logs --follow
-hanzo-bot doctor
-hanzo-bot channels status --probe
+openclaw status
+openclaw gateway status
+openclaw logs --follow
+openclaw doctor
+openclaw channels status --probe
 ```
 
 Expected healthy signals:
 
-- `hanzo-bot gateway status` shows `Runtime: running` and `RPC probe: ok`.
-- `hanzo-bot doctor` reports no blocking config/service issues.
-- `hanzo-bot channels status --probe` shows connected/ready channels.
+- `openclaw gateway status` shows `Runtime: running` and `RPC probe: ok`.
+- `openclaw doctor` reports no blocking config/service issues.
+- `openclaw channels status --probe` shows connected/ready channels.
 
 ## Anthropic 429 extra usage required for long context
 
@@ -63,11 +63,11 @@ Related:
 If channels are up but nothing answers, check routing and policy before reconnecting anything.
 
 ```bash
-hanzo-bot status
-hanzo-bot channels status --probe
-hanzo-bot pairing list <channel>
-hanzo-bot config get channels
-hanzo-bot logs --follow
+openclaw status
+openclaw channels status --probe
+openclaw pairing list --channel <channel> [--account <id>]
+openclaw config get channels
+openclaw logs --follow
 ```
 
 Look for:
@@ -93,11 +93,11 @@ Related:
 When dashboard/control UI will not connect, validate URL, auth mode, and secure context assumptions.
 
 ```bash
-hanzo-bot gateway status
-hanzo-bot status
-hanzo-bot logs --follow
-hanzo-bot doctor
-hanzo-bot gateway status --json
+openclaw gateway status
+openclaw status
+openclaw logs --follow
+openclaw doctor
+openclaw gateway status --json
 ```
 
 Look for:
@@ -109,8 +109,26 @@ Look for:
 Common signatures:
 
 - `device identity required` → non-secure context or missing device auth.
+- `device nonce required` / `device nonce mismatch` → client is not completing the
+  challenge-based device auth flow (`connect.challenge` + `device.nonce`).
+- `device signature invalid` / `device signature expired` → client signed the wrong
+  payload (or stale timestamp) for the current handshake.
 - `unauthorized` / reconnect loop → token/password mismatch.
 - `gateway connect failed:` → wrong host/port/url target.
+
+Device auth v2 migration check:
+
+```bash
+openclaw --version
+openclaw doctor
+openclaw gateway status
+```
+
+If logs show nonce/signature errors, update the connecting client and verify it:
+
+1. waits for `connect.challenge`
+2. signs the challenge-bound payload
+3. sends `connect.params.device.nonce` with the same challenge nonce
 
 Related:
 
@@ -123,11 +141,11 @@ Related:
 Use this when service is installed but process does not stay up.
 
 ```bash
-hanzo-bot gateway status
-hanzo-bot status
-hanzo-bot logs --follow
-hanzo-bot doctor
-hanzo-bot gateway status --deep
+openclaw gateway status
+openclaw status
+openclaw logs --follow
+openclaw doctor
+openclaw gateway status --deep
 ```
 
 Look for:
@@ -138,7 +156,7 @@ Look for:
 
 Common signatures:
 
-- `Gateway start blocked: set gateway.mode=local` → local gateway mode is not enabled. Fix: set `gateway.mode="local"` in your config (or run `bot configure`). If you are running Bot via Podman using the dedicated `bot` user, the config lives at `~bot/.bot/bot.json`.
+- `Gateway start blocked: set gateway.mode=local` → local gateway mode is not enabled. Fix: set `gateway.mode="local"` in your config (or run `openclaw configure`). If you are running OpenClaw via Podman using the dedicated `openclaw` user, the config lives at `~openclaw/.openclaw/openclaw.json`.
 - `refusing to bind gateway ... without auth` → non-loopback bind without token/password.
 - `another gateway instance is already listening` / `EADDRINUSE` → port conflict.
 
@@ -153,11 +171,11 @@ Related:
 If channel state is connected but message flow is dead, focus on policy, permissions, and channel specific delivery rules.
 
 ```bash
-hanzo-bot channels status --probe
-hanzo-bot pairing list <channel>
-hanzo-bot status --deep
-hanzo-bot logs --follow
-hanzo-bot config get channels
+openclaw channels status --probe
+openclaw pairing list --channel <channel> [--account <id>]
+openclaw status --deep
+openclaw logs --follow
+openclaw config get channels
 ```
 
 Look for:
@@ -184,11 +202,11 @@ Related:
 If cron or heartbeat did not run or did not deliver, verify scheduler state first, then delivery target.
 
 ```bash
-hanzo-bot cron status
-hanzo-bot cron list
-hanzo-bot cron runs --id <jobId> --limit 20
-hanzo-bot system heartbeat last
-hanzo-bot logs --follow
+openclaw cron status
+openclaw cron list
+openclaw cron runs --id <jobId> --limit 20
+openclaw system heartbeat last
+openclaw logs --follow
 ```
 
 Look for:
@@ -203,6 +221,7 @@ Common signatures:
 - `cron: timer tick failed` → scheduler tick failed; check file/log/runtime errors.
 - `heartbeat skipped` with `reason=quiet-hours` → outside active hours window.
 - `heartbeat: unknown accountId` → invalid account id for heartbeat delivery target.
+- `heartbeat skipped` with `reason=dm-blocked` → heartbeat target resolved to a DM-style destination while `agents.defaults.heartbeat.directPolicy` (or per-agent override) is set to `block`.
 
 Related:
 
@@ -215,11 +234,11 @@ Related:
 If a node is paired but tools fail, isolate foreground, permission, and approval state.
 
 ```bash
-hanzo-bot nodes status
-hanzo-bot nodes describe --node <idOrNameOrIp>
-hanzo-bot approvals get --node <idOrNameOrIp>
-hanzo-bot logs --follow
-hanzo-bot status
+openclaw nodes status
+openclaw nodes describe --node <idOrNameOrIp>
+openclaw approvals get --node <idOrNameOrIp>
+openclaw logs --follow
+openclaw status
 ```
 
 Look for:
@@ -246,11 +265,11 @@ Related:
 Use this when browser tool actions fail even though the gateway itself is healthy.
 
 ```bash
-hanzo-bot browser status
-hanzo-bot browser start --browser-profile bot
-hanzo-bot browser profiles
-hanzo-bot logs --follow
-hanzo-bot doctor
+openclaw browser status
+openclaw browser start --browser-profile openclaw
+openclaw browser profiles
+openclaw logs --follow
+openclaw doctor
 ```
 
 Look for:
@@ -279,10 +298,10 @@ Most post-upgrade breakage is config drift or stricter defaults now being enforc
 ### 1) Auth and URL override behavior changed
 
 ```bash
-hanzo-bot gateway status
-hanzo-bot config get gateway.mode
-hanzo-bot config get gateway.remote.url
-hanzo-bot config get gateway.auth.mode
+openclaw gateway status
+openclaw config get gateway.mode
+openclaw config get gateway.remote.url
+openclaw config get gateway.auth.mode
 ```
 
 What to check:
@@ -298,10 +317,10 @@ Common signatures:
 ### 2) Bind and auth guardrails are stricter
 
 ```bash
-hanzo-bot config get gateway.bind
-hanzo-bot config get gateway.auth.token
-hanzo-bot gateway status
-hanzo-bot logs --follow
+openclaw config get gateway.bind
+openclaw config get gateway.auth.token
+openclaw gateway status
+openclaw logs --follow
 ```
 
 What to check:
@@ -317,10 +336,10 @@ Common signatures:
 ### 3) Pairing and device identity state changed
 
 ```bash
-hanzo-bot devices list
-hanzo-bot pairing list <channel>
-hanzo-bot logs --follow
-hanzo-bot doctor
+openclaw devices list
+openclaw pairing list --channel <channel> [--account <id>]
+openclaw logs --follow
+openclaw doctor
 ```
 
 What to check:
@@ -336,8 +355,8 @@ Common signatures:
 If the service config and runtime still disagree after checks, reinstall service metadata from the same profile/state directory:
 
 ```bash
-hanzo-bot gateway install --force
-hanzo-bot gateway restart
+openclaw gateway install --force
+openclaw gateway restart
 ```
 
 Related:

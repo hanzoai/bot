@@ -1,5 +1,4 @@
 import type { Command } from "commander";
-import { loadConfig } from "../../config/config.js";
 import { loadNodeHostConfig } from "../../node-host/config.js";
 import { runNodeHost } from "../../node-host/runner.js";
 import { formatDocsLink } from "../../terminal/links.js";
@@ -27,17 +26,19 @@ export function registerNodeCli(program: Command) {
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["bot node run --host 127.0.0.1 --port 18789", "Run the node host in the foreground."],
-          ["bot node status", "Check node host service status."],
-          ["bot node install", "Install the node host service."],
-          ["bot node restart", "Restart the installed node host service."],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/node", "docs.hanzo.bot/cli/node")}\n`,
+          [
+            "openclaw node run --host 127.0.0.1 --port 18789",
+            "Run the node host in the foreground.",
+          ],
+          ["openclaw node status", "Check node host service status."],
+          ["openclaw node install", "Install the node host service."],
+          ["openclaw node restart", "Restart the installed node host service."],
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/node", "docs.openclaw.ai/cli/node")}\n`,
     );
 
   node
     .command("run")
     .description("Run the headless node host (foreground)")
-    .option("--url <url>", "Full gateway WebSocket URL (e.g., wss://gw.example.com)")
     .option("--host <host>", "Gateway host")
     .option("--port <port>", "Gateway port")
     .option("--tls", "Use TLS for the gateway connection", false)
@@ -46,28 +47,10 @@ export function registerNodeCli(program: Command) {
     .option("--display-name <name>", "Override node display name")
     .action(async (opts) => {
       const existing = await loadNodeHostConfig();
-      const explicitHost = (opts.host as string | undefined)?.trim();
-      const explicitUrl = (opts.url as string | undefined)?.trim();
-      // Resolve gateway URL: CLI --url > config gateway.remote.url > --host/--port construction
-      let gatewayUrl: string | undefined;
-      if (explicitUrl) {
-        gatewayUrl = explicitUrl;
-      } else if (!explicitHost) {
-        const cfg = loadConfig();
-        const remoteUrl =
-          cfg.gateway?.mode === "remote" &&
-          typeof cfg.gateway?.remote?.url === "string" &&
-          cfg.gateway.remote.url.trim().length > 0
-            ? cfg.gateway.remote.url.trim()
-            : undefined;
-        if (remoteUrl) {
-          gatewayUrl = remoteUrl;
-        }
-      }
-      const host = explicitHost || existing?.gateway?.host || "127.0.0.1";
+      const host =
+        (opts.host as string | undefined)?.trim() || existing?.gateway?.host || "127.0.0.1";
       const port = parsePortWithFallback(opts.port, existing?.gateway?.port ?? 18789);
       await runNodeHost({
-        gatewayUrl,
         gatewayHost: host,
         gatewayPort: port,
         gatewayTls: Boolean(opts.tls) || Boolean(opts.tlsFingerprint),

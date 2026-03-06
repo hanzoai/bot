@@ -2,7 +2,7 @@ import {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   requestBodyErrorToText,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/voice-call";
 import http from "node:http";
 import { URL } from "node:url";
 import type { VoiceCallConfig } from "./config.js";

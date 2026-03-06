@@ -3,6 +3,7 @@ summary: "Use ACP runtime sessions for Pi, Claude Code, Codex, OpenCode, Gemini 
 read_when:
   - Running coding harnesses through ACP
   - Setting up thread-bound ACP sessions on thread-capable channels
+  - Binding Discord channels or Telegram forum topics to persistent ACP sessions
   - Troubleshooting ACP backend and plugin wiring
   - Operating /acp commands from chat
 title: "ACP Agents"
@@ -10,9 +11,9 @@ title: "ACP Agents"
 
 # ACP agents
 
-[Agent Client Protocol (ACP)](https://agentclientprotocol.com/) sessions let Bot run external coding harnesses (for example Pi, Claude Code, Codex, OpenCode, and Gemini CLI) through an ACP backend plugin.
+[Agent Client Protocol (ACP)](https://agentclientprotocol.com/) sessions let OpenClaw run external coding harnesses (for example Pi, Claude Code, Codex, OpenCode, and Gemini CLI) through an ACP backend plugin.
 
-If you ask Bot in plain language to "run this in Codex" or "start Claude Code in a thread", Bot should route that request to the ACP runtime (not the native sub-agent runtime).
+If you ask OpenClaw in plain language to "run this in Codex" or "start Claude Code in a thread", OpenClaw should route that request to the ACP runtime (not the native sub-agent runtime).
 
 ## Fast operator flow
 
@@ -41,7 +42,7 @@ Examples of natural requests:
 - "Run this as a one-shot Claude Code ACP session and summarize the result."
 - "Use Gemini CLI for this task in a thread, then keep follow-ups in that same thread."
 
-What Bot should do:
+What OpenClaw should do:
 
 1. Pick `runtime: "acp"`.
 2. Resolve the requested harness target (`agentId`, for example `codex`).
@@ -50,11 +51,11 @@ What Bot should do:
 
 ## ACP versus sub-agents
 
-Use ACP when you want an external harness runtime. Use sub-agents when you want Bot-native delegated runs.
+Use ACP when you want an external harness runtime. Use sub-agents when you want OpenClaw-native delegated runs.
 
 | Area          | ACP session                           | Sub-agent run                      |
 | ------------- | ------------------------------------- | ---------------------------------- |
-| Runtime       | ACP backend plugin (for example acpx) | Bot native sub-agent runtime       |
+| Runtime       | ACP backend plugin (for example acpx) | OpenClaw native sub-agent runtime  |
 | Session key   | `agent:<agentId>:acp:<uuid>`          | `agent:<agentId>:subagent:<uuid>`  |
 | Main commands | `/acp ...`                            | `/subagents ...`                   |
 | Spawn tool    | `sessions_spawn` with `runtime:"acp"` | `sessions_spawn` (default runtime) |
@@ -65,12 +66,12 @@ See also [Sub-agents](/tools/subagents).
 
 When thread bindings are enabled for a channel adapter, ACP sessions can be bound to threads:
 
-- Bot binds a thread to a target ACP session.
+- OpenClaw binds a thread to a target ACP session.
 - Follow-up messages in that thread route to the bound ACP session.
 - ACP output is delivered back to the same thread.
 - Unfocus/close/archive/idle-timeout or max-age expiry removes the binding.
 
-Thread binding support is adapter-specific. If the active channel adapter does not support thread bindings, Bot returns a clear unsupported/unavailable message.
+Thread binding support is adapter-specific. If the active channel adapter does not support thread bindings, OpenClaw returns a clear unsupported/unavailable message.
 
 Required feature flags for thread-bound ACP:
 
@@ -87,6 +88,126 @@ Required feature flags for thread-bound ACP:
   - Discord threads/channels
   - Telegram topics (forum topics in groups/supergroups and DM topics)
 - Plugin channels can add support through the same binding interface.
+
+## Channel specific settings
+
+For non-ephemeral workflows, configure persistent ACP bindings in top-level `bindings[]` entries.
+
+### Binding model
+
+- `bindings[].type="acp"` marks a persistent ACP conversation binding.
+- `bindings[].match` identifies the target conversation:
+  - Discord channel or thread: `match.channel="discord"` + `match.peer.id="<channelOrThreadId>"`
+  - Telegram forum topic: `match.channel="telegram"` + `match.peer.id="<chatId>:topic:<topicId>"`
+- `bindings[].agentId` is the owning OpenClaw agent id.
+- Optional ACP overrides live under `bindings[].acp`:
+  - `mode` (`persistent` or `oneshot`)
+  - `label`
+  - `cwd`
+  - `backend`
+
+### Runtime defaults per agent
+
+Use `agents.list[].runtime` to define ACP defaults once per agent:
+
+- `agents.list[].runtime.type="acp"`
+- `agents.list[].runtime.acp.agent` (harness id, for example `codex` or `claude`)
+- `agents.list[].runtime.acp.backend`
+- `agents.list[].runtime.acp.mode`
+- `agents.list[].runtime.acp.cwd`
+
+Override precedence for ACP bound sessions:
+
+1. `bindings[].acp.*`
+2. `agents.list[].runtime.acp.*`
+3. global ACP defaults (for example `acp.backend`)
+
+Example:
+
+```json5
+{
+  agents: {
+    list: [
+      {
+        id: "codex",
+        runtime: {
+          type: "acp",
+          acp: {
+            agent: "codex",
+            backend: "acpx",
+            mode: "persistent",
+            cwd: "/workspace/openclaw",
+          },
+        },
+      },
+      {
+        id: "claude",
+        runtime: {
+          type: "acp",
+          acp: { agent: "claude", backend: "acpx", mode: "persistent" },
+        },
+      },
+    ],
+  },
+  bindings: [
+    {
+      type: "acp",
+      agentId: "codex",
+      match: {
+        channel: "discord",
+        accountId: "default",
+        peer: { kind: "channel", id: "222222222222222222" },
+      },
+      acp: { label: "codex-main" },
+    },
+    {
+      type: "acp",
+      agentId: "claude",
+      match: {
+        channel: "telegram",
+        accountId: "default",
+        peer: { kind: "group", id: "-1001234567890:topic:42" },
+      },
+      acp: { cwd: "/workspace/repo-b" },
+    },
+    {
+      type: "route",
+      agentId: "main",
+      match: { channel: "discord", accountId: "default" },
+    },
+    {
+      type: "route",
+      agentId: "main",
+      match: { channel: "telegram", accountId: "default" },
+    },
+  ],
+  channels: {
+    discord: {
+      guilds: {
+        "111111111111111111": {
+          channels: {
+            "222222222222222222": { requireMention: false },
+          },
+        },
+      },
+    },
+    telegram: {
+      groups: {
+        "-1001234567890": {
+          topics: { "42": { requireMention: false } },
+        },
+      },
+    },
+  },
+}
+```
+
+Behavior:
+
+- OpenClaw ensures the configured ACP session exists before use.
+- Messages in that channel or topic route to the configured ACP session.
+- In bound conversations, `/new` and `/reset` reset the same ACP session key in place.
+- Temporary runtime bindings (for example created by thread-focus flows) still apply where present.
 
 ## Start ACP sessions (interfaces)
 
@@ -107,7 +228,7 @@ Use `runtime: "acp"` to start an ACP session from an agent turn or tool call.
 Notes:
 
 - `runtime` defaults to `subagent`, so set `runtime: "acp"` explicitly for ACP sessions.
-- If `agentId` is omitted, Bot uses `acp.defaultAgent` when configured.
+- If `agentId` is omitted, OpenClaw uses `acp.defaultAgent` when configured.
 - `mode: "session"` requires `thread: true` to keep a persistent bound conversation.
 
 Interface details:
@@ -118,14 +239,16 @@ Interface details:
 - `thread` (optional, default `false`): request thread binding flow where supported.
 - `mode` (optional): `run` (one-shot) or `session` (persistent).
   - default is `run`
-  - if `thread: true` and mode omitted, Bot may default to persistent behavior per runtime path
+  - if `thread: true` and mode omitted, OpenClaw may default to persistent behavior per runtime path
   - `mode: "session"` requires `thread: true`
 - `cwd` (optional): requested runtime working directory (validated by backend/runtime policy).
 - `label` (optional): operator-facing label used in session/banner text.
+- `streamTo` (optional): `"parent"` streams initial ACP run progress summaries back to the requester session as system events.
+  - When available, accepted responses include `streamLogPath` pointing to a session-scoped JSONL log (`<sessionId>.acp-stream.jsonl`) you can tail for full relay history.
 
 ## Sandbox compatibility
 
-ACP sessions currently run on the host runtime, not inside the Bot sandbox.
+ACP sessions currently run on the host runtime, not inside the OpenClaw sandbox.
 
 Current limitations:
 
@@ -168,7 +291,7 @@ Resolution order:
 2. Current thread binding (if this conversation/thread is bound to an ACP session)
 3. Current requester session fallback
 
-If no target resolves, Bot returns a clear error (`Unable to resolve session target: ...`).
+If no target resolves, OpenClaw returns a clear error (`Unable to resolve session target: ...`).
 
 ## Spawn thread modes
 
@@ -209,7 +332,7 @@ Available command family:
 
 `/acp status` shows the effective runtime options and, when available, both runtime-level and backend-level session identifiers.
 
-Some controls depend on backend capabilities. If a backend does not support a control, Bot returns a clear unsupported-control error.
+Some controls depend on backend capabilities. If a backend does not support a control, OpenClaw returns a clear unsupported-control error.
 
 ## ACP command cookbook
 
@@ -256,9 +379,9 @@ Current acpx built-in harness aliases:
 - `gemini`
 - `kimi`
 
-When Bot uses the acpx backend, prefer these values for `agentId` unless your acpx config defines custom agent aliases.
+When OpenClaw uses the acpx backend, prefer these values for `agentId` unless your acpx config defines custom agent aliases.
 
-Direct acpx CLI usage can also target arbitrary adapters via `--agent <command>`, but that raw escape hatch is an acpx CLI feature (not the normal Bot `agentId` path).
+Direct acpx CLI usage can also target arbitrary adapters via `--agent <command>`, but that raw escape hatch is an acpx CLI feature (not the normal OpenClaw `agentId` path).
 
 ## Required config
 
@@ -318,14 +441,14 @@ See [Configuration Reference](/gateway/configuration-reference).
 Install and enable plugin:
 
 ```bash
-hanzo-bot plugins install @bot/acpx
-hanzo-bot config set plugins.entries.acpx.enabled true
+openclaw plugins install acpx
+openclaw config set plugins.entries.acpx.enabled true
 ```
 
 Local workspace install during development:
 
 ```bash
-hanzo-bot plugins install ./extensions/acpx
+openclaw plugins install ./extensions/acpx
 ```
 
 Then verify backend health:
@@ -336,7 +459,7 @@ Then verify backend health:
 
 ### acpx command and version configuration
 
-`@bot/acpx` now enforces a strict plugin-local pinning model:
+By default, the acpx plugin (published as `@openclaw/acpx`) uses the plugin-local pinned binary:
 
 1. Command defaults to `extensions/acpx/node_modules/.bin/acpx`.
 2. Expected version defaults to the extension pin.
@@ -365,8 +488,11 @@ You can override command/version in plugin config:
 
 Notes:
 
-- Bot startup stays non-blocking while acpx ensure runs.
-- If network/install fails, backend remains unavailable and `/acp doctor` reports an actionable fix.
+- `command` accepts an absolute path, relative path, or command name (`acpx`).
+- Relative paths resolve from OpenClaw workspace directory.
+- `expectedVersion: "any"` disables strict version matching.
+- When `command` points to a custom binary/path, plugin-local auto-install is disabled.
+- OpenClaw startup remains non-blocking while the backend health check runs.
 
 See [Plugins](/tools/plugin).
 
@@ -398,13 +524,13 @@ Controls what happens when a permission prompt would be shown but no interactive
 Set via plugin config:
 
 ```bash
-bot config set plugins.entries.acpx.config.permissionMode approve-all
-bot config set plugins.entries.acpx.config.nonInteractivePermissions fail
+openclaw config set plugins.entries.acpx.config.permissionMode approve-all
+openclaw config set plugins.entries.acpx.config.nonInteractivePermissions fail
 ```
 
 Restart the gateway after changing these values.
 
-> **Important:** Bot currently defaults to `permissionMode=approve-reads` and `nonInteractivePermissions=fail`. In non-interactive ACP sessions, any write or exec that triggers a permission prompt can fail with `AcpRuntimeError: Permission prompt unavailable in non-interactive mode`.
+> **Important:** OpenClaw currently defaults to `permissionMode=approve-reads` and `nonInteractivePermissions=fail`. In non-interactive ACP sessions, any write or exec that triggers a permission prompt can fail with `AcpRuntimeError: Permission prompt unavailable in non-interactive mode`.
 >
 > If you need to restrict permissions, set `nonInteractivePermissions` to `deny` so sessions degrade gracefully instead of crashing.
 

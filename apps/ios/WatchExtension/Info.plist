@@ -5,7 +5,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
+<<<<<<< HEAD
 	<string>Hanzo Bot</string>
+=======
+	<string>OpenClaw</string>
+>>>>>>> upstream/main
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -23,7 +27,11 @@
 		<key>NSExtensionAttributes</key>
 		<dict>
 			<key>WKAppBundleIdentifier</key>
+<<<<<<< HEAD
 			<string>$(BOT_WATCH_APP_BUNDLE_ID)</string>
+=======
+			<string>$(OPENCLAW_WATCH_APP_BUNDLE_ID)</string>
+>>>>>>> upstream/main
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.watchkit</string>

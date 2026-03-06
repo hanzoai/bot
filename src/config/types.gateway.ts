@@ -17,7 +17,7 @@ export type GatewayTlsConfig = {
 
 export type WideAreaDiscoveryConfig = {
   enabled?: boolean;
-  /** Optional unicast DNS-SD domain (e.g. "bot.internal"). */
+  /** Optional unicast DNS-SD domain (e.g. "openclaw.internal"). */
   domain?: string;
 };
 
@@ -40,7 +40,7 @@ export type DiscoveryConfig = {
 
 export type CanvasHostConfig = {
   enabled?: boolean;
-  /** Directory to serve (default: ~/.hanzo/bot/workspace/canvas). */
+  /** Directory to serve (default: ~/.openclaw/workspace/canvas). */
   root?: string;
   /** HTTP port to listen on (default: 18793). */
   port?: number;
@@ -85,7 +85,7 @@ export type TalkConfig = {
 export type GatewayControlUiConfig = {
   /** If false, the Gateway will not serve the Control UI (default /). */
   enabled?: boolean;
-  /** Optional base path prefix for the Control UI (e.g. "/bot"). */
+  /** Optional base path prefix for the Control UI (e.g. "/openclaw"). */
   basePath?: string;
   /** Optional filesystem root for Control UI assets (defaults to dist/control-ui). */
   root?: string;
@@ -106,35 +106,7 @@ export type GatewayControlUiConfig = {
   dangerouslyDisableDeviceAuth?: boolean;
 };
 
-export type GatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
-
-export type GatewayIamConfig = {
-  /** IAM server URL (e.g. "https://iam.hanzo.ai"). */
-  serverUrl: string;
-  /** OAuth2 client ID registered with the IAM server. */
-  clientId: string;
-  /** OAuth2 client secret (optional; required for confidential clients). */
-  clientSecret?: string;
-  /** Default org name/slug for login redirects. */
-  orgName?: string;
-  /** Casdoor application name (used for signup URL). */
-  appName?: string;
-  /** OAuth2 scopes to request (defaults to ["openid", "profile", "email"]). */
-  scopes?: string[];
-  /**
-   * Override JWKS URI for JWT validation.
-   * When set, bypasses OIDC discovery for JWKS and uses this URL directly.
-   * Useful when the external JWKS endpoint is behind a CDN/WAF that blocks
-   * server-to-server requests (e.g. Cloudflare challenge pages).
-   * Example: "http://iam.hanzo.svc.cluster.local/.well-known/jwks"
-   */
-  jwksUrl?: string;
-  /**
-   * Email addresses with super-admin privileges.
-   * Super admins bypass billing checks and can credit their own account for testing.
-   */
-  superAdmins?: string[];
-};
+export type GatewayAuthMode = "none" | "token" | "password" | "trusted-proxy";
 
 /**
  * Configuration for trusted reverse proxy authentication.
@@ -177,11 +149,6 @@ export type GatewayAuthConfig = {
    * Required when mode is "trusted-proxy".
    */
   trustedProxy?: GatewayTrustedProxyConfig;
-  /**
-   * Configuration for IAM (OIDC) auth mode.
-   * Required when mode is "iam".
-   */
-  iam?: GatewayIamConfig;
 };
 
 export type GatewayAuthRateLimitConfig = {
@@ -193,20 +160,6 @@ export type GatewayAuthRateLimitConfig = {
   lockoutMs?: number;
   /** Exempt localhost/loopback addresses from auth rate limiting.  @default true */
   exemptLoopback?: boolean;
-};
-
-/**
- * Token-bucket rate limiting for request throughput.
- * Applied per-user (or per-connection when user ID is unavailable)
- * to billable gateway methods (agent, agent.wait, chat.send).
- */
-export type RequestRateLimitConfig = {
-  /** Requests per minute per user.  @default 60 (starter tier) */
-  requestsPerMinute?: number;
-  /** Burst allowance — tokens available immediately.  @default 15 */
-  burstSize?: number;
-  /** Interval in ms for pruning stale rate-limit buckets.  @default 60000 */
-  cleanupIntervalMs?: number;
 };
 
 export type GatewayTailscaleMode = "off" | "serve" | "funnel";
@@ -399,69 +352,6 @@ export type GatewayToolsConfig = {
   allow?: string[];
 };
 
-export type NodeBillingMode = "global" | "dedicated" | "local" | "shared";
-
-/** Per-node billing configuration. */
-export type NodeBillingConfig = {
-  /** How this node is billed (default: "global"). */
-  mode?: NodeBillingMode;
-  /** Budget in cents for dedicated mode. When spent reaches budget, requests are blocked. */
-  budgetCents?: number;
-  /** Running spent total in cents (tracked by gateway, persisted across restarts). */
-  spentCents?: number;
-};
-
-export type GatewayTunnelProvider = "cloudflared" | "ngrok" | "localxpose" | "zrok" | "none";
-
-export type GatewayTunnelConfig = {
-  /**
-   * Tunnel provider to expose the gateway to the internet.
-   * - cloudflared: Cloudflare Tunnel (free, no auth token required for quick tunnels)
-   * - ngrok: ngrok tunnel (free tier available, auth token recommended)
-   * - localxpose: LocalXpose tunnel (requires auth token)
-   * - zrok: zrok tunnel (requires auth token)
-   * - none: Disable tunneling (default)
-   */
-  provider?: GatewayTunnelProvider;
-  /** Provider API key / auth token (required for ngrok, localxpose, zrok). */
-  authToken?: string;
-  /** Custom domain for the tunnel (paid feature on most providers). */
-  domain?: string;
-};
-
-export type MarketplaceConfig = {
-  /** Whether the marketplace is enabled on this gateway. Default: false. */
-  enabled?: boolean;
-  /** When true, marketplace returns "coming soon" instead of processing requests. */
-  comingSoon?: boolean;
-  /** Platform fee percentage taken from each transaction (0-100). Default: 20. */
-  platformFeePct?: number;
-  /**
-   * Marketplace price as a fraction of Anthropic list price (0-1). Default: 0.6.
-   * e.g. 0.6 = buyer pays 60% of list price.
-   */
-  priceFraction?: number;
-  /** Minimum payout threshold in cents. Default: 1000 ($10). */
-  minPayoutCents?: number;
-  /** Bonus percentage for $AI token payouts. Default: 10. */
-  aiTokenBonusPct?: number;
-  /** On-chain $AI token settlement configuration. */
-  chain?: MarketplaceChainConfig;
-};
-
-export type MarketplaceChainConfig = {
-  /** EVM chain ID. Default: 36963 (Hanzo). */
-  chainId?: number;
-  /** JSON-RPC endpoint for the settlement chain. */
-  rpcUrl?: string;
-  /** $AI token ERC-20 contract address (checksummed hex). */
-  tokenContract?: string;
-  /** Treasury/payout wallet address (hex). Signs payout transfers. */
-  treasuryAddress?: string;
-  /** Treasury private key env var name. Default: "MARKETPLACE_TREASURY_KEY". */
-  treasuryKeyEnv?: string;
-};
-
 export type GatewayConfig = {
   /** Single multiplexed port for Gateway WS + HTTP (default: 18789). */
   port?: number;
@@ -485,7 +375,6 @@ export type GatewayConfig = {
   controlUi?: GatewayControlUiConfig;
   auth?: GatewayAuthConfig;
   tailscale?: GatewayTailscaleConfig;
-  tunnel?: GatewayTunnelConfig;
   remote?: GatewayRemoteConfig;
   reload?: GatewayReloadConfig;
   tls?: GatewayTlsConfig;
@@ -504,10 +393,6 @@ export type GatewayConfig = {
   allowRealIpFallback?: boolean;
   /** Tool access restrictions for HTTP /tools/invoke endpoint. */
   tools?: GatewayToolsConfig;
-  /** P2P marketplace configuration for idle compute sharing. */
-  marketplace?: MarketplaceConfig;
-  /** Token-bucket rate limiting for request throughput (billable methods). */
-  requestRateLimit?: RequestRateLimitConfig;
   /**
    * Channel health monitor interval in minutes.
    * Periodically checks channel health and restarts unhealthy channels.

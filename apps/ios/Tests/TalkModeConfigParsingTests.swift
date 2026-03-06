@@ -1,6 +1,10 @@
 import Foundation
 import Testing
+<<<<<<< HEAD
 @testable import Bot
+=======
+@testable import OpenClaw
+>>>>>>> upstream/main
 
 @MainActor
 @Suite struct TalkModeConfigParsingTests {

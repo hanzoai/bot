@@ -1,16 +1,13 @@
 {
-  "name": "@hanzo/bot-nostr",
-  "version": "2026.3.5",
-  "description": "Hanzo Bot Nostr channel plugin for NIP-04 encrypted DMs",
+  "name": "@openclaw/nostr",
+  "version": "2026.3.6",
+  "description": "OpenClaw Nostr channel plugin for NIP-04 encrypted DMs",
   "type": "module",
   "dependencies": {
     "nostr-tools": "^2.23.3",
     "zod": "^4.3.6"
   },
-  "devDependencies": {
-    "@hanzo/bot": "workspace:*"
-  },
-  "bot": {
+  "openclaw": {
     "extensions": [
       "./index.ts"
     ],
@@ -25,7 +22,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@hanzo/bot-nostr",
+      "npmSpec": "@openclaw/nostr",
       "localPath": "extensions/nostr",
       "defaultChoice": "npm"
     }

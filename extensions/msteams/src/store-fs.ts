@@ -1,4 +1,4 @@
-import { readJsonFileWithFallback, writeJsonFileAtomically } from "bot/plugin-sdk";
+import { readJsonFileWithFallback, writeJsonFileAtomically } from "@hanzo/bot/plugin-sdk/msteams";
 import fs from "node:fs";
 import { withFileLock as withPathLock } from "./file-lock.js";
 

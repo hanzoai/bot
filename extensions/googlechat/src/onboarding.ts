@@ -1,4 +1,4 @@
-import type { BotConfig, DmPolicy } from "bot/plugin-sdk";
+import type { BotConfig, DmPolicy } from "@hanzo/bot/plugin-sdk/googlechat";
 import {
   addWildcardAllowFrom,
   formatDocsLink,
@@ -10,7 +10,7 @@ import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   migrateBaseNameToDefaultAccount,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/googlechat";
 import {
   listGoogleChatAccountIds,
   resolveDefaultGoogleChatAccountId,

@@ -1,4 +1,8 @@
-import type { ChannelMessageActionName, ChannelPlugin, BotConfig } from "bot/plugin-sdk";
+import type {
+  ChannelMessageActionName,
+  ChannelPlugin,
+  BotConfig,
+} from "@hanzo/bot/plugin-sdk/msteams";
 import {
   buildBaseChannelStatusSummary,
   buildChannelConfigSchema,
@@ -8,7 +12,7 @@ import {
   PAIRING_APPROVED_MESSAGE,
   resolveAllowlistProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/msteams";
 import { listMSTeamsDirectoryGroupsLive, listMSTeamsDirectoryPeersLive } from "./directory-live.js";
 import { msteamsOnboardingAdapter } from "./onboarding.js";
 import { msteamsOutbound } from "./outbound.js";

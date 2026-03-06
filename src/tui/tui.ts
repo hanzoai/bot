@@ -26,7 +26,7 @@ import {
 import { getSlashCommands } from "./commands.js";
 import { ChatLog } from "./components/chat-log.js";
 import { CustomEditor } from "./components/custom-editor.js";
-import { GatewayChatClient, type GatewayEvent } from "./gateway-chat.js";
+import { GatewayChatClient } from "./gateway-chat.js";
 import { editorTheme, theme } from "./theme/theme.js";
 import { createCommandHandlers } from "./tui-command-handlers.js";
 import { createEventHandlers } from "./tui-event-handlers.js";
@@ -217,9 +217,9 @@ export function resolveGatewayDisconnectState(reason?: string): {
   if (/pairing required/i.test(reasonLabel)) {
     return {
       connectionStatus: `gateway disconnected: ${reasonLabel}`,
-      activityStatus: "pairing required: run bot devices list",
+      activityStatus: "pairing required: run openclaw devices list",
       pairingHint:
-        "Pairing required. Run `bot devices list`, approve your request ID, then reconnect.",
+        "Pairing required. Run `openclaw devices list`, approve your request ID, then reconnect.",
     };
   }
   return {
@@ -471,7 +471,7 @@ export async function runTui(opts: TuiOptions) {
     localRunIds.clear();
   };
 
-  const client = new GatewayChatClient({
+  const client = await GatewayChatClient.connect({
     url: opts.url,
     token: opts.token,
     password: opts.password,
@@ -543,7 +543,7 @@ export async function runTui(opts: TuiOptions) {
     const agentLabel = formatAgentLabel(currentAgentId);
     header.setText(
       theme.header(
-        `bot tui - ${client.connection.url} - agent ${agentLabel} - session ${sessionLabel}`,
+        `openclaw tui - ${client.connection.url} - agent ${agentLabel} - session ${sessionLabel}`,
       ),
     );
   };
@@ -889,7 +889,7 @@ export async function runTui(opts: TuiOptions) {
     void loadHistory();
   };
 
-  client.onEvent = (evt: GatewayEvent) => {
+  client.onEvent = (evt) => {
     if (evt.event === "chat") {
       handleChatEvent(evt.payload);
     }
@@ -919,7 +919,7 @@ export async function runTui(opts: TuiOptions) {
     })();
   };
 
-  client.onDisconnected = (reason: string) => {
+  client.onDisconnected = (reason) => {
     isConnected = false;
     wasDisconnected = true;
     historyLoaded = false;
@@ -934,7 +934,7 @@ export async function runTui(opts: TuiOptions) {
     tui.requestRender();
   };
 
-  client.onGap = (info: { expected: number; received: number }) => {
+  client.onGap = (info) => {
     setConnectionStatus(`event gap: expected ${info.expected}, got ${info.received}`, 5000);
     tui.requestRender();
   };

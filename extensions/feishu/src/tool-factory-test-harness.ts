@@ -1,4 +1,4 @@
-import type { AnyAgentTool, BotPluginApi } from "bot/plugin-sdk";
+import type { AnyAgentTool, BotPluginApi } from "@hanzo/bot/plugin-sdk/feishu";
 
 type ToolContextLike = {
   agentAccountId?: string;

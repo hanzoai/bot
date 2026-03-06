@@ -1,4 +1,4 @@
-import type { ReplyPayload } from "bot/plugin-sdk";
+import type { ReplyPayload } from "@hanzo/bot/plugin-sdk/zalo";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { zaloPlugin } from "./channel.js";
 

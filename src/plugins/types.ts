@@ -35,13 +35,13 @@ export type PluginConfigUiHint = {
   placeholder?: string;
 };
 
-export type PluginKind = "memory";
+export type PluginKind = "memory" | "context-engine";
 
 export type PluginConfigValidation =
   | { ok: true; value?: unknown }
   | { ok: false; errors: string[] };
 
-export type BotPluginConfigSchema = {
+export type OpenClawPluginConfigSchema = {
   safeParse?: (value: unknown) => {
     success: boolean;
     data?: unknown;
@@ -55,7 +55,7 @@ export type BotPluginConfigSchema = {
   jsonSchema?: Record<string, unknown>;
 };
 
-export type BotPluginToolContext = {
+export type OpenClawPluginToolContext = {
   config?: BotConfig;
   workspaceDir?: string;
   agentDir?: string;
@@ -72,17 +72,17 @@ export type BotPluginToolContext = {
   sandboxed?: boolean;
 };
 
-export type BotPluginToolFactory = (
-  ctx: BotPluginToolContext,
+export type OpenClawPluginToolFactory = (
+  ctx: OpenClawPluginToolContext,
 ) => AnyAgentTool | AnyAgentTool[] | null | undefined;
 
-export type BotPluginToolOptions = {
+export type OpenClawPluginToolOptions = {
   name?: string;
   names?: string[];
   optional?: boolean;
 };
 
-export type BotPluginHookOptions = {
+export type OpenClawPluginHookOptions = {
   entry?: HookEntry;
   name?: string;
   description?: string;
@@ -131,7 +131,7 @@ export type ProviderPlugin = {
   refreshOAuth?: (cred: OAuthCredential) => Promise<OAuthCredential>;
 };
 
-export type BotPluginGatewayMethod = {
+export type OpenClawPluginGatewayMethod = {
   method: string;
   handler: GatewayRequestHandler;
 };
@@ -156,7 +156,7 @@ export type PluginCommandContext = {
   args?: string;
   /** The full normalized command body */
   commandBody: string;
-  /** Current Bot configuration */
+  /** Current OpenClaw configuration */
   config: BotConfig;
   /** Raw "From" value (channel-scoped id) */
   from?: string;
@@ -183,7 +183,7 @@ export type PluginCommandHandler = (
 /**
  * Definition for a plugin-registered command.
  */
-export type BotPluginCommandDefinition = {
+export type OpenClawPluginCommandDefinition = {
   /** Command name without leading slash (e.g., "tts") */
   name: string;
   /** Description shown in /help and command menus */
@@ -196,61 +196,63 @@ export type BotPluginCommandDefinition = {
   handler: PluginCommandHandler;
 };
 
-export type BotPluginHttpRouteAuth = "gateway" | "plugin";
-export type BotPluginHttpRouteMatch = "exact" | "prefix";
+export type OpenClawPluginHttpRouteAuth = "gateway" | "plugin";
+export type OpenClawPluginHttpRouteMatch = "exact" | "prefix";
 
-export type BotPluginHttpRouteHandler = (
+export type OpenClawPluginHttpRouteHandler = (
   req: IncomingMessage,
   res: ServerResponse,
 ) => Promise<boolean | void> | boolean | void;
 
-export type BotPluginHttpRouteParams = {
+export type OpenClawPluginHttpRouteParams = {
   path: string;
-  handler: BotPluginHttpRouteHandler;
-  auth: BotPluginHttpRouteAuth;
-  match?: BotPluginHttpRouteMatch;
+  handler: OpenClawPluginHttpRouteHandler;
+  auth: OpenClawPluginHttpRouteAuth;
+  match?: OpenClawPluginHttpRouteMatch;
   replaceExisting?: boolean;
 };
 
-export type BotPluginCliContext = {
+export type OpenClawPluginCliContext = {
   program: Command;
   config: BotConfig;
   workspaceDir?: string;
   logger: PluginLogger;
 };
 
-export type BotPluginCliRegistrar = (ctx: BotPluginCliContext) => void | Promise<void>;
+export type OpenClawPluginCliRegistrar = (ctx: OpenClawPluginCliContext) => void | Promise<void>;
 
-export type BotPluginServiceContext = {
+export type OpenClawPluginServiceContext = {
   config: BotConfig;
   workspaceDir?: string;
   stateDir: string;
   logger: PluginLogger;
 };
 
-export type BotPluginService = {
+export type OpenClawPluginService = {
   id: string;
-  start: (ctx: BotPluginServiceContext) => void | Promise<void>;
-  stop?: (ctx: BotPluginServiceContext) => void | Promise<void>;
+  start: (ctx: OpenClawPluginServiceContext) => void | Promise<void>;
+  stop?: (ctx: OpenClawPluginServiceContext) => void | Promise<void>;
 };
 
-export type BotPluginChannelRegistration = {
+export type OpenClawPluginChannelRegistration = {
   plugin: ChannelPlugin;
   dock?: ChannelDock;
 };
 
-export type BotPluginDefinition = {
+export type OpenClawPluginDefinition = {
   id?: string;
   name?: string;
   description?: string;
   version?: string;
   kind?: PluginKind;
-  configSchema?: BotPluginConfigSchema;
+  configSchema?: OpenClawPluginConfigSchema;
   register?: (api: BotPluginApi) => void | Promise<void>;
   activate?: (api: BotPluginApi) => void | Promise<void>;
 };
 
-export type BotPluginModule = BotPluginDefinition | ((api: BotPluginApi) => void | Promise<void>);
+export type OpenClawPluginModule =
+  | OpenClawPluginDefinition
+  | ((api: BotPluginApi) => void | Promise<void>);
 
 export type BotPluginApi = {
   id: string;
@@ -262,24 +264,32 @@ export type BotPluginApi = {
   pluginConfig?: Record<string, unknown>;
   runtime: PluginRuntime;
   logger: PluginLogger;
-  registerTool: (tool: AnyAgentTool | BotPluginToolFactory, opts?: BotPluginToolOptions) => void;
+  registerTool: (
+    tool: AnyAgentTool | OpenClawPluginToolFactory,
+    opts?: OpenClawPluginToolOptions,
+  ) => void;
   registerHook: (
     events: string | string[],
     handler: InternalHookHandler,
-    opts?: BotPluginHookOptions,
+    opts?: OpenClawPluginHookOptions,
   ) => void;
-  registerHttpRoute: (params: BotPluginHttpRouteParams) => void;
-  registerChannel: (registration: BotPluginChannelRegistration | ChannelPlugin) => void;
+  registerHttpRoute: (params: OpenClawPluginHttpRouteParams) => void;
+  registerChannel: (registration: OpenClawPluginChannelRegistration | ChannelPlugin) => void;
   registerGatewayMethod: (method: string, handler: GatewayRequestHandler) => void;
-  registerCli: (registrar: BotPluginCliRegistrar, opts?: { commands?: string[] }) => void;
-  registerService: (service: BotPluginService) => void;
+  registerCli: (registrar: OpenClawPluginCliRegistrar, opts?: { commands?: string[] }) => void;
+  registerService: (service: OpenClawPluginService) => void;
   registerProvider: (provider: ProviderPlugin) => void;
   /**
    * Register a custom command that bypasses the LLM agent.
    * Plugin commands are processed before built-in commands and before agent invocation.
    * Use this for simple state-toggling or status commands that don't need AI reasoning.
    */
-  registerCommand: (command: BotPluginCommandDefinition) => void;
+  registerCommand: (command: OpenClawPluginCommandDefinition) => void;
+  /** Register a context engine implementation (exclusive slot — only one active at a time). */
+  registerContextEngine: (
+    id: string,
+    factory: import("../context-engine/registry.js").ContextEngineFactory,
+  ) => void;
   resolvePath: (input: string) => string;
   /** Register a lifecycle hook handler */
   on: <K extends PluginHookName>(
@@ -413,7 +423,15 @@ export type PluginHookBeforePromptBuildEvent = {
 export type PluginHookBeforePromptBuildResult = {
   systemPrompt?: string;
   prependContext?: string;
+  /**
+   * Prepended to the agent system prompt so providers can cache it (e.g. prompt caching).
+   * Use for static plugin guidance instead of prependContext to avoid per-turn token cost.
+   */
   prependSystemContext?: string;
+  /**
+   * Appended to the agent system prompt so providers can cache it (e.g. prompt caching).
+   * Use for static plugin guidance instead of prependContext to avoid per-turn token cost.
+   */
   appendSystemContext?: string;
 };
 

@@ -61,8 +61,8 @@ describe("tool-policy", () => {
     expect(resolveToolProfilePolicy("nope")).toBeUndefined();
   });
 
-  it("includes core tool groups in group:bot", () => {
-    const group = TOOL_GROUPS["group:bot"];
+  it("includes core tool groups in group:openclaw", () => {
+    const group = TOOL_GROUPS["group:openclaw"];
     expect(group).toContain("browser");
     expect(group).toContain("message");
     expect(group).toContain("subagents");

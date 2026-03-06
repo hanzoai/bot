@@ -2,8 +2,8 @@ import {
   formatInboundFromLabel as formatInboundFromLabelShared,
   resolveThreadSessionKeys as resolveThreadSessionKeysShared,
   type BotConfig,
-} from "bot/plugin-sdk";
-export { createDedupeCache, rawDataToString } from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/mattermost";
+export { createDedupeCache, rawDataToString } from "@hanzo/bot/plugin-sdk/mattermost";
 
 export type ResponsePrefixContext = {
   model?: string;

@@ -42,7 +42,7 @@ imsg rpc --help
 
       </Step>
 
-      <Step title="Configure Bot">
+      <Step title="Configure OpenClaw">
 
 ```json5
 {
@@ -61,7 +61,7 @@ imsg rpc --help
       <Step title="Start gateway">
 
 ```bash
-bot gateway
+openclaw gateway
 ```
 
       </Step>
@@ -69,8 +69,8 @@ bot gateway
       <Step title="Approve first DM pairing (default dmPolicy)">
 
 ```bash
-bot pairing list imessage
-bot pairing approve imessage <CODE>
+openclaw pairing list imessage
+openclaw pairing approve imessage <CODE>
 ```
 
         Pairing requests expire after 1 hour.
@@ -80,7 +80,7 @@ bot pairing approve imessage <CODE>
   </Tab>
 
   <Tab title="Remote Mac over SSH">
-    Bot only requires a stdio-compatible `cliPath`, so you can point `cliPath` at a wrapper script that SSHes to a remote Mac and runs `imsg`.
+    OpenClaw only requires a stdio-compatible `cliPath`, so you can point `cliPath` at a wrapper script that SSHes to a remote Mac and runs `imsg`.
 
 ```bash
 #!/usr/bin/env bash
@@ -94,15 +94,22 @@ exec ssh -T gateway-host imsg "$@"
   channels: {
     imessage: {
       enabled: true,
-      cliPath: "~/.bot/scripts/imsg-ssh",
+      cliPath: "~/.openclaw/scripts/imsg-ssh",
       remoteHost: "user@gateway-host", // used for SCP attachment fetches
       includeAttachments: true,
+      // Optional: override allowed attachment roots.
+      // Defaults include /Users/*/Library/Messages/Attachments
+      attachmentRoots: ["/Users/*/Library/Messages/Attachments"],
+      remoteAttachmentRoots: ["/Users/*/Library/Messages/Attachments"],
     },
   },
 }
 ```
 
-    If `remoteHost` is not set, Bot attempts to auto-detect it by parsing the SSH wrapper script.
+    If `remoteHost` is not set, OpenClaw attempts to auto-detect it by parsing the SSH wrapper script.
+    `remoteHost` must be `host` or `user@host` (no spaces or SSH options).
+    OpenClaw uses strict host-key checking for SCP, so the relay host key must already exist in `~/.ssh/known_hosts`.
+    Attachment paths are validated against allowed roots (`attachmentRoots` / `remoteAttachmentRoots`).
 
   </Tab>
 </Tabs>
@@ -110,7 +117,7 @@ exec ssh -T gateway-host imsg "$@"
 ## Requirements and permissions (macOS)
 
 - Messages must be signed in on the Mac running `imsg`.
-- Full Disk Access is required for the process context running Bot/`imsg` (Messages DB access).
+- Full Disk Access is required for the process context running OpenClaw/`imsg` (Messages DB access).
 - Automation permission is required to send messages through Messages.app.
 
 <Tip>
@@ -151,6 +158,7 @@ imsg send <handle> "test"
     Group sender allowlist: `channels.imessage.groupAllowFrom`.
 
     Runtime fallback: if `groupAllowFrom` is unset, iMessage group sender checks fall back to `allowFrom` when available.
+    Runtime note: if `channels.imessage` is completely missing, runtime falls back to `groupPolicy="allowlist"` and logs a warning (even if `channels.defaults.groupPolicy` is set).
 
     Mention gating for groups:
 
@@ -171,7 +179,7 @@ imsg send <handle> "test"
     Group-ish thread behavior:
 
     Some multi-participant iMessage threads can arrive with `is_group=false`.
-    If that `chat_id` is explicitly configured under `channels.imessage.groups`, Bot treats it as group traffic (group gating + group session isolation).
+    If that `chat_id` is explicitly configured under `channels.imessage.groups`, OpenClaw treats it as group traffic (group gating + group session isolation).
 
   </Tab>
 </Tabs>
@@ -187,7 +195,7 @@ imsg send <handle> "test"
     1. Create/sign in a dedicated macOS user.
     2. Sign into Messages with the bot Apple ID in that user.
     3. Install `imsg` in that user.
-    4. Create SSH wrapper so Bot can run `imsg` in that user context.
+    4. Create SSH wrapper so OpenClaw can run `imsg` in that user context.
     5. Point `channels.imessage.accounts.<id>.cliPath` and `.dbPath` to that user profile.
 
     First run may require GUI approvals (Automation + Full Disk Access) in that bot user session.
@@ -209,7 +217,7 @@ imsg send <handle> "test"
   channels: {
     imessage: {
       enabled: true,
-      cliPath: "~/.bot/scripts/imsg-ssh",
+      cliPath: "~/.openclaw/scripts/imsg-ssh",
       remoteHost: "bot@mac-mini.tailnet-1234.ts.net",
       includeAttachments: true,
       dbPath: "/Users/bot/Library/Messages/chat.db",
@@ -224,13 +232,14 @@ exec ssh -T bot@mac-mini.tailnet-1234.ts.net imsg "$@"
 ```
 
     Use SSH keys so both SSH and SCP are non-interactive.
+    Ensure the host key is trusted first (for example `ssh bot@mac-mini.tailnet-1234.ts.net`) so `known_hosts` is populated.
 
   </Accordion>
 
   <Accordion title="Multi-account pattern">
     iMessage supports per-account config under `channels.imessage.accounts`.
 
-    Each account can override fields such as `cliPath`, `dbPath`, `allowFrom`, `groupPolicy`, `mediaMaxMb`, and history settings.
+    Each account can override fields such as `cliPath`, `dbPath`, `allowFrom`, `groupPolicy`, `mediaMaxMb`, history settings, and attachment root allowlists.
 
   </Accordion>
 </AccordionGroup>
@@ -241,6 +250,11 @@ exec ssh -T bot@mac-mini.tailnet-1234.ts.net imsg "$@"
   <Accordion title="Attachments and media">
     - inbound attachment ingestion is optional: `channels.imessage.includeAttachments`
     - remote attachment paths can be fetched via SCP when `remoteHost` is set
+    - attachment paths must match allowed roots:
+      - `channels.imessage.attachmentRoots` (local)
+      - `channels.imessage.remoteAttachmentRoots` (remote SCP mode)
+      - default root pattern: `/Users/*/Library/Messages/Attachments`
+    - SCP uses strict host-key checking (`StrictHostKeyChecking=yes`)
     - outbound media size uses `channels.imessage.mediaMaxMb` (default 16 MB)
   </Accordion>
 
@@ -295,7 +309,7 @@ Disable:
 
 ```bash
 imsg rpc --help
-bot channels status --probe
+openclaw channels status --probe
 ```
 
     If probe reports RPC unsupported, update `imsg`.
@@ -307,7 +321,7 @@ bot channels status --probe
 
     - `channels.imessage.dmPolicy`
     - `channels.imessage.allowFrom`
-    - pairing approvals (`bot pairing list imessage`)
+    - pairing approvals (`openclaw pairing list imessage`)
 
   </Accordion>
 
@@ -325,7 +339,9 @@ bot channels status --probe
     Check:
 
     - `channels.imessage.remoteHost`
+    - `channels.imessage.remoteAttachmentRoots`
     - SSH/SCP key auth from the gateway host
+    - host key exists in `~/.ssh/known_hosts` on the gateway host
     - remote path readability on the Mac running Messages
 
   </Accordion>
@@ -338,7 +354,7 @@ imsg chats --limit 1
 imsg send <handle> "test"
 ```
 
-    Confirm Full Disk Access + Automation are granted for the process context that runs Bot/`imsg`.
+    Confirm Full Disk Access + Automation are granted for the process context that runs OpenClaw/`imsg`.
 
   </Accordion>
 </AccordionGroup>

@@ -48,4 +48,8 @@
 --allman false
 
 # Exclusions
+<<<<<<< HEAD
 --exclude .build,.swiftpm,DerivedData,node_modules,dist,coverage,xcuserdata,Peekaboo,Swabble,apps/android,apps/ios,apps/shared,apps/macos/Sources/BotProtocol
+=======
+--exclude .build,.swiftpm,DerivedData,node_modules,dist,coverage,xcuserdata,Peekaboo,Swabble,apps/android,apps/ios,apps/shared,apps/macos/Sources/MoltbotProtocol
+>>>>>>> upstream/main

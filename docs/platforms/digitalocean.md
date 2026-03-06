@@ -1,16 +1,16 @@
 ---
-summary: "Hanzo Bot on DigitalOcean (simple paid VPS option)"
+summary: "OpenClaw on DigitalOcean (simple paid VPS option)"
 read_when:
-  - Setting up Hanzo Bot on DigitalOcean
-  - Looking for cheap VPS hosting for Hanzo Bot
+  - Setting up OpenClaw on DigitalOcean
+  - Looking for cheap VPS hosting for OpenClaw
 title: "DigitalOcean"
 ---
 
-# Hanzo Bot on DigitalOcean
+# OpenClaw on DigitalOcean
 
 ## Goal
 
-Run a persistent Hanzo Bot Gateway on DigitalOcean for **$6/month** (or $4/mo with reserved pricing).
+Run a persistent OpenClaw Gateway on DigitalOcean for **$6/month** (or $4/mo with reserved pricing).
 
 If you want a $0/month option and don’t mind ARM + provider-specific setup, see the [Oracle Cloud guide](/platforms/oracle).
 
@@ -40,6 +40,10 @@ If you want a $0/month option and don’t mind ARM + provider-specific setup, se
 
 ## 1) Create a Droplet
 
+<Warning>
+Use a clean base image (Ubuntu 24.04 LTS). Avoid third-party Marketplace 1-click images unless you have reviewed their startup scripts and firewall defaults.
+</Warning>
+
 1. Log into [DigitalOcean](https://cloud.digitalocean.com/)
 2. Click **Create → Droplets**
 3. Choose:
@@ -56,7 +60,7 @@ If you want a $0/month option and don’t mind ARM + provider-specific setup, se
 ssh root@YOUR_DROPLET_IP
 ```
 
-## 3) Install Hanzo Bot
+## 3) Install OpenClaw
 
 ```bash
 # Update system
@@ -66,17 +70,17 @@ apt update && apt upgrade -y
 curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 apt install -y nodejs
 
-# Install Hanzo Bot
-curl -fsSL https://hanzo.bot/install.sh | bash
+# Install OpenClaw
+curl -fsSL https://openclaw.ai/install.sh | bash
 
 # Verify
-hanzo-bot --version
+openclaw --version
 ```
 
 ## 4) Run Onboarding
 
 ```bash
-hanzo-bot onboard --install-daemon
+openclaw onboard --install-daemon
 ```
 
 The wizard will walk you through:
@@ -90,13 +94,13 @@ The wizard will walk you through:
 
 ```bash
 # Check status
-hanzo-bot status
+openclaw status
 
 # Check service
-systemctl --user status bot-gateway.service
+systemctl --user status openclaw-gateway.service
 
 # View logs
-journalctl --user -u bot-gateway.service -f
+journalctl --user -u openclaw-gateway.service -f
 ```
 
 ## 6) Access the Dashboard
@@ -120,22 +124,22 @@ curl -fsSL https://tailscale.com/install.sh | sh
 tailscale up
 
 # Configure Gateway to use Tailscale Serve
-hanzo-bot config set gateway.tailscale.mode serve
-hanzo-bot gateway restart
+openclaw config set gateway.tailscale.mode serve
+openclaw gateway restart
 ```
 
 Open: `https://<magicdns>/`
 
 Notes:
 
-- Serve keeps the Gateway loopback-only and authenticates via Tailscale identity headers.
+- Serve keeps the Gateway loopback-only and authenticates Control UI/WebSocket traffic via Tailscale identity headers (tokenless auth assumes trusted gateway host; HTTP APIs still require token/password).
 - To require token/password instead, set `gateway.auth.allowTailscale: false` or use `gateway.auth.mode: "password"`.
 
 **Option C: Tailnet bind (no Serve)**
 
 ```bash
-hanzo-bot config set gateway.bind tailnet
-hanzo-bot gateway restart
+openclaw config set gateway.bind tailnet
+openclaw gateway restart
 ```
 
 Open: `http://<tailscale-ip>:18789` (token required).
@@ -145,14 +149,14 @@ Open: `http://<tailscale-ip>:18789` (token required).
 ### Telegram
 
 ```bash
-hanzo-bot pairing list telegram
-hanzo-bot pairing approve telegram <CODE>
+openclaw pairing list telegram
+openclaw pairing approve telegram <CODE>
 ```
 
 ### WhatsApp
 
 ```bash
-hanzo-bot channels login whatsapp
+openclaw channels login whatsapp
 # Scan QR code
 ```
 
@@ -194,13 +198,13 @@ htop
 
 All state lives in:
 
-- `~/.hanzo/bot/` — config, credentials, session data
-- `~/.hanzo/bot/workspace/` — workspace (SOUL.md, memory, etc.)
+- `~/.openclaw/` — config, credentials, session data
+- `~/.openclaw/workspace/` — workspace (SOUL.md, memory, etc.)
 
 These survive reboots. Back them up periodically:
 
 ```bash
-tar -czvf bot-backup.tar.gz ~/.bot ~/.hanzo/bot/workspace
+tar -czvf openclaw-backup.tar.gz ~/.openclaw ~/.openclaw/workspace
 ```
 
 ---
@@ -230,9 +234,9 @@ For the full setup guide, see [Oracle Cloud](/platforms/oracle). For signup tips
 ### Gateway won't start
 
 ```bash
-hanzo-bot gateway status
-hanzo-bot doctor --non-interactive
-journalctl -u hanzo-bot --no-pager -n 50
+openclaw gateway status
+openclaw doctor --non-interactive
+journalctl -u openclaw --no-pager -n 50
 ```
 
 ### Port already in use

@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk/mattermost";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/mattermost";
 import { describe, expect, it, vi } from "vitest";
 import { resolveMattermostAccount } from "./accounts.js";
 import {

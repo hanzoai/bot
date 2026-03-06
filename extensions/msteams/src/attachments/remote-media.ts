@@ -1,4 +1,4 @@
-import type { SsrFPolicy } from "bot/plugin-sdk";
+import type { SsrFPolicy } from "@hanzo/bot/plugin-sdk/msteams";
 import type { MSTeamsInboundMedia } from "./types.js";
 import { getMSTeamsRuntime } from "../runtime.js";
 import { inferPlaceholder } from "./shared.js";

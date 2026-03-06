@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import BotKit
+=======
+import OpenClawKit
+>>>>>>> upstream/main
 import SwiftUI
 import WebKit
 
@@ -125,7 +129,11 @@ final class ScreenWebViewCoordinator: NSObject {
 
 // MARK: - Navigation Delegate
 
+<<<<<<< HEAD
 /// Handles navigation policy to intercept bot:// deep links from canvas
+=======
+/// Handles navigation policy to intercept openclaw:// deep links from canvas
+>>>>>>> upstream/main
 @MainActor
 private final class ScreenNavigationDelegate: NSObject, WKNavigationDelegate {
     weak var controller: ScreenController?
@@ -140,8 +148,13 @@ private final class ScreenNavigationDelegate: NSObject, WKNavigationDelegate {
             return
         }
 
+<<<<<<< HEAD
         // Intercept bot:// deep links.
         if url.scheme?.lowercased() == "hanzo-bot" {
+=======
+        // Intercept openclaw:// deep links.
+        if url.scheme?.lowercased() == "openclaw" {
+>>>>>>> upstream/main
             decisionHandler(.cancel)
             self.controller?.onDeepLink?(url)
             return
@@ -169,7 +182,11 @@ private final class ScreenNavigationDelegate: NSObject, WKNavigationDelegate {
 }
 
 private final class CanvasA2UIActionMessageHandler: NSObject, WKScriptMessageHandler {
+<<<<<<< HEAD
     static let messageName = "botCanvasA2UIAction"
+=======
+    static let messageName = "openclawCanvasA2UIAction"
+>>>>>>> upstream/main
     static let handlerNames = [messageName]
 
     weak var controller: ScreenController?

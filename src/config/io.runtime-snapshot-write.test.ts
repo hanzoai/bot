@@ -13,8 +13,8 @@ import {
 
 describe("runtime config snapshot writes", () => {
   it("preserves source secret refs when writeConfigFile receives runtime-resolved config", async () => {
-    await withTempHome("bot-config-runtime-write-", async (home) => {
-      const configPath = path.join(home, ".bot", "bot.json");
+    await withTempHome("openclaw-config-runtime-write-", async (home) => {
+      const configPath = path.join(home, ".openclaw", "openclaw.json");
       const sourceConfig: BotConfig = {
         models: {
           providers: {

@@ -1,9 +1,10 @@
 ---
 summary: "Delegate gateway authentication to a trusted reverse proxy (Pomerium, Caddy, nginx + OAuth)"
 read_when:
-  - Running Bot behind an identity-aware proxy
-  - Setting up Pomerium, Caddy, or nginx with OAuth in front of Bot
+  - Running OpenClaw behind an identity-aware proxy
+  - Setting up Pomerium, Caddy, or nginx with OAuth in front of OpenClaw
   - Fixing WebSocket 1008 unauthorized errors with reverse proxy setups
+  - Deciding where to set HSTS and other HTTP hardening headers
 ---
 
 # Trusted Proxy Auth
@@ -14,7 +15,7 @@ read_when:
 
 Use `trusted-proxy` auth mode when:
 
-- You run Bot behind an **identity-aware proxy** (Pomerium, Caddy + OAuth, nginx + oauth2-proxy, Traefik + forward auth)
+- You run OpenClaw behind an **identity-aware proxy** (Pomerium, Caddy + OAuth, nginx + oauth2-proxy, Traefik + forward auth)
 - Your proxy handles all authentication and passes user identity via headers
 - You're in a Kubernetes or container environment where the proxy is the only path to the Gateway
 - You're hitting WebSocket `1008 unauthorized` errors because browsers can't pass tokens in WS payloads
@@ -30,17 +31,29 @@ Use `trusted-proxy` auth mode when:
 
 1. Your reverse proxy authenticates users (OAuth, OIDC, SAML, etc.)
 2. Proxy adds a header with the authenticated user identity (e.g., `x-forwarded-user: nick@example.com`)
-3. Bot checks that the request came from a **trusted proxy IP** (configured in `gateway.trustedProxies`)
-4. Bot extracts the user identity from the configured header
+3. OpenClaw checks that the request came from a **trusted proxy IP** (configured in `gateway.trustedProxies`)
+4. OpenClaw extracts the user identity from the configured header
 5. If everything checks out, the request is authorized
+
+## Control UI Pairing Behavior
+
+When `gateway.auth.mode = "trusted-proxy"` is active and the request passes
+trusted-proxy checks, Control UI WebSocket sessions can connect without device
+pairing identity.
+
+Implications:
+
+- Pairing is no longer the primary gate for Control UI access in this mode.
+- Your reverse proxy auth policy and `allowUsers` become the effective access control.
+- Keep gateway ingress locked to trusted proxy IPs only (`gateway.trustedProxies` + firewall).
 
 ## Configuration
 
 ```json5
 {
   gateway: {
-    // Must bind to network interface (not loopback)
-    bind: "lan",
+    // Use loopback for same-host proxy setups; use lan/custom for remote proxy hosts
+    bind: "loopback",
 
     // CRITICAL: Only add your proxy's IP(s) here
     trustedProxies: ["10.0.0.1", "172.17.0.1"],
@@ -62,6 +75,9 @@ Use `trusted-proxy` auth mode when:
 }
 ```
 
+If `gateway.bind` is `loopback`, include a loopback proxy address in
+`gateway.trustedProxies` (`127.0.0.1`, `::1`, or an equivalent loopback CIDR).
+
 ### Configuration Reference
 
 | Field                                       | Required | Description                                                                 |
@@ -71,6 +87,52 @@ Use `trusted-proxy` auth mode when:
 | `gateway.auth.trustedProxy.userHeader`      | Yes      | Header name containing the authenticated user identity                      |
 | `gateway.auth.trustedProxy.requiredHeaders` | No       | Additional headers that must be present for the request to be trusted       |
 | `gateway.auth.trustedProxy.allowUsers`      | No       | Allowlist of user identities. Empty means allow all authenticated users.    |
+
+## TLS termination and HSTS
+
+Use one TLS termination point and apply HSTS there.
+
+### Recommended pattern: proxy TLS termination
+
+When your reverse proxy handles HTTPS for `https://control.example.com`, set
+`Strict-Transport-Security` at the proxy for that domain.
+
+- Good fit for internet-facing deployments.
+- Keeps certificate + HTTP hardening policy in one place.
+- OpenClaw can stay on loopback HTTP behind the proxy.
+
+Example header value:
+
+```text
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+```
+
+### Gateway TLS termination
+
+If OpenClaw itself serves HTTPS directly (no TLS-terminating proxy), set:
+
+```json5
+{
+  gateway: {
+    tls: { enabled: true },
+    http: {
+      securityHeaders: {
+        strictTransportSecurity: "max-age=31536000; includeSubDomains",
+      },
+    },
+  },
+}
+```
+
+`strictTransportSecurity` accepts a string header value, or `false` to disable explicitly.
+
+### Rollout guidance
+
+- Start with a short max age first (for example `max-age=300`) while validating traffic.
+- Increase to long-lived values (for example `max-age=31536000`) only after confidence is high.
+- Add `includeSubDomains` only if every subdomain is HTTPS-ready.
+- Use preload only if you intentionally meet preload requirements for your full domain set.
+- Loopback-only local development does not benefit from HSTS.
 
 ## Proxy Setup Examples
 
@@ -98,8 +160,8 @@ Pomerium config snippet:
 
 ```yaml
 routes:
-  - from: https://bot.example.com
-    to: http://bot-gateway:18789
+  - from: https://openclaw.example.com
+    to: http://openclaw-gateway:18789
     policy:
       - allow:
           or:
@@ -130,11 +192,11 @@ Caddy with the `caddy-security` plugin can authenticate users and pass identity 
 Caddyfile snippet:
 
 ```
-bot.example.com {
+openclaw.example.com {
     authenticate with oauth2_provider
     authorize with policy1
 
-    reverse_proxy bot:18789 {
+    reverse_proxy openclaw:18789 {
         header_up X-Forwarded-User {http.auth.user.email}
     }
 }
@@ -166,7 +228,7 @@ location / {
     auth_request /oauth2/auth;
     auth_request_set $user $upstream_http_x_auth_request_email;
 
-    proxy_pass http://bot:18789;
+    proxy_pass http://openclaw:18789;
     proxy_set_header X-Auth-Request-Email $user;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
@@ -203,7 +265,7 @@ Before enabling trusted-proxy auth, verify:
 
 ## Security Audit
 
-`bot security audit` will flag trusted-proxy auth with a **critical** severity finding. This is intentional — it's a reminder that you're delegating security to your proxy setup.
+`openclaw security audit` will flag trusted-proxy auth with a **critical** severity finding. This is intentional — it's a reminder that you're delegating security to your proxy setup.
 
 The audit checks for:
 
@@ -254,10 +316,10 @@ If you're moving from token auth to trusted-proxy:
 
 1. Configure your proxy to authenticate users and pass headers
 2. Test the proxy setup independently (curl with headers)
-3. Update Bot config with trusted-proxy auth
+3. Update OpenClaw config with trusted-proxy auth
 4. Restart the Gateway
 5. Test WebSocket connections from the Control UI
-6. Run `bot security audit` and review findings
+6. Run `openclaw security audit` and review findings
 
 ## Related
 

@@ -119,7 +119,7 @@ export type SessionConfig = {
   typingMode?: TypingMode;
   /**
    * Max parent transcript token count allowed for thread/session forking.
-   * If parent totalTokens is above this value, Bot skips parent fork and
+   * If parent totalTokens is above this value, OpenClaw skips parent fork and
    * starts a fresh thread session instead. Set to 0 to disable this guard.
    */
   parentForkMaxTokens?: number;
@@ -228,28 +228,6 @@ export type WebConfig = {
 
 // Provider docking: allowlists keyed by provider id (and internal "webchat").
 export type AgentElevatedAllowFromConfig = Partial<Record<string, Array<string | number>>>;
-
-export type DIDConfig = {
-  /** Full DID URI, e.g. "did:hanzo:0xabc..." */
-  uri?: string;
-  /** DID method: hanzo, lux, pars, zoo, ai */
-  method?: "hanzo" | "lux" | "pars" | "zoo" | "ai";
-  /** Chain ID for on-chain DID resolution */
-  chainId?: number;
-};
-
-export type WalletConfig = {
-  /** EOA address derived for this agent (hex) */
-  address?: string;
-  /** Safe contract address (multisig) on target chain */
-  safeAddress?: string;
-  /** Chain the Safe is deployed on */
-  chain?: "lux" | "hanzo" | "zoo" | "pars";
-  /** Chain ID */
-  chainId?: number;
-  /** HD derivation path used for the EOA */
-  derivationPath?: string;
-};
 
 export type IdentityConfig = {
   name?: string;

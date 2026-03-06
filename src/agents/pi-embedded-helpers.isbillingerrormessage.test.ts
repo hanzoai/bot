@@ -29,7 +29,7 @@ const ANTHROPIC_OVERLOADED_PAYLOAD =
 // OpenRouter 402 billing example: https://openrouter.ai/docs/api-reference/errors
 const OPENROUTER_CREDITS_MESSAGE = "Payment Required: insufficient credits";
 // Issue-backed Anthropic/OpenAI-compatible insufficient_quota payload under HTTP 400:
-// https://github.com/hanzoai/bot/issues/23440
+// https://github.com/openclaw/openclaw/issues/23440
 const INSUFFICIENT_QUOTA_PAYLOAD =
   '{"type":"error","error":{"type":"insufficient_quota","message":"Your account has insufficient quota balance to run this request."}}';
 // Together AI error code examples: https://docs.together.ai/docs/error-codes
@@ -295,6 +295,21 @@ describe("isContextOverflowError", () => {
     }
   });
 
+  it("matches model_context_window_exceeded stop reason surfaced by pi-ai", () => {
+    // Anthropic API (and some OpenAI-compatible providers like ZhipuAI/GLM) return
+    // stop_reason: "model_context_window_exceeded" when the context window is hit.
+    // The pi-ai library surfaces this as "Unhandled stop reason: model_context_window_exceeded".
+    const samples = [
+      "Unhandled stop reason: model_context_window_exceeded",
+      "model_context_window_exceeded",
+      "context_window_exceeded",
+      "Unhandled stop reason: context_window_exceeded",
+    ];
+    for (const sample of samples) {
+      expect(isContextOverflowError(sample)).toBe(true);
+    }
+  });
+
   it("matches Chinese context overflow error messages from proxy providers", () => {
     const samples = [
       "上下文过长",
@@ -508,7 +523,7 @@ describe("classifyFailoverReason", () => {
     expect(classifyFailoverReason("no api key found")).toBe("auth");
     expect(
       classifyFailoverReason(
-        'No API key found for provider "openai". Auth store: /tmp/bot-agent-abc/auth-profiles.json (agentDir: /tmp/bot-agent-abc).',
+        'No API key found for provider "openai". Auth store: /tmp/openclaw-agent-abc/auth-profiles.json (agentDir: /tmp/openclaw-agent-abc).',
       ),
     ).toBe("auth");
     expect(classifyFailoverReason("You have insufficient permissions for this operation.")).toBe(
@@ -520,6 +535,14 @@ describe("classifyFailoverReason", () => {
     ).toBe("rate_limit");
     expect(classifyFailoverReason("all credentials for model x are cooling down")).toBeNull();
     expect(classifyFailoverReason("invalid request format")).toBe("format");
+    expect(classifyFailoverReason("credit balance too low")).toBe("billing");
+    // Billing with "limit exhausted" must stay billing, not rate_limit (avoids key-disable regression)
+    expect(
+      classifyFailoverReason("HTTP 402 payment required. Your limit exhausted for this plan."),
+    ).toBe("billing");
+    expect(classifyFailoverReason("402 Payment Required: Weekly/Monthly Limit Exhausted")).toBe(
+      "billing",
+    );
     expect(classifyFailoverReason(INSUFFICIENT_QUOTA_PAYLOAD)).toBe("billing");
     expect(classifyFailoverReason("deadline exceeded")).toBe("timeout");
     expect(classifyFailoverReason("request ended without sending any chunks")).toBe("timeout");
@@ -555,12 +578,30 @@ describe("classifyFailoverReason", () => {
         "This model is currently experiencing high demand. Please try again later.",
       ),
     ).toBe("rate_limit");
-    expect(classifyFailoverReason("LLM error: service unavailable")).toBe("rate_limit");
+    // "service unavailable" combined with overload/capacity indicator → rate_limit
+    // (exercises the new regex — none of the standalone patterns match here)
+    expect(classifyFailoverReason("service unavailable due to capacity limits")).toBe("rate_limit");
     expect(
       classifyFailoverReason(
         '{"error":{"code":503,"message":"The model is overloaded. Please try later","status":"UNAVAILABLE"}}',
       ),
     ).toBe("rate_limit");
+  });
+  it("classifies bare 'service unavailable' as timeout instead of rate_limit (#32828)", () => {
+    // A generic "service unavailable" from a proxy/CDN should stay retryable,
+    // but it should not be treated as provider overload / rate limit.
+    expect(classifyFailoverReason("LLM error: service unavailable")).toBe("timeout");
+  });
+  it("classifies zhipuai Weekly/Monthly Limit Exhausted as rate_limit (#33785)", () => {
+    expect(
+      classifyFailoverReason(
+        "LLM error 1310: Weekly/Monthly Limit Exhausted. Your limit will reset at 2026-03-06 22:19:54 (request_id: 20260303141547610b7f574d1b44cb)",
+      ),
+    ).toBe("rate_limit");
+    // Independent coverage for broader periodic limit patterns.
+    expect(classifyFailoverReason("LLM error: weekly/monthly limit reached")).toBe("rate_limit");
+    expect(classifyFailoverReason("LLM error: monthly limit reached")).toBe("rate_limit");
+    expect(classifyFailoverReason("LLM error: daily limit exceeded")).toBe("rate_limit");
   });
   it("classifies permanent auth errors as auth_permanent", () => {
     expect(classifyFailoverReason("invalid_api_key")).toBe("auth_permanent");

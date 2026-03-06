@@ -1,5 +1,5 @@
-import type { AnyAgentTool, BotPluginApi } from "bot/plugin-sdk";
-import { emptyPluginConfigSchema } from "bot/plugin-sdk";
+import type { AnyAgentTool, BotPluginApi } from "@hanzo/bot/plugin-sdk/zalouser";
+import { emptyPluginConfigSchema } from "@hanzo/bot/plugin-sdk/zalouser";
 import { zalouserDock, zalouserPlugin } from "./src/channel.js";
 import { setZalouserRuntime } from "./src/runtime.js";
 import { ZalouserToolSchema, executeZalouserTool } from "./src/tool.js";

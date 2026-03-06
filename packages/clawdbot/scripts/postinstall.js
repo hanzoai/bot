@@ -1,1 +1,1 @@
-console.warn("hanzo-bot renamed -> bot");
+console.warn("clawdbot renamed -> openclaw");

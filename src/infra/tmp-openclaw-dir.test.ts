@@ -1,11 +1,11 @@
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { POSIX_BOT_TMP_DIR, resolvePreferredBotTmpDir } from "./tmp-bot-dir.js";
+import { POSIX_OPENCLAW_TMP_DIR, resolvePreferredOpenClawTmpDir } from "./tmp-openclaw-dir.js";
 
-type TmpDirOptions = NonNullable<Parameters<typeof resolvePreferredBotTmpDir>[0]>;
+type TmpDirOptions = NonNullable<Parameters<typeof resolvePreferredOpenClawTmpDir>[0]>;
 
 function fallbackTmp(uid = 501) {
-  return path.join("/var/fallback", `bot-${uid}`);
+  return path.join("/var/fallback", `openclaw-${uid}`);
 }
 
 function nodeErrorWithCode(code: string) {
@@ -51,10 +51,10 @@ function resolveWithReadOnlyTmpFallback(params: {
   chmodSync?: NonNullable<TmpDirOptions["chmodSync"]>;
   warn?: NonNullable<TmpDirOptions["warn"]>;
 }) {
-  return resolvePreferredBotTmpDir({
+  return resolvePreferredOpenClawTmpDir({
     accessSync: readOnlyTmpAccessSync(),
     lstatSync: vi.fn((target: string) => {
-      if (target === POSIX_BOT_TMP_DIR) {
+      if (target === POSIX_OPENCLAW_TMP_DIR) {
         throw nodeErrorWithCode("ENOENT");
       }
       if (target === params.fallbackPath) {
@@ -104,7 +104,7 @@ function resolveWithMocks(params: {
   const chmodSync = params.chmodSync ?? vi.fn();
   const warn = params.warn ?? vi.fn();
   const wrappedLstatSync = vi.fn((target: string) => {
-    if (target === POSIX_BOT_TMP_DIR) {
+    if (target === POSIX_OPENCLAW_TMP_DIR) {
       return params.lstatSync(target);
     }
     if (target === fallbackPath) {
@@ -118,7 +118,7 @@ function resolveWithMocks(params: {
   const mkdirSync = vi.fn();
   const getuid = vi.fn(() => uid);
   const tmpdir = vi.fn(() => params.tmpdirPath ?? "/var/fallback");
-  const resolved = resolvePreferredBotTmpDir({
+  const resolved = resolvePreferredOpenClawTmpDir({
     accessSync,
     chmodSync,
     lstatSync: wrappedLstatSync,
@@ -130,7 +130,7 @@ function resolveWithMocks(params: {
   return { resolved, accessSync, lstatSync: wrappedLstatSync, mkdirSync, tmpdir };
 }
 
-describe("resolvePreferredBotTmpDir", () => {
+describe("resolvePreferredOpenClawTmpDir", () => {
   it("prefers /tmp/openclaw when it already exists and is writable", () => {
     const lstatSync: NonNullable<TmpDirOptions["lstatSync"]> = vi.fn(() => ({
       isDirectory: () => true,
@@ -142,7 +142,7 @@ describe("resolvePreferredBotTmpDir", () => {
 
     expect(lstatSync).toHaveBeenCalledTimes(1);
     expect(accessSync).toHaveBeenCalledTimes(1);
-    expect(resolved).toBe(POSIX_BOT_TMP_DIR);
+    expect(resolved).toBe(POSIX_OPENCLAW_TMP_DIR);
     expect(tmpdir).not.toHaveBeenCalled();
   });
 
@@ -153,9 +153,9 @@ describe("resolvePreferredBotTmpDir", () => {
       lstatSync: lstatSyncMock,
     });
 
-    expect(resolved).toBe(POSIX_BOT_TMP_DIR);
+    expect(resolved).toBe(POSIX_OPENCLAW_TMP_DIR);
     expect(accessSync).toHaveBeenCalledWith("/tmp", expect.any(Number));
-    expect(mkdirSync).toHaveBeenCalledWith(POSIX_BOT_TMP_DIR, expect.any(Object));
+    expect(mkdirSync).toHaveBeenCalledWith(POSIX_OPENCLAW_TMP_DIR, expect.any(Object));
     expect(tmpdir).not.toHaveBeenCalled();
   });
 
@@ -206,7 +206,7 @@ describe("resolvePreferredBotTmpDir", () => {
         lstatSync,
         fallbackLstatSync,
       }),
-    ).toThrow(/Unsafe fallback Bot temp dir/);
+    ).toThrow(/Unsafe fallback OpenClaw temp dir/);
   });
 
   it("creates fallback directory when missing, then validates ownership and mode", () => {

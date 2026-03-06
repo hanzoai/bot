@@ -11,10 +11,10 @@ import { resolveNodeService } from "../daemon/node-service.js";
 import { resolveGatewayService } from "../daemon/service.js";
 import { buildGatewayConnectionDetails, callGateway } from "../gateway/call.js";
 import { normalizeControlUiBasePath } from "../gateway/control-ui-shared.js";
-import { resolveGatewayProbeAuth } from "../gateway/probe-auth.js";
+import { resolveGatewayProbeAuthSafe } from "../gateway/probe-auth.js";
 import { probeGateway } from "../gateway/probe.js";
-import { resolveBotPackageRoot } from "../infra/bot-root.js";
 import { collectChannelStatusIssues } from "../infra/channels-status-issues.js";
+import { resolveOpenClawPackageRoot } from "../infra/openclaw-root.js";
 import { resolveOsSummary } from "../infra/os-summary.js";
 import { inspectPortUsage } from "../infra/ports.js";
 import { readRestartSentinel } from "../infra/restart-sentinel.js";
@@ -87,7 +87,7 @@ export async function statusAllCommand(
     progress.tick();
 
     progress.setLabel("Checking for updates…");
-    const root = await resolveBotPackageRoot({
+    const root = await resolveOpenClawPackageRoot({
       moduleUrl: import.meta.url,
       argv1: process.argv[1],
       cwd: process.cwd(),
@@ -117,9 +117,11 @@ export async function statusAllCommand(
     const remoteUrlMissing = isRemoteMode && !remoteUrlRaw;
     const gatewayMode = isRemoteMode ? "remote" : "local";
 
-    const localFallbackAuth = resolveGatewayProbeAuth({ cfg, mode: "local" });
-    const remoteAuth = resolveGatewayProbeAuth({ cfg, mode: "remote" });
-    const probeAuth = isRemoteMode && !remoteUrlMissing ? remoteAuth : localFallbackAuth;
+    const localProbeAuthResolution = resolveGatewayProbeAuthSafe({ cfg, mode: "local" });
+    const remoteProbeAuthResolution = resolveGatewayProbeAuthSafe({ cfg, mode: "remote" });
+    const probeAuthResolution =
+      isRemoteMode && !remoteUrlMissing ? remoteProbeAuthResolution : localProbeAuthResolution;
+    const probeAuth = probeAuthResolution.auth;
 
     const gatewayProbe = await probeGateway({
       url: connection.url,
@@ -183,8 +185,8 @@ export async function statusAllCommand(
     const callOverrides = remoteUrlMissing
       ? {
           url: connection.url,
-          token: localFallbackAuth.token,
-          password: localFallbackAuth.password,
+          token: localProbeAuthResolution.auth.token,
+          password: localProbeAuthResolution.auth.password,
         }
       : {};
 
@@ -296,7 +298,10 @@ export async function statusAllCommand(
         Item: "Gateway",
         Value: `${gatewayMode}${remoteUrlMissing ? " (remote.url missing)" : ""} · ${gatewayTarget} (${connection.urlSource}) · ${gatewayStatus}${gatewayAuth}`,
       },
-      { Item: "Security", Value: `Run: ${formatCliCommand("bot security audit --deep")}` },
+      ...(probeAuthResolution.warning
+        ? [{ Item: "Gateway auth warning", Value: probeAuthResolution.warning }]
+        : []),
+      { Item: "Security", Value: `Run: ${formatCliCommand("openclaw security audit --deep")}` },
       gatewaySelfLine
         ? { Item: "Gateway self", Value: gatewaySelfLine }
         : { Item: "Gateway self", Value: "unknown" },

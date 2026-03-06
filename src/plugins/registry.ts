@@ -10,18 +10,18 @@ import type { HookEntry } from "../hooks/types.js";
 import type { PluginRuntime } from "./runtime/types.js";
 import type {
   BotPluginApi,
-  BotPluginChannelRegistration,
-  BotPluginCliRegistrar,
-  BotPluginCommandDefinition,
-  BotPluginHttpRouteAuth,
-  BotPluginHttpRouteMatch,
-  BotPluginHttpRouteHandler,
-  BotPluginHttpRouteParams,
-  BotPluginHookOptions,
+  OpenClawPluginChannelRegistration,
+  OpenClawPluginCliRegistrar,
+  OpenClawPluginCommandDefinition,
+  OpenClawPluginHttpRouteAuth,
+  OpenClawPluginHttpRouteMatch,
+  OpenClawPluginHttpRouteHandler,
+  OpenClawPluginHttpRouteParams,
+  OpenClawPluginHookOptions,
   ProviderPlugin,
-  BotPluginService,
-  BotPluginToolContext,
-  BotPluginToolFactory,
+  OpenClawPluginService,
+  OpenClawPluginToolContext,
+  OpenClawPluginToolFactory,
   PluginConfigUiHint,
   PluginDiagnostic,
   PluginLogger,
@@ -31,6 +31,7 @@ import type {
   PluginHookHandlerMap,
   PluginHookRegistration as TypedPluginHookRegistration,
 } from "./types.js";
+import { registerContextEngine } from "../context-engine/registry.js";
 import { registerInternalHook } from "../hooks/internal-hooks.js";
 import { resolveUserPath } from "../utils.js";
 import { registerPluginCommand } from "./commands.js";
@@ -43,7 +44,7 @@ import {
 
 export type PluginToolRegistration = {
   pluginId: string;
-  factory: BotPluginToolFactory;
+  factory: OpenClawPluginToolFactory;
   names: string[];
   optional: boolean;
   source: string;
@@ -51,7 +52,7 @@ export type PluginToolRegistration = {
 
 export type PluginCliRegistration = {
   pluginId: string;
-  register: BotPluginCliRegistrar;
+  register: OpenClawPluginCliRegistrar;
   commands: string[];
   source: string;
 };
@@ -59,9 +60,9 @@ export type PluginCliRegistration = {
 export type PluginHttpRouteRegistration = {
   pluginId?: string;
   path: string;
-  handler: BotPluginHttpRouteHandler;
-  auth: BotPluginHttpRouteAuth;
-  match: BotPluginHttpRouteMatch;
+  handler: OpenClawPluginHttpRouteHandler;
+  auth: OpenClawPluginHttpRouteAuth;
+  match: OpenClawPluginHttpRouteMatch;
   source?: string;
 };
 
@@ -87,13 +88,13 @@ export type PluginHookRegistration = {
 
 export type PluginServiceRegistration = {
   pluginId: string;
-  service: BotPluginService;
+  service: OpenClawPluginService;
   source: string;
 };
 
 export type PluginCommandRegistration = {
   pluginId: string;
-  command: BotPluginCommandDefinition;
+  command: OpenClawPluginCommandDefinition;
   source: string;
 };
 
@@ -190,13 +191,13 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
 
   const registerTool = (
     record: PluginRecord,
-    tool: AnyAgentTool | BotPluginToolFactory,
+    tool: AnyAgentTool | OpenClawPluginToolFactory,
     opts?: { name?: string; names?: string[]; optional?: boolean },
   ) => {
     const names = opts?.names ?? (opts?.name ? [opts.name] : []);
     const optional = opts?.optional === true;
-    const factory: BotPluginToolFactory =
-      typeof tool === "function" ? tool : (_ctx: BotPluginToolContext) => tool;
+    const factory: OpenClawPluginToolFactory =
+      typeof tool === "function" ? tool : (_ctx: OpenClawPluginToolContext) => tool;
 
     if (typeof tool !== "function") {
       names.push(tool.name);
@@ -219,7 +220,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     record: PluginRecord,
     events: string | string[],
     handler: Parameters<typeof registerInternalHook>[1],
-    opts: BotPluginHookOptions | undefined,
+    opts: OpenClawPluginHookOptions | undefined,
     config: BotPluginApi["config"],
   ) => {
     const eventList = Array.isArray(events) ? events : [events];
@@ -244,7 +245,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
             ...entry.hook,
             name,
             description,
-            source: "bot-plugin",
+            source: "openclaw-plugin",
             pluginId: record.id,
           },
           metadata: {
@@ -256,7 +257,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
           hook: {
             name,
             description,
-            source: "bot-plugin",
+            source: "openclaw-plugin",
             pluginId: record.id,
             filePath: record.source,
             baseDir: path.dirname(record.source),
@@ -313,7 +314,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     return `${plugin} (${source})`;
   };
 
-  const registerHttpRoute = (record: PluginRecord, params: BotPluginHttpRouteParams) => {
+  const registerHttpRoute = (record: PluginRecord, params: OpenClawPluginHttpRouteParams) => {
     const normalizedPath = normalizePluginHttpPath(params.path);
     if (!normalizedPath) {
       pushDiagnostic({
@@ -383,11 +384,11 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
 
   const registerChannel = (
     record: PluginRecord,
-    registration: BotPluginChannelRegistration | ChannelPlugin,
+    registration: OpenClawPluginChannelRegistration | ChannelPlugin,
   ) => {
     const normalized =
-      typeof (registration as BotPluginChannelRegistration).plugin === "object"
-        ? (registration as BotPluginChannelRegistration)
+      typeof (registration as OpenClawPluginChannelRegistration).plugin === "object"
+        ? (registration as OpenClawPluginChannelRegistration)
         : { plugin: registration as ChannelPlugin };
     const plugin = normalized.plugin;
     const id = typeof plugin?.id === "string" ? plugin.id.trim() : String(plugin?.id ?? "").trim();
@@ -440,7 +441,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
 
   const registerCli = (
     record: PluginRecord,
-    registrar: BotPluginCliRegistrar,
+    registrar: OpenClawPluginCliRegistrar,
     opts?: { commands?: string[] },
   ) => {
     const commands = (opts?.commands ?? []).map((cmd) => cmd.trim()).filter(Boolean);
@@ -453,7 +454,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     });
   };
 
-  const registerService = (record: PluginRecord, service: BotPluginService) => {
+  const registerService = (record: PluginRecord, service: OpenClawPluginService) => {
     const id = service.id.trim();
     if (!id) {
       return;
@@ -466,7 +467,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     });
   };
 
-  const registerCommand = (record: PluginRecord, command: BotPluginCommandDefinition) => {
+  const registerCommand = (record: PluginRecord, command: OpenClawPluginCommandDefinition) => {
     const name = command.name.trim();
     if (!name) {
       pushDiagnostic({
@@ -582,6 +583,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
       registerCli: (registrar, opts) => registerCli(record, registrar, opts),
       registerService: (service) => registerService(record, service),
       registerCommand: (command) => registerCommand(record, command),
+      registerContextEngine: (id, factory) => registerContextEngine(id, factory),
       resolvePath: (input: string) => resolveUserPath(input),
       on: (hookName, handler, opts) =>
         registerTypedHook(record, hookName, handler, opts, params.hookPolicy),

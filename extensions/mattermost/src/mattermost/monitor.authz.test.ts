@@ -1,4 +1,4 @@
-import { resolveControlCommandGate } from "bot/plugin-sdk";
+import { resolveControlCommandGate } from "@hanzo/bot/plugin-sdk/mattermost";
 import { describe, expect, it } from "vitest";
 import { resolveMattermostEffectiveAllowFromLists } from "./monitor-auth.js";
 

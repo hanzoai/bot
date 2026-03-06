@@ -1,4 +1,4 @@
-import type { PluginRuntime, RuntimeEnv } from "bot/plugin-sdk";
+import type { PluginRuntime, RuntimeEnv } from "@hanzo/bot/plugin-sdk/nextcloud-talk";
 import { describe, expect, it, vi } from "vitest";
 import type { ResolvedNextcloudTalkAccount } from "./accounts.js";
 import type { CoreConfig, NextcloudTalkInboundMessage } from "./types.js";
@@ -8,7 +8,7 @@ import { setNextcloudTalkRuntime } from "./runtime.js";
 describe("nextcloud-talk inbound authz", () => {
   it("does not treat DM pairing-store entries as group allowlist entries", async () => {
     const readAllowFromStore = vi.fn(async () => ["attacker"]);
-    const buildMentionRegexes = vi.fn(() => [/@bot/i]);
+    const buildMentionRegexes = vi.fn(() => [/@openclaw/i]);
 
     setNextcloudTalkRuntime({
       channel: {

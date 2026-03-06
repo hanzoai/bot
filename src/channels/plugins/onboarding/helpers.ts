@@ -449,7 +449,7 @@ export async function promptSingleChannelSecretInput(params: {
     copy: {
       modeMessage: `How do you want to provide this ${params.credentialLabel}?`,
       plaintextLabel: `Enter ${params.credentialLabel}`,
-      plaintextHint: "Stores the credential directly in Bot config",
+      plaintextHint: "Stores the credential directly in OpenClaw config",
       refLabel: "Use external secret provider",
       refHint: "Stores a reference to env or configured external secret providers",
     },
@@ -491,9 +491,9 @@ export async function promptSingleChannelSecretInput(params: {
     preferredEnvVar: params.preferredEnvVar,
     copy: {
       sourceMessage: `Where is this ${params.credentialLabel} stored?`,
-      envVarPlaceholder: params.preferredEnvVar ?? "BOT_SECRET",
+      envVarPlaceholder: params.preferredEnvVar ?? "OPENCLAW_SECRET",
       envVarFormatError:
-        'Use an env var name like "BOT_SECRET" (uppercase letters, numbers, underscores).',
+        'Use an env var name like "OPENCLAW_SECRET" (uppercase letters, numbers, underscores).',
       noProvidersMessage:
         "No file/exec secret providers are configured yet. Add one under secrets.providers, or select Environment variable.",
     },

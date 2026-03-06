@@ -152,7 +152,7 @@ export async function gatewayStatusCommand(
       try {
         const probed = await Promise.all(
           targets.map(async (target) => {
-            const authResolution = resolveAuthForTarget(cfg, target, {
+            const authResolution = await resolveAuthForTarget(cfg, target, {
               token: typeof opts.token === "string" ? opts.token : undefined,
               password: typeof opts.password === "string" ? opts.password : undefined,
             });

@@ -6,7 +6,7 @@ import {
 } from "./credentials.js";
 
 function cfg(input: Partial<BotConfig>): BotConfig {
-  return input;
+  return input as BotConfig;
 }
 
 type ResolveFromConfigInput = Parameters<typeof resolveGatewayCredentialsFromConfig>[0];
@@ -15,8 +15,8 @@ type GatewayConfig = NonNullable<BotConfig["gateway"]>;
 const DEFAULT_GATEWAY_AUTH = { token: "config-token", password: "config-password" };
 const DEFAULT_REMOTE_AUTH = { token: "remote-token", password: "remote-password" };
 const DEFAULT_GATEWAY_ENV = {
-  BOT_GATEWAY_TOKEN: "env-token",
-  BOT_GATEWAY_PASSWORD: "env-password",
+  OPENCLAW_GATEWAY_TOKEN: "env-token",
+  OPENCLAW_GATEWAY_PASSWORD: "env-password",
 } as NodeJS.ProcessEnv;
 
 function resolveGatewayCredentialsFor(
@@ -138,6 +138,47 @@ describe("resolveGatewayCredentialsFromConfig", () => {
         includeLegacyEnv: false,
       }),
     ).toThrow("gateway.auth.password");
+  });
+
+  it("treats env-template local tokens as SecretRefs instead of plaintext", () => {
+    const resolved = resolveGatewayCredentialsFromConfig({
+      cfg: cfg({
+        gateway: {
+          mode: "local",
+          auth: {
+            mode: "token",
+            token: "${OPENCLAW_GATEWAY_TOKEN}",
+          },
+        },
+      }),
+      env: {
+        OPENCLAW_GATEWAY_TOKEN: "env-token",
+      } as NodeJS.ProcessEnv,
+      includeLegacyEnv: false,
+    });
+
+    expect(resolved).toEqual({
+      token: "env-token",
+      password: undefined,
+    });
+  });
+
+  it("throws when env-template local token SecretRef is unresolved in token mode", () => {
+    expect(() =>
+      resolveGatewayCredentialsFromConfig({
+        cfg: cfg({
+          gateway: {
+            mode: "local",
+            auth: {
+              mode: "token",
+              token: "${OPENCLAW_GATEWAY_TOKEN}",
+            },
+          },
+        }),
+        env: {} as NodeJS.ProcessEnv,
+        includeLegacyEnv: false,
+      }),
+    ).toThrow("gateway.auth.token");
   });
 
   it("ignores unresolved local password ref when local auth mode is none", () => {
@@ -273,7 +314,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
         },
       }),
       env: {
-        BOT_GATEWAY_TOKEN: "env-token",
+        OPENCLAW_GATEWAY_TOKEN: "env-token",
       } as NodeJS.ProcessEnv,
       remoteTokenFallback: "remote-only",
     });
@@ -303,6 +344,64 @@ describe("resolveGatewayCredentialsFromConfig", () => {
         remoteTokenFallback: "remote-only",
       }),
     ).toThrow("gateway.remote.token");
+  });
+
+  it("ignores unresolved local token ref in remote-only mode when local auth mode is token", () => {
+    const resolved = resolveGatewayCredentialsFromConfig({
+      cfg: {
+        gateway: {
+          mode: "remote",
+          remote: {
+            url: "wss://gateway.example",
+          },
+          auth: {
+            mode: "token",
+            token: { source: "env", provider: "default", id: "MISSING_LOCAL_TOKEN" },
+          },
+        },
+        secrets: {
+          providers: {
+            default: { source: "env" },
+          },
+        },
+      } as unknown as BotConfig,
+      env: {} as NodeJS.ProcessEnv,
+      includeLegacyEnv: false,
+      remoteTokenFallback: "remote-only",
+      remotePasswordFallback: "remote-only",
+    });
+    expect(resolved).toEqual({
+      token: undefined,
+      password: undefined,
+    });
+  });
+
+  it("throws for unresolved local token ref in remote mode when local fallback is enabled", () => {
+    expect(() =>
+      resolveGatewayCredentialsFromConfig({
+        cfg: {
+          gateway: {
+            mode: "remote",
+            remote: {
+              url: "wss://gateway.example",
+            },
+            auth: {
+              mode: "token",
+              token: { source: "env", provider: "default", id: "MISSING_LOCAL_TOKEN" },
+            },
+          },
+          secrets: {
+            providers: {
+              default: { source: "env" },
+            },
+          },
+        } as unknown as BotConfig,
+        env: {} as NodeJS.ProcessEnv,
+        includeLegacyEnv: false,
+        remoteTokenFallback: "remote-env-local",
+        remotePasswordFallback: "remote-only",
+      }),
+    ).toThrow("gateway.auth.token");
   });
 
   it("does not throw for unresolved remote token ref when password is available", () => {
@@ -380,8 +479,8 @@ describe("resolveGatewayCredentialsFromValues", () => {
       configToken: "config-token",
       configPassword: "config-password",
       env: {
-        BOT_GATEWAY_TOKEN: "env-token",
-        BOT_GATEWAY_PASSWORD: "env-password",
+        OPENCLAW_GATEWAY_TOKEN: "env-token",
+        OPENCLAW_GATEWAY_PASSWORD: "env-password",
       } as NodeJS.ProcessEnv,
       includeLegacyEnv: false,
       tokenPrecedence: "config-first",
@@ -398,8 +497,8 @@ describe("resolveGatewayCredentialsFromValues", () => {
       configToken: "config-token",
       configPassword: "config-password",
       env: {
-        BOT_GATEWAY_TOKEN: "env-token",
-        BOT_GATEWAY_PASSWORD: "env-password",
+        OPENCLAW_GATEWAY_TOKEN: "env-token",
+        OPENCLAW_GATEWAY_PASSWORD: "env-password",
       } as NodeJS.ProcessEnv,
     });
     expect(resolved).toEqual({

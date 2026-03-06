@@ -21,7 +21,7 @@ import { requireApiKey, resolveApiKeyForProvider } from "../agents/model-auth.js
 import { applyTemplate } from "../auto-reply/templating.js";
 import { logVerbose, shouldLogVerbose } from "../globals.js";
 import { resolveProxyFetchFromEnv } from "../infra/net/proxy-fetch.js";
-import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
+import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
 import { runExec } from "../process/exec.js";
 import { MediaAttachmentCache } from "./attachments.js";
 import {
@@ -596,7 +596,9 @@ export async function runCliEntry(params: {
     const stat = await fs.stat(pathResult.path);
     assertMinAudioSize({ size: stat.size, attachmentIndex: params.attachmentIndex });
   }
-  const outputDir = await fs.mkdtemp(path.join(resolvePreferredBotTmpDir(), "bot-media-cli-"));
+  const outputDir = await fs.mkdtemp(
+    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-media-cli-"),
+  );
   const mediaPath = pathResult.path;
   const outputBase = path.join(outputDir, path.parse(mediaPath).name);
 

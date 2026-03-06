@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { BotConfig } from "../config/config.js";
-import { resolveGatewayProbeAuth } from "./probe-auth.js";
+import { resolveGatewayProbeAuthSafe } from "./probe-auth.js";
 
-describe("resolveGatewayProbeAuth", () => {
+describe("resolveGatewayProbeAuthSafe", () => {
   it("returns probe auth credentials when available", () => {
-    const result = resolveGatewayProbeAuth({
+    const result = resolveGatewayProbeAuthSafe({
       cfg: {
         gateway: {
           auth: {
@@ -17,13 +17,15 @@ describe("resolveGatewayProbeAuth", () => {
     });
 
     expect(result).toEqual({
-      token: "token-value",
-      password: undefined,
+      auth: {
+        token: "token-value",
+        password: undefined,
+      },
     });
   });
 
-  it("returns empty credentials when token SecretRef is unresolved", () => {
-    const result = resolveGatewayProbeAuth({
+  it("returns warning and empty auth when token SecretRef is unresolved", () => {
+    const result = resolveGatewayProbeAuthSafe({
       cfg: {
         gateway: {
           auth: {
@@ -41,14 +43,13 @@ describe("resolveGatewayProbeAuth", () => {
       env: {} as NodeJS.ProcessEnv,
     });
 
-    // SecretRef objects are non-strings, so trimToUndefined returns undefined.
-    // In local mode with no env fallback, credentials resolve to empty.
-    expect(result.token).toBeUndefined();
-    expect(result.password).toBeUndefined();
+    expect(result.auth).toEqual({});
+    expect(result.warning).toContain("gateway.auth.token");
+    expect(result.warning).toContain("unresolved");
   });
 
   it("ignores unresolved local token SecretRef in remote mode when remote-only auth is requested", () => {
-    const result = resolveGatewayProbeAuth({
+    const result = resolveGatewayProbeAuthSafe({
       cfg: {
         gateway: {
           mode: "remote",
@@ -71,8 +72,10 @@ describe("resolveGatewayProbeAuth", () => {
     });
 
     expect(result).toEqual({
-      token: undefined,
-      password: undefined,
+      auth: {
+        token: undefined,
+        password: undefined,
+      },
     });
   });
 });

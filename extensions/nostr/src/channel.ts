@@ -5,7 +5,7 @@ import {
   DEFAULT_ACCOUNT_ID,
   formatPairingApproveHint,
   type ChannelPlugin,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/nostr";
 import type { NostrProfile } from "./config-schema.js";
 import type { MetricEvent, MetricsSnapshot } from "./metrics.js";
 import type { ProfilePublishResult } from "./nostr-profile.js";
@@ -135,7 +135,7 @@ export const nostrPlugin: ChannelPlugin<ResolvedNostrAccount> = {
   outbound: {
     deliveryMode: "direct",
     textChunkLimit: 4000,
-    sendText: async ({ to, text, accountId }) => {
+    sendText: async ({ cfg, to, text, accountId }) => {
       const core = getNostrRuntime();
       const aid = accountId ?? DEFAULT_ACCOUNT_ID;
       const bus = activeBuses.get(aid);
@@ -143,7 +143,7 @@ export const nostrPlugin: ChannelPlugin<ResolvedNostrAccount> = {
         throw new Error(`Nostr bus not running for account ${aid}`);
       }
       const tableMode = core.channel.text.resolveMarkdownTableMode({
-        cfg: core.config.loadConfig(),
+        cfg,
         channel: "nostr",
         accountId: aid,
       });
@@ -214,7 +214,7 @@ export const nostrPlugin: ChannelPlugin<ResolvedNostrAccount> = {
             `[${account.accountId}] DM from ${senderPubkey}: ${text.slice(0, 50)}...`,
           );
 
-          // Forward to Bot's message pipeline
+          // Forward to OpenClaw's message pipeline
           await (
             runtime.channel.reply as { handleInboundMessage?: (params: unknown) => Promise<void> }
           ).handleInboundMessage?.({

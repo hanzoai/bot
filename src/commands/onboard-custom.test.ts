@@ -345,7 +345,7 @@ describe("promptCustomApiConfig", () => {
         providers: {
           filemain: {
             source: "file",
-            path: "/tmp/bot-missing-provider.json",
+            path: "/tmp/openclaw-missing-provider.json",
             mode: "json",
           },
         },

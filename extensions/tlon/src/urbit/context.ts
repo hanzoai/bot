@@ -1,4 +1,4 @@
-import type { SsrFPolicy } from "bot/plugin-sdk";
+import type { SsrFPolicy } from "@hanzo/bot/plugin-sdk/tlon";
 import { validateUrbitBaseUrl } from "./base-url.js";
 import { UrbitUrlError } from "./errors.js";
 

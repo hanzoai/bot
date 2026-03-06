@@ -47,7 +47,7 @@ Supported keys:
 - `seed`, `normalize`, `lang`, `output_format`, `latency_tier`
 - `once`
 
-## Config (`~/.hanzo/bot/bot.json`)
+## Config (`~/.openclaw/openclaw.json`)
 
 ```json5
 {

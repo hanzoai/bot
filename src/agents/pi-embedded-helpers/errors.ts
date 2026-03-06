@@ -9,6 +9,7 @@ import {
   isAuthPermanentErrorMessage,
   isBillingErrorMessage,
   isOverloadedErrorMessage,
+  isPeriodicUsageLimitErrorMessage,
   isRateLimitErrorMessage,
   isTimeoutErrorMessage,
   matchesFormatErrorPattern,
@@ -105,6 +106,9 @@ export function isContextOverflowError(errorMessage?: string): boolean {
     (lower.includes("max_tokens") && lower.includes("exceed") && lower.includes("context")) ||
     (lower.includes("input length") && lower.includes("exceed") && lower.includes("context")) ||
     (lower.includes("413") && lower.includes("too large")) ||
+    // Anthropic API and OpenAI-compatible providers (e.g. ZhipuAI/GLM) return this stop reason
+    // when the context window is exceeded. pi-ai surfaces it as "Unhandled stop reason: model_context_window_exceeded".
+    lower.includes("context_window_exceeded") ||
     // Chinese proxy error messages for context overflow
     errorMessage.includes("上下文过长") ||
     errorMessage.includes("上下文超出") ||
@@ -257,6 +261,24 @@ export function classifyFailoverReasonFromHttpStatus(
   }
 
   if (status === 402) {
+    // Some providers (e.g. Anthropic Claude Max plan) surface temporary
+    // usage/rate-limit failures as HTTP 402. Use a narrow matcher for
+    // temporary limits to avoid misclassifying billing failures (#30484).
+    if (message) {
+      const lower = message.toLowerCase();
+      // Temporary usage limit signals: retry language + usage/limit terminology
+      const hasTemporarySignal =
+        (lower.includes("try again") ||
+          lower.includes("retry") ||
+          lower.includes("temporary") ||
+          lower.includes("cooldown")) &&
+        (lower.includes("usage limit") ||
+          lower.includes("rate limit") ||
+          lower.includes("organization usage"));
+      if (hasTemporarySignal) {
+        return "rate_limit";
+      }
+    }
     return "billing";
   }
   if (status === 429) {
@@ -773,7 +795,7 @@ export function isModelNotFoundErrorMessage(raw: string): boolean {
   }
   const lower = raw.toLowerCase();
 
-  // Direct pattern matches from Bot internals and common providers.
+  // Direct pattern matches from OpenClaw internals and common providers.
   if (
     lower.includes("unknown model") ||
     lower.includes("model not found") ||
@@ -838,6 +860,9 @@ export function classifyFailoverReason(raw: string): FailoverReason | null {
   }
   if (isJsonApiInternalServerError(raw)) {
     return "timeout";
+  }
+  if (isPeriodicUsageLimitErrorMessage(raw)) {
+    return isBillingErrorMessage(raw) ? "billing" : "rate_limit";
   }
   if (isRateLimitErrorMessage(raw)) {
     return "rate_limit";

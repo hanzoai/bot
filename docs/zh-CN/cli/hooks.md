@@ -2,7 +2,7 @@
 read_when:
   - 你想管理智能体钩子
   - 你想安装或更新钩子
-summary: CLI 参考：`bot hooks`（智能体钩子）
+summary: CLI 参考：`openclaw hooks`（智能体钩子）
 title: hooks
 x-i18n:
   generated_at: "2026-02-03T10:04:32Z"
@@ -13,7 +13,7 @@ x-i18n:
   workflow: 15
 ---
 
-# `bot hooks`
+# `openclaw hooks`
 
 管理智能体钩子（针对 `/new`、`/reset` 等命令以及 Gateway 网关启动的事件驱动自动化）。
 
@@ -25,7 +25,7 @@ x-i18n:
 ## 列出所有钩子
 
 ```bash
-bot hooks list
+openclaw hooks list
 ```
 
 列出从工作区、托管目录和内置目录中发现的所有钩子。
@@ -50,7 +50,7 @@ Ready:
 **示例（详细模式）：**
 
 ```bash
-bot hooks list --verbose
+openclaw hooks list --verbose
 ```
 
 显示不符合条件的钩子缺失的要求。
@@ -58,7 +58,7 @@ bot hooks list --verbose
 **示例（JSON）：**
 
 ```bash
-bot hooks list --json
+openclaw hooks list --json
 ```
 
 返回结构化 JSON，供程序化使用。
@@ -66,7 +66,7 @@ bot hooks list --json
 ## 获取钩子信息
 
 ```bash
-bot hooks info <name>
+openclaw hooks info <name>
 ```
 
 显示特定钩子的详细信息。
@@ -82,7 +82,7 @@ bot hooks info <name>
 **示例：**
 
 ```bash
-bot hooks info session-memory
+openclaw hooks info session-memory
 ```
 
 **输出：**
@@ -93,10 +93,10 @@ bot hooks info session-memory
 Save session context to memory when /new command is issued
 
 Details:
-  Source: bot-bundled
-  Path: /path/to/bot/hooks/bundled/session-memory/HOOK.md
-  Handler: /path/to/bot/hooks/bundled/session-memory/handler.ts
-  Homepage: https://docs.hanzo.bot/automation/hooks#session-memory
+  Source: openclaw-bundled
+  Path: /path/to/openclaw/hooks/bundled/session-memory/HOOK.md
+  Handler: /path/to/openclaw/hooks/bundled/session-memory/handler.ts
+  Homepage: https://docs.openclaw.ai/automation/hooks#session-memory
   Events: command:new
 
 Requirements:
@@ -106,7 +106,7 @@ Requirements:
 ## 检查钩子资格
 
 ```bash
-bot hooks check
+openclaw hooks check
 ```
 
 显示钩子资格状态摘要（有多少已就绪，有多少未就绪）。
@@ -128,12 +128,12 @@ Not ready: 0
 ## 启用钩子
 
 ```bash
-bot hooks enable <name>
+openclaw hooks enable <name>
 ```
 
-通过将特定钩子添加到配置（`~/.bot/config.json`）来启用它。
+通过将特定钩子添加到配置（`~/.openclaw/config.json`）来启用它。
 
-**注意：** 由插件管理的钩子在 `bot hooks list` 中显示 `plugin:<id>`，
+**注意：** 由插件管理的钩子在 `openclaw hooks list` 中显示 `plugin:<id>`，
 无法在此处启用/禁用。请改为启用/禁用该插件。
 
 **参数：**
@@ -143,7 +143,7 @@ bot hooks enable <name>
 **示例：**
 
 ```bash
-bot hooks enable session-memory
+openclaw hooks enable session-memory
 ```
 
 **输出：**
@@ -165,7 +165,7 @@ bot hooks enable session-memory
 ## 禁用钩子
 
 ```bash
-bot hooks disable <name>
+openclaw hooks disable <name>
 ```
 
 通过更新配置来禁用特定钩子。
@@ -177,7 +177,7 @@ bot hooks disable <name>
 **示例：**
 
 ```bash
-bot hooks disable command-logger
+openclaw hooks disable command-logger
 ```
 
 **输出：**
@@ -193,14 +193,14 @@ bot hooks disable command-logger
 ## 安装钩子
 
 ```bash
-bot hooks install <path-or-spec>
+openclaw hooks install <path-or-spec>
 ```
 
 从本地文件夹/压缩包或 npm 安装钩子包。
 
 **执行操作：**
 
-- 将钩子包复制到 `~/.bot/hooks/<id>`
+- 将钩子包复制到 `~/.openclaw/hooks/<id>`
 - 在 `hooks.internal.entries.*` 中启用已安装的钩子
 - 在 `hooks.internal.installs` 下记录安装信息
 
@@ -214,23 +214,23 @@ bot hooks install <path-or-spec>
 
 ```bash
 # 本地目录
-bot hooks install ./my-hook-pack
+openclaw hooks install ./my-hook-pack
 
 # 本地压缩包
-bot hooks install ./my-hook-pack.zip
+openclaw hooks install ./my-hook-pack.zip
 
 # NPM 包
-bot hooks install @bot/my-hook-pack
+openclaw hooks install @openclaw/my-hook-pack
 
 # 链接本地目录而不复制
-bot hooks install -l ./my-hook-pack
+openclaw hooks install -l ./my-hook-pack
 ```
 
 ## 更新钩子
 
 ```bash
-bot hooks update <id>
-bot hooks update --all
+openclaw hooks update <id>
+openclaw hooks update --all
 ```
 
 更新已安装的钩子包（仅限 npm 安装）。
@@ -249,10 +249,10 @@ bot hooks update --all
 **启用：**
 
 ```bash
-bot hooks enable session-memory
+openclaw hooks enable session-memory
 ```
 
-**输出：** `~/.bot/workspace/memory/YYYY-MM-DD-slug.md`
+**输出：** `~/.openclaw/workspace/memory/YYYY-MM-DD-slug.md`
 
 **参见：** [session-memory 文档](/automation/hooks#session-memory)
 
@@ -263,22 +263,22 @@ bot hooks enable session-memory
 **启用：**
 
 ```bash
-bot hooks enable command-logger
+openclaw hooks enable command-logger
 ```
 
-**输出：** `~/.bot/logs/commands.log`
+**输出：** `~/.openclaw/logs/commands.log`
 
 **查看日志：**
 
 ```bash
 # 最近的命令
-tail -n 20 ~/.bot/logs/commands.log
+tail -n 20 ~/.openclaw/logs/commands.log
 
 # 格式化输出
-cat ~/.bot/logs/commands.log | jq .
+cat ~/.openclaw/logs/commands.log | jq .
 
 # 按操作过滤
-grep '"action":"new"' ~/.bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.openclaw/logs/commands.log | jq .
 ```
 
 **参见：** [command-logger 文档](/automation/hooks#command-logger)
@@ -292,7 +292,7 @@ grep '"action":"new"' ~/.bot/logs/commands.log | jq .
 **启用**：
 
 ```bash
-bot hooks enable boot-md
+openclaw hooks enable boot-md
 ```
 
 **参见：** [boot-md 文档](/automation/hooks#boot-md)

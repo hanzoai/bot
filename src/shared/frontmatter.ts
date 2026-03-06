@@ -1,5 +1,5 @@
 import JSON5 from "json5";
-import { LEGACY_MANIFEST_KEYS, MANIFEST_KEY, PROJECT_NAME } from "../compat/legacy-names.js";
+import { LEGACY_MANIFEST_KEYS, MANIFEST_KEY } from "../compat/legacy-names.js";
 import { parseBooleanValue } from "../utils/boolean.js";
 
 export function normalizeStringList(input: unknown): string[] {
@@ -31,7 +31,7 @@ export function parseFrontmatterBool(value: string | undefined, fallback: boolea
   return parsed === undefined ? fallback : parsed;
 }
 
-export function resolveBotManifestBlock(params: {
+export function resolveOpenClawManifestBlock(params: {
   frontmatter: Record<string, unknown>;
   key?: string;
 }): Record<string, unknown> | undefined {
@@ -46,7 +46,7 @@ export function resolveBotManifestBlock(params: {
       return undefined;
     }
 
-    const manifestKeys = [MANIFEST_KEY, PROJECT_NAME, ...LEGACY_MANIFEST_KEYS];
+    const manifestKeys = [MANIFEST_KEY, ...LEGACY_MANIFEST_KEYS];
     for (const key of manifestKeys) {
       const candidate = (parsed as Record<string, unknown>)[key];
       if (candidate && typeof candidate === "object") {
@@ -59,16 +59,16 @@ export function resolveBotManifestBlock(params: {
   }
 }
 
-export type BotManifestRequires = {
+export type OpenClawManifestRequires = {
   bins: string[];
   anyBins: string[];
   env: string[];
   config: string[];
 };
 
-export function resolveBotManifestRequires(
+export function resolveOpenClawManifestRequires(
   metadataObj: Record<string, unknown>,
-): BotManifestRequires | undefined {
+): OpenClawManifestRequires | undefined {
   const requiresRaw =
     typeof metadataObj.requires === "object" && metadataObj.requires !== null
       ? (metadataObj.requires as Record<string, unknown>)
@@ -84,7 +84,7 @@ export function resolveBotManifestRequires(
   };
 }
 
-export function resolveBotManifestInstall<T>(
+export function resolveOpenClawManifestInstall<T>(
   metadataObj: Record<string, unknown>,
   parseInstallSpec: (input: unknown) => T | undefined,
 ): T[] {
@@ -94,11 +94,11 @@ export function resolveBotManifestInstall<T>(
     .filter((entry): entry is T => Boolean(entry));
 }
 
-export function resolveBotManifestOs(metadataObj: Record<string, unknown>): string[] {
+export function resolveOpenClawManifestOs(metadataObj: Record<string, unknown>): string[] {
   return normalizeStringList(metadataObj.os);
 }
 
-export type ParsedBotManifestInstallBase = {
+export type ParsedOpenClawManifestInstallBase = {
   raw: Record<string, unknown>;
   kind: string;
   id?: string;
@@ -106,10 +106,10 @@ export type ParsedBotManifestInstallBase = {
   bins?: string[];
 };
 
-export function parseBotManifestInstallBase(
+export function parseOpenClawManifestInstallBase(
   input: unknown,
   allowedKinds: readonly string[],
-): ParsedBotManifestInstallBase | undefined {
+): ParsedOpenClawManifestInstallBase | undefined {
   if (!input || typeof input !== "object") {
     return undefined;
   }
@@ -121,7 +121,7 @@ export function parseBotManifestInstallBase(
     return undefined;
   }
 
-  const spec: ParsedBotManifestInstallBase = {
+  const spec: ParsedOpenClawManifestInstallBase = {
     raw,
     kind,
   };

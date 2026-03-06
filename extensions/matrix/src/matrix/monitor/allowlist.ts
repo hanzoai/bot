@@ -1,4 +1,7 @@
-import { resolveAllowlistMatchByCandidates, type AllowlistMatch } from "bot/plugin-sdk";
+import {
+  resolveAllowlistMatchByCandidates,
+  type AllowlistMatch,
+} from "@hanzo/bot/plugin-sdk/matrix";
 
 function normalizeAllowList(list?: Array<string | number>) {
   return (list ?? []).map((entry) => String(entry).trim()).filter(Boolean);

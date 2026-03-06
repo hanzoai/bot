@@ -1,5 +1,5 @@
-import type { BotConfig } from "bot/plugin-sdk";
-import { DEFAULT_ACCOUNT_ID } from "bot/plugin-sdk/account-id";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/zalouser";
+import { DEFAULT_ACCOUNT_ID } from "@hanzo/bot/plugin-sdk/account-id";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getZcaUserInfo,

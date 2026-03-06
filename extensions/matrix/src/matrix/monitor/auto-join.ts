@@ -1,5 +1,5 @@
+import type { RuntimeEnv } from "@hanzo/bot/plugin-sdk/matrix";
 import type { MatrixClient } from "@vector-im/matrix-bot-sdk";
-import type { RuntimeEnv } from "bot/plugin-sdk";
 import type { CoreConfig } from "../../types.js";
 import { getMatrixRuntime } from "../../runtime.js";
 import { loadMatrixSdk } from "../sdk-runtime.js";

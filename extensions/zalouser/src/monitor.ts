@@ -3,7 +3,7 @@ import type {
   BotConfig,
   OutboundReplyPayload,
   RuntimeEnv,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/zalouser";
 import {
   createTypingCallbacks,
   createScopedPairingAccess,
@@ -17,7 +17,7 @@ import {
   sendMediaWithLeadingCaption,
   summarizeMapping,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/zalouser";
 import type { ResolvedZalouserAccount, ZaloInboundMessage } from "./types.js";
 import {
   buildZalouserGroupCandidates,

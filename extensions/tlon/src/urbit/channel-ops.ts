@@ -1,4 +1,4 @@
-import type { LookupFn, SsrFPolicy } from "bot/plugin-sdk";
+import type { LookupFn, SsrFPolicy } from "@hanzo/bot/plugin-sdk/tlon";
 import { UrbitHttpError } from "./errors.js";
 import { urbitFetch } from "./fetch.js";
 

@@ -7,7 +7,7 @@ import { sanitizeUntrustedFileName } from "./safe-filename.js";
 function buildSiblingTempPath(targetPath: string): string {
   const id = crypto.randomUUID();
   const safeTail = sanitizeUntrustedFileName(path.basename(targetPath), "output.bin");
-  return path.join(path.dirname(targetPath), `.bot-output-${id}-${safeTail}.part`);
+  return path.join(path.dirname(targetPath), `.openclaw-output-${id}-${safeTail}.part`);
 }
 
 export async function writeViaSiblingTempPath(params: {
@@ -15,8 +15,14 @@ export async function writeViaSiblingTempPath(params: {
   targetPath: string;
   writeTemp: (tempPath: string) => Promise<void>;
 }): Promise<void> {
-  const rootDir = path.resolve(params.rootDir);
-  const targetPath = path.resolve(params.targetPath);
+  const rootDir = await fs
+    .realpath(path.resolve(params.rootDir))
+    .catch(() => path.resolve(params.rootDir));
+  const requestedTargetPath = path.resolve(params.targetPath);
+  const targetPath = await fs
+    .realpath(path.dirname(requestedTargetPath))
+    .then((realDir) => path.join(realDir, path.basename(requestedTargetPath)))
+    .catch(() => requestedTargetPath);
   const relativeTargetPath = path.relative(rootDir, targetPath);
   if (
     !relativeTargetPath ||

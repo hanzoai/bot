@@ -7,7 +7,7 @@ title: "Tlon"
 
 # Tlon (plugin)
 
-Tlon is a decentralized messenger built on Urbit. Hanzo Bot connects to your Urbit ship and can
+Tlon is a decentralized messenger built on Urbit. OpenClaw connects to your Urbit ship and can
 respond to DMs and group chat messages. Group replies require an @ mention by default and can
 be further restricted via allowlists.
 
@@ -21,13 +21,13 @@ Tlon ships as a plugin and is not bundled with the core install.
 Install via CLI (npm registry):
 
 ```bash
-hanzo-bot plugins install @bot/tlon
+openclaw plugins install @openclaw/tlon
 ```
 
 Local checkout (when running from a git repo):
 
 ```bash
-hanzo-bot plugins install ./extensions/tlon
+openclaw plugins install ./extensions/tlon
 ```
 
 Details: [Plugins](/tools/plugin)
@@ -58,8 +58,8 @@ Minimal config (single account):
 
 ## Private/LAN ships
 
-By default, Bot blocks private/internal hostnames and IP ranges for this plugin (SSRF hardening).
-If your ship URL is on a private network (for example `http://192.168.1.50:8080` or `http://localhost:8080`),
+By default, OpenClaw blocks private/internal hostnames and IP ranges for SSRF protection.
+If your ship is running on a private network (localhost, LAN IP, or internal hostname),
 you must explicitly opt in:
 
 ```json5
@@ -197,7 +197,7 @@ Auto-accept group invites:
 
 ## Delivery targets (CLI/cron)
 
-Use these with `hanzo-bot message send` or cron delivery:
+Use these with `openclaw message send` or cron delivery:
 
 - DM: `~sampel-palnet` or `dm/~sampel-palnet`
 - Group: `chat/~host-ship/channel` or `group:~host-ship/channel`
@@ -234,10 +234,10 @@ The skill is automatically available when the plugin is installed.
 Run this ladder first:
 
 ```bash
-bot status
-bot gateway status
-bot logs --follow
-bot doctor
+openclaw status
+openclaw gateway status
+openclaw logs --follow
+openclaw doctor
 ```
 
 Common failures:
@@ -271,5 +271,6 @@ Provider options:
 ## Notes
 
 - Group replies require a mention (e.g. `~your-bot-ship`) to respond.
-- Thread replies: if the inbound message is in a thread, Hanzo Bot replies in-thread.
-- Media: `sendMedia` falls back to text + URL (no native upload).
+- Thread replies: if the inbound message is in a thread, OpenClaw replies in-thread.
+- Rich text: Markdown formatting (bold, italic, code, headers, lists) is converted to Tlon's native format.
+- Images: URLs are uploaded to Tlon storage and embedded as image blocks.

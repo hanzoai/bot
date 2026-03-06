@@ -89,7 +89,7 @@ async function runRepair(cfg: BotConfig) {
 
 const gatewayProgramArguments = [
   "/usr/bin/node",
-  "/usr/local/bin/bot",
+  "/usr/local/bin/openclaw",
   "gateway",
   "--port",
   "18789",
@@ -99,7 +99,7 @@ function setupGatewayTokenRepairScenario(expectedToken: string) {
   mocks.readCommand.mockResolvedValue({
     programArguments: gatewayProgramArguments,
     environment: {
-      BOT_GATEWAY_TOKEN: "stale-token",
+      OPENCLAW_GATEWAY_TOKEN: "stale-token",
     },
   });
   mocks.auditGatewayServiceConfig.mockResolvedValue({
@@ -107,7 +107,7 @@ function setupGatewayTokenRepairScenario(expectedToken: string) {
     issues: [
       {
         code: "gateway-token-mismatch",
-        message: "Gateway service BOT_GATEWAY_TOKEN does not match gateway.auth.token",
+        message: "Gateway service OPENCLAW_GATEWAY_TOKEN does not match gateway.auth.token",
         level: "recommended",
       },
     ],
@@ -116,7 +116,7 @@ function setupGatewayTokenRepairScenario(expectedToken: string) {
     programArguments: gatewayProgramArguments,
     workingDirectory: "/tmp",
     environment: {
-      BOT_GATEWAY_TOKEN: expectedToken,
+      OPENCLAW_GATEWAY_TOKEN: expectedToken,
     },
   });
   mocks.resolveGatewayInstallToken.mockResolvedValue({
@@ -159,8 +159,8 @@ describe("maybeRepairGatewayServiceConfig", () => {
     expect(mocks.install).toHaveBeenCalledTimes(1);
   });
 
-  it("uses BOT_GATEWAY_TOKEN when config token is missing", async () => {
-    await withEnvAsync({ BOT_GATEWAY_TOKEN: "env-token" }, async () => {
+  it("uses OPENCLAW_GATEWAY_TOKEN when config token is missing", async () => {
+    await withEnvAsync({ OPENCLAW_GATEWAY_TOKEN: "env-token" }, async () => {
       setupGatewayTokenRepairScenario("env-token");
 
       const cfg: BotConfig = {
@@ -285,7 +285,7 @@ describe("maybeScanExtraGatewayServices", () => {
       "Legacy gateway removed",
     );
     expect(runtime.log).toHaveBeenCalledWith(
-      "Legacy gateway services removed. Installing Bot gateway next.",
+      "Legacy gateway services removed. Installing OpenClaw gateway next.",
     );
   });
 });

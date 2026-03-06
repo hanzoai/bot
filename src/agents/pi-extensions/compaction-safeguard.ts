@@ -8,6 +8,7 @@ import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { extractKeywords, isQueryStopWordToken } from "../../memory/query-expansion.js";
 import {
   BASE_CHUNK_RATIO,
+  type CompactionSummarizationInstructions,
   MIN_CHUNK_RATIO,
   SAFETY_MARGIN,
   SUMMARIZATION_OVERHEAD_TOKENS,
@@ -646,6 +647,7 @@ function auditSummaryQuality(params: {
 /**
  * Read and format critical workspace context for compaction summary.
  * Extracts "Session Startup" and "Red Lines" from AGENTS.md.
+ * Falls back to legacy names "Every Session" and "Safety".
  * Limited to 2000 chars to avoid bloating the summary.
  */
 async function readWorkspaceContextForSummary(): Promise<string> {
@@ -670,7 +672,12 @@ async function readWorkspaceContextForSummary(): Promise<string> {
         fs.closeSync(opened.fd);
       }
     })();
-    const sections = extractSections(content, ["Session Startup", "Red Lines"]);
+    // Accept legacy section names ("Every Session", "Safety") as fallback
+    // for backward compatibility with older AGENTS.md templates.
+    let sections = extractSections(content, ["Session Startup", "Red Lines"]);
+    if (sections.length === 0) {
+      sections = extractSections(content, ["Every Session", "Safety"]);
+    }
 
     if (sections.length === 0) {
       return "";
@@ -802,7 +809,7 @@ export default function compactionSafeguardExtension(api: ExtensionAPI): void {
                   reserveTokens: Math.max(1, Math.floor(preparation.settings.reserveTokens)),
                   maxChunkTokens: droppedMaxChunkTokens,
                   contextWindow: contextWindowTokens,
-                  customInstructions,
+                  customInstructions: structuredInstructions,
                   summarizationInstructions,
                   previousSummary: preparation.previousSummary,
                 });
@@ -977,6 +984,8 @@ export const __testing = {
   formatToolFailuresSection,
   splitPreservedRecentTurns,
   formatPreservedTurnsSection,
+  buildCompactionStructureInstructions,
+  buildStructuredFallbackSummary,
   appendSummarySection,
   resolveRecentTurnsPreserve,
   resolveQualityGuardMaxRetries,

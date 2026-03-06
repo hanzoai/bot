@@ -9,7 +9,7 @@ title: "Secrets Management"
 
 # Secrets management
 
-Bot supports additive secret references so credentials do not need to be stored as plaintext in config files.
+OpenClaw supports additive SecretRefs so supported credentials do not need to be stored as plaintext in configuration.
 
 Plaintext still works. SecretRefs are opt-in per credential.
 
@@ -46,11 +46,13 @@ Examples of inactive surfaces:
     In local mode without those remote surfaces:
   - `gateway.remote.token` is active when token auth can win and no env/auth token is configured.
   - `gateway.remote.password` is active only when password auth can win and no env/auth password is configured.
+- `gateway.auth.token` SecretRef is inactive for startup auth resolution when `OPENCLAW_GATEWAY_TOKEN` (or `CLAWDBOT_GATEWAY_TOKEN`) is set, because env token input wins for that runtime.
 
 ## Gateway auth surface diagnostics
 
-When a SecretRef is configured on `gateway.auth.password`, `gateway.remote.token`, or
-`gateway.remote.password`, gateway startup/reload logs the surface state explicitly:
+When a SecretRef is configured on `gateway.auth.token`, `gateway.auth.password`,
+`gateway.remote.token`, or `gateway.remote.password`, gateway startup/reload logs the
+surface state explicitly:
 
 - `active`: the SecretRef is part of the effective auth surface and must resolve.
 - `inactive`: the SecretRef is ignored for this runtime because another auth surface wins, or
@@ -61,13 +63,13 @@ active-surface policy, so you can see why a credential was treated as active or 
 
 ## Onboarding reference preflight
 
-When onboarding runs in interactive mode and you choose secret reference storage, Bot performs a fast preflight check before saving:
+When onboarding runs in interactive mode and you choose SecretRef storage, OpenClaw runs preflight validation before saving:
 
 - Env refs: validates env var name and confirms a non-empty value is visible during onboarding.
-- File refs (`sops`): validates `secrets.sources.file`, decrypts, and resolves the JSON pointer.
-- Provider refs (`file` or `exec`): validates the selected provider, resolves the provided `id`, and checks value type.
+- Provider refs (`file` or `exec`): validates provider selection, resolves `id`, and checks resolved value type.
+- Quickstart reuse path: when `gateway.auth.token` is already a SecretRef, onboarding resolves it before probe/dashboard bootstrap (for `env`, `file`, and `exec` refs) using the same fail-fast gate.
 
-If validation fails, onboarding shows the error and lets you retry with a different ref/source.
+If validation fails, onboarding shows the error and lets you retry.
 
 ## SecretRef contract
 
@@ -122,12 +124,12 @@ Define providers under `secrets.providers`:
       default: { source: "env" },
       filemain: {
         source: "file",
-        path: "~/.hanzo/bot/secrets.json",
+        path: "~/.openclaw/secrets.json",
         mode: "json", // or "singleValue"
       },
       vault: {
         source: "exec",
-        command: "/usr/local/bin/bot-vault-resolver",
+        command: "/usr/local/bin/openclaw-vault-resolver",
         args: ["--profile", "prod"],
         passEnv: ["PATH", "VAULT_ADDR"],
         jsonOnly: true,
@@ -164,9 +166,8 @@ Define providers under `secrets.providers`:
 
 - Runs configured absolute binary path, no shell.
 - By default, `command` must point to a regular file (not a symlink).
-- Set `allowSymlinkCommand: true` to allow symlink command paths (for example Homebrew shims). Bot validates the resolved target path.
-- Enable `allowSymlinkCommand` only when required for trusted package-manager paths, and pair it with `trustedDirs` (for example `["/opt/homebrew"]`).
-- When `trustedDirs` is set, checks apply to the resolved target path.
+- Set `allowSymlinkCommand: true` to allow symlink command paths (for example Homebrew shims). OpenClaw validates the resolved target path.
+- Pair `allowSymlinkCommand` with `trustedDirs` for package-manager paths (for example `["/opt/homebrew"]`).
 - Supports timeout, no-output timeout, output byte limits, env allowlist, and trusted dirs.
 - Windows fail-closed note: if ACL verification is unavailable for the command path, resolution fails. For trusted paths only, set `allowInsecurePath: true` on that provider to bypass path security checks.
 
@@ -205,7 +206,7 @@ Optional per-id errors:
         command: "/opt/homebrew/bin/op",
         allowSymlinkCommand: true, // required for Homebrew symlinked binaries
         trustedDirs: ["/opt/homebrew"],
-        args: ["read", "op://Personal/Bot QA API Key/password"],
+        args: ["read", "op://Personal/OpenClaw QA API Key/password"],
         passEnv: ["HOME"],
         jsonOnly: false,
       },
@@ -234,7 +235,7 @@ Optional per-id errors:
         command: "/opt/homebrew/bin/vault",
         allowSymlinkCommand: true, // required for Homebrew symlinked binaries
         trustedDirs: ["/opt/homebrew"],
-        args: ["kv", "get", "-field=OPENAI_API_KEY", "secret/bot"],
+        args: ["kv", "get", "-field=OPENAI_API_KEY", "secret/openclaw"],
         passEnv: ["VAULT_ADDR", "VAULT_TOKEN"],
         jsonOnly: false,
       },
@@ -283,16 +284,11 @@ Optional per-id errors:
 
 ## Supported credential surface
 
-### `~/.hanzoai/bot.json`
+Canonical supported and unsupported credentials are listed in:
 
 - [SecretRef Credential Surface](/reference/secretref-credential-surface)
 
-### `~/.hanzo/bot/agents/<agentId>/agent/auth-profiles.json`
-
-- `profiles.<profileId>.keyRef` for `type: "api_key"`
-- `profiles.<profileId>.tokenRef` for `type: "token"`
-
-OAuth credential storage changes are out of scope.
+Runtime-minted or rotating credentials and OAuth refresh material are intentionally excluded from read-only SecretRef resolution.
 
 ## Required behavior and precedence
 
@@ -303,7 +299,7 @@ OAuth credential storage changes are out of scope.
 Warning and audit signals:
 
 - `SECRETS_REF_OVERRIDES_PLAINTEXT` (runtime warning)
-- `REF_SHADOWED` (audit finding when `auth-profiles.json` credentials take precedence over `bot.json` refs)
+- `REF_SHADOWED` (audit finding when `auth-profiles.json` credentials take precedence over `openclaw.json` refs)
 
 Google Chat compatibility behavior:
 
@@ -327,7 +323,7 @@ Activation contract:
 
 ## Degraded and recovered signals
 
-When reload-time activation fails after a healthy state, Bot enters degraded secrets state.
+When reload-time activation fails after a healthy state, OpenClaw enters degraded secrets state.
 
 One-shot system event and log codes:
 
@@ -347,8 +343,8 @@ Command paths can opt into supported SecretRef resolution via gateway snapshot R
 
 There are two broad behaviors:
 
-- Strict command paths (for example `bot memory` remote-memory paths and `bot qr --remote`) read from the active snapshot and fail fast when a required SecretRef is unavailable.
-- Read-only command paths (for example `bot status`, `bot status --all`, `bot channels status`, `bot channels resolve`, and read-only doctor/config repair flows) also prefer the active snapshot, but degrade instead of aborting when a targeted SecretRef is unavailable in that command path.
+- Strict command paths (for example `openclaw memory` remote-memory paths and `openclaw qr --remote`) read from the active snapshot and fail fast when a required SecretRef is unavailable.
+- Read-only command paths (for example `openclaw status`, `openclaw status --all`, `openclaw channels status`, `openclaw channels resolve`, and read-only doctor/config repair flows) also prefer the active snapshot, but degrade instead of aborting when a targeted SecretRef is unavailable in that command path.
 
 Read-only behavior:
 
@@ -359,7 +355,7 @@ Read-only behavior:
 
 Other notes:
 
-- Snapshot refresh after backend secret rotation is handled by `bot secrets reload`.
+- Snapshot refresh after backend secret rotation is handled by `openclaw secrets reload`.
 - Gateway RPC method used by these command paths: `secrets.resolve`.
 
 ## Audit and configure workflow
@@ -367,18 +363,18 @@ Other notes:
 Default operator flow:
 
 ```bash
-hanzo-bot secrets audit --check
-hanzo-bot secrets configure
-hanzo-bot secrets audit --check
+openclaw secrets audit --check
+openclaw secrets configure
+openclaw secrets audit --check
 ```
 
 ### `secrets audit`
 
 Findings include:
 
-- plaintext values at rest (`bot.json`, `auth-profiles.json`, `.env`)
+- plaintext values at rest (`openclaw.json`, `auth-profiles.json`, `.env`)
 - unresolved refs
-- precedence shadowing (`auth-profiles.json` taking priority over `bot.json` refs)
+- precedence shadowing (`auth-profiles.json` taking priority over `openclaw.json` refs)
 - legacy residues (`auth.json`, OAuth reminders)
 
 ### `secrets configure`
@@ -386,15 +382,17 @@ Findings include:
 Interactive helper that:
 
 - configures `secrets.providers` first (`env`/`file`/`exec`, add/edit/remove)
-- lets you select secret-bearing fields in `bot.json`
+- lets you select supported secret-bearing fields in `openclaw.json` plus `auth-profiles.json` for one agent scope
+- can create a new `auth-profiles.json` mapping directly in the target picker
 - captures SecretRef details (`source`, `provider`, `id`)
 - runs preflight resolution
 - can apply immediately
 
 Helpful modes:
 
-- `hanzo-bot secrets configure --providers-only`
-- `hanzo-bot secrets configure --skip-provider-setup`
+- `openclaw secrets configure --providers-only`
+- `openclaw secrets configure --skip-provider-setup`
+- `openclaw secrets configure --agent <id>`
 
 `configure` apply defaults:
 
@@ -407,8 +405,8 @@ Helpful modes:
 Apply a saved plan:
 
 ```bash
-hanzo-bot secrets apply --from /tmp/bot-secrets-plan.json
-hanzo-bot secrets apply --from /tmp/bot-secrets-plan.json --dry-run
+openclaw secrets apply --from /tmp/openclaw-secrets-plan.json
+openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run
 ```
 
 For strict target/path contract details and exact rejection rules, see:
@@ -417,7 +415,7 @@ For strict target/path contract details and exact rejection rules, see:
 
 ## One-way safety policy
 
-Bot intentionally does **not** write rollback backups that contain pre-migration plaintext secret values.
+OpenClaw intentionally does not write rollback backups containing historical plaintext secret values.
 
 Safety model:
 
@@ -427,7 +425,7 @@ Safety model:
 
 ## Legacy auth compatibility notes
 
-For static credentials, Bot runtime no longer depends on plaintext `auth.json`.
+For static credentials, runtime no longer depends on plaintext legacy auth storage.
 
 - Runtime credential source is the resolved in-memory snapshot.
 - Legacy static `api_key` entries are scrubbed when discovered.

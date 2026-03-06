@@ -3,10 +3,14 @@ import type { SecretDefaults } from "./runtime-shared.js";
 import { coerceSecretRef, hasConfiguredSecretInput } from "../config/types.secrets.js";
 import { isRecord } from "./shared.js";
 
-const GATEWAY_TOKEN_ENV_KEYS = ["BOT_GATEWAY_TOKEN", "CLAWDBOT_GATEWAY_TOKEN"] as const;
-const GATEWAY_PASSWORD_ENV_KEYS = ["BOT_GATEWAY_PASSWORD", "CLAWDBOT_GATEWAY_PASSWORD"] as const;
+const GATEWAY_TOKEN_ENV_KEYS = ["OPENCLAW_GATEWAY_TOKEN", "CLAWDBOT_GATEWAY_TOKEN"] as const;
+const GATEWAY_PASSWORD_ENV_KEYS = [
+  "OPENCLAW_GATEWAY_PASSWORD",
+  "CLAWDBOT_GATEWAY_PASSWORD",
+] as const;
 
 export const GATEWAY_AUTH_SURFACE_PATHS = [
+  "gateway.auth.token",
   "gateway.auth.password",
   "gateway.remote.token",
   "gateway.remote.password",
@@ -82,6 +86,12 @@ export function evaluateGatewayAuthSurfaceStates(params: {
   const gateway = params.config.gateway as Record<string, unknown> | undefined;
   if (!isRecord(gateway)) {
     return {
+      "gateway.auth.token": createState({
+        path: "gateway.auth.token",
+        active: false,
+        reason: "gateway configuration is not set.",
+        hasSecretRef: false,
+      }),
       "gateway.auth.password": createState({
         path: "gateway.auth.password",
         active: false,
@@ -106,6 +116,7 @@ export function evaluateGatewayAuthSurfaceStates(params: {
   const remote = isRecord(gateway?.remote) ? gateway.remote : undefined;
   const authMode = auth && typeof auth.mode === "string" ? auth.mode : undefined;
 
+  const hasAuthTokenRef = coerceSecretRef(auth?.token, defaults) !== null;
   const hasAuthPasswordRef = coerceSecretRef(auth?.password, defaults) !== null;
   const hasRemoteTokenRef = coerceSecretRef(remote?.token, defaults) !== null;
   const hasRemotePasswordRef = coerceSecretRef(remote?.password, defaults) !== null;
@@ -115,9 +126,14 @@ export function evaluateGatewayAuthSurfaceStates(params: {
   const localTokenConfigured = hasConfiguredSecretInput(auth?.token, defaults);
   const localPasswordConfigured = hasConfiguredSecretInput(auth?.password, defaults);
   const remoteTokenConfigured = hasConfiguredSecretInput(remote?.token, defaults);
+  const passwordSourceConfigured = Boolean(envPassword || localPasswordConfigured);
 
   const localTokenCanWin =
     authMode !== "password" && authMode !== "none" && authMode !== "trusted-proxy";
+  const localTokenSurfaceActive =
+    localTokenCanWin &&
+    !envToken &&
+    (authMode === "token" || (authMode === undefined && !passwordSourceConfigured));
   const tokenCanWin = Boolean(envToken || localTokenConfigured || remoteTokenConfigured);
   const passwordCanWin =
     authMode === "password" ||
@@ -160,6 +176,28 @@ export function evaluateGatewayAuthSurfaceStates(params: {
       return "gateway.remote.token is configured.";
     }
     return "token auth can win.";
+  })();
+
+  const authTokenReason = (() => {
+    if (!auth) {
+      return "gateway.auth is not configured.";
+    }
+    if (authMode === "token") {
+      return envToken ? "gateway token env var is configured." : 'gateway.auth.mode is "token".';
+    }
+    if (authMode === "password" || authMode === "none" || authMode === "trusted-proxy") {
+      return `gateway.auth.mode is "${authMode}".`;
+    }
+    if (envToken) {
+      return "gateway token env var is configured.";
+    }
+    if (envPassword) {
+      return "gateway password env var is configured.";
+    }
+    if (localPasswordConfigured) {
+      return "gateway.auth.password is configured.";
+    }
+    return "token auth can win (mode is unset and no password source is configured).";
   })();
 
   const remoteSurfaceReason = describeRemoteConfiguredSurface({
@@ -222,6 +260,12 @@ export function evaluateGatewayAuthSurfaceStates(params: {
   })();
 
   return {
+    "gateway.auth.token": createState({
+      path: "gateway.auth.token",
+      active: localTokenSurfaceActive,
+      reason: authTokenReason,
+      hasSecretRef: hasAuthTokenRef,
+    }),
     "gateway.auth.password": createState({
       path: "gateway.auth.password",
       active: passwordCanWin,

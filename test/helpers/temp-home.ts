@@ -9,7 +9,7 @@ type EnvSnapshot = {
   userProfile: string | undefined;
   homeDrive: string | undefined;
   homePath: string | undefined;
-  botHome: string | undefined;
+  openclawHome: string | undefined;
   stateDir: string | undefined;
 };
 
@@ -26,8 +26,8 @@ function snapshotEnv(): EnvSnapshot {
     userProfile: process.env.USERPROFILE,
     homeDrive: process.env.HOMEDRIVE,
     homePath: process.env.HOMEPATH,
-    botHome: process.env.BOT_HOME,
-    stateDir: process.env.BOT_STATE_DIR,
+    openclawHome: process.env.OPENCLAW_HOME,
+    stateDir: process.env.OPENCLAW_STATE_DIR,
   };
 }
 
@@ -43,8 +43,8 @@ function restoreEnv(snapshot: EnvSnapshot) {
   restoreKey("USERPROFILE", snapshot.userProfile);
   restoreKey("HOMEDRIVE", snapshot.homeDrive);
   restoreKey("HOMEPATH", snapshot.homePath);
-  restoreKey("BOT_HOME", snapshot.botHome);
-  restoreKey("BOT_STATE_DIR", snapshot.stateDir);
+  restoreKey("OPENCLAW_HOME", snapshot.openclawHome);
+  restoreKey("OPENCLAW_STATE_DIR", snapshot.stateDir);
 }
 
 function snapshotExtraEnv(keys: string[]): Record<string, string | undefined> {
@@ -68,9 +68,9 @@ function restoreExtraEnv(snapshot: Record<string, string | undefined>) {
 function setTempHome(base: string) {
   process.env.HOME = base;
   process.env.USERPROFILE = base;
-  // Ensure tests using HOME isolation aren't affected by leaked BOT_HOME.
-  delete process.env.BOT_HOME;
-  process.env.BOT_STATE_DIR = path.join(base, ".hanzo", "bot");
+  // Ensure tests using HOME isolation aren't affected by leaked OPENCLAW_HOME.
+  delete process.env.OPENCLAW_HOME;
+  process.env.OPENCLAW_STATE_DIR = path.join(base, ".openclaw");
 
   if (process.platform !== "win32") {
     return;
@@ -83,7 +83,7 @@ function setTempHome(base: string) {
   process.env.HOMEPATH = match[2] || "\\";
 }
 
-async function _allocateTempHomeBase(prefix: string): Promise<string> {
+async function allocateTempHomeBase(prefix: string): Promise<string> {
   let state = SHARED_HOME_ROOTS.get(prefix);
   if (!state) {
     state = {
@@ -102,7 +102,8 @@ export async function withTempHome<T>(
   fn: (home: string) => Promise<T>,
   opts: { env?: Record<string, EnvValue>; prefix?: string } = {},
 ): Promise<T> {
-  const base = await fs.mkdtemp(path.join(os.tmpdir(), opts.prefix ?? "bot-test-home-"));
+  const prefix = opts.prefix ?? "openclaw-test-home-";
+  const base = await allocateTempHomeBase(prefix);
   const snapshot = snapshotEnv();
   const envKeys = Object.keys(opts.env ?? {});
   for (const key of envKeys) {
@@ -113,9 +114,7 @@ export async function withTempHome<T>(
   const envSnapshot = snapshotExtraEnv(envKeys);
 
   setTempHome(base);
-  await fs.mkdir(path.join(base, ".hanzo", "bot", "agents", "main", "sessions"), {
-    recursive: true,
-  });
+  await fs.mkdir(path.join(base, ".openclaw", "agents", "main", "sessions"), { recursive: true });
   if (opts.env) {
     for (const [key, raw] of Object.entries(opts.env)) {
       const value = typeof raw === "function" ? raw(base) : raw;

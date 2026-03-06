@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { BotConfig } from "../config/config.js";
 import "./test-helpers/fast-core-tools.js";
-import { createBotTools } from "./bot-tools.js";
+import { createBotTools } from "./openclaw-tools.js";
 
 async function withTempAgentDir<T>(run: (agentDir: string) => Promise<T>): Promise<T> {
   const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tools-pdf-"));
@@ -27,7 +27,7 @@ describe("createBotTools PDF registration", () => {
       };
 
       const tools = createBotTools({ config: cfg, agentDir });
-      expect(tools.some((tool: { name: string }) => tool.name === "pdf")).toBe(true);
+      expect(tools.some((tool) => tool.name === "pdf")).toBe(true);
     });
   });
 });

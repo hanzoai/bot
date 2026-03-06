@@ -316,11 +316,11 @@ describe("promptSingleChannelSecretInput", () => {
   });
 
   it("returns ref + resolved value when external env ref is selected", async () => {
-    process.env.BOT_TEST_TOKEN = "secret-token";
+    process.env.OPENCLAW_TEST_TOKEN = "secret-token";
     const prompter = {
       select: vi.fn().mockResolvedValueOnce("ref").mockResolvedValueOnce("env"),
       confirm: vi.fn(async () => false),
-      text: vi.fn(async () => "BOT_TEST_TOKEN"),
+      text: vi.fn(async () => "OPENCLAW_TEST_TOKEN"),
       note: vi.fn(async () => undefined),
     };
 
@@ -336,7 +336,7 @@ describe("promptSingleChannelSecretInput", () => {
       envPrompt: "use env",
       keepPrompt: "keep",
       inputPrompt: "token",
-      preferredEnvVar: "BOT_TEST_TOKEN",
+      preferredEnvVar: "OPENCLAW_TEST_TOKEN",
     });
 
     expect(result).toEqual({
@@ -344,7 +344,7 @@ describe("promptSingleChannelSecretInput", () => {
       value: {
         source: "env",
         provider: "default",
-        id: "BOT_TEST_TOKEN",
+        id: "OPENCLAW_TEST_TOKEN",
       },
       resolvedValue: "secret-token",
     });

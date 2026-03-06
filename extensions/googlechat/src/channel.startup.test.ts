@@ -1,4 +1,4 @@
-import type { ChannelAccountSnapshot } from "bot/plugin-sdk";
+import type { ChannelAccountSnapshot } from "@hanzo/bot/plugin-sdk/googlechat";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import { createStartAccountContext } from "../../test-utils/start-account-context.js";

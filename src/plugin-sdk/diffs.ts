@@ -2,10 +2,10 @@
 // Keep this list additive and scoped to symbols used under extensions/diffs.
 
 export type { BotConfig } from "../config/config.js";
-export { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
+export { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
 export type {
   AnyAgentTool,
   BotPluginApi,
-  BotPluginConfigSchema,
+  OpenClawPluginConfigSchema,
   PluginLogger,
 } from "../plugins/types.js";

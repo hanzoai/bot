@@ -1,4 +1,4 @@
-import type { BotConfig, BotPluginApi } from "bot/plugin-sdk";
+import type { BotConfig, BotPluginApi } from "@hanzo/bot/plugin-sdk/thread-ownership";
 
 type ThreadOwnershipConfig = {
   forwarderUrl?: string;

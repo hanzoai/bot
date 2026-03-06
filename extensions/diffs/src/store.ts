@@ -1,4 +1,4 @@
-import type { PluginLogger } from "bot/plugin-sdk";
+import type { PluginLogger } from "@hanzo/bot/plugin-sdk/diffs";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";

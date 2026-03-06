@@ -1,5 +1,5 @@
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/feishu";
 import type * as Lark from "@larksuiteoapi/node-sdk";
-import type { BotPluginApi } from "bot/plugin-sdk";
 import { Type } from "@sinclair/typebox";
 import { listEnabledFeishuAccounts } from "./accounts.js";
 import { createFeishuToolClient } from "./tool-account.js";

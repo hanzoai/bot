@@ -1,4 +1,4 @@
-import { createDedupeCache } from "bot/plugin-sdk";
+import { createDedupeCache } from "@hanzo/bot/plugin-sdk/tlon";
 
 export type ProcessedMessageTracker = {
   mark: (id?: string | null) => boolean;

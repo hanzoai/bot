@@ -153,7 +153,7 @@ describe("message tool schema scoping", () => {
     label: "Discord",
     docsPath: "/channels/discord",
     blurb: "Discord test plugin.",
-    actions: ["send", "poll"],
+    actions: ["send", "poll", "poll-vote"],
   });
 
   afterEach(() => {

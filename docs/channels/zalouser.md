@@ -1,14 +1,14 @@
 ---
 summary: "Zalo personal account support via native zca-js (QR login), capabilities, and configuration"
 read_when:
-  - Setting up Zalo Personal for Hanzo Bot
+  - Setting up Zalo Personal for OpenClaw
   - Debugging Zalo Personal login or message flow
 title: "Zalo Personal"
 ---
 
 # Zalo Personal (unofficial)
 
-Status: experimental. This integration automates a **personal Zalo account** via native `zca-js` inside Bot.
+Status: experimental. This integration automates a **personal Zalo account** via native `zca-js` inside OpenClaw.
 
 > **Warning:** This is an unofficial integration and may result in account suspension/ban. Use at your own risk.
 
@@ -16,8 +16,8 @@ Status: experimental. This integration automates a **personal Zalo account** via
 
 Zalo Personal ships as a plugin and is not bundled with the core install.
 
-- Install via CLI: `hanzo-bot plugins install @bot/zalouser`
-- Or from a source checkout: `hanzo-bot plugins install ./extensions/zalouser`
+- Install via CLI: `openclaw plugins install @openclaw/zalouser`
+- Or from a source checkout: `openclaw plugins install ./extensions/zalouser`
 - Details: [Plugins](/tools/plugin)
 
 No external `zca`/`openzca` CLI binary is required.
@@ -26,8 +26,8 @@ No external `zca`/`openzca` CLI binary is required.
 
 1. Install the plugin (see above).
 2. Login (QR, on the Gateway machine):
-   - `hanzo-bot channels login --channel zalouser`
-   - Scan the QR code in the terminal with the Zalo mobile app.
+   - `openclaw channels login --channel zalouser`
+   - Scan the QR code with the Zalo mobile app.
 3. Enable the channel:
 
 ```json5
@@ -60,9 +60,9 @@ Channel id is `zalouser` to make it explicit this automates a **personal Zalo us
 Use the directory CLI to discover peers/groups and their IDs:
 
 ```bash
-hanzo-bot directory self --channel zalouser
-hanzo-bot directory peers list --channel zalouser --query "name"
-hanzo-bot directory groups list --channel zalouser --query "work"
+openclaw directory self --channel zalouser
+openclaw directory peers list --channel zalouser --query "name"
+openclaw directory groups list --channel zalouser --query "work"
 ```
 
 ## Limits
@@ -78,8 +78,8 @@ hanzo-bot directory groups list --channel zalouser --query "work"
 
 Approve via:
 
-- `hanzo-bot pairing list zalouser`
-- `hanzo-bot pairing approve zalouser <code>`
+- `openclaw pairing list zalouser`
+- `openclaw pairing approve zalouser <code>`
 
 ## Group access (optional)
 
@@ -89,7 +89,7 @@ Approve via:
   - `channels.zalouser.groups` (keys are group IDs or names)
 - Block all groups: `channels.zalouser.groupPolicy = "disabled"`.
 - The configure wizard can prompt for group allowlists.
-- On startup, Hanzo Bot resolves group/user names in allowlists to IDs and logs the mapping; unresolved entries are kept as typed.
+- On startup, OpenClaw resolves group/user names in allowlists to IDs and logs the mapping; unresolved entries are kept as typed.
 
 Example:
 
@@ -131,7 +131,7 @@ Example:
 
 ## Multi-account
 
-Accounts map to `zalouser` profiles in Bot state. Example:
+Accounts map to `zalouser` profiles in OpenClaw state. Example:
 
 ```json5
 {
@@ -149,20 +149,24 @@ Accounts map to `zalouser` profiles in Bot state. Example:
 
 ## Typing, reactions, and delivery acknowledgements
 
-- Bot sends a typing event before dispatching a reply (best-effort).
+- OpenClaw sends a typing event before dispatching a reply (best-effort).
 - Message reaction action `react` is supported for `zalouser` in channel actions.
   - Use `remove: true` to remove a specific reaction emoji from a message.
   - Reaction semantics: [Reactions](/tools/reactions)
-- For inbound messages that include event metadata, Bot sends delivered + seen acknowledgements (best-effort).
+- For inbound messages that include event metadata, OpenClaw sends delivered + seen acknowledgements (best-effort).
 
 ## Troubleshooting
 
 **Login doesn't stick:**
 
-- `bot channels status --probe`
-- Re-login: `bot channels logout --channel zalouser && bot channels login --channel zalouser`
+- `openclaw channels status --probe`
+- Re-login: `openclaw channels logout --channel zalouser && openclaw channels login --channel zalouser`
 
 **Allowlist/group name didn't resolve:**
 
-- `hanzo-bot channels status --probe`
-- Re-login: `hanzo-bot channels logout --channel zalouser && hanzo-bot channels login --channel zalouser`
+- Use numeric IDs in `allowFrom`/`groups`, or exact friend/group names.
+
+**Upgraded from old CLI-based setup:**
+
+- Remove any old external `zca` process assumptions.
+- The channel now runs fully in OpenClaw without external CLI binaries.

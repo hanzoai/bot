@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ResolvedAcpxPluginConfig } from "../config.js";
-import { resolvePreferredBotTmpDir } from "../../../../src/infra/tmp-bot-dir.js";
+import { resolvePreferredOpenClawTmpDir } from "../../../../src/infra/tmp-openclaw-dir.js";
 import { ACPX_PINNED_VERSION } from "../config.js";
 import { AcpxRuntime } from "../runtime.js";
 
@@ -22,7 +22,7 @@ const fs = require("node:fs");
 
 const args = process.argv.slice(2);
 const logPath = process.env.MOCK_ACPX_LOG;
-const botShell = process.env.BOT_SHELL || "";
+const openclawShell = process.env.OPENCLAW_SHELL || "";
 const writeLog = (entry) => {
   if (!logPath) return;
   fs.appendFileSync(logPath, JSON.stringify(entry) + "\n");
@@ -75,14 +75,35 @@ const setValue = command === "set" ? String(args[commandIndex + 2] || "") : "";
 
 if (command === "sessions" && args[commandIndex + 1] === "ensure") {
   writeLog({ kind: "ensure", agent, args, sessionName: ensureName });
-  emitJson({
-    action: "session_ensured",
-    acpxRecordId: "rec-" + ensureName,
-    acpxSessionId: "sid-" + ensureName,
-    agentSessionId: "inner-" + ensureName,
-    name: ensureName,
-    created: true,
-  });
+  if (process.env.MOCK_ACPX_ENSURE_EMPTY === "1") {
+    emitJson({ action: "session_ensured", name: ensureName });
+  } else {
+    emitJson({
+      action: "session_ensured",
+      acpxRecordId: "rec-" + ensureName,
+      acpxSessionId: "sid-" + ensureName,
+      agentSessionId: "inner-" + ensureName,
+      name: ensureName,
+      created: true,
+    });
+  }
+  process.exit(0);
+}
+
+if (command === "sessions" && args[commandIndex + 1] === "new") {
+  writeLog({ kind: "new", agent, args, sessionName: ensureName });
+  if (process.env.MOCK_ACPX_NEW_EMPTY === "1") {
+    emitJson({ action: "session_created", name: ensureName });
+  } else {
+    emitJson({
+      action: "session_created",
+      acpxRecordId: "rec-" + ensureName,
+      acpxSessionId: "sid-" + ensureName,
+      agentSessionId: "inner-" + ensureName,
+      name: ensureName,
+      created: true,
+    });
+  }
   process.exit(0);
 }
 
@@ -155,7 +176,7 @@ if (command === "prompt") {
     args,
     sessionName: sessionFromOption,
     stdinText,
-    botShell,
+    openclawShell,
   });
   const requestId = "req-1";
 
@@ -300,7 +321,9 @@ async function ensureMockCliScriptPath(): Promise<string> {
     return await sharedMockCliScriptPath;
   }
   sharedMockCliScriptPath = (async () => {
-    const dir = await mkdtemp(path.join(resolvePreferredBotTmpDir(), "bot-acpx-runtime-test-"));
+    const dir = await mkdtemp(
+      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-acpx-runtime-test-"),
+    );
     tempDirs.push(dir);
     const scriptPath = path.join(dir, "mock-acpx.cjs");
     await writeFile(scriptPath, MOCK_CLI_SCRIPT, "utf8");

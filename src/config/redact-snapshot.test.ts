@@ -1,7 +1,7 @@
 import JSON5 from "json5";
 import { describe, expect, it } from "vitest";
 import type { ConfigUiHints } from "./schema.js";
-import type { ConfigFileSnapshot } from "./types.bot.js";
+import type { ConfigFileSnapshot } from "./types.openclaw.js";
 import {
   REDACTED_SENTINEL,
   redactConfigSnapshot,
@@ -24,7 +24,7 @@ function makeSnapshot<TConfig extends Record<string, unknown>>(
   raw?: string,
 ): TestSnapshot<TConfig> {
   return {
-    path: "/home/user/.hanzo/bot/config.json5",
+    path: "/home/user/.openclaw/config.json5",
     exists: true,
     raw: raw ?? JSON.stringify(config),
     parsed: config,
@@ -98,21 +98,19 @@ describe("redactConfigSnapshot", () => {
       shortSecret: { token: "short" },
     });
     const result = redactConfigSnapshot(snapshot);
-    const cfg = result.config;
+    const cfg = result.config as typeof snapshot.config;
 
-    expect(cfg.gateway!.auth!.token).toBe(REDACTED_SENTINEL);
-    expect(cfg.gateway!.auth!.password).toBe(REDACTED_SENTINEL);
-    expect(cfg.channels!.telegram!.botToken).toBe(REDACTED_SENTINEL);
-    expect(cfg.channels!.telegram!.webhookSecret).toBe(REDACTED_SENTINEL);
-    expect(cfg.channels!.slack!.botToken).toBe(REDACTED_SENTINEL);
-    expect(cfg.channels!.slack!.signingSecret).toBe(REDACTED_SENTINEL);
-    expect((cfg.channels!.slack as Record<string, unknown>).token).toBe(REDACTED_SENTINEL);
-    expect(cfg.channels!.feishu!.appSecret).toBe(REDACTED_SENTINEL);
-    expect(cfg.models!.providers!.openai.apiKey).toBe(REDACTED_SENTINEL);
-    expect(cfg.models!.providers!.openai.baseUrl).toBe("https://api.openai.com");
-    expect((cfg as unknown as Record<string, Record<string, unknown>>).shortSecret.token).toBe(
-      REDACTED_SENTINEL,
-    );
+    expect(cfg.gateway.auth.token).toBe(REDACTED_SENTINEL);
+    expect(cfg.gateway.auth.password).toBe(REDACTED_SENTINEL);
+    expect(cfg.channels.telegram.botToken).toBe(REDACTED_SENTINEL);
+    expect(cfg.channels.telegram.webhookSecret).toBe(REDACTED_SENTINEL);
+    expect(cfg.channels.slack.botToken).toBe(REDACTED_SENTINEL);
+    expect(cfg.channels.slack.signingSecret).toBe(REDACTED_SENTINEL);
+    expect(cfg.channels.slack.token).toBe(REDACTED_SENTINEL);
+    expect(cfg.channels.feishu.appSecret).toBe(REDACTED_SENTINEL);
+    expect(cfg.models.providers.openai.apiKey).toBe(REDACTED_SENTINEL);
+    expect(cfg.models.providers.openai.baseUrl).toBe("https://api.openai.com");
+    expect(cfg.shortSecret.token).toBe(REDACTED_SENTINEL);
   });
 
   it("redacts googlechat serviceAccount object payloads", () => {
@@ -223,9 +221,9 @@ describe("redactConfigSnapshot", () => {
     const snapshot = makeSnapshot({
       channels: {
         irc: {
-          passwordFile: "/etc/bot/irc-password.txt",
+          passwordFile: "/etc/openclaw/irc-password.txt",
           nickserv: {
-            passwordFile: "/etc/bot/nickserv-password.txt",
+            passwordFile: "/etc/openclaw/nickserv-password.txt",
             password: "super-secret-nickserv-password",
           },
         },
@@ -237,8 +235,8 @@ describe("redactConfigSnapshot", () => {
     const irc = channels.irc;
     const nickserv = irc.nickserv as Record<string, unknown>;
 
-    expect(irc.passwordFile).toBe("/etc/bot/irc-password.txt");
-    expect(nickserv.passwordFile).toBe("/etc/bot/nickserv-password.txt");
+    expect(irc.passwordFile).toBe("/etc/openclaw/irc-password.txt");
+    expect(nickserv.passwordFile).toBe("/etc/openclaw/nickserv-password.txt");
     expect(nickserv.password).toBe(REDACTED_SENTINEL);
   });
 
@@ -457,8 +455,8 @@ describe("redactConfigSnapshot", () => {
       custom: { mySecret: "this-is-a-custom-secret-value" },
     });
     const result = redactConfigSnapshot(snapshot, hints);
-    const config = result.config;
-    const custom = (config as unknown as Record<string, Record<string, string>>).custom;
+    const config = result.config as typeof snapshot.config;
+    const custom = config.custom as Record<string, string>;
     const resolved = result.resolved as Record<string, Record<string, string>>;
     expect(custom.mySecret).toBe(REDACTED_SENTINEL);
     expect(resolved.custom.mySecret).toBe(REDACTED_SENTINEL);
@@ -489,15 +487,11 @@ describe("redactConfigSnapshot", () => {
     });
 
     const redacted = redactConfigSnapshot(snapshot, hints);
-    const config = redacted.config;
-    expect(config.plugins!.entries!["voice-call"].config!.apiToken).toBe(REDACTED_SENTINEL);
-    expect(config.plugins!.entries!["voice-call"].config!.displayName).toBe("Voice call extension");
-    expect(
-      (config.channels as Record<string, Record<string, unknown>>)["my-channel"].accessToken,
-    ).toBe(REDACTED_SENTINEL);
-    expect((config.channels as Record<string, Record<string, unknown>>)["my-channel"].room).toBe(
-      "general",
-    );
+    const config = redacted.config as typeof snapshot.config;
+    expect(config.plugins.entries["voice-call"].config.apiToken).toBe(REDACTED_SENTINEL);
+    expect(config.plugins.entries["voice-call"].config.displayName).toBe("Voice call extension");
+    expect(config.channels["my-channel"].accessToken).toBe(REDACTED_SENTINEL);
+    expect(config.channels["my-channel"].room).toBe("general");
 
     const restored = restoreRedactedValues(redacted.config, snapshot.config, hints);
     expect(restored).toEqual(snapshot.config);
@@ -521,8 +515,8 @@ describe("redactConfigSnapshot", () => {
     });
 
     const redacted = redactConfigSnapshot(snapshot, hints);
-    const config = redacted.config;
-    expect(config.plugins!.entries!["voice-call"].config!.apiToken).toBe("not-secret-on-purpose");
+    const config = redacted.config as typeof snapshot.config;
+    expect(config.plugins.entries["voice-call"].config.apiToken).toBe("not-secret-on-purpose");
   });
 
   it("round-trips nested and array sensitivity cases", () => {
@@ -1133,9 +1127,9 @@ describe("realredactConfigSnapshot_real", () => {
     });
 
     const result = redactConfigSnapshot(snapshot, hints);
-    const config = result.config;
-    expect(config.agents!.defaults!.memorySearch!.remote!.apiKey).toBe(REDACTED_SENTINEL);
-    expect(config.agents!.list![0].memorySearch!.remote!.apiKey).toBe(REDACTED_SENTINEL);
+    const config = result.config as typeof snapshot.config;
+    expect(config.agents.defaults.memorySearch.remote.apiKey).toBe(REDACTED_SENTINEL);
+    expect(config.agents.list[0].memorySearch.remote.apiKey).toBe(REDACTED_SENTINEL);
     const restored = restoreRedactedValues(result.config, snapshot.config, hints);
     expect(restored.agents.defaults.memorySearch.remote.apiKey).toBe("1234");
     expect(restored.agents.list[0].memorySearch.remote.apiKey).toBe("6789");

@@ -1,7 +1,7 @@
 ---
-summary: "Hanzo Bot capabilities across channels, routing, media, and UX."
+summary: "OpenClaw capabilities across channels, routing, media, and UX."
 read_when:
-  - You want a full list of what Hanzo Bot supports
+  - You want a full list of what OpenClaw supports
 title: "Features"
 ---
 

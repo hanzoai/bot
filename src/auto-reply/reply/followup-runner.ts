@@ -151,7 +151,7 @@ export function createFollowupRunner(params: {
       let fallbackModel = queued.run.model;
       const activeSessionEntry =
         (sessionKey ? sessionStore?.[sessionKey] : undefined) ?? sessionEntry;
-      let _bootstrapPromptWarningSignaturesSeen = resolveBootstrapWarningSignaturesSeen(
+      let bootstrapPromptWarningSignaturesSeen = resolveBootstrapWarningSignaturesSeen(
         activeSessionEntry?.systemPromptReport,
       );
       try {
@@ -210,6 +210,11 @@ export function createFollowupRunner(params: {
               runId,
               allowRateLimitCooldownProbe: runOptions?.allowRateLimitCooldownProbe,
               blockReplyBreak: queued.run.blockReplyBreak,
+              bootstrapPromptWarningSignaturesSeen,
+              bootstrapPromptWarningSignature:
+                bootstrapPromptWarningSignaturesSeen[
+                  bootstrapPromptWarningSignaturesSeen.length - 1
+                ],
               onAgentEvent: (evt) => {
                 if (evt.stream !== "compaction") {
                   return;
@@ -220,7 +225,7 @@ export function createFollowupRunner(params: {
                 }
               },
             });
-            _bootstrapPromptWarningSignaturesSeen = resolveBootstrapWarningSignaturesSeen(
+            bootstrapPromptWarningSignaturesSeen = resolveBootstrapWarningSignaturesSeen(
               result.meta?.systemPromptReport,
             );
             return result;

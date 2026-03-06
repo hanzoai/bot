@@ -11,7 +11,7 @@ import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/c
 import { withEnvAsync } from "../../test-utils/env.js";
 import { createIMessageTestPlugin } from "../../test-utils/imessage-test-plugin.js";
 import { createInternalHookEventPayload } from "../../test-utils/internal-hook-event-payload.js";
-import { resolvePreferredBotTmpDir } from "../tmp-bot-dir.js";
+import { resolvePreferredOpenClawTmpDir } from "../tmp-openclaw-dir.js";
 
 const mocks = vi.hoisted(() => ({
   appendAssistantMessageToSessionTranscript: vi.fn(async () => ({ ok: true, sessionFile: "x" })),
@@ -326,7 +326,7 @@ describe("deliverOutboundPayloads", () => {
     );
   });
 
-  it("includes Bot tmp root in telegram mediaLocalRoots", async () => {
+  it("includes OpenClaw tmp root in telegram mediaLocalRoots", async () => {
     const sendTelegram = vi.fn().mockResolvedValue({ messageId: "m1", chatId: "c1" });
 
     await deliverTelegramPayload({
@@ -338,12 +338,12 @@ describe("deliverOutboundPayloads", () => {
       "123",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredBotTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredOpenClawTmpDir()]),
       }),
     );
   });
 
-  it("includes Bot tmp root in signal mediaLocalRoots", async () => {
+  it("includes OpenClaw tmp root in signal mediaLocalRoots", async () => {
     const sendSignal = vi.fn().mockResolvedValue({ messageId: "s1", timestamp: 123 });
 
     await deliverOutboundPayloads({
@@ -358,12 +358,12 @@ describe("deliverOutboundPayloads", () => {
       "+1555",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredBotTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredOpenClawTmpDir()]),
       }),
     );
   });
 
-  it("includes Bot tmp root in whatsapp mediaLocalRoots", async () => {
+  it("includes OpenClaw tmp root in whatsapp mediaLocalRoots", async () => {
     const sendWhatsApp = vi.fn().mockResolvedValue({ messageId: "w1", toJid: "jid" });
 
     await deliverOutboundPayloads({
@@ -378,12 +378,12 @@ describe("deliverOutboundPayloads", () => {
       "+1555",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredBotTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredOpenClawTmpDir()]),
       }),
     );
   });
 
-  it("includes Bot tmp root in imessage mediaLocalRoots", async () => {
+  it("includes OpenClaw tmp root in imessage mediaLocalRoots", async () => {
     const sendIMessage = vi.fn().mockResolvedValue({ messageId: "i1", chatId: "chat-1" });
 
     await deliverOutboundPayloads({
@@ -398,7 +398,7 @@ describe("deliverOutboundPayloads", () => {
       "imessage:+15551234567",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredBotTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredOpenClawTmpDir()]),
       }),
     );
   });
@@ -888,6 +888,134 @@ describe("deliverOutboundPayloads", () => {
       }),
     );
     expect(results).toEqual([{ channel: "line", messageId: "ln-1" }]);
+  });
+
+  it("falls back to sendText when plugin outbound omits sendMedia", async () => {
+    const sendText = vi.fn().mockResolvedValue({ channel: "matrix", messageId: "mx-1" });
+    setActivePluginRegistry(
+      createTestRegistry([
+        {
+          pluginId: "matrix",
+          source: "test",
+          plugin: createOutboundTestPlugin({
+            id: "matrix",
+            outbound: { deliveryMode: "direct", sendText },
+          }),
+        },
+      ]),
+    );
+
+    const results = await deliverOutboundPayloads({
+      cfg: {},
+      channel: "matrix",
+      to: "!room:1",
+      payloads: [{ text: "caption", mediaUrl: "https://example.com/file.png" }],
+    });
+
+    expect(sendText).toHaveBeenCalledTimes(1);
+    expect(sendText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "caption",
+      }),
+    );
+    expect(logMocks.warn).toHaveBeenCalledWith(
+      "Plugin outbound adapter does not implement sendMedia; media URLs will be dropped and text fallback will be used",
+      expect.objectContaining({
+        channel: "matrix",
+        mediaCount: 1,
+      }),
+    );
+    expect(results).toEqual([{ channel: "matrix", messageId: "mx-1" }]);
+  });
+
+  it("falls back to one sendText call for multi-media payloads when sendMedia is omitted", async () => {
+    const sendText = vi.fn().mockResolvedValue({ channel: "matrix", messageId: "mx-2" });
+    setActivePluginRegistry(
+      createTestRegistry([
+        {
+          pluginId: "matrix",
+          source: "test",
+          plugin: createOutboundTestPlugin({
+            id: "matrix",
+            outbound: { deliveryMode: "direct", sendText },
+          }),
+        },
+      ]),
+    );
+
+    const results = await deliverOutboundPayloads({
+      cfg: {},
+      channel: "matrix",
+      to: "!room:1",
+      payloads: [
+        {
+          text: "caption",
+          mediaUrls: ["https://example.com/a.png", "https://example.com/b.png"],
+        },
+      ],
+    });
+
+    expect(sendText).toHaveBeenCalledTimes(1);
+    expect(sendText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "caption",
+      }),
+    );
+    expect(logMocks.warn).toHaveBeenCalledWith(
+      "Plugin outbound adapter does not implement sendMedia; media URLs will be dropped and text fallback will be used",
+      expect.objectContaining({
+        channel: "matrix",
+        mediaCount: 2,
+      }),
+    );
+    expect(results).toEqual([{ channel: "matrix", messageId: "mx-2" }]);
+  });
+
+  it("fails media-only payloads when plugin outbound omits sendMedia", async () => {
+    hookMocks.runner.hasHooks.mockReturnValue(true);
+    const sendText = vi.fn().mockResolvedValue({ channel: "matrix", messageId: "mx-3" });
+    setActivePluginRegistry(
+      createTestRegistry([
+        {
+          pluginId: "matrix",
+          source: "test",
+          plugin: createOutboundTestPlugin({
+            id: "matrix",
+            outbound: { deliveryMode: "direct", sendText },
+          }),
+        },
+      ]),
+    );
+
+    await expect(
+      deliverOutboundPayloads({
+        cfg: {},
+        channel: "matrix",
+        to: "!room:1",
+        payloads: [{ text: "   ", mediaUrl: "https://example.com/file.png" }],
+      }),
+    ).rejects.toThrow(
+      "Plugin outbound adapter does not implement sendMedia and no text fallback is available for media payload",
+    );
+
+    expect(sendText).not.toHaveBeenCalled();
+    expect(logMocks.warn).toHaveBeenCalledWith(
+      "Plugin outbound adapter does not implement sendMedia; media URLs will be dropped and text fallback will be used",
+      expect.objectContaining({
+        channel: "matrix",
+        mediaCount: 1,
+      }),
+    );
+    expect(hookMocks.runner.runMessageSent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "!room:1",
+        content: "",
+        success: false,
+        error:
+          "Plugin outbound adapter does not implement sendMedia and no text fallback is available for media payload",
+      }),
+      expect.objectContaining({ channelId: "matrix" }),
+    );
   });
 
   it("emits message_sent failure when delivery errors", async () => {

@@ -1,7 +1,12 @@
 import os from "node:os";
 import type { BotConfig } from "../config/types.js";
 import { resolveGatewayPort } from "../config/paths.js";
-import { normalizeSecretInputString, resolveSecretInputRef } from "../config/types.secrets.js";
+import {
+  hasConfiguredSecretInput,
+  normalizeSecretInputString,
+  resolveSecretInputRef,
+} from "../config/types.secrets.js";
+import { assertExplicitGatewayAuthModeWhenBothConfigured } from "../gateway/auth-mode-policy.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
 import { resolveGatewayBindUrl } from "../shared/gateway-bind-url.js";
@@ -152,14 +157,23 @@ function pickTailnetIPv4(
 
 function resolveAuth(cfg: BotConfig, env: NodeJS.ProcessEnv): ResolveAuthResult {
   const mode = cfg.gateway?.auth?.mode;
+  const defaults = cfg.secrets?.defaults;
+  const tokenRef = resolveSecretInputRef({
+    value: cfg.gateway?.auth?.token,
+    defaults,
+  }).ref;
+  const passwordRef = resolveSecretInputRef({
+    value: cfg.gateway?.auth?.password,
+    defaults,
+  }).ref;
   const token =
-    env.BOT_GATEWAY_TOKEN?.trim() ||
+    env.OPENCLAW_GATEWAY_TOKEN?.trim() ||
     env.CLAWDBOT_GATEWAY_TOKEN?.trim() ||
-    normalizeSecretInputString(cfg.gateway?.auth?.token);
+    (tokenRef ? undefined : normalizeSecretInputString(cfg.gateway?.auth?.token));
   const password =
-    env.BOT_GATEWAY_PASSWORD?.trim() ||
+    env.OPENCLAW_GATEWAY_PASSWORD?.trim() ||
     env.CLAWDBOT_GATEWAY_PASSWORD?.trim() ||
-    normalizeSecretInputString(cfg.gateway?.auth?.password);
+    (passwordRef ? undefined : normalizeSecretInputString(cfg.gateway?.auth?.password));
 
   if (mode === "password") {
     if (!password) {
@@ -182,6 +196,56 @@ function resolveAuth(cfg: BotConfig, env: NodeJS.ProcessEnv): ResolveAuthResult 
   return { error: "Gateway auth is not configured (no token or password)." };
 }
 
+async function resolveGatewayTokenSecretRef(
+  cfg: BotConfig,
+  env: NodeJS.ProcessEnv,
+): Promise<BotConfig> {
+  const authToken = cfg.gateway?.auth?.token;
+  const { ref } = resolveSecretInputRef({
+    value: authToken,
+    defaults: cfg.secrets?.defaults,
+  });
+  if (!ref) {
+    return cfg;
+  }
+  const hasTokenEnvCandidate = Boolean(
+    env.OPENCLAW_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim(),
+  );
+  if (hasTokenEnvCandidate) {
+    return cfg;
+  }
+  const mode = cfg.gateway?.auth?.mode;
+  if (mode === "password" || mode === "none" || mode === "trusted-proxy") {
+    return cfg;
+  }
+  if (mode !== "token") {
+    const hasPasswordEnvCandidate = Boolean(
+      env.OPENCLAW_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
+    );
+    if (hasPasswordEnvCandidate) {
+      return cfg;
+    }
+  }
+  const resolved = await resolveSecretRefValues([ref], {
+    config: cfg,
+    env,
+  });
+  const value = resolved.get(secretRefKey(ref));
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error("gateway.auth.token resolved to an empty or non-string value.");
+  }
+  return {
+    ...cfg,
+    gateway: {
+      ...cfg.gateway,
+      auth: {
+        ...cfg.gateway?.auth,
+        token: value.trim(),
+      },
+    },
+  };
+}
+
 async function resolveGatewayPasswordSecretRef(
   cfg: BotConfig,
   env: NodeJS.ProcessEnv,
@@ -195,7 +259,7 @@ async function resolveGatewayPasswordSecretRef(
     return cfg;
   }
   const hasPasswordEnvCandidate = Boolean(
-    env.BOT_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
+    env.OPENCLAW_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
   );
   if (hasPasswordEnvCandidate) {
     return cfg;
@@ -206,8 +270,8 @@ async function resolveGatewayPasswordSecretRef(
   }
   if (mode !== "password") {
     const hasTokenCandidate =
-      Boolean(env.BOT_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim()) ||
-      Boolean(normalizeSecretInputString(cfg.gateway?.auth?.token));
+      Boolean(env.OPENCLAW_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim()) ||
+      hasConfiguredSecretInput(cfg.gateway?.auth?.token, cfg.secrets?.defaults);
     if (hasTokenCandidate) {
       return cfg;
     }
@@ -304,8 +368,10 @@ export async function resolvePairingSetupFromConfig(
   cfg: BotConfig,
   options: ResolvePairingSetupOptions = {},
 ): Promise<PairingSetupResolution> {
+  assertExplicitGatewayAuthModeWhenBothConfigured(cfg);
   const env = options.env ?? process.env;
-  const cfgForAuth = await resolveGatewayPasswordSecretRef(cfg, env);
+  const cfgWithToken = await resolveGatewayTokenSecretRef(cfg, env);
+  const cfgForAuth = await resolveGatewayPasswordSecretRef(cfgWithToken, env);
   const auth = resolveAuth(cfgForAuth, env);
   if (auth.error) {
     return { ok: false, error: auth.error };

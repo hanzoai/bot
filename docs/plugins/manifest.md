@@ -1,15 +1,15 @@
 ---
 summary: "Plugin manifest + JSON schema requirements (strict config validation)"
 read_when:
-  - You are building a Hanzo Bot plugin
+  - You are building a OpenClaw plugin
   - You need to ship a plugin config schema or debug plugin validation errors
 title: "Plugin Manifest"
 ---
 
-# Plugin manifest (bot.plugin.json)
+# Plugin manifest (openclaw.plugin.json)
 
-Every plugin **must** ship a `bot.plugin.json` file in the **plugin root**.
-Hanzo Bot uses this manifest to validate configuration **without executing plugin
+Every plugin **must** ship a `openclaw.plugin.json` file in the **plugin root**.
+OpenClaw uses this manifest to validate configuration **without executing plugin
 code**. Missing or invalid manifests are treated as plugin errors and block
 config validation.
 
@@ -35,7 +35,7 @@ Required keys:
 
 Optional keys:
 
-- `kind` (string): plugin kind (example: `"memory"`).
+- `kind` (string): plugin kind (examples: `"memory"`, `"context-engine"`).
 - `channels` (array): channel ids registered by this plugin (example: `["matrix"]`).
 - `providers` (array): provider ids registered by this plugin.
 - `skills` (array): skill directories to load (relative to the plugin root).
@@ -66,6 +66,10 @@ Optional keys:
 - The manifest is **required for all plugins**, including local filesystem loads.
 - Runtime still loads the plugin module separately; the manifest is only for
   discovery + validation.
+- Exclusive plugin kinds are selected through `plugins.slots.*`.
+  - `kind: "memory"` is selected by `plugins.slots.memory`.
+  - `kind: "context-engine"` is selected by `plugins.slots.contextEngine`
+    (default: built-in `legacy`).
 - If your plugin depends on native modules, document the build steps and any
   package-manager allowlist requirements (for example, pnpm `allow-build-scripts`
   - `pnpm rebuild <package>`).

@@ -40,7 +40,7 @@ function createSelectPrompter(
 }
 
 describe("promptRemoteGatewayConfig", () => {
-  const envSnapshot = captureEnv(["BOT_ALLOW_INSECURE_PRIVATE_WS"]);
+  const envSnapshot = captureEnv(["OPENCLAW_ALLOW_INSECURE_PRIVATE_WS"]);
 
   async function runRemotePrompt(params: {
     text: WizardPrompter["text"];
@@ -154,13 +154,13 @@ describe("promptRemoteGatewayConfig", () => {
   });
 
   it("supports storing remote auth as an external env secret ref", async () => {
-    process.env.BOT_GATEWAY_TOKEN = "remote-token-value";
+    process.env.OPENCLAW_GATEWAY_TOKEN = "remote-token-value";
     const text: WizardPrompter["text"] = vi.fn(async (params) => {
       if (params.message === "Gateway WebSocket URL") {
         return "wss://remote.example.com:18789";
       }
       if (params.message === "Environment variable name") {
-        return "BOT_GATEWAY_TOKEN";
+        return "OPENCLAW_GATEWAY_TOKEN";
       }
       return "";
     }) as WizardPrompter["text"];
@@ -192,7 +192,7 @@ describe("promptRemoteGatewayConfig", () => {
     expect(next.gateway?.remote?.token).toEqual({
       source: "env",
       provider: "default",
-      id: "BOT_GATEWAY_TOKEN",
+      id: "OPENCLAW_GATEWAY_TOKEN",
     });
   });
 });

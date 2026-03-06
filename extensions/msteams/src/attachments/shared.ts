@@ -1,10 +1,10 @@
-import type { SsrFPolicy } from "bot/plugin-sdk";
+import type { SsrFPolicy } from "@hanzo/bot/plugin-sdk/msteams";
 import {
   buildHostnameAllowlistPolicyFromSuffixAllowlist,
   isHttpsUrlAllowedByHostnameSuffixAllowlist,
   isPrivateIpAddress,
   normalizeHostnameSuffixAllowlist,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/msteams";
 import { lookup } from "node:dns/promises";
 import type { MSTeamsAttachmentLike } from "./types.js";
 

@@ -1,4 +1,4 @@
-import type { LookupFn, SsrFPolicy } from "bot/plugin-sdk";
+import type { LookupFn, SsrFPolicy } from "@hanzo/bot/plugin-sdk/tlon";
 import { randomUUID } from "node:crypto";
 import { Readable } from "node:stream";
 import { ensureUrbitChannelOpen, pokeUrbitChannel, scryUrbitPath } from "./channel-ops.js";

@@ -11,29 +11,29 @@ Manage Docker-based sandbox containers for isolated agent execution.
 
 ## Overview
 
-Hanzo Bot can run agents in isolated Docker containers for security. The `sandbox` commands help you manage these containers, especially after updates or configuration changes.
+OpenClaw can run agents in isolated Docker containers for security. The `sandbox` commands help you manage these containers, especially after updates or configuration changes.
 
 ## Commands
 
-### `hanzo-bot sandbox explain`
+### `openclaw sandbox explain`
 
 Inspect the **effective** sandbox mode/scope/workspace access, sandbox tool policy, and elevated gates (with fix-it config key paths).
 
 ```bash
-hanzo-bot sandbox explain
-hanzo-bot sandbox explain --session agent:main:main
-hanzo-bot sandbox explain --agent work
-hanzo-bot sandbox explain --json
+openclaw sandbox explain
+openclaw sandbox explain --session agent:main:main
+openclaw sandbox explain --agent work
+openclaw sandbox explain --json
 ```
 
-### `hanzo-bot sandbox list`
+### `openclaw sandbox list`
 
 List all sandbox containers with their status and configuration.
 
 ```bash
-hanzo-bot sandbox list
-hanzo-bot sandbox list --browser  # List only browser containers
-hanzo-bot sandbox list --json     # JSON output
+openclaw sandbox list
+openclaw sandbox list --browser  # List only browser containers
+openclaw sandbox list --json     # JSON output
 ```
 
 **Output includes:**
@@ -44,16 +44,16 @@ hanzo-bot sandbox list --json     # JSON output
 - Idle time (time since last use)
 - Associated session/agent
 
-### `hanzo-bot sandbox recreate`
+### `openclaw sandbox recreate`
 
 Remove sandbox containers to force recreation with updated images/config.
 
 ```bash
-hanzo-bot sandbox recreate --all                # Recreate all containers
-hanzo-bot sandbox recreate --session main       # Specific session
-hanzo-bot sandbox recreate --agent mybot        # Specific agent
-hanzo-bot sandbox recreate --browser            # Only browser containers
-hanzo-bot sandbox recreate --all --force        # Skip confirmation
+openclaw sandbox recreate --all                # Recreate all containers
+openclaw sandbox recreate --session main       # Specific session
+openclaw sandbox recreate --agent mybot        # Specific agent
+openclaw sandbox recreate --browser            # Only browser containers
+openclaw sandbox recreate --all --force        # Skip confirmation
 ```
 
 **Options:**
@@ -72,14 +72,14 @@ hanzo-bot sandbox recreate --all --force        # Skip confirmation
 
 ```bash
 # Pull new image
-docker pull bot-sandbox:latest
-docker tag bot-sandbox:latest bot-sandbox:bookworm-slim
+docker pull openclaw-sandbox:latest
+docker tag openclaw-sandbox:latest openclaw-sandbox:bookworm-slim
 
 # Update config to use new image
 # Edit config: agents.defaults.sandbox.docker.image (or agents.list[].sandbox.docker.image)
 
 # Recreate containers
-hanzo-bot sandbox recreate --all
+openclaw sandbox recreate --all
 ```
 
 ### After changing sandbox configuration
@@ -88,22 +88,22 @@ hanzo-bot sandbox recreate --all
 # Edit config: agents.defaults.sandbox.* (or agents.list[].sandbox.*)
 
 # Recreate to apply new config
-hanzo-bot sandbox recreate --all
+openclaw sandbox recreate --all
 ```
 
 ### After changing setupCommand
 
 ```bash
-hanzo-bot sandbox recreate --all
+openclaw sandbox recreate --all
 # or just one agent:
-hanzo-bot sandbox recreate --agent family
+openclaw sandbox recreate --agent family
 ```
 
 ### For a specific agent only
 
 ```bash
 # Update only one agent's containers
-hanzo-bot sandbox recreate --agent alfred
+openclaw sandbox recreate --agent alfred
 ```
 
 ## Why is this needed?
@@ -114,14 +114,14 @@ hanzo-bot sandbox recreate --agent alfred
 - Containers are only pruned after 24h of inactivity
 - Regularly-used agents keep old containers running indefinitely
 
-**Solution:** Use `hanzo-bot sandbox recreate` to force removal of old containers. They'll be recreated automatically with current settings when next needed.
+**Solution:** Use `openclaw sandbox recreate` to force removal of old containers. They'll be recreated automatically with current settings when next needed.
 
-Tip: prefer `hanzo-bot sandbox recreate` over manual `docker rm`. It uses the
+Tip: prefer `openclaw sandbox recreate` over manual `docker rm`. It uses the
 Gateway’s container naming and avoids mismatches when scope/session keys change.
 
 ## Configuration
 
-Sandbox settings live in `~/.hanzo/bot/bot.json` under `agents.defaults.sandbox` (per-agent overrides go in `agents.list[].sandbox`):
+Sandbox settings live in `~/.openclaw/openclaw.json` under `agents.defaults.sandbox` (per-agent overrides go in `agents.list[].sandbox`):
 
 ```jsonc
 {
@@ -131,8 +131,8 @@ Sandbox settings live in `~/.hanzo/bot/bot.json` under `agents.defaults.sandbox`
         "mode": "all", // off, non-main, all
         "scope": "agent", // session, agent, shared
         "docker": {
-          "image": "bot-sandbox:bookworm-slim",
-          "containerPrefix": "bot-sbx-",
+          "image": "openclaw-sandbox:bookworm-slim",
+          "containerPrefix": "openclaw-sbx-",
           // ... more Docker options
         },
         "prune": {
