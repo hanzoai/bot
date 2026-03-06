@@ -1,4 +1,4 @@
-import { buildChannelConfigSchema } from "bot/plugin-sdk";
+import { buildChannelConfigSchema } from "@hanzo/bot/plugin-sdk/tlon";
 import { z } from "zod";
 
 const ShipSchema = z.string().min(1);

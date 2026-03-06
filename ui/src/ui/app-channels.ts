@@ -1,4 +1,4 @@
-import type { BotApp } from "./app.ts";
+import type { OpenClawApp } from "./app.ts";
 import type { NostrProfile } from "./types.ts";
 import {
   loadChannels,
@@ -9,28 +9,28 @@ import {
 import { loadConfig, saveConfig } from "./controllers/config.ts";
 import { createNostrProfileFormState } from "./views/channels.nostr-profile-form.ts";
 
-export async function handleWhatsAppStart(host: BotApp, force: boolean) {
+export async function handleWhatsAppStart(host: OpenClawApp, force: boolean) {
   await startWhatsAppLogin(host, force);
   await loadChannels(host, true);
 }
 
-export async function handleWhatsAppWait(host: BotApp) {
+export async function handleWhatsAppWait(host: OpenClawApp) {
   await waitWhatsAppLogin(host);
   await loadChannels(host, true);
 }
 
-export async function handleWhatsAppLogout(host: BotApp) {
+export async function handleWhatsAppLogout(host: OpenClawApp) {
   await logoutWhatsApp(host);
   await loadChannels(host, true);
 }
 
-export async function handleChannelConfigSave(host: BotApp) {
+export async function handleChannelConfigSave(host: OpenClawApp) {
   await saveConfig(host);
   await loadConfig(host);
   await loadChannels(host, true);
 }
 
-export async function handleChannelConfigReload(host: BotApp) {
+export async function handleChannelConfigReload(host: OpenClawApp) {
   await loadConfig(host);
   await loadChannels(host, true);
 }
@@ -57,7 +57,7 @@ function parseValidationErrors(details: unknown): Record<string, string> {
   return errors;
 }
 
-function resolveNostrAccountId(host: BotApp): string {
+function resolveNostrAccountId(host: OpenClawApp): string {
   const accounts = host.channelsSnapshot?.channelAccounts?.nostr ?? [];
   return accounts[0]?.accountId ?? host.nostrProfileAccountId ?? "default";
 }
@@ -66,7 +66,7 @@ function buildNostrProfileUrl(accountId: string, suffix = ""): string {
   return `/api/channels/nostr/${encodeURIComponent(accountId)}/profile${suffix}`;
 }
 
-function resolveGatewayHttpAuthHeader(host: BotApp): string | null {
+function resolveGatewayHttpAuthHeader(host: OpenClawApp): string | null {
   const deviceToken = host.hello?.auth?.deviceToken?.trim();
   if (deviceToken) {
     return `Bearer ${deviceToken}`;
@@ -82,13 +82,13 @@ function resolveGatewayHttpAuthHeader(host: BotApp): string | null {
   return null;
 }
 
-function buildGatewayHttpHeaders(host: BotApp): Record<string, string> {
+function buildGatewayHttpHeaders(host: OpenClawApp): Record<string, string> {
   const authorization = resolveGatewayHttpAuthHeader(host);
   return authorization ? { Authorization: authorization } : {};
 }
 
 export function handleNostrProfileEdit(
-  host: BotApp,
+  host: OpenClawApp,
   accountId: string,
   profile: NostrProfile | null,
 ) {
@@ -96,13 +96,13 @@ export function handleNostrProfileEdit(
   host.nostrProfileFormState = createNostrProfileFormState(profile ?? undefined);
 }
 
-export function handleNostrProfileCancel(host: BotApp) {
+export function handleNostrProfileCancel(host: OpenClawApp) {
   host.nostrProfileFormState = null;
   host.nostrProfileAccountId = null;
 }
 
 export function handleNostrProfileFieldChange(
-  host: BotApp,
+  host: OpenClawApp,
   field: keyof NostrProfile,
   value: string,
 ) {
@@ -123,7 +123,7 @@ export function handleNostrProfileFieldChange(
   };
 }
 
-export function handleNostrProfileToggleAdvanced(host: BotApp) {
+export function handleNostrProfileToggleAdvanced(host: OpenClawApp) {
   const state = host.nostrProfileFormState;
   if (!state) {
     return;
@@ -134,7 +134,7 @@ export function handleNostrProfileToggleAdvanced(host: BotApp) {
   };
 }
 
-export async function handleNostrProfileSave(host: BotApp) {
+export async function handleNostrProfileSave(host: OpenClawApp) {
   const state = host.nostrProfileFormState;
   if (!state || state.saving) {
     return;
@@ -206,7 +206,7 @@ export async function handleNostrProfileSave(host: BotApp) {
   }
 }
 
-export async function handleNostrProfileImport(host: BotApp) {
+export async function handleNostrProfileImport(host: OpenClawApp) {
   const state = host.nostrProfileFormState;
   if (!state || state.importing) {
     return;

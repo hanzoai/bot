@@ -10,9 +10,9 @@ import { createAcpConnection, createAcpGateway } from "./translator.test-helpers
 describe("acp prompt cwd prefix", () => {
   async function runPromptWithCwd(cwd: string) {
     const pinnedHome = os.homedir();
-    const previousBotHome = process.env.BOT_HOME;
+    const previousOpenClawHome = process.env.OPENCLAW_HOME;
     const previousHome = process.env.HOME;
-    delete process.env.BOT_HOME;
+    delete process.env.OPENCLAW_HOME;
     process.env.HOME = pinnedHome;
 
     const sessionStore = createInMemorySessionStore();
@@ -47,10 +47,10 @@ describe("acp prompt cwd prefix", () => {
       ).rejects.toThrow("stop-after-send");
       return requestSpy;
     } finally {
-      if (previousBotHome === undefined) {
-        delete process.env.BOT_HOME;
+      if (previousOpenClawHome === undefined) {
+        delete process.env.OPENCLAW_HOME;
       } else {
-        process.env.BOT_HOME = previousBotHome;
+        process.env.OPENCLAW_HOME = previousOpenClawHome;
       }
       if (previousHome === undefined) {
         delete process.env.HOME;
@@ -61,22 +61,22 @@ describe("acp prompt cwd prefix", () => {
   }
 
   it("redacts home directory in prompt prefix", async () => {
-    const requestSpy = await runPromptWithCwd(path.join(os.homedir(), "bot-test"));
+    const requestSpy = await runPromptWithCwd(path.join(os.homedir(), "openclaw-test"));
     expect(requestSpy).toHaveBeenCalledWith(
       "chat.send",
       expect.objectContaining({
-        message: expect.stringMatching(/\[Working directory: ~[\\/]bot-test\]/),
+        message: expect.stringMatching(/\[Working directory: ~[\\/]openclaw-test\]/),
       }),
       { expectFinal: true },
     );
   });
 
   it("keeps backslash separators when cwd uses them", async () => {
-    const requestSpy = await runPromptWithCwd(`${os.homedir()}\\bot-test`);
+    const requestSpy = await runPromptWithCwd(`${os.homedir()}\\openclaw-test`);
     expect(requestSpy).toHaveBeenCalledWith(
       "chat.send",
       expect.objectContaining({
-        message: expect.stringContaining("[Working directory: ~\\bot-test]"),
+        message: expect.stringContaining("[Working directory: ~\\openclaw-test]"),
       }),
       { expectFinal: true },
     );

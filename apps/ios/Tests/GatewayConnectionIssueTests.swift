@@ -1,5 +1,9 @@
 import Testing
+<<<<<<< HEAD
 @testable import Bot
+=======
+@testable import OpenClaw
+>>>>>>> upstream/main
 
 @Suite(.serialized) struct GatewayConnectionIssueTests {
     @Test func detectsTokenMissing() {

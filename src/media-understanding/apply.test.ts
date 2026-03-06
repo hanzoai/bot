@@ -5,7 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import type { MsgContext } from "../auto-reply/templating.js";
 import type { BotConfig } from "../config/config.js";
 import { resolveApiKeyForProvider } from "../agents/model-auth.js";
-import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
+import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
 import { fetchRemoteMedia } from "../media/fetch.js";
 import { runExec } from "../process/exec.js";
 import { withEnvAsync } from "../test-utils/env.js";
@@ -37,7 +37,7 @@ vi.mock("../process/exec.js", () => ({
 let applyMediaUnderstanding: typeof import("./apply.js").applyMediaUnderstanding;
 const mockedRunExec = vi.mocked(runExec);
 
-const TEMP_MEDIA_PREFIX = "bot-media-";
+const TEMP_MEDIA_PREFIX = "openclaw-media-";
 let suiteTempMediaRootDir = "";
 let tempMediaDirCounter = 0;
 let sharedTempMediaCacheDir = "";
@@ -159,7 +159,7 @@ async function withMediaAutoDetectEnv<T>(
       GROQ_API_KEY: undefined,
       DEEPGRAM_API_KEY: undefined,
       GEMINI_API_KEY: undefined,
-      BOT_AGENT_DIR: undefined,
+      OPENCLAW_AGENT_DIR: undefined,
       PI_CODING_AGENT_DIR: undefined,
       ...env,
     },
@@ -234,7 +234,7 @@ describe("applyMediaUnderstanding", () => {
   const mockedFetchRemoteMedia = vi.mocked(fetchRemoteMedia);
 
   beforeAll(async () => {
-    const baseDir = resolvePreferredBotTmpDir();
+    const baseDir = resolvePreferredOpenClawTmpDir();
     await fs.mkdir(baseDir, { recursive: true });
     suiteTempMediaRootDir = await fs.mkdtemp(path.join(baseDir, TEMP_MEDIA_PREFIX));
     ({ applyMediaUnderstanding } = await import("./apply.js"));
@@ -664,7 +664,7 @@ describe("applyMediaUnderstanding", () => {
     await withMediaAutoDetectEnv(
       {
         PATH: emptyBinDir,
-        BOT_AGENT_DIR: isolatedAgentDir,
+        OPENCLAW_AGENT_DIR: isolatedAgentDir,
         PI_CODING_AGENT_DIR: isolatedAgentDir,
       },
       async () => {

@@ -6,6 +6,7 @@ import type { TemplateContext } from "../templating.js";
 import type { VerboseLevel } from "../thinking.js";
 import type { GetReplyOptions } from "../types.js";
 import type { FollowupRun } from "./queue.js";
+import { resolveBootstrapWarningSignaturesSeen } from "../../agents/bootstrap-budget.js";
 import { estimateMessagesTokens } from "../../agents/compaction.js";
 import { runWithModelFallback } from "../../agents/model-fallback.js";
 import { isCliProvider } from "../../agents/model-selection.js";
@@ -452,6 +453,10 @@ export async function runMemoryFlushIfNeeded(params: {
 
   let activeSessionEntry = entry ?? params.sessionEntry;
   const activeSessionStore = params.sessionStore;
+  let bootstrapPromptWarningSignaturesSeen = resolveBootstrapWarningSignaturesSeen(
+    activeSessionEntry?.systemPromptReport ??
+      (params.sessionKey ? activeSessionStore?.[params.sessionKey]?.systemPromptReport : undefined),
+  );
   const flushRunId = crypto.randomUUID();
   if (params.sessionKey) {
     registerAgentRunContext(flushRunId, {
@@ -484,7 +489,7 @@ export async function runMemoryFlushIfNeeded(params: {
           authProfile,
           allowRateLimitCooldownProbe: runOptions?.allowRateLimitCooldownProbe,
         });
-        return runEmbeddedPiAgent({
+        const result = await runEmbeddedPiAgent({
           ...embeddedContext,
           ...senderContext,
           ...runBaseParams,
@@ -494,6 +499,9 @@ export async function runMemoryFlushIfNeeded(params: {
             cfg: params.cfg,
           }),
           extraSystemPrompt: flushSystemPrompt,
+          bootstrapPromptWarningSignaturesSeen,
+          bootstrapPromptWarningSignature:
+            bootstrapPromptWarningSignaturesSeen[bootstrapPromptWarningSignaturesSeen.length - 1],
           onAgentEvent: (evt) => {
             if (evt.stream === "compaction") {
               const phase = typeof evt.data.phase === "string" ? evt.data.phase : "";
@@ -503,6 +511,10 @@ export async function runMemoryFlushIfNeeded(params: {
             }
           },
         });
+        bootstrapPromptWarningSignaturesSeen = resolveBootstrapWarningSignaturesSeen(
+          result.meta?.systemPromptReport,
+        );
+        return result;
       },
     });
     let memoryFlushCompactionCount =

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { BotPluginService, BotPluginServiceContext } from "./types.js";
+import type { OpenClawPluginService, OpenClawPluginServiceContext } from "./types.js";
 import { createEmptyPluginRegistry } from "./registry.js";
 
 const mockedLogger = vi.hoisted(() => ({
@@ -16,7 +16,7 @@ vi.mock("../logging/subsystem.js", () => ({
 import { STATE_DIR } from "../config/paths.js";
 import { startPluginServices } from "./services.js";
 
-function createRegistry(services: BotPluginService[]) {
+function createRegistry(services: OpenClawPluginService[]) {
   const registry = createEmptyPluginRegistry();
   for (const service of services) {
     registry.services.push({ pluginId: "plugin:test", service, source: "test" });
@@ -32,9 +32,9 @@ describe("startPluginServices", () => {
   it("starts services and stops them in reverse order", async () => {
     const starts: string[] = [];
     const stops: string[] = [];
-    const contexts: BotPluginServiceContext[] = [];
+    const contexts: OpenClawPluginServiceContext[] = [];
 
-    const serviceA: BotPluginService = {
+    const serviceA: OpenClawPluginService = {
       id: "service-a",
       start: (ctx) => {
         starts.push("a");
@@ -44,14 +44,14 @@ describe("startPluginServices", () => {
         stops.push("a");
       },
     };
-    const serviceB: BotPluginService = {
+    const serviceB: OpenClawPluginService = {
       id: "service-b",
       start: (ctx) => {
         starts.push("b");
         contexts.push(ctx);
       },
     };
-    const serviceC: BotPluginService = {
+    const serviceC: OpenClawPluginService = {
       id: "service-c",
       start: (ctx) => {
         starts.push("c");

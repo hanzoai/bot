@@ -44,7 +44,11 @@ struct WatchNotifyMessage: Sendable {
     private static let persistedStateKey = "watch.inbox.state.v1"
     private let defaults: UserDefaults
 
+<<<<<<< HEAD
     var title = "Bot"
+=======
+    var title = "OpenClaw"
+>>>>>>> upstream/main
     var body = "Waiting for messages from your iPhone."
     var transport = "none"
     var updatedAt: Date?
@@ -78,7 +82,11 @@ struct WatchNotifyMessage: Sendable {
             sentAtMs: message.sentAtMs)
         guard deliveryKey != self.lastDeliveryKey else { return }
 
+<<<<<<< HEAD
         let normalizedTitle = message.title.isEmpty ? "Bot" : message.title
+=======
+        let normalizedTitle = message.title.isEmpty ? "OpenClaw" : message.title
+>>>>>>> upstream/main
         self.title = normalizedTitle
         self.body = message.body
         self.transport = transport
@@ -217,7 +225,11 @@ struct WatchNotifyMessage: Sendable {
         content.title = title
         content.body = body
         content.sound = .default
+<<<<<<< HEAD
         content.threadIdentifier = "bot-watch"
+=======
+        content.threadIdentifier = "openclaw-watch"
+>>>>>>> upstream/main
 
         let request = UNNotificationRequest(
             identifier: identifier,

@@ -5,8 +5,10 @@ import {
   MessageReactionAddListener,
   MessageReactionRemoveListener,
   PresenceUpdateListener,
+  ThreadUpdateListener,
   type User,
 } from "@buape/carbon";
+import type { BotConfig } from "../../config/config.js";
 import { danger, logVerbose } from "../../globals.js";
 import { formatDurationSeconds } from "../../infra/format-time/format-duration.ts";
 import { enqueueSystemEvent } from "../../infra/system-events.js";
@@ -30,6 +32,8 @@ import {
 import { formatDiscordReactionEmoji, formatDiscordUserTag } from "./format.js";
 import { resolveDiscordChannelInfo } from "./message-utils.js";
 import { setPresence } from "./presence-cache.js";
+import { isThreadArchived } from "./thread-bindings.discord-api.js";
+import { closeDiscordThreadSessions } from "./thread-session-close.js";
 import { normalizeDiscordListenerTimeoutMs, runDiscordTaskWithTimeout } from "./timeouts.js";
 
 type LoadedConfig = ReturnType<typeof import("../../config/config.js").loadConfig>;
@@ -38,7 +42,11 @@ type Logger = ReturnType<typeof import("../../logging/subsystem.js").createSubsy
 
 export type DiscordMessageEvent = Parameters<MessageCreateListener["handle"]>[0];
 
-export type DiscordMessageHandler = (data: DiscordMessageEvent, client: Client) => Promise<void>;
+export type DiscordMessageHandler = (
+  data: DiscordMessageEvent,
+  client: Client,
+  options?: { abortSignal?: AbortSignal },
+) => Promise<void>;
 
 type DiscordReactionEvent = Parameters<MessageReactionAddListener["handle"]>[0];
 
@@ -98,6 +106,7 @@ function logSlowDiscordListener(params: {
   listener: string;
   event: string;
   durationMs: number;
+  context?: Record<string, unknown>;
 }) {
   if (params.durationMs < DISCORD_SLOW_LISTENER_THRESHOLD_MS) {
     return;
@@ -113,7 +122,8 @@ function logSlowDiscordListener(params: {
     event: params.event,
     durationMs: params.durationMs,
     duration,
-    consoleMessage: message,
+    ...params.context,
+    consoleMessage: `${message}${formatListenerContextSuffix(params.context)}`,
   });
 }
 
@@ -190,18 +200,26 @@ export function registerDiscordListener(listeners: Array<object>, listener: obje
 
 export class DiscordMessageListener extends MessageCreateListener {
   private readonly channelQueue = new KeyedAsyncQueue();
+  private readonly listenerTimeoutMs: number;
 
   constructor(
     private handler: DiscordMessageHandler,
     private logger?: Logger,
     private onEvent?: () => void,
+    options?: { timeoutMs?: number },
   ) {
     super();
+    this.listenerTimeoutMs = normalizeDiscordListenerTimeoutMs(options?.timeoutMs);
   }
 
   async handle(data: DiscordMessageEvent, client: Client) {
     this.onEvent?.();
     const channelId = data.channel_id;
+    const context = {
+      channelId,
+      messageId: (data as { message?: { id?: string } }).message?.id,
+      guildId: (data as { guild_id?: string }).guild_id,
+    } satisfies Record<string, unknown>;
     // Serialize messages within the same channel to preserve ordering,
     // but allow different channels to proceed in parallel so that
     // channel-bound agents are not blocked by each other.
@@ -210,7 +228,9 @@ export class DiscordMessageListener extends MessageCreateListener {
         logger: this.logger,
         listener: this.constructor.name,
         event: this.type,
-        run: () => this.handler(data, client),
+        timeoutMs: this.listenerTimeoutMs,
+        context,
+        run: (abortSignal) => this.handler(data, client, { abortSignal }),
         onError: (err) => {
           const logger = this.logger ?? discordEventQueueLog;
           logger.error(danger(`discord handler failed: ${String(err)}`));
@@ -268,7 +288,7 @@ async function runDiscordReactionHandler(params: {
     logger: params.handlerParams.logger,
     listener: params.listener,
     event: params.event,
-    run: () =>
+    run: async () =>
       handleDiscordReactionEvent({
         data: params.data,
         client: params.client,
@@ -687,5 +707,51 @@ export class DiscordPresenceListener extends PresenceUpdateListener {
       const logger = this.logger ?? discordEventQueueLog;
       logger.error(danger(`discord presence handler failed: ${String(err)}`));
     }
+  }
+}
+
+type ThreadUpdateEvent = Parameters<ThreadUpdateListener["handle"]>[0];
+
+export class DiscordThreadUpdateListener extends ThreadUpdateListener {
+  constructor(
+    private cfg: BotConfig,
+    private accountId: string,
+    private logger?: Logger,
+  ) {
+    super();
+  }
+
+  async handle(data: ThreadUpdateEvent) {
+    await runDiscordListenerWithSlowLog({
+      logger: this.logger,
+      listener: this.constructor.name,
+      event: this.type,
+      run: async () => {
+        // Discord only fires THREAD_UPDATE when a field actually changes, so
+        // `thread_metadata.archived === true` in this payload means the thread
+        // just transitioned to the archived state.
+        if (!isThreadArchived(data)) {
+          return;
+        }
+        const threadId = "id" in data && typeof data.id === "string" ? data.id : undefined;
+        if (!threadId) {
+          return;
+        }
+        const logger = this.logger ?? discordEventQueueLog;
+        logger.info("Discord thread archived — resetting session", { threadId });
+        const count = await closeDiscordThreadSessions({
+          cfg: this.cfg,
+          accountId: this.accountId,
+          threadId,
+        });
+        if (count > 0) {
+          logger.info("Discord thread sessions reset after archival", { threadId, count });
+        }
+      },
+      onError: (err) => {
+        const logger = this.logger ?? discordEventQueueLog;
+        logger.error(danger(`discord thread-update handler failed: ${String(err)}`));
+      },
+    });
   }
 }

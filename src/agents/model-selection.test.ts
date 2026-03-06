@@ -273,7 +273,7 @@ describe("model-selection", () => {
       };
 
       const index = buildModelAliasIndex({
-        cfg: cfg,
+        cfg: cfg as BotConfig,
         defaultProvider: "anthropic",
       });
 
@@ -457,7 +457,7 @@ describe("model-selection", () => {
         };
 
         const result = resolveConfiguredModelRef({
-          cfg: cfg,
+          cfg: cfg as BotConfig,
           defaultProvider: "google",
           defaultModel: "gemini-pro",
         });
@@ -475,7 +475,7 @@ describe("model-selection", () => {
     it("should use default provider/model if config is empty", () => {
       const cfg: Partial<BotConfig> = {};
       const result = resolveConfiguredModelRef({
-        cfg: cfg,
+        cfg: cfg as BotConfig,
         defaultProvider: "openai",
         defaultModel: "gpt-4",
       });

@@ -1,4 +1,4 @@
-import type { AcpRuntime, BotPluginServiceContext } from "bot/plugin-sdk";
+import type { AcpRuntime, OpenClawPluginServiceContext } from "@hanzo/bot/plugin-sdk/acpx";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AcpRuntimeError } from "../../../src/acp/runtime/errors.js";
 import {
@@ -54,8 +54,8 @@ function createRuntimeStub(healthy: boolean): {
 }
 
 function createServiceContext(
-  overrides: Partial<BotPluginServiceContext> = {},
-): BotPluginServiceContext {
+  overrides: Partial<OpenClawPluginServiceContext> = {},
+): OpenClawPluginServiceContext {
   return {
     config: {},
     workspaceDir: "/tmp/workspace",

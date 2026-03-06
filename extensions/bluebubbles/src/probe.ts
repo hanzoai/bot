@@ -1,4 +1,4 @@
-import type { BaseProbeResult } from "bot/plugin-sdk";
+import type { BaseProbeResult } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import { normalizeSecretInputString } from "./secret-input.js";
 import { buildBlueBubblesApiUrl, blueBubblesFetchWithTimeout } from "./types.js";
 

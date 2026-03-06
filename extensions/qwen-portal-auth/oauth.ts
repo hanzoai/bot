@@ -1,4 +1,7 @@
-import { generatePkceVerifierChallenge, toFormUrlEncoded } from "bot/plugin-sdk";
+import {
+  generatePkceVerifierChallenge,
+  toFormUrlEncoded,
+} from "@hanzo/bot/plugin-sdk/qwen-portal-auth";
 import { randomUUID } from "node:crypto";
 
 const QWEN_OAUTH_BASE_URL = "https://chat.qwen.ai";

@@ -44,12 +44,12 @@ describe("findExtraGatewayServices (win32)", () => {
     expect(result).toEqual([]);
   });
 
-  it("collects only non-bot marker tasks from schtasks output", async () => {
+  it("collects only non-openclaw marker tasks from schtasks output", async () => {
     execSchtasksMock.mockResolvedValueOnce({
       code: 0,
       stdout: [
-        "TaskName: Bot Gateway",
-        "Task To Run: C:\\Program Files\\Bot\\bot.exe gateway run",
+        "TaskName: OpenClaw Gateway",
+        "Task To Run: C:\\Program Files\\OpenClaw\\openclaw.exe gateway run",
         "",
         "TaskName: Clawdbot Legacy",
         "Task To Run: C:\\clawdbot\\clawdbot.exe run",

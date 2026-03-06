@@ -6,4 +6,8 @@ export { emitDiagnosticEvent, onDiagnosticEvent } from "../infra/diagnostic-even
 export { registerLogTransport } from "../logging/logger.js";
 export { redactSensitiveText } from "../logging/redact.js";
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
-export type { BotPluginApi, BotPluginService, BotPluginServiceContext } from "../plugins/types.js";
+export type {
+  BotPluginApi,
+  OpenClawPluginService,
+  OpenClawPluginServiceContext,
+} from "../plugins/types.js";

@@ -1,5 +1,5 @@
+import type { PluginRuntime, RuntimeEnv } from "@hanzo/bot/plugin-sdk/matrix";
 import type { MatrixClient } from "@vector-im/matrix-bot-sdk";
-import type { PluginRuntime, RuntimeEnv } from "bot/plugin-sdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMessageMatrixMock = vi.hoisted(() => vi.fn().mockResolvedValue({ messageId: "mx-1" }));

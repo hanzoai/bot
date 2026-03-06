@@ -1,13 +1,19 @@
-import type { BotPluginApi } from "bot/plugin-sdk";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/device-pair";
 import {
   approveDevicePairing,
   listDevicePairing,
   resolveGatewayBindUrl,
   runPluginCommandWithTimeout,
   resolveTailnetHostWithRunner,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/device-pair";
 import os from "node:os";
 import qrcode from "qrcode-terminal";
+import {
+  armPairNotifyOnce,
+  formatPendingRequests,
+  handleNotifyCommand,
+  registerPairingNotifierService,
+} from "./notify.js";
 
 function renderQrAscii(data: string): Promise<string> {
   return new Promise((resolve) => {
@@ -82,7 +88,7 @@ function parsePositiveInteger(raw: string | undefined): number | null {
 
 function resolveGatewayPort(cfg: BotPluginApi["config"]): number {
   const envPort =
-    parsePositiveInteger(process.env.BOT_GATEWAY_PORT?.trim()) ??
+    parsePositiveInteger(process.env.OPENCLAW_GATEWAY_PORT?.trim()) ??
     parsePositiveInteger(process.env.CLAWDBOT_GATEWAY_PORT?.trim());
   if (envPort) {
     return envPort;
@@ -185,13 +191,13 @@ function resolveAuth(cfg: BotPluginApi["config"]): ResolveAuthResult {
   const mode = cfg.gateway?.auth?.mode;
   const token =
     pickFirstDefined([
-      process.env.BOT_GATEWAY_TOKEN,
+      process.env.OPENCLAW_GATEWAY_TOKEN,
       process.env.CLAWDBOT_GATEWAY_TOKEN,
       cfg.gateway?.auth?.token,
     ]) ?? undefined;
   const password =
     pickFirstDefined([
-      process.env.BOT_GATEWAY_PASSWORD,
+      process.env.OPENCLAW_GATEWAY_PASSWORD,
       process.env.CLAWDBOT_GATEWAY_PASSWORD,
       cfg.gateway?.auth?.password,
     ]) ?? undefined;
@@ -317,36 +323,9 @@ function formatSetupInstructions(): string {
   ].join("\n");
 }
 
-type PendingPairingRequest = {
-  requestId: string;
-  deviceId: string;
-  displayName?: string;
-  platform?: string;
-  remoteIp?: string;
-  ts?: number;
-};
-
-function formatPendingRequests(pending: PendingPairingRequest[]): string {
-  if (pending.length === 0) {
-    return "No pending device pairing requests.";
-  }
-  const lines: string[] = ["Pending device pairing requests:"];
-  for (const req of pending) {
-    const label = req.displayName?.trim() || req.deviceId;
-    const platform = req.platform?.trim();
-    const ip = req.remoteIp?.trim();
-    const parts = [
-      `- ${req.requestId}`,
-      label ? `name=${label}` : null,
-      platform ? `platform=${platform}` : null,
-      ip ? `ip=${ip}` : null,
-    ].filter(Boolean);
-    lines.push(parts.join(" · "));
-  }
-  return lines.join("\n");
-}
-
 export default function register(api: BotPluginApi) {
+  registerPairingNotifierService(api);
+
   api.registerCommand({
     name: "pair",
     description: "Generate setup codes and approve device pairing requests.",
@@ -364,6 +343,15 @@ export default function register(api: BotPluginApi) {
       if (action === "status" || action === "pending") {
         const list = await listDevicePairing();
         return { text: formatPendingRequests(list.pending) };
+      }
+
+      if (action === "notify") {
+        const notifyAction = tokens[1]?.trim().toLowerCase() ?? "status";
+        return await handleNotifyCommand({
+          api,
+          ctx,
+          action: notifyAction,
+        });
       }
 
       if (action === "approve") {
@@ -428,6 +416,19 @@ export default function register(api: BotPluginApi) {
 
         const channel = ctx.channel;
         const target = ctx.senderId?.trim() || ctx.from?.trim() || ctx.to?.trim() || "";
+        let autoNotifyArmed = false;
+
+        if (channel === "telegram" && target) {
+          try {
+            autoNotifyArmed = await armPairNotifyOnce({ api, ctx });
+          } catch (err) {
+            api.logger.warn?.(
+              `device-pair: failed to arm one-shot pairing notify (${String(
+                (err as Error)?.message ?? err,
+              )})`,
+            );
+          }
+        }
 
         if (channel === "telegram" && target) {
           try {
@@ -435,7 +436,9 @@ export default function register(api: BotPluginApi) {
             if (send) {
               await send(
                 target,
-                ["Scan this QR code with the Bot iOS app:", "", "```", qrAscii, "```"].join("\n"),
+                ["Scan this QR code with the OpenClaw iOS app:", "", "```", qrAscii, "```"].join(
+                  "\n",
+                ),
                 {
                   ...(ctx.messageThreadId != null ? { messageThreadId: ctx.messageThreadId } : {}),
                   ...(ctx.accountId ? { accountId: ctx.accountId } : {}),
@@ -446,7 +449,15 @@ export default function register(api: BotPluginApi) {
                   `Gateway: ${payload.url}`,
                   `Auth: ${authLabel}`,
                   "",
-                  "After scanning, come back here and run `/pair approve` to complete pairing.",
+                  autoNotifyArmed
+                    ? "After scanning, wait here for the pairing request ping."
+                    : "After scanning, come back here and run `/pair approve` to complete pairing.",
+                  ...(autoNotifyArmed
+                    ? [
+                        "I’ll auto-ping here when the pairing request arrives, then auto-disable.",
+                        "If the ping does not arrive, run `/pair approve latest` manually.",
+                      ]
+                    : []),
                 ].join("\n"),
               };
             }
@@ -465,13 +476,21 @@ export default function register(api: BotPluginApi) {
           `Gateway: ${payload.url}`,
           `Auth: ${authLabel}`,
           "",
-          "After scanning, run `/pair approve` to complete pairing.",
+          autoNotifyArmed
+            ? "After scanning, wait here for the pairing request ping."
+            : "After scanning, run `/pair approve` to complete pairing.",
+          ...(autoNotifyArmed
+            ? [
+                "I’ll auto-ping here when the pairing request arrives, then auto-disable.",
+                "If the ping does not arrive, run `/pair approve latest` manually.",
+              ]
+            : []),
         ];
 
         // WebUI + CLI/TUI: ASCII QR
         return {
           text: [
-            "Scan this QR code with the Bot iOS app:",
+            "Scan this QR code with the OpenClaw iOS app:",
             "",
             "```",
             qrAscii,

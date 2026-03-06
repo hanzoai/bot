@@ -1,4 +1,4 @@
-import { normalizeWebhookPath, type BotConfig } from "bot/plugin-sdk";
+import { normalizeWebhookPath, type BotConfig } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import type { ResolvedBlueBubblesAccount } from "./accounts.js";
 import type { BlueBubblesAccountConfig } from "./types.js";
 import { getBlueBubblesRuntime } from "./runtime.js";
