@@ -1,4 +1,4 @@
-import { runPluginCommandWithTimeout, type RuntimeEnv } from "bot/plugin-sdk";
+import { runPluginCommandWithTimeout, type RuntimeEnv } from "@hanzo/bot/plugin-sdk/matrix";
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";

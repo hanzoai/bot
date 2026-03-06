@@ -62,7 +62,11 @@ enum DeviceInfoHelper {
     }
 
     /// Display string for Settings: "1.2.3" or "1.2.3 (456)" when build differs.
+<<<<<<< HEAD
     static func botVersionString() -> String {
+=======
+    static func openClawVersionString() -> String {
+>>>>>>> upstream/main
         let version = appVersion()
         let build = appBuild()
         if build.isEmpty || build == version {

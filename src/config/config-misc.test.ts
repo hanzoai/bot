@@ -12,11 +12,11 @@ import { BotSchema } from "./zod-schema.js";
 describe("$schema key in config (#14998)", () => {
   it("accepts config with $schema string", () => {
     const result = BotSchema.safeParse({
-      $schema: "https://hanzo.bot/config.json",
+      $schema: "https://openclaw.ai/config.json",
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.$schema).toBe("https://hanzo.bot/config.json");
+      expect(result.data.$schema).toBe("https://openclaw.ai/config.json");
     }
   });
 
@@ -28,6 +28,19 @@ describe("$schema key in config (#14998)", () => {
   it("rejects non-string $schema", () => {
     const result = BotSchema.safeParse({ $schema: 123 });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("plugins.slots.contextEngine", () => {
+  it("accepts a contextEngine slot id", () => {
+    const result = BotSchema.safeParse({
+      plugins: {
+        slots: {
+          contextEngine: "my-context-engine",
+        },
+      },
+    });
+    expect(result.success).toBe(true);
   });
 });
 
@@ -364,11 +377,11 @@ describe("config strict validation", () => {
   it("does not mark resolved-only gateway.bind aliases as auto-migratable legacy", async () => {
     await withTempHome(async (home) => {
       await writeBotConfig(home, {
-        gateway: { bind: "${BOT_BIND}" },
+        gateway: { bind: "${OPENCLAW_BIND}" },
       });
 
-      const prev = process.env.BOT_BIND;
-      process.env.BOT_BIND = "0.0.0.0";
+      const prev = process.env.OPENCLAW_BIND;
+      process.env.OPENCLAW_BIND = "0.0.0.0";
       try {
         const snap = await readConfigFileSnapshot();
         expect(snap.valid).toBe(false);
@@ -376,9 +389,9 @@ describe("config strict validation", () => {
         expect(snap.issues.some((issue) => issue.path === "gateway.bind")).toBe(true);
       } finally {
         if (prev === undefined) {
-          delete process.env.BOT_BIND;
+          delete process.env.OPENCLAW_BIND;
         } else {
-          process.env.BOT_BIND = prev;
+          process.env.OPENCLAW_BIND = prev;
         }
       }
     });

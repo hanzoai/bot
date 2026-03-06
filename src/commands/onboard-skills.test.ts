@@ -56,7 +56,7 @@ function createBundledSkill(params: {
   return {
     name: params.name,
     description: params.description,
-    source: "bot-bundled",
+    source: "openclaw-bundled",
     bundled: true,
     filePath: `/tmp/skills/${params.name}`,
     baseDir: `/tmp/skills/${params.name}`,

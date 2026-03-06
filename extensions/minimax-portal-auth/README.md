@@ -1,4 +1,4 @@
-# MiniMax OAuth (Hanzo Bot plugin)
+# MiniMax OAuth (OpenClaw plugin)
 
 OAuth provider plugin for **MiniMax** (OAuth).
 
@@ -7,19 +7,19 @@ OAuth provider plugin for **MiniMax** (OAuth).
 Bundled plugins are disabled by default. Enable this one:
 
 ```bash
-hanzo-bot plugins enable minimax-portal-auth
+openclaw plugins enable minimax-portal-auth
 ```
 
 Restart the Gateway after enabling.
 
 ```bash
-hanzo-bot gateway restart
+openclaw gateway restart
 ```
 
 ## Authenticate
 
 ```bash
-hanzo-bot models auth login --provider minimax-portal --set-default
+openclaw models auth login --provider minimax-portal --set-default
 ```
 
 You will be prompted to select an endpoint:

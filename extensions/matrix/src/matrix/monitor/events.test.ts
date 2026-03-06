@@ -1,5 +1,5 @@
+import type { PluginRuntime, RuntimeLogger } from "@hanzo/bot/plugin-sdk/matrix";
 import type { MatrixClient } from "@vector-im/matrix-bot-sdk";
-import type { PluginRuntime, RuntimeLogger } from "bot/plugin-sdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MatrixAuth } from "../client.js";
 import type { MatrixRawEvent } from "./types.js";

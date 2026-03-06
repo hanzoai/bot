@@ -25,7 +25,7 @@ import { agentCommandFromIngress } from "../../commands/agent.js";
 import { isDangerousNameMatchingEnabled } from "../../config/dangerous-name-matching.js";
 import { logVerbose, shouldLogVerbose } from "../../globals.js";
 import { formatErrorMessage } from "../../infra/errors.js";
-import { resolvePreferredBotTmpDir } from "../../infra/tmp-bot-dir.js";
+import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import {
   buildProviderRegistry,
@@ -157,32 +157,22 @@ type OpusDecoder = {
   decode: (buffer: Buffer) => Buffer;
 };
 
-let warnedOpusFallback = false;
+let warnedOpusMissing = false;
 
 function createOpusDecoder(): { decoder: OpusDecoder; name: string } | null {
   try {
-    const { OpusEncoder } = require("@discordjs/opus") as {
-      OpusEncoder: new (sampleRate: number, channels: number) => OpusDecoder;
+    const OpusScript = require("opusscript") as {
+      new (sampleRate: number, channels: number, application: number): OpusDecoder;
+      Application: { AUDIO: number };
     };
-    const decoder = new OpusEncoder(SAMPLE_RATE, CHANNELS);
-    return { decoder, name: "@discordjs/opus" };
-  } catch (nativeErr) {
-    try {
-      const OpusScript = require("opusscript") as {
-        new (sampleRate: number, channels: number, application: number): OpusDecoder;
-        Application: { AUDIO: number };
-      };
-      const decoder = new OpusScript(SAMPLE_RATE, CHANNELS, OpusScript.Application.AUDIO);
-      if (!warnedOpusFallback) {
-        warnedOpusFallback = true;
-        logger.warn(
-          `discord voice: @discordjs/opus unavailable (${formatErrorMessage(nativeErr)}); using opusscript fallback`,
-        );
-      }
-      return { decoder, name: "opusscript" };
-    } catch (jsErr) {
-      logger.warn(`discord voice: opus decoder init failed: ${formatErrorMessage(nativeErr)}`);
-      logger.warn(`discord voice: opusscript init failed: ${formatErrorMessage(jsErr)}`);
+    const decoder = new OpusScript(SAMPLE_RATE, CHANNELS, OpusScript.Application.AUDIO);
+    return { decoder, name: "opusscript" };
+  } catch (err) {
+    if (!warnedOpusMissing) {
+      warnedOpusMissing = true;
+      logger.warn(
+        `discord voice: opusscript unavailable (${formatErrorMessage(err)}); cannot decode voice audio`,
+      );
     }
   }
   return null;
@@ -222,7 +212,7 @@ function estimateDurationSeconds(pcm: Buffer): number {
 }
 
 async function writeWavFile(pcm: Buffer): Promise<{ path: string; durationSeconds: number }> {
-  const tempDir = await fs.mkdtemp(path.join(resolvePreferredBotTmpDir(), "discord-voice-"));
+  const tempDir = await fs.mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), "discord-voice-"));
   const filePath = path.join(tempDir, `segment-${randomUUID()}.wav`);
   const wav = buildWavBuffer(pcm);
   await fs.writeFile(filePath, wav);
@@ -683,7 +673,11 @@ export class DiscordVoiceManager {
       cfg: this.params.cfg,
       override: this.params.discordConfig.voice?.tts,
     });
-    const directive = parseTtsDirectives(replyText, ttsConfig.modelOverrides);
+    const directive = parseTtsDirectives(
+      replyText,
+      ttsConfig.modelOverrides,
+      ttsConfig.openai.baseUrl,
+    );
     const speakText = directive.overrides.ttsText ?? directive.cleanedText.trim();
     if (!speakText) {
       logVoiceVerbose(

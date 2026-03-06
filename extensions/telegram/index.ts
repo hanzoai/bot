@@ -1,5 +1,5 @@
-import type { ChannelPlugin, BotPluginApi } from "bot/plugin-sdk";
-import { emptyPluginConfigSchema } from "bot/plugin-sdk";
+import type { ChannelPlugin, BotPluginApi } from "@hanzo/bot/plugin-sdk/telegram";
+import { emptyPluginConfigSchema } from "@hanzo/bot/plugin-sdk/telegram";
 import { telegramPlugin } from "./src/channel.js";
 import { setTelegramRuntime } from "./src/runtime.js";
 
