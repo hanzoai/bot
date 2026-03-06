@@ -1,7 +1,13 @@
 import AVFAudio
+<<<<<<< HEAD
 import BotChatUI
 import BotKit
 import HanzoBotProtocol
+=======
+import OpenClawChatUI
+import OpenClawKit
+import OpenClawProtocol
+>>>>>>> upstream/main
 import Foundation
 import Observation
 import OSLog
@@ -27,13 +33,22 @@ private final class StreamFailureBox: @unchecked Sendable {
 // This file intentionally centralizes talk mode state + behavior.
 // It's large, and splitting would force `private` -> `fileprivate` across many members.
 // We'll refactor into smaller files when the surface stabilizes.
+<<<<<<< HEAD
 // swiftlint:disable type_body_length
+=======
+// swiftlint:disable type_body_length file_length
+>>>>>>> upstream/main
 @MainActor
 @Observable
 final class TalkModeManager: NSObject {
     private typealias SpeechRequest = SFSpeechAudioBufferRecognitionRequest
     private static let defaultModelIdFallback = "eleven_v3"
+<<<<<<< HEAD
     private static let redactedConfigSentinel = "__BOT_REDACTED__"
+=======
+    private static let defaultTalkProvider = "elevenlabs"
+    private static let redactedConfigSentinel = "__OPENCLAW_REDACTED__"
+>>>>>>> upstream/main
     var isEnabled: Bool = false
     var isListening: Bool = false
     var isSpeaking: Bool = false
@@ -41,6 +56,13 @@ final class TalkModeManager: NSObject {
     var statusText: String = "Off"
     /// 0..1-ish (not calibrated). Intended for UI feedback only.
     var micLevel: Double = 0
+<<<<<<< HEAD
+=======
+    var gatewayTalkConfigLoaded: Bool = false
+    var gatewayTalkApiKeyConfigured: Bool = false
+    var gatewayTalkDefaultModelId: String?
+    var gatewayTalkDefaultVoiceId: String?
+>>>>>>> upstream/main
 
     private enum CaptureMode {
         case idle
@@ -52,7 +74,11 @@ final class TalkModeManager: NSObject {
     private var resumeContinuousAfterPTT: Bool = false
     private var activePTTCaptureId: String?
     private var pttAutoStopEnabled: Bool = false
+<<<<<<< HEAD
     private var pttCompletion: CheckedContinuation<HanzoBotTalkPTTStopPayload, Never>?
+=======
+    private var pttCompletion: CheckedContinuation<OpenClawTalkPTTStopPayload, Never>?
+>>>>>>> upstream/main
     private var pttTimeoutTask: Task<Void, Never>?
 
     private let allowSimulatorCapture: Bool
@@ -107,8 +133,15 @@ final class TalkModeManager: NSObject {
     private var incrementalSpeechBuffer = IncrementalSpeechBuffer()
     private var incrementalSpeechContext: IncrementalSpeechContext?
     private var incrementalSpeechDirective: TalkDirective?
+<<<<<<< HEAD
 
     private let logger = Logger(subsystem: "ai.hanzo.bot", category: "TalkMode")
+=======
+    private var incrementalSpeechPrefetch: IncrementalSpeechPrefetchState?
+    private var incrementalSpeechPrefetchMonitorTask: Task<Void, Never>?
+
+    private let logger = Logger(subsystem: "ai.openclaw", category: "TalkMode")
+>>>>>>> upstream/main
 
     init(allowSimulatorCapture: Bool = false) {
         self.allowSimulatorCapture = allowSimulatorCapture
@@ -169,9 +202,13 @@ final class TalkModeManager: NSObject {
         let micOk = await Self.requestMicrophonePermission()
         guard micOk else {
             self.logger.warning("start blocked: microphone permission denied")
+<<<<<<< HEAD
             self.statusText = Self.permissionMessage(
                 kind: "Microphone",
                 status: AVAudioSession.sharedInstance().recordPermission)
+=======
+            self.statusText = "Microphone permission denied"
+>>>>>>> upstream/main
             return
         }
         let speechOk = await Self.requestSpeechPermission()
@@ -220,7 +257,11 @@ final class TalkModeManager: NSObject {
         self.pttTimeoutTask = nil
         self.pttAutoStopEnabled = false
         if pendingPTT {
+<<<<<<< HEAD
             let payload = HanzoBotTalkPTTStopPayload(
+=======
+            let payload = OpenClawTalkPTTStopPayload(
+>>>>>>> upstream/main
                 captureId: pendingCaptureId,
                 transcript: nil,
                 status: "cancelled")
@@ -282,7 +323,11 @@ final class TalkModeManager: NSObject {
         self.stopSpeaking()
     }
 
+<<<<<<< HEAD
     func beginPushToTalk() async throws -> HanzoBotTalkPTTStartPayload {
+=======
+    func beginPushToTalk() async throws -> OpenClawTalkPTTStartPayload {
+>>>>>>> upstream/main
         guard self.gatewayConnected else {
             self.statusText = "Offline"
             throw NSError(domain: "TalkMode", code: 7, userInfo: [
@@ -290,7 +335,11 @@ final class TalkModeManager: NSObject {
             ])
         }
         if self.isPushToTalkActive, let captureId = self.activePTTCaptureId {
+<<<<<<< HEAD
             return HanzoBotTalkPTTStartPayload(captureId: captureId)
+=======
+            return OpenClawTalkPTTStartPayload(captureId: captureId)
+>>>>>>> upstream/main
         }
 
         self.stopSpeaking(storeInterruption: false)
@@ -313,9 +362,13 @@ final class TalkModeManager: NSObject {
         if !self.allowSimulatorCapture {
             let micOk = await Self.requestMicrophonePermission()
             guard micOk else {
+<<<<<<< HEAD
                 self.statusText = Self.permissionMessage(
                     kind: "Microphone",
                     status: AVAudioSession.sharedInstance().recordPermission)
+=======
+                self.statusText = "Microphone permission denied"
+>>>>>>> upstream/main
                 throw NSError(domain: "TalkMode", code: 4, userInfo: [
                     NSLocalizedDescriptionKey: "Microphone permission denied",
                 ])
@@ -346,6 +399,7 @@ final class TalkModeManager: NSObject {
             throw error
         }
 
+<<<<<<< HEAD
         return HanzoBotTalkPTTStartPayload(captureId: captureId)
     }
 
@@ -353,6 +407,15 @@ final class TalkModeManager: NSObject {
         let captureId = self.activePTTCaptureId ?? UUID().uuidString
         guard self.isPushToTalkActive else {
             let payload = HanzoBotTalkPTTStopPayload(
+=======
+        return OpenClawTalkPTTStartPayload(captureId: captureId)
+    }
+
+    func endPushToTalk() async -> OpenClawTalkPTTStopPayload {
+        let captureId = self.activePTTCaptureId ?? UUID().uuidString
+        guard self.isPushToTalkActive else {
+            let payload = OpenClawTalkPTTStopPayload(
+>>>>>>> upstream/main
                 captureId: captureId,
                 transcript: nil,
                 status: "idle")
@@ -379,7 +442,11 @@ final class TalkModeManager: NSObject {
             }
             self.resumeContinuousAfterPTT = false
             self.activePTTCaptureId = nil
+<<<<<<< HEAD
             let payload = HanzoBotTalkPTTStopPayload(
+=======
+            let payload = OpenClawTalkPTTStopPayload(
+>>>>>>> upstream/main
                 captureId: captureId,
                 transcript: nil,
                 status: "empty")
@@ -394,7 +461,11 @@ final class TalkModeManager: NSObject {
             }
             self.resumeContinuousAfterPTT = false
             self.activePTTCaptureId = nil
+<<<<<<< HEAD
             let payload = HanzoBotTalkPTTStopPayload(
+=======
+            let payload = OpenClawTalkPTTStopPayload(
+>>>>>>> upstream/main
                 captureId: captureId,
                 transcript: transcript,
                 status: "offline")
@@ -408,7 +479,11 @@ final class TalkModeManager: NSObject {
         }
         self.resumeContinuousAfterPTT = false
         self.activePTTCaptureId = nil
+<<<<<<< HEAD
         let payload = HanzoBotTalkPTTStopPayload(
+=======
+        let payload = OpenClawTalkPTTStopPayload(
+>>>>>>> upstream/main
             captureId: captureId,
             transcript: transcript,
             status: "queued")
@@ -416,14 +491,22 @@ final class TalkModeManager: NSObject {
         return payload
     }
 
+<<<<<<< HEAD
     func runPushToTalkOnce(maxDurationSeconds: TimeInterval = 12) async throws -> HanzoBotTalkPTTStopPayload {
+=======
+    func runPushToTalkOnce(maxDurationSeconds: TimeInterval = 12) async throws -> OpenClawTalkPTTStopPayload {
+>>>>>>> upstream/main
         if self.pttCompletion != nil {
             _ = await self.cancelPushToTalk()
         }
 
         if self.isPushToTalkActive {
             let captureId = self.activePTTCaptureId ?? UUID().uuidString
+<<<<<<< HEAD
             return HanzoBotTalkPTTStopPayload(
+=======
+            return OpenClawTalkPTTStopPayload(
+>>>>>>> upstream/main
                 captureId: captureId,
                 transcript: nil,
                 status: "busy")
@@ -439,10 +522,17 @@ final class TalkModeManager: NSObject {
         }
     }
 
+<<<<<<< HEAD
     func cancelPushToTalk() async -> HanzoBotTalkPTTStopPayload {
         let captureId = self.activePTTCaptureId ?? UUID().uuidString
         guard self.isPushToTalkActive else {
             let payload = HanzoBotTalkPTTStopPayload(
+=======
+    func cancelPushToTalk() async -> OpenClawTalkPTTStopPayload {
+        let captureId = self.activePTTCaptureId ?? UUID().uuidString
+        guard self.isPushToTalkActive else {
+            let payload = OpenClawTalkPTTStopPayload(
+>>>>>>> upstream/main
                 captureId: captureId,
                 transcript: nil,
                 status: "idle")
@@ -469,7 +559,11 @@ final class TalkModeManager: NSObject {
         self.activePTTCaptureId = nil
         self.statusText = "Ready"
 
+<<<<<<< HEAD
         let payload = HanzoBotTalkPTTStopPayload(
+=======
+        let payload = OpenClawTalkPTTStopPayload(
+>>>>>>> upstream/main
             captureId: captureId,
             transcript: nil,
             status: "cancelled")
@@ -483,14 +577,25 @@ final class TalkModeManager: NSObject {
 
     private func startRecognition() throws {
         #if targetEnvironment(simulator)
+<<<<<<< HEAD
+=======
+            if self.allowSimulatorCapture {
+                self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+                self.recognitionRequest?.shouldReportPartialResults = true
+                return
+            }
+>>>>>>> upstream/main
             if !self.allowSimulatorCapture {
                 throw NSError(domain: "TalkMode", code: 2, userInfo: [
                     NSLocalizedDescriptionKey: "Talk mode is not supported on the iOS simulator",
                 ])
+<<<<<<< HEAD
             } else {
                 self.recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
                 self.recognitionRequest?.shouldReportPartialResults = true
                 return
+=======
+>>>>>>> upstream/main
             }
         #endif
 
@@ -538,7 +643,13 @@ final class TalkModeManager: NSObject {
                         self.noiseFloorSamples.removeAll(keepingCapacity: true)
                         let threshold = min(0.35, max(0.12, avg + 0.10))
                         GatewayDiagnostics.log(
+<<<<<<< HEAD
                             "talk audio: noiseFloor=\(String(format: "%.3f", avg)) threshold=\(String(format: "%.3f", threshold))")
+=======
+                            "talk audio: noiseFloor=\(String(format: "%.3f", avg)) "
+                                + "threshold=\(String(format: "%.3f", threshold))"
+                        )
+>>>>>>> upstream/main
                     }
                 }
 
@@ -562,11 +673,30 @@ final class TalkModeManager: NSObject {
         self.loggedPartialThisCycle = false
 
         GatewayDiagnostics.log(
+<<<<<<< HEAD
             "talk speech: recognition started mode=\(String(describing: self.captureMode)) engineRunning=\(self.audioEngine.isRunning)")
+=======
+            "talk speech: recognition started mode=\(String(describing: self.captureMode)) "
+                + "engineRunning=\(self.audioEngine.isRunning)"
+        )
+>>>>>>> upstream/main
         self.recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
             guard let self else { return }
             if let error {
                 let msg = error.localizedDescription
+<<<<<<< HEAD
+=======
+                let lowered = msg.lowercased()
+                let isCancellation = lowered.contains("cancelled") || lowered.contains("canceled")
+                if isCancellation {
+                    GatewayDiagnostics.log("talk speech: cancelled")
+                    if self.captureMode == .continuous, self.isEnabled, !self.isSpeaking {
+                        self.statusText = "Listening"
+                    }
+                    self.logger.debug("speech recognition cancelled")
+                    return
+                }
+>>>>>>> upstream/main
                 GatewayDiagnostics.log("talk speech: error=\(msg)")
                 if !self.isSpeaking {
                     if msg.localizedCaseInsensitiveContains("no speech detected") {
@@ -730,7 +860,11 @@ final class TalkModeManager: NSObject {
         _ = await self.endPushToTalk()
     }
 
+<<<<<<< HEAD
     private func finishPTTOnce(_ payload: HanzoBotTalkPTTStopPayload) {
+=======
+    private func finishPTTOnce(_ payload: OpenClawTalkPTTStopPayload) {
+>>>>>>> upstream/main
         guard let continuation = self.pttCompletion else { return }
         self.pttCompletion = nil
         continuation.resume(returning: payload)
@@ -853,11 +987,18 @@ final class TalkModeManager: NSObject {
     private func buildPrompt(transcript: String) -> String {
         let interrupted = self.lastInterruptedAtSeconds
         self.lastInterruptedAtSeconds = nil
+<<<<<<< HEAD
         let includeVoiceDirectiveHint = (UserDefaults.standard.object(forKey: "talk.voiceDirectiveHint.enabled") as? Bool) ?? true
         return TalkPromptBuilder.build(
             transcript: transcript,
             interruptedAtSeconds: interrupted,
             includeVoiceDirectiveHint: includeVoiceDirectiveHint)
+=======
+        return TalkPromptBuilder.build(
+            transcript: transcript,
+            interruptedAtSeconds: interrupted,
+            includeVoiceDirectiveHint: false)
+>>>>>>> upstream/main
     }
 
     private enum ChatCompletionState: CustomStringConvertible {
@@ -1202,6 +1343,10 @@ final class TalkModeManager: NSObject {
         self.incrementalSpeechQueue.removeAll()
         self.incrementalSpeechTask?.cancel()
         self.incrementalSpeechTask = nil
+<<<<<<< HEAD
+=======
+        self.cancelIncrementalPrefetch()
+>>>>>>> upstream/main
         self.incrementalSpeechActive = true
         self.incrementalSpeechUsed = false
         self.incrementalSpeechLanguage = nil
@@ -1214,6 +1359,10 @@ final class TalkModeManager: NSObject {
         self.incrementalSpeechQueue.removeAll()
         self.incrementalSpeechTask?.cancel()
         self.incrementalSpeechTask = nil
+<<<<<<< HEAD
+=======
+        self.cancelIncrementalPrefetch()
+>>>>>>> upstream/main
         self.incrementalSpeechActive = false
         self.incrementalSpeechContext = nil
         self.incrementalSpeechDirective = nil
@@ -1241,12 +1390,22 @@ final class TalkModeManager: NSObject {
 
         self.incrementalSpeechTask = Task { @MainActor [weak self] in
             guard let self else { return }
+<<<<<<< HEAD
+=======
+            defer {
+                self.cancelIncrementalPrefetch()
+                self.isSpeaking = false
+                self.stopRecognition()
+                self.incrementalSpeechTask = nil
+            }
+>>>>>>> upstream/main
             while !Task.isCancelled {
                 guard !self.incrementalSpeechQueue.isEmpty else { break }
                 let segment = self.incrementalSpeechQueue.removeFirst()
                 self.statusText = "Speaking…"
                 self.isSpeaking = true
                 self.lastSpokenText = segment
+<<<<<<< HEAD
                 await self.speakIncrementalSegment(segment)
             }
             self.isSpeaking = false
@@ -1255,6 +1414,158 @@ final class TalkModeManager: NSObject {
         }
     }
 
+=======
+                await self.updateIncrementalContextIfNeeded()
+                let context = self.incrementalSpeechContext
+                let prefetchedAudio = await self.consumeIncrementalPrefetchedAudioIfAvailable(
+                    for: segment,
+                    context: context)
+                if let context {
+                    self.startIncrementalPrefetchMonitor(context: context)
+                }
+                await self.speakIncrementalSegment(
+                    segment,
+                    context: context,
+                    prefetchedAudio: prefetchedAudio)
+                self.cancelIncrementalPrefetchMonitor()
+            }
+        }
+    }
+
+    private func cancelIncrementalPrefetch() {
+        self.cancelIncrementalPrefetchMonitor()
+        self.incrementalSpeechPrefetch?.task.cancel()
+        self.incrementalSpeechPrefetch = nil
+    }
+
+    private func cancelIncrementalPrefetchMonitor() {
+        self.incrementalSpeechPrefetchMonitorTask?.cancel()
+        self.incrementalSpeechPrefetchMonitorTask = nil
+    }
+
+    private func startIncrementalPrefetchMonitor(context: IncrementalSpeechContext) {
+        self.cancelIncrementalPrefetchMonitor()
+        self.incrementalSpeechPrefetchMonitorTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            while !Task.isCancelled {
+                if self.ensureIncrementalPrefetchForUpcomingSegment(context: context) {
+                    return
+                }
+                try? await Task.sleep(nanoseconds: 40_000_000)
+            }
+        }
+    }
+
+    private func ensureIncrementalPrefetchForUpcomingSegment(context: IncrementalSpeechContext) -> Bool {
+        guard context.canUseElevenLabs else {
+            self.cancelIncrementalPrefetch()
+            return false
+        }
+        guard let nextSegment = self.incrementalSpeechQueue.first else { return false }
+        if let existing = self.incrementalSpeechPrefetch {
+            if existing.segment == nextSegment, existing.context == context {
+                return true
+            }
+            existing.task.cancel()
+            self.incrementalSpeechPrefetch = nil
+        }
+        self.startIncrementalPrefetch(segment: nextSegment, context: context)
+        return self.incrementalSpeechPrefetch != nil
+    }
+
+    private func startIncrementalPrefetch(segment: String, context: IncrementalSpeechContext) {
+        guard context.canUseElevenLabs, let apiKey = context.apiKey, let voiceId = context.voiceId else { return }
+        let prefetchOutputFormat = self.resolveIncrementalPrefetchOutputFormat(context: context)
+        let request = self.makeIncrementalTTSRequest(
+            text: segment,
+            context: context,
+            outputFormat: prefetchOutputFormat)
+        let id = UUID()
+        let task = Task { [weak self] in
+            let stream = ElevenLabsTTSClient(apiKey: apiKey).streamSynthesize(voiceId: voiceId, request: request)
+            var chunks: [Data] = []
+            do {
+                for try await chunk in stream {
+                    try Task.checkCancellation()
+                    chunks.append(chunk)
+                }
+                self?.completeIncrementalPrefetch(id: id, chunks: chunks)
+            } catch is CancellationError {
+                self?.clearIncrementalPrefetch(id: id)
+            } catch {
+                self?.failIncrementalPrefetch(id: id, error: error)
+            }
+        }
+        self.incrementalSpeechPrefetch = IncrementalSpeechPrefetchState(
+            id: id,
+            segment: segment,
+            context: context,
+            outputFormat: prefetchOutputFormat,
+            chunks: nil,
+            task: task)
+    }
+
+    private func completeIncrementalPrefetch(id: UUID, chunks: [Data]) {
+        guard var prefetch = self.incrementalSpeechPrefetch, prefetch.id == id else { return }
+        prefetch.chunks = chunks
+        self.incrementalSpeechPrefetch = prefetch
+    }
+
+    private func clearIncrementalPrefetch(id: UUID) {
+        guard let prefetch = self.incrementalSpeechPrefetch, prefetch.id == id else { return }
+        prefetch.task.cancel()
+        self.incrementalSpeechPrefetch = nil
+    }
+
+    private func failIncrementalPrefetch(id: UUID, error: any Error) {
+        guard let prefetch = self.incrementalSpeechPrefetch, prefetch.id == id else { return }
+        self.logger.debug("incremental prefetch failed: \(error.localizedDescription, privacy: .public)")
+        prefetch.task.cancel()
+        self.incrementalSpeechPrefetch = nil
+    }
+
+    private func consumeIncrementalPrefetchedAudioIfAvailable(
+        for segment: String,
+        context: IncrementalSpeechContext?
+    ) async -> IncrementalPrefetchedAudio?
+    {
+        guard let context else {
+            self.cancelIncrementalPrefetch()
+            return nil
+        }
+        guard let prefetch = self.incrementalSpeechPrefetch else {
+            return nil
+        }
+        guard prefetch.context == context else {
+            prefetch.task.cancel()
+            self.incrementalSpeechPrefetch = nil
+            return nil
+        }
+        guard prefetch.segment == segment else {
+            return nil
+        }
+        if let chunks = prefetch.chunks, !chunks.isEmpty {
+            let prefetched = IncrementalPrefetchedAudio(chunks: chunks, outputFormat: prefetch.outputFormat)
+            self.incrementalSpeechPrefetch = nil
+            return prefetched
+        }
+        await prefetch.task.value
+        guard let completed = self.incrementalSpeechPrefetch else { return nil }
+        guard completed.context == context, completed.segment == segment else { return nil }
+        guard let chunks = completed.chunks, !chunks.isEmpty else { return nil }
+        let prefetched = IncrementalPrefetchedAudio(chunks: chunks, outputFormat: completed.outputFormat)
+        self.incrementalSpeechPrefetch = nil
+        return prefetched
+    }
+
+    private func resolveIncrementalPrefetchOutputFormat(context: IncrementalSpeechContext) -> String? {
+        if TalkTTSValidation.pcmSampleRate(from: context.outputFormat) != nil {
+            return ElevenLabsTTSClient.validatedOutputFormat("mp3_44100_128")
+        }
+        return context.outputFormat
+    }
+
+>>>>>>> upstream/main
     private func finishIncrementalSpeech() async {
         guard self.incrementalSpeechActive else { return }
         let leftover = self.incrementalSpeechBuffer.flush()
@@ -1289,7 +1600,14 @@ final class TalkModeManager: NSObject {
         for await evt in stream {
             if Task.isCancelled { return }
             guard evt.event == "agent", let payload = evt.payload else { continue }
+<<<<<<< HEAD
             guard let agentEvent = try? GatewayPayloadDecoding.decode(payload, as: HanzoBotAgentEventPayload.self) else {
+=======
+            guard let agentEvent = try? GatewayPayloadDecoding.decode(
+                payload,
+                as: OpenClawAgentEventPayload.self
+            ) else {
+>>>>>>> upstream/main
                 continue
             }
             guard agentEvent.runId == runId, agentEvent.stream == "assistant" else { continue }
@@ -1366,15 +1684,112 @@ final class TalkModeManager: NSObject {
             canUseElevenLabs: canUseElevenLabs)
     }
 
+<<<<<<< HEAD
     private func speakIncrementalSegment(_ text: String) async {
         await self.updateIncrementalContextIfNeeded()
         guard let context = self.incrementalSpeechContext else {
+=======
+    private func makeIncrementalTTSRequest(
+        text: String,
+        context: IncrementalSpeechContext,
+        outputFormat: String?
+    ) -> ElevenLabsTTSRequest
+    {
+        ElevenLabsTTSRequest(
+            text: text,
+            modelId: context.modelId,
+            outputFormat: outputFormat,
+            speed: TalkTTSValidation.resolveSpeed(
+                speed: context.directive?.speed,
+                rateWPM: context.directive?.rateWPM),
+            stability: TalkTTSValidation.validatedStability(
+                context.directive?.stability,
+                modelId: context.modelId),
+            similarity: TalkTTSValidation.validatedUnit(context.directive?.similarity),
+            style: TalkTTSValidation.validatedUnit(context.directive?.style),
+            speakerBoost: context.directive?.speakerBoost,
+            seed: TalkTTSValidation.validatedSeed(context.directive?.seed),
+            normalize: ElevenLabsTTSClient.validatedNormalize(context.directive?.normalize),
+            language: context.language,
+            latencyTier: TalkTTSValidation.validatedLatencyTier(context.directive?.latencyTier))
+    }
+
+    /// Returns `mp3_44100_128` when the API has already rejected PCM, otherwise `pcm_44100`.
+    private var effectiveDefaultOutputFormat: String {
+        self.pcmFormatUnavailable ? "mp3_44100_128" : "pcm_44100"
+    }
+
+    private static func monitorStreamFailures(
+        _ stream: AsyncThrowingStream<Data, Error>,
+        failureBox: StreamFailureBox
+    ) -> AsyncThrowingStream<Data, Error>
+    {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    for try await chunk in stream {
+                        continuation.yield(chunk)
+                    }
+                    continuation.finish()
+                } catch {
+                    failureBox.set(error)
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in
+                task.cancel()
+            }
+        }
+    }
+
+    private static func isPCMFormatRejectedByAPI(_ error: Error?) -> Bool {
+        guard let error = error as NSError? else { return false }
+        guard error.domain == "ElevenLabsTTS", error.code >= 400 else { return false }
+        let message = (error.userInfo[NSLocalizedDescriptionKey] as? String ?? error.localizedDescription).lowercased()
+        return message.contains("output_format")
+            || message.contains("pcm_")
+            || message.contains("pcm ")
+            || message.contains("subscription_required")
+    }
+
+    private static func makeBufferedAudioStream(chunks: [Data]) -> AsyncThrowingStream<Data, Error> {
+        AsyncThrowingStream { continuation in
+            for chunk in chunks {
+                continuation.yield(chunk)
+            }
+            continuation.finish()
+        }
+    }
+
+    private func speakIncrementalSegment(
+        _ text: String,
+        context preferredContext: IncrementalSpeechContext? = nil,
+        prefetchedAudio: IncrementalPrefetchedAudio? = nil
+    ) async
+    {
+        let context: IncrementalSpeechContext
+        if let preferredContext {
+            context = preferredContext
+        } else {
+            await self.updateIncrementalContextIfNeeded()
+            guard let resolvedContext = self.incrementalSpeechContext else {
+                try? await TalkSystemSpeechSynthesizer.shared.speak(
+                    text: text,
+                    language: self.incrementalSpeechLanguage)
+                return
+            }
+            context = resolvedContext
+        }
+
+        guard context.canUseElevenLabs, let apiKey = context.apiKey, let voiceId = context.voiceId else {
+>>>>>>> upstream/main
             try? await TalkSystemSpeechSynthesizer.shared.speak(
                 text: text,
                 language: self.incrementalSpeechLanguage)
             return
         }
 
+<<<<<<< HEAD
         if context.canUseElevenLabs, let apiKey = context.apiKey, let voiceId = context.voiceId {
             let request = ElevenLabsTTSRequest(
                 text: text,
@@ -1437,12 +1852,60 @@ final class TalkModeManager: NSObject {
             try? await TalkSystemSpeechSynthesizer.shared.speak(
                 text: text,
                 language: self.incrementalSpeechLanguage)
+=======
+        let client = ElevenLabsTTSClient(apiKey: apiKey)
+        let request = self.makeIncrementalTTSRequest(
+            text: text,
+            context: context,
+            outputFormat: context.outputFormat)
+        let rawStream: AsyncThrowingStream<Data, Error>
+        if let prefetchedAudio, !prefetchedAudio.chunks.isEmpty {
+            rawStream = Self.makeBufferedAudioStream(chunks: prefetchedAudio.chunks)
+        } else {
+            rawStream = client.streamSynthesize(voiceId: voiceId, request: request)
+        }
+        let playbackFormat = prefetchedAudio?.outputFormat ?? context.outputFormat
+        let sampleRate = TalkTTSValidation.pcmSampleRate(from: playbackFormat)
+        let result: StreamingPlaybackResult
+        if let sampleRate {
+            let streamFailure = StreamFailureBox()
+            let stream = Self.monitorStreamFailures(rawStream, failureBox: streamFailure)
+            self.lastPlaybackWasPCM = true
+            var playback = await self.pcmPlayer.play(stream: stream, sampleRate: sampleRate)
+            if !playback.finished, playback.interruptedAt == nil {
+                self.logger.warning("pcm playback failed; retrying mp3")
+                if Self.isPCMFormatRejectedByAPI(streamFailure.value) {
+                    self.pcmFormatUnavailable = true
+                }
+                self.lastPlaybackWasPCM = false
+                let mp3Format = ElevenLabsTTSClient.validatedOutputFormat("mp3_44100_128")
+                let mp3Stream = client.streamSynthesize(
+                    voiceId: voiceId,
+                    request: self.makeIncrementalTTSRequest(
+                        text: text,
+                        context: context,
+                        outputFormat: mp3Format))
+                playback = await self.mp3Player.play(stream: mp3Stream)
+            }
+            result = playback
+        } else {
+            self.lastPlaybackWasPCM = false
+            result = await self.mp3Player.play(stream: rawStream)
+        }
+        if !result.finished, let interruptedAt = result.interruptedAt {
+            self.lastInterruptedAtSeconds = interruptedAt
+>>>>>>> upstream/main
         }
     }
 
 }
 
 private struct IncrementalSpeechBuffer {
+<<<<<<< HEAD
+=======
+    private static let softBoundaryMinChars = 72
+
+>>>>>>> upstream/main
     private(set) var latestText: String = ""
     private(set) var directive: TalkDirective?
     private var spokenOffset: Int = 0
@@ -1535,8 +1998,14 @@ private struct IncrementalSpeechBuffer {
             }
 
             if !inCodeBlock {
+<<<<<<< HEAD
                 buffer.append(chars[idx])
                 if Self.isBoundary(chars[idx]) {
+=======
+                let currentChar = chars[idx]
+                buffer.append(currentChar)
+                if Self.isBoundary(currentChar) || Self.isSoftBoundary(currentChar, bufferedChars: buffer.count) {
+>>>>>>> upstream/main
                     lastBoundary = idx + 1
                     bufferAtBoundary = buffer
                     inCodeBlockAtBoundary = inCodeBlock
@@ -1563,17 +2032,29 @@ private struct IncrementalSpeechBuffer {
     private static func isBoundary(_ ch: Character) -> Bool {
         ch == "." || ch == "!" || ch == "?" || ch == "\n"
     }
+<<<<<<< HEAD
+=======
+
+    private static func isSoftBoundary(_ ch: Character, bufferedChars: Int) -> Bool {
+        bufferedChars >= Self.softBoundaryMinChars && ch.isWhitespace
+    }
+>>>>>>> upstream/main
 }
 
 extension TalkModeManager {
     nonisolated static func requestMicrophonePermission() async -> Bool {
+<<<<<<< HEAD
         let session = AVAudioSession.sharedInstance()
         switch session.recordPermission {
+=======
+        switch AVAudioApplication.shared.recordPermission {
+>>>>>>> upstream/main
         case .granted:
             return true
         case .denied:
             return false
         case .undetermined:
+<<<<<<< HEAD
             break
         @unknown default:
             return false
@@ -1584,6 +2065,16 @@ extension TalkModeManager {
                 completion(ok)
             }
         }
+=======
+            return await self.requestPermissionWithTimeout { completion in
+                AVAudioApplication.requestRecordPermission(completionHandler: { ok in
+                    completion(ok)
+                })
+            }
+        @unknown default:
+            return false
+        }
+>>>>>>> upstream/main
     }
 
     nonisolated static func requestSpeechPermission() async -> Bool {
@@ -1607,7 +2098,11 @@ extension TalkModeManager {
     }
 
     private nonisolated static func requestPermissionWithTimeout(
+<<<<<<< HEAD
         _ operation: @escaping @Sendable (@escaping (Bool) -> Void) -> Void) async -> Bool
+=======
+        _ operation: @escaping @Sendable (@escaping @Sendable (Bool) -> Void) -> Void) async -> Bool
+>>>>>>> upstream/main
     {
         do {
             return try await AsyncTimeout.withTimeout(
@@ -1726,16 +2221,72 @@ extension TalkModeManager {
         return trimmed
     }
 
+<<<<<<< HEAD
+=======
+    struct TalkProviderConfigSelection {
+        let provider: String
+        let config: [String: Any]
+    }
+
+    private static func normalizedTalkProviderID(_ raw: String?) -> String? {
+        let trimmed = (raw ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    static func selectTalkProviderConfig(_ talk: [String: Any]?) -> TalkProviderConfigSelection? {
+        guard let talk else { return nil }
+        let rawProvider = talk["provider"] as? String
+        let rawProviders = talk["providers"] as? [String: Any]
+        guard rawProvider != nil || rawProviders != nil else { return nil }
+        let providers = rawProviders ?? [:]
+        let normalizedProviders = providers.reduce(into: [String: [String: Any]]()) { acc, entry in
+            guard
+                let providerID = Self.normalizedTalkProviderID(entry.key),
+                let config = entry.value as? [String: Any]
+            else { return }
+            acc[providerID] = config
+        }
+        let providerID =
+            Self.normalizedTalkProviderID(rawProvider) ??
+            normalizedProviders.keys.min() ??
+            Self.defaultTalkProvider
+        return TalkProviderConfigSelection(
+            provider: providerID,
+            config: normalizedProviders[providerID] ?? [:])
+    }
+
+>>>>>>> upstream/main
     func reloadConfig() async {
         guard let gateway else { return }
         self.pcmFormatUnavailable = false
         do {
+<<<<<<< HEAD
             let res = try await gateway.request(method: "talk.config", paramsJSON: "{\"includeSecrets\":true}", timeoutSeconds: 8)
             guard let json = try JSONSerialization.jsonObject(with: res) as? [String: Any] else { return }
             guard let config = json["config"] as? [String: Any] else { return }
             let talk = config["talk"] as? [String: Any]
             self.defaultVoiceId = (talk?["voiceId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
             if let aliases = talk?["voiceAliases"] as? [String: Any] {
+=======
+            let res = try await gateway.request(
+                method: "talk.config",
+                paramsJSON: "{\"includeSecrets\":true}",
+                timeoutSeconds: 8
+            )
+            guard let json = try JSONSerialization.jsonObject(with: res) as? [String: Any] else { return }
+            guard let config = json["config"] as? [String: Any] else { return }
+            let talk = config["talk"] as? [String: Any]
+            let selection = Self.selectTalkProviderConfig(talk)
+            if talk != nil, selection == nil {
+                GatewayDiagnostics.log(
+                    "talk config ignored: legacy payload unsupported on iOS beta; expected talk.provider/providers")
+            }
+            let activeProvider = selection?.provider ?? Self.defaultTalkProvider
+            let activeConfig = selection?.config
+            self.defaultVoiceId = (activeConfig?["voiceId"] as? String)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if let aliases = activeConfig?["voiceAliases"] as? [String: Any] {
+>>>>>>> upstream/main
                 var resolved: [String: String] = [:]
                 for (key, value) in aliases {
                     guard let id = value as? String else { continue }
@@ -1751,30 +2302,68 @@ extension TalkModeManager {
             if !self.voiceOverrideActive {
                 self.currentVoiceId = self.defaultVoiceId
             }
+<<<<<<< HEAD
             let model = (talk?["modelId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+=======
+            let model = (activeConfig?["modelId"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+>>>>>>> upstream/main
             self.defaultModelId = (model?.isEmpty == false) ? model : Self.defaultModelIdFallback
             if !self.modelOverrideActive {
                 self.currentModelId = self.defaultModelId
             }
+<<<<<<< HEAD
             self.defaultOutputFormat = (talk?["outputFormat"] as? String)?
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             let rawConfigApiKey = (talk?["apiKey"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
             let configApiKey = Self.normalizedTalkApiKey(rawConfigApiKey)
             let localApiKey = Self.normalizedTalkApiKey(GatewaySettingsStore.loadTalkElevenLabsApiKey())
+=======
+            self.defaultOutputFormat = (activeConfig?["outputFormat"] as? String)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let rawConfigApiKey = (activeConfig?["apiKey"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let configApiKey = Self.normalizedTalkApiKey(rawConfigApiKey)
+            let localApiKey = Self.normalizedTalkApiKey(
+                GatewaySettingsStore.loadTalkProviderApiKey(provider: activeProvider))
+>>>>>>> upstream/main
             if rawConfigApiKey == Self.redactedConfigSentinel {
                 self.apiKey = (localApiKey?.isEmpty == false) ? localApiKey : nil
                 GatewayDiagnostics.log("talk config apiKey redacted; using local override if present")
             } else {
                 self.apiKey = (localApiKey?.isEmpty == false) ? localApiKey : configApiKey
             }
+<<<<<<< HEAD
             if let interrupt = talk?["interruptOnSpeech"] as? Bool {
                 self.interruptOnSpeech = interrupt
             }
+=======
+            if activeProvider != Self.defaultTalkProvider {
+                self.apiKey = nil
+                GatewayDiagnostics.log(
+                    "talk provider '\(activeProvider)' not yet supported on iOS; using system voice fallback")
+            }
+            self.gatewayTalkDefaultVoiceId = self.defaultVoiceId
+            self.gatewayTalkDefaultModelId = self.defaultModelId
+            self.gatewayTalkApiKeyConfigured = (self.apiKey?.isEmpty == false)
+            self.gatewayTalkConfigLoaded = true
+            if let interrupt = talk?["interruptOnSpeech"] as? Bool {
+                self.interruptOnSpeech = interrupt
+            }
+            if selection != nil {
+                GatewayDiagnostics.log("talk config provider=\(activeProvider)")
+            }
+>>>>>>> upstream/main
         } catch {
             self.defaultModelId = Self.defaultModelIdFallback
             if !self.modelOverrideActive {
                 self.currentModelId = self.defaultModelId
             }
+<<<<<<< HEAD
+=======
+            self.gatewayTalkDefaultVoiceId = nil
+            self.gatewayTalkDefaultModelId = nil
+            self.gatewayTalkApiKeyConfigured = false
+            self.gatewayTalkConfigLoaded = false
+>>>>>>> upstream/main
         }
     }
 
@@ -1792,10 +2381,25 @@ extension TalkModeManager {
 
     private static func describeAudioSession() -> String {
         let session = AVAudioSession.sharedInstance()
+<<<<<<< HEAD
         let inputs = session.currentRoute.inputs.map { "\($0.portType.rawValue):\($0.portName)" }.joined(separator: ",")
         let outputs = session.currentRoute.outputs.map { "\($0.portType.rawValue):\($0.portName)" }.joined(separator: ",")
         let available = session.availableInputs?.map { "\($0.portType.rawValue):\($0.portName)" }.joined(separator: ",") ?? ""
         return "category=\(session.category.rawValue) mode=\(session.mode.rawValue) opts=\(session.categoryOptions.rawValue) inputAvail=\(session.isInputAvailable) routeIn=[\(inputs)] routeOut=[\(outputs)] availIn=[\(available)]"
+=======
+        let inputs = session.currentRoute.inputs
+            .map { "\($0.portType.rawValue):\($0.portName)" }
+            .joined(separator: ",")
+        let outputs = session.currentRoute.outputs
+            .map { "\($0.portType.rawValue):\($0.portName)" }
+            .joined(separator: ",")
+        let available = session.availableInputs?
+            .map { "\($0.portType.rawValue):\($0.portName)" }
+            .joined(separator: ",") ?? ""
+        return "category=\(session.category.rawValue) mode=\(session.mode.rawValue) "
+            + "opts=\(session.categoryOptions.rawValue) inputAvail=\(session.isInputAvailable) "
+            + "routeIn=[\(inputs)] routeOut=[\(outputs)] availIn=[\(available)]"
+>>>>>>> upstream/main
     }
 }
 
@@ -1863,7 +2467,13 @@ private final class AudioTapDiagnostics: @unchecked Sendable {
 
         guard shouldLog else { return }
         GatewayDiagnostics.log(
+<<<<<<< HEAD
             "\(label) mic: buffers=\(count) frames=\(frames) rate=\(Int(rate))Hz ch=\(ch) rms=\(String(format: "%.4f", resolvedRms)) max=\(String(format: "%.4f", maxRms))")
+=======
+            "\(label) mic: buffers=\(count) frames=\(frames) rate=\(Int(rate))Hz ch=\(ch) "
+                + "rms=\(String(format: "%.4f", resolvedRms)) max=\(String(format: "%.4f", maxRms))"
+        )
+>>>>>>> upstream/main
     }
 }
 
@@ -1900,7 +2510,11 @@ extension TalkModeManager {
 }
 #endif
 
+<<<<<<< HEAD
 private struct IncrementalSpeechContext {
+=======
+private struct IncrementalSpeechContext: Equatable {
+>>>>>>> upstream/main
     let apiKey: String?
     let voiceId: String?
     let modelId: String?
@@ -1910,4 +2524,22 @@ private struct IncrementalSpeechContext {
     let canUseElevenLabs: Bool
 }
 
+<<<<<<< HEAD
 // swiftlint:enable type_body_length
+=======
+private struct IncrementalSpeechPrefetchState {
+    let id: UUID
+    let segment: String
+    let context: IncrementalSpeechContext
+    let outputFormat: String?
+    var chunks: [Data]?
+    let task: Task<Void, Never>
+}
+
+private struct IncrementalPrefetchedAudio {
+    let chunks: [Data]
+    let outputFormat: String?
+}
+
+// swiftlint:enable type_body_length file_length
+>>>>>>> upstream/main

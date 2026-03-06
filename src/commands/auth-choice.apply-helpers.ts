@@ -3,7 +3,11 @@ import type { WizardPrompter } from "../wizard/prompts.js";
 import type { ApplyAuthChoiceParams } from "./auth-choice.apply.js";
 import type { SecretInputMode } from "./onboard-types.js";
 import { resolveEnvApiKey } from "../agents/model-auth.js";
-import { type SecretInput, type SecretRef } from "../config/types.secrets.js";
+import {
+  isValidEnvSecretRefId,
+  type SecretInput,
+  type SecretRef,
+} from "../config/types.secrets.js";
 import { encodeJsonPointerToken } from "../secrets/json-pointer.js";
 import { PROVIDER_ENV_VARS } from "../secrets/provider-env-vars.js";
 import {
@@ -15,7 +19,6 @@ import { formatApiKeyPreview } from "./auth-choice.api-key.js";
 import { applyDefaultModelChoice } from "./auth-choice.default-model.js";
 
 const ENV_SOURCE_LABEL_RE = /(?:^|:\s)([A-Z][A-Z0-9_]*)$/;
-const ENV_SECRET_REF_ID_RE = /^[A-Z][A-Z0-9_]{0,127}$/;
 
 type SecretRefChoice = "env" | "provider";
 
@@ -127,7 +130,7 @@ export async function promptSecretRefForOnboarding(params: {
         placeholder: params.copy?.envVarPlaceholder ?? "OPENAI_API_KEY",
         validate: (value) => {
           const candidate = value.trim();
-          if (!ENV_SECRET_REF_ID_RE.test(candidate)) {
+          if (!isValidEnvSecretRefId(candidate)) {
             return (
               params.copy?.envVarFormatError ??
               'Use an env var name like "OPENAI_API_KEY" (uppercase letters, numbers, underscores).'
@@ -144,7 +147,7 @@ export async function promptSecretRefForOnboarding(params: {
       });
       const envCandidate = String(envVarRaw ?? "").trim();
       const envVar =
-        envCandidate && ENV_SECRET_REF_ID_RE.test(envCandidate) ? envCandidate : defaultEnvVar;
+        envCandidate && isValidEnvSecretRefId(envCandidate) ? envCandidate : defaultEnvVar;
       if (!envVar) {
         throw new Error(
           `No valid environment variable name provided for provider "${params.provider}".`,
@@ -163,7 +166,7 @@ export async function promptSecretRefForOnboarding(params: {
       });
       await params.prompter.note(
         params.copy?.envValidatedMessage?.(envVar) ??
-          `Validated environment variable ${envVar}. Bot will store a reference, not the key value.`,
+          `Validated environment variable ${envVar}. OpenClaw will store a reference, not the key value.`,
         "Reference validated",
       );
       return { ref, resolvedValue };
@@ -251,7 +254,7 @@ export async function promptSecretRefForOnboarding(params: {
       });
       await params.prompter.note(
         params.copy?.providerValidatedMessage?.(selectedProvider, id, providerEntry.source) ??
-          `Validated ${providerEntry.source} reference ${selectedProvider}:${id}. Bot will store a reference, not the key value.`,
+          `Validated ${providerEntry.source} reference ${selectedProvider}:${id}. OpenClaw will store a reference, not the key value.`,
         "Reference validated",
       );
       return { ref, resolvedValue };
@@ -392,7 +395,7 @@ export async function resolveSecretInputModeForEnvSelection(params: {
       {
         value: "plaintext",
         label: params.copy?.plaintextLabel ?? "Paste API key now",
-        hint: params.copy?.plaintextHint ?? "Stores the key directly in Bot config",
+        hint: params.copy?.plaintextHint ?? "Stores the key directly in OpenClaw config",
       },
       {
         value: "ref",

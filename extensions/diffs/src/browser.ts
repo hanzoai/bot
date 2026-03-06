@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/diffs";
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -114,10 +114,10 @@ export class PlaywrightDiffScreenshotter implements DiffScreenshotter {
         await page.setContent(injectBaseHref(params.html), { waitUntil: "load" });
         await page.waitForFunction(
           () => {
-            if (document.documentElement.dataset.botDiffsReady === "true") {
+            if (document.documentElement.dataset.openclawDiffsReady === "true") {
               return true;
             }
-            return [...document.querySelectorAll("[data-bot-diff-host]")].every((element) => {
+            return [...document.querySelectorAll("[data-openclaw-diff-host]")].every((element) => {
               return (
                 element instanceof HTMLElement && element.shadowRoot?.querySelector("[data-diffs]")
               );
@@ -281,7 +281,7 @@ async function resolveBrowserExecutablePath(config: BotConfig): Promise<string |
   const cacheKey = JSON.stringify({
     configPath: config.browser?.executablePath?.trim() || "",
     env: [
-      process.env.BOT_BROWSER_EXECUTABLE_PATH ?? "",
+      process.env.OPENCLAW_BROWSER_EXECUTABLE_PATH ?? "",
       process.env.BROWSER_EXECUTABLE_PATH ?? "",
       process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?? "",
     ],
@@ -315,7 +315,7 @@ async function resolveBrowserExecutablePathUncached(
   }
 
   const envCandidates = [
-    process.env.BOT_BROWSER_EXECUTABLE_PATH,
+    process.env.OPENCLAW_BROWSER_EXECUTABLE_PATH,
     process.env.BROWSER_EXECUTABLE_PATH,
     process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
   ]

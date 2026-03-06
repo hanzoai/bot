@@ -50,10 +50,10 @@ function buildConfig(enableNoVnc: boolean): SandboxConfig {
     mode: "all",
     scope: "session",
     workspaceAccess: "none",
-    workspaceRoot: "/tmp/bot-sandboxes",
+    workspaceRoot: "/tmp/openclaw-sandboxes",
     docker: {
-      image: "bot-sandbox:bookworm-slim",
-      containerPrefix: "bot-sbx-",
+      image: "openclaw-sandbox:bookworm-slim",
+      containerPrefix: "openclaw-sbx-",
       workdir: "/workspace",
       readOnlyRoot: true,
       tmpfs: ["/tmp", "/var/tmp", "/run"],
@@ -63,9 +63,9 @@ function buildConfig(enableNoVnc: boolean): SandboxConfig {
     },
     browser: {
       enabled: true,
-      image: "bot-sandbox-browser:bookworm-slim",
-      containerPrefix: "bot-sbx-browser-",
-      network: "bot-sandbox-browser",
+      image: "openclaw-sandbox-browser:bookworm-slim",
+      containerPrefix: "openclaw-sbx-browser-",
+      network: "openclaw-sandbox-browser",
       cdpPort: 9222,
       vncPort: 5900,
       noVncPort: 6080,
@@ -147,11 +147,11 @@ describe("ensureSandboxBrowser create args", () => {
     expect(createArgs).toBeDefined();
     expect(createArgs).toContain("127.0.0.1::6080");
     const envEntries = collectDockerFlagValues(createArgs ?? [], "-e");
-    expect(envEntries).toContain("BOT_BROWSER_NO_SANDBOX=1");
+    expect(envEntries).toContain("OPENCLAW_BROWSER_NO_SANDBOX=1");
     const passwordEntry = envEntries.find((entry) =>
-      entry.startsWith("BOT_BROWSER_NOVNC_PASSWORD="),
+      entry.startsWith("OPENCLAW_BROWSER_NOVNC_PASSWORD="),
     );
-    expect(passwordEntry).toMatch(/^BOT_BROWSER_NOVNC_PASSWORD=[A-Za-z0-9]{8}$/);
+    expect(passwordEntry).toMatch(/^OPENCLAW_BROWSER_NOVNC_PASSWORD=[A-Za-z0-9]{8}$/);
     expect(result?.noVncUrl).toMatch(/^http:\/\/127\.0\.0\.1:19000\/sandbox\/novnc\?token=/);
     expect(result?.noVncUrl).not.toContain("password=");
   });
@@ -166,7 +166,9 @@ describe("ensureSandboxBrowser create args", () => {
 
     const createArgs = findDockerArgsCall(dockerMocks.execDocker.mock.calls, "create");
     const envEntries = collectDockerFlagValues(createArgs ?? [], "-e");
-    expect(envEntries.some((entry) => entry.startsWith("BOT_BROWSER_NOVNC_PASSWORD="))).toBe(false);
+    expect(envEntries.some((entry) => entry.startsWith("OPENCLAW_BROWSER_NOVNC_PASSWORD="))).toBe(
+      false,
+    );
     expect(result?.noVncUrl).toBeUndefined();
   });
 

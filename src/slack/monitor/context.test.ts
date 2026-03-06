@@ -36,11 +36,12 @@ function createTestContext() {
     threadInheritParent: false,
     slashCommand: {
       enabled: true,
-      name: "@hanzo/bot",
+      name: "openclaw",
       ephemeral: true,
       sessionPrefix: "slack:slash",
     },
     textLimit: 4000,
+    typingReaction: "",
     ackReactionScope: "group-mentions",
     mediaMaxBytes: 20 * 1024 * 1024,
     removeAckAfterReply: false,

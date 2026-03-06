@@ -1,3 +1,8 @@
+import type {
+  SessionEntry,
+  loadSessionStore as loadSessionStoreFn,
+  resolveStorePath as resolveStorePathFn,
+} from "../../../config/sessions.js";
 import type { CommandHandler, CommandHandlerResult } from "../commands-types.js";
 import {
   countPendingDescendantRuns,

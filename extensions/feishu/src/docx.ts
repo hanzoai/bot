@@ -1,5 +1,5 @@
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/feishu";
 import type * as Lark from "@larksuiteoapi/node-sdk";
-import type { BotPluginApi } from "bot/plugin-sdk";
 import { Type } from "@sinclair/typebox";
 import { existsSync, promises as fs } from "node:fs";
 import { homedir } from "node:os";

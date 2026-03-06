@@ -1,28 +1,28 @@
 ---
-summary: "Hanzo Bot is a multi-channel gateway for AI agents that runs on any OS."
+summary: "OpenClaw is a multi-channel gateway for AI agents that runs on any OS."
 read_when:
-  - Introducing Hanzo Bot to newcomers
-title: "Hanzo Bot"
+  - Introducing OpenClaw to newcomers
+title: "OpenClaw"
 ---
 
-# Hanzo Bot
+# OpenClaw 🦞
 
 <p align="center">
     <img
-        src="/assets/bot-logo-text-dark.png"
-        alt="Hanzo Bot"
+        src="/assets/openclaw-logo-text-dark.png"
+        alt="OpenClaw"
         width="500"
         class="dark:hidden"
     />
     <img
-        src="/assets/bot-logo-text.png"
-        alt="Hanzo Bot"
+        src="/assets/openclaw-logo-text.png"
+        alt="OpenClaw"
         width="500"
         class="hidden dark:block"
     />
 </p>
 
-> _Your AI team, deployed everywhere._
+> _"EXFOLIATE! EXFOLIATE!"_ — A space lobster, probably
 
 <p align="center">
   <strong>Any OS gateway for AI agents across WhatsApp, Telegram, Discord, iMessage, and more.</strong><br />
@@ -31,19 +31,19 @@ title: "Hanzo Bot"
 
 <Columns>
   <Card title="Get Started" href="/start/getting-started" icon="rocket">
-    Install Hanzo Bot and bring up the Gateway in minutes.
+    Install OpenClaw and bring up the Gateway in minutes.
   </Card>
   <Card title="Run the Wizard" href="/start/wizard" icon="sparkles">
-    Guided setup with `hanzo-bot onboard` and pairing flows.
+    Guided setup with `openclaw onboard` and pairing flows.
   </Card>
   <Card title="Open the Control UI" href="/web/control-ui" icon="layout-dashboard">
     Launch the browser dashboard for chat, config, and sessions.
   </Card>
 </Columns>
 
-## What is Hanzo Bot?
+## What is OpenClaw?
 
-Hanzo Bot is a **self-hosted gateway** that connects your favorite chat apps — WhatsApp, Telegram, Discord, iMessage, and more — to AI coding agents like Pi. You run a single Gateway process on your own machine (or a server), and it becomes the bridge between your messaging apps and an always-available AI assistant.
+OpenClaw is a **self-hosted gateway** that connects your favorite chat apps — WhatsApp, Telegram, Discord, iMessage, and more — to AI coding agents like Pi. You run a single Gateway process on your own machine (or a server), and it becomes the bridge between your messaging apps and an always-available AI assistant.
 
 **Who is it for?** Developers and power users who want a personal AI assistant they can message from anywhere — without giving up control of their data or relying on a hosted service.
 
@@ -96,20 +96,20 @@ The Gateway is the single source of truth for sessions, routing, and channel con
 ## Quick start
 
 <Steps>
-  <Step title="Install Hanzo Bot">
+  <Step title="Install OpenClaw">
     ```bash
-    npm install -g bot@latest
+    npm install -g openclaw@latest
     ```
   </Step>
   <Step title="Onboard and install the service">
     ```bash
-    hanzo-bot onboard --install-daemon
+    openclaw onboard --install-daemon
     ```
   </Step>
   <Step title="Pair WhatsApp and start the Gateway">
     ```bash
-    hanzo-bot channels login
-    hanzo-bot gateway --port 18789
+    openclaw channels login
+    openclaw gateway --port 18789
     ```
   </Step>
 </Steps>
@@ -124,14 +124,14 @@ Open the browser Control UI after the Gateway starts.
 - Remote access: [Web surfaces](/web) and [Tailscale](/gateway/tailscale)
 
 <p align="center">
-  <img src="whatsapp-bot.jpg" alt="Hanzo Bot" width="420" />
+  <img src="whatsapp-openclaw.jpg" alt="OpenClaw" width="420" />
 </p>
 
 ## Configuration (optional)
 
-Config lives at `~/.hanzo/bot/bot.json`.
+Config lives at `~/.openclaw/openclaw.json`.
 
-- If you **do nothing**, Hanzo Bot uses the bundled Pi binary in RPC mode with per-sender sessions.
+- If you **do nothing**, OpenClaw uses the bundled Pi binary in RPC mode with per-sender sessions.
 - If you want to lock it down, start with `channels.whatsapp.allowFrom` and (for groups) mention rules.
 
 Example:
@@ -144,7 +144,7 @@ Example:
       groups: { "*": { requireMention: true } },
     },
   },
-  messages: { groupChat: { mentionPatterns: ["@bot"] } },
+  messages: { groupChat: { mentionPatterns: ["@openclaw"] } },
 }
 ```
 

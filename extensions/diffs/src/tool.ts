@@ -1,4 +1,4 @@
-import type { AnyAgentTool, BotPluginApi } from "bot/plugin-sdk";
+import type { AnyAgentTool, BotPluginApi } from "@hanzo/bot/plugin-sdk/diffs";
 import { Static, Type } from "@sinclair/typebox";
 import fs from "node:fs/promises";
 import type { DiffArtifactStore } from "./store.js";

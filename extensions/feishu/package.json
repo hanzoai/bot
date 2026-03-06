@@ -1,7 +1,7 @@
 {
-  "name": "@hanzo/bot-feishu",
-  "version": "2026.3.5",
-  "description": "Hanzo Bot Feishu/Lark channel plugin (community maintained by @m1heng)",
+  "name": "@openclaw/feishu",
+  "version": "2026.3.6",
+  "description": "OpenClaw Feishu/Lark channel plugin (community maintained by @m1heng)",
   "type": "module",
   "dependencies": {
     "@larksuiteoapi/node-sdk": "^1.59.0",
@@ -9,10 +9,7 @@
     "https-proxy-agent": "^7.0.6",
     "zod": "^4.3.6"
   },
-  "devDependencies": {
-    "@hanzo/bot": "workspace:*"
-  },
-  "bot": {
+  "openclaw": {
     "extensions": [
       "./index.ts"
     ],
@@ -30,7 +27,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@hanzo/bot-feishu",
+      "npmSpec": "@openclaw/feishu",
       "localPath": "extensions/feishu",
       "defaultChoice": "npm"
     }

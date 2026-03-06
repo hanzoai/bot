@@ -7,8 +7,8 @@ import type { GetReplyOptions, ReplyPayload } from "../types.js";
 import type { InlineDirectives } from "./directive-handling.js";
 import type { createModelSelectionState } from "./model-selection.js";
 import type { TypingController } from "./typing.js";
-import { createBotTools } from "../../agents/bot-tools.js";
 import { collectTextContentBlocks } from "../../agents/content-blocks.js";
+import { createBotTools } from "../../agents/openclaw-tools.js";
 import { applyOwnerOnlyToolPolicy } from "../../agents/tool-policy.js";
 import { getChannelDock } from "../../channels/dock.js";
 import { logVerbose } from "../../globals.js";
@@ -332,6 +332,8 @@ export async function handleInlineActions(params: {
     handleCommands({
       // Pass sessionCtx so command handlers can mutate stripped body for same-turn continuation.
       ctx: sessionCtx,
+      // Keep original finalized context in sync when command handlers need outer-dispatch side effects.
+      rootCtx: ctx,
       cfg,
       command: commandInput,
       agentId,

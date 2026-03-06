@@ -1,5 +1,5 @@
-import type { BotPluginApi } from "bot/plugin-sdk";
-import { emptyPluginConfigSchema } from "bot/plugin-sdk";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/diagnostics-otel";
+import { emptyPluginConfigSchema } from "@hanzo/bot/plugin-sdk/diagnostics-otel";
 import { createDiagnosticsOtelService } from "./src/service.js";
 
 const plugin = {
