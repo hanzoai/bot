@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026.3.5
+
+### Changes
+
+- Version alignment with core Hanzo Bot release numbers.
+
 ## 2026.3.1
 
 ### Changes
