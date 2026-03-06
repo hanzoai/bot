@@ -14,7 +14,7 @@ describe("buildSystemdUnit", () => {
 
   it("renders control-group kill mode for child-process cleanup", () => {
     const unit = buildSystemdUnit({
-      description: "OpenClaw Gateway",
+      description: "Bot Gateway",
       programArguments: ["/usr/bin/openclaw", "gateway", "run"],
       environment: {},
     });

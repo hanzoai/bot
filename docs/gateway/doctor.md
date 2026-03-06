@@ -240,6 +240,14 @@ Doctor warns when `gateway.auth` is missing on a local gateway and offers to
 generate a token. Use `hanzo-bot doctor --generate-gateway-token` to force token
 creation in automation.
 
+### 12b) Read-only SecretRef-aware repairs
+
+Some repair flows need to inspect configured credentials without weakening runtime fail-fast behavior.
+
+- `openclaw doctor --fix` now uses the same read-only SecretRef summary model as status-family commands for targeted config repairs.
+- Example: Telegram `allowFrom` / `groupAllowFrom` `@username` repair tries to use configured bot credentials when available.
+- If the Telegram bot token is configured via SecretRef but unavailable in the current command path, doctor reports that the credential is configured-but-unavailable and skips auto-resolution instead of crashing or misreporting the token as missing.
+
 ### 13) Gateway health check + restart
 
 Doctor runs a health check and offers to restart the gateway when it looks
