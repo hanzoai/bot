@@ -1,48 +1,42 @@
 ---
 title: "Default AGENTS.md"
-summary: "Default Hanzo Bot agent instructions and skills roster for the personal assistant setup"
+summary: "Default OpenClaw agent instructions and skills roster for the personal assistant setup"
 read_when:
-  - Starting a new Hanzo Bot agent session
+  - Starting a new OpenClaw agent session
   - Enabling or auditing default skills
 ---
 
-# AGENTS.md — Hanzo Bot Personal Assistant (default)
+# AGENTS.md — OpenClaw Personal Assistant (default)
 
 ## First run (recommended)
 
-Hanzo Bot uses a dedicated workspace directory for the agent. Default: `~/.hanzo/bot/workspace` (configurable via `agents.defaults.workspace`).
+OpenClaw uses a dedicated workspace directory for the agent. Default: `~/.openclaw/workspace` (configurable via `agents.defaults.workspace`).
 
 1. Create the workspace (if it doesn’t already exist):
 
 ```bash
-mkdir -p ~/.hanzo/bot/workspace
+mkdir -p ~/.openclaw/workspace
 ```
 
 2. Copy the default workspace templates into the workspace:
 
 ```bash
-cp docs/reference/templates/AGENTS.md ~/.hanzo/bot/workspace/AGENTS.md
-cp docs/reference/templates/SOUL.md ~/.hanzo/bot/workspace/SOUL.md
-cp docs/reference/templates/TOOLS.md ~/.hanzo/bot/workspace/TOOLS.md
-```
-
-Optional: if you want a CEO-style multi-agent software delivery persona, start from the Architect soul template instead:
-
-```bash
-cp docs/reference/templates/SOUL.architect.md ~/.bot/workspace/SOUL.md
+cp docs/reference/templates/AGENTS.md ~/.openclaw/workspace/AGENTS.md
+cp docs/reference/templates/SOUL.md ~/.openclaw/workspace/SOUL.md
+cp docs/reference/templates/TOOLS.md ~/.openclaw/workspace/TOOLS.md
 ```
 
 3. Optional: if you want the personal assistant skill roster, replace AGENTS.md with this file:
 
 ```bash
-cp docs/reference/AGENTS.default.md ~/.hanzo/bot/workspace/AGENTS.md
+cp docs/reference/AGENTS.default.md ~/.openclaw/workspace/AGENTS.md
 ```
 
 4. Optional: choose a different workspace by setting `agents.defaults.workspace` (supports `~`):
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.hanzo/bot/workspace" } },
+  agents: { defaults: { workspace: "~/.openclaw/workspace" } },
 }
 ```
 
@@ -83,20 +77,20 @@ cp docs/reference/AGENTS.default.md ~/.hanzo/bot/workspace/AGENTS.md
 
 ## Backup tip (recommended)
 
-If you treat this workspace as Bot's memory, make it a git repo (ideally private) so `AGENTS.md` and your memory files are backed up.
+If you treat this workspace as Clawd’s “memory”, make it a git repo (ideally private) so `AGENTS.md` and your memory files are backed up.
 
 ```bash
-cd ~/.hanzo/bot/workspace
+cd ~/.openclaw/workspace
 git init
 git add AGENTS.md
-git commit -m "Add Bot workspace"
+git commit -m "Add Clawd workspace"
 # Optional: add a private remote + push
 ```
 
-## What Hanzo Bot Does
+## What OpenClaw Does
 
 - Runs WhatsApp gateway + Pi coding agent so the assistant can read/write chats, fetch context, and run skills via the host Mac.
-- macOS app manages permissions (screen recording, notifications, microphone) and exposes the `bot` CLI via its bundled binary.
+- macOS app manages permissions (screen recording, notifications, microphone) and exposes the `openclaw` CLI via its bundled binary.
 - Direct chats collapse into the agent's `main` session by default; groups stay isolated as `agent:<agentId>:<channel>:group:<id>` (rooms/channels: `agent:<agentId>:<channel>:channel:<id>`); heartbeats keep background tasks alive.
 
 ## Core Skills (enable in Settings → Skills)
@@ -121,10 +115,10 @@ git commit -m "Add Bot workspace"
 
 ## Usage Notes
 
-- Prefer the `bot` CLI for scripting; mac app handles permissions.
+- Prefer the `openclaw` CLI for scripting; mac app handles permissions.
 - Run installs from the Skills tab; it hides the button if a binary is already present.
 - Keep heartbeats enabled so the assistant can schedule reminders, monitor inboxes, and trigger camera captures.
 - Canvas UI runs full-screen with native overlays. Avoid placing critical controls in the top-left/top-right/bottom edges; add explicit gutters in the layout and don’t rely on safe-area insets.
-- For browser-driven verification, use `hanzo-bot browser` (tabs/status/screenshot) with the Hanzo Bot-managed Chrome profile.
-- For DOM inspection, use `hanzo-bot browser eval|query|dom|snapshot` (and `--json`/`--out` when you need machine output).
-- For interactions, use `hanzo-bot browser click|type|hover|drag|select|upload|press|wait|navigate|back|evaluate|run` (click/type require snapshot refs; use `evaluate` for CSS selectors).
+- For browser-driven verification, use `openclaw browser` (tabs/status/screenshot) with the OpenClaw-managed Chrome profile.
+- For DOM inspection, use `openclaw browser eval|query|dom|snapshot` (and `--json`/`--out` when you need machine output).
+- For interactions, use `openclaw browser click|type|hover|drag|select|upload|press|wait|navigate|back|evaluate|run` (click/type require snapshot refs; use `evaluate` for CSS selectors).

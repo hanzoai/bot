@@ -1,4 +1,4 @@
-import type { BotPluginConfigSchema } from "bot/plugin-sdk";
+import type { OpenClawPluginConfigSchema } from "@hanzo/bot/plugin-sdk/acpx";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -182,7 +182,7 @@ function resolveConfiguredCommand(params: { configured?: string; workspaceDir?: 
   return configured;
 }
 
-export function createAcpxPluginConfigSchema(): BotPluginConfigSchema {
+export function createAcpxPluginConfigSchema(): OpenClawPluginConfigSchema {
   return {
     safeParse(value: unknown):
       | { success: true; data?: unknown }

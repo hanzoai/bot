@@ -14,7 +14,7 @@ import {
 } from "../../discord/monitor/thread-bindings.js";
 import { logVerbose } from "../../globals.js";
 import { getSessionBindingService } from "../../infra/outbound/session-binding-service.js";
-import { scheduleGatewaySigusr1Restart, triggerBotRestart } from "../../infra/restart.js";
+import { scheduleGatewaySigusr1Restart, triggerOpenClawRestart } from "../../infra/restart.js";
 import { loadCostUsageSummary, loadSessionCostSummary } from "../../infra/session-cost-usage.js";
 import {
   setTelegramThreadBindingIdleTimeoutBySessionKey,
@@ -569,11 +569,11 @@ export const handleRestartCommand: CommandHandler = async (params, allowTextComm
     return {
       shouldContinue: false,
       reply: {
-        text: "⚙️ Restarting Bot in-process (SIGUSR1); back in a few seconds.",
+        text: "⚙️ Restarting OpenClaw in-process (SIGUSR1); back in a few seconds.",
       },
     };
   }
-  const restartMethod = triggerBotRestart();
+  const restartMethod = triggerOpenClawRestart();
   if (!restartMethod.ok) {
     const detail = restartMethod.detail ? ` Details: ${restartMethod.detail}` : "";
     return {
@@ -586,7 +586,7 @@ export const handleRestartCommand: CommandHandler = async (params, allowTextComm
   return {
     shouldContinue: false,
     reply: {
-      text: `⚙️ Restarting Bot via ${restartMethod.method}; give me a few seconds to come back online.`,
+      text: `⚙️ Restarting OpenClaw via ${restartMethod.method}; give me a few seconds to come back online.`,
     },
   };
 };

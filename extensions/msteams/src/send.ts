@@ -1,5 +1,5 @@
-import type { BotConfig } from "bot/plugin-sdk";
-import { loadOutboundMediaFromUrl } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/msteams";
+import { loadOutboundMediaFromUrl } from "@hanzo/bot/plugin-sdk/msteams";
 import { createMSTeamsConversationStoreFs } from "./conversation-store-fs.js";
 import {
   classifyMSTeamsSendError,

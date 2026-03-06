@@ -1,7 +1,7 @@
 import type { ApiClientOptions } from "grammy";
 import { sequentialize } from "@grammyjs/runner";
 import { apiThrottler } from "@grammyjs/transformer-throttler";
-import { Bot, webhookCallback } from "grammy";
+import { Bot } from "grammy";
 import type { BotConfig, ReplyToMode } from "../config/config.js";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { resolveTextChunkLimit } from "../auto-reply/chunk.js";
@@ -413,8 +413,4 @@ export function createTelegramBot(opts: TelegramBotOptions) {
   }) as typeof bot.stop;
 
   return bot;
-}
-
-export function createTelegramWebhookCallback(bot: Bot, path = "/telegram-webhook") {
-  return { path, handler: webhookCallback(bot, "http") };
 }

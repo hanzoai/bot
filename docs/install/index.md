@@ -1,5 +1,5 @@
 ---
-summary: "Install Hanzo Bot — installer script, npm/pnpm, from source, Docker, and more"
+summary: "Install OpenClaw — installer script, npm/pnpm, from source, Docker, and more"
 read_when:
   - You need an install method other than the Getting Started quickstart
   - You want to deploy to a cloud platform
@@ -18,14 +18,18 @@ Already followed [Getting Started](/start/getting-started)? You're all set — t
 - `pnpm` only if you build from source
 
 <Note>
-On Windows, we strongly recommend running Hanzo Bot under [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install).
+On Windows, we strongly recommend running OpenClaw under [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install).
 </Note>
 
 ## Install methods
 
 <Tip>
-The **installer script** is the recommended way to install Hanzo Bot. It handles Node detection, installation, and onboarding in one step.
+The **installer script** is the recommended way to install OpenClaw. It handles Node detection, installation, and onboarding in one step.
 </Tip>
+
+<Warning>
+For VPS/cloud hosts, avoid third-party "1-click" marketplace images when possible. Prefer a clean base OS image (for example Ubuntu LTS), then install OpenClaw yourself with the installer script.
+</Warning>
 
 <AccordionGroup>
   <Accordion title="Installer script" icon="rocket" defaultOpen>
@@ -34,12 +38,12 @@ The **installer script** is the recommended way to install Hanzo Bot. It handles
     <Tabs>
       <Tab title="macOS / Linux / WSL2">
         ```bash
-        curl -fsSL https://hanzo.bot/install.sh | bash
+        curl -fsSL https://openclaw.ai/install.sh | bash
         ```
       </Tab>
       <Tab title="Windows (PowerShell)">
         ```powershell
-        iwr -useb https://hanzo.bot/install.ps1 | iex
+        iwr -useb https://openclaw.ai/install.ps1 | iex
         ```
       </Tab>
     </Tabs>
@@ -51,12 +55,12 @@ The **installer script** is the recommended way to install Hanzo Bot. It handles
     <Tabs>
       <Tab title="macOS / Linux / WSL2">
         ```bash
-        curl -fsSL https://hanzo.bot/install.sh | bash -s -- --no-onboard
+        curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-onboard
         ```
       </Tab>
       <Tab title="Windows (PowerShell)">
         ```powershell
-        & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -NoOnboard
+        & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
         ```
       </Tab>
     </Tabs>
@@ -71,15 +75,15 @@ The **installer script** is the recommended way to install Hanzo Bot. It handles
     <Tabs>
       <Tab title="npm">
         ```bash
-        npm install -g bot@latest
-        hanzo-bot onboard --install-daemon
+        npm install -g openclaw@latest
+        openclaw onboard --install-daemon
         ```
 
         <Accordion title="sharp build errors?">
           If you have libvips installed globally (common on macOS via Homebrew) and `sharp` fails, force prebuilt binaries:
 
           ```bash
-          SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install -g bot@latest
+          SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm install -g openclaw@latest
           ```
 
           If you see `sharp: Please add node-gyp to your dependencies`, either install build tooling (macOS: Xcode CLT + `npm install -g node-gyp`) or use the env var above.
@@ -87,9 +91,9 @@ The **installer script** is the recommended way to install Hanzo Bot. It handles
       </Tab>
       <Tab title="pnpm">
         ```bash
-        pnpm add -g bot@latest
-        pnpm approve-builds -g        # approve bot, node-llama-cpp, sharp, etc.
-        hanzo-bot onboard --install-daemon
+        pnpm add -g openclaw@latest
+        pnpm approve-builds -g        # approve openclaw, node-llama-cpp, sharp, etc.
+        openclaw onboard --install-daemon
         ```
 
         <Note>
@@ -105,28 +109,28 @@ The **installer script** is the recommended way to install Hanzo Bot. It handles
 
     <Steps>
       <Step title="Clone and build">
-        Clone the [Hanzo Bot repo](https://github.com/hanzoai/bot) and build:
+        Clone the [OpenClaw repo](https://github.com/openclaw/openclaw) and build:
 
         ```bash
-        git clone https://github.com/hanzoai/bot.git
-        cd bot
+        git clone https://github.com/openclaw/openclaw.git
+        cd openclaw
         pnpm install
         pnpm ui:build
         pnpm build
         ```
       </Step>
       <Step title="Link the CLI">
-        Make the `bot` command available globally:
+        Make the `openclaw` command available globally:
 
         ```bash
         pnpm link --global
         ```
 
-        Alternatively, skip the link and run commands via `pnpm hanzo-bot ...` from inside the repo.
+        Alternatively, skip the link and run commands via `pnpm openclaw ...` from inside the repo.
       </Step>
       <Step title="Run onboarding">
         ```bash
-        hanzo-bot onboard --install-daemon
+        openclaw onboard --install-daemon
         ```
       </Step>
     </Steps>
@@ -161,20 +165,20 @@ The **installer script** is the recommended way to install Hanzo Bot. It handles
 Verify everything is working:
 
 ```bash
-hanzo-bot doctor         # check for config issues
-hanzo-bot status         # gateway status
-hanzo-bot dashboard      # open the browser UI
+openclaw doctor         # check for config issues
+openclaw status         # gateway status
+openclaw dashboard      # open the browser UI
 ```
 
 If you need custom runtime paths, use:
 
-- `BOT_HOME` for home-directory based internal paths
-- `BOT_STATE_DIR` for mutable state location
-- `BOT_CONFIG_PATH` for config file location
+- `OPENCLAW_HOME` for home-directory based internal paths
+- `OPENCLAW_STATE_DIR` for mutable state location
+- `OPENCLAW_CONFIG_PATH` for config file location
 
 See [Environment vars](/help/environment) for precedence and full details.
 
-## Troubleshooting: `bot` not found
+## Troubleshooting: `openclaw` not found
 
 <Accordion title="PATH diagnosis and fix">
   Quick diagnosis:
@@ -186,7 +190,7 @@ npm prefix -g
 echo "$PATH"
 ```
 
-If `$(npm prefix -g)/bin` (macOS/Linux) or `$(npm prefix -g)` (Windows) is **not** in your `$PATH`, your shell can't find global npm binaries (including `bot`).
+If `$(npm prefix -g)/bin` (macOS/Linux) or `$(npm prefix -g)` (Windows) is **not** in your `$PATH`, your shell can't find global npm binaries (including `openclaw`).
 
 Fix — add it to your shell startup file (`~/.zshrc` or `~/.bashrc`):
 
@@ -203,12 +207,12 @@ Then open a new terminal (or `rehash` in zsh / `hash -r` in bash).
 
 <CardGroup cols={3}>
   <Card title="Updating" href="/install/updating" icon="refresh-cw">
-    Keep Hanzo Bot up to date.
+    Keep OpenClaw up to date.
   </Card>
   <Card title="Migrating" href="/install/migrating" icon="arrow-right">
     Move to a new machine.
   </Card>
   <Card title="Uninstall" href="/install/uninstall" icon="trash-2">
-    Remove Hanzo Bot completely.
+    Remove OpenClaw completely.
   </Card>
 </CardGroup>

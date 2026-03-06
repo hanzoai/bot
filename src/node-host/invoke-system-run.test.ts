@@ -5,6 +5,7 @@ import { describe, expect, it, type Mock, vi } from "vitest";
 import type { ExecHostResponse } from "../infra/exec-host.js";
 import type { HandleSystemRunInvokeOptions } from "./invoke-system-run.js";
 import { saveExecApprovals } from "../infra/exec-approvals.js";
+import { buildSystemRunApprovalPlan } from "./invoke-system-run-plan.js";
 import { handleSystemRunInvoke, formatSystemRunAllowlistMissMessage } from "./invoke-system-run.js";
 
 type MockedRunCommand = Mock<HandleSystemRunInvokeOptions["runCommand"]>;
@@ -133,17 +134,17 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     approvals: Parameters<typeof saveExecApprovals>[0];
     run: (ctx: { tempHome: string }) => Promise<T>;
   }): Promise<T> {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "bot-exec-approvals-"));
-    const previousBotHome = process.env.BOT_HOME;
-    process.env.BOT_HOME = tempHome;
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-exec-approvals-"));
+    const previousOpenClawHome = process.env.OPENCLAW_HOME;
+    process.env.OPENCLAW_HOME = tempHome;
     saveExecApprovals(params.approvals);
     try {
       return await params.run({ tempHome });
     } finally {
-      if (previousBotHome === undefined) {
-        delete process.env.BOT_HOME;
+      if (previousOpenClawHome === undefined) {
+        delete process.env.OPENCLAW_HOME;
       } else {
-        process.env.BOT_HOME = previousBotHome;
+        process.env.OPENCLAW_HOME = previousOpenClawHome;
       }
       fs.rmSync(tempHome, { recursive: true, force: true });
     }
@@ -233,6 +234,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     preferMacAppExecHost: boolean;
     runViaResponse?: ExecHostResponse | null;
     command?: string[];
+    rawCommand?: string | null;
     cwd?: string;
     security?: "full" | "allowlist";
     ask?: "off" | "on-miss" | "always";
@@ -286,6 +288,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
       client: {} as never,
       params: {
         command: params.command ?? ["echo", "ok"],
+        rawCommand: params.rawCommand,
         cwd: params.cwd,
         approved: params.approved ?? false,
         sessionKey: "agent:main:main",
@@ -377,7 +380,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
 
   for (const testCase of approvedEnvShellWrapperCases) {
     it.runIf(process.platform !== "win32")(testCase.name, async () => {
-      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "bot-approved-wrapper-"));
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approved-wrapper-"));
       const marker = path.join(tmp, "marker");
       const attackerScript = path.join(tmp, "sh");
       fs.writeFileSync(attackerScript, "#!/bin/sh\necho exploited > marker\n");
@@ -472,7 +475,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     "pins PATH-token executable to canonical path for approval-based runs",
     async () => {
       await withPathTokenCommand({
-        tmpPrefix: "bot-approval-path-pin-",
+        tmpPrefix: "openclaw-approval-path-pin-",
         run: async ({ expected }) => {
           const { runCommand, sendInvokeResult } = await runSystemInvoke({
             preferMacAppExecHost: false,
@@ -493,6 +496,39 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   );
 
   it.runIf(process.platform !== "win32")(
+    "accepts prepared plans after PATH-token hardening rewrites argv",
+    async () => {
+      await withPathTokenCommand({
+        tmpPrefix: "openclaw-prepare-run-path-pin-",
+        run: async ({ expected }) => {
+          const prepared = buildSystemRunApprovalPlan({
+            command: ["poccmd", "hello"],
+          });
+          expect(prepared.ok).toBe(true);
+          if (!prepared.ok) {
+            throw new Error("unreachable");
+          }
+
+          const { runCommand, sendInvokeResult } = await runSystemInvoke({
+            preferMacAppExecHost: false,
+            command: prepared.plan.argv,
+            rawCommand: prepared.plan.rawCommand,
+            approved: true,
+            security: "full",
+            ask: "off",
+          });
+          expectCommandPinnedToCanonicalPath({
+            runCommand,
+            expected,
+            commandTail: ["hello"],
+          });
+          expectInvokeOk(sendInvokeResult);
+        },
+      });
+    },
+  );
+
+  it.runIf(process.platform !== "win32")(
     "pins PATH-token executable to canonical path for allowlist runs",
     async () => {
       const runCommand = vi.fn(async () => ({
@@ -500,7 +536,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
       }));
       const sendInvokeResult = vi.fn(async () => {});
       await withPathTokenCommand({
-        tmpPrefix: "bot-allowlist-path-pin-",
+        tmpPrefix: "openclaw-allowlist-path-pin-",
         run: async ({ link, expected }) => {
           await withTempApprovalsHome({
             approvals: {
@@ -541,7 +577,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "denies approval-based execution when cwd is a symlink",
     async () => {
-      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "bot-approval-cwd-link-"));
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-cwd-link-"));
       const safeDir = path.join(tmp, "safe");
       const linkDir = path.join(tmp, "cwd-link");
       const script = path.join(safeDir, "run.sh");
@@ -569,7 +605,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   it.runIf(process.platform !== "win32")(
     "denies approval-based execution when cwd contains a symlink parent component",
     async () => {
-      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "bot-approval-cwd-parent-link-"));
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-cwd-parent-link-"));
       const safeRoot = path.join(tmp, "safe-root");
       const safeSub = path.join(safeRoot, "sub");
       const linkRoot = path.join(tmp, "approved-link");
@@ -593,7 +629,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   );
 
   it("uses canonical executable path for approval-based relative command execution", async () => {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "bot-approval-cwd-real-"));
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-cwd-real-"));
     const script = path.join(tmp, "run.sh");
     fs.writeFileSync(script, "#!/bin/sh\necho SAFE\n");
     fs.chmodSync(script, 0o755);
@@ -619,8 +655,8 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("denies approval-based execution when cwd identity drifts before execution", async () => {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "bot-approval-cwd-drift-"));
-    const fallback = fs.mkdtempSync(path.join(os.tmpdir(), "bot-approval-cwd-drift-alt-"));
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-cwd-drift-"));
+    const fallback = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-cwd-drift-alt-"));
     const script = path.join(tmp, "run.sh");
     fs.writeFileSync(script, "#!/bin/sh\necho SAFE\n");
     fs.chmodSync(script, 0o755);
@@ -652,7 +688,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("denies ./sh wrapper spoof in allowlist on-miss mode before execution", async () => {
-    const marker = path.join(os.tmpdir(), `bot-wrapper-spoof-${process.pid}-${Date.now()}`);
+    const marker = path.join(os.tmpdir(), `openclaw-wrapper-spoof-${process.pid}-${Date.now()}`);
     const runCommand = vi.fn(async () => {
       fs.writeFileSync(marker, "executed");
       return createLocalRunResult();
@@ -718,7 +754,7 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
   });
 
   it("denies semicolon-chained shell payloads in allowlist mode without explicit approval", async () => {
-    const payloads = ["bot status; id", "bot status; cat /etc/passwd"];
+    const payloads = ["openclaw status; id", "openclaw status; cat /etc/passwd"];
     for (const payload of payloads) {
       const command =
         process.platform === "win32"

@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/feishu";
 import { describe, expect, it } from "vitest";
 import { feishuOnboardingAdapter } from "./onboarding.js";
 

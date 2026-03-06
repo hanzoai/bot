@@ -1,5 +1,5 @@
 import type { MatrixClient } from "@vector-im/matrix-bot-sdk";
-import { normalizeAccountId } from "bot/plugin-sdk/account-id";
+import { normalizeAccountId } from "@hanzo/bot/plugin-sdk/account-id";
 import type { CoreConfig } from "../../types.js";
 import type { MatrixAuth } from "./types.js";
 import { getMatrixLogService } from "../sdk-runtime.js";

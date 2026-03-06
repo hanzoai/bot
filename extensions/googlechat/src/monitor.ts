@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/googlechat";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import {
   createWebhookInFlightLimiter,
@@ -6,7 +6,7 @@ import {
   registerWebhookTargetWithPluginRoute,
   resolveInboundRouteEnvelopeBuilderWithRuntime,
   resolveWebhookPath,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/googlechat";
 import type {
   GoogleChatCoreRuntime,
   GoogleChatMonitorOptions,
@@ -113,7 +113,7 @@ async function processGoogleChatEvent(event: GoogleChatEvent, target: WebhookTar
  * Resolve bot display name with fallback chain:
  * 1. Account config name
  * 2. Agent name from config
- * 3. "Bot" as generic fallback
+ * 3. "OpenClaw" as generic fallback
  */
 function resolveBotDisplayName(params: {
   accountName?: string;
@@ -128,7 +128,7 @@ function resolveBotDisplayName(params: {
   if (agent?.name?.trim()) {
     return agent.name.trim();
   }
-  return "Bot";
+  return "OpenClaw";
 }
 
 async function processMessageWithPipeline(params: {

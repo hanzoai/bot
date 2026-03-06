@@ -1,5 +1,5 @@
 ---
-summary: "Model providers (LLMs) supported by Hanzo Bot"
+summary: "Model providers (LLMs) supported by OpenClaw"
 read_when:
   - You want to choose a model provider
   - You need a quick overview of supported LLM backends
@@ -8,14 +8,14 @@ title: "Model Providers"
 
 # Model Providers
 
-Hanzo Bot can use many LLM providers. Pick a provider, authenticate, then set the
+OpenClaw can use many LLM providers. Pick a provider, authenticate, then set the
 default model as `provider/model`.
 
 Looking for chat channel docs (WhatsApp/Telegram/Discord/Slack/Mattermost (plugin)/etc.)? See [Channels](/channels).
 
 ## Quick start
 
-1. Authenticate with the provider (usually via `hanzo-bot onboard`).
+1. Authenticate with the provider (usually via `openclaw onboard`).
 2. Set the default model:
 
 ```json5
@@ -26,16 +26,6 @@ Looking for chat channel docs (WhatsApp/Telegram/Discord/Slack/Mattermost (plugi
 
 ## Provider docs
 
-- [OpenAI (API + Codex)](/providers/openai)
-- [Anthropic (API + Claude Code CLI)](/providers/anthropic)
-- [Qwen (OAuth)](/providers/qwen)
-- [OpenRouter](/providers/openrouter)
-- [LiteLLM (unified gateway)](/providers/litellm)
-- [Vercel AI Gateway](/providers/vercel-ai-gateway)
-- [Together AI](/providers/together)
-- [Cloudflare AI Gateway](/providers/cloudflare-ai-gateway)
-- [Moonshot AI (Kimi + Kimi Coding)](/providers/moonshot)
-- [OpenCode Zen](/providers/opencode)
 - [Amazon Bedrock](/providers/bedrock)
 - [Anthropic (API + Claude Code CLI)](/providers/anthropic)
 - [Cloudflare AI Gateway](/providers/cloudflare-ai-gateway)
