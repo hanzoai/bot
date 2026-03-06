@@ -78,11 +78,14 @@ Required feature flags for thread-bound ACP:
 - `acp.dispatch.enabled` is on by default (set `false` to pause ACP dispatch)
 - Channel-adapter ACP thread-spawn flag enabled (adapter-specific)
   - Discord: `channels.discord.threadBindings.spawnAcpSessions=true`
+  - Telegram: `channels.telegram.threadBindings.spawnAcpSessions=true`
 
 ### Thread supporting channels
 
 - Any channel adapter that exposes session/thread binding capability.
-- Current built-in support: Discord.
+- Current built-in support:
+  - Discord threads/channels
+  - Telegram topics (forum topics in groups/supergroups and DM topics)
 - Plugin channels can add support through the same binding interface.
 
 ## Start ACP sessions (interfaces)
@@ -180,7 +183,9 @@ If no target resolves, Bot returns a clear error (`Unable to resolve session tar
 Notes:
 
 - On non-thread binding surfaces, default behavior is effectively `off`.
-- Thread-bound spawn requires channel policy support (for Discord: `channels.discord.threadBindings.spawnAcpSessions=true`).
+- Thread-bound spawn requires channel policy support:
+  - Discord: `channels.discord.threadBindings.spawnAcpSessions=true`
+  - Telegram: `channels.telegram.threadBindings.spawnAcpSessions=true`
 
 ## ACP controls
 

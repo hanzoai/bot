@@ -48,6 +48,7 @@ export type ChannelSetupAdapter = {
 export type ChannelConfigAdapter<ResolvedAccount> = {
   listAccountIds: (cfg: BotConfig) => string[];
   resolveAccount: (cfg: BotConfig, accountId?: string | null) => ResolvedAccount;
+  inspectAccount?: (cfg: BotConfig, accountId?: string | null) => unknown;
   defaultAccountId?: (cfg: BotConfig) => string;
   setAccountEnabled?: (params: {
     cfg: BotConfig;
