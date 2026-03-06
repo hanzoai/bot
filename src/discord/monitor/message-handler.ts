@@ -7,8 +7,9 @@ import {
 } from "../../channels/inbound-debounce-policy.js";
 import { resolveOpenProviderRuntimeGroupPolicy } from "../../config/runtime-group-policy.js";
 import { danger } from "../../globals.js";
+import { buildDiscordInboundJob } from "./inbound-job.js";
+import { createDiscordInboundWorker } from "./inbound-worker.js";
 import { preflightDiscordMessage } from "./message-handler.preflight.js";
-import { processDiscordMessage } from "./message-handler.process.js";
 import {
   hasDiscordMessageStickers,
   resolveDiscordMessageChannelId,
@@ -18,7 +19,15 @@ import {
 type DiscordMessageHandlerParams = Omit<
   DiscordMessagePreflightParams,
   "ackReactionScope" | "groupPolicy" | "data" | "client"
->;
+> & {
+  setStatus?: DiscordMonitorStatusSink;
+  abortSignal?: AbortSignal;
+  workerRunTimeoutMs?: number;
+};
+
+export type DiscordMessageHandlerWithLifecycle = DiscordMessageHandler & {
+  deactivate: () => void;
+};
 
 export function createDiscordMessageHandler(
   params: DiscordMessageHandlerParams,
@@ -32,6 +41,13 @@ export function createDiscordMessageHandler(
     params.discordConfig?.ackReactionScope ??
     params.cfg.messages?.ackReactionScope ??
     "group-mentions";
+  const inboundWorker = createDiscordInboundWorker({
+    runtime: params.runtime,
+    setStatus: params.setStatus,
+    abortSignal: params.abortSignal,
+    runTimeoutMs: params.workerRunTimeoutMs,
+  });
+
   const { debouncer } = createChannelInboundDebouncer<{
     data: DiscordMessageEvent;
     client: Client;
@@ -84,7 +100,7 @@ export function createDiscordMessageHandler(
         if (!ctx) {
           return;
         }
-        await processDiscordMessage(ctx);
+        inboundWorker.enqueue(buildDiscordInboundJob(ctx));
         return;
       }
       const combinedBaseText = entries
@@ -128,7 +144,7 @@ export function createDiscordMessageHandler(
           ctxBatch.MessageSidLast = ids[ids.length - 1];
         }
       }
-      await processDiscordMessage(ctx);
+      inboundWorker.enqueue(buildDiscordInboundJob(ctx));
     },
     onError: (err) => {
       params.runtime.error?.(danger(`discord debounce flush failed: ${String(err)}`));
@@ -142,4 +158,8 @@ export function createDiscordMessageHandler(
       params.runtime.error?.(danger(`handler failed: ${String(err)}`));
     }
   };
+
+  handler.deactivate = inboundWorker.deactivate;
+
+  return handler;
 }
