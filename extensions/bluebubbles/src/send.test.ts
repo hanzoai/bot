@@ -1,4 +1,4 @@
-import type { PluginRuntime } from "bot/plugin-sdk";
+import type { PluginRuntime } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import "./test-mocks.js";
 import type { BlueBubblesSendTarget } from "./types.js";

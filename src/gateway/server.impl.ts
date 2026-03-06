@@ -38,7 +38,7 @@ import { createExecApprovalForwarder } from "../infra/exec-approval-forwarder.js
 import { onHeartbeatEvent } from "../infra/heartbeat-events.js";
 import { startHeartbeatRunner, type HeartbeatRunner } from "../infra/heartbeat-runner.js";
 import { getMachineDisplayName } from "../infra/machine-name.js";
-import { ensureBotCliOnPath } from "../infra/path-env.js";
+import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
 import { setGatewaySigusr1RestartPolicy, setPreRestartDeferralCheck } from "../infra/restart.js";
 import {
   primeRemoteSkillsCache,
@@ -89,7 +89,7 @@ import { createSecretsHandlers } from "./server-methods/secrets.js";
 import { hasConnectedMobileNode } from "./server-mobile-nodes.js";
 import { loadGatewayModelCatalog } from "./server-model-catalog.js";
 import { createNodeSubscriptionManager } from "./server-node-subscriptions.js";
-import { loadGatewayPlugins } from "./server-plugins.js";
+import { loadGatewayPlugins, setFallbackGatewayContext } from "./server-plugins.js";
 import { createGatewayReloadHandlers } from "./server-reload-handlers.js";
 import { resolveGatewayRuntimeConfig } from "./server-runtime-config.js";
 import { createGatewayRuntimeState } from "./server-runtime-state.js";
@@ -107,12 +107,16 @@ import {
   refreshGatewayHealthSnapshot,
 } from "./server/health-state.js";
 import { loadGatewayTlsRuntime } from "./server/tls.js";
-import { ensureGatewayStartupAuth } from "./startup-auth.js";
+import {
+  ensureGatewayStartupAuth,
+  mergeGatewayAuthConfig,
+  mergeGatewayTailscaleConfig,
+} from "./startup-auth.js";
 import { maybeSeedControlUiAllowedOriginsAtStartup } from "./startup-control-ui-origins.js";
 
 export { __resetModelCatalogCacheForTest } from "./server-model-catalog.js";
 
-ensureBotCliOnPath();
+ensureOpenClawCliOnPath();
 
 const log = createSubsystemLogger("gateway");
 const logCanvas = log.child("canvas");
@@ -172,6 +176,23 @@ function logGatewayAuthSurfaceDiagnostics(prepared: {
     const details = inactiveDetails ?? state.reason;
     logSecrets.info(`[SECRETS_GATEWAY_AUTH_SURFACE] ${path} is ${stateLabel}. ${details}`);
   }
+}
+
+function applyGatewayAuthOverridesForStartupPreflight(
+  config: BotConfig,
+  overrides: Pick<GatewayServerOptions, "auth" | "tailscale">,
+): BotConfig {
+  if (!overrides.auth && !overrides.tailscale) {
+    return config;
+  }
+  return {
+    ...config,
+    gateway: {
+      ...config.gateway,
+      auth: mergeGatewayAuthConfig(config.gateway?.auth, overrides.auth),
+      tailscale: mergeGatewayTailscaleConfig(config.gateway?.tailscale, overrides.tailscale),
+    },
+  };
 }
 
 export type GatewayServer = {
@@ -234,16 +255,16 @@ export async function startGatewayServer(
   opts: GatewayServerOptions = {},
 ): Promise<GatewayServer> {
   const minimalTestGateway =
-    process.env.VITEST === "1" && process.env.BOT_TEST_MINIMAL_GATEWAY === "1";
+    process.env.VITEST === "1" && process.env.OPENCLAW_TEST_MINIMAL_GATEWAY === "1";
 
   // Ensure all default port derivations (browser/canvas) see the actual runtime port.
-  process.env.BOT_GATEWAY_PORT = String(port);
+  process.env.OPENCLAW_GATEWAY_PORT = String(port);
   logAcceptedEnvOption({
-    key: "BOT_RAW_STREAM",
+    key: "OPENCLAW_RAW_STREAM",
     description: "raw stream logging enabled",
   });
   logAcceptedEnvOption({
-    key: "BOT_RAW_STREAM_PATH",
+    key: "OPENCLAW_RAW_STREAM_PATH",
     description: "raw stream log path override",
   });
 
@@ -256,17 +277,18 @@ export async function startGatewayServer(
     }
     const { config: migrated, changes } = migrateLegacyConfig(configSnapshot.parsed);
     if (!migrated) {
-      throw new Error(
-        `Legacy config entries detected but auto-migration failed. Run "${formatCliCommand("bot doctor")}" to migrate.`,
+      log.warn(
+        "gateway: legacy config entries detected but no auto-migration changes were produced; continuing with validation.",
       );
-    }
-    await writeConfigFile(migrated);
-    if (changes.length > 0) {
-      log.info(
-        `gateway: migrated legacy config entries:\n${changes
-          .map((entry) => `- ${entry}`)
-          .join("\n")}`,
-      );
+    } else {
+      await writeConfigFile(migrated);
+      if (changes.length > 0) {
+        log.info(
+          `gateway: migrated legacy config entries:\n${changes
+            .map((entry) => `- ${entry}`)
+            .join("\n")}`,
+        );
+      }
     }
   }
 
@@ -277,7 +299,7 @@ export async function startGatewayServer(
         ? formatConfigIssueLines(configSnapshot.issues, "", { normalizeRoot: true }).join("\n")
         : "Unknown validation issue.";
     throw new Error(
-      `Invalid config at ${configSnapshot.path}.\n${issues}\nRun "${formatCliCommand("bot doctor")}" to repair, then retry.`,
+      `Invalid config at ${configSnapshot.path}.\n${issues}\nRun "${formatCliCommand("openclaw doctor")}" to repair, then retry.`,
     );
   }
 
@@ -372,7 +394,14 @@ export async function startGatewayServer(
           : "Unknown validation issue.";
       throw new Error(`Invalid config at ${freshSnapshot.path}.\n${issues}`);
     }
-    await activateRuntimeSecrets(freshSnapshot.config, {
+    const startupPreflightConfig = applyGatewayAuthOverridesForStartupPreflight(
+      freshSnapshot.config,
+      {
+        auth: opts.auth,
+        tailscale: opts.tailscale,
+      },
+    );
+    await activateRuntimeSecrets(startupPreflightConfig, {
       reason: "startup",
       activate: false,
     });
@@ -394,7 +423,7 @@ export async function startGatewayServer(
       );
     } else {
       log.warn(
-        "Gateway auth token was missing. Generated a runtime token for this startup without changing config; restart will generate a different token. Persist one with `bot config set gateway.auth.mode token` and `bot config set gateway.auth.token <token>`.",
+        "Gateway auth token was missing. Generated a runtime token for this startup without changing config; restart will generate a different token. Persist one with `openclaw config set gateway.auth.mode token` and `openclaw config set gateway.auth.token <token>`.",
       );
     }
   }
@@ -750,6 +779,63 @@ export async function startGatewayServer(
 
   const canvasHostServerPort = (canvasHostServer as CanvasHostServer | null)?.port;
 
+  const gatewayRequestContext: import("./server-methods/types.js").GatewayRequestContext = {
+    deps,
+    cron,
+    cronStorePath,
+    execApprovalManager,
+    loadGatewayModelCatalog,
+    getHealthCache,
+    refreshHealthSnapshot: refreshGatewayHealthSnapshot,
+    logHealth,
+    logGateway: log,
+    incrementPresenceVersion,
+    getHealthVersion,
+    broadcast,
+    broadcastToConnIds,
+    nodeSendToSession,
+    nodeSendToAllSubscribed,
+    nodeSubscribe,
+    nodeUnsubscribe,
+    nodeUnsubscribeAll,
+    hasConnectedMobileNode: hasMobileNodeConnected,
+    hasExecApprovalClients: () => {
+      for (const gatewayClient of clients) {
+        const scopes = Array.isArray(gatewayClient.connect.scopes)
+          ? gatewayClient.connect.scopes
+          : [];
+        if (scopes.includes("operator.admin") || scopes.includes("operator.approvals")) {
+          return true;
+        }
+      }
+      return false;
+    },
+    nodeRegistry,
+    agentRunSeq,
+    chatAbortControllers,
+    chatAbortedRuns: chatRunState.abortedRuns,
+    chatRunBuffers: chatRunState.buffers,
+    chatDeltaSentAt: chatRunState.deltaSentAt,
+    addChatRun,
+    removeChatRun,
+    registerToolEventRecipient: toolEventRecipients.add,
+    dedupe,
+    wizardSessions,
+    findRunningWizard,
+    purgeWizardSession,
+    getRuntimeSnapshot,
+    startChannel,
+    stopChannel,
+    markChannelLoggedOut,
+    wizardRunner,
+    broadcastVoiceWakeChanged,
+  };
+
+  // Store the gateway context as a fallback for plugin subagent dispatch
+  // in non-WS paths (Telegram polling, WhatsApp, etc.) where no per-request
+  // scope is set via AsyncLocalStorage.
+  setFallbackGatewayContext(gatewayRequestContext);
+
   attachGatewayWsHandlers({
     wss,
     clients,
@@ -771,57 +857,7 @@ export async function startGatewayServer(
       ...secretsHandlers,
     },
     broadcast,
-    context: {
-      deps,
-      cron,
-      cronStorePath,
-      execApprovalManager,
-      loadGatewayModelCatalog,
-      getHealthCache,
-      refreshHealthSnapshot: refreshGatewayHealthSnapshot,
-      logHealth,
-      logGateway: log,
-      incrementPresenceVersion,
-      getHealthVersion,
-      broadcast,
-      broadcastToConnIds,
-      nodeSendToSession,
-      nodeSendToAllSubscribed,
-      nodeSubscribe,
-      nodeUnsubscribe,
-      nodeUnsubscribeAll,
-      hasConnectedMobileNode: hasMobileNodeConnected,
-      hasExecApprovalClients: () => {
-        for (const gatewayClient of clients) {
-          const scopes = Array.isArray(gatewayClient.connect.scopes)
-            ? gatewayClient.connect.scopes
-            : [];
-          if (scopes.includes("operator.admin") || scopes.includes("operator.approvals")) {
-            return true;
-          }
-        }
-        return false;
-      },
-      nodeRegistry,
-      agentRunSeq,
-      chatAbortControllers,
-      chatAbortedRuns: chatRunState.abortedRuns,
-      chatRunBuffers: chatRunState.buffers,
-      chatDeltaSentAt: chatRunState.deltaSentAt,
-      addChatRun,
-      removeChatRun,
-      registerToolEventRecipient: toolEventRecipients.add,
-      dedupe,
-      wizardSessions,
-      findRunningWizard,
-      purgeWizardSession,
-      getRuntimeSnapshot,
-      startChannel,
-      stopChannel,
-      markChannelLoggedOut,
-      wizardRunner,
-      broadcastVoiceWakeChanged,
-    },
+    context: gatewayRequestContext,
   });
   logGatewayStartup({
     cfg: cfgAtStart,

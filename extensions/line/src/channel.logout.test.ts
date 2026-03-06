@@ -1,4 +1,4 @@
-import type { BotConfig, PluginRuntime, ResolvedLineAccount } from "bot/plugin-sdk";
+import type { BotConfig, PluginRuntime, ResolvedLineAccount } from "@hanzo/bot/plugin-sdk/line";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createRuntimeEnv } from "../../test-utils/runtime-env.js";
 import { linePlugin } from "./channel.js";

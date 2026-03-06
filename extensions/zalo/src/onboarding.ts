@@ -4,7 +4,7 @@ import type {
   BotConfig,
   SecretInput,
   WizardPrompter,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/zalo";
 import {
   addWildcardAllowFrom,
   DEFAULT_ACCOUNT_ID,
@@ -13,7 +13,7 @@ import {
   normalizeAccountId,
   promptAccountId,
   promptSingleChannelSecretInput,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/zalo";
 import { listZaloAccountIds, resolveDefaultZaloAccountId, resolveZaloAccount } from "./accounts.js";
 
 const channel = "zalo" as const;
@@ -118,7 +118,7 @@ async function noteZaloTokenHelp(prompter: WizardPrompter): Promise<void> {
       "2) Create a bot and get the token",
       "3) Token looks like 12345689:abc-xyz",
       "Tip: you can also set ZALO_BOT_TOKEN in your env.",
-      "Docs: https://docs.hanzo.bot/channels/zalo",
+      "Docs: https://docs.openclaw.ai/channels/zalo",
     ].join("\n"),
     "Zalo bot token",
   );

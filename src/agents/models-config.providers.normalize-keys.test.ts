@@ -7,7 +7,7 @@ import { normalizeProviders } from "./models-config.providers.js";
 
 describe("normalizeProviders", () => {
   it("trims provider keys so image models remain discoverable for custom providers", async () => {
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-agent-"));
+    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
     try {
       const providers: NonNullable<NonNullable<BotConfig["models"]>["providers"]> = {
         " dashscope-vision ": {
@@ -37,7 +37,7 @@ describe("normalizeProviders", () => {
   });
 
   it("keeps the latest provider config when duplicate keys only differ by whitespace", async () => {
-    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-agent-"));
+    const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
     try {
       const providers: NonNullable<NonNullable<BotConfig["models"]>["providers"]> = {
         openai: {

@@ -1,106 +1,46 @@
 # Changelog
 
-## 2026.3.5
+## 2026.3.6
 
 ### Changes
 
-- Version alignment with core Hanzo Bot release numbers.
+- Version alignment with core OpenClaw release numbers.
+
+## 2026.3.2
+
+### Changes
+
+- Version alignment with core OpenClaw release numbers.
 
 ## 2026.3.1
 
 ### Changes
 
-- Version alignment with core Hanzo Bot release numbers.
+- Version alignment with core OpenClaw release numbers.
 
-## 2026.2.27
-
-### Changes
-
-- Version alignment with core Hanzo Bot release numbers.
-
-## 2026.2.23
+## 2026.2.26
 
 ### Changes
 
-- Version alignment with core Hanzo Bot release numbers.
+- Version alignment with core OpenClaw release numbers.
 
-## 2026.2.17
-
-### Changes
-
-- Version alignment with core Hanzo Bot release numbers.
-
-## 2026.2.16
+## 2026.2.25
 
 ### Changes
 
-- Version alignment with core Bot release numbers.
+- Version alignment with core OpenClaw release numbers.
 
-## 2026.2.15
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.2.14
+## 2026.2.24
 
 ### Changes
 
-- Version alignment with core Bot release numbers.
+- Version alignment with core OpenClaw release numbers.
 
-## 2026.2.13
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.2.6-3
+## 2026.2.22
 
 ### Changes
 
-- Version alignment with core Bot release numbers.
-
-## 2026.2.6-2
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.2.6
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.2.4
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.2.2
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.31
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.30
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.29
-
-### Changes
-
-- Version alignment with core Bot release numbers.
+- Version alignment with core OpenClaw release numbers.
 
 ## 2026.1.26
 
@@ -111,65 +51,11 @@
 - Removed legacy `tts.model`/`tts.voice`/`tts.instructions` plugin fields.
 - Ngrok free-tier bypass renamed to `tunnel.allowNgrokFreeTierLoopbackBypass` and gated to loopback + `tunnel.provider="ngrok"`.
 
-## 2026.1.23
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.22
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.21
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.20
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.17-1
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.17
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.16
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.15
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
-## 2026.1.14
-
-### Changes
-
-- Version alignment with core Bot release numbers.
-
 ## 0.1.0
 
 ### Highlights
 
-- First public release of the @bot/voice-call plugin.
+- First public release of the @openclaw/voice-call plugin.
 
 ### Features
 
@@ -182,6 +68,6 @@
 - Speech: OpenAI TTS (model/voice/instructions) with Twilio `<Say>` fallback.
 - Tooling: `voice_call` tool actions for initiate/continue/speak/end/status.
 - Gateway RPC: `voicecall.initiate|continue|speak|end|status` (+ legacy `voicecall.start`).
-- CLI: `bot voicecall` commands (call/start/continue/speak/end/status/tail/expose).
+- CLI: `openclaw voicecall` commands (call/start/continue/speak/end/status/tail/expose).
 - Observability: JSONL call logs and `voicecall tail` for live inspection.
 - Response controls: `responseModel`, `responseSystemPrompt`, and `responseTimeoutMs` for auto‑responses.

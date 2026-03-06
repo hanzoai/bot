@@ -42,6 +42,6 @@ export function formatAuthDoctorHint(params: {
     }`,
     `- auth store oauth profiles: ${storeOauthProfiles || "(none)"}`,
     `- suggested profile: ${suggested}`,
-    `Fix: run "${formatCliCommand("bot doctor --yes")}"`,
+    `Fix: run "${formatCliCommand("openclaw doctor --yes")}"`,
   ].join("\n");
 }

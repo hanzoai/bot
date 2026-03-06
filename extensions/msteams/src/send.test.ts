@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/msteams";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sendMessageMSTeams } from "./send.js";
 
@@ -11,7 +11,7 @@ const mockState = vi.hoisted(() => ({
   sendMSTeamsMessages: vi.fn(),
 }));
 
-vi.mock("bot/plugin-sdk", () => ({
+vi.mock("@hanzo/bot/plugin-sdk/msteams", () => ({
   loadOutboundMediaFromUrl: mockState.loadOutboundMediaFromUrl,
 }));
 

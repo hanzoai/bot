@@ -1,4 +1,4 @@
-import { buildMediaPayload } from "bot/plugin-sdk";
+import { buildMediaPayload } from "@hanzo/bot/plugin-sdk/msteams";
 
 export function buildMSTeamsMediaPayload(
   mediaList: Array<{ path: string; contentType?: string }>,

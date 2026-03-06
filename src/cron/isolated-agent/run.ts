@@ -10,6 +10,7 @@ import {
   resolveDefaultAgentId,
 } from "../../agents/agent-scope.js";
 import { resolveSessionAuthProfileOverride } from "../../agents/auth-profiles/session-override.js";
+import { resolveBootstrapWarningSignaturesSeen } from "../../agents/bootstrap-budget.js";
 import { runCliAgent } from "../../agents/cli-runner.js";
 import { getCliSessionId, setCliSessionId } from "../../agents/cli-session.js";
 import { lookupContextTokens } from "../../agents/context.js";
@@ -81,7 +82,7 @@ export type RunCronAgentTurnResult = {
    * channel (via outbound payloads, the subagent announce flow, or a matching
    * messaging-tool send). Callers should skip posting a summary to the main
    * session to avoid duplicate
-   * messages.  See: https://github.com/hanzoai/bot/issues/15692
+   * messages.  See: https://github.com/openclaw/openclaw/issues/15692
    */
   delivered?: boolean;
   /**
@@ -112,7 +113,7 @@ export async function runCronIsolatedAgentTurn(params: {
       ? reason.trim()
       : "cron: job execution timed out";
   };
-  const isFastTestEnv = process.env.BOT_TEST_FAST === "1";
+  const isFastTestEnv = process.env.OPENCLAW_TEST_FAST === "1";
   const defaultAgentId = resolveDefaultAgentId(params.cfg);
   const requestedAgentId =
     typeof params.agentId === "string" && params.agentId.trim()
@@ -127,7 +128,7 @@ export async function runCronIsolatedAgentTurn(params: {
   const { model: overrideModel, ...agentOverrideRest } = agentConfigOverride ?? {};
   // Use the requested agentId even when there is no explicit agent config entry.
   // This ensures auth-profiles, workspace, and agentDir all resolve to the
-  // correct per-agent paths (e.g. ~/.hanzo/bot/agents/<agentId>/agent/).
+  // correct per-agent paths (e.g. ~/.openclaw/agents/<agentId>/agent/).
   const agentId = normalizedRequested ?? defaultAgentId;
   const agentCfg: AgentDefaultsConfig = Object.assign(
     {},
@@ -478,7 +479,7 @@ export async function runCronIsolatedAgentTurn(params: {
             // Passing an existing ID activates the resume watchdog profile
             // (noOutputTimeoutRatio 0.3, maxMs 180 s) instead of the fresh profile
             // (ratio 0.8, maxMs 600 s), causing jobs to time out at roughly 1/3 of
-            // the configured timeoutSeconds. See: https://github.com/hanzoai/bot/issues/29774
+            // the configured timeoutSeconds. See: https://github.com/openclaw/openclaw/issues/29774
             const cliSessionId = cronSession.isNewSession
               ? undefined
               : getCliSessionId(cronSession.sessionEntry, providerOverride);

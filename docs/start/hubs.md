@@ -1,5 +1,5 @@
 ---
-summary: "Hubs that link to every Hanzo Bot doc"
+summary: "Hubs that link to every OpenClaw doc"
 read_when:
   - You want a complete map of the documentation
 title: "Docs Hubs"
@@ -8,7 +8,7 @@ title: "Docs Hubs"
 # Docs hubs
 
 <Note>
-If you are new to Hanzo Bot, start with [Getting Started](/start/getting-started).
+If you are new to OpenClaw, start with [Getting Started](/start/getting-started).
 </Note>
 
 Use these hubs to discover every page, including deep dives and reference docs that don’t appear in the left nav.
@@ -26,7 +26,7 @@ Use these hubs to discover every page, including deep dives and reference docs t
 - [Docs directory](/start/docs-directory)
 - [Configuration](/gateway/configuration)
 - [Configuration examples](/gateway/configuration-examples)
-- [Hanzo Bot assistant](/start/bot)
+- [OpenClaw assistant](/start/openclaw)
 - [Showcase](/start/showcase)
 - [Lore](/start/lore)
 
@@ -72,7 +72,6 @@ Use these hubs to discover every page, including deep dives and reference docs t
 - [Model providers hub](/providers/models)
 - [WhatsApp](/channels/whatsapp)
 - [Telegram](/channels/telegram)
-- [Telegram (grammY notes)](/channels/grammy)
 - [Slack](/channels/slack)
 - [Discord](/channels/discord)
 - [Mattermost](/channels/mattermost) (plugin)
@@ -167,7 +166,7 @@ Use these hubs to discover every page, including deep dives and reference docs t
 ## Workspace + templates
 
 - [Skills](/tools/skills)
-- [Hanzo Skills Hub](/tools/hanzo-skills)
+- [ClawHub](/tools/clawhub)
 - [Skills config](/tools/skills-config)
 - [Default AGENTS](/reference/AGENTS.default)
 - [Templates: AGENTS](/reference/templates/AGENTS)
@@ -181,8 +180,6 @@ Use these hubs to discover every page, including deep dives and reference docs t
 ## Experiments (exploratory)
 
 - [Onboarding config protocol](/experiments/onboarding-config-protocol)
-- [Cron hardening notes](/experiments/plans/cron-add-hardening)
-- [Group policy hardening notes](/experiments/plans/group-policy-hardening)
 - [Research: memory](/experiments/research/memory)
 - [Model config exploration](/experiments/proposals/model-config)
 

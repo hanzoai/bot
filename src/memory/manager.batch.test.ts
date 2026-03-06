@@ -117,7 +117,7 @@ describe("memory indexing with OpenAI batches", () => {
   }
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-mem-batch-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mem-batch-"));
     workspaceDir = path.join(fixtureRoot, "workspace");
     memoryDir = path.join(workspaceDir, "memory");
     indexPath = path.join(fixtureRoot, "index.sqlite");

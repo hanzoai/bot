@@ -13,6 +13,7 @@ const BASE_LANG = process.env.LANG ?? "C";
 let fixtureRoot = "";
 let sharedBinDir = "";
 let sharedHomeDir = "";
+let sharedHomeBinDir = "";
 let sharedFakePythonPath = "";
 const runScriptCache = new Map<string, { ok: boolean; stdout: string; stderr: string }>();
 type TeamCandidate = {
@@ -95,7 +96,7 @@ function runScript(
   const binDir = path.join(homeDir, "bin");
   const env = {
     HOME: homeDir,
-    PATH: `${binDir}:${sharedBinDir}:${BASE_PATH}`,
+    PATH: `${binDir}${path.delimiter}${sharedBinDir}${path.delimiter}${BASE_PATH}`,
     LANG: BASE_LANG,
     ...extraEnv,
   };
@@ -123,38 +124,13 @@ function runScript(
 
 describe("scripts/ios-team-id.sh", () => {
   beforeAll(async () => {
-    fixtureRoot = await mkdtemp(path.join(os.tmpdir(), "bot-ios-team-id-shared-"));
-    sharedHomeDir = path.join(fixtureRoot, "home");
-    sharedBinDir = path.join(fixtureRoot, "bin");
-    sharedFakePythonPath = path.join(sharedBinDir, "fake-python3");
+    fixtureRoot = await mkdtemp(path.join(os.tmpdir(), "openclaw-ios-team-id-"));
+    sharedBinDir = path.join(fixtureRoot, "shared-bin");
     await mkdir(sharedBinDir, { recursive: true });
+    sharedHomeDir = path.join(fixtureRoot, "home");
+    sharedHomeBinDir = path.join(sharedHomeDir, "bin");
+    await mkdir(sharedHomeBinDir, { recursive: true });
     await mkdir(path.join(sharedHomeDir, "Library", "Preferences"), { recursive: true });
-    await writeFile(
-      path.join(sharedHomeDir, "Library", "Preferences", "com.apple.dt.Xcode.plist"),
-      "",
-    );
-    await writeExecutable(path.join(sharedBinDir, "plutil"), `#!/usr/bin/env bash\necho '{}'`);
-    await writeExecutable(
-      path.join(sharedBinDir, "defaults"),
-      `#!/usr/bin/env bash
-if [[ "$3" == "DVTDeveloperAccountManagerAppleIDLists" ]]; then
-  echo '(identifier = "dev@example.com";)'
-  exit 0
-fi
-echo "Domain/default pair of (com.apple.dt.Xcode, $3) does not exist" >&2
-exit 1`,
-    );
-  });
-
-  it("falls back to Xcode-managed provisioning profiles when preference teams are empty", async () => {
-    const homeDir = await mkdtemp(path.join(os.tmpdir(), "bot-ios-team-id-"));
-    const binDir = path.join(homeDir, "bin");
-    await mkdir(binDir, { recursive: true });
-    await mkdir(path.join(homeDir, "Library", "Preferences"), { recursive: true });
-    const profilesDir = path.join(homeDir, "Library", "MobileDevice", "Provisioning Profiles");
-    await mkdir(profilesDir, { recursive: true });
-    await writeFile(path.join(profilesDir, "test.mobileprovision"), "stub");
-    await writeFile(path.join(homeDir, "Library", "Preferences", "com.apple.dt.Xcode.plist"), "");
     await writeFile(
       path.join(sharedHomeDir, "Library", "Preferences", "com.apple.dt.Xcode.plist"),
       "",
@@ -174,99 +150,7 @@ fi
 exit 0`,
     );
     await writeExecutable(
-      path.join(binDir, "security"),
-      `#!/usr/bin/env bash
-if [[ "$1" == "cms" && "$2" == "-D" ]]; then
-  cat <<'PLIST'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>TeamIdentifier</key>
-  <array>
-    <string>ABCDE12345</string>
-  </array>
-</dict>
-</plist>
-PLIST
-  exit 0
-fi
-exit 0`,
-    );
-
-    const result = runScript(homeDir);
-    expect(result.ok).toBe(true);
-    expect(result.stdout).toBe("ABCDE12345");
-  });
-
-  it("prints actionable guidance when Xcode account exists but no Team ID is resolvable", async () => {
-    const homeDir = await mkdtemp(path.join(os.tmpdir(), "bot-ios-team-id-"));
-    const binDir = path.join(homeDir, "bin");
-    await mkdir(binDir, { recursive: true });
-    await mkdir(path.join(homeDir, "Library", "Preferences"), { recursive: true });
-    await writeFile(path.join(homeDir, "Library", "Preferences", "com.apple.dt.Xcode.plist"), "");
-
-    await writeExecutable(
-      path.join(binDir, "plutil"),
-      `#!/usr/bin/env bash
-echo '{}'`,
-    );
-    await writeExecutable(
-      path.join(binDir, "defaults"),
-      `#!/usr/bin/env bash
-if [[ "$3" == "DVTDeveloperAccountManagerAppleIDLists" ]]; then
-  echo '(identifier = "dev@example.com";)'
-  exit 0
-fi
-echo "Domain/default pair of (com.apple.dt.Xcode, $3) does not exist" >&2
-exit 1`,
-    );
-    await writeExecutable(
-      path.join(binDir, "security"),
-      `#!/usr/bin/env bash
-exit 1`,
-    );
-
-    const result = runScript(homeDir);
-    expect(result.ok).toBe(false);
-    expect(result.stderr).toContain("An Apple account is signed in to Xcode");
-    expect(result.stderr).toContain("IOS_DEVELOPMENT_TEAM");
-  });
-
-  it("honors IOS_PREFERRED_TEAM_ID when multiple profile teams are available", async () => {
-    const homeDir = await mkdtemp(path.join(os.tmpdir(), "bot-ios-team-id-"));
-    const binDir = path.join(homeDir, "bin");
-    await mkdir(binDir, { recursive: true });
-    await mkdir(path.join(homeDir, "Library", "Preferences"), { recursive: true });
-    await mkdir(path.join(homeDir, "Library", "MobileDevice", "Provisioning Profiles"), {
-      recursive: true,
-    });
-    await writeFile(path.join(homeDir, "Library", "Preferences", "com.apple.dt.Xcode.plist"), "");
-    await writeFile(
-      path.join(homeDir, "Library", "MobileDevice", "Provisioning Profiles", "one.mobileprovision"),
-      "stub1",
-    );
-    await writeFile(
-      path.join(homeDir, "Library", "MobileDevice", "Provisioning Profiles", "two.mobileprovision"),
-      "stub2",
-    );
-
-    await writeExecutable(
-      path.join(binDir, "plutil"),
-      `#!/usr/bin/env bash
-echo '{}'`,
-    );
-    await writeExecutable(
-      path.join(binDir, "defaults"),
-      `#!/usr/bin/env bash
-if [[ "$3" == "DVTDeveloperAccountManagerAppleIDLists" ]]; then
-  echo '(identifier = "dev@example.com";)'
-  exit 0
-fi
-exit 0`,
-    );
-    await writeExecutable(
-      path.join(binDir, "security"),
+      path.join(sharedBinDir, "security"),
       `#!/usr/bin/env bash
 if [[ "$1" == "cms" && "$2" == "-D" ]]; then
   if [[ "$4" == *"one.mobileprovision" ]]; then
@@ -288,19 +172,7 @@ PLIST
 fi
 exit 1`,
     );
-
-    const result = runScript(homeDir, { IOS_PREFERRED_TEAM_ID: "BBBBB22222" });
-    expect(result.ok).toBe(true);
-    expect(result.stdout).toBe("BBBBB22222");
-  });
-
-  it("matches preferred team IDs even when parser output uses CRLF line endings", async () => {
-    const homeDir = await mkdtemp(path.join(os.tmpdir(), "bot-ios-team-id-"));
-    const binDir = path.join(homeDir, "bin");
-    await mkdir(binDir, { recursive: true });
-    await mkdir(path.join(homeDir, "Library", "Preferences"), { recursive: true });
-    await writeFile(path.join(homeDir, "Library", "Preferences", "com.apple.dt.Xcode.plist"), "");
-
+    sharedFakePythonPath = path.join(sharedHomeBinDir, "fake-python");
     await writeExecutable(
       sharedFakePythonPath,
       `#!/usr/bin/env bash

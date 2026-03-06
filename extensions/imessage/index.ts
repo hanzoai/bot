@@ -1,5 +1,5 @@
-import type { BotPluginApi } from "bot/plugin-sdk";
-import { emptyPluginConfigSchema } from "bot/plugin-sdk";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/imessage";
+import { emptyPluginConfigSchema } from "@hanzo/bot/plugin-sdk/imessage";
 import { imessagePlugin } from "./src/channel.js";
 import { setIMessageRuntime } from "./src/runtime.js";
 

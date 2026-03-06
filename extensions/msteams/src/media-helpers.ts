@@ -7,7 +7,7 @@ import {
   extensionForMime,
   extractOriginalFilename,
   getFileExtension,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/msteams";
 import path from "node:path";
 
 /**

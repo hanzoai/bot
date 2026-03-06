@@ -1,9 +1,9 @@
-import { normalizeResolvedSecretInputString } from "bot/plugin-sdk";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeOptionalAccountId,
-} from "bot/plugin-sdk/account-id";
+} from "@hanzo/bot/plugin-sdk/account-id";
+import { normalizeResolvedSecretInputString } from "@hanzo/bot/plugin-sdk/irc";
 import { readFileSync } from "node:fs";
 import type { CoreConfig, IrcAccountConfig, IrcNickServConfig } from "./types.js";
 
@@ -227,12 +227,12 @@ export function resolveIrcAccount(params: {
       merged.username?.trim() ||
       (accountId === DEFAULT_ACCOUNT_ID ? process.env.IRC_USERNAME?.trim() : "") ||
       nick ||
-      "@hanzo/bot"
+      "openclaw"
     ).trim();
     const realname = (
       merged.realname?.trim() ||
       (accountId === DEFAULT_ACCOUNT_ID ? process.env.IRC_REALNAME?.trim() : "") ||
-      "Bot"
+      "OpenClaw"
     ).trim();
 
     const passwordResolution = resolvePassword(accountId, merged);

@@ -5,39 +5,39 @@ describe("irc monitor inbound target", () => {
   it("keeps channel target for group messages", () => {
     expect(
       resolveIrcInboundTarget({
-        target: "#bot",
+        target: "#openclaw",
         senderNick: "alice",
       }),
     ).toEqual({
       isGroup: true,
-      target: "#bot",
-      rawTarget: "#bot",
+      target: "#openclaw",
+      rawTarget: "#openclaw",
     });
   });
 
   it("maps DM target to sender nick and preserves raw target", () => {
     expect(
       resolveIrcInboundTarget({
-        target: "bot-bot",
+        target: "openclaw-bot",
         senderNick: "alice",
       }),
     ).toEqual({
       isGroup: false,
       target: "alice",
-      rawTarget: "bot-bot",
+      rawTarget: "openclaw-bot",
     });
   });
 
   it("falls back to raw target when sender nick is empty", () => {
     expect(
       resolveIrcInboundTarget({
-        target: "bot-bot",
+        target: "openclaw-bot",
         senderNick: " ",
       }),
     ).toEqual({
       isGroup: false,
-      target: "bot-bot",
-      rawTarget: "bot-bot",
+      target: "openclaw-bot",
+      rawTarget: "openclaw-bot",
     });
   });
 });

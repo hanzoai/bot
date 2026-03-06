@@ -13,6 +13,10 @@ import type { ExecElevatedDefaults } from "../bash-tools.js";
 import type { EmbeddedPiCompactResult } from "./types.js";
 import { resolveHeartbeatPrompt } from "../../auto-reply/heartbeat.js";
 import { resolveChannelCapabilities } from "../../config/channel-capabilities.js";
+import {
+  ensureContextEnginesInitialized,
+  resolveContextEngine,
+} from "../../context-engine/index.js";
 import { createInternalHookEvent, triggerInternalHook } from "../../hooks/internal-hooks.js";
 import { getMachineDisplayName } from "../../infra/machine-name.js";
 import { generateSecureToken } from "../../infra/secure-random.js";
@@ -26,15 +30,16 @@ import { buildTtsSystemPromptHint } from "../../tts/tts.js";
 import { resolveUserPath } from "../../utils.js";
 import { normalizeMessageChannel } from "../../utils/message-channel.js";
 import { isReasoningTagProvider } from "../../utils/provider-utils.js";
-import { resolveBotAgentDir } from "../agent-paths.js";
+import { resolveOpenClawAgentDir } from "../agent-paths.js";
 import { resolveSessionAgentIds } from "../agent-scope.js";
 import { makeBootstrapWarn, resolveBootstrapContextForRun } from "../bootstrap-files.js";
 import { listChannelSupportedActions, resolveChannelMessageToolHints } from "../channel-tools.js";
+import { resolveContextWindowInfo } from "../context-window-guard.js";
 import { formatUserTime, resolveUserTimeFormat, resolveUserTimezone } from "../date-time.js";
-import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../defaults.js";
-import { resolveBotDocsPath } from "../docs-path.js";
+import { DEFAULT_CONTEXT_TOKENS, DEFAULT_MODEL, DEFAULT_PROVIDER } from "../defaults.js";
+import { resolveOpenClawDocsPath } from "../docs-path.js";
 import { getApiKeyForModel, resolveModelAuthMode } from "../model-auth.js";
-import { ensureBotModelsJson } from "../models-config.js";
+import { ensureOpenClawModelsJson } from "../models-config.js";
 import { resolveOwnerDisplaySetting } from "../owner-display.js";
 import {
   ensureSessionHeader,
@@ -42,7 +47,7 @@ import {
   validateGeminiTurns,
 } from "../pi-embedded-helpers.js";
 import { createPreparedEmbeddedPiSettingsManager } from "../pi-project-settings.js";
-import { createBotCodingTools } from "../pi-tools.js";
+import { createOpenClawCodingTools } from "../pi-tools.js";
 import { resolveSandboxContext } from "../sandbox.js";
 import { repairSessionFileIfNeeded } from "../session-file-repair.js";
 import { guardSessionManager } from "../session-tool-result-guard-wrapper.js";
@@ -115,6 +120,8 @@ export type CompactEmbeddedPiSessionParams = {
   reasoningLevel?: ReasoningLevel;
   bashElevated?: ExecElevatedDefaults;
   customInstructions?: string;
+  tokenBudget?: number;
+  force?: boolean;
   trigger?: "overflow" | "manual";
   diagId?: string;
   attempt?: number;
@@ -276,8 +283,8 @@ export async function compactEmbeddedPiSessionDirect(
       reason,
     };
   };
-  const agentDir = params.agentDir ?? resolveBotAgentDir();
-  await ensureBotModelsJson(params.config, agentDir);
+  const agentDir = params.agentDir ?? resolveOpenClawAgentDir();
+  await ensureOpenClawModelsJson(params.config, agentDir);
   const { model, error, authStorage, modelRegistry } = resolveModel(
     provider,
     modelId,
@@ -369,7 +376,7 @@ export async function compactEmbeddedPiSessionDirect(
       warn: makeBootstrapWarn({ sessionLabel, warn: (message) => log.warn(message) }),
     });
     const runAbortController = new AbortController();
-    const toolsRaw = createBotCodingTools({
+    const toolsRaw = createOpenClawCodingTools({
       exec: {
         elevated: params.bashElevated,
       },
@@ -483,7 +490,7 @@ export async function compactEmbeddedPiSessionDirect(
       isSubagentSessionKey(params.sessionKey) || isCronSessionKey(params.sessionKey)
         ? "minimal"
         : "full";
-    const docsPath = await resolveBotDocsPath({
+    const docsPath = await resolveOpenClawDocsPath({
       workspaceDir: effectiveWorkspace,
       argv1: process.argv[1],
       cwd: process.cwd(),
@@ -846,6 +853,49 @@ export async function compactEmbeddedPiSession(
   const enqueueGlobal =
     params.enqueue ?? ((task, opts) => enqueueCommandInLane(globalLane, task, opts));
   return enqueueCommandInLane(sessionLane, () =>
-    enqueueGlobal(async () => compactEmbeddedPiSessionDirect(params)),
+    enqueueGlobal(async () => {
+      ensureContextEnginesInitialized();
+      const contextEngine = await resolveContextEngine(params.config);
+      try {
+        // Resolve token budget from model context window so the context engine
+        // knows the compaction target.  The runner's afterTurn path passes this
+        // automatically, but the /compact command path needs to compute it here.
+        const ceProvider = (params.provider ?? DEFAULT_PROVIDER).trim() || DEFAULT_PROVIDER;
+        const ceModelId = (params.model ?? DEFAULT_MODEL).trim() || DEFAULT_MODEL;
+        const agentDir = params.agentDir ?? resolveOpenClawAgentDir();
+        const { model: ceModel } = resolveModel(ceProvider, ceModelId, agentDir, params.config);
+        const ceCtxInfo = resolveContextWindowInfo({
+          cfg: params.config,
+          provider: ceProvider,
+          modelId: ceModelId,
+          modelContextWindow: ceModel?.contextWindow,
+          defaultTokens: DEFAULT_CONTEXT_TOKENS,
+        });
+        const result = await contextEngine.compact({
+          sessionId: params.sessionId,
+          sessionFile: params.sessionFile,
+          tokenBudget: ceCtxInfo.tokens,
+          customInstructions: params.customInstructions,
+          force: params.trigger === "manual",
+          legacyParams: params as Record<string, unknown>,
+        });
+        return {
+          ok: result.ok,
+          compacted: result.compacted,
+          reason: result.reason,
+          result: result.result
+            ? {
+                summary: result.result.summary ?? "",
+                firstKeptEntryId: result.result.firstKeptEntryId ?? "",
+                tokensBefore: result.result.tokensBefore,
+                tokensAfter: result.result.tokensAfter,
+                details: result.result.details,
+              }
+            : undefined,
+        };
+      } finally {
+        await contextEngine.dispose?.();
+      }
+    }),
   );
 }

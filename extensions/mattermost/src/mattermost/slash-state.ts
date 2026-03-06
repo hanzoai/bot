@@ -9,7 +9,7 @@
  * overwrite each other's tokens, registered commands, or handlers.
  */
 
-import type { BotPluginApi } from "bot/plugin-sdk";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/mattermost";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { ResolvedMattermostAccount } from "./accounts.js";
 import { resolveSlashCommandConfig, type MattermostRegisteredCommand } from "./slash-commands.js";
@@ -86,8 +86,8 @@ export function activateSlashCommands(params: {
   registeredCommands: MattermostRegisteredCommand[];
   triggerMap?: Map<string, string>;
   api: {
-    cfg: import("bot/plugin-sdk").BotConfig;
-    runtime: import("bot/plugin-sdk").RuntimeEnv;
+    cfg: import("@hanzo/bot/plugin-sdk/mattermost").BotConfig;
+    runtime: import("@hanzo/bot/plugin-sdk/mattermost").RuntimeEnv;
   };
   log?: (msg: string) => void;
 }) {

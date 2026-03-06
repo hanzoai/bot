@@ -3,7 +3,7 @@ import {
   type BotPluginApi,
   type ProviderAuthContext,
   type ProviderAuthResult,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/minimax-portal-auth";
 import { loginMiniMaxPortalOAuth, type MiniMaxRegion } from "./oauth.js";
 
 const PROVIDER_ID = "minimax-portal";

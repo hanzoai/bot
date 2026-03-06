@@ -18,7 +18,7 @@ import { resolveGatewayService } from "../daemon/service.js";
 import { hasAmbiguousGatewayAuthModeConfig } from "../gateway/auth-mode-policy.js";
 import { resolveGatewayAuth } from "../gateway/auth.js";
 import { buildGatewayConnectionDetails } from "../gateway/call.js";
-import { resolveBotPackageRoot } from "../infra/bot-root.js";
+import { resolveOpenClawPackageRoot } from "../infra/openclaw-root.js";
 import { defaultRuntime } from "../runtime.js";
 import { note } from "../terminal/note.js";
 import { stylePromptTitle } from "../terminal/prompt-style.js";
@@ -75,9 +75,9 @@ export async function doctorCommand(
 ) {
   const prompter = createDoctorPrompter({ runtime, options });
   printWizardHeader(runtime);
-  intro("Bot doctor");
+  intro("OpenClaw doctor");
 
-  const root = await resolveBotPackageRoot({
+  const root = await resolveOpenClawPackageRoot({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
     cwd: process.cwd(),
@@ -111,11 +111,11 @@ export async function doctorCommand(
   if (!cfg.gateway?.mode) {
     const lines = [
       "gateway.mode is unset; gateway start will be blocked.",
-      `Fix: run ${formatCliCommand("bot configure")} and set Gateway mode (local/remote).`,
-      `Or set directly: ${formatCliCommand("bot config set gateway.mode local")}`,
+      `Fix: run ${formatCliCommand("openclaw configure")} and set Gateway mode (local/remote).`,
+      `Or set directly: ${formatCliCommand("openclaw config set gateway.mode local")}`,
     ];
     if (!fs.existsSync(configPath)) {
-      lines.push(`Missing config: run ${formatCliCommand("bot setup")} first.`);
+      lines.push(`Missing config: run ${formatCliCommand("openclaw setup")} first.`);
     }
     note(lines.join("\n"), "Gateway");
   }
@@ -339,7 +339,7 @@ export async function doctorCommand(
       runtime.log(`Backup: ${shortenHomePath(backupPath)}`);
     }
   } else if (!prompter.shouldRepair) {
-    runtime.log(`Run "${formatCliCommand("bot doctor --fix")}" to apply changes.`);
+    runtime.log(`Run "${formatCliCommand("openclaw doctor --fix")}" to apply changes.`);
   }
 
   if (options.workspaceSuggestions !== false) {

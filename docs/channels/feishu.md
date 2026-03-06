@@ -8,7 +8,7 @@ title: Feishu
 
 # Feishu bot
 
-Feishu (Lark) is a team chat platform used by companies for messaging and collaboration. This plugin connects Hanzo Bot to a Feishu/Lark bot using the platform’s WebSocket event subscription so messages can be received without exposing a public webhook URL.
+Feishu (Lark) is a team chat platform used by companies for messaging and collaboration. This plugin connects OpenClaw to a Feishu/Lark bot using the platform’s WebSocket event subscription so messages can be received without exposing a public webhook URL.
 
 ---
 
@@ -17,13 +17,13 @@ Feishu (Lark) is a team chat platform used by companies for messaging and collab
 Install the Feishu plugin:
 
 ```bash
-hanzo-bot plugins install @bot/feishu
+openclaw plugins install @openclaw/feishu
 ```
 
 Local checkout (when running from a git repo):
 
 ```bash
-hanzo-bot plugins install ./extensions/feishu
+openclaw plugins install ./extensions/feishu
 ```
 
 ---
@@ -34,38 +34,38 @@ There are two ways to add the Feishu channel:
 
 ### Method 1: onboarding wizard (recommended)
 
-If you just installed Hanzo Bot, run the wizard:
+If you just installed OpenClaw, run the wizard:
 
 ```bash
-hanzo-bot onboard
+openclaw onboard
 ```
 
 The wizard guides you through:
 
 1. Creating a Feishu app and collecting credentials
-2. Configuring app credentials in Hanzo Bot
+2. Configuring app credentials in OpenClaw
 3. Starting the gateway
 
 ✅ **After configuration**, check gateway status:
 
-- `hanzo-bot gateway status`
-- `hanzo-bot logs --follow`
+- `openclaw gateway status`
+- `openclaw logs --follow`
 
 ### Method 2: CLI setup
 
 If you already completed initial install, add the channel via CLI:
 
 ```bash
-hanzo-bot channels add
+openclaw channels add
 ```
 
 Choose **Feishu**, then enter the App ID and App Secret.
 
 ✅ **After configuration**, manage the gateway:
 
-- `hanzo-bot gateway status`
-- `hanzo-bot gateway restart`
-- `hanzo-bot logs --follow`
+- `openclaw gateway status`
+- `openclaw gateway restart`
+- `openclaw logs --follow`
 
 ---
 
@@ -143,8 +143,8 @@ In **App Capability** > **Bot**:
 
 ⚠️ **Important:** before setting event subscription, make sure:
 
-1. You already ran `hanzo-bot channels add` for Feishu
-2. The gateway is running (`hanzo-bot gateway status`)
+1. You already ran `openclaw channels add` for Feishu
+2. The gateway is running (`openclaw gateway status`)
 
 In **Event Subscription**:
 
@@ -163,19 +163,19 @@ In **Event Subscription**:
 
 ---
 
-## Step 2: Configure Hanzo Bot
+## Step 2: Configure OpenClaw
 
 ### Configure with the wizard (recommended)
 
 ```bash
-hanzo-bot channels add
+openclaw channels add
 ```
 
 Choose **Feishu** and paste your App ID + App Secret.
 
 ### Configure via config file
 
-Edit `~/.hanzo/bot/bot.json`:
+Edit `~/.openclaw/openclaw.json`:
 
 ```json5
 {
@@ -194,6 +194,19 @@ Edit `~/.hanzo/bot/bot.json`:
   },
 }
 ```
+
+If you use `connectionMode: "webhook"`, set `verificationToken`. The Feishu webhook server binds to `127.0.0.1` by default; set `webhookHost` only if you intentionally need a different bind address.
+
+#### Verification Token (webhook mode)
+
+When using webhook mode, set `channels.feishu.verificationToken` in your config. To get the value:
+
+1. In Feishu Open Platform, open your app
+2. Go to **Development** → **Events & Callbacks** (开发配置 → 事件与回调)
+3. Open the **Encryption** tab (加密策略)
+4. Copy **Verification Token**
+
+![Verification Token location](../images/feishu-verification-token.png)
 
 ### Configure via environment variables
 
@@ -257,7 +270,7 @@ Set them at top level or per account:
 ### 1. Start the gateway
 
 ```bash
-hanzo-bot gateway
+openclaw gateway
 ```
 
 ### 2. Send a test message
@@ -269,7 +282,7 @@ In Feishu, find your bot and send a message.
 By default, the bot replies with a pairing code. Approve it:
 
 ```bash
-hanzo-bot pairing approve feishu <CODE>
+openclaw pairing approve feishu <CODE>
 ```
 
 After approval, you can chat normally.
@@ -293,8 +306,8 @@ After approval, you can chat normally.
 - **Approve pairing**:
 
   ```bash
-  hanzo-bot pairing list feishu
-  hanzo-bot pairing approve feishu <CODE>
+  openclaw pairing list feishu
+  openclaw pairing approve feishu <CODE>
   ```
 
 - **Allowlist mode**: set `channels.feishu.allowFrom` with allowed Open IDs
@@ -357,9 +370,9 @@ After approval, you can chat normally.
 }
 ```
 
-### Allow specific users to run control commands in a group (e.g. /reset, /new)
+### Restrict which senders can message in a group (sender allowlist)
 
-In addition to allowing the group itself, control commands are gated by the **sender** open_id.
+In addition to allowing the group itself, **all messages** in that group are gated by the sender open_id: only users listed in `groups.<chat_id>.allowFrom` have their messages processed; messages from other members are ignored (this is full sender-level gating, not only for control commands like /reset or /new).
 
 ```json5
 {
@@ -389,7 +402,7 @@ Group IDs look like `oc_xxx`.
 **Method 1 (recommended)**
 
 1. Start the gateway and @mention the bot in the group
-2. Run `hanzo-bot logs --follow` and look for `chat_id`
+2. Run `openclaw logs --follow` and look for `chat_id`
 
 **Method 2**
 
@@ -402,14 +415,14 @@ User IDs look like `ou_xxx`.
 **Method 1 (recommended)**
 
 1. Start the gateway and DM the bot
-2. Run `hanzo-bot logs --follow` and look for `open_id`
+2. Run `openclaw logs --follow` and look for `open_id`
 
 **Method 2**
 
 Check pairing requests for user Open IDs:
 
 ```bash
-hanzo-bot pairing list feishu
+openclaw pairing list feishu
 ```
 
 ---
@@ -426,13 +439,13 @@ hanzo-bot pairing list feishu
 
 ## Gateway management commands
 
-| Command                     | Description                   |
-| --------------------------- | ----------------------------- |
-| `hanzo-bot gateway status`  | Show gateway status           |
-| `hanzo-bot gateway install` | Install/start gateway service |
-| `hanzo-bot gateway stop`    | Stop gateway service          |
-| `hanzo-bot gateway restart` | Restart gateway service       |
-| `hanzo-bot logs --follow`   | Tail gateway logs             |
+| Command                    | Description                   |
+| -------------------------- | ----------------------------- |
+| `openclaw gateway status`  | Show gateway status           |
+| `openclaw gateway install` | Install/start gateway service |
+| `openclaw gateway stop`    | Stop gateway service          |
+| `openclaw gateway restart` | Restart gateway service       |
+| `openclaw logs --follow`   | Tail gateway logs             |
 
 ---
 
@@ -443,7 +456,7 @@ hanzo-bot pairing list feishu
 1. Ensure the bot is added to the group
 2. Ensure you @mention the bot (default behavior)
 3. Check `groupPolicy` is not set to `"disabled"`
-4. Check logs: `hanzo-bot logs --follow`
+4. Check logs: `openclaw logs --follow`
 
 ### Bot does not receive messages
 
@@ -451,8 +464,8 @@ hanzo-bot pairing list feishu
 2. Ensure event subscription includes `im.message.receive_v1`
 3. Ensure **long connection** is enabled
 4. Ensure app permissions are complete
-5. Ensure the gateway is running: `hanzo-bot gateway status`
-6. Check logs: `hanzo-bot logs --follow`
+5. Ensure the gateway is running: `openclaw gateway status`
+6. Check logs: `openclaw logs --follow`
 
 ### App Secret leak
 
@@ -529,14 +542,14 @@ Use `bindings` to route Feishu DMs or groups to different agents.
     list: [
       { id: "main" },
       {
-        id: "bot-fan",
-        workspace: "/home/user/bot-fan",
-        agentDir: "/home/user/.hanzo/bot/agents/bot-fan/agent",
+        id: "clawd-fan",
+        workspace: "/home/user/clawd-fan",
+        agentDir: "/home/user/.openclaw/agents/clawd-fan/agent",
       },
       {
-        id: "bot-xi",
-        workspace: "/home/user/bot-xi",
-        agentDir: "/home/user/.hanzo/bot/agents/bot-xi/agent",
+        id: "clawd-xi",
+        workspace: "/home/user/clawd-xi",
+        agentDir: "/home/user/.openclaw/agents/clawd-xi/agent",
       },
     ],
   },
@@ -549,14 +562,14 @@ Use `bindings` to route Feishu DMs or groups to different agents.
       },
     },
     {
-      agentId: "bot-fan",
+      agentId: "clawd-fan",
       match: {
         channel: "feishu",
         peer: { kind: "direct", id: "ou_yyy" },
       },
     },
     {
-      agentId: "bot-xi",
+      agentId: "clawd-xi",
       match: {
         channel: "feishu",
         peer: { kind: "group", id: "oc_zzz" },
@@ -582,23 +595,29 @@ Full configuration: [Gateway configuration](/gateway/configuration)
 
 Key options:
 
-| Setting                                           | Description                     | Default   |
-| ------------------------------------------------- | ------------------------------- | --------- |
-| `channels.feishu.enabled`                         | Enable/disable channel          | `true`    |
-| `channels.feishu.domain`                          | API domain (`feishu` or `lark`) | `feishu`  |
-| `channels.feishu.accounts.<id>.appId`             | App ID                          | -         |
-| `channels.feishu.accounts.<id>.appSecret`         | App Secret                      | -         |
-| `channels.feishu.accounts.<id>.domain`            | Per-account API domain override | `feishu`  |
-| `channels.feishu.dmPolicy`                        | DM policy                       | `pairing` |
-| `channels.feishu.allowFrom`                       | DM allowlist (open_id list)     | -         |
-| `channels.feishu.groupPolicy`                     | Group policy                    | `open`    |
-| `channels.feishu.groupAllowFrom`                  | Group allowlist                 | -         |
-| `channels.feishu.groups.<chat_id>.requireMention` | Require @mention                | `true`    |
-| `channels.feishu.groups.<chat_id>.enabled`        | Enable group                    | `true`    |
-| `channels.feishu.textChunkLimit`                  | Message chunk size              | `2000`    |
-| `channels.feishu.mediaMaxMb`                      | Media size limit                | `30`      |
-| `channels.feishu.streaming`                       | Enable streaming card output    | `true`    |
-| `channels.feishu.blockStreaming`                  | Enable block streaming          | `true`    |
+| Setting                                           | Description                             | Default          |
+| ------------------------------------------------- | --------------------------------------- | ---------------- |
+| `channels.feishu.enabled`                         | Enable/disable channel                  | `true`           |
+| `channels.feishu.domain`                          | API domain (`feishu` or `lark`)         | `feishu`         |
+| `channels.feishu.connectionMode`                  | Event transport mode                    | `websocket`      |
+| `channels.feishu.defaultAccount`                  | Default account ID for outbound routing | `default`        |
+| `channels.feishu.verificationToken`               | Required for webhook mode               | -                |
+| `channels.feishu.webhookPath`                     | Webhook route path                      | `/feishu/events` |
+| `channels.feishu.webhookHost`                     | Webhook bind host                       | `127.0.0.1`      |
+| `channels.feishu.webhookPort`                     | Webhook bind port                       | `3000`           |
+| `channels.feishu.accounts.<id>.appId`             | App ID                                  | -                |
+| `channels.feishu.accounts.<id>.appSecret`         | App Secret                              | -                |
+| `channels.feishu.accounts.<id>.domain`            | Per-account API domain override         | `feishu`         |
+| `channels.feishu.dmPolicy`                        | DM policy                               | `pairing`        |
+| `channels.feishu.allowFrom`                       | DM allowlist (open_id list)             | -                |
+| `channels.feishu.groupPolicy`                     | Group policy                            | `open`           |
+| `channels.feishu.groupAllowFrom`                  | Group allowlist                         | -                |
+| `channels.feishu.groups.<chat_id>.requireMention` | Require @mention                        | `true`           |
+| `channels.feishu.groups.<chat_id>.enabled`        | Enable group                            | `true`           |
+| `channels.feishu.textChunkLimit`                  | Message chunk size                      | `2000`           |
+| `channels.feishu.mediaMaxMb`                      | Media size limit                        | `30`             |
+| `channels.feishu.streaming`                       | Enable streaming card output            | `true`           |
+| `channels.feishu.blockStreaming`                  | Enable block streaming                  | `true`           |
 
 ---
 

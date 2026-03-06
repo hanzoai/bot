@@ -60,7 +60,7 @@ export async function buildGatewayInstallPlan(params: {
     token: params.token,
     launchdLabel:
       process.platform === "darwin"
-        ? resolveGatewayLaunchAgentLabel(params.env.BOT_PROFILE)
+        ? resolveGatewayLaunchAgentLabel(params.env.OPENCLAW_PROFILE)
         : undefined,
   });
 
@@ -77,5 +77,5 @@ export async function buildGatewayInstallPlan(params: {
 export function gatewayInstallErrorHint(platform = process.platform): string {
   return platform === "win32"
     ? "Tip: rerun from an elevated PowerShell (Start → type PowerShell → right-click → Run as administrator) or skip service install."
-    : `Tip: rerun \`${formatCliCommand("bot gateway install")}\` after fixing the error.`;
+    : `Tip: rerun \`${formatCliCommand("openclaw gateway install")}\` after fixing the error.`;
 }

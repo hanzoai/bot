@@ -2,7 +2,10 @@
  * Security module: token validation, rate limiting, input sanitization, user allowlist.
  */
 
-import { createFixedWindowRateLimiter, type FixedWindowRateLimiter } from "bot/plugin-sdk";
+import {
+  createFixedWindowRateLimiter,
+  type FixedWindowRateLimiter,
+} from "@hanzo/bot/plugin-sdk/synology-chat";
 import * as crypto from "node:crypto";
 
 export type DmAuthorizationResult =
@@ -18,7 +21,7 @@ export function validateToken(received: string, expected: string): boolean {
 
   // Use HMAC to normalize lengths before comparison,
   // preventing timing side-channel on token length.
-  const key = "bot-token-cmp";
+  const key = "openclaw-token-cmp";
   const a = crypto.createHmac("sha256", key).update(received).digest();
   const b = crypto.createHmac("sha256", key).update(expected).digest();
 

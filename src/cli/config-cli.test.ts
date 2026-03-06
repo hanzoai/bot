@@ -4,7 +4,7 @@ import type { ConfigFileSnapshot, BotConfig } from "../config/types.js";
 
 /**
  * Test for issue #6070:
- * `bot config set/unset` must update snapshot.resolved (user config after $include/${ENV},
+ * `openclaw config set/unset` must update snapshot.resolved (user config after $include/${ENV},
  * but before runtime defaults), so runtime defaults don't leak into the written config.
  */
 
@@ -36,7 +36,7 @@ vi.mock("../runtime.js", () => ({
 
 function buildSnapshot(params: { resolved: BotConfig; config: BotConfig }): ConfigFileSnapshot {
   return {
-    path: "/tmp/bot.json",
+    path: "/tmp/openclaw.json",
     exists: true,
     raw: JSON.stringify(params.resolved),
     parsed: params.resolved,
@@ -74,7 +74,7 @@ function makeInvalidSnapshot(params: {
   path?: string;
 }): ConfigFileSnapshot {
   return {
-    path: params.path ?? "/tmp/custom-bot.json",
+    path: params.path ?? "/tmp/custom-openclaw.json",
     exists: true,
     raw: "{}",
     parsed: {},
@@ -212,7 +212,7 @@ describe("config cli", () => {
 
       await runConfigCommand(["config", "get", "gateway.auth.token"]);
 
-      expect(mockLog).toHaveBeenCalledWith("__BOT_REDACTED__");
+      expect(mockLog).toHaveBeenCalledWith("__OPENCLAW_REDACTED__");
     });
   });
 
@@ -260,7 +260,7 @@ describe("config cli", () => {
 
       const payload = await runValidateJsonAndGetPayload();
       expect(payload.valid).toBe(false);
-      expect(payload.path).toBe("/tmp/custom-bot.json");
+      expect(payload.path).toBe("/tmp/custom-openclaw.json");
       expect(payload.issues).toEqual([{ path: "gateway.bind", message: "Invalid enum value" }]);
       expect(mockError).not.toHaveBeenCalled();
     });
@@ -281,7 +281,7 @@ describe("config cli", () => {
 
       const payload = await runValidateJsonAndGetPayload();
       expect(payload.valid).toBe(false);
-      expect(payload.path).toBe("/tmp/custom-bot.json");
+      expect(payload.path).toBe("/tmp/custom-openclaw.json");
       expect(payload.issues).toEqual([
         {
           path: "update.channel",
@@ -294,7 +294,7 @@ describe("config cli", () => {
 
     it("prints file-not-found and exits 1 when config file is missing", async () => {
       setSnapshotOnce({
-        path: "/tmp/bot.json",
+        path: "/tmp/openclaw.json",
         exists: false,
         raw: null,
         parsed: {},
@@ -424,19 +424,19 @@ describe("config cli", () => {
 
       await runConfigCommand(["config", "file"]);
 
-      expect(mockLog).toHaveBeenCalledWith("/tmp/bot.json");
+      expect(mockLog).toHaveBeenCalledWith("/tmp/openclaw.json");
       expect(mockWriteConfigFile).not.toHaveBeenCalled();
     });
 
     it("handles config file path with home directory", async () => {
       const resolved: BotConfig = { gateway: { port: 18789 } };
       const snapshot = buildSnapshot({ resolved, config: resolved });
-      snapshot.path = "/home/user/.hanzoai/bot.json";
+      snapshot.path = "/home/user/.openclaw/openclaw.json";
       mockReadConfigFileSnapshot.mockResolvedValueOnce(snapshot);
 
       await runConfigCommand(["config", "file"]);
 
-      expect(mockLog).toHaveBeenCalledWith("/home/user/.hanzoai/bot.json");
+      expect(mockLog).toHaveBeenCalledWith("/home/user/.openclaw/openclaw.json");
     });
   });
 });

@@ -1,12 +1,12 @@
-import type { BotPluginApi } from "bot/plugin-sdk";
-import { emptyPluginConfigSchema } from "bot/plugin-sdk";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/googlechat";
+import { emptyPluginConfigSchema } from "@hanzo/bot/plugin-sdk/googlechat";
 import { googlechatDock, googlechatPlugin } from "./src/channel.js";
 import { setGoogleChatRuntime } from "./src/runtime.js";
 
 const plugin = {
   id: "googlechat",
   name: "Google Chat",
-  description: "Bot Google Chat channel plugin",
+  description: "OpenClaw Google Chat channel plugin",
   configSchema: emptyPluginConfigSchema(),
   register(api: BotPluginApi) {
     setGoogleChatRuntime(api.runtime);

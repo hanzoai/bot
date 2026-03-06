@@ -21,7 +21,7 @@ describe("createCacheTrace", () => {
         diagnostics: {
           cacheTrace: {
             enabled: true,
-            filePath: "~/.hanzo/bot/logs/cache-trace.jsonl",
+            filePath: "~/.openclaw/logs/cache-trace.jsonl",
           },
         },
       },
@@ -33,7 +33,7 @@ describe("createCacheTrace", () => {
     });
 
     expect(trace).not.toBeNull();
-    expect(trace?.filePath).toBe(resolveUserPath("~/.hanzo/bot/logs/cache-trace.jsonl"));
+    expect(trace?.filePath).toBe(resolveUserPath("~/.openclaw/logs/cache-trace.jsonl"));
 
     trace?.recordStage("session:loaded", {
       messages: [],
@@ -80,7 +80,7 @@ describe("createCacheTrace", () => {
         },
       },
       env: {
-        BOT_CACHE_TRACE: "0",
+        OPENCLAW_CACHE_TRACE: "0",
       },
       writer: {
         filePath: "memory",
