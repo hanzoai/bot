@@ -1,4 +1,4 @@
-import { MarkdownConfigSchema, buildChannelConfigSchema } from "bot/plugin-sdk";
+import { MarkdownConfigSchema, buildChannelConfigSchema } from "@hanzo/bot/plugin-sdk/nostr";
 import { z } from "zod";
 
 const allowFromEntry = z.union([z.string(), z.number()]);

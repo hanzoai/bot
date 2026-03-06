@@ -8,7 +8,7 @@ import { capEntryCount, pruneStaleEntries, rotateSessionFile } from "./store.js"
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const fixtureSuite = createFixtureSuite("bot-pruning-suite-");
+const fixtureSuite = createFixtureSuite("openclaw-pruning-suite-");
 
 beforeAll(async () => {
   await fixtureSuite.setup();

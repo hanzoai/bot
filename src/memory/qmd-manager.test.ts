@@ -137,7 +137,7 @@ describe("QmdMemoryManager", () => {
     // Only workspace must exist for configured collection paths; state paths are
     // created lazily by manager code when needed.
     await fs.mkdir(workspaceDir);
-    process.env.BOT_STATE_DIR = stateDir;
+    process.env.OPENCLAW_STATE_DIR = stateDir;
     cfg = {
       agents: {
         list: [{ id: agentId, default: true, workspace: workspaceDir }],
@@ -155,9 +155,9 @@ describe("QmdMemoryManager", () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    delete process.env.BOT_STATE_DIR;
-    delete (globalThis as Record<string, unknown>).__botMcporterDaemonStart;
-    delete (globalThis as Record<string, unknown>).__botMcporterColdStartWarned;
+    delete process.env.OPENCLAW_STATE_DIR;
+    delete (globalThis as Record<string, unknown>).__openclawMcporterDaemonStart;
+    delete (globalThis as Record<string, unknown>).__openclawMcporterColdStartWarned;
   });
 
   it("debounces back-to-back sync calls", async () => {

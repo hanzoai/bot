@@ -1,4 +1,4 @@
-import { buildChannelKeyCandidates, resolveChannelEntryMatch } from "bot/plugin-sdk";
+import { buildChannelKeyCandidates, resolveChannelEntryMatch } from "@hanzo/bot/plugin-sdk/matrix";
 import type { MatrixRoomConfig } from "../../types.js";
 
 export type MatrixRoomConfigResolved = {

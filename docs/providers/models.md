@@ -1,5 +1,5 @@
 ---
-summary: "Model providers (LLMs) supported by Hanzo Bot"
+summary: "Model providers (LLMs) supported by OpenClaw"
 read_when:
   - You want to choose a model provider
   - You want quick setup examples for LLM auth + model selection
@@ -8,12 +8,12 @@ title: "Model Provider Quickstart"
 
 # Model Providers
 
-Hanzo Bot can use many LLM providers. Pick one, authenticate, then set the default
+OpenClaw can use many LLM providers. Pick one, authenticate, then set the default
 model as `provider/model`.
 
 ## Quick start (two steps)
 
-1. Authenticate with the provider (usually via `hanzo-bot onboard`).
+1. Authenticate with the provider (usually via `openclaw onboard`).
 2. Set the default model:
 
 ```json5
@@ -30,6 +30,7 @@ model as `provider/model`.
 - [Vercel AI Gateway](/providers/vercel-ai-gateway)
 - [Cloudflare AI Gateway](/providers/cloudflare-ai-gateway)
 - [Moonshot AI (Kimi + Kimi Coding)](/providers/moonshot)
+- [Mistral](/providers/mistral)
 - [Synthetic](/providers/synthetic)
 - [OpenCode Zen](/providers/opencode)
 - [Z.AI](/providers/zai)
