@@ -21,6 +21,7 @@ jobs:
     uses: hanzoai/.github/.github/workflows/docker-build.yml@main
     with:
       image: ghcr.io/${{ github.repository }}
+      platforms: "linux/amd64"
       deploy: true
       deploy-deployment: bot-gateway
       deploy-namespace: hanzo
