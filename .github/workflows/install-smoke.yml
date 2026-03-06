@@ -28,7 +28,9 @@ jobs:
   install-smoke:
     needs: [docs-scope]
     if: needs.docs-scope.outputs.docs_only != 'true'
-    runs-on: hanzo-k8s
+    runs-on: hanzo-build
+    env:
+      DOCKER_HOST: tcp://localhost:2375
     steps:
       - name: Checkout CLI
         uses: actions/checkout@v4
