@@ -206,7 +206,7 @@ describe("resolvePreferredBotTmpDir", () => {
         lstatSync,
         fallbackLstatSync,
       }),
-    ).toThrow(/Unsafe fallback OpenClaw temp dir/);
+    ).toThrow(/Unsafe fallback Bot temp dir/);
   });
 
   it("creates fallback directory when missing, then validates ownership and mode", () => {

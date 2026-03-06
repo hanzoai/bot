@@ -26,12 +26,17 @@ Hanzo Bot ships with the pi‑ai catalog. These providers require **no**
 
 - Provider: `openai`
 - Auth: `OPENAI_API_KEY`
-- Example model: `openai/gpt-5.1-codex`
-- CLI: `hanzo-bot onboard --auth-choice openai-api-key`
+- Optional rotation: `OPENAI_API_KEYS`, `OPENAI_API_KEY_1`, `OPENAI_API_KEY_2`, plus `BOT_LIVE_OPENAI_KEY` (single override)
+- Example models: `openai/gpt-5.4`, `openai/gpt-5.4-pro`
+- CLI: `bot onboard --auth-choice openai-api-key`
+- Default transport is `auto` (WebSocket-first, SSE fallback)
+- Override per model via `agents.defaults.models["openai/<model>"].params.transport` (`"sse"`, `"websocket"`, or `"auto"`)
+- OpenAI Responses WebSocket warm-up defaults to enabled via `params.openaiWsWarmup` (`true`/`false`)
+- OpenAI priority processing can be enabled via `agents.defaults.models["openai/<model>"].params.serviceTier`
 
 ```json5
 {
-  agents: { defaults: { model: { primary: "openai/gpt-5.1-codex" } } },
+  agents: { defaults: { model: { primary: "openai/gpt-5.4" } } },
 }
 ```
 
@@ -52,12 +57,15 @@ Hanzo Bot ships with the pi‑ai catalog. These providers require **no**
 
 - Provider: `openai-codex`
 - Auth: OAuth (ChatGPT)
-- Example model: `openai-codex/gpt-5.3-codex`
-- CLI: `hanzo-bot onboard --auth-choice openai-codex` or `hanzo-bot models auth login --provider openai-codex`
+- Example model: `openai-codex/gpt-5.4`
+- CLI: `bot onboard --auth-choice openai-codex` or `bot models auth login --provider openai-codex`
+- Default transport is `auto` (WebSocket-first, SSE fallback)
+- Override per model via `agents.defaults.models["openai-codex/<model>"].params.transport` (`"sse"`, `"websocket"`, or `"auto"`)
+- Policy note: OpenAI Codex OAuth is explicitly supported for external tools/workflows like Bot.
 
 ```json5
 {
-  agents: { defaults: { model: { primary: "openai-codex/gpt-5.3-codex" } } },
+  agents: { defaults: { model: { primary: "openai-codex/gpt-5.4" } } },
 }
 ```
 

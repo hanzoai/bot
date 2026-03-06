@@ -43,6 +43,7 @@ import {
   wrapToolParamNormalization,
 } from "./pi-tools.read.js";
 import { cleanToolSchemaForGemini, normalizeToolParameters } from "./pi-tools.schema.js";
+import { isXaiProvider } from "./schema/clean-for-xai.js";
 import { getSubagentDepthFromSessionStore } from "./subagent-depth.js";
 import { createToolFsPolicy, resolveToolFsConfig } from "./tool-fs-policy.js";
 import {
@@ -65,6 +66,7 @@ function isOpenAIProvider(provider?: string) {
 const TOOL_DENY_BY_MESSAGE_PROVIDER: Readonly<Record<string, readonly string[]>> = {
   voice: ["tts"],
 };
+const TOOL_DENY_FOR_XAI_PROVIDERS = new Set(["web_search"]);
 
 function normalizeMessageProvider(messageProvider?: string): string | undefined {
   const normalized = messageProvider?.trim().toLowerCase();
@@ -85,6 +87,18 @@ function applyMessageProviderToolPolicy(
   }
   const deniedSet = new Set(deniedTools);
   return tools.filter((tool) => !deniedSet.has(tool.name));
+}
+
+function applyModelProviderToolPolicy(
+  tools: AnyAgentTool[],
+  params?: { modelProvider?: string; modelId?: string },
+): AnyAgentTool[] {
+  if (!isXaiProvider(params?.modelProvider, params?.modelId)) {
+    return tools;
+  }
+  // xAI/Grok providers expose a native web_search tool; sending Bot's
+  // web_search alongside it causes duplicate-name request failures.
+  return tools.filter((tool) => !TOOL_DENY_FOR_XAI_PROVIDERS.has(tool.name));
 }
 
 function isApplyPatchAllowedForModel(params: {
@@ -177,6 +191,7 @@ export const __testing = {
   patchToolSchemaForClaudeCompatibility,
   wrapToolParamNormalization,
   assertRequiredParams,
+  applyModelProviderToolPolicy,
 } as const;
 
 export function createBotCodingTools(options?: {
@@ -501,9 +516,13 @@ export function createBotCodingTools(options?: {
     }),
   ];
   const toolsForMessageProvider = applyMessageProviderToolPolicy(tools, options?.messageProvider);
+  const toolsForModelProvider = applyModelProviderToolPolicy(toolsForMessageProvider, {
+    modelProvider: options?.modelProvider,
+    modelId: options?.modelId,
+  });
   // Security: treat unknown/undefined as unauthorized (opt-in, not opt-out)
   const senderIsOwner = options?.senderIsOwner === true;
-  const toolsByAuthorization = applyOwnerOnlyToolPolicy(toolsForMessageProvider, senderIsOwner);
+  const toolsByAuthorization = applyOwnerOnlyToolPolicy(toolsForModelProvider, senderIsOwner);
   const subagentFiltered = applyToolPolicyPipeline({
     tools: toolsByAuthorization,
     toolMeta: (tool) => getPluginToolMeta(tool),

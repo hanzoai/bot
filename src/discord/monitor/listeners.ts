@@ -30,6 +30,7 @@ import {
 import { formatDiscordReactionEmoji, formatDiscordUserTag } from "./format.js";
 import { resolveDiscordChannelInfo } from "./message-utils.js";
 import { setPresence } from "./presence-cache.js";
+import { normalizeDiscordListenerTimeoutMs, runDiscordTaskWithTimeout } from "./timeouts.js";
 
 type LoadedConfig = ReturnType<typeof import("../../config/config.js").loadConfig>;
 type RuntimeEnv = import("../../runtime.js").RuntimeEnv;
@@ -64,6 +65,34 @@ type DiscordReactionRoutingParams = {
 const DISCORD_SLOW_LISTENER_THRESHOLD_MS = 30_000;
 const discordEventQueueLog = createSubsystemLogger("discord/event-queue");
 
+function formatListenerContextValue(value: unknown): string | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+  return null;
+}
+
+function formatListenerContextSuffix(context?: Record<string, unknown>): string {
+  if (!context) {
+    return "";
+  }
+  const entries = Object.entries(context).flatMap(([key, value]) => {
+    const formatted = formatListenerContextValue(value);
+    return formatted ? [`${key}=${formatted}`] : [];
+  });
+  if (entries.length === 0) {
+    return "";
+  }
+  return ` (${entries.join(" ")})`;
+}
+
 function logSlowDiscordListener(params: {
   logger: Logger | undefined;
   listener: string;
@@ -92,12 +121,46 @@ async function runDiscordListenerWithSlowLog(params: {
   logger: Logger | undefined;
   listener: string;
   event: string;
-  run: () => Promise<void>;
+  run: (abortSignal: AbortSignal | undefined) => Promise<void>;
+  timeoutMs?: number;
+  context?: Record<string, unknown>;
   onError?: (err: unknown) => void;
 }) {
   const startedAt = Date.now();
+  const timeoutMs = normalizeDiscordListenerTimeoutMs(params.timeoutMs);
+  const logger = params.logger ?? discordEventQueueLog;
+  let timedOut = false;
+
   try {
-    await params.run();
+    timedOut = await runDiscordTaskWithTimeout({
+      run: params.run,
+      timeoutMs,
+      onTimeout: (resolvedTimeoutMs) => {
+        logger.error(
+          danger(
+            `discord handler timed out after ${formatDurationSeconds(resolvedTimeoutMs, {
+              decimals: 1,
+              unit: "seconds",
+            })}${formatListenerContextSuffix(params.context)}`,
+          ),
+        );
+      },
+      onAbortAfterTimeout: () => {
+        logger.warn(
+          `discord handler canceled after timeout${formatListenerContextSuffix(params.context)}`,
+        );
+      },
+      onErrorAfterTimeout: (err) => {
+        logger.error(
+          danger(
+            `discord handler failed after timeout: ${String(err)}${formatListenerContextSuffix(params.context)}`,
+          ),
+        );
+      },
+    });
+    if (timedOut) {
+      return;
+    }
   } catch (err) {
     if (params.onError) {
       params.onError(err);
@@ -105,12 +168,15 @@ async function runDiscordListenerWithSlowLog(params: {
     }
     throw err;
   } finally {
-    logSlowDiscordListener({
-      logger: params.logger,
-      listener: params.listener,
-      event: params.event,
-      durationMs: Date.now() - startedAt,
-    });
+    if (!timedOut) {
+      logSlowDiscordListener({
+        logger: params.logger,
+        listener: params.listener,
+        event: params.event,
+        durationMs: Date.now() - startedAt,
+        context: params.context,
+      });
+    }
   }
 }
 

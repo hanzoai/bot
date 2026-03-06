@@ -79,6 +79,7 @@ function sendJson(res: ServerResponse, status: number, body: unknown) {
 }
 
 const GATEWAY_PROBE_STATUS_BY_PATH = new Map<string, "live" | "ready">([
+  ["/", "live"],
   ["/health", "live"],
   ["/healthz", "live"],
   ["/ready", "ready"],
@@ -509,6 +510,7 @@ export function createGatewayHttpServer(opts: {
   controlUiBasePath: string;
   controlUiRoot?: ControlUiRootState;
   openAiChatCompletionsEnabled: boolean;
+  openAiChatCompletionsConfig?: import("../config/types.gateway.js").GatewayHttpChatCompletionsConfig;
   openResponsesEnabled: boolean;
   openResponsesConfig?: import("../config/types.gateway.js").GatewayHttpResponsesConfig;
   strictTransportSecurityHeader?: string;
@@ -527,6 +529,7 @@ export function createGatewayHttpServer(opts: {
     controlUiBasePath,
     controlUiRoot,
     openAiChatCompletionsEnabled,
+    openAiChatCompletionsConfig,
     openResponsesEnabled,
     openResponsesConfig,
     strictTransportSecurityHeader,
@@ -610,6 +613,7 @@ export function createGatewayHttpServer(opts: {
           run: () =>
             handleOpenAiHttpRequest(req, res, {
               auth: resolvedAuth,
+              config: openAiChatCompletionsConfig,
               trustedProxies,
               allowRealIpFallback,
               rateLimiter,

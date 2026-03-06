@@ -374,6 +374,7 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
       expect.objectContaining({
         OriginatingChannel: "telegram",
         OriginatingTo: "telegram:6812765697",
+        ExplicitDeliverRoute: true,
         AccountId: "default",
         MessageThreadId: 42,
       }),
@@ -408,6 +409,298 @@ describe("chat directive tag stripping for non-streaming final payloads", () => 
         OriginatingChannel: "feishu",
         OriginatingTo: "ou_feishu_direct_123",
         AccountId: "default",
+      }),
+    );
+  });
+
+  it("chat.send inherits routing metadata for per-account channel-peer session keys", async () => {
+    createTranscriptFixture("openclaw-chat-send-per-account-channel-peer-routing-");
+    mockState.finalText = "ok";
+    mockState.sessionEntry = {
+      deliveryContext: {
+        channel: "telegram",
+        to: "telegram:6812765697",
+        accountId: "account-a",
+      },
+      lastChannel: "telegram",
+      lastTo: "telegram:6812765697",
+      lastAccountId: "account-a",
+    };
+    const respond = vi.fn();
+    const context = createChatContext();
+
+    await runNonStreamingChatSend({
+      context,
+      respond,
+      idempotencyKey: "idem-per-account-channel-peer-routing",
+      sessionKey: "agent:main:telegram:account-a:direct:6812765697",
+      deliver: true,
+      expectBroadcast: false,
+    });
+
+    expect(mockState.lastDispatchCtx).toEqual(
+      expect.objectContaining({
+        OriginatingChannel: "telegram",
+        OriginatingTo: "telegram:6812765697",
+        AccountId: "account-a",
+      }),
+    );
+  });
+
+  it("chat.send inherits routing metadata for legacy channel-peer session keys", async () => {
+    createTranscriptFixture("openclaw-chat-send-legacy-channel-peer-routing-");
+    mockState.finalText = "ok";
+    mockState.sessionEntry = {
+      deliveryContext: {
+        channel: "telegram",
+        to: "telegram:6812765697",
+        accountId: "default",
+      },
+      lastChannel: "telegram",
+      lastTo: "telegram:6812765697",
+      lastAccountId: "default",
+    };
+    const respond = vi.fn();
+    const context = createChatContext();
+
+    await runNonStreamingChatSend({
+      context,
+      respond,
+      idempotencyKey: "idem-legacy-channel-peer-routing",
+      sessionKey: "agent:main:telegram:6812765697",
+      deliver: true,
+      expectBroadcast: false,
+    });
+
+    expect(mockState.lastDispatchCtx).toEqual(
+      expect.objectContaining({
+        OriginatingChannel: "telegram",
+        OriginatingTo: "telegram:6812765697",
+        AccountId: "default",
+      }),
+    );
+  });
+
+  it("chat.send inherits routing metadata for legacy channel-peer thread session keys", async () => {
+    createTranscriptFixture("openclaw-chat-send-legacy-thread-channel-peer-routing-");
+    mockState.finalText = "ok";
+    mockState.sessionEntry = {
+      deliveryContext: {
+        channel: "telegram",
+        to: "telegram:6812765697",
+        accountId: "default",
+        threadId: "42",
+      },
+      lastChannel: "telegram",
+      lastTo: "telegram:6812765697",
+      lastAccountId: "default",
+      lastThreadId: "42",
+    };
+    const respond = vi.fn();
+    const context = createChatContext();
+
+    await runNonStreamingChatSend({
+      context,
+      respond,
+      idempotencyKey: "idem-legacy-thread-channel-peer-routing",
+      sessionKey: "agent:main:telegram:6812765697:thread:42",
+      deliver: true,
+      expectBroadcast: false,
+    });
+
+    expect(mockState.lastDispatchCtx).toEqual(
+      expect.objectContaining({
+        OriginatingChannel: "telegram",
+        OriginatingTo: "telegram:6812765697",
+        AccountId: "default",
+        MessageThreadId: "42",
+      }),
+    );
+  });
+
+  it("chat.send does not inherit external delivery context for shared main sessions", async () => {
+    createTranscriptFixture("openclaw-chat-send-main-no-cross-route-");
+    mockState.finalText = "ok";
+    mockState.sessionEntry = {
+      deliveryContext: {
+        channel: "discord",
+        to: "discord:1234567890",
+        accountId: "default",
+      },
+      lastChannel: "discord",
+      lastTo: "discord:1234567890",
+      lastAccountId: "default",
+    };
+    const respond = vi.fn();
+    const context = createChatContext();
+
+    await runNonStreamingChatSend({
+      context,
+      respond,
+      idempotencyKey: "idem-main-no-cross-route",
+      sessionKey: "main",
+      expectBroadcast: false,
+    });
+
+    expect(mockState.lastDispatchCtx).toEqual(
+      expect.objectContaining({
+        OriginatingChannel: "webchat",
+        OriginatingTo: undefined,
+        ExplicitDeliverRoute: false,
+        AccountId: undefined,
+      }),
+    );
+  });
+
+  it("chat.send does not inherit external delivery context for UI clients on main sessions", async () => {
+    createTranscriptFixture("openclaw-chat-send-main-ui-routes-");
+    mockState.finalText = "ok";
+    mockState.sessionEntry = {
+      deliveryContext: {
+        channel: "whatsapp",
+        to: "whatsapp:+8613800138000",
+        accountId: "default",
+      },
+      lastChannel: "whatsapp",
+      lastTo: "whatsapp:+8613800138000",
+      lastAccountId: "default",
+    };
+    const respond = vi.fn();
+    const context = createChatContext();
+
+    await runNonStreamingChatSend({
+      context,
+      respond,
+      idempotencyKey: "idem-main-ui-routes",
+      client: {
+        connect: {
+          client: {
+            mode: GATEWAY_CLIENT_MODES.UI,
+            id: "openclaw-tui",
+          },
+        },
+      } as unknown,
+      sessionKey: "agent:main:main",
+      expectBroadcast: false,
+    });
+
+    expect(mockState.lastDispatchCtx).toEqual(
+      expect.objectContaining({
+        OriginatingChannel: "webchat",
+        OriginatingTo: undefined,
+        AccountId: undefined,
+      }),
+    );
+  });
+
+  it("chat.send inherits external delivery context for CLI clients on configured main sessions", async () => {
+    createTranscriptFixture("openclaw-chat-send-config-main-cli-routes-");
+    mockState.mainSessionKey = "work";
+    mockState.finalText = "ok";
+    mockState.sessionEntry = {
+      deliveryContext: {
+        channel: "whatsapp",
+        to: "whatsapp:+8613800138000",
+        accountId: "default",
+      },
+      lastChannel: "whatsapp",
+      lastTo: "whatsapp:+8613800138000",
+      lastAccountId: "default",
+    };
+    const respond = vi.fn();
+    const context = createChatContext();
+
+    await runNonStreamingChatSend({
+      context,
+      respond,
+      idempotencyKey: "idem-config-main-cli-routes",
+      client: {
+        connect: {
+          client: {
+            mode: GATEWAY_CLIENT_MODES.CLI,
+            id: "cli",
+          },
+        },
+      } as unknown,
+      sessionKey: "agent:main:work",
+      deliver: true,
+      expectBroadcast: false,
+    });
+
+    expect(mockState.lastDispatchCtx).toEqual(
+      expect.objectContaining({
+        OriginatingChannel: "whatsapp",
+        OriginatingTo: "whatsapp:+8613800138000",
+        AccountId: "default",
+      }),
+    );
+  });
+
+  it("chat.send does not inherit external delivery context for non-channel custom sessions", async () => {
+    createTranscriptFixture("openclaw-chat-send-custom-no-cross-route-");
+    mockState.finalText = "ok";
+    mockState.sessionEntry = {
+      deliveryContext: {
+        channel: "discord",
+        to: "discord:1234567890",
+        accountId: "default",
+      },
+      lastChannel: "discord",
+      lastTo: "discord:1234567890",
+      lastAccountId: "default",
+    };
+    const respond = vi.fn();
+    const context = createChatContext();
+
+    await runNonStreamingChatSend({
+      context,
+      respond,
+      idempotencyKey: "idem-custom-no-cross-route",
+      // Keep a second custom scope token so legacy-shape detection is exercised.
+      // "agent:main:work" only yields one rest token and does not hit that path.
+      sessionKey: "agent:main:work:ticket-123",
+      expectBroadcast: false,
+    });
+
+    expect(mockState.lastDispatchCtx).toEqual(
+      expect.objectContaining({
+        OriginatingChannel: "webchat",
+        OriginatingTo: undefined,
+        AccountId: undefined,
+      }),
+    );
+  });
+
+  it("chat.send keeps replies on the internal surface when deliver is not enabled", async () => {
+    createTranscriptFixture("openclaw-chat-send-no-deliver-internal-surface-");
+    mockState.finalText = "ok";
+    mockState.sessionEntry = {
+      deliveryContext: {
+        channel: "discord",
+        to: "user:1234567890",
+        accountId: "default",
+      },
+      lastChannel: "discord",
+      lastTo: "user:1234567890",
+      lastAccountId: "default",
+    };
+    const respond = vi.fn();
+    const context = createChatContext();
+
+    await runNonStreamingChatSend({
+      context,
+      respond,
+      idempotencyKey: "idem-no-deliver-internal-surface",
+      sessionKey: "agent:main:discord:direct:1234567890",
+      deliver: false,
+      expectBroadcast: false,
+    });
+
+    expect(mockState.lastDispatchCtx).toEqual(
+      expect.objectContaining({
+        OriginatingChannel: "webchat",
+        OriginatingTo: undefined,
+        AccountId: undefined,
       }),
     );
   });

@@ -439,6 +439,13 @@ curl "https://api.telegram.org/bot<bot_token>/getUpdates"
 
     Topic inheritance: topic entries inherit group settings unless overridden (`requireMention`, `allowFrom`, `skills`, `systemPrompt`, `enabled`, `groupPolicy`).
 
+    **Thread-bound ACP spawn from chat**:
+
+    - `/acp spawn <agent> --thread here|auto` can bind the current Telegram topic to a new ACP session.
+    - Follow-up topic messages route to the bound ACP session directly (no `/acp steer` required).
+    - Bot pins the spawn confirmation message in-topic after a successful bind.
+    - Requires `channels.telegram.threadBindings.spawnAcpSessions=true`.
+
     Template context includes:
 
     - `MessageThreadId`
@@ -645,6 +652,28 @@ bot message send --channel telegram --target 123456789 --message "hi"
 bot message send --channel telegram --target @name --message "hi"
 ```
 
+    Telegram polls use `bot message poll` and support forum topics:
+
+```bash
+bot message poll --channel telegram --target 123456789 \
+  --poll-question "Ship it?" --poll-option "Yes" --poll-option "No"
+bot message poll --channel telegram --target -1001234567890:topic:42 \
+  --poll-question "Pick a time" --poll-option "10am" --poll-option "2pm" \
+  --poll-duration-seconds 300 --poll-public
+```
+
+    Telegram-only poll flags:
+
+    - `--poll-duration-seconds` (5-600)
+    - `--poll-anonymous`
+    - `--poll-public`
+    - `--thread-id` for forum topics (or use a `:topic:` target)
+
+    Action gating:
+
+    - `channels.telegram.actions.sendMessage=false` disables outbound Telegram messages, including polls
+    - `channels.telegram.actions.poll=false` disables Telegram poll creation while leaving regular sends enabled
+
   </Accordion>
 </AccordionGroup>
 
@@ -702,7 +731,9 @@ Primary reference:
 - `channels.telegram.botToken`: bot token (BotFather).
 - `channels.telegram.tokenFile`: read token from file path.
 - `channels.telegram.dmPolicy`: `pairing | allowlist | open | disabled` (default: pairing).
-- `channels.telegram.allowFrom`: DM allowlist (numeric Telegram user IDs). `open` requires `"*"`. `bot doctor --fix` can resolve legacy `@username` entries to IDs.
+- `channels.telegram.allowFrom`: DM allowlist (numeric Telegram user IDs). `allowlist` requires at least one sender ID. `open` requires `"*"`. `bot doctor --fix` can resolve legacy `@username` entries to IDs and can recover allowlist entries from pairing-store files in allowlist migration flows.
+- `channels.telegram.actions.poll`: enable or disable Telegram poll creation (default: enabled; still requires `sendMessage`).
+- `channels.telegram.defaultTo`: default Telegram target used by CLI `--deliver` when no explicit `--reply-to` is provided.
 - `channels.telegram.groupPolicy`: `open | allowlist | disabled` (default: allowlist).
 - `channels.telegram.groupAllowFrom`: group sender allowlist (numeric Telegram user IDs). `bot doctor --fix` can resolve legacy `@username` entries to IDs.
 - `channels.telegram.groups`: per-group defaults + allowlist (use `"*"` for global defaults).

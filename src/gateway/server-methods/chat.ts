@@ -847,11 +847,48 @@ export const chatHandlers: GatewayRequestHandlers = {
       const routeAccountIdCandidate =
         entry?.deliveryContext?.accountId ?? entry?.lastAccountId ?? undefined;
       const routeThreadIdCandidate = entry?.deliveryContext?.threadId ?? entry?.lastThreadId;
-      const hasDeliverableRoute =
+      const parsedSessionKey = parseAgentSessionKey(sessionKey);
+      const sessionScopeParts = (parsedSessionKey?.rest ?? sessionKey).split(":").filter(Boolean);
+      const sessionScopeHead = sessionScopeParts[0];
+      const sessionChannelHint = normalizeMessageChannel(sessionScopeHead);
+      const normalizedSessionScopeHead = (sessionScopeHead ?? "").trim().toLowerCase();
+      const sessionPeerShapeCandidates = [sessionScopeParts[1], sessionScopeParts[2]]
+        .map((part) => (part ?? "").trim().toLowerCase())
+        .filter(Boolean);
+      const isChannelAgnosticSessionScope = CHANNEL_AGNOSTIC_SESSION_SCOPES.has(
+        normalizedSessionScopeHead,
+      );
+      const isChannelScopedSession = sessionPeerShapeCandidates.some((part) =>
+        CHANNEL_SCOPED_SESSION_SHAPES.has(part),
+      );
+      const hasLegacyChannelPeerShape =
+        !isChannelScopedSession &&
+        typeof sessionScopeParts[1] === "string" &&
+        sessionChannelHint === routeChannelCandidate;
+      const clientMode = client?.connect?.client?.mode;
+      const isFromWebchatClient =
+        isWebchatClient(client?.connect?.client) || clientMode === GATEWAY_CLIENT_MODES.UI;
+      const configuredMainKey = (cfg.session?.mainKey ?? "main").trim().toLowerCase();
+      const isConfiguredMainSessionScope =
+        normalizedSessionScopeHead.length > 0 && normalizedSessionScopeHead === configuredMainKey;
+      // Channel-agnostic session scopes (main, direct:<peer>, etc.) can leak
+      // stale routes across surfaces. Allow configured main sessions from
+      // non-Webchat/UI clients (e.g., CLI, backend) to keep the last external route.
+      const canInheritDeliverableRoute = Boolean(
+        sessionChannelHint &&
+        sessionChannelHint !== INTERNAL_MESSAGE_CHANNEL &&
+        ((!isChannelAgnosticSessionScope &&
+          (isChannelScopedSession || hasLegacyChannelPeerShape)) ||
+          (isConfiguredMainSessionScope && client?.connect !== undefined && !isFromWebchatClient)),
+      );
+      const hasDeliverableRoute = Boolean(
+        shouldDeliverExternally &&
+        canInheritDeliverableRoute &&
         routeChannelCandidate &&
         routeChannelCandidate !== INTERNAL_MESSAGE_CHANNEL &&
         typeof routeToCandidate === "string" &&
-        routeToCandidate.trim().length > 0;
+        routeToCandidate.trim().length > 0,
+      );
       const originatingChannel = hasDeliverableRoute
         ? routeChannelCandidate
         : INTERNAL_MESSAGE_CHANNEL;
@@ -874,6 +911,7 @@ export const chatHandlers: GatewayRequestHandlers = {
         Surface: INTERNAL_MESSAGE_CHANNEL,
         OriginatingChannel: originatingChannel,
         OriginatingTo: originatingTo,
+        ExplicitDeliverRoute: hasDeliverableRoute,
         AccountId: accountId,
         MessageThreadId: messageThreadId,
         ChatType: "direct",

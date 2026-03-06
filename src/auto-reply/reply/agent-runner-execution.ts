@@ -30,6 +30,7 @@ import {
   isMarkdownCapableMessageChannel,
   resolveMessageChannel,
 } from "../../utils/message-channel.js";
+import { isInternalMessageChannel } from "../../utils/message-channel.js";
 import { stripHeartbeatToken } from "../heartbeat.js";
 import {
   HEARTBEAT_TOKEN,
@@ -112,11 +113,17 @@ export async function runAgentTurnWithFallback(params: {
     didNotifyAgentRunStart = true;
     params.opts?.onAgentRunStart?.(runId);
   };
+  const shouldSurfaceToControlUi = isInternalMessageChannel(
+    params.followupRun.run.messageProvider ??
+      params.sessionCtx.Surface ??
+      params.sessionCtx.Provider,
+  );
   if (params.sessionKey) {
     registerAgentRunContext(runId, {
       sessionKey: params.sessionKey,
       verboseLevel: params.resolvedVerboseLevel,
       isHeartbeat: params.isHeartbeat,
+      isControlUiVisible: shouldSurfaceToControlUi,
     });
   }
   let runResult: Awaited<ReturnType<typeof runEmbeddedPiAgent>>;
@@ -182,7 +189,7 @@ export async function runAgentTurnWithFallback(params: {
       const onToolResult = params.opts?.onToolResult;
       const fallbackResult = await runWithModelFallback({
         ...resolveModelFallbackOptions(params.followupRun.run),
-        run: (provider, model) => {
+        run: (provider, model, runOptions) => {
           // Notify that model selection is complete (including after fallback).
           // This allows responsePrefix template interpolation with the actual model.
           params.opts?.onModelSelected?.({
@@ -292,6 +299,7 @@ export async function runAgentTurnWithFallback(params: {
             model,
             runId,
             authProfile,
+            allowRateLimitCooldownProbe: runOptions?.allowRateLimitCooldownProbe,
           });
           return runEmbeddedPiAgent({
             ...embeddedContext,

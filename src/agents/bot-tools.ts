@@ -130,6 +130,7 @@ export function createBotTools(options?: {
     createBrowserTool({
       sandboxBridgeUrl: options?.sandboxBrowserBridgeUrl,
       allowHostControl: options?.allowHostBrowserControl,
+      agentSessionKey: options?.agentSessionKey,
     }),
     createCanvasTool(),
     createNodesTool({
