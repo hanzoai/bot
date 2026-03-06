@@ -1,4 +1,4 @@
-import type { BotConfig } from "bot/plugin-sdk/mattermost";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/mattermost";
 import { describe, expect, it } from "vitest";
 import { resolveMattermostGroupRequireMention } from "./group-mentions.js";
 

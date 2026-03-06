@@ -27,7 +27,7 @@ async function writeInstallableSkill(workspaceDir: string, name: string): Promis
     `---
 name: ${name}
 description: test skill
-metadata: {"@hanzo/bot":{"install":[{"id":"deps","kind":"node","package":"example-package"}]}}
+metadata: {"openclaw":{"install":[{"id":"deps","kind":"node","package":"example-package"}]}}
 ---
 
 # ${name}
@@ -38,11 +38,11 @@ metadata: {"@hanzo/bot":{"install":[{"id":"deps","kind":"node","package":"exampl
   return skillDir;
 }
 
-const workspaceSuite = createFixtureSuite("bot-skills-install-");
+const workspaceSuite = createFixtureSuite("openclaw-skills-install-");
 let tempHome: TempHomeEnv;
 
 beforeAll(async () => {
-  tempHome = await createTempHomeEnv("bot-skills-install-home-");
+  tempHome = await createTempHomeEnv("openclaw-skills-install-home-");
   await workspaceSuite.setup();
 });
 

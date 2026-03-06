@@ -1,20 +1,16 @@
 {
-  "name": "@hanzo/bot-tlon",
-  "version": "2026.3.5",
-  "private": true,
-  "description": "Hanzo Bot Tlon/Urbit channel plugin",
+  "name": "@openclaw/tlon",
+  "version": "2026.3.6",
+  "description": "OpenClaw Tlon/Urbit channel plugin",
   "type": "module",
   "dependencies": {
-    "@tloncorp/api": "github:tloncorp/api-beta#7eede1c1a756977b09f96aa14a92e2b06318ae87",
+    "@tloncorp/api": "git+https://github.com/tloncorp/api-beta.git#7eede1c1a756977b09f96aa14a92e2b06318ae87",
     "@tloncorp/tlon-skill": "0.1.9",
     "@urbit/aura": "^3.0.0",
     "@urbit/http-api": "^3.0.0",
     "zod": "^4.3.6"
   },
-  "devDependencies": {
-    "@hanzo/bot": "workspace:*"
-  },
-  "bot": {
+  "openclaw": {
     "extensions": [
       "./index.ts"
     ],
@@ -29,7 +25,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@hanzo/bot-tlon",
+      "npmSpec": "@openclaw/tlon",
       "localPath": "extensions/tlon",
       "defaultChoice": "npm"
     }

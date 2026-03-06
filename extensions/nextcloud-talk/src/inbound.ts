@@ -14,7 +14,7 @@ import {
   type OutboundReplyPayload,
   type BotConfig,
   type RuntimeEnv,
-} from "bot/plugin-sdk";
+} from "@hanzo/bot/plugin-sdk/nextcloud-talk";
 import type { ResolvedNextcloudTalkAccount } from "./accounts.js";
 import type { CoreConfig, GroupPolicy, NextcloudTalkInboundMessage } from "./types.js";
 import {

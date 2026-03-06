@@ -1,19 +1,21 @@
 {
-  "name": "@hanzo/bot-googlechat",
-  "version": "2026.3.5",
+  "name": "@openclaw/googlechat",
+  "version": "2026.3.6",
   "private": true,
-  "description": "Hanzo Bot Google Chat channel plugin",
+  "description": "OpenClaw Google Chat channel plugin",
   "type": "module",
   "dependencies": {
-    "google-auth-library": "^10.5.0"
-  },
-  "devDependencies": {
-    "@hanzo/bot": "workspace:*"
+    "google-auth-library": "^10.6.1"
   },
   "peerDependencies": {
-    "@hanzo/bot": ">=2026.1.26"
+    "openclaw": ">=2026.3.2"
   },
-  "bot": {
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
+  },
+  "openclaw": {
     "extensions": [
       "./index.ts"
     ],
@@ -32,7 +34,7 @@
       "order": 55
     },
     "install": {
-      "npmSpec": "@hanzo/bot-googlechat",
+      "npmSpec": "@openclaw/googlechat",
       "localPath": "extensions/googlechat",
       "defaultChoice": "npm"
     }

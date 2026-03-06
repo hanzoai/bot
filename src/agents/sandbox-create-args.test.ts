@@ -8,8 +8,8 @@ describe("buildSandboxCreateArgs", () => {
     binds?: string[],
   ): SandboxDockerConfig {
     return {
-      image: "bot-sandbox:bookworm-slim",
-      containerPrefix: "bot-sbx-",
+      image: "openclaw-sandbox:bookworm-slim",
+      containerPrefix: "openclaw-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -39,8 +39,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("includes hardening and resource flags", () => {
     const cfg: SandboxDockerConfig = {
-      image: "bot-sandbox:bookworm-slim",
-      containerPrefix: "bot-sbx-",
+      image: "openclaw-sandbox:bookworm-slim",
+      containerPrefix: "openclaw-sbx-",
       workdir: "/workspace",
       readOnlyRoot: true,
       tmpfs: ["/tmp"],
@@ -58,32 +58,32 @@ describe("buildSandboxCreateArgs", () => {
         core: "0",
       },
       seccompProfile: "/tmp/seccomp.json",
-      apparmorProfile: "bot-sandbox",
+      apparmorProfile: "openclaw-sandbox",
       dns: ["1.1.1.1"],
       extraHosts: ["internal.service:10.0.0.5"],
     };
 
     const args = buildSandboxCreateArgs({
-      name: "bot-sbx-test",
+      name: "openclaw-sbx-test",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
-      labels: { "bot.sandboxBrowser": "1" },
+      labels: { "openclaw.sandboxBrowser": "1" },
     });
 
     expect(args).toEqual(
       expect.arrayContaining([
         "create",
         "--name",
-        "bot-sbx-test",
+        "openclaw-sbx-test",
         "--label",
-        "bot.sandbox=1",
+        "openclaw.sandbox=1",
         "--label",
-        "bot.sessionKey=main",
+        "openclaw.sessionKey=main",
         "--label",
-        "bot.createdAtMs=1700000000000",
+        "openclaw.createdAtMs=1700000000000",
         "--label",
-        "bot.sandboxBrowser=1",
+        "openclaw.sandboxBrowser=1",
         "--read-only",
         "--tmpfs",
         "/tmp",
@@ -98,7 +98,7 @@ describe("buildSandboxCreateArgs", () => {
         "--security-opt",
         "seccomp=/tmp/seccomp.json",
         "--security-opt",
-        "apparmor=bot-sandbox",
+        "apparmor=openclaw-sandbox",
         "--dns",
         "1.1.1.1",
         "--add-host",
@@ -131,8 +131,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("emits -v flags for safe custom binds", () => {
     const cfg: SandboxDockerConfig = {
-      image: "bot-sandbox:bookworm-slim",
-      containerPrefix: "bot-sbx-",
+      image: "openclaw-sandbox:bookworm-slim",
+      containerPrefix: "openclaw-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -142,7 +142,7 @@ describe("buildSandboxCreateArgs", () => {
     };
 
     const args = buildSandboxCreateArgs({
-      name: "bot-sbx-binds",
+      name: "openclaw-sbx-binds",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -165,37 +165,37 @@ describe("buildSandboxCreateArgs", () => {
   it.each([
     {
       name: "dangerous Docker socket bind mounts",
-      containerName: "bot-sbx-dangerous",
+      containerName: "openclaw-sbx-dangerous",
       cfg: createSandboxConfig({}, ["/var/run/docker.sock:/var/run/docker.sock"]),
       expected: /blocked path/,
     },
     {
       name: "dangerous parent bind mounts",
-      containerName: "bot-sbx-dangerous-parent",
+      containerName: "openclaw-sbx-dangerous-parent",
       cfg: createSandboxConfig({}, ["/run:/run"]),
       expected: /blocked path/,
     },
     {
       name: "network host mode",
-      containerName: "bot-sbx-host",
+      containerName: "openclaw-sbx-host",
       cfg: createSandboxConfig({ network: "host" }),
       expected: /network mode "host" is blocked/,
     },
     {
       name: "network container namespace join",
-      containerName: "bot-sbx-container-network",
+      containerName: "openclaw-sbx-container-network",
       cfg: createSandboxConfig({ network: "container:peer" }),
       expected: /network mode "container:peer" is blocked by default/,
     },
     {
       name: "seccomp unconfined",
-      containerName: "bot-sbx-seccomp",
+      containerName: "openclaw-sbx-seccomp",
       cfg: createSandboxConfig({ seccompProfile: "unconfined" }),
       expected: /seccomp profile "unconfined" is blocked/,
     },
     {
       name: "apparmor unconfined",
-      containerName: "bot-sbx-apparmor",
+      containerName: "openclaw-sbx-apparmor",
       cfg: createSandboxConfig({ apparmorProfile: "unconfined" }),
       expected: /apparmor profile "unconfined" is blocked/,
     },
@@ -205,8 +205,8 @@ describe("buildSandboxCreateArgs", () => {
 
   it("omits -v flags when binds is empty or undefined", () => {
     const cfg: SandboxDockerConfig = {
-      image: "bot-sandbox:bookworm-slim",
-      containerPrefix: "bot-sbx-",
+      image: "openclaw-sandbox:bookworm-slim",
+      containerPrefix: "openclaw-sbx-",
       workdir: "/workspace",
       readOnlyRoot: false,
       tmpfs: [],
@@ -216,7 +216,7 @@ describe("buildSandboxCreateArgs", () => {
     };
 
     const args = buildSandboxCreateArgs({
-      name: "bot-sbx-no-binds",
+      name: "openclaw-sbx-no-binds",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -239,7 +239,7 @@ describe("buildSandboxCreateArgs", () => {
     const cfg = createSandboxConfig({}, ["/opt/external:/data:rw"]);
     expect(() =>
       buildSandboxCreateArgs({
-        name: "bot-sbx-outside-roots",
+        name: "openclaw-sbx-outside-roots",
         cfg,
         scopeKey: "main",
         createdAtMs: 1700000000000,
@@ -251,7 +251,7 @@ describe("buildSandboxCreateArgs", () => {
   it("allows bind sources outside runtime allowlist with explicit override", () => {
     const cfg = createSandboxConfig({}, ["/opt/external:/data:rw"]);
     const args = buildSandboxCreateArgs({
-      name: "bot-sbx-outside-roots-override",
+      name: "openclaw-sbx-outside-roots-override",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -263,13 +263,13 @@ describe("buildSandboxCreateArgs", () => {
 
   it("blocks reserved /workspace target bind mounts by default", () => {
     const cfg = createSandboxConfig({}, ["/tmp/override:/workspace:rw"]);
-    expectBuildToThrow("bot-sbx-reserved-target", cfg, /reserved container path/);
+    expectBuildToThrow("openclaw-sbx-reserved-target", cfg, /reserved container path/);
   });
 
   it("allows reserved /workspace target bind mounts with explicit dangerous override", () => {
     const cfg = createSandboxConfig({}, ["/tmp/override:/workspace:rw"]);
     const args = buildSandboxCreateArgs({
-      name: "bot-sbx-reserved-target-override",
+      name: "openclaw-sbx-reserved-target-override",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,
@@ -284,7 +284,7 @@ describe("buildSandboxCreateArgs", () => {
       dangerouslyAllowContainerNamespaceJoin: true,
     });
     const args = buildSandboxCreateArgs({
-      name: "bot-sbx-container-network-override",
+      name: "openclaw-sbx-container-network-override",
       cfg,
       scopeKey: "main",
       createdAtMs: 1700000000000,

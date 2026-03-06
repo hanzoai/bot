@@ -11,7 +11,7 @@ vi.mock("../plugins/tools.js", () => ({
   resolvePluginTools: resolvePluginToolsMock,
 }));
 
-import { createBotTools } from "./bot-tools.js";
+import { createBotTools } from "./openclaw-tools.js";
 
 describe("createBotTools plugin context", () => {
   it("forwards trusted requester sender identity to plugin tool context", () => {
