@@ -15,6 +15,7 @@ import { attachChildProcessBridge } from "./process/child-process-bridge.js";
 const ENTRY_WRAPPER_PAIRS = [
   { wrapperBasename: "openclaw.mjs", entryBasename: "entry.js" },
   { wrapperBasename: "openclaw.js", entryBasename: "entry.js" },
+  { wrapperBasename: "hanzo-bot.mjs", entryBasename: "entry.js" },
 ] as const;
 
 function shouldForceReadOnlyAuthStore(argv: string[]): boolean {
