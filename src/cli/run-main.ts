@@ -86,6 +86,18 @@ export async function runCli(argv: string[] = process.argv) {
     return;
   }
 
+  // First-run cloud connect: if no config file exists, authenticate with Hanzo Cloud
+  // before proceeding. Skip for help/version flags and non-default commands that don't
+  // need cloud credentials.
+  if (!hasHelpOrVersion(normalizedArgv)) {
+    const { readConfigFileSnapshot } = await import("../config/config.js");
+    const snapshot = await readConfigFileSnapshot();
+    if (!snapshot.exists) {
+      const { runFirstRunCloudConnect } = await import("../commands/cloud-connect.js");
+      await runFirstRunCloudConnect();
+    }
+  }
+
   // Capture all console output into structured logs while keeping stdout/stderr behavior.
   enableConsoleCapture();
 
