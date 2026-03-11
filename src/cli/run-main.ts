@@ -95,6 +95,20 @@ export async function runCli(argv: string[] = process.argv) {
     if (!snapshot.exists) {
       const { runFirstRunCloudConnect } = await import("../commands/cloud-connect.js");
       await runFirstRunCloudConnect();
+      // runFirstRunCloudConnect now runs a long-lived process (local gateway or
+      // cloud monitor). If it returns (e.g. user cancelled), exit cleanly.
+      return;
+    }
+  }
+
+  // No subcommand given by a returning user — show the interactive launch menu
+  // instead of falling through to Commander help.
+  if (!hasHelpOrVersion(normalizedArgv)) {
+    const primary = getPrimaryCommand(normalizedArgv);
+    if (!primary) {
+      const { showLaunchMenu } = await import("../commands/cloud-connect.js");
+      await showLaunchMenu();
+      return;
     }
   }
 
