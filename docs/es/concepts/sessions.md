@@ -9,7 +9,7 @@ title: "Sessions"
 
 Esta página aún no tiene traducción completa al español.
 
-- Ver la versión en inglés: [Open English doc](/concepts/sessions)
+- Ver la versión en inglés: [Open English doc](/concepts/session)
 - Volver al inicio en español: [Hanzo Bot ES](/es)
 
 > Estado: traducción en progreso.
