@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
@@ -10,20 +10,31 @@ import { openUrl } from "./onboard-helpers.js";
 const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/login/oauth/authorize";
 const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/api/login/oauth/access_token";
 const HANZO_CLIENT_ID = "hanzobot-client-id";
-const HANZO_CLIENT_SECRET = "";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 const HANZO_GATEWAY_URL = "wss://gw.hanzo.bot";
 const PLAYGROUND_NODES_URL = "https://app.hanzo.bot/nodes";
 const PLAYGROUND_URL = "https://app.hanzo.bot/playground";
 
-function buildAuthorizeUrl(state: string): string {
+// PKCE (RFC 7636) helpers for public client authentication
+function generateCodeVerifier(): string {
+  // 32 random bytes → 43 base64url chars (within the 43-128 char range per RFC 7636)
+  return randomBytes(32).toString("base64url");
+}
+
+function computeCodeChallenge(verifier: string): string {
+  return createHash("sha256").update(verifier).digest("base64url");
+}
+
+function buildAuthorizeUrl(state: string, codeChallenge: string): string {
   const qs = new URLSearchParams({
     client_id: process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID,
     redirect_uri: process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI,
     response_type: "code",
     scope: HANZO_SCOPES,
     state,
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
   });
   return `${HANZO_IAM_AUTHORIZE_ENDPOINT}?${qs.toString()}`;
 }
@@ -108,22 +119,21 @@ async function waitForCallback(params: {
   });
 }
 
-async function exchangeCode(code: string): Promise<{
+async function exchangeCode(code: string, codeVerifier: string): Promise<{
   access_token: string;
   refresh_token?: string;
   token_type: string;
   expires_in?: number;
 }> {
   const clientId = process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID;
-  const clientSecret = process.env.HANZO_CLIENT_SECRET?.trim() || HANZO_CLIENT_SECRET;
   const redirectUri = process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI;
 
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     client_id: clientId,
-    client_secret: clientSecret,
     code,
     redirect_uri: redirectUri,
+    code_verifier: codeVerifier,
   });
 
   const res = await fetch(HANZO_IAM_TOKEN_ENDPOINT, {
@@ -178,7 +188,9 @@ export async function runFirstRunCloudConnect(): Promise<void> {
   console.log("  Connecting your machine to Hanzo Cloud...");
 
   const state = randomBytes(16).toString("hex");
-  const authorizeUrl = buildAuthorizeUrl(state);
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = computeCodeChallenge(codeVerifier);
+  const authorizeUrl = buildAuthorizeUrl(state, codeChallenge);
   const timeoutMs = 3 * 60 * 1000;
 
   let codeAndState: { code: string; state: string };
@@ -203,18 +215,18 @@ export async function runFirstRunCloudConnect(): Promise<void> {
       // eslint-disable-next-line no-console
       console.log(`  Open this URL in your browser to sign in:\n\n  ${authorizeUrl}\n`);
       codeAndState = await promptPasteCode(state);
-      return completeLogin(codeAndState.code);
+      return completeLogin(codeAndState.code, codeVerifier);
     }
 
     await openUrl(authorizeUrl);
     codeAndState = await callbackPromise;
   }
 
-  await completeLogin(codeAndState.code);
+  await completeLogin(codeAndState.code, codeVerifier);
 }
 
-async function completeLogin(code: string): Promise<void> {
-  const tokens = await exchangeCode(code);
+async function completeLogin(code: string, codeVerifier: string): Promise<void> {
+  const tokens = await exchangeCode(code, codeVerifier);
 
   // Store OAuth credentials
   const creds = {
