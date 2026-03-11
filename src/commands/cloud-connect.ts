@@ -1,8 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { createServer } from "node:http";
-import os from "node:os";
-import path from "node:path";
-import { writeConfigFile } from "../config/io.js";
+import { isCancel, select } from "@clack/prompts";
 import { isRemoteEnvironment } from "./oauth-env.js";
 import { writeOAuthCredentials } from "./onboard-auth.credentials.js";
 import { openUrl } from "./onboard-helpers.js";
@@ -12,9 +10,6 @@ const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/api/login/oauth/access_token"
 const HANZO_CLIENT_ID = "hanzobot-client-id";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
-const HANZO_GATEWAY_URL = "wss://gw.hanzo.bot";
-const PLAYGROUND_NODES_URL = "https://app.hanzo.bot/nodes";
-const PLAYGROUND_URL = "https://app.hanzo.bot/playground";
 
 // PKCE (RFC 7636) helpers for public client authentication
 function generateCodeVerifier(): string {
@@ -238,36 +233,94 @@ async function completeLogin(code: string, codeVerifier: string): Promise<void> 
   };
   await writeOAuthCredentials("hanzo-iam", creds);
 
-  // Write config for remote gateway connection
-  const config = {
-    gateway: {
-      mode: "remote" as const,
-      remote: {
-        url: process.env.HANZO_GATEWAY_URL?.trim() || HANZO_GATEWAY_URL,
-        token: tokens.access_token,
-      },
-      auth: { mode: "token" as const },
-    },
-    agents: {
-      defaults: {
-        workspace: path.join(os.homedir(), ".hanzo", "bot", "workspace"),
-      },
-    },
-  };
-  await writeConfigFile(config as Parameters<typeof writeConfigFile>[0]);
-
   // Set API key for current process
   process.env.HANZO_API_KEY = tokens.access_token;
 
-  // Show success and playground links
   // eslint-disable-next-line no-console
   console.log("  Logged in to Hanzo Cloud\n");
-  // eslint-disable-next-line no-console
-  console.log(`  View your node:    ${PLAYGROUND_NODES_URL}`);
-  // eslint-disable-next-line no-console
-  console.log(`  Open Playground:   ${PLAYGROUND_URL}\n`);
-  // eslint-disable-next-line no-console
-  console.log("  Your machine will appear in the Playground momentarily.");
-  // eslint-disable-next-line no-console
-  console.log("  Press Ctrl+C to disconnect.\n");
+
+  // Show interactive launch menu — config will be written by the chosen launch path
+  await showPostAuthMenu(tokens.access_token);
+}
+
+// ---------------------------------------------------------------------------
+// Interactive launch menu
+// ---------------------------------------------------------------------------
+
+async function showPostAuthMenu(accessToken: string): Promise<void> {
+  const choice = await select({
+    message: "How would you like to run your bot?",
+    options: [
+      {
+        value: "local" as const,
+        label: "Run Locally",
+        hint: "Start bot on this machine, visible in Playground",
+      },
+      {
+        value: "cloud" as const,
+        label: "Launch in Cloud",
+        hint: "Spin up a cloud VM (Digital Ocean Linux)",
+      },
+    ],
+  });
+
+  if (isCancel(choice)) {
+    // eslint-disable-next-line no-console
+    console.log("  Setup cancelled.\n");
+    process.exit(0);
+  }
+
+  if (choice === "local") {
+    const { launchLocal } = await import("./local-launch.js");
+    await launchLocal({ accessToken });
+  } else {
+    const { launchCloudNode } = await import("./cloud-launch.js");
+    await launchCloudNode({ accessToken });
+  }
+}
+
+/**
+ * Launch menu for returning users (config already exists).
+ * Reuses saved credentials or re-runs OAuth if expired.
+ */
+export async function showLaunchMenu(): Promise<void> {
+  // Try to find existing IAM token from auth profiles
+  let accessToken: string | null = null;
+  try {
+    const { ensureAuthProfileStore } = await import("../agents/auth-profiles/store.js");
+    const store = ensureAuthProfileStore();
+    for (const [profileId, cred] of Object.entries(store.profiles)) {
+      if (!profileId.startsWith("hanzo-iam:")) {
+        continue;
+      }
+      if ((cred as { type?: string }).type !== "oauth") {
+        continue;
+      }
+      const access = (cred as { access?: string }).access?.trim();
+      if (!access) {
+        continue;
+      }
+      const expires = (cred as { expires?: number }).expires;
+      if (typeof expires === "number" && Date.now() > expires - 60_000) {
+        continue;
+      }
+      accessToken = access;
+      break;
+    }
+  } catch {
+    // Auth store not available — fall through to re-auth
+  }
+
+  // Also check environment
+  if (!accessToken) {
+    accessToken = process.env.HANZO_API_KEY?.trim() || null;
+  }
+
+  if (accessToken) {
+    process.env.HANZO_API_KEY = accessToken;
+    await showPostAuthMenu(accessToken);
+  } else {
+    // No valid credentials — re-run the full OAuth flow
+    await runFirstRunCloudConnect();
+  }
 }
