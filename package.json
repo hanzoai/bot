@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot",
-  "version": "2026.3.8",
+  "version": "2026.3.9",
   "description": "Multi-channel AI gateway with extensible messaging integrations",
   "keywords": [],
   "homepage": "https://github.com/hanzoai/bot#readme",
@@ -23,6 +23,7 @@
   "files": [
     "CHANGELOG.md",
     "LICENSE",
+    "hanzo-bot.mjs",
     "openclaw.mjs",
     "README-header.png",
     "README.md",
