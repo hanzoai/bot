@@ -754,7 +754,12 @@ export function attachGatewayWsMessageHandler(params: {
           authOk,
           authMethod,
         });
+        // Cloud-provisioned nodes carry BOT_GATEWAY_TOKEN (sharedAuthOk) and
+        // auto-generate device keys on ephemeral pods. They should skip pairing
+        // since their identity is already proven by the shared gateway token.
+        const skipNodePairing = role === "node" && sharedAuthOk;
         const skipPairing =
+          skipNodePairing ||
           shouldSkipBackendSelfPairing({
             connectParams,
             isLocalClient,
