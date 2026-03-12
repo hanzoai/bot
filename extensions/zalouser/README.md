@@ -1,4 +1,4 @@
-# @openclaw/zalouser
+# @hanzo/bot-zalouser
 
 OpenClaw extension for Zalo Personal Account messaging via native `zca-js` integration.
 
@@ -24,7 +24,7 @@ No external `zca`, `openzca`, or `zca-cli` binary is required.
 ### Option A: npm
 
 ```bash
-openclaw plugins install @openclaw/zalouser
+openclaw plugins install @hanzo/bot-zalouser
 ```
 
 ### Option B: local source checkout
