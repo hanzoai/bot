@@ -95,8 +95,14 @@ export function evaluateMissingDeviceIdentity(params: {
   }
   // IAM-authenticated connections (any role) can skip device pairing — the
   // OIDC JWT already provides verified identity through the IAM provider.
-  // This allows cloud-provisioned nodes to connect without device keys.
   if (params.authOk && params.authMethod === "iam") {
+    return { kind: "allow" };
+  }
+  // Node role with shared-token auth can skip device identity. Cloud-
+  // provisioned nodes carry the gateway token (BOT_GATEWAY_TOKEN) which
+  // proves they are trusted infrastructure. They don't have device keys
+  // because they are ephemeral K8s pods.
+  if (params.role === "node" && params.sharedAuthOk) {
     return { kind: "allow" };
   }
   if (roleCanSkipDeviceIdentity(params.role, params.sharedAuthOk)) {
