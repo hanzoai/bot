@@ -44,7 +44,8 @@ export function registerNodeCli(program: Command) {
     .option("--tls", "Use TLS for the gateway connection", false)
     .option("--tls-fingerprint <sha256>", "Expected TLS certificate fingerprint (sha256)")
     .option("--node-id <id>", "Override node id (clears pairing token)")
-    .option("--display-name <name>", "Override node display name")
+    .option("--name <name>", "Alias for --node-id (used by cloud provisioner)")
+    .option("--display-name <displayName>", "Override node display name")
     .action(async (opts) => {
       const existing = await loadNodeHostConfig();
       const host =
@@ -55,7 +56,7 @@ export function registerNodeCli(program: Command) {
         gatewayPort: port,
         gatewayTls: Boolean(opts.tls) || Boolean(opts.tlsFingerprint),
         gatewayTlsFingerprint: opts.tlsFingerprint,
-        nodeId: opts.nodeId,
+        nodeId: opts.nodeId || opts.name,
         displayName: opts.displayName,
       });
     });
