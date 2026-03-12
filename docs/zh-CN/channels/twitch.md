@@ -23,7 +23,7 @@ Twitch 作为插件发布，未与核心安装捆绑。
 通过 CLI 安装（npm 注册表）：
 
 ```bash
-openclaw plugins install @openclaw/twitch
+openclaw plugins install @hanzo/bot-twitch
 ```
 
 本地检出（从 git 仓库运行时）：
