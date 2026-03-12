@@ -17,7 +17,7 @@ import os from "node:os";
 import path from "node:path";
 import { writeConfigFile } from "../config/io.js";
 import { openUrl } from "./onboard-helpers.js";
-import { writeOAuthCredentials } from "./onboard-auth.credentials.js";
+import { upsertAuthProfile } from "../agents/auth-profiles.js";
 
 /** Hanzo API proxy endpoint — accepts IAM tokens, proxies to model providers. */
 const HANZO_API_BASE_URL = "https://api.hanzo.ai";
@@ -27,17 +27,20 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
   const { accessToken } = params;
 
   // 1. Store IAM credentials for the embedded agent.
-  //    - Write an OAuth auth-profile under the "anthropic" provider so the
+  //    - Write an api_key auth-profile under the "anthropic" provider so the
   //      agent's model-auth resolver picks it up when calling Claude models.
+  //      Using api_key type (not oauth) avoids token-refresh attempts — the
+  //      IAM token is used as-is against the Hanzo API proxy.
   //    - Set env vars as fallback for both the embedded agent path
   //      (ANTHROPIC_API_KEY) and the marketplace-proxy path (HANZO_API_KEY).
   try {
-    await writeOAuthCredentials("anthropic", {
-      access: accessToken,
-      refresh: "",
-      expires: 0,
-      tokenType: "Bearer",
-      createdAt: Date.now(),
+    upsertAuthProfile({
+      profileId: "anthropic:hanzo-iam",
+      credential: {
+        type: "api_key" as const,
+        provider: "anthropic",
+        key: accessToken,
+      },
     });
   } catch {
     // Auth profile write failure is non-fatal — env vars provide fallback.
