@@ -59,6 +59,7 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
       providers: {
         anthropic: {
           baseUrl: HANZO_API_BASE_URL,
+          models: [],
         },
       },
     },
