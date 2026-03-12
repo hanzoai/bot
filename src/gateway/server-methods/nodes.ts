@@ -464,7 +464,12 @@ export const nodeHandlers: GatewayRequestHandlers = {
       const connectedById = new Map(connected.map((n) => [n.nodeId, n]));
       const nodeIds = new Set<string>([...pairedById.keys(), ...connectedById.keys()]);
 
-      const nodes = [...nodeIds].map((nodeId) => {
+      const connectedOnly = (params as { connectedOnly?: boolean }).connectedOnly === true;
+      const filteredNodeIds = connectedOnly
+        ? [...nodeIds].filter((id) => connectedById.has(id))
+        : [...nodeIds];
+
+      const nodes = filteredNodeIds.map((nodeId) => {
         const paired = pairedById.get(nodeId);
         const live = connectedById.get(nodeId);
 
