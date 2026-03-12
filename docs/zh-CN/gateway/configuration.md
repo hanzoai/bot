@@ -1318,7 +1318,7 @@ Slack 动作组（控制 `slack` 工具动作）：
 ### `channels.mattermost`（机器人 token）
 
 Mattermost 作为插件提供，不包含在核心安装中。
-请先安装：`openclaw plugins install @openclaw/mattermost`（或从 git checkout 使用 `./extensions/mattermost`）。
+请先安装：`openclaw plugins install @hanzo/bot-mattermost`（或从 git checkout 使用 `./extensions/mattermost`）。
 
 Mattermost 需要机器人 token 加上服务器的基础 URL：
 
