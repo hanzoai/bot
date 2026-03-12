@@ -133,13 +133,14 @@ export async function resolveConnectAuthState(params: {
       // primary auth flow (or deferred for device-token candidates).
       rateLimitScope: AUTH_RATE_LIMIT_SCOPE_SHARED_SECRET,
     }));
-  // Trusted-proxy auth is semantically shared: the proxy vouches for identity,
-  // no per-device credential needed. Include it so operator connections
+  // Trusted-proxy and IAM auth are semantically shared: they vouch for identity,
+  // no per-device credential needed. Include them so operator connections
   // can skip device identity via roleCanSkipDeviceIdentity().
   const sharedAuthOk =
     (sharedAuthResult?.ok === true &&
       (sharedAuthResult.method === "token" || sharedAuthResult.method === "password")) ||
-    (authResult.ok && authResult.method === "trusted-proxy");
+    (authResult.ok && authResult.method === "trusted-proxy") ||
+    (authResult.ok && authResult.method === "iam");
 
   return {
     authResult,

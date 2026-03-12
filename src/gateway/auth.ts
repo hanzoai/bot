@@ -13,6 +13,7 @@ import {
   type AuthRateLimiter,
   type RateLimitCheckResult,
 } from "./auth-rate-limit.js";
+import { validateIamToken } from "./auth-iam.js";
 import { resolveGatewayCredentialsFromValues } from "./credentials.js";
 import {
   isLocalishHost,
@@ -41,7 +42,7 @@ export type ResolvedGatewayAuth = {
 
 export type GatewayAuthResult = {
   ok: boolean;
-  method?: "none" | "token" | "password" | "tailscale" | "device-token" | "trusted-proxy";
+  method?: "none" | "token" | "password" | "tailscale" | "device-token" | "trusted-proxy" | "iam";
   user?: string;
   reason?: string;
   /** Present when the request was blocked by the rate limiter. */
@@ -456,6 +457,38 @@ export async function authorizeGatewayConnect(
         user: tailscaleCheck.user.login,
       };
     }
+  }
+
+  // IAM (OIDC JWT) authentication — validate the provided token as a JWT
+  // issued by the configured IAM provider (e.g. hanzo.id / Casdoor).
+  // Falls back to shared gateway-token comparison so cloud-provisioned pods
+  // that authenticate with BOT_GATEWAY_TOKEN still work alongside IAM users.
+  if (auth.mode === "iam") {
+    if (!connectAuth?.token) {
+      limiter?.recordFailure(ip, rateLimitScope);
+      return { ok: false, reason: "iam_token_missing" };
+    }
+    // First, try IAM JWT validation if IAM config is present.
+    if (auth.iam) {
+      try {
+        const iamResult = await validateIamToken(connectAuth.token, auth.iam);
+        if (iamResult.ok) {
+          limiter?.reset(ip, rateLimitScope);
+          return { ok: true, method: "iam", user: iamResult.userId };
+        }
+      } catch {
+        // IAM validation threw (network error, JWKS unreachable, etc.)
+        // — fall through to shared-token check below.
+      }
+    }
+    // Fallback: accept a matching shared gateway token so cloud-provisioned
+    // nodes (which carry BOT_GATEWAY_TOKEN, not an IAM JWT) can connect.
+    if (auth.token && safeEqualSecret(connectAuth.token, auth.token)) {
+      limiter?.reset(ip, rateLimitScope);
+      return { ok: true, method: "token" };
+    }
+    limiter?.recordFailure(ip, rateLimitScope);
+    return { ok: false, reason: "iam_validation_failed" };
   }
 
   if (auth.mode === "token") {
