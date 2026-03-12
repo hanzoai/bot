@@ -13,7 +13,6 @@ import {
   type AuthRateLimiter,
   type RateLimitCheckResult,
 } from "./auth-rate-limit.js";
-import { validateIamToken } from "./auth-iam.js";
 import { resolveGatewayCredentialsFromValues } from "./credentials.js";
 import {
   isLocalishHost,
@@ -469,8 +468,10 @@ export async function authorizeGatewayConnect(
       return { ok: false, reason: "iam_token_missing" };
     }
     // First, try IAM JWT validation if IAM config is present.
+    // Dynamic import avoids pulling @hanzo/iam into the plugin-sdk DTS build.
     if (auth.iam) {
       try {
+        const { validateIamToken } = await import("./auth-iam.js");
         const iamResult = await validateIamToken(connectAuth.token, auth.iam);
         if (iamResult.ok) {
           limiter?.reset(ip, rateLimitScope);
