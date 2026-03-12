@@ -73,6 +73,7 @@ export function evaluateMissingDeviceIdentity(params: {
   trustedProxyAuthOk?: boolean;
   sharedAuthOk: boolean;
   authOk: boolean;
+  authMethod?: string;
   hasSharedAuth: boolean;
   isLocalClient: boolean;
 }): MissingDeviceIdentityDecision {
@@ -91,6 +92,12 @@ export function evaluateMissingDeviceIdentity(params: {
     if (!params.controlUiAuthPolicy.allowInsecureAuthConfigured || !params.isLocalClient) {
       return { kind: "reject-control-ui-insecure-auth" };
     }
+  }
+  // IAM-authenticated connections (any role) can skip device pairing — the
+  // OIDC JWT already provides verified identity through the IAM provider.
+  // This allows cloud-provisioned nodes to connect without device keys.
+  if (params.authOk && params.authMethod === "iam") {
+    return { kind: "allow" };
   }
   if (roleCanSkipDeviceIdentity(params.role, params.sharedAuthOk)) {
     return { kind: "allow" };
