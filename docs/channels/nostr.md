@@ -29,7 +29,7 @@ You can always override the choice in the prompt.
 ### Manual install
 
 ```bash
-openclaw plugins install @openclaw/nostr
+openclaw plugins install @hanzo/bot-nostr
 ```
 
 Use a local checkout (dev workflows):

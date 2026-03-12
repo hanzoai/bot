@@ -23,7 +23,7 @@ x-i18n:
 
 Zalo Personal 作为插件提供，不包含在核心安装中。
 
-- 通过 CLI 安装：`openclaw plugins install @openclaw/zalouser`
+- 通过 CLI 安装：`openclaw plugins install @hanzo/bot-zalouser`
 - 或从源码检出安装：`openclaw plugins install ./extensions/zalouser`
 - 详情：[插件](/tools/plugin)
 

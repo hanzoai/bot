@@ -19,7 +19,7 @@ Mattermost ships as a plugin and is not bundled with the core install.
 Install via CLI (npm registry):
 
 ```bash
-openclaw plugins install @openclaw/mattermost
+openclaw plugins install @hanzo/bot-mattermost
 ```
 
 Local checkout (when running from a git repo):
