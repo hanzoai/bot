@@ -1,6 +1,7 @@
 export const GATEWAY_CLIENT_IDS = {
   WEBCHAT_UI: "webchat-ui",
   CONTROL_UI: "openclaw-control-ui",
+  BOT_CONTROL_UI: "bot-control-ui",
   WEBCHAT: "webchat",
   CLI: "cli",
   GATEWAY_CLIENT: "gateway-client",
@@ -50,6 +51,16 @@ export type GatewayClientCap = (typeof GATEWAY_CLIENT_CAPS)[keyof typeof GATEWAY
 
 const GATEWAY_CLIENT_ID_SET = new Set<GatewayClientId>(Object.values(GATEWAY_CLIENT_IDS));
 const GATEWAY_CLIENT_MODE_SET = new Set<GatewayClientMode>(Object.values(GATEWAY_CLIENT_MODES));
+
+const CONTROL_UI_IDS: ReadonlySet<string> = new Set<string>([
+  GATEWAY_CLIENT_IDS.CONTROL_UI,
+  GATEWAY_CLIENT_IDS.BOT_CONTROL_UI,
+]);
+
+/** Returns true for any control-UI client id variant (openclaw-control-ui, bot-control-ui). */
+export function isControlUiClientId(id: string | null | undefined): boolean {
+  return typeof id === "string" && CONTROL_UI_IDS.has(id);
+}
 
 export function normalizeGatewayClientId(raw?: string | null): GatewayClientId | undefined {
   const normalized = raw?.trim().toLowerCase();
