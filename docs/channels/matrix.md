@@ -22,7 +22,7 @@ Matrix ships as a plugin and is not bundled with the core install.
 Install via CLI (npm registry):
 
 ```bash
-openclaw plugins install @openclaw/matrix
+openclaw plugins install @hanzo/bot-matrix
 ```
 
 Local checkout (when running from a git repo):
@@ -39,7 +39,7 @@ Details: [Plugins](/tools/plugin)
 ## Setup
 
 1. Install the Matrix plugin:
-   - From npm: `openclaw plugins install @openclaw/matrix`
+   - From npm: `openclaw plugins install @hanzo/bot-matrix`
    - From a local checkout: `openclaw plugins install ./extensions/matrix`
 2. Create a Matrix account on a homeserver:
    - Browse hosting options at [https://matrix.org/ecosystem/hosting/](https://matrix.org/ecosystem/hosting/)
