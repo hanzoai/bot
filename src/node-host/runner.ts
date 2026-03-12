@@ -258,7 +258,10 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     ],
     pathEnv,
     permissions: undefined,
-    deviceIdentity: loadOrCreateDeviceIdentity(),
+    // Cloud-provisioned nodes authenticate via shared gateway token and do not
+    // have paired device keys.  Sending a device identity would trigger the
+    // pairing flow on the gateway, causing the connection to be rejected.
+    deviceIdentity: process.env.BOT_CLOUD_NODE === "true" ? undefined : loadOrCreateDeviceIdentity(),
     tlsFingerprint: gateway.tlsFingerprint,
     onEvent: (evt) => {
       if (evt.event !== "node.invoke.request") {
