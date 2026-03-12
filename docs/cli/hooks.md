@@ -219,7 +219,7 @@ openclaw hooks install ./my-hook-pack
 openclaw hooks install ./my-hook-pack.zip
 
 # NPM package
-openclaw hooks install @openclaw/my-hook-pack
+openclaw hooks install @hanzo/bot-my-hook-pack
 
 # Link a local directory without copying
 openclaw hooks install -l ./my-hook-pack
