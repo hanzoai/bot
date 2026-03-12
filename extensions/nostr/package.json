@@ -1,6 +1,6 @@
 {
-  "name": "@openclaw/nostr",
-  "version": "2026.3.16",
+  "name": "@hanzo/bot-nostr",
+  "version": "2026.3.17",
   "description": "OpenClaw Nostr channel plugin for NIP-04 encrypted DMs",
   "type": "module",
   "dependencies": {
@@ -22,7 +22,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/nostr",
+      "npmSpec": "@hanzo/bot-nostr",
       "localPath": "extensions/nostr",
       "defaultChoice": "npm"
     }
