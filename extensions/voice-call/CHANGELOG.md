@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026.3.17
+
+### Changes
+- Version alignment with core OpenClaw release numbers.
+
 ## 2026.3.16
 
 ### Changes
@@ -105,7 +110,7 @@
 
 ### Highlights
 
-- First public release of the @openclaw/voice-call plugin.
+- First public release of the @hanzo/bot-voice-call plugin.
 
 ### Features
 

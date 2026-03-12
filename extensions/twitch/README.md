@@ -1,4 +1,4 @@
-# @openclaw/twitch
+# @hanzo/bot-twitch
 
 Twitch channel plugin for OpenClaw.
 
@@ -11,7 +11,7 @@ openclaw plugins install ./extensions/twitch
 ## Install (npm)
 
 ```bash
-openclaw plugins install @openclaw/twitch
+openclaw plugins install @hanzo/bot-twitch
 ```
 
 Onboarding: select Twitch and confirm the install prompt to fetch the plugin automatically.

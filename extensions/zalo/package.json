@@ -1,6 +1,6 @@
 {
-  "name": "@openclaw/zalo",
-  "version": "2026.3.16",
+  "name": "@hanzo/bot-zalo",
+  "version": "2026.3.17",
   "description": "OpenClaw Zalo channel plugin",
   "type": "module",
   "dependencies": {
@@ -25,7 +25,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/zalo",
+      "npmSpec": "@hanzo/bot-zalo",
       "localPath": "extensions/zalo",
       "defaultChoice": "npm"
     }
