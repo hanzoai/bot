@@ -109,15 +109,18 @@ export class GatewayClient {
 
   start() {
     if (this.closed) {
+      console.error("[GWC] start: already closed, skipping");
       return;
     }
     const url = this.opts.url ?? "ws://127.0.0.1:18789";
+    console.error(`[GWC] start: url=${url} instanceId=${this.opts.instanceId ?? "n/a"}`);
     if (this.opts.tlsFingerprint && !url.startsWith("wss://")) {
       this.opts.onConnectError?.(new Error("gateway tls fingerprint requires wss:// gateway url"));
       return;
     }
 
     const allowPrivateWs = process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1";
+    console.error(`[GWC] start: allowPrivateWs=${allowPrivateWs}`);
     // Security check: block ALL plaintext ws:// to non-loopback addresses (CWE-319, CVSS 9.8)
     // This protects both credentials AND chat/conversation data from MITM attacks.
     // Device tokens may be loaded later in sendConnect(), so we block regardless of hasCredentials.
@@ -170,9 +173,12 @@ export class GatewayClient {
         // oxlint-disable-next-line typescript/no-explicit-any
       }) as any;
     }
+    console.error(`[GWC] start: creating WebSocket to ${url}`);
     this.ws = new WebSocket(url, wsOptions);
+    console.error(`[GWC] start: WebSocket created, registering handlers`);
 
     this.ws.on("open", () => {
+      console.error(`[GWC] WebSocket OPEN`);
       if (url.startsWith("wss://") && this.opts.tlsFingerprint) {
         const tlsError = this.validateTlsFingerprint();
         if (tlsError) {
@@ -183,8 +189,12 @@ export class GatewayClient {
       }
       this.queueConnect();
     });
-    this.ws.on("message", (data) => this.handleMessage(rawDataToString(data)));
+    this.ws.on("message", (data) => {
+      console.error(`[GWC] message received`);
+      this.handleMessage(rawDataToString(data));
+    });
     this.ws.on("close", (code, reason) => {
+      console.error(`[GWC] WebSocket CLOSE code=${code} reason=${rawDataToString(reason)}`);
       const reasonText = rawDataToString(reason);
       this.ws = null;
       // Clear persisted device auth state only when device-token auth was active.
@@ -216,7 +226,7 @@ export class GatewayClient {
       this.opts.onClose?.(code, reasonText);
     });
     this.ws.on("error", (err) => {
-      logDebug(`gateway client error: ${String(err)}`);
+      console.error(`[GWC] WebSocket ERROR: ${String(err)}`);
       if (!this.connectSent) {
         this.opts.onConnectError?.(err instanceof Error ? err : new Error(String(err)));
       }
