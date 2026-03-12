@@ -11,7 +11,8 @@ import os from "node:os";
 import { VERSION } from "../version.js";
 
 const PLAYGROUND_API_BASE = "https://api.hanzo.bot/v1";
-const HEARTBEAT_INTERVAL_MS = 30_000;
+// Must be well under the server's HeartbeatTTL (15 s) to stay "online".
+const HEARTBEAT_INTERVAL_MS = 10_000;
 
 /**
  * Derive a stable node ID from the machine hostname so re-runs of the
@@ -47,7 +48,7 @@ export async function registerLocalBot(params: {
     deployment_type: "long_running",
     version: VERSION,
     health_status: "active",
-    lifecycle_status: "running",
+    lifecycle_status: "ready",
     metadata: {
       platform: process.platform,
       display_name: displayName,
@@ -91,6 +92,10 @@ export async function registerLocalBot(params: {
       // Heartbeat failures are silent — the health monitor will handle staleness.
     }
   };
+
+  // Fire an immediate heartbeat so the presence manager has a fresh
+  // timestamp right away (registration alone starts a 15 s TTL clock).
+  void heartbeat();
 
   const timer = setInterval(heartbeat, HEARTBEAT_INTERVAL_MS);
 
