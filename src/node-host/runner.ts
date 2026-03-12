@@ -235,8 +235,11 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     url = `${scheme}://${host}:${port}`;
   }
   const pathEnv = ensureNodePathEnv();
+  const isCloudNode = process.env.BOT_CLOUD_NODE === "true";
   // eslint-disable-next-line no-console
   console.log(`node host PATH: ${pathEnv}`);
+  // eslint-disable-next-line no-console
+  console.log(`node host gateway: url=${url} nodeId=${nodeId} cloud=${isCloudNode} hasToken=${Boolean(token)}`);
 
   const client = new GatewayClient({
     url,
@@ -261,7 +264,9 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     // Cloud-provisioned nodes authenticate via shared gateway token and do not
     // have paired device keys.  Sending a device identity would trigger the
     // pairing flow on the gateway, causing the connection to be rejected.
-    deviceIdentity: process.env.BOT_CLOUD_NODE === "true" ? undefined : loadOrCreateDeviceIdentity(),
+    // Pass null (not undefined) to explicitly opt out — undefined would cause
+    // the GatewayClient constructor to fall back to loadOrCreateDeviceIdentity().
+    deviceIdentity: process.env.BOT_CLOUD_NODE === "true" ? null : loadOrCreateDeviceIdentity(),
     tlsFingerprint: gateway.tlsFingerprint,
     onEvent: (evt) => {
       if (evt.event !== "node.invoke.request") {
@@ -290,6 +295,10 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     return bins;
   }, pathEnv);
 
+  // eslint-disable-next-line no-console
+  console.log("node host: starting gateway client...");
   client.start();
+  // eslint-disable-next-line no-console
+  console.log("node host: gateway client started, waiting...");
   await new Promise(() => {});
 }
