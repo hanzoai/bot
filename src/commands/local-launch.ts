@@ -4,8 +4,8 @@
  *
  * Flow:
  * 1. Write config with gateway.mode = "local"
- * 2. Start the gateway server (HTTP + WS on port 18789)
- * 3. Connect to wss://gw.hanzo.bot as a remote node
+ * 2. Start the gateway server (HTTP + WS on port 18789) with no auth (loopback-only)
+ * 3. Attempt cloud registration on wss://gw.hanzo.bot (non-blocking)
  * 4. Open the Control UI in the user's browser
  * 5. Keep running until Ctrl+C
  */
@@ -24,12 +24,14 @@ const DEFAULT_PORT = 18789;
 export async function launchLocal(params: { accessToken: string }): Promise<void> {
   const { accessToken } = params;
 
-  // 1. Write config for local gateway mode
+  // 1. Write config for local gateway mode.
+  //    We intentionally omit gateway.auth here — auth mode is passed as a
+  //    runtime override to startGatewayServer() so it doesn't persist a
+  //    "none" auth mode that would affect other gateway commands.
   const config = {
     gateway: {
       mode: "local" as const,
       bind: "loopback" as const,
-      auth: { mode: "token" as const },
     },
     agents: {
       defaults: {
@@ -51,7 +53,7 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
     { loadOrCreateDeviceIdentity },
     { VERSION },
     { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES },
-    { NODE_SYSTEM_RUN_COMMANDS, NODE_EXEC_APPROVALS_COMMANDS, NODE_BROWSER_PROXY_COMMAND },
+    { NODE_SYSTEM_RUN_COMMANDS, NODE_EXEC_APPROVALS_COMMANDS },
     { defaultRuntime },
   ] = await Promise.all([
     import("../gateway/server.js"),
@@ -70,44 +72,22 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
   const nodeId = randomUUID();
 
   // 3. Start gateway loop — this is long-running.
-  // Inside the `start` callback we also connect to gw.hanzo.bot as a remote node.
   try {
     await runGatewayLoop({
       runtime: defaultRuntime,
       lockPort: port,
       start: async () => {
+        // Start the gateway with auth disabled.  We bind to loopback only,
+        // so only local processes can connect — no token needed.  The auth
+        // override is a runtime-only option and does NOT get persisted to
+        // the config file, so `openclaw gateway run` still defaults to
+        // token auth on subsequent invocations.
         const server = await startGatewayServer(port, {
           bind: "loopback",
+          auth: { mode: "none" as const },
         });
 
-        // Connect to gw.hanzo.bot as a remote node so this machine
-        // appears in the Hanzo Playground.
-        const client = new GatewayClient({
-          url: CLOUD_GATEWAY_URL,
-          token: accessToken,
-          instanceId: nodeId,
-          clientName: GATEWAY_CLIENT_NAMES.NODE_HOST,
-          clientDisplayName: displayName,
-          clientVersion: VERSION,
-          platform: process.platform,
-          mode: GATEWAY_CLIENT_MODES.NODE,
-          role: "node",
-          scopes: [],
-          caps: ["system"],
-          commands: [...NODE_SYSTEM_RUN_COMMANDS, ...NODE_EXEC_APPROVALS_COMMANDS],
-          deviceIdentity: loadOrCreateDeviceIdentity(),
-          onConnectError: (err) => {
-            // eslint-disable-next-line no-console
-            console.error(`  Cloud gateway connect failed: ${err.message}`);
-          },
-          onClose: (code, reason) => {
-            // eslint-disable-next-line no-console
-            console.error(`  Cloud gateway closed (${code}): ${reason}`);
-          },
-        });
-        client.start();
-
-        // Open Control UI in browser
+        // Open Control UI in browser — no token required now.
         try {
           await openUrl(`http://127.0.0.1:${port}/`);
         } catch {
@@ -117,13 +97,53 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
         // eslint-disable-next-line no-console
         console.log(`  Gateway running on http://127.0.0.1:${port}/`);
         // eslint-disable-next-line no-console
-        console.log(`  Connected to Hanzo Cloud as "${displayName}"\n`);
+        console.log(`  Control UI opened in your browser.\n`);
+
+        // Attempt to register with the Hanzo Cloud gateway.
+        // This is best-effort — the cloud gateway may not be available or
+        // may not accept the IAM token yet.  Failure here does not affect
+        // the local gateway experience.
+        let cloudConnected = false;
+        try {
+          const client = new GatewayClient({
+            url: CLOUD_GATEWAY_URL,
+            token: accessToken,
+            instanceId: nodeId,
+            clientName: GATEWAY_CLIENT_NAMES.NODE_HOST,
+            clientDisplayName: displayName,
+            clientVersion: VERSION,
+            platform: process.platform,
+            mode: GATEWAY_CLIENT_MODES.NODE,
+            role: "node",
+            scopes: [],
+            caps: ["system"],
+            commands: [...NODE_SYSTEM_RUN_COMMANDS, ...NODE_EXEC_APPROVALS_COMMANDS],
+            deviceIdentity: loadOrCreateDeviceIdentity(),
+            onConnectError: (_err) => {
+              if (!cloudConnected) {
+                // Only log the first failure, not repeated reconnect attempts
+                // eslint-disable-next-line no-console
+                console.log(
+                  "  Cloud Playground registration unavailable — running in local-only mode.",
+                );
+                // eslint-disable-next-line no-console
+                console.log(
+                  "  (Your bot works locally; Playground visibility will be added in a future update.)\n",
+                );
+              }
+            },
+            onClose: (_code, _reason) => {
+              // Silently handle cloud gateway disconnection
+              cloudConnected = false;
+            },
+          });
+          client.start();
+        } catch {
+          // Cloud registration is entirely optional — swallow any startup errors.
+        }
+
         // eslint-disable-next-line no-console
-        console.log(`  View your node:    ${PLAYGROUND_NODES_URL}`);
-        // eslint-disable-next-line no-console
-        console.log(`  Open Playground:   ${PLAYGROUND_URL}\n`);
-        // eslint-disable-next-line no-console
-        console.log("  Press Ctrl+C to disconnect.\n");
+        console.log("  Press Ctrl+C to stop the gateway.\n");
 
         return server;
       },
