@@ -1,6 +1,6 @@
 {
-  "name": "@openclaw/matrix",
-  "version": "2026.3.16",
+  "name": "@hanzo/bot-matrix",
+  "version": "2026.3.17",
   "description": "OpenClaw Matrix channel plugin",
   "type": "module",
   "dependencies": {
@@ -26,7 +26,7 @@
       "quickstartAllowFrom": true
     },
     "install": {
-      "npmSpec": "@openclaw/matrix",
+      "npmSpec": "@hanzo/bot-matrix",
       "localPath": "extensions/matrix",
       "defaultChoice": "npm"
     }

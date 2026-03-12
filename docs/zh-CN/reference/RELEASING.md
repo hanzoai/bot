@@ -98,7 +98,7 @@ x-i18n:
 
 ## 插件发布范围（npm）
 
-我们只发布 `@openclaw/*` 范围下的**现有 npm 插件**。不在 npm 上的内置插件保持**仅磁盘树**（仍在 `extensions/**` 中发布）。
+我们只发布 `@hanzo/bot-*` 范围下的**现有 npm 插件**。不在 npm 上的内置插件保持**仅磁盘树**（仍在 `extensions/**` 中发布）。
 
 获取列表的流程：
 
@@ -108,16 +108,16 @@ x-i18n:
 
 当前 npm 插件列表（根据需要更新）：
 
-- @openclaw/bluebubbles
-- @openclaw/diagnostics-otel
-- @openclaw/discord
-- @openclaw/lobster
-- @openclaw/matrix
-- @openclaw/msteams
-- @openclaw/nextcloud-talk
-- @openclaw/nostr
-- @openclaw/voice-call
-- @openclaw/zalo
-- @openclaw/zalouser
+- @hanzo/bot-bluebubbles
+- @hanzo/bot-diagnostics-otel
+- @hanzo/bot-discord
+- @hanzo/bot-lobster
+- @hanzo/bot-matrix
+- @hanzo/bot-msteams
+- @hanzo/bot-nextcloud-talk
+- @hanzo/bot-nostr
+- @hanzo/bot-voice-call
+- @hanzo/bot-zalo
+- @hanzo/bot-zalouser
 
 发布说明还必须标注**默认未启用**的**新可选内置插件**（例如：`tlon`）。

@@ -84,7 +84,7 @@ NODE
   mkdir -p "$pack_dir/package"
   cat > "$pack_dir/package/package.json" <<'"'"'JSON'"'"'
 {
-  "name": "@openclaw/demo-plugin-tgz",
+  "name": "@hanzo/bot-demo-plugin-tgz",
   "version": "0.0.1",
   "openclaw": { "extensions": ["./index.js"] }
 }
@@ -131,7 +131,7 @@ NODE
   dir_plugin="$(mktemp -d "/tmp/openclaw-plugin-dir.XXXXXX")"
   cat > "$dir_plugin/package.json" <<'"'"'JSON'"'"'
 {
-  "name": "@openclaw/demo-plugin-dir",
+  "name": "@hanzo/bot-demo-plugin-dir",
   "version": "0.0.1",
   "openclaw": { "extensions": ["./index.js"] }
 }
@@ -178,7 +178,7 @@ NODE
   mkdir -p "$file_pack_dir/package"
   cat > "$file_pack_dir/package/package.json" <<'"'"'JSON'"'"'
 {
-  "name": "@openclaw/demo-plugin-file",
+  "name": "@hanzo/bot-demo-plugin-file",
   "version": "0.0.1",
   "openclaw": { "extensions": ["./index.js"] }
 }
