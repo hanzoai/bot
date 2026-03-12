@@ -17,7 +17,7 @@ title: 飞书
 安装 Feishu 插件：
 
 ```bash
-openclaw plugins install @openclaw/feishu
+openclaw plugins install @hanzo/bot-feishu
 ```
 
 本地 checkout（在 git 仓库内运行）：

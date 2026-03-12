@@ -231,16 +231,16 @@ describe("packNpmSpecToArchive", () => {
     const cwd = await createFixtureDir();
     mockPackCommandResult({
       stdout: "",
-      stderr: "npm error code E404\nnpm error 404  '@openclaw/whatsapp@*' is not in this registry.",
+      stderr: "npm error code E404\nnpm error 404  '@hanzo/bot-whatsapp@*' is not in this registry.",
       code: 1,
     });
 
-    const result = await runPack("@openclaw/whatsapp", cwd);
+    const result = await runPack("@hanzo/bot-whatsapp", cwd);
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error).toContain("Package not found on npm");
-      expect(result.error).toContain("@openclaw/whatsapp");
+      expect(result.error).toContain("@hanzo/bot-whatsapp");
       expect(result.error).toContain("docs.openclaw.ai/tools/plugin");
     }
   });
@@ -267,18 +267,18 @@ describe("packNpmSpecToArchive", () => {
         "npm notice creating package\n" +
         JSON.stringify([
           {
-            id: "@openclaw/plugin-demo@2.0.0",
+            id: "@hanzo/bot-plugin-demo@2.0.0",
             filename: "openclaw-plugin-demo-2.0.0.tgz",
           },
         ]),
     });
 
-    const result = await runPack("@openclaw/plugin-demo@2.0.0", cwd);
+    const result = await runPack("@hanzo/bot-plugin-demo@2.0.0", cwd);
     expect(result).toEqual({
       ok: true,
       archivePath: path.join(cwd, "openclaw-plugin-demo-2.0.0.tgz"),
       metadata: {
-        resolvedSpec: "@openclaw/plugin-demo@2.0.0",
+        resolvedSpec: "@hanzo/bot-plugin-demo@2.0.0",
       },
     });
   });

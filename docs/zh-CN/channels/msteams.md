@@ -31,7 +31,7 @@ Microsoft Teams 作为插件提供，不包含在核心安装中。
 通过 CLI 安装（npm 注册表）：
 
 ```bash
-openclaw plugins install @openclaw/msteams
+openclaw plugins install @hanzo/bot-msteams
 ```
 
 本地检出（从 git 仓库运行时）：
@@ -246,7 +246,7 @@ tailscale funnel 3978
 ## 设置（最小纯文本）
 
 1. **安装 Microsoft Teams 插件**
-   - 从 npm：`openclaw plugins install @openclaw/msteams`
+   - 从 npm：`openclaw plugins install @hanzo/bot-msteams`
    - 从本地检出：`openclaw plugins install ./extensions/msteams`
 
 2. **机器人注册**

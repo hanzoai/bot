@@ -1,6 +1,6 @@
 {
-  "name": "@openclaw/imessage",
-  "version": "2026.3.16",
+  "name": "@hanzo/bot-imessage",
+  "version": "2026.3.17",
   "private": true,
   "description": "OpenClaw iMessage channel plugin",
   "type": "module",

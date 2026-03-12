@@ -1,4 +1,4 @@
-# @openclaw/diffs
+# @hanzo/bot-diffs
 
 Read-only diff viewer plugin for **OpenClaw** agents.
 

@@ -1,6 +1,6 @@
 {
-  "name": "@openclaw/googlechat",
-  "version": "2026.3.16",
+  "name": "@hanzo/bot-googlechat",
+  "version": "2026.3.17",
   "private": true,
   "description": "OpenClaw Google Chat channel plugin",
   "type": "module",
@@ -34,7 +34,7 @@
       "order": 55
     },
     "install": {
-      "npmSpec": "@openclaw/googlechat",
+      "npmSpec": "@hanzo/bot-googlechat",
       "localPath": "extensions/googlechat",
       "defaultChoice": "npm"
     }

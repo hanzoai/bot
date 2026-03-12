@@ -34,7 +34,7 @@ x-i18n:
 ### 选项 A：从 npm 安装
 
 ```bash
-openclaw plugins install @openclaw/zalouser
+openclaw plugins install @hanzo/bot-zalouser
 ```
 
 之后重启 Gateway 网关。

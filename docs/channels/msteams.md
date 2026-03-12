@@ -24,7 +24,7 @@ Explainable: keeps core installs lighter and lets MS Teams dependencies update i
 Install via CLI (npm registry):
 
 ```bash
-openclaw plugins install @openclaw/msteams
+openclaw plugins install @hanzo/bot-msteams
 ```
 
 Local checkout (when running from a git repo):
@@ -241,7 +241,7 @@ This is often easier than hand-editing JSON manifests.
 ## Setup (minimal text-only)
 
 1. **Install the Microsoft Teams plugin**
-   - From npm: `openclaw plugins install @openclaw/msteams`
+   - From npm: `openclaw plugins install @hanzo/bot-msteams`
    - From a local checkout: `openclaw plugins install ./extensions/msteams`
 
 2. **Bot registration**

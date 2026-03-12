@@ -55,7 +55,7 @@ Example:
 
 ```json
 {
-  "name": "@openclaw/my-plugin",
+  "name": "@hanzo/bot-my-plugin",
   "version": "1.2.3",
   "openclaw": {
     "extensions": ["./dist/index.js"]

@@ -220,7 +220,7 @@ openclaw hooks install ./my-hook-pack
 openclaw hooks install ./my-hook-pack.zip
 
 # NPM 包
-openclaw hooks install @openclaw/my-hook-pack
+openclaw hooks install @hanzo/bot-my-hook-pack
 
 # 链接本地目录而不复制
 openclaw hooks install -l ./my-hook-pack

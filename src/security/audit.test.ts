@@ -2905,7 +2905,7 @@ description: test skill
         installs: {
           "voice-call": {
             source: "npm",
-            spec: "@openclaw/voice-call",
+            spec: "@hanzo/bot-voice-call",
           },
         },
       },
@@ -2914,7 +2914,7 @@ description: test skill
           installs: {
             "test-hooks": {
               source: "npm",
-              spec: "@openclaw/test-hooks",
+              spec: "@hanzo/bot-test-hooks",
             },
           },
         },
@@ -2942,7 +2942,7 @@ description: test skill
         installs: {
           "voice-call": {
             source: "npm",
-            spec: "@openclaw/voice-call@1.2.3",
+            spec: "@hanzo/bot-voice-call@1.2.3",
             integrity: "sha512-plugin",
           },
         },
@@ -2952,7 +2952,7 @@ description: test skill
           installs: {
             "test-hooks": {
               source: "npm",
-              spec: "@openclaw/test-hooks@1.2.3",
+              spec: "@hanzo/bot-test-hooks@1.2.3",
               integrity: "sha512-hook",
             },
           },
@@ -2984,12 +2984,12 @@ description: test skill
     await fs.mkdir(hookDir, { recursive: true });
     await fs.writeFile(
       path.join(pluginDir, "package.json"),
-      JSON.stringify({ name: "@openclaw/voice-call", version: "9.9.9" }),
+      JSON.stringify({ name: "@hanzo/bot-voice-call", version: "9.9.9" }),
       "utf-8",
     );
     await fs.writeFile(
       path.join(hookDir, "package.json"),
-      JSON.stringify({ name: "@openclaw/test-hooks", version: "8.8.8" }),
+      JSON.stringify({ name: "@hanzo/bot-test-hooks", version: "8.8.8" }),
       "utf-8",
     );
 
@@ -2998,7 +2998,7 @@ description: test skill
         installs: {
           "voice-call": {
             source: "npm",
-            spec: "@openclaw/voice-call@1.2.3",
+            spec: "@hanzo/bot-voice-call@1.2.3",
             integrity: "sha512-plugin",
             resolvedVersion: "1.2.3",
           },
@@ -3009,7 +3009,7 @@ description: test skill
           installs: {
             "test-hooks": {
               source: "npm",
-              spec: "@openclaw/test-hooks@1.2.3",
+              spec: "@hanzo/bot-test-hooks@1.2.3",
               integrity: "sha512-hook",
               resolvedVersion: "1.2.3",
             },

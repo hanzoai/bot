@@ -29,7 +29,7 @@ No external `zca`/`openzca` CLI binary is required.
 ### Option A: install from npm
 
 ```bash
-openclaw plugins install @openclaw/zalouser
+openclaw plugins install @hanzo/bot-zalouser
 ```
 
 Restart the Gateway afterwards.

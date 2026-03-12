@@ -1,6 +1,6 @@
 {
-  "name": "@openclaw/slack",
-  "version": "2026.3.16",
+  "name": "@hanzo/bot-slack",
+  "version": "2026.3.17",
   "private": true,
   "description": "OpenClaw Slack channel plugin",
   "type": "module",

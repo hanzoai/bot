@@ -25,7 +25,7 @@ Matrix 作为插件提供，不包含在核心安装中。
 通过 CLI 安装（npm 仓库）：
 
 ```bash
-openclaw plugins install @openclaw/matrix
+openclaw plugins install @hanzo/bot-matrix
 ```
 
 本地检出（从 git 仓库运行时）：
@@ -41,7 +41,7 @@ openclaw plugins install ./extensions/matrix
 ## 设置
 
 1. 安装 Matrix 插件：
-   - 从 npm：`openclaw plugins install @openclaw/matrix`
+   - 从 npm：`openclaw plugins install @hanzo/bot-matrix`
    - 从本地检出：`openclaw plugins install ./extensions/matrix`
 2. 在主服务器上创建 Matrix 账户：
    - 在 [https://matrix.org/ecosystem/hosting/](https://matrix.org/ecosystem/hosting/) 浏览托管选项
