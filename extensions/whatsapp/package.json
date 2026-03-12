@@ -1,6 +1,6 @@
 {
-  "name": "@openclaw/whatsapp",
-  "version": "2026.3.16",
+  "name": "@hanzo/bot-whatsapp",
+  "version": "2026.3.17",
   "private": true,
   "description": "OpenClaw WhatsApp channel plugin",
   "type": "module",
