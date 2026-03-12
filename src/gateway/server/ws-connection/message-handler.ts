@@ -623,6 +623,7 @@ export function attachGatewayWsMessageHandler(params: {
             trustedProxyAuthOk,
             sharedAuthOk,
             authOk,
+            authMethod,
             hasSharedAuth,
             isLocalClient,
           });
