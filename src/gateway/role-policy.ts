@@ -12,10 +12,7 @@ export function parseGatewayRole(roleRaw: unknown): GatewayRole | null {
 }
 
 export function roleCanSkipDeviceIdentity(role: GatewayRole, sharedAuthOk: boolean): boolean {
-  // Both operators and nodes can skip device identity when authenticated
-  // with the shared gateway token. Cloud-provisioned node pods carry the
-  // gateway token (BOT_GATEWAY_TOKEN) and don't have device keys.
-  return sharedAuthOk;
+  return role === "operator" && sharedAuthOk;
 }
 
 export function isRoleAuthorizedForMethod(role: GatewayRole, method: string): boolean {
