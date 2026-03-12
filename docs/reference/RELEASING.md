@@ -92,7 +92,7 @@ When the operator says “release”, immediately do this preflight (no extra qu
 
 ## Plugin publish scope (npm)
 
-We only publish **existing npm plugins** under the `@openclaw/*` scope. Bundled
+We only publish **existing npm plugins** under the `@hanzo/bot-*` scope. Bundled
 plugins that are not on npm stay **disk-tree only** (still shipped in
 `extensions/**`).
 
@@ -104,18 +104,18 @@ Process to derive the list:
 
 Current npm plugin list (update as needed):
 
-- @openclaw/bluebubbles
-- @openclaw/diagnostics-otel
-- @openclaw/discord
-- @openclaw/feishu
-- @openclaw/lobster
-- @openclaw/matrix
-- @openclaw/msteams
-- @openclaw/nextcloud-talk
-- @openclaw/nostr
-- @openclaw/voice-call
-- @openclaw/zalo
-- @openclaw/zalouser
+- @hanzo/bot-bluebubbles
+- @hanzo/bot-diagnostics-otel
+- @hanzo/bot-discord
+- @hanzo/bot-feishu
+- @hanzo/bot-lobster
+- @hanzo/bot-matrix
+- @hanzo/bot-msteams
+- @hanzo/bot-nextcloud-talk
+- @hanzo/bot-nostr
+- @hanzo/bot-voice-call
+- @hanzo/bot-zalo
+- @hanzo/bot-zalouser
 
 Release notes must also call out **new optional bundled plugins** that are **not
 on by default** (example: `tlon`).

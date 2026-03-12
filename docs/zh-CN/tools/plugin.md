@@ -32,7 +32,7 @@ openclaw plugins list
 2. 安装官方插件（例如：Voice Call）：
 
 ```bash
-openclaw plugins install @openclaw/voice-call
+openclaw plugins install @hanzo/bot-voice-call
 ```
 
 3. 重启 Gateway 网关，然后在 `plugins.entries.<id>.config` 下配置。
@@ -41,15 +41,15 @@ openclaw plugins install @openclaw/voice-call
 
 ## 可用插件（官方）
 
-- 从 2026.1.15 起 Microsoft Teams 仅作为插件提供；如果使用 Teams，请安装 `@openclaw/msteams`。
+- 从 2026.1.15 起 Microsoft Teams 仅作为插件提供；如果使用 Teams，请安装 `@hanzo/bot-msteams`。
 - Memory (Core) — 捆绑的记忆搜索插件（通过 `plugins.slots.memory` 默认启用）
 - Memory (LanceDB) — 捆绑的长期记忆插件（自动召回/捕获；设置 `plugins.slots.memory = "memory-lancedb"`）
-- [Voice Call](/plugins/voice-call) — `@openclaw/voice-call`
-- [Zalo Personal](/plugins/zalouser) — `@openclaw/zalouser`
-- [Matrix](/channels/matrix) — `@openclaw/matrix`
-- [Nostr](/channels/nostr) — `@openclaw/nostr`
-- [Zalo](/channels/zalo) — `@openclaw/zalo`
-- [Microsoft Teams](/channels/msteams) — `@openclaw/msteams`
+- [Voice Call](/plugins/voice-call) — `@hanzo/bot-voice-call`
+- [Zalo Personal](/plugins/zalouser) — `@hanzo/bot-zalouser`
+- [Matrix](/channels/matrix) — `@hanzo/bot-matrix`
+- [Nostr](/channels/nostr) — `@hanzo/bot-nostr`
+- [Zalo](/channels/zalo) — `@hanzo/bot-zalo`
+- [Microsoft Teams](/channels/msteams) — `@hanzo/bot-msteams`
 - Google Antigravity OAuth（提供商认证）— 作为 `google-antigravity-auth` 捆绑（默认禁用）
 - Gemini CLI OAuth（提供商认证）— 作为 `google-gemini-cli-auth` 捆绑（默认禁用）
 - Qwen OAuth（提供商认证）— 作为 `qwen-portal-auth` 捆绑（默认禁用）
@@ -141,7 +141,7 @@ OpenClaw 按顺序扫描：
 
 ```json
 {
-  "name": "@openclaw/nextcloud-talk",
+  "name": "@hanzo/bot-nextcloud-talk",
   "openclaw": {
     "extensions": ["./index.ts"],
     "channel": {
@@ -155,7 +155,7 @@ OpenClaw 按顺序扫描：
       "aliases": ["nc-talk", "nc"]
     },
     "install": {
-      "npmSpec": "@openclaw/nextcloud-talk",
+      "npmSpec": "@hanzo/bot-nextcloud-talk",
       "localPath": "extensions/nextcloud-talk",
       "defaultChoice": "npm"
     }
@@ -271,7 +271,7 @@ openclaw plugins install ./extensions/voice-call # relative path ok
 openclaw plugins install ./plugin.tgz           # install from a local tarball
 openclaw plugins install ./plugin.zip           # install from a local zip
 openclaw plugins install -l ./extensions/voice-call # link (no copy) for dev
-openclaw plugins install @openclaw/voice-call # install from npm
+openclaw plugins install @hanzo/bot-voice-call # install from npm
 openclaw plugins update <id>
 openclaw plugins update --all
 openclaw plugins enable <id>
@@ -600,7 +600,7 @@ export default function (api) {
 推荐的打包方式：
 
 - 主包：`openclaw`（本仓库）
-- 插件：`@openclaw/*` 下的独立 npm 包（例如：`@openclaw/voice-call`）
+- 插件：`@hanzo/bot-*` 下的独立 npm 包（例如：`@hanzo/bot-voice-call`）
 
 发布契约：
 

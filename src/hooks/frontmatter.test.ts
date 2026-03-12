@@ -201,7 +201,7 @@ describe("resolveOpenClawMetadata", () => {
           events: ["command"],
           install: [
             { id: "bundled", kind: "bundled", label: "Bundled with OpenClaw" },
-            { id: "npm", kind: "npm", package: "@openclaw/hook" },
+            { id: "npm", kind: "npm", package: "@hanzo/bot-hook" },
           ],
         },
       }),
@@ -211,7 +211,7 @@ describe("resolveOpenClawMetadata", () => {
     expect(result?.install).toHaveLength(2);
     expect(result?.install?.[0].kind).toBe("bundled");
     expect(result?.install?.[1].kind).toBe("npm");
-    expect(result?.install?.[1].package).toBe("@openclaw/hook");
+    expect(result?.install?.[1].package).toBe("@hanzo/bot-hook");
   });
 
   it("handles os restrictions", () => {
