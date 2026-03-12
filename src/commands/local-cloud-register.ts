@@ -85,7 +85,7 @@ export async function registerLocalBot(params: {
       await fetch(`${PLAYGROUND_API_BASE}/nodes/${encodeURIComponent(nodeId)}/heartbeat`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ status: "active" }),
+        body: JSON.stringify({ status: "ready" }),
       });
     } catch {
       // Heartbeat failures are silent — the health monitor will handle staleness.
