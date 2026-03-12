@@ -468,10 +468,18 @@ export async function authorizeGatewayConnect(
       return { ok: false, reason: "iam_token_missing" };
     }
     // First, try IAM JWT validation if IAM config is present.
-    // Dynamic import avoids pulling @hanzo/iam into the plugin-sdk DTS build.
+    // Use a variable for the module path so TypeScript does not resolve the
+    // import statically — @hanzo/iam types are unavailable in the plugin-sdk
+    // DTS build and would cause compilation errors.
     if (auth.iam) {
       try {
-        const { validateIamToken } = await import("./auth-iam.js");
+        const iamMod = "./auth-iam.js";
+        const { validateIamToken } = (await import(iamMod)) as {
+          validateIamToken: (
+            token: string,
+            config: GatewayIamConfig,
+          ) => Promise<{ ok: true; userId: string } | { ok: false; reason: string }>;
+        };
         const iamResult = await validateIamToken(connectAuth.token, auth.iam);
         if (iamResult.ok) {
           limiter?.reset(ip, rateLimitScope);
