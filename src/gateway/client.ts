@@ -61,7 +61,7 @@ export type GatewayClientOptions = {
   commands?: string[];
   permissions?: Record<string, boolean>;
   pathEnv?: string;
-  deviceIdentity?: DeviceIdentity;
+  deviceIdentity?: DeviceIdentity | null;
   minProtocol?: number;
   maxProtocol?: number;
   tlsFingerprint?: string;
@@ -101,7 +101,9 @@ export class GatewayClient {
   constructor(opts: GatewayClientOptions) {
     this.opts = {
       ...opts,
-      deviceIdentity: opts.deviceIdentity ?? loadOrCreateDeviceIdentity(),
+      // Explicit null means "no device identity" (e.g. cloud nodes).
+      // Only fall back to loadOrCreateDeviceIdentity() when the option is omitted (undefined).
+      deviceIdentity: opts.deviceIdentity === null ? undefined : (opts.deviceIdentity ?? loadOrCreateDeviceIdentity()),
     };
   }
 
