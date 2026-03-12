@@ -1,28 +1,27 @@
 /**
- * Local launch — starts the bot gateway on this machine and registers it
- * as a node on gw.hanzo.bot so it appears in the Hanzo Playground.
+ * Local launch — starts the bot gateway on this machine.
  *
  * Flow:
  * 1. Write config with gateway.mode = "local"
  * 2. Start the gateway server (HTTP + WS on port 18789) with no auth (loopback-only)
- * 3. Attempt cloud registration on wss://gw.hanzo.bot (non-blocking)
- * 4. Open the Control UI in the user's browser
- * 5. Keep running until Ctrl+C
+ * 3. Open the Control UI in the user's browser
+ * 4. Keep running until Ctrl+C
+ *
+ * Cloud Playground registration (connecting to wss://gw.hanzo.bot so the bot
+ * appears in app.hanzo.bot) will be enabled in a future release once the cloud
+ * gateway accepts IAM OAuth tokens for node registration.
  */
 
 import os from "node:os";
 import path from "node:path";
-import { randomUUID } from "node:crypto";
 import { writeConfigFile } from "../config/io.js";
 import { openUrl } from "./onboard-helpers.js";
 
-const CLOUD_GATEWAY_URL = "wss://gw.hanzo.bot";
-const PLAYGROUND_NODES_URL = "https://app.hanzo.bot/nodes";
-const PLAYGROUND_URL = "https://app.hanzo.bot/playground";
 const DEFAULT_PORT = 18789;
 
 export async function launchLocal(params: { accessToken: string }): Promise<void> {
-  const { accessToken } = params;
+  // accessToken is saved for future use when cloud registration is enabled.
+  const { accessToken: _accessToken } = params;
 
   // 1. Write config for local gateway mode.
   //    We intentionally omit gateway.auth here — auth mode is passed as a
@@ -44,32 +43,14 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
   // eslint-disable-next-line no-console
   console.log("\n  Starting local gateway...\n");
 
-  // 2. Dynamically import gateway/node-host dependencies (heavy modules)
-  const [
-    { startGatewayServer },
-    { GatewayClient },
-    { runGatewayLoop },
-    { getMachineDisplayName },
-    { loadOrCreateDeviceIdentity },
-    { VERSION },
-    { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES },
-    { NODE_SYSTEM_RUN_COMMANDS, NODE_EXEC_APPROVALS_COMMANDS },
-    { defaultRuntime },
-  ] = await Promise.all([
+  // 2. Dynamically import gateway dependencies (heavy modules)
+  const [{ startGatewayServer }, { runGatewayLoop }, { defaultRuntime }] = await Promise.all([
     import("../gateway/server.js"),
-    import("../gateway/client.js"),
     import("../cli/gateway-cli/run-loop.js"),
-    import("../infra/machine-name.js"),
-    import("../infra/device-identity.js"),
-    import("../version.js"),
-    import("../utils/message-channel.js"),
-    import("../infra/node-commands.js"),
     import("../runtime.js"),
   ]);
 
   const port = DEFAULT_PORT;
-  const displayName = await getMachineDisplayName();
-  const nodeId = randomUUID();
 
   // 3. Start gateway loop — this is long-running.
   try {
@@ -87,7 +68,7 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
           auth: { mode: "none" as const },
         });
 
-        // Open Control UI in browser — no token required now.
+        // Open Control UI in browser — no token required.
         try {
           await openUrl(`http://127.0.0.1:${port}/`);
         } catch {
@@ -98,50 +79,6 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
         console.log(`  Gateway running on http://127.0.0.1:${port}/`);
         // eslint-disable-next-line no-console
         console.log(`  Control UI opened in your browser.\n`);
-
-        // Attempt to register with the Hanzo Cloud gateway.
-        // This is best-effort — the cloud gateway may not be available or
-        // may not accept the IAM token yet.  Failure here does not affect
-        // the local gateway experience.
-        let cloudConnected = false;
-        try {
-          const client = new GatewayClient({
-            url: CLOUD_GATEWAY_URL,
-            token: accessToken,
-            instanceId: nodeId,
-            clientName: GATEWAY_CLIENT_NAMES.NODE_HOST,
-            clientDisplayName: displayName,
-            clientVersion: VERSION,
-            platform: process.platform,
-            mode: GATEWAY_CLIENT_MODES.NODE,
-            role: "node",
-            scopes: [],
-            caps: ["system"],
-            commands: [...NODE_SYSTEM_RUN_COMMANDS, ...NODE_EXEC_APPROVALS_COMMANDS],
-            deviceIdentity: loadOrCreateDeviceIdentity(),
-            onConnectError: (_err) => {
-              if (!cloudConnected) {
-                // Only log the first failure, not repeated reconnect attempts
-                // eslint-disable-next-line no-console
-                console.log(
-                  "  Cloud Playground registration unavailable — running in local-only mode.",
-                );
-                // eslint-disable-next-line no-console
-                console.log(
-                  "  (Your bot works locally; Playground visibility will be added in a future update.)\n",
-                );
-              }
-            },
-            onClose: (_code, _reason) => {
-              // Silently handle cloud gateway disconnection
-              cloudConnected = false;
-            },
-          });
-          client.start();
-        } catch {
-          // Cloud registration is entirely optional — swallow any startup errors.
-        }
-
         // eslint-disable-next-line no-console
         console.log("  Press Ctrl+C to stop the gateway.\n");
 
