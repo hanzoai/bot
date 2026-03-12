@@ -41,7 +41,10 @@ export const NodeRenameParamsSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export const NodeListParamsSchema = Type.Object({}, { additionalProperties: false });
+export const NodeListParamsSchema = Type.Object(
+  { connectedOnly: Type.Optional(Type.Boolean()) },
+  { additionalProperties: false },
+);
 
 export const NodeDescribeParamsSchema = Type.Object(
   { nodeId: NonEmptyString },
