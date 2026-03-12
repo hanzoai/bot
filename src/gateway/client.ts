@@ -370,7 +370,13 @@ export class GatewayClient {
             return;
           }
           this.connectNonce = nonce.trim();
-          this.sendConnect();
+          try {
+            this.sendConnect();
+          } catch (connectErr) {
+            logError(`gateway client sendConnect error: ${String(connectErr)}`);
+            this.opts.onConnectError?.(connectErr instanceof Error ? connectErr : new Error(String(connectErr)));
+            this.ws?.close(1008, "connect failed");
+          }
           return;
         }
         const seq = typeof evt.seq === "number" ? evt.seq : null;
