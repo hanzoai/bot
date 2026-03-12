@@ -77,6 +77,11 @@ function readGatewayTokenEnv(
   if (primary) {
     return primary;
   }
+  // BOT_GATEWAY_TOKEN is the canonical env var used by K8s deployments.
+  const bot = trimToUndefined(env.BOT_GATEWAY_TOKEN);
+  if (bot) {
+    return bot;
+  }
   if (!includeLegacyEnv) {
     return undefined;
   }
@@ -90,6 +95,11 @@ function readGatewayPasswordEnv(
   const primary = trimToUndefined(env.OPENCLAW_GATEWAY_PASSWORD);
   if (primary) {
     return primary;
+  }
+  // BOT_GATEWAY_PASSWORD is the canonical env var used by K8s deployments.
+  const bot = trimToUndefined(env.BOT_GATEWAY_PASSWORD);
+  if (bot) {
+    return bot;
   }
   if (!includeLegacyEnv) {
     return undefined;
