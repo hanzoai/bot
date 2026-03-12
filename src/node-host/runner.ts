@@ -213,15 +213,27 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   const resolvedBrowser = resolveBrowserConfig(cfg.browser, cfg);
   const browserProxyEnabled =
     cfg.nodeHost?.browserProxy?.enabled !== false && resolvedBrowser.enabled;
-  const { token, password } = await resolveNodeHostGatewayCredentials({
+  const { token: resolvedToken, password } = await resolveNodeHostGatewayCredentials({
     config: cfg,
     env: process.env,
   });
+  // Cloud-provisioned nodes may have BOT_GATEWAY_TOKEN set by the Playground
+  // provisioner. Use it as a fallback when no other token was resolved.
+  const token =
+    resolvedToken || process.env.BOT_GATEWAY_TOKEN || undefined;
 
-  const host = gateway.host ?? "127.0.0.1";
-  const port = gateway.port ?? 18789;
-  const scheme = gateway.tls ? "wss" : "ws";
-  const url = `${scheme}://${host}:${port}`;
+  // Cloud-provisioned nodes (BOT_CLOUD_NODE=true) receive the gateway URL
+  // and auth token via environment variables set by the Playground provisioner.
+  const gatewayUrlOverride = process.env.BOT_NODE_GATEWAY_URL;
+  let url: string;
+  if (gatewayUrlOverride) {
+    url = gatewayUrlOverride;
+  } else {
+    const host = gateway.host ?? "127.0.0.1";
+    const port = gateway.port ?? 18789;
+    const scheme = gateway.tls ? "wss" : "ws";
+    url = `${scheme}://${host}:${port}`;
+  }
   const pathEnv = ensureNodePathEnv();
   // eslint-disable-next-line no-console
   console.log(`node host PATH: ${pathEnv}`);
