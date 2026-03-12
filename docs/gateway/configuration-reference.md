@@ -440,7 +440,7 @@ WhatsApp runs through the gateway's web channel (Baileys Web). It starts automat
 
 ### Mattermost
 
-Mattermost ships as a plugin: `openclaw plugins install @openclaw/mattermost`.
+Mattermost ships as a plugin: `openclaw plugins install @hanzo/bot-mattermost`.
 
 ```json5
 {
