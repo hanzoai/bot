@@ -22,7 +22,9 @@ function trimToUndefined(value: unknown): string | undefined {
 
 async function resolveGatewayAuthToken(): Promise<string | null> {
   const envToken =
-    process.env.OPENCLAW_GATEWAY_TOKEN?.trim() || process.env.CLAWDBOT_GATEWAY_TOKEN?.trim();
+    process.env.OPENCLAW_GATEWAY_TOKEN?.trim() ||
+    process.env.BOT_GATEWAY_TOKEN?.trim() ||
+    process.env.CLAWDBOT_GATEWAY_TOKEN?.trim();
   if (envToken) {
     return envToken;
   }
