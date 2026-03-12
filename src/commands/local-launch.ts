@@ -115,6 +115,17 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
         console.log(`  Control UI opened in your browser.`);
         // eslint-disable-next-line no-console
         console.log(`  AI models via Hanzo Cloud (api.hanzo.ai)\n`);
+
+        // Register with Hanzo Cloud so the bot appears on app.hanzo.bot
+        try {
+          const { registerLocalBot } = await import("./local-cloud-register.js");
+          const stopHeartbeat = await registerLocalBot({ accessToken, port });
+          process.once("SIGINT", stopHeartbeat);
+          process.once("SIGTERM", stopHeartbeat);
+        } catch {
+          // Cloud registration is best-effort — local bot works without it.
+        }
+
         // eslint-disable-next-line no-console
         console.log("  Press Ctrl+C to stop the gateway.\n");
 
