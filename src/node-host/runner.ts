@@ -281,11 +281,15 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     onConnectError: (err) => {
       // keep retrying (handled by GatewayClient)
       // eslint-disable-next-line no-console
-      console.error(`node host gateway connect failed: ${err.message}`);
+      console.log(`node host gateway connect failed: ${err.message}`);
     },
     onClose: (code, reason) => {
       // eslint-disable-next-line no-console
-      console.error(`node host gateway closed (${code}): ${reason}`);
+      console.log(`node host gateway closed (${code}): ${reason}`);
+    },
+    onHelloOk: (hello) => {
+      // eslint-disable-next-line no-console
+      console.log(`node host gateway connected: connId=${hello?.server?.connId ?? "?"} protocol=${hello?.protocol ?? "?"}`);
     },
   });
 
