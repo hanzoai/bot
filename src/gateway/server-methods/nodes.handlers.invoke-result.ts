@@ -45,7 +45,16 @@ export const handleNodeInvokeResult: GatewayRequestHandler = async ({
     payloadJSON?: string | null;
     error?: { code?: string; message?: string } | null;
   };
-  const callerNodeId = client?.connect?.device?.id ?? client?.connect?.client?.id;
+  // Resolve the caller's node ID using the same logic as NodeRegistry.register:
+  // prefer device.id (local nodes with key pairs), then instanceId (cloud nodes),
+  // then client.id (client name — last resort, may differ from the nodeId).
+  const callerConnect = client?.connect;
+  const callerInstanceId =
+    typeof (callerConnect?.client as { instanceId?: string })?.instanceId === "string"
+      ? ((callerConnect?.client as { instanceId?: string }).instanceId?.trim() ?? "")
+      : "";
+  const callerNodeId =
+    callerConnect?.device?.id ?? (callerInstanceId || callerConnect?.client?.id);
   if (callerNodeId && callerNodeId !== p.nodeId) {
     respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "nodeId mismatch"));
     return;
