@@ -122,6 +122,13 @@ export type GatewayIamConfig = {
   /** OAuth2 scopes to request (defaults to ["openid", "profile", "email"]). */
   scopes?: string[];
   /**
+   * Internal JWKS endpoint URL for token signature verification.
+   * When set, JWKS fetches are redirected to this URL instead of the public
+   * OIDC discovery URL, bypassing Cloudflare/WAF restrictions within K8s.
+   * Example: "http://iam.hanzo.svc.cluster.local/.well-known/jwks"
+   */
+  jwksUrl?: string;
+  /**
    * Email addresses with super-admin privileges.
    * Super admins bypass billing checks and can credit their own account for testing.
    */
