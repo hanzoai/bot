@@ -1,4 +1,5 @@
 import type { TlsOptions } from "node:tls";
+import type { Duplex } from "node:stream";
 import type { WebSocketServer } from "ws";
 import {
   createServer as createHttpServer,
@@ -10,6 +11,11 @@ import { createServer as createHttpsServer } from "node:https";
 import type { CanvasHostHandler } from "../canvas-host/server.js";
 import type { createSubsystemLogger } from "../logging/subsystem.js";
 import type { GatewayWsClient } from "./server/ws-types.js";
+
+export type VncProxyHandlers = {
+  handleUpgrade: (req: IncomingMessage, socket: Duplex, head: Buffer) => boolean;
+  handleTunnelUpgrade: (req: IncomingMessage, socket: Duplex, head: Buffer) => boolean;
+};
 import { resolveAgentAvatar } from "../agents/identity-avatar.js";
 import { CANVAS_WS_PATH, handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
 import { loadConfig } from "../config/config.js";
@@ -520,6 +526,8 @@ export function createGatewayHttpServer(opts: {
   /** Optional rate limiter for auth brute-force protection. */
   rateLimiter?: AuthRateLimiter;
   tlsOptions?: TlsOptions;
+  /** Optional VNC viewer HTML handler. Called for GET /vnc-viewer requests. */
+  handleVncViewerRequest?: (req: IncomingMessage, res: ServerResponse) => boolean;
 }): HttpServer {
   const {
     canvasHost,
@@ -573,7 +581,14 @@ export function createGatewayHttpServer(opts: {
       const pluginPathContext = handlePluginRequest
         ? resolvePluginRoutePathContext(requestPath)
         : null;
-      const requestStages: GatewayHttpRequestStage[] = [
+      const requestStages: GatewayHttpRequestStage[] = [];
+      if (opts.handleVncViewerRequest) {
+        requestStages.push({
+          name: "vnc-viewer",
+          run: () => opts.handleVncViewerRequest!(req, res),
+        });
+      }
+      requestStages.push(
         {
           name: "hooks",
           run: () => handleHooksRequest(req, res),
@@ -592,7 +607,7 @@ export function createGatewayHttpServer(opts: {
           name: "slack",
           run: () => handleSlackHttpRequest(req, res),
         },
-      ];
+      );
       if (openResponsesEnabled) {
         requestStages.push({
           name: "openresponses",
@@ -721,6 +736,8 @@ export function attachGatewayUpgradeHandler(opts: {
   resolvedAuth: ResolvedGatewayAuth;
   /** Optional rate limiter for auth brute-force protection. */
   rateLimiter?: AuthRateLimiter;
+  /** Optional VNC proxy for /vnc and /vnc-tunnel WebSocket upgrades. */
+  vncProxy?: VncProxyHandlers;
 }) {
   const { httpServer, wss, canvasHost, clients, resolvedAuth, rateLimiter } = opts;
   httpServer.on("upgrade", (req, socket, head) => {
@@ -733,6 +750,15 @@ export function attachGatewayUpgradeHandler(opts: {
       }
       if (scopedCanvas.rewrittenUrl) {
         req.url = scopedCanvas.rewrittenUrl;
+      }
+      // VNC tunnel: check /vnc and /vnc-tunnel before canvas/main WS handler.
+      if (opts.vncProxy) {
+        if (opts.vncProxy.handleTunnelUpgrade(req, socket, head)) {
+          return;
+        }
+        if (opts.vncProxy.handleUpgrade(req, socket, head)) {
+          return;
+        }
       }
       if (canvasHost) {
         const url = new URL(req.url ?? "/", "http://localhost");
