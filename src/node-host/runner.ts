@@ -10,6 +10,7 @@ import {
   NODE_BROWSER_PROXY_COMMAND,
   NODE_EXEC_APPROVALS_COMMANDS,
   NODE_SYSTEM_RUN_COMMANDS,
+  NODE_VNC_TUNNEL_COMMAND,
 } from "../infra/node-commands.js";
 import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
@@ -253,10 +254,11 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     mode: GATEWAY_CLIENT_MODES.NODE,
     role: "node",
     scopes: [],
-    caps: ["system", ...(browserProxyEnabled ? ["browser"] : [])],
+    caps: ["system", "vnc", ...(browserProxyEnabled ? ["browser"] : [])],
     commands: [
       ...NODE_SYSTEM_RUN_COMMANDS,
       ...NODE_EXEC_APPROVALS_COMMANDS,
+      NODE_VNC_TUNNEL_COMMAND,
       ...(browserProxyEnabled ? [NODE_BROWSER_PROXY_COMMAND] : []),
     ],
     pathEnv,
