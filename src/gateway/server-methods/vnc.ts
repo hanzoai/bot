@@ -46,10 +46,11 @@ export function createVncProxy(opts?: {
   vncHost?: string;
   vncPort?: number;
   nodeRegistry?: NodeRegistry;
+  getNodeRegistry?: () => NodeRegistry | null | undefined;
 }) {
   const vncHost = opts?.vncHost ?? process.env.BOT_VNC_HOST?.trim() ?? DEFAULT_VNC_HOST;
   const vncPort = Number(process.env.BOT_VNC_PORT?.trim() ?? opts?.vncPort ?? DEFAULT_VNC_PORT);
-  const nodeRegistry = opts?.nodeRegistry;
+  const getRegistry = opts?.getNodeRegistry ?? (() => opts?.nodeRegistry);
 
   // Per-instance HMAC-SHA256 signing key for tunnel tokens.
   // Regenerated on every gateway restart — old tokens are inherently invalidated.
@@ -198,7 +199,7 @@ export function createVncProxy(opts?: {
       return false;
     }
     const nodeId = url.searchParams.get("nodeId");
-    if (nodeId && nodeRegistry) {
+    if (nodeId && getRegistry()) {
       // Tunnel mode: create pending tunnel and invoke node.
       handleTunnelBrowserUpgrade(req, socket, head, nodeId);
       return true;
@@ -217,7 +218,8 @@ export function createVncProxy(opts?: {
     head: Buffer,
     nodeId: string,
   ) {
-    const node = nodeRegistry?.get(nodeId);
+    const registry = getRegistry();
+    const node = registry?.get(nodeId);
     if (!node) {
       const msg = `HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n`;
       socket.write(msg);
@@ -245,7 +247,7 @@ export function createVncProxy(opts?: {
       const tunnelUrl = `${isSecure ? "wss" : "ws"}://${host}/vnc-tunnel?tunnelId=${signedToken}`;
 
       // Invoke the node to open a VNC tunnel.
-      void nodeRegistry!.invoke({
+      void registry!.invoke({
         nodeId,
         command: "vnc.tunnel.open",
         params: { tunnelId: signedToken, tunnelUrl },

@@ -9,10 +9,12 @@ import type { ResolvedGatewayAuth } from "./auth.js";
 import type { ChatAbortControllerEntry } from "./chat-abort.js";
 import type { ControlUiRootState } from "./control-ui.js";
 import type { HooksConfigResolved } from "./hooks.js";
+import type { NodeRegistry } from "./node-registry.js";
 import type { DedupeEntry } from "./server-shared.js";
 import type { GatewayTlsRuntime } from "./server/tls.js";
 import type { GatewayWsClient } from "./server/ws-types.js";
 import { CANVAS_HOST_PATH } from "../canvas-host/a2ui.js";
+import { createVncProxy, vncViewerHtml } from "./server-methods/vnc.js";
 import { type CanvasHostHandler, createCanvasHostHandler } from "../canvas-host/server.js";
 import { isLoopbackHost, resolveGatewayListenHosts } from "./net.js";
 import {
@@ -61,6 +63,8 @@ export async function createGatewayRuntimeState(params: {
   log: { info: (msg: string) => void; warn: (msg: string) => void };
   logHooks: ReturnType<typeof createSubsystemLogger>;
   logPlugins: ReturnType<typeof createSubsystemLogger>;
+  /** Lazy getter for the node registry — used by VNC tunnel proxy. Set after nodeRegistry is created. */
+  getNodeRegistry?: () => NodeRegistry | null | undefined;
 }): Promise<{
   canvasHost: CanvasHostHandler | null;
   httpServer: HttpServer;
@@ -137,6 +141,30 @@ export async function createGatewayRuntimeState(params: {
         "Host-header origin fallback weakens origin checks and should only be used as break-glass.",
     );
   }
+  // Create VNC proxy with lazy nodeRegistry getter (nodeRegistry is created after this function returns).
+  const vncProxy = createVncProxy({
+    getNodeRegistry: params.getNodeRegistry,
+  });
+  const handleVncViewerRequest = (req: import("node:http").IncomingMessage, res: import("node:http").ServerResponse): boolean => {
+    const url = new URL(req.url ?? "/", "http://localhost");
+    if (url.pathname !== "/vnc-viewer") {
+      return false;
+    }
+    const host = req.headers["x-forwarded-host"] as string | undefined
+      ?? req.headers.host
+      ?? "gw.hanzo.bot";
+    const proto = req.headers["x-forwarded-proto"] as string | undefined ?? "https";
+    const origin = `${proto}://${host}`;
+    const nodeId = url.searchParams.get("nodeId") ?? undefined;
+    const token = url.searchParams.get("token") ?? undefined;
+    const html = vncViewerHtml(origin, nodeId, token);
+    res.statusCode = 200;
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    res.end(html);
+    return true;
+  };
+
   const httpServers: HttpServer[] = [];
   const httpBindHosts: string[] = [];
   for (const host of bindHosts) {
@@ -157,6 +185,7 @@ export async function createGatewayRuntimeState(params: {
       resolvedAuth: params.resolvedAuth,
       rateLimiter: params.rateLimiter,
       tlsOptions: params.gatewayTls?.enabled ? params.gatewayTls.tlsOptions : undefined,
+      handleVncViewerRequest,
     });
     try {
       await listenGatewayHttpServer({
@@ -192,6 +221,7 @@ export async function createGatewayRuntimeState(params: {
       clients,
       resolvedAuth: params.resolvedAuth,
       rateLimiter: params.rateLimiter,
+      vncProxy,
     });
   }
 

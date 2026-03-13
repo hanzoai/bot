@@ -546,6 +546,11 @@ export async function startGatewayServer(
   if (cfgAtStart.gateway?.tls?.enabled && !gatewayTls.enabled) {
     throw new Error(gatewayTls.error ?? "gateway tls: failed to enable");
   }
+  // Mutable ref so the VNC proxy (created inside createGatewayRuntimeState) can
+  // access the nodeRegistry lazily. The ref is populated right after nodeRegistry
+  // is created below, before any VNC tunnel requests can arrive.
+  const nodeRegistryRef: { current: NodeRegistry | null } = { current: null };
+
   const {
     canvasHost,
     httpServer,
@@ -589,9 +594,11 @@ export async function startGatewayServer(
     log,
     logHooks,
     logPlugins,
+    getNodeRegistry: () => nodeRegistryRef.current,
   });
   let bonjourStop: (() => Promise<void>) | null = null;
   const nodeRegistry = new NodeRegistry();
+  nodeRegistryRef.current = nodeRegistry;
   const nodePresenceTimers = new Map<string, ReturnType<typeof setInterval>>();
   const nodeSubscriptions = createNodeSubscriptionManager();
   const nodeSendEvent = (opts: { nodeId: string; event: string; payloadJSON?: string | null }) => {
