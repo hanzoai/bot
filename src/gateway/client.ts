@@ -109,11 +109,11 @@ export class GatewayClient {
 
   start() {
     if (this.closed) {
-      logDebug("gateway client start: already closed, skipping");
+      logError("[GWC] start: already closed, skipping");
       return;
     }
     const url = this.opts.url ?? "ws://127.0.0.1:18789";
-    logDebug(`gateway client start: url=${url} instanceId=${this.opts.instanceId ?? "n/a"}`);
+    logError(`[GWC] start: url=${url} instanceId=${this.opts.instanceId ?? "n/a"} token=${this.opts.token ? "yes" : "no"}`);
     if (this.opts.tlsFingerprint && !url.startsWith("wss://")) {
       this.opts.onConnectError?.(new Error("gateway tls fingerprint requires wss:// gateway url"));
       return;
@@ -123,6 +123,7 @@ export class GatewayClient {
     // Security check: block ALL plaintext ws:// to non-loopback addresses (CWE-319, CVSS 9.8)
     // This protects both credentials AND chat/conversation data from MITM attacks.
     // Device tokens may be loaded later in sendConnect(), so we block regardless of hasCredentials.
+    logError(`[GWC] security check: allowPrivateWs=${allowPrivateWs} isSecure=${isSecureWebSocketUrl(url, { allowPrivateWs })}`);
     if (!isSecureWebSocketUrl(url, { allowPrivateWs })) {
       // Safe hostname extraction - avoid throwing on malformed URLs in error path
       let displayHost = url;
@@ -175,6 +176,7 @@ export class GatewayClient {
     this.ws = new WebSocket(url, wsOptions);
 
     this.ws.on("open", () => {
+      logError(`[GWC] ws open url=${url}`);
       if (url.startsWith("wss://") && this.opts.tlsFingerprint) {
         const tlsError = this.validateTlsFingerprint();
         if (tlsError) {
@@ -186,11 +188,18 @@ export class GatewayClient {
       this.queueConnect();
     });
     this.ws.on("message", (data) => {
-      this.handleMessage(rawDataToString(data));
+      const raw = rawDataToString(data);
+      try {
+        const parsed = JSON.parse(raw);
+        logError(`[GWC] ws message type=${parsed.type} event=${parsed.event ?? "n/a"} method=${parsed.method ?? "n/a"}`);
+      } catch {
+        logError(`[GWC] ws message (unparsed) len=${raw.length}`);
+      }
+      this.handleMessage(raw);
     });
     this.ws.on("close", (code, reason) => {
       const reasonText = rawDataToString(reason);
-      logDebug(`gateway client WebSocket closed (${code}): ${reasonText}`);
+      logError(`[GWC] ws closed (${code}): ${reasonText}`);
       this.ws = null;
       // Clear persisted device auth state only when device-token auth was active.
       // Shared token/password failures can return the same close reason but should
@@ -329,8 +338,10 @@ export class GatewayClient {
       device,
     };
 
+    logError(`[GWC] sendConnect: sending connect request role=${role} hasToken=${!!authToken} hasDevice=${!!device}`);
     void this.request<HelloOk>("connect", params)
       .then((helloOk) => {
+        logError(`[GWC] sendConnect: hello-ok received`);
         const authInfo = helloOk?.auth;
         if (authInfo?.deviceToken && this.opts.deviceIdentity) {
           storeDeviceAuthToken({
@@ -350,6 +361,7 @@ export class GatewayClient {
         this.opts.onHelloOk?.(helloOk);
       })
       .catch((err) => {
+        logError(`[GWC] sendConnect failed: ${String(err)}`);
         this.opts.onConnectError?.(err instanceof Error ? err : new Error(String(err)));
         const msg = `gateway connect failed: ${String(err)}`;
         if (this.opts.mode === GATEWAY_CLIENT_MODES.PROBE) {
@@ -375,6 +387,7 @@ export class GatewayClient {
             return;
           }
           this.connectNonce = nonce.trim();
+          logError(`[GWC] received connect.challenge nonce=${this.connectNonce.substring(0, 8)}...`);
           try {
             this.sendConnect();
           } catch (connectErr) {
@@ -433,8 +446,10 @@ export class GatewayClient {
     }
     this.connectTimer = setTimeout(() => {
       if (this.connectSent || this.ws?.readyState !== WebSocket.OPEN) {
+        logError(`[GWC] queueConnect timeout: connectSent=${this.connectSent} wsState=${this.ws?.readyState}`);
         return;
       }
+      logError(`[GWC] queueConnect: connect challenge timeout after ${connectChallengeTimeoutMs}ms`);
       this.opts.onConnectError?.(new Error("gateway connect challenge timeout"));
       this.ws?.close(1008, "connect challenge timeout");
     }, connectChallengeTimeoutMs);
