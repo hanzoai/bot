@@ -1,0 +1,136 @@
+/**
+ * VNC Tunnel - Node Host Side
+ *
+ * When the gateway sends a `vnc.tunnel.open` invoke, the node-host:
+ * 1. Connects to the local VNC server (default: localhost:5900)
+ * 2. Opens a WebSocket to the gateway's /vnc-tunnel endpoint
+ * 3. Bridges binary VNC data between the TCP socket and the WebSocket
+ *
+ * This allows the gateway to proxy VNC from a remote cloud node through
+ * a WebSocket tunnel to the browser's noVNC client.
+ */
+
+import { createConnection } from "node:net";
+import { WebSocket } from "ws";
+
+const DEFAULT_VNC_HOST = process.env.BOT_VNC_HOST?.trim() ?? "127.0.0.1";
+const DEFAULT_VNC_PORT = Number(process.env.BOT_VNC_PORT?.trim() ?? 5900);
+
+export type VncTunnelParams = {
+  tunnelId: string;
+  tunnelUrl: string;
+  vncHost?: string;
+  vncPort?: number;
+};
+
+/**
+ * Open a VNC tunnel: connect to local VNC server and bridge to gateway tunnel WS.
+ * Returns a cleanup function. Non-fatal — errors are logged but not thrown.
+ */
+export async function openVncTunnel(params: VncTunnelParams): Promise<() => void> {
+  const vncHost = params.vncHost ?? DEFAULT_VNC_HOST;
+  const vncPort = params.vncPort ?? DEFAULT_VNC_PORT;
+  const { tunnelUrl } = params;
+
+  return new Promise<() => void>((resolve) => {
+    let disposed = false;
+    let tcp: ReturnType<typeof createConnection> | null = null;
+    let ws: WebSocket | null = null;
+
+    const cleanup = () => {
+      if (disposed) return;
+      disposed = true;
+      try {
+        tcp?.destroy();
+      } catch {}
+      try {
+        ws?.close(1000, "tunnel closed");
+      } catch {}
+    };
+
+    // Connect to local VNC server via TCP
+    tcp = createConnection({ host: vncHost, port: vncPort }, () => {
+      if (disposed) {
+        tcp?.destroy();
+        return;
+      }
+
+      // Open WebSocket to gateway tunnel endpoint
+      ws = new WebSocket(tunnelUrl, {
+        headers: {},
+        handshakeTimeout: 10_000,
+      });
+
+      ws.on("open", () => {
+        if (disposed) {
+          ws?.close();
+          return;
+        }
+        // Bridge: TCP → WS
+        tcp!.on("data", (chunk: Buffer) => {
+          if (!disposed && ws?.readyState === WebSocket.OPEN) {
+            ws.send(chunk, (err) => {
+              if (err && !disposed) {
+                // eslint-disable-next-line no-console
+                console.warn(`vnc tunnel: ws send error: ${err.message}`);
+              }
+            });
+          }
+        });
+
+        // Bridge: WS → TCP
+        ws!.on("message", (data) => {
+          if (!disposed && tcp && !tcp.destroyed) {
+            const buf = data instanceof Buffer ? data : Buffer.from(data as ArrayBuffer);
+            tcp.write(buf);
+          }
+        });
+
+        resolve(cleanup);
+      });
+
+      ws.on("error", (err) => {
+        if (!disposed) {
+          // eslint-disable-next-line no-console
+          console.warn(`vnc tunnel: ws error: ${err.message}`);
+          cleanup();
+        }
+        // Resolve anyway so the invoke doesn't hang
+        resolve(cleanup);
+      });
+
+      ws.on("close", () => {
+        if (!disposed) {
+          cleanup();
+        }
+      });
+    });
+
+    tcp.on("error", (err) => {
+      if (!disposed) {
+        // eslint-disable-next-line no-console
+        console.warn(`vnc tunnel: tcp error connecting to ${vncHost}:${vncPort}: ${err.message}`);
+        cleanup();
+      }
+      resolve(cleanup);
+    });
+
+    tcp.on("close", () => {
+      if (!disposed) {
+        cleanup();
+      }
+    });
+
+    // Timeout if connection doesn't establish
+    const timeout = setTimeout(() => {
+      if (!disposed) {
+        // eslint-disable-next-line no-console
+        console.warn(`vnc tunnel: timed out connecting to VNC server`);
+        cleanup();
+        resolve(cleanup);
+      }
+    }, 10_000);
+
+    tcp.once("connect", () => clearTimeout(timeout));
+  });
+}

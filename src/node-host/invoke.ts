@@ -28,6 +28,7 @@ import {
 import { sanitizeHostExecEnv } from "../infra/host-env-security.js";
 import { runBrowserProxyCommand } from "./invoke-browser.js";
 import { buildSystemRunApprovalPlan, handleSystemRunInvoke } from "./invoke-system-run.js";
+import { openVncTunnel } from "./invoke-vnc.js";
 
 const OUTPUT_CAP = 200_000;
 const OUTPUT_EVENT_TAIL = 20_000;
@@ -507,6 +508,29 @@ export async function handleInvoke(
         cmdText: prepared.cmdText,
         plan: prepared.plan,
       });
+    } catch (err) {
+      await sendInvalidRequestResult(client, frame, err);
+    }
+    return;
+  }
+
+  if (command === "vnc.tunnel.open") {
+    try {
+      const params = decodeParams<{ tunnelId: string; tunnelUrl: string }>(frame.paramsJSON);
+      if (!params.tunnelUrl || !params.tunnelId) {
+        await sendErrorResult(client, frame, "INVALID_REQUEST", "tunnelId and tunnelUrl required");
+        return;
+      }
+      // Open VNC tunnel asynchronously — respond immediately to prevent gateway timeout
+      void (async () => {
+        try {
+          await openVncTunnel({ tunnelId: params.tunnelId, tunnelUrl: params.tunnelUrl });
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn(`vnc tunnel: failed: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      })();
+      await sendJsonPayloadResult(client, frame, { ok: true });
     } catch (err) {
       await sendInvalidRequestResult(client, frame, err);
     }
