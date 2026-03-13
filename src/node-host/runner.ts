@@ -304,5 +304,55 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   client.start();
   // eslint-disable-next-line no-console
   console.log("node host: gateway client started, waiting...");
+
+  // Cloud-provisioned nodes: register with the Playground and send heartbeats
+  // so the node shows as active in the dashboard.
+  if (isCloudNode) {
+    const playgroundServer = process.env.PLAYGROUND_SERVER?.trim();
+    const agentNodeId = process.env.AGENT_NODE_ID?.trim() || nodeId;
+    const playgroundToken = token || process.env.BOT_GATEWAY_TOKEN || "";
+    if (playgroundServer && agentNodeId && playgroundToken) {
+      const playgroundHeaders = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${playgroundToken}`,
+      };
+      const registerWithPlayground = async () => {
+        try {
+          await fetch(`${playgroundServer}/api/v1/nodes/register`, {
+            method: "POST",
+            headers: playgroundHeaders,
+            body: JSON.stringify({
+              id: agentNodeId,
+              base_url: "",
+              deployment_type: "long_running",
+              version: VERSION,
+              health_status: "active",
+              lifecycle_status: "running",
+              metadata: { platform: process.platform, display_name: displayName },
+            }),
+          });
+          // eslint-disable-next-line no-console
+          console.log(`node host: registered with playground as ${agentNodeId}`);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.warn(`node host: playground registration failed (non-fatal): ${err instanceof Error ? err.message : String(err)}`);
+        }
+      };
+      const sendPlaygroundHeartbeat = async () => {
+        try {
+          await fetch(`${playgroundServer}/api/v1/nodes/${agentNodeId}/heartbeat`, {
+            method: "POST",
+            headers: playgroundHeaders,
+            body: JSON.stringify({ status: "active" }),
+          });
+        } catch {
+          // non-fatal
+        }
+      };
+      void registerWithPlayground();
+      setInterval(() => void sendPlaygroundHeartbeat(), 25_000);
+    }
+  }
+
   await new Promise(() => {});
 }
