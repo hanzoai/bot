@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   no-tabs:
-    runs-on: hanzo-k8s
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
           PY
 
   actionlint:
-    runs-on: hanzo-k8s
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
