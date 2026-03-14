@@ -46,6 +46,7 @@ import {
   validateAgentsListParams,
   validateAgentsUpdateParams,
 } from "../protocol/index.js";
+import type { NodeRegistry } from "../node-registry.js";
 import { listAgentsForGateway } from "../session-utils.js";
 
 const BOOTSTRAP_FILE_NAMES = [
@@ -348,13 +349,25 @@ async function listAgentFiles(workspaceDir: string, options?: { hideBootstrap?: 
   return files;
 }
 
-function resolveAgentIdOrError(agentIdRaw: string, cfg: ReturnType<typeof loadConfig>) {
+function resolveAgentIdOrError(
+  agentIdRaw: string,
+  cfg: ReturnType<typeof loadConfig>,
+  nodeRegistry?: NodeRegistry,
+) {
   const agentId = normalizeAgentId(agentIdRaw);
   const allowed = new Set(listAgentIds(cfg));
-  if (!allowed.has(agentId)) {
-    return null;
+  if (allowed.has(agentId)) {
+    return agentId;
   }
-  return agentId;
+  // Also accept cloud-provisioned agents that are connected via NodeRegistry
+  // but not present in the gateway config file.
+  if (nodeRegistry) {
+    const node = nodeRegistry.get(agentId);
+    if (node) {
+      return agentId;
+    }
+  }
+  return null;
 }
 
 function sanitizeIdentityLine(value: string): string {
@@ -456,7 +469,7 @@ function respondWorkspaceFileMissing(params: {
 }
 
 export const agentsHandlers: GatewayRequestHandlers = {
-  "agents.list": ({ params, respond }) => {
+  "agents.list": ({ params, respond, context }) => {
     if (!validateAgentsListParams(params)) {
       respond(
         false,
@@ -471,6 +484,25 @@ export const agentsHandlers: GatewayRequestHandlers = {
 
     const cfg = loadConfig();
     const result = listAgentsForGateway(cfg);
+
+    // Augment with cloud-provisioned agents that are connected via NodeRegistry
+    // but not present in the gateway config file.
+    const knownIds = new Set(result.agents.map((a) => a.id));
+    const connectedNodes = context.nodeRegistry.listConnected();
+    for (const node of connectedNodes) {
+      const nodeAgentId = normalizeAgentId(node.nodeId);
+      if (nodeAgentId && !knownIds.has(nodeAgentId)) {
+        result.agents.push({
+          id: nodeAgentId,
+          name: node.displayName ?? nodeAgentId,
+          identity: {
+            name: node.displayName ?? nodeAgentId,
+          },
+        });
+        knownIds.add(nodeAgentId);
+      }
+    }
+
     respond(true, result, undefined);
   },
   "agents.create": async ({ params, respond }) => {
@@ -630,7 +662,7 @@ export const agentsHandlers: GatewayRequestHandlers = {
 
     respond(true, { ok: true, agentId, removedBindings: result.removedBindings }, undefined);
   },
-  "agents.files.list": async ({ params, respond }) => {
+  "agents.files.list": async ({ params, respond, context }) => {
     if (!validateAgentsFilesListParams(params)) {
       respond(
         false,
@@ -645,7 +677,7 @@ export const agentsHandlers: GatewayRequestHandlers = {
       return;
     }
     const cfg = loadConfig();
-    const agentId = resolveAgentIdOrError(String(params.agentId ?? ""), cfg);
+    const agentId = resolveAgentIdOrError(String(params.agentId ?? ""), cfg, context.nodeRegistry);
     if (!agentId) {
       respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "unknown agent id"));
       return;

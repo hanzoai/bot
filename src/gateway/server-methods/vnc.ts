@@ -401,18 +401,43 @@ export function vncViewerHtml(
   <script type="module"${nonceAttr}>
     import RFB from "https://esm.sh/@novnc/novnc@1.5.0/lib/rfb.js";
     const status = document.getElementById("status");
+    const screen = document.getElementById("screen");
     const autoPassword = new URLSearchParams(location.search).get("vncpw");
-    const rfb = new RFB(document.getElementById("screen"), "${wsUrl}");
-    rfb.scaleViewport = true;
-    rfb.resizeSession = true;
-    rfb.addEventListener("connect", () => { status.textContent = "Connected"; setTimeout(() => status.style.opacity = "0", 2000); });
-    rfb.addEventListener("disconnect", (e) => { status.style.opacity = "1"; status.textContent = e.detail.clean ? "Disconnected" : "Connection lost"; });
-    rfb.addEventListener("credentialsrequired", () => {
-      if (autoPassword) { rfb.sendCredentials({ password: autoPassword }); return; }
-      status.textContent = "VNC password required";
-      const pw = prompt("VNC password:");
-      if (pw) rfb.sendCredentials({ password: pw });
-    });
+    const wsUrl = "${wsUrl}";
+    let reconnectDelay = 1000;
+    const MAX_RECONNECT_DELAY = 10000;
+    let reconnectTimer = null;
+    let rfb = null;
+
+    function connect() {
+      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      // Clear previous canvas
+      while (screen.firstChild) screen.removeChild(screen.firstChild);
+      status.style.opacity = "1";
+      status.textContent = "Connecting\\u2026";
+      rfb = new RFB(screen, wsUrl);
+      rfb.scaleViewport = true;
+      rfb.resizeSession = true;
+      rfb.addEventListener("connect", () => {
+        status.textContent = "Connected";
+        setTimeout(() => status.style.opacity = "0", 2000);
+        reconnectDelay = 1000; // reset on successful connect
+      });
+      rfb.addEventListener("disconnect", (e) => {
+        status.style.opacity = "1";
+        const label = e.detail.clean ? "Disconnected" : "Connection lost";
+        status.textContent = label + " — reconnecting in " + Math.round(reconnectDelay/1000) + "s\\u2026";
+        reconnectTimer = setTimeout(() => { connect(); }, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 1.5, MAX_RECONNECT_DELAY);
+      });
+      rfb.addEventListener("credentialsrequired", () => {
+        if (autoPassword) { rfb.sendCredentials({ password: autoPassword }); return; }
+        status.textContent = "VNC password required";
+        const pw = prompt("VNC password:");
+        if (pw) rfb.sendCredentials({ password: pw });
+      });
+    }
+    connect();
   </script>
 </body>
 </html>`;
