@@ -162,20 +162,37 @@ export function createVncProxy(opts?: {
 
     const tunnel: ActiveTunnel = { browserWs, nodeWs, nodeId: pending.nodeId };
     activeTunnels.set(tunnelId, tunnel);
+    // eslint-disable-next-line no-console
+    console.log(`[vnc-proxy] tunnel active: tunnelId=${tunnelId} nodeId=${pending.nodeId}`);
+
+    let browserBytes = 0;
+    let nodeBytes = 0;
 
     // Relay: browser ↔ node
     browserWs.on("message", (data: Buffer) => {
+      browserBytes += data.length;
+      if (browserBytes <= data.length) {
+        // eslint-disable-next-line no-console
+        console.log(`[vnc-proxy] first browser→node data: ${data.length} bytes`);
+      }
       if (nodeWs.readyState === WebSocket.OPEN) {
         nodeWs.send(data);
       }
     });
     nodeWs.on("message", (data: Buffer) => {
+      nodeBytes += data.length;
+      if (nodeBytes <= data.length) {
+        // eslint-disable-next-line no-console
+        console.log(`[vnc-proxy] first node→browser data: ${data.length} bytes`);
+      }
       if (browserWs.readyState === WebSocket.OPEN) {
         browserWs.send(data);
       }
     });
 
     const cleanup = () => {
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] tunnel cleanup: tunnelId=${tunnelId} browserBytes=${browserBytes} nodeBytes=${nodeBytes} browserState=${browserWs.readyState} nodeState=${nodeWs.readyState}`);
       activeTunnels.delete(tunnelId);
       if (browserWs.readyState === WebSocket.OPEN) {
         browserWs.close(1000, "tunnel closed");
@@ -184,10 +201,26 @@ export function createVncProxy(opts?: {
         nodeWs.close(1000, "tunnel closed");
       }
     };
-    browserWs.on("close", cleanup);
-    browserWs.on("error", cleanup);
-    nodeWs.on("close", cleanup);
-    nodeWs.on("error", cleanup);
+    browserWs.on("close", (code, reason) => {
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] browser ws close: code=${code} reason=${reason?.toString()}`);
+      cleanup();
+    });
+    browserWs.on("error", (err) => {
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] browser ws error: ${err.message}`);
+      cleanup();
+    });
+    nodeWs.on("close", (code, reason) => {
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] node ws close: code=${code} reason=${reason?.toString()}`);
+      cleanup();
+    });
+    nodeWs.on("error", (err) => {
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] node ws error: ${err.message}`);
+      cleanup();
+    });
   });
 
   // --- Upgrade handlers ---
