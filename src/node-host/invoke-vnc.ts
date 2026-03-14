@@ -61,6 +61,9 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
   const vncPort = params.vncPort ?? DEFAULT_VNC_PORT;
   const tunnelUrl = rewriteTunnelUrl(params.tunnelUrl);
 
+  // eslint-disable-next-line no-console
+  console.log(`vnc tunnel: opening tcp=${vncHost}:${vncPort} ws=${tunnelUrl}`);
+
   return new Promise<() => void>((resolve) => {
     let disposed = false;
     let tcp: ReturnType<typeof createConnection> | null = null;
@@ -69,6 +72,8 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
     const cleanup = () => {
       if (disposed) return;
       disposed = true;
+      // eslint-disable-next-line no-console
+      console.log("vnc tunnel: cleanup");
       try {
         tcp?.destroy();
       } catch {}
@@ -83,6 +88,8 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
         tcp?.destroy();
         return;
       }
+      // eslint-disable-next-line no-console
+      console.log(`vnc tunnel: tcp connected to ${vncHost}:${vncPort}, opening ws to ${tunnelUrl}`);
 
       // Open WebSocket to gateway tunnel endpoint
       ws = new WebSocket(tunnelUrl, {
@@ -91,6 +98,8 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
       });
 
       ws.on("open", () => {
+        // eslint-disable-next-line no-console
+        console.log("vnc tunnel: ws open — bridge active");
         if (disposed) {
           ws?.close();
           return;

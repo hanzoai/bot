@@ -199,12 +199,20 @@ export function createVncProxy(opts?: {
       return false;
     }
     const nodeId = url.searchParams.get("nodeId");
-    if (nodeId && getRegistry()) {
+    const registry = getRegistry();
+    // eslint-disable-next-line no-console
+    console.log(`[vnc-proxy] /vnc upgrade: nodeId=${nodeId} hasRegistry=${!!registry} registrySize=${registry?.listConnected().length ?? 0}`);
+    if (nodeId && registry) {
+      const node = registry.get(nodeId);
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] tunnel mode: nodeId=${nodeId} nodeFound=${!!node}`);
       // Tunnel mode: create pending tunnel and invoke node.
       handleTunnelBrowserUpgrade(req, socket, head, nodeId);
       return true;
     }
     // Local mode: connect to gateway's own VNC server.
+    // eslint-disable-next-line no-console
+    console.log(`[vnc-proxy] local mode (no nodeId or no registry)`);
     wss.handleUpgrade(req, socket, head, (ws) => {
       wss.emit("connection", ws, req);
     });
@@ -221,6 +229,8 @@ export function createVncProxy(opts?: {
     const registry = getRegistry();
     const node = registry?.get(nodeId);
     if (!node) {
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] tunnel: node ${nodeId} not found in registry`);
       const msg = `HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n`;
       socket.write(msg);
       socket.destroy();
@@ -231,7 +241,11 @@ export function createVncProxy(opts?: {
     tempWss.handleUpgrade(req, socket, head, (browserWs) => {
       const tunnelId = randomUUID();
       const signedToken = signTunnelId(tunnelId);
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] tunnel created: tunnelId=${tunnelId} nodeId=${nodeId}`);
       const timer = setTimeout(() => {
+        // eslint-disable-next-line no-console
+        console.log(`[vnc-proxy] tunnel timeout: tunnelId=${tunnelId} nodeId=${nodeId}`);
         pendingTunnels.delete(tunnelId);
         browserWs.close(1011, "tunnel timeout: node did not connect back");
       }, TUNNEL_TIMEOUT_MS);
@@ -262,8 +276,12 @@ export function createVncProxy(opts?: {
     if (url.pathname !== "/vnc-tunnel") {
       return false;
     }
+    // eslint-disable-next-line no-console
+    console.log(`[vnc-proxy] /vnc-tunnel upgrade received`);
     const signedToken = url.searchParams.get("tunnelId");
     if (!signedToken) {
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] /vnc-tunnel: missing tunnelId`);
       const msg = `HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n`;
       socket.write(msg);
       socket.destroy();
@@ -271,7 +289,11 @@ export function createVncProxy(opts?: {
     }
     // Verify HMAC signature before looking up the tunnel.
     const tunnelId = verifyTunnelToken(signedToken);
+    // eslint-disable-next-line no-console
+    console.log(`[vnc-proxy] /vnc-tunnel: verified=${!!tunnelId} pending=${tunnelId ? pendingTunnels.has(tunnelId) : false}`);
     if (!tunnelId || !pendingTunnels.has(tunnelId)) {
+      // eslint-disable-next-line no-console
+      console.log(`[vnc-proxy] /vnc-tunnel: rejecting — invalid token or no pending tunnel`);
       const msg = `HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n`;
       socket.write(msg);
       socket.destroy();
