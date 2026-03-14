@@ -111,6 +111,44 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
       // eslint-disable-next-line no-console
       console.log(`vnc tunnel: TCP connected to ${vncHost}:${vncPort}, sending RFB version to break deadlock`);
 
+      let vncBytes = 0;
+      let gwBytes = 0;
+
+      // Buffer for data from x11vnc that arrives before the gateway WS opens.
+      // x11vnc responds on localhost in microseconds after receiving the RFB
+      // version, but the gateway WS handshake goes over the network and takes
+      // much longer. Without buffering, the initial server response is lost.
+      const pendingVncData: Buffer[] = [];
+      let wsReady = false;
+
+      // Number of bytes to drop from browser→vnc direction.
+      // noVNC will send its own version string (12 bytes) after receiving
+      // the server's version, but x11vnc already consumed our injected one.
+      // We must drop the browser's version to keep the protocol in sync.
+      let browserBytesToDrop = RFB_CLIENT_VERSION.length;
+
+      // Register TCP data handler IMMEDIATELY — before sending the RFB version
+      // and before the gateway WS handshake. This ensures we capture x11vnc's
+      // response even if it arrives before the WS is open.
+      vncTcp!.on("data", (data: Buffer) => {
+        vncBytes += data.length;
+        if (vncBytes <= data.length) {
+          // eslint-disable-next-line no-console
+          console.log(`vnc tunnel: first vnc→gw data: ${data.length} bytes (first 20: ${data.subarray(0, 20).toString("utf8").replace(/[^\x20-\x7E]/g, ".")})`);
+        }
+        if (wsReady && !disposed && gatewayWs?.readyState === WebSocket.OPEN) {
+          gatewayWs.send(data, (err) => {
+            if (err && !disposed) {
+              // eslint-disable-next-line no-console
+              console.warn(`vnc tunnel: gw send error: ${err.message}`);
+            }
+          });
+        } else if (!disposed) {
+          // Buffer data until WS is ready
+          pendingVncData.push(Buffer.from(data));
+        }
+      });
+
       // Send RFB client version to break LibVNCServer's MSG_PEEK deadlock.
       // x11vnc will see "R" (not "G" for "GET"), enter RFB mode, consume
       // this as the client's version string, then send the server version.
@@ -130,31 +168,20 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
           gatewayWs?.close();
           return;
         }
-        let vncBytes = 0;
-        let gwBytes = 0;
+        wsReady = true;
 
-        // Number of bytes to drop from browser→vnc direction.
-        // noVNC will send its own version string (12 bytes) after receiving
-        // the server's version, but x11vnc already consumed our injected one.
-        // We must drop the browser's version to keep the protocol in sync.
-        let browserBytesToDrop = RFB_CLIENT_VERSION.length;
-
-        // Bridge: VNC server (TCP) → Gateway (browser WS)
-        vncTcp!.on("data", (data: Buffer) => {
-          vncBytes += data.length;
-          if (vncBytes <= data.length) {
-            // eslint-disable-next-line no-console
-            console.log(`vnc tunnel: first vnc→gw data: ${data.length} bytes (first 20: ${data.subarray(0, 20).toString("utf8").replace(/[^\x20-\x7E]/g, ".")})`);
+        // Flush any data buffered from x11vnc while WS was connecting
+        if (pendingVncData.length > 0) {
+          const totalBytes = pendingVncData.reduce((s, b) => s + b.length, 0);
+          // eslint-disable-next-line no-console
+          console.log(`vnc tunnel: flushing ${pendingVncData.length} buffered chunks (${totalBytes} bytes) to gateway`);
+          for (const buf of pendingVncData) {
+            if (!disposed && gatewayWs?.readyState === WebSocket.OPEN) {
+              gatewayWs.send(buf);
+            }
           }
-          if (!disposed && gatewayWs?.readyState === WebSocket.OPEN) {
-            gatewayWs.send(data, (err) => {
-              if (err && !disposed) {
-                // eslint-disable-next-line no-console
-                console.warn(`vnc tunnel: gw send error: ${err.message}`);
-              }
-            });
-          }
-        });
+          pendingVncData.length = 0;
+        }
 
         // Bridge: Gateway (browser WS) → VNC server (TCP)
         gatewayWs!.on("message", (data) => {
