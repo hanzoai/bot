@@ -2,25 +2,13 @@
  * VNC Tunnel - Node Host Side
  *
  * When the gateway sends a `vnc.tunnel.open` invoke, the node-host:
- * 1. Connects to x11vnc via raw TCP (default: 127.0.0.1:5900)
- * 2. Sends the RFB client version to break LibVNCServer's MSG_PEEK deadlock
- * 3. Opens a WebSocket to the gateway's /vnc-tunnel endpoint
- * 4. Bridges VNC data between TCP and WebSocket, intercepting the protocol
- *    to drop the duplicate version string the browser will send
+ * 1. Connects to the VNC server via raw TCP (default: 127.0.0.1:5900)
+ * 2. Opens a WebSocket to the gateway's /vnc-tunnel endpoint
+ * 3. Bridges VNC data between TCP and WebSocket
  *
- * Why raw TCP with protocol interception?
- * - x11vnc (LibVNCServer 0.9.13) blocks on recv(MSG_PEEK) on new connections
- *   to detect WebSocket vs RFB. Since RFB requires the server to speak first,
- *   this creates a deadlock where both sides wait indefinitely.
- * - websockify on port 6080 also deadlocks because it opens a clean TCP
- *   connection to x11vnc:5900 without sending initial data.
- * - x11vnc's built-in WebSocket is too basic for the `ws` npm library.
- * - FIX: We send "RFB 003.008\n" immediately after TCP connect. x11vnc's
- *   MSG_PEEK sees "R" (not "G" for "GET"), enters RFB mode, consumes our
- *   version as the client version, and sends its server version + security
- *   types. We then relay x11vnc's data to the browser (noVNC), but DROP
- *   the first 12 bytes the browser sends back (noVNC's version response)
- *   since x11vnc already consumed one.
+ * The VNC server (TigerVNC x0vncserver) speaks the RFB protocol correctly:
+ * it sends the server version banner immediately after accept(), so no
+ * protocol injection or interception is needed.
  */
 
 import { createConnection, type Socket } from "node:net";
@@ -28,12 +16,6 @@ import { WebSocket } from "ws";
 
 const DEFAULT_VNC_HOST = process.env.BOT_VNC_HOST?.trim() ?? "127.0.0.1";
 const DEFAULT_VNC_PORT = Number(process.env.BOT_VNC_PORT?.trim() ?? 5900);
-
-/**
- * RFB version string: exactly 12 bytes.
- * Sent to x11vnc to break the LibVNCServer MSG_PEEK deadlock.
- */
-const RFB_CLIENT_VERSION = Buffer.from("RFB 003.008\n");
 
 export type VncTunnelParams = {
   tunnelId: string;
@@ -72,8 +54,8 @@ function rewriteTunnelUrl(tunnelUrl: string): string {
 }
 
 /**
- * Open a VNC tunnel: connect to local x11vnc via TCP (with deadlock fix)
- * and bridge to gateway tunnel WS.
+ * Open a VNC tunnel: connect to local VNC server via TCP and bridge to
+ * gateway tunnel WS.
  * Returns a cleanup function. Non-fatal — errors are logged but not thrown.
  */
 export async function openVncTunnel(params: VncTunnelParams): Promise<() => void> {
@@ -102,34 +84,27 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
       } catch {}
     };
 
-    // Connect to x11vnc via raw TCP
+    // Connect to VNC server via raw TCP
     vncTcp = createConnection({ host: vncHost, port: vncPort }, () => {
       if (disposed) {
         vncTcp?.destroy();
         return;
       }
       // eslint-disable-next-line no-console
-      console.log(`vnc tunnel: TCP connected to ${vncHost}:${vncPort}, sending RFB version to break deadlock`);
+      console.log(`vnc tunnel: TCP connected to ${vncHost}:${vncPort}`);
 
       let vncBytes = 0;
       let gwBytes = 0;
 
-      // Buffer for data from x11vnc that arrives before the gateway WS opens.
-      // x11vnc responds on localhost in microseconds after receiving the RFB
-      // version, but the gateway WS handshake goes over the network and takes
-      // much longer. Without buffering, the initial server response is lost.
+      // Buffer for data from VNC server that arrives before the gateway WS opens.
+      // The VNC server responds on localhost in microseconds, but the gateway WS
+      // handshake goes over the network and takes much longer. Without buffering,
+      // the initial server response (RFB version banner) is lost.
       const pendingVncData: Buffer[] = [];
       let wsReady = false;
 
-      // Number of bytes to drop from browser→vnc direction.
-      // noVNC will send its own version string (12 bytes) after receiving
-      // the server's version, but x11vnc already consumed our injected one.
-      // We must drop the browser's version to keep the protocol in sync.
-      let browserBytesToDrop = RFB_CLIENT_VERSION.length;
-
-      // Register TCP data handler IMMEDIATELY — before sending the RFB version
-      // and before the gateway WS handshake. This ensures we capture x11vnc's
-      // response even if it arrives before the WS is open.
+      // Register TCP data handler IMMEDIATELY to capture the VNC server's
+      // initial RFB version banner before the gateway WS handshake completes.
       vncTcp!.on("data", (data: Buffer) => {
         vncBytes += data.length;
         if (vncBytes <= data.length) {
@@ -149,12 +124,7 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
         }
       });
 
-      // Send RFB client version to break LibVNCServer's MSG_PEEK deadlock.
-      // x11vnc will see "R" (not "G" for "GET"), enter RFB mode, consume
-      // this as the client's version string, then send the server version.
-      vncTcp!.write(RFB_CLIENT_VERSION);
-
-      // Now open WebSocket to gateway tunnel endpoint
+      // Open WebSocket to gateway tunnel endpoint
       gatewayWs = new WebSocket(tunnelUrl, {
         headers: {},
         handshakeTimeout: 10_000,
@@ -170,7 +140,7 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
         }
         wsReady = true;
 
-        // Flush any data buffered from x11vnc while WS was connecting
+        // Flush any data buffered from VNC server while WS was connecting
         if (pendingVncData.length > 0) {
           const totalBytes = pendingVncData.reduce((s, b) => s + b.length, 0);
           // eslint-disable-next-line no-console
@@ -187,23 +157,6 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
         gatewayWs!.on("message", (data) => {
           const buf = data instanceof Buffer ? data : Buffer.from(data as ArrayBuffer);
           gwBytes += buf.length;
-
-          // Drop the first 12 bytes (noVNC's version response) since x11vnc
-          // already consumed our injected version string.
-          if (browserBytesToDrop > 0) {
-            const skip = Math.min(browserBytesToDrop, buf.length);
-            browserBytesToDrop -= skip;
-            if (gwBytes <= buf.length) {
-              // eslint-disable-next-line no-console
-              console.log(`vnc tunnel: dropping ${skip} bytes of browser version response (remaining to drop: ${browserBytesToDrop})`);
-            }
-            const remaining = buf.subarray(skip);
-            if (remaining.length > 0 && !disposed && vncTcp && !vncTcp.destroyed) {
-              vncTcp.write(remaining);
-            }
-            return;
-          }
-
           if (gwBytes <= buf.length) {
             // eslint-disable-next-line no-console
             console.log(`vnc tunnel: first gw→vnc data: ${buf.length} bytes`);
