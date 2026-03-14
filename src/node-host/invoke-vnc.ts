@@ -104,8 +104,15 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
           ws?.close();
           return;
         }
+        let tcpBytes = 0;
+        let wsBytes = 0;
         // Bridge: TCP → WS
         tcp!.on("data", (chunk: Buffer) => {
+          tcpBytes += chunk.length;
+          if (tcpBytes <= chunk.length) {
+            // eslint-disable-next-line no-console
+            console.log(`vnc tunnel: first tcp data: ${chunk.length} bytes (first 20: ${chunk.subarray(0, 20).toString("utf8").replace(/[^\x20-\x7E]/g, ".")})`);
+          }
           if (!disposed && ws?.readyState === WebSocket.OPEN) {
             ws.send(chunk, (err) => {
               if (err && !disposed) {
@@ -118,10 +125,20 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
 
         // Bridge: WS → TCP
         ws!.on("message", (data) => {
+          const buf = data instanceof Buffer ? data : Buffer.from(data as ArrayBuffer);
+          wsBytes += buf.length;
+          if (wsBytes <= buf.length) {
+            // eslint-disable-next-line no-console
+            console.log(`vnc tunnel: first ws data: ${buf.length} bytes`);
+          }
           if (!disposed && tcp && !tcp.destroyed) {
-            const buf = data instanceof Buffer ? data : Buffer.from(data as ArrayBuffer);
             tcp.write(buf);
           }
+        });
+
+        tcp!.on("end", () => {
+          // eslint-disable-next-line no-console
+          console.log(`vnc tunnel: tcp end event (tcpBytes=${tcpBytes} wsBytes=${wsBytes})`);
         });
 
         resolve(cleanup);
@@ -137,7 +154,9 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
         resolve(cleanup);
       });
 
-      ws.on("close", () => {
+      ws.on("close", (code, reason) => {
+        // eslint-disable-next-line no-console
+        console.log(`vnc tunnel: ws close event (code=${code} reason=${reason?.toString()})`);
         if (!disposed) {
           cleanup();
         }
@@ -147,13 +166,15 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
     tcp.on("error", (err) => {
       if (!disposed) {
         // eslint-disable-next-line no-console
-        console.warn(`vnc tunnel: tcp error connecting to ${vncHost}:${vncPort}: ${err.message}`);
+        console.warn(`vnc tunnel: tcp error: ${err.message}`);
         cleanup();
       }
       resolve(cleanup);
     });
 
-    tcp.on("close", () => {
+    tcp.on("close", (hadError) => {
+      // eslint-disable-next-line no-console
+      console.log(`vnc tunnel: tcp close event (hadError=${hadError})`);
       if (!disposed) {
         cleanup();
       }
