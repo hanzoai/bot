@@ -2,22 +2,24 @@
  * VNC Tunnel - Node Host Side
  *
  * When the gateway sends a `vnc.tunnel.open` invoke, the node-host:
- * 1. Connects to the local VNC server via WebSocket (default: ws://127.0.0.1:5900)
+ * 1. Connects to the local websockify server via WebSocket (default: ws://127.0.0.1:6080)
  * 2. Opens a WebSocket to the gateway's /vnc-tunnel endpoint
  * 3. Bridges binary VNC data between the two WebSocket connections
  *
- * Note: x11vnc (v0.9.16 with LibVNCServer) has built-in WebSocket support on
- * its RFB port. When a raw TCP client connects, LibVNCServer's WebSocket
- * auto-detection blocks waiting for client data to determine the protocol,
- * creating a deadlock (RFB protocol requires the server to speak first).
- * By connecting via WebSocket, x11vnc properly handshakes and sends the
- * RFB banner, allowing noVNC to render the desktop.
+ * Why websockify (port 6080) instead of x11vnc (port 5900)?
+ * - x11vnc 0.9.16 (LibVNCServer) has WebSocket auto-detection on port 5900
+ *   but its implementation is too basic for the `ws` npm library's handshake
+ * - Raw TCP to port 5900 also fails because LibVNCServer blocks on recv(MSG_PEEK)
+ *   waiting for client data to detect WebSocket vs RFB, but RFB requires the
+ *   server to speak first — creating a deadlock
+ * - websockify on port 6080 is a proper WebSocket server that bridges to
+ *   x11vnc:5900 via TCP, handling the protocol correctly
  */
 
 import { WebSocket } from "ws";
 
 const DEFAULT_VNC_HOST = process.env.BOT_VNC_HOST?.trim() ?? "127.0.0.1";
-const DEFAULT_VNC_PORT = Number(process.env.BOT_VNC_PORT?.trim() ?? 5900);
+const DEFAULT_VNC_PORT = Number(process.env.BOT_VNC_PORT?.trim() ?? 6080);
 
 export type VncTunnelParams = {
   tunnelId: string;
