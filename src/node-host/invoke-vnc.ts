@@ -2,15 +2,18 @@
  * VNC Tunnel - Node Host Side
  *
  * When the gateway sends a `vnc.tunnel.open` invoke, the node-host:
- * 1. Connects to the local VNC server (default: localhost:5900)
+ * 1. Connects to the local VNC server via WebSocket (default: ws://127.0.0.1:5900)
  * 2. Opens a WebSocket to the gateway's /vnc-tunnel endpoint
- * 3. Bridges binary VNC data between the TCP socket and the WebSocket
+ * 3. Bridges binary VNC data between the two WebSocket connections
  *
- * This allows the gateway to proxy VNC from a remote cloud node through
- * a WebSocket tunnel to the browser's noVNC client.
+ * Note: x11vnc (v0.9.16 with LibVNCServer) has built-in WebSocket support on
+ * its RFB port. When a raw TCP client connects, LibVNCServer's WebSocket
+ * auto-detection blocks waiting for client data to determine the protocol,
+ * creating a deadlock (RFB protocol requires the server to speak first).
+ * By connecting via WebSocket, x11vnc properly handshakes and sends the
+ * RFB banner, allowing noVNC to render the desktop.
  */
 
-import { createConnection } from "node:net";
 import { WebSocket } from "ws";
 
 const DEFAULT_VNC_HOST = process.env.BOT_VNC_HOST?.trim() ?? "127.0.0.1";
@@ -53,21 +56,23 @@ function rewriteTunnelUrl(tunnelUrl: string): string {
 }
 
 /**
- * Open a VNC tunnel: connect to local VNC server and bridge to gateway tunnel WS.
+ * Open a VNC tunnel: connect to local VNC server via WebSocket and bridge
+ * to gateway tunnel WS.
  * Returns a cleanup function. Non-fatal — errors are logged but not thrown.
  */
 export async function openVncTunnel(params: VncTunnelParams): Promise<() => void> {
   const vncHost = params.vncHost ?? DEFAULT_VNC_HOST;
   const vncPort = params.vncPort ?? DEFAULT_VNC_PORT;
   const tunnelUrl = rewriteTunnelUrl(params.tunnelUrl);
+  const vncWsUrl = `ws://${vncHost}:${vncPort}`;
 
   // eslint-disable-next-line no-console
-  console.log(`vnc tunnel: opening tcp=${vncHost}:${vncPort} ws=${tunnelUrl}`);
+  console.log(`vnc tunnel: opening vncWs=${vncWsUrl} gatewayWs=${tunnelUrl}`);
 
   return new Promise<() => void>((resolve) => {
     let disposed = false;
-    let tcp: ReturnType<typeof createConnection> | null = null;
-    let ws: WebSocket | null = null;
+    let vncWs: WebSocket | null = null;
+    let gatewayWs: WebSocket | null = null;
 
     const cleanup = () => {
       if (disposed) return;
@@ -75,106 +80,118 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
       // eslint-disable-next-line no-console
       console.log("vnc tunnel: cleanup");
       try {
-        tcp?.destroy();
+        vncWs?.close(1000, "tunnel closed");
       } catch {}
       try {
-        ws?.close(1000, "tunnel closed");
+        gatewayWs?.close(1000, "tunnel closed");
       } catch {}
     };
 
-    // Connect to local VNC server via TCP
-    tcp = createConnection({ host: vncHost, port: vncPort }, () => {
+    // Connect to local VNC server via WebSocket
+    // x11vnc (with LibVNCServer) supports WebSocket natively on its RFB port.
+    // Using WebSocket avoids the protocol auto-detection deadlock that occurs
+    // with raw TCP connections (LibVNCServer waits for client data to detect
+    // WebSocket vs RFB, but RFB requires the server to speak first).
+    vncWs = new WebSocket(vncWsUrl, {
+      headers: {},
+      handshakeTimeout: 10_000,
+    });
+    vncWs.binaryType = "arraybuffer";
+
+    vncWs.on("open", () => {
       if (disposed) {
-        tcp?.destroy();
+        vncWs?.close();
         return;
       }
       // eslint-disable-next-line no-console
-      console.log(`vnc tunnel: tcp connected to ${vncHost}:${vncPort}, opening ws to ${tunnelUrl}`);
+      console.log(`vnc tunnel: vncWs connected to ${vncWsUrl}, opening gateway ws to ${tunnelUrl}`);
 
-      // Open WebSocket to gateway tunnel endpoint
-      ws = new WebSocket(tunnelUrl, {
+      // Now open WebSocket to gateway tunnel endpoint
+      gatewayWs = new WebSocket(tunnelUrl, {
         headers: {},
         handshakeTimeout: 10_000,
       });
+      gatewayWs.binaryType = "arraybuffer";
 
-      ws.on("open", () => {
+      gatewayWs.on("open", () => {
         // eslint-disable-next-line no-console
-        console.log("vnc tunnel: ws open — bridge active");
+        console.log("vnc tunnel: gatewayWs open — bridge active");
         if (disposed) {
-          ws?.close();
+          gatewayWs?.close();
           return;
         }
-        let tcpBytes = 0;
-        let wsBytes = 0;
-        // Bridge: TCP → WS
-        tcp!.on("data", (chunk: Buffer) => {
-          tcpBytes += chunk.length;
-          if (tcpBytes <= chunk.length) {
+        let vncBytes = 0;
+        let gwBytes = 0;
+
+        // Bridge: VNC server → Gateway (browser)
+        vncWs!.on("message", (data) => {
+          const buf = data instanceof Buffer ? data : Buffer.from(data as ArrayBuffer);
+          vncBytes += buf.length;
+          if (vncBytes <= buf.length) {
             // eslint-disable-next-line no-console
-            console.log(`vnc tunnel: first tcp data: ${chunk.length} bytes (first 20: ${chunk.subarray(0, 20).toString("utf8").replace(/[^\x20-\x7E]/g, ".")})`);
+            console.log(`vnc tunnel: first vnc→gw data: ${buf.length} bytes (first 20: ${buf.subarray(0, 20).toString("utf8").replace(/[^\x20-\x7E]/g, ".")})`);
           }
-          if (!disposed && ws?.readyState === WebSocket.OPEN) {
-            ws.send(chunk, (err) => {
+          if (!disposed && gatewayWs?.readyState === WebSocket.OPEN) {
+            gatewayWs.send(buf, (err) => {
               if (err && !disposed) {
                 // eslint-disable-next-line no-console
-                console.warn(`vnc tunnel: ws send error: ${err.message}`);
+                console.warn(`vnc tunnel: gw send error: ${err.message}`);
               }
             });
           }
         });
 
-        // Bridge: WS → TCP
-        ws!.on("message", (data) => {
+        // Bridge: Gateway (browser) → VNC server
+        gatewayWs!.on("message", (data) => {
           const buf = data instanceof Buffer ? data : Buffer.from(data as ArrayBuffer);
-          wsBytes += buf.length;
-          if (wsBytes <= buf.length) {
+          gwBytes += buf.length;
+          if (gwBytes <= buf.length) {
             // eslint-disable-next-line no-console
-            console.log(`vnc tunnel: first ws data: ${buf.length} bytes`);
+            console.log(`vnc tunnel: first gw→vnc data: ${buf.length} bytes`);
           }
-          if (!disposed && tcp && !tcp.destroyed) {
-            tcp.write(buf);
+          if (!disposed && vncWs?.readyState === WebSocket.OPEN) {
+            vncWs.send(buf, (err) => {
+              if (err && !disposed) {
+                // eslint-disable-next-line no-console
+                console.warn(`vnc tunnel: vnc send error: ${err.message}`);
+              }
+            });
           }
-        });
-
-        tcp!.on("end", () => {
-          // eslint-disable-next-line no-console
-          console.log(`vnc tunnel: tcp end event (tcpBytes=${tcpBytes} wsBytes=${wsBytes})`);
         });
 
         resolve(cleanup);
       });
 
-      ws.on("error", (err) => {
+      gatewayWs.on("error", (err) => {
         if (!disposed) {
           // eslint-disable-next-line no-console
-          console.warn(`vnc tunnel: ws error: ${err.message}`);
+          console.warn(`vnc tunnel: gatewayWs error: ${err.message}`);
           cleanup();
         }
-        // Resolve anyway so the invoke doesn't hang
         resolve(cleanup);
       });
 
-      ws.on("close", (code, reason) => {
+      gatewayWs.on("close", (code, reason) => {
         // eslint-disable-next-line no-console
-        console.log(`vnc tunnel: ws close event (code=${code} reason=${reason?.toString()})`);
+        console.log(`vnc tunnel: gatewayWs close (code=${code} reason=${reason?.toString()})`);
         if (!disposed) {
           cleanup();
         }
       });
     });
 
-    tcp.on("error", (err) => {
+    vncWs.on("error", (err) => {
       if (!disposed) {
         // eslint-disable-next-line no-console
-        console.warn(`vnc tunnel: tcp error: ${err.message}`);
+        console.warn(`vnc tunnel: vncWs error: ${err.message}`);
         cleanup();
       }
       resolve(cleanup);
     });
 
-    tcp.on("close", (hadError) => {
+    vncWs.on("close", (code, reason) => {
       // eslint-disable-next-line no-console
-      console.log(`vnc tunnel: tcp close event (hadError=${hadError})`);
+      console.log(`vnc tunnel: vncWs close (code=${code} reason=${reason?.toString()})`);
       if (!disposed) {
         cleanup();
       }
@@ -190,6 +207,6 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
       }
     }, 10_000);
 
-    tcp.once("connect", () => clearTimeout(timeout));
+    vncWs.once("open", () => clearTimeout(timeout));
   });
 }
