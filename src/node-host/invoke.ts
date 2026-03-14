@@ -77,7 +77,8 @@ export type NodeInvokeRequestPayload = {
 export type { SkillBinsProvider } from "./invoke-types.js";
 
 function resolveExecSecurity(value?: string): ExecSecurity {
-  return value === "deny" || value === "allowlist" || value === "full" ? value : "allowlist";
+  const v = value ?? process.env.BOT_EXEC_SECURITY;
+  return v === "deny" || v === "allowlist" || v === "full" ? v : "allowlist";
 }
 
 function isCmdExeInvocation(argv: string[]): boolean {
@@ -90,7 +91,8 @@ function isCmdExeInvocation(argv: string[]): boolean {
 }
 
 function resolveExecAsk(value?: string): ExecAsk {
-  return value === "off" || value === "on-miss" || value === "always" ? value : "on-miss";
+  const v = value ?? process.env.BOT_EXEC_ASK;
+  return v === "off" || v === "on-miss" || v === "always" ? v : "on-miss";
 }
 
 export function sanitizeEnv(overrides?: Record<string, string> | null): Record<string, string> {
