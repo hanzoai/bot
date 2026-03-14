@@ -24,13 +24,42 @@ export type VncTunnelParams = {
 };
 
 /**
+ * Rewrite the tunnel URL host/protocol to match the node's own gateway URL.
+ *
+ * The gateway constructs the tunnelUrl from the browser's Host header
+ * (e.g. wss://gw.hanzo.bot/vnc-tunnel?tunnelId=...).  Cloud nodes connect
+ * to the gateway via an internal K8s service URL (e.g.
+ * ws://bot-gateway.hanzo.svc:18789).  Trying to connect back through the
+ * public URL would hairpin through Cloudflare/Traefik and often fails.
+ *
+ * This rewrites the tunnelUrl to use the same host the node already uses
+ * for its main gateway connection, keeping the path and query intact.
+ */
+function rewriteTunnelUrl(tunnelUrl: string): string {
+  const gatewayUrl = process.env.BOT_NODE_GATEWAY_URL;
+  if (!gatewayUrl) {
+    return tunnelUrl;
+  }
+  try {
+    const tunnel = new URL(tunnelUrl);
+    // Parse the gateway URL (ws://host:port or wss://host:port)
+    const gw = new URL(gatewayUrl);
+    tunnel.protocol = gw.protocol === "wss:" ? "wss:" : "ws:";
+    tunnel.host = gw.host;
+    return tunnel.toString();
+  } catch {
+    return tunnelUrl;
+  }
+}
+
+/**
  * Open a VNC tunnel: connect to local VNC server and bridge to gateway tunnel WS.
  * Returns a cleanup function. Non-fatal — errors are logged but not thrown.
  */
 export async function openVncTunnel(params: VncTunnelParams): Promise<() => void> {
   const vncHost = params.vncHost ?? DEFAULT_VNC_HOST;
   const vncPort = params.vncPort ?? DEFAULT_VNC_PORT;
-  const { tunnelUrl } = params;
+  const tunnelUrl = rewriteTunnelUrl(params.tunnelUrl);
 
   return new Promise<() => void>((resolve) => {
     let disposed = false;
