@@ -46,11 +46,24 @@ export function registerNodeCli(program: Command) {
     .option("--node-id <id>", "Override node id (clears pairing token)")
     .option("--name <name>", "Alias for --node-id (used by cloud provisioner)")
     .option("--display-name <displayName>", "Override node display name")
+    .option(
+      "--security <level>",
+      "Exec security level: deny | allowlist | full (default: allowlist)",
+    )
+    .option("--ask <mode>", "Exec approval mode: off | on-miss | always (default: on-miss)")
     .action(async (opts) => {
       const existing = await loadNodeHostConfig();
       const host =
         (opts.host as string | undefined)?.trim() || existing?.gateway?.host || "127.0.0.1";
       const port = parsePortWithFallback(opts.port, existing?.gateway?.port ?? 18789);
+      // Expose --security and --ask as env vars so exec-approval code can
+      // pick them up without requiring a config file (used by cloud provisioner).
+      if (opts.security) {
+        process.env.BOT_EXEC_SECURITY = opts.security;
+      }
+      if (opts.ask) {
+        process.env.BOT_EXEC_ASK = opts.ask;
+      }
       await runNodeHost({
         gatewayHost: host,
         gatewayPort: port,
