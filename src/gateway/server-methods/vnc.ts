@@ -263,10 +263,15 @@ export function createVncProxy(opts?: {
     const node = registry?.get(nodeId);
     if (!node) {
       // eslint-disable-next-line no-console
-      console.log(`[vnc-proxy] tunnel: node ${nodeId} not found in registry`);
-      const msg = `HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n`;
-      socket.write(msg);
-      socket.destroy();
+      console.log(
+        `[vnc-proxy] tunnel: node ${nodeId} not found in registry (registrySize=${registry?.size ?? 0})`,
+      );
+      // Complete the WebSocket upgrade so the browser gets a proper close
+      // frame (code 4404) instead of a raw HTTP 404 that shows as code 1006.
+      const notFoundWss = new WebSocketServer({ noServer: true });
+      notFoundWss.handleUpgrade(req, socket, head, (ws) => {
+        ws.close(4404, `node ${nodeId} not in registry`);
+      });
       return;
     }
     // Accept the browser WebSocket first.
