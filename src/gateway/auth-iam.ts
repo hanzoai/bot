@@ -124,9 +124,9 @@ export async function validateIamToken(
 
   // The @hanzo/iam SDK's audience retry checks for "audience" in the jose
   // error message, but jose actually says '"aud" claim check failed'.
-  // Work around by decoding the JWT, checking for an audience mismatch, and
-  // retrying with the token's actual audience so jose's check passes while
-  // signature + issuer + expiry verification still applies.
+  // Work around by decoding the JWT, checking for an audience/issuer mismatch,
+  // and retrying with the token's actual values so jose's check passes while
+  // signature + expiry verification still applies.
   if (!sdkResult.ok && sdkResult.reason === "iam_signature_invalid") {
     try {
       const parts = token.split(".");
@@ -137,9 +137,31 @@ export async function validateIamToken(
           : typeof payload.aud === "string"
             ? [payload.aud]
             : [];
-        if (aud.length > 0 && !aud.includes(config.clientId)) {
-          const retryConfig: IamConfig = { ...toIamConfig(config), clientId: aud[0] };
-          const retryResult = await validateToken(token, retryConfig);
+        const tokenIssuer = typeof payload.iss === "string" ? payload.iss : null;
+        const configIssuer = config.serverUrl.replace(/\/+$/, "");
+
+        // Build a retry config that adjusts audience and/or issuer to match
+        // the token's actual claims. This handles Casdoor setups where the
+        // OIDC discovery endpoint (e.g. hanzo.id) advertises a different
+        // issuer than what the IAM server stamps into JWTs (e.g. iam.hanzo.ai).
+        const needAudRetry = aud.length > 0 && !aud.includes(config.clientId);
+        const needIssRetry = tokenIssuer && tokenIssuer !== configIssuer;
+
+        if (needAudRetry || needIssRetry) {
+          const retryIamConfig: IamConfig = {
+            ...toIamConfig(config),
+            ...(needAudRetry ? { clientId: aud[0] } : {}),
+            ...(needIssRetry ? { serverUrl: tokenIssuer! } : {}),
+          };
+          // Use the same JWKS endpoint (from the reachable server) even when
+          // retrying with the token's issuer — the signing keys are shared.
+          const jwksOverride = config.jwksUrl ?? `${configIssuer}/.well-known/jwks`;
+          const retryValidate = () => validateToken(token, retryIamConfig);
+          const retryResult = await withJwksRewrite(
+            jwksOverride,
+            retryIamConfig.serverUrl,
+            retryValidate,
+          );
           if (retryResult.ok) {
             sdkResult = retryResult;
           }
