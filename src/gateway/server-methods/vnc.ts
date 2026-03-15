@@ -294,11 +294,44 @@ export function createVncProxy(opts?: {
       const tunnelUrl = `${isSecure ? "wss" : "ws"}://${host}/vnc-tunnel?tunnelId=${signedToken}`;
 
       // Invoke the node to open a VNC tunnel.
-      void registry!.invoke({
+      // Handle errors so the browser WS gets closed immediately instead of
+      // hanging until the tunnel timeout fires.
+      registry!.invoke({
         nodeId,
         command: "vnc.tunnel.open",
         params: { tunnelId: signedToken, tunnelUrl },
         timeoutMs: TUNNEL_TIMEOUT_MS,
+      }).then((result) => {
+        if (!result.ok) {
+          const errCode = (result as any).error?.code ?? "UNKNOWN";
+          const errMsg = (result as any).error?.message ?? "invoke failed";
+          // eslint-disable-next-line no-console
+          console.log(
+            `[vnc-proxy] tunnel invoke failed: tunnelId=${tunnelId} nodeId=${nodeId} code=${errCode} msg=${errMsg}`,
+          );
+          const pending = pendingTunnels.get(tunnelId);
+          if (pending) {
+            clearTimeout(pending.timer);
+            pendingTunnels.delete(tunnelId);
+            if (browserWs.readyState === WebSocket.OPEN) {
+              browserWs.close(1011, `tunnel invoke failed: ${errCode}`);
+            }
+          }
+        }
+      }).catch((err: unknown) => {
+        // eslint-disable-next-line no-console
+        console.error(
+          `[vnc-proxy] tunnel invoke exception: tunnelId=${tunnelId} nodeId=${nodeId}`,
+          err,
+        );
+        const pending = pendingTunnels.get(tunnelId);
+        if (pending) {
+          clearTimeout(pending.timer);
+          pendingTunnels.delete(tunnelId);
+          if (browserWs.readyState === WebSocket.OPEN) {
+            browserWs.close(1011, "tunnel invoke exception");
+          }
+        }
       });
     });
   }
