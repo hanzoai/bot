@@ -93,7 +93,7 @@ export async function runCli(argv: string[] = process.argv) {
   // OAuth — there is no TTY inside K8s pods.
   const isCloudNode = process.env.BOT_CLOUD_NODE === "true";
   const primaryCmd = getPrimaryCommand(normalizedArgv);
-  if (!hasHelpOrVersion(normalizedArgv) && !isCloudNode && primaryCmd !== "node") {
+  if (!hasHelpOrVersion(normalizedArgv) && !isCloudNode && primaryCmd !== "node" && primaryCmd !== "gateway") {
     const { readConfigFileSnapshot } = await import("../config/config.js");
     const snapshot = await readConfigFileSnapshot();
     if (!snapshot.exists) {
