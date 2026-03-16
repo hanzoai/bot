@@ -111,6 +111,12 @@ function withJwksRewrite<T>(
  *
  * When `config.jwksUrl` is set, rewrites the JWKS fetch URL to bypass
  * Cloudflare/WAF blocking. Otherwise uses the @hanzo/iam SDK directly.
+ *
+ * If the SDK rejects the token due to an issuer mismatch (e.g. the OIDC
+ * discovery endpoint advertises issuer "https://hanzo.id" but the IAM server
+ * stamps JWTs with iss "https://iam.hanzo.ai"), retries verification using
+ * jose directly — bypassing SDK OIDC discovery (which would try to reach
+ * the unreachable issuer) while using the reachable JWKS endpoint.
  */
 export async function validateIamToken(
   token: string,
@@ -123,13 +129,6 @@ export async function validateIamToken(
     ? await withJwksRewrite(config.jwksUrl, config.serverUrl, validate)
     : await validate();
 
-  console.log(`[auth-iam] initial validation: ok=${sdkResult.ok} reason=${sdkResult.ok ? 'n/a' : (sdkResult as any).reason}`);
-
-  // The @hanzo/iam SDK's audience retry checks for "audience" in the jose
-  // error message, but jose actually says '"aud" claim check failed'.
-  // Work around by decoding the JWT, checking for an audience/issuer mismatch,
-  // and retrying with the token's actual values so jose's check passes while
-  // signature + expiry verification still applies.
   // When the SDK returns iam_signature_invalid, it may be due to an
   // issuer or audience mismatch (jose groups these under the same error).
   // Retry using jose directly — bypassing the SDK's OIDC discovery which
@@ -142,7 +141,6 @@ export async function validateIamToken(
         const tokenIssuer = typeof payload.iss === "string" ? payload.iss : null;
         const configIssuer = config.serverUrl.replace(/\/+$/, "");
 
-        console.log(`[auth-iam] retry: tokenIss=${tokenIssuer} configIss=${configIssuer}`);
         if (tokenIssuer && tokenIssuer !== configIssuer) {
           // The token's issuer differs from the configured server URL.
           // Use jose directly with the reachable JWKS endpoint (from config)
@@ -152,27 +150,18 @@ export async function validateIamToken(
 
           // Try with audience check first, then without
           let verified;
-          console.log(`[auth-iam] jose retry: jwksUrl=${jwksUrl} issuer=${tokenIssuer} aud=${config.clientId}`);
           try {
             verified = await jwtVerify(token, keySet, {
               issuer: tokenIssuer,
               audience: config.clientId,
               clockTolerance: 30,
             });
-            console.log("[auth-iam] jose retry with aud: ok");
-          } catch (e1) {
-            console.log(`[auth-iam] jose retry with aud failed: ${e1 instanceof Error ? e1.message : e1}`);
+          } catch {
             // Audience may not match — retry without audience check
-            try {
-              verified = await jwtVerify(token, keySet, {
-                issuer: tokenIssuer,
-                clockTolerance: 30,
-              });
-              console.log("[auth-iam] jose retry without aud: ok");
-            } catch (e2) {
-              console.log(`[auth-iam] jose retry without aud failed: ${e2 instanceof Error ? e2.message : e2}`);
-              throw e2;
-            }
+            verified = await jwtVerify(token, keySet, {
+              issuer: tokenIssuer,
+              clockTolerance: 30,
+            });
           }
 
           const claims = verified.payload as unknown as IamJwtClaims;
@@ -197,8 +186,8 @@ export async function validateIamToken(
           }
         }
       }
-    } catch (retryErr) {
-      console.error("[auth-iam] retry threw:", retryErr);
+    } catch {
+      // Fall through to original error
     }
   }
 
