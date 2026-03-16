@@ -123,6 +123,8 @@ export async function validateIamToken(
     ? await withJwksRewrite(config.jwksUrl, config.serverUrl, validate)
     : await validate();
 
+  console.log(`[auth-iam] initial validation: ok=${sdkResult.ok} reason=${sdkResult.ok ? 'n/a' : (sdkResult as any).reason}`);
+
   // The @hanzo/iam SDK's audience retry checks for "audience" in the jose
   // error message, but jose actually says '"aud" claim check failed'.
   // Work around by decoding the JWT, checking for an audience/issuer mismatch,
@@ -140,6 +142,7 @@ export async function validateIamToken(
         const tokenIssuer = typeof payload.iss === "string" ? payload.iss : null;
         const configIssuer = config.serverUrl.replace(/\/+$/, "");
 
+        console.log(`[auth-iam] retry: tokenIss=${tokenIssuer} configIss=${configIssuer}`);
         if (tokenIssuer && tokenIssuer !== configIssuer) {
           // The token's issuer differs from the configured server URL.
           // Use jose directly with the reachable JWKS endpoint (from config)
@@ -185,8 +188,8 @@ export async function validateIamToken(
           }
         }
       }
-    } catch {
-      // Fall through to original error
+    } catch (retryErr) {
+      console.error("[auth-iam] retry threw:", retryErr);
     }
   }
 
