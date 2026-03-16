@@ -13,6 +13,7 @@ import {
   type IamAuthResult,
   type IamJwtClaims,
 } from "@hanzo/iam";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { GatewayIamConfig } from "../config/types.gateway.js";
 
 // ---------------------------------------------------------------------------
@@ -127,54 +128,64 @@ export async function validateIamToken(
   // Work around by decoding the JWT, checking for an audience/issuer mismatch,
   // and retrying with the token's actual values so jose's check passes while
   // signature + expiry verification still applies.
+  // When the SDK returns iam_signature_invalid, it may be due to an
+  // issuer or audience mismatch (jose groups these under the same error).
+  // Retry using jose directly — bypassing the SDK's OIDC discovery which
+  // would try to reach the token's issuer (potentially unreachable).
   if (!sdkResult.ok && sdkResult.reason === "iam_signature_invalid") {
     try {
       const parts = token.split(".");
       if (parts.length === 3) {
         const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString());
-        const aud = Array.isArray(payload.aud)
-          ? payload.aud
-          : typeof payload.aud === "string"
-            ? [payload.aud]
-            : [];
         const tokenIssuer = typeof payload.iss === "string" ? payload.iss : null;
         const configIssuer = config.serverUrl.replace(/\/+$/, "");
 
-        console.log(`[auth-iam] retry check: tokenIss=${tokenIssuer} configIss=${configIssuer} tokenAud=${JSON.stringify(aud)} clientId=${config.clientId}`);
+        if (tokenIssuer && tokenIssuer !== configIssuer) {
+          // The token's issuer differs from the configured server URL.
+          // Use jose directly with the reachable JWKS endpoint (from config)
+          // but accept the token's actual issuer claim.
+          const jwksUrl = config.jwksUrl ?? `${configIssuer}/.well-known/jwks`;
+          const keySet = createRemoteJWKSet(new URL(jwksUrl));
 
-        // Build a retry config that adjusts audience and/or issuer to match
-        // the token's actual claims. This handles Casdoor setups where the
-        // OIDC discovery endpoint (e.g. hanzo.id) advertises a different
-        // issuer than what the IAM server stamps into JWTs (e.g. iam.hanzo.ai).
-        const needAudRetry = aud.length > 0 && !aud.includes(config.clientId);
-        const needIssRetry = tokenIssuer && tokenIssuer !== configIssuer;
+          // Try with audience check first, then without
+          let verified;
+          try {
+            verified = await jwtVerify(token, keySet, {
+              issuer: tokenIssuer,
+              audience: config.clientId,
+              clockTolerance: 30,
+            });
+          } catch {
+            // Audience may not match — retry without audience check
+            verified = await jwtVerify(token, keySet, {
+              issuer: tokenIssuer,
+              clockTolerance: 30,
+            });
+          }
 
-        console.log(`[auth-iam] needAudRetry=${needAudRetry} needIssRetry=${needIssRetry}`);
+          const claims = verified.payload as unknown as IamJwtClaims;
+          const sub =
+            claims.sub ||
+            (typeof claims.owner === "string" && typeof claims.name === "string"
+              ? `${claims.owner}/${claims.name}`
+              : undefined);
 
-        if (needAudRetry || needIssRetry) {
-          const retryIamConfig: IamConfig = {
-            ...toIamConfig(config),
-            ...(needAudRetry ? { clientId: aud[0] } : {}),
-            ...(needIssRetry ? { serverUrl: tokenIssuer! } : {}),
-          };
-          // Use the same JWKS endpoint (from the reachable server) even when
-          // retrying with the token's issuer — the signing keys are shared.
-          const jwksOverride = config.jwksUrl ?? `${configIssuer}/.well-known/jwks`;
-          console.log(`[auth-iam] retrying with serverUrl=${retryIamConfig.serverUrl} clientId=${retryIamConfig.clientId} jwksOverride=${jwksOverride}`);
-          const retryValidate = () => validateToken(token, retryIamConfig);
-          const retryResult = await withJwksRewrite(
-            jwksOverride,
-            retryIamConfig.serverUrl,
-            retryValidate,
-          );
-          console.log(`[auth-iam] retry result: ok=${retryResult.ok} reason=${retryResult.ok ? 'n/a' : (retryResult as any).reason}`);
-          if (retryResult.ok) {
-            sdkResult = retryResult;
+          if (sub) {
+            const ownerParts = sub.split("/");
+            const owner = ownerParts.length > 1 ? ownerParts[0] : config.orgName ?? "unknown";
+            sdkResult = {
+              ok: true,
+              userId: sub,
+              email: typeof claims.email === "string" ? claims.email : undefined,
+              name: typeof claims.name === "string" ? claims.name : undefined,
+              avatar: typeof claims.picture === "string" ? claims.picture : undefined,
+              owner,
+              claims,
+            };
           }
         }
       }
-    } catch (retryErr) {
-      console.error("[auth-iam] retry threw:", retryErr);
+    } catch {
       // Fall through to original error
     }
   }
