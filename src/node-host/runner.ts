@@ -320,12 +320,14 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
       };
       const registerWithPlayground = async () => {
         try {
+          const teamId = process.env.HANZO_TEAM_ID?.trim() || process.env.AGENT_TEAM_ID?.trim() || "";
           await fetch(`${playgroundServer}/api/v1/nodes/register`, {
             method: "POST",
             headers: playgroundHeaders,
             body: JSON.stringify({
               id: agentNodeId,
               base_url: "",
+              team_id: teamId,
               deployment_type: "long_running",
               version: VERSION,
               health_status: "active",
