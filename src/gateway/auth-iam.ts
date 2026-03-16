@@ -152,18 +152,27 @@ export async function validateIamToken(
 
           // Try with audience check first, then without
           let verified;
+          console.log(`[auth-iam] jose retry: jwksUrl=${jwksUrl} issuer=${tokenIssuer} aud=${config.clientId}`);
           try {
             verified = await jwtVerify(token, keySet, {
               issuer: tokenIssuer,
               audience: config.clientId,
               clockTolerance: 30,
             });
-          } catch {
+            console.log("[auth-iam] jose retry with aud: ok");
+          } catch (e1) {
+            console.log(`[auth-iam] jose retry with aud failed: ${e1 instanceof Error ? e1.message : e1}`);
             // Audience may not match — retry without audience check
-            verified = await jwtVerify(token, keySet, {
-              issuer: tokenIssuer,
-              clockTolerance: 30,
-            });
+            try {
+              verified = await jwtVerify(token, keySet, {
+                issuer: tokenIssuer,
+                clockTolerance: 30,
+              });
+              console.log("[auth-iam] jose retry without aud: ok");
+            } catch (e2) {
+              console.log(`[auth-iam] jose retry without aud failed: ${e2 instanceof Error ? e2.message : e2}`);
+              throw e2;
+            }
           }
 
           const claims = verified.payload as unknown as IamJwtClaims;
