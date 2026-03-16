@@ -140,12 +140,16 @@ export async function validateIamToken(
         const tokenIssuer = typeof payload.iss === "string" ? payload.iss : null;
         const configIssuer = config.serverUrl.replace(/\/+$/, "");
 
+        console.log(`[auth-iam] retry check: tokenIss=${tokenIssuer} configIss=${configIssuer} tokenAud=${JSON.stringify(aud)} clientId=${config.clientId}`);
+
         // Build a retry config that adjusts audience and/or issuer to match
         // the token's actual claims. This handles Casdoor setups where the
         // OIDC discovery endpoint (e.g. hanzo.id) advertises a different
         // issuer than what the IAM server stamps into JWTs (e.g. iam.hanzo.ai).
         const needAudRetry = aud.length > 0 && !aud.includes(config.clientId);
         const needIssRetry = tokenIssuer && tokenIssuer !== configIssuer;
+
+        console.log(`[auth-iam] needAudRetry=${needAudRetry} needIssRetry=${needIssRetry}`);
 
         if (needAudRetry || needIssRetry) {
           const retryIamConfig: IamConfig = {
@@ -156,18 +160,21 @@ export async function validateIamToken(
           // Use the same JWKS endpoint (from the reachable server) even when
           // retrying with the token's issuer — the signing keys are shared.
           const jwksOverride = config.jwksUrl ?? `${configIssuer}/.well-known/jwks`;
+          console.log(`[auth-iam] retrying with serverUrl=${retryIamConfig.serverUrl} clientId=${retryIamConfig.clientId} jwksOverride=${jwksOverride}`);
           const retryValidate = () => validateToken(token, retryIamConfig);
           const retryResult = await withJwksRewrite(
             jwksOverride,
             retryIamConfig.serverUrl,
             retryValidate,
           );
+          console.log(`[auth-iam] retry result: ok=${retryResult.ok} reason=${retryResult.ok ? 'n/a' : (retryResult as any).reason}`);
           if (retryResult.ok) {
             sdkResult = retryResult;
           }
         }
       }
-    } catch {
+    } catch (retryErr) {
+      console.error("[auth-iam] retry threw:", retryErr);
       // Fall through to original error
     }
   }
