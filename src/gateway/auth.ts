@@ -485,11 +485,9 @@ export async function authorizeGatewayConnect(
           limiter?.reset(ip, rateLimitScope);
           return { ok: true, method: "iam", user: iamResult.userId };
         }
-        console.log(`[auth] IAM validation returned ok=false reason=${(iamResult as any).reason}`);
-      } catch (iamErr) {
+      } catch {
         // IAM validation threw (network error, JWKS unreachable, etc.)
         // — fall through to shared-token check below.
-        console.error("[auth] IAM validation threw:", iamErr);
       }
     }
     // Fallback: accept a matching shared gateway token so cloud-provisioned
