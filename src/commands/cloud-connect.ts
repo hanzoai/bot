@@ -1,13 +1,13 @@
+import { isCancel, select } from "@clack/prompts";
 import { createHash, randomBytes } from "node:crypto";
 import { createServer } from "node:http";
-import { isCancel, select } from "@clack/prompts";
 import { isRemoteEnvironment } from "./oauth-env.js";
 import { writeOAuthCredentials } from "./onboard-auth.credentials.js";
 import { openUrl } from "./onboard-helpers.js";
 
-const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/login/oauth/authorize";
-const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/api/login/oauth/access_token";
-const HANZO_CLIENT_ID = "hanzobot-client-id";
+const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
+const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
+const HANZO_CLIENT_ID = "app-bot";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 
@@ -114,7 +114,10 @@ async function waitForCallback(params: {
   });
 }
 
-async function exchangeCode(code: string, codeVerifier: string): Promise<{
+async function exchangeCode(
+  code: string,
+  codeVerifier: string,
+): Promise<{
   access_token: string;
   refresh_token?: string;
   token_type: string;
