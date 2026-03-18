@@ -14,7 +14,7 @@ import { openUrl } from "../commands/onboard-helpers.js";
 
 const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
 const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
-const HANZO_CLIENT_ID = process.env.HANZO_CLIENT_ID ?? "app-bot";
+const HANZO_CLIENT_ID = process.env.HANZO_CLIENT_ID ?? "hanzo-bot";
 const HANZO_CLIENT_SECRET = process.env.HANZO_CLIENT_SECRET ?? "";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
