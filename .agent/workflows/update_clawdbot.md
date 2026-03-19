@@ -1,8 +1,8 @@
 ---
-description: Update OpenClaw from upstream when branch has diverged (ahead/behind)
+description: Update Hanzo Bot from upstream when branch has diverged (ahead/behind)
 ---
 
-# OpenClaw Upstream Sync Workflow
+# Hanzo Bot Upstream Sync Workflow
 
 Use this workflow when your fork has diverged from upstream (e.g., "18 commits ahead, 29 commits behind").
 
@@ -132,16 +132,16 @@ pnpm mac:package
 
 ```bash
 # Kill running app
-pkill -x "OpenClaw" || true
+pkill -x "Hanzo Bot" || true
 
 # Move old version
-mv /Applications/OpenClaw.app /tmp/OpenClaw-backup.app
+mv /Applications/Hanzo Bot.app /tmp/Hanzo Bot-backup.app
 
 # Install new build
-cp -R dist/OpenClaw.app /Applications/
+cp -R dist/Hanzo Bot.app /Applications/
 
 # Launch
-open /Applications/OpenClaw.app
+open /Applications/Hanzo Bot.app
 ```
 
 ---

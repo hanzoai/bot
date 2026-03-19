@@ -1,5 +1,5 @@
 ---
-summary: "Automated, hardened OpenClaw installation with Ansible, Tailscale VPN, and firewall isolation"
+summary: "Automated, hardened Hanzo Bot installation with Ansible, Tailscale VPN, and firewall isolation"
 read_when:
   - You want automated server deployment with security hardening
   - You need firewall-isolated setup with VPN access
@@ -9,10 +9,10 @@ title: "Ansible"
 
 # Ansible Installation
 
-Deploy OpenClaw to production servers with **[openclaw-ansible](https://github.com/openclaw/openclaw-ansible)** -- an automated installer with security-first architecture.
+Deploy Hanzo Bot to production servers with **[openclaw-ansible](https://github.com/hanzoai/bot-ansible)** -- an automated installer with security-first architecture.
 
 <Info>
-The [openclaw-ansible](https://github.com/openclaw/openclaw-ansible) repo is the source of truth for Ansible deployment. This page is a quick overview.
+The [openclaw-ansible](https://github.com/hanzoai/bot-ansible) repo is the source of truth for Ansible deployment. This page is a quick overview.
 </Info>
 
 ## Prerequisites
@@ -38,7 +38,7 @@ The [openclaw-ansible](https://github.com/openclaw/openclaw-ansible) repo is the
 One-command install:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/openclaw/openclaw-ansible/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/hanzoai/bot-ansible/main/install.sh | bash
 ```
 
 ## What Gets Installed
@@ -49,7 +49,7 @@ The Ansible playbook installs and configures:
 2. **UFW firewall** -- SSH + Tailscale ports only
 3. **Docker CE + Compose V2** -- for agent sandboxes
 4. **Node.js 24 + pnpm** -- runtime dependencies (Node 22 LTS, currently `22.16+`, remains supported)
-5. **OpenClaw** -- host-based, not containerized
+5. **Hanzo Bot** -- host-based, not containerized
 6. **Systemd service** -- auto-start with security hardening
 
 <Note>
@@ -59,24 +59,24 @@ The gateway runs directly on the host (not in Docker), but agent sandboxes use D
 ## Post-Install Setup
 
 <Steps>
-  <Step title="Switch to the openclaw user">
+  <Step title="Switch to the hanzo-bot user">
     ```bash
     sudo -i -u openclaw
     ```
   </Step>
   <Step title="Run the onboarding wizard">
-    The post-install script guides you through configuring OpenClaw settings.
+    The post-install script guides you through configuring Hanzo Bot settings.
   </Step>
   <Step title="Connect messaging providers">
     Log in to WhatsApp, Telegram, Discord, or Signal:
     ```bash
-    openclaw channels login
+    hanzo-bot channels login
     ```
   </Step>
   <Step title="Verify the installation">
     ```bash
     sudo systemctl status openclaw
-    sudo journalctl -u openclaw -f
+    sudo journalctl -u hanzo-bot -f
     ```
   </Step>
   <Step title="Connect to Tailscale">
@@ -91,12 +91,12 @@ The gateway runs directly on the host (not in Docker), but agent sandboxes use D
 sudo systemctl status openclaw
 
 # View live logs
-sudo journalctl -u openclaw -f
+sudo journalctl -u hanzo-bot -f
 
 # Restart gateway
 sudo systemctl restart openclaw
 
-# Provider login (run as openclaw user)
+# Provider login (run as hanzo-bot user)
 sudo -i -u openclaw
 openclaw channels login
 ```
@@ -132,7 +132,7 @@ If you prefer manual control over the automation:
   </Step>
   <Step title="Clone the repository">
     ```bash
-    git clone https://github.com/openclaw/openclaw-ansible.git
+    git clone https://github.com/hanzoai/bot-ansible.git
     cd openclaw-ansible
     ```
   </Step>
@@ -157,7 +157,7 @@ If you prefer manual control over the automation:
 
 ## Updating
 
-The Ansible installer sets up OpenClaw for manual updates. See [Updating](/install/updating) for the standard update flow.
+The Ansible installer sets up Hanzo Bot for manual updates. See [Updating](/install/updating) for the standard update flow.
 
 To re-run the Ansible playbook (for example, for configuration changes):
 
@@ -179,7 +179,7 @@ This is idempotent and safe to run multiple times.
   <Accordion title="Service will not start">
     ```bash
     # Check logs
-    sudo journalctl -u openclaw -n 100
+    sudo journalctl -u hanzo-bot -n 100
 
     # Verify permissions
     sudo ls -la /opt/openclaw
@@ -187,7 +187,7 @@ This is idempotent and safe to run multiple times.
     # Test manual start
     sudo -i -u openclaw
     cd ~/openclaw
-    openclaw gateway run
+    hanzo-bot gateway run
     ```
 
   </Accordion>
@@ -200,8 +200,8 @@ This is idempotent and safe to run multiple times.
     sudo docker images | grep openclaw-sandbox
 
     # Build sandbox image if missing
-    cd /opt/openclaw/openclaw
-    sudo -u openclaw ./scripts/sandbox-setup.sh
+    cd /opt/hanzoai/bot
+    sudo -u hanzo-bot ./scripts/sandbox-setup.sh
     ```
 
   </Accordion>
@@ -209,7 +209,7 @@ This is idempotent and safe to run multiple times.
     Make sure you are running as the `openclaw` user:
     ```bash
     sudo -i -u openclaw
-    openclaw channels login
+    hanzo-bot channels login
     ```
   </Accordion>
 </AccordionGroup>
@@ -218,13 +218,13 @@ This is idempotent and safe to run multiple times.
 
 For detailed security architecture and troubleshooting, see the openclaw-ansible repo:
 
-- [Security Architecture](https://github.com/openclaw/openclaw-ansible/blob/main/docs/security.md)
-- [Technical Details](https://github.com/openclaw/openclaw-ansible/blob/main/docs/architecture.md)
-- [Troubleshooting Guide](https://github.com/openclaw/openclaw-ansible/blob/main/docs/troubleshooting.md)
+- [Security Architecture](https://github.com/hanzoai/bot-ansible/blob/main/docs/security.md)
+- [Technical Details](https://github.com/hanzoai/bot-ansible/blob/main/docs/architecture.md)
+- [Troubleshooting Guide](https://github.com/hanzoai/bot-ansible/blob/main/docs/troubleshooting.md)
 
 ## Related
 
-- [openclaw-ansible](https://github.com/openclaw/openclaw-ansible) -- full deployment guide
+- [openclaw-ansible](https://github.com/hanzoai/bot-ansible) -- full deployment guide
 - [Docker](/install/docker) -- containerized gateway setup
 - [Sandboxing](/gateway/sandboxing) -- agent sandbox configuration
 - [Multi-Agent Sandbox and Tools](/tools/multi-agent-sandbox-tools) -- per-agent isolation

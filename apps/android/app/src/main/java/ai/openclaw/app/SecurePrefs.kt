@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package ai.openclaw.app
+package ai.hanzo.bot.app
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -20,7 +20,7 @@ class SecurePrefs(
   private val securePrefsOverride: SharedPreferences? = null,
 ) {
   companion object {
-    val defaultWakeWords: List<String> = listOf("openclaw", "claude")
+    val defaultWakeWords: List<String> = listOf("@hanzo/bot", "claude")
     private const val displayNameKey = "node.displayName"
     private const val locationModeKey = "location.enabledMode"
     private const val voiceWakeModeKey = "voiceWake.mode"

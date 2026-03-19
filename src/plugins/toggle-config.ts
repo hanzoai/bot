@@ -1,15 +1,15 @@
 import { normalizeChatChannelId } from "../channels/registry.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 
 export function setPluginEnabledInConfig(
-  config: OpenClawConfig,
+  config: Hanzo BotConfig,
   pluginId: string,
   enabled: boolean,
-): OpenClawConfig {
+): Hanzo BotConfig {
   const builtInChannelId = normalizeChatChannelId(pluginId);
   const resolvedId = builtInChannelId ?? pluginId;
 
-  const next: OpenClawConfig = {
+  const next: Hanzo BotConfig = {
     ...config,
     plugins: {
       ...config.plugins,

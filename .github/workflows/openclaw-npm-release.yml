@@ -1,4 +1,4 @@
-name: OpenClaw NPM Release
+name: Hanzo Bot NPM Release
 
 on:
   push:

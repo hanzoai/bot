@@ -15,7 +15,7 @@ import {
   type PluginManifestRegistry,
 } from "../plugins/manifest-registry.js";
 import { isRecord } from "../utils.js";
-import type { OpenClawConfig } from "./config.js";
+import type { Hanzo BotConfig } from "./config.js";
 import { ensurePluginAllowlisted } from "./plugins-allowlist.js";
 
 type PluginEnableChange = {
@@ -24,7 +24,7 @@ type PluginEnableChange = {
 };
 
 export type PluginAutoEnableResult = {
-  config: OpenClawConfig;
+  config: Hanzo BotConfig;
   changes: string[];
 };
 
@@ -57,7 +57,7 @@ function accountsHaveKeys(value: unknown, keys: readonly string[]): boolean {
 }
 
 function resolveChannelConfig(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   channelId: string,
 ): Record<string, unknown> | null {
   const channels = cfg.channels as Record<string, unknown> | undefined;
@@ -132,7 +132,7 @@ function hasAnyNumberKeys(entry: Record<string, unknown>, keys: readonly string[
 }
 
 function isStructuredChannelConfigured(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   channelId: string,
   env: NodeJS.ProcessEnv,
   spec: StructuredChannelConfigSpec,
@@ -159,7 +159,7 @@ function isStructuredChannelConfigured(
   return hasMeaningfulChannelConfig(entry);
 }
 
-function isWhatsAppConfigured(cfg: OpenClawConfig): boolean {
+function isWhatsAppConfigured(cfg: Hanzo BotConfig): boolean {
   if (hasAnyWhatsAppAuth(cfg)) {
     return true;
   }
@@ -170,13 +170,13 @@ function isWhatsAppConfigured(cfg: OpenClawConfig): boolean {
   return hasMeaningfulChannelConfig(entry);
 }
 
-function isGenericChannelConfigured(cfg: OpenClawConfig, channelId: string): boolean {
+function isGenericChannelConfigured(cfg: Hanzo BotConfig, channelId: string): boolean {
   const entry = resolveChannelConfig(cfg, channelId);
   return hasMeaningfulChannelConfig(entry);
 }
 
 export function isChannelConfigured(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   channelId: string,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
@@ -190,7 +190,7 @@ export function isChannelConfigured(
   return isGenericChannelConfigured(cfg, channelId);
 }
 
-function collectModelRefs(cfg: OpenClawConfig): string[] {
+function collectModelRefs(cfg: Hanzo BotConfig): string[] {
   const refs: string[] = [];
   const pushModelRef = (value: unknown) => {
     if (typeof value === "string" && value.trim()) {
@@ -244,7 +244,7 @@ function extractProviderFromModelRef(value: string): string | null {
   return normalizeProviderId(trimmed.slice(0, slash));
 }
 
-function isProviderConfigured(cfg: OpenClawConfig, providerId: string): boolean {
+function isProviderConfigured(cfg: Hanzo BotConfig, providerId: string): boolean {
   const normalized = normalizeProviderId(providerId);
 
   const profiles = cfg.auth?.profiles;
@@ -314,7 +314,7 @@ function listKnownChannelPluginIds(env: NodeJS.ProcessEnv): string[] {
   );
 }
 
-function collectCandidateChannelIds(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): string[] {
+function collectCandidateChannelIds(cfg: Hanzo BotConfig, env: NodeJS.ProcessEnv): string[] {
   const channelIds = new Set<string>(listKnownChannelPluginIds(env));
   const configuredChannels = cfg.channels as Record<string, unknown> | undefined;
   if (!configuredChannels || typeof configuredChannels !== "object") {
@@ -331,7 +331,7 @@ function collectCandidateChannelIds(cfg: OpenClawConfig, env: NodeJS.ProcessEnv)
 }
 
 function resolveConfiguredPlugins(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   env: NodeJS.ProcessEnv,
   registry: PluginManifestRegistry,
 ): PluginEnableChange[] {
@@ -366,7 +366,7 @@ function resolveConfiguredPlugins(
   return changes;
 }
 
-function isPluginExplicitlyDisabled(cfg: OpenClawConfig, pluginId: string): boolean {
+function isPluginExplicitlyDisabled(cfg: Hanzo BotConfig, pluginId: string): boolean {
   const builtInChannelId = normalizeChatChannelId(pluginId);
   if (builtInChannelId) {
     const channels = cfg.channels as Record<string, unknown> | undefined;
@@ -384,7 +384,7 @@ function isPluginExplicitlyDisabled(cfg: OpenClawConfig, pluginId: string): bool
   return entry?.enabled === false;
 }
 
-function isPluginDenied(cfg: OpenClawConfig, pluginId: string): boolean {
+function isPluginDenied(cfg: Hanzo BotConfig, pluginId: string): boolean {
   const deny = cfg.plugins?.deny;
   return Array.isArray(deny) && deny.includes(pluginId);
 }
@@ -399,7 +399,7 @@ function resolvePreferredOverIds(pluginId: string, env: NodeJS.ProcessEnv): stri
 }
 
 function shouldSkipPreferredPluginAutoEnable(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   entry: PluginEnableChange,
   configured: PluginEnableChange[],
   env: NodeJS.ProcessEnv,
@@ -422,7 +422,7 @@ function shouldSkipPreferredPluginAutoEnable(
   return false;
 }
 
-function registerPluginEntry(cfg: OpenClawConfig, pluginId: string): OpenClawConfig {
+function registerPluginEntry(cfg: Hanzo BotConfig, pluginId: string): Hanzo BotConfig {
   const builtInChannelId = normalizeChatChannelId(pluginId);
   if (builtInChannelId) {
     const channels = cfg.channels as Record<string, unknown> | undefined;
@@ -469,7 +469,7 @@ function formatAutoEnableChange(entry: PluginEnableChange): string {
 }
 
 export function applyPluginAutoEnable(params: {
-  config: OpenClawConfig;
+  config: Hanzo BotConfig;
   env?: NodeJS.ProcessEnv;
   /** Pre-loaded manifest registry. When omitted, the registry is loaded from
    *  the installed plugins on disk. Pass an explicit registry in tests to

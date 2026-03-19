@@ -1,4 +1,4 @@
-package ai.openclaw.app
+package ai.hanzo.bot.app
 
 enum class VoiceWakeMode(val rawValue: String) {
   Off("off"),

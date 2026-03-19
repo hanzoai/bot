@@ -1,4 +1,4 @@
-# MiniMax (OpenClaw plugin)
+# MiniMax (Hanzo Bot plugin)
 
 Bundled MiniMax plugin for both:
 

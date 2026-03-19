@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import type { ResolvedQmdConfig } from "./backend-config.js";
 import { resolveMemoryBackendConfig } from "./backend-config.js";
@@ -39,7 +39,7 @@ export type MemorySearchManagerResult = {
 };
 
 export async function getMemorySearchManager(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   agentId: string;
   purpose?: "default" | "status";
 }): Promise<MemorySearchManagerResult> {

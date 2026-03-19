@@ -256,7 +256,7 @@ describe("memory cli", () => {
   it("documents memory help examples", () => {
     const helpText = getMemoryHelpText();
 
-    expect(helpText).toContain("openclaw memory status --deep");
+    expect(helpText).toContain("hanzo-bot memory status --deep");
     expect(helpText).toContain("Probe embedding provider readiness.");
     expect(helpText).toContain('openclaw memory search "meeting notes"');
     expect(helpText).toContain("Quick search using positional query.");

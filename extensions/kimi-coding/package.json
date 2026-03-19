@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/kimi-provider",
+  "name": "@hanzo/bot-kimi-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Kimi provider plugin",
+  "description": "Hanzo Bot Kimi provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

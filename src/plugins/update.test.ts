@@ -101,7 +101,7 @@ describe("updateNpmInstalledPlugins", () => {
     installPluginFromNpmSpecMock.mockResolvedValue({
       ok: false,
       code: "npm_package_not_found",
-      error: "Package not found on npm: @openclaw/missing.",
+      error: "Package not found on npm: @hanzo/bot-missing.",
     });
 
     const result = await updateNpmInstalledPlugins({
@@ -110,7 +110,7 @@ describe("updateNpmInstalledPlugins", () => {
           installs: {
             missing: {
               source: "npm",
-              spec: "@openclaw/missing",
+              spec: "@hanzo/bot-missing",
               installPath: "/tmp/missing",
             },
           },
@@ -124,7 +124,7 @@ describe("updateNpmInstalledPlugins", () => {
       {
         pluginId: "missing",
         status: "error",
-        message: "Failed to check missing: npm package not found for @openclaw/missing.",
+        message: "Failed to check missing: npm package not found for @hanzo/bot-missing.",
       },
     ]);
   });
@@ -287,7 +287,7 @@ describe("updateNpmInstalledPlugins", () => {
   it("migrates legacy unscoped install keys when a scoped npm package updates", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue({
       ok: true,
-      pluginId: "@openclaw/voice-call",
+      pluginId: "@hanzo/bot-voice-call",
       targetDir: "/tmp/openclaw-voice-call",
       version: "0.0.2",
       extensions: ["index.ts"],
@@ -308,7 +308,7 @@ describe("updateNpmInstalledPlugins", () => {
           installs: {
             "voice-call": {
               source: "npm",
-              spec: "@openclaw/voice-call",
+              spec: "@hanzo/bot-voice-call",
               installPath: "/tmp/voice-call",
             },
           },
@@ -319,21 +319,21 @@ describe("updateNpmInstalledPlugins", () => {
 
     expect(installPluginFromNpmSpecMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        spec: "@openclaw/voice-call",
+        spec: "@hanzo/bot-voice-call",
         expectedPluginId: "voice-call",
       }),
     );
-    expect(result.config.plugins?.allow).toEqual(["@openclaw/voice-call"]);
-    expect(result.config.plugins?.deny).toEqual(["@openclaw/voice-call"]);
-    expect(result.config.plugins?.slots?.memory).toBe("@openclaw/voice-call");
-    expect(result.config.plugins?.entries?.["@openclaw/voice-call"]).toEqual({
+    expect(result.config.plugins?.allow).toEqual(["@hanzo/bot-voice-call"]);
+    expect(result.config.plugins?.deny).toEqual(["@hanzo/bot-voice-call"]);
+    expect(result.config.plugins?.slots?.memory).toBe("@hanzo/bot-voice-call");
+    expect(result.config.plugins?.entries?.["@hanzo/bot-voice-call"]).toEqual({
       enabled: false,
       hooks: { allowPromptInjection: false },
     });
     expect(result.config.plugins?.entries?.["voice-call"]).toBeUndefined();
-    expect(result.config.plugins?.installs?.["@openclaw/voice-call"]).toMatchObject({
+    expect(result.config.plugins?.installs?.["@hanzo/bot-voice-call"]).toMatchObject({
       source: "npm",
-      spec: "@openclaw/voice-call",
+      spec: "@hanzo/bot-voice-call",
       installPath: "/tmp/openclaw-voice-call",
       version: "0.0.2",
     });
@@ -442,7 +442,7 @@ describe("syncPluginsForUpdateChannel", () => {
           {
             pluginId: "feishu",
             localPath: "/app/extensions/feishu",
-            npmSpec: "@openclaw/feishu",
+            npmSpec: "@hanzo/bot-feishu",
           },
         ],
       ]),
@@ -458,7 +458,7 @@ describe("syncPluginsForUpdateChannel", () => {
               source: "path",
               sourcePath: "/app/extensions/feishu",
               installPath: "/app/extensions/feishu",
-              spec: "@openclaw/feishu",
+              spec: "@hanzo/bot-feishu",
             },
           },
         },
@@ -480,7 +480,7 @@ describe("syncPluginsForUpdateChannel", () => {
           {
             pluginId: "feishu",
             localPath: "/app/extensions/feishu",
-            npmSpec: "@openclaw/feishu",
+            npmSpec: "@hanzo/bot-feishu",
           },
         ],
       ]),
@@ -496,7 +496,7 @@ describe("syncPluginsForUpdateChannel", () => {
               source: "path",
               sourcePath: "/app/extensions/feishu",
               installPath: "/tmp/old-feishu",
-              spec: "@openclaw/feishu",
+              spec: "@hanzo/bot-feishu",
             },
           },
         },
@@ -509,14 +509,14 @@ describe("syncPluginsForUpdateChannel", () => {
       source: "path",
       sourcePath: "/app/extensions/feishu",
       installPath: "/app/extensions/feishu",
-      spec: "@openclaw/feishu",
+      spec: "@hanzo/bot-feishu",
     });
     expect(installPluginFromNpmSpecMock).not.toHaveBeenCalled();
   });
 
   it("forwards an explicit env to bundled plugin source resolution", async () => {
     resolveBundledPluginSourcesMock.mockReturnValue(new Map());
-    const env = { OPENCLAW_HOME: "/srv/openclaw-home" } as NodeJS.ProcessEnv;
+    const env = { BOT_HOME: "/srv/openclaw-home" } as NodeJS.ProcessEnv;
 
     await syncPluginsForUpdateChannel({
       channel: "beta",
@@ -540,7 +540,7 @@ describe("syncPluginsForUpdateChannel", () => {
           {
             pluginId: "feishu",
             localPath: `${bundledHome}/plugins/feishu`,
-            npmSpec: "@openclaw/feishu",
+            npmSpec: "@hanzo/bot-feishu",
           },
         ],
       ]),
@@ -553,7 +553,7 @@ describe("syncPluginsForUpdateChannel", () => {
         channel: "beta",
         env: {
           ...process.env,
-          OPENCLAW_HOME: bundledHome,
+          BOT_HOME: bundledHome,
           HOME: "/tmp/ignored-home",
         },
         config: {
@@ -564,7 +564,7 @@ describe("syncPluginsForUpdateChannel", () => {
                 source: "path",
                 sourcePath: "~/plugins/feishu",
                 installPath: "~/plugins/feishu",
-                spec: "@openclaw/feishu",
+                spec: "@hanzo/bot-feishu",
               },
             },
           },

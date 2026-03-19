@@ -1,6 +1,6 @@
-import OpenClawKit
+import Hanzo BotKit
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct DeepLinkAgentPolicyTests {
     @Test func `validate message for handle rejects too long when unkeyed`() {

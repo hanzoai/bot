@@ -4,7 +4,7 @@ import path from "node:path";
 import type { App } from "@slack/bolt";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { expectChannelInboundContextContract as expectInboundContextContract } from "../../../../../src/channels/plugins/contracts/suites.js";
-import type { OpenClawConfig } from "../../../../../src/config/config.js";
+import type { Hanzo BotConfig } from "../../../../../src/config/config.js";
 import { resolveAgentRoute } from "../../../../../src/routing/resolve-route.js";
 import { resolveThreadSessionKeys } from "../../../../../src/routing/session-key.js";
 import type { ResolvedSlackAccount } from "../../accounts.js";
@@ -43,7 +43,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
     const slackCtx = createInboundSlackCtx({
       cfg: {
         channels: { slack: { enabled: true } },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
     });
     // oxlint-disable-next-line typescript/no-explicit-any
     slackCtx.resolveUserName = async () => ({ name: "Alice" }) as any;
@@ -94,7 +94,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
     });
   }
 
-  function createThreadSlackCtx(params: { cfg: OpenClawConfig; replies: unknown }) {
+  function createThreadSlackCtx(params: { cfg: Hanzo BotConfig; replies: unknown }) {
     return createInboundSlackCtx({
       cfg: params.cfg,
       appClient: { conversations: { replies: params.replies } } as App["client"],
@@ -136,7 +136,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
       cfg: {
         channels: { slack: { enabled: true } },
         session: { dmScope: "main" },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
     });
     // oxlint-disable-next-line typescript/no-explicit-any
     slackCtx.resolveUserName = async () => ({ name: "Alice" }) as any;
@@ -184,7 +184,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
             ...(params?.groupPolicy ? { groupPolicy: params.groupPolicy } : {}),
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       replyToMode: "all",
       ...(params?.defaultRequireMention === undefined
         ? {}
@@ -273,7 +273,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
         channels: {
           slack: { enabled: true },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       defaultRequireMention: false,
     });
     // oxlint-disable-next-line typescript/no-explicit-any
@@ -305,7 +305,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
             enabled: true,
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       defaultRequireMention: false,
       channelsConfig: {
         C123: { systemPrompt: "Config prompt" },
@@ -436,7 +436,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
       cfg: {
         session: { store: storePath },
         channels: { slack: { enabled: true, replyToMode: "all", groupPolicy: "open" } },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       replies,
     });
     slackCtx.resolveUserName = async (id: string) => ({
@@ -462,7 +462,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
     const cfg = {
       session: { store: storePath },
       channels: { slack: { enabled: true, replyToMode: "all", groupPolicy: "open" } },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const route = resolveAgentRoute({
       cfg,
       channel: "slack",
@@ -551,7 +551,7 @@ describe("slack prepareSlackMessage inbound contract", () => {
       cfg: {
         session: { store: storePath },
         channels: { slack: { enabled: true, replyToMode: "all" } },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       replyToMode: "all",
     });
     // oxlint-disable-next-line typescript/no-explicit-any
@@ -667,7 +667,7 @@ describe("prepareSlackMessage sender prefix", () => {
       useAccessGroups: true,
       slashCommand: {
         enabled: false,
-        name: "openclaw",
+        name: "@hanzo/bot",
         sessionPrefix: "slack:slash",
         ephemeral: true,
       },

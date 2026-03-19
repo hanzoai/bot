@@ -50,7 +50,7 @@ export function appendInjectedAssistantMessageToTranscript(params: {
     usage,
     // Make these explicit so downstream tooling never treats this as model output.
     api: "openai-responses",
-    provider: "openclaw",
+    provider: "@hanzo/bot",
     model: "gateway-injected",
     ...(params.idempotencyKey ? { idempotencyKey: params.idempotencyKey } : {}),
     ...(params.abortMeta

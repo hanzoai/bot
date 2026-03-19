@@ -14,14 +14,14 @@ x-i18n:
 
 # OpenAI Chat Completions（HTTP）
 
-OpenClaw 的 Gateway 网关可以提供一个小型的 OpenAI 兼容 Chat Completions 端点。
+Hanzo Bot 的 Gateway 网关可以提供一个小型的 OpenAI 兼容 Chat Completions 端点。
 
 此端点**默认禁用**。请先在配置中启用它。
 
 - `POST /v1/chat/completions`
 - 与 Gateway 网关相同的端口（WS + HTTP 多路复用）：`http://<gateway-host>:<port>/v1/chat/completions`
 
-底层实现中，请求作为普通的 Gateway 网关智能体运行执行（与 `openclaw agent` 相同的代码路径），因此路由/权限/配置与你的 Gateway 网关一致。
+底层实现中，请求作为普通的 Gateway 网关智能体运行执行（与 `hanzo-bot agent` 相同的代码路径），因此路由/权限/配置与你的 Gateway 网关一致。
 
 ## 认证
 
@@ -31,8 +31,8 @@ OpenClaw 的 Gateway 网关可以提供一个小型的 OpenAI 兼容 Chat Comple
 
 注意事项：
 
-- 当 `gateway.auth.mode="token"` 时，使用 `gateway.auth.token`（或 `OPENCLAW_GATEWAY_TOKEN`）。
-- 当 `gateway.auth.mode="password"` 时，使用 `gateway.auth.password`（或 `OPENCLAW_GATEWAY_PASSWORD`）。
+- 当 `gateway.auth.mode="token"` 时，使用 `gateway.auth.token`（或 `BOT_GATEWAY_TOKEN`）。
+- 当 `gateway.auth.mode="password"` 时，使用 `gateway.auth.password`（或 `BOT_GATEWAY_PASSWORD`）。
 
 ## 选择智能体
 
@@ -41,7 +41,7 @@ OpenClaw 的 Gateway 网关可以提供一个小型的 OpenAI 兼容 Chat Comple
 - `model: "openclaw:<agentId>"`（例如：`"openclaw:main"`、`"openclaw:beta"`）
 - `model: "agent:<agentId>"`（别名）
 
-或通过头指定特定的 OpenClaw 智能体：
+或通过头指定特定的 Hanzo Bot 智能体：
 
 - `x-openclaw-agent-id: <agentId>`（默认：`main`）
 
@@ -105,7 +105,7 @@ curl -sS http://127.0.0.1:18789/v1/chat/completions \
   -H 'Content-Type: application/json' \
   -H 'x-openclaw-agent-id: main' \
   -d '{
-    "model": "openclaw",
+    "model": "@hanzo/bot",
     "messages": [{"role":"user","content":"hi"}]
   }'
 ```
@@ -118,7 +118,7 @@ curl -N http://127.0.0.1:18789/v1/chat/completions \
   -H 'Content-Type: application/json' \
   -H 'x-openclaw-agent-id: main' \
   -d '{
-    "model": "openclaw",
+    "model": "@hanzo/bot",
     "stream": true,
     "messages": [{"role":"user","content":"hi"}]
   }'

@@ -3,7 +3,7 @@ import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../src/config/config.js";
+import type { Hanzo BotConfig } from "../../../src/config/config.js";
 import { resetLogger, setLoggerOverride } from "../../../src/logging.js";
 import { redactIdentifier } from "../../../src/logging/redact-identifier.js";
 import { setActiveWebListener } from "./active-listener.js";
@@ -194,7 +194,7 @@ describe("web outbound", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
 
     await sendMessageWhatsApp("+1555", "pic", {
       verbose: false,

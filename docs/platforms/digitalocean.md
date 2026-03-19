@@ -1,16 +1,16 @@
 ---
-summary: "OpenClaw on DigitalOcean (simple paid VPS option)"
+summary: "Hanzo Bot on DigitalOcean (simple paid VPS option)"
 read_when:
-  - Setting up OpenClaw on DigitalOcean
-  - Looking for cheap VPS hosting for OpenClaw
+  - Setting up Hanzo Bot on DigitalOcean
+  - Looking for cheap VPS hosting for Hanzo Bot
 title: "DigitalOcean"
 ---
 
-# OpenClaw on DigitalOcean
+# Hanzo Bot on DigitalOcean
 
 ## Goal
 
-Run a persistent OpenClaw Gateway on DigitalOcean for **$6/month** (or $4/mo with reserved pricing).
+Run a persistent Hanzo Bot Gateway on DigitalOcean for **$6/month** (or $4/mo with reserved pricing).
 
 If you want a $0/month option and don’t mind ARM + provider-specific setup, see the [Oracle Cloud guide](/platforms/oracle).
 
@@ -60,7 +60,7 @@ Use a clean base image (Ubuntu 24.04 LTS). Avoid third-party Marketplace 1-click
 ssh root@YOUR_DROPLET_IP
 ```
 
-## 3) Install OpenClaw
+## 3) Install Hanzo Bot
 
 ```bash
 # Update system
@@ -70,8 +70,8 @@ apt update && apt upgrade -y
 curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
 apt install -y nodejs
 
-# Install OpenClaw
-curl -fsSL https://openclaw.ai/install.sh | bash
+# Install Hanzo Bot
+curl -fsSL https://hanzo.bot/install.sh | bash
 
 # Verify
 openclaw --version
@@ -198,13 +198,13 @@ htop
 
 All state lives in:
 
-- `~/.openclaw/` — config, credentials, session data
-- `~/.openclaw/workspace/` — workspace (SOUL.md, memory, etc.)
+- `~/.hanzo/bot/` — config, credentials, session data
+- `~/.hanzo/bot/workspace/` — workspace (SOUL.md, memory, etc.)
 
 These survive reboots. Back them up periodically:
 
 ```bash
-tar -czvf openclaw-backup.tar.gz ~/.openclaw ~/.openclaw/workspace
+tar -czvf openclaw-backup.tar.gz ~/.openclaw ~/.hanzo/bot/workspace
 ```
 
 ---
@@ -236,7 +236,7 @@ For the full setup guide, see [Oracle Cloud](/platforms/oracle). For signup tips
 ```bash
 openclaw gateway status
 openclaw doctor --non-interactive
-journalctl -u openclaw --no-pager -n 50
+journalctl -u hanzo-bot --no-pager -n 50
 ```
 
 ### Port already in use

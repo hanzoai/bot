@@ -15,7 +15,7 @@ x-i18n:
 
 # 相机捕获（智能体）
 
-OpenClaw 支持用于智能体工作流的**相机捕获**：
+Hanzo Bot 支持用于智能体工作流的**相机捕获**：
 
 - **iOS 节点**（通过 Gateway 网关配对）：通过 `node.invoke` 捕获**照片**（`jpg`）或**短视频片段**（`mp4`，可选音频）。
 - **Android 节点**（通过 Gateway 网关配对）：通过 `node.invoke` 捕获**照片**（`jpg`）或**短视频片段**（`mp4`，可选音频）。
@@ -140,7 +140,7 @@ openclaw nodes camera clip --node <id> --no-audio
 
 注意事项：
 
-- `openclaw nodes camera snap` 默认 `maxWidth=1600`，除非被覆盖。
+- `hanzo-bot nodes camera snap` 默认 `maxWidth=1600`，除非被覆盖。
 - 在 macOS 上，`camera.snap` 在预热/曝光稳定后等待 `delayMs`（默认 2000ms）再捕获。
 - 照片载荷会重新压缩以保持 base64 小于 5 MB。
 

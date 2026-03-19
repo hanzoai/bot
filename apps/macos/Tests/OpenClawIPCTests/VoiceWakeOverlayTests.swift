@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct VoiceWakeOverlayTests {
     @Test func `guard token drops when no active`() {

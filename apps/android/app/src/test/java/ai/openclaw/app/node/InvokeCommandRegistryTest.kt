@@ -1,17 +1,17 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
-import ai.openclaw.app.protocol.OpenClawCalendarCommand
-import ai.openclaw.app.protocol.OpenClawCameraCommand
-import ai.openclaw.app.protocol.OpenClawCallLogCommand
-import ai.openclaw.app.protocol.OpenClawCapability
-import ai.openclaw.app.protocol.OpenClawContactsCommand
-import ai.openclaw.app.protocol.OpenClawDeviceCommand
-import ai.openclaw.app.protocol.OpenClawLocationCommand
-import ai.openclaw.app.protocol.OpenClawMotionCommand
-import ai.openclaw.app.protocol.OpenClawNotificationsCommand
-import ai.openclaw.app.protocol.OpenClawPhotosCommand
-import ai.openclaw.app.protocol.OpenClawSmsCommand
-import ai.openclaw.app.protocol.OpenClawSystemCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotCalendarCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotCameraCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotCallLogCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotCapability
+import ai.hanzo.bot.app.protocol.Hanzo BotContactsCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotDeviceCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotLocationCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotMotionCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotNotificationsCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotPhotosCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotSmsCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotSystemCommand
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -19,52 +19,52 @@ import org.junit.Test
 class InvokeCommandRegistryTest {
   private val coreCapabilities =
     setOf(
-      OpenClawCapability.Canvas.rawValue,
-      OpenClawCapability.Device.rawValue,
-      OpenClawCapability.Notifications.rawValue,
-      OpenClawCapability.System.rawValue,
-      OpenClawCapability.Photos.rawValue,
-      OpenClawCapability.Contacts.rawValue,
-      OpenClawCapability.Calendar.rawValue,
-      OpenClawCapability.CallLog.rawValue,
+      Hanzo BotCapability.Canvas.rawValue,
+      Hanzo BotCapability.Device.rawValue,
+      Hanzo BotCapability.Notifications.rawValue,
+      Hanzo BotCapability.System.rawValue,
+      Hanzo BotCapability.Photos.rawValue,
+      Hanzo BotCapability.Contacts.rawValue,
+      Hanzo BotCapability.Calendar.rawValue,
+      Hanzo BotCapability.CallLog.rawValue,
     )
 
   private val optionalCapabilities =
     setOf(
-      OpenClawCapability.Camera.rawValue,
-      OpenClawCapability.Location.rawValue,
-      OpenClawCapability.Sms.rawValue,
-      OpenClawCapability.VoiceWake.rawValue,
-      OpenClawCapability.Motion.rawValue,
+      Hanzo BotCapability.Camera.rawValue,
+      Hanzo BotCapability.Location.rawValue,
+      Hanzo BotCapability.Sms.rawValue,
+      Hanzo BotCapability.VoiceWake.rawValue,
+      Hanzo BotCapability.Motion.rawValue,
     )
 
   private val coreCommands =
     setOf(
-      OpenClawDeviceCommand.Status.rawValue,
-      OpenClawDeviceCommand.Info.rawValue,
-      OpenClawDeviceCommand.Permissions.rawValue,
-      OpenClawDeviceCommand.Health.rawValue,
-      OpenClawNotificationsCommand.List.rawValue,
-      OpenClawNotificationsCommand.Actions.rawValue,
-      OpenClawSystemCommand.Notify.rawValue,
-      OpenClawPhotosCommand.Latest.rawValue,
-      OpenClawContactsCommand.Search.rawValue,
-      OpenClawContactsCommand.Add.rawValue,
-      OpenClawCalendarCommand.Events.rawValue,
-      OpenClawCalendarCommand.Add.rawValue,
-      OpenClawCallLogCommand.Search.rawValue,
+      Hanzo BotDeviceCommand.Status.rawValue,
+      Hanzo BotDeviceCommand.Info.rawValue,
+      Hanzo BotDeviceCommand.Permissions.rawValue,
+      Hanzo BotDeviceCommand.Health.rawValue,
+      Hanzo BotNotificationsCommand.List.rawValue,
+      Hanzo BotNotificationsCommand.Actions.rawValue,
+      Hanzo BotSystemCommand.Notify.rawValue,
+      Hanzo BotPhotosCommand.Latest.rawValue,
+      Hanzo BotContactsCommand.Search.rawValue,
+      Hanzo BotContactsCommand.Add.rawValue,
+      Hanzo BotCalendarCommand.Events.rawValue,
+      Hanzo BotCalendarCommand.Add.rawValue,
+      Hanzo BotCallLogCommand.Search.rawValue,
     )
 
   private val optionalCommands =
     setOf(
-      OpenClawCameraCommand.Snap.rawValue,
-      OpenClawCameraCommand.Clip.rawValue,
-      OpenClawCameraCommand.List.rawValue,
-      OpenClawLocationCommand.Get.rawValue,
-      OpenClawMotionCommand.Activity.rawValue,
-      OpenClawMotionCommand.Pedometer.rawValue,
-      OpenClawSmsCommand.Send.rawValue,
-      OpenClawSmsCommand.Search.rawValue,
+      Hanzo BotCameraCommand.Snap.rawValue,
+      Hanzo BotCameraCommand.Clip.rawValue,
+      Hanzo BotCameraCommand.List.rawValue,
+      Hanzo BotLocationCommand.Get.rawValue,
+      Hanzo BotMotionCommand.Activity.rawValue,
+      Hanzo BotMotionCommand.Pedometer.rawValue,
+      Hanzo BotSmsCommand.Send.rawValue,
+      Hanzo BotSmsCommand.Search.rawValue,
     )
 
   private val debugCommands = setOf("debug.logs", "debug.ed25519")
@@ -137,8 +137,8 @@ class InvokeCommandRegistryTest {
         ),
       )
 
-    assertTrue(commands.contains(OpenClawMotionCommand.Activity.rawValue))
-    assertFalse(commands.contains(OpenClawMotionCommand.Pedometer.rawValue))
+    assertTrue(commands.contains(Hanzo BotMotionCommand.Activity.rawValue))
+    assertFalse(commands.contains(Hanzo BotMotionCommand.Pedometer.rawValue))
   }
 
   @Test
@@ -152,10 +152,10 @@ class InvokeCommandRegistryTest {
         defaultFlags(sendSmsAvailable = true),
       )
 
-    assertTrue(readOnlyCommands.contains(OpenClawSmsCommand.Search.rawValue))
-    assertFalse(readOnlyCommands.contains(OpenClawSmsCommand.Send.rawValue))
-    assertTrue(sendOnlyCommands.contains(OpenClawSmsCommand.Send.rawValue))
-    assertFalse(sendOnlyCommands.contains(OpenClawSmsCommand.Search.rawValue))
+    assertTrue(readOnlyCommands.contains(Hanzo BotSmsCommand.Search.rawValue))
+    assertFalse(readOnlyCommands.contains(Hanzo BotSmsCommand.Send.rawValue))
+    assertTrue(sendOnlyCommands.contains(Hanzo BotSmsCommand.Send.rawValue))
+    assertFalse(sendOnlyCommands.contains(Hanzo BotSmsCommand.Search.rawValue))
   }
 
   @Test
@@ -169,8 +169,8 @@ class InvokeCommandRegistryTest {
         defaultFlags(sendSmsAvailable = true),
       )
 
-    assertTrue(readOnlyCapabilities.contains(OpenClawCapability.Sms.rawValue))
-    assertTrue(sendOnlyCapabilities.contains(OpenClawCapability.Sms.rawValue))
+    assertTrue(readOnlyCapabilities.contains(Hanzo BotCapability.Sms.rawValue))
+    assertTrue(sendOnlyCapabilities.contains(Hanzo BotCapability.Sms.rawValue))
   }
 
   private fun defaultFlags(

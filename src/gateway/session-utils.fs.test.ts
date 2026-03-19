@@ -680,7 +680,7 @@ describe("readLatestSessionUsageFromTranscript", () => {
       {
         message: {
           role: "assistant",
-          provider: "openclaw",
+          provider: "@hanzo/bot",
           model: "delivery-mirror",
           usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
         },
@@ -806,8 +806,8 @@ describe("resolveSessionTranscriptCandidates", () => {
     vi.unstubAllEnvs();
   });
 
-  test("fallback candidate uses OPENCLAW_HOME instead of os.homedir()", () => {
-    vi.stubEnv("OPENCLAW_HOME", "/srv/openclaw-home");
+  test("fallback candidate uses BOT_HOME instead of os.homedir()", () => {
+    vi.stubEnv("BOT_HOME", "/srv/openclaw-home");
     vi.stubEnv("HOME", "/home/other");
 
     const candidates = resolveSessionTranscriptCandidates("sess-1", undefined);
@@ -877,7 +877,7 @@ describe("archiveSessionTranscripts", () => {
   });
 
   beforeAll(() => {
-    vi.stubEnv("OPENCLAW_HOME", tmpDir);
+    vi.stubEnv("BOT_HOME", tmpDir);
   });
 
   afterAll(() => {

@@ -25,9 +25,9 @@ openclaw channels status --probe
 
 Expected healthy signals:
 
-- `openclaw gateway status` shows `Runtime: running` and `RPC probe: ok`.
-- `openclaw doctor` reports no blocking config/service issues.
-- `openclaw channels status --probe` shows connected/ready channels.
+- `hanzo-bot gateway status` shows `Runtime: running` and `RPC probe: ok`.
+- `hanzo-bot doctor` reports no blocking config/service issues.
+- `hanzo-bot channels status --probe` shows connected/ready channels.
 
 ## Anthropic 429 extra usage required for long context
 
@@ -123,10 +123,10 @@ Use `error.details.code` from the failed `connect` response to pick the next act
 
 | Detail code                  | Meaning                                                  | Recommended action                                                                                                                                                   |
 | ---------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTH_TOKEN_MISSING`         | Client did not send a required shared token.             | Paste/set token in the client and retry. For dashboard paths: `openclaw config get gateway.auth.token` then paste into Control UI settings.                          |
+| `AUTH_TOKEN_MISSING`         | Client did not send a required shared token.             | Paste/set token in the client and retry. For dashboard paths: `hanzo-bot config get gateway.auth.token` then paste into Control UI settings.                          |
 | `AUTH_TOKEN_MISMATCH`        | Shared token did not match gateway auth token.           | If `canRetryWithDeviceToken=true`, allow one trusted retry. If still failing, run the [token drift recovery checklist](/cli/devices#token-drift-recovery-checklist). |
 | `AUTH_DEVICE_TOKEN_MISMATCH` | Cached per-device token is stale or revoked.             | Rotate/re-approve device token using [devices CLI](/cli/devices), then reconnect.                                                                                    |
-| `PAIRING_REQUIRED`           | Device identity is known but not approved for this role. | Approve pending request: `openclaw devices list` then `openclaw devices approve <requestId>`.                                                                        |
+| `PAIRING_REQUIRED`           | Device identity is known but not approved for this role. | Approve pending request: `hanzo-bot devices list` then `hanzo-bot devices approve <requestId>`.                                                                        |
 
 Device auth v2 migration check:
 
@@ -169,7 +169,7 @@ Look for:
 
 Common signatures:
 
-- `Gateway start blocked: set gateway.mode=local` → local gateway mode is not enabled. Fix: set `gateway.mode="local"` in your config (or run `openclaw configure`). If you are running OpenClaw via Podman using the dedicated `openclaw` user, the config lives at `~openclaw/.openclaw/openclaw.json`.
+- `Gateway start blocked: set gateway.mode=local` → local gateway mode is not enabled. Fix: set `gateway.mode="local"` in your config (or run `hanzo-bot configure`). If you are running Hanzo Bot via Podman using the dedicated `openclaw` user, the config lives at `~openclaw/.hanzoai/bot.json`.
 - `refusing to bind gateway ... without auth` → non-loopback bind without token/password.
 - `another gateway instance is already listening` / `EADDRINUSE` → port conflict.
 

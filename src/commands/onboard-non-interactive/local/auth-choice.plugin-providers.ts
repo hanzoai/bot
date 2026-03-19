@@ -5,7 +5,7 @@ import {
 } from "../../../agents/agent-scope.js";
 import type { ApiKeyCredential } from "../../../agents/auth-profiles/types.js";
 import { resolveDefaultAgentWorkspaceDir } from "../../../agents/workspace.js";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { Hanzo BotConfig } from "../../../config/config.js";
 import { enablePluginInConfig } from "../../../plugins/enable.js";
 import { resolvePreferredProviderForAuthChoice } from "../../../plugins/provider-auth-choice-preference.js";
 import type {
@@ -29,9 +29,9 @@ const loadAuthChoicePluginProvidersRuntime = createLazyRuntimeSurface(
 );
 
 function buildIsolatedProviderResolutionConfig(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   providerId: string | undefined,
-): OpenClawConfig {
+): Hanzo BotConfig {
   if (!providerId) {
     return cfg;
   }
@@ -54,11 +54,11 @@ function buildIsolatedProviderResolutionConfig(
 }
 
 export async function applyNonInteractivePluginProviderChoice(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: Hanzo BotConfig;
   authChoice: string;
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: OpenClawConfig;
+  baseConfig: Hanzo BotConfig;
   resolveApiKey: (input: ProviderResolveNonInteractiveApiKeyParams) => Promise<{
     key: string;
     source: "profile" | "env" | "flag";
@@ -67,7 +67,7 @@ export async function applyNonInteractivePluginProviderChoice(params: {
   toApiKeyCredential: (
     input: ProviderNonInteractiveApiKeyCredentialParams,
   ) => ApiKeyCredential | null;
-}): Promise<OpenClawConfig | null | undefined> {
+}): Promise<Hanzo BotConfig | null | undefined> {
   const agentId = resolveDefaultAgentId(params.nextConfig);
   const agentDir = resolveAgentDir(params.nextConfig, agentId);
   const workspaceDir =

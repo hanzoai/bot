@@ -1,16 +1,16 @@
 ---
 name: openclaw-parallels-smoke
-description: End-to-end Parallels smoke, upgrade, and rerun workflow for OpenClaw across macOS, Windows, and Linux guests. Use when Codex needs to run, rerun, debug, or interpret VM-based install, onboarding, gateway smoke tests, latest-release-to-main upgrade checks, fresh snapshot retests, or optional Discord roundtrip verification under Parallels.
+description: End-to-end Parallels smoke, upgrade, and rerun workflow for Hanzo Bot across macOS, Windows, and Linux guests. Use when Codex needs to run, rerun, debug, or interpret VM-based install, onboarding, gateway smoke tests, latest-release-to-main upgrade checks, fresh snapshot retests, or optional Discord roundtrip verification under Parallels.
 ---
 
-# OpenClaw Parallels Smoke
+# Hanzo Bot Parallels Smoke
 
 Use this skill for Parallels guest workflows and smoke interpretation. Do not load it for normal repo work.
 
 ## Global rules
 
 - Use the snapshot most closely matching the requested fresh baseline.
-- Gateway verification in smoke runs should use `openclaw gateway status --deep --require-rpc` unless the stable version being checked does not support it yet.
+- Gateway verification in smoke runs should use `hanzo-bot gateway status --deep --require-rpc` unless the stable version being checked does not support it yet.
 - Stable `2026.3.12` pre-upgrade diagnostics may require a plain `gateway status --deep` fallback.
 - Treat `precheck=latest-ref-fail` on that stable pre-upgrade lane as baseline, not automatically a regression.
 - Pass `--json` for machine-readable summaries.
@@ -52,7 +52,7 @@ Use this skill for Parallels guest workflows and smoke interpretation. Do not lo
   - `--discord-guild-id`
   - `--discord-channel-id`
 - Keep the Discord token only in a host env var.
-- Use installed `openclaw message send/read`, not `node openclaw.mjs message ...`.
+- Use installed `hanzo-bot message send/read`, not `node hanzo-bot.mjs message ...`.
 - Set `channels.discord.guilds` as one JSON object, not dotted config paths with snowflakes.
 - Avoid long `prlctl enter` or expect-driven Discord config scripts; prefer `prlctl exec --current-user /bin/sh -lc ...` with short commands.
 - For a narrower macOS-only Discord proof run, the existing `parallels-discord-roundtrip` skill is the deep-dive companion.

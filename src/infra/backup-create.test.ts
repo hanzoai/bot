@@ -61,13 +61,13 @@ describe("formatBackupCreateSummary", () => {
             kind: "config",
             sourcePath: "/config",
             archivePath: "archive/config",
-            displayPath: "~/.openclaw/config.json",
+            displayPath: "~/.hanzo/bot/config.json",
           },
           {
             kind: "credentials",
             sourcePath: "/oauth",
             archivePath: "archive/oauth",
-            displayPath: "~/.openclaw/oauth",
+            displayPath: "~/.hanzo/bot/oauth",
           },
         ],
       }),
@@ -76,8 +76,8 @@ describe("formatBackupCreateSummary", () => {
     expect(lines).toEqual([
       "Backup archive: /tmp/openclaw-backup.tar.gz",
       "Included 2 paths:",
-      "- config: ~/.openclaw/config.json",
-      "- credentials: ~/.openclaw/oauth",
+      "- config: ~/.hanzo/bot/config.json",
+      "- credentials: ~/.hanzo/bot/oauth",
       "Dry run only; archive was not written.",
     ]);
   });

@@ -1,8 +1,8 @@
 import AppKit
 import Foundation
-import OpenClawIPC
+import Hanzo BotIPC
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized)
 @MainActor

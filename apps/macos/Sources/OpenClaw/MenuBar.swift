@@ -8,7 +8,7 @@ import Security
 import SwiftUI
 
 @main
-struct OpenClawApp: App {
+struct Hanzo BotApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @State private var state: AppState
     private static let logger = Logger(subsystem: "ai.openclaw", category: "app")
@@ -32,7 +32,7 @@ struct OpenClawApp: App {
     }
 
     init() {
-        OpenClawLogging.bootstrapIfNeeded()
+        Hanzo BotLogging.bootstrapIfNeeded()
 
         Self.applyAttachOnlyOverrideIfNeeded()
         _state = State(initialValue: AppStateStore.shared)

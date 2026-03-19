@@ -1,19 +1,19 @@
 ---
-summary: "OpenClaw on Oracle Cloud (Always Free ARM)"
+summary: "Hanzo Bot on Oracle Cloud (Always Free ARM)"
 read_when:
-  - Setting up OpenClaw on Oracle Cloud
-  - Looking for low-cost VPS hosting for OpenClaw
-  - Want 24/7 OpenClaw on a small server
+  - Setting up Hanzo Bot on Oracle Cloud
+  - Looking for low-cost VPS hosting for Hanzo Bot
+  - Want 24/7 Hanzo Bot on a small server
 title: "Oracle Cloud"
 ---
 
-# OpenClaw on Oracle Cloud (OCI)
+# Hanzo Bot on Oracle Cloud (OCI)
 
 ## Goal
 
-Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier.
+Run a persistent Hanzo Bot Gateway on Oracle Cloud's **Always Free** ARM tier.
 
-Oracle’s free tier can be a great fit for OpenClaw (especially if you already have an OCI account), but it comes with tradeoffs:
+Oracle’s free tier can be a great fit for Hanzo Bot (especially if you already have an OCI account), but it comes with tradeoffs:
 
 - ARM architecture (most things work, but some binaries may be x86-only)
 - Capacity and signup can be finicky
@@ -96,10 +96,10 @@ tailscale status
 
 **From now on, connect via Tailscale:** `ssh ubuntu@openclaw` (or use the Tailscale IP).
 
-## 5) Install OpenClaw
+## 5) Install Hanzo Bot
 
 ```bash
-curl -fsSL https://openclaw.ai/install.sh | bash
+curl -fsSL https://hanzo.bot/install.sh | bash
 source ~/.bashrc
 ```
 
@@ -178,7 +178,7 @@ No SSH tunnel needed. Tailscale provides:
 
 With the VCN locked down (only UDP 41641 open) and the Gateway bound to loopback, you get strong defense-in-depth: public traffic is blocked at the network edge, and admin access happens over your tailnet.
 
-This setup often removes the _need_ for extra host-based firewall rules purely to stop Internet-wide SSH brute force — but you should still keep the OS updated, run `openclaw security audit`, and verify you aren’t accidentally listening on public interfaces.
+This setup often removes the _need_ for extra host-based firewall rules purely to stop Internet-wide SSH brute force — but you should still keep the OS updated, run `hanzo-bot security audit`, and verify you aren’t accidentally listening on public interfaces.
 
 ### Already protected
 
@@ -194,7 +194,7 @@ This setup often removes the _need_ for extra host-based firewall rules purely t
 ### Still Recommended
 
 - **Credential permissions:** `chmod 700 ~/.openclaw`
-- **Security audit:** `openclaw security audit`
+- **Security audit:** `hanzo-bot security audit`
 - **System updates:** `sudo apt update && sudo apt upgrade` regularly
 - **Monitor Tailscale:** Review devices in [Tailscale admin console](https://login.tailscale.com/admin)
 
@@ -283,13 +283,13 @@ Most npm packages work fine. For binaries, look for `linux-arm64` or `aarch64` r
 
 All state lives in:
 
-- `~/.openclaw/` — config, credentials, session data
-- `~/.openclaw/workspace/` — workspace (SOUL.md, memory, artifacts)
+- `~/.hanzo/bot/` — config, credentials, session data
+- `~/.hanzo/bot/workspace/` — workspace (SOUL.md, memory, artifacts)
 
 Back up periodically:
 
 ```bash
-tar -czvf openclaw-backup.tar.gz ~/.openclaw ~/.openclaw/workspace
+tar -czvf openclaw-backup.tar.gz ~/.openclaw ~/.hanzo/bot/workspace
 ```
 
 ---

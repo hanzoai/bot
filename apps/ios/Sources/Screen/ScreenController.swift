@@ -1,4 +1,4 @@
-import OpenClawKit
+import Hanzo BotKit
 import Observation
 import UIKit
 import WebKit
@@ -159,7 +159,7 @@ final class ScreenController {
 
     func snapshotBase64(
         maxWidth: CGFloat? = nil,
-        format: OpenClawCanvasSnapshotFormat,
+        format: Hanzo BotCanvasSnapshotFormat,
         quality: Double? = nil) async throws -> String
     {
         let image = try await self.snapshotImage(maxWidth: maxWidth)
@@ -226,7 +226,7 @@ final class ScreenController {
         subdirectory: String)
         -> URL?
     {
-        let bundle = OpenClawKitResources.bundle
+        let bundle = Hanzo BotKitResources.bundle
         return bundle.url(forResource: name, withExtension: ext, subdirectory: subdirectory)
             ?? bundle.url(forResource: name, withExtension: ext)
     }

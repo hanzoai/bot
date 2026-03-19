@@ -5,7 +5,7 @@ struct FileHandleLegacyAPIGuardTests {
     @Test func `sources avoid legacy non throwing file handle read AP is`() throws {
         let testFile = URL(fileURLWithPath: #filePath)
         let packageRoot = testFile
-            .deletingLastPathComponent() // OpenClawIPCTests
+            .deletingLastPathComponent() // Hanzo BotIPCTests
             .deletingLastPathComponent() // Tests
             .deletingLastPathComponent() // apps/macos
 

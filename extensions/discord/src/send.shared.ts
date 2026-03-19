@@ -9,7 +9,7 @@ import {
 import { PollLayoutType } from "discord-api-types/payloads/v10";
 import type { RESTAPIPoll } from "discord-api-types/rest/v10";
 import { Routes, type APIChannel, type APIEmbed } from "discord-api-types/v10";
-import { loadConfig, type OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import { loadConfig, type Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { RetryRunner } from "openclaw/plugin-sdk/infra-runtime";
 import { buildOutboundMediaLoadOptions } from "openclaw/plugin-sdk/media-runtime";
 import {
@@ -85,7 +85,7 @@ function parseRecipient(raw: string): DiscordRecipient {
 export async function parseAndResolveRecipient(
   raw: string,
   accountId?: string,
-  cfg?: OpenClawConfig,
+  cfg?: Hanzo BotConfig,
 ): Promise<DiscordRecipient> {
   const resolvedCfg = cfg ?? loadConfig();
   const accountInfo = resolveDiscordAccount({ cfg: resolvedCfg, accountId });

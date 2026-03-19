@@ -1,14 +1,14 @@
 import { describe, expect, it, test } from "vitest";
 import {
-  applyOpenClawManifestInstallCommonFields,
+  applyHanzo BotManifestInstallCommonFields,
   getFrontmatterString,
   normalizeStringList,
   parseFrontmatterBool,
-  parseOpenClawManifestInstallBase,
-  resolveOpenClawManifestBlock,
-  resolveOpenClawManifestInstall,
-  resolveOpenClawManifestOs,
-  resolveOpenClawManifestRequires,
+  parseHanzo BotManifestInstallBase,
+  resolveHanzo BotManifestBlock,
+  resolveHanzo BotManifestInstall,
+  resolveHanzo BotManifestOs,
+  resolveHanzo BotManifestRequires,
 } from "./frontmatter.js";
 
 describe("shared/frontmatter", () => {
@@ -30,9 +30,9 @@ describe("shared/frontmatter", () => {
     expect(parseFrontmatterBool("maybe", false)).toBe(false);
   });
 
-  test("resolveOpenClawManifestBlock reads current manifest keys and custom metadata fields", () => {
+  test("resolveHanzo BotManifestBlock reads current manifest keys and custom metadata fields", () => {
     expect(
-      resolveOpenClawManifestBlock({
+      resolveHanzo BotManifestBlock({
         frontmatter: {
           metadata: "{ openclaw: { foo: 1, bar: 'baz' } }",
         },
@@ -40,7 +40,7 @@ describe("shared/frontmatter", () => {
     ).toEqual({ foo: 1, bar: "baz" });
 
     expect(
-      resolveOpenClawManifestBlock({
+      resolveHanzo BotManifestBlock({
         frontmatter: {
           pluginMeta: "{ openclaw: { foo: 2 } }",
         },
@@ -49,43 +49,43 @@ describe("shared/frontmatter", () => {
     ).toEqual({ foo: 2 });
   });
 
-  test("resolveOpenClawManifestBlock returns undefined for invalid input", () => {
-    expect(resolveOpenClawManifestBlock({ frontmatter: {} })).toBeUndefined();
+  test("resolveHanzo BotManifestBlock returns undefined for invalid input", () => {
+    expect(resolveHanzo BotManifestBlock({ frontmatter: {} })).toBeUndefined();
     expect(
-      resolveOpenClawManifestBlock({ frontmatter: { metadata: "not-json5" } }),
+      resolveHanzo BotManifestBlock({ frontmatter: { metadata: "not-json5" } }),
     ).toBeUndefined();
-    expect(resolveOpenClawManifestBlock({ frontmatter: { metadata: "123" } })).toBeUndefined();
-    expect(resolveOpenClawManifestBlock({ frontmatter: { metadata: "[]" } })).toBeUndefined();
+    expect(resolveHanzo BotManifestBlock({ frontmatter: { metadata: "123" } })).toBeUndefined();
+    expect(resolveHanzo BotManifestBlock({ frontmatter: { metadata: "[]" } })).toBeUndefined();
     expect(
-      resolveOpenClawManifestBlock({ frontmatter: { metadata: "{ nope: { a: 1 } }" } }),
+      resolveHanzo BotManifestBlock({ frontmatter: { metadata: "{ nope: { a: 1 } }" } }),
     ).toBeUndefined();
   });
 
   it("normalizes manifest requirement and os lists", () => {
     expect(
-      resolveOpenClawManifestRequires({
+      resolveHanzo BotManifestRequires({
         requires: {
           bins: "bun, node",
           anyBins: [" ffmpeg ", ""],
-          env: ["OPENCLAW_TOKEN", " OPENCLAW_URL "],
+          env: ["BOT_TOKEN", " BOT_URL "],
           config: null,
         },
       }),
     ).toEqual({
       bins: ["bun", "node"],
       anyBins: ["ffmpeg"],
-      env: ["OPENCLAW_TOKEN", "OPENCLAW_URL"],
+      env: ["BOT_TOKEN", "BOT_URL"],
       config: [],
     });
-    expect(resolveOpenClawManifestRequires({})).toBeUndefined();
-    expect(resolveOpenClawManifestOs({ os: [" darwin ", "linux", ""] })).toEqual([
+    expect(resolveHanzo BotManifestRequires({})).toBeUndefined();
+    expect(resolveHanzo BotManifestOs({ os: [" darwin ", "linux", ""] })).toEqual([
       "darwin",
       "linux",
     ]);
   });
 
   it("parses and applies install common fields", () => {
-    const parsed = parseOpenClawManifestInstallBase(
+    const parsed = parseHanzo BotManifestInstallBase(
       {
         type: " Brew ",
         id: "brew.git",
@@ -107,9 +107,9 @@ describe("shared/frontmatter", () => {
       label: "Git",
       bins: ["git", "git"],
     });
-    expect(parseOpenClawManifestInstallBase({ kind: "bad" }, ["brew"])).toBeUndefined();
+    expect(parseHanzo BotManifestInstallBase({ kind: "bad" }, ["brew"])).toBeUndefined();
     expect(
-      applyOpenClawManifestInstallCommonFields<{
+      applyHanzo BotManifestInstallCommonFields<{
         extra: boolean;
         id?: string;
         label?: string;
@@ -124,7 +124,7 @@ describe("shared/frontmatter", () => {
   });
 
   it("prefers explicit kind, ignores invalid common fields, and leaves missing ones untouched", () => {
-    const parsed = parseOpenClawManifestInstallBase(
+    const parsed = parseHanzo BotManifestInstallBase(
       {
         kind: " npm ",
         type: "brew",
@@ -146,7 +146,7 @@ describe("shared/frontmatter", () => {
       kind: "npm",
     });
     expect(
-      applyOpenClawManifestInstallCommonFields(
+      applyHanzo BotManifestInstallCommonFields(
         { id: "keep", label: "Keep", bins: ["bun"] },
         parsed!,
       ),
@@ -159,7 +159,7 @@ describe("shared/frontmatter", () => {
 
   it("maps install entries through the parser and filters rejected specs", () => {
     expect(
-      resolveOpenClawManifestInstall(
+      resolveHanzo BotManifestInstall(
         {
           install: [{ id: "keep" }, { id: "drop" }, "bad"],
         },

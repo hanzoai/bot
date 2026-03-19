@@ -6,7 +6,7 @@ import openAIPlugin from "../../../extensions/openai/index.js";
 import qwenPortalPlugin from "../../../extensions/qwen-portal-auth/index.js";
 import { createCapturedPluginRegistration } from "../../test-utils/plugin-registration.js";
 import { createProviderUsageFetch, makeResponse } from "../../test-utils/provider-usage-fetch.js";
-import type { OpenClawPluginApi, ProviderPlugin } from "../types.js";
+import type { Hanzo BotPluginApi, ProviderPlugin } from "../types.js";
 import type { ProviderRuntimeModel } from "../types.js";
 import { requireProviderContractProvider as requireBundledProviderContractProvider } from "./registry.js";
 
@@ -46,7 +46,7 @@ function createModel(overrides: Partial<ProviderRuntimeModel> & Pick<ProviderRun
   } satisfies ProviderRuntimeModel;
 }
 
-function registerProviders(...plugins: Array<{ register(api: OpenClawPluginApi): void }>) {
+function registerProviders(...plugins: Array<{ register(api: Hanzo BotPluginApi): void }>) {
   const captured = createCapturedPluginRegistration();
   for (const plugin of plugins) {
     plugin.register(captured.api);
@@ -152,7 +152,7 @@ describe("provider runtime contract", () => {
       });
 
       expect(hint).toContain("suggested profile: anthropic:oauth-user@example.com");
-      expect(hint).toContain("openclaw doctor --yes");
+      expect(hint).toContain("hanzo-bot doctor --yes");
     });
 
     it("owns usage snapshot fetching", async () => {

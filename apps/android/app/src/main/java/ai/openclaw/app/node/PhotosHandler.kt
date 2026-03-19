@@ -1,4 +1,4 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
 import android.Manifest
 import android.content.ContentResolver
@@ -12,7 +12,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.scale
-import ai.openclaw.app.gateway.GatewaySession
+import ai.hanzo.bot.app.gateway.GatewaySession
 import java.io.ByteArrayOutputStream
 import java.time.Instant
 import kotlin.math.max

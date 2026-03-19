@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawProtocol
+import Hanzo BotProtocol
 import UniformTypeIdentifiers
 
 actor MacNodeBrowserProxy {
@@ -14,8 +14,8 @@ actor MacNodeBrowserProxy {
     private struct RequestParams: Decodable {
         let method: String?
         let path: String?
-        let query: [String: OpenClawProtocol.AnyCodable]?
-        let body: OpenClawProtocol.AnyCodable?
+        let query: [String: Hanzo BotProtocol.AnyCodable]?
+        let body: Hanzo BotProtocol.AnyCodable?
         let timeoutMs: Int?
         let profile: String?
     }

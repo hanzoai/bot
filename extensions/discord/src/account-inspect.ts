@@ -8,7 +8,7 @@ import {
   resolveDefaultDiscordAccountId,
   resolveDiscordAccountConfig,
 } from "./accounts.js";
-import type { DiscordAccountConfig, OpenClawConfig } from "./runtime-api.js";
+import type { DiscordAccountConfig, Hanzo BotConfig } from "./runtime-api.js";
 
 export type DiscordCredentialStatus = "available" | "configured_unavailable" | "missing";
 
@@ -47,7 +47,7 @@ function inspectDiscordTokenValue(value: unknown): {
 }
 
 export function inspectDiscordAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   envToken?: string | null;
 }): InspectedDiscordAccount {

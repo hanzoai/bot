@@ -12,15 +12,15 @@ docker run --rm -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 -i "$IMAGE_NAME" bash -s <<
 set -euo pipefail
 
 if [ -f dist/index.mjs ]; then
-  OPENCLAW_ENTRY="dist/index.mjs"
+  BOT_ENTRY="dist/index.mjs"
 elif [ -f dist/index.js ]; then
-  OPENCLAW_ENTRY="dist/index.js"
+  BOT_ENTRY="dist/index.js"
 else
   echo "Missing dist/index.(m)js (build output):"
   ls -la dist || true
   exit 1
 fi
-export OPENCLAW_ENTRY
+export BOT_ENTRY
 
 home_dir=$(mktemp -d "/tmp/openclaw-plugins-e2e.XXXXXX")
 export HOME="$home_dir"
@@ -35,9 +35,9 @@ write_fixture_plugin() {
   mkdir -p "$dir"
   cat > "$dir/package.json" <<JSON
 {
-  "name": "@openclaw/$id",
+  "name": "@hanzo/bot-$id",
   "version": "$version",
-  "openclaw": { "extensions": ["./index.js"] }
+  "@hanzo/bot": { "extensions": ["./index.js"] }
 }
 JSON
   cat > "$dir/index.js" <<JS
@@ -68,9 +68,9 @@ fs.writeFileSync(file, `${JSON.stringify(parsed, null, 2)}\n`);
 NODE
 }
 
-mkdir -p "$HOME/.openclaw/extensions/demo-plugin"
+mkdir -p "$HOME/.hanzo/bot/extensions/demo-plugin"
 
-cat > "$HOME/.openclaw/extensions/demo-plugin/index.js" <<'JS'
+cat > "$HOME/.hanzo/bot/extensions/demo-plugin/index.js" <<'JS'
 module.exports = {
   id: "demo-plugin",
   name: "Demo Plugin",
@@ -83,7 +83,7 @@ module.exports = {
   },
 };
 JS
-cat > "$HOME/.openclaw/extensions/demo-plugin/openclaw.plugin.json" <<'JSON'
+cat > "$HOME/.hanzo/bot/extensions/demo-plugin/openclaw.plugin.json" <<'JSON'
 {
   "id": "demo-plugin",
   "configSchema": {
@@ -93,7 +93,7 @@ cat > "$HOME/.openclaw/extensions/demo-plugin/openclaw.plugin.json" <<'JSON'
 }
 JSON
 
-node "$OPENCLAW_ENTRY" plugins list --json > /tmp/plugins.json
+node "$BOT_ENTRY" plugins list --json > /tmp/plugins.json
 
 node - <<'NODE'
 const fs = require("node:fs");
@@ -129,9 +129,9 @@ pack_dir="$(mktemp -d "/tmp/openclaw-plugin-pack.XXXXXX")"
 mkdir -p "$pack_dir/package"
 cat > "$pack_dir/package/package.json" <<'JSON'
 {
-  "name": "@openclaw/demo-plugin-tgz",
+  "name": "@hanzo/bot-demo-plugin-tgz",
   "version": "0.0.1",
-  "openclaw": { "extensions": ["./index.js"] }
+  "@hanzo/bot": { "extensions": ["./index.js"] }
 }
 JSON
 cat > "$pack_dir/package/index.js" <<'JS'
@@ -154,8 +154,8 @@ cat > "$pack_dir/package/openclaw.plugin.json" <<'JSON'
 JSON
 tar -czf /tmp/demo-plugin-tgz.tgz -C "$pack_dir" package
 
-node "$OPENCLAW_ENTRY" plugins install /tmp/demo-plugin-tgz.tgz
-node "$OPENCLAW_ENTRY" plugins list --json > /tmp/plugins2.json
+node "$BOT_ENTRY" plugins install /tmp/demo-plugin-tgz.tgz
+node "$BOT_ENTRY" plugins list --json > /tmp/plugins2.json
 
 node - <<'NODE'
 const fs = require("node:fs");
@@ -176,9 +176,9 @@ echo "Testing install from local folder (plugins.load.paths)..."
 dir_plugin="$(mktemp -d "/tmp/openclaw-plugin-dir.XXXXXX")"
 cat > "$dir_plugin/package.json" <<'JSON'
 {
-  "name": "@openclaw/demo-plugin-dir",
+  "name": "@hanzo/bot-demo-plugin-dir",
   "version": "0.0.1",
-  "openclaw": { "extensions": ["./index.js"] }
+  "@hanzo/bot": { "extensions": ["./index.js"] }
 }
 JSON
 cat > "$dir_plugin/index.js" <<'JS'
@@ -200,8 +200,8 @@ cat > "$dir_plugin/openclaw.plugin.json" <<'JSON'
 }
 JSON
 
-node "$OPENCLAW_ENTRY" plugins install "$dir_plugin"
-node "$OPENCLAW_ENTRY" plugins list --json > /tmp/plugins3.json
+node "$BOT_ENTRY" plugins install "$dir_plugin"
+node "$BOT_ENTRY" plugins list --json > /tmp/plugins3.json
 
 node - <<'NODE'
 const fs = require("node:fs");
@@ -223,9 +223,9 @@ file_pack_dir="$(mktemp -d "/tmp/openclaw-plugin-filepack.XXXXXX")"
 mkdir -p "$file_pack_dir/package"
 cat > "$file_pack_dir/package/package.json" <<'JSON'
 {
-  "name": "@openclaw/demo-plugin-file",
+  "name": "@hanzo/bot-demo-plugin-file",
   "version": "0.0.1",
-  "openclaw": { "extensions": ["./index.js"] }
+  "@hanzo/bot": { "extensions": ["./index.js"] }
 }
 JSON
 cat > "$file_pack_dir/package/index.js" <<'JS'
@@ -247,8 +247,8 @@ cat > "$file_pack_dir/package/openclaw.plugin.json" <<'JSON'
 }
 JSON
 
-node "$OPENCLAW_ENTRY" plugins install "file:$file_pack_dir/package"
-node "$OPENCLAW_ENTRY" plugins list --json > /tmp/plugins4.json
+node "$BOT_ENTRY" plugins install "file:$file_pack_dir/package"
+node "$BOT_ENTRY" plugins list --json > /tmp/plugins4.json
 
 node - <<'NODE'
 const fs = require("node:fs");
@@ -315,7 +315,7 @@ cat > "$HOME/.claude/plugins/known_marketplaces.json" <<JSON
 }
 JSON
 
-node "$OPENCLAW_ENTRY" plugins marketplace list claude-fixtures --json > /tmp/marketplace-list.json
+node "$BOT_ENTRY" plugins marketplace list claude-fixtures --json > /tmp/marketplace-list.json
 
 node - <<'NODE'
 const fs = require("node:fs");
@@ -331,9 +331,9 @@ if (!names.includes("marketplace-shortcut") || !names.includes("marketplace-dire
 console.log("ok");
 NODE
 
-node "$OPENCLAW_ENTRY" plugins install marketplace-shortcut@claude-fixtures
-node "$OPENCLAW_ENTRY" plugins install marketplace-direct --marketplace claude-fixtures
-node "$OPENCLAW_ENTRY" plugins list --json > /tmp/plugins-marketplace.json
+node "$BOT_ENTRY" plugins install marketplace-shortcut@claude-fixtures
+node "$BOT_ENTRY" plugins install marketplace-direct --marketplace claude-fixtures
+node "$BOT_ENTRY" plugins list --json > /tmp/plugins-marketplace.json
 
 node - <<'NODE'
 const fs = require("node:fs");
@@ -393,9 +393,9 @@ write_fixture_plugin \
   "0.0.2" \
   "demo.marketplace.shortcut.v2" \
   "Marketplace Shortcut"
-node "$OPENCLAW_ENTRY" plugins update marketplace-shortcut --dry-run
-node "$OPENCLAW_ENTRY" plugins update marketplace-shortcut
-node "$OPENCLAW_ENTRY" plugins list --json > /tmp/plugins-marketplace-updated.json
+node "$BOT_ENTRY" plugins update marketplace-shortcut --dry-run
+node "$BOT_ENTRY" plugins update marketplace-shortcut
+node "$BOT_ENTRY" plugins list --json > /tmp/plugins-marketplace-updated.json
 
 node - <<'NODE'
 const fs = require("node:fs");

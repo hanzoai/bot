@@ -1,9 +1,9 @@
-import OpenClawProtocol
+import Hanzo BotProtocol
 import SwiftUI
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
-private typealias ProtoAnyCodable = OpenClawProtocol.AnyCodable
+private typealias ProtoAnyCodable = Hanzo BotProtocol.AnyCodable
 
 @Suite(.serialized)
 @MainActor

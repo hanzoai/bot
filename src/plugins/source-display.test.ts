@@ -10,7 +10,7 @@ function createPluginSourceRoots() {
     "homebrew",
     "lib",
     "node_modules",
-    "openclaw",
+    "@hanzo/bot",
     "extensions",
   );
   const globalRoot = path.resolve(path.sep, "Users", "x", ".openclaw", "extensions");
@@ -67,8 +67,8 @@ describe("formatPluginSourceForTable", () => {
     const homeDir = path.resolve(path.sep, "tmp", "openclaw-home");
     const roots = withEnv(
       {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(ignoredHome, "ignored-bundled"),
-        OPENCLAW_STATE_DIR: path.join(ignoredHome, "ignored-state"),
+        BOT_BUNDLED_PLUGINS_DIR: path.join(ignoredHome, "ignored-bundled"),
+        BOT_STATE_DIR: path.join(ignoredHome, "ignored-state"),
         HOME: ignoredHome,
       },
       () =>
@@ -76,8 +76,8 @@ describe("formatPluginSourceForTable", () => {
           env: {
             ...process.env,
             HOME: homeDir,
-            OPENCLAW_BUNDLED_PLUGINS_DIR: "~/bundled",
-            OPENCLAW_STATE_DIR: "~/state",
+            BOT_BUNDLED_PLUGINS_DIR: "~/bundled",
+            BOT_STATE_DIR: "~/state",
           },
           workspaceDir: "~/ws",
         }),

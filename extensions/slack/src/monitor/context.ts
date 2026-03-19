@@ -1,7 +1,7 @@
 import type { App } from "@slack/bolt";
 import { formatAllowlistMatchMeta } from "openclaw/plugin-sdk/channel-runtime";
 import type {
-  OpenClawConfig,
+  Hanzo BotConfig,
   SlackReactionNotificationMode,
 } from "openclaw/plugin-sdk/config-runtime";
 import { resolveSessionKey, type SessionScope } from "openclaw/plugin-sdk/config-runtime";
@@ -22,7 +22,7 @@ import { isSlackChannelAllowedByPolicy } from "./policy.js";
 export { inferSlackChannelType, normalizeSlackChannelType } from "./channel-type.js";
 
 export type SlackMonitorContext = {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId: string;
   botToken: string;
   app: App;
@@ -88,7 +88,7 @@ export type SlackMonitorContext = {
 };
 
 export function createSlackMonitorContext(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId: string;
   botToken: string;
   app: App;

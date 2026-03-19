@@ -1,20 +1,20 @@
 ---
-summary: "Gmail Pub/Sub push wired into OpenClaw webhooks via gogcli"
+summary: "Gmail Pub/Sub push wired into Hanzo Bot webhooks via gogcli"
 read_when:
-  - Wiring Gmail inbox triggers to OpenClaw
+  - Wiring Gmail inbox triggers to Hanzo Bot
   - Setting up Pub/Sub push for agent wake
 title: "Gmail PubSub"
 ---
 
-# Gmail Pub/Sub -> OpenClaw
+# Gmail Pub/Sub -> Hanzo Bot
 
-Goal: Gmail watch -> Pub/Sub push -> `gog gmail watch serve` -> OpenClaw webhook.
+Goal: Gmail watch -> Pub/Sub push -> `gog gmail watch serve` -> Hanzo Bot webhook.
 
 ## Prereqs
 
 - `gcloud` installed and logged in ([install guide](https://docs.cloud.google.com/sdk/docs/install-sdk)).
 - `gog` (gogcli) installed and authorized for the Gmail account ([gogcli.sh](https://gogcli.sh/)).
-- OpenClaw hooks enabled (see [Webhooks](/automation/webhook)).
+- Hanzo Bot hooks enabled (see [Webhooks](/automation/webhook)).
 - `tailscale` logged in ([tailscale.com](https://tailscale.com/)). Supported setup uses Tailscale Funnel for the public HTTPS endpoint.
   Other tunnel services can work, but are DIY/unsupported and require manual wiring.
   Right now, Tailscale is what we support.
@@ -25,7 +25,7 @@ Example hook config (enable Gmail preset mapping):
 {
   hooks: {
     enabled: true,
-    token: "OPENCLAW_HOOK_TOKEN",
+    token: "BOT_HOOK_TOKEN",
     path: "/hooks",
     presets: ["gmail"],
   },
@@ -39,7 +39,7 @@ that sets `deliver` + optional `channel`/`to`:
 {
   hooks: {
     enabled: true,
-    token: "OPENCLAW_HOOK_TOKEN",
+    token: "BOT_HOOK_TOKEN",
     presets: ["gmail"],
     mappings: [
       {
@@ -88,11 +88,11 @@ Notes:
   To disable (dangerous), set `hooks.gmail.allowUnsafeExternalContent: true`.
 
 To customize payload handling further, add `hooks.mappings` or a JS/TS transform module
-under `~/.openclaw/hooks/transforms` (see [Webhooks](/automation/webhook)).
+under `~/.hanzo/bot/hooks/transforms` (see [Webhooks](/automation/webhook)).
 
 ## Wizard (recommended)
 
-Use the OpenClaw helper to wire everything together (installs deps on macOS via brew):
+Use the Hanzo Bot helper to wire everything together (installs deps on macOS via brew):
 
 ```bash
 openclaw webhooks gmail setup \
@@ -102,10 +102,10 @@ openclaw webhooks gmail setup \
 Defaults:
 
 - Uses Tailscale Funnel for the public push endpoint.
-- Writes `hooks.gmail` config for `openclaw webhooks gmail run`.
+- Writes `hooks.gmail` config for `hanzo-bot webhooks gmail run`.
 - Enables the Gmail hook preset (`hooks.presets: ["gmail"]`).
 
-Path note: when `tailscale.mode` is enabled, OpenClaw automatically sets
+Path note: when `tailscale.mode` is enabled, Hanzo Bot automatically sets
 `hooks.gmail.serve.path` to `/` and keeps the public path at
 `hooks.gmail.tailscale.path` (default `/gmail-pubsub`) because Tailscale
 strips the set-path prefix before proxying.
@@ -122,7 +122,7 @@ Gateway auto-start (recommended):
 
 - When `hooks.enabled=true` and `hooks.gmail.account` is set, the Gateway starts
   `gog gmail watch serve` on boot and auto-renews the watch.
-- Set `OPENCLAW_SKIP_GMAIL_WATCHER=1` to opt out (useful if you run the daemon yourself).
+- Set `BOT_SKIP_GMAIL_WATCHER=1` to opt out (useful if you run the daemon yourself).
 - Do not run the manual daemon at the same time, or you will hit
   `listen tcp 127.0.0.1:8788: bind: address already in use`.
 
@@ -186,7 +186,7 @@ gog gmail watch serve \
   --path /gmail-pubsub \
   --token <shared> \
   --hook-url http://127.0.0.1:18789/hooks/gmail \
-  --hook-token OPENCLAW_HOOK_TOKEN \
+  --hook-token BOT_HOOK_TOKEN \
   --include-body \
   --max-bytes 20000
 ```
@@ -194,10 +194,10 @@ gog gmail watch serve \
 Notes:
 
 - `--token` protects the push endpoint (`x-gog-token` or `?token=`).
-- `--hook-url` points to OpenClaw `/hooks/gmail` (mapped; isolated run + summary to main).
-- `--include-body` and `--max-bytes` control the body snippet sent to OpenClaw.
+- `--hook-url` points to Hanzo Bot `/hooks/gmail` (mapped; isolated run + summary to main).
+- `--include-body` and `--max-bytes` control the body snippet sent to Hanzo Bot.
 
-Recommended: `openclaw webhooks gmail run` wraps the same flow and auto-renews the watch.
+Recommended: `hanzo-bot webhooks gmail run` wraps the same flow and auto-renews the watch.
 
 ## Expose the handler (advanced, unsupported)
 

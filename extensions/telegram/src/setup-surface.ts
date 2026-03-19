@@ -2,7 +2,7 @@ import {
   createAllowFromSection,
   DEFAULT_ACCOUNT_ID,
   hasConfiguredSecretInput,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
   patchChannelConfigForAccount,
   setChannelDmPolicyWithAllowFrom,
   setSetupChannelEnabled,

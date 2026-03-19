@@ -1,5 +1,5 @@
 ---
-summary: "Optional Docker-based setup and onboarding for OpenClaw"
+summary: "Optional Docker-based setup and onboarding for Hanzo Bot"
 read_when:
   - You want a containerized gateway instead of local installs
   - You are validating the Docker flow
@@ -12,7 +12,7 @@ Docker is **optional**. Use it only if you want a containerized gateway or to va
 
 ## Is Docker right for me?
 
-- **Yes**: you want an isolated, throwaway gateway environment or to run OpenClaw on a host without local installs.
+- **Yes**: you want an isolated, throwaway gateway environment or to run Hanzo Bot on a host without local installs.
 - **No**: you are running on your own machine and just want the fastest dev loop. Use the normal install flow instead.
 - **Sandboxing note**: agent sandboxing uses Docker too, but it does **not** require the full gateway to run in Docker. See [Sandboxing](/gateway/sandboxing).
 
@@ -38,12 +38,12 @@ Docker is **optional**. Use it only if you want a containerized gateway or to va
     This builds the gateway image locally. To use a pre-built image instead:
 
     ```bash
-    export OPENCLAW_IMAGE="ghcr.io/openclaw/openclaw:latest"
+    export BOT_IMAGE="ghcr.io/hanzoai/bot:latest"
     ./docker-setup.sh
     ```
 
     Pre-built images are published at the
-    [GitHub Container Registry](https://github.com/openclaw/openclaw/pkgs/container/openclaw).
+    [GitHub Container Registry](https://github.com/hanzoai/bot/pkgs/container/openclaw).
     Common tags: `main`, `latest`, `<version>` (e.g. `2026.2.26`).
 
   </Step>
@@ -99,8 +99,8 @@ docker compose up -d openclaw-gateway
 ```
 
 <Note>
-Run `docker compose` from the repo root. If you enabled `OPENCLAW_EXTRA_MOUNTS`
-or `OPENCLAW_HOME_VOLUME`, the setup script writes `docker-compose.extra.yml`;
+Run `docker compose` from the repo root. If you enabled `BOT_EXTRA_MOUNTS`
+or `BOT_HOME_VOLUME`, the setup script writes `docker-compose.extra.yml`;
 include it with `-f docker-compose.yml -f docker-compose.extra.yml`.
 </Note>
 
@@ -110,13 +110,13 @@ The setup script accepts these optional environment variables:
 
 | Variable                       | Purpose                                                          |
 | ------------------------------ | ---------------------------------------------------------------- |
-| `OPENCLAW_IMAGE`               | Use a remote image instead of building locally                   |
-| `OPENCLAW_DOCKER_APT_PACKAGES` | Install extra apt packages during build (space-separated)        |
-| `OPENCLAW_EXTENSIONS`          | Pre-install extension deps at build time (space-separated names) |
-| `OPENCLAW_EXTRA_MOUNTS`        | Extra host bind mounts (comma-separated `source:target[:opts]`)  |
-| `OPENCLAW_HOME_VOLUME`         | Persist `/home/node` in a named Docker volume                    |
-| `OPENCLAW_SANDBOX`             | Opt in to sandbox bootstrap (`1`, `true`, `yes`, `on`)           |
-| `OPENCLAW_DOCKER_SOCKET`       | Override Docker socket path                                      |
+| `BOT_IMAGE`               | Use a remote image instead of building locally                   |
+| `BOT_DOCKER_APT_PACKAGES` | Install extra apt packages during build (space-separated)        |
+| `BOT_EXTENSIONS`          | Pre-install extension deps at build time (space-separated names) |
+| `BOT_EXTRA_MOUNTS`        | Extra host bind mounts (comma-separated `source:target[:opts]`)  |
+| `BOT_HOME_VOLUME`         | Persist `/home/node` in a named Docker volume                    |
+| `BOT_SANDBOX`             | Opt in to sandbox bootstrap (`1`, `true`, `yes`, `on`)           |
+| `BOT_DOCKER_SOCKET`       | Override Docker socket path                                      |
 
 ### Health checks
 
@@ -134,12 +134,12 @@ orchestration systems can restart or replace it.
 Authenticated deep health snapshot:
 
 ```bash
-docker compose exec openclaw-gateway node dist/index.js health --token "$OPENCLAW_GATEWAY_TOKEN"
+docker compose exec openclaw-gateway node dist/index.js health --token "$BOT_GATEWAY_TOKEN"
 ```
 
 ### LAN vs loopback
 
-`docker-setup.sh` defaults `OPENCLAW_GATEWAY_BIND=lan` so host access to
+`docker-setup.sh` defaults `BOT_GATEWAY_BIND=lan` so host access to
 `http://127.0.0.1:18789` works with Docker port publishing.
 
 - `lan` (default): host browser and host CLI can reach the published gateway port.
@@ -153,8 +153,8 @@ Use bind mode values in `gateway.bind` (`lan` / `loopback` / `custom` /
 
 ### Storage and persistence
 
-Docker Compose bind-mounts `OPENCLAW_CONFIG_DIR` to `/home/node/.openclaw` and
-`OPENCLAW_WORKSPACE_DIR` to `/home/node/.openclaw/workspace`, so those paths
+Docker Compose bind-mounts `BOT_CONFIG_DIR` to `/home/node/.openclaw` and
+`BOT_WORKSPACE_DIR` to `/home/node/.hanzo/bot/workspace`, so those paths
 survive container replacement.
 
 For full persistence details on VM deployments, see
@@ -168,26 +168,26 @@ and rolling file logs under `/tmp/openclaw/`.
 For easier day-to-day Docker management, install `ClawDock`:
 
 ```bash
-mkdir -p ~/.clawdock && curl -sL https://raw.githubusercontent.com/openclaw/openclaw/main/scripts/shell-helpers/clawdock-helpers.sh -o ~/.clawdock/clawdock-helpers.sh
+mkdir -p ~/.clawdock && curl -sL https://raw.githubusercontent.com/hanzoai/bot/main/scripts/shell-helpers/clawdock-helpers.sh -o ~/.clawdock/clawdock-helpers.sh
 echo 'source ~/.clawdock/clawdock-helpers.sh' >> ~/.zshrc && source ~/.zshrc
 ```
 
 Then use `clawdock-start`, `clawdock-stop`, `clawdock-dashboard`, etc. Run
 `clawdock-help` for all commands.
-See the [`ClawDock` Helper README](https://github.com/openclaw/openclaw/blob/main/scripts/shell-helpers/README.md).
+See the [`ClawDock` Helper README](https://github.com/hanzoai/bot/blob/main/scripts/shell-helpers/README.md).
 
 <AccordionGroup>
   <Accordion title="Enable agent sandbox for Docker gateway">
     ```bash
-    export OPENCLAW_SANDBOX=1
+    export BOT_SANDBOX=1
     ./docker-setup.sh
     ```
 
     Custom socket path (e.g. rootless Docker):
 
     ```bash
-    export OPENCLAW_SANDBOX=1
-    export OPENCLAW_DOCKER_SOCKET=/run/user/1000/docker.sock
+    export BOT_SANDBOX=1
+    export BOT_DOCKER_SOCKET=/run/user/1000/docker.sock
     ./docker-setup.sh
     ```
 
@@ -252,8 +252,8 @@ See the [`ClawDock` Helper README](https://github.com/openclaw/openclaw/blob/mai
     The default image is security-first and runs as non-root `node`. For a more
     full-featured container:
 
-    1. **Persist `/home/node`**: `export OPENCLAW_HOME_VOLUME="openclaw_home"`
-    2. **Bake system deps**: `export OPENCLAW_DOCKER_APT_PACKAGES="git curl jq"`
+    1. **Persist `/home/node`**: `export BOT_HOME_VOLUME="openclaw_home"`
+    2. **Bake system deps**: `export BOT_DOCKER_APT_PACKAGES="git curl jq"`
     3. **Install Playwright browsers**:
        ```bash
        docker compose run --rm openclaw-cli \
@@ -261,7 +261,7 @@ See the [`ClawDock` Helper README](https://github.com/openclaw/openclaw/blob/mai
        ```
     4. **Persist browser downloads**: set
        `PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright` and use
-       `OPENCLAW_HOME_VOLUME` or `OPENCLAW_EXTRA_MOUNTS`.
+       `BOT_HOME_VOLUME` or `BOT_EXTRA_MOUNTS`.
 
   </Accordion>
 
@@ -329,7 +329,7 @@ scripts/sandbox-setup.sh
 <AccordionGroup>
   <Accordion title="Image missing or sandbox container not starting">
     Build the sandbox image with
-    [`scripts/sandbox-setup.sh`](https://github.com/openclaw/openclaw/blob/main/scripts/sandbox-setup.sh)
+    [`scripts/sandbox-setup.sh`](https://github.com/hanzoai/bot/blob/main/scripts/sandbox-setup.sh)
     or set `agents.defaults.sandbox.docker.image` to your custom image.
     Containers are auto-created per session on demand.
   </Accordion>
@@ -340,7 +340,7 @@ scripts/sandbox-setup.sh
   </Accordion>
 
   <Accordion title="Custom tools not found in sandbox">
-    OpenClaw runs commands with `sh -lc` (login shell), which sources
+    Hanzo Bot runs commands with `sh -lc` (login shell), which sources
     `/etc/profile` and may reset PATH. Set `docker.env.PATH` to prepend your
     custom tool paths, or add a script under `/etc/profile.d/` in your Dockerfile.
   </Accordion>

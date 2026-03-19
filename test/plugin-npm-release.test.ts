@@ -19,8 +19,8 @@ describe("parsePluginReleaseSelection", () => {
 
   it("dedupes and sorts comma or whitespace separated package names", () => {
     expect(
-      parsePluginReleaseSelection(" @openclaw/zalo, @openclaw/feishu  @openclaw/zalo "),
-    ).toEqual(["@openclaw/feishu", "@openclaw/zalo"]);
+      parsePluginReleaseSelection(" @hanzo/bot-zalo, @hanzo/bot-feishu  @hanzo/bot-zalo "),
+    ).toEqual(["@hanzo/bot-feishu", "@hanzo/bot-zalo"]);
   });
 });
 
@@ -56,7 +56,7 @@ describe("parsePluginReleaseArgs", () => {
         "--selection-mode",
         "all-publishable",
         "--plugins",
-        "@openclaw/zalo",
+        "@hanzo/bot-zalo",
       ]),
     ).toThrowError("`--selection-mode all-publishable` must not be combined with `--plugins`.");
   });
@@ -77,7 +77,7 @@ describe("collectPublishablePluginPackageErrors", () => {
         extensionId: "zalo",
         packageDir: "extensions/zalo",
         packageJson: {
-          name: "@openclaw/zalo",
+          name: "@hanzo/bot-zalo",
           version: "2026.3.15",
           openclaw: {
             extensions: ["./index.ts"],
@@ -108,7 +108,7 @@ describe("collectPublishablePluginPackageErrors", () => {
         },
       }),
     ).toEqual([
-      'package name must start with "@openclaw/"; found "broken".',
+      'package name must start with "@hanzo/bot-"; found "broken".',
       "package.json private must not be true.",
       'package.json version must match YYYY.M.D or YYYY.M.D-beta.N; found "latest".',
       "openclaw.extensions must contain only non-empty strings.",
@@ -121,7 +121,7 @@ describe("resolveSelectedPublishablePluginPackages", () => {
     {
       extensionId: "feishu",
       packageDir: "extensions/feishu",
-      packageName: "@openclaw/feishu",
+      packageName: "@hanzo/bot-feishu",
       version: "2026.3.15",
       channel: "stable",
       publishTag: "latest",
@@ -129,7 +129,7 @@ describe("resolveSelectedPublishablePluginPackages", () => {
     {
       extensionId: "zalo",
       packageDir: "extensions/zalo",
-      packageName: "@openclaw/zalo",
+      packageName: "@hanzo/bot-zalo",
       version: "2026.3.15-beta.1",
       channel: "beta",
       publishTag: "beta",
@@ -149,7 +149,7 @@ describe("resolveSelectedPublishablePluginPackages", () => {
     expect(
       resolveSelectedPublishablePluginPackages({
         plugins: publishablePlugins,
-        selection: ["@openclaw/zalo"],
+        selection: ["@hanzo/bot-zalo"],
       }),
     ).toEqual([publishablePlugins[1]]);
   });
@@ -158,9 +158,9 @@ describe("resolveSelectedPublishablePluginPackages", () => {
     expect(() =>
       resolveSelectedPublishablePluginPackages({
         plugins: publishablePlugins,
-        selection: ["@openclaw/missing"],
+        selection: ["@hanzo/bot-missing"],
       }),
-    ).toThrowError("Unknown or non-publishable plugin package selection: @openclaw/missing.");
+    ).toThrowError("Unknown or non-publishable plugin package selection: @hanzo/bot-missing.");
   });
 });
 
@@ -182,7 +182,7 @@ describe("resolveChangedPublishablePluginPackages", () => {
     {
       extensionId: "feishu",
       packageDir: "extensions/feishu",
-      packageName: "@openclaw/feishu",
+      packageName: "@hanzo/bot-feishu",
       version: "2026.3.15",
       channel: "stable",
       publishTag: "latest",
@@ -190,7 +190,7 @@ describe("resolveChangedPublishablePluginPackages", () => {
     {
       extensionId: "zalo",
       packageDir: "extensions/zalo",
-      packageName: "@openclaw/zalo",
+      packageName: "@hanzo/bot-zalo",
       version: "2026.3.15-beta.1",
       channel: "beta",
       publishTag: "beta",

@@ -1,5 +1,5 @@
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized)
 struct GatewayAutostartPolicyTests {

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { withTempHome } from "../../test/helpers/temp-home.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import {
   isMatrixLegacyCryptoInspectorAvailable,
   loadMatrixLegacyCryptoInspector,
@@ -62,7 +62,7 @@ describe("matrix plugin helper resolution", () => {
       },
       {
         env: {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: (home) => path.join(home, "bundled"),
+          BOT_BUNDLED_PLUGINS_DIR: (home) => path.join(home, "bundled"),
         },
       },
     );
@@ -90,7 +90,7 @@ describe("matrix plugin helper resolution", () => {
           ].join("\n"),
         );
 
-        const cfg: OpenClawConfig = {
+        const cfg: Hanzo BotConfig = {
           plugins: {
             load: {
               paths: [customRoot],
@@ -119,7 +119,7 @@ describe("matrix plugin helper resolution", () => {
       },
       {
         env: {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: (home) => path.join(home, "bundled"),
+          BOT_BUNDLED_PLUGINS_DIR: (home) => path.join(home, "bundled"),
         },
       },
     );
@@ -161,7 +161,7 @@ describe("matrix plugin helper resolution", () => {
           return;
         }
 
-        const cfg: OpenClawConfig = {
+        const cfg: Hanzo BotConfig = {
           plugins: {
             load: {
               paths: [customRoot],
@@ -179,7 +179,7 @@ describe("matrix plugin helper resolution", () => {
       },
       {
         env: {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: (home) => path.join(home, "empty-bundled"),
+          BOT_BUNDLED_PLUGINS_DIR: (home) => path.join(home, "empty-bundled"),
         },
       },
     );

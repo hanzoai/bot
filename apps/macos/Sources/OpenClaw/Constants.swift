@@ -2,8 +2,8 @@ import Foundation
 
 // Stable identifier used for both the macOS LaunchAgent label and Nix-managed defaults suite.
 // nix-openclaw writes app defaults into this suite to survive app bundle identifier churn.
-let launchdLabel = "ai.openclaw.mac"
-let gatewayLaunchdLabel = "ai.openclaw.gateway"
+let launchdLabel = "ai.hanzo.bot.mac"
+let gatewayLaunchdLabel = "ai.hanzo.bot.gateway"
 let onboardingVersionKey = "openclaw.onboardingVersion"
 let onboardingSeenKey = "openclaw.onboardingSeen"
 let currentOnboardingVersion = 7
@@ -14,7 +14,7 @@ let swabbleTriggersKey = "openclaw.swabbleTriggers"
 let voiceWakeTriggerChimeKey = "openclaw.voiceWakeTriggerChime"
 let voiceWakeSendChimeKey = "openclaw.voiceWakeSendChime"
 let showDockIconKey = "openclaw.showDockIcon"
-let defaultVoiceWakeTriggers = ["openclaw"]
+let defaultVoiceWakeTriggers = ["@hanzo/bot"]
 let voiceWakeMaxWords = 32
 let voiceWakeMaxWordLength = 64
 let voiceWakeMicKey = "openclaw.voiceWakeMicID"

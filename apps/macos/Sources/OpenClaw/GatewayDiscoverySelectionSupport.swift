@@ -1,4 +1,4 @@
-import OpenClawDiscovery
+import Hanzo BotDiscovery
 
 @MainActor
 enum GatewayDiscoverySelectionSupport {
@@ -17,11 +17,11 @@ enum GatewayDiscoverySelectionSupport {
         state.remoteTarget = GatewayDiscoveryHelpers.sshTarget(for: gateway) ?? ""
 
         if let endpoint = GatewayDiscoveryHelpers.serviceEndpoint(for: gateway) {
-            OpenClawConfigFile.setRemoteGatewayUrl(
+            Hanzo BotConfigFile.setRemoteGatewayUrl(
                 host: endpoint.host,
                 port: endpoint.port)
         } else {
-            OpenClawConfigFile.clearRemoteGatewayUrl()
+            Hanzo BotConfigFile.clearRemoteGatewayUrl()
         }
     }
 

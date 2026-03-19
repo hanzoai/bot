@@ -5,11 +5,11 @@ import {
   resolveBundledPluginSources,
 } from "./bundled-sources.js";
 
-const discoverOpenClawPluginsMock = vi.fn();
+const discoverHanzo BotPluginsMock = vi.fn();
 const loadPluginManifestMock = vi.fn();
 
 vi.mock("./discovery.js", () => ({
-  discoverOpenClawPlugins: (...args: unknown[]) => discoverOpenClawPluginsMock(...args),
+  discoverHanzo BotPlugins: (...args: unknown[]) => discoverHanzo BotPluginsMock(...args),
 }));
 
 vi.mock("./manifest.js", () => ({
@@ -18,36 +18,36 @@ vi.mock("./manifest.js", () => ({
 
 describe("bundled plugin sources", () => {
   beforeEach(() => {
-    discoverOpenClawPluginsMock.mockReset();
+    discoverHanzo BotPluginsMock.mockReset();
     loadPluginManifestMock.mockReset();
   });
 
   it("resolves bundled sources keyed by plugin id", () => {
-    discoverOpenClawPluginsMock.mockReturnValue({
+    discoverHanzo BotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "global",
           rootDir: "/global/feishu",
-          packageName: "@openclaw/feishu",
-          packageManifest: { install: { npmSpec: "@openclaw/feishu" } },
+          packageName: "@hanzo/bot-feishu",
+          packageManifest: { install: { npmSpec: "@hanzo/bot-feishu" } },
         },
         {
           origin: "bundled",
           rootDir: "/app/extensions/feishu",
-          packageName: "@openclaw/feishu",
-          packageManifest: { install: { npmSpec: "@openclaw/feishu" } },
+          packageName: "@hanzo/bot-feishu",
+          packageManifest: { install: { npmSpec: "@hanzo/bot-feishu" } },
         },
         {
           origin: "bundled",
           rootDir: "/app/extensions/feishu-dup",
-          packageName: "@openclaw/feishu",
-          packageManifest: { install: { npmSpec: "@openclaw/feishu" } },
+          packageName: "@hanzo/bot-feishu",
+          packageManifest: { install: { npmSpec: "@hanzo/bot-feishu" } },
         },
         {
           origin: "bundled",
           rootDir: "/app/extensions/msteams",
-          packageName: "@openclaw/msteams",
-          packageManifest: { install: { npmSpec: "@openclaw/msteams" } },
+          packageName: "@hanzo/bot-msteams",
+          packageManifest: { install: { npmSpec: "@hanzo/bot-msteams" } },
         },
       ],
       diagnostics: [],
@@ -73,18 +73,18 @@ describe("bundled plugin sources", () => {
     expect(map.get("feishu")).toEqual({
       pluginId: "feishu",
       localPath: "/app/extensions/feishu",
-      npmSpec: "@openclaw/feishu",
+      npmSpec: "@hanzo/bot-feishu",
     });
   });
 
   it("finds bundled source by npm spec", () => {
-    discoverOpenClawPluginsMock.mockReturnValue({
+    discoverHanzo BotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "bundled",
           rootDir: "/app/extensions/feishu",
-          packageName: "@openclaw/feishu",
-          packageManifest: { install: { npmSpec: "@openclaw/feishu" } },
+          packageName: "@hanzo/bot-feishu",
+          packageManifest: { install: { npmSpec: "@hanzo/bot-feishu" } },
         },
       ],
       diagnostics: [],
@@ -92,10 +92,10 @@ describe("bundled plugin sources", () => {
     loadPluginManifestMock.mockReturnValue({ ok: true, manifest: { id: "feishu" } });
 
     const resolved = findBundledPluginSource({
-      lookup: { kind: "npmSpec", value: "@openclaw/feishu" },
+      lookup: { kind: "npmSpec", value: "@hanzo/bot-feishu" },
     });
     const missing = findBundledPluginSource({
-      lookup: { kind: "npmSpec", value: "@openclaw/not-found" },
+      lookup: { kind: "npmSpec", value: "@hanzo/bot-not-found" },
     });
 
     expect(resolved?.pluginId).toBe("feishu");
@@ -104,7 +104,7 @@ describe("bundled plugin sources", () => {
   });
 
   it("forwards an explicit env to bundled discovery helpers", () => {
-    discoverOpenClawPluginsMock.mockReturnValue({
+    discoverHanzo BotPluginsMock.mockReturnValue({
       candidates: [],
       diagnostics: [],
     });
@@ -121,24 +121,24 @@ describe("bundled plugin sources", () => {
       env,
     });
 
-    expect(discoverOpenClawPluginsMock).toHaveBeenNthCalledWith(1, {
+    expect(discoverHanzo BotPluginsMock).toHaveBeenNthCalledWith(1, {
       workspaceDir: "/workspace",
       env,
     });
-    expect(discoverOpenClawPluginsMock).toHaveBeenNthCalledWith(2, {
+    expect(discoverHanzo BotPluginsMock).toHaveBeenNthCalledWith(2, {
       workspaceDir: "/workspace",
       env,
     });
   });
 
   it("finds bundled source by plugin id", () => {
-    discoverOpenClawPluginsMock.mockReturnValue({
+    discoverHanzo BotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "bundled",
           rootDir: "/app/extensions/diffs",
-          packageName: "@openclaw/diffs",
-          packageManifest: { install: { npmSpec: "@openclaw/diffs" } },
+          packageName: "@hanzo/bot-diffs",
+          packageManifest: { install: { npmSpec: "@hanzo/bot-diffs" } },
         },
       ],
       diagnostics: [],
@@ -164,7 +164,7 @@ describe("bundled plugin sources", () => {
         {
           pluginId: "feishu",
           localPath: "/app/extensions/feishu",
-          npmSpec: "@openclaw/feishu",
+          npmSpec: "@hanzo/bot-feishu",
         },
       ],
     ]);
@@ -177,12 +177,12 @@ describe("bundled plugin sources", () => {
     ).toEqual({
       pluginId: "feishu",
       localPath: "/app/extensions/feishu",
-      npmSpec: "@openclaw/feishu",
+      npmSpec: "@hanzo/bot-feishu",
     });
     expect(
       findBundledPluginSourceInMap({
         bundled,
-        lookup: { kind: "npmSpec", value: "@openclaw/feishu" },
+        lookup: { kind: "npmSpec", value: "@hanzo/bot-feishu" },
       })?.pluginId,
     ).toBe("feishu");
   });

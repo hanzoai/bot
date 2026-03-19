@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-import OpenClawProtocol
+import Hanzo BotProtocol
 
 struct AnyCodableTests {
     @Test

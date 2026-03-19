@@ -1,4 +1,4 @@
-import OpenClawKit
+import Hanzo BotKit
 import SwiftUI
 import WebKit
 
@@ -141,7 +141,7 @@ private final class ScreenNavigationDelegate: NSObject, WKNavigationDelegate {
         }
 
         // Intercept openclaw:// deep links.
-        if url.scheme?.lowercased() == "openclaw" {
+        if url.scheme?.lowercased() == "@hanzo/bot" {
             decisionHandler(.cancel)
             self.controller?.onDeepLink?(url)
             return

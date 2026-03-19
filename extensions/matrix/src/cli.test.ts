@@ -244,14 +244,14 @@ describe("matrix CLI verification commands", () => {
     listMatrixOwnDevicesMock.mockResolvedValue([
       {
         deviceId: "A7hWrQ70ea",
-        displayName: "OpenClaw Gateway",
+        displayName: "Hanzo Bot Gateway",
         lastSeenIp: "127.0.0.1",
         lastSeenTs: 1_741_507_200_000,
         current: true,
       },
       {
         deviceId: "BritdXC6iL",
-        displayName: "OpenClaw Gateway",
+        displayName: "Hanzo Bot Gateway",
         lastSeenIp: null,
         lastSeenTs: null,
         current: false,
@@ -263,9 +263,9 @@ describe("matrix CLI verification commands", () => {
 
     expect(listMatrixOwnDevicesMock).toHaveBeenCalledWith({ accountId: "poe" });
     expect(console.log).toHaveBeenCalledWith("Account: poe");
-    expect(console.log).toHaveBeenCalledWith("- A7hWrQ70ea (current, OpenClaw Gateway)");
+    expect(console.log).toHaveBeenCalledWith("- A7hWrQ70ea (current, Hanzo Bot Gateway)");
     expect(console.log).toHaveBeenCalledWith("  Last IP: 127.0.0.1");
-    expect(console.log).toHaveBeenCalledWith("- BritdXC6iL (OpenClaw Gateway)");
+    expect(console.log).toHaveBeenCalledWith("- BritdXC6iL (Hanzo Bot Gateway)");
   });
 
   it("prunes stale matrix gateway devices", async () => {
@@ -273,14 +273,14 @@ describe("matrix CLI verification commands", () => {
       before: [
         {
           deviceId: "A7hWrQ70ea",
-          displayName: "OpenClaw Gateway",
+          displayName: "Hanzo Bot Gateway",
           lastSeenIp: "127.0.0.1",
           lastSeenTs: 1_741_507_200_000,
           current: true,
         },
         {
           deviceId: "BritdXC6iL",
-          displayName: "OpenClaw Gateway",
+          displayName: "Hanzo Bot Gateway",
           lastSeenIp: null,
           lastSeenTs: null,
           current: false,
@@ -292,7 +292,7 @@ describe("matrix CLI verification commands", () => {
       remainingDevices: [
         {
           deviceId: "A7hWrQ70ea",
-          displayName: "OpenClaw Gateway",
+          displayName: "Hanzo Bot Gateway",
           lastSeenIp: "127.0.0.1",
           lastSeenTs: 1_741_507_200_000,
           current: true,
@@ -306,7 +306,7 @@ describe("matrix CLI verification commands", () => {
     });
 
     expect(pruneMatrixStaleGatewayDevicesMock).toHaveBeenCalledWith({ accountId: "poe" });
-    expect(console.log).toHaveBeenCalledWith("Deleted stale OpenClaw devices: BritdXC6iL");
+    expect(console.log).toHaveBeenCalledWith("Deleted stale Hanzo Bot devices: BritdXC6iL");
     expect(console.log).toHaveBeenCalledWith("Current device: A7hWrQ70ea");
     expect(console.log).toHaveBeenCalledWith("Remaining devices: 1");
   });
@@ -372,7 +372,7 @@ describe("matrix CLI verification commands", () => {
     );
     expect(console.log).toHaveBeenCalledWith("Saved matrix account: ops");
     expect(console.log).toHaveBeenCalledWith(
-      "Bind this account to an agent: openclaw agents bind --agent <id> --bind matrix:ops",
+      "Bind this account to an agent: hanzo-bot agents bind --agent <id> --bind matrix:ops",
     );
   });
 
@@ -383,14 +383,14 @@ describe("matrix CLI verification commands", () => {
     listMatrixOwnDevicesMock.mockResolvedValue([
       {
         deviceId: "BritdXC6iL",
-        displayName: "OpenClaw Gateway",
+        displayName: "Hanzo Bot Gateway",
         lastSeenIp: null,
         lastSeenTs: null,
         current: false,
       },
       {
         deviceId: "du314Zpw3A",
-        displayName: "OpenClaw Gateway",
+        displayName: "Hanzo Bot Gateway",
         lastSeenIp: null,
         lastSeenTs: null,
         current: true,
@@ -432,7 +432,7 @@ describe("matrix CLI verification commands", () => {
     );
     expect(console.log).toHaveBeenCalledWith("Backup version: 7");
     expect(console.log).toHaveBeenCalledWith(
-      "Matrix device hygiene warning: stale OpenClaw devices detected (BritdXC6iL). Run 'openclaw matrix devices prune-stale --account ops'.",
+      "Matrix device hygiene warning: stale Hanzo Bot devices detected (BritdXC6iL). Run 'openclaw matrix devices prune-stale --account ops'.",
     );
   });
 
@@ -534,7 +534,7 @@ describe("matrix CLI verification commands", () => {
         accountId: "ops",
         deviceHealth: expect.objectContaining({
           currentDeviceId: null,
-          staleOpenClawDeviceIds: [],
+          staleHanzo BotDeviceIds: [],
           error: "homeserver unavailable",
         }),
       }),
@@ -576,7 +576,7 @@ describe("matrix CLI verification commands", () => {
       }),
     );
     expect(console.log).toHaveBeenCalledWith(
-      "Bind this account to an agent: openclaw agents bind --agent <id> --bind matrix:main-bot",
+      "Bind this account to an agent: hanzo-bot agents bind --agent <id> --bind matrix:main-bot",
     );
   });
 

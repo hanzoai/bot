@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../api.js";
+import type { Hanzo BotConfig } from "../api.js";
 import { twitchPlugin } from "./plugin.js";
 
 describe("twitchPlugin.status.buildAccountSnapshot", () => {
@@ -27,7 +27,7 @@ describe("twitchPlugin.status.buildAccountSnapshot", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
 
     const snapshot = await twitchPlugin.status?.buildAccountSnapshot?.({
       account: secondary,

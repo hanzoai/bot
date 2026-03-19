@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/kilocode-provider",
+  "name": "@hanzo/bot-kilocode-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Kilo Gateway provider plugin",
+  "description": "Hanzo Bot Kilo Gateway provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

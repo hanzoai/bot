@@ -2,14 +2,14 @@
 summary: "Integrated browser control service + action commands"
 read_when:
   - Adding agent-controlled browser automation
-  - Debugging why openclaw is interfering with your own Chrome
+  - Debugging why hanzo-bot is interfering with your own Chrome
   - Implementing browser settings + lifecycle in the macOS app
-title: "Browser (OpenClaw-managed)"
+title: "Browser (Hanzo Bot-managed)"
 ---
 
 # Browser (openclaw-managed)
 
-OpenClaw can run a **dedicated Chrome/Brave/Edge/Chromium profile** that the agent controls.
+Hanzo Bot can run a **dedicated Chrome/Brave/Edge/Chromium profile** that the agent controls.
 It is isolated from your personal browser and is managed through a small local
 control service inside the Gateway (loopback only).
 
@@ -33,10 +33,10 @@ agent automation and verification.
 ## Quick start
 
 ```bash
-openclaw browser --browser-profile openclaw status
-openclaw browser --browser-profile openclaw start
-openclaw browser --browser-profile openclaw open https://example.com
-openclaw browser --browser-profile openclaw snapshot
+openclaw browser --browser-profile hanzo-bot status
+openclaw browser --browser-profile hanzo-bot start
+openclaw browser --browser-profile hanzo-bot open https://example.com
+openclaw browser --browser-profile hanzo-bot snapshot
 ```
 
 If you get “Browser disabled”, enable it in config (see below) and restart the
@@ -55,11 +55,11 @@ For agent browser tool calls:
   is at the computer to click/approve any attach prompt.
 - `profile` is the explicit override when you want a specific browser mode.
 
-Set `browser.defaultProfile: "openclaw"` if you want managed mode by default.
+Set `browser.defaultProfile: "@hanzo/bot"` if you want managed mode by default.
 
 ## Configuration
 
-Browser settings live in `~/.openclaw/openclaw.json`.
+Browser settings live in `~/.hanzoai/bot.json`.
 
 ```json5
 {
@@ -74,7 +74,7 @@ Browser settings live in `~/.openclaw/openclaw.json`.
     // cdpUrl: "http://127.0.0.1:18792", // legacy single-profile override
     remoteCdpTimeoutMs: 1500, // remote CDP HTTP timeout (ms)
     remoteCdpHandshakeTimeoutMs: 3000, // remote CDP WebSocket handshake timeout (ms)
-    defaultProfile: "openclaw",
+    defaultProfile: "@hanzo/bot",
     color: "#FF4500",
     headless: false,
     noSandbox: false,
@@ -104,7 +104,7 @@ Notes:
 
 - The browser control service binds to loopback on a port derived from `gateway.port`
   (default: `18791`, which is gateway + 2).
-- If you override the Gateway port (`gateway.port` or `OPENCLAW_GATEWAY_PORT`),
+- If you override the Gateway port (`gateway.port` or `BOT_GATEWAY_PORT`),
   the derived browser ports shift to stay in the same “family”.
 - `cdpUrl` defaults to the managed local CDP port when unset.
 - `remoteCdpTimeoutMs` applies to remote (non-loopback) CDP reachability checks.
@@ -115,7 +115,7 @@ Notes:
 - `browser.ssrfPolicy.allowPrivateNetwork` remains supported as a legacy alias for compatibility.
 - `attachOnly: true` means “never launch a local browser; only attach if it is already running.”
 - `color` + per-profile `color` tint the browser UI so you can see which profile is active.
-- Default profile is `openclaw` (OpenClaw-managed standalone browser). Use `defaultProfile: "user"` to opt into the signed-in user browser.
+- Default profile is `openclaw` (Hanzo Bot-managed standalone browser). Use `defaultProfile: "user"` to opt into the signed-in user browser.
 - Auto-detect order: system default browser if Chromium-based; otherwise Chrome → Brave → Edge → Chromium → Chrome Canary.
 - Local `openclaw` profiles auto-assign `cdpPort`/`cdpUrl` — set those only for remote CDP.
 - `driver: "existing-session"` uses Chrome DevTools MCP instead of raw CDP. Do
@@ -126,7 +126,7 @@ Notes:
 ## Use Brave (or another Chromium-based browser)
 
 If your **system default** browser is Chromium-based (Chrome/Brave/Edge/etc),
-OpenClaw uses it automatically. Set `browser.executablePath` to override
+Hanzo Bot uses it automatically. Set `browser.executablePath` to override
 auto-detection:
 
 CLI example:
@@ -163,20 +163,20 @@ openclaw config set browser.executablePath "/usr/bin/google-chrome"
 - **Local control (default):** the Gateway starts the loopback control service and can launch a local browser.
 - **Remote control (node host):** run a node host on the machine that has the browser; the Gateway proxies browser actions to it.
 - **Remote CDP:** set `browser.profiles.<name>.cdpUrl` (or `browser.cdpUrl`) to
-  attach to a remote Chromium-based browser. In this case, OpenClaw will not launch a local browser.
+  attach to a remote Chromium-based browser. In this case, Hanzo Bot will not launch a local browser.
 
 Remote CDP URLs can include auth:
 
 - Query tokens (e.g., `https://provider.example?token=<token>`)
 - HTTP Basic auth (e.g., `https://user:pass@provider.example`)
 
-OpenClaw preserves the auth when calling `/json/*` endpoints and when connecting
+Hanzo Bot preserves the auth when calling `/json/*` endpoints and when connecting
 to the CDP WebSocket. Prefer environment variables or secrets managers for
 tokens instead of committing them to config files.
 
 ## Node browser proxy (zero-config default)
 
-If you run a **node host** on the machine that has your browser, OpenClaw can
+If you run a **node host** on the machine that has your browser, Hanzo Bot can
 auto-route browser tool calls to that node without any extra browser config.
 This is the default path for remote gateways.
 
@@ -191,7 +191,7 @@ Notes:
 ## Browserless (hosted remote CDP)
 
 [Browserless](https://browserless.io) is a hosted Chromium service that exposes
-CDP endpoints over HTTPS. You can point an OpenClaw browser profile at a
+CDP endpoints over HTTPS. You can point an Hanzo Bot browser profile at a
 Browserless region endpoint and authenticate with your API key.
 
 Example:
@@ -221,11 +221,11 @@ Notes:
 ## Direct WebSocket CDP providers
 
 Some hosted browser services expose a **direct WebSocket** endpoint rather than
-the standard HTTP-based CDP discovery (`/json/version`). OpenClaw supports both:
+the standard HTTP-based CDP discovery (`/json/version`). Hanzo Bot supports both:
 
-- **HTTP(S) endpoints** (e.g. Browserless) — OpenClaw calls `/json/version` to
+- **HTTP(S) endpoints** (e.g. Browserless) — Hanzo Bot calls `/json/version` to
   discover the WebSocket debugger URL, then connects.
-- **WebSocket endpoints** (`ws://` / `wss://`) — OpenClaw connects directly,
+- **WebSocket endpoints** (`ws://` / `wss://`) — Hanzo Bot connects directly,
   skipping `/json/version`. Use this for services like
   [Browserbase](https://www.browserbase.com) or any provider that hands you a
   WebSocket URL.
@@ -270,7 +270,7 @@ Notes:
 Key ideas:
 
 - Browser control is loopback-only; access flows through the Gateway’s auth or node pairing.
-- If browser control is enabled and no auth is configured, OpenClaw auto-generates `gateway.auth.token` on startup and persists it to config.
+- If browser control is enabled and no auth is configured, Hanzo Bot auto-generates `gateway.auth.token` on startup and persists it to config.
 - Keep the Gateway and any node hosts on a private network (Tailscale); avoid public exposure.
 - Treat remote CDP URLs/tokens as secrets; prefer env vars or a secrets manager.
 
@@ -281,7 +281,7 @@ Remote CDP tips:
 
 ## Profiles (multi-browser)
 
-OpenClaw supports multiple named profiles (routing configs). Profiles can be:
+Hanzo Bot supports multiple named profiles (routing configs). Profiles can be:
 
 - **openclaw-managed**: a dedicated Chromium-based browser instance with its own user data directory + CDP port
 - **remote**: an explicit CDP URL (Chromium-based browser running elsewhere)
@@ -299,7 +299,7 @@ All control endpoints accept `?profile=<name>`; the CLI uses `--browser-profile`
 
 ## Existing-session via Chrome DevTools MCP
 
-OpenClaw can also attach to a running Chromium-based browser profile through the
+Hanzo Bot can also attach to a running Chromium-based browser profile through the
 official Chrome DevTools MCP server. This reuses the tabs and login state
 already open in that browser profile.
 
@@ -341,7 +341,7 @@ Then in the matching browser:
 
 1. Open that browser's inspect page for remote debugging.
 2. Enable remote debugging.
-3. Keep the browser running and approve the connection prompt when OpenClaw attaches.
+3. Keep the browser running and approve the connection prompt when Hanzo Bot attaches.
 
 Common inspect pages:
 
@@ -371,7 +371,7 @@ What to check if attach does not work:
 - the target Chromium-based browser is version `144+`
 - remote debugging is enabled in that browser's inspect page
 - the browser showed and you accepted the attach consent prompt
-- `openclaw doctor` migrates old extension-based browser config and checks that
+- `hanzo-bot doctor` migrates old extension-based browser config and checks that
   Chrome is installed locally for default auto-connect profiles, but it cannot
   enable browser-side remote debugging for you
 
@@ -387,10 +387,10 @@ Notes:
 
 - This path is higher-risk than the isolated `openclaw` profile because it can
   act inside your signed-in browser session.
-- OpenClaw does not launch the browser for this driver; it attaches to an
+- Hanzo Bot does not launch the browser for this driver; it attaches to an
   existing session only.
-- OpenClaw uses the official Chrome DevTools MCP `--autoConnect` flow here. If
-  `userDataDir` is set, OpenClaw passes it through to target that explicit
+- Hanzo Bot uses the official Chrome DevTools MCP `--autoConnect` flow here. If
+  `userDataDir` is set, Hanzo Bot passes it through to target that explicit
   Chromium user data directory.
 - Existing-session screenshots support page captures and `--ref` element
   captures from snapshots, but not CSS `--element` selectors.
@@ -409,7 +409,7 @@ Notes:
 
 ## Browser selection
 
-When launching locally, OpenClaw picks the first available:
+When launching locally, Hanzo Bot picks the first available:
 
 1. Chrome
 2. Brave
@@ -457,7 +457,7 @@ error. ARIA snapshots and basic screenshots still work for openclaw-managed Chro
 
 If you see `Playwright is not available in this gateway build`, install the full
 Playwright package (not `playwright-core`) and restart the gateway, or reinstall
-OpenClaw with browser support.
+Hanzo Bot with browser support.
 
 #### Docker Playwright install
 
@@ -471,7 +471,7 @@ docker compose run --rm openclaw-cli \
 
 To persist browser downloads, set `PLAYWRIGHT_BROWSERS_PATH` (for example,
 `/home/node/.cache/ms-playwright`) and make sure `/home/node` is persisted via
-`OPENCLAW_HOME_VOLUME` or a bind mount. See [Docker](/install/docker).
+`BOT_HOME_VOLUME` or a bind mount. See [Docker](/install/docker).
 
 ## How it works (internal)
 
@@ -493,88 +493,88 @@ All commands also accept `--json` for machine-readable output (stable payloads).
 
 Basics:
 
-- `openclaw browser status`
-- `openclaw browser start`
-- `openclaw browser stop`
-- `openclaw browser tabs`
-- `openclaw browser tab`
-- `openclaw browser tab new`
-- `openclaw browser tab select 2`
-- `openclaw browser tab close 2`
-- `openclaw browser open https://example.com`
-- `openclaw browser focus abcd1234`
-- `openclaw browser close abcd1234`
+- `hanzo-bot browser status`
+- `hanzo-bot browser start`
+- `hanzo-bot browser stop`
+- `hanzo-bot browser tabs`
+- `hanzo-bot browser tab`
+- `hanzo-bot browser tab new`
+- `hanzo-bot browser tab select 2`
+- `hanzo-bot browser tab close 2`
+- `hanzo-bot browser open https://example.com`
+- `hanzo-bot browser focus abcd1234`
+- `hanzo-bot browser close abcd1234`
 
 Inspection:
 
-- `openclaw browser screenshot`
-- `openclaw browser screenshot --full-page`
-- `openclaw browser screenshot --ref 12`
-- `openclaw browser screenshot --ref e12`
-- `openclaw browser snapshot`
-- `openclaw browser snapshot --format aria --limit 200`
-- `openclaw browser snapshot --interactive --compact --depth 6`
-- `openclaw browser snapshot --efficient`
-- `openclaw browser snapshot --labels`
-- `openclaw browser snapshot --selector "#main" --interactive`
-- `openclaw browser snapshot --frame "iframe#main" --interactive`
-- `openclaw browser console --level error`
-- `openclaw browser errors --clear`
-- `openclaw browser requests --filter api --clear`
-- `openclaw browser pdf`
-- `openclaw browser responsebody "**/api" --max-chars 5000`
+- `hanzo-bot browser screenshot`
+- `hanzo-bot browser screenshot --full-page`
+- `hanzo-bot browser screenshot --ref 12`
+- `hanzo-bot browser screenshot --ref e12`
+- `hanzo-bot browser snapshot`
+- `hanzo-bot browser snapshot --format aria --limit 200`
+- `hanzo-bot browser snapshot --interactive --compact --depth 6`
+- `hanzo-bot browser snapshot --efficient`
+- `hanzo-bot browser snapshot --labels`
+- `hanzo-bot browser snapshot --selector "#main" --interactive`
+- `hanzo-bot browser snapshot --frame "iframe#main" --interactive`
+- `hanzo-bot browser console --level error`
+- `hanzo-bot browser errors --clear`
+- `hanzo-bot browser requests --filter api --clear`
+- `hanzo-bot browser pdf`
+- `hanzo-bot browser responsebody "**/api" --max-chars 5000`
 
 Actions:
 
-- `openclaw browser navigate https://example.com`
-- `openclaw browser resize 1280 720`
-- `openclaw browser click 12 --double`
-- `openclaw browser click e12 --double`
-- `openclaw browser type 23 "hello" --submit`
-- `openclaw browser press Enter`
-- `openclaw browser hover 44`
-- `openclaw browser scrollintoview e12`
-- `openclaw browser drag 10 11`
-- `openclaw browser select 9 OptionA OptionB`
-- `openclaw browser download e12 report.pdf`
-- `openclaw browser waitfordownload report.pdf`
-- `openclaw browser upload /tmp/openclaw/uploads/file.pdf`
-- `openclaw browser fill --fields '[{"ref":"1","type":"text","value":"Ada"}]'`
-- `openclaw browser dialog --accept`
-- `openclaw browser wait --text "Done"`
-- `openclaw browser wait "#main" --url "**/dash" --load networkidle --fn "window.ready===true"`
-- `openclaw browser evaluate --fn '(el) => el.textContent' --ref 7`
-- `openclaw browser highlight e12`
-- `openclaw browser trace start`
-- `openclaw browser trace stop`
+- `hanzo-bot browser navigate https://example.com`
+- `hanzo-bot browser resize 1280 720`
+- `hanzo-bot browser click 12 --double`
+- `hanzo-bot browser click e12 --double`
+- `hanzo-bot browser type 23 "hello" --submit`
+- `hanzo-bot browser press Enter`
+- `hanzo-bot browser hover 44`
+- `hanzo-bot browser scrollintoview e12`
+- `hanzo-bot browser drag 10 11`
+- `hanzo-bot browser select 9 OptionA OptionB`
+- `hanzo-bot browser download e12 report.pdf`
+- `hanzo-bot browser waitfordownload report.pdf`
+- `hanzo-bot browser upload /tmp/openclaw/uploads/file.pdf`
+- `hanzo-bot browser fill --fields '[{"ref":"1","type":"text","value":"Ada"}]'`
+- `hanzo-bot browser dialog --accept`
+- `hanzo-bot browser wait --text "Done"`
+- `hanzo-bot browser wait "#main" --url "**/dash" --load networkidle --fn "window.ready===true"`
+- `hanzo-bot browser evaluate --fn '(el) => el.textContent' --ref 7`
+- `hanzo-bot browser highlight e12`
+- `hanzo-bot browser trace start`
+- `hanzo-bot browser trace stop`
 
 State:
 
-- `openclaw browser cookies`
-- `openclaw browser cookies set session abc123 --url "https://example.com"`
-- `openclaw browser cookies clear`
-- `openclaw browser storage local get`
-- `openclaw browser storage local set theme dark`
-- `openclaw browser storage session clear`
-- `openclaw browser set offline on`
-- `openclaw browser set headers --headers-json '{"X-Debug":"1"}'`
-- `openclaw browser set credentials user pass`
-- `openclaw browser set credentials --clear`
-- `openclaw browser set geo 37.7749 -122.4194 --origin "https://example.com"`
-- `openclaw browser set geo --clear`
-- `openclaw browser set media dark`
-- `openclaw browser set timezone America/New_York`
-- `openclaw browser set locale en-US`
-- `openclaw browser set device "iPhone 14"`
+- `hanzo-bot browser cookies`
+- `hanzo-bot browser cookies set session abc123 --url "https://example.com"`
+- `hanzo-bot browser cookies clear`
+- `hanzo-bot browser storage local get`
+- `hanzo-bot browser storage local set theme dark`
+- `hanzo-bot browser storage session clear`
+- `hanzo-bot browser set offline on`
+- `hanzo-bot browser set headers --headers-json '{"X-Debug":"1"}'`
+- `hanzo-bot browser set credentials user pass`
+- `hanzo-bot browser set credentials --clear`
+- `hanzo-bot browser set geo 37.7749 -122.4194 --origin "https://example.com"`
+- `hanzo-bot browser set geo --clear`
+- `hanzo-bot browser set media dark`
+- `hanzo-bot browser set timezone America/New_York`
+- `hanzo-bot browser set locale en-US`
+- `hanzo-bot browser set device "iPhone 14"`
 
 Notes:
 
 - `upload` and `dialog` are **arming** calls; run them before the click/press
   that triggers the chooser/dialog.
-- Download and trace output paths are constrained to OpenClaw temp roots:
+- Download and trace output paths are constrained to Hanzo Bot temp roots:
   - traces: `/tmp/openclaw` (fallback: `${os.tmpdir()}/openclaw`)
   - downloads: `/tmp/openclaw/downloads` (fallback: `${os.tmpdir()}/openclaw/downloads`)
-- Upload paths are constrained to an OpenClaw temp uploads root:
+- Upload paths are constrained to an Hanzo Bot temp uploads root:
   - uploads: `/tmp/openclaw/uploads` (fallback: `${os.tmpdir()}/openclaw/uploads`)
 - `upload` can also set file inputs directly via `--input-ref` or `--element`.
 - `snapshot`:
@@ -591,16 +591,16 @@ Notes:
 
 ## Snapshots and refs
 
-OpenClaw supports two “snapshot” styles:
+Hanzo Bot supports two “snapshot” styles:
 
-- **AI snapshot (numeric refs)**: `openclaw browser snapshot` (default; `--format ai`)
+- **AI snapshot (numeric refs)**: `hanzo-bot browser snapshot` (default; `--format ai`)
   - Output: a text snapshot that includes numeric refs.
-  - Actions: `openclaw browser click 12`, `openclaw browser type 23 "hello"`.
+  - Actions: `hanzo-bot browser click 12`, `hanzo-bot browser type 23 "hello"`.
   - Internally, the ref is resolved via Playwright’s `aria-ref`.
 
-- **Role snapshot (role refs like `e12`)**: `openclaw browser snapshot --interactive` (or `--compact`, `--depth`, `--selector`, `--frame`)
+- **Role snapshot (role refs like `e12`)**: `hanzo-bot browser snapshot --interactive` (or `--compact`, `--depth`, `--selector`, `--frame`)
   - Output: a role-based list/tree with `[ref=e12]` (and optional `[nth=1]`).
-  - Actions: `openclaw browser click e12`, `openclaw browser highlight e12`.
+  - Actions: `hanzo-bot browser click e12`, `hanzo-bot browser highlight e12`.
   - Internally, the ref is resolved via `getByRole(...)` (plus `nth()` for duplicates).
   - Add `--labels` to include a viewport screenshot with overlayed `e12` labels.
 
@@ -614,13 +614,13 @@ Ref behavior:
 You can wait on more than just time/text:
 
 - Wait for URL (globs supported by Playwright):
-  - `openclaw browser wait --url "**/dash"`
+  - `hanzo-bot browser wait --url "**/dash"`
 - Wait for load state:
-  - `openclaw browser wait --load networkidle`
+  - `hanzo-bot browser wait --load networkidle`
 - Wait for a JS predicate:
-  - `openclaw browser wait --fn "window.ready===true"`
+  - `hanzo-bot browser wait --fn "window.ready===true"`
 - Wait for a selector to become visible:
-  - `openclaw browser wait "#main"`
+  - `hanzo-bot browser wait "#main"`
 
 These can be combined:
 
@@ -636,16 +636,16 @@ openclaw browser wait "#main" \
 
 When an action fails (e.g. “not visible”, “strict mode violation”, “covered”):
 
-1. `openclaw browser snapshot --interactive`
+1. `hanzo-bot browser snapshot --interactive`
 2. Use `click <ref>` / `type <ref>` (prefer role refs in interactive mode)
-3. If it still fails: `openclaw browser highlight <ref>` to see what Playwright is targeting
+3. If it still fails: `hanzo-bot browser highlight <ref>` to see what Playwright is targeting
 4. If the page behaves oddly:
-   - `openclaw browser errors --clear`
-   - `openclaw browser requests --filter api --clear`
+   - `hanzo-bot browser errors --clear`
+   - `hanzo-bot browser requests --filter api --clear`
 5. For deep debugging: record a trace:
-   - `openclaw browser trace start`
+   - `hanzo-bot browser trace start`
    - reproduce the issue
-   - `openclaw browser trace stop` (prints `TRACE:<path>`)
+   - `hanzo-bot browser trace stop` (prints `TRACE:<path>`)
 
 ## JSON output
 
@@ -680,8 +680,8 @@ These are useful for “make the site behave like X” workflows:
 
 ## Security & privacy
 
-- The openclaw browser profile may contain logged-in sessions; treat it as sensitive.
-- `browser act kind=evaluate` / `openclaw browser evaluate` and `wait --fn`
+- The hanzo-bot browser profile may contain logged-in sessions; treat it as sensitive.
+- `browser act kind=evaluate` / `hanzo-bot browser evaluate` and `wait --fn`
   execute arbitrary JavaScript in the page context. Prompt injection can steer
   this. Disable it with `browser.evaluateEnabled=false` if you do not need it.
 - For logins and anti-bot notes (X/Twitter, etc.), see [Browser login + X/Twitter posting](/tools/browser-login).

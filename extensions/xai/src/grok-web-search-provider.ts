@@ -201,7 +201,7 @@ function createGrokToolDefinition(
           return {
             error: name.startsWith("date_") ? "unsupported_date_filter" : `unsupported_${name}`,
             message: `${label} is not supported by the grok provider. Only Brave and Perplexity support ${name === "country" ? "country filtering" : name === "language" ? "language filtering" : name === "freshness" ? "freshness" : "date filtering"}.`,
-            docs: "https://docs.openclaw.ai/tools/web",
+            docs: "https://docs.hanzo.bot/tools/web",
           };
         }
       }
@@ -213,7 +213,7 @@ function createGrokToolDefinition(
           error: "missing_xai_api_key",
           message:
             "web_search (grok) needs an xAI API key. Set XAI_API_KEY in the Gateway environment, or configure tools.web.search.grok.apiKey.",
-          docs: "https://docs.openclaw.ai/tools/web",
+          docs: "https://docs.hanzo.bot/tools/web",
         };
       }
 
@@ -273,7 +273,7 @@ export function createGrokWebSearchProvider(): WebSearchProviderPlugin {
     envVars: ["XAI_API_KEY"],
     placeholder: "xai-...",
     signupUrl: "https://console.x.ai/",
-    docsUrl: "https://docs.openclaw.ai/tools/web",
+    docsUrl: "https://docs.hanzo.bot/tools/web",
     autoDetectOrder: 30,
     credentialPath: "plugins.entries.xai.config.webSearch.apiKey",
     inactiveSecretPaths: ["plugins.entries.xai.config.webSearch.apiKey"],

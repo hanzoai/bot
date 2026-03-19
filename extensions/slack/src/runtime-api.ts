@@ -7,7 +7,7 @@ export {
   projectCredentialSnapshotFields,
   resolveConfiguredFromRequiredCredentialStatuses,
   type ChannelPlugin,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
   type SlackAccountConfig,
 } from "openclaw/plugin-sdk/slack";
 export {

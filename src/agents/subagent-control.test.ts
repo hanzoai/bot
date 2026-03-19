@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { killSubagentRunAdmin, sendControlledSubagentMessage } from "./subagent-control.js";
 import {
   addSubagentRunForTests,
@@ -15,7 +15,7 @@ describe("sendControlledSubagentMessage", () => {
     const result = await sendControlledSubagentMessage({
       cfg: {
         channels: { whatsapp: { allowFrom: ["*"] } },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       controller: {
         controllerSessionKey: "agent:main:subagent:leaf",
         callerSessionKey: "agent:main:subagent:leaf",
@@ -84,7 +84,7 @@ describe("killSubagentRunAdmin", () => {
 
     const cfg = {
       session: { store: storePath },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
 
     const result = await killSubagentRunAdmin({
       cfg,
@@ -102,7 +102,7 @@ describe("killSubagentRunAdmin", () => {
 
   it("returns found=false when the session key is not tracked as a subagent run", async () => {
     const result = await killSubagentRunAdmin({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as Hanzo BotConfig,
       sessionKey: "agent:main:subagent:missing",
     });
 

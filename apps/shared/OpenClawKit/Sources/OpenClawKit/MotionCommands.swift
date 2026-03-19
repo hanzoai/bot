@@ -1,13 +1,13 @@
 import Foundation
 
-public enum OpenClawMotionCommand: String, Codable, Sendable {
+public enum Hanzo BotMotionCommand: String, Codable, Sendable {
     case activity = "motion.activity"
     case pedometer = "motion.pedometer"
 }
 
-public typealias OpenClawMotionActivityParams = OpenClawDateRangeLimitParams
+public typealias Hanzo BotMotionActivityParams = Hanzo BotDateRangeLimitParams
 
-public struct OpenClawMotionActivityEntry: Codable, Sendable, Equatable {
+public struct Hanzo BotMotionActivityEntry: Codable, Sendable, Equatable {
     public var startISO: String
     public var endISO: String
     public var confidence: String
@@ -41,15 +41,15 @@ public struct OpenClawMotionActivityEntry: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawMotionActivityPayload: Codable, Sendable, Equatable {
-    public var activities: [OpenClawMotionActivityEntry]
+public struct Hanzo BotMotionActivityPayload: Codable, Sendable, Equatable {
+    public var activities: [Hanzo BotMotionActivityEntry]
 
-    public init(activities: [OpenClawMotionActivityEntry]) {
+    public init(activities: [Hanzo BotMotionActivityEntry]) {
         self.activities = activities
     }
 }
 
-public struct OpenClawPedometerParams: Codable, Sendable, Equatable {
+public struct Hanzo BotPedometerParams: Codable, Sendable, Equatable {
     public var startISO: String?
     public var endISO: String?
 
@@ -59,7 +59,7 @@ public struct OpenClawPedometerParams: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawPedometerPayload: Codable, Sendable, Equatable {
+public struct Hanzo BotPedometerPayload: Codable, Sendable, Equatable {
     public var startISO: String
     public var endISO: String
     public var steps: Int?

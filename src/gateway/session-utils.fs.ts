@@ -72,7 +72,7 @@ function setCachedSessionTitleFields(cacheKey: string, stat: fs.Stats, value: Se
   }
 }
 
-export function attachOpenClawTranscriptMeta(
+export function attachHanzo BotTranscriptMeta(
   message: unknown,
   meta: Record<string, unknown>,
 ): unknown {
@@ -117,7 +117,7 @@ export function readSessionMessages(
       if (parsed?.message) {
         messageSeq += 1;
         messages.push(
-          attachOpenClawTranscriptMeta(parsed.message, {
+          attachHanzo BotTranscriptMeta(parsed.message, {
             ...(typeof parsed.id === "string" ? { id: parsed.id } : {}),
             seq: messageSeq,
           }),
@@ -637,7 +637,7 @@ function extractLatestUsageFromTranscriptChunk(
           : typeof parsed.model === "string"
             ? parsed.model.trim()
             : undefined;
-      const isDeliveryMirror = modelProvider === "openclaw" && model === "delivery-mirror";
+      const isDeliveryMirror = modelProvider === "@hanzo/bot" && model === "delivery-mirror";
       const hasMeaningfulUsage =
         hasNonzeroUsage(usage) ||
         typeof totalTokens === "number" ||

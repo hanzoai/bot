@@ -1,8 +1,8 @@
 ---
 read_when:
-  - 你想在 OpenClaw 中使用 MiniMax 模型
+  - 你想在 Hanzo Bot 中使用 MiniMax 模型
   - 你需要 MiniMax 设置指南
-summary: 在 OpenClaw 中使用 MiniMax M2.5
+summary: 在 Hanzo Bot 中使用 MiniMax M2.5
 title: MiniMax
 x-i18n:
   generated_at: "2026-03-16T06:26:04Z"
@@ -58,7 +58,7 @@ openclaw onboard --auth-choice minimax-portal
 - **Global** - 国际用户（`api.minimax.io`）
 - **CN** - 中国用户（`api.minimaxi.com`）
 
-详情请参阅 [MiniMax plugin README](https://github.com/openclaw/openclaw/tree/main/extensions/minimax)。
+详情请参阅 [MiniMax plugin README](https://github.com/hanzoai/bot/tree/main/extensions/minimax)。
 
 ### MiniMax M2.5（API key）
 
@@ -66,7 +66,7 @@ openclaw onboard --auth-choice minimax-portal
 
 通过 CLI 配置：
 
-- 运行 `openclaw configure`
+- 运行 `hanzo-bot configure`
 - 选择 **Model/auth**
 - 选择 **MiniMax M2.5**
 
@@ -169,11 +169,11 @@ openclaw onboard --auth-choice minimax-portal
 }
 ```
 
-## 通过 `openclaw configure` 配置
+## 通过 `hanzo-bot configure` 配置
 
 使用交互式配置向导设置 MiniMax，而无需编辑 JSON：
 
-1. 运行 `openclaw configure`。
+1. 运行 `hanzo-bot configure`。
 2. 选择 **Model/auth**。
 3. 选择 **MiniMax M2.5**。
 4. 在提示时选择你的默认模型。
@@ -195,7 +195,7 @@ openclaw onboard --auth-choice minimax-portal
 - 如果你需要精确成本跟踪，请更新 `models.json` 中的定价值。
 - MiniMax Coding Plan 推荐链接（九折）：[https://platform.minimax.io/subscribe/coding-plan?code=DbXJTRClnb&source=link](https://platform.minimax.io/subscribe/coding-plan?code=DbXJTRClnb&source=link)
 - 关于提供商规则，请参阅 [/concepts/model-providers](/concepts/model-providers)。
-- 使用 `openclaw models list` 和 `openclaw models set minimax/MiniMax-M2.5` 进行切换。
+- 使用 `hanzo-bot models list` 和 `hanzo-bot models set minimax/MiniMax-M2.5` 进行切换。
 
 ## 故障排除
 
@@ -206,7 +206,7 @@ openclaw onboard --auth-choice minimax-portal
 **2026.1.12** 中（在撰写本文时尚未发布）。修复方法：
 
 - 升级到 **2026.1.12**（或从源码运行 `main`），然后重启 gateway。
-- 运行 `openclaw configure` 并选择 **MiniMax M2.5**，或者
+- 运行 `hanzo-bot configure` 并选择 **MiniMax M2.5**，或者
 - 手动添加 `models.providers.minimax` 配置块，或者
 - 设置 `MINIMAX_API_KEY`（或 MiniMax 凭证配置文件），以便注入该提供商。
 

@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/ollama-provider",
+  "name": "@hanzo/bot-ollama-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Ollama provider plugin",
+  "description": "Hanzo Bot Ollama provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

@@ -1,9 +1,9 @@
 ---
 read_when:
-  - 你想在 GCP 上 24/7 运行 OpenClaw
+  - 你想在 GCP 上 24/7 运行 Hanzo Bot
   - 你想要在自己的 VM 上运行生产级、常驻的 Gateway 网关
   - 你想完全控制持久化、二进制文件和重启行为
-summary: 在 GCP Compute Engine VM（Docker）上 24/7 运行 OpenClaw Gateway 网关并持久化状态
+summary: 在 GCP Compute Engine VM（Docker）上 24/7 运行 Hanzo Bot Gateway 网关并持久化状态
 title: GCP
 x-i18n:
   generated_at: "2026-02-03T07:52:50Z"
@@ -14,13 +14,13 @@ x-i18n:
   workflow: 15
 ---
 
-# 在 GCP Compute Engine 上运行 OpenClaw（Docker，生产 VPS 指南）
+# 在 GCP Compute Engine 上运行 Hanzo Bot（Docker，生产 VPS 指南）
 
 ## 目标
 
-使用 Docker 在 GCP Compute Engine VM 上运行持久化的 OpenClaw Gateway 网关，具有持久状态、内置二进制文件和安全的重启行为。
+使用 Docker 在 GCP Compute Engine VM 上运行持久化的 Hanzo Bot Gateway 网关，具有持久状态、内置二进制文件和安全的重启行为。
 
-如果你想要"OpenClaw 24/7 大约 $5-12/月"，这是在 Google Cloud 上的可靠设置。
+如果你想要"Hanzo Bot 24/7 大约 $5-12/月"，这是在 Google Cloud 上的可靠设置。
 价格因机器类型和区域而异；选择适合你工作负载的最小 VM，如果遇到 OOM 则扩容。
 
 ## 我们在做什么（简单说明）？
@@ -28,8 +28,8 @@ x-i18n:
 - 创建 GCP 项目并启用计费
 - 创建 Compute Engine VM
 - 安装 Docker（隔离的应用运行时）
-- 在 Docker 中启动 OpenClaw Gateway 网关
-- 在主机上持久化 `~/.openclaw` + `~/.openclaw/workspace`（重启/重建后仍保留）
+- 在 Docker 中启动 Hanzo Bot Gateway 网关
+- 在主机上持久化 `~/.openclaw` + `~/.hanzo/bot/workspace`（重启/重建后仍保留）
 - 通过 SSH 隧道从你的笔记本电脑访问控制 UI
 
 Gateway 网关可以通过以下方式访问：
@@ -49,7 +49,7 @@ Ubuntu 也可以；请相应地映射软件包。
 2. 创建 Compute Engine VM（e2-small，Debian 12，20GB）
 3. SSH 进入 VM
 4. 安装 Docker
-5. 克隆 OpenClaw 仓库
+5. 克隆 Hanzo Bot 仓库
 6. 创建持久化主机目录
 7. 配置 `.env` 和 `docker-compose.yml`
 8. 内置所需二进制文件、构建并启动
@@ -96,7 +96,7 @@ gcloud auth login
 **CLI：**
 
 ```bash
-gcloud projects create my-openclaw-project --name="OpenClaw Gateway"
+gcloud projects create my-openclaw-project --name="Hanzo Bot Gateway"
 gcloud config set project my-openclaw-project
 ```
 
@@ -194,10 +194,10 @@ docker compose version
 
 ---
 
-## 6) 克隆 OpenClaw 仓库
+## 6) 克隆 Hanzo Bot 仓库
 
 ```bash
-git clone https://github.com/openclaw/openclaw.git
+git clone https://github.com/hanzoai/bot.git
 cd openclaw
 ```
 
@@ -212,7 +212,7 @@ Docker 容器是临时的。
 
 ```bash
 mkdir -p ~/.openclaw
-mkdir -p ~/.openclaw/workspace
+mkdir -p ~/.hanzo/bot/workspace
 ```
 
 ---
@@ -222,13 +222,13 @@ mkdir -p ~/.openclaw/workspace
 在仓库根目录创建 `.env`。
 
 ```bash
-OPENCLAW_IMAGE=openclaw:latest
-OPENCLAW_GATEWAY_TOKEN=change-me-now
-OPENCLAW_GATEWAY_BIND=lan
-OPENCLAW_GATEWAY_PORT=18789
+BOT_IMAGE=openclaw:latest
+BOT_GATEWAY_TOKEN=change-me-now
+BOT_GATEWAY_BIND=lan
+BOT_GATEWAY_PORT=18789
 
-OPENCLAW_CONFIG_DIR=/home/$USER/.openclaw
-OPENCLAW_WORKSPACE_DIR=/home/$USER/.openclaw/workspace
+BOT_CONFIG_DIR=/home/$USER/.openclaw
+BOT_WORKSPACE_DIR=/home/$USER/.hanzo/bot/workspace
 
 GOG_KEYRING_PASSWORD=change-me-now
 XDG_CONFIG_HOME=/home/node/.openclaw
@@ -251,7 +251,7 @@ openssl rand -hex 32
 ```yaml
 services:
   openclaw-gateway:
-    image: ${OPENCLAW_IMAGE}
+    image: ${BOT_IMAGE}
     build: .
     restart: unless-stopped
     env_file:
@@ -260,19 +260,19 @@ services:
       - HOME=/home/node
       - NODE_ENV=production
       - TERM=xterm-256color
-      - OPENCLAW_GATEWAY_BIND=${OPENCLAW_GATEWAY_BIND}
-      - OPENCLAW_GATEWAY_PORT=${OPENCLAW_GATEWAY_PORT}
-      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - BOT_GATEWAY_BIND=${BOT_GATEWAY_BIND}
+      - BOT_GATEWAY_PORT=${BOT_GATEWAY_PORT}
+      - BOT_GATEWAY_TOKEN=${BOT_GATEWAY_TOKEN}
       - GOG_KEYRING_PASSWORD=${GOG_KEYRING_PASSWORD}
       - XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
       - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     volumes:
-      - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
-      - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+      - ${BOT_CONFIG_DIR}:/home/node/.openclaw
+      - ${BOT_WORKSPACE_DIR}:/home/node/.hanzo/bot/workspace
     ports:
       # 推荐：在 VM 上保持 Gateway 网关仅绑定 loopback；通过 SSH 隧道访问。
       # 要公开暴露，移除 `127.0.0.1:` 前缀并相应配置防火墙。
-      - "127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789"
+      - "127.0.0.1:${BOT_GATEWAY_PORT}:18789"
 
       # 可选：仅当你针对此 VM 运行 iOS/Android 节点并需要 Canvas 主机时。
       # 如果你公开暴露此端口，请阅读 /gateway/security 并相应配置防火墙。
@@ -283,9 +283,9 @@ services:
         "dist/index.js",
         "gateway",
         "--bind",
-        "${OPENCLAW_GATEWAY_BIND}",
+        "${BOT_GATEWAY_BIND}",
         "--port",
-        "${OPENCLAW_GATEWAY_PORT}",
+        "${BOT_GATEWAY_PORT}",
       ]
 ```
 
@@ -411,17 +411,17 @@ gcloud compute ssh openclaw-gateway --zone=us-central1-a -- -L 18789:127.0.0.1:1
 
 ## 什么持久化在哪里（真实来源）
 
-OpenClaw 在 Docker 中运行，但 Docker 不是真实来源。
+Hanzo Bot 在 Docker 中运行，但 Docker 不是真实来源。
 所有长期状态必须在重启、重建和重启后仍然存在。
 
 | 组件             | 位置                              | 持久化机制    | 说明                        |
 | ---------------- | --------------------------------- | ------------- | --------------------------- |
-| Gateway 网关配置 | `/home/node/.openclaw/`           | 主机卷挂载    | 包括 `openclaw.json`、令牌  |
-| 模型认证配置文件 | `/home/node/.openclaw/`           | 主机卷挂载    | OAuth 令牌、API 密钥        |
-| Skill 配置       | `/home/node/.openclaw/skills/`    | 主机卷挂载    | Skill 级别状态              |
-| 智能体工作区     | `/home/node/.openclaw/workspace/` | 主机卷挂载    | 代码和智能体产物            |
-| WhatsApp 会话    | `/home/node/.openclaw/`           | 主机卷挂载    | 保留 QR 登录                |
-| Gmail 密钥环     | `/home/node/.openclaw/`           | 主机卷 + 密码 | 需要 `GOG_KEYRING_PASSWORD` |
+| Gateway 网关配置 | `/home/node/.hanzo/bot/`           | 主机卷挂载    | 包括 `openclaw.json`、令牌  |
+| 模型认证配置文件 | `/home/node/.hanzo/bot/`           | 主机卷挂载    | OAuth 令牌、API 密钥        |
+| Skill 配置       | `/home/node/.hanzo/bot/skills/`    | 主机卷挂载    | Skill 级别状态              |
+| 智能体工作区     | `/home/node/.hanzo/bot/workspace/` | 主机卷挂载    | 代码和智能体产物            |
+| WhatsApp 会话    | `/home/node/.hanzo/bot/`           | 主机卷挂载    | 保留 QR 登录                |
+| Gmail 密钥环     | `/home/node/.hanzo/bot/`           | 主机卷 + 密码 | 需要 `GOG_KEYRING_PASSWORD` |
 | 外部二进制文件   | `/usr/local/bin/`                 | Docker 镜像   | 必须在构建时内置            |
 | Node 运行时      | 容器文件系统                      | Docker 镜像   | 每次镜像构建时重建          |
 | OS 包            | 容器文件系统                      | Docker 镜像   | 不要在运行时安装            |
@@ -431,7 +431,7 @@ OpenClaw 在 Docker 中运行，但 Docker 不是真实来源。
 
 ## 更新
 
-在 VM 上更新 OpenClaw：
+在 VM 上更新 Hanzo Bot：
 
 ```bash
 cd ~/openclaw
@@ -487,7 +487,7 @@ gcloud compute instances start openclaw-gateway --zone=us-central1-a
 
    ```bash
    gcloud iam service-accounts create openclaw-deploy \
-     --display-name="OpenClaw Deployment"
+     --display-name="Hanzo Bot Deployment"
    ```
 
 2. 授予 Compute Instance Admin 角色（或更窄的自定义角色）：

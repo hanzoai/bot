@@ -1,4 +1,4 @@
-package ai.openclaw.app.ui
+package ai.hanzo.bot.app.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.animation.AnimatedVisibility
@@ -52,8 +52,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import ai.openclaw.app.MainViewModel
-import ai.openclaw.app.ui.mobileCardSurface
+import ai.hanzo.bot.app.MainViewModel
+import ai.hanzo.bot.app.ui.mobileCardSurface
 
 private enum class ConnectInputMode {
   SetupCode,
@@ -296,7 +296,7 @@ fun ConnectTabScreen(viewModel: MainViewModel) {
         ) {
           Text("Last gateway error", style = mobileHeadline, color = mobileWarning)
           Text(statusLabel, style = mobileBody.copy(fontFamily = FontFamily.Monospace), color = mobileText)
-          Text("OpenClaw Android ${openClawAndroidVersionLabel()}", style = mobileCaption1, color = mobileTextSecondary)
+          Text("Hanzo Bot Android ${openClawAndroidVersionLabel()}", style = mobileCaption1, color = mobileTextSecondary)
           Button(
             onClick = {
               copyGatewayDiagnosticsReport(
@@ -373,8 +373,8 @@ fun ConnectTabScreen(viewModel: MainViewModel) {
           }
 
           Text("Run these on the gateway host:", style = mobileCallout, color = mobileTextSecondary)
-          CommandBlock("openclaw qr --setup-code-only")
-          CommandBlock("openclaw qr --json")
+          CommandBlock("hanzo-bot qr --setup-code-only")
+          CommandBlock("hanzo-bot qr --json")
 
           if (inputMode == ConnectInputMode.SetupCode) {
             Text("Setup Code", style = mobileCaption1.copy(fontWeight = FontWeight.SemiBold), color = mobileTextSecondary)

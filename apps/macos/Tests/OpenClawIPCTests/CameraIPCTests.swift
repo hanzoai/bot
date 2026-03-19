@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawIPC
+import Hanzo BotIPC
 import Testing
 
 struct CameraIPCTests {

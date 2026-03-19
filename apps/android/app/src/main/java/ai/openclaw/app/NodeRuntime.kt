@@ -1,4 +1,4 @@
-package ai.openclaw.app
+package ai.hanzo.bot.app
 
 import android.Manifest
 import android.content.Context
@@ -6,22 +6,22 @@ import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.ContextCompat
-import ai.openclaw.app.chat.ChatController
-import ai.openclaw.app.chat.ChatMessage
-import ai.openclaw.app.chat.ChatPendingToolCall
-import ai.openclaw.app.chat.ChatSessionEntry
-import ai.openclaw.app.chat.OutgoingAttachment
-import ai.openclaw.app.gateway.DeviceAuthStore
-import ai.openclaw.app.gateway.DeviceIdentityStore
-import ai.openclaw.app.gateway.GatewayDiscovery
-import ai.openclaw.app.gateway.GatewayEndpoint
-import ai.openclaw.app.gateway.GatewaySession
-import ai.openclaw.app.gateway.probeGatewayTlsFingerprint
-import ai.openclaw.app.node.*
-import ai.openclaw.app.protocol.OpenClawCanvasA2UIAction
-import ai.openclaw.app.voice.MicCaptureManager
-import ai.openclaw.app.voice.TalkModeManager
-import ai.openclaw.app.voice.VoiceConversationEntry
+import ai.hanzo.bot.app.chat.ChatController
+import ai.hanzo.bot.app.chat.ChatMessage
+import ai.hanzo.bot.app.chat.ChatPendingToolCall
+import ai.hanzo.bot.app.chat.ChatSessionEntry
+import ai.hanzo.bot.app.chat.OutgoingAttachment
+import ai.hanzo.bot.app.gateway.DeviceAuthStore
+import ai.hanzo.bot.app.gateway.DeviceIdentityStore
+import ai.hanzo.bot.app.gateway.GatewayDiscovery
+import ai.hanzo.bot.app.gateway.GatewayEndpoint
+import ai.hanzo.bot.app.gateway.GatewaySession
+import ai.hanzo.bot.app.gateway.probeGatewayTlsFingerprint
+import ai.hanzo.bot.app.node.*
+import ai.hanzo.bot.app.protocol.Hanzo BotCanvasA2UIAction
+import ai.hanzo.bot.app.voice.MicCaptureManager
+import ai.hanzo.bot.app.voice.TalkModeManager
+import ai.hanzo.bot.app.voice.VoiceConversationEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -497,7 +497,7 @@ class NodeRuntime(
           _canvasRehydratePending.value = false
           _canvasRehydrateErrorText.value = "Failed to request restore. Tap to retry."
         }
-        Log.w("OpenClawCanvas", "canvas rehydrate request failed ($source): transport unavailable")
+        Log.w("Hanzo BotCanvas", "canvas rehydrate request failed ($source): transport unavailable")
         return@launch
       }
       scope.launch {
@@ -844,7 +844,7 @@ class NodeRuntime(
       val actionId = (userActionObj["id"] as? JsonPrimitive)?.content?.trim().orEmpty().ifEmpty {
         java.util.UUID.randomUUID().toString()
       }
-      val name = OpenClawCanvasA2UIAction.extractActionName(userActionObj) ?: return@launch
+      val name = Hanzo BotCanvasA2UIAction.extractActionName(userActionObj) ?: return@launch
 
       val surfaceId =
         (userActionObj["surfaceId"] as? JsonPrimitive)?.content?.trim().orEmpty().ifEmpty { "main" }
@@ -854,7 +854,7 @@ class NodeRuntime(
 
       val sessionKey = resolveMainSessionKey()
       val message =
-        OpenClawCanvasA2UIAction.formatAgentMessage(
+        Hanzo BotCanvasA2UIAction.formatAgentMessage(
           actionName = name,
           sessionKey = sessionKey,
           surfaceId = surfaceId,
@@ -888,7 +888,7 @@ class NodeRuntime(
 
       try {
         canvas.eval(
-          OpenClawCanvasA2UIAction.jsDispatchA2UIActionStatus(
+          Hanzo BotCanvasA2UIAction.jsDispatchA2UIActionStatus(
             actionId = actionId,
             ok = connected && error == null,
             error = error,
@@ -1032,7 +1032,7 @@ class NodeRuntime(
         HomeCanvasPayload(
           gatewayState = "connecting",
           eyebrow = "Reconnecting",
-          title = "OpenClaw is syncing back up",
+          title = "Hanzo Bot is syncing back up",
           subtitle =
             "The gateway session is coming back online. Agent shortcuts should settle automatically in a moment.",
           gatewayLabel = gatewayLabel,
@@ -1046,7 +1046,7 @@ class NodeRuntime(
       HomeCanvasGatewayState.Error, HomeCanvasGatewayState.Offline ->
         HomeCanvasPayload(
           gatewayState = if (state == HomeCanvasGatewayState.Error) "error" else "offline",
-          eyebrow = "Welcome to OpenClaw",
+          eyebrow = "Welcome to Hanzo Bot",
           title = "Your phone stays quiet until it is needed",
           subtitle =
             "Pair this device to your gateway to wake it only for real work, keep a live agent overview handy, and avoid battery-draining background loops.",

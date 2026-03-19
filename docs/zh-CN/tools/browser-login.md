@@ -25,7 +25,7 @@ x-i18n:
 
 ## 使用哪个 Chrome 配置文件？
 
-OpenClaw 控制一个**专用的 Chrome 配置文件**（名为 `openclaw`，橙色调 UI）。这与你的日常浏览器配置文件是分开的。
+Hanzo Bot 控制一个**专用的 Chrome 配置文件**（名为 `openclaw`，橙色调 UI）。这与你的日常浏览器配置文件是分开的。
 
 两种简单的访问方式：
 
@@ -69,7 +69,7 @@ openclaw browser open https://x.com
 然后定位主机浏览器：
 
 ```bash
-openclaw browser open https://x.com --browser-profile openclaw --target host
+openclaw browser open https://x.com --browser-profile hanzo-bot --target host
 ```
 
 或者为发布更新的智能体禁用沙箱隔离。

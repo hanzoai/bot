@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct GatewayChannelShutdownTests {
     @Test func `shutdown prevents reconnect loop from receive failure`() async throws {

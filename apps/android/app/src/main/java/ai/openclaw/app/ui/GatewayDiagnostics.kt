@@ -1,11 +1,11 @@
-package ai.openclaw.app.ui
+package ai.hanzo.bot.app.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
 import android.widget.Toast
-import ai.openclaw.app.BuildConfig
+import ai.hanzo.bot.app.BuildConfig
 
 internal fun openClawAndroidVersionLabel(): String {
   val versionName = BuildConfig.VERSION_NAME.trim().ifEmpty { "dev" }
@@ -44,14 +44,14 @@ internal fun buildGatewayDiagnosticsReport(
   val endpoint = gatewayAddress.trim().ifEmpty { "unknown" }
   val status = gatewayStatusForDisplay(statusText)
   return """
-    Help diagnose this OpenClaw Android gateway connection failure.
+    Help diagnose this Hanzo Bot Android gateway connection failure.
 
     Please:
     - pick one route only: same machine, same LAN, Tailscale, or public URL
     - classify this as pairing/auth, TLS trust, wrong advertised route, wrong address/port, or gateway down
     - quote the exact app status/error below
-    - tell me whether `openclaw devices list` should show a pending pairing request
-    - if more signal is needed, ask for `openclaw qr --json`, `openclaw devices list`, and `openclaw nodes status`
+    - tell me whether `hanzo-bot devices list` should show a pending pairing request
+    - if more signal is needed, ask for `hanzo-bot qr --json`, `hanzo-bot devices list`, and `hanzo-bot nodes status`
     - give the next exact command or tap
 
     Debug info:
@@ -72,6 +72,6 @@ internal fun copyGatewayDiagnosticsReport(
 ) {
   val clipboard = context.getSystemService(ClipboardManager::class.java) ?: return
   val report = buildGatewayDiagnosticsReport(screen = screen, gatewayAddress = gatewayAddress, statusText = statusText)
-  clipboard.setPrimaryClip(ClipData.newPlainText("OpenClaw gateway diagnostics", report))
+  clipboard.setPrimaryClip(ClipData.newPlainText("Hanzo Bot gateway diagnostics", report))
   Toast.makeText(context, "Copied gateway diagnostics", Toast.LENGTH_SHORT).show()
 }

@@ -5,7 +5,7 @@ import {
   registerSessionBindingAdapter,
   resolveAgentRoute,
   setActivePluginRegistry,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "../../../../../test/helpers/extensions/matrix-monitor-route.js";
 import { matrixPlugin } from "../../channel.js";
 import { resolveMatrixInboundRoute } from "./route.js";
@@ -15,9 +15,9 @@ const baseCfg = {
   agents: {
     list: [{ id: "main" }, { id: "sender-agent" }, { id: "room-agent" }, { id: "acp-agent" }],
   },
-} satisfies OpenClawConfig;
+} satisfies Hanzo BotConfig;
 
-function resolveDmRoute(cfg: OpenClawConfig) {
+function resolveDmRoute(cfg: Hanzo BotConfig) {
   return resolveMatrixInboundRoute({
     cfg,
     accountId: "ops",
@@ -58,7 +58,7 @@ describe("resolveMatrixInboundRoute", () => {
           },
         },
       ],
-    } satisfies OpenClawConfig;
+    } satisfies Hanzo BotConfig;
 
     const { route, configuredBinding } = resolveDmRoute(cfg);
 
@@ -88,7 +88,7 @@ describe("resolveMatrixInboundRoute", () => {
           },
         },
       ],
-    } satisfies OpenClawConfig;
+    } satisfies Hanzo BotConfig;
 
     const { route, configuredBinding } = resolveDmRoute(cfg);
 
@@ -120,7 +120,7 @@ describe("resolveMatrixInboundRoute", () => {
           },
         },
       ],
-    } satisfies OpenClawConfig;
+    } satisfies Hanzo BotConfig;
 
     const { route, configuredBinding } = resolveDmRoute(cfg);
 
@@ -174,7 +174,7 @@ describe("resolveMatrixInboundRoute", () => {
           },
         },
       ],
-    } satisfies OpenClawConfig;
+    } satisfies Hanzo BotConfig;
 
     const { route, configuredBinding } = resolveDmRoute(cfg);
 

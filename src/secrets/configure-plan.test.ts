@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import {
   buildConfigureCandidates,
   buildConfigureCandidatesForScope,
@@ -19,7 +19,7 @@ describe("secrets configure plan helpers", () => {
           botToken: "token", // pragma: allowlist secret
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
 
     const candidates = buildConfigureCandidates(config);
     const paths = candidates.map((entry) => entry.path);
@@ -35,7 +35,7 @@ describe("secrets configure plan helpers", () => {
           legacy: { source: "env" },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const next = {
       secrets: {
         providers: {
@@ -43,7 +43,7 @@ describe("secrets configure plan helpers", () => {
           modern: { source: "env" },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
 
     const changes = collectConfigureProviderChanges({ original, next });
     expect(Object.keys(changes.upserts).toSorted()).toEqual(["default", "modern"]);
@@ -52,7 +52,7 @@ describe("secrets configure plan helpers", () => {
 
   it("discovers auth-profiles candidates for the selected agent scope", () => {
     const candidates = buildConfigureCandidatesForScope({
-      config: {} as OpenClawConfig,
+      config: {} as Hanzo BotConfig,
       authProfiles: {
         agentId: "main",
         store: {
@@ -90,7 +90,7 @@ describe("secrets configure plan helpers", () => {
             id: "TALK_API_KEY",
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       authProfiles: {
         agentId: "main",
         store: {
@@ -144,12 +144,12 @@ describe("secrets configure plan helpers", () => {
           },
           apiKey: "demo-talk-key", // pragma: allowlist secret
         },
-      } as OpenClawConfig,
-      authoredOpenClawConfig: {
+      } as Hanzo BotConfig,
+      authoredHanzo BotConfig: {
         talk: {
           apiKey: "demo-talk-key", // pragma: allowlist secret
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
     });
 
     const legacy = candidates.find((entry) => entry.path === "talk.apiKey");

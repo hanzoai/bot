@@ -1,20 +1,20 @@
 ---
 title: "LiteLLM"
-summary: "Run OpenClaw through LiteLLM Proxy for unified model access and cost tracking"
+summary: "Run Hanzo Bot through LiteLLM Proxy for unified model access and cost tracking"
 read_when:
-  - You want to route OpenClaw through a LiteLLM proxy
+  - You want to route Hanzo Bot through a LiteLLM proxy
   - You need cost tracking, logging, or model routing through LiteLLM
 ---
 
 # LiteLLM
 
-[LiteLLM](https://litellm.ai) is an open-source LLM gateway that provides a unified API to 100+ model providers. Route OpenClaw through LiteLLM to get centralized cost tracking, logging, and the flexibility to switch backends without changing your OpenClaw config.
+[LiteLLM](https://litellm.ai) is an open-source LLM gateway that provides a unified API to 100+ model providers. Route Hanzo Bot through LiteLLM to get centralized cost tracking, logging, and the flexibility to switch backends without changing your Hanzo Bot config.
 
-## Why use LiteLLM with OpenClaw?
+## Why use LiteLLM with Hanzo Bot?
 
-- **Cost tracking** — See exactly what OpenClaw spends across all models
+- **Cost tracking** — See exactly what Hanzo Bot spends across all models
 - **Model routing** — Switch between Claude, GPT-4, Gemini, Bedrock without config changes
-- **Virtual keys** — Create keys with spend limits for OpenClaw
+- **Virtual keys** — Create keys with spend limits for Hanzo Bot
 - **Logging** — Full request/response logs for debugging
 - **Fallbacks** — Automatic failover if your primary provider is down
 
@@ -35,7 +35,7 @@ pip install 'litellm[proxy]'
 litellm --model claude-opus-4-6
 ```
 
-2. Point OpenClaw to LiteLLM:
+2. Point Hanzo Bot to LiteLLM:
 
 ```bash
 export LITELLM_API_KEY="your-litellm-key"
@@ -43,7 +43,7 @@ export LITELLM_API_KEY="your-litellm-key"
 openclaw
 ```
 
-That's it. OpenClaw now routes through LiteLLM.
+That's it. Hanzo Bot now routes through LiteLLM.
 
 ## Configuration
 
@@ -94,14 +94,14 @@ export LITELLM_API_KEY="sk-litellm-key"
 
 ## Virtual keys
 
-Create a dedicated key for OpenClaw with spend limits:
+Create a dedicated key for Hanzo Bot with spend limits:
 
 ```bash
 curl -X POST "http://localhost:4000/key/generate" \
   -H "Authorization: Bearer $LITELLM_MASTER_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "key_alias": "openclaw",
+    "key_alias": "@hanzo/bot",
     "max_budget": 50.00,
     "budget_duration": "monthly"
   }'
@@ -126,7 +126,7 @@ model_list:
       api_key: os.environ/OPENAI_API_KEY
 ```
 
-OpenClaw keeps requesting `claude-opus-4-6` — LiteLLM handles the routing.
+Hanzo Bot keeps requesting `claude-opus-4-6` — LiteLLM handles the routing.
 
 ## Viewing usage
 
@@ -145,8 +145,8 @@ curl "http://localhost:4000/spend/logs" \
 ## Notes
 
 - LiteLLM runs on `http://localhost:4000` by default
-- OpenClaw connects via the OpenAI-compatible `/v1/chat/completions` endpoint
-- All OpenClaw features work through LiteLLM — no limitations
+- Hanzo Bot connects via the OpenAI-compatible `/v1/chat/completions` endpoint
+- All Hanzo Bot features work through LiteLLM — no limitations
 
 ## See also
 

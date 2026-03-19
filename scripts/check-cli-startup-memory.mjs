@@ -17,7 +17,7 @@ const repoRoot = process.cwd();
 const tmpHome = mkdtempSync(path.join(os.tmpdir(), "openclaw-startup-memory-"));
 const tmpDir = process.env.TMPDIR || process.env.TEMP || process.env.TMP || os.tmpdir();
 const rssHookPath = path.join(tmpHome, "measure-rss.mjs");
-const MAX_RSS_MARKER = "__OPENCLAW_MAX_RSS_KB__=";
+const MAX_RSS_MARKER = "__BOT_MAX_RSS_KB__=";
 
 writeFileSync(
   rssHookPath,
@@ -41,23 +41,23 @@ const cases = [
   {
     id: "help",
     label: "--help",
-    args: ["openclaw.mjs", "--help"],
-    limitMb: Number(process.env.OPENCLAW_STARTUP_MEMORY_HELP_MB ?? DEFAULT_LIMITS_MB.help),
+    args: ["hanzo-bot.mjs", "--help"],
+    limitMb: Number(process.env.BOT_STARTUP_MEMORY_HELP_MB ?? DEFAULT_LIMITS_MB.help),
   },
   {
     id: "statusJson",
     label: "status --json",
-    args: ["openclaw.mjs", "status", "--json"],
+    args: ["hanzo-bot.mjs", "status", "--json"],
     limitMb: Number(
-      process.env.OPENCLAW_STARTUP_MEMORY_STATUS_JSON_MB ?? DEFAULT_LIMITS_MB.statusJson,
+      process.env.BOT_STARTUP_MEMORY_STATUS_JSON_MB ?? DEFAULT_LIMITS_MB.statusJson,
     ),
   },
   {
     id: "gatewayStatus",
     label: "gateway status",
-    args: ["openclaw.mjs", "gateway", "status"],
+    args: ["hanzo-bot.mjs", "gateway", "status"],
     limitMb: Number(
-      process.env.OPENCLAW_STARTUP_MEMORY_GATEWAY_STATUS_MB ?? DEFAULT_LIMITS_MB.gatewayStatus,
+      process.env.BOT_STARTUP_MEMORY_GATEWAY_STATUS_MB ?? DEFAULT_LIMITS_MB.gatewayStatus,
     ),
   },
 ];
@@ -73,7 +73,7 @@ function formatFixGuidance(testCase, details) {
     "2. If this is an RSS overage, compare the startup import graph against the last passing commit and look for newly eager imports, bootstrap side effects, or plugin loading on the command path.",
     "3. If this is a non-zero exit, inspect the first transitive import/config error in stderr and fix that root cause before re-checking memory.",
     "LLM prompt:",
-    `"OpenClaw startup-memory CI failed for '${testCase.label}'. Analyze this failure, identify the first runtime/import side effect that makes startup heavier or broken, and propose the smallest safe patch. Failure output:\n${details}"`,
+    `"Hanzo Bot startup-memory CI failed for '${testCase.label}'. Analyze this failure, identify the first runtime/import side effect that makes startup heavier or broken, and propose the smallest safe patch. Failure output:\n${details}"`,
   ];
   return `${guidance.join("\n")}\n`;
 }
@@ -127,7 +127,7 @@ function buildBenchEnv() {
   }
   // Keep the benchmark on a single process so RSS reflects the actual command
   // path rather than the warning-suppression respawn wrapper.
-  env.OPENCLAW_NO_RESPAWN = "1";
+  env.BOT_NO_RESPAWN = "1";
 
   return env;
 }

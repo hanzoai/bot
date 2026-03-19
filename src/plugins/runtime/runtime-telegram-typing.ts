@@ -1,16 +1,16 @@
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import { logWarn } from "../../logger.js";
 
 export type CreateTelegramTypingLeaseParams = {
   to: string;
   accountId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: Hanzo BotConfig;
   intervalMs?: number;
   messageThreadId?: number;
   pulse: (params: {
     to: string;
     accountId?: string;
-    cfg?: OpenClawConfig;
+    cfg?: Hanzo BotConfig;
     messageThreadId?: number;
   }) => Promise<unknown>;
 };

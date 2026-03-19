@@ -1,18 +1,18 @@
 {
-  "name": "@openclaw/memory-core",
+  "name": "@hanzo/bot-memory-core",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw core memory search plugin",
+  "description": "Hanzo Bot core memory search plugin",
   "type": "module",
   "peerDependencies": {
-    "openclaw": ">=2026.3.11"
+    "@hanzo/bot": ">=2026.3.11"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

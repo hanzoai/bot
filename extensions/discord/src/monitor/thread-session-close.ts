@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { resolveStorePath, updateSessionStore } from "openclaw/plugin-sdk/config-runtime";
 
 /**
@@ -11,7 +11,7 @@ import { resolveStorePath, updateSessionStore } from "openclaw/plugin-sdk/config
  * any on-disk transcript history.
  */
 export async function closeDiscordThreadSessions(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId: string;
   threadId: string;
 }): Promise<number> {

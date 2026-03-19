@@ -5,7 +5,7 @@ VM_NAME="Windows 11"
 SNAPSHOT_HINT="pre-openclaw-native-e2e-2026-03-12"
 MODE="both"
 OPENAI_API_KEY_ENV="OPENAI_API_KEY"
-INSTALL_URL="https://openclaw.ai/install.ps1"
+INSTALL_URL="https://hanzo.bot/install.ps1"
 HOST_PORT="18426"
 HOST_PORT_EXPLICIT=0
 HOST_IP=""
@@ -86,7 +86,7 @@ Options:
   --mode <fresh|upgrade|both>
   --openai-api-key-env <var> Host env var name for OpenAI API key.
                              Default: OPENAI_API_KEY
-  --install-url <url>        Installer URL for latest release. Default: https://openclaw.ai/install.ps1
+  --install-url <url>        Installer URL for latest release. Default: https://hanzo.bot/install.ps1
   --host-port <port>         Host HTTP port for current-main tgz. Default: 18426
   --host-ip <ip>             Override Parallels host IP.
   --latest-version <ver>     Override npm latest version lookup.
@@ -470,7 +470,7 @@ import re
 import sys
 
 text = pathlib.Path(sys.argv[1]).read_text(errors="replace")
-matches = re.findall(r"OpenClaw [^\r\n]+ \([0-9a-f]{7,}\)", text)
+matches = re.findall(r"Hanzo Bot [^\r\n]+ \([0-9a-f]{7,}\)", text)
 print(matches[-1] if matches else "")
 PY
 }
@@ -518,7 +518,7 @@ resolve_latest_version() {
     printf '%s\n' "$LATEST_VERSION"
     return
   fi
-  npm view openclaw version --userconfig "$(mktemp)"
+  npm view hanzo-bot version --userconfig "$(mktemp)"
 }
 
 resolve_mingit_download() {
@@ -624,12 +624,12 @@ ensure_guest_git() {
   if guest_exec cmd.exe /d /s /c "where git.exe >nul 2>nul && git.exe --version"; then
     return
   fi
-  guest_exec cmd.exe /d /s /c "if exist \"%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\" rmdir /s /q \"%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\""
-  guest_exec cmd.exe /d /s /c "if not exist \"%LOCALAPPDATA%\\OpenClaw\\deps\" mkdir \"%LOCALAPPDATA%\\OpenClaw\\deps\""
-  guest_exec cmd.exe /d /s /c "mkdir \"%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\""
+  guest_exec cmd.exe /d /s /c "if exist \"%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\" rmdir /s /q \"%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\""
+  guest_exec cmd.exe /d /s /c "if not exist \"%LOCALAPPDATA%\\Hanzo Bot\\deps\" mkdir \"%LOCALAPPDATA%\\Hanzo Bot\\deps\""
+  guest_exec cmd.exe /d /s /c "mkdir \"%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\""
   guest_exec cmd.exe /d /s /c "curl.exe -fsSL \"$mingit_url\" -o \"%TEMP%\\$MINGIT_ZIP_NAME\""
-  guest_exec cmd.exe /d /s /c "tar.exe -xf \"%TEMP%\\$MINGIT_ZIP_NAME\" -C \"%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\""
-  guest_exec cmd.exe /d /s /c "del /q \"%TEMP%\\$MINGIT_ZIP_NAME\" & set \"PATH=%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\\cmd;%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\\mingw64\\bin;%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\\usr\\bin;%PATH%\" && git.exe --version"
+  guest_exec cmd.exe /d /s /c "tar.exe -xf \"%TEMP%\\$MINGIT_ZIP_NAME\" -C \"%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\""
+  guest_exec cmd.exe /d /s /c "del /q \"%TEMP%\\$MINGIT_ZIP_NAME\" & set \"PATH=%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\\cmd;%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\\mingw64\\bin;%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\\usr\\bin;%PATH%\" && git.exe --version"
 }
 
 pack_main_tgz() {
@@ -735,7 +735,7 @@ install_main_tgz() {
   local temp_name="$2"
   local tgz_url
   tgz_url="http://$host_ip:$HOST_PORT/$(basename "$MAIN_TGZ_PATH")"
-  guest_exec cmd.exe /d /s /c "set \"PATH=%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\\cmd;%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\\mingw64\\bin;%LOCALAPPDATA%\\OpenClaw\\deps\\portable-git\\usr\\bin;%PATH%\" && curl.exe -fsSL \"$tgz_url\" -o \"%TEMP%\\$temp_name\" && npm.cmd install -g \"%TEMP%\\$temp_name\" --no-fund --no-audit && \"%APPDATA%\\npm\\openclaw.cmd\" --version"
+  guest_exec cmd.exe /d /s /c "set \"PATH=%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\\cmd;%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\\mingw64\\bin;%LOCALAPPDATA%\\Hanzo Bot\\deps\\portable-git\\usr\\bin;%PATH%\" && curl.exe -fsSL \"$tgz_url\" -o \"%TEMP%\\$temp_name\" && npm.cmd install -g \"%TEMP%\\$temp_name\" --no-fund --no-audit && \"%APPDATA%\\npm\\openclaw.cmd\" --version"
 }
 
 verify_version_contains() {

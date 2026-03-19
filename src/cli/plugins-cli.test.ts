@@ -1,10 +1,10 @@
 import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { createCliRuntimeCapture } from "./test-runtime-capture.js";
 
-const loadConfig = vi.fn<() => OpenClawConfig>(() => ({}) as OpenClawConfig);
-const writeConfigFile = vi.fn<(config: OpenClawConfig) => Promise<void>>(async () => undefined);
+const loadConfig = vi.fn<() => Hanzo BotConfig>(() => ({}) as Hanzo BotConfig);
+const writeConfigFile = vi.fn<(config: Hanzo BotConfig) => Promise<void>>(async () => undefined);
 const resolveStateDir = vi.fn(() => "/tmp/openclaw-state");
 const installPluginFromMarketplace = vi.fn();
 const listMarketplacePlugins = vi.fn();
@@ -32,7 +32,7 @@ vi.mock("../config/config.js", async (importOriginal) => {
   return {
     ...actual,
     loadConfig: () => loadConfig(),
-    writeConfigFile: (config: OpenClawConfig) => writeConfigFile(config),
+    writeConfigFile: (config: Hanzo BotConfig) => writeConfigFile(config),
   };
 });
 
@@ -127,7 +127,7 @@ describe("plugins cli", () => {
     installPluginFromNpmSpec.mockReset();
     installPluginFromPath.mockReset();
 
-    loadConfig.mockReturnValue({} as OpenClawConfig);
+    loadConfig.mockReturnValue({} as Hanzo BotConfig);
     writeConfigFile.mockResolvedValue(undefined);
     resolveStateDir.mockReturnValue("/tmp/openclaw-state");
     resolveMarketplaceInstallShortcut.mockResolvedValue(null);
@@ -135,19 +135,19 @@ describe("plugins cli", () => {
       ok: false,
       error: "marketplace install failed",
     });
-    enablePluginInConfig.mockImplementation((cfg: OpenClawConfig) => ({ config: cfg }));
-    recordPluginInstall.mockImplementation((cfg: OpenClawConfig) => cfg);
+    enablePluginInConfig.mockImplementation((cfg: Hanzo BotConfig) => ({ config: cfg }));
+    recordPluginInstall.mockImplementation((cfg: Hanzo BotConfig) => cfg);
     buildPluginStatusReport.mockReturnValue({
       plugins: [],
       diagnostics: [],
     });
-    applyExclusiveSlotSelection.mockImplementation(({ config }: { config: OpenClawConfig }) => ({
+    applyExclusiveSlotSelection.mockImplementation(({ config }: { config: Hanzo BotConfig }) => ({
       config,
       warnings: [],
     }));
     uninstallPlugin.mockResolvedValue({
       ok: true,
-      config: {} as OpenClawConfig,
+      config: {} as Hanzo BotConfig,
       warnings: [],
       actions: {
         entry: false,
@@ -161,7 +161,7 @@ describe("plugins cli", () => {
     updateNpmInstalledPlugins.mockResolvedValue({
       outcomes: [],
       changed: false,
-      config: {} as OpenClawConfig,
+      config: {} as Hanzo BotConfig,
     });
     promptYesNo.mockResolvedValue(true);
     installPluginFromPath.mockResolvedValue({ ok: false, error: "path install disabled in test" });
@@ -199,7 +199,7 @@ describe("plugins cli", () => {
       plugins: {
         entries: {},
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const enabledCfg = {
       plugins: {
         entries: {
@@ -208,7 +208,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const installedCfg = {
       ...enabledCfg,
       plugins: {
@@ -220,7 +220,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
 
     loadConfig.mockReturnValue(cfg);
     installPluginFromMarketplace.mockResolvedValue({
@@ -267,7 +267,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as Hanzo BotConfig);
     buildPluginStatusReport.mockReturnValue({
       plugins: [{ id: "alpha", name: "alpha" }],
       diagnostics: [],
@@ -294,13 +294,13 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const nextConfig = {
       plugins: {
         entries: {},
         installs: {},
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
 
     loadConfig.mockReturnValue(baseConfig);
     buildPluginStatusReport.mockReturnValue({
@@ -339,7 +339,7 @@ describe("plugins cli", () => {
         entries: {},
         installs: {},
       },
-    } as OpenClawConfig);
+    } as Hanzo BotConfig);
     buildPluginStatusReport.mockReturnValue({
       plugins: [{ id: "alpha", name: "alpha" }],
       diagnostics: [],
@@ -358,7 +358,7 @@ describe("plugins cli", () => {
       plugins: {
         installs: {},
       },
-    } as OpenClawConfig);
+    } as Hanzo BotConfig);
 
     await expect(runCommand(["plugins", "update"])).rejects.toThrow("__exit__:1");
 
@@ -371,7 +371,7 @@ describe("plugins cli", () => {
       plugins: {
         installs: {},
       },
-    } as OpenClawConfig);
+    } as Hanzo BotConfig);
 
     await runCommand(["plugins", "update", "--all"]);
 
@@ -391,7 +391,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     loadConfig.mockReturnValue(config);
     updateNpmInstalledPlugins.mockResolvedValue({
       config,
@@ -418,13 +418,13 @@ describe("plugins cli", () => {
         installs: {
           "voice-call": {
             source: "npm",
-            spec: "@openclaw/voice-call",
+            spec: "@hanzo/bot-voice-call",
             installPath: "/tmp/voice-call",
-            resolvedName: "@openclaw/voice-call",
+            resolvedName: "@hanzo/bot-voice-call",
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     loadConfig.mockReturnValue(config);
     updateNpmInstalledPlugins.mockResolvedValue({
       config,
@@ -432,14 +432,14 @@ describe("plugins cli", () => {
       outcomes: [],
     });
 
-    await runCommand(["plugins", "update", "@openclaw/voice-call@beta"]);
+    await runCommand(["plugins", "update", "@hanzo/bot-voice-call@beta"]);
 
     expect(updateNpmInstalledPlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         config,
         pluginIds: ["voice-call"],
         specOverrides: {
-          "voice-call": "@openclaw/voice-call@beta",
+          "voice-call": "@hanzo/bot-voice-call@beta",
         },
       }),
     );
@@ -457,7 +457,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     loadConfig.mockReturnValue(config);
     updateNpmInstalledPlugins.mockResolvedValue({
       config,
@@ -490,7 +490,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     loadConfig.mockReturnValue(config);
     updateNpmInstalledPlugins.mockResolvedValue({
       config,
@@ -519,21 +519,21 @@ describe("plugins cli", () => {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.0.0",
+            spec: "@hanzo/bot-alpha@1.0.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const nextConfig = {
       plugins: {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.1.0",
+            spec: "@hanzo/bot-alpha@1.1.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     loadConfig.mockReturnValue(cfg);
     updateNpmInstalledPlugins.mockResolvedValue({
       outcomes: [{ status: "ok", message: "Updated alpha -> 1.1.0" }],

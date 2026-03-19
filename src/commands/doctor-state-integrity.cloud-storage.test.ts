@@ -12,7 +12,7 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "Mobile Documents",
       "com~apple~CloudDocs",
-      "OpenClaw",
+      "Hanzo Bot",
       ".openclaw",
     );
 
@@ -28,7 +28,7 @@ describe("detectMacCloudSyncedStateDir", () => {
   });
 
   it("detects state dir under Library/CloudStorage", () => {
-    const stateDir = path.join(home, "Library", "CloudStorage", "Dropbox", "OpenClaw", ".openclaw");
+    const stateDir = path.join(home, "Library", "CloudStorage", "Dropbox", "Hanzo Bot", ".openclaw");
 
     const result = detectMacCloudSyncedStateDir(stateDir, {
       platform: "darwin",
@@ -48,7 +48,7 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "CloudStorage",
       "OneDrive-Personal",
-      "OpenClaw",
+      "Hanzo Bot",
       ".openclaw",
     );
 
@@ -70,7 +70,7 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "CloudStorage",
       "OneDrive-Personal",
-      "OpenClaw",
+      "Hanzo Bot",
       ".openclaw",
     );
     const resolvedLocalPath = path.join(home, ".openclaw");
@@ -84,10 +84,10 @@ describe("detectMacCloudSyncedStateDir", () => {
     expect(result).toBeNull();
   });
 
-  it("anchors cloud detection to OS homedir when OPENCLAW_HOME is overridden", () => {
+  it("anchors cloud detection to OS homedir when BOT_HOME is overridden", () => {
     const stateDir = path.join(home, "Library", "CloudStorage", "iCloud Drive", ".openclaw");
-    const originalOpenClawHome = process.env.OPENCLAW_HOME;
-    process.env.OPENCLAW_HOME = "/tmp/openclaw-home-override";
+    const originalHanzo BotHome = process.env.BOT_HOME;
+    process.env.BOT_HOME = "/tmp/openclaw-home-override";
     const homedirSpy = vi.spyOn(os, "homedir").mockReturnValue(home);
     try {
       const result = detectMacCloudSyncedStateDir(stateDir, {
@@ -100,10 +100,10 @@ describe("detectMacCloudSyncedStateDir", () => {
       });
     } finally {
       homedirSpy.mockRestore();
-      if (originalOpenClawHome === undefined) {
-        delete process.env.OPENCLAW_HOME;
+      if (originalHanzo BotHome === undefined) {
+        delete process.env.BOT_HOME;
       } else {
-        process.env.OPENCLAW_HOME = originalOpenClawHome;
+        process.env.BOT_HOME = originalHanzo BotHome;
       }
     }
   });
@@ -114,7 +114,7 @@ describe("detectMacCloudSyncedStateDir", () => {
       "Library",
       "Mobile Documents",
       "com~apple~CloudDocs",
-      "OpenClaw",
+      "Hanzo Bot",
       ".openclaw",
     );
 

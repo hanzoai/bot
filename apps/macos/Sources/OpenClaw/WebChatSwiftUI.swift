@@ -1,8 +1,8 @@
 import AppKit
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import Hanzo BotChatUI
+import Hanzo BotKit
+import Hanzo BotProtocol
 import OSLog
 import QuartzCore
 import SwiftUI
@@ -17,12 +17,12 @@ private enum WebChatSwiftUILayout {
     static let anchorPadding: CGFloat = 8
 }
 
-struct MacGatewayChatTransport: OpenClawChatTransport {
-    func requestHistory(sessionKey: String) async throws -> OpenClawChatHistoryPayload {
+struct MacGatewayChatTransport: Hanzo BotChatTransport {
+    func requestHistory(sessionKey: String) async throws -> Hanzo BotChatHistoryPayload {
         try await GatewayConnection.shared.chatHistory(sessionKey: sessionKey)
     }
 
-    func listModels() async throws -> [OpenClawChatModelChoice] {
+    func listModels() async throws -> [Hanzo BotChatModelChoice] {
         do {
             let data = try await GatewayConnection.shared.request(
                 method: "models.list",
@@ -47,7 +47,7 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
             timeoutMs: 10000)
     }
 
-    func listSessions(limit: Int?) async throws -> OpenClawChatSessionsListResponse {
+    func listSessions(limit: Int?) async throws -> Hanzo BotChatSessionsListResponse {
         var params: [String: AnyCodable] = [
             "includeGlobal": AnyCodable(true),
             "includeUnknown": AnyCodable(false),
@@ -59,18 +59,18 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
             method: "sessions.list",
             params: params,
             timeoutMs: 15000)
-        let decoded = try JSONDecoder().decode(OpenClawChatSessionsListResponse.self, from: data)
+        let decoded = try JSONDecoder().decode(Hanzo BotChatSessionsListResponse.self, from: data)
         let mainSessionKey = await GatewayConnection.shared.cachedMainSessionKey()
         let defaults = decoded.defaults.map {
-            OpenClawChatSessionsDefaults(
+            Hanzo BotChatSessionsDefaults(
                 model: $0.model,
                 contextTokens: $0.contextTokens,
                 mainSessionKey: mainSessionKey)
-        } ?? OpenClawChatSessionsDefaults(
+        } ?? Hanzo BotChatSessionsDefaults(
             model: nil,
             contextTokens: nil,
             mainSessionKey: mainSessionKey)
-        return OpenClawChatSessionsListResponse(
+        return Hanzo BotChatSessionsListResponse(
             ts: decoded.ts,
             path: decoded.path,
             count: decoded.count,
@@ -105,7 +105,7 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
         message: String,
         thinking: String,
         idempotencyKey: String,
-        attachments: [OpenClawChatAttachmentPayload]) async throws -> OpenClawChatSendResponse
+        attachments: [Hanzo BotChatAttachmentPayload]) async throws -> Hanzo BotChatSendResponse
     {
         try await GatewayConnection.shared.chatSend(
             sessionKey: sessionKey,
@@ -126,7 +126,7 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
             timeoutMs: 10000)
     }
 
-    func events() -> AsyncStream<OpenClawChatTransportEvent> {
+    func events() -> AsyncStream<Hanzo BotChatTransportEvent> {
         AsyncStream { continuation in
             let task = Task {
                 do {
@@ -150,11 +150,11 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
         }
     }
 
-    static func mapPushToTransportEvent(_ push: GatewayPush) -> OpenClawChatTransportEvent? {
+    static func mapPushToTransportEvent(_ push: GatewayPush) -> Hanzo BotChatTransportEvent? {
         switch push {
         case let .snapshot(hello):
             let ok = (try? JSONDecoder().decode(
-                OpenClawGatewayHealthOK.self,
+                Hanzo BotGatewayHealthOK.self,
                 from: JSONEncoder().encode(hello.snapshot.health)))?.ok ?? true
             return .health(ok: ok)
 
@@ -163,7 +163,7 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
             case "health":
                 guard let payload = evt.payload else { return nil }
                 let ok = (try? JSONDecoder().decode(
-                    OpenClawGatewayHealthOK.self,
+                    Hanzo BotGatewayHealthOK.self,
                     from: JSONEncoder().encode(payload)))?.ok ?? true
                 return .health(ok: ok)
             case "tick":
@@ -171,7 +171,7 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
             case "chat":
                 guard let payload = evt.payload else { return nil }
                 guard let chat = try? JSONDecoder().decode(
-                    OpenClawChatEventPayload.self,
+                    Hanzo BotChatEventPayload.self,
                     from: JSONEncoder().encode(payload))
                 else {
                     return nil
@@ -180,7 +180,7 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
             case "agent":
                 guard let payload = evt.payload else { return nil }
                 guard let agent = try? JSONDecoder().decode(
-                    OpenClawAgentEventPayload.self,
+                    Hanzo BotAgentEventPayload.self,
                     from: JSONEncoder().encode(payload))
                 else {
                     return nil
@@ -195,8 +195,8 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
         }
     }
 
-    private static func mapModelChoice(_ model: OpenClawProtocol.ModelChoice) -> OpenClawChatModelChoice {
-        OpenClawChatModelChoice(
+    private static func mapModelChoice(_ model: Hanzo BotProtocol.ModelChoice) -> Hanzo BotChatModelChoice {
+        Hanzo BotChatModelChoice(
             modelID: model.id,
             name: model.name,
             provider: model.provider,
@@ -210,7 +210,7 @@ struct MacGatewayChatTransport: OpenClawChatTransport {
 final class WebChatSwiftUIWindowController {
     private let presentation: WebChatPresentation
     private let sessionKey: String
-    private let hosting: NSHostingController<OpenClawChatView>
+    private let hosting: NSHostingController<Hanzo BotChatView>
     private let contentController: NSViewController
     private var window: NSWindow?
     private var dismissMonitor: Any?
@@ -221,10 +221,10 @@ final class WebChatSwiftUIWindowController {
         self.init(sessionKey: sessionKey, presentation: presentation, transport: MacGatewayChatTransport())
     }
 
-    init(sessionKey: String, presentation: WebChatPresentation, transport: any OpenClawChatTransport) {
+    init(sessionKey: String, presentation: WebChatPresentation, transport: any Hanzo BotChatTransport) {
         self.sessionKey = sessionKey
         self.presentation = presentation
-        let vm = OpenClawChatViewModel(
+        let vm = Hanzo BotChatViewModel(
             sessionKey: sessionKey,
             transport: transport,
             initialThinkingLevel: Self.persistedThinkingLevel(),
@@ -232,7 +232,7 @@ final class WebChatSwiftUIWindowController {
                 UserDefaults.standard.set(level, forKey: webChatThinkingLevelDefaultsKey)
             })
         let accent = Self.color(fromHex: AppStateStore.shared.seamColorHex)
-        self.hosting = NSHostingController(rootView: OpenClawChatView(
+        self.hosting = NSHostingController(rootView: Hanzo BotChatView(
             viewModel: vm,
             showsSessionSwitcher: true,
             userAccent: accent))
@@ -350,7 +350,7 @@ final class WebChatSwiftUIWindowController {
                 styleMask: [.titled, .closable, .resizable, .miniaturizable],
                 backing: .buffered,
                 defer: false)
-            window.title = "OpenClaw Chat"
+            window.title = "Hanzo Bot Chat"
             window.contentViewController = contentViewController
             window.isReleasedWhenClosed = false
             window.titleVisibility = .visible
@@ -393,7 +393,7 @@ final class WebChatSwiftUIWindowController {
 
     private static func makeContentController(
         for presentation: WebChatPresentation,
-        hosting: NSHostingController<OpenClawChatView>) -> NSViewController
+        hosting: NSHostingController<Hanzo BotChatView>) -> NSViewController
     {
         let controller = NSViewController()
         let effectView = NSVisualEffectView()

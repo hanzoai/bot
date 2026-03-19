@@ -1,38 +1,38 @@
 import Foundation
 
-public enum OpenClawCameraCommand: String, Codable, Sendable {
+public enum Hanzo BotCameraCommand: String, Codable, Sendable {
     case list = "camera.list"
     case snap = "camera.snap"
     case clip = "camera.clip"
 }
 
-public enum OpenClawCameraFacing: String, Codable, Sendable {
+public enum Hanzo BotCameraFacing: String, Codable, Sendable {
     case back
     case front
 }
 
-public enum OpenClawCameraImageFormat: String, Codable, Sendable {
+public enum Hanzo BotCameraImageFormat: String, Codable, Sendable {
     case jpg
     case jpeg
 }
 
-public enum OpenClawCameraVideoFormat: String, Codable, Sendable {
+public enum Hanzo BotCameraVideoFormat: String, Codable, Sendable {
     case mp4
 }
 
-public struct OpenClawCameraSnapParams: Codable, Sendable, Equatable {
-    public var facing: OpenClawCameraFacing?
+public struct Hanzo BotCameraSnapParams: Codable, Sendable, Equatable {
+    public var facing: Hanzo BotCameraFacing?
     public var maxWidth: Int?
     public var quality: Double?
-    public var format: OpenClawCameraImageFormat?
+    public var format: Hanzo BotCameraImageFormat?
     public var deviceId: String?
     public var delayMs: Int?
 
     public init(
-        facing: OpenClawCameraFacing? = nil,
+        facing: Hanzo BotCameraFacing? = nil,
         maxWidth: Int? = nil,
         quality: Double? = nil,
-        format: OpenClawCameraImageFormat? = nil,
+        format: Hanzo BotCameraImageFormat? = nil,
         deviceId: String? = nil,
         delayMs: Int? = nil)
     {
@@ -45,18 +45,18 @@ public struct OpenClawCameraSnapParams: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawCameraClipParams: Codable, Sendable, Equatable {
-    public var facing: OpenClawCameraFacing?
+public struct Hanzo BotCameraClipParams: Codable, Sendable, Equatable {
+    public var facing: Hanzo BotCameraFacing?
     public var durationMs: Int?
     public var includeAudio: Bool?
-    public var format: OpenClawCameraVideoFormat?
+    public var format: Hanzo BotCameraVideoFormat?
     public var deviceId: String?
 
     public init(
-        facing: OpenClawCameraFacing? = nil,
+        facing: Hanzo BotCameraFacing? = nil,
         durationMs: Int? = nil,
         includeAudio: Bool? = nil,
-        format: OpenClawCameraVideoFormat? = nil,
+        format: Hanzo BotCameraVideoFormat? = nil,
         deviceId: String? = nil)
     {
         self.facing = facing

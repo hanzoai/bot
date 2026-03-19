@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/anthropic-provider",
+  "name": "@hanzo/bot-anthropic-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Anthropic provider plugin",
+  "description": "Hanzo Bot Anthropic provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

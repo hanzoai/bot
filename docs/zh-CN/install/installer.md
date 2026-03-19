@@ -1,6 +1,6 @@
 ---
 read_when:
-  - 你想了解 `openclaw.ai/install.sh`
+  - 你想了解 `hanzo.bot/install.sh`
   - 你想自动化安装（CI / 无头）
   - 你想从 GitHub 检出安装
 summary: 安装脚本的工作原理（install.sh、install-cli.sh、install.ps1）、标志和自动化
@@ -16,44 +16,44 @@ x-i18n:
 
 # 安装器内部机制
 
-OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
+Hanzo Bot 提供三个安装脚本，由 `hanzo.bot` 提供。
 
 | 脚本                               | 平台                  | 功能                                                                          |
 | ---------------------------------- | --------------------- | ----------------------------------------------------------------------------- |
-| [`install.sh`](#installsh)         | macOS / Linux / WSL   | 如有需要则安装 Node，通过 npm（默认）或 git 安装 OpenClaw，并可运行新手引导。 |
-| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL   | 将 Node + OpenClaw 安装到本地前缀（`~/.openclaw`）中。无需 root。             |
-| [`install.ps1`](#installps1)       | Windows（PowerShell） | 如有需要则安装 Node，通过 npm（默认）或 git 安装 OpenClaw，并可运行新手引导。 |
+| [`install.sh`](#installsh)         | macOS / Linux / WSL   | 如有需要则安装 Node，通过 npm（默认）或 git 安装 Hanzo Bot，并可运行新手引导。 |
+| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL   | 将 Node + Hanzo Bot 安装到本地前缀（`~/.openclaw`）中。无需 root。             |
+| [`install.ps1`](#installps1)       | Windows（PowerShell） | 如有需要则安装 Node，通过 npm（默认）或 git 安装 Hanzo Bot，并可运行新手引导。 |
 
 ## 快速命令
 
 <Tabs>
   <Tab title="install.sh">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash
     ```
 
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --help
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash -s -- --help
     ```
 
   </Tab>
   <Tab title="install-cli.sh">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install-cli.sh | bash
     ```
 
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --help
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install-cli.sh | bash -s -- --help
     ```
 
   </Tab>
   <Tab title="install.ps1">
     ```powershell
-    iwr -useb https://openclaw.ai/install.ps1 | iex
+    iwr -useb https://hanzo.bot/install.ps1 | iex
     ```
 
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -Tag beta -NoOnboard -DryRun
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -Tag beta -NoOnboard -DryRun
     ```
 
   </Tab>
@@ -78,17 +78,17 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
     支持 macOS 和 Linux（包括 WSL）。如果检测到 macOS，则会在缺少 Homebrew 时安装它。
   </Step>
   <Step title="默认确保使用 Node.js 24">
-    检查 Node 版本，并在需要时安装 Node 24（macOS 上使用 Homebrew，Linux apt/dnf/yum 上使用 NodeSource 设置脚本）。为了兼容性，OpenClaw 仍支持 Node 22 LTS，目前为 `22.16+`。
+    检查 Node 版本，并在需要时安装 Node 24（macOS 上使用 Homebrew，Linux apt/dnf/yum 上使用 NodeSource 设置脚本）。为了兼容性，Hanzo Bot 仍支持 Node 22 LTS，目前为 `22.16+`。
   </Step>
   <Step title="确保安装 Git">
     如果缺少 Git，则安装它。
   </Step>
-  <Step title="安装 OpenClaw">
+  <Step title="安装 Hanzo Bot">
     - `npm` 方法（默认）：全局 npm 安装
     - `git` 方法：克隆/更新仓库，使用 pnpm 安装依赖，构建，然后将包装器安装到 `~/.local/bin/openclaw`
   </Step>
   <Step title="安装后任务">
-    - 在升级和 git 安装时运行 `openclaw doctor --non-interactive`（尽力而为）
+    - 在升级和 git 安装时运行 `hanzo-bot doctor --non-interactive`（尽力而为）
     - 在适当情况下尝试运行新手引导（有 TTY、未禁用新手引导，并且 bootstrap/配置检查通过）
     - 默认设置 `SHARP_IGNORE_GLOBAL_LIBVIPS=1`
   </Step>
@@ -96,7 +96,7 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 
 ### 源码检出检测
 
-如果在 OpenClaw 检出目录中运行（`package.json` + `pnpm-workspace.yaml`），脚本会提供：
+如果在 Hanzo Bot 检出目录中运行（`package.json` + `pnpm-workspace.yaml`），脚本会提供：
 
 - 使用检出目录（`git`），或
 - 使用全局安装（`npm`）
@@ -110,27 +110,27 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 <Tabs>
   <Tab title="默认">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash
     ```
   </Tab>
   <Tab title="跳过新手引导">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-onboard
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash -s -- --no-onboard
     ```
   </Tab>
   <Tab title="Git 安装">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --install-method git
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash -s -- --install-method git
     ```
   </Tab>
   <Tab title="通过 npm 安装 GitHub main">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --version main
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash -s -- --version main
     ```
   </Tab>
   <Tab title="试运行">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --dry-run
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash -s -- --dry-run
     ```
   </Tab>
 </Tabs>
@@ -160,16 +160,16 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 
 | 变量                                                    | 说明                                 |
 | ------------------------------------------------------- | ------------------------------------ |
-| `OPENCLAW_INSTALL_METHOD=git\|npm`                      | 安装方法                             |
-| `OPENCLAW_VERSION=latest\|next\|main\|<semver>\|<spec>` | npm 版本、dist-tag 或包规范          |
-| `OPENCLAW_BETA=0\|1`                                    | 如有可用则使用 beta                  |
-| `OPENCLAW_GIT_DIR=<path>`                               | 检出目录                             |
-| `OPENCLAW_GIT_UPDATE=0\|1`                              | 切换 git 更新                        |
-| `OPENCLAW_NO_PROMPT=1`                                  | 禁用提示                             |
-| `OPENCLAW_NO_ONBOARD=1`                                 | 跳过新手引导                         |
-| `OPENCLAW_DRY_RUN=1`                                    | 试运行模式                           |
-| `OPENCLAW_VERBOSE=1`                                    | 调试模式                             |
-| `OPENCLAW_NPM_LOGLEVEL=error\|warn\|notice`             | npm 日志级别                         |
+| `BOT_INSTALL_METHOD=git\|npm`                      | 安装方法                             |
+| `BOT_VERSION=latest\|next\|main\|<semver>\|<spec>` | npm 版本、dist-tag 或包规范          |
+| `BOT_BETA=0\|1`                                    | 如有可用则使用 beta                  |
+| `BOT_GIT_DIR=<path>`                               | 检出目录                             |
+| `BOT_GIT_UPDATE=0\|1`                              | 切换 git 更新                        |
+| `BOT_NO_PROMPT=1`                                  | 禁用提示                             |
+| `BOT_NO_ONBOARD=1`                                 | 跳过新手引导                         |
+| `BOT_DRY_RUN=1`                                    | 试运行模式                           |
+| `BOT_VERBOSE=1`                                    | 调试模式                             |
+| `BOT_NPM_LOGLEVEL=error\|warn\|notice`             | npm 日志级别                         |
 | `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`                      | 控制 sharp/libvips 行为（默认：`1`） |
 
   </Accordion>
@@ -192,7 +192,7 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
   <Step title="确保安装 Git">
     如果缺少 Git，则尝试在 Linux 上通过 apt/dnf/yum 安装，或在 macOS 上通过 Homebrew 安装。
   </Step>
-  <Step title="在前缀下安装 OpenClaw">
+  <Step title="在前缀下安装 Hanzo Bot">
     使用 `--prefix <prefix>` 通过 npm 安装，然后将包装器写入 `<prefix>/bin/openclaw`。
   </Step>
 </Steps>
@@ -202,22 +202,22 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 <Tabs>
   <Tab title="默认">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install-cli.sh | bash
     ```
   </Tab>
   <Tab title="自定义前缀 + 版本">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --prefix /opt/openclaw --version latest
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install-cli.sh | bash -s -- --prefix /opt/openclaw --version latest
     ```
   </Tab>
   <Tab title="自动化 JSON 输出">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --json --prefix /opt/openclaw
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install-cli.sh | bash -s -- --json --prefix /opt/openclaw
     ```
   </Tab>
   <Tab title="运行新手引导">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --onboard
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install-cli.sh | bash -s -- --onboard
     ```
   </Tab>
 </Tabs>
@@ -228,10 +228,10 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 | 标志                   | 说明                                                                   |
 | ---------------------- | ---------------------------------------------------------------------- |
 | `--prefix <path>`      | 安装前缀（默认：`~/.openclaw`）                                        |
-| `--version <ver>`      | OpenClaw 版本或 dist-tag（默认：`latest`）                             |
+| `--version <ver>`      | Hanzo Bot 版本或 dist-tag（默认：`latest`）                             |
 | `--node-version <ver>` | Node 版本（默认：`22.22.0`）                                           |
 | `--json`               | 输出 NDJSON 事件                                                       |
-| `--onboard`            | 安装后运行 `openclaw onboard`                                          |
+| `--onboard`            | 安装后运行 `hanzo-bot onboard`                                          |
 | `--no-onboard`         | 跳过新手引导（默认）                                                   |
 | `--set-npm-prefix`     | 在 Linux 上，如果当前前缀不可写，则强制将 npm 前缀设为 `~/.npm-global` |
 | `--help`               | 显示用法（`-h`）                                                       |
@@ -242,12 +242,12 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 
 | 变量                                        | 说明                                                   |
 | ------------------------------------------- | ------------------------------------------------------ |
-| `OPENCLAW_PREFIX=<path>`                    | 安装前缀                                               |
-| `OPENCLAW_VERSION=<ver>`                    | OpenClaw 版本或 dist-tag                               |
-| `OPENCLAW_NODE_VERSION=<ver>`               | Node 版本                                              |
-| `OPENCLAW_NO_ONBOARD=1`                     | 跳过新手引导                                           |
-| `OPENCLAW_NPM_LOGLEVEL=error\|warn\|notice` | npm 日志级别                                           |
-| `OPENCLAW_GIT_DIR=<path>`                   | 旧版清理查找路径（用于删除旧的 `Peekaboo` 子模块检出） |
+| `BOT_PREFIX=<path>`                    | 安装前缀                                               |
+| `BOT_VERSION=<ver>`                    | Hanzo Bot 版本或 dist-tag                               |
+| `BOT_NODE_VERSION=<ver>`               | Node 版本                                              |
+| `BOT_NO_ONBOARD=1`                     | 跳过新手引导                                           |
+| `BOT_NPM_LOGLEVEL=error\|warn\|notice` | npm 日志级别                                           |
+| `BOT_GIT_DIR=<path>`                   | 旧版清理查找路径（用于删除旧的 `Peekaboo` 子模块检出） |
 | `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`          | 控制 sharp/libvips 行为（默认：`1`）                   |
 
   </Accordion>
@@ -266,12 +266,12 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
   <Step title="默认确保使用 Node.js 24">
     如果缺少，则依次尝试通过 winget、Chocolatey、Scoop 安装。为了兼容性，Node 22 LTS（当前为 `22.16+`）仍然受支持。
   </Step>
-  <Step title="安装 OpenClaw">
+  <Step title="安装 Hanzo Bot">
     - `npm` 方法（默认）：使用所选 `-Tag` 进行全局 npm 安装
     - `git` 方法：克隆/更新仓库，使用 pnpm 安装/构建，并将包装器安装到 `%USERPROFILE%\.local\bin\openclaw.cmd`
   </Step>
   <Step title="安装后任务">
-    在可能情况下将所需 bin 目录添加到用户 PATH，然后在升级和 git 安装时运行 `openclaw doctor --non-interactive`（尽力而为）。
+    在可能情况下将所需 bin 目录添加到用户 PATH，然后在升级和 git 安装时运行 `hanzo-bot doctor --non-interactive`（尽力而为）。
   </Step>
 </Steps>
 
@@ -280,34 +280,34 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 <Tabs>
   <Tab title="默认">
     ```powershell
-    iwr -useb https://openclaw.ai/install.ps1 | iex
+    iwr -useb https://hanzo.bot/install.ps1 | iex
     ```
   </Tab>
   <Tab title="Git 安装">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -InstallMethod git
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -InstallMethod git
     ```
   </Tab>
   <Tab title="通过 npm 安装 GitHub main">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -Tag main
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -Tag main
     ```
   </Tab>
   <Tab title="自定义 git 目录">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -InstallMethod git -GitDir "C:\openclaw"
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -InstallMethod git -GitDir "C:\openclaw"
     ```
   </Tab>
   <Tab title="试运行">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -DryRun
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -DryRun
     ```
   </Tab>
   <Tab title="调试跟踪">
     ```powershell
     # install.ps1 目前还没有专门的 -Verbose 标志。
     Set-PSDebug -Trace 1
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -NoOnboard
     Set-PSDebug -Trace 0
     ```
   </Tab>
@@ -331,11 +331,11 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 
 | 变量                               | 说明          |
 | ---------------------------------- | ------------- |
-| `OPENCLAW_INSTALL_METHOD=git\|npm` | 安装方法      |
-| `OPENCLAW_GIT_DIR=<path>`          | 检出目录      |
-| `OPENCLAW_NO_ONBOARD=1`            | 跳过新手引导  |
-| `OPENCLAW_GIT_UPDATE=0`            | 禁用 git pull |
-| `OPENCLAW_DRY_RUN=1`               | 试运行模式    |
+| `BOT_INSTALL_METHOD=git\|npm` | 安装方法      |
+| `BOT_GIT_DIR=<path>`          | 检出目录      |
+| `BOT_NO_ONBOARD=1`            | 跳过新手引导  |
+| `BOT_GIT_UPDATE=0`            | 禁用 git pull |
+| `BOT_DRY_RUN=1`               | 试运行模式    |
 
   </Accordion>
 </AccordionGroup>
@@ -353,23 +353,23 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 <Tabs>
   <Tab title="install.sh（非交互式 npm）">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash -s -- --no-prompt --no-onboard
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash -s -- --no-prompt --no-onboard
     ```
   </Tab>
   <Tab title="install.sh（非交互式 git）">
     ```bash
-    OPENCLAW_INSTALL_METHOD=git OPENCLAW_NO_PROMPT=1 \
-      curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
+    BOT_INSTALL_METHOD=git BOT_NO_PROMPT=1 \
+      curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash
     ```
   </Tab>
   <Tab title="install-cli.sh（JSON）">
     ```bash
-    curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | bash -s -- --json --prefix /opt/openclaw
+    curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install-cli.sh | bash -s -- --json --prefix /opt/openclaw
     ```
   </Tab>
   <Tab title="install.ps1（跳过新手引导）">
     ```powershell
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -NoOnboard
     ```
   </Tab>
 </Tabs>
@@ -391,7 +391,7 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
     这些脚本默认设置 `SHARP_IGNORE_GLOBAL_LIBVIPS=1`，以避免 sharp 针对系统 libvips 进行构建。若要覆盖：
 
     ```bash
-    SHARP_IGNORE_GLOBAL_LIBVIPS=0 curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
+    SHARP_IGNORE_GLOBAL_LIBVIPS=0 curl -fsSL --proto '=https' --tlsv1.2 https://hanzo.bot/install.sh | bash
     ```
 
   </Accordion>
@@ -410,7 +410,7 @@ OpenClaw 提供三个安装脚本，由 `openclaw.ai` 提供。
 
     ```powershell
     Set-PSDebug -Trace 1
-    & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
+    & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -NoOnboard
     Set-PSDebug -Trace 0
     ```
 

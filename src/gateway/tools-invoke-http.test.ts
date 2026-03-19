@@ -20,7 +20,7 @@ const hookMocks = vi.hoisted(() => ({
 }));
 
 let cfg: Record<string, unknown> = {};
-let lastCreateOpenClawToolsContext: Record<string, unknown> | undefined;
+let lastCreateHanzo BotToolsContext: Record<string, unknown> | undefined;
 
 // Perf: keep this suite pure unit. Mock heavyweight config/session modules.
 vi.mock("../config/config.js", () => ({
@@ -97,8 +97,8 @@ vi.mock("../agents/openclaw-tools.js", () => {
       execute: async () => ({
         ok: true,
         route: {
-          agentTo: lastCreateOpenClawToolsContext?.agentTo,
-          agentThreadId: lastCreateOpenClawToolsContext?.agentThreadId,
+          agentTo: lastCreateHanzo BotToolsContext?.agentTo,
+          agentThreadId: lastCreateHanzo BotToolsContext?.agentThreadId,
         },
       }),
     },
@@ -160,8 +160,8 @@ vi.mock("../agents/openclaw-tools.js", () => {
   ];
 
   return {
-    createOpenClawTools: (ctx: Record<string, unknown>) => {
-      lastCreateOpenClawToolsContext = ctx;
+    createHanzo BotTools: (ctx: Record<string, unknown>) => {
+      lastCreateHanzo BotToolsContext = ctx;
       return tools;
     },
   };
@@ -224,11 +224,11 @@ afterAll(async () => {
 });
 
 beforeEach(() => {
-  delete process.env.OPENCLAW_GATEWAY_TOKEN;
-  delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+  delete process.env.BOT_GATEWAY_TOKEN;
+  delete process.env.BOT_GATEWAY_PASSWORD;
   pluginHttpHandlers = [];
   cfg = {};
-  lastCreateOpenClawToolsContext = undefined;
+  lastCreateHanzo BotToolsContext = undefined;
   hookMocks.resolveToolLoopDetectionConfig.mockClear();
   hookMocks.resolveToolLoopDetectionConfig.mockImplementation(() => ({ warnAt: 3 }));
   hookMocks.runBeforeToolCallHook.mockClear();
@@ -367,7 +367,7 @@ describe("POST /tools/invoke", () => {
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body).toHaveProperty("result");
-    expect(lastCreateOpenClawToolsContext?.allowMediaInvokeCommands).toBe(true);
+    expect(lastCreateHanzo BotToolsContext?.allowMediaInvokeCommands).toBe(true);
     expect(hookMocks.runBeforeToolCallHook).toHaveBeenCalledWith(
       expect.objectContaining({
         toolName: "agents_list",
@@ -385,7 +385,7 @@ describe("POST /tools/invoke", () => {
     const res = await invokeAgentsListAuthed({ sessionKey: "main" });
 
     expect(res.status).toBe(200);
-    expect(lastCreateOpenClawToolsContext?.allowGatewaySubagentBinding).toBe(true);
+    expect(lastCreateHanzo BotToolsContext?.allowGatewaySubagentBinding).toBe(true);
   });
 
   it("blocks tool execution when before_tool_call rejects the invoke", async () => {

@@ -37,13 +37,13 @@ vi.mock("./env.js", () => ({
   isTruthyEnvValue: (value?: string) => value === "1" || value === "true",
 }));
 
-let ensureOpenClawCliOnPath: typeof import("./path-env.js").ensureOpenClawCliOnPath;
+let ensureHanzo BotCliOnPath: typeof import("./path-env.js").ensureHanzo BotCliOnPath;
 
-describe("ensureOpenClawCliOnPath", () => {
+describe("ensureHanzo BotCliOnPath", () => {
   const envKeys = [
     "PATH",
-    "OPENCLAW_PATH_BOOTSTRAPPED",
-    "OPENCLAW_ALLOW_PROJECT_LOCAL_BIN",
+    "BOT_PATH_BOOTSTRAPPED",
+    "BOT_ALLOW_PROJECT_LOCAL_BIN",
     "MISE_DATA_DIR",
     "HOMEBREW_PREFIX",
     "HOMEBREW_BREW_FILE",
@@ -52,7 +52,7 @@ describe("ensureOpenClawCliOnPath", () => {
   let envSnapshot: Record<(typeof envKeys)[number], string | undefined>;
 
   beforeAll(async () => {
-    ({ ensureOpenClawCliOnPath } = await import("./path-env.js"));
+    ({ ensureHanzo BotCliOnPath } = await import("./path-env.js"));
   });
 
   beforeEach(() => {
@@ -79,7 +79,7 @@ describe("ensureOpenClawCliOnPath", () => {
   function setupAppCliRoot(name: string) {
     const tmp = abs(`/tmp/openclaw-path/${name}`);
     const appBinDir = path.join(tmp, "AppBin");
-    const appCli = path.join(appBinDir, "openclaw");
+    const appCli = path.join(appBinDir, "@hanzo/bot");
     setDir(tmp);
     setDir(appBinDir);
     setExe(appCli);
@@ -93,14 +93,14 @@ describe("ensureOpenClawCliOnPath", () => {
     platform: NodeJS.Platform;
     allowProjectLocalBin?: boolean;
   }) {
-    ensureOpenClawCliOnPath(params);
+    ensureHanzo BotCliOnPath(params);
     return (process.env.PATH ?? "").split(path.delimiter);
   }
 
-  it("prepends the bundled app bin dir when a sibling openclaw exists", () => {
+  it("prepends the bundled app bin dir when a sibling hanzo-bot exists", () => {
     const { tmp, appBinDir, appCli } = setupAppCliRoot("case-bundled");
     process.env.PATH = "/usr/bin";
-    delete process.env.OPENCLAW_PATH_BOOTSTRAPPED;
+    delete process.env.BOT_PATH_BOOTSTRAPPED;
 
     const updated = bootstrapPath({
       execPath: appCli,
@@ -113,8 +113,8 @@ describe("ensureOpenClawCliOnPath", () => {
 
   it("is idempotent", () => {
     process.env.PATH = "/bin";
-    process.env.OPENCLAW_PATH_BOOTSTRAPPED = "1";
-    ensureOpenClawCliOnPath({
+    process.env.BOT_PATH_BOOTSTRAPPED = "1";
+    ensureHanzo BotCliOnPath({
       execPath: "/tmp/does-not-matter",
       cwd: "/tmp",
       homeDir: "/tmp",
@@ -132,7 +132,7 @@ describe("ensureOpenClawCliOnPath", () => {
 
     process.env.MISE_DATA_DIR = miseDataDir;
     process.env.PATH = "/usr/bin";
-    delete process.env.OPENCLAW_PATH_BOOTSTRAPPED;
+    delete process.env.BOT_PATH_BOOTSTRAPPED;
 
     const updated = bootstrapPath({
       execPath: appCli,
@@ -162,14 +162,14 @@ describe("ensureOpenClawCliOnPath", () => {
     ({ envValue, allowProjectLocalBin }) => {
       const { tmp, appCli } = setupAppCliRoot("case-project-local");
       const localBinDir = path.join(tmp, "node_modules", ".bin");
-      const localCli = path.join(localBinDir, "openclaw");
+      const localCli = path.join(localBinDir, "@hanzo/bot");
       setDir(path.join(tmp, "node_modules"));
       setDir(localBinDir);
       setExe(localCli);
 
       process.env.PATH = "/usr/bin";
-      delete process.env.OPENCLAW_PATH_BOOTSTRAPPED;
-      delete process.env.OPENCLAW_ALLOW_PROJECT_LOCAL_BIN;
+      delete process.env.BOT_PATH_BOOTSTRAPPED;
+      delete process.env.BOT_ALLOW_PROJECT_LOCAL_BIN;
 
       const withoutOptIn = bootstrapPath({
         execPath: appCli,
@@ -180,11 +180,11 @@ describe("ensureOpenClawCliOnPath", () => {
       expect(withoutOptIn.includes(localBinDir)).toBe(false);
 
       process.env.PATH = "/usr/bin";
-      delete process.env.OPENCLAW_PATH_BOOTSTRAPPED;
+      delete process.env.BOT_PATH_BOOTSTRAPPED;
       if (envValue === undefined) {
-        delete process.env.OPENCLAW_ALLOW_PROJECT_LOCAL_BIN;
+        delete process.env.BOT_ALLOW_PROJECT_LOCAL_BIN;
       } else {
-        process.env.OPENCLAW_ALLOW_PROJECT_LOCAL_BIN = envValue;
+        process.env.BOT_ALLOW_PROJECT_LOCAL_BIN = envValue;
       }
 
       const withOptIn = bootstrapPath({
@@ -211,7 +211,7 @@ describe("ensureOpenClawCliOnPath", () => {
 
     process.env.PATH = "/usr/bin";
     process.env.XDG_BIN_HOME = xdgBinHome;
-    delete process.env.OPENCLAW_PATH_BOOTSTRAPPED;
+    delete process.env.BOT_PATH_BOOTSTRAPPED;
 
     const updated = bootstrapPath({
       execPath: appCli,
@@ -236,7 +236,7 @@ describe("ensureOpenClawCliOnPath", () => {
     setDir(linuxbrewSbin);
 
     process.env.PATH = "/usr/bin";
-    delete process.env.OPENCLAW_PATH_BOOTSTRAPPED;
+    delete process.env.BOT_PATH_BOOTSTRAPPED;
     delete process.env.HOMEBREW_PREFIX;
     delete process.env.HOMEBREW_BREW_FILE;
     delete process.env.XDG_BIN_HOME;

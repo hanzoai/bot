@@ -1,4 +1,4 @@
-package ai.openclaw.app.ui
+package ai.hanzo.bot.app.ui
 
 import java.util.Base64
 import java.util.Locale

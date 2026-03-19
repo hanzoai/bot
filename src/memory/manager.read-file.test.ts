@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { resetEmbeddingMocks } from "./embedding.test-mocks.js";
 import type { MemoryIndexManager } from "./index.js";
 import { getRequiredMemoryIndexManager } from "./test-manager-helpers.js";
@@ -10,7 +10,7 @@ import { getRequiredMemoryIndexManager } from "./test-manager-helpers.js";
 function createMemorySearchCfg(options: {
   workspaceDir: string;
   indexPath: string;
-}): OpenClawConfig {
+}): Hanzo BotConfig {
   return {
     agents: {
       defaults: {
@@ -26,7 +26,7 @@ function createMemorySearchCfg(options: {
       },
       list: [{ id: "main", default: true }],
     },
-  } as OpenClawConfig;
+  } as Hanzo BotConfig;
 }
 
 describe("MemoryIndexManager.readFile", () => {

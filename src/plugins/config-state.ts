@@ -1,5 +1,5 @@
 import { normalizeChatChannelId } from "../channels/registry.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import type { PluginRecord } from "./registry.js";
 import { defaultSlotIdForKey } from "./slots.js";
 
@@ -172,7 +172,7 @@ const normalizePluginEntries = (entries: unknown): NormalizedPluginsConfig["entr
 };
 
 export const normalizePluginsConfig = (
-  config?: OpenClawConfig["plugins"],
+  config?: Hanzo BotConfig["plugins"],
 ): NormalizedPluginsConfig => {
   const memorySlot = normalizeSlotValue(config?.slots?.memory);
   return {
@@ -187,13 +187,13 @@ export const normalizePluginsConfig = (
   };
 };
 
-const hasExplicitMemorySlot = (plugins?: OpenClawConfig["plugins"]) =>
+const hasExplicitMemorySlot = (plugins?: Hanzo BotConfig["plugins"]) =>
   Boolean(plugins?.slots && Object.prototype.hasOwnProperty.call(plugins.slots, "memory"));
 
-const hasExplicitMemoryEntry = (plugins?: OpenClawConfig["plugins"]) =>
+const hasExplicitMemoryEntry = (plugins?: Hanzo BotConfig["plugins"]) =>
   Boolean(plugins?.entries && Object.prototype.hasOwnProperty.call(plugins.entries, "memory-core"));
 
-const hasExplicitPluginConfig = (plugins?: OpenClawConfig["plugins"]) => {
+const hasExplicitPluginConfig = (plugins?: Hanzo BotConfig["plugins"]) => {
   if (!plugins) {
     return false;
   }
@@ -219,9 +219,9 @@ const hasExplicitPluginConfig = (plugins?: OpenClawConfig["plugins"]) => {
 };
 
 export function applyTestPluginDefaults(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   env: NodeJS.ProcessEnv = process.env,
-): OpenClawConfig {
+): Hanzo BotConfig {
   if (!env.VITEST) {
     return cfg;
   }
@@ -257,7 +257,7 @@ export function applyTestPluginDefaults(
 }
 
 export function isTestDefaultMemorySlotDisabled(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
   if (!env.VITEST) {
@@ -309,7 +309,7 @@ export function resolveEnableState(
 }
 
 export function isBundledChannelEnabledByChannelConfig(
-  cfg: OpenClawConfig | undefined,
+  cfg: Hanzo BotConfig | undefined,
   pluginId: string,
 ): boolean {
   if (!cfg) {
@@ -331,7 +331,7 @@ export function resolveEffectiveEnableState(params: {
   id: string;
   origin: PluginRecord["origin"];
   config: NormalizedPluginsConfig;
-  rootConfig?: OpenClawConfig;
+  rootConfig?: Hanzo BotConfig;
   enabledByDefault?: boolean;
 }): { enabled: boolean; reason?: string } {
   const base = resolveEnableState(params.id, params.origin, params.config, params.enabledByDefault);

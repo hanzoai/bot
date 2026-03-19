@@ -13,7 +13,7 @@ export {
   ToolAuthorizationError,
   WhatsAppConfigSchema,
   type ChannelPlugin,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/whatsapp-core";
 
 export {

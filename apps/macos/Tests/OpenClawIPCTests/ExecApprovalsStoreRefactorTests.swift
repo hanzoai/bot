@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized)
 struct ExecApprovalsStoreRefactorTests {
@@ -11,7 +11,7 @@ struct ExecApprovalsStoreRefactorTests {
             .appendingPathComponent("openclaw-state-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager().removeItem(at: stateDir) }
 
-        try await TestIsolation.withEnvValues(["OPENCLAW_STATE_DIR": stateDir.path]) {
+        try await TestIsolation.withEnvValues(["BOT_STATE_DIR": stateDir.path]) {
             try await body(stateDir)
         }
     }

@@ -4,7 +4,7 @@ import { getCompletionScript } from "./completion-cli.js";
 
 function createCompletionProgram(): Command {
   const program = new Command();
-  program.name("openclaw");
+  program.name("@hanzo/bot");
   program.description("CLI root");
   program.option("-v, --verbose", "Verbose output");
 
@@ -40,13 +40,13 @@ describe("completion-cli", () => {
     const script = getCompletionScript("fish", createCompletionProgram());
 
     expect(script).toContain(
-      'complete -c openclaw -n "__fish_use_subcommand" -a "gateway" -d \'Gateway commands\'',
+      'complete -c hanzo-bot -n "__fish_use_subcommand" -a "gateway" -d \'Gateway commands\'',
     );
     expect(script).toContain(
-      'complete -c openclaw -n "__fish_seen_subcommand_from gateway" -a "status" -d \'Show gateway status\'',
+      'complete -c hanzo-bot -n "__fish_seen_subcommand_from gateway" -a "status" -d \'Show gateway status\'',
     );
     expect(script).toContain(
-      "complete -c openclaw -n \"__fish_seen_subcommand_from gateway\" -l force -d 'Force the action'",
+      "complete -c hanzo-bot -n \"__fish_seen_subcommand_from gateway\" -l force -d 'Force the action'",
     );
   });
 });

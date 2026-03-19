@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { normalizeEnv } from "../infra/env.js";
 import { formatUncaughtError } from "../infra/errors.js";
 import { isMainModule } from "../infra/is-main.js";
-import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
+import { ensureHanzo BotCliOnPath } from "../infra/path-env.js";
 import { assertSupportedRuntime } from "../infra/runtime-guard.js";
 import { enableConsoleCapture } from "../logging.js";
 import {
@@ -93,7 +93,7 @@ export async function runCli(argv: string[] = process.argv) {
   loadCliDotEnv({ quiet: true });
   normalizeEnv();
   if (shouldEnsureCliPath(normalizedArgv)) {
-    ensureOpenClawCliOnPath();
+    ensureHanzo BotCliOnPath();
   }
 
   // Enforce the minimum supported runtime before doing any work.

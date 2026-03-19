@@ -1,6 +1,6 @@
-# @openclaw/zalouser
+# @hanzo/bot-zalouser
 
-OpenClaw extension for Zalo Personal Account messaging via native `zca-js` integration.
+Hanzo Bot extension for Zalo Personal Account messaging via native `zca-js` integration.
 
 > **Warning:** Using Zalo automation may result in account suspension or ban. Use at your own risk. This is an unofficial integration.
 
@@ -14,7 +14,7 @@ OpenClaw extension for Zalo Personal Account messaging via native `zca-js` integ
 
 ## Prerequisites
 
-- OpenClaw Gateway
+- Hanzo Bot Gateway
 - Zalo mobile app (for QR login)
 
 No external `zca`, `openzca`, or `zca-cli` binary is required.
@@ -24,7 +24,7 @@ No external `zca`, `openzca`, or `zca-cli` binary is required.
 ### Option A: npm
 
 ```bash
-openclaw plugins install @openclaw/zalouser
+openclaw plugins install @hanzo/bot-zalouser
 ```
 
 ### Option B: local source checkout
@@ -58,7 +58,7 @@ channels:
 ### Send a message
 
 ```bash
-openclaw message send --channel zalouser --target <threadId> --message "Hello from OpenClaw"
+openclaw message send --channel zalouser --target <threadId> --message "Hello from Hanzo Bot"
 ```
 
 ## Configuration
@@ -110,8 +110,8 @@ Available actions: `send`, `image`, `link`, `friends`, `groups`, `me`, `status`
 
 ## Troubleshooting
 
-- Login not persisted: `openclaw channels logout --channel zalouser && openclaw channels login --channel zalouser`
-- Probe status: `openclaw channels status --probe`
+- Login not persisted: `hanzo-bot channels logout --channel zalouser && hanzo-bot channels login --channel zalouser`
+- Probe status: `hanzo-bot channels status --probe`
 - Name resolution issues (allowlist/groups): use numeric IDs or exact Zalo names
 
 ## Credits

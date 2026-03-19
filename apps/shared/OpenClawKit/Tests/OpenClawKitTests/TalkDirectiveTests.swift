@@ -1,5 +1,5 @@
 import XCTest
-@testable import OpenClawKit
+@testable import Hanzo BotKit
 
 final class TalkDirectiveTests: XCTestCase {
     func testParsesDirectiveAndStripsLine() {

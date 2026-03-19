@@ -1,14 +1,14 @@
 {
-  "name": "@openclaw/zalouser",
+  "name": "@hanzo/bot-zalouser",
   "version": "2026.3.14",
-  "description": "OpenClaw Zalo Personal Account plugin via native zca-js integration",
+  "description": "Hanzo Bot Zalo Personal Account plugin via native zca-js integration",
   "type": "module",
   "dependencies": {
     "@sinclair/typebox": "0.34.48",
     "zca-js": "2.1.2",
     "zod": "^4.3.6"
   },
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -27,7 +27,7 @@
       "quickstartAllowFrom": false
     },
     "install": {
-      "npmSpec": "@openclaw/zalouser",
+      "npmSpec": "@hanzo/bot-zalouser",
       "localPath": "extensions/zalouser",
       "defaultChoice": "npm"
     },
