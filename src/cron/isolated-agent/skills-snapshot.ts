@@ -2,12 +2,12 @@ import { resolveAgentSkillsFilter } from "../../agents/agent-scope.js";
 import { buildWorkspaceSkillSnapshot, type SkillSnapshot } from "../../agents/skills.js";
 import { matchesSkillFilter } from "../../agents/skills/filter.js";
 import { getSkillsSnapshotVersion } from "../../agents/skills/refresh.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { getRemoteSkillEligibility } from "../../infra/skills-remote.js";
 
 export function resolveCronSkillsSnapshot(params: {
   workspaceDir: string;
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   agentId: string;
   existingSnapshot?: SkillSnapshot;
   isFastTestEnv: boolean;

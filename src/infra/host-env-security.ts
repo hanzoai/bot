@@ -1,5 +1,5 @@
 import HOST_ENV_SECURITY_POLICY_JSON from "./host-env-security-policy.json" with { type: "json" };
-import { markHanzo BotExecEnv } from "./openclaw-exec-env.js";
+import { markHanzoBotExecEnv } from "./openclaw-exec-env.js";
 
 const PORTABLE_ENV_VAR_KEY = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
@@ -115,7 +115,7 @@ export function sanitizeHostExecEnv(params?: {
   }
 
   if (!overrides) {
-    return markHanzo BotExecEnv(merged);
+    return markHanzoBotExecEnv(merged);
   }
 
   for (const [key, value] of listNormalizedPortableEnvEntries(overrides)) {
@@ -131,7 +131,7 @@ export function sanitizeHostExecEnv(params?: {
     merged[key] = value;
   }
 
-  return markHanzo BotExecEnv(merged);
+  return markHanzoBotExecEnv(merged);
 }
 
 export function sanitizeSystemRunEnvOverrides(params?: {

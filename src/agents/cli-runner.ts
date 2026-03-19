@@ -1,7 +1,7 @@
 import type { ImageContent } from "@mariozechner/pi-ai";
 import { resolveHeartbeatPrompt } from "../auto-reply/heartbeat.js";
 import type { ThinkLevel } from "../auto-reply/thinking.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { shouldLogVerbose } from "../globals.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { requestHeartbeatNow } from "../infra/heartbeat-wake.js";
@@ -35,7 +35,7 @@ import {
   resolveSystemPromptUsage,
   writeCliImages,
 } from "./cli-runner/helpers.js";
-import { resolveHanzo BotDocsPath } from "./docs-path.js";
+import { resolveHanzoBotDocsPath } from "./docs-path.js";
 import { FailoverError, resolveFailoverStatus } from "./failover-error.js";
 import {
   classifyFailoverReason,
@@ -56,7 +56,7 @@ export async function runCliAgent(params: {
   agentId?: string;
   sessionFile: string;
   workspaceDir: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   prompt: string;
   provider: string;
   model?: string;
@@ -147,7 +147,7 @@ export async function runCliAgent(params: {
     sessionAgentId === defaultAgentId
       ? resolveHeartbeatPrompt(params.config?.agents?.defaults?.heartbeat?.prompt)
       : undefined;
-  const docsPath = await resolveHanzo BotDocsPath({
+  const docsPath = await resolveHanzoBotDocsPath({
     workspaceDir,
     argv1: process.argv[1],
     cwd: process.cwd(),
@@ -491,7 +491,7 @@ export async function runClaudeCliAgent(params: {
   agentId?: string;
   sessionFile: string;
   workspaceDir: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   prompt: string;
   provider?: string;
   model?: string;

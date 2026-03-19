@@ -1,8 +1,8 @@
 import { expect, type MockInstance } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 export function createWhatsAppPollFixture() {
-  const cfg = { marker: "resolved-cfg" } as Hanzo BotConfig;
+  const cfg = { marker: "resolved-cfg" } as HanzoBotConfig;
   const poll = {
     question: "Lunch?",
     options: ["Pizza", "Sushi"],
@@ -19,7 +19,7 @@ export function createWhatsAppPollFixture() {
 export function expectWhatsAppPollSent(
   sendPollWhatsApp: MockInstance,
   params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     poll: { question: string; options: string[]; maxSelections: number };
     to?: string;
     accountId?: string;

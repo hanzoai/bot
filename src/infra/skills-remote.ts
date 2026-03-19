@@ -2,7 +2,7 @@ import type { SkillEligibilityContext, SkillEntry } from "../agents/skills.js";
 import { loadWorkspaceSkillEntries } from "../agents/skills.js";
 import { bumpSkillsSnapshotVersion } from "../agents/skills/refresh.js";
 import { listAgentWorkspaceDirs } from "../agents/workspace-dirs.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { NodeRegistry } from "../gateway/node-registry.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { listNodePairing, updatePairedNodeMetadata } from "./node-pairing.js";
@@ -243,7 +243,7 @@ export async function refreshRemoteNodeBins(params: {
   platform?: string;
   deviceFamily?: string;
   commands?: string[];
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   timeoutMs?: number;
 }) {
   if (!remoteRegistry) {
@@ -334,7 +334,7 @@ export function getRemoteSkillEligibility(): SkillEligibilityContext["remote"] |
   };
 }
 
-export async function refreshRemoteBinsForConnectedNodes(cfg: Hanzo BotConfig) {
+export async function refreshRemoteBinsForConnectedNodes(cfg: HanzoBotConfig) {
   if (!remoteRegistry) {
     return;
   }

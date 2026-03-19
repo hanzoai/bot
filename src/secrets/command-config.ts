@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { coerceSecretRef, resolveSecretInputRef } from "../config/types.secrets.js";
 import { getPath } from "./path-utils.js";
 import { isExpectedResolvedSecretValue } from "./secret-value.js";
@@ -28,8 +28,8 @@ export type AnalyzeAssignmentsFromSnapshotResult = {
 };
 
 export function analyzeCommandSecretAssignmentsFromSnapshot(params: {
-  sourceConfig: Hanzo BotConfig;
-  resolvedConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
+  resolvedConfig: HanzoBotConfig;
   targetIds: ReadonlySet<string>;
   inactiveRefPaths?: ReadonlySet<string>;
   allowedPaths?: ReadonlySet<string>;
@@ -92,8 +92,8 @@ export function analyzeCommandSecretAssignmentsFromSnapshot(params: {
 }
 
 export function collectCommandSecretAssignmentsFromSnapshot(params: {
-  sourceConfig: Hanzo BotConfig;
-  resolvedConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
+  resolvedConfig: HanzoBotConfig;
   commandName: string;
   targetIds: ReadonlySet<string>;
   inactiveRefPaths?: ReadonlySet<string>;

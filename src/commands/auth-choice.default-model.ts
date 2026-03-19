@@ -1,17 +1,17 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import { ensureModelAllowlistEntry } from "./model-allowlist.js";
 
 export async function applyDefaultModelChoice(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   setDefaultModel: boolean;
   defaultModel: string;
-  applyDefaultConfig: (config: Hanzo BotConfig) => Hanzo BotConfig;
-  applyProviderConfig: (config: Hanzo BotConfig) => Hanzo BotConfig;
+  applyDefaultConfig: (config: HanzoBotConfig) => HanzoBotConfig;
+  applyProviderConfig: (config: HanzoBotConfig) => HanzoBotConfig;
   noteDefault?: string;
   noteAgentModel: (model: string) => Promise<void>;
   prompter: WizardPrompter;
-}): Promise<{ config: Hanzo BotConfig; agentModelOverride?: string }> {
+}): Promise<{ config: HanzoBotConfig; agentModelOverride?: string }> {
   if (params.setDefaultModel) {
     const next = params.applyDefaultConfig(params.config);
     if (params.noteDefault) {

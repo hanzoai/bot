@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   mergeSessionEntry,
   setSessionRuntimeModel,
@@ -19,7 +19,7 @@ function resolveNonNegativeNumber(value: number | undefined): number | undefined
 }
 
 export async function updateSessionStoreAfterAgentRun(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   contextTokensOverride?: number;
   sessionId: string;
   sessionKey: string;

@@ -9,7 +9,7 @@ import {
   modelSupportsVision,
 } from "../agents/model-catalog.js";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
@@ -75,7 +75,7 @@ export type RunCapabilityResult = {
 
 export function buildProviderRegistry(
   overrides?: Record<string, MediaUnderstandingProvider>,
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
 ): ProviderRegistry {
   return buildMediaUnderstandingRegistry(overrides, cfg);
 }
@@ -85,7 +85,7 @@ export function normalizeMediaAttachments(ctx: MsgContext): MediaAttachment[] {
 }
 
 export function resolveMediaAttachmentLocalRoots(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   ctx: MsgContext;
 }): readonly string[] {
   return mergeInboundPathRoots(
@@ -339,7 +339,7 @@ async function resolveGeminiCliEntry(
 }
 
 async function resolveKeyEntry(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir?: string;
   providerRegistry: ProviderRegistry;
   capability: MediaUnderstandingCapability;
@@ -426,7 +426,7 @@ async function resolveKeyEntry(params: {
   return null;
 }
 
-function resolveImageModelFromAgentDefaults(cfg: Hanzo BotConfig): MediaUnderstandingModelConfig[] {
+function resolveImageModelFromAgentDefaults(cfg: HanzoBotConfig): MediaUnderstandingModelConfig[] {
   const refs: string[] = [];
   const primary = resolveAgentModelPrimaryValue(cfg.agents?.defaults?.imageModel);
   if (primary?.trim()) {
@@ -456,7 +456,7 @@ function resolveImageModelFromAgentDefaults(cfg: Hanzo BotConfig): MediaUndersta
 }
 
 async function resolveAutoEntries(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir?: string;
   providerRegistry: ProviderRegistry;
   capability: MediaUnderstandingCapability;
@@ -490,7 +490,7 @@ async function resolveAutoEntries(params: {
 }
 
 export async function resolveAutoImageModel(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir?: string;
   activeModel?: ActiveMediaModel;
 }): Promise<ActiveMediaModel | null> {
@@ -531,7 +531,7 @@ export async function resolveAutoImageModel(params: {
 }
 
 async function resolveActiveModelEntry(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir?: string;
   providerRegistry: ProviderRegistry;
   capability: MediaUnderstandingCapability;
@@ -575,7 +575,7 @@ async function resolveActiveModelEntry(params: {
 
 async function runAttachmentEntries(params: {
   capability: MediaUnderstandingCapability;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   ctx: MsgContext;
   attachmentIndex: number;
   agentDir?: string;
@@ -662,7 +662,7 @@ async function runAttachmentEntries(params: {
 
 export async function runCapability(params: {
   capability: MediaUnderstandingCapability;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   ctx: MsgContext;
   attachments: MediaAttachmentCache;
   media: MediaAttachment[];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import {
   buildIMessageInboundContext,
   resolveIMessageInboundDecision,
@@ -7,7 +7,7 @@ import {
 import { parseIMessageNotification } from "./monitor/parse-notification.js";
 import type { IMessagePayload } from "./monitor/types.js";
 
-function baseCfg(): Hanzo BotConfig {
+function baseCfg(): HanzoBotConfig {
   return {
     channels: {
       imessage: {
@@ -21,11 +21,11 @@ function baseCfg(): Hanzo BotConfig {
     messages: {
       groupChat: { mentionPatterns: ["@openclaw"] },
     },
-  } as unknown as Hanzo BotConfig;
+  } as unknown as HanzoBotConfig;
 }
 
 function resolve(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   message: IMessagePayload;
   storeAllowFrom?: string[];
 }) {
@@ -49,7 +49,7 @@ function resolve(params: {
 }
 
 function resolveDispatchDecision(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   message: IMessagePayload;
   groupHistories?: Parameters<typeof resolveIMessageInboundDecision>[0]["groupHistories"];
 }) {
@@ -76,7 +76,7 @@ function resolveDispatchDecision(params: {
   return { decision, groupHistories };
 }
 
-function buildDispatchContextPayload(params: { cfg: Hanzo BotConfig; message: IMessagePayload }) {
+function buildDispatchContextPayload(params: { cfg: HanzoBotConfig; message: IMessagePayload }) {
   const { cfg, message } = params;
   const { decision, groupHistories } = resolveDispatchDecision({ cfg, message });
 

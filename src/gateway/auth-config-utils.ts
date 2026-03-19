@@ -1,8 +1,8 @@
-import type { GatewayAuthConfig, Hanzo BotConfig } from "../config/config.js";
+import type { GatewayAuthConfig, HanzoBotConfig } from "../config/config.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { resolveRequiredConfiguredSecretRefInputString } from "./resolve-configured-secret-input-string.js";
 
-export function withGatewayAuthPassword(cfg: Hanzo BotConfig, password: string): Hanzo BotConfig {
+export function withGatewayAuthPassword(cfg: HanzoBotConfig, password: string): HanzoBotConfig {
   return {
     ...cfg,
     gateway: {
@@ -38,12 +38,12 @@ function shouldResolveGatewayPasswordSecretRef(params: {
 }
 
 export async function resolveGatewayPasswordSecretRef(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
   mode?: GatewayAuthConfig["mode"];
   hasPasswordCandidate: boolean;
   hasTokenCandidate: boolean;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   const authPassword = params.cfg.gateway?.auth?.password;
   const { ref } = resolveSecretInputRef({
     value: authPassword,

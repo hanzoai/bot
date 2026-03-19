@@ -1,15 +1,15 @@
 import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 const mocks = vi.hoisted(() => ({
   memoryRegister: vi.fn(),
   otherRegister: vi.fn(),
-  loadHanzo BotPlugins: vi.fn(),
+  loadHanzoBotPlugins: vi.fn(),
 }));
 
 vi.mock("./loader.js", () => ({
-  loadHanzo BotPlugins: (...args: unknown[]) => mocks.loadHanzo BotPlugins(...args),
+  loadHanzoBotPlugins: (...args: unknown[]) => mocks.loadHanzoBotPlugins(...args),
 }));
 
 import { registerPluginCliCommands } from "./cli.js";
@@ -18,8 +18,8 @@ describe("registerPluginCliCommands", () => {
   beforeEach(() => {
     mocks.memoryRegister.mockClear();
     mocks.otherRegister.mockClear();
-    mocks.loadHanzo BotPlugins.mockReset();
-    mocks.loadHanzo BotPlugins.mockReturnValue({
+    mocks.loadHanzoBotPlugins.mockReset();
+    mocks.loadHanzoBotPlugins.mockReturnValue({
       cliRegistrars: [
         {
           pluginId: "memory-core",
@@ -52,9 +52,9 @@ describe("registerPluginCliCommands", () => {
     const program = new Command();
     const env = { BOT_HOME: "/srv/openclaw-home" } as NodeJS.ProcessEnv;
 
-    registerPluginCliCommands(program, {} as Hanzo BotConfig, env);
+    registerPluginCliCommands(program, {} as HanzoBotConfig, env);
 
-    expect(mocks.loadHanzo BotPlugins).toHaveBeenCalledWith(
+    expect(mocks.loadHanzoBotPlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         env,
       }),

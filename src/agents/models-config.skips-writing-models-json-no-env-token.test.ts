@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { resolveHanzo BotAgentDir } from "./agent-paths.js";
+import { resolveHanzoBotAgentDir } from "./agent-paths.js";
 import {
   CUSTOM_PROXY_MODELS_CONFIG,
   installModelsConfigTestHooks,
@@ -10,7 +10,7 @@ import {
   withTempEnv,
   withModelsTempHome as withTempHome,
 } from "./models-config.e2e-harness.js";
-import { ensureHanzo BotModelsJson } from "./models-config.js";
+import { ensureHanzoBotModelsJson } from "./models-config.js";
 
 installModelsConfigTestHooks();
 
@@ -31,9 +31,9 @@ async function runEnvProviderCase(params: {
   const previousValue = process.env[params.envVar];
   process.env[params.envVar] = params.envValue;
   try {
-    await ensureHanzo BotModelsJson({});
+    await ensureHanzoBotModelsJson({});
 
-    const modelPath = path.join(resolveHanzo BotAgentDir(), "models.json");
+    const modelPath = path.join(resolveHanzoBotAgentDir(), "models.json");
     const raw = await fs.readFile(modelPath, "utf8");
     const parsed = JSON.parse(raw) as { providers: Record<string, ProviderConfig> };
     const provider = parsed.providers[params.providerKey];
@@ -63,7 +63,7 @@ describe("models-config", () => {
         process.env.BOT_AGENT_DIR = agentDir;
         process.env.PI_CODING_AGENT_DIR = agentDir;
 
-        const result = await ensureHanzo BotModelsJson(
+        const result = await ensureHanzoBotModelsJson(
           {
             models: { providers: {} },
           },
@@ -78,9 +78,9 @@ describe("models-config", () => {
 
   it("writes models.json for configured providers", async () => {
     await withTempHome(async () => {
-      await ensureHanzo BotModelsJson(CUSTOM_PROXY_MODELS_CONFIG);
+      await ensureHanzoBotModelsJson(CUSTOM_PROXY_MODELS_CONFIG);
 
-      const modelPath = path.join(resolveHanzo BotAgentDir(), "models.json");
+      const modelPath = path.join(resolveHanzoBotAgentDir(), "models.json");
       const raw = await fs.readFile(modelPath, "utf8");
       const parsed = JSON.parse(raw) as {
         providers: Record<

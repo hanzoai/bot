@@ -3,12 +3,12 @@ import {
   type SessionStoreSelectionOptions,
   type SessionStoreTarget,
 } from "../config/sessions.js";
-import type { Hanzo BotConfig } from "../config/types.openclaw.js";
+import type { HanzoBotConfig } from "../config/types.openclaw.js";
 import type { RuntimeEnv } from "../runtime.js";
 export { resolveSessionStoreTargets, type SessionStoreSelectionOptions, type SessionStoreTarget };
 
 export function resolveSessionStoreTargetsOrExit(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   opts: SessionStoreSelectionOptions;
   runtime: RuntimeEnv;
 }): SessionStoreTarget[] | null {

@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig, ConfigFileSnapshot } from "../config/types.openclaw.js";
+import type { HanzoBotConfig, ConfigFileSnapshot } from "../config/types.openclaw.js";
 import type { UpdateRunResult } from "../infra/update-runner.js";
 import { withEnvAsync } from "../test-utils/env.js";
 
@@ -38,7 +38,7 @@ vi.mock("../infra/update-runner.js", () => ({
 }));
 
 vi.mock("../infra/openclaw-root.js", () => ({
-  resolveHanzo BotPackageRoot: vi.fn(),
+  resolveHanzoBotPackageRoot: vi.fn(),
 }));
 
 vi.mock("../config/config.js", () => ({
@@ -137,7 +137,7 @@ vi.mock("../runtime.js", () => ({
 }));
 
 const { runGatewayUpdate } = await import("../infra/update-runner.js");
-const { resolveHanzo BotPackageRoot } = await import("../infra/openclaw-root.js");
+const { resolveHanzoBotPackageRoot } = await import("../infra/openclaw-root.js");
 const { readConfigFileSnapshot, writeConfigFile } = await import("../config/config.js");
 const { checkUpdateStatus, fetchNpmTagVersion, resolveNpmChannelTag } =
   await import("../infra/update-check.js");
@@ -157,7 +157,7 @@ describe("update-cli", () => {
     return dir;
   };
 
-  const baseConfig = {} as Hanzo BotConfig;
+  const baseConfig = {} as HanzoBotConfig;
   const baseSnapshot: ConfigFileSnapshot = {
     path: "/tmp/openclaw-config.json",
     exists: true,
@@ -186,7 +186,7 @@ describe("update-cli", () => {
   };
 
   const mockPackageInstallStatus = (root: string) => {
-    vi.mocked(resolveHanzo BotPackageRoot).mockResolvedValue(root);
+    vi.mocked(resolveHanzoBotPackageRoot).mockResolvedValue(root);
     vi.mocked(checkUpdateStatus).mockResolvedValue({
       root,
       installKind: "package",
@@ -288,7 +288,7 @@ describe("update-cli", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(resolveHanzo BotPackageRoot).mockResolvedValue(process.cwd());
+    vi.mocked(resolveHanzoBotPackageRoot).mockResolvedValue(process.cwd());
     vi.mocked(readConfigFileSnapshot).mockResolvedValue(baseSnapshot);
     vi.mocked(fetchNpmTagVersion).mockResolvedValue({
       tag: "latest",
@@ -475,7 +475,7 @@ describe("update-cli", () => {
       prepare: async () => {
         vi.mocked(readConfigFileSnapshot).mockResolvedValue({
           ...baseSnapshot,
-          config: { update: { channel: "beta" } } as Hanzo BotConfig,
+          config: { update: { channel: "beta" } } as HanzoBotConfig,
         });
       },
       expectedChannel: "beta" as const,
@@ -529,7 +529,7 @@ describe("update-cli", () => {
     mockPackageInstallStatus(tempDir);
     vi.mocked(readConfigFileSnapshot).mockResolvedValue({
       ...baseSnapshot,
-      config: { update: { channel: "beta" } } as Hanzo BotConfig,
+      config: { update: { channel: "beta" } } as HanzoBotConfig,
     });
     vi.mocked(resolveNpmChannelTag).mockResolvedValue({
       tag: "latest",
@@ -588,7 +588,7 @@ describe("update-cli", () => {
       readPackageName.mockResolvedValue("@hanzo/bot");
       readPackageVersion.mockResolvedValue("1.0.0");
       resolveGlobalManager.mockResolvedValue("npm");
-      vi.mocked(resolveHanzo BotPackageRoot).mockResolvedValue(process.cwd());
+      vi.mocked(resolveHanzoBotPackageRoot).mockResolvedValue(process.cwd());
       await scenario.run();
       expectPackageInstallSpec(scenario.expectedSpec);
     }

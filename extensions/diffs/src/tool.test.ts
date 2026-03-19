@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestPluginApi } from "../../../test/helpers/extensions/plugin-api.js";
-import type { Hanzo BotPluginApi, Hanzo BotPluginToolContext } from "../api.js";
+import type { HanzoBotPluginApi, HanzoBotPluginToolContext } from "../api.js";
 import type { DiffScreenshotter } from "./browser.js";
 import { DEFAULT_DIFFS_TOOL_DEFAULTS } from "./config.js";
 import { DiffArtifactStore } from "./store.js";
@@ -420,7 +420,7 @@ describe("diffs tool", () => {
   });
 });
 
-function createApi(): Hanzo BotPluginApi {
+function createApi(): HanzoBotPluginApi {
   return createTestPluginApi({
     id: "diffs",
     name: "Diffs",
@@ -432,15 +432,15 @@ function createApi(): Hanzo BotPluginApi {
         bind: "loopback",
       },
     },
-    runtime: {} as Hanzo BotPluginApi["runtime"],
-  }) as Hanzo BotPluginApi;
+    runtime: {} as HanzoBotPluginApi["runtime"],
+  }) as HanzoBotPluginApi;
 }
 
 function createToolWithScreenshotter(
   store: DiffArtifactStore,
   screenshotter: DiffScreenshotter,
   defaults = DEFAULT_DIFFS_TOOL_DEFAULTS,
-  context: Hanzo BotPluginToolContext | undefined = {
+  context: HanzoBotPluginToolContext | undefined = {
     agentId: "main",
     sessionId: "session-123",
     messageChannel: "discord",

@@ -5,7 +5,7 @@ import {
   prepareScopedSetupConfig,
   type ChannelSetupAdapter,
   type DmPolicy,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/setup";
 import { applyBlueBubblesConnectionConfig } from "./config-apply.js";
 
@@ -14,15 +14,15 @@ const setBlueBubblesTopLevelDmPolicy = createTopLevelChannelDmPolicySetter({
   channel,
 });
 
-export function setBlueBubblesDmPolicy(cfg: Hanzo BotConfig, dmPolicy: DmPolicy): Hanzo BotConfig {
+export function setBlueBubblesDmPolicy(cfg: HanzoBotConfig, dmPolicy: DmPolicy): HanzoBotConfig {
   return setBlueBubblesTopLevelDmPolicy(cfg, dmPolicy);
 }
 
 export function setBlueBubblesAllowFrom(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
   allowFrom: string[],
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return patchScopedAccountConfig({
     cfg,
     channelKey: channel,

@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import {
   readConfigFileSnapshotForWrite,
   writeConfigFile,
@@ -98,7 +98,7 @@ function rewriteTargetIfMatch(params: {
 }
 
 function replaceTelegramDefaultToTargets(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   matchKey: string;
   resolvedTarget: string;
 }): boolean {
@@ -137,7 +137,7 @@ function replaceTelegramDefaultToTargets(params: {
 }
 
 export async function maybePersistResolvedTelegramTarget(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   rawTarget: string;
   resolvedChatId: string;
   verbose?: boolean;

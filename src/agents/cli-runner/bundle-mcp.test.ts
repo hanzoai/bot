@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   createBundleMcpTempHarness,
   createBundleProbePlugin,
@@ -24,7 +24,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
       const { serverPath } = await createBundleProbePlugin(homeDir);
 
-      const config: Hanzo BotConfig = {
+      const config: HanzoBotConfig = {
         plugins: {
           entries: {
             "bundle-probe": { enabled: true },

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resetLogger, setLoggerOverride } from "../logging/logger.js";
 import {
   buildAllowedModelSet,
@@ -25,7 +25,7 @@ const EXPLICIT_ALLOWLIST_CONFIG = {
       },
     },
   },
-} as Hanzo BotConfig;
+} as HanzoBotConfig;
 
 const BUNDLED_ALLOWLIST_CATALOG = [
   { provider: "anthropic", id: "claude-sonnet-4-5", name: "Claude Sonnet 4.5" },
@@ -41,7 +41,7 @@ const ANTHROPIC_OPUS_CATALOG = [
   },
 ];
 
-function resolveAnthropicOpusThinking(cfg: Hanzo BotConfig) {
+function resolveAnthropicOpusThinking(cfg: HanzoBotConfig) {
   return resolveThinkingDefault({
     cfg,
     provider: "anthropic",
@@ -80,7 +80,7 @@ function createAgentFallbackConfig(params: {
           }
         : {}),
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 function createProviderWithModelsConfig(provider: string, models: Array<Record<string, unknown>>) {
@@ -93,12 +93,12 @@ function createProviderWithModelsConfig(provider: string, models: Array<Record<s
         },
       },
     },
-  } as Partial<Hanzo BotConfig>;
+  } as Partial<HanzoBotConfig>;
 }
 
-function resolveConfiguredRefForTest(cfg: Partial<Hanzo BotConfig>) {
+function resolveConfiguredRefForTest(cfg: Partial<HanzoBotConfig>) {
   return resolveConfiguredModelRef({
-    cfg: cfg as Hanzo BotConfig,
+    cfg: cfg as HanzoBotConfig,
     defaultProvider: "anthropic",
     defaultModel: "claude-opus-4-6",
   });
@@ -274,7 +274,7 @@ describe("model-selection", () => {
             },
           },
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       expect(
         inferUniqueProviderFromConfiguredModels({
@@ -294,7 +294,7 @@ describe("model-selection", () => {
             },
           },
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       expect(
         inferUniqueProviderFromConfiguredModels({
@@ -313,7 +313,7 @@ describe("model-selection", () => {
             },
           },
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       expect(
         inferUniqueProviderFromConfiguredModels({
@@ -332,7 +332,7 @@ describe("model-selection", () => {
             },
           },
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       expect(
         inferUniqueProviderFromConfiguredModels({
@@ -345,7 +345,7 @@ describe("model-selection", () => {
 
   describe("buildModelAliasIndex", () => {
     it("should build alias index from config", () => {
-      const cfg: Partial<Hanzo BotConfig> = {
+      const cfg: Partial<HanzoBotConfig> = {
         agents: {
           defaults: {
             models: {
@@ -357,7 +357,7 @@ describe("model-selection", () => {
       };
 
       const index = buildModelAliasIndex({
-        cfg: cfg as Hanzo BotConfig,
+        cfg: cfg as HanzoBotConfig,
         defaultProvider: "anthropic",
       });
 
@@ -455,7 +455,7 @@ describe("model-selection", () => {
     });
 
     it("strips trailing auth profile suffix before allowlist matching", () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         agents: {
           defaults: {
             models: {
@@ -463,7 +463,7 @@ describe("model-selection", () => {
             },
           },
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       const result = resolveAllowedModelRef({
         cfg,
@@ -584,7 +584,7 @@ describe("model-selection", () => {
       setLoggerOverride({ level: "silent", consoleLevel: "warn" });
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
       try {
-        const cfg: Partial<Hanzo BotConfig> = {
+        const cfg: Partial<HanzoBotConfig> = {
           agents: {
             defaults: {
               model: { primary: "claude-3-5-sonnet" },
@@ -593,7 +593,7 @@ describe("model-selection", () => {
         };
 
         const result = resolveConfiguredModelRef({
-          cfg: cfg as Hanzo BotConfig,
+          cfg: cfg as HanzoBotConfig,
           defaultProvider: "google",
           defaultModel: "gemini-pro",
         });
@@ -612,7 +612,7 @@ describe("model-selection", () => {
       setLoggerOverride({ level: "silent", consoleLevel: "warn" });
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
       try {
-        const cfg: Partial<Hanzo BotConfig> = {
+        const cfg: Partial<HanzoBotConfig> = {
           agents: {
             defaults: {
               model: { primary: "\u001B[31mclaude-3-5-sonnet\nspoof" },
@@ -621,7 +621,7 @@ describe("model-selection", () => {
         };
 
         const result = resolveConfiguredModelRef({
-          cfg: cfg as Hanzo BotConfig,
+          cfg: cfg as HanzoBotConfig,
           defaultProvider: "google",
           defaultModel: "gemini-pro",
         });
@@ -642,9 +642,9 @@ describe("model-selection", () => {
     });
 
     it("should use default provider/model if config is empty", () => {
-      const cfg: Partial<Hanzo BotConfig> = {};
+      const cfg: Partial<HanzoBotConfig> = {};
       const result = resolveConfiguredModelRef({
-        cfg: cfg as Hanzo BotConfig,
+        cfg: cfg as HanzoBotConfig,
         defaultProvider: "openai",
         defaultModel: "gpt-4",
       });
@@ -693,7 +693,7 @@ describe("model-selection", () => {
       setLoggerOverride({ level: "silent", consoleLevel: "warn" });
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
       try {
-        const cfg: Partial<Hanzo BotConfig> = {
+        const cfg: Partial<HanzoBotConfig> = {
           agents: {
             defaults: {
               model: { primary: "openai/" },
@@ -702,7 +702,7 @@ describe("model-selection", () => {
         };
 
         const result = resolveConfiguredModelRef({
-          cfg: cfg as Hanzo BotConfig,
+          cfg: cfg as HanzoBotConfig,
           defaultProvider: "anthropic",
           defaultModel: "claude-opus-4-6",
         });
@@ -732,7 +732,7 @@ describe("model-selection", () => {
             },
           },
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       expect(resolveAnthropicOpusThinking(cfg)).toBe("high");
     });
@@ -748,7 +748,7 @@ describe("model-selection", () => {
             },
           },
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       expect(
         resolveThinkingDefault({
@@ -770,13 +770,13 @@ describe("model-selection", () => {
             },
           },
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       expect(resolveAnthropicOpusThinking(cfg)).toBe("adaptive");
     });
 
     it("defaults Anthropic Claude 4.6 models to adaptive", () => {
-      const cfg = {} as Hanzo BotConfig;
+      const cfg = {} as HanzoBotConfig;
 
       expect(resolveAnthropicOpusThinking(cfg)).toBe("adaptive");
 

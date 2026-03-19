@@ -3,12 +3,12 @@ import path from "node:path";
 import {
   getRuntimeConfigSourceSnapshot,
   projectConfigOntoRuntimeSourceSnapshot,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   loadConfig,
 } from "../config/config.js";
 import { createConfigRuntimeEnv } from "../config/env-vars.js";
-import { resolveHanzo BotAgentDir } from "./agent-paths.js";
-import { planHanzo BotModelsJson } from "./models-config.plan.js";
+import { resolveHanzoBotAgentDir } from "./agent-paths.js";
+import { planHanzoBotModelsJson } from "./models-config.plan.js";
 
 const MODELS_JSON_WRITE_LOCKS = new Map<string, Promise<void>>();
 
@@ -42,9 +42,9 @@ async function writeModelsFileAtomic(targetPath: string, contents: string): Prom
   await fs.rename(tempPath, targetPath);
 }
 
-function resolveModelsConfigInput(config?: Hanzo BotConfig): {
-  config: Hanzo BotConfig;
-  sourceConfigForSecrets: Hanzo BotConfig;
+function resolveModelsConfigInput(config?: HanzoBotConfig): {
+  config: HanzoBotConfig;
+  sourceConfigForSecrets: HanzoBotConfig;
 } {
   const runtimeSource = getRuntimeConfigSourceSnapshot();
   if (!config) {
@@ -88,13 +88,13 @@ async function withModelsJsonWriteLock<T>(targetPath: string, run: () => Promise
   }
 }
 
-export async function ensureHanzo BotModelsJson(
-  config?: Hanzo BotConfig,
+export async function ensureHanzoBotModelsJson(
+  config?: HanzoBotConfig,
   agentDirOverride?: string,
 ): Promise<{ agentDir: string; wrote: boolean }> {
   const resolved = resolveModelsConfigInput(config);
   const cfg = resolved.config;
-  const agentDir = agentDirOverride?.trim() ? agentDirOverride.trim() : resolveHanzo BotAgentDir();
+  const agentDir = agentDirOverride?.trim() ? agentDirOverride.trim() : resolveHanzoBotAgentDir();
   const targetPath = path.join(agentDir, "models.json");
 
   return await withModelsJsonWriteLock(targetPath, async () => {
@@ -102,7 +102,7 @@ export async function ensureHanzo BotModelsJson(
     // are available to provider discovery without mutating process.env.
     const env = createConfigRuntimeEnv(cfg);
     const existingModelsFile = await readExistingModelsFile(targetPath);
-    const plan = await planHanzo BotModelsJson({
+    const plan = await planHanzoBotModelsJson({
       cfg,
       sourceConfigForSecrets: resolved.sourceConfigForSecrets,
       agentDir,

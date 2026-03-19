@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../runtime-api.js";
+import type { HanzoBotConfig } from "../../runtime-api.js";
 import { deliverMattermostReplyPayload } from "./reply-delivery.js";
 
 describe("deliverMattermostReplyPayload", () => {
@@ -25,7 +25,7 @@ describe("deliverMattermostReplyPayload", () => {
 
       const agentId = "agent-1";
       const mediaUrl = `file://${path.join(stateDir, `workspace-${agentId}`, "photo.png")}`;
-      const cfg = {} satisfies Hanzo BotConfig;
+      const cfg = {} satisfies HanzoBotConfig;
 
       await deliverMattermostReplyPayload({
         core,
@@ -75,7 +75,7 @@ describe("deliverMattermostReplyPayload", () => {
 
     await deliverMattermostReplyPayload({
       core,
-      cfg: {} satisfies Hanzo BotConfig,
+      cfg: {} satisfies HanzoBotConfig,
       payload: { text: "hello" },
       to: "channel:town-square",
       accountId: "default",

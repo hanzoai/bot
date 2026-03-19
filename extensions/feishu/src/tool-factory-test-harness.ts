@@ -1,4 +1,4 @@
-import type { AnyAgentTool, Hanzo BotPluginApi } from "../runtime-api.js";
+import type { AnyAgentTool, HanzoBotPluginApi } from "../runtime-api.js";
 
 type ToolContextLike = {
   agentAccountId?: string;
@@ -34,10 +34,10 @@ function asToolLike(tool: AnyAgentTool, fallbackName?: string): ToolLike {
   };
 }
 
-export function createToolFactoryHarness(cfg: Hanzo BotPluginApi["config"]) {
+export function createToolFactoryHarness(cfg: HanzoBotPluginApi["config"]) {
   const registered: RegisteredTool[] = [];
 
-  const api: Pick<Hanzo BotPluginApi, "config" | "logger" | "registerTool"> = {
+  const api: Pick<HanzoBotPluginApi, "config" | "logger" | "registerTool"> = {
     config: cfg,
     logger: {
       info: () => {},
@@ -70,7 +70,7 @@ export function createToolFactoryHarness(cfg: Hanzo BotPluginApi["config"]) {
   };
 
   return {
-    api: api as Hanzo BotPluginApi,
+    api: api as HanzoBotPluginApi,
     resolveTool,
   };
 }

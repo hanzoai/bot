@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import * as bootstrapCache from "../../agents/bootstrap-cache.js";
 import { buildModelAliasIndex } from "../../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { formatZonedTimestamp } from "../../infra/format-time/format-datetime.ts";
 import {
@@ -111,7 +111,7 @@ describe("initSessionState thread forking", () => {
 
     const cfg = {
       session: { store: storePath },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const threadSessionKey = "agent:main:slack:channel:c1:thread:123";
     const threadLabel = "Slack thread #general: starter";
@@ -201,7 +201,7 @@ describe("initSessionState thread forking", () => {
 
     const cfg = {
       session: { store: storePath },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const first = await initSessionState({
       ctx: {
@@ -279,7 +279,7 @@ describe("initSessionState thread forking", () => {
 
     const cfg = {
       session: { store: storePath },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const threadSessionKey = "agent:main:slack:channel:c1:thread:456";
     const result = await initSessionState({
@@ -350,7 +350,7 @@ describe("initSessionState thread forking", () => {
         store: storePath,
         parentForkMaxTokens: 200_000,
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const threadSessionKey = "agent:main:slack:channel:c1:thread:789";
     const result = await initSessionState({
@@ -381,7 +381,7 @@ describe("initSessionState thread forking", () => {
 
     const cfg = {
       session: { store: storePath },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -405,7 +405,7 @@ describe("initSessionState RawBody", () => {
   it("uses RawBody for command extraction and reset triggers when Body contains wrapped context", async () => {
     const root = await makeCaseDir("openclaw-rawbody-");
     const storePath = path.join(root, "sessions.json");
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     const statusResult = await initSessionState({
       ctx: {
@@ -442,7 +442,7 @@ describe("initSessionState RawBody", () => {
         store: storePath,
         resetTriggers: ["/new"],
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const ctx = {
       RawBody: "/NEW KeepThisCase",
@@ -495,7 +495,7 @@ describe("initSessionState RawBody", () => {
           allowFrom: ["*"],
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -539,7 +539,7 @@ describe("initSessionState RawBody", () => {
           allowFrom: ["*"],
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -599,7 +599,7 @@ describe("initSessionState RawBody", () => {
           allowFrom: ["*"],
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -643,7 +643,7 @@ describe("initSessionState RawBody", () => {
           allowFrom: ["*"],
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -701,7 +701,7 @@ describe("initSessionState RawBody", () => {
           allowFrom: ["*"],
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     sessionBindingTesting.resetSessionBindingAdaptersForTests();
     registerSessionBindingAdapter({
@@ -786,7 +786,7 @@ describe("initSessionState RawBody", () => {
           allowFrom: ["*"],
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -828,7 +828,7 @@ describe("initSessionState RawBody", () => {
         },
       });
 
-      const cfg = {} as Hanzo BotConfig;
+      const cfg = {} as HanzoBotConfig;
       const result = await initSessionState({
         ctx: {
           Body: "hello",
@@ -880,7 +880,7 @@ describe("initSessionState reset policy", () => {
       },
     });
 
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
     const result = await initSessionState({
       ctx: { Body: "hello", SessionKey: sessionKey },
       cfg,
@@ -909,7 +909,7 @@ describe("initSessionState reset policy", () => {
       },
     });
 
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
     const result = await initSessionState({
       ctx: { Body: "hello", SessionKey: sessionKey },
       cfg,
@@ -939,7 +939,7 @@ describe("initSessionState reset policy", () => {
         store: storePath,
         reset: { mode: "daily", atHour: 4, idleMinutes: 30 },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = await initSessionState({
       ctx: { Body: "hello", SessionKey: sessionKey },
       cfg,
@@ -970,7 +970,7 @@ describe("initSessionState reset policy", () => {
         reset: { mode: "daily", atHour: 4 },
         resetByType: { thread: { mode: "idle", idleMinutes: 180 } },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = await initSessionState({
       ctx: { Body: "reply", SessionKey: sessionKey, ThreadLabel: "Slack thread" },
       cfg,
@@ -1000,7 +1000,7 @@ describe("initSessionState reset policy", () => {
         store: storePath,
         resetByType: { thread: { mode: "idle", idleMinutes: 180 } },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = await initSessionState({
       ctx: { Body: "reply", SessionKey: sessionKey, ThreadLabel: "Discord thread" },
       cfg,
@@ -1030,7 +1030,7 @@ describe("initSessionState reset policy", () => {
         store: storePath,
         resetByType: { thread: { mode: "idle", idleMinutes: 60 } },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = await initSessionState({
       ctx: { Body: "hello", SessionKey: sessionKey },
       cfg,
@@ -1060,7 +1060,7 @@ describe("initSessionState reset policy", () => {
         store: storePath,
         idleMinutes: 240,
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = await initSessionState({
       ctx: { Body: "hello", SessionKey: sessionKey },
       cfg,
@@ -1098,7 +1098,7 @@ describe("initSessionState channel reset overrides", () => {
         resetByType: { direct: { mode: "idle", idleMinutes: 10 } },
         resetByChannel: { discord: { mode: "idle", idleMinutes: 10080 } },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -1129,7 +1129,7 @@ describe("initSessionState reset triggers in WhatsApp groups", () => {
     });
   }
 
-  function makeCfg(params: { storePath: string; allowFrom: string[] }): Hanzo BotConfig {
+  function makeCfg(params: { storePath: string; allowFrom: string[] }): HanzoBotConfig {
     return {
       session: { store: params.storePath, idleMinutes: 999 },
       channels: {
@@ -1138,7 +1138,7 @@ describe("initSessionState reset triggers in WhatsApp groups", () => {
           groupPolicy: "open",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   it("applies WhatsApp group reset authorization across sender variants", async () => {
@@ -1234,7 +1234,7 @@ describe("initSessionState reset triggers in Slack channels", () => {
     });
     const cfg = {
       session: { store: storePath, idleMinutes: 999 },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -1263,7 +1263,7 @@ describe("initSessionState reset triggers in Slack channels", () => {
 
 describe("applyResetModelOverride", () => {
   it("selects a model hint and strips it from the body", async () => {
-    const cfg = {} as Hanzo BotConfig;
+    const cfg = {} as HanzoBotConfig;
     const aliasIndex = buildModelAliasIndex({ cfg, defaultProvider: "openai" });
     const sessionEntry: SessionEntry = {
       sessionId: "s1",
@@ -1293,7 +1293,7 @@ describe("applyResetModelOverride", () => {
   });
 
   it("clears auth profile overrides when reset applies a model", async () => {
-    const cfg = {} as Hanzo BotConfig;
+    const cfg = {} as HanzoBotConfig;
     const aliasIndex = buildModelAliasIndex({ cfg, defaultProvider: "openai" });
     const sessionEntry: SessionEntry = {
       sessionId: "s1",
@@ -1326,7 +1326,7 @@ describe("applyResetModelOverride", () => {
   });
 
   it("skips when resetTriggered is false", async () => {
-    const cfg = {} as Hanzo BotConfig;
+    const cfg = {} as HanzoBotConfig;
     const aliasIndex = buildModelAliasIndex({ cfg, defaultProvider: "openai" });
     const sessionEntry: SessionEntry = {
       sessionId: "s1",
@@ -1403,7 +1403,7 @@ describe("initSessionState preserves behavior overrides across /new and /reset",
 
       const cfg = {
         session: { store: storePath, idleMinutes: 999 },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       const result = await initSessionState({
         ctx: {
@@ -1460,7 +1460,7 @@ describe("initSessionState preserves behavior overrides across /new and /reset",
 
       const cfg = {
         session: { store: storePath, idleMinutes: 999 },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       const result = await initSessionState({
         ctx: {
@@ -1500,7 +1500,7 @@ describe("initSessionState preserves behavior overrides across /new and /reset",
 
     const cfg = {
       session: { store: storePath, idleMinutes: 999 },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -1552,7 +1552,7 @@ describe("initSessionState preserves behavior overrides across /new and /reset",
       const sessionUtils = await import("../../gateway/session-utils.fs.js");
       const archiveSpy = vi.spyOn(sessionUtils, "archiveSessionTranscripts");
 
-      const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+      const cfg = { session: { store: storePath } } as HanzoBotConfig;
       const result = await initSessionState({
         ctx: {
           Body: "hello",
@@ -1591,7 +1591,7 @@ describe("initSessionState preserves behavior overrides across /new and /reset",
 
     const cfg = {
       session: { store: storePath, idleMinutes: 0 },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -1627,7 +1627,7 @@ describe("drainFormattedSystemEvents", () => {
       enqueueSystemEvent("Model switched.", { sessionKey: "agent:main:main" });
 
       const result = await drainFormattedSystemEvents({
-        cfg: {} as Hanzo BotConfig,
+        cfg: {} as HanzoBotConfig,
         sessionKey: "agent:main:main",
         isMainSession: true,
         isNewSession: false,
@@ -1846,7 +1846,7 @@ describe("persistSessionUsageUpdate", () => {
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       usage: { input: 2_000, output: 500, cacheRead: 1_000, cacheWrite: 200 },
       lastCallUsage: { input: 800, output: 200, cacheRead: 300, cacheWrite: 50 },
       providerUsed: "openai",
@@ -1892,7 +1892,7 @@ describe("persistSessionUsageUpdate", () => {
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       usage: { input: 5_107, output: 1_827, cacheRead: 1_536, cacheWrite: 0 },
       lastCallUsage: { input: 5_107, output: 1_827, cacheRead: 1_536, cacheWrite: 0 },
       providerUsed: "openai-codex",
@@ -1908,7 +1908,7 @@ describe("persistSessionUsageUpdate", () => {
 describe("initSessionState stale threadId fallback", () => {
   it("does not inherit lastThreadId from a previous thread interaction in non-thread sessions", async () => {
     const storePath = await createStorePath("stale-thread-");
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     // First interaction: inside a DM topic (thread session)
     const threadResult = await initSessionState({
@@ -1938,7 +1938,7 @@ describe("initSessionState stale threadId fallback", () => {
 
   it("preserves lastThreadId within the same thread session", async () => {
     const storePath = await createStorePath("preserve-thread-");
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     // First message in thread
     await initSessionState({
@@ -1984,7 +1984,7 @@ describe("initSessionState dmScope delivery migration", () => {
     });
     const cfg = {
       session: { store: storePath, dmScope: "per-channel-peer" },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -2030,7 +2030,7 @@ describe("initSessionState dmScope delivery migration", () => {
     });
     const cfg = {
       session: { store: storePath, dmScope: "per-channel-peer" },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await initSessionState({
       ctx: {
@@ -2073,7 +2073,7 @@ describe("initSessionState internal channel routing preservation", () => {
         },
       },
     });
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -2112,7 +2112,7 @@ describe("initSessionState internal channel routing preservation", () => {
     });
     const cfg = {
       session: { store: storePath, dmScope: "per-channel-peer" },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -2146,7 +2146,7 @@ describe("initSessionState internal channel routing preservation", () => {
     });
     const cfg = {
       session: { store: storePath, dmScope: "per-channel-peer" },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -2181,7 +2181,7 @@ describe("initSessionState internal channel routing preservation", () => {
         },
       },
     });
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -2203,7 +2203,7 @@ describe("initSessionState internal channel routing preservation", () => {
   it("uses session key channel hint when first turn is internal webchat", async () => {
     const storePath = await createStorePath("session-key-channel-hint-");
     const sessionKey = "agent:main:telegram:group:98765";
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -2221,7 +2221,7 @@ describe("initSessionState internal channel routing preservation", () => {
 
   it("keeps internal route when there is no persisted external fallback", async () => {
     const storePath = await createStorePath("no-external-fallback-");
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -2240,7 +2240,7 @@ describe("initSessionState internal channel routing preservation", () => {
 
   it("keeps webchat channel for webchat/main sessions", async () => {
     const storePath = await createStorePath("preserve-webchat-main-");
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -2272,7 +2272,7 @@ describe("initSessionState internal channel routing preservation", () => {
         },
       },
     });
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {
@@ -2305,7 +2305,7 @@ describe("initSessionState internal channel routing preservation", () => {
         },
       },
     });
-    const cfg = { session: { store: storePath } } as Hanzo BotConfig;
+    const cfg = { session: { store: storePath } } as HanzoBotConfig;
 
     const result = await initSessionState({
       ctx: {

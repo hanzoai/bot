@@ -12,8 +12,8 @@ import {
 import {
   isChromeCdpReady,
   isChromeReachable,
-  launchHanzo BotChrome,
-  stopHanzo BotChrome,
+  launchHanzoBotChrome,
+  stopHanzoBotChrome,
 } from "./chrome.js";
 import type { ResolvedBrowserProfile } from "./config.js";
 import { BrowserProfileUnavailableError } from "./errors.js";
@@ -118,7 +118,7 @@ export function createProfileAvailability({
 
     const previousProfile = reconcile.previousProfile;
     if (profileState.running) {
-      await stopHanzo BotChrome(profileState.running).catch(() => {});
+      await stopHanzoBotChrome(profileState.running).catch(() => {});
       setProfileRunning(null);
     }
     if (getBrowserProfileCapabilities(previousProfile).usesChromeMcp) {
@@ -131,7 +131,7 @@ export function createProfileAvailability({
   };
 
   const waitForCdpReadyAfterLaunch = async (): Promise<void> => {
-    // launchHanzo BotChrome() can return before Chrome is fully ready to serve /json/version + CDP WS.
+    // launchHanzoBotChrome() can return before Chrome is fully ready to serve /json/version + CDP WS.
     // If a follow-up call races ahead, we can hit PortInUseError trying to launch again on the same port.
     const deadlineMs = Date.now() + CDP_READY_AFTER_LAUNCH_WINDOW_MS;
     while (Date.now() < deadlineMs) {
@@ -182,12 +182,12 @@ export function createProfileAvailability({
             : `Browser attachOnly is enabled and profile "${profile.name}" is not running.`,
         );
       }
-      const launched = await launchHanzo BotChrome(current.resolved, profile);
+      const launched = await launchHanzoBotChrome(current.resolved, profile);
       attachRunning(launched);
       try {
         await waitForCdpReadyAfterLaunch();
       } catch (err) {
-        await stopHanzo BotChrome(launched).catch(() => {});
+        await stopHanzoBotChrome(launched).catch(() => {});
         setProfileRunning(null);
         throw err;
       }
@@ -223,10 +223,10 @@ export function createProfileAvailability({
       );
     }
 
-    await stopHanzo BotChrome(profileState.running);
+    await stopHanzoBotChrome(profileState.running);
     setProfileRunning(null);
 
-    const relaunched = await launchHanzo BotChrome(current.resolved, profile);
+    const relaunched = await launchHanzoBotChrome(current.resolved, profile);
     attachRunning(relaunched);
 
     if (!(await isReachable(PROFILE_POST_RESTART_WS_TIMEOUT_MS))) {
@@ -246,7 +246,7 @@ export function createProfileAvailability({
     if (!profileState.running) {
       return { stopped: false };
     }
-    await stopHanzo BotChrome(profileState.running);
+    await stopHanzoBotChrome(profileState.running);
     setProfileRunning(null);
     return { stopped: true };
   };

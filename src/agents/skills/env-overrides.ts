@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { normalizeResolvedSecretInputString } from "../../config/types.secrets.js";
 import { isDangerousHostEnvVarName } from "../../infra/host-env-security.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
@@ -210,7 +210,7 @@ function createEnvReverter(updates: EnvUpdate[]) {
   };
 }
 
-export function applySkillEnvOverrides(params: { skills: SkillEntry[]; config?: Hanzo BotConfig }) {
+export function applySkillEnvOverrides(params: { skills: SkillEntry[]; config?: HanzoBotConfig }) {
   const { skills, config } = params;
   const updates: EnvUpdate[] = [];
 
@@ -235,7 +235,7 @@ export function applySkillEnvOverrides(params: { skills: SkillEntry[]; config?: 
 
 export function applySkillEnvOverridesFromSnapshot(params: {
   snapshot?: SkillSnapshot;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
 }) {
   const { snapshot, config } = params;
   if (!snapshot) {

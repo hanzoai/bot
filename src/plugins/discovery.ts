@@ -7,7 +7,7 @@ import {
   DEFAULT_PLUGIN_ENTRY_CANDIDATES,
   getPackageManifestMetadata,
   resolvePackageExtensionEntries,
-  type Hanzo BotPackageManifest,
+  type HanzoBotPackageManifest,
   type PackageManifest,
 } from "./manifest.js";
 import { formatPosixMode, isPathInside, safeRealpathSync, safeStatSync } from "./path-safety.js";
@@ -37,7 +37,7 @@ export type PluginCandidate = {
   packageVersion?: string;
   packageDescription?: string;
   packageDir?: string;
-  packageManifest?: Hanzo BotPackageManifest;
+  packageManifest?: HanzoBotPackageManifest;
 };
 
 export type PluginDiscoveryResult = {
@@ -754,7 +754,7 @@ function discoverFromPath(params: {
   }
 }
 
-export function discoverHanzo BotPlugins(params: {
+export function discoverHanzoBotPlugins(params: {
   workspaceDir?: string;
   extraPaths?: string[];
   ownershipUid?: number | null;

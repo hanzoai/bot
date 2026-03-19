@@ -1,6 +1,6 @@
 import type { RequestClient } from "@buape/carbon";
 import { resolveAgentAvatar } from "openclaw/plugin-sdk/agent-runtime";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { MarkdownTableMode, ReplyToMode } from "openclaw/plugin-sdk/config-runtime";
 import {
   resolveRetryConfig,
@@ -114,7 +114,7 @@ function resolveBoundThreadBinding(params: {
 }
 
 function resolveBindingPersona(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   binding: DiscordThreadBindingLookupRecord | undefined,
 ): {
   username?: string;
@@ -139,7 +139,7 @@ function resolveBindingPersona(
 }
 
 async function sendDiscordChunkWithFallback(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   target: string;
   text: string;
   token: string;
@@ -216,7 +216,7 @@ async function sendDiscordChunkWithFallback(params: {
 }
 
 export async function deliverDiscordReply(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   replies: ReplyPayload[];
   target: string;
   token: string;

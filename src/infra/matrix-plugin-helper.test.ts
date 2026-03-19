@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { withTempHome } from "../../test/helpers/temp-home.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   isMatrixLegacyCryptoInspectorAvailable,
   loadMatrixLegacyCryptoInspector,
@@ -90,7 +90,7 @@ describe("matrix plugin helper resolution", () => {
           ].join("\n"),
         );
 
-        const cfg: Hanzo BotConfig = {
+        const cfg: HanzoBotConfig = {
           plugins: {
             load: {
               paths: [customRoot],
@@ -161,7 +161,7 @@ describe("matrix plugin helper resolution", () => {
           return;
         }
 
-        const cfg: Hanzo BotConfig = {
+        const cfg: HanzoBotConfig = {
           plugins: {
             load: {
               paths: [customRoot],

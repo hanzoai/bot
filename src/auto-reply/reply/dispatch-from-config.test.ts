@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { SessionBindingRecord } from "../../infra/outbound/session-binding-service.js";
 import type { PluginTargetedInboundClaimOutcome } from "../../plugins/hooks.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
@@ -100,7 +100,7 @@ const ttsMocks = vi.hoisted(() => {
     normalizeTtsAutoMode: vi.fn((value: unknown) =>
       typeof value === "string" ? value : undefined,
     ),
-    resolveTtsConfig: vi.fn((_cfg: Hanzo BotConfig) => ({ mode: "final" })),
+    resolveTtsConfig: vi.fn((_cfg: HanzoBotConfig) => ({ mode: "final" })),
   };
 });
 
@@ -190,11 +190,11 @@ vi.mock("../../infra/outbound/session-binding-service.js", async (importOriginal
 vi.mock("../../tts/tts.js", () => ({
   maybeApplyTtsToPayload: (params: unknown) => ttsMocks.maybeApplyTtsToPayload(params),
   normalizeTtsAutoMode: (value: unknown) => ttsMocks.normalizeTtsAutoMode(value),
-  resolveTtsConfig: (cfg: Hanzo BotConfig) => ttsMocks.resolveTtsConfig(cfg),
+  resolveTtsConfig: (cfg: HanzoBotConfig) => ttsMocks.resolveTtsConfig(cfg),
 }));
 
 const noAbortResult = { handled: false, aborted: false } as const;
-const emptyConfig = {} as Hanzo BotConfig;
+const emptyConfig = {} as HanzoBotConfig;
 let dispatchReplyFromConfig: typeof import("./dispatch-from-config.js").dispatchReplyFromConfig;
 let resetInboundDedupe: typeof import("./inbound-dedupe.js").resetInboundDedupe;
 let acpManagerTesting: typeof import("../../acp/control-plane/manager.js").__testing;
@@ -352,7 +352,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       _opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => ({ text: "hi" }) satisfies ReplyPayload;
     await dispatchReplyFromConfig({ ctx, cfg, dispatcher, replyResolver });
 
@@ -377,7 +377,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       _opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => ({ text: "hi" }) satisfies ReplyPayload;
     await dispatchReplyFromConfig({ ctx, cfg, dispatcher, replyResolver });
 
@@ -597,7 +597,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       _opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => ({ text: "hi" }) satisfies ReplyPayload;
     await dispatchReplyFromConfig({ ctx, cfg, dispatcher, replyResolver });
 
@@ -621,7 +621,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       _opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => ({ text: "hi" }) satisfies ReplyPayload;
     await dispatchReplyFromConfig({ ctx, cfg, dispatcher, replyResolver });
 
@@ -650,7 +650,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => {
       expect(opts?.onToolResult).toBeDefined();
       await opts?.onToolResult?.({
@@ -683,7 +683,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => {
       expect(opts?.onToolResult).toBeDefined();
       expect(typeof opts?.onToolResult).toBe("function");
@@ -706,7 +706,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => {
       expect(opts?.onToolResult).toBeDefined();
       await opts?.onToolResult?.({ text: "🔧 exec: ls" });
@@ -738,7 +738,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => {
       await opts?.onToolResult?.({
         text: "Approval required.\n\n```txt\n/approve 117ba06d allow-once\n```",
@@ -783,7 +783,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => {
       // Simulate tool result emission
       await opts?.onToolResult?.({ text: "🔧 exec: ls" });
@@ -810,7 +810,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => {
       expect(opts?.onToolResult).toBeDefined();
       await opts?.onToolResult?.({ text: "🔧 tools/sessions_send" });
@@ -841,7 +841,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       opts?: GetReplyOptions,
-      _cfg?: Hanzo BotConfig,
+      _cfg?: HanzoBotConfig,
     ) => {
       await opts?.onToolResult?.({
         text: "Approval required.\n\n```txt\n/approve 117ba06d allow-once\n```",
@@ -952,7 +952,7 @@ describe("dispatchReplyFromConfig", () => {
         dispatch: { enabled: true },
         stream: { coalesceIdleMs: 0, maxChunkChars: 128 },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1027,7 +1027,7 @@ describe("dispatchReplyFromConfig", () => {
         enabled: true,
         dispatch: { enabled: true },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1109,7 +1109,7 @@ describe("dispatchReplyFromConfig", () => {
         enabled: true,
         dispatch: { enabled: true },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1166,7 +1166,7 @@ describe("dispatchReplyFromConfig", () => {
           default: "deny",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1215,7 +1215,7 @@ describe("dispatchReplyFromConfig", () => {
           default: "deny",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1272,7 +1272,7 @@ describe("dispatchReplyFromConfig", () => {
           default: "deny",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1339,7 +1339,7 @@ describe("dispatchReplyFromConfig", () => {
           default: "allow",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1392,7 +1392,7 @@ describe("dispatchReplyFromConfig", () => {
           default: "deny",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1448,7 +1448,7 @@ describe("dispatchReplyFromConfig", () => {
           default: "deny",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1507,7 +1507,7 @@ describe("dispatchReplyFromConfig", () => {
         dispatch: { enabled: true },
         stream: { coalesceIdleMs: 0, maxChunkChars: 256 },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1558,7 +1558,7 @@ describe("dispatchReplyFromConfig", () => {
         dispatch: { enabled: true },
         stream: { coalesceIdleMs: 0, maxChunkChars: 256 },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1608,7 +1608,7 @@ describe("dispatchReplyFromConfig", () => {
         dispatch: { enabled: true },
         stream: { coalesceIdleMs: 0, maxChunkChars: 128 },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1660,7 +1660,7 @@ describe("dispatchReplyFromConfig", () => {
         enabled: true,
         dispatch: { enabled: true },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1701,7 +1701,7 @@ describe("dispatchReplyFromConfig", () => {
         enabled: true,
         dispatch: { enabled: false },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1729,7 +1729,7 @@ describe("dispatchReplyFromConfig", () => {
         enabled: true,
         dispatch: { enabled: true },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1777,7 +1777,7 @@ describe("dispatchReplyFromConfig", () => {
         enabled: true,
         dispatch: { enabled: true },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -1828,7 +1828,7 @@ describe("dispatchReplyFromConfig", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "discord",
@@ -2061,7 +2061,7 @@ describe("dispatchReplyFromConfig", () => {
 
   it("emits diagnostics when enabled", async () => {
     setNoAbort();
-    const cfg = { diagnostics: { enabled: true } } as Hanzo BotConfig;
+    const cfg = { diagnostics: { enabled: true } } as HanzoBotConfig;
     const dispatcher = createDispatcher();
     const ctx = buildTestCtx({
       Provider: "slack",
@@ -2496,7 +2496,7 @@ describe("dispatchReplyFromConfig", () => {
 
   it("marks diagnostics skipped for duplicate inbound messages", async () => {
     setNoAbort();
-    const cfg = { diagnostics: { enabled: true } } as Hanzo BotConfig;
+    const cfg = { diagnostics: { enabled: true } } as HanzoBotConfig;
     const ctx = buildTestCtx({
       Provider: "whatsapp",
       OriginatingChannel: "whatsapp",

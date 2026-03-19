@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 
 const probeFeishuMock = vi.hoisted(() => vi.fn());
 const createFeishuClientMock = vi.hoisted(() => vi.fn());
@@ -54,7 +54,7 @@ vi.mock("./channel.runtime.js", () => ({
 
 import { feishuPlugin } from "./channel.js";
 
-function getDescribedActions(cfg: Hanzo BotConfig): string[] {
+function getDescribedActions(cfg: HanzoBotConfig): string[] {
   return [...(feishuPlugin.actions?.describeMessageTool?.({ cfg })?.actions ?? [])];
 }
 
@@ -73,7 +73,7 @@ describe("feishuPlugin.status.probeAccount", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const account = feishuPlugin.config.resolveAccount(cfg, "main");
     probeFeishuMock.mockResolvedValueOnce({ ok: true, appId: "cli_main" });
@@ -108,7 +108,7 @@ describe("feishuPlugin actions", () => {
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -144,7 +144,7 @@ describe("feishuPlugin actions", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     expect(getDescribedActions(disabledCfg)).toEqual([
       "send",

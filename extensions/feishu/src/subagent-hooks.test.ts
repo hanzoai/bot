@@ -3,7 +3,7 @@ import {
   getRequiredHookHandler,
   registerHookHandlersForTest,
 } from "../../../test/helpers/extensions/subagent-hooks.js";
-import type { Hanzo BotPluginApi } from "../runtime-api.js";
+import type { HanzoBotPluginApi } from "../runtime-api.js";
 import { registerFeishuSubagentHooks } from "./subagent-hooks.js";
 import {
   __testing as threadBindingTesting,
@@ -16,7 +16,7 @@ const baseConfig = {
 };
 
 function registerHandlersForTest(config: Record<string, unknown> = baseConfig) {
-  return registerHookHandlersForTest<Hanzo BotPluginApi>({
+  return registerHookHandlersForTest<HanzoBotPluginApi>({
     config,
     register: registerFeishuSubagentHooks,
   });

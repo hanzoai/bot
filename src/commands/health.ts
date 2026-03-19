@@ -4,7 +4,7 @@ import { getChannelPlugin, listChannelPlugins } from "../channels/plugins/index.
 import type { ChannelAccountSnapshot, ChannelPlugin } from "../channels/plugins/types.js";
 import { inspectReadOnlyChannelAccount } from "../channels/read-only-account-inspect.js";
 import { withProgress } from "../cli/progress.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadConfig, readBestEffortConfig } from "../config/config.js";
 import { loadSessionStore, resolveStorePath } from "../config/sessions.js";
 import { buildGatewayConnectionDetails, callGateway } from "../gateway/call.js";
@@ -165,7 +165,7 @@ const buildSessionSummary = (storePath: string) => {
 const asRecord = (value: unknown): Record<string, unknown> | null =>
   value && typeof value === "object" ? (value as Record<string, unknown>) : null;
 
-async function inspectHealthAccount(plugin: ChannelPlugin, cfg: Hanzo BotConfig, accountId: string) {
+async function inspectHealthAccount(plugin: ChannelPlugin, cfg: HanzoBotConfig, accountId: string) {
   return (
     plugin.config.inspectAccount?.(cfg, accountId) ??
     (await inspectReadOnlyChannelAccount({
@@ -186,7 +186,7 @@ function readBooleanField(value: unknown, key: string): boolean | undefined {
 
 async function resolveHealthAccountContext(params: {
   plugin: ChannelPlugin;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
 }): Promise<{
   account: unknown;
@@ -595,7 +595,7 @@ export async function getHealthSnapshot(params?: {
 }
 
 export async function healthCommand(
-  opts: { json?: boolean; timeoutMs?: number; verbose?: boolean; config?: Hanzo BotConfig },
+  opts: { json?: boolean; timeoutMs?: number; verbose?: boolean; config?: HanzoBotConfig },
   runtime: RuntimeEnv,
 ) {
   const cfg = opts.config ?? (await readBestEffortConfig());

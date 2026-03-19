@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import { captureEnv } from "../../../test/helpers/extensions/env.js";
 import {
   handleTelegramAction,
@@ -49,13 +49,13 @@ describe("handleTelegramAction", () => {
     emoji: "✅",
   } as const;
 
-  function reactionConfig(reactionLevel: "minimal" | "extensive" | "off" | "ack"): Hanzo BotConfig {
+  function reactionConfig(reactionLevel: "minimal" | "extensive" | "off" | "ack"): HanzoBotConfig {
     return {
       channels: { telegram: { botToken: "tok", reactionLevel } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
-  function telegramConfig(overrides?: Record<string, unknown>): Hanzo BotConfig {
+  function telegramConfig(overrides?: Record<string, unknown>): HanzoBotConfig {
     return {
       channels: {
         telegram: {
@@ -63,7 +63,7 @@ describe("handleTelegramAction", () => {
           ...overrides,
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   async function sendInlineButtonsMessage(params: {
@@ -168,7 +168,7 @@ describe("handleTelegramAction", () => {
   it("soft-fails when messageId is missing", async () => {
     const cfg = {
       channels: { telegram: { botToken: "tok", reactionLevel: "minimal" } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = await handleTelegramAction(
       {
         action: "react",
@@ -203,7 +203,7 @@ describe("handleTelegramAction", () => {
   });
 
   it("rejects sticker actions when disabled by default", async () => {
-    const cfg = { channels: { telegram: { botToken: "tok" } } } as Hanzo BotConfig;
+    const cfg = { channels: { telegram: { botToken: "tok" } } } as HanzoBotConfig;
     await expect(
       handleTelegramAction(
         {
@@ -220,7 +220,7 @@ describe("handleTelegramAction", () => {
   it("sends stickers when enabled", async () => {
     const cfg = {
       channels: { telegram: { botToken: "tok", actions: { sticker: true } } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     await handleTelegramAction(
       {
         action: "sendSticker",
@@ -239,7 +239,7 @@ describe("handleTelegramAction", () => {
   it("accepts shared sticker action aliases", async () => {
     const cfg = {
       channels: { telegram: { botToken: "tok", actions: { sticker: true } } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     await handleTelegramAction(
       {
         action: "sticker",
@@ -309,7 +309,7 @@ describe("handleTelegramAction", () => {
           actions: { reactions: false },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = await handleTelegramAction(
       {
         action: "react",
@@ -637,7 +637,7 @@ describe("handleTelegramAction", () => {
       channels: {
         telegram: { botToken: "tok", actions: { sendMessage: false } },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     await expect(
       handleTelegramAction(
         {
@@ -655,7 +655,7 @@ describe("handleTelegramAction", () => {
       channels: {
         telegram: { botToken: "tok", actions: { poll: false } },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     await expect(
       handleTelegramAction(
         {
@@ -672,7 +672,7 @@ describe("handleTelegramAction", () => {
   it("deletes a message", async () => {
     const cfg = {
       channels: { telegram: { botToken: "tok" } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     await handleTelegramAction(
       {
         action: "deleteMessage",
@@ -693,7 +693,7 @@ describe("handleTelegramAction", () => {
       channels: {
         telegram: { botToken: "tok", actions: { deleteMessage: false } },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     await expect(
       handleTelegramAction(
         {
@@ -708,7 +708,7 @@ describe("handleTelegramAction", () => {
 
   it("throws on missing bot token for sendMessage", async () => {
     delete process.env.TELEGRAM_BOT_TOKEN;
-    const cfg = {} as Hanzo BotConfig;
+    const cfg = {} as HanzoBotConfig;
     await expect(
       handleTelegramAction(
         {
@@ -724,7 +724,7 @@ describe("handleTelegramAction", () => {
   it("allows inline buttons by default (allowlist)", async () => {
     const cfg = {
       channels: { telegram: { botToken: "tok" } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     await handleTelegramAction(
       {
         action: "sendMessage",
@@ -877,7 +877,7 @@ describe("handleTelegramAction per-account gating", () => {
     >;
     topLevelBotToken?: string;
     topLevelActions?: { reactions?: boolean };
-  }): Hanzo BotConfig {
+  }): HanzoBotConfig {
     return {
       channels: {
         telegram: {
@@ -886,10 +886,10 @@ describe("handleTelegramAction per-account gating", () => {
           accounts: params.accounts,
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
-  async function expectAccountStickerSend(cfg: Hanzo BotConfig, accountId = "media") {
+  async function expectAccountStickerSend(cfg: HanzoBotConfig, accountId = "media") {
     await handleTelegramAction(
       { action: "sendSticker", to: "123", fileId: "sticker-id", accountId },
       cfg,
@@ -919,7 +919,7 @@ describe("handleTelegramAction per-account gating", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await expect(
       handleTelegramAction(

@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { SkillSnapshot } from "../skills.js";
 
 const hoisted = vi.hoisted(() => ({
   loadWorkspaceSkillEntries: vi.fn(
-    (_workspaceDir: string, _options?: { config?: Hanzo BotConfig }) => [],
+    (_workspaceDir: string, _options?: { config?: HanzoBotConfig }) => [],
   ),
 }));
 
@@ -12,7 +12,7 @@ vi.mock("../skills.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../skills.js")>();
   return {
     ...actual,
-    loadWorkspaceSkillEntries: (workspaceDir: string, options?: { config?: Hanzo BotConfig }) =>
+    loadWorkspaceSkillEntries: (workspaceDir: string, options?: { config?: HanzoBotConfig }) =>
       hoisted.loadWorkspaceSkillEntries(workspaceDir, options),
   };
 });
@@ -26,7 +26,7 @@ describe("resolveEmbeddedRunSkillEntries", () => {
   });
 
   it("loads skill entries with config when no resolved snapshot skills exist", () => {
-    const config: Hanzo BotConfig = {
+    const config: HanzoBotConfig = {
       plugins: {
         entries: {
           diffs: { enabled: true },

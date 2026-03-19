@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { ChannelHeartbeatVisibilityConfig } from "../config/types.channels.js";
 import type { GatewayMessageChannel } from "../utils/message-channel.js";
 
@@ -20,7 +20,7 @@ const DEFAULT_VISIBILITY: ResolvedHeartbeatVisibility = {
  * For webchat, uses channels.defaults.heartbeat since webchat doesn't have per-channel config.
  */
 export function resolveHeartbeatVisibility(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: GatewayMessageChannel;
   accountId?: string;
 }): ResolvedHeartbeatVisibility {

@@ -3,7 +3,7 @@ import type {
   ChannelMessageActionName,
   ChannelThreadingToolContext,
 } from "../../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   getChannelMessageAdapter,
   type CrossContextComponentsBuilder,
@@ -91,7 +91,7 @@ export function enforceCrossContextPolicy(params: {
   action: ChannelMessageActionName;
   args: Record<string, unknown>;
   toolContext?: ChannelThreadingToolContext;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
 }): void {
   const currentTarget = params.toolContext?.currentChannelId?.trim();
   if (!currentTarget) {
@@ -139,7 +139,7 @@ export function enforceCrossContextPolicy(params: {
 }
 
 export async function buildCrossContextDecoration(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: ChannelId;
   target: string;
   toolContext?: ChannelThreadingToolContext;

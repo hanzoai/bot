@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { loadSessionStore, resolveStorePath } from "../../config/sessions.js";
 import { readChannelAllowFromStoreSync } from "../../pairing/pairing-store.js";
 import { DEFAULT_ACCOUNT_ID } from "../../routing/session-key.js";
@@ -8,7 +8,7 @@ import { normalizeChatChannelId } from "../registry.js";
 type HeartbeatRecipientsResult = { recipients: string[]; source: string };
 type HeartbeatRecipientsOpts = { to?: string; all?: boolean };
 
-function getSessionRecipients(cfg: Hanzo BotConfig) {
+function getSessionRecipients(cfg: HanzoBotConfig) {
   const sessionCfg = cfg.session;
   const scope = sessionCfg?.scope ?? "per-sender";
   if (scope === "global") {
@@ -45,7 +45,7 @@ function getSessionRecipients(cfg: Hanzo BotConfig) {
 }
 
 export function resolveWhatsAppHeartbeatRecipients(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   opts: HeartbeatRecipientsOpts = {},
 ): HeartbeatRecipientsResult {
   if (opts.to) {

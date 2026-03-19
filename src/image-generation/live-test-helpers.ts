@@ -1,5 +1,5 @@
 import type { AuthProfileStore } from "../agents/auth-profiles.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 export const DEFAULT_LIVE_IMAGE_MODELS: Record<string, string> = {
   google: "google/gemini-3.1-flash-image-preview",
@@ -57,7 +57,7 @@ export function parseProviderModelMap(raw?: string): Map<string, string> {
   return entries;
 }
 
-export function resolveConfiguredLiveImageModels(cfg: Hanzo BotConfig): Map<string, string> {
+export function resolveConfiguredLiveImageModels(cfg: HanzoBotConfig): Map<string, string> {
   const resolved = new Map<string, string>();
   const configured = cfg.agents?.defaults?.imageGenerationModel;
   const add = (value: string | undefined) => {

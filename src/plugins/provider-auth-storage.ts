@@ -1,4 +1,4 @@
-import { resolveHanzo BotAgentDir } from "../agents/agent-paths.js";
+import { resolveHanzoBotAgentDir } from "../agents/agent-paths.js";
 import { upsertAuthProfile } from "../agents/auth-profiles.js";
 import type { SecretInput } from "../config/types.secrets.js";
 import { KILOCODE_DEFAULT_MODEL_REF } from "../providers/kilocode-shared.js";
@@ -9,7 +9,7 @@ import {
   type WriteOAuthCredentialsOptions,
 } from "./provider-auth-helpers.js";
 
-const resolveAuthAgentDir = (agentDir?: string) => agentDir ?? resolveHanzo BotAgentDir();
+const resolveAuthAgentDir = (agentDir?: string) => agentDir ?? resolveHanzoBotAgentDir();
 
 export { KILOCODE_DEFAULT_MODEL_REF };
 export {

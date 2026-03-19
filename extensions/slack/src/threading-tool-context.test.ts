@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import { buildSlackThreadingToolContext } from "./threading-tool-context.js";
 
-const emptyCfg = {} as Hanzo BotConfig;
+const emptyCfg = {} as HanzoBotConfig;
 
 function resolveReplyToModeWithConfig(params: {
   slackConfig: Record<string, unknown>;
@@ -12,7 +12,7 @@ function resolveReplyToModeWithConfig(params: {
     channels: {
       slack: params.slackConfig,
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
   const result = buildSlackThreadingToolContext({
     cfg,
     accountId: null,
@@ -27,7 +27,7 @@ describe("buildSlackThreadingToolContext", () => {
       channels: {
         slack: { replyToMode: "first" },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = buildSlackThreadingToolContext({
       cfg,
       accountId: null,
@@ -67,7 +67,7 @@ describe("buildSlackThreadingToolContext", () => {
           replyToMode: "first",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = buildSlackThreadingToolContext({
       cfg,
       accountId: null,
@@ -127,7 +127,7 @@ describe("buildSlackThreadingToolContext", () => {
           replyToModeByChatType: { channel: "first" },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = buildSlackThreadingToolContext({
       cfg,
       accountId: null,

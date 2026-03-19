@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Hanzo BotPluginConfigSchema } from "../runtime-api.js";
+import type { HanzoBotPluginConfigSchema } from "../runtime-api.js";
 
 export const ACPX_PERMISSION_MODES = ["approve-all", "approve-reads", "deny-all"] as const;
 export type AcpxPermissionMode = (typeof ACPX_PERMISSION_MODES)[number];
@@ -289,7 +289,7 @@ function resolveConfiguredCommand(params: { configured?: string; workspaceDir?: 
   return configured;
 }
 
-export function createAcpxPluginConfigSchema(): Hanzo BotPluginConfigSchema {
+export function createAcpxPluginConfigSchema(): HanzoBotPluginConfigSchema {
   return {
     safeParse(value: unknown):
       | { success: true; data?: unknown }

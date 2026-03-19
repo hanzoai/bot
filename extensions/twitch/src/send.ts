@@ -5,7 +5,7 @@
  * They support dependency injection via the `deps` parameter for testability.
  */
 
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 import { getClientManager as getRegistryClientManager } from "./client-manager-registry.js";
 import { DEFAULT_ACCOUNT_ID, getAccountConfig } from "./config.js";
 import { resolveTwitchToken } from "./token.js";
@@ -51,7 +51,7 @@ export interface SendMessageResult {
 export async function sendMessageTwitchInternal(
   channel: string,
   text: string,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string = DEFAULT_ACCOUNT_ID,
   stripMarkdown: boolean = true,
   logger: Console = console,

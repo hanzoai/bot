@@ -316,7 +316,7 @@ vi.mock("../gateway/session-utils.js", async (importOriginal) => {
   };
 });
 vi.mock("../infra/openclaw-root.js", () => ({
-  resolveHanzo BotPackageRoot: vi.fn().mockResolvedValue("/tmp/openclaw"),
+  resolveHanzoBotPackageRoot: vi.fn().mockResolvedValue("/tmp/openclaw"),
 }));
 vi.mock("../infra/os-summary.js", () => ({
   resolveOsSummary: () => ({

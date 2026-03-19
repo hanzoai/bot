@@ -3,7 +3,7 @@ import {
   resolveThreadBindingMaxAgeMs,
   resolveThreadBindingsEnabled,
 } from "openclaw/plugin-sdk/channel-runtime";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
 
 export {
@@ -13,7 +13,7 @@ export {
 };
 
 export function resolveDiscordThreadBindingIdleTimeoutMs(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string;
 }): number {
   const accountId = normalizeAccountId(params.accountId);
@@ -26,7 +26,7 @@ export function resolveDiscordThreadBindingIdleTimeoutMs(params: {
 }
 
 export function resolveDiscordThreadBindingMaxAgeMs(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string;
 }): number {
   const accountId = normalizeAccountId(params.accountId);

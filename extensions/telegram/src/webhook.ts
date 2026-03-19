@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { createServer } from "node:http";
 import { InputFile, webhookCallback } from "grammy";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { isDiagnosticsEnabled } from "openclaw/plugin-sdk/infra-runtime";
 import { formatErrorMessage } from "openclaw/plugin-sdk/infra-runtime";
 import { readJsonBodyWithLimit } from "openclaw/plugin-sdk/infra-runtime";
@@ -100,7 +100,7 @@ function hasValidTelegramWebhookSecret(
 export async function startTelegramWebhook(opts: {
   token: string;
   accountId?: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   path?: string;
   port?: number;
   host?: string;

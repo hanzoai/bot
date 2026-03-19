@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 import { createChannelReplyPipeline } from "../runtime-api.js";
 const { sendMessageMattermostMock } = vi.hoisted(() => ({
   sendMessageMattermostMock: vi.fn(),
@@ -17,7 +17,7 @@ import {
   withMockedGlobalFetch,
 } from "./mattermost/reactions.test-helpers.js";
 
-function getDescribedActions(cfg: Hanzo BotConfig): string[] {
+function getDescribedActions(cfg: HanzoBotConfig): string[] {
   return [...(mattermostPlugin.actions?.describeMessageTool?.({ cfg })?.actions ?? [])];
 }
 
@@ -76,7 +76,7 @@ describe("mattermostPlugin", () => {
         return;
       }
 
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           mattermost: {
             replyToMode: "all",
@@ -126,7 +126,7 @@ describe("mattermostPlugin", () => {
     };
 
     it("exposes react when mattermost is configured", () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -144,7 +144,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("hides react when mattermost is not configured", () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -157,7 +157,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("hides react when actions.reactions is false", () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -174,7 +174,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("respects per-account actions.reactions in message discovery", () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -196,7 +196,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("blocks react when default account disables reactions and accountId is omitted", async () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -341,7 +341,7 @@ describe("mattermostPlugin", () => {
             baseUrl: "https://chat.example.com",
           },
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
 
       await sendText({
         cfg,
@@ -413,14 +413,14 @@ describe("mattermostPlugin", () => {
       const formatAllowFrom = mattermostPlugin.config.formatAllowFrom!;
 
       const formatted = formatAllowFrom({
-        cfg: {} as Hanzo BotConfig,
+        cfg: {} as HanzoBotConfig,
         allowFrom: ["@Alice", "user:USER123", "mattermost:BOT999"],
       });
       expect(formatted).toEqual(["@alice", "user123", "bot999"]);
     });
 
     it("uses account responsePrefix overrides", () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           mattermost: {
             responsePrefix: "[Channel]",

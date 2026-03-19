@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import "./test-helpers/fast-coding-tools.js";
-import { createHanzo BotCodingTools } from "./pi-tools.js";
+import { createHanzoBotCodingTools } from "./pi-tools.js";
 
 vi.mock("./channel-tools.js", () => {
   const stubTool = (name: string) => ({
@@ -16,7 +16,7 @@ vi.mock("./channel-tools.js", () => {
 
 describe("owner-only tool gating", () => {
   it("removes owner-only tools for unauthorized senders", () => {
-    const tools = createHanzo BotCodingTools({ senderIsOwner: false });
+    const tools = createHanzoBotCodingTools({ senderIsOwner: false });
     const toolNames = tools.map((tool) => tool.name);
     expect(toolNames).not.toContain("whatsapp_login");
     expect(toolNames).not.toContain("cron");
@@ -25,7 +25,7 @@ describe("owner-only tool gating", () => {
   });
 
   it("keeps owner-only tools for authorized senders", () => {
-    const tools = createHanzo BotCodingTools({ senderIsOwner: true });
+    const tools = createHanzoBotCodingTools({ senderIsOwner: true });
     const toolNames = tools.map((tool) => tool.name);
     expect(toolNames).toContain("whatsapp_login");
     expect(toolNames).toContain("cron");
@@ -34,13 +34,13 @@ describe("owner-only tool gating", () => {
   });
 
   it("keeps canvas available to unauthorized senders by current trust model", () => {
-    const tools = createHanzo BotCodingTools({ senderIsOwner: false });
+    const tools = createHanzoBotCodingTools({ senderIsOwner: false });
     const toolNames = tools.map((tool) => tool.name);
     expect(toolNames).toContain("canvas");
   });
 
   it("defaults to removing owner-only tools when owner status is unknown", () => {
-    const tools = createHanzo BotCodingTools();
+    const tools = createHanzoBotCodingTools();
     const toolNames = tools.map((tool) => tool.name);
     expect(toolNames).not.toContain("whatsapp_login");
     expect(toolNames).not.toContain("cron");

@@ -1,8 +1,8 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { resolveGatewayDriftCheckCredentialsFromConfig } from "../../gateway/credentials.js";
 
 export function resolveGatewayTokenForDriftCheck(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
 }) {
   void params.env;

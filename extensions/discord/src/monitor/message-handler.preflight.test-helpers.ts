@@ -1,9 +1,9 @@
 import { ChannelType } from "@buape/carbon";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { preflightDiscordMessage } from "./message-handler.preflight.js";
 import { createNoopThreadBindingManager } from "./thread-bindings.js";
 
-export type DiscordConfig = NonNullable<Hanzo BotConfig["channels"]>["discord"];
+export type DiscordConfig = NonNullable<HanzoBotConfig["channels"]>["discord"];
 export type DiscordMessageEvent = import("./listeners.js").DiscordMessageEvent;
 export type DiscordClient = import("@buape/carbon").Client;
 
@@ -12,7 +12,7 @@ export const DEFAULT_PREFLIGHT_CFG = {
     mainKey: "main",
     scope: "per-sender",
   },
-} as Hanzo BotConfig;
+} as HanzoBotConfig;
 
 export function createGuildTextClient(channelId: string): DiscordClient {
   return {
@@ -79,7 +79,7 @@ export function createDiscordMessage(params: {
 }
 
 export function createDiscordPreflightArgs(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   discordConfig: DiscordConfig;
   data: DiscordMessageEvent;
   client: DiscordClient;

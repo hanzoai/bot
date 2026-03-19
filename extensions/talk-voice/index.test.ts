@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotPluginCommandDefinition } from "../../test/helpers/extensions/plugin-command.js";
+import type { HanzoBotPluginCommandDefinition } from "../../test/helpers/extensions/plugin-command.js";
 import { createPluginRuntimeMock } from "../../test/helpers/extensions/plugin-runtime-mock.js";
 import register from "./index.js";
 
 function createHarness(config: Record<string, unknown>) {
-  let command: Hanzo BotPluginCommandDefinition | undefined;
+  let command: HanzoBotPluginCommandDefinition | undefined;
   const runtime = createPluginRuntimeMock({
     config: {
       loadConfig: vi.fn(() => config),
@@ -16,7 +16,7 @@ function createHarness(config: Record<string, unknown>) {
   });
   const api = {
     runtime,
-    registerCommand: vi.fn((definition: Hanzo BotPluginCommandDefinition) => {
+    registerCommand: vi.fn((definition: HanzoBotPluginCommandDefinition) => {
       command = definition;
     }),
   };

@@ -1,8 +1,8 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
 export function createPerSenderSessionConfig(
-  overrides: Partial<NonNullable<Hanzo BotConfig["session"]>> = {},
-): NonNullable<Hanzo BotConfig["session"]> {
+  overrides: Partial<NonNullable<HanzoBotConfig["session"]>> = {},
+): NonNullable<HanzoBotConfig["session"]> {
   return {
     mainKey: "main",
     scope: "per-sender",

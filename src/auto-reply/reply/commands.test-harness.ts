@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { MsgContext } from "../templating.js";
 import type { HandleCommandsParams } from "./commands-types.js";
 import { buildCommandContext } from "./commands.js";
@@ -6,7 +6,7 @@ import { parseInlineDirectives } from "./directive-handling.js";
 
 export function buildCommandTestParams(
   commandBody: string,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   ctxOverrides?: Partial<MsgContext>,
   options?: {
     workspaceDir?: string;

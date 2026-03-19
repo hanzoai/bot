@@ -1,5 +1,5 @@
 import type { TSchema } from "@sinclair/typebox";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { defaultRuntime } from "../../runtime.js";
 import { normalizeAnyChannelId } from "../registry.js";
 import { getChannelPlugin, listChannelPlugins } from "./index.js";
@@ -12,7 +12,7 @@ import type {
 } from "./types.js";
 
 export type ChannelMessageActionDiscoveryInput = {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   channel?: string | null;
   currentChannelProvider?: string | null;
   currentChannelId?: string | null;
@@ -45,7 +45,7 @@ export function createMessageActionDiscoveryContext(
     params.channel ?? params.currentChannelProvider,
   );
   return {
-    cfg: params.cfg ?? ({} as Hanzo BotConfig),
+    cfg: params.cfg ?? ({} as HanzoBotConfig),
     currentChannelId: params.currentChannelId,
     currentChannelProvider,
     currentThreadTs: params.currentThreadTs,
@@ -146,7 +146,7 @@ export function resolveMessageActionDiscoveryForPlugin(params: {
   };
 }
 
-export function listChannelMessageActions(cfg: Hanzo BotConfig): ChannelMessageActionName[] {
+export function listChannelMessageActions(cfg: HanzoBotConfig): ChannelMessageActionName[] {
   const actions = new Set<ChannelMessageActionName>(["send", "broadcast"]);
   for (const plugin of listChannelPlugins()) {
     for (const action of resolveMessageActionDiscoveryForPlugin({
@@ -161,7 +161,7 @@ export function listChannelMessageActions(cfg: Hanzo BotConfig): ChannelMessageA
   return Array.from(actions);
 }
 
-export function listChannelMessageCapabilities(cfg: Hanzo BotConfig): ChannelMessageCapability[] {
+export function listChannelMessageCapabilities(cfg: HanzoBotConfig): ChannelMessageCapability[] {
   const capabilities = new Set<ChannelMessageCapability>();
   for (const plugin of listChannelPlugins()) {
     for (const capability of resolveMessageActionDiscoveryForPlugin({
@@ -177,7 +177,7 @@ export function listChannelMessageCapabilities(cfg: Hanzo BotConfig): ChannelMes
 }
 
 export function listChannelMessageCapabilitiesForChannel(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel?: string;
   currentChannelId?: string | null;
   currentThreadTs?: string | null;
@@ -220,7 +220,7 @@ function mergeToolSchemaProperties(
 }
 
 export function resolveChannelMessageToolSchemaProperties(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel?: string;
   currentChannelId?: string | null;
   currentThreadTs?: string | null;
@@ -260,7 +260,7 @@ export function resolveChannelMessageToolSchemaProperties(params: {
 }
 
 export function channelSupportsMessageCapability(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   capability: ChannelMessageCapability,
 ): boolean {
   return listChannelMessageCapabilities(cfg).includes(capability);
@@ -268,7 +268,7 @@ export function channelSupportsMessageCapability(
 
 export function channelSupportsMessageCapabilityForChannel(
   params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     channel?: string;
     currentChannelId?: string | null;
     currentThreadTs?: string | null;

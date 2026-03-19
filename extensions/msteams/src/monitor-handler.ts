@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig, RuntimeEnv } from "../runtime-api.js";
+import type { HanzoBotConfig, RuntimeEnv } from "../runtime-api.js";
 import type { MSTeamsConversationStore } from "./conversation-store.js";
 import { buildFileInfoCard, parseFileConsentInvoke, uploadToConsentUrl } from "./file-consent.js";
 import { normalizeMSTeamsConversationId } from "./inbound.js";
@@ -25,7 +25,7 @@ export type MSTeamsActivityHandler = {
 };
 
 export type MSTeamsMessageHandlerDeps = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   appId: string;
   adapter: MSTeamsAdapter;

@@ -6,7 +6,7 @@ import { captureEnv } from "../test-utils/env.js";
 import type { UpdateCheckResult } from "./update-check.js";
 
 vi.mock("./openclaw-root.js", () => ({
-  resolveHanzo BotPackageRoot: vi.fn(),
+  resolveHanzoBotPackageRoot: vi.fn(),
 }));
 
 vi.mock("./update-check.js", async () => {
@@ -45,7 +45,7 @@ describe("update-startup", () => {
   let tempDir: string;
   let envSnapshot: ReturnType<typeof captureEnv>;
 
-  let resolveHanzo BotPackageRoot: (typeof import("./openclaw-root.js"))["resolveHanzo BotPackageRoot"];
+  let resolveHanzoBotPackageRoot: (typeof import("./openclaw-root.js"))["resolveHanzoBotPackageRoot"];
   let checkUpdateStatus: (typeof import("./update-check.js"))["checkUpdateStatus"];
   let resolveNpmChannelTag: (typeof import("./update-check.js"))["resolveNpmChannelTag"];
   let runCommandWithTimeout: (typeof import("../process/exec.js"))["runCommandWithTimeout"];
@@ -74,7 +74,7 @@ describe("update-startup", () => {
 
     // Perf: load mocked modules once (after timers/env are set up).
     if (!loaded) {
-      ({ resolveHanzo BotPackageRoot } = await import("./openclaw-root.js"));
+      ({ resolveHanzoBotPackageRoot } = await import("./openclaw-root.js"));
       ({ checkUpdateStatus, resolveNpmChannelTag } = await import("./update-check.js"));
       ({ runCommandWithTimeout } = await import("../process/exec.js"));
       ({
@@ -85,7 +85,7 @@ describe("update-startup", () => {
       } = await import("./update-startup.js"));
       loaded = true;
     }
-    vi.mocked(resolveHanzo BotPackageRoot).mockClear();
+    vi.mocked(resolveHanzoBotPackageRoot).mockClear();
     vi.mocked(checkUpdateStatus).mockClear();
     vi.mocked(resolveNpmChannelTag).mockClear();
     vi.mocked(runCommandWithTimeout).mockClear();
@@ -112,7 +112,7 @@ describe("update-startup", () => {
   }
 
   function mockPackageInstallStatus() {
-    vi.mocked(resolveHanzo BotPackageRoot).mockResolvedValue("/opt/openclaw");
+    vi.mocked(resolveHanzoBotPackageRoot).mockResolvedValue("/opt/openclaw");
     vi.mocked(checkUpdateStatus).mockResolvedValue({
       root: "/opt/openclaw",
       installKind: "package",

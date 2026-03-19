@@ -2,11 +2,11 @@ import { resolveWhatsAppAccount } from "./accounts.js";
 import {
   ToolAuthorizationError,
   resolveWhatsAppOutboundTarget,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "./runtime-api.js";
 
 export function resolveAuthorizedWhatsAppOutboundTarget(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   chatJid: string;
   accountId?: string;
   actionLabel: string;

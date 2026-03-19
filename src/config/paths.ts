@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { resolveHomeRelativePath, resolveRequiredHomeDir } from "../infra/home-dir.js";
-import type { Hanzo BotConfig } from "./types.js";
+import type { HanzoBotConfig } from "./types.js";
 
 /**
  * Nix mode detection: When BOT_NIX_MODE=1, the gateway is running under Nix.
@@ -252,7 +252,7 @@ export function resolveOAuthPath(
 }
 
 export function resolveGatewayPort(
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): number {
   const envRaw = env.BOT_GATEWAY_PORT?.trim() || env.BOT_GATEWAY_PORT?.trim();

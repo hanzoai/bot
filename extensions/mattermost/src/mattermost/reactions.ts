@@ -1,10 +1,10 @@
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 import { resolveMattermostAccount } from "./accounts.js";
 import { createMattermostClient, fetchMattermostMe, type MattermostClient } from "./client.js";
 
 type Result = { ok: true } | { ok: false; error: string };
 type ReactionParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   postId: string;
   emojiName: string;
   accountId?: string | null;
@@ -34,7 +34,7 @@ async function resolveBotUserId(
 }
 
 export async function addMattermostReaction(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   postId: string;
   emojiName: string;
   accountId?: string | null;
@@ -47,7 +47,7 @@ export async function addMattermostReaction(params: {
 }
 
 export async function removeMattermostReaction(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   postId: string;
   emojiName: string;
   accountId?: string | null;

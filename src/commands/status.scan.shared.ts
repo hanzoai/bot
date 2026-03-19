@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import type { Hanzo BotConfig } from "../config/types.js";
+import type { HanzoBotConfig } from "../config/types.js";
 import { buildGatewayConnectionDetails } from "../gateway/call.js";
 import { normalizeControlUiBasePath } from "../gateway/control-ui-shared.js";
 import { probeGateway } from "../gateway/probe.js";
@@ -31,7 +31,7 @@ export type GatewayProbeSnapshot = {
   gatewayProbe: Awaited<ReturnType<typeof probeGateway>> | null;
 };
 
-export function hasExplicitMemorySearchConfig(cfg: Hanzo BotConfig, agentId: string): boolean {
+export function hasExplicitMemorySearchConfig(cfg: HanzoBotConfig, agentId: string): boolean {
   if (
     cfg.agents?.defaults &&
     Object.prototype.hasOwnProperty.call(cfg.agents.defaults, "memorySearch")
@@ -44,7 +44,7 @@ export function hasExplicitMemorySearchConfig(cfg: Hanzo BotConfig, agentId: str
   );
 }
 
-export function resolveMemoryPluginStatus(cfg: Hanzo BotConfig): MemoryPluginStatus {
+export function resolveMemoryPluginStatus(cfg: HanzoBotConfig): MemoryPluginStatus {
   const pluginsEnabled = cfg.plugins?.enabled !== false;
   if (!pluginsEnabled) {
     return { enabled: false, slot: null, reason: "plugins disabled" };
@@ -57,7 +57,7 @@ export function resolveMemoryPluginStatus(cfg: Hanzo BotConfig): MemoryPluginSta
 }
 
 export async function resolveGatewayProbeSnapshot(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   opts: { timeoutMs?: number; all?: boolean };
 }): Promise<GatewayProbeSnapshot> {
   const gatewayConnection = buildGatewayConnectionDetails({ config: params.cfg });
@@ -103,12 +103,12 @@ export function buildTailscaleHttpsUrl(params: {
 }
 
 export async function resolveSharedMemoryStatusSnapshot(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentStatus: { defaultId?: string | null };
   memoryPlugin: MemoryPluginStatus;
-  resolveMemoryConfig: (cfg: Hanzo BotConfig, agentId: string) => { store: { path: string } } | null;
+  resolveMemoryConfig: (cfg: HanzoBotConfig, agentId: string) => { store: { path: string } } | null;
   getMemorySearchManager: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     agentId: string;
     purpose: "status";
   }) => Promise<{

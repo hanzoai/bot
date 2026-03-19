@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 const callGateway = vi.fn();
 
@@ -18,12 +18,12 @@ beforeEach(() => {
 });
 
 describe("resolveCommandSecretRefsViaGateway", () => {
-  function makeTalkApiKeySecretRefConfig(envKey: string): Hanzo BotConfig {
+  function makeTalkApiKeySecretRefConfig(envKey: string): HanzoBotConfig {
     return {
       talk: {
         apiKey: { source: "env", provider: "default", id: envKey },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   async function withEnvValue(
@@ -88,7 +88,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
       talk: {
         apiKey: "plain", // pragma: allowlist secret
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = await resolveCommandSecretRefsViaGateway({
       config,
       commandName: "memory status",
@@ -113,7 +113,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
           },
         ],
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
 
     const result = await resolveCommandSecretRefsViaGateway({
       config,
@@ -143,7 +143,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
       talk: {
         apiKey: { source: "env", provider: "default", id: "TALK_API_KEY" },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const result = await resolveCommandSecretRefsViaGateway({
       config,
       commandName: "memory status",
@@ -189,7 +189,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
             },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       commandName: "message",
       targetIds: new Set(["channels.discord.accounts.*.token"]),
       allowedPaths: new Set(["channels.discord.accounts.ops.token"]),
@@ -214,7 +214,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
             talk: {
               apiKey: { source: "env", provider: "default", id: envKey },
             },
-          } as Hanzo BotConfig,
+          } as HanzoBotConfig,
           commandName: "memory status",
           targetIds: new Set(["talk.apiKey"]),
         }),
@@ -243,7 +243,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               default: { source: "env" },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         commandName: "memory status",
         targetIds: new Set(["talk.apiKey"]),
       });
@@ -280,7 +280,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         commandName: "agent",
         targetIds: new Set(["tools.web.search.gemini.apiKey"]),
       });
@@ -308,7 +308,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         commandName: "agent",
         targetIds: new Set(["tools.web.fetch.firecrawl.apiKey"]),
       });
@@ -335,7 +335,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
             },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       commandName: "agent",
       targetIds: new Set(["tools.web.search.gemini.apiKey"]),
     });
@@ -384,7 +384,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
           talk: {
             apiKey: { source: "env", provider: "default", id: "TALK_API_KEY" },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         commandName: "memory status",
         targetIds: new Set(["talk.apiKey"]),
       }),
@@ -408,7 +408,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
           talk: {
             apiKey: { source: "env", provider: "default", id: "TALK_API_KEY" },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         commandName: "memory status",
         targetIds: new Set(["talk.apiKey"]),
       }),
@@ -478,7 +478,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
           },
         ],
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
 
     const result = await resolveCommandSecretRefsViaGateway({
       config,
@@ -590,7 +590,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         commandName: "message send",
         targetIds: new Set(["talk.apiKey", "talk.providers.*.apiKey"]),
       });
@@ -634,7 +634,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               password: { source: "env", provider: "default", id: gatewayEnvKey },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         commandName: "status",
         targetIds: new Set(["talk.apiKey"]),
         mode: "read_only_status",
@@ -669,7 +669,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
           talk: {
             apiKey: { source: "env", provider: "default", id: envKey },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         commandName: "channels resolve",
         targetIds: new Set(["talk.apiKey"]),
         mode: "read_only_operational",

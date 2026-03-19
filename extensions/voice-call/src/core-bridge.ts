@@ -1,4 +1,4 @@
-import type { Hanzo BotPluginApi } from "../api.js";
+import type { HanzoBotPluginApi } from "../api.js";
 import type { VoiceCallTtsConfig } from "./config.js";
 
 export type CoreConfig = {
@@ -11,4 +11,4 @@ export type CoreConfig = {
   [key: string]: unknown;
 };
 
-export type CoreAgentDeps = Hanzo BotPluginApi["runtime"]["agent"];
+export type CoreAgentDeps = HanzoBotPluginApi["runtime"]["agent"];

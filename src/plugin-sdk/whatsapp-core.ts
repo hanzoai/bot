@@ -1,5 +1,5 @@
 export type { ChannelPlugin } from "./channel-plugin-common.js";
-export type { Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
 export {
   DEFAULT_ACCOUNT_ID,
   buildChannelConfigSchema,

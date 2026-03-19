@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import { applyDefaultModelChoice } from "./auth-choice.default-model.js";
 import {
@@ -30,7 +30,7 @@ function makePrompter(): WizardPrompter {
 }
 
 function expectPrimaryModelChanged(
-  applied: { changed: boolean; next: Hanzo BotConfig },
+  applied: { changed: boolean; next: HanzoBotConfig },
   primary: string,
 ) {
   expect(applied.changed).toBe(true);
@@ -38,18 +38,18 @@ function expectPrimaryModelChanged(
 }
 
 function expectConfigUnchanged(
-  applied: { changed: boolean; next: Hanzo BotConfig },
-  cfg: Hanzo BotConfig,
+  applied: { changed: boolean; next: HanzoBotConfig },
+  cfg: HanzoBotConfig,
 ) {
   expect(applied.changed).toBe(false);
   expect(applied.next).toEqual(cfg);
 }
 
 type SharedDefaultModelCase = {
-  apply: (cfg: Hanzo BotConfig) => { changed: boolean; next: Hanzo BotConfig };
+  apply: (cfg: HanzoBotConfig) => { changed: boolean; next: HanzoBotConfig };
   defaultModel: string;
-  overrideConfig: Hanzo BotConfig;
-  alreadyDefaultConfig: Hanzo BotConfig;
+  overrideConfig: HanzoBotConfig;
+  alreadyDefaultConfig: HanzoBotConfig;
 };
 
 const SHARED_DEFAULT_MODEL_CASES: SharedDefaultModelCase[] = [
@@ -58,20 +58,20 @@ const SHARED_DEFAULT_MODEL_CASES: SharedDefaultModelCase[] = [
     defaultModel: GOOGLE_GEMINI_DEFAULT_MODEL,
     overrideConfig: {
       agents: { defaults: { model: { primary: "anthropic/claude-opus-4-5" } } },
-    } as Hanzo BotConfig,
+    } as HanzoBotConfig,
     alreadyDefaultConfig: {
       agents: { defaults: { model: { primary: GOOGLE_GEMINI_DEFAULT_MODEL } } },
-    } as Hanzo BotConfig,
+    } as HanzoBotConfig,
   },
   {
     apply: applyOpencodeZenModelDefault,
     defaultModel: OPENCODE_ZEN_DEFAULT_MODEL,
     overrideConfig: {
       agents: { defaults: { model: "anthropic/claude-opus-4-5" } },
-    } as Hanzo BotConfig,
+    } as HanzoBotConfig,
     alreadyDefaultConfig: {
       agents: { defaults: { model: OPENCODE_ZEN_DEFAULT_MODEL } },
-    } as Hanzo BotConfig,
+    } as HanzoBotConfig,
   },
 ];
 
@@ -84,8 +84,8 @@ describe("applyDefaultModelChoice", () => {
       setDefaultModel: false,
       defaultModel,
       // Simulate a provider function that does not explicitly add the entry.
-      applyProviderConfig: (config: Hanzo BotConfig) => config,
-      applyDefaultConfig: (config: Hanzo BotConfig) => config,
+      applyProviderConfig: (config: HanzoBotConfig) => config,
+      applyDefaultConfig: (config: HanzoBotConfig) => config,
       noteAgentModel,
       prompter: makePrompter(),
     });
@@ -101,8 +101,8 @@ describe("applyDefaultModelChoice", () => {
       config: {},
       setDefaultModel: false,
       defaultModel,
-      applyProviderConfig: (config: Hanzo BotConfig) => config,
-      applyDefaultConfig: (config: Hanzo BotConfig) => config,
+      applyProviderConfig: (config: HanzoBotConfig) => config,
+      applyDefaultConfig: (config: HanzoBotConfig) => config,
       noteAgentModel: async () => {},
       prompter: makePrompter(),
     });
@@ -117,7 +117,7 @@ describe("applyDefaultModelChoice", () => {
       config: {},
       setDefaultModel: true,
       defaultModel,
-      applyProviderConfig: (config: Hanzo BotConfig) => config,
+      applyProviderConfig: (config: HanzoBotConfig) => config,
       applyDefaultConfig: () => ({
         agents: {
           defaults: {
@@ -138,7 +138,7 @@ describe("applyDefaultModelChoice", () => {
 describe("shared default model behavior", () => {
   it("sets defaults when model is unset", () => {
     for (const testCase of SHARED_DEFAULT_MODEL_CASES) {
-      const cfg: Hanzo BotConfig = { agents: { defaults: {} } };
+      const cfg: HanzoBotConfig = { agents: { defaults: {} } };
       const applied = testCase.apply(cfg);
       expectPrimaryModelChanged(applied, testCase.defaultModel);
     }
@@ -197,13 +197,13 @@ describe("applyOpencodeZenModelDefault", () => {
   it("no-ops when already legacy opencode-zen default", () => {
     const cfg = {
       agents: { defaults: { model: "opencode-zen/claude-opus-4-5" } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const applied = applyOpencodeZenModelDefault(cfg);
     expectConfigUnchanged(applied, cfg);
   });
 
   it("preserves fallbacks when setting primary", () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       agents: {
         defaults: {
           model: {

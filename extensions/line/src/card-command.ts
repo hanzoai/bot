@@ -1,4 +1,4 @@
-import type { LineChannelData, Hanzo BotPluginApi, ReplyPayload } from "../api.js";
+import type { LineChannelData, HanzoBotPluginApi, ReplyPayload } from "../api.js";
 import {
   createActionCard,
   createImageCard,
@@ -154,7 +154,7 @@ function parseCardArgs(argsStr: string): {
   return result;
 }
 
-export function registerLineCardCommand(api: Hanzo BotPluginApi): void {
+export function registerLineCardCommand(api: HanzoBotPluginApi): void {
   api.registerCommand({
     name: "card",
     description: "Send a rich card message (LINE).",

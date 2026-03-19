@@ -1,6 +1,6 @@
 import type { AgentToolResult } from "@mariozechner/pi-agent-core";
 import { createDiscordActionGate } from "../accounts.js";
-import { readStringParam, type Hanzo BotConfig } from "../runtime-api.js";
+import { readStringParam, type HanzoBotConfig } from "../runtime-api.js";
 import { handleDiscordGuildAction } from "./runtime.guild.js";
 import { handleDiscordMessagingAction } from "./runtime.messaging.js";
 import { handleDiscordModerationAction } from "./runtime.moderation.js";
@@ -56,7 +56,7 @@ const presenceActions = new Set(["setPresence"]);
 
 export async function handleDiscordAction(
   params: Record<string, unknown>,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   options?: {
     mediaLocalRoots?: readonly string[];
   },

@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { createProviderUsageFetch } from "../test-utils/provider-usage-fetch.js";
 import type { ProviderAuth } from "./provider-usage.auth.js";
 import type { UsageSummary } from "./provider-usage.types.js";
@@ -9,7 +9,7 @@ type ProviderUsageLoader = (params: {
   now: number;
   auth?: ProviderAuth[];
   fetch?: typeof fetch;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
 }) => Promise<UsageSummary>;
 
 export type ProviderUsageAuth<T extends ProviderUsageLoader> = NonNullable<
@@ -26,6 +26,6 @@ export async function loadUsageWithAuth<T extends ProviderUsageLoader>(
     auth,
     fetch: mockFetch as unknown as typeof fetch,
     // These tests exercise the built-in usage fetchers, not provider plugin hooks.
-    config: { plugins: { enabled: false } } as Hanzo BotConfig,
+    config: { plugins: { enabled: false } } as HanzoBotConfig,
   });
 }

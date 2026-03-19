@@ -1,7 +1,7 @@
-import type { Hanzo BotConfig } from "../../config/types.js";
+import type { HanzoBotConfig } from "../../config/types.js";
 
 export type DirectoryConfigParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   query?: string | null;
   limit?: number | null;

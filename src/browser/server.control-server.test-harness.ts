@@ -253,7 +253,7 @@ export function getLaunchCalls() {
 vi.mock("./chrome.js", () => ({
   isChromeCdpReady: vi.fn(async () => state.reachable),
   isChromeReachable: vi.fn(async () => state.reachable),
-  launchHanzo BotChrome: vi.fn(async (_resolved: unknown, profile: { cdpPort: number }) => {
+  launchHanzoBotChrome: vi.fn(async (_resolved: unknown, profile: { cdpPort: number }) => {
     launchCalls.push({ port: profile.cdpPort });
     state.reachable = true;
     return {
@@ -265,8 +265,8 @@ vi.mock("./chrome.js", () => ({
       proc,
     };
   }),
-  resolveHanzo BotUserDataDir: vi.fn(() => chromeUserDataDir.dir),
-  stopHanzo BotChrome: vi.fn(async () => {
+  resolveHanzoBotUserDataDir: vi.fn(() => chromeUserDataDir.dir),
+  stopHanzoBotChrome: vi.fn(async () => {
     state.reachable = false;
   }),
 }));

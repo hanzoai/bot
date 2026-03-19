@@ -4,7 +4,7 @@ import path from "node:path";
 import { resolveBrewPathDirs } from "./brew.js";
 import { isTruthyEnvValue } from "./env.js";
 
-type EnsureHanzo BotPathOpts = {
+type EnsureHanzoBotPathOpts = {
   execPath?: string;
   cwd?: string;
   homeDir?: string;
@@ -49,7 +49,7 @@ function mergePath(params: { existing: string; prepend?: string[]; append?: stri
   return merged.join(path.delimiter);
 }
 
-function candidateBinDirs(opts: EnsureHanzo BotPathOpts): { prepend: string[]; append: string[] } {
+function candidateBinDirs(opts: EnsureHanzoBotPathOpts): { prepend: string[]; append: string[] } {
   const execPath = opts.execPath ?? process.execPath;
   const cwd = opts.cwd ?? process.cwd();
   const homeDir = opts.homeDir ?? os.homedir();
@@ -109,7 +109,7 @@ function candidateBinDirs(opts: EnsureHanzo BotPathOpts): { prepend: string[]; a
  * Best-effort PATH bootstrap so skills that require the `openclaw` CLI can run
  * under launchd/minimal environments (and inside the macOS app bundle).
  */
-export function ensureHanzo BotCliOnPath(opts: EnsureHanzo BotPathOpts = {}) {
+export function ensureHanzoBotCliOnPath(opts: EnsureHanzoBotPathOpts = {}) {
   if (isTruthyEnvValue(process.env.BOT_PATH_BOOTSTRAPPED)) {
     return;
   }

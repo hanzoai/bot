@@ -39,7 +39,7 @@ export type {
 export type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 export { createReplyPrefixContext } from "../channels/reply-prefix.js";
 export { createChannelReplyPipeline } from "./channel-reply-pipeline.js";
-export type { Hanzo BotConfig as ClawdbotConfig, Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig as ClawdbotConfig, HanzoBotConfig } from "../config/config.js";
 export {
   resolveAllowlistProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
@@ -61,7 +61,7 @@ export { resolveAgentOutboundIdentity } from "../infra/outbound/identity.js";
 export type { OutboundIdentity } from "../infra/outbound/identity.js";
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 export type { PluginRuntime } from "../plugins/runtime/types.js";
-export type { AnyAgentTool, Hanzo BotPluginApi } from "../plugins/types.js";
+export type { AnyAgentTool, HanzoBotPluginApi } from "../plugins/types.js";
 export { DEFAULT_ACCOUNT_ID, normalizeAgentId } from "../routing/session-key.js";
 export type { RuntimeEnv } from "../runtime.js";
 export { formatDocsLink } from "../terminal/links.js";

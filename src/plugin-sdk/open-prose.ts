@@ -2,4 +2,4 @@
 // Keep this list additive and scoped to symbols used under extensions/open-prose.
 
 export { definePluginEntry } from "./core.js";
-export type { Hanzo BotPluginApi } from "../plugins/types.js";
+export type { HanzoBotPluginApi } from "../plugins/types.js";

@@ -8,7 +8,7 @@ import {
   splitSetupEntries,
   type ChannelSetupAdapter,
   type ChannelSetupWizard,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/setup";
 import { listAccountIds, resolveAccount } from "./accounts.js";
 import type { SynologyChatAccountRaw, SynologyChatChannelConfig } from "./types.js";
@@ -33,11 +33,11 @@ const SYNOLOGY_ALLOW_FROM_HELP_LINES = [
   `Docs: ${formatDocsLink("/channels/synology-chat", "channels/synology-chat")}`,
 ];
 
-function getChannelConfig(cfg: Hanzo BotConfig): SynologyChatChannelConfig {
+function getChannelConfig(cfg: HanzoBotConfig): SynologyChatChannelConfig {
   return (cfg.channels?.[channel] as SynologyChatChannelConfig | undefined) ?? {};
 }
 
-function getRawAccountConfig(cfg: Hanzo BotConfig, accountId: string): SynologyChatAccountRaw {
+function getRawAccountConfig(cfg: HanzoBotConfig, accountId: string): SynologyChatAccountRaw {
   const channelConfig = getChannelConfig(cfg);
   if (accountId === DEFAULT_ACCOUNT_ID) {
     return channelConfig;
@@ -46,12 +46,12 @@ function getRawAccountConfig(cfg: Hanzo BotConfig, accountId: string): SynologyC
 }
 
 function patchSynologyChatAccountConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   patch: Record<string, unknown>;
   clearFields?: string[];
   enabled?: boolean;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const channelConfig = getChannelConfig(params.cfg);
   if (params.accountId === DEFAULT_ACCOUNT_ID) {
     const nextChannelConfig = { ...channelConfig } as Record<string, unknown>;
@@ -98,7 +98,7 @@ function patchSynologyChatAccountConfig(params: {
   };
 }
 
-function isSynologyChatConfigured(cfg: Hanzo BotConfig, accountId: string): boolean {
+function isSynologyChatConfigured(cfg: HanzoBotConfig, accountId: string): boolean {
   const account = resolveAccount(cfg, accountId);
   return Boolean(account.token.trim() && account.incomingUrl.trim());
 }
@@ -128,7 +128,7 @@ function parseSynologyUserId(value: string): string | null {
   return /^\d+$/.test(cleaned) ? cleaned : null;
 }
 
-function resolveExistingAllowedUserIds(cfg: Hanzo BotConfig, accountId: string): string[] {
+function resolveExistingAllowedUserIds(cfg: HanzoBotConfig, accountId: string): string[] {
   const raw = getRawAccountConfig(cfg, accountId).allowedUserIds;
   if (Array.isArray(raw)) {
     return raw.map((value) => String(value).trim()).filter(Boolean);

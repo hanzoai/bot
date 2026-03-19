@@ -1,16 +1,16 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { validateConfigObject } from "../config/validation.js";
-import { resolveHanzo BotAgentDir } from "./agent-paths.js";
+import { resolveHanzoBotAgentDir } from "./agent-paths.js";
 import { NON_ENV_SECRETREF_MARKER } from "./model-auth-markers.js";
 import {
   CUSTOM_PROXY_MODELS_CONFIG,
   installModelsConfigTestHooks,
   withModelsTempHome as withTempHome,
 } from "./models-config.e2e-harness.js";
-import { ensureHanzo BotModelsJson } from "./models-config.js";
+import { ensureHanzoBotModelsJson } from "./models-config.js";
 import { readGeneratedModelsJson } from "./models-config.test-utils.js";
 
 installModelsConfigTestHooks();
@@ -32,7 +32,7 @@ async function withEnvVar(name: string, value: string, run: () => Promise<void>)
 }
 
 async function writeAgentModelsJson(content: unknown): Promise<void> {
-  const agentDir = resolveHanzo BotAgentDir();
+  const agentDir = resolveHanzoBotAgentDir();
   await fs.mkdir(agentDir, { recursive: true });
   await fs.writeFile(
     path.join(agentDir, MODELS_JSON_NAME),
@@ -91,7 +91,7 @@ async function runCustomProviderMergeTest(params: {
   const existingProviderKey = params.existingProviderKey ?? "custom";
   const configProviderKey = params.configProviderKey ?? "custom";
   await writeAgentModelsJson({ providers: { [existingProviderKey]: params.seedProvider } });
-  await ensureHanzo BotModelsJson({
+  await ensureHanzoBotModelsJson({
     models: {
       mode: "merge",
       providers: {
@@ -134,7 +134,7 @@ async function expectCustomProviderApiKeyRewrite(params: {
       },
     });
 
-    await ensureHanzo BotModelsJson({
+    await ensureHanzoBotModelsJson({
       models: {
         mode: "merge",
         providers: {
@@ -157,7 +157,7 @@ async function expectCustomProviderApiKeyRewrite(params: {
 function createMoonshotConfig(overrides: {
   contextWindow: number;
   maxTokens: number;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   return {
     models: {
       providers: {
@@ -181,7 +181,7 @@ function createMoonshotConfig(overrides: {
   };
 }
 
-function createOpenAiConfigWithResolvedApiKey(mergeMode = false): Hanzo BotConfig {
+function createOpenAiConfigWithResolvedApiKey(mergeMode = false): HanzoBotConfig {
   return {
     models: {
       ...(mergeMode ? { mode: "merge" as const } : {}),
@@ -223,7 +223,7 @@ async function expectOpenAiEnvMarkerApiKey(options?: { seedMergedProvider?: bool
         });
       }
 
-      await ensureHanzo BotModelsJson(
+      await ensureHanzoBotModelsJson(
         createOpenAiConfigWithResolvedApiKey(options?.seedMergedProvider),
       );
       const result = await readGeneratedModelsJson<{
@@ -242,7 +242,7 @@ async function expectMoonshotTokenLimits(params: {
 }) {
   await withTempHome(async () => {
     await withEnvVar("MOONSHOT_API_KEY", "sk-moonshot-test", async () => {
-      await ensureHanzo BotModelsJson(
+      await ensureHanzoBotModelsJson(
         createMoonshotConfig({
           contextWindow: params.contextWindow,
           maxTokens: params.maxTokens,
@@ -286,7 +286,7 @@ describe("models-config", () => {
         throw new Error("expected config to validate");
       }
 
-      await ensureHanzo BotModelsJson(validated.config);
+      await ensureHanzoBotModelsJson(validated.config);
 
       const parsed = await readGeneratedModelsJson<{
         providers: Record<string, { api?: string; models?: Array<{ id: string; api?: string }> }>;
@@ -300,7 +300,7 @@ describe("models-config", () => {
   it("fills missing provider.apiKey from env var name when models exist", async () => {
     await withTempHome(async () => {
       await withEnvVar("MINIMAX_API_KEY", "sk-minimax-test", async () => {
-        const cfg: Hanzo BotConfig = {
+        const cfg: HanzoBotConfig = {
           models: {
             providers: {
               minimax: {
@@ -322,7 +322,7 @@ describe("models-config", () => {
           },
         };
 
-        await ensureHanzo BotModelsJson(cfg);
+        await ensureHanzoBotModelsJson(cfg);
 
         const parsed = await readGeneratedModelsJson<{
           providers: Record<string, { apiKey?: string; models?: Array<{ id: string }> }>;
@@ -357,7 +357,7 @@ describe("models-config", () => {
         },
       });
 
-      await ensureHanzo BotModelsJson(CUSTOM_PROXY_MODELS_CONFIG);
+      await ensureHanzoBotModelsJson(CUSTOM_PROXY_MODELS_CONFIG);
 
       const parsed = await readGeneratedModelsJson<{
         providers: Record<string, { baseUrl?: string }>;
@@ -428,7 +428,7 @@ describe("models-config", () => {
 
   it("replaces stale merged apiKey when provider is SecretRef-managed via auth-profiles", async () => {
     await withTempHome(async () => {
-      const agentDir = resolveHanzo BotAgentDir();
+      const agentDir = resolveHanzoBotAgentDir();
       await fs.mkdir(agentDir, { recursive: true });
       await fs.writeFile(
         path.join(agentDir, "auth-profiles.json"),
@@ -459,7 +459,7 @@ describe("models-config", () => {
         },
       });
 
-      await ensureHanzo BotModelsJson({
+      await ensureHanzoBotModelsJson({
         models: {
           mode: "merge",
           providers: {},
@@ -501,7 +501,7 @@ describe("models-config", () => {
       await withEnvVar("MOONSHOT_API_KEY", "sk-moonshot-test", async () => {
         const cfg = createMoonshotConfig({ contextWindow: 1024, maxTokens: 256 });
 
-        await ensureHanzo BotModelsJson(cfg);
+        await ensureHanzoBotModelsJson(cfg);
 
         const parsed = await readGeneratedModelsJson<{
           providers: Record<

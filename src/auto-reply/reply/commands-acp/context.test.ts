@@ -3,7 +3,7 @@ import {
   __testing as feishuThreadBindingTesting,
   createFeishuThreadBindingManager,
 } from "../../../../extensions/feishu/src/thread-bindings.js";
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import {
   __testing as sessionBindingTesting,
   getSessionBindingService,
@@ -18,7 +18,7 @@ import {
 
 const baseCfg = {
   session: { mainKey: "main", scope: "per-sender" },
-} satisfies Hanzo BotConfig;
+} satisfies HanzoBotConfig;
 
 describe("commands-acp context", () => {
   beforeEach(() => {

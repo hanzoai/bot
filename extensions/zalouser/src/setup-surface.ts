@@ -11,7 +11,7 @@ import {
   type ChannelSetupDmPolicy,
   type ChannelSetupWizard,
   type DmPolicy,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/setup";
 import {
   listZalouserAccountIds,
@@ -47,35 +47,35 @@ function parseZalouserEntries(raw: string): string[] {
 }
 
 function setZalouserAccountScopedConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
   defaultPatch: Record<string, unknown>,
   accountPatch: Record<string, unknown> = defaultPatch,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return patchScopedAccountConfig({
     cfg,
     channelKey: channel,
     accountId,
     patch: defaultPatch,
     accountPatch,
-  }) as Hanzo BotConfig;
+  }) as HanzoBotConfig;
 }
 
 function setZalouserGroupPolicy(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
   groupPolicy: "open" | "allowlist" | "disabled",
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return setZalouserAccountScopedConfig(cfg, accountId, {
     groupPolicy,
   });
 }
 
 function setZalouserGroupAllowlist(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
   groupKeys: string[],
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const groups = Object.fromEntries(
     groupKeys.map((key) => [key, { allow: true, requireMention: true }]),
   );
@@ -84,8 +84,8 @@ function setZalouserGroupAllowlist(
   });
 }
 
-function ensureZalouserPluginEnabled(cfg: Hanzo BotConfig): Hanzo BotConfig {
-  const next: Hanzo BotConfig = {
+function ensureZalouserPluginEnabled(cfg: HanzoBotConfig): HanzoBotConfig {
+  const next: HanzoBotConfig = {
     ...cfg,
     plugins: {
       ...cfg.plugins,
@@ -127,10 +127,10 @@ async function noteZalouserHelp(
 }
 
 async function promptZalouserAllowFrom(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: Parameters<NonNullable<ChannelSetupDmPolicy["promptAllowFrom"]>>[0]["prompter"];
   accountId: string;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   const { cfg, prompter, accountId } = params;
   const resolved = resolveZalouserAccountSync({ cfg, accountId });
   const existingAllowFrom = resolved.config.allowFrom ?? [];
@@ -199,9 +199,9 @@ const zalouserDmPolicy: ChannelSetupDmPolicy = createTopLevelChannelDmPolicy({
     const id =
       accountId && normalizeAccountId(accountId)
         ? (normalizeAccountId(accountId) ?? DEFAULT_ACCOUNT_ID)
-        : resolveDefaultZalouserAccountId(cfg as Hanzo BotConfig);
+        : resolveDefaultZalouserAccountId(cfg as HanzoBotConfig);
     return await promptZalouserAllowFrom({
-      cfg: cfg as Hanzo BotConfig,
+      cfg: cfg as HanzoBotConfig,
       prompter,
       accountId: id,
     });
@@ -209,10 +209,10 @@ const zalouserDmPolicy: ChannelSetupDmPolicy = createTopLevelChannelDmPolicy({
 });
 
 async function promptZalouserQuickstartDmPolicy(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: Parameters<NonNullable<ChannelSetupWizard["prepare"]>>[0]["prompter"];
   accountId: string;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   const { cfg, prompter, accountId } = params;
   const resolved = resolveZalouserAccountSync({ cfg, accountId });
   const existingPolicy = (cfg.channels?.zalouser?.dmPolicy ?? "pairing") as DmPolicy;
@@ -375,7 +375,7 @@ export const zalouserSetupWizard: ChannelSetupWizard = {
     updatePrompt: ({ cfg, accountId }) =>
       Boolean(resolveZalouserAccountSync({ cfg, accountId }).config.groups),
     setPolicy: ({ cfg, accountId, policy }) =>
-      setZalouserGroupPolicy(cfg as Hanzo BotConfig, accountId, policy),
+      setZalouserGroupPolicy(cfg as HanzoBotConfig, accountId, policy),
     resolveAllowlist: async ({ cfg, accountId, entries, prompter }) => {
       if (entries.length === 0) {
         await prompter.note(
@@ -389,7 +389,7 @@ export const zalouserSetupWizard: ChannelSetupWizard = {
         );
         return [];
       }
-      const updatedAccount = resolveZalouserAccountSync({ cfg: cfg as Hanzo BotConfig, accountId });
+      const updatedAccount = resolveZalouserAccountSync({ cfg: cfg as HanzoBotConfig, accountId });
       try {
         const resolved = await resolveZaloGroupsByEntries({
           profile: updatedAccount.profile,
@@ -417,7 +417,7 @@ export const zalouserSetupWizard: ChannelSetupWizard = {
       }
     },
     applyAllowlist: ({ cfg, accountId, resolved }) =>
-      setZalouserGroupAllowlist(cfg as Hanzo BotConfig, accountId, resolved as string[]),
+      setZalouserGroupAllowlist(cfg as HanzoBotConfig, accountId, resolved as string[]),
   },
   finalize: async ({ cfg, accountId, forceAllowFrom, options, prompter }) => {
     let next = cfg;

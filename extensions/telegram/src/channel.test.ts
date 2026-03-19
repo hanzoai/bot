@@ -1,7 +1,7 @@
 import type {
   ChannelAccountSnapshot,
   ChannelGatewayContext,
-  Hanzo BotConfig,
+  HanzoBotConfig,
   PluginRuntime,
 } from "openclaw/plugin-sdk/telegram";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -43,7 +43,7 @@ vi.mock("./monitor.js", async (importOriginal) => {
   };
 });
 
-function createCfg(): Hanzo BotConfig {
+function createCfg(): HanzoBotConfig {
   return {
     channels: {
       telegram: {
@@ -55,11 +55,11 @@ function createCfg(): Hanzo BotConfig {
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 function createStartAccountCtx(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   runtime: ReturnType<typeof createRuntimeEnv>;
 }): ChannelGatewayContext<ResolvedTelegramAccount> {
@@ -126,7 +126,7 @@ function installGatewayRuntime(params?: { probeOk?: boolean; botUsername?: strin
   };
 }
 
-function configureOpsProxyNetwork(cfg: Hanzo BotConfig) {
+function configureOpsProxyNetwork(cfg: HanzoBotConfig) {
   cfg.channels!.telegram!.accounts!.ops = {
     ...cfg.channels!.telegram!.accounts!.ops,
     proxy: "http://127.0.0.1:8888",
@@ -173,7 +173,7 @@ describe("telegramPlugin groups", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     expect(
       telegramPlugin.groups?.resolveRequireMention?.({

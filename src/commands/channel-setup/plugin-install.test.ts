@@ -46,7 +46,7 @@ vi.mock("../../plugins/bundled-sources.js", () => ({
 }));
 
 vi.mock("../../plugins/loader.js", () => ({
-  loadHanzo BotPlugins: vi.fn(),
+  loadHanzoBotPlugins: vi.fn(),
 }));
 
 const clearPluginDiscoveryCache = vi.fn();
@@ -56,8 +56,8 @@ vi.mock("../../plugins/discovery.js", () => ({
 
 import fs from "node:fs";
 import type { ChannelPluginCatalogEntry } from "../../channels/plugins/catalog.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
-import { loadHanzo BotPlugins } from "../../plugins/loader.js";
+import type { HanzoBotConfig } from "../../config/config.js";
+import { loadHanzoBotPlugins } from "../../plugins/loader.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
@@ -103,7 +103,7 @@ async function runInitialValueForChannel(channel: "dev" | "beta") {
   const runtime = makeRuntime();
   const select = vi.fn((async <T extends string>() => "skip" as T) as WizardPrompter["select"]);
   const prompter = makePrompter({ select: select as unknown as WizardPrompter["select"] });
-  const cfg: Hanzo BotConfig = { update: { channel } };
+  const cfg: HanzoBotConfig = { update: { channel } };
   mockRepoLocalPathExists();
 
   await ensureChannelSetupPluginInstalled({
@@ -131,7 +131,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
     const prompter = makePrompter({
       select: vi.fn(async () => "npm") as WizardPrompter["select"],
     });
-    const cfg: Hanzo BotConfig = { plugins: { allow: ["other"] } };
+    const cfg: HanzoBotConfig = { plugins: { allow: ["other"] } };
     vi.mocked(fs.existsSync).mockReturnValue(false);
     installPluginFromNpmSpec.mockResolvedValue({
       ok: true,
@@ -163,7 +163,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
     const prompter = makePrompter({
       select: vi.fn(async () => "local") as WizardPrompter["select"],
     });
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
     mockRepoLocalPathExists();
 
     const result = await ensureChannelSetupPluginInstalled({
@@ -182,7 +182,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
     const prompter = makePrompter({
       select: vi.fn(async () => "local") as WizardPrompter["select"],
     });
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
     mockRepoLocalPathExists();
 
     const result = await ensureChannelSetupPluginInstalled({
@@ -213,7 +213,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
     const runtime = makeRuntime();
     const select = vi.fn((async <T extends string>() => "skip" as T) as WizardPrompter["select"]);
     const prompter = makePrompter({ select: select as unknown as WizardPrompter["select"] });
-    const cfg: Hanzo BotConfig = { update: { channel: "beta" } };
+    const cfg: HanzoBotConfig = { update: { channel: "beta" } };
     vi.mocked(fs.existsSync).mockReturnValue(false);
     resolveBundledPluginSources.mockReturnValue(
       new Map([
@@ -257,7 +257,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       note,
       confirm,
     });
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
     mockRepoLocalPathExists();
     installPluginFromNpmSpec.mockResolvedValue({
       ok: false,
@@ -278,7 +278,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("clears discovery cache before reloading the setup plugin registry", () => {
     const runtime = makeRuntime();
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
 
     reloadChannelSetupPluginRegistry({
       cfg,
@@ -287,7 +287,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
     });
 
     expect(clearPluginDiscoveryCache).toHaveBeenCalledTimes(1);
-    expect(loadHanzo BotPlugins).toHaveBeenCalledWith(
+    expect(loadHanzoBotPlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         config: cfg,
         workspaceDir: "/tmp/openclaw-workspace",
@@ -296,13 +296,13 @@ describe("ensureChannelSetupPluginInstalled", () => {
       }),
     );
     expect(clearPluginDiscoveryCache.mock.invocationCallOrder[0]).toBeLessThan(
-      vi.mocked(loadHanzo BotPlugins).mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
+      vi.mocked(loadHanzoBotPlugins).mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
     );
   });
 
   it("scopes channel reloads when setup starts from an empty registry", () => {
     const runtime = makeRuntime();
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
 
     reloadChannelSetupPluginRegistryForChannel({
       cfg,
@@ -311,7 +311,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       workspaceDir: "/tmp/openclaw-workspace",
     });
 
-    expect(loadHanzo BotPlugins).toHaveBeenCalledWith(
+    expect(loadHanzoBotPlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         config: cfg,
         workspaceDir: "/tmp/openclaw-workspace",
@@ -324,7 +324,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("keeps full reloads when the active plugin registry is already populated", () => {
     const runtime = makeRuntime();
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
     const registry = createEmptyPluginRegistry();
     registry.plugins.push({
       id: "loaded",
@@ -358,7 +358,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       workspaceDir: "/tmp/openclaw-workspace",
     });
 
-    expect(loadHanzo BotPlugins).toHaveBeenCalledWith(
+    expect(loadHanzoBotPlugins).toHaveBeenCalledWith(
       expect.not.objectContaining({
         onlyPluginIds: expect.anything(),
       }),
@@ -367,7 +367,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("can load a channel-scoped snapshot without activating the global registry", () => {
     const runtime = makeRuntime();
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
 
     loadChannelSetupPluginRegistrySnapshotForChannel({
       cfg,
@@ -376,7 +376,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       workspaceDir: "/tmp/openclaw-workspace",
     });
 
-    expect(loadHanzo BotPlugins).toHaveBeenCalledWith(
+    expect(loadHanzoBotPlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         config: cfg,
         workspaceDir: "/tmp/openclaw-workspace",
@@ -390,7 +390,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
 
   it("scopes snapshots by plugin id when channel and plugin ids differ", () => {
     const runtime = makeRuntime();
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
 
     loadChannelSetupPluginRegistrySnapshotForChannel({
       cfg,
@@ -400,7 +400,7 @@ describe("ensureChannelSetupPluginInstalled", () => {
       workspaceDir: "/tmp/openclaw-workspace",
     });
 
-    expect(loadHanzo BotPlugins).toHaveBeenCalledWith(
+    expect(loadHanzoBotPlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         config: cfg,
         workspaceDir: "/tmp/openclaw-workspace",

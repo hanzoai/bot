@@ -2,7 +2,7 @@ import { Type } from "@sinclair/typebox";
 import { normalizeGroupActivation } from "../../auto-reply/group-activation.js";
 import { getFollowupQueueDepth, resolveQueueSettings } from "../../auto-reply/reply/queue.js";
 import { buildStatusMessage } from "../../auto-reply/status.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { loadConfig } from "../../config/config.js";
 import {
   loadSessionStore,
@@ -92,7 +92,7 @@ function resolveSessionEntry(params: {
 }
 
 function resolveSessionKeyFromSessionId(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   sessionId: string;
   agentId?: string;
 }): string | null {
@@ -110,7 +110,7 @@ function resolveSessionKeyFromSessionId(params: {
 }
 
 async function resolveModelOverride(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   raw: string;
   sessionEntry?: SessionEntry;
   agentId: string;
@@ -175,7 +175,7 @@ async function resolveModelOverride(params: {
 
 export function createSessionStatusTool(opts?: {
   agentSessionKey?: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   sandboxed?: boolean;
 }): AnyAgentTool {
   return {

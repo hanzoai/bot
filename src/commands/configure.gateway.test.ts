@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 
 const mocks = vi.hoisted(() => ({
@@ -61,7 +61,7 @@ function makeRuntime(): RuntimeEnv {
 async function runGatewayPrompt(params: {
   selectQueue: string[];
   textQueue: Array<string | undefined>;
-  baseConfig?: Hanzo BotConfig;
+  baseConfig?: HanzoBotConfig;
   randomToken?: string;
   confirmResult?: boolean;
   authConfigFactory?: (input: Record<string, unknown>) => Record<string, unknown>;

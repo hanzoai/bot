@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { loadModelCatalog } from "../agents/model-catalog.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { withTempHome as withTempHomeHarness } from "../config/home-env.test-harness.js";
 import { getReplyFromConfig } from "./reply.js";
 
@@ -47,7 +47,7 @@ function createTelegramMessage(messageSid: string) {
   } as const;
 }
 
-function createReplyConfig(home: string, streamMode?: "block"): Hanzo BotConfig {
+function createReplyConfig(home: string, streamMode?: "block"): HanzoBotConfig {
   return {
     agents: {
       defaults: {

@@ -3,7 +3,7 @@ import {
   validateConfigObjectWithPlugins,
   writeConfigFile,
 } from "../../config/config.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import type { PluginRecord } from "../../plugins/registry.js";
 import {
@@ -30,7 +30,7 @@ function renderJsonBlock(label: string, value: unknown): string {
 
 function buildPluginInspectJson(params: {
   id: string;
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   report: PluginStatusReport;
 }): {
   inspect: NonNullable<ReturnType<typeof buildPluginInspectReport>>;
@@ -61,7 +61,7 @@ function buildPluginInspectJson(params: {
 }
 
 function buildAllPluginInspectJson(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   report: PluginStatusReport;
 }): Array<{
   inspect: ReturnType<typeof buildAllPluginInspectReports>[number];
@@ -125,7 +125,7 @@ async function loadPluginCommandState(workspaceDir: string): Promise<
   | {
       ok: true;
       path: string;
-      config: Hanzo BotConfig;
+      config: HanzoBotConfig;
       report: PluginStatusReport;
     }
   | { ok: false; path: string; error: string }

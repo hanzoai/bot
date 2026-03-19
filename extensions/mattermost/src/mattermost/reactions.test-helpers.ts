@@ -1,7 +1,7 @@
 import { expect, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../runtime-api.js";
+import type { HanzoBotConfig } from "../../runtime-api.js";
 
-export function createMattermostTestConfig(): Hanzo BotConfig {
+export function createMattermostTestConfig(): HanzoBotConfig {
   return {
     channels: {
       mattermost: {

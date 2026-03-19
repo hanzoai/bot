@@ -9,7 +9,7 @@ export {
 } from "./windows-spawn.js";
 export type {
   AnyAgentTool,
-  Hanzo BotPluginApi,
-  Hanzo BotPluginToolContext,
-  Hanzo BotPluginToolFactory,
+  HanzoBotPluginApi,
+  HanzoBotPluginToolContext,
+  HanzoBotPluginToolFactory,
 } from "../plugins/types.js";

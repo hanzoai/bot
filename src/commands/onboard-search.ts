@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   DEFAULT_SECRET_PROVIDER_ALIAS,
   type SecretInput,
@@ -13,9 +13,9 @@ import type { WizardPrompter } from "../wizard/prompts.js";
 import type { SecretInputMode } from "./onboard-types.js";
 
 export type SearchProvider = NonNullable<
-  NonNullable<NonNullable<NonNullable<Hanzo BotConfig["tools"]>["web"]>["search"]>["provider"]
+  NonNullable<NonNullable<NonNullable<HanzoBotConfig["tools"]>["web"]>["search"]>["provider"]
 >;
-type SearchConfig = NonNullable<NonNullable<NonNullable<Hanzo BotConfig["tools"]>["web"]>["search"]>;
+type SearchConfig = NonNullable<NonNullable<NonNullable<HanzoBotConfig["tools"]>["web"]>["search"]>;
 type MutableSearchConfig = SearchConfig & Record<string, unknown>;
 
 type SearchProviderEntry = {
@@ -47,7 +47,7 @@ export function hasKeyInEnv(entry: SearchProviderEntry): boolean {
   return entry.envKeys.some((k) => Boolean(process.env[k]?.trim()));
 }
 
-function rawKeyValue(config: Hanzo BotConfig, provider: SearchProvider): unknown {
+function rawKeyValue(config: HanzoBotConfig, provider: SearchProvider): unknown {
   const search = config.tools?.web?.search;
   const entry = resolvePluginWebSearchProviders({
     config,
@@ -58,14 +58,14 @@ function rawKeyValue(config: Hanzo BotConfig, provider: SearchProvider): unknown
 
 /** Returns the plaintext key string, or undefined for SecretRefs/missing. */
 export function resolveExistingKey(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   provider: SearchProvider,
 ): string | undefined {
   return normalizeSecretInputString(rawKeyValue(config, provider));
 }
 
 /** Returns true if a key is configured (plaintext string or SecretRef). */
-export function hasExistingKey(config: Hanzo BotConfig, provider: SearchProvider): boolean {
+export function hasExistingKey(config: HanzoBotConfig, provider: SearchProvider): boolean {
   return hasConfiguredSecretInput(rawKeyValue(config, provider));
 }
 
@@ -95,10 +95,10 @@ function resolveSearchSecretInput(
 }
 
 export function applySearchKey(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   provider: SearchProvider,
   key: SecretInput,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const providerEntry = resolvePluginWebSearchProviders({
     config,
     bundledAllowlistCompat: true,
@@ -107,7 +107,7 @@ export function applySearchKey(
   if (providerEntry) {
     providerEntry.setCredentialValue(search, key);
   }
-  const nextBase: Hanzo BotConfig = {
+  const nextBase: HanzoBotConfig = {
     ...config,
     tools: {
       ...config.tools,
@@ -117,7 +117,7 @@ export function applySearchKey(
   return providerEntry?.applySelectionConfig?.(nextBase) ?? nextBase;
 }
 
-function applyProviderOnly(config: Hanzo BotConfig, provider: SearchProvider): Hanzo BotConfig {
+function applyProviderOnly(config: HanzoBotConfig, provider: SearchProvider): HanzoBotConfig {
   const providerEntry = resolvePluginWebSearchProviders({
     config,
     bundledAllowlistCompat: true,
@@ -127,7 +127,7 @@ function applyProviderOnly(config: Hanzo BotConfig, provider: SearchProvider): H
     provider,
     enabled: true,
   };
-  const nextBase: Hanzo BotConfig = {
+  const nextBase: HanzoBotConfig = {
     ...config,
     tools: {
       ...config.tools,
@@ -140,7 +140,7 @@ function applyProviderOnly(config: Hanzo BotConfig, provider: SearchProvider): H
   return providerEntry?.applySelectionConfig?.(nextBase) ?? nextBase;
 }
 
-function preserveDisabledState(original: Hanzo BotConfig, result: Hanzo BotConfig): Hanzo BotConfig {
+function preserveDisabledState(original: HanzoBotConfig, result: HanzoBotConfig): HanzoBotConfig {
   if (original.tools?.web?.search?.enabled !== false) {
     return result;
   }
@@ -159,11 +159,11 @@ export type SetupSearchOptions = {
 };
 
 export async function setupSearch(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   _runtime: RuntimeEnv,
   prompter: WizardPrompter,
   opts?: SetupSearchOptions,
-): Promise<Hanzo BotConfig> {
+): Promise<HanzoBotConfig> {
   await prompter.note(
     [
       "Web search lets your agent look things up online.",

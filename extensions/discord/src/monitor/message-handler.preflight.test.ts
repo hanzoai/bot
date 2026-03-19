@@ -58,7 +58,7 @@ function createThreadBinding(
 }
 
 function createPreflightArgs(params: {
-  cfg: import("../../../../src/config/config.js").Hanzo BotConfig;
+  cfg: import("../../../../src/config/config.js").HanzoBotConfig;
   discordConfig: DiscordConfig;
   data: DiscordMessageEvent;
   client: DiscordClient;
@@ -150,7 +150,7 @@ async function runGuildPreflight(params: {
   guildId: string;
   message: import("@buape/carbon").Message;
   discordConfig: DiscordConfig;
-  cfg?: import("../../../../src/config/config.js").Hanzo BotConfig;
+  cfg?: import("../../../../src/config/config.js").HanzoBotConfig;
   guildEntries?: Parameters<typeof preflightDiscordMessage>[0]["guildEntries"];
   includeGuildObject?: boolean;
 }) {
@@ -467,7 +467,7 @@ describe("preflightDiscordMessage", () => {
       createPreflightArgs({
         cfg: {
           ...DEFAULT_PREFLIGHT_CFG,
-        } as import("../../../../src/config/config.js").Hanzo BotConfig,
+        } as import("../../../../src/config/config.js").HanzoBotConfig,
         discordConfig: {
           allowBots: true,
         } as DiscordConfig,
@@ -726,7 +726,7 @@ describe("preflightDiscordMessage", () => {
               mentionPatterns: ["@hanzo/bot"],
             },
           },
-        } as import("../../../../src/config/config.js").Hanzo BotConfig,
+        } as import("../../../../src/config/config.js").HanzoBotConfig,
         discordConfig: {} as DiscordConfig,
         data: createGuildEvent({
           channelId,

@@ -1,6 +1,6 @@
 import { Type } from "@sinclair/typebox";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { defaultRuntime } from "../../runtime.js";
 import {
@@ -80,14 +80,14 @@ describe("message action capability checks", () => {
   it("aggregates capabilities across plugins", () => {
     activateMessageActionTestRegistry();
 
-    expect(listChannelMessageCapabilities({} as Hanzo BotConfig).toSorted()).toEqual([
+    expect(listChannelMessageCapabilities({} as HanzoBotConfig).toSorted()).toEqual([
       "buttons",
       "cards",
       "interactive",
     ]);
-    expect(channelSupportsMessageCapability({} as Hanzo BotConfig, "interactive")).toBe(true);
-    expect(channelSupportsMessageCapability({} as Hanzo BotConfig, "buttons")).toBe(true);
-    expect(channelSupportsMessageCapability({} as Hanzo BotConfig, "cards")).toBe(true);
+    expect(channelSupportsMessageCapability({} as HanzoBotConfig, "interactive")).toBe(true);
+    expect(channelSupportsMessageCapability({} as HanzoBotConfig, "buttons")).toBe(true);
+    expect(channelSupportsMessageCapability({} as HanzoBotConfig, "cards")).toBe(true);
   });
 
   it("checks per-channel capabilities", () => {
@@ -95,47 +95,47 @@ describe("message action capability checks", () => {
 
     expect(
       listChannelMessageCapabilitiesForChannel({
-        cfg: {} as Hanzo BotConfig,
+        cfg: {} as HanzoBotConfig,
         channel: "discord",
       }),
     ).toEqual(["interactive", "buttons"]);
     expect(
       listChannelMessageCapabilitiesForChannel({
-        cfg: {} as Hanzo BotConfig,
+        cfg: {} as HanzoBotConfig,
         channel: "telegram",
       }),
     ).toEqual(["cards"]);
     expect(
       channelSupportsMessageCapabilityForChannel(
-        { cfg: {} as Hanzo BotConfig, channel: "discord" },
+        { cfg: {} as HanzoBotConfig, channel: "discord" },
         "interactive",
       ),
     ).toBe(true);
     expect(
       channelSupportsMessageCapabilityForChannel(
-        { cfg: {} as Hanzo BotConfig, channel: "telegram" },
+        { cfg: {} as HanzoBotConfig, channel: "telegram" },
         "interactive",
       ),
     ).toBe(false);
     expect(
       channelSupportsMessageCapabilityForChannel(
-        { cfg: {} as Hanzo BotConfig, channel: "discord" },
+        { cfg: {} as HanzoBotConfig, channel: "discord" },
         "buttons",
       ),
     ).toBe(true);
     expect(
       channelSupportsMessageCapabilityForChannel(
-        { cfg: {} as Hanzo BotConfig, channel: "telegram" },
+        { cfg: {} as HanzoBotConfig, channel: "telegram" },
         "buttons",
       ),
     ).toBe(false);
     expect(
       channelSupportsMessageCapabilityForChannel(
-        { cfg: {} as Hanzo BotConfig, channel: "telegram" },
+        { cfg: {} as HanzoBotConfig, channel: "telegram" },
         "cards",
       ),
     ).toBe(true);
-    expect(channelSupportsMessageCapabilityForChannel({ cfg: {} as Hanzo BotConfig }, "cards")).toBe(
+    expect(channelSupportsMessageCapabilityForChannel({ cfg: {} as HanzoBotConfig }, "cards")).toBe(
       false,
     );
   });
@@ -157,7 +157,7 @@ describe("message action capability checks", () => {
 
     expect(
       listChannelMessageCapabilitiesForChannel({
-        cfg: {} as Hanzo BotConfig,
+        cfg: {} as HanzoBotConfig,
         channel: "tg",
       }),
     ).toEqual(["cards"]);
@@ -189,11 +189,11 @@ describe("message action capability checks", () => {
       createTestRegistry([{ pluginId: "discord", source: "test", plugin: unifiedPlugin }]),
     );
 
-    expect(listChannelMessageActions({} as Hanzo BotConfig)).toEqual(["send", "broadcast", "react"]);
-    expect(listChannelMessageCapabilities({} as Hanzo BotConfig)).toEqual(["interactive"]);
+    expect(listChannelMessageActions({} as HanzoBotConfig)).toEqual(["send", "broadcast", "react"]);
+    expect(listChannelMessageCapabilities({} as HanzoBotConfig)).toEqual(["interactive"]);
     expect(
       resolveChannelMessageToolSchemaProperties({
-        cfg: {} as Hanzo BotConfig,
+        cfg: {} as HanzoBotConfig,
         channel: "discord",
       }),
     ).toHaveProperty("components");
@@ -219,12 +219,12 @@ describe("message action capability checks", () => {
       createTestRegistry([{ pluginId: "discord", source: "test", plugin: crashingPlugin }]),
     );
 
-    expect(listChannelMessageActions({} as Hanzo BotConfig)).toEqual(["send", "broadcast"]);
-    expect(listChannelMessageCapabilities({} as Hanzo BotConfig)).toEqual([]);
+    expect(listChannelMessageActions({} as HanzoBotConfig)).toEqual(["send", "broadcast"]);
+    expect(listChannelMessageCapabilities({} as HanzoBotConfig)).toEqual([]);
     expect(errorSpy).toHaveBeenCalledTimes(1);
 
-    expect(listChannelMessageActions({} as Hanzo BotConfig)).toEqual(["send", "broadcast"]);
-    expect(listChannelMessageCapabilities({} as Hanzo BotConfig)).toEqual([]);
+    expect(listChannelMessageActions({} as HanzoBotConfig)).toEqual(["send", "broadcast"]);
+    expect(listChannelMessageCapabilities({} as HanzoBotConfig)).toEqual([]);
     expect(errorSpy).toHaveBeenCalledTimes(1);
   });
 });

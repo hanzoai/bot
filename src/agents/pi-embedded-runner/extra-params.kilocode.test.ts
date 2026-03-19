@@ -1,6 +1,6 @@
 import type { Model } from "@mariozechner/pi-ai";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { captureEnv } from "../../test-utils/env.js";
 import { runExtraParamsCase } from "./extra-params.test-support.js";
 
@@ -12,13 +12,13 @@ const TEST_CFG = {
       },
     },
   },
-} satisfies Hanzo BotConfig;
+} satisfies HanzoBotConfig;
 
 function applyAndCapture(params: {
   provider: string;
   modelId: string;
   callerHeaders?: Record<string, string>;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
 }) {
   return runExtraParamsCase({
     applyModelId: params.modelId,
@@ -35,7 +35,7 @@ function applyAndCapture(params: {
 }
 
 function applyAndCaptureReasoning(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   modelId: string;
   initialPayload?: Record<string, unknown>;
   thinkingLevel?: "minimal" | "low" | "medium" | "high";

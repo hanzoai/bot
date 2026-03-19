@@ -1,8 +1,8 @@
 import { normalizeSafeBinProfileFixtures } from "../infra/exec-safe-bin-policy.js";
 import { normalizeTrustedSafeBinDirs } from "../infra/exec-safe-bin-trust.js";
-import type { Hanzo BotConfig } from "./types.js";
+import type { HanzoBotConfig } from "./types.js";
 
-export function normalizeExecSafeBinProfilesInConfig(cfg: Hanzo BotConfig): void {
+export function normalizeExecSafeBinProfilesInConfig(cfg: HanzoBotConfig): void {
   const normalizeExec = (exec: unknown) => {
     if (!exec || typeof exec !== "object" || Array.isArray(exec)) {
       return;

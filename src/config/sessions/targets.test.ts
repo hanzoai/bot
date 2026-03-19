@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { withTempHome } from "../../../test/helpers/temp-home.js";
-import type { Hanzo BotConfig } from "../config.js";
+import type { HanzoBotConfig } from "../config.js";
 import {
   resolveAllAgentSessionStoreTargets,
   resolveAllAgentSessionStoreTargetsSync,
@@ -29,7 +29,7 @@ async function createAgentSessionStores(
   return storePaths;
 }
 
-function createCustomRootCfg(customRoot: string, defaultAgentId = "ops"): Hanzo BotConfig {
+function createCustomRootCfg(customRoot: string, defaultAgentId = "ops"): HanzoBotConfig {
   return {
     session: {
       store: path.join(customRoot, "agents", "{agentId}", "sessions", "sessions.json"),
@@ -65,19 +65,19 @@ function expectTargetsToContainStores(
 const discoveryResolvers = [
   {
     label: "async",
-    resolve: async (cfg: Hanzo BotConfig, env: NodeJS.ProcessEnv) =>
+    resolve: async (cfg: HanzoBotConfig, env: NodeJS.ProcessEnv) =>
       await resolveAllAgentSessionStoreTargets(cfg, { env }),
   },
   {
     label: "sync",
-    resolve: async (cfg: Hanzo BotConfig, env: NodeJS.ProcessEnv) =>
+    resolve: async (cfg: HanzoBotConfig, env: NodeJS.ProcessEnv) =>
       resolveAllAgentSessionStoreTargetsSync(cfg, { env }),
   },
 ] as const;
 
 describe("resolveSessionStoreTargets", () => {
   it("resolves all configured agent stores", () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       session: {
         store: "~/.hanzo/bot/agents/{agentId}/sessions/sessions.json",
       },
@@ -105,7 +105,7 @@ describe("resolveSessionStoreTargets", () => {
   });
 
   it("dedupes shared store paths for --all-agents", () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       session: {
         store: "/tmp/shared-sessions.json",
       },
@@ -120,7 +120,7 @@ describe("resolveSessionStoreTargets", () => {
   });
 
   it("rejects unknown agent ids", () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       agents: {
         list: [{ id: "main", default: true }, { id: "work" }],
       },
@@ -145,7 +145,7 @@ describe("resolveAllAgentSessionStoreTargets", () => {
       const stateDir = path.join(home, ".openclaw");
       const storePaths = await createAgentSessionStores(stateDir, ["ops", "retired"]);
 
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         agents: {
           list: [{ id: "ops", default: true }],
         },
@@ -199,7 +199,7 @@ describe("resolveAllAgentSessionStoreTargets", () => {
         ...process.env,
         BOT_STATE_DIR: envStateDir,
       };
-      const cfg: Hanzo BotConfig = {};
+      const cfg: HanzoBotConfig = {};
       const mainStorePath = await resolveRealStorePath(mainSessionsDir);
       const retiredStorePath = await resolveRealStorePath(retiredSessionsDir);
 
@@ -277,7 +277,7 @@ describe("resolveAllAgentSessionStoreTargets", () => {
       await fs.writeFile(path.join(mainSessionsDir, "sessions.json"), "{}", "utf8");
       await fs.writeFile(path.join(junkSessionsDir, "sessions.json"), "{}", "utf8");
 
-      const cfg: Hanzo BotConfig = {};
+      const cfg: HanzoBotConfig = {};
       const mainStorePath = await resolveRealStorePath(mainSessionsDir);
       const targets = await resolveAllAgentSessionStoreTargets(cfg, { env: process.env });
 

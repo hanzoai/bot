@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { withTempHome } from "../../config/home-env.test-harness.js";
 import { handleCommands } from "./commands-core.js";
 import { createCommandWorkspaceHarness } from "./commands-filesystem.test-support.js";
@@ -7,7 +7,7 @@ import { buildCommandTestParams } from "./commands.test-harness.js";
 
 const workspaceHarness = createCommandWorkspaceHarness("openclaw-command-mcp-");
 
-function buildCfg(): Hanzo BotConfig {
+function buildCfg(): HanzoBotConfig {
   return {
     commands: {
       text: true,

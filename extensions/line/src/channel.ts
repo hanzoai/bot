@@ -20,7 +20,7 @@ import {
   type ChannelStatusIssue,
   type LineConfig,
   type LineChannelData,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type ResolvedLineAccount,
 } from "../api.js";
 import { lineConfigAdapter } from "./config-adapter.js";
@@ -458,7 +458,7 @@ export const linePlugin: ChannelPlugin<ResolvedLineAccount> = {
     },
     logoutAccount: async ({ accountId, cfg }) => {
       const envToken = process.env.LINE_CHANNEL_ACCESS_TOKEN?.trim() ?? "";
-      const nextCfg = { ...cfg } as Hanzo BotConfig;
+      const nextCfg = { ...cfg } as HanzoBotConfig;
       const lineConfig = (cfg.channels?.line ?? {}) as LineConfig;
       const nextLine = { ...lineConfig };
       let cleared = false;

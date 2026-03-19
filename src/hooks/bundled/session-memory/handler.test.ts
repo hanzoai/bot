@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import { writeWorkspaceFile } from "../../../test-helpers/workspace.js";
 import type { HookHandler } from "../../hooks.js";
 import { createHookEvent } from "../../hooks.js";
@@ -63,7 +63,7 @@ function createMockSessionContent(
 async function runNewWithPreviousSessionEntry(params: {
   tempDir: string;
   previousSessionEntry: { sessionId: string; sessionFile?: string };
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   action?: "new" | "reset";
   sessionKey?: string;
   workspaceDirOverride?: string;
@@ -77,7 +77,7 @@ async function runNewWithPreviousSessionEntry(params: {
         params.cfg ??
         ({
           agents: { defaults: { workspace: params.tempDir } },
-        } satisfies Hanzo BotConfig),
+        } satisfies HanzoBotConfig),
       previousSessionEntry: params.previousSessionEntry,
       ...(params.workspaceDirOverride ? { workspaceDir: params.workspaceDirOverride } : {}),
     },
@@ -94,7 +94,7 @@ async function runNewWithPreviousSessionEntry(params: {
 
 async function runNewWithPreviousSession(params: {
   sessionContent: string;
-  cfg?: (tempDir: string) => Hanzo BotConfig;
+  cfg?: (tempDir: string) => HanzoBotConfig;
   action?: "new" | "reset";
 }): Promise<{ tempDir: string; files: string[]; memoryContent: string }> {
   const tempDir = await createCaseWorkspace("workspace");
@@ -111,7 +111,7 @@ async function runNewWithPreviousSession(params: {
     params.cfg?.(tempDir) ??
     ({
       agents: { defaults: { workspace: tempDir } },
-    } satisfies Hanzo BotConfig);
+    } satisfies HanzoBotConfig);
 
   const { files, memoryContent } = await runNewWithPreviousSessionEntry({
     tempDir,
@@ -125,7 +125,7 @@ async function runNewWithPreviousSession(params: {
   return { tempDir, files, memoryContent };
 }
 
-function makeSessionMemoryConfig(tempDir: string, messages?: number): Hanzo BotConfig {
+function makeSessionMemoryConfig(tempDir: string, messages?: number): HanzoBotConfig {
   return {
     agents: { defaults: { workspace: tempDir } },
     ...(typeof messages === "number"
@@ -139,7 +139,7 @@ function makeSessionMemoryConfig(tempDir: string, messages?: number): Hanzo BotC
           },
         }
       : {}),
-  } satisfies Hanzo BotConfig;
+  } satisfies HanzoBotConfig;
 }
 
 async function createSessionMemoryWorkspace(params?: {
@@ -272,7 +272,7 @@ describe("session-memory hook", () => {
           defaults: { workspace: mainWorkspace },
           list: [{ id: "navi", workspace: naviWorkspace }],
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       sessionKey: "agent:main:main",
       workspaceDirOverride: naviWorkspace,
       previousSessionEntry: {

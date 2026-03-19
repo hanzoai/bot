@@ -1,6 +1,6 @@
 import type { App } from "@slack/bolt";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../../src/config/config.js";
 import type { RuntimeEnv } from "../../../../src/runtime.js";
 import type { SlackMessageEvent } from "../types.js";
 import { resolveSlackChannelConfig } from "./channel-config.js";
@@ -110,7 +110,7 @@ describe("resolveSlackChannelConfig", () => {
 });
 
 const baseParams = () => ({
-  cfg: {} as Hanzo BotConfig,
+  cfg: {} as HanzoBotConfig,
   accountId: "default",
   botToken: "token",
   app: { client: {} } as App,

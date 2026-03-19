@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { setLoggerOverride } from "../logging/logger.js";
 import { loggingState } from "../logging/state.js";
 import { stripAnsi } from "../terminal/ansi.js";
@@ -54,7 +54,7 @@ describe("loader", () => {
 
   function createEnabledHooksConfig(
     handlers?: Array<{ event: string; module: string; export?: string }>,
-  ): Hanzo BotConfig {
+  ): HanzoBotConfig {
     return {
       hooks: {
         internal: handlers ? { enabled: true, handlers } : { enabled: true },
@@ -85,14 +85,14 @@ describe("loader", () => {
         },
       ]);
 
-    const expectNoCommandHookRegistration = async (cfg: Hanzo BotConfig) => {
+    const expectNoCommandHookRegistration = async (cfg: HanzoBotConfig) => {
       const count = await loadInternalHooks(cfg, tmpDir);
       expect(count).toBe(0);
       expect(getRegisteredEventKeys()).not.toContain("command:new");
     };
 
     it("should return 0 when hooks are not enabled", async () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         hooks: {
           internal: {
             enabled: false,
@@ -105,7 +105,7 @@ describe("loader", () => {
     });
 
     it("should return 0 when hooks config is missing", async () => {
-      const cfg: Hanzo BotConfig = {};
+      const cfg: HanzoBotConfig = {};
       const count = await loadInternalHooks(cfg, tmpDir);
       expect(count).toBe(0);
     });

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
-const loadConfig = vi.hoisted(() => vi.fn(() => ({}) as Hanzo BotConfig));
+const loadConfig = vi.hoisted(() => vi.fn(() => ({}) as HanzoBotConfig));
 const resolveDefaultAgentId = vi.hoisted(() => vi.fn(() => "main"));
 const getMemorySearchManager = vi.hoisted(() => vi.fn());
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { PluginWebSearchProviderEntry } from "../plugins/types.js";
 import * as webSearchProviders from "../plugins/web-search-providers.js";
 import * as secretResolve from "./resolve.js";
@@ -16,8 +16,8 @@ vi.mock("../plugins/web-search-providers.js", () => ({
   resolvePluginWebSearchProviders: resolvePluginWebSearchProvidersMock,
 }));
 
-function asConfig(value: unknown): Hanzo BotConfig {
-  return value as Hanzo BotConfig;
+function asConfig(value: unknown): HanzoBotConfig {
+  return value as HanzoBotConfig;
 }
 
 function providerPluginId(provider: ProviderUnderTest): string {
@@ -44,7 +44,7 @@ function ensureRecord(target: Record<string, unknown>, key: string): Record<stri
 }
 
 function setConfiguredProviderKey(
-  configTarget: Hanzo BotConfig,
+  configTarget: HanzoBotConfig,
   pluginId: string,
   value: unknown,
 ): void {
@@ -106,7 +106,7 @@ function buildTestWebSearchProviders(): PluginWebSearchProviderEntry[] {
   ];
 }
 
-async function runRuntimeWebTools(params: { config: Hanzo BotConfig; env?: NodeJS.ProcessEnv }) {
+async function runRuntimeWebTools(params: { config: HanzoBotConfig; env?: NodeJS.ProcessEnv }) {
   const sourceConfig = structuredClone(params.config);
   const resolvedConfig = structuredClone(params.config);
   const context = createResolverContext({
@@ -124,7 +124,7 @@ async function runRuntimeWebTools(params: { config: Hanzo BotConfig; env?: NodeJ
 function createProviderSecretRefConfig(
   provider: ProviderUnderTest,
   envRefId: string,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return asConfig({
     tools: {
       web: {
@@ -149,7 +149,7 @@ function createProviderSecretRefConfig(
   });
 }
 
-function readProviderKey(config: Hanzo BotConfig, provider: ProviderUnderTest): unknown {
+function readProviderKey(config: HanzoBotConfig, provider: ProviderUnderTest): unknown {
   const pluginConfig = config.plugins?.entries?.[providerPluginId(provider)]?.config as
     | { webSearch?: { apiKey?: unknown } }
     | undefined;

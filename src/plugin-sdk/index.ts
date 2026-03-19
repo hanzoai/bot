@@ -40,8 +40,8 @@ export type {
 export type {
   AnyAgentTool,
   MediaUnderstandingProviderPlugin,
-  Hanzo BotPluginApi,
-  Hanzo BotPluginConfigSchema,
+  HanzoBotPluginApi,
+  HanzoBotPluginConfigSchema,
   PluginLogger,
   ProviderAuthContext,
   ProviderAuthResult,
@@ -54,9 +54,9 @@ export type {
   SubagentRunParams,
   SubagentRunResult,
 } from "../plugins/runtime/types.js";
-export type { Hanzo BotConfig } from "../config/config.js";
-/** @deprecated Use Hanzo BotConfig instead */
-export type { Hanzo BotConfig as ClawdbotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
+/** @deprecated Use HanzoBotConfig instead */
+export type { HanzoBotConfig as ClawdbotConfig } from "../config/config.js";
 export * from "./image-generation.js";
 export type { SecretInput, SecretRef } from "../config/types.secrets.js";
 export type { RuntimeEnv } from "../runtime.js";

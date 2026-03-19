@@ -5,7 +5,7 @@ import {
   resolveStateDir,
 } from "../../config/config.js";
 import type {
-  Hanzo BotConfig,
+  HanzoBotConfig,
   GatewayBindMode,
   GatewayControlUiConfig,
 } from "../../config/types.js";
@@ -60,8 +60,8 @@ type PortStatusSummary = {
 
 type DaemonConfigContext = {
   mergedDaemonEnv: Record<string, string | undefined>;
-  cliCfg: Hanzo BotConfig;
-  daemonCfg: Hanzo BotConfig;
+  cliCfg: HanzoBotConfig;
+  daemonCfg: HanzoBotConfig;
   cliConfigSummary: ConfigSummary;
   daemonConfigSummary: ConfigSummary;
   configMismatch: boolean;
@@ -188,8 +188,8 @@ async function loadDaemonConfigContext(
 }
 
 async function resolveGatewayStatusSummary(params: {
-  daemonCfg: Hanzo BotConfig;
-  cliCfg: Hanzo BotConfig;
+  daemonCfg: HanzoBotConfig;
+  cliCfg: HanzoBotConfig;
   mergedDaemonEnv: Record<string, string | undefined>;
   commandProgramArguments?: string[];
   rpcUrlOverride?: string;
