@@ -8,6 +8,7 @@ import {
 import { createServer as createHttpsServer } from "node:https";
 import type { TlsOptions } from "node:tls";
 import { handleSlackHttpRequest } from "openclaw/plugin-sdk/slack";
+import { VERSION } from "../version.js";
 import type { WebSocketServer } from "ws";
 import { resolveAgentAvatar } from "../agents/identity-avatar.js";
 import { CANVAS_WS_PATH, handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
@@ -74,6 +75,7 @@ import type { GatewayWsClient } from "./server/ws-types.js";
 import { handleSessionKillHttpRequest } from "./session-kill-http.js";
 import { handleSessionHistoryHttpRequest } from "./sessions-history-http.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
+import { handleVncHttpRequest } from "./vnc-http.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
 
@@ -251,7 +253,13 @@ async function handleGatewayProbeRequest(
     }
   } else {
     statusCode = 200;
-    body = JSON.stringify({ ok: true, status });
+    const uptimeMs = Math.round(process.uptime() * 1000);
+    body = JSON.stringify({
+      status: "ok",
+      version: VERSION,
+      uptime: uptimeMs,
+      gateway: { mode: "local", auth: resolvedAuth.mode },
+    });
   }
   res.statusCode = statusCode;
   res.end(method === "HEAD" ? undefined : body);
@@ -816,6 +824,16 @@ export function createGatewayHttpServer(opts: {
           name: "sessions-history",
           run: () =>
             handleSessionHistoryHttpRequest(req, res, {
+              auth: resolvedAuth,
+              trustedProxies,
+              allowRealIpFallback,
+              rateLimiter,
+            }),
+        },
+        {
+          name: "vnc",
+          run: () =>
+            handleVncHttpRequest(req, res, {
               auth: resolvedAuth,
               trustedProxies,
               allowRealIpFallback,
