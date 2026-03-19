@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { runCommandWithTimeout } from "../process/exec.js";
 import { defaultRuntime, type RuntimeEnv } from "../runtime.js";
-import { resolveHanzo BotPackageRoot, resolveHanzo BotPackageRootSync } from "./openclaw-root.js";
+import { resolveHanzoBotPackageRoot, resolveHanzoBotPackageRootSync } from "./openclaw-root.js";
 
 const CONTROL_UI_DIST_PATH_SEGMENTS = ["dist", "control-ui", "index.html"] as const;
 
@@ -98,7 +98,7 @@ export async function resolveControlUiDistIndexPath(
     }
   }
 
-  const packageRoot = await resolveHanzo BotPackageRoot({ argv1: normalized, moduleUrl });
+  const packageRoot = await resolveHanzoBotPackageRoot({ argv1: normalized, moduleUrl });
   if (packageRoot) {
     return path.join(packageRoot, "dist", "control-ui", "index.html");
   }
@@ -209,7 +209,7 @@ export function resolveControlUiRootSync(opts: ControlUiRootResolveOptions = {})
       return null;
     }
   })();
-  const packageRoot = resolveHanzo BotPackageRootSync({
+  const packageRoot = resolveHanzoBotPackageRootSync({
     argv1,
     moduleUrl: opts.moduleUrl,
     cwd,
@@ -255,7 +255,7 @@ export function isPackageProvenControlUiRootSync(
 ): boolean {
   const argv1 = opts.argv1 ?? process.argv[1];
   const cwd = opts.cwd ?? process.cwd();
-  const packageRoot = resolveHanzo BotPackageRootSync({
+  const packageRoot = resolveHanzoBotPackageRootSync({
     argv1,
     moduleUrl: opts.moduleUrl,
     cwd,

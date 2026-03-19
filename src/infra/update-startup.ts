@@ -7,7 +7,7 @@ import { resolveStateDir } from "../config/paths.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import { VERSION } from "../version.js";
 import { writeJsonAtomic } from "./json-files.js";
-import { resolveHanzo BotPackageRoot } from "./openclaw-root.js";
+import { resolveHanzoBotPackageRoot } from "./openclaw-root.js";
 import { normalizeUpdateChannel, DEFAULT_PACKAGE_CHANNEL } from "./update-channels.js";
 import { compareSemverStrings, resolveNpmChannelTag, checkUpdateStatus } from "./update-check.js";
 
@@ -344,7 +344,7 @@ export async function runGatewayUpdateCheck(params: {
     }
   }
 
-  const root = await resolveHanzo BotPackageRoot({
+  const root = await resolveHanzoBotPackageRoot({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
     cwd: process.cwd(),

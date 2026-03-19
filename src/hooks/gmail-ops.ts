@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { formatCliCommand } from "../cli/command-format.js";
 import {
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   CONFIG_PATH,
   loadConfig,
   readConfigFileSnapshot,
@@ -197,7 +197,7 @@ export async function runGmailSetup(opts: GmailSetupOptions) {
     true,
   );
 
-  const nextConfig: Hanzo BotConfig = {
+  const nextConfig: HanzoBotConfig = {
     ...baseConfig,
     hooks: {
       ...baseConfig.hooks,

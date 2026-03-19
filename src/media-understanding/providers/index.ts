@@ -1,6 +1,6 @@
 import { normalizeProviderId } from "../../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
-import { loadHanzo BotPlugins } from "../../plugins/loader.js";
+import type { HanzoBotConfig } from "../../config/config.js";
+import { loadHanzoBotPlugins } from "../../plugins/loader.js";
 import { getActivePluginRegistry } from "../../plugins/runtime.js";
 import type { MediaUnderstandingProvider } from "../types.js";
 import { deepgramProvider } from "./deepgram/index.js";
@@ -34,7 +34,7 @@ export function normalizeMediaProviderId(id: string): string {
 
 export function buildMediaUnderstandingRegistry(
   overrides?: Record<string, MediaUnderstandingProvider>,
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
 ): Map<string, MediaUnderstandingProvider> {
   const registry = new Map<string, MediaUnderstandingProvider>();
   for (const provider of PROVIDERS) {
@@ -44,7 +44,7 @@ export function buildMediaUnderstandingRegistry(
   const pluginRegistry =
     (active?.mediaUnderstandingProviders?.length ?? 0) > 0
       ? active
-      : loadHanzo BotPlugins({ config: cfg });
+      : loadHanzoBotPlugins({ config: cfg });
   for (const entry of pluginRegistry?.mediaUnderstandingProviders ?? []) {
     mergeProviderIntoRegistry(registry, entry.provider);
   }

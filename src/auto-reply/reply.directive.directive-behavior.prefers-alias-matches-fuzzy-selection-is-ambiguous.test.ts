@@ -2,7 +2,7 @@ import "./reply.directive.directive-behavior.e2e-mocks.js";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadSessionStore } from "../config/sessions.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
 import { drainSystemEvents } from "../infra/system-events.js";
@@ -64,7 +64,7 @@ function makeMoonshotConfig(home: string, storePath: string) {
       },
     },
     session: { store: storePath },
-  } as unknown as Hanzo BotConfig;
+  } as unknown as HanzoBotConfig;
 }
 
 describe("directive behavior", () => {
@@ -190,7 +190,7 @@ describe("directive behavior", () => {
           {
             ...testCase.config,
             session: { store: testCase.storePath },
-          } as unknown as Hanzo BotConfig,
+          } as unknown as HanzoBotConfig,
         );
         assertModelSelection(testCase.storePath);
       }

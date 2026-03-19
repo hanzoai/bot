@@ -3,8 +3,8 @@
 
 export { definePluginEntry } from "./core.js";
 export type {
-  Hanzo BotPluginApi,
-  Hanzo BotPluginCommandDefinition,
-  Hanzo BotPluginService,
+  HanzoBotPluginApi,
+  HanzoBotPluginCommandDefinition,
+  HanzoBotPluginService,
   PluginCommandContext,
 } from "../plugins/types.js";

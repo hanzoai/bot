@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { AuthProfileConfig } from "../../config/types.js";
 import { findNormalizedProviderKey, normalizeProviderId } from "../model-selection.js";
 import { dedupeProfileIds, listProfilesForProvider } from "./profiles.js";
@@ -21,7 +21,7 @@ function isEmailLike(value: string): boolean {
 }
 
 export function suggestOAuthProfileIdForLegacyDefault(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   store: AuthProfileStore;
   provider: string;
   legacyProfileId: string;
@@ -82,7 +82,7 @@ export function suggestOAuthProfileIdForLegacyDefault(params: {
 }
 
 export function repairOAuthProfileIdMismatch(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   store: AuthProfileStore;
   provider: string;
   legacyProfileId?: string;
@@ -143,7 +143,7 @@ export function repairOAuthProfileIdMismatch(params: {
     return { ...order, [resolvedKey]: deduped };
   })();
 
-  const nextCfg: Hanzo BotConfig = {
+  const nextCfg: HanzoBotConfig = {
     ...params.cfg,
     auth: {
       ...params.cfg.auth,

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { getEmbedBatchMock, resetEmbeddingMocks } from "./embedding.test-mocks.js";
 import type { MemoryIndexManager } from "./index.js";
 import { getRequiredMemoryIndexManager } from "./test-manager-helpers.js";
@@ -54,7 +54,7 @@ describe("memory manager sync failures", () => {
         },
         list: [{ id: "main", default: true }],
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     manager = await getRequiredMemoryIndexManager({ cfg, agentId: "main" });
     const syncSpy = vi.spyOn(manager, "sync");

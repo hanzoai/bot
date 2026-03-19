@@ -1,5 +1,5 @@
 import type { FinalizedMsgContext } from "../auto-reply/templating.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type {
   PluginHookInboundClaimContext,
   PluginHookInboundClaimEvent,
@@ -343,8 +343,8 @@ export function toInternalMessageReceivedContext(
 
 export function toInternalMessageTranscribedContext(
   canonical: CanonicalInboundMessageHookContext,
-  cfg: Hanzo BotConfig,
-): MessageTranscribedHookContext & { cfg: Hanzo BotConfig } {
+  cfg: HanzoBotConfig,
+): MessageTranscribedHookContext & { cfg: HanzoBotConfig } {
   const shared = toInternalInboundMessageHookContextBase(canonical);
   return {
     ...shared,
@@ -355,8 +355,8 @@ export function toInternalMessageTranscribedContext(
 
 export function toInternalMessagePreprocessedContext(
   canonical: CanonicalInboundMessageHookContext,
-  cfg: Hanzo BotConfig,
-): MessagePreprocessedHookContext & { cfg: Hanzo BotConfig } {
+  cfg: HanzoBotConfig,
+): MessagePreprocessedHookContext & { cfg: HanzoBotConfig } {
   const shared = toInternalInboundMessageHookContextBase(canonical);
   return {
     ...shared,

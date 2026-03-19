@@ -1,5 +1,5 @@
 import { type Api, type Model } from "@mariozechner/pi-ai";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { getDefaultLocalRoots } from "../../media/web-media.js";
 import type { ImageModelConfig } from "./image-tool.helpers.js";
 import type { ToolModelConfig } from "./model-config.helpers.js";
@@ -19,24 +19,24 @@ type TextToolResult = {
 };
 
 export function applyImageModelConfigDefaults(
-  cfg: Hanzo BotConfig | undefined,
+  cfg: HanzoBotConfig | undefined,
   imageModelConfig: ImageModelConfig,
-): Hanzo BotConfig | undefined {
+): HanzoBotConfig | undefined {
   return applyAgentDefaultModelConfig(cfg, "imageModel", imageModelConfig);
 }
 
 export function applyImageGenerationModelConfigDefaults(
-  cfg: Hanzo BotConfig | undefined,
+  cfg: HanzoBotConfig | undefined,
   imageGenerationModelConfig: ToolModelConfig,
-): Hanzo BotConfig | undefined {
+): HanzoBotConfig | undefined {
   return applyAgentDefaultModelConfig(cfg, "imageGenerationModel", imageGenerationModelConfig);
 }
 
 function applyAgentDefaultModelConfig(
-  cfg: Hanzo BotConfig | undefined,
+  cfg: HanzoBotConfig | undefined,
   key: "imageModel" | "imageGenerationModel",
   modelConfig: ToolModelConfig,
-): Hanzo BotConfig | undefined {
+): HanzoBotConfig | undefined {
   if (!cfg) {
     return undefined;
   }
@@ -112,7 +112,7 @@ export function resolveModelFromRegistry(params: {
 
 export async function resolveModelRuntimeApiKey(params: {
   model: Model<Api>;
-  cfg: Hanzo BotConfig | undefined;
+  cfg: HanzoBotConfig | undefined;
   agentDir: string;
   authStorage: {
     setRuntimeApiKey: (provider: string, apiKey: string) => void;

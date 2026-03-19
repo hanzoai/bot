@@ -3,7 +3,7 @@ import { resolveAgentDir, resolveDefaultAgentId } from "../agents/agent-scope.js
 import { resolveMemorySearchConfig } from "../agents/memory-search.js";
 import { resolveApiKeyForProvider } from "../agents/model-auth.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveMemoryBackendConfig } from "../memory/backend-config.js";
 import { DEFAULT_LOCAL_MODEL } from "../memory/embeddings.js";
 import { hasConfiguredMemorySecretInput } from "../memory/secret-input.js";
@@ -15,7 +15,7 @@ import { resolveUserPath } from "../utils.js";
  * Runs as part of `hanzo-bot doctor` — config-only, no network calls.
  */
 export async function noteMemorySearchHealth(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   opts?: {
     gatewayMemoryProbe?: {
       checked: boolean;
@@ -188,7 +188,7 @@ function hasLocalEmbeddings(local: { modelPath?: string }, useDefaultFallback = 
 
 async function hasApiKeyForProvider(
   provider: "openai" | "gemini" | "voyage" | "mistral" | "ollama",
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentDir: string,
 ): Promise<boolean> {
   // Map embedding provider names to model-auth provider names

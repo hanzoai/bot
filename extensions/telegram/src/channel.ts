@@ -29,7 +29,7 @@ import {
   resolveConfiguredFromCredentialStatuses,
   type ChannelPlugin,
   type ChannelMessageActionAdapter,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "../runtime-api.js";
 import {
   listTelegramAccountIds,
@@ -76,7 +76,7 @@ type TelegramSendFn = ReturnType<
 type TelegramSendOptions = NonNullable<Parameters<TelegramSendFn>[2]>;
 
 function buildTelegramSendOptions(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   mediaUrl?: string | null;
   mediaLocalRoots?: readonly string[] | null;
   accountId?: string | null;
@@ -99,7 +99,7 @@ function buildTelegramSendOptions(params: {
 }
 
 async function sendTelegramOutbound(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   to: string;
   text: string;
   mediaUrl?: string | null;
@@ -191,7 +191,7 @@ function parseTelegramExplicitTarget(raw: string) {
 }
 
 function buildTelegramBaseSessionKey(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId: string;
   accountId?: string | null;
   peer: RoutePeer;
@@ -200,7 +200,7 @@ function buildTelegramBaseSessionKey(params: {
 }
 
 function resolveTelegramOutboundSessionRoute(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId: string;
   accountId?: string | null;
   target: string;
@@ -250,7 +250,7 @@ function resolveTelegramOutboundSessionRoute(params: {
   };
 }
 
-function hasTelegramExecApprovalDmRoute(cfg: Hanzo BotConfig): boolean {
+function hasTelegramExecApprovalDmRoute(cfg: HanzoBotConfig): boolean {
   return listTelegramAccountIds(cfg).some((accountId) => {
     if (!isTelegramExecApprovalClientEnabled({ cfg, accountId })) {
       return false;
@@ -727,7 +727,7 @@ export const telegramPlugin: ChannelPlugin<ResolvedTelegramAccount, TelegramProb
     },
     logoutAccount: async ({ accountId, cfg }) => {
       const envToken = process.env.TELEGRAM_BOT_TOKEN?.trim() ?? "";
-      const nextCfg = { ...cfg } as Hanzo BotConfig;
+      const nextCfg = { ...cfg } as HanzoBotConfig;
       const nextTelegram = cfg.channels?.telegram ? { ...cfg.channels.telegram } : undefined;
       let cleared = false;
       let changed = false;

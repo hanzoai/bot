@@ -3,7 +3,7 @@ import {
   listLineAccountIds,
   resolveDefaultLineAccountId,
   resolveLineAccount,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type ResolvedLineAccount,
 } from "../runtime-api.js";
 
@@ -14,7 +14,7 @@ export function normalizeLineAllowFrom(entry: string): string {
 export const lineConfigAdapter = createScopedChannelConfigAdapter<
   ResolvedLineAccount,
   ResolvedLineAccount,
-  Hanzo BotConfig
+  HanzoBotConfig
 >({
   sectionKey: "line",
   listAccountIds: listLineAccountIds,

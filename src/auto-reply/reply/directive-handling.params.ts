@@ -1,12 +1,12 @@
 import type { ModelAliasIndex } from "../../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import type { MsgContext } from "../templating.js";
 import type { InlineDirectives } from "./directive-handling.parse.js";
 import type { ElevatedLevel, ReasoningLevel, ThinkLevel, VerboseLevel } from "./directives.js";
 
 export type HandleDirectiveOnlyCoreParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   directives: InlineDirectives;
   sessionEntry: SessionEntry;
   sessionStore: Record<string, SessionEntry>;
@@ -44,7 +44,7 @@ export type ApplyInlineDirectivesFastLaneParams = HandleDirectiveOnlyCoreParams 
   ctx: MsgContext;
   agentId?: string;
   isGroup: boolean;
-  agentCfg?: NonNullable<Hanzo BotConfig["agents"]>["defaults"];
+  agentCfg?: NonNullable<HanzoBotConfig["agents"]>["defaults"];
   modelState: {
     resolveDefaultThinkingLevel: () => Promise<ThinkLevel | undefined>;
     allowedModelKeys: Set<string>;

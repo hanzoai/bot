@@ -7,7 +7,7 @@ import type {
 import type { Client } from "@buape/carbon";
 import { ChannelType } from "discord-api-types/v10";
 import type { GatewayPresenceUpdate } from "discord-api-types/v10";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { DiscordAccountConfig } from "openclaw/plugin-sdk/config-runtime";
 import { buildPluginBindingApprovalCustomId } from "openclaw/plugin-sdk/conversation-runtime";
 import { buildAgentSessionKey } from "openclaw/plugin-sdk/routing";
@@ -144,7 +144,7 @@ vi.mock("openclaw/plugin-sdk/plugin-runtime", async (importOriginal) => {
 });
 
 describe("agent components", () => {
-  const createCfg = (): Hanzo BotConfig => ({}) as Hanzo BotConfig;
+  const createCfg = (): HanzoBotConfig => ({}) as HanzoBotConfig;
 
   const createBaseDmInteraction = (overrides: Record<string, unknown> = {}) => {
     const reply = vi.fn().mockResolvedValue(undefined);
@@ -337,14 +337,14 @@ describe("agent components", () => {
 });
 
 describe("discord component interactions", () => {
-  const createCfg = (): Hanzo BotConfig =>
+  const createCfg = (): HanzoBotConfig =>
     ({
       channels: {
         discord: {
           replyToMode: "first",
         },
       },
-    }) as Hanzo BotConfig;
+    }) as HanzoBotConfig;
 
   const createDiscordConfig = (overrides?: Partial<DiscordAccountConfig>): DiscordAccountConfig =>
     ({
@@ -593,7 +593,7 @@ describe("discord component interactions", () => {
         cfg: {
           commands: { useAccessGroups: true },
           channels: { discord: { replyToMode: "first" } },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         allowFrom: ["owner-1"],
       }),
     );
@@ -625,7 +625,7 @@ describe("discord component interactions", () => {
         cfg: {
           commands: { useAccessGroups: true },
           channels: { discord: { replyToMode: "first" } },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         allowFrom: ["123456789"],
       }),
     );
@@ -669,7 +669,7 @@ describe("discord component interactions", () => {
         cfg: {
           commands: { useAccessGroups: true },
           channels: { discord: { replyToMode: "first" } },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         allowFrom: ["owner-1"],
       }),
     );
@@ -711,7 +711,7 @@ describe("discord component interactions", () => {
         cfg: {
           commands: { useAccessGroups: true },
           channels: { discord: { replyToMode: "first" } },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         allowFrom: ["123456789"],
       }),
     );

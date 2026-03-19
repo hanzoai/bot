@@ -10,7 +10,7 @@ import {
   runSingleChannelSecretStep,
   type ChannelSetupDmPolicy,
   type ChannelSetupWizard,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type SecretInput,
 } from "openclaw/plugin-sdk/setup";
 import { listZaloAccountIds, resolveDefaultZaloAccountId, resolveZaloAccount } from "./accounts.js";
@@ -21,13 +21,13 @@ const channel = "zalo" as const;
 type UpdateMode = "polling" | "webhook";
 
 function setZaloUpdateMode(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
   mode: UpdateMode,
   webhookUrl?: string,
   webhookSecret?: SecretInput,
   webhookPath?: string,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const isDefault = accountId === DEFAULT_ACCOUNT_ID;
   if (mode === "polling") {
     if (isDefault) {
@@ -43,7 +43,7 @@ function setZaloUpdateMode(
           ...cfg.channels,
           zalo: rest,
         },
-      } as Hanzo BotConfig;
+      } as HanzoBotConfig;
     }
     const accounts = { ...cfg.channels?.zalo?.accounts } as Record<string, Record<string, unknown>>;
     const existing = accounts[accountId] ?? {};
@@ -58,7 +58,7 @@ function setZaloUpdateMode(
           accounts,
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   if (isDefault) {
@@ -73,7 +73,7 @@ function setZaloUpdateMode(
           webhookPath,
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   const accounts = { ...cfg.channels?.zalo?.accounts } as Record<string, Record<string, unknown>>;
@@ -92,7 +92,7 @@ function setZaloUpdateMode(
         accounts,
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 async function noteZaloTokenHelp(
@@ -111,10 +111,10 @@ async function noteZaloTokenHelp(
 }
 
 async function promptZaloAllowFrom(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: Parameters<NonNullable<ChannelSetupDmPolicy["promptAllowFrom"]>>[0]["prompter"];
   accountId: string;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   const { cfg, prompter, accountId } = params;
   const resolved = resolveZaloAccount({ cfg, accountId });
   const existingAllowFrom = resolved.config.allowFrom ?? [];
@@ -148,7 +148,7 @@ async function promptZaloAllowFrom(params: {
           allowFrom: unique,
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   return {
@@ -169,7 +169,7 @@ async function promptZaloAllowFrom(params: {
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 const zaloDmPolicy: ChannelSetupDmPolicy = createTopLevelChannelDmPolicy({
@@ -182,9 +182,9 @@ const zaloDmPolicy: ChannelSetupDmPolicy = createTopLevelChannelDmPolicy({
     const id =
       accountId && normalizeAccountId(accountId)
         ? (normalizeAccountId(accountId) ?? DEFAULT_ACCOUNT_ID)
-        : resolveDefaultZaloAccountId(cfg as Hanzo BotConfig);
+        : resolveDefaultZaloAccountId(cfg as HanzoBotConfig);
     return await promptZaloAllowFrom({
-      cfg: cfg as Hanzo BotConfig,
+      cfg: cfg as HanzoBotConfig,
       prompter,
       accountId: id,
     });
@@ -259,7 +259,7 @@ export const zaloSetupWizard: ChannelSetupWizard = {
                   enabled: true,
                 },
               },
-            } as Hanzo BotConfig)
+            } as HanzoBotConfig)
           : currentCfg,
       applySet: async (currentCfg, value) =>
         accountId === DEFAULT_ACCOUNT_ID
@@ -273,7 +273,7 @@ export const zaloSetupWizard: ChannelSetupWizard = {
                   botToken: value,
                 },
               },
-            } as Hanzo BotConfig)
+            } as HanzoBotConfig)
           : ({
               ...currentCfg,
               channels: {
@@ -291,7 +291,7 @@ export const zaloSetupWizard: ChannelSetupWizard = {
                   },
                 },
               },
-            } as Hanzo BotConfig),
+            } as HanzoBotConfig),
     });
     next = tokenStep.cfg;
 

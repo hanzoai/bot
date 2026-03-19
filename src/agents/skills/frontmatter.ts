@@ -2,18 +2,18 @@ import type { Skill } from "@mariozechner/pi-coding-agent";
 import { validateRegistryNpmSpec } from "../../infra/npm-registry-spec.js";
 import { parseFrontmatterBlock } from "../../markdown/frontmatter.js";
 import {
-  applyHanzo BotManifestInstallCommonFields,
+  applyHanzoBotManifestInstallCommonFields,
   getFrontmatterString,
   normalizeStringList,
-  parseHanzo BotManifestInstallBase,
+  parseHanzoBotManifestInstallBase,
   parseFrontmatterBool,
-  resolveHanzo BotManifestBlock,
-  resolveHanzo BotManifestInstall,
-  resolveHanzo BotManifestOs,
-  resolveHanzo BotManifestRequires,
+  resolveHanzoBotManifestBlock,
+  resolveHanzoBotManifestInstall,
+  resolveHanzoBotManifestOs,
+  resolveHanzoBotManifestRequires,
 } from "../../shared/frontmatter.js";
 import type {
-  Hanzo BotSkillMetadata,
+  HanzoBotSkillMetadata,
   ParsedSkillFrontmatter,
   SkillEntry,
   SkillInstallSpec,
@@ -109,12 +109,12 @@ function normalizeSafeDownloadUrl(raw: unknown): string | undefined {
 }
 
 function parseInstallSpec(input: unknown): SkillInstallSpec | undefined {
-  const parsed = parseHanzo BotManifestInstallBase(input, ["brew", "node", "go", "uv", "download"]);
+  const parsed = parseHanzoBotManifestInstallBase(input, ["brew", "node", "go", "uv", "download"]);
   if (!parsed) {
     return undefined;
   }
   const { raw } = parsed;
-  const spec = applyHanzo BotManifestInstallCommonFields<SkillInstallSpec>(
+  const spec = applyHanzoBotManifestInstallCommonFields<SkillInstallSpec>(
     {
       kind: parsed.kind as SkillInstallSpec["kind"],
     },
@@ -183,16 +183,16 @@ function parseInstallSpec(input: unknown): SkillInstallSpec | undefined {
   return spec;
 }
 
-export function resolveHanzo BotMetadata(
+export function resolveHanzoBotMetadata(
   frontmatter: ParsedSkillFrontmatter,
-): Hanzo BotSkillMetadata | undefined {
-  const metadataObj = resolveHanzo BotManifestBlock({ frontmatter });
+): HanzoBotSkillMetadata | undefined {
+  const metadataObj = resolveHanzoBotManifestBlock({ frontmatter });
   if (!metadataObj) {
     return undefined;
   }
-  const requires = resolveHanzo BotManifestRequires(metadataObj);
-  const install = resolveHanzo BotManifestInstall(metadataObj, parseInstallSpec);
-  const osRaw = resolveHanzo BotManifestOs(metadataObj);
+  const requires = resolveHanzoBotManifestRequires(metadataObj);
+  const install = resolveHanzoBotManifestInstall(metadataObj, parseInstallSpec);
+  const osRaw = resolveHanzoBotManifestOs(metadataObj);
   return {
     always: typeof metadataObj.always === "boolean" ? metadataObj.always : undefined,
     emoji: typeof metadataObj.emoji === "string" ? metadataObj.emoji : undefined,

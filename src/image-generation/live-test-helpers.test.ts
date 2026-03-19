@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   parseCaseFilter,
   parseCsvFilter,
@@ -45,7 +45,7 @@ describe("image-generation live-test helpers", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     expect(resolveConfiguredLiveImageModels(cfg)).toEqual(
       new Map([

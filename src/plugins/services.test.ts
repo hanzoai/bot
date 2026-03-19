@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createEmptyPluginRegistry } from "./registry.js";
-import type { Hanzo BotPluginService, Hanzo BotPluginServiceContext } from "./types.js";
+import type { HanzoBotPluginService, HanzoBotPluginServiceContext } from "./types.js";
 
 const mockedLogger = vi.hoisted(() => ({
   info: vi.fn<(msg: string) => void>(),
@@ -17,7 +17,7 @@ vi.mock("../logging/subsystem.js", () => ({
 import { STATE_DIR } from "../config/paths.js";
 import { startPluginServices } from "./services.js";
 
-function createRegistry(services: Hanzo BotPluginService[]) {
+function createRegistry(services: HanzoBotPluginService[]) {
   const registry = createEmptyPluginRegistry();
   for (const service of services) {
     registry.services.push({
@@ -38,9 +38,9 @@ describe("startPluginServices", () => {
   it("starts services and stops them in reverse order", async () => {
     const starts: string[] = [];
     const stops: string[] = [];
-    const contexts: Hanzo BotPluginServiceContext[] = [];
+    const contexts: HanzoBotPluginServiceContext[] = [];
 
-    const serviceA: Hanzo BotPluginService = {
+    const serviceA: HanzoBotPluginService = {
       id: "service-a",
       start: (ctx) => {
         starts.push("a");
@@ -50,14 +50,14 @@ describe("startPluginServices", () => {
         stops.push("a");
       },
     };
-    const serviceB: Hanzo BotPluginService = {
+    const serviceB: HanzoBotPluginService = {
       id: "service-b",
       start: (ctx) => {
         starts.push("b");
         contexts.push(ctx);
       },
     };
-    const serviceC: Hanzo BotPluginService = {
+    const serviceC: HanzoBotPluginService = {
       id: "service-c",
       start: (ctx) => {
         starts.push("c");

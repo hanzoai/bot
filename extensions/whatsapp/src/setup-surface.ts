@@ -8,7 +8,7 @@ import {
   splitSetupEntries,
   setSetupChannelEnabled,
   type DmPolicy,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/setup";
 import type { ChannelSetupWizard } from "openclaw/plugin-sdk/setup";
 import { formatCliCommand, formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
@@ -19,10 +19,10 @@ import { whatsappSetupAdapter } from "./setup-core.js";
 const channel = "whatsapp" as const;
 
 function mergeWhatsAppConfig(
-  cfg: Hanzo BotConfig,
-  patch: Partial<NonNullable<NonNullable<Hanzo BotConfig["channels"]>["whatsapp"]>>,
+  cfg: HanzoBotConfig,
+  patch: Partial<NonNullable<NonNullable<HanzoBotConfig["channels"]>["whatsapp"]>>,
   options?: { unsetOnUndefined?: string[] },
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const base = { ...(cfg.channels?.whatsapp ?? {}) } as Record<string, unknown>;
   for (const [key, value] of Object.entries(patch)) {
     if (value === undefined) {
@@ -42,19 +42,19 @@ function mergeWhatsAppConfig(
   };
 }
 
-function setWhatsAppDmPolicy(cfg: Hanzo BotConfig, dmPolicy: DmPolicy): Hanzo BotConfig {
+function setWhatsAppDmPolicy(cfg: HanzoBotConfig, dmPolicy: DmPolicy): HanzoBotConfig {
   return mergeWhatsAppConfig(cfg, { dmPolicy });
 }
 
-function setWhatsAppAllowFrom(cfg: Hanzo BotConfig, allowFrom?: string[]): Hanzo BotConfig {
+function setWhatsAppAllowFrom(cfg: HanzoBotConfig, allowFrom?: string[]): HanzoBotConfig {
   return mergeWhatsAppConfig(cfg, { allowFrom }, { unsetOnUndefined: ["allowFrom"] });
 }
 
-function setWhatsAppSelfChatMode(cfg: Hanzo BotConfig, selfChatMode: boolean): Hanzo BotConfig {
+function setWhatsAppSelfChatMode(cfg: HanzoBotConfig, selfChatMode: boolean): HanzoBotConfig {
   return mergeWhatsAppConfig(cfg, { selfChatMode });
 }
 
-async function detectWhatsAppLinked(cfg: Hanzo BotConfig, accountId: string): Promise<boolean> {
+async function detectWhatsAppLinked(cfg: HanzoBotConfig, accountId: string): Promise<boolean> {
   const { authDir } = resolveWhatsAppAuthDir({ cfg, accountId });
   const credsPath = path.join(authDir, "creds.json");
   return await pathExists(credsPath);
@@ -99,12 +99,12 @@ async function promptWhatsAppOwnerAllowFrom(params: {
 }
 
 async function applyWhatsAppOwnerAllowlist(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   existingAllowFrom: string[];
   messageLines: string[];
   prompter: Parameters<NonNullable<ChannelSetupWizard["finalize"]>>[0]["prompter"];
   title: string;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   const { normalized, allowFrom } = await promptWhatsAppOwnerAllowFrom({
     prompter: params.prompter,
     existingAllowFrom: params.existingAllowFrom,
@@ -140,10 +140,10 @@ function parseWhatsAppAllowFromEntries(raw: string): { entries: string[]; invali
 }
 
 async function promptWhatsAppDmAccess(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   forceAllowFrom: boolean;
   prompter: Parameters<NonNullable<ChannelSetupWizard["finalize"]>>[0]["prompter"];
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   const existingPolicy = params.cfg.channels?.whatsapp?.dmPolicy ?? "pairing";
   const existingAllowFrom = params.cfg.channels?.whatsapp?.allowFrom ?? [];
   const existingLabel = existingAllowFrom.length > 0 ? existingAllowFrom.join(", ") : "unset";

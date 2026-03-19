@@ -1,1 +1,1 @@
-export type { Hanzo BotPluginCommandDefinition } from "openclaw/plugin-sdk/core";
+export type { HanzoBotPluginCommandDefinition } from "openclaw/plugin-sdk/core";

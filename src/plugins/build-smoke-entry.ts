@@ -4,4 +4,4 @@ export {
   getPluginCommandSpecs,
   matchPluginCommand,
 } from "./commands.js";
-export { loadHanzo BotPlugins } from "./loader.js";
+export { loadHanzoBotPlugins } from "./loader.js";

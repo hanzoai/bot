@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "./config.js";
+import type { HanzoBotConfig } from "./config.js";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -134,7 +134,7 @@ export function normalizeLegacyWebSearchConfig<T>(raw: T): T {
 }
 
 export function resolvePluginWebSearchConfig(
-  config: Hanzo BotConfig | undefined,
+  config: HanzoBotConfig | undefined,
   pluginId: string,
 ): Record<string, unknown> | undefined {
   const pluginConfig = config?.plugins?.entries?.[pluginId]?.config;

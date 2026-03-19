@@ -1,5 +1,5 @@
 import type { AcpSessionUpdateTag } from "../../acp/runtime/types.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { clampPositiveInteger, resolveEffectiveBlockStreamingConfig } from "./block-streaming.js";
 
 const DEFAULT_ACP_STREAM_COALESCE_IDLE_MS = 350;
@@ -57,7 +57,7 @@ function resolveAcpHiddenBoundarySeparator(
   return fallback;
 }
 
-function resolveAcpStreamCoalesceIdleMs(cfg: Hanzo BotConfig): number {
+function resolveAcpStreamCoalesceIdleMs(cfg: HanzoBotConfig): number {
   return clampPositiveInteger(
     cfg.acp?.stream?.coalesceIdleMs,
     DEFAULT_ACP_STREAM_COALESCE_IDLE_MS,
@@ -68,14 +68,14 @@ function resolveAcpStreamCoalesceIdleMs(cfg: Hanzo BotConfig): number {
   );
 }
 
-function resolveAcpStreamMaxChunkChars(cfg: Hanzo BotConfig): number {
+function resolveAcpStreamMaxChunkChars(cfg: HanzoBotConfig): number {
   return clampPositiveInteger(cfg.acp?.stream?.maxChunkChars, DEFAULT_ACP_STREAM_MAX_CHUNK_CHARS, {
     min: 50,
     max: 4_000,
   });
 }
 
-export function resolveAcpProjectionSettings(cfg: Hanzo BotConfig): AcpProjectionSettings {
+export function resolveAcpProjectionSettings(cfg: HanzoBotConfig): AcpProjectionSettings {
   const stream = cfg.acp?.stream;
   const deliveryMode = resolveAcpDeliveryMode(stream?.deliveryMode);
   const hiddenBoundaryFallback: AcpHiddenBoundarySeparator =
@@ -106,7 +106,7 @@ export function resolveAcpProjectionSettings(cfg: Hanzo BotConfig): AcpProjectio
 }
 
 export function resolveAcpStreamingConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   provider?: string;
   accountId?: string;
   deliveryMode?: AcpDeliveryMode;

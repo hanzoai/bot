@@ -6,12 +6,12 @@ import {
 } from "openclaw/plugin-sdk/provider-models";
 import {
   applyProviderConfigWithModelCatalogPreset,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export { VENICE_DEFAULT_MODEL_REF };
 
-function applyVenicePreset(cfg: Hanzo BotConfig, primaryModelRef?: string): Hanzo BotConfig {
+function applyVenicePreset(cfg: HanzoBotConfig, primaryModelRef?: string): HanzoBotConfig {
   return applyProviderConfigWithModelCatalogPreset(cfg, {
     providerId: "venice",
     api: "openai-completions",
@@ -22,10 +22,10 @@ function applyVenicePreset(cfg: Hanzo BotConfig, primaryModelRef?: string): Hanz
   });
 }
 
-export function applyVeniceProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyVeniceProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyVenicePreset(cfg);
 }
 
-export function applyVeniceConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyVeniceConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyVenicePreset(cfg, VENICE_DEFAULT_MODEL_REF);
 }

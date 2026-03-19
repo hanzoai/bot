@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { clearPluginDiscoveryCache, discoverHanzo BotPlugins } from "./discovery.js";
+import { clearPluginDiscoveryCache, discoverHanzoBotPlugins } from "./discovery.js";
 import {
   cleanupTrackedTempDirs,
   makeTrackedTempDir,
@@ -44,9 +44,9 @@ function buildDiscoveryEnv(stateDir: string): NodeJS.ProcessEnv {
 
 async function discoverWithStateDir(
   stateDir: string,
-  params: Parameters<typeof discoverHanzo BotPlugins>[0],
+  params: Parameters<typeof discoverHanzoBotPlugins>[0],
 ) {
-  return discoverHanzo BotPlugins({ ...params, env: buildDiscoveryEnv(stateDir) });
+  return discoverHanzoBotPlugins({ ...params, env: buildDiscoveryEnv(stateDir) });
 }
 
 function writePluginPackageManifest(params: {
@@ -75,7 +75,7 @@ afterEach(() => {
   cleanupTrackedTempDirs(tempDirs);
 });
 
-describe("discoverHanzo BotPlugins", () => {
+describe("discoverHanzoBotPlugins", () => {
   it("discovers global and workspace extensions", async () => {
     const stateDir = makeTempDir();
     const workspaceDir = path.join(stateDir, "workspace");
@@ -103,7 +103,7 @@ describe("discoverHanzo BotPlugins", () => {
     mkdirSafe(workspaceExt);
     fs.writeFileSync(path.join(workspaceExt, "tilde-workspace.ts"), "export default {}", "utf-8");
 
-    const result = discoverHanzo BotPlugins({
+    const result = discoverHanzoBotPlugins({
       workspaceDir: "~/workspace",
       env: {
         ...buildDiscoveryEnv(stateDir),
@@ -515,7 +515,7 @@ describe("discoverHanzo BotPlugins", () => {
       fs.writeFileSync(path.join(packDir, "index.ts"), "export default function () {}", "utf-8");
       fs.chmodSync(packDir, 0o777);
 
-      const result = discoverHanzo BotPlugins({
+      const result = discoverHanzoBotPlugins({
         env: {
           ...process.env,
           BOT_STATE_DIR: stateDir,
@@ -563,7 +563,7 @@ describe("discoverHanzo BotPlugins", () => {
     const pluginPath = path.join(globalExt, "cached.ts");
     fs.writeFileSync(pluginPath, "export default function () {}", "utf-8");
 
-    const first = discoverHanzo BotPlugins({
+    const first = discoverHanzoBotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDir),
         BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
@@ -573,7 +573,7 @@ describe("discoverHanzo BotPlugins", () => {
 
     fs.rmSync(pluginPath, { force: true });
 
-    const second = discoverHanzo BotPlugins({
+    const second = discoverHanzoBotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDir),
         BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
@@ -583,7 +583,7 @@ describe("discoverHanzo BotPlugins", () => {
 
     clearPluginDiscoveryCache();
 
-    const third = discoverHanzo BotPlugins({
+    const third = discoverHanzoBotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDir),
         BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
@@ -602,13 +602,13 @@ describe("discoverHanzo BotPlugins", () => {
     fs.writeFileSync(path.join(globalExtA, "alpha.ts"), "export default function () {}", "utf-8");
     fs.writeFileSync(path.join(globalExtB, "beta.ts"), "export default function () {}", "utf-8");
 
-    const first = discoverHanzo BotPlugins({
+    const first = discoverHanzoBotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDirA),
         BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
     });
-    const second = discoverHanzo BotPlugins({
+    const second = discoverHanzoBotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDirB),
         BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
@@ -632,7 +632,7 @@ describe("discoverHanzo BotPlugins", () => {
     fs.writeFileSync(pluginA, "export default {}", "utf-8");
     fs.writeFileSync(pluginB, "export default {}", "utf-8");
 
-    const first = discoverHanzo BotPlugins({
+    const first = discoverHanzoBotPlugins({
       extraPaths: ["~/plugins/demo.ts"],
       env: {
         ...buildDiscoveryEnv(stateDir),
@@ -640,7 +640,7 @@ describe("discoverHanzo BotPlugins", () => {
         BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
     });
-    const second = discoverHanzo BotPlugins({
+    const second = discoverHanzoBotPlugins({
       extraPaths: ["~/plugins/demo.ts"],
       env: {
         ...buildDiscoveryEnv(stateDir),
@@ -668,11 +668,11 @@ describe("discoverHanzo BotPlugins", () => {
       BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
     };
 
-    const first = discoverHanzo BotPlugins({
+    const first = discoverHanzoBotPlugins({
       extraPaths: [pluginA, pluginB],
       env,
     });
-    const second = discoverHanzo BotPlugins({
+    const second = discoverHanzoBotPlugins({
       extraPaths: [pluginB, pluginA],
       env,
     });

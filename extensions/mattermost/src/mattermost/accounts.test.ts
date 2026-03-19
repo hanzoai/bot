@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../runtime-api.js";
+import type { HanzoBotConfig } from "../../runtime-api.js";
 import {
   resolveDefaultMattermostAccountId,
   resolveMattermostAccount,
@@ -8,7 +8,7 @@ import {
 
 describe("resolveDefaultMattermostAccountId", () => {
   it("prefers channels.mattermost.defaultAccount when it matches a configured account", () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       channels: {
         mattermost: {
           defaultAccount: "alerts",
@@ -24,7 +24,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("normalizes channels.mattermost.defaultAccount before lookup", () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       channels: {
         mattermost: {
           defaultAccount: "Ops Team",
@@ -39,7 +39,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("falls back when channels.mattermost.defaultAccount is missing", () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       channels: {
         mattermost: {
           defaultAccount: "missing",
@@ -57,7 +57,7 @@ describe("resolveDefaultMattermostAccountId", () => {
 
 describe("resolveMattermostReplyToMode", () => {
   it("uses the configured mode for channel and group messages", () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       channels: {
         mattermost: {
           replyToMode: "all",
@@ -71,7 +71,7 @@ describe("resolveMattermostReplyToMode", () => {
   });
 
   it("keeps direct messages off even when replyToMode is enabled", () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       channels: {
         mattermost: {
           replyToMode: "all",

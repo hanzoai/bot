@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { resolveGatewayProbeAuth as resolveStatusGatewayProbeAuth } from "../commands/status.gateway-probe.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveGatewayAuth } from "./auth.js";
 import { resolveGatewayCredentialsFromConfig } from "./credentials.js";
 import { resolveGatewayProbeAuth } from "./probe-auth.js";
@@ -14,7 +14,7 @@ type ExpectedCredentialSet = {
 
 type TestCase = {
   name: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
   expected: ExpectedCredentialSet;
 };
@@ -24,7 +24,7 @@ const gatewayEnv = {
   BOT_GATEWAY_PASSWORD: "env-password", // pragma: allowlist secret
 } as NodeJS.ProcessEnv;
 
-function makeRemoteGatewayConfig(remote: { token?: string; password?: string }): Hanzo BotConfig {
+function makeRemoteGatewayConfig(remote: { token?: string; password?: string }): HanzoBotConfig {
   return {
     gateway: {
       mode: "remote",
@@ -34,7 +34,7 @@ function makeRemoteGatewayConfig(remote: { token?: string; password?: string }):
         password: "local-password", // pragma: allowlist secret
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 function withGatewayAuthEnv<T>(env: NodeJS.ProcessEnv, fn: () => T): T {
@@ -81,7 +81,7 @@ describe("gateway credential precedence parity", () => {
             password: "config-password", // pragma: allowlist secret
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {
         BOT_GATEWAY_TOKEN: "env-token", // pragma: allowlist secret
         BOT_GATEWAY_PASSWORD: "env-password", // pragma: allowlist secret
@@ -127,7 +127,7 @@ describe("gateway credential precedence parity", () => {
           mode: "local",
           auth: {},
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {
         BOT_GATEWAY_TOKEN: "legacy-token", // pragma: allowlist secret
         BOT_GATEWAY_PASSWORD: "legacy-password", // pragma: allowlist secret
@@ -149,7 +149,7 @@ describe("gateway credential precedence parity", () => {
             password: "config-password", // pragma: allowlist secret
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {
         BOT_GATEWAY_TOKEN: "env-token",
         BOT_GATEWAY_PASSWORD: "env-password", // pragma: allowlist secret

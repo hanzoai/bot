@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { HookStatusReport } from "../hooks/hooks-status.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
@@ -114,7 +114,7 @@ describe("onboard-hooks", () => {
 
   async function runSetupInternalHooks(params: {
     selected: string[];
-    cfg?: Hanzo BotConfig;
+    cfg?: HanzoBotConfig;
     eligible?: boolean;
   }) {
     const { buildWorkspaceHookStatus } = await import("../hooks/hooks-status.js");
@@ -182,7 +182,7 @@ describe("onboard-hooks", () => {
     });
 
     it("should preserve existing hooks config when enabled", async () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         hooks: {
           enabled: true,
           path: "/webhook",
@@ -204,7 +204,7 @@ describe("onboard-hooks", () => {
     });
 
     it("should preserve existing config when user skips", async () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         agents: { defaults: { workspace: "/workspace" } },
       };
       const { result } = await runSetupInternalHooks({

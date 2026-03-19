@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import type { Command } from "commander";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadConfig, writeConfigFile } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
@@ -204,9 +204,9 @@ function formatInstallLines(install: PluginInstallRecord | undefined): string[] 
 }
 
 function applySlotSelectionForPlugin(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   pluginId: string,
-): { config: Hanzo BotConfig; warnings: string[] } {
+): { config: HanzoBotConfig; warnings: string[] } {
   const report = buildPluginStatusReport({ config });
   const plugin = report.plugins.find((entry) => entry.id === pluginId);
   if (!plugin) {
@@ -288,14 +288,14 @@ function logSlotWarnings(warnings: string[]) {
 }
 
 async function installBundledPluginSource(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   rawSpec: string;
   bundledSource: BundledPluginSource;
   warning: string;
 }) {
   const existing = params.config.plugins?.load?.paths ?? [];
   const mergedPaths = Array.from(new Set([...existing, params.bundledSource.localPath]));
-  let next: Hanzo BotConfig = {
+  let next: HanzoBotConfig = {
     ...params.config,
     plugins: {
       ...params.config.plugins,
@@ -410,7 +410,7 @@ async function runPluginInstallCommand(params: {
         return defaultRuntime.exit(1);
       }
 
-      let next: Hanzo BotConfig = enablePluginInConfig(
+      let next: HanzoBotConfig = enablePluginInConfig(
         {
           ...cfg,
           plugins: {
@@ -895,7 +895,7 @@ export function registerPluginsCli(program: Command) {
     .action(async (id: string) => {
       const cfg = loadConfig();
       const enableResult = enablePluginInConfig(cfg, id);
-      let next: Hanzo BotConfig = enableResult.config;
+      let next: HanzoBotConfig = enableResult.config;
       const slotResult = applySlotSelectionForPlugin(next, id);
       next = slotResult.config;
       await writeConfigFile(next);

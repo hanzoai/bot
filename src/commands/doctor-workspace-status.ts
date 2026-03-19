@@ -1,12 +1,12 @@
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { buildWorkspaceSkillStatus } from "../agents/skills-status.js";
-import type { Hanzo BotConfig } from "../config/config.js";
-import { loadHanzo BotPlugins } from "../plugins/loader.js";
+import type { HanzoBotConfig } from "../config/config.js";
+import { loadHanzoBotPlugins } from "../plugins/loader.js";
 import { buildPluginCompatibilityWarnings } from "../plugins/status.js";
 import { note } from "../terminal/note.js";
 import { detectLegacyWorkspaceDirs, formatLegacyWorkspaceWarning } from "./doctor-workspace.js";
 
-export function noteWorkspaceStatus(cfg: Hanzo BotConfig) {
+export function noteWorkspaceStatus(cfg: HanzoBotConfig) {
   const workspaceDir = resolveAgentWorkspaceDir(cfg, resolveDefaultAgentId(cfg));
   const legacyWorkspace = detectLegacyWorkspaceDirs({ workspaceDir });
   if (legacyWorkspace.legacyDirs.length > 0) {
@@ -26,7 +26,7 @@ export function noteWorkspaceStatus(cfg: Hanzo BotConfig) {
     "Skills status",
   );
 
-  const pluginRegistry = loadHanzo BotPlugins({
+  const pluginRegistry = loadHanzoBotPlugins({
     config: cfg,
     workspaceDir,
     logger: {

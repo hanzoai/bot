@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AuthProfileStore } from "../agents/auth-profiles.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { PluginWebSearchProviderEntry } from "../plugins/types.js";
 import { getPath, setPathCreateStrict } from "./path-utils.js";
 import { clearSecretsRuntimeSnapshot, prepareSecretsRuntimeSnapshot } from "./runtime.js";
@@ -97,8 +97,8 @@ function toConcretePathSegments(pathPattern: string): string[] {
   return out;
 }
 
-function buildConfigForHanzo BotTarget(entry: SecretRegistryEntry, envId: string): Hanzo BotConfig {
-  const config = {} as Hanzo BotConfig;
+function buildConfigForHanzoBotTarget(entry: SecretRegistryEntry, envId: string): HanzoBotConfig {
+  const config = {} as HanzoBotConfig;
   const refTargetPath =
     entry.secretShape === "sibling_ref" && entry.refPathPattern // pragma: allowlist secret
       ? entry.refPathPattern
@@ -242,7 +242,7 @@ describe("secrets runtime target coverage", () => {
       const envId = `BOT_SECRET_TARGET_${index}`;
       const expectedValue = `resolved-${entry.id}`;
       const snapshot = await prepareSecretsRuntimeSnapshot({
-        config: buildConfigForHanzo BotTarget(entry, envId),
+        config: buildConfigForHanzoBotTarget(entry, envId),
         env: { [envId]: expectedValue },
         agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
@@ -266,7 +266,7 @@ describe("secrets runtime target coverage", () => {
       const envId = `BOT_AUTH_SECRET_TARGET_${index}`;
       const expectedValue = `resolved-${entry.id}`;
       const snapshot = await prepareSecretsRuntimeSnapshot({
-        config: {} as Hanzo BotConfig,
+        config: {} as HanzoBotConfig,
         env: { [envId]: expectedValue },
         agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => buildAuthStoreForTarget(entry, envId),

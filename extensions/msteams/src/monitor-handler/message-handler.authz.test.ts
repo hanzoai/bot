@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig, PluginRuntime, RuntimeEnv } from "../../runtime-api.js";
+import type { HanzoBotConfig, PluginRuntime, RuntimeEnv } from "../../runtime-api.js";
 import type { MSTeamsMessageHandlerDeps } from "../monitor-handler.js";
 import { setMSTeamsRuntime } from "../runtime.js";
 import { createMSTeamsMessageHandler } from "./message-handler.js";
 
 describe("msteams monitor handler authz", () => {
-  function createDeps(cfg: Hanzo BotConfig) {
+  function createDeps(cfg: HanzoBotConfig) {
     const readAllowFromStore = vi.fn(async () => ["attacker-aad"]);
     setMSTeamsRuntime({
       logging: { shouldLogVerbose: () => false },
@@ -69,7 +69,7 @@ describe("msteams monitor handler authz", () => {
           groupAllowFrom: [],
         },
       },
-    } as Hanzo BotConfig);
+    } as HanzoBotConfig);
 
     const handler = createMSTeamsMessageHandler(deps);
     await handler({
@@ -120,7 +120,7 @@ describe("msteams monitor handler authz", () => {
           },
         },
       },
-    } as Hanzo BotConfig);
+    } as HanzoBotConfig);
 
     const handler = createMSTeamsMessageHandler(deps);
     await handler({

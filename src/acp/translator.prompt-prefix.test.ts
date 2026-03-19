@@ -55,7 +55,7 @@ describe("acp prompt cwd prefix", () => {
 
   async function runPromptWithCwd(cwd: string) {
     const pinnedHome = os.homedir();
-    const previousHanzo BotHome = process.env.BOT_HOME;
+    const previousHanzoBotHome = process.env.BOT_HOME;
     const previousHome = process.env.HOME;
     delete process.env.BOT_HOME;
     process.env.HOME = pinnedHome;
@@ -63,10 +63,10 @@ describe("acp prompt cwd prefix", () => {
     try {
       return await runPromptAndCaptureRequest({ cwd, prefixCwd: true });
     } finally {
-      if (previousHanzo BotHome === undefined) {
+      if (previousHanzoBotHome === undefined) {
         delete process.env.BOT_HOME;
       } else {
-        process.env.BOT_HOME = previousHanzo BotHome;
+        process.env.BOT_HOME = previousHanzoBotHome;
       }
       if (previousHome === undefined) {
         delete process.env.HOME;

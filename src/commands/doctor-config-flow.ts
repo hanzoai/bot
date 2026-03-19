@@ -10,7 +10,7 @@ import { formatCliCommand } from "../cli/command-format.js";
 import { resolveCommandSecretRefsViaGateway } from "../cli/command-secret-gateway.js";
 import { getChannelsCommandSecretTargetIds } from "../cli/command-secret-targets.js";
 import { listRouteBindings } from "../config/bindings.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { CONFIG_PATH, migrateLegacyConfig } from "../config/config.js";
 import { collectProviderDangerousNameMatchingScopes } from "../config/dangerous-name-matching.js";
 import { formatConfigIssueLines } from "../config/issue-format.js";
@@ -106,7 +106,7 @@ type ChannelMissingDefaultAccountContext = {
 };
 
 function collectChannelsMissingDefaultAccount(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): ChannelMissingDefaultAccountContext[] {
   const channels = asObjectRecord(cfg.channels);
   if (!channels) {
@@ -139,7 +139,7 @@ function collectChannelsMissingDefaultAccount(
   return contexts;
 }
 
-export function collectMissingDefaultAccountBindingWarnings(cfg: Hanzo BotConfig): string[] {
+export function collectMissingDefaultAccountBindingWarnings(cfg: HanzoBotConfig): string[] {
   const bindings = listRouteBindings(cfg);
   const warnings: string[] = [];
 
@@ -204,7 +204,7 @@ export function collectMissingDefaultAccountBindingWarnings(cfg: Hanzo BotConfig
   return warnings;
 }
 
-export function collectMissingExplicitDefaultAccountWarnings(cfg: Hanzo BotConfig): string[] {
+export function collectMissingExplicitDefaultAccountWarnings(cfg: HanzoBotConfig): string[] {
   const warnings: string[] = [];
   for (const { channelKey, channel, normalizedAccountIds } of collectChannelsMissingDefaultAccount(
     cfg,
@@ -235,7 +235,7 @@ export function collectMissingExplicitDefaultAccountWarnings(cfg: Hanzo BotConfi
 }
 
 function collectTelegramAccountScopes(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): Array<{ prefix: string; account: Record<string, unknown> }> {
   const scopes: Array<{ prefix: string; account: Record<string, unknown> }> = [];
   const telegram = asObjectRecord(cfg.channels?.telegram);
@@ -301,7 +301,7 @@ function collectTelegramAllowFromLists(
   return refs;
 }
 
-function scanTelegramAllowFromUsernameEntries(cfg: Hanzo BotConfig): TelegramAllowFromUsernameHit[] {
+function scanTelegramAllowFromUsernameEntries(cfg: HanzoBotConfig): TelegramAllowFromUsernameHit[] {
   const hits: TelegramAllowFromUsernameHit[] = [];
 
   const scanList = (pathLabel: string, list: unknown) => {
@@ -362,7 +362,7 @@ function formatMatrixLegacyCryptoPreview(
   return notes;
 }
 
-async function collectMatrixInstallPathWarnings(cfg: Hanzo BotConfig): Promise<string[]> {
+async function collectMatrixInstallPathWarnings(cfg: HanzoBotConfig): Promise<string[]> {
   const issue = await detectPluginInstallPathIssue({
     pluginId: "matrix",
     install: cfg.plugins?.installs?.matrix,
@@ -379,8 +379,8 @@ async function collectMatrixInstallPathWarnings(cfg: Hanzo BotConfig): Promise<s
   }).map((entry) => `- ${entry}`);
 }
 
-async function maybeRepairTelegramAllowFromUsernames(cfg: Hanzo BotConfig): Promise<{
-  config: Hanzo BotConfig;
+async function maybeRepairTelegramAllowFromUsernames(cfg: HanzoBotConfig): Promise<{
+  config: HanzoBotConfig;
   changes: string[];
 }> {
   const hits = scanTelegramAllowFromUsernameEntries(cfg);
@@ -547,7 +547,7 @@ type DiscordIdListRef = {
 };
 
 function collectDiscordAccountScopes(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): Array<{ prefix: string; account: Record<string, unknown> }> {
   const scopes: Array<{ prefix: string; account: Record<string, unknown> }> = [];
   const discord = asObjectRecord(cfg.channels?.discord);
@@ -627,7 +627,7 @@ function collectDiscordIdLists(
   return refs;
 }
 
-function scanDiscordNumericIdEntries(cfg: Hanzo BotConfig): DiscordNumericIdHit[] {
+function scanDiscordNumericIdEntries(cfg: HanzoBotConfig): DiscordNumericIdHit[] {
   const hits: DiscordNumericIdHit[] = [];
   const scanList = (pathLabel: string, list: unknown) => {
     if (!Array.isArray(list)) {
@@ -650,8 +650,8 @@ function scanDiscordNumericIdEntries(cfg: Hanzo BotConfig): DiscordNumericIdHit[
   return hits;
 }
 
-function maybeRepairDiscordNumericIds(cfg: Hanzo BotConfig): {
-  config: Hanzo BotConfig;
+function maybeRepairDiscordNumericIds(cfg: HanzoBotConfig): {
+  config: HanzoBotConfig;
   changes: string[];
 } {
   const hits = scanDiscordNumericIdEntries(cfg);
@@ -731,7 +731,7 @@ function addMutableAllowlistHits(params: {
   }
 }
 
-function scanMutableAllowlistEntries(cfg: Hanzo BotConfig): MutableAllowlistHit[] {
+function scanMutableAllowlistEntries(cfg: HanzoBotConfig): MutableAllowlistHit[] {
   const hits: MutableAllowlistHit[] = [];
 
   for (const scope of collectProviderDangerousNameMatchingScopes(cfg, "discord")) {
@@ -995,8 +995,8 @@ function scanMutableAllowlistEntries(cfg: Hanzo BotConfig): MutableAllowlistHit[
  * users (or integrations) set dmPolicy to "open" without realising that an explicit
  * allowFrom wildcard is also required.
  */
-function maybeRepairOpenPolicyAllowFrom(cfg: Hanzo BotConfig): {
-  config: Hanzo BotConfig;
+function maybeRepairOpenPolicyAllowFrom(cfg: HanzoBotConfig): {
+  config: HanzoBotConfig;
   changes: string[];
 } {
   const channels = cfg.channels;
@@ -1124,8 +1124,8 @@ function hasAllowFromEntries(list?: Array<string | number>) {
   return Array.isArray(list) && list.map((v) => String(v).trim()).filter(Boolean).length > 0;
 }
 
-async function maybeRepairAllowlistPolicyAllowFrom(cfg: Hanzo BotConfig): Promise<{
-  config: Hanzo BotConfig;
+async function maybeRepairAllowlistPolicyAllowFrom(cfg: HanzoBotConfig): Promise<{
+  config: HanzoBotConfig;
   changes: string[];
 }> {
   const channels = cfg.channels;
@@ -1283,7 +1283,7 @@ async function maybeRepairAllowlistPolicyAllowFrom(cfg: Hanzo BotConfig): Promis
  * allowlist. Common after upgrades that remove external allowlist
  * file support.
  */
-function detectEmptyAllowlistPolicy(cfg: Hanzo BotConfig): string[] {
+function detectEmptyAllowlistPolicy(cfg: HanzoBotConfig): string[] {
   const channels = cfg.channels;
   if (!channels || typeof channels !== "object") {
     return [];
@@ -1451,7 +1451,7 @@ function normalizeConfiguredTrustedSafeBinDirs(entries: unknown): string[] {
   );
 }
 
-function collectExecSafeBinScopes(cfg: Hanzo BotConfig): ExecSafeBinScopeRef[] {
+function collectExecSafeBinScopes(cfg: HanzoBotConfig): ExecSafeBinScopeRef[] {
   const scopes: ExecSafeBinScopeRef[] = [];
   const globalExec = asObjectRecord(cfg.tools?.exec);
   const globalTrustedDirs = normalizeConfiguredTrustedSafeBinDirs(globalExec?.safeBinTrustedDirs);
@@ -1505,7 +1505,7 @@ function collectExecSafeBinScopes(cfg: Hanzo BotConfig): ExecSafeBinScopeRef[] {
   return scopes;
 }
 
-function scanExecSafeBinCoverage(cfg: Hanzo BotConfig): ExecSafeBinCoverageHit[] {
+function scanExecSafeBinCoverage(cfg: HanzoBotConfig): ExecSafeBinCoverageHit[] {
   const hits: ExecSafeBinCoverageHit[] = [];
   for (const scope of collectExecSafeBinScopes(cfg)) {
     const interpreterBins = new Set(listInterpreterLikeSafeBins(scope.safeBins));
@@ -1523,7 +1523,7 @@ function scanExecSafeBinCoverage(cfg: Hanzo BotConfig): ExecSafeBinCoverageHit[]
   return hits;
 }
 
-function scanExecSafeBinTrustedDirHints(cfg: Hanzo BotConfig): ExecSafeBinTrustedDirHintHit[] {
+function scanExecSafeBinTrustedDirHints(cfg: HanzoBotConfig): ExecSafeBinTrustedDirHintHit[] {
   const hits: ExecSafeBinTrustedDirHintHit[] = [];
   for (const scope of collectExecSafeBinScopes(cfg)) {
     for (const bin of scope.safeBins) {
@@ -1549,8 +1549,8 @@ function scanExecSafeBinTrustedDirHints(cfg: Hanzo BotConfig): ExecSafeBinTruste
   return hits;
 }
 
-function maybeRepairExecSafeBinProfiles(cfg: Hanzo BotConfig): {
-  config: Hanzo BotConfig;
+function maybeRepairExecSafeBinProfiles(cfg: HanzoBotConfig): {
+  config: HanzoBotConfig;
   changes: string[];
   warnings: string[];
 } {
@@ -1638,14 +1638,14 @@ function collectLegacyToolsBySenderKeyHits(
   }
 }
 
-function scanLegacyToolsBySenderKeys(cfg: Hanzo BotConfig): LegacyToolsBySenderKeyHit[] {
+function scanLegacyToolsBySenderKeys(cfg: HanzoBotConfig): LegacyToolsBySenderKeyHit[] {
   const hits: LegacyToolsBySenderKeyHit[] = [];
   collectLegacyToolsBySenderKeyHits(cfg, [], hits);
   return hits;
 }
 
-function maybeRepairLegacyToolsBySenderKeys(cfg: Hanzo BotConfig): {
-  config: Hanzo BotConfig;
+function maybeRepairLegacyToolsBySenderKeys(cfg: HanzoBotConfig): {
+  config: HanzoBotConfig;
   changes: string[];
 } {
   const next = structuredClone(cfg);
@@ -1711,7 +1711,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
   const preflight = await runDoctorConfigPreflight();
   let snapshot = preflight.snapshot;
   const baseCfg = preflight.baseConfig;
-  let cfg: Hanzo BotConfig = baseCfg;
+  let cfg: HanzoBotConfig = baseCfg;
   let candidate = structuredClone(baseCfg);
   let pendingChanges = false;
   let shouldWriteConfig = false;

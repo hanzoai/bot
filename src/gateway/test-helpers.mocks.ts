@@ -7,7 +7,7 @@ import { Mock, vi } from "vitest";
 import type { MsgContext } from "../auto-reply/templating.js";
 import type { GetReplyOptions, ReplyPayload } from "../auto-reply/types.js";
 import type { ChannelPlugin, ChannelOutboundAdapter } from "../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import type { AgentBinding } from "../config/types.agents.js";
 import type { HooksConfig } from "../config/types.hooks.js";
@@ -25,7 +25,7 @@ type StubChannelOptions = {
 type GetReplyFromConfigFn = (
   ctx: MsgContext,
   opts?: GetReplyOptions,
-  configOverride?: Hanzo BotConfig,
+  configOverride?: HanzoBotConfig,
 ) => Promise<ReplyPayload | ReplyPayload[] | undefined>;
 
 const createStubOutboundAdapter = (channelId: ChannelPlugin["id"]): ChannelOutboundAdapter => ({
@@ -492,7 +492,7 @@ vi.mock("../config/config.js", async () => {
       canvasHost,
       hooks,
       cron,
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   };
 
   const writeConfigFile = vi.fn(async (cfg: Record<string, unknown>) => {
@@ -517,7 +517,7 @@ vi.mock("../config/config.js", async () => {
       config: testState.migrationConfig ?? (raw as Record<string, unknown>),
       changes: testState.migrationChanges,
     }),
-    applyConfigOverrides: (cfg: Hanzo BotConfig) =>
+    applyConfigOverrides: (cfg: HanzoBotConfig) =>
       composeTestConfig(cfg as Record<string, unknown>),
     loadConfig: () => {
       const configPath = resolveConfigPath();
@@ -616,7 +616,7 @@ vi.mock("../plugins/loader.js", async () => {
     await vi.importActual<typeof import("../plugins/loader.js")>("../plugins/loader.js");
   return {
     ...actual,
-    loadHanzo BotPlugins: () => pluginRegistryState.registry,
+    loadHanzoBotPlugins: () => pluginRegistryState.registry,
   };
 });
 

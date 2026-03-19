@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetSubagentRegistryForTests } from "../../agents/subagent-registry.js";
 import type { SpawnSubagentResult } from "../../agents/subagent-spawn.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { installSubagentsCommandCoreMocks } from "./commands-subagents.test-mocks.js";
 
 const hoisted = vi.hoisted(() => {
@@ -45,7 +45,7 @@ function forbiddenResult(error: string): SpawnSubagentResult {
 
 const baseCfg = {
   session: { mainKey: "main", scope: "per-sender" },
-} satisfies Hanzo BotConfig;
+} satisfies HanzoBotConfig;
 
 describe("/subagents spawn command", () => {
   beforeEach(() => {

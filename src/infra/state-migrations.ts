@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { listTelegramAccountIds } from "openclaw/plugin-sdk/telegram";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   resolveLegacyStateDirs,
   resolveNewStateDir,
@@ -602,7 +602,7 @@ export async function autoMigrateLegacyStateDir(params: {
 }
 
 export async function detectLegacyStateMigrations(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
   homedir?: () => string;
 }): Promise<LegacyStateDetection> {
@@ -967,7 +967,7 @@ export async function runLegacyStateMigrations(params: {
 }
 
 export async function autoMigrateLegacyAgentDir(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
   homedir?: () => string;
   log?: MigrationLogger;
@@ -982,7 +982,7 @@ export async function autoMigrateLegacyAgentDir(params: {
 }
 
 export async function autoMigrateLegacyState(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
   homedir?: () => string;
   log?: MigrationLogger;

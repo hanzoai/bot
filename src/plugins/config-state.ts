@@ -1,5 +1,5 @@
 import { normalizeChatChannelId } from "../channels/registry.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { PluginRecord } from "./registry.js";
 import { defaultSlotIdForKey } from "./slots.js";
 
@@ -172,7 +172,7 @@ const normalizePluginEntries = (entries: unknown): NormalizedPluginsConfig["entr
 };
 
 export const normalizePluginsConfig = (
-  config?: Hanzo BotConfig["plugins"],
+  config?: HanzoBotConfig["plugins"],
 ): NormalizedPluginsConfig => {
   const memorySlot = normalizeSlotValue(config?.slots?.memory);
   return {
@@ -187,13 +187,13 @@ export const normalizePluginsConfig = (
   };
 };
 
-const hasExplicitMemorySlot = (plugins?: Hanzo BotConfig["plugins"]) =>
+const hasExplicitMemorySlot = (plugins?: HanzoBotConfig["plugins"]) =>
   Boolean(plugins?.slots && Object.prototype.hasOwnProperty.call(plugins.slots, "memory"));
 
-const hasExplicitMemoryEntry = (plugins?: Hanzo BotConfig["plugins"]) =>
+const hasExplicitMemoryEntry = (plugins?: HanzoBotConfig["plugins"]) =>
   Boolean(plugins?.entries && Object.prototype.hasOwnProperty.call(plugins.entries, "memory-core"));
 
-const hasExplicitPluginConfig = (plugins?: Hanzo BotConfig["plugins"]) => {
+const hasExplicitPluginConfig = (plugins?: HanzoBotConfig["plugins"]) => {
   if (!plugins) {
     return false;
   }
@@ -219,9 +219,9 @@ const hasExplicitPluginConfig = (plugins?: Hanzo BotConfig["plugins"]) => {
 };
 
 export function applyTestPluginDefaults(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv = process.env,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   if (!env.VITEST) {
     return cfg;
   }
@@ -257,7 +257,7 @@ export function applyTestPluginDefaults(
 }
 
 export function isTestDefaultMemorySlotDisabled(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
   if (!env.VITEST) {
@@ -309,7 +309,7 @@ export function resolveEnableState(
 }
 
 export function isBundledChannelEnabledByChannelConfig(
-  cfg: Hanzo BotConfig | undefined,
+  cfg: HanzoBotConfig | undefined,
   pluginId: string,
 ): boolean {
   if (!cfg) {
@@ -331,7 +331,7 @@ export function resolveEffectiveEnableState(params: {
   id: string;
   origin: PluginRecord["origin"];
   config: NormalizedPluginsConfig;
-  rootConfig?: Hanzo BotConfig;
+  rootConfig?: HanzoBotConfig;
   enabledByDefault?: boolean;
 }): { enabled: boolean; reason?: string } {
   const base = resolveEnableState(params.id, params.origin, params.config, params.enabledByDefault);

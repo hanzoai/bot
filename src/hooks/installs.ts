@@ -1,9 +1,9 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { HookInstallRecord } from "../config/types.hooks.js";
 
 export type HookInstallUpdate = HookInstallRecord & { hookId: string };
 
-export function recordHookInstall(cfg: Hanzo BotConfig, update: HookInstallUpdate): Hanzo BotConfig {
+export function recordHookInstall(cfg: HanzoBotConfig, update: HookInstallUpdate): HanzoBotConfig {
   const { hookId, ...record } = update;
   const installs = {
     ...cfg.hooks?.internal?.installs,

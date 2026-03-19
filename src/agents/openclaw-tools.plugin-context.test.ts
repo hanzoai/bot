@@ -12,16 +12,16 @@ vi.mock("../plugins/tools.js", () => ({
   getPluginToolMeta: vi.fn(() => undefined),
 }));
 
-import { createHanzo BotTools } from "./openclaw-tools.js";
-import { createHanzo BotCodingTools } from "./pi-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
+import { createHanzoBotCodingTools } from "./pi-tools.js";
 
-describe("createHanzo BotTools plugin context", () => {
+describe("createHanzoBotTools plugin context", () => {
   beforeEach(() => {
     resolvePluginToolsMock.mockClear();
   });
 
   it("forwards trusted requester sender identity to plugin tool context", () => {
-    createHanzo BotTools({
+    createHanzoBotTools({
       config: {} as never,
       requesterSenderId: "trusted-sender",
       senderIsOwner: true,
@@ -38,7 +38,7 @@ describe("createHanzo BotTools plugin context", () => {
   });
 
   it("forwards ephemeral sessionId to plugin tool context", () => {
-    createHanzo BotTools({
+    createHanzoBotTools({
       config: {} as never,
       agentSessionKey: "agent:main:telegram:direct:12345",
       sessionId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -55,7 +55,7 @@ describe("createHanzo BotTools plugin context", () => {
   });
 
   it("forwards gateway subagent binding for plugin tools", () => {
-    createHanzo BotTools({
+    createHanzoBotTools({
       config: {} as never,
       allowGatewaySubagentBinding: true,
     });
@@ -68,7 +68,7 @@ describe("createHanzo BotTools plugin context", () => {
   });
 
   it("forwards gateway subagent binding through coding tools", () => {
-    createHanzo BotCodingTools({
+    createHanzoBotCodingTools({
       config: {} as never,
       allowGatewaySubagentBinding: true,
     });

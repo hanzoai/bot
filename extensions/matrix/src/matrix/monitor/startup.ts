@@ -74,9 +74,9 @@ export async function runMatrixStartupMaintenance(params: {
 
   try {
     const deviceHealth = summarizeMatrixDeviceHealth(await params.client.listOwnDevices());
-    if (deviceHealth.staleHanzo BotDevices.length > 0) {
+    if (deviceHealth.staleHanzoBotDevices.length > 0) {
       params.logger.warn(
-        `matrix: stale Hanzo Bot devices detected for ${params.auth.userId}: ${deviceHealth.staleHanzo BotDevices.map((device) => device.deviceId).join(", ")}. Run 'openclaw matrix devices prune-stale --account ${params.effectiveAccountId}' to keep encrypted-room trust healthy.`,
+        `matrix: stale Hanzo Bot devices detected for ${params.auth.userId}: ${deviceHealth.staleHanzoBotDevices.map((device) => device.deviceId).join(", ")}. Run 'openclaw matrix devices prune-stale --account ${params.effectiveAccountId}' to keep encrypted-room trust healthy.`,
       );
     }
   } catch (err) {

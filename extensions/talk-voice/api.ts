@@ -1,2 +1,2 @@
 export { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-export type { Hanzo BotPluginApi } from "openclaw/plugin-sdk/core";
+export type { HanzoBotPluginApi } from "openclaw/plugin-sdk/core";

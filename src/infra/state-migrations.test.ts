@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveChannelAllowFromPath } from "../pairing/pairing-store.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import { detectLegacyStateMigrations, runLegacyStateMigrations } from "./state-migrations.js";
@@ -9,7 +9,7 @@ import { detectLegacyStateMigrations, runLegacyStateMigrations } from "./state-m
 const tempDirs = createTrackedTempDirs();
 const createTempDir = () => tempDirs.make("openclaw-state-migrations-test-");
 
-function createConfig(): Hanzo BotConfig {
+function createConfig(): HanzoBotConfig {
   return {
     agents: {
       list: [{ id: "worker-1", default: true }],
@@ -25,7 +25,7 @@ function createConfig(): Hanzo BotConfig {
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 function createEnv(stateDir: string): NodeJS.ProcessEnv {

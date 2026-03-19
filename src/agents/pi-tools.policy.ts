@@ -1,6 +1,6 @@
 import { getChannelPlugin } from "../channels/plugins/index.js";
 import { DEFAULT_SUBAGENT_MAX_SPAWN_DEPTH } from "../config/agent-limits.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveChannelGroupToolsPolicy } from "../config/group-policy.js";
 import type { AgentToolsConfig } from "../config/types.tools.js";
 import { normalizeAgentId } from "../routing/session-key.js";
@@ -73,7 +73,7 @@ function resolveSubagentDenyListForRole(role: SubagentSessionRole): string[] {
   return [...SUBAGENT_TOOL_DENY_ALWAYS];
 }
 
-export function resolveSubagentToolPolicy(cfg?: Hanzo BotConfig, depth?: number): SandboxToolPolicy {
+export function resolveSubagentToolPolicy(cfg?: HanzoBotConfig, depth?: number): SandboxToolPolicy {
   const configured = cfg?.tools?.subagents?.tools;
   const maxSpawnDepth =
     cfg?.agents?.defaults?.subagents?.maxSpawnDepth ?? DEFAULT_SUBAGENT_MAX_SPAWN_DEPTH;
@@ -93,7 +93,7 @@ export function resolveSubagentToolPolicy(cfg?: Hanzo BotConfig, depth?: number)
 }
 
 export function resolveSubagentToolPolicyForSession(
-  cfg: Hanzo BotConfig | undefined,
+  cfg: HanzoBotConfig | undefined,
   sessionKey: string,
 ): SandboxToolPolicy {
   const configured = cfg?.tools?.subagents?.tools;
@@ -199,7 +199,7 @@ function resolveProviderToolPolicy(params: {
   return undefined;
 }
 
-function resolveExplicitProfileAlsoAllow(tools?: Hanzo BotConfig["tools"]): string[] | undefined {
+function resolveExplicitProfileAlsoAllow(tools?: HanzoBotConfig["tools"]): string[] | undefined {
   return Array.isArray(tools?.alsoAllow) ? tools.alsoAllow : undefined;
 }
 
@@ -208,7 +208,7 @@ function hasExplicitToolSection(section: unknown): boolean {
 }
 
 function resolveImplicitProfileAlsoAllow(params: {
-  globalTools?: Hanzo BotConfig["tools"];
+  globalTools?: HanzoBotConfig["tools"];
   agentTools?: AgentToolsConfig;
 }): string[] | undefined {
   const implicit = new Set<string>();
@@ -231,7 +231,7 @@ function resolveImplicitProfileAlsoAllow(params: {
 }
 
 export function resolveEffectiveToolPolicy(params: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   sessionKey?: string;
   agentId?: string;
   modelProvider?: string;
@@ -288,7 +288,7 @@ export function resolveEffectiveToolPolicy(params: {
 }
 
 export function resolveGroupToolPolicy(params: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   sessionKey?: string;
   spawnedBy?: string | null;
   messageProvider?: string;

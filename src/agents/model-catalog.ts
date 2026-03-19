@@ -1,7 +1,7 @@
-import { type Hanzo BotConfig, loadConfig } from "../config/config.js";
+import { type HanzoBotConfig, loadConfig } from "../config/config.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
-import { resolveHanzo BotAgentDir } from "./agent-paths.js";
-import { ensureHanzo BotModelsJson } from "./models-config.js";
+import { resolveHanzoBotAgentDir } from "./agent-paths.js";
+import { ensureHanzoBotModelsJson } from "./models-config.js";
 
 const log = createSubsystemLogger("model-catalog");
 
@@ -58,7 +58,7 @@ function normalizeConfiguredModelInput(input: unknown): ModelInputType[] | undef
   return normalized.length > 0 ? normalized : undefined;
 }
 
-function readConfiguredOptInProviderModels(config: Hanzo BotConfig): ModelCatalogEntry[] {
+function readConfiguredOptInProviderModels(config: HanzoBotConfig): ModelCatalogEntry[] {
   const providers = config.models?.providers;
   if (!providers || typeof providers !== "object") {
     return [];
@@ -107,7 +107,7 @@ function readConfiguredOptInProviderModels(config: Hanzo BotConfig): ModelCatalo
 }
 
 function mergeConfiguredOptInProviderModels(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   models: ModelCatalogEntry[];
 }): void {
   const configured = readConfiguredOptInProviderModels(params.config);
@@ -143,7 +143,7 @@ export function __setModelCatalogImportForTest(loader?: () => Promise<PiSdkModul
 }
 
 export async function loadModelCatalog(params?: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   useCache?: boolean;
 }): Promise<ModelCatalogEntry[]> {
   if (params?.useCache === false) {
@@ -165,13 +165,13 @@ export async function loadModelCatalog(params?: {
       });
     try {
       const cfg = params?.config ?? loadConfig();
-      await ensureHanzo BotModelsJson(cfg);
+      await ensureHanzoBotModelsJson(cfg);
       // IMPORTANT: keep the dynamic import *inside* the try/catch.
       // If this fails once (e.g. during a pnpm install that temporarily swaps node_modules),
       // we must not poison the cache with a rejected promise (otherwise all channel handlers
       // will keep failing until restart).
       const piSdk = await importPiSdk();
-      const agentDir = resolveHanzo BotAgentDir();
+      const agentDir = resolveHanzoBotAgentDir();
       const [{ shouldSuppressBuiltInModel }, { augmentModelCatalogWithProviderPlugins }] =
         await Promise.all([loadModelSuppression(), loadProviderRuntime()]);
       const { join } = await import("node:path");

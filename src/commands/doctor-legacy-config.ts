@@ -1,5 +1,5 @@
 import { shouldMoveSingleAccountChannelKey } from "../channels/plugins/setup-helpers.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   formatSlackStreamingBooleanMigrationMessage,
   formatSlackStreamModeMigrationMessage,
@@ -10,14 +10,14 @@ import {
 } from "../config/discord-preview-streaming.js";
 import { DEFAULT_ACCOUNT_ID } from "../routing/session-key.js";
 
-export function normalizeCompatibilityConfigValues(cfg: Hanzo BotConfig): {
-  config: Hanzo BotConfig;
+export function normalizeCompatibilityConfigValues(cfg: HanzoBotConfig): {
+  config: HanzoBotConfig;
   changes: string[];
 } {
   const changes: string[] = [];
   const NANO_BANANA_SKILL_KEY = "nano-banana-pro";
   const NANO_BANANA_MODEL = "google/gemini-3-pro-image-preview";
-  let next: Hanzo BotConfig = cfg;
+  let next: HanzoBotConfig = cfg;
 
   const isRecord = (value: unknown): value is Record<string, unknown> =>
     Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -420,7 +420,7 @@ export function normalizeCompatibilityConfigValues(cfg: Hanzo BotConfig): {
     }
     next = {
       ...next,
-      channels: nextChannels as Hanzo BotConfig["channels"],
+      channels: nextChannels as HanzoBotConfig["channels"],
     };
   };
 
@@ -466,7 +466,7 @@ export function normalizeCompatibilityConfigValues(cfg: Hanzo BotConfig): {
 
     next = {
       ...next,
-      browser: migratedBrowser as Hanzo BotConfig["browser"],
+      browser: migratedBrowser as HanzoBotConfig["browser"],
     };
     changes.push(
       `Moved browser.ssrfPolicy.allowPrivateNetwork → browser.ssrfPolicy.dangerouslyAllowPrivateNetwork (${String(resolvedDangerousAllowPrivateNetwork)}).`,
@@ -475,9 +475,9 @@ export function normalizeCompatibilityConfigValues(cfg: Hanzo BotConfig): {
 
   const normalizeLegacyNanoBananaSkill = () => {
     type ModelProviderEntry = Partial<
-      NonNullable<NonNullable<Hanzo BotConfig["models"]>["providers"]>[string]
+      NonNullable<NonNullable<HanzoBotConfig["models"]>["providers"]>[string]
     >;
-    type ModelsConfigPatch = Partial<NonNullable<Hanzo BotConfig["models"]>>;
+    type ModelsConfigPatch = Partial<NonNullable<HanzoBotConfig["models"]>>;
 
     const rawSkills = next.skills;
     if (!isRecord(rawSkills)) {
@@ -562,10 +562,10 @@ export function normalizeCompatibilityConfigValues(cfg: Hanzo BotConfig): {
     if (!hasGoogleApiKey && legacyApiKey) {
       rawGoogle.apiKey = legacyApiKey;
       rawProviders.google = rawGoogle;
-      rawModels.providers = rawProviders as NonNullable<Hanzo BotConfig["models"]>["providers"];
+      rawModels.providers = rawProviders as NonNullable<HanzoBotConfig["models"]>["providers"];
       next = {
         ...next,
-        models: rawModels as Hanzo BotConfig["models"],
+        models: rawModels as HanzoBotConfig["models"],
       };
       changes.push(
         `Moved skills.entries.${NANO_BANANA_SKILL_KEY}.${legacyEnvApiKey ? "env.GEMINI_API_KEY" : "apiKey"} → models.providers.google.apiKey.`,

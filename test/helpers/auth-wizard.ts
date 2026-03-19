@@ -74,7 +74,7 @@ export function createAuthTestLifecycle(envKeys: string[]): AuthTestLifecycle {
   };
 }
 
-export function requireHanzo BotAgentDir(): string {
+export function requireHanzoBotAgentDir(): string {
   const agentDir = process.env.BOT_AGENT_DIR;
   if (!agentDir) {
     throw new Error("BOT_AGENT_DIR not set");

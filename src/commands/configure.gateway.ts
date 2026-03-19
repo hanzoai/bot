@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveGatewayPort } from "../config/config.js";
 import { isValidEnvSecretRefId, type SecretInput } from "../config/types.secrets.js";
 import {
@@ -25,10 +25,10 @@ type GatewayAuthChoice = "token" | "password" | "trusted-proxy";
 type GatewayTokenInputMode = "plaintext" | "ref";
 
 export async function promptGatewayConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   runtime: RuntimeEnv,
 ): Promise<{
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   port: number;
   token?: string;
 }> {

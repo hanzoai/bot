@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { MANIFEST_KEY } from "../compat/legacy-names.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { openBoundaryFileSync } from "../infra/boundary-file-read.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { isPathInsideWithRealpath } from "../security/scan-paths.js";
@@ -11,7 +11,7 @@ import { shouldIncludeHook } from "./config.js";
 import {
   parseFrontmatter,
   resolveHookInvocationPolicy,
-  resolveHanzo BotMetadata,
+  resolveHanzoBotMetadata,
 } from "./frontmatter.js";
 import { resolvePluginHookDirs } from "./plugin-hooks.js";
 import type {
@@ -30,7 +30,7 @@ const log = createSubsystemLogger("hooks/workspace");
 
 function filterHookEntries(
   entries: HookEntry[],
-  config?: Hanzo BotConfig,
+  config?: HanzoBotConfig,
   eligibility?: HookEligibilityContext,
 ): HookEntry[] {
   return entries.filter((entry) => shouldIncludeHook({ entry, config, eligibility }));
@@ -228,7 +228,7 @@ export function loadHookEntriesFromDir(params: {
         pluginId: params.pluginId,
       },
       frontmatter,
-      metadata: resolveHanzo BotMetadata(frontmatter),
+      metadata: resolveHanzoBotMetadata(frontmatter),
       invocation: resolveHookInvocationPolicy(frontmatter),
     };
     return entry;
@@ -238,7 +238,7 @@ export function loadHookEntriesFromDir(params: {
 function loadHookEntries(
   workspaceDir: string,
   opts?: {
-    config?: Hanzo BotConfig;
+    config?: HanzoBotConfig;
     managedHooksDir?: string;
     bundledHooksDir?: string;
   },
@@ -308,7 +308,7 @@ function loadHookEntries(
 export function buildWorkspaceHookSnapshot(
   workspaceDir: string,
   opts?: {
-    config?: Hanzo BotConfig;
+    config?: HanzoBotConfig;
     managedHooksDir?: string;
     bundledHooksDir?: string;
     entries?: HookEntry[];
@@ -332,7 +332,7 @@ export function buildWorkspaceHookSnapshot(
 export function loadWorkspaceHookEntries(
   workspaceDir: string,
   opts?: {
-    config?: Hanzo BotConfig;
+    config?: HanzoBotConfig;
     managedHooksDir?: string;
     bundledHooksDir?: string;
   },

@@ -3,7 +3,7 @@ import { listEnabledZaloAccounts } from "./accounts.js";
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageActionName,
-  Hanzo BotConfig,
+  HanzoBotConfig,
 } from "./runtime-api.js";
 import { extractToolSend, jsonResult, readStringParam } from "./runtime-api.js";
 
@@ -14,7 +14,7 @@ const loadZaloActionsRuntime = createLazyRuntimeNamedExport(
 
 const providerId = "zalo";
 
-function listEnabledAccounts(cfg: Hanzo BotConfig) {
+function listEnabledAccounts(cfg: HanzoBotConfig) {
   return listEnabledZaloAccounts(cfg).filter(
     (account) => account.enabled && account.tokenSource !== "none",
   );

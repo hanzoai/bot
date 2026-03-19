@@ -1,4 +1,4 @@
-export type { Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
 export type { TelegramActionConfig } from "../config/types.js";
 export type { ChannelPlugin } from "./channel-plugin-common.js";
 export { buildChannelConfigSchema, getChatChannelMeta } from "./channel-plugin-common.js";

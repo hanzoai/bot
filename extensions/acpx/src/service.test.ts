@@ -5,7 +5,7 @@ import {
   getAcpRuntimeBackend,
   requireAcpRuntimeBackend,
 } from "../../../src/acp/runtime/registry.js";
-import type { AcpRuntime, Hanzo BotPluginServiceContext } from "../runtime-api.js";
+import type { AcpRuntime, HanzoBotPluginServiceContext } from "../runtime-api.js";
 import { ACPX_BUNDLED_BIN, ACPX_PINNED_VERSION } from "./config.js";
 import { createAcpxRuntimeService } from "./service.js";
 
@@ -54,8 +54,8 @@ function createRuntimeStub(healthy: boolean): {
 }
 
 function createServiceContext(
-  overrides: Partial<Hanzo BotPluginServiceContext> = {},
-): Hanzo BotPluginServiceContext {
+  overrides: Partial<HanzoBotPluginServiceContext> = {},
+): HanzoBotPluginServiceContext {
   return {
     config: {},
     workspaceDir: "/tmp/workspace",

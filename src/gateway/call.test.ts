@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { captureEnv } from "../test-utils/env.js";
 import {
   loadConfigMock as loadConfig,
@@ -254,7 +254,7 @@ describe("callGateway url resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
     resolveGatewayPort.mockReturnValue(18789);
     pickPrimaryTailnetIPv4.mockReturnValue(undefined);
     process.env.BOT_GATEWAY_URL = "wss://gateway-in-container.internal:9443/ws";
@@ -782,7 +782,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -805,7 +805,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -828,7 +828,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -851,7 +851,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -878,7 +878,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await expect(callGateway({ method: "health" })).rejects.toThrow("gateway.auth.token");
   });
@@ -900,7 +900,7 @@ describe("callGateway password resolution", () => {
             default: { source: "env" },
           },
         },
-      } as unknown as Hanzo BotConfig);
+      } as unknown as HanzoBotConfig);
 
       await callGateway({ method: "health" });
 
@@ -928,7 +928,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -952,7 +952,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -976,7 +976,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -1000,7 +1000,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -1026,7 +1026,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -1051,7 +1051,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -1076,7 +1076,7 @@ describe("callGateway password resolution", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig);
+    } as unknown as HanzoBotConfig);
 
     await callGateway({ method: "health" });
 
@@ -1103,7 +1103,7 @@ describe("callGateway password resolution", () => {
             default: { source: "env" },
           },
         },
-      } as unknown as Hanzo BotConfig);
+      } as unknown as HanzoBotConfig);
 
       await callGateway({ method: "health" });
 

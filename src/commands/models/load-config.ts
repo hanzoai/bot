@@ -4,17 +4,17 @@ import {
   loadConfig,
   readConfigFileSnapshotForWrite,
   setRuntimeConfigSnapshot,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "../../config/config.js";
 import type { RuntimeEnv } from "../../runtime.js";
 
 export type LoadedModelsConfig = {
-  sourceConfig: Hanzo BotConfig;
-  resolvedConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
+  resolvedConfig: HanzoBotConfig;
   diagnostics: string[];
 };
 
-async function loadSourceConfigSnapshot(fallback: Hanzo BotConfig): Promise<Hanzo BotConfig> {
+async function loadSourceConfigSnapshot(fallback: HanzoBotConfig): Promise<HanzoBotConfig> {
   try {
     const { snapshot } = await readConfigFileSnapshotForWrite();
     if (snapshot.valid) {
@@ -53,6 +53,6 @@ export async function loadModelsConfigWithSource(params: {
 export async function loadModelsConfig(params: {
   commandName: string;
   runtime?: RuntimeEnv;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   return (await loadModelsConfigWithSource(params)).resolvedConfig;
 }

@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import {
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   DEFAULT_GATEWAY_PORT,
   type HooksGmailTailscaleMode,
   resolveGatewayPort,
@@ -98,7 +98,7 @@ export function buildDefaultHookUrl(
 }
 
 export function resolveGmailHookRuntimeConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   overrides: GmailHookOverrides,
 ): { ok: true; value: GmailHookRuntimeConfig } | { ok: false; error: string } {
   const hooks = cfg.hooks;

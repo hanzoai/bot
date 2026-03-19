@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { isRecord } from "../utils.js";
 import {
   mergeProviders,
@@ -13,7 +13,7 @@ import {
   type ProviderConfig,
 } from "./models-config.providers.js";
 
-type ModelsConfig = NonNullable<Hanzo BotConfig["models"]>;
+type ModelsConfig = NonNullable<HanzoBotConfig["models"]>;
 
 export type ModelsJsonPlan =
   | {
@@ -28,7 +28,7 @@ export type ModelsJsonPlan =
     };
 
 async function resolveProvidersForModelsJson(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir: string;
   env: NodeJS.ProcessEnv;
 }): Promise<Record<string, ProviderConfig>> {
@@ -47,7 +47,7 @@ async function resolveProvidersForModelsJson(params: {
 }
 
 function resolveExplicitBaseUrlProviders(
-  providers: Hanzo BotConfig["models"] | undefined,
+  providers: HanzoBotConfig["models"] | undefined,
 ): ReadonlySet<string> {
   return new Set(
     Object.entries(providers?.providers ?? {})
@@ -86,9 +86,9 @@ async function resolveProvidersForMode(params: {
   });
 }
 
-export async function planHanzo BotModelsJson(params: {
-  cfg: Hanzo BotConfig;
-  sourceConfigForSecrets?: Hanzo BotConfig;
+export async function planHanzoBotModelsJson(params: {
+  cfg: HanzoBotConfig;
+  sourceConfigForSecrets?: HanzoBotConfig;
   agentDir: string;
   env: NodeJS.ProcessEnv;
   existingRaw: string;

@@ -1,7 +1,7 @@
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import type { SessionAcpMeta } from "../../../config/sessions/types.js";
 
-export function createAcpTestConfig(overrides?: Partial<Hanzo BotConfig>): Hanzo BotConfig {
+export function createAcpTestConfig(overrides?: Partial<HanzoBotConfig>): HanzoBotConfig {
   return {
     acp: {
       enabled: true,
@@ -11,7 +11,7 @@ export function createAcpTestConfig(overrides?: Partial<Hanzo BotConfig>): Hanzo
       },
     },
     ...overrides,
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 export function createAcpSessionMeta(overrides?: Partial<SessionAcpMeta>): SessionAcpMeta {

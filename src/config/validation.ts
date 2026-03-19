@@ -25,8 +25,8 @@ import {
   normalizeLegacyWebSearchConfig,
 } from "./legacy-web-search.js";
 import { findLegacyConfigIssues } from "./legacy.js";
-import type { Hanzo BotConfig, ConfigValidationIssue } from "./types.js";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import type { HanzoBotConfig, ConfigValidationIssue } from "./types.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
 const LEGACY_REMOVED_PLUGIN_IDS = new Set(["google-antigravity-auth", "google-gemini-cli-auth"]);
 
@@ -149,7 +149,7 @@ function isWorkspaceAvatarPath(value: string, workspaceDir: string): boolean {
   return isPathWithinRoot(workspaceRoot, resolved);
 }
 
-function validateIdentityAvatar(config: Hanzo BotConfig): ConfigValidationIssue[] {
+function validateIdentityAvatar(config: HanzoBotConfig): ConfigValidationIssue[] {
   const agents = config.agents?.list;
   if (!Array.isArray(agents) || agents.length === 0) {
     return [];
@@ -199,7 +199,7 @@ function validateIdentityAvatar(config: Hanzo BotConfig): ConfigValidationIssue[
   return issues;
 }
 
-function validateGatewayTailscaleBind(config: Hanzo BotConfig): ConfigValidationIssue[] {
+function validateGatewayTailscaleBind(config: HanzoBotConfig): ConfigValidationIssue[] {
   const tailscaleMode = config.gateway?.tailscale?.mode ?? "off";
   if (tailscaleMode !== "serve" && tailscaleMode !== "funnel") {
     return [];
@@ -232,7 +232,7 @@ function validateGatewayTailscaleBind(config: Hanzo BotConfig): ConfigValidation
  */
 export function validateConfigObjectRaw(
   raw: unknown,
-): { ok: true; config: Hanzo BotConfig } | { ok: false; issues: ConfigValidationIssue[] } {
+): { ok: true; config: HanzoBotConfig } | { ok: false; issues: ConfigValidationIssue[] } {
   const normalizedRaw = normalizeLegacyWebSearchConfig(raw);
   const legacyIssues = findLegacyConfigIssues(normalizedRaw);
   if (legacyIssues.length > 0) {
@@ -244,14 +244,14 @@ export function validateConfigObjectRaw(
       })),
     };
   }
-  const validated = Hanzo BotSchema.safeParse(normalizedRaw);
+  const validated = HanzoBotSchema.safeParse(normalizedRaw);
   if (!validated.success) {
     return {
       ok: false,
       issues: validated.error.issues.map((issue) => mapZodIssueToConfigIssue(issue)),
     };
   }
-  const duplicates = findDuplicateAgentDirs(validated.data as Hanzo BotConfig);
+  const duplicates = findDuplicateAgentDirs(validated.data as HanzoBotConfig);
   if (duplicates.length > 0) {
     return {
       ok: false,
@@ -263,23 +263,23 @@ export function validateConfigObjectRaw(
       ],
     };
   }
-  const avatarIssues = validateIdentityAvatar(validated.data as Hanzo BotConfig);
+  const avatarIssues = validateIdentityAvatar(validated.data as HanzoBotConfig);
   if (avatarIssues.length > 0) {
     return { ok: false, issues: avatarIssues };
   }
-  const gatewayTailscaleBindIssues = validateGatewayTailscaleBind(validated.data as Hanzo BotConfig);
+  const gatewayTailscaleBindIssues = validateGatewayTailscaleBind(validated.data as HanzoBotConfig);
   if (gatewayTailscaleBindIssues.length > 0) {
     return { ok: false, issues: gatewayTailscaleBindIssues };
   }
   return {
     ok: true,
-    config: validated.data as Hanzo BotConfig,
+    config: validated.data as HanzoBotConfig,
   };
 }
 
 export function validateConfigObject(
   raw: unknown,
-): { ok: true; config: Hanzo BotConfig } | { ok: false; issues: ConfigValidationIssue[] } {
+): { ok: true; config: HanzoBotConfig } | { ok: false; issues: ConfigValidationIssue[] } {
   const result = validateConfigObjectRaw(raw);
   if (!result.ok) {
     return result;
@@ -293,7 +293,7 @@ export function validateConfigObject(
 type ValidateConfigWithPluginsResult =
   | {
       ok: true;
-      config: Hanzo BotConfig;
+      config: HanzoBotConfig;
       warnings: ConfigValidationIssue[];
     }
   | {

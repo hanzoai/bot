@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import type { Hanzo BotPluginApi } from "../runtime-api.js";
+import type { HanzoBotPluginApi } from "../runtime-api.js";
 import { registerFeishuBitableTools } from "./bitable.js";
 import { registerFeishuDriveTools } from "./drive.js";
 import { registerFeishuPermTools } from "./perm.js";
@@ -26,7 +26,7 @@ function createConfig(params: {
     perm?: boolean;
   };
   defaultAccount?: string;
-}): Hanzo BotPluginApi["config"] {
+}): HanzoBotPluginApi["config"] {
   return {
     channels: {
       feishu: {
@@ -46,7 +46,7 @@ function createConfig(params: {
         },
       },
     },
-  } as Hanzo BotPluginApi["config"];
+  } as HanzoBotPluginApi["config"];
 }
 
 describe("feishu tool account routing", () => {

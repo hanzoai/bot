@@ -1,5 +1,5 @@
 import type * as Lark from "@larksuiteoapi/node-sdk";
-import type { Hanzo BotPluginApi } from "../runtime-api.js";
+import type { HanzoBotPluginApi } from "../runtime-api.js";
 import { listEnabledFeishuAccounts } from "./accounts.js";
 import { FeishuDriveSchema, type FeishuDriveParams } from "./drive-schema.js";
 import { createFeishuToolClient, resolveAnyEnabledFeishuToolsConfig } from "./tool-account.js";
@@ -163,7 +163,7 @@ async function deleteFile(client: Lark.Client, fileToken: string, type: string) 
 
 // ============ Tool Registration ============
 
-export function registerFeishuDriveTools(api: Hanzo BotPluginApi) {
+export function registerFeishuDriveTools(api: HanzoBotPluginApi) {
   if (!api.config) {
     api.logger.debug?.("feishu_drive: No config available, skipping drive tools");
     return;

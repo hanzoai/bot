@@ -14,7 +14,7 @@ import type {
   ChannelGroupContext,
   ChannelMessageActionAdapter,
   ChannelPlugin,
-  Hanzo BotConfig,
+  HanzoBotConfig,
   GroupToolPolicyConfig,
 } from "../runtime-api.js";
 import {
@@ -155,11 +155,11 @@ function resolveZalouserQrProfile(accountId?: string | null): string {
   return normalized;
 }
 
-function resolveZalouserOutboundChunkMode(cfg: Hanzo BotConfig, accountId?: string) {
+function resolveZalouserOutboundChunkMode(cfg: HanzoBotConfig, accountId?: string) {
   return getZalouserRuntime().channel.text.resolveChunkMode(cfg, "zalouser", accountId);
 }
 
-function resolveZalouserOutboundTextChunkLimit(cfg: Hanzo BotConfig, accountId?: string) {
+function resolveZalouserOutboundTextChunkLimit(cfg: HanzoBotConfig, accountId?: string) {
   return getZalouserRuntime().channel.text.resolveTextChunkLimit(cfg, "zalouser", accountId, {
     fallbackLimit: ZALOUSER_TEXT_CHUNK_LIMIT,
   });

@@ -6,7 +6,7 @@ import {
 import {
   applyAgentDefaultModelPrimary,
   applyProviderConfigWithDefaultModel,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export { CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF };
@@ -39,9 +39,9 @@ export function buildCloudflareAiGatewayConfigPatch(params: {
 }
 
 export function applyCloudflareAiGatewayProviderConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   params?: { accountId?: string; gatewayId?: string },
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const models = { ...cfg.agents?.defaults?.models };
   models[CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF] = {
     ...models[CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF],
@@ -83,9 +83,9 @@ export function applyCloudflareAiGatewayProviderConfig(
 }
 
 export function applyCloudflareAiGatewayConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   params?: { accountId?: string; gatewayId?: string },
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return applyAgentDefaultModelPrimary(
     applyCloudflareAiGatewayProviderConfig(cfg, params),
     CLOUDFLARE_AI_GATEWAY_DEFAULT_MODEL_REF,

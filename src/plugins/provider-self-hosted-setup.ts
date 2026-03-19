@@ -5,7 +5,7 @@ import {
   SELF_HOSTED_DEFAULT_COST,
   SELF_HOSTED_DEFAULT_MAX_TOKENS,
 } from "../agents/self-hosted-provider-defaults.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { normalizeOptionalSecretInput } from "../utils/normalize-secret-input.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import { applyAuthProfileConfig } from "./provider-auth-helpers.js";
@@ -22,7 +22,7 @@ export {
   SELF_HOSTED_DEFAULT_MAX_TOKENS,
 } from "../agents/self-hosted-provider-defaults.js";
 
-export function applyProviderDefaultModel(cfg: Hanzo BotConfig, modelRef: string): Hanzo BotConfig {
+export function applyProviderDefaultModel(cfg: HanzoBotConfig, modelRef: string): HanzoBotConfig {
   const existingModel = cfg.agents?.defaults?.model;
   const fallbacks =
     existingModel && typeof existingModel === "object" && "fallbacks" in existingModel
@@ -45,7 +45,7 @@ export function applyProviderDefaultModel(cfg: Hanzo BotConfig, modelRef: string
 }
 
 function buildOpenAICompatibleSelfHostedProviderConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   providerId: string;
   baseUrl: string;
   providerApiKey: string;
@@ -54,7 +54,7 @@ function buildOpenAICompatibleSelfHostedProviderConfig(params: {
   reasoning?: boolean;
   contextWindow?: number;
   maxTokens?: number;
-}): { config: Hanzo BotConfig; modelId: string; modelRef: string; profileId: string } {
+}): { config: HanzoBotConfig; modelId: string; modelRef: string; profileId: string } {
   const modelRef = `${params.providerId}/${params.modelId}`;
   const profileId = `${params.providerId}:default`;
   return {
@@ -91,7 +91,7 @@ function buildOpenAICompatibleSelfHostedProviderConfig(params: {
 }
 
 type OpenAICompatibleSelfHostedProviderSetupParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
   providerId: string;
   providerLabel: string;
@@ -105,7 +105,7 @@ type OpenAICompatibleSelfHostedProviderSetupParams = {
 };
 
 type OpenAICompatibleSelfHostedProviderPromptResult = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   credential: AuthProfileCredential;
   modelId: string;
   modelRef: string;
@@ -240,7 +240,7 @@ export async function configureOpenAICompatibleSelfHostedProviderNonInteractive(
   reasoning?: boolean;
   contextWindow?: number;
   maxTokens?: number;
-}): Promise<Hanzo BotConfig | null> {
+}): Promise<HanzoBotConfig | null> {
   const baseUrl = (
     normalizeOptionalSecretInput(params.ctx.opts.customBaseUrl) ?? params.defaultBaseUrl
   ).replace(/\/+$/, "");

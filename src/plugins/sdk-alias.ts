@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveHanzo BotPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveHanzoBotPackageRootSync } from "../infra/openclaw-root.js";
 
 type PluginSdkAliasCandidateKind = "dist" | "src";
 
@@ -38,7 +38,7 @@ function listPluginSdkSubpathsFromPackageJson(pkg: PluginSdkPackageJson): string
     .toSorted();
 }
 
-function hasTrustedHanzo BotRootIndicator(params: {
+function hasTrustedHanzoBotRootIndicator(params: {
   packageRoot: string;
   packageJson: PluginSdkPackageJson;
 }): boolean {
@@ -51,14 +51,14 @@ function hasTrustedHanzo BotRootIndicator(params: {
     return false;
   }
   const hasCliEntryExport = Object.prototype.hasOwnProperty.call(packageExports, "./cli-entry");
-  const hasHanzo BotBin =
+  const hasHanzoBotBin =
     (typeof params.packageJson.bin === "string" &&
       params.packageJson.bin.toLowerCase().includes("@hanzo/bot")) ||
     (typeof params.packageJson.bin === "object" &&
       params.packageJson.bin !== null &&
       typeof params.packageJson.bin.openclaw === "string");
-  const hasHanzo BotEntrypoint = fs.existsSync(path.join(params.packageRoot, "hanzo-bot.mjs"));
-  return hasCliEntryExport || hasHanzo BotBin || hasHanzo BotEntrypoint;
+  const hasHanzoBotEntrypoint = fs.existsSync(path.join(params.packageRoot, "hanzo-bot.mjs"));
+  return hasCliEntryExport || hasHanzoBotBin || hasHanzoBotEntrypoint;
 }
 
 function readPluginSdkSubpathsFromPackageRoot(packageRoot: string): string[] | null {
@@ -66,7 +66,7 @@ function readPluginSdkSubpathsFromPackageRoot(packageRoot: string): string[] | n
   if (!pkg) {
     return null;
   }
-  if (!hasTrustedHanzo BotRootIndicator({ packageRoot, packageJson: pkg })) {
+  if (!hasTrustedHanzoBotRootIndicator({ packageRoot, packageJson: pkg })) {
     return null;
   }
   const subpaths = listPluginSdkSubpathsFromPackageJson(pkg);
@@ -93,13 +93,13 @@ export function resolveLoaderPackageRoot(
   params: LoaderModuleResolveParams & { modulePath: string },
 ): string | null {
   const cwd = params.cwd ?? path.dirname(params.modulePath);
-  const fromModulePath = resolveHanzo BotPackageRootSync({ cwd });
+  const fromModulePath = resolveHanzoBotPackageRootSync({ cwd });
   if (fromModulePath) {
     return fromModulePath;
   }
   const argv1 = params.argv1 ?? process.argv[1];
   const moduleUrl = params.moduleUrl ?? (params.modulePath ? undefined : import.meta.url);
-  return resolveHanzo BotPackageRootSync({
+  return resolveHanzoBotPackageRootSync({
     cwd,
     ...(argv1 ? { argv1 } : {}),
     ...(moduleUrl ? { moduleUrl } : {}),
@@ -110,10 +110,10 @@ function resolveLoaderPluginSdkPackageRoot(
   params: LoaderModuleResolveParams & { modulePath: string },
 ): string | null {
   const cwd = params.cwd ?? path.dirname(params.modulePath);
-  const fromCwd = resolveHanzo BotPackageRootSync({ cwd });
+  const fromCwd = resolveHanzoBotPackageRootSync({ cwd });
   const fromExplicitHints =
     params.argv1 || params.moduleUrl
-      ? resolveHanzo BotPackageRootSync({
+      ? resolveHanzoBotPackageRootSync({
           cwd,
           ...(params.argv1 ? { argv1: params.argv1 } : {}),
           ...(params.moduleUrl ? { moduleUrl: params.moduleUrl } : {}),

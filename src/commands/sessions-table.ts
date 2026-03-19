@@ -1,7 +1,7 @@
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../agents/defaults.js";
 import { resolveConfiguredModelRef } from "../agents/model-selection.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { Hanzo BotConfig } from "../config/types.openclaw.js";
+import type { HanzoBotConfig } from "../config/types.openclaw.js";
 import { resolveSessionModelRef } from "../gateway/session-utils.js";
 import { formatTimeAgo } from "../infra/format-time/format-relative.ts";
 import { parseAgentSessionKey } from "../routing/session-key.js";
@@ -70,7 +70,7 @@ export function toSessionDisplayRows(store: Record<string, SessionEntry>): Sessi
     .toSorted((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
 }
 
-export function resolveSessionDisplayDefaults(cfg: Hanzo BotConfig): SessionDisplayDefaults {
+export function resolveSessionDisplayDefaults(cfg: HanzoBotConfig): SessionDisplayDefaults {
   const resolved = resolveConfiguredModelRef({
     cfg,
     defaultProvider: DEFAULT_PROVIDER,
@@ -82,7 +82,7 @@ export function resolveSessionDisplayDefaults(cfg: Hanzo BotConfig): SessionDisp
 }
 
 export function resolveSessionDisplayModel(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   row: Pick<
     SessionDisplayRow,
     "key" | "model" | "modelProvider" | "modelOverride" | "providerOverride"

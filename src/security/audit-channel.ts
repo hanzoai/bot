@@ -8,7 +8,7 @@ import type { ChannelId } from "../channels/plugins/types.js";
 import { inspectReadOnlyChannelAccount } from "../channels/read-only-account-inspect.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { resolveNativeCommandsEnabled, resolveNativeSkillsEnabled } from "../config/commands.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { isDangerousNameMatchingEnabled } from "../config/dangerous-name-matching.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createLazyRuntimeSurface } from "../shared/lazy-runtime.js";
@@ -122,7 +122,7 @@ function dedupeFindings(findings: SecurityAuditFinding[]): SecurityAuditFinding[
 }
 
 function hasExplicitProviderAccountConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   provider: string,
   accountId: string,
 ): boolean {
@@ -138,8 +138,8 @@ function hasExplicitProviderAccountConfig(
 }
 
 export async function collectChannelSecurityFindings(params: {
-  cfg: Hanzo BotConfig;
-  sourceConfig?: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
+  sourceConfig?: HanzoBotConfig;
   plugins: ReturnType<typeof listChannelPlugins>;
 }): Promise<SecurityAuditFinding[]> {
   const findings: SecurityAuditFinding[] = [];
@@ -147,7 +147,7 @@ export async function collectChannelSecurityFindings(params: {
 
   const inspectChannelAccount = async (
     plugin: (typeof params.plugins)[number],
-    cfg: Hanzo BotConfig,
+    cfg: HanzoBotConfig,
     accountId: string,
   ) =>
     plugin.config.inspectAccount?.(cfg, accountId) ??

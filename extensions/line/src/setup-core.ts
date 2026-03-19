@@ -1,4 +1,4 @@
-import type { ChannelSetupAdapter, Hanzo BotConfig } from "openclaw/plugin-sdk/setup";
+import type { ChannelSetupAdapter, HanzoBotConfig } from "openclaw/plugin-sdk/setup";
 import {
   DEFAULT_ACCOUNT_ID,
   listLineAccountIds,
@@ -10,12 +10,12 @@ import {
 const channel = "line" as const;
 
 export function patchLineAccountConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   patch: Record<string, unknown>;
   clearFields?: string[];
   enabled?: boolean;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const accountId = normalizeAccountId(params.accountId);
   const lineConfig = (params.cfg.channels?.line ?? {}) as LineConfig;
   const clearFields = params.clearFields ?? [];
@@ -65,7 +65,7 @@ export function patchLineAccountConfig(params: {
   };
 }
 
-export function isLineConfigured(cfg: Hanzo BotConfig, accountId: string): boolean {
+export function isLineConfigured(cfg: HanzoBotConfig, accountId: string): boolean {
   const resolved = resolveLineAccount({ cfg, accountId });
   return Boolean(resolved.channelAccessToken.trim() && resolved.channelSecret.trim());
 }

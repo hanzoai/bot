@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveAgentModelFallbackValues } from "../config/model-input.js";
 import { resolveStateDir } from "../config/paths.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -23,7 +23,7 @@ function stripNullBytes(s: string): string {
 
 export { resolveAgentIdFromSessionKey };
 
-type AgentEntry = NonNullable<NonNullable<Hanzo BotConfig["agents"]>["list"]>[number];
+type AgentEntry = NonNullable<NonNullable<HanzoBotConfig["agents"]>["list"]>[number];
 
 type ResolvedAgentConfig = {
   name?: string;
@@ -43,7 +43,7 @@ type ResolvedAgentConfig = {
 
 let defaultAgentWarned = false;
 
-export function listAgentEntries(cfg: Hanzo BotConfig): AgentEntry[] {
+export function listAgentEntries(cfg: HanzoBotConfig): AgentEntry[] {
   const list = cfg.agents?.list;
   if (!Array.isArray(list)) {
     return [];
@@ -51,7 +51,7 @@ export function listAgentEntries(cfg: Hanzo BotConfig): AgentEntry[] {
   return list.filter((entry): entry is AgentEntry => Boolean(entry && typeof entry === "object"));
 }
 
-export function listAgentIds(cfg: Hanzo BotConfig): string[] {
+export function listAgentIds(cfg: HanzoBotConfig): string[] {
   const agents = listAgentEntries(cfg);
   if (agents.length === 0) {
     return [DEFAULT_AGENT_ID];
@@ -69,7 +69,7 @@ export function listAgentIds(cfg: Hanzo BotConfig): string[] {
   return ids.length > 0 ? ids : [DEFAULT_AGENT_ID];
 }
 
-export function resolveDefaultAgentId(cfg: Hanzo BotConfig): string {
+export function resolveDefaultAgentId(cfg: HanzoBotConfig): string {
   const agents = listAgentEntries(cfg);
   if (agents.length === 0) {
     return DEFAULT_AGENT_ID;
@@ -85,7 +85,7 @@ export function resolveDefaultAgentId(cfg: Hanzo BotConfig): string {
 
 export function resolveSessionAgentIds(params: {
   sessionKey?: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentId?: string;
 }): {
   defaultAgentId: string;
@@ -105,18 +105,18 @@ export function resolveSessionAgentIds(params: {
 
 export function resolveSessionAgentId(params: {
   sessionKey?: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
 }): string {
   return resolveSessionAgentIds(params).sessionAgentId;
 }
 
-function resolveAgentEntry(cfg: Hanzo BotConfig, agentId: string): AgentEntry | undefined {
+function resolveAgentEntry(cfg: HanzoBotConfig, agentId: string): AgentEntry | undefined {
   const id = normalizeAgentId(agentId);
   return listAgentEntries(cfg).find((entry) => normalizeAgentId(entry.id) === id);
 }
 
 export function resolveAgentConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
 ): ResolvedAgentConfig | undefined {
   const id = normalizeAgentId(agentId);
@@ -145,7 +145,7 @@ export function resolveAgentConfig(
 }
 
 export function resolveAgentSkillsFilter(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
 ): string[] | undefined {
   return normalizeSkillFilter(resolveAgentConfig(cfg, agentId)?.skills);
@@ -168,7 +168,7 @@ function resolveModelPrimary(raw: unknown): string | undefined {
 }
 
 export function resolveAgentExplicitModelPrimary(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
 ): string | undefined {
   const raw = resolveAgentConfig(cfg, agentId)?.model;
@@ -176,7 +176,7 @@ export function resolveAgentExplicitModelPrimary(
 }
 
 export function resolveAgentEffectiveModelPrimary(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
 ): string | undefined {
   return (
@@ -186,12 +186,12 @@ export function resolveAgentEffectiveModelPrimary(
 }
 
 // Backward-compatible alias. Prefer explicit/effective helpers at new call sites.
-export function resolveAgentModelPrimary(cfg: Hanzo BotConfig, agentId: string): string | undefined {
+export function resolveAgentModelPrimary(cfg: HanzoBotConfig, agentId: string): string | undefined {
   return resolveAgentExplicitModelPrimary(cfg, agentId);
 }
 
 export function resolveAgentModelFallbacksOverride(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
 ): string[] | undefined {
   const raw = resolveAgentConfig(cfg, agentId)?.model;
@@ -217,7 +217,7 @@ export function resolveFallbackAgentId(params: {
 }
 
 export function resolveRunModelFallbacksOverride(params: {
-  cfg: Hanzo BotConfig | undefined;
+  cfg: HanzoBotConfig | undefined;
   agentId?: string | null;
   sessionKey?: string | null;
 }): string[] | undefined {
@@ -231,7 +231,7 @@ export function resolveRunModelFallbacksOverride(params: {
 }
 
 export function hasConfiguredModelFallbacks(params: {
-  cfg: Hanzo BotConfig | undefined;
+  cfg: HanzoBotConfig | undefined;
   agentId?: string | null;
   sessionKey?: string | null;
 }): boolean {
@@ -241,7 +241,7 @@ export function hasConfiguredModelFallbacks(params: {
 }
 
 export function resolveEffectiveModelFallbacks(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId: string;
   hasSessionModelOverride: boolean;
 }): string[] | undefined {
@@ -253,7 +253,7 @@ export function resolveEffectiveModelFallbacks(params: {
   return agentFallbacksOverride ?? defaultFallbacks;
 }
 
-export function resolveAgentWorkspaceDir(cfg: Hanzo BotConfig, agentId: string) {
+export function resolveAgentWorkspaceDir(cfg: HanzoBotConfig, agentId: string) {
   const id = normalizeAgentId(agentId);
   const configured = resolveAgentConfig(cfg, id)?.workspace?.trim();
   if (configured) {
@@ -293,7 +293,7 @@ function isPathWithinRoot(candidatePath: string, rootPath: string): boolean {
 }
 
 export function resolveAgentIdsByWorkspacePath(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   workspacePath: string,
 ): string[] {
   const normalizedWorkspacePath = normalizePathForComparison(workspacePath);
@@ -321,14 +321,14 @@ export function resolveAgentIdsByWorkspacePath(
 }
 
 export function resolveAgentIdByWorkspacePath(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   workspacePath: string,
 ): string | undefined {
   return resolveAgentIdsByWorkspacePath(cfg, workspacePath)[0];
 }
 
 export function resolveAgentDir(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
   env: NodeJS.ProcessEnv = process.env,
 ) {

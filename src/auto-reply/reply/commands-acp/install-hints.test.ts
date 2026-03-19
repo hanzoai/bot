@@ -2,14 +2,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import { resolveAcpInstallCommandHint, resolveConfiguredAcpBackendId } from "./install-hints.js";
 
 const originalCwd = process.cwd();
 const tempDirs: string[] = [];
 
-function withAcpConfig(acp: Hanzo BotConfig["acp"]): Hanzo BotConfig {
-  return { acp } as Hanzo BotConfig;
+function withAcpConfig(acp: HanzoBotConfig["acp"]): HanzoBotConfig {
+  return { acp } as HanzoBotConfig;
 }
 
 afterEach(() => {

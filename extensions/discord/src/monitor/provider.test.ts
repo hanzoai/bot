@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AcpRuntimeError } from "../../../../src/acp/runtime/errors.js";
-import type { Hanzo BotConfig } from "../../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../../src/config/config.js";
 import {
   baseConfig,
   baseRuntime,
@@ -36,7 +36,7 @@ const {
   voiceRuntimeModuleLoadedMock,
 } = getProviderMonitorTestMocks();
 
-function createConfigWithDiscordAccount(overrides: Record<string, unknown> = {}): Hanzo BotConfig {
+function createConfigWithDiscordAccount(overrides: Record<string, unknown> = {}): HanzoBotConfig {
   return {
     channels: {
       discord: {
@@ -48,7 +48,7 @@ function createConfigWithDiscordAccount(overrides: Record<string, unknown> = {})
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 vi.mock("openclaw/plugin-sdk/plugin-runtime", async () => {
@@ -71,7 +71,7 @@ vi.mock("../voice/manager.runtime.js", () => {
 
 describe("monitorDiscordProvider", () => {
   type ReconcileHealthProbeParams = {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId: string;
     sessionKey: string;
     binding: unknown;
@@ -79,7 +79,7 @@ describe("monitorDiscordProvider", () => {
   };
 
   type ReconcileStartupParams = {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     healthProbe?: (
       params: ReconcileHealthProbeParams,
     ) => Promise<{ status: string; reason?: string }>;

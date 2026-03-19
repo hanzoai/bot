@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { resolvePreferredHanzo BotTmpDir } from "openclaw/plugin-sdk/infra-runtime";
+import { resolvePreferredHanzoBotTmpDir } from "openclaw/plugin-sdk/infra-runtime";
 import type { ResolvedAcpxPluginConfig } from "../config.js";
 import { ACPX_PINNED_VERSION } from "../config.js";
 import { AcpxRuntime } from "../runtime.js";
@@ -368,7 +368,7 @@ async function ensureMockCliScriptPath(): Promise<string> {
   }
   sharedMockCliScriptPath = (async () => {
     const dir = await mkdtemp(
-      path.join(resolvePreferredHanzo BotTmpDir(), "openclaw-acpx-runtime-test-"),
+      path.join(resolvePreferredHanzoBotTmpDir(), "openclaw-acpx-runtime-test-"),
     );
     tempDirs.push(dir);
     const scriptPath = path.join(dir, "mock-acpx.cjs");

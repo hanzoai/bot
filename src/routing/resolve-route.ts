@@ -1,7 +1,7 @@
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import type { ChatType } from "../channels/chat-type.js";
 import { normalizeChatType } from "../channels/chat-type.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { shouldLogVerbose } from "../globals.js";
 import { logDebug } from "../logger.js";
 import { listBindings } from "./bindings.js";
@@ -24,7 +24,7 @@ export type RoutePeer = {
 };
 
 export type ResolveAgentRouteInput = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: string;
   accountId?: string | null;
   peer?: RoutePeer | null;
@@ -111,20 +111,20 @@ export function buildAgentSessionKey(params: {
   });
 }
 
-function listAgents(cfg: Hanzo BotConfig) {
+function listAgents(cfg: HanzoBotConfig) {
   const agents = cfg.agents?.list;
   return Array.isArray(agents) ? agents : [];
 }
 
 type AgentLookupCache = {
-  agentsRef: Hanzo BotConfig["agents"] | undefined;
+  agentsRef: HanzoBotConfig["agents"] | undefined;
   byNormalizedId: Map<string, string>;
   fallbackDefaultAgentId: string;
 };
 
-const agentLookupCacheByCfg = new WeakMap<Hanzo BotConfig, AgentLookupCache>();
+const agentLookupCacheByCfg = new WeakMap<HanzoBotConfig, AgentLookupCache>();
 
-function resolveAgentLookupCache(cfg: Hanzo BotConfig): AgentLookupCache {
+function resolveAgentLookupCache(cfg: HanzoBotConfig): AgentLookupCache {
   const agentsRef = cfg.agents;
   const existing = agentLookupCacheByCfg.get(cfg);
   if (existing && existing.agentsRef === agentsRef) {
@@ -148,7 +148,7 @@ function resolveAgentLookupCache(cfg: Hanzo BotConfig): AgentLookupCache {
   return next;
 }
 
-export function pickFirstExistingAgentId(cfg: Hanzo BotConfig, agentId: string): string {
+export function pickFirstExistingAgentId(cfg: HanzoBotConfig, agentId: string): string {
   const lookup = resolveAgentLookupCache(cfg);
   const trimmed = (agentId ?? "").trim();
   if (!trimmed) {
@@ -192,20 +192,20 @@ type BindingScope = {
 };
 
 type EvaluatedBindingsCache = {
-  bindingsRef: Hanzo BotConfig["bindings"];
+  bindingsRef: HanzoBotConfig["bindings"];
   byChannel: Map<string, EvaluatedBindingsByChannel>;
   byChannelAccount: Map<string, EvaluatedBinding[]>;
   byChannelAccountIndex: Map<string, EvaluatedBindingsIndex>;
 };
 
-const evaluatedBindingsCacheByCfg = new WeakMap<Hanzo BotConfig, EvaluatedBindingsCache>();
+const evaluatedBindingsCacheByCfg = new WeakMap<HanzoBotConfig, EvaluatedBindingsCache>();
 const MAX_EVALUATED_BINDINGS_CACHE_KEYS = 2000;
 const resolvedRouteCacheByCfg = new WeakMap<
-  Hanzo BotConfig,
+  HanzoBotConfig,
   {
-    bindingsRef: Hanzo BotConfig["bindings"];
-    agentsRef: Hanzo BotConfig["agents"];
-    sessionRef: Hanzo BotConfig["session"];
+    bindingsRef: HanzoBotConfig["bindings"];
+    agentsRef: HanzoBotConfig["agents"];
+    sessionRef: HanzoBotConfig["session"];
     byKey: Map<string, ResolvedAgentRoute>;
   }
 >();
@@ -233,7 +233,7 @@ function resolveAccountPatternKey(accountPattern: string): string {
 }
 
 function buildEvaluatedBindingsByChannel(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): Map<string, EvaluatedBindingsByChannel> {
   const byChannel = new Map<string, EvaluatedBindingsByChannel>();
   let order = 0;
@@ -411,7 +411,7 @@ function buildEvaluatedBindingsIndex(bindings: EvaluatedBinding[]): EvaluatedBin
 }
 
 function getEvaluatedBindingsForChannelAccount(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   channel: string,
   accountId: string,
 ): EvaluatedBinding[] {
@@ -454,7 +454,7 @@ function getEvaluatedBindingsForChannelAccount(
 }
 
 function getEvaluatedBindingIndexForChannelAccount(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   channel: string,
   accountId: string,
 ): EvaluatedBindingsIndex {
@@ -505,7 +505,7 @@ function normalizeBindingMatch(
   };
 }
 
-function resolveRouteCacheForConfig(cfg: Hanzo BotConfig): Map<string, ResolvedAgentRoute> {
+function resolveRouteCacheForConfig(cfg: HanzoBotConfig): Map<string, ResolvedAgentRoute> {
   const existing = resolvedRouteCacheByCfg.get(cfg);
   if (
     existing &&

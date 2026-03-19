@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../api.js";
+import type { HanzoBotConfig } from "../../api.js";
 import type { TlonSettingsStore } from "../settings.js";
 
 type ChannelAuthorization = {
@@ -7,7 +7,7 @@ type ChannelAuthorization = {
 };
 
 export function resolveChannelAuthorization(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   channelNest: string,
   settings?: TlonSettingsStore,
 ): { mode: "restricted" | "open"; allowedShips: string[] } {

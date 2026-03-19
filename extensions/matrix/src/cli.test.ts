@@ -534,7 +534,7 @@ describe("matrix CLI verification commands", () => {
         accountId: "ops",
         deviceHealth: expect.objectContaining({
           currentDeviceId: null,
-          staleHanzo BotDeviceIds: [],
+          staleHanzoBotDeviceIds: [],
           error: "homeserver unavailable",
         }),
       }),

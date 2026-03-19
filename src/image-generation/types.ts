@@ -1,5 +1,5 @@
 import type { AuthProfileStore } from "../agents/auth-profiles.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 export type GeneratedImageAsset = {
   buffer: Buffer;
@@ -22,7 +22,7 @@ export type ImageGenerationRequest = {
   provider: string;
   model: string;
   prompt: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir?: string;
   authStore?: AuthProfileStore;
   count?: number;

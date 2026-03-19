@@ -39,13 +39,13 @@ const {
   getActivePluginRegistry,
   getActivePluginRegistryKey,
   getGlobalHookRunner,
-  loadHanzo BotPlugins,
+  loadHanzoBotPlugins,
   resetGlobalHookRunner,
   setActivePluginRegistry,
 } = await importFreshPluginTestModules();
 
 type TempPlugin = { dir: string; file: string; id: string };
-type PluginLoadConfig = NonNullable<Parameters<typeof loadHanzo BotPlugins>[0]>["config"];
+type PluginLoadConfig = NonNullable<Parameters<typeof loadHanzoBotPlugins>[0]>["config"];
 
 function chmodSafeDir(dir: string) {
   if (process.platform === "win32") {
@@ -144,7 +144,7 @@ function loadBundledMemoryPluginRegistry(options?: {
 }) {
   if (!options && cachedBundledMemoryDir) {
     process.env.BOT_BUNDLED_PLUGINS_DIR = cachedBundledMemoryDir;
-    return loadHanzo BotPlugins({
+    return loadHanzoBotPlugins({
       cache: false,
       workspaceDir: cachedBundledMemoryDir,
       config: {
@@ -194,7 +194,7 @@ function loadBundledMemoryPluginRegistry(options?: {
   }
   process.env.BOT_BUNDLED_PLUGINS_DIR = bundledDir;
 
-  return loadHanzo BotPlugins({
+  return loadHanzoBotPlugins({
     cache: false,
     workspaceDir: bundledDir,
     config: {
@@ -220,7 +220,7 @@ function setupBundledTelegramPlugin() {
   process.env.BOT_BUNDLED_PLUGINS_DIR = cachedBundledTelegramDir;
 }
 
-function expectTelegramLoaded(registry: ReturnType<typeof loadHanzo BotPlugins>) {
+function expectTelegramLoaded(registry: ReturnType<typeof loadHanzoBotPlugins>) {
   const telegram = registry.plugins.find((entry) => entry.id === "telegram");
   expect(telegram?.status).toBe("loaded");
   expect(registry.channels.some((entry) => entry.plugin.id === "telegram")).toBe(true);
@@ -234,10 +234,10 @@ function loadRegistryFromSinglePlugin(params: {
   plugin: TempPlugin;
   pluginConfig?: Record<string, unknown>;
   includeWorkspaceDir?: boolean;
-  options?: Omit<Parameters<typeof loadHanzo BotPlugins>[0], "cache" | "workspaceDir" | "config">;
+  options?: Omit<Parameters<typeof loadHanzoBotPlugins>[0], "cache" | "workspaceDir" | "config">;
 }) {
   const pluginConfig = params.pluginConfig ?? {};
-  return loadHanzo BotPlugins({
+  return loadHanzoBotPlugins({
     cache: false,
     ...(params.includeWorkspaceDir === false ? {} : { workspaceDir: params.plugin.dir }),
     ...params.options,
@@ -252,9 +252,9 @@ function loadRegistryFromSinglePlugin(params: {
 
 function loadRegistryFromAllowedPlugins(
   plugins: TempPlugin[],
-  options?: Omit<Parameters<typeof loadHanzo BotPlugins>[0], "cache" | "config">,
+  options?: Omit<Parameters<typeof loadHanzoBotPlugins>[0], "cache" | "config">,
 ) {
-  return loadHanzo BotPlugins({
+  return loadHanzoBotPlugins({
     cache: false,
     ...options,
     config: {
@@ -387,7 +387,7 @@ function loadBundleFixture(params: {
   const bundleRoot = path.join(workspaceDir, ".openclaw", "extensions", params.pluginId);
   params.build(bundleRoot);
   return withEnv({ BOT_STATE_DIR: stateDir, ...params.env }, () =>
-    loadHanzo BotPlugins({
+    loadHanzoBotPlugins({
       workspaceDir,
       onlyPluginIds: params.onlyPluginIds ?? [params.pluginId],
       config: {
@@ -405,7 +405,7 @@ function loadBundleFixture(params: {
 }
 
 function expectNoUnwiredBundleDiagnostic(
-  registry: ReturnType<typeof loadHanzo BotPlugins>,
+  registry: ReturnType<typeof loadHanzoBotPlugins>,
   pluginId: string,
 ) {
   expect(
@@ -418,7 +418,7 @@ function expectNoUnwiredBundleDiagnostic(
 }
 
 function resolveLoadedPluginSource(
-  registry: ReturnType<typeof loadHanzo BotPlugins>,
+  registry: ReturnType<typeof loadHanzoBotPlugins>,
   pluginId: string,
 ) {
   return fs.realpathSync(registry.plugins.find((entry) => entry.id === pluginId)?.source ?? "");
@@ -426,8 +426,8 @@ function resolveLoadedPluginSource(
 
 function expectCachePartitionByPluginSource(params: {
   pluginId: string;
-  loadFirst: () => ReturnType<typeof loadHanzo BotPlugins>;
-  loadSecond: () => ReturnType<typeof loadHanzo BotPlugins>;
+  loadFirst: () => ReturnType<typeof loadHanzoBotPlugins>;
+  loadSecond: () => ReturnType<typeof loadHanzoBotPlugins>;
   expectedFirstSource: string;
   expectedSecondSource: string;
 }) {
@@ -444,8 +444,8 @@ function expectCachePartitionByPluginSource(params: {
 }
 
 function expectCacheMissThenHit(params: {
-  loadFirst: () => ReturnType<typeof loadHanzo BotPlugins>;
-  loadVariant: () => ReturnType<typeof loadHanzo BotPlugins>;
+  loadFirst: () => ReturnType<typeof loadHanzoBotPlugins>;
+  loadVariant: () => ReturnType<typeof loadHanzoBotPlugins>;
 }) {
   const first = params.loadFirst();
   const second = params.loadVariant();
@@ -613,7 +613,7 @@ function expectEscapingEntryRejected(params: {
     throw err;
   }
 
-  const registry = loadHanzo BotPlugins({
+  const registry = loadHanzoBotPlugins({
     cache: false,
     config: {
       plugins: {
@@ -708,7 +708,7 @@ describe("bundle plugins", () => {
     );
 
     const registry = withEnv({ BOT_STATE_DIR: stateDir }, () =>
-      loadHanzo BotPlugins({
+      loadHanzoBotPlugins({
         workspaceDir,
         onlyPluginIds: ["sample-bundle"],
         config: {
@@ -864,7 +864,7 @@ afterAll(() => {
   }
 });
 
-describe("loadHanzo BotPlugins", () => {
+describe("loadHanzoBotPlugins", () => {
   it("disables bundled plugins by default", () => {
     const bundledDir = makeTempDir();
     writePlugin({
@@ -875,7 +875,7 @@ describe("loadHanzo BotPlugins", () => {
     });
     process.env.BOT_BUNDLED_PLUGINS_DIR = bundledDir;
 
-    const registry = loadHanzo BotPlugins({
+    const registry = loadHanzoBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -901,7 +901,7 @@ describe("loadHanzo BotPlugins", () => {
             },
           },
         } satisfies PluginLoadConfig,
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           expectTelegramLoaded(registry);
         },
       },
@@ -917,7 +917,7 @@ describe("loadHanzo BotPlugins", () => {
             enabled: true,
           },
         } satisfies PluginLoadConfig,
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           expectTelegramLoaded(registry);
         },
       },
@@ -935,7 +935,7 @@ describe("loadHanzo BotPlugins", () => {
             },
           },
         } satisfies PluginLoadConfig,
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const telegram = registry.plugins.find((entry) => entry.id === "telegram");
           expect(telegram?.status).toBe("disabled");
           expect(telegram?.error).toBe("disabled in config");
@@ -944,7 +944,7 @@ describe("loadHanzo BotPlugins", () => {
     ] as const;
 
     for (const testCase of cases) {
-      const registry = loadHanzo BotPlugins({
+      const registry = loadHanzoBotPlugins({
         cache: false,
         workspaceDir: cachedBundledTelegramDir,
         config: testCase.config,
@@ -987,7 +987,7 @@ describe("loadHanzo BotPlugins", () => {
 };`,
           });
 
-          const registry = loadHanzo BotPlugins({
+          const registry = loadHanzoBotPlugins({
             cache: false,
             workspaceDir: plugin.dir,
             config: {
@@ -1020,7 +1020,7 @@ describe("loadHanzo BotPlugins", () => {
 module.exports = { id: "skipped-scoped-only", register() { throw new Error("skipped plugin should not load"); } };`,
           });
 
-          const registry = loadHanzo BotPlugins({
+          const registry = loadHanzoBotPlugins({
             cache: false,
             config: {
               plugins: {
@@ -1058,12 +1058,12 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
             },
           };
 
-          const full = loadHanzo BotPlugins(options);
-          const scoped = loadHanzo BotPlugins({
+          const full = loadHanzoBotPlugins(options);
+          const scoped = loadHanzoBotPlugins({
             ...options,
             onlyPluginIds: ["allowed-cache-scope"],
           });
-          const scopedAgain = loadHanzo BotPlugins({
+          const scopedAgain = loadHanzoBotPlugins({
             ...options,
             onlyPluginIds: ["allowed-cache-scope"],
           });
@@ -1090,7 +1090,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
           setActivePluginRegistry(previousRegistry, "existing-registry");
           resetGlobalHookRunner();
 
-          const scoped = loadHanzo BotPlugins({
+          const scoped = loadHanzoBotPlugins({
             cache: false,
             activate: false,
             workspaceDir: plugin.dir,
@@ -1137,7 +1137,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
 
     clearPluginCommands();
 
-    const scoped = loadHanzo BotPlugins({
+    const scoped = loadHanzoBotPlugins({
       cache: false,
       activate: false,
       workspaceDir: plugin.dir,
@@ -1154,7 +1154,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
     expect(scoped.commands.map((entry) => entry.command.name)).toEqual(["pair"]);
     expect(getPluginCommandSpecs("telegram")).toEqual([]);
 
-    const active = loadHanzo BotPlugins({
+    const active = loadHanzoBotPlugins({
       cache: false,
       workspaceDir: plugin.dir,
       config: {
@@ -1179,10 +1179,10 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
   });
 
   it("throws when activate:false is used without cache:false", () => {
-    expect(() => loadHanzo BotPlugins({ activate: false })).toThrow(
+    expect(() => loadHanzoBotPlugins({ activate: false })).toThrow(
       "activate:false requires cache:false",
     );
-    expect(() => loadHanzo BotPlugins({ activate: false, cache: true })).toThrow(
+    expect(() => loadHanzoBotPlugins({ activate: false, cache: true })).toThrow(
       "activate:false requires cache:false",
     );
   });
@@ -1205,13 +1205,13 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
       },
     };
 
-    const first = loadHanzo BotPlugins(options);
+    const first = loadHanzoBotPlugins(options);
     expect(getGlobalHookRunner()).not.toBeNull();
 
     resetGlobalHookRunner();
     expect(getGlobalHookRunner()).toBeNull();
 
-    const second = loadHanzo BotPlugins(options);
+    const second = loadHanzoBotPlugins(options);
     expect(second).toBe(first);
     expect(getGlobalHookRunner()).not.toBeNull();
 
@@ -1253,7 +1253,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
           expectedFirstSource: pluginA.file,
           expectedSecondSource: pluginB.file,
           loadFirst: () =>
-            loadHanzo BotPlugins({
+            loadHanzoBotPlugins({
               ...options,
               env: {
                 ...process.env,
@@ -1261,7 +1261,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
               },
             }),
           loadSecond: () =>
-            loadHanzo BotPlugins({
+            loadHanzoBotPlugins({
               ...options,
               env: {
                 ...process.env,
@@ -1310,7 +1310,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
           expectedFirstSource: pluginA.file,
           expectedSecondSource: pluginB.file,
           loadFirst: () =>
-            loadHanzo BotPlugins({
+            loadHanzoBotPlugins({
               ...options,
               env: {
                 ...process.env,
@@ -1321,7 +1321,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
               },
             }),
           loadSecond: () =>
-            loadHanzo BotPlugins({
+            loadHanzoBotPlugins({
               ...options,
               env: {
                 ...process.env,
@@ -1381,7 +1381,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
         const secondHome = makeTempDir();
         return {
           loadFirst: () =>
-            loadHanzo BotPlugins({
+            loadHanzoBotPlugins({
               ...options,
               env: {
                 ...process.env,
@@ -1393,7 +1393,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
               },
             }),
           loadVariant: () =>
-            loadHanzo BotPlugins({
+            loadHanzoBotPlugins({
               ...options,
               env: {
                 ...process.env,
@@ -1430,9 +1430,9 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
         };
 
         return {
-          loadFirst: () => loadHanzo BotPlugins(options),
+          loadFirst: () => loadHanzoBotPlugins(options),
           loadVariant: () =>
-            loadHanzo BotPlugins({
+            loadHanzoBotPlugins({
               ...options,
               runtimeOptions: {
                 allowGatewaySubagentBinding: true,
@@ -1457,7 +1457,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
     );
 
     const loadWithStateDir = (stateDir: string) =>
-      loadHanzo BotPlugins({
+      loadHanzoBotPlugins({
         env: {
           ...process.env,
           BOT_STATE_DIR: stateDir,
@@ -1497,7 +1497,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
       body: `module.exports = { id: "tilde-bundled", register() {} };`,
     });
 
-    const registry = loadHanzo BotPlugins({
+    const registry = loadHanzoBotPlugins({
       env: {
         ...process.env,
         HOME: homeDir,
@@ -1531,7 +1531,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
       body: `module.exports = { id: "openclaw-home-demo", register() {} };`,
     });
 
-    const registry = loadHanzo BotPlugins({
+    const registry = loadHanzoBotPlugins({
       env: {
         ...process.env,
         HOME: ignoredHome,
@@ -1682,7 +1682,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
     }
   });
 } };`,
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const channel = registry.channels.find((entry) => entry.plugin.id === "demo");
           expect(channel).toBeDefined();
         },
@@ -1728,7 +1728,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
     }
   });
 } };`,
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           expect(registry.channels.filter((entry) => entry.plugin.id === "demo")).toHaveLength(1);
           expect(
             registry.diagnostics.some(
@@ -1746,7 +1746,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
         body: `module.exports = { id: "context-engine-core-collision", register(api) {
   api.registerContextEngine("legacy", () => ({}));
 } };`,
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           expect(
             registry.diagnostics.some(
               (diag) =>
@@ -1763,7 +1763,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
         body: `module.exports = { id: "cli-missing-metadata", register(api) {
   api.registerCli(() => {});
 } };`,
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           expect(registry.cliRegistrars).toHaveLength(0);
           expect(
             registry.diagnostics.some(
@@ -1854,7 +1854,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
   api.registerHook("gateway:startup", () => {}, { name: "shared-hook" });
 } };`,
-        selectCount: (registry: ReturnType<typeof loadHanzo BotPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadHanzoBotPlugins>) =>
           registry.hooks.filter((entry) => entry.entry.hook.name === "shared-hook").length,
         duplicateMessage: "hook already registered: shared-hook (hook-owner-a)",
       },
@@ -1865,7 +1865,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
   api.registerService({ id: "shared-service", start() {} });
 } };`,
-        selectCount: (registry: ReturnType<typeof loadHanzo BotPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadHanzoBotPlugins>) =>
           registry.services.filter((entry) => entry.service.id === "shared-service").length,
         duplicateMessage: "service already registered: shared-service (service-owner-a)",
       },
@@ -1887,10 +1887,10 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
   api.registerCli(() => {}, { commands: ["shared-cli"] });
 } };`,
-        selectCount: (registry: ReturnType<typeof loadHanzo BotPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadHanzoBotPlugins>) =>
           registry.cliRegistrars.length,
         duplicateMessage: "cli command already registered: shared-cli (cli-owner-a)",
-        assertPrimaryOwner: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assertPrimaryOwner: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           expect(registry.cliRegistrars[0]?.pluginId).toBe("cli-owner-a");
         },
       },
@@ -1999,7 +1999,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
 } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           expect(
             registry.httpRoutes.find((entry) => entry.pluginId === "http-route-missing-auth"),
           ).toBeUndefined();
@@ -2022,7 +2022,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
 } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-replace-self",
           );
@@ -2049,7 +2049,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
 } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const route = registry.httpRoutes.find((entry) => entry.path === "/demo");
           expect(route?.pluginId).toBe("http-route-owner-a");
           expect(
@@ -2071,7 +2071,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
 } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-overlap",
           );
@@ -2096,7 +2096,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
 } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-overlap-same-auth",
           );
@@ -2128,7 +2128,7 @@ module.exports = { id: "skipped-scoped-only", register() { throw new Error("skip
       body: `module.exports = { id: "config-disable", register() {} };`,
     });
 
-    const registry = loadHanzo BotPlugins({
+    const registry = loadHanzoBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -2198,7 +2198,7 @@ module.exports = {
       },
     };
 
-    const registry = loadHanzo BotPlugins({
+    const registry = loadHanzoBotPlugins({
       cache: false,
       config,
     });
@@ -2207,7 +2207,7 @@ module.exports = {
     expect(registry.channelSetups).toHaveLength(0);
     expect(registry.plugins.find((entry) => entry.id === "lazy-channel")?.status).toBe("disabled");
 
-    const setupRegistry = loadHanzo BotPlugins({
+    const setupRegistry = loadHanzoBotPlugins({
       cache: false,
       config,
       includeSetupOnlyChannelPlugins: true,
@@ -2233,7 +2233,7 @@ module.exports = {
         configured: false,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadHanzo BotPlugins({
+        loadHanzoBotPlugins({
           cache: false,
           config: {
             plugins: {
@@ -2261,7 +2261,7 @@ module.exports = {
         configured: false,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadHanzo BotPlugins({
+        loadHanzoBotPlugins({
           cache: false,
           config: {
             plugins: {
@@ -2286,7 +2286,7 @@ module.exports = {
         startupDeferConfiguredChannelFullLoadUntilAfterListen: true,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadHanzo BotPlugins({
+        loadHanzoBotPlugins({
           cache: false,
           preferSetupRuntimeForChannelPlugins: true,
           config: {
@@ -2317,7 +2317,7 @@ module.exports = {
         configured: true,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadHanzo BotPlugins({
+        loadHanzoBotPlugins({
           cache: false,
           preferSetupRuntimeForChannelPlugins: true,
           config: {
@@ -2478,7 +2478,7 @@ module.exports = {
             body: `module.exports = { id: "memory-b", kind: "memory", register() {} };`,
           });
 
-          return loadHanzo BotPlugins({
+          return loadHanzoBotPlugins({
             cache: false,
             config: {
               plugins: {
@@ -2488,7 +2488,7 @@ module.exports = {
             },
           });
         },
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const a = registry.plugins.find((entry) => entry.id === "memory-a");
           const b = registry.plugins.find((entry) => entry.id === "memory-b");
           expect(b?.status).toBe("loaded");
@@ -2543,7 +2543,7 @@ module.exports = {
           );
           process.env.BOT_BUNDLED_PLUGINS_DIR = bundledDir;
 
-          return loadHanzo BotPlugins({
+          return loadHanzoBotPlugins({
             cache: false,
             config: {
               plugins: {
@@ -2557,7 +2557,7 @@ module.exports = {
             },
           });
         },
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const a = registry.plugins.find((entry) => entry.id === "memory-a");
           const b = registry.plugins.find((entry) => entry.id === "memory-b");
           expect(a?.status).toBe("disabled");
@@ -2574,7 +2574,7 @@ module.exports = {
             body: `module.exports = { id: "memory-off", kind: "memory", register() {} };`,
           });
 
-          return loadHanzo BotPlugins({
+          return loadHanzoBotPlugins({
             cache: false,
             config: {
               plugins: {
@@ -2584,7 +2584,7 @@ module.exports = {
             },
           });
         },
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const entry = registry.plugins.find((item) => item.id === "memory-off");
           expect(entry?.status).toBe("disabled");
         },
@@ -2618,7 +2618,7 @@ module.exports = {
             body: `module.exports = { id: "shadow", register() {} };`,
           });
 
-          return loadHanzo BotPlugins({
+          return loadHanzoBotPlugins({
             cache: false,
             config: {
               plugins: {
@@ -2658,7 +2658,7 @@ module.exports = {
               filename: "index.cjs",
             });
 
-            return loadHanzo BotPlugins({
+            return loadHanzoBotPlugins({
               cache: false,
               config: {
                 plugins: {
@@ -2700,7 +2700,7 @@ module.exports = {
               filename: "index.cjs",
             });
 
-            return loadHanzo BotPlugins({
+            return loadHanzoBotPlugins({
               cache: false,
               config: {
                 plugins: {
@@ -2773,7 +2773,7 @@ module.exports = {
       };
 
       for (let index = 0; index < scenario.loads; index += 1) {
-        loadHanzo BotPlugins(options);
+        loadHanzoBotPlugins(options);
       }
 
       const openAllowWarnings = warnings.filter((msg) => msg.includes("plugins.allow is empty"));
@@ -2807,7 +2807,7 @@ module.exports = {
             filename: "index.cjs",
           });
 
-          return loadHanzo BotPlugins({
+          return loadHanzoBotPlugins({
             cache: false,
             workspaceDir,
             config: {
@@ -2817,7 +2817,7 @@ module.exports = {
             },
           });
         },
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const workspacePlugin = registry.plugins.find((entry) => entry.id === "workspace-helper");
           expect(workspacePlugin?.origin).toBe("workspace");
           expect(workspacePlugin?.status).toBe("disabled");
@@ -2843,7 +2843,7 @@ module.exports = {
             filename: "index.cjs",
           });
 
-          return loadHanzo BotPlugins({
+          return loadHanzoBotPlugins({
             cache: false,
             workspaceDir,
             config: {
@@ -2854,7 +2854,7 @@ module.exports = {
             },
           });
         },
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const workspacePlugin = registry.plugins.find((entry) => entry.id === "workspace-helper");
           expect(workspacePlugin?.origin).toBe("workspace");
           expect(workspacePlugin?.status).toBe("loaded");
@@ -2883,7 +2883,7 @@ module.exports = {
             filename: "index.cjs",
           });
 
-          return loadHanzo BotPlugins({
+          return loadHanzoBotPlugins({
             cache: false,
             workspaceDir,
             config: {
@@ -2897,7 +2897,7 @@ module.exports = {
             },
           });
         },
-        assert: (registry: ReturnType<typeof loadHanzo BotPlugins>) => {
+        assert: (registry: ReturnType<typeof loadHanzoBotPlugins>) => {
           const entries = registry.plugins.filter((entry) => entry.id === "shadowed");
           const loaded = entries.find((entry) => entry.status === "loaded");
           const overridden = entries.find((entry) => entry.status === "disabled");
@@ -2937,7 +2937,7 @@ module.exports = {
     );
     process.env.BOT_BUNDLED_PLUGINS_DIR = bundledDir;
 
-    const registry = loadHanzo BotPlugins({
+    const registry = loadHanzoBotPlugins({
       cache: false,
       workspaceDir: bundledDir,
       config: {
@@ -2965,7 +2965,7 @@ module.exports = {
       filename: "unscoped.cjs",
     });
 
-    const registry = loadHanzo BotPlugins({
+    const registry = loadHanzoBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -3000,7 +3000,7 @@ module.exports = {
             });
 
             const warnings: string[] = [];
-            const registry = loadHanzo BotPlugins({
+            const registry = loadHanzoBotPlugins({
               cache: false,
               logger: createWarningLogger(warnings),
               config: {
@@ -3019,7 +3019,7 @@ module.exports = {
         loadRegistry: () => {
           const { plugin, env } = createEnvResolvedPluginFixture("tracked-load-path");
           const warnings: string[] = [];
-          const registry = loadHanzo BotPlugins({
+          const registry = loadHanzoBotPlugins({
             cache: false,
             logger: createWarningLogger(warnings),
             env,
@@ -3045,7 +3045,7 @@ module.exports = {
         loadRegistry: () => {
           const { plugin, env } = createEnvResolvedPluginFixture("tracked-install-path");
           const warnings: string[] = [];
-          const registry = loadHanzo BotPlugins({
+          const registry = loadHanzoBotPlugins({
             cache: false,
             logger: createWarningLogger(warnings),
             env,
@@ -3150,7 +3150,7 @@ module.exports = {
     }
 
     process.env.BOT_BUNDLED_PLUGINS_DIR = bundledDir;
-    const registry = loadHanzo BotPlugins({
+    const registry = loadHanzoBotPlugins({
       cache: false,
       workspaceDir: bundledDir,
       config: {
@@ -3223,8 +3223,8 @@ module.exports = {
       path.join(process.cwd(), "src", "plugins", "loader.ts"),
     ).href;
     const script = `
-      import { loadHanzo BotPlugins } from ${JSON.stringify(loaderModuleUrl)};
-      const registry = loadHanzo BotPlugins({
+      import { loadHanzoBotPlugins } from ${JSON.stringify(loaderModuleUrl)};
+      const registry = loadHanzoBotPlugins({
         cache: false,
         workspaceDir: ${JSON.stringify(plugin.dir)},
         config: {
@@ -3646,7 +3646,7 @@ export default {
     );
 
     const registry = withEnv({ NODE_ENV: "production", VITEST: undefined }, () =>
-      loadHanzo BotPlugins({
+      loadHanzoBotPlugins({
         cache: false,
         workspaceDir: gitExtensionRoot,
         config: {
@@ -3685,7 +3685,7 @@ export const runtimeValue = helperValue;`,
       "utf-8",
     );
 
-    const registry = loadHanzo BotPlugins({
+    const registry = loadHanzoBotPlugins({
       cache: false,
       workspaceDir: plugin.dir,
       config: {

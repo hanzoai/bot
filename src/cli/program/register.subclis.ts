@@ -1,5 +1,5 @@
 import type { Command } from "commander";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { isTruthyEnvValue } from "../../infra/env.js";
 import { getPrimaryCommand, hasHelpOrVersion } from "../argv.js";
 import { reparseProgramFromActionArgs } from "./action-reparse.js";
@@ -33,7 +33,7 @@ const shouldEagerRegisterSubcommands = (_argv: string[]) => {
 };
 
 export const loadValidatedConfigForPluginRegistration =
-  async (): Promise<Hanzo BotConfig | null> => {
+  async (): Promise<HanzoBotConfig | null> => {
     const mod = await import("../../config/config.js");
     const snapshot = await mod.readConfigFileSnapshot();
     if (!snapshot.valid) {

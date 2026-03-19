@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import * as imageGenerationRuntime from "../image-generation/runtime.js";
-import { createHanzo BotTools } from "./openclaw-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
 
 vi.mock("../plugins/tools.js", () => ({
   resolvePluginTools: () => [],
 }));
 
-function asConfig(value: unknown): Hanzo BotConfig {
-  return value as Hanzo BotConfig;
+function asConfig(value: unknown): HanzoBotConfig {
+  return value as HanzoBotConfig;
 }
 
 function stubImageGenerationProviders() {
@@ -49,7 +49,7 @@ describe("hanzo-bot tools image generation registration", () => {
   });
 
   it("registers image_generate when image-generation config is present", () => {
-    const tools = createHanzo BotTools({
+    const tools = createHanzoBotTools({
       config: asConfig({
         agents: {
           defaults: {
@@ -69,7 +69,7 @@ describe("hanzo-bot tools image generation registration", () => {
     stubImageGenerationProviders();
     vi.stubEnv("OPENAI_API_KEY", "openai-test");
 
-    const tools = createHanzo BotTools({
+    const tools = createHanzoBotTools({
       config: asConfig({}),
       agentDir: "/tmp/openclaw-agent-main",
     });
@@ -80,7 +80,7 @@ describe("hanzo-bot tools image generation registration", () => {
   it("omits image_generate when config is absent and no compatible provider auth exists", () => {
     stubImageGenerationProviders();
 
-    const tools = createHanzo BotTools({
+    const tools = createHanzoBotTools({
       config: asConfig({}),
       agentDir: "/tmp/openclaw-agent-main",
     });

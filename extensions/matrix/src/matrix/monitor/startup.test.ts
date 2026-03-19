@@ -70,7 +70,7 @@ function createLegacyCryptoRestoreResult(
 const hoisted = vi.hoisted(() => ({
   maybeRestoreLegacyMatrixBackup: vi.fn(async () => createLegacyCryptoRestoreResult()),
   summarizeMatrixDeviceHealth: vi.fn(() => ({
-    staleHanzo BotDevices: [] as Array<{ deviceId: string }>,
+    staleHanzoBotDevices: [] as Array<{ deviceId: string }>,
   })),
   syncMatrixOwnProfile: vi.fn(async () => createProfileSyncResult()),
   ensureMatrixStartupVerification: vi.fn(async () => createStartupVerificationOutcome("verified")),
@@ -102,7 +102,7 @@ describe("runMatrixStartupMaintenance", () => {
     hoisted.maybeRestoreLegacyMatrixBackup
       .mockClear()
       .mockResolvedValue(createLegacyCryptoRestoreResult());
-    hoisted.summarizeMatrixDeviceHealth.mockClear().mockReturnValue({ staleHanzo BotDevices: [] });
+    hoisted.summarizeMatrixDeviceHealth.mockClear().mockReturnValue({ staleHanzoBotDevices: [] });
     hoisted.syncMatrixOwnProfile.mockClear().mockResolvedValue(createProfileSyncResult());
     hoisted.ensureMatrixStartupVerification
       .mockClear()
@@ -185,7 +185,7 @@ describe("runMatrixStartupMaintenance", () => {
     const params = createParams();
     params.auth.encryption = true;
     hoisted.summarizeMatrixDeviceHealth.mockReturnValue({
-      staleHanzo BotDevices: [{ deviceId: "DEV123" }],
+      staleHanzoBotDevices: [{ deviceId: "DEV123" }],
     });
     hoisted.ensureMatrixStartupVerification.mockResolvedValue(
       createStartupVerificationOutcome("pending"),

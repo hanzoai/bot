@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { expectGeneratedTokenPersistedToGatewayAuth } from "../test-utils/auth-token-assertions.js";
 
 const mocks = vi.hoisted(() => ({
-  writeConfigFile: vi.fn(async (_cfg: Hanzo BotConfig) => {}),
+  writeConfigFile: vi.fn(async (_cfg: HanzoBotConfig) => {}),
 }));
 
 vi.mock("../config/config.js", async (importOriginal) => {
@@ -20,7 +20,7 @@ import {
 } from "./startup-auth.js";
 
 describe("ensureGatewayStartupAuth", () => {
-  async function expectEphemeralGeneratedTokenWhenOverridden(cfg: Hanzo BotConfig) {
+  async function expectEphemeralGeneratedTokenWhenOverridden(cfg: HanzoBotConfig) {
     const result = await ensureGatewayStartupAuth({
       cfg,
       env: {} as NodeJS.ProcessEnv,
@@ -40,7 +40,7 @@ describe("ensureGatewayStartupAuth", () => {
     mocks.writeConfigFile.mockClear();
   });
 
-  async function expectNoTokenGeneration(cfg: Hanzo BotConfig, mode: string) {
+  async function expectNoTokenGeneration(cfg: HanzoBotConfig, mode: string) {
     const result = await ensureGatewayStartupAuth({
       cfg,
       env: {} as NodeJS.ProcessEnv,
@@ -54,7 +54,7 @@ describe("ensureGatewayStartupAuth", () => {
   }
 
   async function expectResolvedToken(params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     env: NodeJS.ProcessEnv;
     expectedToken: string;
     expectedConfiguredToken?: unknown;
@@ -75,7 +75,7 @@ describe("ensureGatewayStartupAuth", () => {
     expect(mocks.writeConfigFile).not.toHaveBeenCalled();
   }
 
-  function createMissingGatewayTokenSecretRefConfig(): Hanzo BotConfig {
+  function createMissingGatewayTokenSecretRefConfig(): HanzoBotConfig {
     return {
       gateway: {
         auth: {
@@ -279,7 +279,7 @@ describe("ensureGatewayStartupAuth", () => {
   });
 
   it("does not resolve gateway.auth.password SecretRef when token mode is explicit", async () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       gateway: {
         auth: {
           mode: "token",
@@ -333,7 +333,7 @@ describe("ensureGatewayStartupAuth", () => {
   });
 
   it("treats undefined token override as no override", async () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       gateway: {
         auth: {
           mode: "token",

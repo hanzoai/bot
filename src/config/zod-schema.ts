@@ -228,7 +228,7 @@ const McpConfigSchema = z
   .strict()
   .optional();
 
-export const Hanzo BotSchema = z
+export const HanzoBotSchema = z
   .object({
     $schema: z.string().optional(),
     meta: z

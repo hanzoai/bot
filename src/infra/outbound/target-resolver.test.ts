@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelDirectoryEntry } from "../../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 type TargetResolverModule = typeof import("./target-resolver.js");
 
 let resetDirectoryCache: TargetResolverModule["resetDirectoryCache"];
@@ -39,7 +39,7 @@ beforeEach(async () => {
 });
 
 describe("resolveMessagingTarget (directory fallback)", () => {
-  const cfg = {} as Hanzo BotConfig;
+  const cfg = {} as HanzoBotConfig;
 
   beforeEach(() => {
     resetDirectoryCache();

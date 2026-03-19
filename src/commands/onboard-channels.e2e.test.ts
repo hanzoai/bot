@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPluginCatalogEntry } from "../channels/plugins/catalog.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { createEmptyPluginRegistry } from "../plugins/registry.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
@@ -48,7 +48,7 @@ function createUnexpectedPromptGuards() {
 type SetupChannelsOptions = Parameters<typeof setupChannels>[3];
 
 function runSetupChannels(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   prompter: WizardPrompter,
   options?: SetupChannelsOptions,
 ) {
@@ -85,7 +85,7 @@ function createUnexpectedQuickstartPrompter(select: WizardPrompter["select"]) {
   };
 }
 
-function createTelegramCfg(botToken: string, enabled?: boolean): Hanzo BotConfig {
+function createTelegramCfg(botToken: string, enabled?: boolean): HanzoBotConfig {
   return {
     channels: {
       telegram: {
@@ -93,7 +93,7 @@ function createTelegramCfg(botToken: string, enabled?: boolean): Hanzo BotConfig
         ...(typeof enabled === "boolean" ? { enabled } : {}),
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 function patchTelegramAdapter(overrides: Parameters<typeof patchChannelSetupWizardAdapter>[1]) {
@@ -101,7 +101,7 @@ function patchTelegramAdapter(overrides: Parameters<typeof patchChannelSetupWiza
     ...overrides,
     getStatus:
       overrides.getStatus ??
-      vi.fn(async ({ cfg }: { cfg: Hanzo BotConfig }) => ({
+      vi.fn(async ({ cfg }: { cfg: HanzoBotConfig }) => ({
         channel: "telegram",
         configured: Boolean(cfg.channels?.telegram?.botToken),
         statusLines: [],
@@ -165,7 +165,7 @@ async function runQuickstartTelegramSetupWithInteractive(params: {
   );
 
   try {
-    const cfg = await runSetupChannels({} as Hanzo BotConfig, prompter, {
+    const cfg = await runSetupChannels({} as HanzoBotConfig, prompter, {
       quickstartDefaults: true,
       onSelection: selection,
       onAccountId,
@@ -218,7 +218,7 @@ vi.mock("./channel-setup/plugin-install.js", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...(actual as Record<string, unknown>),
-    ensureChannelSetupPluginInstalled: vi.fn(async ({ cfg }: { cfg: Hanzo BotConfig }) => ({
+    ensureChannelSetupPluginInstalled: vi.fn(async ({ cfg }: { cfg: HanzoBotConfig }) => ({
       cfg,
       installed: true,
     })),
@@ -266,7 +266,7 @@ describe("setupChannels", () => {
       text: text as unknown as WizardPrompter["text"],
     });
 
-    await runSetupChannels({} as Hanzo BotConfig, prompter, {
+    await runSetupChannels({} as HanzoBotConfig, prompter, {
       quickstartDefaults: true,
       forceAllowFromChannels: ["whatsapp"],
     });
@@ -292,10 +292,10 @@ describe("setupChannels", () => {
     });
 
     await expect(
-      runSetupChannels({} as Hanzo BotConfig, prompter, {
+      runSetupChannels({} as HanzoBotConfig, prompter, {
         quickstartDefaults: true,
       }),
-    ).resolves.toEqual({} as Hanzo BotConfig);
+    ).resolves.toEqual({} as HanzoBotConfig);
 
     expect(select).toHaveBeenCalledWith(
       expect.objectContaining({ message: "Select channel (QuickStart)" }),
@@ -318,10 +318,10 @@ describe("setupChannels", () => {
     });
 
     await expect(
-      runSetupChannels({} as Hanzo BotConfig, prompter, {
+      runSetupChannels({} as HanzoBotConfig, prompter, {
         quickstartDefaults: true,
       }),
-    ).resolves.toEqual({} as Hanzo BotConfig);
+    ).resolves.toEqual({} as HanzoBotConfig);
 
     expect(select).toHaveBeenCalledWith(
       expect.objectContaining({ message: "Select channel (QuickStart)" }),
@@ -350,7 +350,7 @@ describe("setupChannels", () => {
       text: text as unknown as WizardPrompter["text"],
     });
 
-    await runSetupChannels({} as Hanzo BotConfig, prompter, {
+    await runSetupChannels({} as HanzoBotConfig, prompter, {
       quickstartDefaults: true,
     });
 
@@ -379,7 +379,7 @@ describe("setupChannels", () => {
       text,
     });
 
-    await runSetupChannels({} as Hanzo BotConfig, prompter);
+    await runSetupChannels({} as HanzoBotConfig, prompter);
 
     const sawPrimer = note.mock.calls.some(
       ([message, title]) =>
@@ -466,7 +466,7 @@ describe("setupChannels", () => {
             "@hanzo/bot-msteams-plugin": { enabled: true },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       prompter,
     );
 
@@ -561,7 +561,7 @@ describe("setupChannels", () => {
       text,
     });
 
-    await runSetupChannels({} as Hanzo BotConfig, prompter);
+    await runSetupChannels({} as HanzoBotConfig, prompter);
 
     expect(ensureChannelSetupPluginInstalled).not.toHaveBeenCalled();
     expect(loadChannelSetupPluginRegistrySnapshotForChannel).toHaveBeenCalledWith(
@@ -581,7 +581,7 @@ describe("setupChannels", () => {
         accountId,
         enabled,
       }: {
-        cfg: Hanzo BotConfig;
+        cfg: HanzoBotConfig;
         accountId: string;
         enabled: boolean;
       }) => ({
@@ -626,12 +626,12 @@ describe("setupChannels", () => {
               },
               capabilities: { chatTypes: ["direct"] },
               config: {
-                listAccountIds: (cfg: Hanzo BotConfig) =>
+                listAccountIds: (cfg: HanzoBotConfig) =>
                   Object.keys(
                     (cfg.channels?.msteams as { accounts?: Record<string, unknown> } | undefined)
                       ?.accounts ?? {},
                   ),
-                resolveAccount: (cfg: Hanzo BotConfig, accountId: string) =>
+                resolveAccount: (cfg: HanzoBotConfig, accountId: string) =>
                   (
                     cfg.channels?.msteams as
                       | {
@@ -646,7 +646,7 @@ describe("setupChannels", () => {
                 status: {
                   configuredLabel: "configured",
                   unconfiguredLabel: "needs setup",
-                  resolveConfigured: ({ cfg }: { cfg: Hanzo BotConfig }) =>
+                  resolveConfigured: ({ cfg }: { cfg: HanzoBotConfig }) =>
                     Boolean((cfg.channels?.msteams as { tenantId?: string } | undefined)?.tenantId),
                   resolveStatusLines: async () => [],
                   resolveSelectionHint: async () => "configured",
@@ -700,7 +700,7 @@ describe("setupChannels", () => {
             msteams: { enabled: true },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       prompter,
       { allowDisable: true },
     );
@@ -795,14 +795,14 @@ describe("setupChannels", () => {
   });
 
   it("applies configureInteractive result cfg/account updates", async () => {
-    const configureInteractive = vi.fn(async ({ cfg }: { cfg: Hanzo BotConfig }) => ({
+    const configureInteractive = vi.fn(async ({ cfg }: { cfg: HanzoBotConfig }) => ({
       cfg: {
         ...cfg,
         channels: {
           ...cfg.channels,
           telegram: { ...cfg.channels?.telegram, botToken: "new-token" },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       accountId: "acct-1",
     }));
     const configure = createUnexpectedConfigureCall(
@@ -821,14 +821,14 @@ describe("setupChannels", () => {
   });
 
   it("uses configureWhenConfigured when channel is already configured", async () => {
-    const configureWhenConfigured = vi.fn(async ({ cfg }: { cfg: Hanzo BotConfig }) => ({
+    const configureWhenConfigured = vi.fn(async ({ cfg }: { cfg: HanzoBotConfig }) => ({
       cfg: {
         ...cfg,
         channels: {
           ...cfg.channels,
           telegram: { ...cfg.channels?.telegram, botToken: "updated-token" },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       accountId: "acct-2",
     }));
     const { cfg, selection, onAccountId, configure } = await runConfiguredTelegramSetup({

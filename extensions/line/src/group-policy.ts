@@ -1,8 +1,8 @@
 import { resolveChannelGroupRequireMention } from "openclaw/plugin-sdk/channel-policy";
-import { resolveExactLineGroupConfigKey, type Hanzo BotConfig } from "../runtime-api.js";
+import { resolveExactLineGroupConfigKey, type HanzoBotConfig } from "../runtime-api.js";
 
 type LineGroupContext = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   groupId?: string | null;
 };

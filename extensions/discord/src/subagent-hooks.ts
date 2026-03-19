@@ -1,4 +1,4 @@
-import type { Hanzo BotPluginApi } from "openclaw/plugin-sdk/core";
+import type { HanzoBotPluginApi } from "openclaw/plugin-sdk/core";
 import { resolveDiscordAccount } from "./accounts.js";
 import {
   autoBindSpawnedDiscordSubagent,
@@ -16,7 +16,7 @@ function summarizeError(err: unknown): string {
   return "error";
 }
 
-export function registerDiscordSubagentHooks(api: Hanzo BotPluginApi) {
+export function registerDiscordSubagentHooks(api: HanzoBotPluginApi) {
   const resolveThreadBindingFlags = (accountId?: string) => {
     const account = resolveDiscordAccount({
       cfg: api.config,

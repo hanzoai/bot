@@ -1,11 +1,11 @@
 import {
   applyAgentDefaultModelPrimary,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export const VERCEL_AI_GATEWAY_DEFAULT_MODEL_REF = "vercel-ai-gateway/anthropic/claude-opus-4.6";
 
-export function applyVercelAiGatewayProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyVercelAiGatewayProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   const models = { ...cfg.agents?.defaults?.models };
   models[VERCEL_AI_GATEWAY_DEFAULT_MODEL_REF] = {
     ...models[VERCEL_AI_GATEWAY_DEFAULT_MODEL_REF],
@@ -24,7 +24,7 @@ export function applyVercelAiGatewayProviderConfig(cfg: Hanzo BotConfig): Hanzo 
   };
 }
 
-export function applyVercelAiGatewayConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyVercelAiGatewayConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyAgentDefaultModelPrimary(
     applyVercelAiGatewayProviderConfig(cfg),
     VERCEL_AI_GATEWAY_DEFAULT_MODEL_REF,

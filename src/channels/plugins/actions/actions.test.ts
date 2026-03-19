@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import type { ChannelMessageActionAdapter } from "../types.js";
 
 const handleDiscordAction = vi.fn(async (..._args: unknown[]) => ({ details: { ok: true } }));
@@ -33,13 +33,13 @@ let createSlackActions: typeof import("../../../../extensions/slack/src/channel-
 
 function getDescribedActions(params: {
   describeMessageTool?: ChannelMessageActionAdapter["describeMessageTool"];
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
 }) {
   return [...(params.describeMessageTool?.({ cfg: params.cfg })?.actions ?? [])];
 }
 
-function telegramCfg(): Hanzo BotConfig {
-  return { channels: { telegram: { botToken: "tok" } } } as Hanzo BotConfig;
+function telegramCfg(): HanzoBotConfig {
+  return { channels: { telegram: { botToken: "tok" } } } as HanzoBotConfig;
 }
 
 type TelegramActionInput = Parameters<NonNullable<typeof telegramMessageActions.handleAction>>[0];
@@ -47,7 +47,7 @@ type TelegramActionInput = Parameters<NonNullable<typeof telegramMessageActions.
 async function runTelegramAction(
   action: TelegramActionInput["action"],
   params: TelegramActionInput["params"],
-  options?: { cfg?: Hanzo BotConfig; accountId?: string },
+  options?: { cfg?: HanzoBotConfig; accountId?: string },
 ) {
   const cfg = options?.cfg ?? telegramCfg();
   const handleAction = telegramMessageActions.handleAction;
@@ -70,13 +70,13 @@ async function runSignalAction(
   action: SignalActionInput["action"],
   params: SignalActionInput["params"],
   options?: {
-    cfg?: Hanzo BotConfig;
+    cfg?: HanzoBotConfig;
     accountId?: string;
     toolContext?: SignalActionInput["toolContext"];
   },
 ) {
   const cfg =
-    options?.cfg ?? ({ channels: { signal: { account: "+15550001111" } } } as Hanzo BotConfig);
+    options?.cfg ?? ({ channels: { signal: { account: "+15550001111" } } } as HanzoBotConfig);
   const handleAction = signalMessageActions.handleAction;
   if (!handleAction) {
     throw new Error("signal handleAction unavailable");
@@ -93,7 +93,7 @@ async function runSignalAction(
 }
 
 function slackHarness() {
-  const cfg = { channels: { slack: { botToken: "tok" } } } as Hanzo BotConfig;
+  const cfg = { channels: { slack: { botToken: "tok" } } } as HanzoBotConfig;
   const actions = createSlackActions("slack");
   return { cfg, actions };
 }
@@ -135,7 +135,7 @@ function expectChannelCreateAction(actions: string[], expected: boolean) {
   expect(actions).not.toContain("channel-create");
 }
 
-function createSignalAccountOverrideCfg(): Hanzo BotConfig {
+function createSignalAccountOverrideCfg(): HanzoBotConfig {
   return {
     channels: {
       signal: {
@@ -145,12 +145,12 @@ function createSignalAccountOverrideCfg(): Hanzo BotConfig {
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 function createDiscordModerationOverrideCfg(params?: {
   channelsEnabled?: boolean;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const accountActions = params?.channelsEnabled
     ? { moderation: true, channels: true }
     : { moderation: true };
@@ -163,13 +163,13 @@ function createDiscordModerationOverrideCfg(params?: {
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 async function expectSignalActionRejected(
   params: Record<string, unknown>,
   error: RegExp,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ) {
   const handleAction = signalMessageActions.handleAction;
   if (!handleAction) {
@@ -216,7 +216,7 @@ describe("discord message actions", () => {
     const cases = [
       {
         name: "defaults",
-        cfg: { channels: { discord: { token: "d0" } } } as Hanzo BotConfig,
+        cfg: { channels: { discord: { token: "d0" } } } as HanzoBotConfig,
         expectUploads: true,
         expectChannelCreate: true,
         expectModeration: false,
@@ -225,7 +225,7 @@ describe("discord message actions", () => {
         name: "disabled channel actions",
         cfg: {
           channels: { discord: { token: "d0", actions: { channels: false } } },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectUploads: true,
         expectChannelCreate: false,
         expectModeration: false,
@@ -240,7 +240,7 @@ describe("discord message actions", () => {
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectUploads: true,
         expectChannelCreate: true,
         expectModeration: true,
@@ -256,7 +256,7 @@ describe("discord message actions", () => {
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectUploads: true,
         expectChannelCreate: true,
         expectModeration: true,
@@ -272,7 +272,7 @@ describe("discord message actions", () => {
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectUploads: true,
         expectChannelCreate: true,
         expectModeration: false,
@@ -475,7 +475,7 @@ describe("handleDiscordMessageAction", () => {
     it(testCase.name, async () => {
       await handleDiscordMessageAction({
         ...testCase.input,
-        cfg: {} as Hanzo BotConfig,
+        cfg: {} as HanzoBotConfig,
       });
 
       const call = handleDiscordAction.mock.calls.at(-1);
@@ -493,7 +493,7 @@ describe("handleDiscordMessageAction", () => {
         durationMin: 5,
         senderUserId: "spoofed-admin-id",
       },
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       requesterSenderId: "trusted-sender-id",
       toolContext: { currentChannelProvider: "discord" },
     });
@@ -522,7 +522,7 @@ describe("handleDiscordMessageAction", () => {
               channelId: "123",
               emoji: "ok",
             },
-            cfg: {} as Hanzo BotConfig,
+            cfg: {} as HanzoBotConfig,
             toolContext: { currentMessageId: "9001" },
           });
         },
@@ -548,7 +548,7 @@ describe("handleDiscordMessageAction", () => {
                 channelId: "123",
                 emoji: "ok",
               },
-              cfg: {} as Hanzo BotConfig,
+              cfg: {} as HanzoBotConfig,
             }),
           ).rejects.toThrow(/messageId required/i);
         },
@@ -584,7 +584,7 @@ describe("telegramMessageActions", () => {
               actions: { editForumTopic: true },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectPoll: true,
         expectTopicEdit: true,
       },
@@ -597,7 +597,7 @@ describe("telegramMessageActions", () => {
               actions: { sendMessage: false },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectPoll: false,
         expectTopicEdit: true,
       },
@@ -610,7 +610,7 @@ describe("telegramMessageActions", () => {
               actions: { poll: false },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectPoll: false,
         expectTopicEdit: true,
       },
@@ -637,7 +637,7 @@ describe("telegramMessageActions", () => {
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectPoll: false,
         expectTopicEdit: true,
       },
@@ -676,7 +676,7 @@ describe("telegramMessageActions", () => {
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectSticker: true,
       },
       {
@@ -690,7 +690,7 @@ describe("telegramMessageActions", () => {
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectSticker: false,
       },
     ] as const;
@@ -883,7 +883,7 @@ describe("telegramMessageActions", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const actions = getDescribedActions({
       describeMessageTool: telegramMessageActions.describeMessageTool,
       cfg,
@@ -983,7 +983,7 @@ it("forwards trusted mediaLocalRoots for send actions", async () => {
         await handleDiscordMessageAction({
           action: "send",
           params: { to: "channel:123", message: "hi", media: "/tmp/file.png" },
-          cfg: {} as Hanzo BotConfig,
+          cfg: {} as HanzoBotConfig,
           mediaLocalRoots: ["/tmp/agent-root"],
         });
       },
@@ -1040,14 +1040,14 @@ describe("signalMessageActions", () => {
     const cases = [
       {
         name: "no configured accounts",
-        cfg: {} as Hanzo BotConfig,
+        cfg: {} as HanzoBotConfig,
         expected: [],
       },
       {
         name: "reactions disabled",
         cfg: {
           channels: { signal: { account: "+15550001111", actions: { reactions: false } } },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expected: ["send"],
       },
       {
@@ -1073,7 +1073,7 @@ describe("signalMessageActions", () => {
   it("blocks reactions when action gate is disabled", async () => {
     const cfg = {
       channels: { signal: { account: "+15550001111", actions: { reactions: false } } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     await expectSignalActionRejected(
       { to: "+15550001111", messageId: "123", emoji: "✅" },
       /actions\.reactions/,
@@ -1095,7 +1095,7 @@ describe("signalMessageActions", () => {
       },
       {
         name: "normalizes uuid recipients",
-        cfg: { channels: { signal: { account: "+15550001111" } } } as Hanzo BotConfig,
+        cfg: { channels: { signal: { account: "+15550001111" } } } as HanzoBotConfig,
         accountId: undefined,
         params: {
           recipient: "uuid:123e4567-e89b-12d3-a456-426614174000",
@@ -1109,7 +1109,7 @@ describe("signalMessageActions", () => {
       },
       {
         name: "passes groupId and targetAuthor for group reactions",
-        cfg: { channels: { signal: { account: "+15550001111" } } } as Hanzo BotConfig,
+        cfg: { channels: { signal: { account: "+15550001111" } } } as HanzoBotConfig,
         accountId: undefined,
         params: {
           to: "signal:group:group-id",
@@ -1128,7 +1128,7 @@ describe("signalMessageActions", () => {
       },
       {
         name: "falls back to toolContext.currentMessageId when messageId is omitted",
-        cfg: { channels: { signal: { account: "+15550001111" } } } as Hanzo BotConfig,
+        cfg: { channels: { signal: { account: "+15550001111" } } } as HanzoBotConfig,
         accountId: undefined,
         params: { to: "+15559999999", emoji: "🔥" },
         expectedRecipient: "+15559999999",
@@ -1161,7 +1161,7 @@ describe("signalMessageActions", () => {
   it("rejects invalid signal reaction inputs before dispatch", async () => {
     const cfg = {
       channels: { signal: { account: "+15550001111" } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     for (const testCase of [
       {
         params: { to: "+15559999999", emoji: "✅" },

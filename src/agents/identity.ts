@@ -1,17 +1,17 @@
-import type { Hanzo BotConfig, HumanDelayConfig, IdentityConfig } from "../config/config.js";
+import type { HanzoBotConfig, HumanDelayConfig, IdentityConfig } from "../config/config.js";
 import { resolveAgentConfig } from "./agent-scope.js";
 
 const DEFAULT_ACK_REACTION = "👀";
 
 export function resolveAgentIdentity(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
 ): IdentityConfig | undefined {
   return resolveAgentConfig(cfg, agentId)?.identity;
 }
 
 export function resolveAckReaction(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
   opts?: { channel?: string; accountId?: string },
 ): string {
@@ -46,7 +46,7 @@ export function resolveAckReaction(
 }
 
 export function resolveIdentityNamePrefix(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
 ): string | undefined {
   const name = resolveAgentIdentity(cfg, agentId)?.name?.trim();
@@ -57,12 +57,12 @@ export function resolveIdentityNamePrefix(
 }
 
 /** Returns just the identity name (without brackets) for template context. */
-export function resolveIdentityName(cfg: Hanzo BotConfig, agentId: string): string | undefined {
+export function resolveIdentityName(cfg: HanzoBotConfig, agentId: string): string | undefined {
   return resolveAgentIdentity(cfg, agentId)?.name?.trim() || undefined;
 }
 
 export function resolveMessagePrefix(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
   opts?: { configured?: string; hasAllowFrom?: boolean; fallback?: string },
 ): string {
@@ -81,7 +81,7 @@ export function resolveMessagePrefix(
 
 /** Helper to extract a channel config value by dynamic key. */
 function getChannelConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   channel: string,
 ): Record<string, unknown> | undefined {
   const channels = cfg.channels as Record<string, unknown> | undefined;
@@ -92,7 +92,7 @@ function getChannelConfig(
 }
 
 export function resolveResponsePrefix(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
   opts?: { channel?: string; accountId?: string },
 ): string | undefined {
@@ -133,7 +133,7 @@ export function resolveResponsePrefix(
 }
 
 export function resolveEffectiveMessagesConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
   opts?: {
     hasAllowFrom?: boolean;
@@ -155,7 +155,7 @@ export function resolveEffectiveMessagesConfig(
 }
 
 export function resolveHumanDelayConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
 ): HumanDelayConfig | undefined {
   const defaults = cfg.agents?.defaults?.humanDelay;

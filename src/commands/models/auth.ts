@@ -21,7 +21,7 @@ import { normalizeProviderId } from "../../agents/model-selection.js";
 import { resolveDefaultAgentWorkspaceDir } from "../../agents/workspace.js";
 import { formatCliCommand } from "../../cli/command-format.js";
 import { parseDurationMs } from "../../cli/parse-duration.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { logConfigUpdated } from "../../config/logging.js";
 import { applyAuthProfileConfig } from "../../plugins/provider-auth-helpers.js";
 import { resolvePluginProviders } from "../../plugins/providers.js";
@@ -82,7 +82,7 @@ function resolveDefaultTokenProfileId(provider: string): string {
 }
 
 type ResolvedModelsAuthContext = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   agentDir: string;
   workspaceDir: string;
   providers: ProviderPlugin[];
@@ -263,7 +263,7 @@ async function persistProviderAuthResult(params: {
 }
 
 async function runProviderAuthMethod(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   agentDir: string;
   workspaceDir: string;
   provider: ProviderPlugin;

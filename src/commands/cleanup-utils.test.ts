@@ -1,6 +1,6 @@
 import path from "node:path";
 import { describe, expect, it, test, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 import {
   buildCleanupPlan,
@@ -19,7 +19,7 @@ describe("buildCleanupPlan", () => {
       },
     };
     const plan = buildCleanupPlan({
-      cfg: cfg as unknown as Hanzo BotConfig,
+      cfg: cfg as unknown as HanzoBotConfig,
       stateDir: path.join(tmpRoot, "openclaw-state"),
       configPath: path.join(tmpRoot, "openclaw-state", "openclaw.json"),
       oauthDir: path.join(tmpRoot, "openclaw-oauth"),
@@ -38,14 +38,14 @@ describe("buildCleanupPlan", () => {
 
 describe("applyAgentDefaultPrimaryModel", () => {
   it("does not mutate when already set", () => {
-    const cfg = { agents: { defaults: { model: { primary: "a/b" } } } } as Hanzo BotConfig;
+    const cfg = { agents: { defaults: { model: { primary: "a/b" } } } } as HanzoBotConfig;
     const result = applyAgentDefaultPrimaryModel({ cfg, model: "a/b" });
     expect(result.changed).toBe(false);
     expect(result.next).toBe(cfg);
   });
 
   it("normalizes legacy models", () => {
-    const cfg = { agents: { defaults: { model: { primary: "legacy" } } } } as Hanzo BotConfig;
+    const cfg = { agents: { defaults: { model: { primary: "legacy" } } } } as HanzoBotConfig;
     const result = applyAgentDefaultPrimaryModel({
       cfg,
       model: "a/b",

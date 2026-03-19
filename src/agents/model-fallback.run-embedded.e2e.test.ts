@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import type { AssistantMessage } from "@mariozechner/pi-ai";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { AuthProfileFailureReason } from "./auth-profiles.js";
 import { runWithModelFallback } from "./model-fallback.js";
 import type { EmbeddedRunAttemptResult } from "./pi-embedded-runner/run/types.js";
@@ -35,7 +35,7 @@ vi.mock("./models-config.js", async (importOriginal) => {
   const mod = await importOriginal<typeof import("./models-config.js")>();
   return {
     ...mod,
-    ensureHanzo BotModelsJson: vi.fn(async () => ({ wrote: false })),
+    ensureHanzoBotModelsJson: vi.fn(async () => ({ wrote: false })),
   };
 });
 
@@ -94,7 +94,7 @@ const makeAttempt = (overrides: Partial<EmbeddedRunAttemptResult>): EmbeddedRunA
   ...overrides,
 });
 
-function makeConfig(): Hanzo BotConfig {
+function makeConfig(): HanzoBotConfig {
   const apiKeyField = ["api", "Key"].join("");
   return {
     agents: {
@@ -141,7 +141,7 @@ function makeConfig(): Hanzo BotConfig {
         },
       },
     },
-  } satisfies Hanzo BotConfig;
+  } satisfies HanzoBotConfig;
 }
 
 async function withAgentWorkspace<T>(

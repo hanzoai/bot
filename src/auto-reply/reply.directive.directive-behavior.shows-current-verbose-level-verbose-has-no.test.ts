@@ -1,6 +1,6 @@
 import "./reply.directive.directive-behavior.e2e-mocks.js";
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadSessionStore } from "../config/sessions.js";
 import {
   AUTHORIZED_WHATSAPP_COMMAND,
@@ -230,7 +230,7 @@ describe("directive behavior", () => {
           CommandAuthorized: true,
         },
         {},
-        makeRestrictedElevatedDisabledConfig(home) as unknown as Hanzo BotConfig,
+        makeRestrictedElevatedDisabledConfig(home) as unknown as HanzoBotConfig,
       );
       const deniedText = replyText(deniedRes);
       expect(deniedText).toContain("agents.list[].tools.elevated.enabled");
@@ -246,7 +246,7 @@ describe("directive behavior", () => {
           CommandAuthorized: true,
         },
         {},
-        makeRestrictedElevatedDisabledConfig(home) as unknown as Hanzo BotConfig,
+        makeRestrictedElevatedDisabledConfig(home) as unknown as HanzoBotConfig,
       );
       const statusText = replyText(statusRes);
       expect(statusText).not.toContain("elevated");

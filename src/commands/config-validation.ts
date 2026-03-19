@@ -1,5 +1,5 @@
 import { formatCliCommand } from "../cli/command-format.js";
-import { type Hanzo BotConfig, readConfigFileSnapshot } from "../config/config.js";
+import { type HanzoBotConfig, readConfigFileSnapshot } from "../config/config.js";
 import { formatConfigIssueLines } from "../config/issue-format.js";
 import {
   buildPluginCompatibilityNotices,
@@ -10,7 +10,7 @@ import type { RuntimeEnv } from "../runtime.js";
 export async function requireValidConfigSnapshot(
   runtime: RuntimeEnv,
   opts?: { includeCompatibilityAdvisory?: boolean },
-): Promise<Hanzo BotConfig | null> {
+): Promise<HanzoBotConfig | null> {
   const snapshot = await readConfigFileSnapshot();
   if (snapshot.exists && !snapshot.valid) {
     const issues =

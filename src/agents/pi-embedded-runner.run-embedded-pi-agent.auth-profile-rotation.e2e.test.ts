@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import type { AssistantMessage } from "@mariozechner/pi-ai";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { registerLogTransport, resetLogger, setLoggerOverride } from "../logging/logger.js";
 import { redactIdentifier } from "../logging/redact-identifier.js";
 import type { AuthProfileFailureReason } from "./auth-profiles.js";
@@ -72,7 +72,7 @@ vi.mock("./models-config.js", async (importOriginal) => {
   const mod = await importOriginal<typeof import("./models-config.js")>();
   return {
     ...mod,
-    ensureHanzo BotModelsJson: vi.fn(async () => ({ wrote: false })),
+    ensureHanzoBotModelsJson: vi.fn(async () => ({ wrote: false })),
   };
 });
 
@@ -138,7 +138,7 @@ const makeAttempt = (overrides: Partial<EmbeddedRunAttemptResult>): EmbeddedRunA
   ...overrides,
 });
 
-const makeConfig = (opts?: { fallbacks?: string[]; apiKey?: string }): Hanzo BotConfig =>
+const makeConfig = (opts?: { fallbacks?: string[]; apiKey?: string }): HanzoBotConfig =>
   ({
     agents: {
       defaults: {
@@ -167,9 +167,9 @@ const makeConfig = (opts?: { fallbacks?: string[]; apiKey?: string }): Hanzo Bot
         },
       },
     },
-  }) satisfies Hanzo BotConfig;
+  }) satisfies HanzoBotConfig;
 
-const makeAgentOverrideOnlyFallbackConfig = (agentId: string): Hanzo BotConfig =>
+const makeAgentOverrideOnlyFallbackConfig = (agentId: string): HanzoBotConfig =>
   ({
     agents: {
       defaults: {
@@ -206,11 +206,11 @@ const makeAgentOverrideOnlyFallbackConfig = (agentId: string): Hanzo BotConfig =
         },
       },
     },
-  }) satisfies Hanzo BotConfig;
+  }) satisfies HanzoBotConfig;
 
 const copilotModelId = "gpt-4o";
 
-const makeCopilotConfig = (): Hanzo BotConfig =>
+const makeCopilotConfig = (): HanzoBotConfig =>
   ({
     models: {
       providers: {
@@ -231,7 +231,7 @@ const makeCopilotConfig = (): Hanzo BotConfig =>
         },
       },
     },
-  }) satisfies Hanzo BotConfig;
+  }) satisfies HanzoBotConfig;
 
 const writeAuthStore = async (
   agentDir: string,

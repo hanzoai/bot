@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { Hanzo BotConfig, PluginRuntime } from "openclaw/plugin-sdk/bluebubbles";
+import type { HanzoBotConfig, PluginRuntime } from "openclaw/plugin-sdk/bluebubbles";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPluginRuntimeMock } from "../../../test/helpers/extensions/plugin-runtime-mock.js";
 import type { ResolvedBlueBubblesAccount } from "./accounts.js";
@@ -263,7 +263,7 @@ describe("BlueBubbles webhook monitor", () => {
 
   function setupWebhookTarget(params?: {
     account?: ResolvedBlueBubblesAccount;
-    config?: Hanzo BotConfig;
+    config?: HanzoBotConfig;
     core?: PluginRuntime;
     statusSink?: (event: unknown) => void;
   }) {
@@ -344,7 +344,7 @@ describe("BlueBubbles webhook monitor", () => {
       statusSink?: (event: unknown) => void;
     }>,
   ) {
-    const config: Hanzo BotConfig = {};
+    const config: HanzoBotConfig = {};
     const core = createMockRuntime();
     setBlueBubblesRuntime(core);
 

@@ -23,7 +23,7 @@ import {
   resolveNativeCommandsEnabled,
   resolveNativeSkillsEnabled,
 } from "openclaw/plugin-sdk/config-runtime";
-import type { Hanzo BotConfig, ReplyToMode } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig, ReplyToMode } from "openclaw/plugin-sdk/config-runtime";
 import { loadConfig } from "openclaw/plugin-sdk/config-runtime";
 import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/config-runtime";
 import {
@@ -101,7 +101,7 @@ import { formatThreadBindingDurationLabel } from "./thread-bindings.messages.js"
 export type MonitorDiscordOpts = {
   token?: string;
   accountId?: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   runtime?: RuntimeEnv;
   abortSignal?: AbortSignal;
   mediaMaxMb?: number;
@@ -186,7 +186,7 @@ function classifyAcpStatusProbeError(params: { error: unknown; isStaleRunning: b
 }
 
 async function probeDiscordAcpBindingHealth(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   sessionKey: string;
   storedState?: "idle" | "running" | "error";
   lastActivityAt?: number;

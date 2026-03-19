@@ -4,7 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import { stageBundledPluginRuntime } from "../../scripts/stage-bundled-plugin-runtime.mjs";
-import { discoverHanzo BotPlugins } from "./discovery.js";
+import { discoverHanzoBotPlugins } from "./discovery.js";
 import { loadPluginManifestRegistry } from "./manifest-registry.js";
 
 const tempDirs: string[] = [];
@@ -278,7 +278,7 @@ describe("stageBundledPluginRuntime", () => {
       ...process.env,
       BOT_BUNDLED_PLUGINS_DIR: runtimeExtensionsDir,
     };
-    const discovery = discoverHanzo BotPlugins({
+    const discovery = discoverHanzoBotPlugins({
       env,
       cache: false,
     });

@@ -1,5 +1,5 @@
 import type {
-  Hanzo BotPluginApi,
+  HanzoBotPluginApi,
   ProviderAuthContext,
   ProviderFetchUsageSnapshotContext,
 } from "openclaw/plugin-sdk/plugin-entry";
@@ -47,7 +47,7 @@ async function fetchGeminiCliUsage(ctx: ProviderFetchUsageSnapshotContext) {
   return await fetchGeminiUsage(ctx.token, ctx.timeoutMs, ctx.fetchFn, PROVIDER_ID);
 }
 
-export function registerGoogleGeminiCliProvider(api: Hanzo BotPluginApi) {
+export function registerGoogleGeminiCliProvider(api: HanzoBotPluginApi) {
   api.registerProvider({
     id: PROVIDER_ID,
     label: PROVIDER_LABEL,

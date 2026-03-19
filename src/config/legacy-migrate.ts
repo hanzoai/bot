@@ -1,9 +1,9 @@
 import { applyLegacyMigrations } from "./legacy.js";
-import type { Hanzo BotConfig } from "./types.js";
+import type { HanzoBotConfig } from "./types.js";
 import { validateConfigObjectWithPlugins } from "./validation.js";
 
 export function migrateLegacyConfig(raw: unknown): {
-  config: Hanzo BotConfig | null;
+  config: HanzoBotConfig | null;
   changes: string[];
 } {
   const { next, changes } = applyLegacyMigrations(raw);
