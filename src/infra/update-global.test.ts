@@ -12,7 +12,7 @@ import {
   globalInstallFallbackArgs,
   isExplicitPackageInstallSpec,
   isMainPackageTarget,
-  OPENCLAW_MAIN_PACKAGE_SPEC,
+  BOT_MAIN_PACKAGE_SPEC,
   resolveGlobalPackageRoot,
   resolveGlobalInstallSpec,
   resolveGlobalRoot,
@@ -28,17 +28,17 @@ describe("update global helpers", () => {
   });
 
   it("prefers explicit package spec overrides", () => {
-    envSnapshot = captureEnv(["OPENCLAW_UPDATE_PACKAGE_SPEC"]);
-    process.env.OPENCLAW_UPDATE_PACKAGE_SPEC = "file:/tmp/openclaw.tgz";
+    envSnapshot = captureEnv(["BOT_UPDATE_PACKAGE_SPEC"]);
+    process.env.BOT_UPDATE_PACKAGE_SPEC = "file:/tmp/openclaw.tgz";
 
-    expect(resolveGlobalInstallSpec({ packageName: "openclaw", tag: "latest" })).toBe(
+    expect(resolveGlobalInstallSpec({ packageName: "@hanzo/bot", tag: "latest" })).toBe(
       "file:/tmp/openclaw.tgz",
     );
     expect(
       resolveGlobalInstallSpec({
-        packageName: "openclaw",
+        packageName: "@hanzo/bot",
         tag: "beta",
-        env: { OPENCLAW_UPDATE_PACKAGE_SPEC: "openclaw@next" },
+        env: { BOT_UPDATE_PACKAGE_SPEC: "openclaw@next" },
       }),
     ).toBe("openclaw@next");
   });
@@ -60,23 +60,23 @@ describe("update global helpers", () => {
       path.join(".bun", "install", "global", "node_modules"),
     );
     await expect(resolveGlobalPackageRoot("npm", runCommand, 1000)).resolves.toBe(
-      path.join("/tmp/npm-root", "openclaw"),
+      path.join("/tmp/npm-root", "@hanzo/bot"),
     );
   });
 
   it("maps main and explicit install specs for global installs", () => {
-    expect(resolveGlobalInstallSpec({ packageName: "openclaw", tag: "main" })).toBe(
-      OPENCLAW_MAIN_PACKAGE_SPEC,
+    expect(resolveGlobalInstallSpec({ packageName: "@hanzo/bot", tag: "main" })).toBe(
+      BOT_MAIN_PACKAGE_SPEC,
     );
     expect(
       resolveGlobalInstallSpec({
-        packageName: "openclaw",
-        tag: "github:openclaw/openclaw#feature/my-branch",
+        packageName: "@hanzo/bot",
+        tag: "github:hanzoai/bot#feature/my-branch",
       }),
-    ).toBe("github:openclaw/openclaw#feature/my-branch");
+    ).toBe("github:hanzoai/bot#feature/my-branch");
     expect(
       resolveGlobalInstallSpec({
-        packageName: "openclaw",
+        packageName: "@hanzo/bot",
         tag: "https://example.com/openclaw-main.tgz",
       }),
     ).toBe("https://example.com/openclaw-main.tgz");
@@ -87,7 +87,7 @@ describe("update global helpers", () => {
     expect(isMainPackageTarget(" MAIN ")).toBe(true);
     expect(isMainPackageTarget("beta")).toBe(false);
 
-    expect(isExplicitPackageInstallSpec("github:openclaw/openclaw#main")).toBe(true);
+    expect(isExplicitPackageInstallSpec("github:hanzoai/bot#main")).toBe(true);
     expect(isExplicitPackageInstallSpec("https://example.com/openclaw-main.tgz")).toBe(true);
     expect(isExplicitPackageInstallSpec("file:/tmp/openclaw-main.tgz")).toBe(true);
     expect(isExplicitPackageInstallSpec("beta")).toBe(false);
@@ -95,7 +95,7 @@ describe("update global helpers", () => {
     expect(canResolveRegistryVersionForPackageTarget("latest")).toBe(true);
     expect(canResolveRegistryVersionForPackageTarget("2026.3.14")).toBe(true);
     expect(canResolveRegistryVersionForPackageTarget("main")).toBe(false);
-    expect(canResolveRegistryVersionForPackageTarget("github:openclaw/openclaw#main")).toBe(false);
+    expect(canResolveRegistryVersionForPackageTarget("github:hanzoai/bot#main")).toBe(false);
   });
 
   it("detects install managers from resolved roots and on-disk presence", async () => {
@@ -103,10 +103,10 @@ describe("update global helpers", () => {
     const npmRoot = path.join(base, "npm-root");
     const pnpmRoot = path.join(base, "pnpm-root");
     const bunRoot = path.join(base, ".bun", "install", "global", "node_modules");
-    const pkgRoot = path.join(pnpmRoot, "openclaw");
+    const pkgRoot = path.join(pnpmRoot, "@hanzo/bot");
     await fs.mkdir(pkgRoot, { recursive: true });
-    await fs.mkdir(path.join(npmRoot, "openclaw"), { recursive: true });
-    await fs.mkdir(path.join(bunRoot, "openclaw"), { recursive: true });
+    await fs.mkdir(path.join(npmRoot, "@hanzo/bot"), { recursive: true });
+    await fs.mkdir(path.join(bunRoot, "@hanzo/bot"), { recursive: true });
 
     envSnapshot = captureEnv(["BUN_INSTALL"]);
     process.env.BUN_INSTALL = path.join(base, ".bun");
@@ -126,8 +126,8 @@ describe("update global helpers", () => {
     );
     await expect(detectGlobalInstallManagerByPresence(runCommand, 1000)).resolves.toBe("npm");
 
-    await fs.rm(path.join(npmRoot, "openclaw"), { recursive: true, force: true });
-    await fs.rm(path.join(pnpmRoot, "openclaw"), { recursive: true, force: true });
+    await fs.rm(path.join(npmRoot, "@hanzo/bot"), { recursive: true, force: true });
+    await fs.rm(path.join(pnpmRoot, "@hanzo/bot"), { recursive: true, force: true });
     await expect(detectGlobalInstallManagerByPresence(runCommand, 1000)).resolves.toBe("bun");
   });
 
@@ -172,17 +172,17 @@ describe("update global helpers", () => {
     await fs.mkdir(path.join(root, ".openclaw-123"), { recursive: true });
     await fs.mkdir(path.join(root, ".openclaw-456"), { recursive: true });
     await fs.writeFile(path.join(root, ".openclaw-file"), "nope", "utf8");
-    await fs.mkdir(path.join(root, "openclaw"), { recursive: true });
+    await fs.mkdir(path.join(root, "@hanzo/bot"), { recursive: true });
 
     await expect(
       cleanupGlobalRenameDirs({
         globalRoot: root,
-        packageName: "openclaw",
+        packageName: "@hanzo/bot",
       }),
     ).resolves.toEqual({
       removed: [".openclaw-123", ".openclaw-456"],
     });
-    await expect(fs.stat(path.join(root, "openclaw"))).resolves.toBeDefined();
+    await expect(fs.stat(path.join(root, "@hanzo/bot"))).resolves.toBeDefined();
     await expect(fs.stat(path.join(root, ".openclaw-file"))).resolves.toBeDefined();
   });
 });

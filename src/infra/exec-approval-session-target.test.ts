@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { resolveExecApprovalSessionTarget } from "./exec-approval-session-target.js";
 import type { ExecApprovalRequest } from "./exec-approvals.js";
@@ -34,12 +34,12 @@ function createTempDir(): string {
 function writeStoreFile(
   storePath: string,
   entries: Record<string, Partial<SessionEntry>>,
-): OpenClawConfig {
+): Hanzo BotConfig {
   fs.mkdirSync(path.dirname(storePath), { recursive: true });
   fs.writeFileSync(storePath, JSON.stringify(entries), "utf-8");
   return {
     session: { store: storePath },
-  } as OpenClawConfig;
+  } as Hanzo BotConfig;
 }
 
 describe("exec approval session target", () => {

@@ -29,7 +29,7 @@ let stickerCache: StickerCacheModule;
 
 describe("sticker-cache", () => {
   beforeEach(async () => {
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-test-sticker-cache";
+    process.env.BOT_STATE_DIR = "/tmp/openclaw-test-sticker-cache";
     fs.rmSync("/tmp/openclaw-test-sticker-cache", { recursive: true, force: true });
     fs.mkdirSync(TEST_CACHE_DIR, { recursive: true });
     vi.resetModules();
@@ -38,7 +38,7 @@ describe("sticker-cache", () => {
 
   afterEach(() => {
     fs.rmSync("/tmp/openclaw-test-sticker-cache", { recursive: true, force: true });
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   });
 
   describe("getCachedSticker", () => {

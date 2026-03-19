@@ -1,24 +1,24 @@
 ---
 summary: "Matrix support status, setup, and configuration examples"
 read_when:
-  - Setting up Matrix in OpenClaw
+  - Setting up Matrix in Hanzo Bot
   - Configuring Matrix E2EE and verification
 title: "Matrix"
 ---
 
 # Matrix (plugin)
 
-Matrix is the Matrix channel plugin for OpenClaw.
+Matrix is the Matrix channel plugin for Hanzo Bot.
 It uses the official `matrix-js-sdk` and supports DMs, rooms, threads, media, reactions, polls, location, and E2EE.
 
 ## Plugin required
 
-Matrix is a plugin and is not bundled with core OpenClaw.
+Matrix is a plugin and is not bundled with core Hanzo Bot.
 
 Install from npm:
 
 ```bash
-openclaw plugins install @openclaw/matrix
+openclaw plugins install @hanzo/bot-matrix
 ```
 
 Install from a local checkout:
@@ -62,7 +62,7 @@ Wizard behavior that matters:
 - DM allowlist prompts accept full `@user:server` values immediately. Display names only work when live directory lookup finds one exact match; otherwise the wizard asks you to retry with a full Matrix ID.
 - Room allowlist prompts accept room IDs and aliases directly. They can also resolve joined-room names live, but unresolved names are only kept as typed during setup and are ignored later by runtime allowlist resolution. Prefer `!room:server` or `#alias:server`.
 - Runtime room/session identity uses the stable Matrix room ID. Room-declared aliases are only used as lookup inputs, not as the long-term session key or stable group identity.
-- To resolve room names before saving them, use `openclaw channels resolve --channel matrix "Project Room"`.
+- To resolve room names before saving them, use `hanzo-bot channels resolve --channel matrix "Project Room"`.
 
 Minimal token-based setup:
 
@@ -89,13 +89,13 @@ Password-based setup (token is cached after login):
       homeserver: "https://matrix.example.org",
       userId: "@bot:example.org",
       password: "replace-me", // pragma: allowlist secret
-      deviceName: "OpenClaw Gateway",
+      deviceName: "Hanzo Bot Gateway",
     },
   },
 }
 ```
 
-Matrix stores cached credentials in `~/.openclaw/credentials/matrix/`.
+Matrix stores cached credentials in `~/.hanzo/bot/credentials/matrix/`.
 The default account uses `credentials.json`; named accounts use `credentials-<account>.json`.
 
 Environment variable equivalents (used when the config key is not set):
@@ -277,19 +277,19 @@ When encryption is disabled or unavailable for a named account, Matrix warnings 
 
 ### What "verified" means
 
-OpenClaw treats this Matrix device as verified only when it is verified by your own cross-signing identity.
-In practice, `openclaw matrix verify status --verbose` exposes three trust signals:
+Hanzo Bot treats this Matrix device as verified only when it is verified by your own cross-signing identity.
+In practice, `hanzo-bot matrix verify status --verbose` exposes three trust signals:
 
 - `Locally trusted`: this device is trusted by the current client only
 - `Cross-signing verified`: the SDK reports the device as verified through cross-signing
 - `Signed by owner`: the device is signed by your own self-signing key
 
 `Verified by owner` becomes `yes` only when cross-signing verification or owner-signing is present.
-Local trust by itself is not enough for OpenClaw to treat the device as fully verified.
+Local trust by itself is not enough for Hanzo Bot to treat the device as fully verified.
 
 ### What bootstrap does
 
-`openclaw matrix verify bootstrap` is the repair and setup command for encrypted Matrix accounts.
+`hanzo-bot matrix verify bootstrap` is the repair and setup command for encrypted Matrix accounts.
 It does all of the following in order:
 
 - bootstraps secret storage, reusing an existing recovery key when possible
@@ -297,11 +297,11 @@ It does all of the following in order:
 - attempts to mark and cross-sign the current device
 - creates a new server-side room-key backup if one does not already exist
 
-If the homeserver requires interactive auth to upload cross-signing keys, OpenClaw tries the upload without auth first, then with `m.login.dummy`, then with `m.login.password` when `channels.matrix.password` is configured.
+If the homeserver requires interactive auth to upload cross-signing keys, Hanzo Bot tries the upload without auth first, then with `m.login.dummy`, then with `m.login.password` when `channels.matrix.password` is configured.
 
 Use `--force-reset-cross-signing` only when you intentionally want to discard the current cross-signing identity and create a new one.
 
-If you intentionally want to discard the current room-key backup and start a new backup baseline for future messages, use `openclaw matrix verify backup reset --yes`.
+If you intentionally want to discard the current room-key backup and start a new backup baseline for future messages, use `hanzo-bot matrix verify backup reset --yes`.
 Do this only when you accept that unrecoverable old encrypted history will stay unavailable.
 
 ### Fresh backup baseline
@@ -328,28 +328,28 @@ if you want a shorter or longer retry window.
 Startup also performs a conservative crypto bootstrap pass automatically.
 That pass tries to reuse the current secret storage and cross-signing identity first, and avoids resetting cross-signing unless you run an explicit bootstrap repair flow.
 
-If startup finds broken bootstrap state and `channels.matrix.password` is configured, OpenClaw can attempt a stricter repair path.
-If the current device is already owner-signed, OpenClaw preserves that identity instead of resetting it automatically.
+If startup finds broken bootstrap state and `channels.matrix.password` is configured, Hanzo Bot can attempt a stricter repair path.
+If the current device is already owner-signed, Hanzo Bot preserves that identity instead of resetting it automatically.
 
 Upgrading from the previous public Matrix plugin:
 
-- OpenClaw automatically reuses the same Matrix account, access token, and device identity when possible.
-- Before any actionable Matrix migration changes run, OpenClaw creates or reuses a recovery snapshot under `~/Backups/openclaw-migrations/`.
-- If you use multiple Matrix accounts, set `channels.matrix.defaultAccount` before upgrading from the old flat-store layout so OpenClaw knows which account should receive that shared legacy state.
-- If the previous plugin stored a Matrix room-key backup decryption key locally, startup or `openclaw doctor --fix` will import it into the new recovery-key flow automatically.
+- Hanzo Bot automatically reuses the same Matrix account, access token, and device identity when possible.
+- Before any actionable Matrix migration changes run, Hanzo Bot creates or reuses a recovery snapshot under `~/Backups/openclaw-migrations/`.
+- If you use multiple Matrix accounts, set `channels.matrix.defaultAccount` before upgrading from the old flat-store layout so Hanzo Bot knows which account should receive that shared legacy state.
+- If the previous plugin stored a Matrix room-key backup decryption key locally, startup or `hanzo-bot doctor --fix` will import it into the new recovery-key flow automatically.
 - If the Matrix access token changed after migration was prepared, startup now scans sibling token-hash storage roots for pending legacy restore state before giving up on the automatic backup restore.
-- If the Matrix access token changes later for the same account, homeserver, and user, OpenClaw now prefers reusing the most complete existing token-hash storage root instead of starting from an empty Matrix state directory.
+- If the Matrix access token changes later for the same account, homeserver, and user, Hanzo Bot now prefers reusing the most complete existing token-hash storage root instead of starting from an empty Matrix state directory.
 - On the next gateway start, backed-up room keys are restored automatically into the new crypto store.
-- If the old plugin had local-only room keys that were never backed up, OpenClaw will warn clearly. Those keys cannot be exported automatically from the previous rust crypto store, so some old encrypted history may remain unavailable until recovered manually.
+- If the old plugin had local-only room keys that were never backed up, Hanzo Bot will warn clearly. Those keys cannot be exported automatically from the previous rust crypto store, so some old encrypted history may remain unavailable until recovered manually.
 - See [Matrix migration](/install/migrating-matrix) for the full upgrade flow, limits, recovery commands, and common migration messages.
 
 Encrypted runtime state is organized under per-account, per-user token-hash roots in
-`~/.openclaw/matrix/accounts/<account>/<homeserver>__<user>/<token-hash>/`.
+`~/.hanzo/bot/matrix/accounts/<account>/<homeserver>__<user>/<token-hash>/`.
 That directory contains the sync store (`bot-storage.json`), crypto store (`crypto/`),
 recovery key file (`recovery-key.json`), IndexedDB snapshot (`crypto-idb-snapshot.json`),
 thread bindings (`thread-bindings.json`), and startup verification state (`startup-verification.json`)
 when those features are in use.
-When the token changes but the account identity stays the same, OpenClaw reuses the best existing
+When the token changes but the account identity stays the same, Hanzo Bot reuses the best existing
 root for that account/homeserver/user tuple so prior sync state, crypto state, thread bindings,
 and startup verification state remain visible.
 
@@ -358,7 +358,7 @@ and startup verification state remain visible.
 Matrix E2EE in this plugin uses the official `matrix-js-sdk` Rust crypto path in Node.
 That path expects IndexedDB-backed persistence when you want crypto state to survive restarts.
 
-OpenClaw currently provides that in Node by:
+Hanzo Bot currently provides that in Node by:
 
 - using `fake-indexeddb` as the IndexedDB API shim expected by the SDK
 - restoring the Rust crypto IndexedDB contents from `crypto-idb-snapshot.json` before `initRustCrypto`
@@ -366,11 +366,11 @@ OpenClaw currently provides that in Node by:
 
 This is compatibility/storage plumbing, not a custom crypto implementation.
 The snapshot file is sensitive runtime state and is stored with restrictive file permissions.
-Under OpenClaw's security model, the gateway host and local OpenClaw state directory are already inside the trusted operator boundary, so this is primarily an operational durability concern rather than a separate remote trust boundary.
+Under Hanzo Bot's security model, the gateway host and local Hanzo Bot state directory are already inside the trusted operator boundary, so this is primarily an operational durability concern rather than a separate remote trust boundary.
 
 Planned improvement:
 
-- add SecretRef support for persistent Matrix key material so recovery keys and related store-encryption secrets can be sourced from OpenClaw secrets providers instead of only local files
+- add SecretRef support for persistent Matrix key material so recovery keys and related store-encryption secrets can be sourced from Hanzo Bot secrets providers instead of only local files
 
 ## Automatic verification notices
 
@@ -382,25 +382,25 @@ That includes:
 - verification start and completion notices
 - SAS details (emoji and decimal) when available
 
-Incoming verification requests from another Matrix client are tracked and auto-accepted by OpenClaw.
-For self-verification flows, OpenClaw also starts the SAS flow automatically when emoji verification becomes available and confirms its own side.
-For verification requests from another Matrix user/device, OpenClaw auto-accepts the request and then waits for the SAS flow to proceed normally.
+Incoming verification requests from another Matrix client are tracked and auto-accepted by Hanzo Bot.
+For self-verification flows, Hanzo Bot also starts the SAS flow automatically when emoji verification becomes available and confirms its own side.
+For verification requests from another Matrix user/device, Hanzo Bot auto-accepts the request and then waits for the SAS flow to proceed normally.
 You still need to compare the emoji or decimal SAS in your Matrix client and confirm "They match" there to complete the verification.
 
-OpenClaw does not auto-accept self-initiated duplicate flows blindly. Startup skips creating a new request when a self-verification request is already pending.
+Hanzo Bot does not auto-accept self-initiated duplicate flows blindly. Startup skips creating a new request when a self-verification request is already pending.
 
 Verification protocol/system notices are not forwarded to the agent chat pipeline, so they do not produce `NO_REPLY`.
 
 ### Device hygiene
 
-Old OpenClaw-managed Matrix devices can accumulate on the account and make encrypted-room trust harder to reason about.
+Old Hanzo Bot-managed Matrix devices can accumulate on the account and make encrypted-room trust harder to reason about.
 List them with:
 
 ```bash
 openclaw matrix devices list
 ```
 
-Remove stale OpenClaw-managed devices with:
+Remove stale Hanzo Bot-managed devices with:
 
 ```bash
 openclaw matrix devices prune-stale
@@ -408,7 +408,7 @@ openclaw matrix devices prune-stale
 
 ### Direct Room Repair
 
-If direct-message state gets out of sync, OpenClaw can end up with stale `m.direct` mappings that point at old solo rooms instead of the live DM. Inspect the current mapping for a peer with:
+If direct-message state gets out of sync, Hanzo Bot can end up with stale `m.direct` mappings that point at old solo rooms instead of the live DM. Inspect the current mapping for a peer with:
 
 ```bash
 openclaw matrix direct inspect --user-id @alice:example.org
@@ -466,7 +466,7 @@ Matrix supports outbound reaction actions, inbound reaction notifications, and i
 - `emoji=""` removes the bot account's own reactions on that event.
 - `remove: true` removes only the specified emoji reaction from the bot account.
 
-Ack reactions use the standard OpenClaw resolution order:
+Ack reactions use the standard Hanzo Bot resolution order:
 
 - `channels["matrix"].accounts.<accountId>.ackReaction`
 - `channels["matrix"].ackReaction`
@@ -522,7 +522,7 @@ openclaw pairing list matrix
 openclaw pairing approve matrix <CODE>
 ```
 
-If an unapproved Matrix user keeps messaging you before approval, OpenClaw reuses the same pending pairing code and may send a reminder reply again after a short cooldown instead of minting a new code.
+If an unapproved Matrix user keeps messaging you before approval, Hanzo Bot reuses the same pending pairing code and may send a reminder reply again after a short cooldown instead of minting a new code.
 
 See [Pairing](/channels/pairing) for the shared DM pairing flow and storage layout.
 
@@ -556,13 +556,13 @@ See [Pairing](/channels/pairing) for the shared DM pairing flow and storage layo
 ```
 
 Top-level `channels.matrix` values act as defaults for named accounts unless an account overrides them.
-Set `defaultAccount` when you want OpenClaw to prefer one named Matrix account for implicit routing, probing, and CLI operations.
+Set `defaultAccount` when you want Hanzo Bot to prefer one named Matrix account for implicit routing, probing, and CLI operations.
 If you configure multiple named accounts, set `defaultAccount` or pass `--account <id>` for CLI commands that rely on implicit account selection.
-Pass `--account <id>` to `openclaw matrix verify ...` and `openclaw matrix devices ...` when you want to override that implicit selection for one command.
+Pass `--account <id>` to `hanzo-bot matrix verify ...` and `hanzo-bot matrix devices ...` when you want to override that implicit selection for one command.
 
 ## Target resolution
 
-Matrix accepts these target forms anywhere OpenClaw asks you for a room or user target:
+Matrix accepts these target forms anywhere Hanzo Bot asks you for a room or user target:
 
 - Users: `@user:server`, `user:@user:server`, or `matrix:user:@user:server`
 - Rooms: `!room:server`, `room:!room:server`, or `matrix:room:!room:server`
@@ -605,7 +605,7 @@ Live directory lookup uses the logged-in Matrix account:
 - `reactionNotifications`: inbound reaction notification mode (`own`, `off`).
 - `mediaMaxMb`: outbound media size cap in MB.
 - `autoJoin`: invite auto-join policy (`always`, `allowlist`, `off`). Default: `off`.
-- `autoJoinAllowlist`: rooms/aliases allowed when `autoJoin` is `allowlist`. Alias entries are resolved to room IDs during invite handling; OpenClaw does not trust alias state claimed by the invited room.
+- `autoJoinAllowlist`: rooms/aliases allowed when `autoJoin` is `allowlist`. Alias entries are resolved to room IDs during invite handling; Hanzo Bot does not trust alias state claimed by the invited room.
 - `dm`: DM policy block (`enabled`, `policy`, `allowFrom`).
 - `dm.allowFrom` entries should be full Matrix user IDs unless you already resolved them through live directory lookup.
 - `accounts`: named per-account overrides. Top-level `channels.matrix` values act as defaults for these entries.

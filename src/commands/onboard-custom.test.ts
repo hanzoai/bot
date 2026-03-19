@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CONTEXT_WINDOW_HARD_MIN_TOKENS } from "../agents/context-window-guard.js";
 import { OLLAMA_DEFAULT_BASE_URL } from "../agents/ollama-defaults.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { defaultRuntime } from "../runtime.js";
 import {
   applyCustomApiConfig,
@@ -80,7 +80,7 @@ function expectOpenAiCompatResult(params: {
 
 function buildCustomProviderConfig(contextWindow?: number) {
   if (contextWindow === undefined) {
-    return {} as OpenClawConfig;
+    return {} as Hanzo BotConfig;
   }
   return {
     models: {
@@ -102,7 +102,7 @@ function buildCustomProviderConfig(contextWindow?: number) {
         },
       },
     },
-  } as OpenClawConfig;
+  } as Hanzo BotConfig;
 }
 
 function applyCustomModelConfigWithContextWindow(contextWindow?: number) {
@@ -616,7 +616,7 @@ describe("applyCustomApiConfig", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       baseUrl: "https://llm.example.com/v1",
       modelId: "foo-large",
       compatibility: "openai",
@@ -646,7 +646,7 @@ describe("applyCustomApiConfig", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       baseUrl: "https://my-resource.openai.azure.com",
       modelId: "o3-mini",
       compatibility: "openai",

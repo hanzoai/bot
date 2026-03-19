@@ -116,8 +116,8 @@ struct SettingsRootView: View {
 
     private var nixManagedBanner: some View {
         // Prefer gateway-resolved paths; fall back to local env defaults if disconnected.
-        let configPath = self.snapshotPaths.configPath ?? OpenClawPaths.configURL.path
-        let stateDir = self.snapshotPaths.stateDir ?? OpenClawPaths.stateDirURL.path
+        let configPath = self.snapshotPaths.configPath ?? Hanzo BotPaths.configURL.path
+        let stateDir = self.snapshotPaths.stateDir ?? Hanzo BotPaths.stateDirURL.path
 
         return VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {

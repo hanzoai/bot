@@ -1,11 +1,11 @@
-import OpenClawKit
+import Hanzo BotKit
 import Foundation
 import Testing
 
 @Suite struct CanvasSnapshotFormatTests {
     @Test func acceptsJpgAlias() throws {
         struct Wrapper: Codable {
-            var format: OpenClawCanvasSnapshotFormat
+            var format: Hanzo BotCanvasSnapshotFormat
         }
 
         let data = try #require("{\"format\":\"jpg\"}".data(using: .utf8))

@@ -1,7 +1,7 @@
 import Foundation
 import Observation
-import OpenClawKit
-import OpenClawProtocol
+import Hanzo BotKit
+import Hanzo BotProtocol
 import SwiftUI
 
 struct ControlHeartbeatEvent: Codable {
@@ -23,7 +23,7 @@ struct ControlAgentEvent: Codable, Identifiable {
     let seq: Int
     let stream: String
     let ts: Double
-    let data: [String: OpenClawProtocol.AnyCodable]
+    let data: [String: Hanzo BotProtocol.AnyCodable]
     let summary: String?
 }
 
@@ -166,8 +166,8 @@ final class ControlChannel {
         timeoutMs: Double? = nil) async throws -> Data
     {
         do {
-            let rawParams = params?.reduce(into: [String: OpenClawKit.AnyCodable]()) {
-                $0[$1.key] = OpenClawKit.AnyCodable($1.value.base)
+            let rawParams = params?.reduce(into: [String: Hanzo BotKit.AnyCodable]()) {
+                $0[$1.key] = Hanzo BotKit.AnyCodable($1.value.base)
             }
             let data = try await GatewayConnection.shared.request(
                 method: method,
@@ -399,20 +399,20 @@ final class ControlChannel {
     }
 
     private static func bridgeToProtocolArgs(
-        _ value: OpenClawProtocol.AnyCodable?) -> [String: OpenClawProtocol.AnyCodable]?
+        _ value: Hanzo BotProtocol.AnyCodable?) -> [String: Hanzo BotProtocol.AnyCodable]?
     {
         guard let value else { return nil }
-        if let dict = value.value as? [String: OpenClawProtocol.AnyCodable] {
+        if let dict = value.value as? [String: Hanzo BotProtocol.AnyCodable] {
             return dict
         }
-        if let dict = value.value as? [String: OpenClawKit.AnyCodable],
+        if let dict = value.value as? [String: Hanzo BotKit.AnyCodable],
            let data = try? JSONEncoder().encode(dict),
-           let decoded = try? JSONDecoder().decode([String: OpenClawProtocol.AnyCodable].self, from: data)
+           let decoded = try? JSONDecoder().decode([String: Hanzo BotProtocol.AnyCodable].self, from: data)
         {
             return decoded
         }
         if let data = try? JSONEncoder().encode(value),
-           let decoded = try? JSONDecoder().decode([String: OpenClawProtocol.AnyCodable].self, from: data)
+           let decoded = try? JSONDecoder().decode([String: Hanzo BotProtocol.AnyCodable].self, from: data)
         {
             return decoded
         }

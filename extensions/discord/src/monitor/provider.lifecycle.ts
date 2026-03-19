@@ -323,7 +323,7 @@ export async function runDiscordGatewayLifecycle(params: {
       return;
     }
 
-    // Carbon starts the gateway during client construction, before OpenClaw can
+    // Carbon starts the gateway during client construction, before Hanzo Bot can
     // attach lifecycle listeners. Require a READY/RESUMED-connected gateway
     // before continuing so the monitor does not look healthy while silently
     // missing inbound events.

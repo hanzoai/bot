@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
-import OpenClawDiscovery
-import OpenClawIPC
+import Hanzo BotDiscovery
+import Hanzo BotIPC
 import SwiftUI
 
 extension OnboardingView {

@@ -46,7 +46,7 @@ import {
   projectCredentialSnapshotFields,
   resolveConfiguredFromRequiredCredentialStatuses,
   type ChannelPlugin,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "./runtime-api.js";
 import { getSlackRuntime } from "./runtime.js";
 import { fetchSlackScopes } from "./scopes.js";
@@ -151,7 +151,7 @@ function parseSlackExplicitTarget(raw: string) {
 }
 
 function buildSlackBaseSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   agentId: string;
   accountId?: string | null;
   peer: RoutePeer;
@@ -160,7 +160,7 @@ function buildSlackBaseSessionKey(params: {
 }
 
 async function resolveSlackChannelType(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   channelId: string;
 }): Promise<"channel" | "group" | "dm" | "unknown"> {
@@ -223,7 +223,7 @@ async function resolveSlackChannelType(params: {
 }
 
 async function resolveSlackOutboundSessionRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   agentId: string;
   accountId?: string | null;
   target: string;
@@ -485,7 +485,7 @@ export const slackPlugin: ChannelPlugin<ResolvedSlackAccount> = {
     invoke: async (action, cfg, toolContext) =>
       await getSlackRuntime().channel.slack.handleSlackAction(
         action,
-        cfg as OpenClawConfig,
+        cfg as Hanzo BotConfig,
         toolContext as SlackActionContext | undefined,
       ),
   }),

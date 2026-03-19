@@ -1,5 +1,5 @@
 import AVFoundation
-import OpenClawKit
+import Hanzo BotKit
 import ReplayKit
 
 final class ScreenRecordService: @unchecked Sendable {
@@ -56,7 +56,7 @@ final class ScreenRecordService: @unchecked Sendable {
             outPath: outPath)
 
         let state = CaptureState()
-        let recordQueue = DispatchQueue(label: "ai.openclaw.screenrecord")
+        let recordQueue = DispatchQueue(label: "ai.hanzo.bot.screenrecord")
 
         try await self.startCapture(state: state, config: config, recordQueue: recordQueue)
         try await Task.sleep(nanoseconds: UInt64(config.durationMs) * 1_000_000)

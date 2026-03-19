@@ -1,8 +1,8 @@
 import Foundation
-import OpenClawDiscovery
+import Hanzo BotDiscovery
 import SwiftUI
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized)
 @MainActor
@@ -33,7 +33,7 @@ struct OnboardingViewSmokeTests {
             .appendingPathComponent("openclaw.json")
             .path
 
-        await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
+        await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
             let state = AppState(preview: true)
             state.remoteTransport = .ssh
             state.remoteTarget = "user@old-host:2222"

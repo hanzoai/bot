@@ -1,7 +1,7 @@
 import Darwin
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct LogLocatorTests {
     @Test func `launchd gateway log path ensures tmp dir exists`() {
@@ -9,9 +9,9 @@ struct LogLocatorTests {
         let baseDir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
         let logDir = baseDir.appendingPathComponent("openclaw-tests-\(UUID().uuidString)")
 
-        setenv("OPENCLAW_LOG_DIR", logDir.path, 1)
+        setenv("BOT_LOG_DIR", logDir.path, 1)
         defer {
-            unsetenv("OPENCLAW_LOG_DIR")
+            unsetenv("BOT_LOG_DIR")
             try? fm.removeItem(at: logDir)
         }
 

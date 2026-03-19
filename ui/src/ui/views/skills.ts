@@ -51,7 +51,7 @@ export function renderSkills(props: SkillsProps) {
       <div class="filters" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px;">
         <a
           class="btn"
-          href="https://clawhub.com"
+          href="https://skills.hanzo.bot"
           target="_blank"
           rel="noreferrer"
           title="Browse skills on ClawHub"

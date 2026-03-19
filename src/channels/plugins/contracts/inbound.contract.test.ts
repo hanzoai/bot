@@ -3,7 +3,7 @@ import { buildDiscordInboundAccessContext } from "../../../../extensions/discord
 import type { ResolvedSlackAccount } from "../../../../extensions/slack/src/accounts.js";
 import type { SlackMessageEvent } from "../../../../extensions/slack/src/types.js";
 import type { MsgContext } from "../../../auto-reply/templating.js";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { Hanzo BotConfig } from "../../../config/config.js";
 import { inboundCtxCapture } from "./inbound-testkit.js";
 import { expectChannelInboundContextContract } from "./suites.js";
 
@@ -181,7 +181,7 @@ describe("channel inbound contract", () => {
     const ctx = createInboundSlackTestContext({
       cfg: {
         channels: { slack: { enabled: true } },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
     });
     // oxlint-disable-next-line typescript/no-explicit-any
     ctx.resolveUserName = async () => ({ name: "Alice" }) as any;
@@ -211,7 +211,7 @@ describe("channel inbound contract", () => {
             groups: { "*": { requireMention: false } },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies Hanzo BotConfig,
       message: {
         chat: { id: 42, type: "group", title: "Ops" },
         text: "hello",

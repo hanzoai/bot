@@ -1,10 +1,10 @@
 import Foundation
-import OpenClawProtocol
+import Hanzo BotProtocol
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized) struct VoiceWakeGlobalSettingsSyncTests {
-    private func voiceWakeChangedEvent(payload: OpenClawProtocol.AnyCodable) -> EventFrame {
+    private func voiceWakeChangedEvent(payload: Hanzo BotProtocol.AnyCodable) -> EventFrame {
         EventFrame(
             type: "event",
             event: "voicewake.changed",
@@ -23,15 +23,15 @@ import Testing
 
     @Test func `applies voice wake changed event to app state`() async {
         let previous = await applyTriggersAndCapturePrevious(["before"])
-        let evt = self.voiceWakeChangedEvent(payload: OpenClawProtocol.AnyCodable(["triggers": [
-            "openclaw",
+        let evt = self.voiceWakeChangedEvent(payload: Hanzo BotProtocol.AnyCodable(["triggers": [
+            "@hanzo/bot",
             "computer",
         ]]))
 
         await VoiceWakeGlobalSettingsSync.shared.handle(push: .event(evt))
 
         let updated = await MainActor.run { AppStateStore.shared.swabbleTriggerWords }
-        #expect(updated == ["openclaw", "computer"])
+        #expect(updated == ["@hanzo/bot", "computer"])
 
         await MainActor.run {
             AppStateStore.shared.applyGlobalVoiceWakeTriggers(previous)
@@ -40,7 +40,7 @@ import Testing
 
     @Test func `ignores voice wake changed event with invalid payload`() async {
         let previous = await applyTriggersAndCapturePrevious(["before"])
-        let evt = self.voiceWakeChangedEvent(payload: OpenClawProtocol.AnyCodable(["unexpected": 123]))
+        let evt = self.voiceWakeChangedEvent(payload: Hanzo BotProtocol.AnyCodable(["unexpected": 123]))
 
         await VoiceWakeGlobalSettingsSync.shared.handle(push: .event(evt))
 

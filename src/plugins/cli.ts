@@ -1,16 +1,16 @@
 import type { Command } from "commander";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { loadConfig } from "../config/config.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadHanzo BotPlugins } from "./loader.js";
 import type { PluginLogger } from "./types.js";
 
 const log = createSubsystemLogger("plugins");
 
 export function registerPluginCliCommands(
   program: Command,
-  cfg?: OpenClawConfig,
+  cfg?: Hanzo BotConfig,
   env?: NodeJS.ProcessEnv,
 ) {
   const config = cfg ?? loadConfig();
@@ -21,7 +21,7 @@ export function registerPluginCliCommands(
     error: (msg: string) => log.error(msg),
     debug: (msg: string) => log.debug(msg),
   };
-  const registry = loadOpenClawPlugins({
+  const registry = loadHanzo BotPlugins({
     config,
     workspaceDir,
     env,

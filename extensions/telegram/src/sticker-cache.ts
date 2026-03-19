@@ -7,7 +7,7 @@ import {
   modelSupportsVision,
 } from "openclaw/plugin-sdk/agent-runtime";
 import { resolveDefaultModelForAgent } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { loadJsonFile, saveJsonFile } from "openclaw/plugin-sdk/json-store";
 import { AUTO_IMAGE_KEY_PROVIDERS, DEFAULT_IMAGE_MODELS } from "openclaw/plugin-sdk/media-runtime";
 import { resolveAutoImageModel } from "openclaw/plugin-sdk/media-runtime";
@@ -146,7 +146,7 @@ const STICKER_DESCRIPTION_PROMPT =
 
 export interface DescribeStickerParams {
   imagePath: string;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   agentDir?: string;
   agentId?: string;
 }

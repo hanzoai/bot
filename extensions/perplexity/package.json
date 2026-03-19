@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/perplexity-plugin",
+  "name": "@hanzo/bot-perplexity-plugin",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Perplexity plugin",
+  "description": "Hanzo Bot Perplexity plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

@@ -1,7 +1,7 @@
 import Foundation
 import os
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized) struct CanvasFileWatcherTests {
     private func makeTempDir() throws -> URL {

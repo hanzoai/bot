@@ -1,4 +1,4 @@
-import OpenClawKit
+import Hanzo BotKit
 
 enum GatewayPushSubscription {
     @MainActor

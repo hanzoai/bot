@@ -1,6 +1,6 @@
-import OpenClawProtocol
+import Hanzo BotProtocol
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct TalkModeConfigParsingTests {
     @Test func `rejects normalized talk provider payload without resolved`() {

@@ -76,8 +76,8 @@ describe("run-node script", () => {
           args: ["--version"],
           env: {
             ...process.env,
-            OPENCLAW_FORCE_BUILD: "1",
-            OPENCLAW_RUNNER_LOG: "0",
+            BOT_FORCE_BUILD: "1",
+            BOT_RUNNER_LOG: "0",
           },
           spawn,
           execPath: process.execPath,
@@ -91,7 +91,7 @@ describe("run-node script", () => {
         await expect(fs.readFile(indexPath, "utf-8")).resolves.toContain("sentinel");
         expect(nodeCalls).toEqual([
           [process.execPath, "scripts/tsdown-build.mjs", "--no-clean"],
-          [process.execPath, "openclaw.mjs", "--version"],
+          [process.execPath, "hanzo-bot.mjs", "--version"],
         ]);
       });
     },
@@ -135,8 +135,8 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_FORCE_BUILD: "1",
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_FORCE_BUILD: "1",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         execPath: process.execPath,
@@ -146,7 +146,7 @@ describe("run-node script", () => {
       expect(exitCode).toBe(0);
       expect(spawnCalls).toEqual([
         expectedBuildSpawn(),
-        [process.execPath, "openclaw.mjs", "status"],
+        [process.execPath, "hanzo-bot.mjs", "status"],
       ]);
 
       await expect(
@@ -209,7 +209,7 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         spawnSync,
@@ -218,7 +218,7 @@ describe("run-node script", () => {
       });
 
       expect(exitCode).toBe(0);
-      expect(spawnCalls).toEqual([[process.execPath, "openclaw.mjs", "status"]]);
+      expect(spawnCalls).toEqual([[process.execPath, "hanzo-bot.mjs", "status"]]);
     });
   });
 
@@ -236,8 +236,8 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_FORCE_BUILD: "1",
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_FORCE_BUILD: "1",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         execPath: process.execPath,
@@ -284,7 +284,7 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         spawnSync,
@@ -295,7 +295,7 @@ describe("run-node script", () => {
       expect(exitCode).toBe(0);
       expect(spawnCalls).toEqual([
         expectedBuildSpawn(),
-        [process.execPath, "openclaw.mjs", "status"],
+        [process.execPath, "hanzo-bot.mjs", "status"],
       ]);
     });
   });
@@ -318,7 +318,7 @@ describe("run-node script", () => {
       await fs.writeFile(manifestPath, '{"id":"demo","configSchema":{"type":"object"}}\n', "utf-8");
       await fs.writeFile(
         packagePath,
-        '{"name":"demo","openclaw":{"extensions":["./index.ts"]}}\n',
+        '{"name":"demo","@hanzo/bot":{"extensions":["./index.ts"]}}\n',
         "utf-8",
       );
       await fs.writeFile(tsconfigPath, "{}\n", "utf-8");
@@ -327,7 +327,7 @@ describe("run-node script", () => {
       await fs.writeFile(distEntryPath, "console.log('built');\n", "utf-8");
       await fs.writeFile(
         distPackagePath,
-        '{"name":"demo","openclaw":{"extensions":["./stale.js"]}}\n',
+        '{"name":"demo","@hanzo/bot":{"extensions":["./stale.js"]}}\n',
         "utf-8",
       );
       await fs.writeFile(buildStampPath, '{"head":"abc123"}\n', "utf-8");
@@ -355,7 +355,7 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         spawnSync,
@@ -364,7 +364,7 @@ describe("run-node script", () => {
       });
 
       expect(exitCode).toBe(0);
-      expect(spawnCalls).toEqual([[process.execPath, "openclaw.mjs", "status"]]);
+      expect(spawnCalls).toEqual([[process.execPath, "hanzo-bot.mjs", "status"]]);
       await expect(fs.readFile(distPackagePath, "utf-8")).resolves.toContain('"./index.js"');
     });
   });
@@ -419,7 +419,7 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         spawnSync,
@@ -428,7 +428,7 @@ describe("run-node script", () => {
       });
 
       expect(exitCode).toBe(0);
-      expect(spawnCalls).toEqual([[process.execPath, "openclaw.mjs", "status"]]);
+      expect(spawnCalls).toEqual([[process.execPath, "hanzo-bot.mjs", "status"]]);
     });
   });
 
@@ -489,7 +489,7 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         spawnSync,
@@ -498,7 +498,7 @@ describe("run-node script", () => {
       });
 
       expect(exitCode).toBe(0);
-      expect(spawnCalls).toEqual([[process.execPath, "openclaw.mjs", "status"]]);
+      expect(spawnCalls).toEqual([[process.execPath, "hanzo-bot.mjs", "status"]]);
       await expect(
         fs.readFile(distManifestPath, "utf-8").then((raw) => JSON.parse(raw)),
       ).resolves.toMatchObject({
@@ -558,7 +558,7 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         spawnSync,
@@ -567,7 +567,7 @@ describe("run-node script", () => {
       });
 
       expect(exitCode).toBe(0);
-      expect(spawnCalls).toEqual([[process.execPath, "openclaw.mjs", "status"]]);
+      expect(spawnCalls).toEqual([[process.execPath, "hanzo-bot.mjs", "status"]]);
       await expect(
         fs.readFile(distManifestPath, "utf-8").then((raw) => JSON.parse(raw)),
       ).resolves.toMatchObject({
@@ -633,7 +633,7 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         spawnSync,
@@ -642,7 +642,7 @@ describe("run-node script", () => {
       });
 
       expect(exitCode).toBe(0);
-      expect(spawnCalls).toEqual([[process.execPath, "openclaw.mjs", "status"]]);
+      expect(spawnCalls).toEqual([[process.execPath, "hanzo-bot.mjs", "status"]]);
       await expect(fs.access(distManifestPath)).rejects.toThrow();
       await expect(fs.access(distPackagePath)).rejects.toThrow();
     });
@@ -692,7 +692,7 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         spawnSync,
@@ -701,7 +701,7 @@ describe("run-node script", () => {
       });
 
       expect(exitCode).toBe(0);
-      expect(spawnCalls).toEqual([[process.execPath, "openclaw.mjs", "status"]]);
+      expect(spawnCalls).toEqual([[process.execPath, "hanzo-bot.mjs", "status"]]);
     });
   });
 
@@ -753,7 +753,7 @@ describe("run-node script", () => {
         args: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_RUNNER_LOG: "0",
+          BOT_RUNNER_LOG: "0",
         },
         spawn,
         spawnSync,
@@ -764,7 +764,7 @@ describe("run-node script", () => {
       expect(exitCode).toBe(0);
       expect(spawnCalls).toEqual([
         expectedBuildSpawn(),
-        [process.execPath, "openclaw.mjs", "status"],
+        [process.execPath, "hanzo-bot.mjs", "status"],
       ]);
     });
   });

@@ -15,7 +15,7 @@ x-i18n:
 
 # 认证
 
-OpenClaw 支持模型提供商使用 OAuth 和 API key。对于始终在线的 Gateway 网关
+Hanzo Bot 支持模型提供商使用 OAuth 和 API key。对于始终在线的 Gateway 网关
 主机，API key 通常是最可预测的选项。当它们与你的提供商账号模型匹配时，
 也支持订阅/OAuth 流程。
 
@@ -32,7 +32,7 @@ OpenClaw 支持模型提供商使用 OAuth 和 API key。对于始终在线的 G
 订阅 setup-token 认证。
 
 1. 在你的提供商控制台中创建一个 API key。
-2. 将它放在 **Gateway 网关主机** 上（运行 `openclaw gateway` 的机器）。
+2. 将它放在 **Gateway 网关主机** 上（运行 `hanzo-bot gateway` 的机器）。
 
 ```bash
 export <PROVIDER>_API_KEY="..."
@@ -40,10 +40,10 @@ openclaw models status
 ```
 
 3. 如果 Gateway 通过 systemd/launchd 运行，建议将 key 放入
-   `~/.openclaw/.env`，这样守护进程就可以读取它：
+   `~/.hanzo/bot/.env`，这样守护进程就可以读取它：
 
 ```bash
-cat >> ~/.openclaw/.env <<'EOF'
+cat >> ~/.hanzo/bot/.env <<'EOF'
 <PROVIDER>_API_KEY=...
 EOF
 ```
@@ -56,10 +56,10 @@ openclaw doctor
 ```
 
 如果你不想自己管理环境变量，设置向导可以为守护进程使用场景存储
-API key：`openclaw onboard`。
+API key：`hanzo-bot onboard`。
 
 有关环境继承（`env.shellEnv`、
-`~/.openclaw/.env`、systemd/launchd）的详细信息，请参阅 [Help](/help)。
+`~/.hanzo/bot/.env`、systemd/launchd）的详细信息，请参阅 [Help](/help)。
 
 ## Anthropic：setup-token（订阅认证）
 
@@ -70,7 +70,7 @@ API key：`openclaw onboard`。
 claude setup-token
 ```
 
-然后将它粘贴到 OpenClaw 中：
+然后将它粘贴到 Hanzo Bot 中：
 
 ```bash
 openclaw models auth setup-token --provider anthropic
@@ -131,13 +131,13 @@ openclaw doctor
 某些提供商支持在 API 调用触发提供商限流时，使用替代 key 重试请求。
 
 - 优先级顺序：
-  - `OPENCLAW_LIVE_<PROVIDER>_KEY`（单个覆盖值）
+  - `BOT_LIVE_<PROVIDER>_KEY`（单个覆盖值）
   - `<PROVIDER>_API_KEYS`
   - `<PROVIDER>_API_KEY`
   - `<PROVIDER>_API_KEY_*`
 - Google 提供商还将 `GOOGLE_API_KEY` 作为额外回退项。
 - 使用前会对同一组 key 列表去重。
-- 仅当出现限流错误时，OpenClaw 才会使用下一个 key 重试（例如
+- 仅当出现限流错误时，Hanzo Bot 才会使用下一个 key 重试（例如
   `429`、`rate_limit`、`quota`、`resource exhausted`）。
 - 非限流错误不会使用替代 key 重试。
 - 如果所有 key 都失败，则返回最后一次尝试的最终错误。
@@ -175,7 +175,7 @@ openclaw models status
 
 ### Token 即将过期/已过期
 
-运行 `openclaw models status` 以确认哪个配置文件即将过期。如果该配置文件
+运行 `hanzo-bot models status` 以确认哪个配置文件即将过期。如果该配置文件
 缺失，请重新运行 `claude setup-token` 并再次粘贴 token。
 
 ## 要求

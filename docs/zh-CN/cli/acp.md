@@ -15,7 +15,7 @@ x-i18n:
 
 # acp
 
-运行与 OpenClaw Gateway 网关通信的 ACP（Agent Client Protocol）桥接器。
+运行与 Hanzo Bot Gateway 网关通信的 ACP（Agent Client Protocol）桥接器。
 
 此命令通过 stdio 使用 ACP 协议与 IDE 通信，并通过 WebSocket 将提示转发到 Gateway 网关。它将 ACP 会话映射到 Gateway 网关会话键。
 
@@ -49,16 +49,16 @@ openclaw acp client
 openclaw acp client --server-args --url wss://gateway-host:18789 --token <token>
 
 # Override the server command (default: openclaw)
-openclaw acp client --server "node" --server-args openclaw.mjs acp --url ws://127.0.0.1:19001
+openclaw acp client --server "node" --server-args hanzo-bot.mjs acp --url ws://127.0.0.1:19001
 ```
 
 ## 如何使用
 
-当 IDE（或其他客户端）使用 Agent Client Protocol 并且你希望它驱动 OpenClaw Gateway 网关会话时，请使用 ACP。
+当 IDE（或其他客户端）使用 Agent Client Protocol 并且你希望它驱动 Hanzo Bot Gateway 网关会话时，请使用 ACP。
 
 1. 确保 Gateway 网关正在运行（本地或远程）。
 2. 配置 Gateway 网关目标（配置或标志）。
-3. 将你的 IDE 配置为通过 stdio 运行 `openclaw acp`。
+3. 将你的 IDE 配置为通过 stdio 运行 `hanzo-bot acp`。
 
 示例配置（持久化）：
 
@@ -94,9 +94,9 @@ openclaw acp --session agent:qa:bug-123
 ```json
 {
   "agent_servers": {
-    "OpenClaw ACP": {
+    "Hanzo Bot ACP": {
       "type": "custom",
-      "command": "openclaw",
+      "command": "@hanzo/bot",
       "args": ["acp"],
       "env": {}
     }
@@ -109,9 +109,9 @@ openclaw acp --session agent:qa:bug-123
 ```json
 {
   "agent_servers": {
-    "OpenClaw ACP": {
+    "Hanzo Bot ACP": {
       "type": "custom",
-      "command": "openclaw",
+      "command": "@hanzo/bot",
       "args": [
         "acp",
         "--url",
@@ -127,7 +127,7 @@ openclaw acp --session agent:qa:bug-123
 }
 ```
 
-在 Zed 中，打开 Agent 面板并选择"OpenClaw ACP"来开始一个会话。
+在 Zed 中，打开 Agent 面板并选择"Hanzo Bot ACP"来开始一个会话。
 
 ## 会话映射
 

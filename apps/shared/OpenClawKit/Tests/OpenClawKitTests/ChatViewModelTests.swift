@@ -1,7 +1,7 @@
-import OpenClawKit
+import Hanzo BotKit
 import Foundation
 import Testing
-@testable import OpenClawChatUI
+@testable import Hanzo BotChatUI
 
 private func chatTextMessage(role: String, text: String, timestamp: Double) -> AnyCodable {
     AnyCodable([
@@ -14,17 +14,17 @@ private func chatTextMessage(role: String, text: String, timestamp: Double) -> A
 private func historyPayload(
     sessionKey: String = "main",
     sessionId: String? = "sess-main",
-    messages: [AnyCodable] = []) -> OpenClawChatHistoryPayload
+    messages: [AnyCodable] = []) -> Hanzo BotChatHistoryPayload
 {
-    OpenClawChatHistoryPayload(
+    Hanzo BotChatHistoryPayload(
         sessionKey: sessionKey,
         sessionId: sessionId,
         messages: messages,
         thinkingLevel: "off")
 }
 
-private func sessionEntry(key: String, updatedAt: Double) -> OpenClawChatSessionEntry {
-    OpenClawChatSessionEntry(
+private func sessionEntry(key: String, updatedAt: Double) -> Hanzo BotChatSessionEntry {
+    Hanzo BotChatSessionEntry(
         key: key,
         kind: nil,
         displayName: nil,
@@ -50,9 +50,9 @@ private func sessionEntry(
     key: String,
     updatedAt: Double,
     model: String?,
-    modelProvider: String? = nil) -> OpenClawChatSessionEntry
+    modelProvider: String? = nil) -> Hanzo BotChatSessionEntry
 {
-    OpenClawChatSessionEntry(
+    Hanzo BotChatSessionEntry(
         key: key,
         kind: nil,
         displayName: nil,
@@ -74,21 +74,21 @@ private func sessionEntry(
         contextTokens: nil)
 }
 
-private func modelChoice(id: String, name: String, provider: String = "anthropic") -> OpenClawChatModelChoice {
-    OpenClawChatModelChoice(modelID: id, name: name, provider: provider, contextWindow: nil)
+private func modelChoice(id: String, name: String, provider: String = "anthropic") -> Hanzo BotChatModelChoice {
+    Hanzo BotChatModelChoice(modelID: id, name: name, provider: provider, contextWindow: nil)
 }
 
 private func makeViewModel(
     sessionKey: String = "main",
-    historyResponses: [OpenClawChatHistoryPayload],
-    sessionsResponses: [OpenClawChatSessionsListResponse] = [],
-    modelResponses: [[OpenClawChatModelChoice]] = [],
+    historyResponses: [Hanzo BotChatHistoryPayload],
+    sessionsResponses: [Hanzo BotChatSessionsListResponse] = [],
+    modelResponses: [[Hanzo BotChatModelChoice]] = [],
     resetSessionHook: (@Sendable (String) async throws -> Void)? = nil,
     setSessionModelHook: (@Sendable (String?) async throws -> Void)? = nil,
     setSessionThinkingHook: (@Sendable (String) async throws -> Void)? = nil,
     initialThinkingLevel: String? = nil,
     onThinkingLevelChanged: (@MainActor @Sendable (String) -> Void)? = nil) async
-    -> (TestChatTransport, OpenClawChatViewModel)
+    -> (TestChatTransport, Hanzo BotChatViewModel)
 {
     let transport = TestChatTransport(
         historyResponses: historyResponses,
@@ -98,7 +98,7 @@ private func makeViewModel(
         setSessionModelHook: setSessionModelHook,
         setSessionThinkingHook: setSessionThinkingHook)
     let vm = await MainActor.run {
-        OpenClawChatViewModel(
+        Hanzo BotChatViewModel(
             sessionKey: sessionKey,
             transport: transport,
             initialThinkingLevel: initialThinkingLevel,
@@ -108,7 +108,7 @@ private func makeViewModel(
 }
 
 private func loadAndWaitBootstrap(
-    vm: OpenClawChatViewModel,
+    vm: Hanzo BotChatViewModel,
     sessionId: String? = nil) async throws
 {
     await MainActor.run { vm.load() }
@@ -119,7 +119,7 @@ private func loadAndWaitBootstrap(
     }
 }
 
-private func sendUserMessage(_ vm: OpenClawChatViewModel, text: String = "hi") async {
+private func sendUserMessage(_ vm: Hanzo BotChatViewModel, text: String = "hi") async {
     await MainActor.run {
         vm.input = text
         vm.send()
@@ -134,7 +134,7 @@ private func emitAssistantText(
 {
     transport.emit(
         .agent(
-            OpenClawAgentEventPayload(
+            Hanzo BotAgentEventPayload(
                 runId: runId,
                 seq: seq,
                 stream: "assistant",
@@ -149,7 +149,7 @@ private func emitToolStart(
 {
     transport.emit(
         .agent(
-            OpenClawAgentEventPayload(
+            Hanzo BotAgentEventPayload(
                 runId: runId,
                 seq: seq,
                 stream: "tool",
@@ -169,7 +169,7 @@ private func emitExternalFinal(
 {
     transport.emit(
         .chat(
-            OpenClawChatEventPayload(
+            Hanzo BotChatEventPayload(
                 runId: runId,
                 sessionKey: sessionKey,
                 state: "final",
@@ -209,22 +209,22 @@ private actor TestChatTransportState {
     var patchedThinkingLevels: [String] = []
 }
 
-private final class TestChatTransport: @unchecked Sendable, OpenClawChatTransport {
+private final class TestChatTransport: @unchecked Sendable, Hanzo BotChatTransport {
     private let state = TestChatTransportState()
-    private let historyResponses: [OpenClawChatHistoryPayload]
-    private let sessionsResponses: [OpenClawChatSessionsListResponse]
-    private let modelResponses: [[OpenClawChatModelChoice]]
+    private let historyResponses: [Hanzo BotChatHistoryPayload]
+    private let sessionsResponses: [Hanzo BotChatSessionsListResponse]
+    private let modelResponses: [[Hanzo BotChatModelChoice]]
     private let resetSessionHook: (@Sendable (String) async throws -> Void)?
     private let setSessionModelHook: (@Sendable (String?) async throws -> Void)?
     private let setSessionThinkingHook: (@Sendable (String) async throws -> Void)?
 
-    private let stream: AsyncStream<OpenClawChatTransportEvent>
-    private let continuation: AsyncStream<OpenClawChatTransportEvent>.Continuation
+    private let stream: AsyncStream<Hanzo BotChatTransportEvent>
+    private let continuation: AsyncStream<Hanzo BotChatTransportEvent>.Continuation
 
     init(
-        historyResponses: [OpenClawChatHistoryPayload],
-        sessionsResponses: [OpenClawChatSessionsListResponse] = [],
-        modelResponses: [[OpenClawChatModelChoice]] = [],
+        historyResponses: [Hanzo BotChatHistoryPayload],
+        sessionsResponses: [Hanzo BotChatSessionsListResponse] = [],
+        modelResponses: [[Hanzo BotChatModelChoice]] = [],
         resetSessionHook: (@Sendable (String) async throws -> Void)? = nil,
         setSessionModelHook: (@Sendable (String?) async throws -> Void)? = nil,
         setSessionThinkingHook: (@Sendable (String) async throws -> Void)? = nil)
@@ -235,26 +235,26 @@ private final class TestChatTransport: @unchecked Sendable, OpenClawChatTranspor
         self.resetSessionHook = resetSessionHook
         self.setSessionModelHook = setSessionModelHook
         self.setSessionThinkingHook = setSessionThinkingHook
-        var cont: AsyncStream<OpenClawChatTransportEvent>.Continuation!
+        var cont: AsyncStream<Hanzo BotChatTransportEvent>.Continuation!
         self.stream = AsyncStream { c in
             cont = c
         }
         self.continuation = cont
     }
 
-    func events() -> AsyncStream<OpenClawChatTransportEvent> {
+    func events() -> AsyncStream<Hanzo BotChatTransportEvent> {
         self.stream
     }
 
     func setActiveSessionKey(_: String) async throws {}
 
-    func requestHistory(sessionKey: String) async throws -> OpenClawChatHistoryPayload {
+    func requestHistory(sessionKey: String) async throws -> Hanzo BotChatHistoryPayload {
         let idx = await self.state.historyCallCount
         await self.state.setHistoryCallCount(idx + 1)
         if idx < self.historyResponses.count {
             return self.historyResponses[idx]
         }
-        return self.historyResponses.last ?? OpenClawChatHistoryPayload(
+        return self.historyResponses.last ?? Hanzo BotChatHistoryPayload(
             sessionKey: sessionKey,
             sessionId: nil,
             messages: [],
@@ -266,24 +266,24 @@ private final class TestChatTransport: @unchecked Sendable, OpenClawChatTranspor
         message _: String,
         thinking: String,
         idempotencyKey: String,
-        attachments _: [OpenClawChatAttachmentPayload]) async throws -> OpenClawChatSendResponse
+        attachments _: [Hanzo BotChatAttachmentPayload]) async throws -> Hanzo BotChatSendResponse
     {
         await self.state.sentRunIdsAppend(idempotencyKey)
         await self.state.sentThinkingLevelsAppend(thinking)
-        return OpenClawChatSendResponse(runId: idempotencyKey, status: "ok")
+        return Hanzo BotChatSendResponse(runId: idempotencyKey, status: "ok")
     }
 
     func abortRun(sessionKey _: String, runId: String) async throws {
         await self.state.abortedRunIdsAppend(runId)
     }
 
-    func listSessions(limit _: Int?) async throws -> OpenClawChatSessionsListResponse {
+    func listSessions(limit _: Int?) async throws -> Hanzo BotChatSessionsListResponse {
         let idx = await self.state.sessionsCallCount
         await self.state.setSessionsCallCount(idx + 1)
         if idx < self.sessionsResponses.count {
             return self.sessionsResponses[idx]
         }
-        return self.sessionsResponses.last ?? OpenClawChatSessionsListResponse(
+        return self.sessionsResponses.last ?? Hanzo BotChatSessionsListResponse(
             ts: nil,
             path: nil,
             count: 0,
@@ -291,7 +291,7 @@ private final class TestChatTransport: @unchecked Sendable, OpenClawChatTranspor
             sessions: [])
     }
 
-    func listModels() async throws -> [OpenClawChatModelChoice] {
+    func listModels() async throws -> [Hanzo BotChatModelChoice] {
         let idx = await self.state.modelsCallCount
         await self.state.setModelsCallCount(idx + 1)
         if idx < self.modelResponses.count {
@@ -325,7 +325,7 @@ private final class TestChatTransport: @unchecked Sendable, OpenClawChatTranspor
         true
     }
 
-    func emit(_ evt: OpenClawChatTransportEvent) {
+    func emit(_ evt: Hanzo BotChatTransportEvent) {
         self.continuation.yield(evt)
     }
 
@@ -424,7 +424,7 @@ extension TestChatTransportState {
         let runId = try #require(await transport.lastSentRunId())
         transport.emit(
             .chat(
-                OpenClawChatEventPayload(
+                Hanzo BotChatEventPayload(
                     runId: runId,
                     sessionKey: "main",
                     state: "final",
@@ -457,7 +457,7 @@ extension TestChatTransportState {
         let runId = try #require(await transport.lastSentRunId())
         transport.emit(
             .chat(
-                OpenClawChatEventPayload(
+                Hanzo BotChatEventPayload(
                     runId: runId,
                     sessionKey: "agent:main:main",
                     state: "final",
@@ -486,7 +486,7 @@ extension TestChatTransportState {
 
         transport.emit(
             .chat(
-                OpenClawChatEventPayload(
+                Hanzo BotChatEventPayload(
                     runId: "external-run",
                     sessionKey: "agent:main:main",
                     state: "final",
@@ -569,7 +569,7 @@ extension TestChatTransportState {
         let recentOlder = now - (5 * 60 * 60 * 1000)
         let stale = now - (26 * 60 * 60 * 1000)
         let history = historyPayload()
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 4,
@@ -593,7 +593,7 @@ extension TestChatTransportState {
         let now = Date().timeIntervalSince1970 * 1000
         let recent = now - (30 * 60 * 1000)
         let history = historyPayload(sessionKey: "custom", sessionId: "sess-custom")
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 1,
@@ -618,16 +618,16 @@ extension TestChatTransportState {
         let recent = now - (30 * 60 * 1000)
         let recentOlder = now - (90 * 60 * 1000)
         let history = historyPayload(sessionKey: "Luke’s MacBook Pro", sessionId: "sess-main")
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 2,
-            defaults: OpenClawChatSessionsDefaults(
+            defaults: Hanzo BotChatSessionsDefaults(
                 model: nil,
                 contextTokens: nil,
                 mainSessionKey: "Luke’s MacBook Pro"),
             sessions: [
-                OpenClawChatSessionEntry(
+                Hanzo BotChatSessionEntry(
                     key: "Luke’s MacBook Pro",
                     kind: nil,
                     displayName: "Luke’s MacBook Pro",
@@ -666,16 +666,16 @@ extension TestChatTransportState {
         let recent = now - (2 * 60 * 1000)
         let recentOlder = now - (5 * 60 * 1000)
         let history = historyPayload(sessionKey: "agent:main:main", sessionId: "sess-main")
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 2,
-            defaults: OpenClawChatSessionsDefaults(
+            defaults: Hanzo BotChatSessionsDefaults(
                 model: nil,
                 contextTokens: nil,
                 mainSessionKey: "agent:main:main"),
             sessions: [
-                OpenClawChatSessionEntry(
+                Hanzo BotChatSessionEntry(
                     key: "agent:main:onboarding",
                     kind: nil,
                     displayName: "Luke’s MacBook Pro",
@@ -695,7 +695,7 @@ extension TestChatTransportState {
                     modelProvider: nil,
                     model: nil,
                     contextTokens: nil),
-                OpenClawChatSessionEntry(
+                Hanzo BotChatSessionEntry(
                     key: "agent:main:main",
                     kind: nil,
                     displayName: "Luke’s MacBook Pro",
@@ -761,11 +761,11 @@ extension TestChatTransportState {
     @Test func bootstrapsModelSelectionFromSessionAndDefaults() async throws {
         let now = Date().timeIntervalSince1970 * 1000
         let history = historyPayload()
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 1,
-            defaults: OpenClawChatSessionsDefaults(model: "openai/gpt-4.1-mini", contextTokens: nil),
+            defaults: Hanzo BotChatSessionsDefaults(model: "openai/gpt-4.1-mini", contextTokens: nil),
             sessions: [
                 sessionEntry(key: "main", updatedAt: now, model: "anthropic/claude-opus-4-6"),
             ])
@@ -789,11 +789,11 @@ extension TestChatTransportState {
     @Test func selectingDefaultModelPatchesNilAndUpdatesSelection() async throws {
         let now = Date().timeIntervalSince1970 * 1000
         let history = historyPayload()
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 1,
-            defaults: OpenClawChatSessionsDefaults(model: "openai/gpt-4.1-mini", contextTokens: nil),
+            defaults: Hanzo BotChatSessionsDefaults(model: "openai/gpt-4.1-mini", contextTokens: nil),
             sessions: [
                 sessionEntry(key: "main", updatedAt: now, model: "anthropic/claude-opus-4-6"),
             ])
@@ -809,24 +809,24 @@ extension TestChatTransportState {
 
         try await loadAndWaitBootstrap(vm: vm)
 
-        await MainActor.run { vm.selectModel(OpenClawChatViewModel.defaultModelSelectionID) }
+        await MainActor.run { vm.selectModel(Hanzo BotChatViewModel.defaultModelSelectionID) }
 
         try await waitUntil("session model patched") {
             let patched = await transport.patchedModels()
             return patched == [nil]
         }
 
-        #expect(await MainActor.run { vm.modelSelectionID } == OpenClawChatViewModel.defaultModelSelectionID)
+        #expect(await MainActor.run { vm.modelSelectionID } == Hanzo BotChatViewModel.defaultModelSelectionID)
     }
 
     @Test func selectingProviderQualifiedModelDisambiguatesDuplicateModelIDs() async throws {
         let now = Date().timeIntervalSince1970 * 1000
         let history = historyPayload()
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 1,
-            defaults: OpenClawChatSessionsDefaults(model: "openrouter/gpt-4.1-mini", contextTokens: nil),
+            defaults: Hanzo BotChatSessionsDefaults(model: "openrouter/gpt-4.1-mini", contextTokens: nil),
             sessions: [
                 sessionEntry(key: "main", updatedAt: now, model: "gpt-4.1-mini", modelProvider: "openrouter"),
             ])
@@ -855,7 +855,7 @@ extension TestChatTransportState {
     @Test func slashModelIDsStayProviderQualifiedInSelectionAndPatch() async throws {
         let now = Date().timeIntervalSince1970 * 1000
         let history = historyPayload()
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 1,
@@ -888,7 +888,7 @@ extension TestChatTransportState {
     @Test func staleModelPatchCompletionsDoNotOverwriteNewerSelection() async throws {
         let now = Date().timeIntervalSince1970 * 1000
         let history = historyPayload()
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 1,
@@ -931,7 +931,7 @@ extension TestChatTransportState {
     @Test func sendWaitsForInFlightModelPatchToFinish() async throws {
         let now = Date().timeIntervalSince1970 * 1000
         let history = historyPayload()
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 1,
@@ -984,7 +984,7 @@ extension TestChatTransportState {
     @Test func failedLatestModelSelectionDoesNotReplayAfterOlderCompletionFinishes() async throws {
         let now = Date().timeIntervalSince1970 * 1000
         let history = historyPayload()
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 1,
@@ -1034,7 +1034,7 @@ extension TestChatTransportState {
     @Test func failedLatestModelSelectionRestoresEarlierSuccessWithoutReplay() async throws {
         let now = Date().timeIntervalSince1970 * 1000
         let history = historyPayload()
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 1,
@@ -1082,7 +1082,7 @@ extension TestChatTransportState {
 
     @Test func switchingSessionsIgnoresLateModelPatchCompletionFromPreviousSession() async throws {
         let now = Date().timeIntervalSince1970 * 1000
-        let sessions = OpenClawChatSessionsListResponse(
+        let sessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 2,
@@ -1121,13 +1121,13 @@ extension TestChatTransportState {
             return patched == ["openai/gpt-5.4"]
         }
 
-        #expect(await MainActor.run { vm.modelSelectionID } == OpenClawChatViewModel.defaultModelSelectionID)
+        #expect(await MainActor.run { vm.modelSelectionID } == Hanzo BotChatViewModel.defaultModelSelectionID)
         #expect(await MainActor.run { vm.sessions.first(where: { $0.key == "other" })?.model } == nil)
     }
 
     @Test func lateModelCompletionDoesNotReplayCurrentSessionSelectionIntoPreviousSession() async throws {
         let now = Date().timeIntervalSince1970 * 1000
-        let initialSessions = OpenClawChatSessionsListResponse(
+        let initialSessions = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 2,
@@ -1136,7 +1136,7 @@ extension TestChatTransportState {
                 sessionEntry(key: "main", updatedAt: now, model: nil),
                 sessionEntry(key: "other", updatedAt: now - 1000, model: nil),
             ])
-        let sessionsAfterOtherSelection = OpenClawChatSessionsListResponse(
+        let sessionsAfterOtherSelection = Hanzo BotChatSessionsListResponse(
             ts: now,
             path: nil,
             count: 2,
@@ -1198,7 +1198,7 @@ extension TestChatTransportState {
     }
 
     @Test func explicitThinkingLevelWinsOverHistoryAndPersistsChanges() async throws {
-        let history = OpenClawChatHistoryPayload(
+        let history = Hanzo BotChatHistoryPayload(
             sessionKey: "main",
             sessionId: "sess-main",
             messages: [],
@@ -1227,7 +1227,7 @@ extension TestChatTransportState {
     }
 
     @Test func serverProvidedThinkingLevelsOutsideMenuArePreservedForSend() async throws {
-        let history = OpenClawChatHistoryPayload(
+        let history = Hanzo BotChatHistoryPayload(
             sessionKey: "main",
             sessionId: "sess-main",
             messages: [],
@@ -1245,7 +1245,7 @@ extension TestChatTransportState {
     }
 
     @Test func staleThinkingPatchCompletionReappliesLatestSelection() async throws {
-        let history = OpenClawChatHistoryPayload(
+        let history = Hanzo BotChatHistoryPayload(
             sessionKey: "main",
             sessionId: "sess-main",
             messages: [],
@@ -1288,7 +1288,7 @@ extension TestChatTransportState {
 
         transport.emit(
             .chat(
-                OpenClawChatEventPayload(
+                Hanzo BotChatEventPayload(
                     runId: "other-run",
                     sessionKey: "main",
                     state: "error",
@@ -1299,7 +1299,7 @@ extension TestChatTransportState {
     }
 
     @Test func stripsInboundMetadataFromHistoryMessages() async throws {
-        let history = OpenClawChatHistoryPayload(
+        let history = Hanzo BotChatHistoryPayload(
             sessionKey: "main",
             sessionId: "sess-main",
             messages: [
@@ -1318,7 +1318,7 @@ Hello?
             ],
             thinkingLevel: "off")
         let transport = TestChatTransport(historyResponses: [history])
-        let vm = await MainActor.run { OpenClawChatViewModel(sessionKey: "main", transport: transport) }
+        let vm = await MainActor.run { Hanzo BotChatViewModel(sessionKey: "main", transport: transport) }
 
         await MainActor.run { vm.load() }
         try await waitUntil("history loaded") { await MainActor.run { !vm.messages.isEmpty } }
@@ -1349,7 +1349,7 @@ Hello?
 
         transport.emit(
             .chat(
-                OpenClawChatEventPayload(
+                Hanzo BotChatEventPayload(
                     runId: runId,
                     sessionKey: "main",
                     state: "aborted",

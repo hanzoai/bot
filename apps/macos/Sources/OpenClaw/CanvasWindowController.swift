@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
-import OpenClawIPC
-import OpenClawKit
+import Hanzo BotIPC
+import Hanzo BotKit
 import WebKit
 
 @MainActor

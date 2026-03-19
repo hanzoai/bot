@@ -1,9 +1,9 @@
-import type { OpenClawConfig } from "../config/config.js";
-import { loadOpenClawPlugins } from "../plugins/loader.js";
+import type { Hanzo BotConfig } from "../config/config.js";
+import { loadHanzo BotPlugins } from "../plugins/loader.js";
 import { resolveUserPath } from "../utils.js";
 
 export function ensureRuntimePluginsLoaded(params: {
-  config?: OpenClawConfig;
+  config?: Hanzo BotConfig;
   workspaceDir?: string | null;
   allowGatewaySubagentBinding?: boolean;
 }): void {
@@ -12,7 +12,7 @@ export function ensureRuntimePluginsLoaded(params: {
       ? resolveUserPath(params.workspaceDir)
       : undefined;
 
-  loadOpenClawPlugins({
+  loadHanzo BotPlugins({
     config: params.config,
     workspaceDir,
     runtimeOptions: params.allowGatewaySubagentBinding

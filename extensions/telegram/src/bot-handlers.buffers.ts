@@ -1,6 +1,6 @@
 import type { Message } from "@grammyjs/types";
 import { shouldDebounceTextInbound } from "openclaw/plugin-sdk/channel-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import {
   createInboundDebouncer,
   resolveInboundDebounceMs,
@@ -49,7 +49,7 @@ type TelegramBotApi = {
 export function createTelegramInboundBufferRuntime(params: {
   accountId?: string | null;
   bot: { api: TelegramBotApi };
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   logger: { warn: (...args: unknown[]) => void };
   mediaMaxBytes: number;
   opts: {

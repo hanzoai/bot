@@ -273,7 +273,7 @@ describe("registerSlackInteractionEvents", () => {
     expect(app.client.chat.update).toHaveBeenCalledTimes(1);
   });
 
-  it("registers a matcher that accepts plugin action ids beyond the OpenClaw prefix", () => {
+  it("registers a matcher that accepts plugin action ids beyond the Hanzo Bot prefix", () => {
     const { ctx, getActionMatcher } = createContext();
     registerSlackInteractionEvents({ ctx: ctx as never });
 
@@ -1411,13 +1411,13 @@ describe("registerSlackInteractionEvents", () => {
               email_block: {
                 email_input: {
                   type: "email_text_input",
-                  value: "team@openclaw.ai",
+                  value: "team@hanzo.bot",
                 },
               },
               url_block: {
                 url_input: {
                   type: "url_text_input",
-                  value: "https://docs.openclaw.ai",
+                  value: "https://docs.hanzo.bot",
                 },
               },
               richtext_block: {
@@ -1508,12 +1508,12 @@ describe("registerSlackInteractionEvents", () => {
         expect.objectContaining({
           actionId: "email_input",
           inputKind: "email",
-          inputEmail: "team@openclaw.ai",
+          inputEmail: "team@hanzo.bot",
         }),
         expect.objectContaining({
           actionId: "url_input",
           inputKind: "url",
-          inputUrl: "https://docs.openclaw.ai/",
+          inputUrl: "https://docs.hanzo.bot/",
         }),
         expect.objectContaining({
           actionId: "richtext_input",

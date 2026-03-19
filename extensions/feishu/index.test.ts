@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi } from "./runtime-api.js";
+import type { Hanzo BotPluginApi } from "./runtime-api.js";
 
 const registerFeishuDocToolsMock = vi.hoisted(() => vi.fn());
 const registerFeishuChatToolsMock = vi.hoisted(() => vi.fn());
@@ -52,7 +52,7 @@ describe("feishu plugin register", () => {
       on: vi.fn(),
       config: {},
       registrationMode: "full",
-    } as unknown as OpenClawPluginApi;
+    } as unknown as Hanzo BotPluginApi;
 
     plugin.register(api);
 

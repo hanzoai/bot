@@ -1,15 +1,15 @@
 ---
 title: Fly.io
-description: Deploy OpenClaw on Fly.io
-summary: "Step-by-step Fly.io deployment for OpenClaw with persistent storage and HTTPS"
+description: Deploy Hanzo Bot on Fly.io
+summary: "Step-by-step Fly.io deployment for Hanzo Bot with persistent storage and HTTPS"
 read_when:
-  - Deploying OpenClaw on Fly.io
+  - Deploying Hanzo Bot on Fly.io
   - Setting up Fly volumes, secrets, and first-run config
 ---
 
 # Fly.io Deployment
 
-**Goal:** OpenClaw Gateway running on a [Fly.io](https://fly.io) machine with persistent storage, automatic HTTPS, and Discord/channel access.
+**Goal:** Hanzo Bot Gateway running on a [Fly.io](https://fly.io) machine with persistent storage, automatic HTTPS, and Discord/channel access.
 
 ## What you need
 
@@ -29,7 +29,7 @@ read_when:
   <Step title="Create the Fly app">
     ```bash
     # Clone the repo
-    git clone https://github.com/openclaw/openclaw.git
+    git clone https://github.com/hanzoai/bot.git
     cd openclaw
 
     # Create a new Fly app (pick your own name)
@@ -57,8 +57,8 @@ read_when:
 
     [env]
       NODE_ENV = "production"
-      OPENCLAW_PREFER_PNPM = "1"
-      OPENCLAW_STATE_DIR = "/data"
+      BOT_PREFER_PNPM = "1"
+      BOT_STATE_DIR = "/data"
       NODE_OPTIONS = "--max-old-space-size=1536"
 
     [processes]
@@ -87,16 +87,16 @@ read_when:
     | ------------------------------ | --------------------------------------------------------------------------- |
     | `--bind lan`                   | Binds to `0.0.0.0` so Fly's proxy can reach the gateway                     |
     | `--allow-unconfigured`         | Starts without a config file (you'll create one after)                      |
-    | `internal_port = 3000`         | Must match `--port 3000` (or `OPENCLAW_GATEWAY_PORT`) for Fly health checks |
+    | `internal_port = 3000`         | Must match `--port 3000` (or `BOT_GATEWAY_PORT`) for Fly health checks |
     | `memory = "2048mb"`            | 512MB is too small; 2GB recommended                                         |
-    | `OPENCLAW_STATE_DIR = "/data"` | Persists state on the volume                                                |
+    | `BOT_STATE_DIR = "/data"` | Persists state on the volume                                                |
 
   </Step>
 
   <Step title="Set secrets">
     ```bash
     # Required: Gateway token (for non-loopback binding)
-    fly secrets set OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)
+    fly secrets set BOT_GATEWAY_TOKEN=$(openssl rand -hex 32)
 
     # Model provider API keys
     fly secrets set ANTHROPIC_API_KEY=sk-ant-...
@@ -111,7 +111,7 @@ read_when:
 
     **Notes:**
 
-    - Non-loopback binds (`--bind lan`) require `OPENCLAW_GATEWAY_TOKEN` for security.
+    - Non-loopback binds (`--bind lan`) require `BOT_GATEWAY_TOKEN` for security.
     - Treat these tokens like passwords.
     - **Prefer env vars over config file** for all API keys and tokens. This keeps secrets out of `openclaw.json` where they could be accidentally exposed or logged.
 
@@ -201,7 +201,7 @@ read_when:
     EOF
     ```
 
-    **Note:** With `OPENCLAW_STATE_DIR=/data`, the config path is `/data/openclaw.json`.
+    **Note:** With `BOT_STATE_DIR=/data`, the config path is `/data/openclaw.json`.
 
     **Note:** The Discord token can come from either:
 
@@ -230,7 +230,7 @@ read_when:
 
     Or visit `https://my-openclaw.fly.dev/`
 
-    Paste your gateway token (the one from `OPENCLAW_GATEWAY_TOKEN`) to authenticate.
+    Paste your gateway token (the one from `BOT_GATEWAY_TOKEN`) to authenticate.
 
     ### Logs
 
@@ -260,7 +260,7 @@ The gateway is binding to `127.0.0.1` instead of `0.0.0.0`.
 
 Fly can't reach the gateway on the configured port.
 
-**Fix:** Ensure `internal_port` matches the gateway port (set `--port 3000` or `OPENCLAW_GATEWAY_PORT=3000`).
+**Fix:** Ensure `internal_port` matches the gateway port (set `--port 3000` or `BOT_GATEWAY_PORT=3000`).
 
 ### OOM / Memory Issues
 
@@ -329,7 +329,7 @@ fly ssh console --command "rm /data/openclaw.json"
 
 If you lose credentials or sessions after a restart, the state dir is writing to the container filesystem.
 
-**Fix:** Ensure `OPENCLAW_STATE_DIR=/data` is set in `fly.toml` and redeploy.
+**Fix:** Ensure `BOT_STATE_DIR=/data` is set in `fly.toml` and redeploy.
 
 ## Updates
 
@@ -499,4 +499,4 @@ See [Fly.io pricing](https://fly.io/docs/about/pricing/) for details.
 
 - Set up messaging channels: [Channels](/channels)
 - Configure the Gateway: [Gateway configuration](/gateway/configuration)
-- Keep OpenClaw up to date: [Updating](/install/updating)
+- Keep Hanzo Bot up to date: [Updating](/install/updating)

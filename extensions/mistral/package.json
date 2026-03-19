@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/mistral-provider",
+  "name": "@hanzo/bot-mistral-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Mistral provider plugin",
+  "description": "Hanzo Bot Mistral provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

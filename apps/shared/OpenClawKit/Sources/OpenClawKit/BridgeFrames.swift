@@ -27,14 +27,14 @@ public struct BridgeInvokeResponse: Codable, Sendable {
     public let id: String
     public let ok: Bool
     public let payloadJSON: String?
-    public let error: OpenClawNodeError?
+    public let error: Hanzo BotNodeError?
 
     public init(
         type: String = "invoke-res",
         id: String,
         ok: Bool,
         payloadJSON: String? = nil,
-        error: OpenClawNodeError? = nil)
+        error: Hanzo BotNodeError? = nil)
     {
         self.type = type
         self.id = id

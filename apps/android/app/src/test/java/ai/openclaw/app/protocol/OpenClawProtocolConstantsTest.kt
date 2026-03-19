@@ -1,98 +1,98 @@
-package ai.openclaw.app.protocol
+package ai.hanzo.bot.app.protocol
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class OpenClawProtocolConstantsTest {
+class Hanzo BotProtocolConstantsTest {
   @Test
   fun canvasCommandsUseStableStrings() {
-    assertEquals("canvas.present", OpenClawCanvasCommand.Present.rawValue)
-    assertEquals("canvas.hide", OpenClawCanvasCommand.Hide.rawValue)
-    assertEquals("canvas.navigate", OpenClawCanvasCommand.Navigate.rawValue)
-    assertEquals("canvas.eval", OpenClawCanvasCommand.Eval.rawValue)
-    assertEquals("canvas.snapshot", OpenClawCanvasCommand.Snapshot.rawValue)
+    assertEquals("canvas.present", Hanzo BotCanvasCommand.Present.rawValue)
+    assertEquals("canvas.hide", Hanzo BotCanvasCommand.Hide.rawValue)
+    assertEquals("canvas.navigate", Hanzo BotCanvasCommand.Navigate.rawValue)
+    assertEquals("canvas.eval", Hanzo BotCanvasCommand.Eval.rawValue)
+    assertEquals("canvas.snapshot", Hanzo BotCanvasCommand.Snapshot.rawValue)
   }
 
   @Test
   fun a2uiCommandsUseStableStrings() {
-    assertEquals("canvas.a2ui.push", OpenClawCanvasA2UICommand.Push.rawValue)
-    assertEquals("canvas.a2ui.pushJSONL", OpenClawCanvasA2UICommand.PushJSONL.rawValue)
-    assertEquals("canvas.a2ui.reset", OpenClawCanvasA2UICommand.Reset.rawValue)
+    assertEquals("canvas.a2ui.push", Hanzo BotCanvasA2UICommand.Push.rawValue)
+    assertEquals("canvas.a2ui.pushJSONL", Hanzo BotCanvasA2UICommand.PushJSONL.rawValue)
+    assertEquals("canvas.a2ui.reset", Hanzo BotCanvasA2UICommand.Reset.rawValue)
   }
 
   @Test
   fun capabilitiesUseStableStrings() {
-    assertEquals("canvas", OpenClawCapability.Canvas.rawValue)
-    assertEquals("camera", OpenClawCapability.Camera.rawValue)
-    assertEquals("voiceWake", OpenClawCapability.VoiceWake.rawValue)
-    assertEquals("location", OpenClawCapability.Location.rawValue)
-    assertEquals("sms", OpenClawCapability.Sms.rawValue)
-    assertEquals("device", OpenClawCapability.Device.rawValue)
-    assertEquals("notifications", OpenClawCapability.Notifications.rawValue)
-    assertEquals("system", OpenClawCapability.System.rawValue)
-    assertEquals("photos", OpenClawCapability.Photos.rawValue)
-    assertEquals("contacts", OpenClawCapability.Contacts.rawValue)
-    assertEquals("calendar", OpenClawCapability.Calendar.rawValue)
-    assertEquals("motion", OpenClawCapability.Motion.rawValue)
-    assertEquals("callLog", OpenClawCapability.CallLog.rawValue)
+    assertEquals("canvas", Hanzo BotCapability.Canvas.rawValue)
+    assertEquals("camera", Hanzo BotCapability.Camera.rawValue)
+    assertEquals("voiceWake", Hanzo BotCapability.VoiceWake.rawValue)
+    assertEquals("location", Hanzo BotCapability.Location.rawValue)
+    assertEquals("sms", Hanzo BotCapability.Sms.rawValue)
+    assertEquals("device", Hanzo BotCapability.Device.rawValue)
+    assertEquals("notifications", Hanzo BotCapability.Notifications.rawValue)
+    assertEquals("system", Hanzo BotCapability.System.rawValue)
+    assertEquals("photos", Hanzo BotCapability.Photos.rawValue)
+    assertEquals("contacts", Hanzo BotCapability.Contacts.rawValue)
+    assertEquals("calendar", Hanzo BotCapability.Calendar.rawValue)
+    assertEquals("motion", Hanzo BotCapability.Motion.rawValue)
+    assertEquals("callLog", Hanzo BotCapability.CallLog.rawValue)
   }
 
   @Test
   fun cameraCommandsUseStableStrings() {
-    assertEquals("camera.list", OpenClawCameraCommand.List.rawValue)
-    assertEquals("camera.snap", OpenClawCameraCommand.Snap.rawValue)
-    assertEquals("camera.clip", OpenClawCameraCommand.Clip.rawValue)
+    assertEquals("camera.list", Hanzo BotCameraCommand.List.rawValue)
+    assertEquals("camera.snap", Hanzo BotCameraCommand.Snap.rawValue)
+    assertEquals("camera.clip", Hanzo BotCameraCommand.Clip.rawValue)
   }
 
   @Test
   fun notificationsCommandsUseStableStrings() {
-    assertEquals("notifications.list", OpenClawNotificationsCommand.List.rawValue)
-    assertEquals("notifications.actions", OpenClawNotificationsCommand.Actions.rawValue)
+    assertEquals("notifications.list", Hanzo BotNotificationsCommand.List.rawValue)
+    assertEquals("notifications.actions", Hanzo BotNotificationsCommand.Actions.rawValue)
   }
 
   @Test
   fun deviceCommandsUseStableStrings() {
-    assertEquals("device.status", OpenClawDeviceCommand.Status.rawValue)
-    assertEquals("device.info", OpenClawDeviceCommand.Info.rawValue)
-    assertEquals("device.permissions", OpenClawDeviceCommand.Permissions.rawValue)
-    assertEquals("device.health", OpenClawDeviceCommand.Health.rawValue)
+    assertEquals("device.status", Hanzo BotDeviceCommand.Status.rawValue)
+    assertEquals("device.info", Hanzo BotDeviceCommand.Info.rawValue)
+    assertEquals("device.permissions", Hanzo BotDeviceCommand.Permissions.rawValue)
+    assertEquals("device.health", Hanzo BotDeviceCommand.Health.rawValue)
   }
 
   @Test
   fun systemCommandsUseStableStrings() {
-    assertEquals("system.notify", OpenClawSystemCommand.Notify.rawValue)
+    assertEquals("system.notify", Hanzo BotSystemCommand.Notify.rawValue)
   }
 
   @Test
   fun photosCommandsUseStableStrings() {
-    assertEquals("photos.latest", OpenClawPhotosCommand.Latest.rawValue)
+    assertEquals("photos.latest", Hanzo BotPhotosCommand.Latest.rawValue)
   }
 
   @Test
   fun contactsCommandsUseStableStrings() {
-    assertEquals("contacts.search", OpenClawContactsCommand.Search.rawValue)
-    assertEquals("contacts.add", OpenClawContactsCommand.Add.rawValue)
+    assertEquals("contacts.search", Hanzo BotContactsCommand.Search.rawValue)
+    assertEquals("contacts.add", Hanzo BotContactsCommand.Add.rawValue)
   }
 
   @Test
   fun calendarCommandsUseStableStrings() {
-    assertEquals("calendar.events", OpenClawCalendarCommand.Events.rawValue)
-    assertEquals("calendar.add", OpenClawCalendarCommand.Add.rawValue)
+    assertEquals("calendar.events", Hanzo BotCalendarCommand.Events.rawValue)
+    assertEquals("calendar.add", Hanzo BotCalendarCommand.Add.rawValue)
   }
 
   @Test
   fun motionCommandsUseStableStrings() {
-    assertEquals("motion.activity", OpenClawMotionCommand.Activity.rawValue)
-    assertEquals("motion.pedometer", OpenClawMotionCommand.Pedometer.rawValue)
+    assertEquals("motion.activity", Hanzo BotMotionCommand.Activity.rawValue)
+    assertEquals("motion.pedometer", Hanzo BotMotionCommand.Pedometer.rawValue)
   }
 
   @Test
   fun callLogCommandsUseStableStrings() {
-    assertEquals("callLog.search", OpenClawCallLogCommand.Search.rawValue)
+    assertEquals("callLog.search", Hanzo BotCallLogCommand.Search.rawValue)
   }
 
   @Test
   fun smsCommandsUseStableStrings() {
-    assertEquals("sms.search", OpenClawSmsCommand.Search.rawValue)
+    assertEquals("sms.search", Hanzo BotSmsCommand.Search.rawValue)
   }
 }

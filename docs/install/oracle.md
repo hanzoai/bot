@@ -1,15 +1,15 @@
 ---
-summary: "Host OpenClaw on Oracle Cloud's Always Free ARM tier"
+summary: "Host Hanzo Bot on Oracle Cloud's Always Free ARM tier"
 read_when:
-  - Setting up OpenClaw on Oracle Cloud
-  - Looking for free VPS hosting for OpenClaw
-  - Want 24/7 OpenClaw on a small server
+  - Setting up Hanzo Bot on Oracle Cloud
+  - Looking for free VPS hosting for Hanzo Bot
+  - Want 24/7 Hanzo Bot on a small server
 title: "Oracle Cloud"
 ---
 
 # Oracle Cloud
 
-Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up to 4 OCPU, 24 GB RAM, 200 GB storage) at no cost.
+Run a persistent Hanzo Bot Gateway on Oracle Cloud's **Always Free** ARM tier (up to 4 OCPU, 24 GB RAM, 200 GB storage) at no cost.
 
 ## Prerequisites
 
@@ -73,9 +73,9 @@ Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up
 
   </Step>
 
-  <Step title="Install OpenClaw">
+  <Step title="Install Hanzo Bot">
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash
+    curl -fsSL https://hanzo.bot/install.sh | bash
     source ~/.bashrc
     ```
 
@@ -87,11 +87,11 @@ Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up
     Use token auth with Tailscale Serve for secure remote access.
 
     ```bash
-    openclaw config set gateway.bind loopback
-    openclaw config set gateway.auth.mode token
-    openclaw doctor --generate-gateway-token
-    openclaw config set gateway.tailscale.mode serve
-    openclaw config set gateway.trustedProxies '["127.0.0.1"]'
+    hanzo-bot config set gateway.bind loopback
+    hanzo-bot config set gateway.auth.mode token
+    hanzo-bot doctor --generate-gateway-token
+    hanzo-bot config set gateway.tailscale.mode serve
+    hanzo-bot config set gateway.trustedProxies '["127.0.0.1"]'
 
     systemctl --user restart openclaw-gateway
     ```
@@ -112,7 +112,7 @@ Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up
 
   <Step title="Verify">
     ```bash
-    openclaw --version
+    hanzo-bot --version
     systemctl --user status openclaw-gateway
     tailscale serve status
     curl http://localhost:18789
@@ -145,7 +145,7 @@ Then open `http://localhost:18789`.
 
 **Tailscale will not connect** -- Run `sudo tailscale up --ssh --hostname=openclaw --reset` to re-authenticate.
 
-**Gateway will not start** -- Run `openclaw doctor --non-interactive` and check logs with `journalctl --user -u openclaw-gateway -n 50`.
+**Gateway will not start** -- Run `hanzo-bot doctor --non-interactive` and check logs with `journalctl --user -u openclaw-gateway -n 50`.
 
 **ARM binary issues** -- Most npm packages work on ARM64. For native binaries, look for `linux-arm64` or `aarch64` releases. Verify architecture with `uname -m`.
 
@@ -153,4 +153,4 @@ Then open `http://localhost:18789`.
 
 - [Channels](/channels) -- connect Telegram, WhatsApp, Discord, and more
 - [Gateway configuration](/gateway/configuration) -- all config options
-- [Updating](/install/updating) -- keep OpenClaw up to date
+- [Updating](/install/updating) -- keep Hanzo Bot up to date

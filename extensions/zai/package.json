@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/zai-provider",
+  "name": "@hanzo/bot-zai-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Z.AI provider plugin",
+  "description": "Hanzo Bot Z.AI provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

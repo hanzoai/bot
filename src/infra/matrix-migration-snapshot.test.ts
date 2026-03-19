@@ -232,7 +232,7 @@ describe("matrix migration snapshots", () => {
         });
         expect(detection.plans).toHaveLength(1);
         expect(detection.warnings).toContain(
-          "Legacy Matrix encrypted state was detected, but the Matrix plugin helper is unavailable. Install or repair @openclaw/matrix so OpenClaw can inspect the old rust crypto store before upgrading.",
+          "Legacy Matrix encrypted state was detected, but the Matrix plugin helper is unavailable. Install or repair @hanzo/bot-matrix so Hanzo Bot can inspect the old rust crypto store before upgrading.",
         );
         expect(
           hasActionableMatrixMigration({
@@ -243,7 +243,7 @@ describe("matrix migration snapshots", () => {
       },
       {
         env: {
-          OPENCLAW_BUNDLED_PLUGINS_DIR: (home) => path.join(home, "empty-bundled"),
+          BOT_BUNDLED_PLUGINS_DIR: (home) => path.join(home, "empty-bundled"),
         },
       },
     );

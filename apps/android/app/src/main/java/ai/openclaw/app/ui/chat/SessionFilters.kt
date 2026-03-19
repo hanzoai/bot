@@ -1,6 +1,6 @@
-package ai.openclaw.app.ui.chat
+package ai.hanzo.bot.app.ui.chat
 
-import ai.openclaw.app.chat.ChatSessionEntry
+import ai.hanzo.bot.app.chat.ChatSessionEntry
 
 private const val RECENT_WINDOW_MS = 24 * 60 * 60 * 1000L
 

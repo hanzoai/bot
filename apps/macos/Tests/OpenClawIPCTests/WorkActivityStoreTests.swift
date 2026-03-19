@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawProtocol
+import Hanzo BotProtocol
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @MainActor
 struct WorkActivityStoreTests {

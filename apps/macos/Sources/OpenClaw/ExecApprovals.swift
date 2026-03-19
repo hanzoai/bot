@@ -229,11 +229,11 @@ enum ExecApprovalsStore {
     private static let secureStateDirPermissions = 0o700
 
     static func fileURL() -> URL {
-        OpenClawPaths.stateDirURL.appendingPathComponent("exec-approvals.json")
+        Hanzo BotPaths.stateDirURL.appendingPathComponent("exec-approvals.json")
     }
 
     static func socketPath() -> String {
-        OpenClawPaths.stateDirURL.appendingPathComponent("exec-approvals.sock").path
+        Hanzo BotPaths.stateDirURL.appendingPathComponent("exec-approvals.sock").path
     }
 
     static func normalizeIncoming(_ file: ExecApprovalsFile) -> ExecApprovalsFile {
@@ -539,7 +539,7 @@ enum ExecApprovalsStore {
     }
 
     private static func ensureSecureStateDirectory() {
-        let url = OpenClawPaths.stateDirURL
+        let url = Hanzo BotPaths.stateDirURL
         do {
             try FileManager().createDirectory(at: url, withIntermediateDirectories: true)
             try FileManager().setAttributes(

@@ -5,8 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import { createTestPluginApi } from "../../test/helpers/extensions/plugin-api.js";
 import registerPhoneControl from "./index.js";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginCommandDefinition,
+  Hanzo BotPluginApi,
+  Hanzo BotPluginCommandDefinition,
   PluginCommandContext,
 } from "./runtime-api.js";
 
@@ -14,8 +14,8 @@ function createApi(params: {
   stateDir: string;
   getConfig: () => Record<string, unknown>;
   writeConfig: (next: Record<string, unknown>) => Promise<void>;
-  registerCommand: (command: OpenClawPluginCommandDefinition) => void;
-}): OpenClawPluginApi {
+  registerCommand: (command: Hanzo BotPluginCommandDefinition) => void;
+}): Hanzo BotPluginApi {
   return createTestPluginApi({
     id: "phone-control",
     name: "phone-control",
@@ -30,9 +30,9 @@ function createApi(params: {
         loadConfig: () => params.getConfig(),
         writeConfigFile: (next: Record<string, unknown>) => params.writeConfig(next),
       },
-    } as OpenClawPluginApi["runtime"],
+    } as Hanzo BotPluginApi["runtime"],
     registerCommand: params.registerCommand,
-  }) as OpenClawPluginApi;
+  }) as Hanzo BotPluginApi;
 }
 
 function createCommandContext(args: string): PluginCommandContext {
@@ -67,7 +67,7 @@ describe("phone-control plugin", () => {
         config = next;
       });
 
-      let command: OpenClawPluginCommandDefinition | undefined;
+      let command: Hanzo BotPluginCommandDefinition | undefined;
       registerPhoneControl.register(
         createApi({
           stateDir,

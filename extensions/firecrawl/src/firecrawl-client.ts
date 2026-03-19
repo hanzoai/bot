@@ -1,5 +1,5 @@
 import { markdownToText, truncateText } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { withTrustedWebToolsEndpoint } from "openclaw/plugin-sdk/provider-web-search";
 import {
   DEFAULT_CACHE_TTL_MINUTES,
@@ -41,7 +41,7 @@ type FirecrawlSearchItem = {
 };
 
 export type FirecrawlSearchParams = {
-  cfg?: OpenClawConfig;
+  cfg?: Hanzo BotConfig;
   query: string;
   count?: number;
   timeoutSeconds?: number;
@@ -51,7 +51,7 @@ export type FirecrawlSearchParams = {
 };
 
 export type FirecrawlScrapeParams = {
-  cfg?: OpenClawConfig;
+  cfg?: Hanzo BotConfig;
   url: string;
   extractMode: "markdown" | "text";
   maxChars?: number;

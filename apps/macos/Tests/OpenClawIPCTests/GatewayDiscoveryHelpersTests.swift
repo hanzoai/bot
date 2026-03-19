@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawDiscovery
+import Hanzo BotDiscovery
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct GatewayDiscoveryHelpersTests {
     private func makeGateway(

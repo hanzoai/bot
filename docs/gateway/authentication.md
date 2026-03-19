@@ -8,7 +8,7 @@ title: "Authentication"
 
 # Authentication
 
-OpenClaw supports OAuth and API keys for model providers. For always-on gateway
+Hanzo Bot supports OAuth and API keys for model providers. For always-on gateway
 hosts, API keys are usually the most predictable option. Subscription/OAuth
 flows are also supported when they match your provider account model.
 
@@ -26,7 +26,7 @@ For Anthropic specifically, API key auth is the safe path and is recommended
 over subscription setup-token auth.
 
 1. Create an API key in your provider console.
-2. Put it on the **gateway host** (the machine running `openclaw gateway`).
+2. Put it on the **gateway host** (the machine running `hanzo-bot gateway`).
 
 ```bash
 export <PROVIDER>_API_KEY="..."
@@ -34,10 +34,10 @@ openclaw models status
 ```
 
 3. If the Gateway runs under systemd/launchd, prefer putting the key in
-   `~/.openclaw/.env` so the daemon can read it:
+   `~/.hanzo/bot/.env` so the daemon can read it:
 
 ```bash
-cat >> ~/.openclaw/.env <<'EOF'
+cat >> ~/.hanzo/bot/.env <<'EOF'
 <PROVIDER>_API_KEY=...
 EOF
 ```
@@ -50,10 +50,10 @@ openclaw doctor
 ```
 
 If you’d rather not manage env vars yourself, onboarding can store
-API keys for daemon use: `openclaw onboard`.
+API keys for daemon use: `hanzo-bot onboard`.
 
 See [Help](/help) for details on env inheritance (`env.shellEnv`,
-`~/.openclaw/.env`, systemd/launchd).
+`~/.hanzo/bot/.env`, systemd/launchd).
 
 ## Anthropic: setup-token (subscription auth)
 
@@ -64,7 +64,7 @@ it on the **gateway host**:
 claude setup-token
 ```
 
-Then paste it into OpenClaw:
+Then paste it into Hanzo Bot:
 
 ```bash
 openclaw models auth setup-token --provider anthropic
@@ -126,13 +126,13 @@ Some providers support retrying a request with alternative keys when an API call
 hits a provider rate limit.
 
 - Priority order:
-  - `OPENCLAW_LIVE_<PROVIDER>_KEY` (single override)
+  - `BOT_LIVE_<PROVIDER>_KEY` (single override)
   - `<PROVIDER>_API_KEYS`
   - `<PROVIDER>_API_KEY`
   - `<PROVIDER>_API_KEY_*`
 - Google providers also include `GOOGLE_API_KEY` as an additional fallback.
 - The same key list is deduplicated before use.
-- OpenClaw retries with the next key only for rate-limit errors (for example
+- Hanzo Bot retries with the next key only for rate-limit errors (for example
   `429`, `rate_limit`, `quota`, `resource exhausted`).
 - Non-rate-limit errors are not retried with alternate keys.
 - If all keys fail, the final error from the last attempt is returned.
@@ -170,7 +170,7 @@ openclaw models status
 
 ### Token expiring/expired
 
-Run `openclaw models status` to confirm which profile is expiring. If the profile
+Run `hanzo-bot models status` to confirm which profile is expiring. If the profile
 is missing, rerun `claude setup-token` and paste the token again.
 
 ## Requirements

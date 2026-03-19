@@ -35,7 +35,7 @@ function createPluginCandidate(params: {
   rootDir: string;
   sourceName?: string;
   origin: "bundled" | "global" | "workspace" | "config";
-  format?: "openclaw" | "bundle";
+  format?: "@hanzo/bot" | "bundle";
   bundleFormat?: "codex" | "claude" | "cursor";
 }): PluginCandidate {
   return {
@@ -649,14 +649,14 @@ describe("loadPluginManifestRegistry", () => {
       cache: true,
       env: {
         ...process.env,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledA,
+        BOT_BUNDLED_PLUGINS_DIR: bundledA,
       },
     });
     const second = loadPluginManifestRegistry({
       cache: true,
       env: {
         ...process.env,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledB,
+        BOT_BUNDLED_PLUGINS_DIR: bundledB,
       },
     });
 
@@ -702,8 +702,8 @@ describe("loadPluginManifestRegistry", () => {
       env: {
         ...process.env,
         HOME: homeA,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_STATE_DIR: path.join(homeA, ".state"),
+        BOT_HOME: undefined,
+        BOT_STATE_DIR: path.join(homeA, ".state"),
       },
     });
     const second = loadPluginManifestRegistry({
@@ -712,8 +712,8 @@ describe("loadPluginManifestRegistry", () => {
       env: {
         ...process.env,
         HOME: homeB,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_STATE_DIR: path.join(homeB, ".state"),
+        BOT_HOME: undefined,
+        BOT_STATE_DIR: path.join(homeB, ".state"),
       },
     });
 

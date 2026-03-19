@@ -1,7 +1,7 @@
 import { getChannelPlugin, listChannelPlugins } from "../channels/plugins/index.js";
 import type { ChannelId, ChannelPlugin } from "../channels/plugins/types.js";
 import { normalizeAnyChannelId } from "../channels/registry.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { normalizeStringEntries } from "../shared/string-normalization.js";
 import {
   INTERNAL_MESSAGE_CHANNEL,
@@ -20,7 +20,7 @@ export type CommandAuthorization = {
   to?: string;
 };
 
-function resolveProviderFromContext(ctx: MsgContext, cfg: OpenClawConfig): ChannelId | undefined {
+function resolveProviderFromContext(ctx: MsgContext, cfg: Hanzo BotConfig): ChannelId | undefined {
   const explicitMessageChannel =
     normalizeMessageChannel(ctx.Provider) ??
     normalizeMessageChannel(ctx.Surface) ??
@@ -76,7 +76,7 @@ function resolveProviderFromContext(ctx: MsgContext, cfg: OpenClawConfig): Chann
 
 function formatAllowFromList(params: {
   plugin?: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   allowFrom: Array<string | number>;
 }): string[] {
@@ -92,7 +92,7 @@ function formatAllowFromList(params: {
 
 function normalizeAllowFromEntry(params: {
   plugin?: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   value: string;
 }): string[] {
@@ -107,7 +107,7 @@ function normalizeAllowFromEntry(params: {
 
 function resolveOwnerAllowFromList(params: {
   plugin?: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   providerId?: ChannelId;
   allowFrom?: Array<string | number>;
@@ -154,7 +154,7 @@ function resolveOwnerAllowFromList(params: {
  */
 function resolveCommandsAllowFromList(params: {
   plugin?: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   providerId?: ChannelId;
 }): string[] | null {
@@ -214,7 +214,7 @@ function shouldUseFromAsSenderFallback(params: {
 function resolveSenderCandidates(params: {
   plugin?: ChannelPlugin;
   providerId?: ChannelId;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   senderId?: string | null;
   senderE164?: string | null;
@@ -257,7 +257,7 @@ function resolveSenderCandidates(params: {
 }
 
 function resolveFallbackAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   providerId?: ChannelId;
   accountId?: string | null;
 }): Array<string | number> {
@@ -302,7 +302,7 @@ function resolveFallbackCommandOptions(providerId?: ChannelId): {
 
 export function resolveCommandAuthorization(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   commandAuthorized: boolean;
 }): CommandAuthorization {
   const { ctx, cfg, commandAuthorized } = params;

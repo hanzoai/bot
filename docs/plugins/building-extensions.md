@@ -1,20 +1,20 @@
 ---
 title: "Building Extensions"
-summary: "Step-by-step guide for creating OpenClaw channel and provider extensions"
+summary: "Step-by-step guide for creating Hanzo Bot channel and provider extensions"
 read_when:
-  - You want to create a new OpenClaw plugin or extension
+  - You want to create a new Hanzo Bot plugin or extension
   - You need to understand the plugin SDK import patterns
-  - You are adding a new channel or provider to OpenClaw
+  - You are adding a new channel or provider to Hanzo Bot
 ---
 
 # Building Extensions
 
-This guide walks through creating an OpenClaw extension from scratch. Extensions
+This guide walks through creating an Hanzo Bot extension from scratch. Extensions
 can add channels, model providers, tools, or other capabilities.
 
 ## Prerequisites
 
-- OpenClaw repository cloned and dependencies installed (`pnpm install`)
+- Hanzo Bot repository cloned and dependencies installed (`pnpm install`)
 - Familiarity with TypeScript (ESM)
 
 ## Extension structure
@@ -23,7 +23,7 @@ Every extension lives under `extensions/<name>/` and follows this layout:
 
 ```
 extensions/my-channel/
-├── package.json          # npm metadata + openclaw config
+├── package.json          # npm metadata + hanzo-bot config
 ├── index.ts              # Entry point (defineChannelPluginEntry)
 ├── setup-entry.ts        # Setup wizard (optional)
 ├── api.ts                # Public contract barrel (optional)
@@ -40,12 +40,12 @@ Create `extensions/my-channel/package.json`:
 
 ```json
 {
-  "name": "@openclaw/my-channel",
+  "name": "@hanzo/bot-my-channel",
   "version": "2026.1.1",
-  "description": "OpenClaw My Channel plugin",
+  "description": "Hanzo Bot My Channel plugin",
   "type": "module",
   "dependencies": {},
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": ["./index.ts"],
     "setupEntry": "./setup-entry.ts",
     "channel": {
@@ -58,7 +58,7 @@ Create `extensions/my-channel/package.json`:
       "order": 80
     },
     "install": {
-      "npmSpec": "@openclaw/my-channel",
+      "npmSpec": "@hanzo/bot-my-channel",
       "localPath": "extensions/my-channel"
     }
   }
@@ -78,7 +78,7 @@ import { defineChannelPluginEntry } from "openclaw/plugin-sdk/core";
 export default defineChannelPluginEntry({
   id: "my-channel",
   name: "My Channel",
-  description: "Connects OpenClaw to My Channel",
+  description: "Connects Hanzo Bot to My Channel",
   plugin: {
     // Channel adapter implementation
   },
@@ -155,7 +155,7 @@ Create `openclaw.plugin.json` in your extension root:
   "kind": "channel",
   "channels": ["my-channel"],
   "name": "My Channel Plugin",
-  "description": "Connects OpenClaw to My Channel"
+  "description": "Connects Hanzo Bot to My Channel"
 }
 ```
 
@@ -163,7 +163,7 @@ See [Plugin manifest](/plugins/manifest) for the full schema.
 
 ## Step 6: Test with contract tests
 
-OpenClaw runs contract tests against all registered plugins. After adding your
+Hanzo Bot runs contract tests against all registered plugins. After adding your
 extension, run:
 
 ```bash

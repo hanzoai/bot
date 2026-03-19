@@ -1,5 +1,5 @@
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct NodePairingReconcilePolicyTests {
     @Test func `policy polls only when active`() {

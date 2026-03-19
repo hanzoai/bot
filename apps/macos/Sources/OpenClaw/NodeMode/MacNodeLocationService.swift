@@ -1,6 +1,6 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 
 @MainActor
 final class MacNodeLocationService: NSObject, CLLocationManagerDelegate, LocationServiceCommon {
@@ -27,7 +27,7 @@ final class MacNodeLocationService: NSObject, CLLocationManagerDelegate, Locatio
     }
 
     func currentLocation(
-        desiredAccuracy: OpenClawLocationAccuracy,
+        desiredAccuracy: Hanzo BotLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     {

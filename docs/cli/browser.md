@@ -1,15 +1,15 @@
 ---
-summary: "CLI reference for `openclaw browser` (profiles, tabs, actions, Chrome MCP, and CDP)"
+summary: "CLI reference for `hanzo-bot browser` (profiles, tabs, actions, Chrome MCP, and CDP)"
 read_when:
-  - You use `openclaw browser` and want examples for common tasks
+  - You use `hanzo-bot browser` and want examples for common tasks
   - You want to control a browser running on another machine via a node host
   - You want to attach to your local signed-in Chrome via Chrome MCP
 title: "browser"
 ---
 
-# `openclaw browser`
+# `hanzo-bot browser`
 
-Manage OpenClaw’s browser control server and run browser actions (tabs, snapshots, screenshots, navigation, clicks, typing).
+Manage Hanzo Bot’s browser control server and run browser actions (tabs, snapshots, screenshots, navigation, clicks, typing).
 
 Related:
 
@@ -27,16 +27,16 @@ Related:
 
 ```bash
 openclaw browser profiles
-openclaw browser --browser-profile openclaw start
-openclaw browser --browser-profile openclaw open https://example.com
-openclaw browser --browser-profile openclaw snapshot
+openclaw browser --browser-profile hanzo-bot start
+openclaw browser --browser-profile hanzo-bot open https://example.com
+openclaw browser --browser-profile hanzo-bot snapshot
 ```
 
 ## Profiles
 
 Profiles are named browser routing configs. In practice:
 
-- `openclaw`: launches or attaches to a dedicated OpenClaw-managed Chrome instance (isolated user data dir).
+- `openclaw`: launches or attaches to a dedicated Hanzo Bot-managed Chrome instance (isolated user data dir).
 - `user`: controls your existing signed-in Chrome session via Chrome DevTools MCP.
 - custom CDP profiles: point at a local or remote CDP endpoint.
 
@@ -57,7 +57,7 @@ openclaw browser --browser-profile work tabs
 
 ```bash
 openclaw browser tabs
-openclaw browser open https://docs.openclaw.ai
+openclaw browser open https://docs.hanzo.bot
 openclaw browser focus <targetId>
 openclaw browser close <targetId>
 ```

@@ -1,7 +1,7 @@
 ---
-summary: "Use MiniMax M2.5 in OpenClaw"
+summary: "Use MiniMax M2.5 in Hanzo Bot"
 read_when:
-  - You want MiniMax models in OpenClaw
+  - You want MiniMax models in Hanzo Bot
   - You need MiniMax setup guidance
 title: "MiniMax"
 ---
@@ -52,7 +52,7 @@ You will be prompted to select an endpoint:
 - **Global** - International users (`api.minimax.io`)
 - **CN** - Users in China (`api.minimaxi.com`)
 
-See [MiniMax plugin README](https://github.com/openclaw/openclaw/tree/main/extensions/minimax) for details.
+See [MiniMax plugin README](https://github.com/hanzoai/bot/tree/main/extensions/minimax) for details.
 
 ### MiniMax M2.5 (API key)
 
@@ -60,7 +60,7 @@ See [MiniMax plugin README](https://github.com/openclaw/openclaw/tree/main/exten
 
 Configure via CLI:
 
-- Run `openclaw configure`
+- Run `hanzo-bot configure`
 - Select **Model/auth**
 - Choose **MiniMax M2.5**
 
@@ -164,11 +164,11 @@ Configure manually via `openclaw.json`:
 }
 ```
 
-## Configure via `openclaw configure`
+## Configure via `hanzo-bot configure`
 
 Use the interactive config wizard to set MiniMax without editing JSON:
 
-1. Run `openclaw configure`.
+1. Run `hanzo-bot configure`.
 2. Select **Model/auth**.
 3. Choose **MiniMax M2.5**.
 4. Pick your default model when prompted.
@@ -190,7 +190,7 @@ Use the interactive config wizard to set MiniMax without editing JSON:
 - Update pricing values in `models.json` if you need exact cost tracking.
 - Referral link for MiniMax Coding Plan (10% off): [https://platform.minimax.io/subscribe/coding-plan?code=DbXJTRClnb&source=link](https://platform.minimax.io/subscribe/coding-plan?code=DbXJTRClnb&source=link)
 - See [/concepts/model-providers](/concepts/model-providers) for provider rules.
-- Use `openclaw models list` and `openclaw models set minimax/MiniMax-M2.5` to switch.
+- Use `hanzo-bot models list` and `hanzo-bot models set minimax/MiniMax-M2.5` to switch.
 
 ## Troubleshooting
 
@@ -201,7 +201,7 @@ and no MiniMax auth profile/env key found). A fix for this detection is in
 **2026.1.12** (unreleased at the time of writing). Fix by:
 
 - Upgrading to **2026.1.12** (or run from source `main`), then restarting the gateway.
-- Running `openclaw configure` and selecting **MiniMax M2.5**, or
+- Running `hanzo-bot configure` and selecting **MiniMax M2.5**, or
 - Adding the `models.providers.minimax` block manually, or
 - Setting `MINIMAX_API_KEY` (or a MiniMax auth profile) so the provider can be injected.
 

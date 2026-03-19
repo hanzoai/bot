@@ -1,6 +1,6 @@
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 
-// Prefer the OpenClawKit wrapper to keep gateway request payloads consistent.
-typealias AnyCodable = OpenClawKit.AnyCodable
-typealias InstanceIdentity = OpenClawKit.InstanceIdentity
+// Prefer the Hanzo BotKit wrapper to keep gateway request payloads consistent.
+typealias AnyCodable = Hanzo BotKit.AnyCodable
+typealias InstanceIdentity = Hanzo BotKit.InstanceIdentity

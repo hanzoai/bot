@@ -1,8 +1,8 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct MacNodeRuntimeTests {
     @Test func `handle invoke rejects unknown command`() async {
@@ -14,28 +14,28 @@ struct MacNodeRuntimeTests {
 
     @Test func `handle invoke rejects empty system run`() async throws {
         let runtime = MacNodeRuntime()
-        let params = OpenClawSystemRunParams(command: [])
+        let params = Hanzo BotSystemRunParams(command: [])
         let json = try String(data: JSONEncoder().encode(params), encoding: .utf8)
         let response = await runtime.handleInvoke(
-            BridgeInvokeRequest(id: "req-2", command: OpenClawSystemCommand.run.rawValue, paramsJSON: json))
+            BridgeInvokeRequest(id: "req-2", command: Hanzo BotSystemCommand.run.rawValue, paramsJSON: json))
         #expect(response.ok == false)
     }
 
     @Test func `handle invoke rejects empty system which`() async throws {
         let runtime = MacNodeRuntime()
-        let params = OpenClawSystemWhichParams(bins: [])
+        let params = Hanzo BotSystemWhichParams(bins: [])
         let json = try String(data: JSONEncoder().encode(params), encoding: .utf8)
         let response = await runtime.handleInvoke(
-            BridgeInvokeRequest(id: "req-2b", command: OpenClawSystemCommand.which.rawValue, paramsJSON: json))
+            BridgeInvokeRequest(id: "req-2b", command: Hanzo BotSystemCommand.which.rawValue, paramsJSON: json))
         #expect(response.ok == false)
     }
 
     @Test func `handle invoke rejects empty notification`() async throws {
         let runtime = MacNodeRuntime()
-        let params = OpenClawSystemNotifyParams(title: "", body: "")
+        let params = Hanzo BotSystemNotifyParams(title: "", body: "")
         let json = try String(data: JSONEncoder().encode(params), encoding: .utf8)
         let response = await runtime.handleInvoke(
-            BridgeInvokeRequest(id: "req-3", command: OpenClawSystemCommand.notify.rawValue, paramsJSON: json))
+            BridgeInvokeRequest(id: "req-3", command: Hanzo BotSystemCommand.notify.rawValue, paramsJSON: json))
         #expect(response.ok == false)
     }
 
@@ -43,7 +43,7 @@ struct MacNodeRuntimeTests {
         await TestIsolation.withUserDefaultsValues([cameraEnabledKey: false]) {
             let runtime = MacNodeRuntime()
             let response = await runtime.handleInvoke(
-                BridgeInvokeRequest(id: "req-4", command: OpenClawCameraCommand.list.rawValue))
+                BridgeInvokeRequest(id: "req-4", command: Hanzo BotCameraCommand.list.rawValue))
             #expect(response.ok == false)
             #expect(response.error?.message.contains("CAMERA_DISABLED") == true)
         }
@@ -74,7 +74,7 @@ struct MacNodeRuntimeTests {
             }
 
             func currentLocation(
-                desiredAccuracy: OpenClawLocationAccuracy,
+                desiredAccuracy: Hanzo BotLocationAccuracy,
                 maxAgeMs: Int?,
                 timeoutMs: Int?) async throws -> CLLocation
             {
@@ -110,7 +110,7 @@ struct MacNodeRuntimeTests {
         let response = await runtime.handleInvoke(
             BridgeInvokeRequest(
                 id: "req-browser",
-                command: OpenClawBrowserCommand.proxy.rawValue,
+                command: Hanzo BotBrowserCommand.proxy.rawValue,
                 paramsJSON: paramsJSON))
 
         #expect(response.ok == true)
@@ -119,7 +119,7 @@ struct MacNodeRuntimeTests {
 
     @Test func `handle invoke browser proxy rejects disabled browser control`() async throws {
         let override = TestIsolation.tempConfigPath()
-        try await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
+        try await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
             try JSONSerialization.data(withJSONObject: ["browser": ["enabled": false]])
                 .write(to: URL(fileURLWithPath: override))
 
@@ -130,7 +130,7 @@ struct MacNodeRuntimeTests {
             let response = await runtime.handleInvoke(
                 BridgeInvokeRequest(
                     id: "req-browser-disabled",
-                    command: OpenClawBrowserCommand.proxy.rawValue,
+                    command: Hanzo BotBrowserCommand.proxy.rawValue,
                     paramsJSON: #"{"method":"GET","path":"/tabs"}"#))
 
             #expect(response.ok == false)

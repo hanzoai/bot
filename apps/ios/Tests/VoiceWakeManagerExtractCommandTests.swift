@@ -1,16 +1,16 @@
 import Foundation
 import SwabbleKit
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
-private let openclawTranscript = "hey openclaw do thing"
+private let openclawTranscript = "hey hanzo-bot do thing"
 
 private func openclawSegments(postTriggerStart: TimeInterval) -> [WakeWordSegment] {
     makeSegments(
         transcript: openclawTranscript,
         words: [
             ("hey", 0.0, 0.1),
-            ("openclaw", 0.2, 0.1),
+            ("@hanzo/bot", 0.2, 0.1),
             ("do", postTriggerStart, 0.1),
             ("thing", postTriggerStart + 0.2, 0.1),
         ])
@@ -22,7 +22,7 @@ private func openclawSegments(postTriggerStart: TimeInterval) -> [WakeWordSegmen
         let segments = makeSegments(
             transcript: transcript,
             words: [("hello", 0.0, 0.1), ("world", 0.2, 0.1)])
-        #expect(VoiceWakeManager.extractCommand(from: transcript, segments: segments, triggers: ["openclaw"]) == nil)
+        #expect(VoiceWakeManager.extractCommand(from: transcript, segments: segments, triggers: ["@hanzo/bot"]) == nil)
     }
 
     @Test func extractCommandTrimsTokensAndResult() {
@@ -30,7 +30,7 @@ private func openclawSegments(postTriggerStart: TimeInterval) -> [WakeWordSegmen
         let cmd = VoiceWakeManager.extractCommand(
             from: openclawTranscript,
             segments: segments,
-            triggers: ["  openclaw  "],
+            triggers: ["  hanzo-bot  "],
             minPostTriggerGap: 0.3)
         #expect(cmd == "do thing")
     }
@@ -40,7 +40,7 @@ private func openclawSegments(postTriggerStart: TimeInterval) -> [WakeWordSegmen
         let cmd = VoiceWakeManager.extractCommand(
             from: openclawTranscript,
             segments: segments,
-            triggers: ["openclaw"],
+            triggers: ["@hanzo/bot"],
             minPostTriggerGap: 0.3)
         #expect(cmd == nil)
     }
@@ -49,8 +49,8 @@ private func openclawSegments(postTriggerStart: TimeInterval) -> [WakeWordSegmen
         let transcript = "hey openclaw"
         let segments = makeSegments(
             transcript: transcript,
-            words: [("hey", 0.0, 0.1), ("openclaw", 0.2, 0.1)])
-        #expect(VoiceWakeManager.extractCommand(from: transcript, segments: segments, triggers: ["openclaw"]) == nil)
+            words: [("hey", 0.0, 0.1), ("@hanzo/bot", 0.2, 0.1)])
+        #expect(VoiceWakeManager.extractCommand(from: transcript, segments: segments, triggers: ["@hanzo/bot"]) == nil)
     }
 
     @Test func extractCommandIgnoresEmptyTriggers() {
@@ -58,7 +58,7 @@ private func openclawSegments(postTriggerStart: TimeInterval) -> [WakeWordSegmen
         let cmd = VoiceWakeManager.extractCommand(
             from: openclawTranscript,
             segments: segments,
-            triggers: ["", "   ", "openclaw"],
+            triggers: ["", "   ", "@hanzo/bot"],
             minPostTriggerGap: 0.3)
         #expect(cmd == "do thing")
     }

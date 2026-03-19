@@ -25,7 +25,7 @@ import {
   listWhatsAppDirectoryGroupsFromConfig,
   listWhatsAppDirectoryPeersFromConfig,
 } from "../../../extensions/whatsapp/src/directory-config.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import type { LineProbeResult } from "../../line/types.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
@@ -118,7 +118,7 @@ describe("channel plugin registry", () => {
 describe("channel plugin catalog", () => {
   it("includes Microsoft Teams", () => {
     const entry = getChannelPluginCatalogEntry("msteams");
-    expect(entry?.install.npmSpec).toBe("@openclaw/msteams");
+    expect(entry?.install.npmSpec).toBe("@hanzo/bot-msteams");
     expect(entry?.meta.aliases).toContain("teams");
   });
 
@@ -135,7 +135,7 @@ describe("channel plugin catalog", () => {
       JSON.stringify({
         entries: [
           {
-            name: "@openclaw/demo-channel",
+            name: "@hanzo/bot-demo-channel",
             openclaw: {
               channel: {
                 id: "demo-channel",
@@ -146,7 +146,7 @@ describe("channel plugin catalog", () => {
                 order: 999,
               },
               install: {
-                npmSpec: "@openclaw/demo-channel",
+                npmSpec: "@hanzo/bot-demo-channel",
               },
             },
           },
@@ -195,9 +195,9 @@ describe("channel plugin catalog", () => {
     const entry = listChannelPluginCatalogEntries({
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        CLAWDBOT_STATE_DIR: undefined,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
+        BOT_STATE_DIR: stateDir,
+        BOT_STATE_DIR: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
       },
     }).find((item) => item.id === "demo-channel");
 
@@ -212,7 +212,7 @@ describe("channel plugin catalog", () => {
       JSON.stringify({
         entries: [
           {
-            name: "@openclaw/env-demo-channel",
+            name: "@hanzo/bot-env-demo-channel",
             openclaw: {
               channel: {
                 id: "env-demo-channel",
@@ -223,7 +223,7 @@ describe("channel plugin catalog", () => {
                 order: 1000,
               },
               install: {
-                npmSpec: "@openclaw/env-demo-channel",
+                npmSpec: "@hanzo/bot-env-demo-channel",
               },
             },
           },
@@ -234,7 +234,7 @@ describe("channel plugin catalog", () => {
     const ids = listChannelPluginCatalogEntries({
       env: {
         ...process.env,
-        OPENCLAW_PLUGIN_CATALOG_PATHS: "~/catalog.json",
+        BOT_PLUGIN_CATALOG_PATHS: "~/catalog.json",
         HOME: home,
       },
     }).map((entry) => entry.id);
@@ -251,7 +251,7 @@ describe("channel plugin catalog", () => {
       JSON.stringify({
         entries: [
           {
-            name: "@openclaw/default-env-demo",
+            name: "@hanzo/bot-default-env-demo",
             openclaw: {
               channel: {
                 id: "default-env-demo",
@@ -261,7 +261,7 @@ describe("channel plugin catalog", () => {
                 blurb: "Default env demo entry",
               },
               install: {
-                npmSpec: "@openclaw/default-env-demo",
+                npmSpec: "@hanzo/bot-default-env-demo",
               },
             },
           },
@@ -272,8 +272,8 @@ describe("channel plugin catalog", () => {
     const ids = listChannelPluginCatalogEntries({
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        CLAWDBOT_STATE_DIR: undefined,
+        BOT_STATE_DIR: stateDir,
+        BOT_STATE_DIR: undefined,
       },
     }).map((entry) => entry.id);
 
@@ -286,13 +286,13 @@ describe("channel plugin catalog", () => {
     fs.mkdirSync(bundledDir, { recursive: true });
     fs.writeFileSync(
       path.join(packageRoot, "package.json"),
-      JSON.stringify({ name: "openclaw" }),
+      JSON.stringify({ name: "@hanzo/bot" }),
       "utf8",
     );
     fs.writeFileSync(
       path.join(bundledDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/whatsapp",
+        name: "@hanzo/bot-whatsapp",
         openclaw: {
           extensions: ["./index.js"],
           channel: {
@@ -304,7 +304,7 @@ describe("channel plugin catalog", () => {
             blurb: "works with your own number; recommend a separate phone + eSIM.",
           },
           install: {
-            npmSpec: "@openclaw/whatsapp",
+            npmSpec: "@hanzo/bot-whatsapp",
             defaultChoice: "npm",
           },
         },
@@ -320,11 +320,11 @@ describe("channel plugin catalog", () => {
     const entry = listChannelPluginCatalogEntries({
       env: {
         ...process.env,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(packageRoot, "dist", "extensions"),
+        BOT_BUNDLED_PLUGINS_DIR: path.join(packageRoot, "dist", "extensions"),
       },
     }).find((item) => item.id === "whatsapp");
 
-    expect(entry?.install.npmSpec).toBe("@openclaw/whatsapp");
+    expect(entry?.install.npmSpec).toBe("@hanzo/bot-whatsapp");
     expect(entry?.pluginId).toBe("whatsapp");
   });
 });
@@ -385,13 +385,13 @@ function makeSlackConfigWritesCfg(accountIdKey: string) {
 }
 
 type DirectoryListFn = (params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   query?: string | null;
   limit?: number | null;
 }) => Promise<ChannelDirectoryEntry[]>;
 
-async function listDirectoryEntriesWithDefaults(listFn: DirectoryListFn, cfg: OpenClawConfig) {
+async function listDirectoryEntriesWithDefaults(listFn: DirectoryListFn, cfg: Hanzo BotConfig) {
   return await listFn({
     cfg,
     accountId: "default",
@@ -402,7 +402,7 @@ async function listDirectoryEntriesWithDefaults(listFn: DirectoryListFn, cfg: Op
 
 async function expectDirectoryIds(
   listFn: DirectoryListFn,
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   expected: string[],
   options?: { sorted?: boolean },
 ) {

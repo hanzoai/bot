@@ -2,7 +2,7 @@
 import AppKit
 import Foundation
 import Testing
-@testable import OpenClawChatUI
+@testable import Hanzo BotChatUI
 
 @Suite(.serialized)
 @MainActor

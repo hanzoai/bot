@@ -7,7 +7,7 @@ import type {
 import type { Client } from "@buape/carbon";
 import { ChannelType } from "discord-api-types/v10";
 import type { GatewayPresenceUpdate } from "discord-api-types/v10";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { DiscordAccountConfig } from "openclaw/plugin-sdk/config-runtime";
 import { buildPluginBindingApprovalCustomId } from "openclaw/plugin-sdk/conversation-runtime";
 import { buildAgentSessionKey } from "openclaw/plugin-sdk/routing";
@@ -144,7 +144,7 @@ vi.mock("openclaw/plugin-sdk/plugin-runtime", async (importOriginal) => {
 });
 
 describe("agent components", () => {
-  const createCfg = (): OpenClawConfig => ({}) as OpenClawConfig;
+  const createCfg = (): Hanzo BotConfig => ({}) as Hanzo BotConfig;
 
   const createBaseDmInteraction = (overrides: Record<string, unknown> = {}) => {
     const reply = vi.fn().mockResolvedValue(undefined);
@@ -204,7 +204,7 @@ describe("agent components", () => {
     expect(pairingText).toContain("Pairing code:");
     const code = pairingText.match(/Pairing code:\s*([A-Z2-9]{8})/)?.[1];
     expect(code).toBeDefined();
-    expect(pairingText).toContain(`openclaw pairing approve discord ${code}`);
+    expect(pairingText).toContain(`hanzo-bot pairing approve discord ${code}`);
     expect(enqueueSystemEventMock).not.toHaveBeenCalled();
     expect(readAllowFromStoreMock).toHaveBeenCalledWith("discord", "default");
   });
@@ -337,14 +337,14 @@ describe("agent components", () => {
 });
 
 describe("discord component interactions", () => {
-  const createCfg = (): OpenClawConfig =>
+  const createCfg = (): Hanzo BotConfig =>
     ({
       channels: {
         discord: {
           replyToMode: "first",
         },
       },
-    }) as OpenClawConfig;
+    }) as Hanzo BotConfig;
 
   const createDiscordConfig = (overrides?: Partial<DiscordAccountConfig>): DiscordAccountConfig =>
     ({
@@ -476,7 +476,7 @@ describe("discord component interactions", () => {
       binding: {
         bindingId: "binding-1",
         pluginId: "openclaw-codex-app-server",
-        pluginName: "OpenClaw App Server",
+        pluginName: "Hanzo Bot App Server",
         pluginRoot: "/plugins/codex",
         channel: "discord",
         accountId: "default",
@@ -486,7 +486,7 @@ describe("discord component interactions", () => {
       request: {
         id: "approval-1",
         pluginId: "openclaw-codex-app-server",
-        pluginName: "OpenClaw App Server",
+        pluginName: "Hanzo Bot App Server",
         pluginRoot: "/plugins/codex",
         requestedAt: Date.now(),
         conversation: {
@@ -593,7 +593,7 @@ describe("discord component interactions", () => {
         cfg: {
           commands: { useAccessGroups: true },
           channels: { discord: { replyToMode: "first" } },
-        } as OpenClawConfig,
+        } as Hanzo BotConfig,
         allowFrom: ["owner-1"],
       }),
     );
@@ -625,7 +625,7 @@ describe("discord component interactions", () => {
         cfg: {
           commands: { useAccessGroups: true },
           channels: { discord: { replyToMode: "first" } },
-        } as OpenClawConfig,
+        } as Hanzo BotConfig,
         allowFrom: ["123456789"],
       }),
     );
@@ -669,7 +669,7 @@ describe("discord component interactions", () => {
         cfg: {
           commands: { useAccessGroups: true },
           channels: { discord: { replyToMode: "first" } },
-        } as OpenClawConfig,
+        } as Hanzo BotConfig,
         allowFrom: ["owner-1"],
       }),
     );
@@ -711,7 +711,7 @@ describe("discord component interactions", () => {
         cfg: {
           commands: { useAccessGroups: true },
           channels: { discord: { replyToMode: "first" } },
-        } as OpenClawConfig,
+        } as Hanzo BotConfig,
         allowFrom: ["123456789"],
       }),
     );

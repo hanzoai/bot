@@ -1,8 +1,8 @@
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 import Testing
-@testable import OpenClaw
-@testable import OpenClawIPC
+@testable import Hanzo Bot
+@testable import Hanzo BotIPC
 
 private final class FakeWebSocketTask: WebSocketTasking, @unchecked Sendable {
     var state: URLSessionTask.State = .running

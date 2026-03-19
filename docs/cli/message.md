@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `openclaw message` (send + channel actions)"
+summary: "CLI reference for `hanzo-bot message` (send + channel actions)"
 read_when:
   - Adding or modifying message CLI actions
   - Changing outbound channel behavior
 title: "message"
 ---
 
-# `openclaw message`
+# `hanzo-bot message`
 
 Single outbound command for sending messages and channel actions
 (Discord/Google Chat/Slack/Mattermost (plugin)/Telegram/WhatsApp/Signal/iMessage/MS Teams).
@@ -38,7 +38,7 @@ Target formats (`--target`):
 Name lookup:
 
 - For supported providers (Discord/Slack/etc), channel names like `Help` or `#help` are resolved via the directory cache.
-- On cache miss, OpenClaw will attempt a live directory lookup when the provider supports it.
+- On cache miss, Hanzo Bot will attempt a live directory lookup when the provider supports it.
 
 ## Common flags
 
@@ -52,11 +52,11 @@ Name lookup:
 
 ## SecretRef behavior
 
-- `openclaw message` resolves supported channel SecretRefs before running the selected action.
+- `hanzo-bot message` resolves supported channel SecretRefs before running the selected action.
 - Resolution is scoped to the active action target when possible:
   - channel-scoped when `--channel` is set (or inferred from prefixed targets like `discord:...`)
   - account-scoped when `--account` is set (channel globals + selected account surfaces)
-  - when `--account` is omitted, OpenClaw does not force a `default` account SecretRef scope
+  - when `--account` is omitted, Hanzo Bot does not force a `default` account SecretRef scope
 - Unresolved SecretRefs on unrelated channels do not block a targeted message action.
 - If the selected channel/account SecretRef is unresolved, the command fails closed for that action.
 
