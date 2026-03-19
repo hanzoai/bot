@@ -2,7 +2,7 @@ import {
   applyAgentDefaultModelPrimary,
   applyOnboardAuthAgentModelsAndProviders,
   type ModelProviderConfig,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 import {
   buildMinimaxApiModelDefinition,
@@ -17,9 +17,9 @@ type MinimaxApiProviderConfigParams = {
 };
 
 function applyMinimaxApiProviderConfigWithBaseUrl(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   params: MinimaxApiProviderConfigParams,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const providers = { ...cfg.models?.providers } as Record<string, ModelProviderConfig>;
   const existingProvider = providers[params.providerId];
   const existingModels = existingProvider?.models ?? [];
@@ -52,17 +52,17 @@ function applyMinimaxApiProviderConfigWithBaseUrl(
 }
 
 function applyMinimaxApiConfigWithBaseUrl(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   params: MinimaxApiProviderConfigParams,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const next = applyMinimaxApiProviderConfigWithBaseUrl(cfg, params);
   return applyAgentDefaultModelPrimary(next, `${params.providerId}/${params.modelId}`);
 }
 
 export function applyMinimaxApiProviderConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   modelId: string = "MiniMax-M2.7",
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return applyMinimaxApiProviderConfigWithBaseUrl(cfg, {
     providerId: "minimax",
     modelId,
@@ -71,9 +71,9 @@ export function applyMinimaxApiProviderConfig(
 }
 
 export function applyMinimaxApiConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   modelId: string = "MiniMax-M2.7",
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return applyMinimaxApiConfigWithBaseUrl(cfg, {
     providerId: "minimax",
     modelId,
@@ -82,9 +82,9 @@ export function applyMinimaxApiConfig(
 }
 
 export function applyMinimaxApiProviderConfigCn(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   modelId: string = "MiniMax-M2.7",
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return applyMinimaxApiProviderConfigWithBaseUrl(cfg, {
     providerId: "minimax",
     modelId,
@@ -93,9 +93,9 @@ export function applyMinimaxApiProviderConfigCn(
 }
 
 export function applyMinimaxApiConfigCn(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   modelId: string = "MiniMax-M2.7",
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return applyMinimaxApiConfigWithBaseUrl(cfg, {
     providerId: "minimax",
     modelId,

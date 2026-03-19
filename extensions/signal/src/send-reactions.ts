@@ -3,13 +3,13 @@
  */
 
 import { loadConfig } from "openclaw/plugin-sdk/config-runtime";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { resolveSignalAccount } from "./accounts.js";
 import { signalRpcRequest } from "./client.js";
 import { resolveSignalRpcContext } from "./rpc-context.js";
 
 export type SignalReactionOpts = {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   baseUrl?: string;
   account?: string;
   accountId?: string;

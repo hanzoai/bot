@@ -83,7 +83,7 @@ function candidateDirsFromArgv1(argv1: string): string[] {
   return candidates;
 }
 
-export async function resolveHanzo BotPackageRoot(opts: {
+export async function resolveHanzoBotPackageRoot(opts: {
   cwd?: string;
   argv1?: string;
   moduleUrl?: string;
@@ -98,7 +98,7 @@ export async function resolveHanzo BotPackageRoot(opts: {
   return null;
 }
 
-export function resolveHanzo BotPackageRootSync(opts: {
+export function resolveHanzoBotPackageRootSync(opts: {
   cwd?: string;
   argv1?: string;
   moduleUrl?: string;

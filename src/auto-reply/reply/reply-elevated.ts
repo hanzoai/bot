@@ -1,6 +1,6 @@
 import { resolveAgentConfig } from "../../agents/agent-scope.js";
 import { getChannelPlugin, normalizeChannelId } from "../../channels/plugins/index.js";
-import type { AgentElevatedAllowFromConfig, Hanzo BotConfig } from "../../config/config.js";
+import type { AgentElevatedAllowFromConfig, HanzoBotConfig } from "../../config/config.js";
 import { normalizeStringEntries } from "../../shared/string-normalization.js";
 import type { MsgContext } from "../templating.js";
 import {
@@ -28,7 +28,7 @@ function resolveElevatedAllowList(
 }
 
 function resolveAllowFromFormatter(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   provider: string;
   accountId?: string;
 }): AllowFromFormatter {
@@ -159,7 +159,7 @@ function isApprovedElevatedSender(params: {
 }
 
 export function resolveElevatedPermissions(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId: string;
   ctx: MsgContext;
   provider: string;

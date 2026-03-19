@@ -9,7 +9,7 @@ import {
   setAccountAllowFromForChannel,
   setChannelDmPolicyWithAllowFrom,
   setSetupChannelEnabled,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type WizardPrompter,
 } from "openclaw/plugin-sdk/setup";
 import type {
@@ -89,10 +89,10 @@ function buildSignalSetupPatch(input: {
 }
 
 export async function promptSignalAllowFrom(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   return promptParsedAllowFromForAccount({
     cfg: params.cfg,
     accountId: params.accountId,
@@ -127,8 +127,8 @@ export const signalDmPolicy: ChannelSetupDmPolicy = {
   channel,
   policyKey: "channels.signal.dmPolicy",
   allowFromKey: "channels.signal.allowFrom",
-  getCurrent: (cfg: Hanzo BotConfig) => cfg.channels?.signal?.dmPolicy ?? "pairing",
-  setPolicy: (cfg: Hanzo BotConfig, policy) =>
+  getCurrent: (cfg: HanzoBotConfig) => cfg.channels?.signal?.dmPolicy ?? "pairing",
+  setPolicy: (cfg: HanzoBotConfig, policy) =>
     setChannelDmPolicyWithAllowFrom({
       cfg,
       channel,
@@ -138,7 +138,7 @@ export const signalDmPolicy: ChannelSetupDmPolicy = {
 };
 
 function resolveSignalCliPath(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   credentialValues: Record<string, unknown>;
 }) {
@@ -231,6 +231,6 @@ export function createSignalSetupWizardProxy(loadWizard: () => Promise<ChannelSe
     ],
     completionNote: signalCompletionNote,
     dmPolicy: signalDmPolicy,
-    disable: (cfg: Hanzo BotConfig) => setSetupChannelEnabled(cfg, channel, false),
+    disable: (cfg: HanzoBotConfig) => setSetupChannelEnabled(cfg, channel, false),
   });
 }

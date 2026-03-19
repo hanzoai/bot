@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
 import { writeFileWithinRoot } from "../infra/fs-safe.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -122,7 +122,7 @@ type QmdManagerMode = "full" | "status";
 
 export class QmdMemoryManager implements MemorySearchManager {
   static async create(params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     agentId: string;
     resolved: ResolvedMemoryBackendConfig;
     mode?: QmdManagerMode;
@@ -136,7 +136,7 @@ export class QmdMemoryManager implements MemorySearchManager {
     return manager;
   }
 
-  private readonly cfg: Hanzo BotConfig;
+  private readonly cfg: HanzoBotConfig;
   private readonly agentId: string;
   private readonly qmd: ResolvedQmdConfig;
   private readonly workspaceDir: string;
@@ -178,7 +178,7 @@ export class QmdMemoryManager implements MemorySearchManager {
   private attemptedDuplicateDocumentRepair = false;
 
   private constructor(params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     agentId: string;
     resolved: ResolvedQmdConfig;
   }) {

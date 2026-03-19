@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { withTempHome as withTempHomeBase } from "../../test/helpers/temp-home.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { CronJob } from "./types.js";
 
 export async function withTempCronHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
@@ -35,9 +35,9 @@ export async function writeSessionStoreEntries(
 export function makeCfg(
   home: string,
   storePath: string,
-  overrides: Partial<Hanzo BotConfig> = {},
-): Hanzo BotConfig {
-  const base: Hanzo BotConfig = {
+  overrides: Partial<HanzoBotConfig> = {},
+): HanzoBotConfig {
+  const base: HanzoBotConfig = {
     agents: {
       defaults: {
         model: "anthropic/claude-opus-4-5",
@@ -45,7 +45,7 @@ export function makeCfg(
       },
     },
     session: { store: storePath, mainKey: "main" },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
   return { ...base, ...overrides };
 }
 

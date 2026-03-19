@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as replyModule from "../auto-reply/reply.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { runHeartbeatOnce } from "./heartbeat-runner.js";
 import {
   seedMainSessionStore,
@@ -38,8 +38,8 @@ describe("Ghost reminder bug (issue #13317)", () => {
     tmpDir: string;
     storePath: string;
     target?: "telegram" | "none";
-  }): Promise<{ cfg: Hanzo BotConfig; sessionKey: string }> => {
-    const cfg: Hanzo BotConfig = {
+  }): Promise<{ cfg: HanzoBotConfig; sessionKey: string }> => {
+    const cfg: HanzoBotConfig = {
       agents: {
         defaults: {
           workspace: params.tmpDir,

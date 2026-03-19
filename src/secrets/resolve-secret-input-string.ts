@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   normalizeSecretInputString,
   resolveSecretInputRef,
@@ -6,10 +6,10 @@ import {
 } from "../config/types.secrets.js";
 import { resolveSecretRefString } from "./resolve.js";
 
-type SecretDefaults = NonNullable<Hanzo BotConfig["secrets"]>["defaults"];
+type SecretDefaults = NonNullable<HanzoBotConfig["secrets"]>["defaults"];
 
 export async function resolveSecretInputString(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   value: unknown;
   env: NodeJS.ProcessEnv;
   defaults?: SecretDefaults;

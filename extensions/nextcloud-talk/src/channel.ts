@@ -18,7 +18,7 @@ import {
   clearAccountEntryFields,
   DEFAULT_ACCOUNT_ID,
   type ChannelPlugin,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "../runtime-api.js";
 import {
   listNextcloudTalkAccountIds,
@@ -260,7 +260,7 @@ export const nextcloudTalkPlugin: ChannelPlugin<ResolvedNextcloudTalkAccount> = 
       });
     },
     logoutAccount: async ({ accountId, cfg }) => {
-      const nextCfg = { ...cfg } as Hanzo BotConfig;
+      const nextCfg = { ...cfg } as HanzoBotConfig;
       const nextSection = cfg.channels?.["nextcloud-talk"]
         ? { ...cfg.channels["nextcloud-talk"] }
         : undefined;
@@ -298,7 +298,7 @@ export const nextcloudTalkPlugin: ChannelPlugin<ResolvedNextcloudTalkAccount> = 
           const nextChannels = { ...nextCfg.channels } as Record<string, unknown>;
           delete nextChannels["nextcloud-talk"];
           if (Object.keys(nextChannels).length > 0) {
-            nextCfg.channels = nextChannels as Hanzo BotConfig["channels"];
+            nextCfg.channels = nextChannels as HanzoBotConfig["channels"];
           } else {
             delete nextCfg.channels;
           }

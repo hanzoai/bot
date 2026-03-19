@@ -4,7 +4,7 @@ import {
   resolveCommandSecretRefsViaGateway,
 } from "../../cli/command-secret-gateway.js";
 import { getChannelsCommandSecretTargetIds } from "../../cli/command-secret-targets.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { DEFAULT_ACCOUNT_ID } from "../../routing/session-key.js";
 import { defaultRuntime, type RuntimeEnv } from "../../runtime.js";
 import { requireValidConfigSnapshot } from "../config-validation.js";
@@ -19,7 +19,7 @@ export async function requireValidConfig(
     commandName?: string;
     mode?: CommandSecretResolutionMode;
   },
-): Promise<Hanzo BotConfig | null> {
+): Promise<HanzoBotConfig | null> {
   const cfg = await requireValidConfigSnapshot(runtime);
   if (!cfg) {
     return null;

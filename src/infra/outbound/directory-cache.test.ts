@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { DirectoryCache, buildDirectoryCacheKey } from "./directory-cache.js";
 
 describe("buildDirectoryCacheKey", () => {
@@ -28,8 +28,8 @@ describe("DirectoryCache", () => {
   it("expires entries after ttl and resets when config ref changes", () => {
     vi.useFakeTimers();
     const cache = new DirectoryCache<string>(1_000);
-    const cfgA = {} as Hanzo BotConfig;
-    const cfgB = {} as Hanzo BotConfig;
+    const cfgA = {} as HanzoBotConfig;
+    const cfgB = {} as HanzoBotConfig;
 
     cache.set("a", "first", cfgA);
     expect(cache.get("a", cfgA)).toBe("first");
@@ -45,7 +45,7 @@ describe("DirectoryCache", () => {
 
   it("evicts least-recent entries, refreshes insertion order, and clears matches", () => {
     const cache = new DirectoryCache<string>(60_000, 2);
-    const cfg = {} as Hanzo BotConfig;
+    const cfg = {} as HanzoBotConfig;
 
     cache.set("a", "A", cfg);
     cache.set("b", "B", cfg);

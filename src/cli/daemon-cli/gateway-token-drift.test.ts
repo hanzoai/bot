@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { resolveGatewayTokenForDriftCheck } from "./gateway-token-drift.js";
 
 describe("resolveGatewayTokenForDriftCheck", () => {
@@ -12,7 +12,7 @@ describe("resolveGatewayTokenForDriftCheck", () => {
             token: "config-token",
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {
         BOT_GATEWAY_TOKEN: "env-token",
       } as NodeJS.ProcessEnv,
@@ -36,7 +36,7 @@ describe("resolveGatewayTokenForDriftCheck", () => {
               token: { source: "env", provider: "default", id: "BOT_GATEWAY_TOKEN" },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         env: {
           BOT_GATEWAY_TOKEN: "env-token",
         } as NodeJS.ProcessEnv,
@@ -63,7 +63,7 @@ describe("resolveGatewayTokenForDriftCheck", () => {
               token: "remote-token",
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         env: {} as NodeJS.ProcessEnv,
       }),
     ).toThrow(/gateway\.auth\.token/i);

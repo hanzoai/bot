@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import { writeConfigFile, type Hanzo BotConfig } from "../config/config.js";
+import { writeConfigFile, type HanzoBotConfig } from "../config/config.js";
 import { resolveGatewayPort, resolveIsNixMode } from "../config/paths.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import {
@@ -191,7 +191,7 @@ async function cleanupLegacyLinuxUserServices(
 }
 
 export async function maybeRepairGatewayServiceConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   mode: "local" | "remote",
   runtime: RuntimeEnv,
   prompter: DoctorPrompter,
@@ -336,7 +336,7 @@ export async function maybeRepairGatewayServiceConfig(
       : undefined;
   let cfgForServiceInstall = cfg;
   if (!tokenRefConfigured && !configuredGatewayToken && gatewayTokenForRepair) {
-    const nextCfg: Hanzo BotConfig = {
+    const nextCfg: HanzoBotConfig = {
       ...cfg,
       gateway: {
         ...cfg.gateway,

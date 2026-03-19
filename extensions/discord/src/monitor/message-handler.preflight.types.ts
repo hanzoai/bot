@@ -21,7 +21,7 @@ export type DiscordMessageEvent = import("./listeners.js").DiscordMessageEvent;
 type DiscordMessagePreflightSharedFields = {
   cfg: LoadedConfig;
   discordConfig: NonNullable<
-    import("openclaw/plugin-sdk/config-runtime").Hanzo BotConfig["channels"]
+    import("openclaw/plugin-sdk/config-runtime").HanzoBotConfig["channels"]
   >["discord"];
   accountId: string;
   token: string;

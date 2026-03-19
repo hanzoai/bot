@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   createScopedAccountReplyToModeResolver,
   createStaticReplyToModeResolver,
@@ -8,8 +8,8 @@ import {
 
 describe("createStaticReplyToModeResolver", () => {
   it("always returns the configured mode", () => {
-    expect(createStaticReplyToModeResolver("off")({ cfg: {} as Hanzo BotConfig })).toBe("off");
-    expect(createStaticReplyToModeResolver("all")({ cfg: {} as Hanzo BotConfig })).toBe("all");
+    expect(createStaticReplyToModeResolver("off")({ cfg: {} as HanzoBotConfig })).toBe("off");
+    expect(createStaticReplyToModeResolver("all")({ cfg: {} as HanzoBotConfig })).toBe("all");
   });
 });
 
@@ -18,14 +18,14 @@ describe("createTopLevelChannelReplyToModeResolver", () => {
     const resolver = createTopLevelChannelReplyToModeResolver("discord");
     expect(
       resolver({
-        cfg: { channels: { discord: { replyToMode: "first" } } } as Hanzo BotConfig,
+        cfg: { channels: { discord: { replyToMode: "first" } } } as HanzoBotConfig,
       }),
     ).toBe("first");
   });
 
   it("falls back to off", () => {
     const resolver = createTopLevelChannelReplyToModeResolver("discord");
-    expect(resolver({ cfg: {} as Hanzo BotConfig })).toBe("off");
+    expect(resolver({ cfg: {} as HanzoBotConfig })).toBe("off");
   });
 });
 
@@ -51,7 +51,7 @@ describe("createScopedAccountReplyToModeResolver", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     expect(resolver({ cfg, accountId: "assistant" })).toBe("all");
     expect(resolver({ cfg, accountId: "default" })).toBe("off");
@@ -67,7 +67,7 @@ describe("createScopedAccountReplyToModeResolver", () => {
       },
     });
 
-    expect(resolver({ cfg: {} as Hanzo BotConfig, chatType: "group" })).toBe("first");
+    expect(resolver({ cfg: {} as HanzoBotConfig, chatType: "group" })).toBe("first");
     expect(seen).toEqual(["group"]);
   });
 });

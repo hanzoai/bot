@@ -11,7 +11,7 @@ vi.mock("./agent.js", () => ({
   agentCommand: vi.fn(),
 }));
 
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import * as configModule from "../config/config.js";
 import { callGateway } from "../gateway/call.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -26,7 +26,7 @@ const runtime: RuntimeEnv = {
 
 const configSpy = vi.spyOn(configModule, "loadConfig");
 
-function mockConfig(storePath: string, overrides?: Partial<Hanzo BotConfig>) {
+function mockConfig(storePath: string, overrides?: Partial<HanzoBotConfig>) {
   configSpy.mockReturnValue({
     agents: {
       defaults: {
@@ -45,7 +45,7 @@ function mockConfig(storePath: string, overrides?: Partial<Hanzo BotConfig>) {
 
 async function withTempStore(
   fn: (ctx: { dir: string; store: string }) => Promise<void>,
-  overrides?: Partial<Hanzo BotConfig>,
+  overrides?: Partial<HanzoBotConfig>,
 ) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-agent-cli-"));
   const store = path.join(dir, "sessions.json");

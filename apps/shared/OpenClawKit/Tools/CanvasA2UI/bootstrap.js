@@ -211,7 +211,7 @@ const openclawTheme = {
   },
 };
 
-class Hanzo BotA2UIHost extends LitElement {
+class HanzoBotA2UIHost extends LitElement {
   static properties = {
     surfaces: { state: true },
     pendingAction: { state: true },
@@ -545,5 +545,5 @@ class Hanzo BotA2UIHost extends LitElement {
 }
 
 if (!customElements.get("openclaw-a2ui-host")) {
-  customElements.define("openclaw-a2ui-host", Hanzo BotA2UIHost);
+  customElements.define("openclaw-a2ui-host", HanzoBotA2UIHost);
 }

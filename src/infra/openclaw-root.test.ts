@@ -89,13 +89,13 @@ vi.mock("node:fs/promises", async (importOriginal) => {
   return { ...wrapped, default: wrapped };
 });
 
-describe("resolveHanzo BotPackageRoot", () => {
-  let resolveHanzo BotPackageRoot: typeof import("./openclaw-root.js").resolveHanzo BotPackageRoot;
-  let resolveHanzo BotPackageRootSync: typeof import("./openclaw-root.js").resolveHanzo BotPackageRootSync;
+describe("resolveHanzoBotPackageRoot", () => {
+  let resolveHanzoBotPackageRoot: typeof import("./openclaw-root.js").resolveHanzoBotPackageRoot;
+  let resolveHanzoBotPackageRootSync: typeof import("./openclaw-root.js").resolveHanzoBotPackageRootSync;
 
   beforeEach(async () => {
     vi.resetModules();
-    ({ resolveHanzo BotPackageRoot, resolveHanzo BotPackageRootSync } =
+    ({ resolveHanzoBotPackageRoot, resolveHanzoBotPackageRootSync } =
       await import("./openclaw-root.js"));
     state.entries.clear();
     state.realpaths.clear();
@@ -108,7 +108,7 @@ describe("resolveHanzo BotPackageRoot", () => {
     const pkgRoot = path.join(project, "node_modules", "@hanzo/bot");
     setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "@hanzo/bot" }));
 
-    expect(resolveHanzo BotPackageRootSync({ argv1 })).toBe(pkgRoot);
+    expect(resolveHanzoBotPackageRootSync({ argv1 })).toBe(pkgRoot);
   });
 
   it("resolves package root via symlinked argv1", async () => {
@@ -118,7 +118,7 @@ describe("resolveHanzo BotPackageRoot", () => {
     state.realpaths.set(abs(bin), abs(path.join(realPkg, "hanzo-bot.mjs")));
     setFile(path.join(realPkg, "package.json"), JSON.stringify({ name: "@hanzo/bot" }));
 
-    expect(resolveHanzo BotPackageRootSync({ argv1: bin })).toBe(realPkg);
+    expect(resolveHanzoBotPackageRootSync({ argv1: bin })).toBe(realPkg);
   });
 
   it("falls back when argv1 realpath throws", async () => {
@@ -128,7 +128,7 @@ describe("resolveHanzo BotPackageRoot", () => {
     state.realpathErrors.add(abs(argv1));
     setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "@hanzo/bot" }));
 
-    expect(resolveHanzo BotPackageRootSync({ argv1 })).toBe(pkgRoot);
+    expect(resolveHanzoBotPackageRootSync({ argv1 })).toBe(pkgRoot);
   });
 
   it("prefers moduleUrl candidates", async () => {
@@ -136,7 +136,7 @@ describe("resolveHanzo BotPackageRoot", () => {
     setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "@hanzo/bot" }));
     const moduleUrl = pathToFileURL(path.join(pkgRoot, "dist", "index.js")).toString();
 
-    expect(resolveHanzo BotPackageRootSync({ moduleUrl })).toBe(pkgRoot);
+    expect(resolveHanzoBotPackageRootSync({ moduleUrl })).toBe(pkgRoot);
   });
 
   it("falls through from a non-openclaw moduleUrl candidate to cwd", async () => {
@@ -146,8 +146,8 @@ describe("resolveHanzo BotPackageRoot", () => {
     setFile(path.join(cwdPkgRoot, "package.json"), JSON.stringify({ name: "@hanzo/bot" }));
     const moduleUrl = pathToFileURL(path.join(wrongPkgRoot, "dist", "index.js")).toString();
 
-    expect(resolveHanzo BotPackageRootSync({ moduleUrl, cwd: cwdPkgRoot })).toBe(cwdPkgRoot);
-    await expect(resolveHanzo BotPackageRoot({ moduleUrl, cwd: cwdPkgRoot })).resolves.toBe(
+    expect(resolveHanzoBotPackageRootSync({ moduleUrl, cwd: cwdPkgRoot })).toBe(cwdPkgRoot);
+    await expect(resolveHanzoBotPackageRoot({ moduleUrl, cwd: cwdPkgRoot })).resolves.toBe(
       cwdPkgRoot,
     );
   });
@@ -156,11 +156,11 @@ describe("resolveHanzo BotPackageRoot", () => {
     const pkgRoot = fx("invalid-moduleurl");
     setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "@hanzo/bot" }));
 
-    expect(resolveHanzo BotPackageRootSync({ moduleUrl: "not-a-file-url", cwd: pkgRoot })).toBe(
+    expect(resolveHanzoBotPackageRootSync({ moduleUrl: "not-a-file-url", cwd: pkgRoot })).toBe(
       pkgRoot,
     );
     await expect(
-      resolveHanzo BotPackageRoot({ moduleUrl: "not-a-file-url", cwd: pkgRoot }),
+      resolveHanzoBotPackageRoot({ moduleUrl: "not-a-file-url", cwd: pkgRoot }),
     ).resolves.toBe(pkgRoot);
   });
 
@@ -168,7 +168,7 @@ describe("resolveHanzo BotPackageRoot", () => {
     const pkgRoot = fx("not-openclaw");
     setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "not-openclaw" }));
 
-    expect(resolveHanzo BotPackageRootSync({ cwd: pkgRoot })).toBeNull();
+    expect(resolveHanzoBotPackageRootSync({ cwd: pkgRoot })).toBeNull();
   });
 
   it("falls back from a symlinked argv1 to the node_modules package root", () => {
@@ -178,17 +178,17 @@ describe("resolveHanzo BotPackageRoot", () => {
     const pkgRoot = path.join(project, "node_modules", "@hanzo/bot");
     setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "@hanzo/bot" }));
 
-    expect(resolveHanzo BotPackageRootSync({ argv1 })).toBe(pkgRoot);
+    expect(resolveHanzoBotPackageRootSync({ argv1 })).toBe(pkgRoot);
   });
 
   it("async resolver matches sync behavior", async () => {
     const pkgRoot = fx("async");
     setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "@hanzo/bot" }));
 
-    await expect(resolveHanzo BotPackageRoot({ cwd: pkgRoot })).resolves.toBe(pkgRoot);
+    await expect(resolveHanzoBotPackageRoot({ cwd: pkgRoot })).resolves.toBe(pkgRoot);
   });
 
   it("async resolver returns null when no package roots exist", async () => {
-    await expect(resolveHanzo BotPackageRoot({ cwd: fx("missing") })).resolves.toBeNull();
+    await expect(resolveHanzoBotPackageRoot({ cwd: fx("missing") })).resolves.toBeNull();
   });
 });

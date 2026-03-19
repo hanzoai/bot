@@ -1,4 +1,4 @@
-import type { RuntimeEnv, ReplyPayload, Hanzo BotConfig } from "../../api.js";
+import type { RuntimeEnv, ReplyPayload, HanzoBotConfig } from "../../api.js";
 import { createLoggerBackedRuntime } from "../../api.js";
 import { getTlonRuntime } from "../runtime.js";
 import { createSettingsManager, type TlonSettingsStore } from "../settings.js";
@@ -48,7 +48,7 @@ export type MonitorTlonOpts = {
 
 export async function monitorTlonProvider(opts: MonitorTlonOpts = {}): Promise<void> {
   const core = getTlonRuntime();
-  const cfg = core.config.loadConfig() as Hanzo BotConfig;
+  const cfg = core.config.loadConfig() as HanzoBotConfig;
   if (cfg.channels?.tlon?.enabled === false) {
     return;
   }

@@ -2,12 +2,12 @@
 // the agent reports a model id. This includes custom models.json entries.
 
 import { loadConfig } from "../config/config.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { computeBackoff, type BackoffPolicy } from "../infra/backoff.js";
 import { consumeRootOptionToken, FLAG_TERMINATOR } from "../infra/cli-root-options.js";
-import { resolveHanzo BotAgentDir } from "./agent-paths.js";
+import { resolveHanzoBotAgentDir } from "./agent-paths.js";
 import { normalizeProviderId } from "./model-selection.js";
-import { ensureHanzo BotModelsJson } from "./models-config.js";
+import { ensureHanzoBotModelsJson } from "./models-config.js";
 
 type ModelEntry = { id: string; contextWindow?: number };
 type ModelRegistryLike = {
@@ -80,7 +80,7 @@ export function applyConfiguredContextWindows(params: {
 
 const MODEL_CACHE = new Map<string, number>();
 let loadPromise: Promise<void> | null = null;
-let configuredConfig: Hanzo BotConfig | undefined;
+let configuredConfig: HanzoBotConfig | undefined;
 let configLoadFailures = 0;
 let nextConfigLoadAttemptAtMs = 0;
 
@@ -130,7 +130,7 @@ function shouldSkipEagerContextWindowWarmup(argv: string[] = process.argv): bool
   return primary ? SKIP_EAGER_WARMUP_PRIMARY_COMMANDS.has(primary) : false;
 }
 
-function primeConfiguredContextWindows(): Hanzo BotConfig | undefined {
+function primeConfiguredContextWindows(): HanzoBotConfig | undefined {
   if (configuredConfig) {
     return configuredConfig;
   }
@@ -168,7 +168,7 @@ function ensureContextWindowCacheLoaded(): Promise<void> {
 
   loadPromise = (async () => {
     try {
-      await ensureHanzo BotModelsJson(cfg);
+      await ensureHanzoBotModelsJson(cfg);
     } catch {
       // Continue with best-effort discovery/overrides.
     }
@@ -176,7 +176,7 @@ function ensureContextWindowCacheLoaded(): Promise<void> {
     try {
       const { discoverAuthStorage, discoverModels } =
         await import("./pi-model-discovery-runtime.js");
-      const agentDir = resolveHanzo BotAgentDir();
+      const agentDir = resolveHanzoBotAgentDir();
       const authStorage = discoverAuthStorage(agentDir);
       const modelRegistry = discoverModels(authStorage, agentDir) as unknown as ModelRegistryLike;
       const models =
@@ -217,7 +217,7 @@ if (!shouldSkipEagerContextWindowWarmup()) {
 }
 
 function resolveConfiguredModelParams(
-  cfg: Hanzo BotConfig | undefined,
+  cfg: HanzoBotConfig | undefined,
   provider: string,
   model: string,
 ): Record<string, unknown> | undefined {
@@ -267,7 +267,7 @@ function resolveProviderModelRef(params: {
 // keys overlap with raw slash-containing model IDs (e.g. OpenRouter's
 // "google/gemini-2.5-pro" stored as a raw catalog entry).
 function resolveConfiguredProviderContextWindow(
-  cfg: Hanzo BotConfig | undefined,
+  cfg: HanzoBotConfig | undefined,
   provider: string,
   model: string,
 ): number | undefined {
@@ -325,7 +325,7 @@ function isAnthropic1MModel(provider: string, model: string): boolean {
 }
 
 export function resolveContextTokensForModel(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   provider?: string;
   model?: string;
   contextTokensOverride?: number;

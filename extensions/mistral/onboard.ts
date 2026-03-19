@@ -1,6 +1,6 @@
 import {
   applyProviderConfigWithDefaultModelPreset,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 import {
   buildMistralModelDefinition,
@@ -10,7 +10,7 @@ import {
 
 export const MISTRAL_DEFAULT_MODEL_REF = `mistral/${MISTRAL_DEFAULT_MODEL_ID}`;
 
-function applyMistralPreset(cfg: Hanzo BotConfig, primaryModelRef?: string): Hanzo BotConfig {
+function applyMistralPreset(cfg: HanzoBotConfig, primaryModelRef?: string): HanzoBotConfig {
   return applyProviderConfigWithDefaultModelPreset(cfg, {
     providerId: "mistral",
     api: "openai-completions",
@@ -22,10 +22,10 @@ function applyMistralPreset(cfg: Hanzo BotConfig, primaryModelRef?: string): Han
   });
 }
 
-export function applyMistralProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyMistralProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyMistralPreset(cfg);
 }
 
-export function applyMistralConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyMistralConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyMistralPreset(cfg, MISTRAL_DEFAULT_MODEL_REF);
 }

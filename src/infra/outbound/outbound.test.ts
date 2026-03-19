@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { discordPlugin } from "../../../extensions/discord/src/channel.js";
 import type { ReplyPayload } from "../../auto-reply/types.js";
 import { setDefaultChannelPluginRegistryForTests } from "../../commands/channel-test-helpers.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { typedCases } from "../../test-utils/typed-cases.js";
@@ -629,7 +629,7 @@ describe("delivery-queue", () => {
 });
 
 describe("DirectoryCache", () => {
-  const cfg = {} as Hanzo BotConfig;
+  const cfg = {} as HanzoBotConfig;
 
   afterEach(() => {
     vi.useRealTimers();
@@ -880,13 +880,13 @@ const slackConfig = {
       appToken: "xapp-test",
     },
   },
-} as Hanzo BotConfig;
+} as HanzoBotConfig;
 
 const discordConfig = {
   channels: {
     discord: {},
   },
-} as Hanzo BotConfig;
+} as HanzoBotConfig;
 
 describe("outbound policy", () => {
   beforeEach(() => {
@@ -899,7 +899,7 @@ describe("outbound policy", () => {
       tools: {
         message: { crossContext: { allowAcrossProviders: true } },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     expect(() =>
       enforceCrossContextPolicy({
@@ -939,10 +939,10 @@ describe("resolveOutboundSessionRoute", () => {
     setDefaultChannelPluginRegistryForTests();
   });
 
-  const baseConfig = {} as Hanzo BotConfig;
+  const baseConfig = {} as HanzoBotConfig;
 
   it("resolves provider-specific session routes", async () => {
-    const perChannelPeerCfg = { session: { dmScope: "per-channel-peer" } } as Hanzo BotConfig;
+    const perChannelPeerCfg = { session: { dmScope: "per-channel-peer" } } as HanzoBotConfig;
     const identityLinksCfg = {
       session: {
         dmScope: "per-peer",
@@ -950,7 +950,7 @@ describe("resolveOutboundSessionRoute", () => {
           alice: ["discord:123"],
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const slackMpimCfg = {
       channels: {
         slack: {
@@ -959,10 +959,10 @@ describe("resolveOutboundSessionRoute", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       channel: string;
       target: string;
       replyToId?: string;
@@ -1249,7 +1249,7 @@ describe("resolveOutboundSessionRoute", () => {
 
   it("uses resolved Discord user targets to route bare numeric ids as DMs", async () => {
     const route = await resolveOutboundSessionRoute({
-      cfg: { session: { dmScope: "per-channel-peer" } } as Hanzo BotConfig,
+      cfg: { session: { dmScope: "per-channel-peer" } } as HanzoBotConfig,
       channel: "discord",
       agentId: "main",
       target: "123",
@@ -1271,7 +1271,7 @@ describe("resolveOutboundSessionRoute", () => {
   it("uses resolved Mattermost user targets to route bare ids as DMs", async () => {
     const userId = "dthcxgoxhifn3pwh65cut3ud3w";
     const route = await resolveOutboundSessionRoute({
-      cfg: { session: { dmScope: "per-channel-peer" } } as Hanzo BotConfig,
+      cfg: { session: { dmScope: "per-channel-peer" } } as HanzoBotConfig,
       channel: "mattermost",
       agentId: "main",
       target: userId,
@@ -1293,7 +1293,7 @@ describe("resolveOutboundSessionRoute", () => {
   it("rejects bare numeric Discord targets when the caller has no kind hint", async () => {
     await expect(
       resolveOutboundSessionRoute({
-        cfg: { session: { dmScope: "per-channel-peer" } } as Hanzo BotConfig,
+        cfg: { session: { dmScope: "per-channel-peer" } } as HanzoBotConfig,
         channel: "discord",
         agentId: "main",
         target: "123",

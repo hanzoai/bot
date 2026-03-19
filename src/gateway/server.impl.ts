@@ -11,7 +11,7 @@ import { createDefaultDeps } from "../cli/deps.js";
 import { isRestartEnabled } from "../config/commands.js";
 import {
   type ConfigFileSnapshot,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   applyConfigOverrides,
   isNixMode,
   loadConfig,
@@ -35,7 +35,7 @@ import { createExecApprovalForwarder } from "../infra/exec-approval-forwarder.js
 import { onHeartbeatEvent } from "../infra/heartbeat-events.js";
 import { startHeartbeatRunner, type HeartbeatRunner } from "../infra/heartbeat-runner.js";
 import { getMachineDisplayName } from "../infra/machine-name.js";
-import { ensureHanzo BotCliOnPath } from "../infra/path-env.js";
+import { ensureHanzoBotCliOnPath } from "../infra/path-env.js";
 import {
   detectPluginInstallPathIssue,
   formatPluginInstallPathIssue,
@@ -126,7 +126,7 @@ import { createReadinessChecker } from "./server/readiness.js";
 import { loadGatewayTlsRuntime } from "./server/tls.js";
 import { resolveSessionKeyForTranscriptFile } from "./session-transcript-key.js";
 import {
-  attachHanzo BotTranscriptMeta,
+  attachHanzoBotTranscriptMeta,
   loadGatewaySessionRow,
   loadSessionEntry,
   readSessionMessages,
@@ -140,7 +140,7 @@ import { maybeSeedControlUiAllowedOriginsAtStartup } from "./startup-control-ui-
 
 export { __resetModelCatalogCacheForTest } from "./server-model-catalog.js";
 
-ensureHanzo BotCliOnPath();
+ensureHanzoBotCliOnPath();
 
 const MAX_MEDIA_TTL_HOURS = 24 * 7;
 
@@ -192,7 +192,7 @@ function createGatewayAuthRateLimiters(rateLimitConfig: AuthRateLimitConfig | un
 }
 
 function logGatewayAuthSurfaceDiagnostics(prepared: {
-  sourceConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
   warnings: Array<{ code: string; path: string; message: string }>;
 }): void {
   const states = evaluateGatewayAuthSurfaceStates({
@@ -221,9 +221,9 @@ function logGatewayAuthSurfaceDiagnostics(prepared: {
 }
 
 function applyGatewayAuthOverridesForStartupPreflight(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   overrides: Pick<GatewayServerOptions, "auth" | "tailscale">,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   if (!overrides.auth && !overrides.tailscale) {
     return config;
   }
@@ -258,13 +258,13 @@ async function prepareGatewayStartupConfig(params: {
   configSnapshot: ConfigFileSnapshot;
   // Keep startup auth/runtime behavior aligned with loadConfig(), which applies
   // runtime overrides beyond the raw on-disk snapshot.
-  runtimeConfig: Hanzo BotConfig;
+  runtimeConfig: HanzoBotConfig;
   authOverride?: GatewayServerOptions["auth"];
   tailscaleOverride?: GatewayServerOptions["tailscale"];
   activateRuntimeSecrets: (
-    config: Hanzo BotConfig,
+    config: HanzoBotConfig,
     options: { reason: "startup"; activate: boolean },
-  ) => Promise<{ config: Hanzo BotConfig }>;
+  ) => Promise<{ config: HanzoBotConfig }>;
 }): Promise<Awaited<ReturnType<typeof ensureGatewayStartupAuth>>> {
   assertValidGatewayStartupConfigSnapshot(params.configSnapshot);
 
@@ -426,7 +426,7 @@ export async function startGatewayServer(
   const emitSecretsStateEvent = (
     code: "SECRETS_RELOADER_DEGRADED" | "SECRETS_RELOADER_RECOVERED",
     message: string,
-    cfg: Hanzo BotConfig,
+    cfg: HanzoBotConfig,
   ) => {
     enqueueSystemEvent(`[${code}] ${message}`, {
       sessionKey: resolveMainSessionKey(cfg),
@@ -443,7 +443,7 @@ export async function startGatewayServer(
     return await run;
   };
   const activateRuntimeSecrets = async (
-    config: Hanzo BotConfig,
+    config: HanzoBotConfig,
     params: { reason: "startup" | "reload" | "restart-check"; activate: boolean },
   ) =>
     await runWithSecretsActivationLock(async () => {
@@ -488,7 +488,7 @@ export async function startGatewayServer(
       }
     });
 
-  let cfgAtStart: Hanzo BotConfig;
+  let cfgAtStart: HanzoBotConfig;
   const startupRuntimeConfig = applyConfigOverrides(configSnapshot.config);
   const authBootstrap = await prepareGatewayStartupConfig({
     configSnapshot,
@@ -898,7 +898,7 @@ export async function startGatewayServer(
               runtimeMs: sessionRow.runtimeMs,
             }
           : {};
-        const message = attachHanzo BotTranscriptMeta(update.message, {
+        const message = attachHanzoBotTranscriptMeta(update.message, {
           ...(typeof update.messageId === "string" ? { id: update.messageId } : {}),
           ...(typeof messageSeq === "number" ? { seq: messageSeq } : {}),
         });

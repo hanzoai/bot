@@ -9,7 +9,7 @@ import {
 } from "../../agents/model-selection.js";
 import { formatCliCommand } from "../../cli/command-format.js";
 import {
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   readConfigFileSnapshot,
   writeConfigFile,
 } from "../../config/config.js";
@@ -64,7 +64,7 @@ export const isLocalBaseUrl = (baseUrl: string) => {
   }
 };
 
-export async function loadValidConfigOrThrow(): Promise<Hanzo BotConfig> {
+export async function loadValidConfigOrThrow(): Promise<HanzoBotConfig> {
   const snapshot = await readConfigFileSnapshot();
   if (!snapshot.valid) {
     const issues = formatConfigIssueLines(snapshot.issues, "-").join("\n");
@@ -74,15 +74,15 @@ export async function loadValidConfigOrThrow(): Promise<Hanzo BotConfig> {
 }
 
 export async function updateConfig(
-  mutator: (cfg: Hanzo BotConfig) => Hanzo BotConfig,
-): Promise<Hanzo BotConfig> {
+  mutator: (cfg: HanzoBotConfig) => HanzoBotConfig,
+): Promise<HanzoBotConfig> {
   const config = await loadValidConfigOrThrow();
   const next = mutator(config);
   await writeConfigFile(next);
   return next;
 }
 
-export function resolveModelTarget(params: { raw: string; cfg: Hanzo BotConfig }): {
+export function resolveModelTarget(params: { raw: string; cfg: HanzoBotConfig }): {
   provider: string;
   model: string;
 } {
@@ -102,7 +102,7 @@ export function resolveModelTarget(params: { raw: string; cfg: Hanzo BotConfig }
 }
 
 export function resolveModelKeysFromEntries(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   entries: readonly string[];
 }): string[] {
   const aliasIndex = buildModelAliasIndex({
@@ -121,7 +121,7 @@ export function resolveModelKeysFromEntries(params: {
     .map((entry) => modelKey(entry.ref.provider, entry.ref.model));
 }
 
-export function buildAllowlistSet(cfg: Hanzo BotConfig): Set<string> {
+export function buildAllowlistSet(cfg: HanzoBotConfig): Set<string> {
   const allowed = new Set<string>();
   const models = cfg.agents?.defaults?.models ?? {};
   for (const raw of Object.keys(models)) {
@@ -146,7 +146,7 @@ export function normalizeAlias(alias: string): string {
 }
 
 export function resolveKnownAgentId(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   rawAgentId?: string | null;
 }): string | undefined {
   const raw = params.rawAgentId?.trim();
@@ -200,10 +200,10 @@ export function mergePrimaryFallbackConfig(
 }
 
 export function applyDefaultModelPrimaryUpdate(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   modelRaw: string;
   field: "model" | "imageModel";
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const resolved = resolveModelTarget({ raw: params.modelRaw, cfg: params.cfg });
   const nextModels = {
     ...params.cfg.agents?.defaults?.models,

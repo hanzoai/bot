@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   resolveGatewayConnectionAuth,
   resolveGatewayConnectionAuthFromConfig,
@@ -10,14 +10,14 @@ type ResolvedAuth = { token?: string; password?: string };
 
 type ConnectionAuthCase = {
   name: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
   options?: Partial<Omit<GatewayConnectionAuthOptions, "config" | "env">>;
   expected: ResolvedAuth;
 };
 
-function cfg(input: Partial<Hanzo BotConfig>): Hanzo BotConfig {
-  return input as Hanzo BotConfig;
+function cfg(input: Partial<HanzoBotConfig>): HanzoBotConfig {
+  return input as HanzoBotConfig;
 }
 
 function createRemoteModeConfig() {
@@ -61,7 +61,7 @@ function createUnresolvedLocalAuthConfig(params: {
   });
 }
 
-async function expectFailClosedOnUnresolvedLocalAuth(config: Hanzo BotConfig, path: string) {
+async function expectFailClosedOnUnresolvedLocalAuth(config: HanzoBotConfig, path: string) {
   await expect(
     resolveGatewayConnectionAuth({
       config,

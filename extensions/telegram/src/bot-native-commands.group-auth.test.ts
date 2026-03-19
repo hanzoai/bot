@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import type { ChannelGroupPolicy } from "../../../src/config/group-policy.js";
 import type { TelegramAccountConfig } from "../../../src/config/types.js";
 import {
@@ -10,7 +10,7 @@ import {
 
 describe("native command auth in groups", () => {
   function setup(params: {
-    cfg?: Hanzo BotConfig;
+    cfg?: HanzoBotConfig;
     telegramCfg?: TelegramAccountConfig;
     allowFrom?: string[];
     groupAllowFrom?: string[];
@@ -19,7 +19,7 @@ describe("native command auth in groups", () => {
     resolveGroupPolicy?: () => ChannelGroupPolicy;
   }) {
     return createNativeCommandsHarness({
-      cfg: params.cfg ?? ({} as Hanzo BotConfig),
+      cfg: params.cfg ?? ({} as HanzoBotConfig),
       telegramCfg: params.telegramCfg ?? ({} as TelegramAccountConfig),
       allowFrom: params.allowFrom ?? [],
       groupAllowFrom: params.groupAllowFrom ?? [],
@@ -58,7 +58,7 @@ describe("native command auth in groups", () => {
             telegram: ["12345"],
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       allowFrom: ["99999"],
       groupAllowFrom: ["99999"],
       useAccessGroups: true,
@@ -80,7 +80,7 @@ describe("native command auth in groups", () => {
             telegram: ["99999"],
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       groupAllowFrom: ["12345"],
       useAccessGroups: true,
     });
@@ -109,7 +109,7 @@ describe("native command auth in groups", () => {
             telegram: ["12345"],
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       useAccessGroups: true,
       resolveGroupPolicy: () =>
         ({
@@ -137,7 +137,7 @@ describe("native command auth in groups", () => {
             telegram: ["12345"],
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       useAccessGroups: true,
       resolveGroupPolicy: () =>
         ({

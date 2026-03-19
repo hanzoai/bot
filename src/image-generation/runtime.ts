@@ -1,7 +1,7 @@
 import type { AuthProfileStore } from "../agents/auth-profiles.js";
 import { describeFailoverError, isFailoverError } from "../agents/failover-error.js";
 import type { FallbackAttempt } from "../agents/model-fallback.types.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
@@ -18,7 +18,7 @@ import type {
 const log = createSubsystemLogger("image-generation");
 
 export type GenerateImageParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompt: string;
   agentDir?: string;
   authStore?: AuthProfileStore;
@@ -54,7 +54,7 @@ function parseModelRef(raw: string | undefined): { provider: string; model: stri
 }
 
 function resolveImageGenerationCandidates(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   modelOverride?: string;
 }): Array<{ provider: string; model: string }> {
   const candidates: Array<{ provider: string; model: string }> = [];
@@ -100,7 +100,7 @@ function throwImageGenerationFailure(params: {
   });
 }
 
-export function listRuntimeImageGenerationProviders(params?: { config?: Hanzo BotConfig }) {
+export function listRuntimeImageGenerationProviders(params?: { config?: HanzoBotConfig }) {
   return listImageGenerationProviders(params?.config);
 }
 

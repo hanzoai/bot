@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { applyMergePatch } from "../config/merge-patch.js";
 import { openBoundaryFileSync } from "../infra/boundary-file-read.js";
 import { isRecord } from "../utils.js";
@@ -314,7 +314,7 @@ export function inspectBundleMcpRuntimeSupport(params: {
 
 export function loadEnabledBundleMcpConfig(params: {
   workspaceDir: string;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
 }): EnabledBundleMcpConfigResult {
   const registry = loadPluginManifestRegistry({
     workspaceDir: params.workspaceDir,

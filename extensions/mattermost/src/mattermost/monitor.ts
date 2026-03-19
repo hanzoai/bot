@@ -1,7 +1,7 @@
 import type {
   ChannelAccountSnapshot,
   ChatType,
-  Hanzo BotConfig,
+  HanzoBotConfig,
   ReplyPayload,
   RuntimeEnv,
 } from "../runtime-api.js";
@@ -99,7 +99,7 @@ export type MonitorMattermostOpts = {
   botToken?: string;
   baseUrl?: string;
   accountId?: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   runtime?: RuntimeEnv;
   abortSignal?: AbortSignal;
   statusSink?: (patch: Partial<ChannelAccountSnapshot>) => void;

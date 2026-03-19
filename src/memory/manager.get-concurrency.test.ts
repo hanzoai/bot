@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import "./test-runtime-mocks.js";
 import type { MemoryIndexManager } from "./index.js";
 
@@ -61,7 +61,7 @@ describe("memory manager cache hydration", () => {
     await fs.rm(workspaceDir, { recursive: true, force: true });
   });
 
-  function createMemoryConcurrencyConfig(indexPath: string): Hanzo BotConfig {
+  function createMemoryConcurrencyConfig(indexPath: string): HanzoBotConfig {
     return {
       agents: {
         defaults: {
@@ -75,7 +75,7 @@ describe("memory manager cache hydration", () => {
         },
         list: [{ id: "main", default: true }],
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   it("deduplicates concurrent manager creation for the same cache key", async () => {

@@ -12,7 +12,7 @@ vi.mock("./targets.js", async () => {
   };
 });
 
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 type AgentDeliveryModule = typeof import("./agent-delivery.js");
 
 let resolveAgentDeliveryPlan: AgentDeliveryModule["resolveAgentDeliveryPlan"];
@@ -57,7 +57,7 @@ describe("agent delivery helpers", () => {
     });
 
     const resolved = resolveAgentOutboundTarget({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       plan,
       targetMode: "implicit",
     });
@@ -95,7 +95,7 @@ describe("agent delivery helpers", () => {
 
     mocks.resolveOutboundTarget.mockClear();
     const resolved = resolveAgentOutboundTarget({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       plan,
       targetMode: "explicit",
       validateExplicitTarget: false,

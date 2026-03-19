@@ -19,7 +19,7 @@ import type {
   ChannelResolveKind,
   ChannelResolveResult,
   ChannelStatusAdapter,
-  Hanzo BotConfig,
+  HanzoBotConfig,
   OutboundDeliveryResult,
   RuntimeEnv,
 } from "../runtime-api.js";
@@ -137,5 +137,5 @@ import type { z } from "zod";
 import type { TwitchConfigSchema } from "./config-schema.js";
 export type TwitchConfig = z.infer<typeof TwitchConfigSchema>;
 
-export type { Hanzo BotConfig };
+export type { HanzoBotConfig };
 export type { RuntimeEnv };

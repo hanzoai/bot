@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { HandleCommandsParams } from "./commands-types.js";
 
-const { createHanzo BotCodingToolsMock } = vi.hoisted(() => ({
-  createHanzo BotCodingToolsMock: vi.fn(() => []),
+const { createHanzoBotCodingToolsMock } = vi.hoisted(() => ({
+  createHanzoBotCodingToolsMock: vi.fn(() => []),
 }));
 
 vi.mock("../../agents/bootstrap-files.js", () => ({
@@ -13,7 +13,7 @@ vi.mock("../../agents/bootstrap-files.js", () => ({
 }));
 
 vi.mock("../../agents/pi-tools.js", () => ({
-  createHanzo BotCodingTools: createHanzo BotCodingToolsMock,
+  createHanzoBotCodingTools: createHanzoBotCodingToolsMock,
 }));
 
 vi.mock("../../agents/sandbox.js", () => ({
@@ -108,14 +108,14 @@ function makeParams(): HandleCommandsParams {
 
 describe("resolveCommandsSystemPromptBundle", () => {
   beforeEach(() => {
-    createHanzo BotCodingToolsMock.mockClear();
-    createHanzo BotCodingToolsMock.mockReturnValue([]);
+    createHanzoBotCodingToolsMock.mockClear();
+    createHanzoBotCodingToolsMock.mockReturnValue([]);
   });
 
   it("opts command tool builds into gateway subagent binding", async () => {
     await resolveCommandsSystemPromptBundle(makeParams());
 
-    expect(createHanzo BotCodingToolsMock).toHaveBeenCalledWith(
+    expect(createHanzoBotCodingToolsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         allowGatewaySubagentBinding: true,
         sessionKey: "agent:main:default",

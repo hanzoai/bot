@@ -6,7 +6,7 @@ import type {
   GroupToolPolicyBySenderConfig,
   GroupToolPolicyConfig,
   MarkdownConfig,
-  Hanzo BotConfig,
+  HanzoBotConfig,
   BaseProbeResult,
 } from "./runtime-api.js";
 
@@ -71,8 +71,8 @@ export type IrcConfig = IrcAccountConfig & {
   defaultAccount?: string;
 };
 
-export type CoreConfig = Hanzo BotConfig & {
-  channels?: Hanzo BotConfig["channels"] & {
+export type CoreConfig = HanzoBotConfig & {
+  channels?: HanzoBotConfig["channels"] & {
     irc?: IrcConfig;
   };
 };

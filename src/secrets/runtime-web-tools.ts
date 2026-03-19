@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import type {
   PluginWebSearchProviderEntry,
@@ -32,7 +32,7 @@ export type {
   RuntimeWebToolsMetadata,
 };
 
-type FetchConfig = NonNullable<Hanzo BotConfig["tools"]>["web"] extends infer Web
+type FetchConfig = NonNullable<HanzoBotConfig["tools"]>["web"] extends infer Web
   ? Web extends { fetch?: infer Fetch }
     ? Fetch
     : undefined
@@ -93,7 +93,7 @@ function buildUnresolvedReason(params: {
 }
 
 async function resolveSecretInputWithEnvFallback(params: {
-  sourceConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
   context: ResolverContext;
   defaults: SecretDefaults | undefined;
   value: unknown;
@@ -207,7 +207,7 @@ function ensureObject(target: Record<string, unknown>, key: string): Record<stri
 }
 
 function setResolvedWebSearchApiKey(params: {
-  resolvedConfig: Hanzo BotConfig;
+  resolvedConfig: HanzoBotConfig;
   provider: PluginWebSearchProviderEntry;
   value: string;
 }): void {
@@ -221,7 +221,7 @@ function setResolvedWebSearchApiKey(params: {
 }
 
 function setResolvedFirecrawlApiKey(params: {
-  resolvedConfig: Hanzo BotConfig;
+  resolvedConfig: HanzoBotConfig;
   value: string;
 }): void {
   const tools = ensureObject(params.resolvedConfig as Record<string, unknown>, "tools");
@@ -251,8 +251,8 @@ function hasConfiguredSecretRef(value: unknown, defaults: SecretDefaults | undef
 }
 
 export async function resolveRuntimeWebTools(params: {
-  sourceConfig: Hanzo BotConfig;
-  resolvedConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
+  resolvedConfig: HanzoBotConfig;
   context: ResolverContext;
 }): Promise<RuntimeWebToolsMetadata> {
   const defaults = params.sourceConfig.secrets?.defaults;

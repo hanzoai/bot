@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 import { mattermostSetupWizard } from "./setup-surface.js";
 
 describe("mattermost setup status", () => {
@@ -16,7 +16,7 @@ describe("mattermost setup status", () => {
             },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
     });
 
     expect(configured).toBe(true);

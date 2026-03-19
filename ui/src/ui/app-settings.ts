@@ -7,7 +7,7 @@ import {
   stopDebugPolling,
 } from "./app-polling.ts";
 import { scheduleChatScroll, scheduleLogsScroll } from "./app-scroll.ts";
-import type { Hanzo BotApp } from "./app.ts";
+import type { HanzoBotApp } from "./app.ts";
 import { loadAgentIdentities, loadAgentIdentity } from "./controllers/agent-identity.ts";
 import { loadAgentSkills } from "./controllers/agent-skills.ts";
 import { loadAgents } from "./controllers/agents.ts";
@@ -221,36 +221,36 @@ export async function refreshActiveTab(host: SettingsHost) {
     await loadChannelsTab(host);
   }
   if (host.tab === "instances") {
-    await loadPresence(host as unknown as Hanzo BotApp);
+    await loadPresence(host as unknown as HanzoBotApp);
   }
   if (host.tab === "usage") {
-    await loadUsage(host as unknown as Hanzo BotApp);
+    await loadUsage(host as unknown as HanzoBotApp);
   }
   if (host.tab === "sessions") {
-    await loadSessions(host as unknown as Hanzo BotApp);
+    await loadSessions(host as unknown as HanzoBotApp);
   }
   if (host.tab === "cron") {
     await loadCron(host);
   }
   if (host.tab === "skills") {
-    await loadSkills(host as unknown as Hanzo BotApp);
+    await loadSkills(host as unknown as HanzoBotApp);
   }
   if (host.tab === "agents") {
-    await loadAgents(host as unknown as Hanzo BotApp);
-    await loadConfig(host as unknown as Hanzo BotApp);
+    await loadAgents(host as unknown as HanzoBotApp);
+    await loadConfig(host as unknown as HanzoBotApp);
     const agentIds = host.agentsList?.agents?.map((entry) => entry.id) ?? [];
     if (agentIds.length > 0) {
-      void loadAgentIdentities(host as unknown as Hanzo BotApp, agentIds);
+      void loadAgentIdentities(host as unknown as HanzoBotApp, agentIds);
     }
     const agentId =
       host.agentsSelectedId ?? host.agentsList?.defaultId ?? host.agentsList?.agents?.[0]?.id;
     if (agentId) {
-      void loadAgentIdentity(host as unknown as Hanzo BotApp, agentId);
+      void loadAgentIdentity(host as unknown as HanzoBotApp, agentId);
       if (host.agentsPanel === "skills") {
-        void loadAgentSkills(host as unknown as Hanzo BotApp, agentId);
+        void loadAgentSkills(host as unknown as HanzoBotApp, agentId);
       }
       if (host.agentsPanel === "channels") {
-        void loadChannels(host as unknown as Hanzo BotApp, false);
+        void loadChannels(host as unknown as HanzoBotApp, false);
       }
       if (host.agentsPanel === "cron") {
         void loadCron(host);
@@ -258,10 +258,10 @@ export async function refreshActiveTab(host: SettingsHost) {
     }
   }
   if (host.tab === "nodes") {
-    await loadNodes(host as unknown as Hanzo BotApp);
-    await loadDevices(host as unknown as Hanzo BotApp);
-    await loadConfig(host as unknown as Hanzo BotApp);
-    await loadExecApprovals(host as unknown as Hanzo BotApp);
+    await loadNodes(host as unknown as HanzoBotApp);
+    await loadDevices(host as unknown as HanzoBotApp);
+    await loadConfig(host as unknown as HanzoBotApp);
+    await loadExecApprovals(host as unknown as HanzoBotApp);
   }
   if (host.tab === "chat") {
     await refreshChat(host as unknown as Parameters<typeof refreshChat>[0]);
@@ -278,16 +278,16 @@ export async function refreshActiveTab(host: SettingsHost) {
     host.tab === "infrastructure" ||
     host.tab === "aiAgents"
   ) {
-    await loadConfigSchema(host as unknown as Hanzo BotApp);
-    await loadConfig(host as unknown as Hanzo BotApp);
+    await loadConfigSchema(host as unknown as HanzoBotApp);
+    await loadConfig(host as unknown as HanzoBotApp);
   }
   if (host.tab === "debug") {
-    await loadDebug(host as unknown as Hanzo BotApp);
+    await loadDebug(host as unknown as HanzoBotApp);
     host.eventLog = host.eventLogBuffer;
   }
   if (host.tab === "logs") {
     host.logsAtBottom = true;
-    await loadLogs(host as unknown as Hanzo BotApp, { reset: true });
+    await loadLogs(host as unknown as HanzoBotApp, { reset: true });
     scheduleLogsScroll(host as unknown as Parameters<typeof scheduleLogsScroll>[0], true);
   }
 }
@@ -495,7 +495,7 @@ export function syncUrlWithSessionKey(host: SettingsHost, sessionKey: string, re
 }
 
 export async function loadOverview(host: SettingsHost) {
-  const app = host as unknown as Hanzo BotApp;
+  const app = host as unknown as HanzoBotApp;
   await Promise.allSettled([
     loadChannels(app, false),
     loadPresence(app),
@@ -532,7 +532,7 @@ export function hasMissingSkillDependencies(
   return Object.values(missing).some((value) => Array.isArray(value) && value.length > 0);
 }
 
-async function loadOverviewLogs(host: Hanzo BotApp) {
+async function loadOverviewLogs(host: HanzoBotApp) {
   if (!host.client || !host.connected) {
     return;
   }
@@ -558,7 +558,7 @@ async function loadOverviewLogs(host: Hanzo BotApp) {
   }
 }
 
-function buildAttentionItems(host: Hanzo BotApp) {
+function buildAttentionItems(host: HanzoBotApp) {
   const items: AttentionItem[] = [];
 
   if (host.lastError) {
@@ -636,14 +636,14 @@ function buildAttentionItems(host: Hanzo BotApp) {
 
 export async function loadChannelsTab(host: SettingsHost) {
   await Promise.all([
-    loadChannels(host as unknown as Hanzo BotApp, true),
-    loadConfigSchema(host as unknown as Hanzo BotApp),
-    loadConfig(host as unknown as Hanzo BotApp),
+    loadChannels(host as unknown as HanzoBotApp, true),
+    loadConfigSchema(host as unknown as HanzoBotApp),
+    loadConfig(host as unknown as HanzoBotApp),
   ]);
 }
 
 export async function loadCron(host: SettingsHost) {
-  const app = host as unknown as Hanzo BotApp;
+  const app = host as unknown as HanzoBotApp;
   const activeCronJobId = app.cronRunsScope === "job" ? app.cronRunsJobId : null;
   await Promise.all([
     loadChannels(app, false),

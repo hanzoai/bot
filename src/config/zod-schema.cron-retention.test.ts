@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
-describe("Hanzo BotSchema cron retention and run-log validation", () => {
+describe("HanzoBotSchema cron retention and run-log validation", () => {
   it("accepts valid cron.sessionRetention and runLog values", () => {
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         cron: {
           sessionRetention: "1h30m",
           runLog: {
@@ -18,7 +18,7 @@ describe("Hanzo BotSchema cron retention and run-log validation", () => {
 
   it("rejects invalid cron.sessionRetention", () => {
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         cron: {
           sessionRetention: "abc",
         },
@@ -28,7 +28,7 @@ describe("Hanzo BotSchema cron retention and run-log validation", () => {
 
   it("rejects invalid cron.runLog.maxBytes", () => {
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         cron: {
           runLog: {
             maxBytes: "wat",

@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { DmPolicy } from "../../config/types.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
@@ -31,11 +31,11 @@ export type SetupChannelsOptions = {
 };
 
 export type PromptAccountIdParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
   label: string;
   currentId?: string;
-  listAccountIds: (cfg: Hanzo BotConfig) => string[];
+  listAccountIds: (cfg: HanzoBotConfig) => string[];
   defaultAccountId: string;
 };
 
@@ -50,13 +50,13 @@ export type ChannelSetupStatus = {
 };
 
 export type ChannelSetupStatusContext = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   options?: SetupChannelsOptions;
   accountOverrides: Partial<Record<ChannelId, string>>;
 };
 
 export type ChannelSetupConfigureContext = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   prompter: WizardPrompter;
   options?: SetupChannelsOptions;
@@ -66,8 +66,8 @@ export type ChannelSetupConfigureContext = {
 };
 
 export type ChannelOnboardingPostWriteContext = {
-  previousCfg: Hanzo BotConfig;
-  cfg: Hanzo BotConfig;
+  previousCfg: HanzoBotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   runtime: RuntimeEnv;
 };
@@ -75,11 +75,11 @@ export type ChannelOnboardingPostWriteContext = {
 export type ChannelOnboardingPostWriteHook = {
   channel: ChannelId;
   accountId: string;
-  run: (ctx: { cfg: Hanzo BotConfig; runtime: RuntimeEnv }) => Promise<void> | void;
+  run: (ctx: { cfg: HanzoBotConfig; runtime: RuntimeEnv }) => Promise<void> | void;
 };
 
 export type ChannelSetupResult = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string;
 };
 
@@ -96,16 +96,16 @@ export type ChannelSetupDmPolicy = {
   policyKey: string;
   allowFromKey: string;
   resolveConfigKeys?: (
-    cfg: Hanzo BotConfig,
+    cfg: HanzoBotConfig,
     accountId?: string,
   ) => { policyKey: string; allowFromKey: string };
-  getCurrent: (cfg: Hanzo BotConfig, accountId?: string) => DmPolicy;
-  setPolicy: (cfg: Hanzo BotConfig, policy: DmPolicy, accountId?: string) => Hanzo BotConfig;
+  getCurrent: (cfg: HanzoBotConfig, accountId?: string) => DmPolicy;
+  setPolicy: (cfg: HanzoBotConfig, policy: DmPolicy, accountId?: string) => HanzoBotConfig;
   promptAllowFrom?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     prompter: WizardPrompter;
     accountId?: string;
-  }) => Promise<Hanzo BotConfig>;
+  }) => Promise<HanzoBotConfig>;
 };
 
 export type ChannelSetupWizardAdapter = {
@@ -121,5 +121,5 @@ export type ChannelSetupWizardAdapter = {
   afterConfigWritten?: (ctx: ChannelOnboardingPostWriteContext) => Promise<void> | void;
   dmPolicy?: ChannelSetupDmPolicy;
   onAccountRecorded?: (accountId: string, options?: SetupChannelsOptions) => void;
-  disable?: (cfg: Hanzo BotConfig) => Hanzo BotConfig;
+  disable?: (cfg: HanzoBotConfig) => HanzoBotConfig;
 };

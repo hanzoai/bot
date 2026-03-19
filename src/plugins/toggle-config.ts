@@ -1,15 +1,15 @@
 import { normalizeChatChannelId } from "../channels/registry.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 export function setPluginEnabledInConfig(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   pluginId: string,
   enabled: boolean,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const builtInChannelId = normalizeChatChannelId(pluginId);
   const resolvedId = builtInChannelId ?? pluginId;
 
-  const next: Hanzo BotConfig = {
+  const next: HanzoBotConfig = {
     ...config,
     plugins: {
       ...config.plugins,

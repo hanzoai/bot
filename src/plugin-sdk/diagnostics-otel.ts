@@ -7,7 +7,7 @@ export { registerLogTransport } from "../logging/logger.js";
 export { redactSensitiveText } from "../logging/redact.js";
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 export type {
-  Hanzo BotPluginApi,
-  Hanzo BotPluginService,
-  Hanzo BotPluginServiceContext,
+  HanzoBotPluginApi,
+  HanzoBotPluginService,
+  HanzoBotPluginServiceContext,
 } from "../plugins/types.js";

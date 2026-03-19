@@ -1,8 +1,8 @@
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/provider-onboard";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/provider-onboard";
 
 export const FAL_DEFAULT_IMAGE_MODEL_REF = "fal/fal-ai/flux/dev";
 
-export function applyFalConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyFalConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   if (cfg.agents?.defaults?.imageGenerationModel) {
     return cfg;
   }

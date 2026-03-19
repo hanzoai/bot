@@ -25,7 +25,7 @@ import {
   listWhatsAppDirectoryGroupsFromConfig,
   listWhatsAppDirectoryPeersFromConfig,
 } from "../../../extensions/whatsapp/src/directory-config.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { LineProbeResult } from "../../line/types.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
@@ -385,13 +385,13 @@ function makeSlackConfigWritesCfg(accountIdKey: string) {
 }
 
 type DirectoryListFn = (params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   query?: string | null;
   limit?: number | null;
 }) => Promise<ChannelDirectoryEntry[]>;
 
-async function listDirectoryEntriesWithDefaults(listFn: DirectoryListFn, cfg: Hanzo BotConfig) {
+async function listDirectoryEntriesWithDefaults(listFn: DirectoryListFn, cfg: HanzoBotConfig) {
   return await listFn({
     cfg,
     accountId: "default",
@@ -402,7 +402,7 @@ async function listDirectoryEntriesWithDefaults(listFn: DirectoryListFn, cfg: Ha
 
 async function expectDirectoryIds(
   listFn: DirectoryListFn,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   expected: string[],
   options?: { sorted?: boolean },
 ) {

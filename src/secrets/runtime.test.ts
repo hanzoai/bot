@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ensureAuthProfileStore, type AuthProfileStore } from "../agents/auth-profiles.js";
-import { loadConfig, type Hanzo BotConfig, writeConfigFile } from "../config/config.js";
+import { loadConfig, type HanzoBotConfig, writeConfigFile } from "../config/config.js";
 import { withTempHome } from "../config/home-env.test-harness.js";
 import type { PluginWebSearchProviderEntry } from "../plugins/types.js";
 import {
@@ -24,8 +24,8 @@ vi.mock("../plugins/web-search-providers.js", () => ({
   resolvePluginWebSearchProviders: resolvePluginWebSearchProvidersMock,
 }));
 
-function asConfig(value: unknown): Hanzo BotConfig {
-  return value as Hanzo BotConfig;
+function asConfig(value: unknown): HanzoBotConfig {
+  return value as HanzoBotConfig;
 }
 
 function createTestProvider(params: {
@@ -94,7 +94,7 @@ function buildTestWebSearchProviders(): PluginWebSearchProviderEntry[] {
 
 const OPENAI_ENV_KEY_REF = { source: "env", provider: "default", id: "OPENAI_API_KEY" } as const;
 
-function createOpenAiFileModelsConfig(): NonNullable<Hanzo BotConfig["models"]> {
+function createOpenAiFileModelsConfig(): NonNullable<HanzoBotConfig["models"]> {
   return {
     providers: {
       openai: {
@@ -374,7 +374,7 @@ describe("secrets runtime snapshot", () => {
   });
 
   it("normalizes inline SecretRef object on token to tokenRef", async () => {
-    const config: Hanzo BotConfig = { models: {}, secrets: {} };
+    const config: HanzoBotConfig = { models: {}, secrets: {} };
     const snapshot = await prepareSecretsRuntimeSnapshot({
       config,
       env: { MY_TOKEN: "resolved-token-value" },
@@ -401,7 +401,7 @@ describe("secrets runtime snapshot", () => {
   });
 
   it("normalizes inline SecretRef object on key to keyRef", async () => {
-    const config: Hanzo BotConfig = { models: {}, secrets: {} };
+    const config: HanzoBotConfig = { models: {}, secrets: {} };
     const snapshot = await prepareSecretsRuntimeSnapshot({
       config,
       env: { MY_KEY: "resolved-key-value" },
@@ -428,7 +428,7 @@ describe("secrets runtime snapshot", () => {
   });
 
   it("keeps explicit keyRef when inline key SecretRef is also present", async () => {
-    const config: Hanzo BotConfig = { models: {}, secrets: {} };
+    const config: HanzoBotConfig = { models: {}, secrets: {} };
     const snapshot = await prepareSecretsRuntimeSnapshot({
       config,
       env: {
@@ -1023,7 +1023,7 @@ describe("secrets runtime snapshot", () => {
 
       const persistedConfig = JSON.parse(
         await fs.readFile(path.join(home, ".openclaw", "openclaw.json"), "utf8"),
-      ) as Hanzo BotConfig;
+      ) as HanzoBotConfig;
       const persistedGoogleWebSearchConfig = persistedConfig.plugins?.entries?.google?.config as
         | { webSearch?: { apiKey?: unknown } }
         | undefined;

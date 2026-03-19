@@ -1,11 +1,11 @@
 import {
   applyAgentDefaultModelPrimary,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export const OPENROUTER_DEFAULT_MODEL_REF = "openrouter/auto";
 
-export function applyOpenrouterProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyOpenrouterProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   const models = { ...cfg.agents?.defaults?.models };
   models[OPENROUTER_DEFAULT_MODEL_REF] = {
     ...models[OPENROUTER_DEFAULT_MODEL_REF],
@@ -24,7 +24,7 @@ export function applyOpenrouterProviderConfig(cfg: Hanzo BotConfig): Hanzo BotCo
   };
 }
 
-export function applyOpenrouterConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyOpenrouterConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyAgentDefaultModelPrimary(
     applyOpenrouterProviderConfig(cfg),
     OPENROUTER_DEFAULT_MODEL_REF,

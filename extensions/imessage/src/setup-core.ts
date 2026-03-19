@@ -8,7 +8,7 @@ import {
   setAccountAllowFromForChannel,
   setChannelDmPolicyWithAllowFrom,
   setSetupChannelEnabled,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type WizardPrompter,
 } from "openclaw/plugin-sdk/setup";
 import type {
@@ -71,10 +71,10 @@ function buildIMessageSetupPatch(input: {
 }
 
 export async function promptIMessageAllowFrom(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   return promptParsedAllowFromForAccount({
     cfg: params.cfg,
     accountId: params.accountId,
@@ -111,8 +111,8 @@ export const imessageDmPolicy: ChannelSetupDmPolicy = {
   channel,
   policyKey: "channels.imessage.dmPolicy",
   allowFromKey: "channels.imessage.allowFrom",
-  getCurrent: (cfg: Hanzo BotConfig) => cfg.channels?.imessage?.dmPolicy ?? "pairing",
-  setPolicy: (cfg: Hanzo BotConfig, policy) =>
+  getCurrent: (cfg: HanzoBotConfig) => cfg.channels?.imessage?.dmPolicy ?? "pairing",
+  setPolicy: (cfg: HanzoBotConfig, policy) =>
     setChannelDmPolicyWithAllowFrom({
       cfg,
       channel,
@@ -121,7 +121,7 @@ export const imessageDmPolicy: ChannelSetupDmPolicy = {
   promptAllowFrom: promptIMessageAllowFrom,
 };
 
-function resolveIMessageCliPath(params: { cfg: Hanzo BotConfig; accountId: string }) {
+function resolveIMessageCliPath(params: { cfg: HanzoBotConfig; accountId: string }) {
   return resolveIMessageAccount(params).config.cliPath ?? "imsg";
 }
 
@@ -161,7 +161,7 @@ export const imessageSetupStatusBase = {
   unconfiguredHint: "imsg missing",
   configuredScore: 1,
   unconfiguredScore: 0,
-  resolveConfigured: ({ cfg }: { cfg: Hanzo BotConfig }) =>
+  resolveConfigured: ({ cfg }: { cfg: HanzoBotConfig }) =>
     listIMessageAccountIds(cfg).some((accountId) => {
       const account = resolveIMessageAccount({ cfg, accountId });
       return Boolean(
@@ -197,6 +197,6 @@ export function createIMessageSetupWizardProxy(loadWizard: () => Promise<Channel
     ],
     completionNote: imessageCompletionNote,
     dmPolicy: imessageDmPolicy,
-    disable: (cfg: Hanzo BotConfig) => setSetupChannelEnabled(cfg, channel, false),
+    disable: (cfg: HanzoBotConfig) => setSetupChannelEnabled(cfg, channel, false),
   });
 }

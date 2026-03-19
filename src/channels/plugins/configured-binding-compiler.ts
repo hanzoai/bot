@@ -1,5 +1,5 @@
 import { listConfiguredBindings } from "../../config/bindings.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { getActivePluginRegistry, getActivePluginRegistryVersion } from "../../plugins/runtime.js";
 import { pickFirstExistingAgentId } from "../../routing/resolve-route.js";
 import { resolveChannelConfiguredBindingProvider } from "./binding-provider.js";
@@ -26,7 +26,7 @@ type CachedCompiledConfiguredBindingRegistry = {
 };
 
 const compiledRegistryCache = new WeakMap<
-  Hanzo BotConfig,
+  HanzoBotConfig,
   CachedCompiledConfiguredBindingRegistry
 >();
 
@@ -105,7 +105,7 @@ function compileConfiguredBindingTarget(params: {
 }
 
 function compileConfiguredBindingRule(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: ConfiguredBindingChannel;
   binding: CompiledConfiguredBinding["binding"];
   target: ChannelConfiguredBindingConversationRef;
@@ -153,7 +153,7 @@ function pushCompiledRule(
 }
 
 function compileConfiguredBindingRegistry(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
 }): CompiledConfiguredBindingRegistry {
   const rulesByChannel = new Map<ConfiguredBindingChannel, CompiledConfiguredBinding[]>();
 
@@ -197,7 +197,7 @@ function compileConfiguredBindingRegistry(params: {
 }
 
 export function resolveCompiledBindingRegistry(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): CompiledConfiguredBindingRegistry {
   const registryVersion = getActivePluginRegistryVersion();
   const cached = compiledRegistryCache.get(cfg);
@@ -216,7 +216,7 @@ export function resolveCompiledBindingRegistry(
 }
 
 export function primeCompiledBindingRegistry(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): CompiledConfiguredBindingRegistry {
   const registry = compileConfiguredBindingRegistry({ cfg });
   compiledRegistryCache.set(cfg, {

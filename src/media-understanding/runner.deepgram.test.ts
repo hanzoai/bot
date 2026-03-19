@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { buildProviderRegistry, runCapability } from "./runner.js";
 import { withAudioFixture } from "./runner.test-utils.js";
 
@@ -74,7 +74,7 @@ describe("runCapability deepgram provider options", () => {
             },
           },
         },
-      } as unknown as Hanzo BotConfig;
+      } as unknown as HanzoBotConfig;
 
       const result = await runCapability({
         capability: "audio",

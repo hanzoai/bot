@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { CliBackendConfig } from "../config/types.js";
 import {
   CLI_FRESH_WATCHDOG_DEFAULTS,
@@ -202,7 +202,7 @@ function normalizeClaudeBackendConfig(config: CliBackendConfig): CliBackendConfi
   };
 }
 
-export function resolveCliBackendIds(cfg?: Hanzo BotConfig): Set<string> {
+export function resolveCliBackendIds(cfg?: HanzoBotConfig): Set<string> {
   const ids = new Set<string>([
     normalizeBackendKey("claude-cli"),
     normalizeBackendKey("codex-cli"),
@@ -216,7 +216,7 @@ export function resolveCliBackendIds(cfg?: Hanzo BotConfig): Set<string> {
 
 export function resolveCliBackendConfig(
   provider: string,
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
 ): ResolvedCliBackend | null {
   const normalized = normalizeBackendKey(provider);
   const configured = cfg?.agents?.defaults?.cliBackends ?? {};

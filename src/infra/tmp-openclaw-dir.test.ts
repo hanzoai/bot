@@ -1,8 +1,8 @@
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { POSIX_BOT_TMP_DIR, resolvePreferredHanzo BotTmpDir } from "./tmp-openclaw-dir.js";
+import { POSIX_BOT_TMP_DIR, resolvePreferredHanzoBotTmpDir } from "./tmp-openclaw-dir.js";
 
-type TmpDirOptions = NonNullable<Parameters<typeof resolvePreferredHanzo BotTmpDir>[0]>;
+type TmpDirOptions = NonNullable<Parameters<typeof resolvePreferredHanzoBotTmpDir>[0]>;
 
 function fallbackTmp(uid = 501) {
   return path.join("/var/fallback", `openclaw-${uid}`);
@@ -51,7 +51,7 @@ function resolveWithReadOnlyTmpFallback(params: {
   chmodSync?: NonNullable<TmpDirOptions["chmodSync"]>;
   warn?: NonNullable<TmpDirOptions["warn"]>;
 }) {
-  return resolvePreferredHanzo BotTmpDir({
+  return resolvePreferredHanzoBotTmpDir({
     accessSync: readOnlyTmpAccessSync(),
     lstatSync: vi.fn((target: string) => {
       if (target === POSIX_BOT_TMP_DIR) {
@@ -118,7 +118,7 @@ function resolveWithMocks(params: {
   const mkdirSync = vi.fn();
   const getuid = vi.fn(() => uid);
   const tmpdir = vi.fn(() => params.tmpdirPath ?? "/var/fallback");
-  const resolved = resolvePreferredHanzo BotTmpDir({
+  const resolved = resolvePreferredHanzoBotTmpDir({
     accessSync,
     chmodSync,
     lstatSync: wrappedLstatSync,
@@ -130,7 +130,7 @@ function resolveWithMocks(params: {
   return { resolved, accessSync, lstatSync: wrappedLstatSync, mkdirSync, tmpdir };
 }
 
-describe("resolvePreferredHanzo BotTmpDir", () => {
+describe("resolvePreferredHanzoBotTmpDir", () => {
   it("prefers /tmp/openclaw when it already exists and is writable", () => {
     const lstatSync: NonNullable<TmpDirOptions["lstatSync"]> = vi.fn(() => ({
       isDirectory: () => true,
@@ -299,7 +299,7 @@ describe("resolvePreferredHanzo BotTmpDir", () => {
     const tmpdirPath = "/var/fallback";
     const fallbackPath = path.join(tmpdirPath, "@hanzo/bot");
 
-    const resolved = resolvePreferredHanzo BotTmpDir({
+    const resolved = resolvePreferredHanzoBotTmpDir({
       accessSync: vi.fn((target: string) => {
         if (target === "/tmp") {
           throw new Error("read-only");
@@ -392,7 +392,7 @@ describe("resolvePreferredHanzo BotTmpDir", () => {
 
   it("throws when the fallback directory cannot be created", () => {
     expect(() =>
-      resolvePreferredHanzo BotTmpDir({
+      resolvePreferredHanzoBotTmpDir({
         accessSync: readOnlyTmpAccessSync(),
         lstatSync: vi.fn((target: string) => {
           if (target === POSIX_BOT_TMP_DIR || target === fallbackTmp()) {

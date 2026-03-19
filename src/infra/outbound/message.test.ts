@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
   getChannelPlugin: vi.fn(),
   resolveOutboundTarget: vi.fn(),
   deliverOutboundPayloads: vi.fn(),
-  loadHanzo BotPlugins: vi.fn(),
+  loadHanzoBotPlugins: vi.fn(),
 }));
 
 vi.mock("../../channels/plugins/index.js", () => ({
@@ -33,7 +33,7 @@ vi.mock("../../config/plugin-auto-enable.js", () => ({
 }));
 
 vi.mock("../../plugins/loader.js", () => ({
-  loadHanzo BotPlugins: mocks.loadHanzo BotPlugins,
+  loadHanzoBotPlugins: mocks.loadHanzoBotPlugins,
 }));
 
 vi.mock("./targets.js", () => ({
@@ -57,7 +57,7 @@ describe("sendMessage", () => {
     mocks.getChannelPlugin.mockClear();
     mocks.resolveOutboundTarget.mockClear();
     mocks.deliverOutboundPayloads.mockClear();
-    mocks.loadHanzo BotPlugins.mockClear();
+    mocks.loadHanzoBotPlugins.mockClear();
 
     mocks.getChannelPlugin.mockReturnValue({
       outbound: { deliveryMode: "direct" },
@@ -129,6 +129,6 @@ describe("sendMessage", () => {
       via: "direct",
     });
 
-    expect(mocks.loadHanzo BotPlugins).toHaveBeenCalledTimes(1);
+    expect(mocks.loadHanzoBotPlugins).toHaveBeenCalledTimes(1);
   });
 });

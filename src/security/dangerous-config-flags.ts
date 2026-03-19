@@ -1,6 +1,6 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
-export function collectEnabledInsecureOrDangerousFlags(cfg: Hanzo BotConfig): string[] {
+export function collectEnabledInsecureOrDangerousFlags(cfg: HanzoBotConfig): string[] {
   const enabledFlags: string[] = [];
   if (cfg.gateway?.controlUi?.allowInsecureAuth === true) {
     enabledFlags.push("gateway.controlUi.allowInsecureAuth=true");

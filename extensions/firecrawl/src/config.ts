@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/config-runtime";
 import { normalizeSecretInput } from "openclaw/plugin-sdk/provider-auth";
 
@@ -7,13 +7,13 @@ export const DEFAULT_FIRECRAWL_SEARCH_TIMEOUT_SECONDS = 30;
 export const DEFAULT_FIRECRAWL_SCRAPE_TIMEOUT_SECONDS = 60;
 export const DEFAULT_FIRECRAWL_MAX_AGE_MS = 172_800_000;
 
-type WebSearchConfig = NonNullable<Hanzo BotConfig["tools"]>["web"] extends infer Web
+type WebSearchConfig = NonNullable<HanzoBotConfig["tools"]>["web"] extends infer Web
   ? Web extends { search?: infer Search }
     ? Search
     : undefined
   : undefined;
 
-type WebFetchConfig = NonNullable<Hanzo BotConfig["tools"]>["web"] extends infer Web
+type WebFetchConfig = NonNullable<HanzoBotConfig["tools"]>["web"] extends infer Web
   ? Web extends { fetch?: infer Fetch }
     ? Fetch
     : undefined
@@ -45,7 +45,7 @@ type FirecrawlFetchConfig =
     }
   | undefined;
 
-function resolveSearchConfig(cfg?: Hanzo BotConfig): WebSearchConfig {
+function resolveSearchConfig(cfg?: HanzoBotConfig): WebSearchConfig {
   const search = cfg?.tools?.web?.search;
   if (!search || typeof search !== "object") {
     return undefined;
@@ -53,7 +53,7 @@ function resolveSearchConfig(cfg?: Hanzo BotConfig): WebSearchConfig {
   return search as WebSearchConfig;
 }
 
-function resolveFetchConfig(cfg?: Hanzo BotConfig): WebFetchConfig {
+function resolveFetchConfig(cfg?: HanzoBotConfig): WebFetchConfig {
   const fetch = cfg?.tools?.web?.fetch;
   if (!fetch || typeof fetch !== "object") {
     return undefined;
@@ -61,7 +61,7 @@ function resolveFetchConfig(cfg?: Hanzo BotConfig): WebFetchConfig {
   return fetch as WebFetchConfig;
 }
 
-export function resolveFirecrawlSearchConfig(cfg?: Hanzo BotConfig): FirecrawlSearchConfig {
+export function resolveFirecrawlSearchConfig(cfg?: HanzoBotConfig): FirecrawlSearchConfig {
   const pluginConfig = cfg?.plugins?.entries?.firecrawl?.config as PluginEntryConfig;
   const pluginWebSearch = pluginConfig?.webSearch;
   if (pluginWebSearch && typeof pluginWebSearch === "object" && !Array.isArray(pluginWebSearch)) {
@@ -78,7 +78,7 @@ export function resolveFirecrawlSearchConfig(cfg?: Hanzo BotConfig): FirecrawlSe
   return firecrawl as FirecrawlSearchConfig;
 }
 
-export function resolveFirecrawlFetchConfig(cfg?: Hanzo BotConfig): FirecrawlFetchConfig {
+export function resolveFirecrawlFetchConfig(cfg?: HanzoBotConfig): FirecrawlFetchConfig {
   const fetch = resolveFetchConfig(cfg);
   if (!fetch || typeof fetch !== "object") {
     return undefined;
@@ -99,7 +99,7 @@ function normalizeConfiguredSecret(value: unknown, path: string): string | undef
   );
 }
 
-export function resolveFirecrawlApiKey(cfg?: Hanzo BotConfig): string | undefined {
+export function resolveFirecrawlApiKey(cfg?: HanzoBotConfig): string | undefined {
   const search = resolveFirecrawlSearchConfig(cfg);
   const fetch = resolveFirecrawlFetchConfig(cfg);
   return (
@@ -114,7 +114,7 @@ export function resolveFirecrawlApiKey(cfg?: Hanzo BotConfig): string | undefine
   );
 }
 
-export function resolveFirecrawlBaseUrl(cfg?: Hanzo BotConfig): string {
+export function resolveFirecrawlBaseUrl(cfg?: HanzoBotConfig): string {
   const search = resolveFirecrawlSearchConfig(cfg);
   const fetch = resolveFirecrawlFetchConfig(cfg);
   const configured =
@@ -125,7 +125,7 @@ export function resolveFirecrawlBaseUrl(cfg?: Hanzo BotConfig): string {
   return configured || DEFAULT_FIRECRAWL_BASE_URL;
 }
 
-export function resolveFirecrawlOnlyMainContent(cfg?: Hanzo BotConfig, override?: boolean): boolean {
+export function resolveFirecrawlOnlyMainContent(cfg?: HanzoBotConfig, override?: boolean): boolean {
   if (typeof override === "boolean") {
     return override;
   }
@@ -136,7 +136,7 @@ export function resolveFirecrawlOnlyMainContent(cfg?: Hanzo BotConfig, override?
   return true;
 }
 
-export function resolveFirecrawlMaxAgeMs(cfg?: Hanzo BotConfig, override?: number): number {
+export function resolveFirecrawlMaxAgeMs(cfg?: HanzoBotConfig, override?: number): number {
   if (typeof override === "number" && Number.isFinite(override) && override >= 0) {
     return Math.floor(override);
   }
@@ -152,7 +152,7 @@ export function resolveFirecrawlMaxAgeMs(cfg?: Hanzo BotConfig, override?: numbe
 }
 
 export function resolveFirecrawlScrapeTimeoutSeconds(
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
   override?: number,
 ): number {
   if (typeof override === "number" && Number.isFinite(override) && override > 0) {

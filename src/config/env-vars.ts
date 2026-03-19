@@ -4,13 +4,13 @@ import {
   normalizeEnvVarKey,
 } from "../infra/host-env-security.js";
 import { containsEnvVarReference } from "./env-substitution.js";
-import type { Hanzo BotConfig } from "./types.js";
+import type { HanzoBotConfig } from "./types.js";
 
 function isBlockedConfigEnvVar(key: string): boolean {
   return isDangerousHostEnvVarName(key) || isDangerousHostEnvOverrideVarName(key);
 }
 
-function collectConfigEnvVarsByTarget(cfg?: Hanzo BotConfig): Record<string, string> {
+function collectConfigEnvVarsByTarget(cfg?: HanzoBotConfig): Record<string, string> {
   const envConfig = cfg?.env;
   if (!envConfig) {
     return {};
@@ -54,21 +54,21 @@ function collectConfigEnvVarsByTarget(cfg?: Hanzo BotConfig): Record<string, str
   return entries;
 }
 
-export function collectConfigRuntimeEnvVars(cfg?: Hanzo BotConfig): Record<string, string> {
+export function collectConfigRuntimeEnvVars(cfg?: HanzoBotConfig): Record<string, string> {
   return collectConfigEnvVarsByTarget(cfg);
 }
 
-export function collectConfigServiceEnvVars(cfg?: Hanzo BotConfig): Record<string, string> {
+export function collectConfigServiceEnvVars(cfg?: HanzoBotConfig): Record<string, string> {
   return collectConfigEnvVarsByTarget(cfg);
 }
 
 /** @deprecated Use `collectConfigRuntimeEnvVars` or `collectConfigServiceEnvVars`. */
-export function collectConfigEnvVars(cfg?: Hanzo BotConfig): Record<string, string> {
+export function collectConfigEnvVars(cfg?: HanzoBotConfig): Record<string, string> {
   return collectConfigRuntimeEnvVars(cfg);
 }
 
 export function createConfigRuntimeEnv(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   baseEnv: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv {
   const env = { ...baseEnv };
@@ -77,7 +77,7 @@ export function createConfigRuntimeEnv(
 }
 
 export function applyConfigEnvVars(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): void {
   const entries = collectConfigRuntimeEnvVars(cfg);

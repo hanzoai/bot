@@ -1,7 +1,7 @@
 import type {
   ChannelAccountSnapshot,
   ChannelGatewayContext,
-  Hanzo BotConfig,
+  HanzoBotConfig,
   PluginRuntime,
 } from "openclaw/plugin-sdk/discord";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -38,7 +38,7 @@ vi.mock("./audit.js", async (importOriginal) => {
   };
 });
 
-function createCfg(): Hanzo BotConfig {
+function createCfg(): HanzoBotConfig {
   return {
     channels: {
       discord: {
@@ -46,11 +46,11 @@ function createCfg(): Hanzo BotConfig {
         token: "discord-token",
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 function createStartAccountCtx(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   runtime: ReturnType<typeof createRuntimeEnv>;
 }): ChannelGatewayContext<ResolvedDiscordAccount> {
@@ -94,7 +94,7 @@ describe("discordPlugin outbound", () => {
     } as unknown as PluginRuntime);
 
     const result = await discordPlugin.outbound!.sendMedia!({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       to: "channel:123",
       text: "hi",
       mediaUrl: "/tmp/image.png",
@@ -230,7 +230,7 @@ describe("discordPlugin groups", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     expect(
       discordPlugin.groups?.resolveRequireMention?.({

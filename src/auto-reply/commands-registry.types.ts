@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/types.js";
+import type { HanzoBotConfig } from "../config/types.js";
 
 export type CommandScope = "text" | "native" | "both";
 
@@ -14,7 +14,7 @@ export type CommandCategory =
 export type CommandArgType = "string" | "number" | "boolean";
 
 export type CommandArgChoiceContext = {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   provider?: string;
   model?: string;
   command: ChatCommandDefinition;
@@ -81,7 +81,7 @@ export type CommandDetection = {
 };
 
 export type ShouldHandleTextCommandsParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   surface: string;
   commandSource?: "text" | "native";
 };

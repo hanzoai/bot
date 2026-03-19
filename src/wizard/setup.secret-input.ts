@@ -1,8 +1,8 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { normalizeSecretInputString, resolveSecretInputRef } from "../config/types.secrets.js";
 import { resolveSecretRefString } from "../secrets/resolve.js";
 
-type SecretDefaults = NonNullable<Hanzo BotConfig["secrets"]>["defaults"];
+type SecretDefaults = NonNullable<HanzoBotConfig["secrets"]>["defaults"];
 
 function formatSecretResolutionError(error: unknown): string {
   if (error instanceof Error && error.message.trim().length > 0) {
@@ -12,7 +12,7 @@ function formatSecretResolutionError(error: unknown): string {
 }
 
 export async function resolveSetupSecretInputString(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   value: unknown;
   path: string;
   defaults?: SecretDefaults;

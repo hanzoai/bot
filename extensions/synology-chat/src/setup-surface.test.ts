@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { buildChannelSetupWizardAdapterFromSetupWizard } from "../../../src/channels/plugins/setup-wizard.js";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import { createRuntimeEnv } from "../../../test/helpers/extensions/runtime-env.js";
 import {
   createTestWizardPrompter,
@@ -32,7 +32,7 @@ describe("synology-chat setup wizard", () => {
     });
 
     const result = await synologyChatConfigureAdapter.configure({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       runtime: createRuntimeEnv(),
       prompter,
       options: {},
@@ -69,7 +69,7 @@ describe("synology-chat setup wizard", () => {
     });
 
     const result = await synologyChatConfigureAdapter.configure({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       runtime: createRuntimeEnv(),
       prompter,
       options: {},

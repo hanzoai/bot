@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { Static, Type } from "@sinclair/typebox";
-import type { AnyAgentTool, Hanzo BotPluginApi, Hanzo BotPluginToolContext } from "../api.js";
+import type { AnyAgentTool, HanzoBotPluginApi, HanzoBotPluginToolContext } from "../api.js";
 import { PlaywrightDiffScreenshotter, type DiffScreenshotter } from "./browser.js";
 import { resolveDiffImageRenderOptions } from "./config.js";
 import { renderDiffDocument } from "./render.js";
@@ -134,11 +134,11 @@ type DiffsToolRawParams = DiffsToolParams & {
 };
 
 export function createDiffsTool(params: {
-  api: Hanzo BotPluginApi;
+  api: HanzoBotPluginApi;
   store: DiffArtifactStore;
   defaults: DiffToolDefaults;
   screenshotter?: DiffScreenshotter;
-  context?: Hanzo BotPluginToolContext;
+  context?: HanzoBotPluginToolContext;
 }): AnyAgentTool {
   return {
     name: "diffs",
@@ -392,7 +392,7 @@ async function renderDiffArtifactFile(params: {
 }
 
 function buildArtifactContext(
-  context: Hanzo BotPluginToolContext | undefined,
+  context: HanzoBotPluginToolContext | undefined,
 ): DiffArtifactContext | undefined {
   if (!context) {
     return undefined;

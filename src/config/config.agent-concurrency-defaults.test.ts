@@ -6,8 +6,8 @@ import {
   resolveSubagentMaxConcurrent,
 } from "./agent-limits.js";
 import { loadConfig } from "./config.js";
-import { withTempHome, writeHanzo BotConfig } from "./test-helpers.js";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import { withTempHome, writeHanzoBotConfig } from "./test-helpers.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
 describe("agent concurrency defaults", () => {
   it("resolves defaults when unset", () => {
@@ -29,7 +29,7 @@ describe("agent concurrency defaults", () => {
   });
 
   it("accepts subagent spawn depth and per-agent child limits", () => {
-    const parsed = Hanzo BotSchema.parse({
+    const parsed = HanzoBotSchema.parse({
       agents: {
         defaults: {
           subagents: {
@@ -46,7 +46,7 @@ describe("agent concurrency defaults", () => {
 
   it("injects defaults on load", async () => {
     await withTempHome(async (home) => {
-      await writeHanzo BotConfig(home, {});
+      await writeHanzoBotConfig(home, {});
 
       const cfg = loadConfig();
 

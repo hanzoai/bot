@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { stopHanzo BotChromeMock } = vi.hoisted(() => ({
-  stopHanzo BotChromeMock: vi.fn(async () => {}),
+const { stopHanzoBotChromeMock } = vi.hoisted(() => ({
+  stopHanzoBotChromeMock: vi.fn(async () => {}),
 }));
 
 const { createBrowserRouteContextMock, listKnownProfileNamesMock } = vi.hoisted(() => ({
@@ -10,7 +10,7 @@ const { createBrowserRouteContextMock, listKnownProfileNamesMock } = vi.hoisted(
 }));
 
 vi.mock("./chrome.js", () => ({
-  stopHanzo BotChrome: stopHanzo BotChromeMock,
+  stopHanzoBotChrome: stopHanzoBotChromeMock,
 }));
 
 vi.mock("./server-context.js", () => ({
@@ -35,7 +35,7 @@ describe("stopKnownBrowserProfiles", () => {
   beforeEach(() => {
     createBrowserRouteContextMock.mockClear();
     listKnownProfileNamesMock.mockClear();
-    stopHanzo BotChromeMock.mockClear();
+    stopHanzoBotChromeMock.mockClear();
   });
 
   it("stops all known profiles and ignores per-profile failures", async () => {
@@ -93,7 +93,7 @@ describe("stopKnownBrowserProfiles", () => {
       onWarn: vi.fn(),
     });
 
-    expect(stopHanzo BotChromeMock).toHaveBeenCalledWith(launchedBrowser);
+    expect(stopHanzoBotChromeMock).toHaveBeenCalledWith(launchedBrowser);
     expect(localRuntime.running).toBeNull();
   });
 

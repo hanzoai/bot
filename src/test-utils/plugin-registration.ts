@@ -1,14 +1,14 @@
 import { createCapturedPluginRegistration } from "../plugins/captured-registration.js";
-import type { Hanzo BotPluginApi, ProviderPlugin } from "../plugins/types.js";
+import type { HanzoBotPluginApi, ProviderPlugin } from "../plugins/types.js";
 
 export { createCapturedPluginRegistration };
 
 type RegistrablePlugin = {
-  register(api: Hanzo BotPluginApi): void;
+  register(api: HanzoBotPluginApi): void;
 };
 
 export function registerSingleProviderPlugin(params: {
-  register(api: Hanzo BotPluginApi): void;
+  register(api: HanzoBotPluginApi): void;
 }): ProviderPlugin {
   const captured = createCapturedPluginRegistration();
   params.register(captured.api);

@@ -31,7 +31,7 @@ import {
   resolveBrowserExecutableForPlatform,
 } from "./chrome.executables.js";
 import {
-  decorateHanzo BotProfile,
+  decorateHanzoBotProfile,
   ensureProfileCleanExit,
   isProfileDecorated,
 } from "./chrome.profile-decoration.js";
@@ -51,7 +51,7 @@ export {
   resolveBrowserExecutableForPlatform,
 } from "./chrome.executables.js";
 export {
-  decorateHanzo BotProfile,
+  decorateHanzoBotProfile,
   ensureProfileCleanExit,
   isProfileDecorated,
 } from "./chrome.profile-decoration.js";
@@ -77,7 +77,7 @@ function resolveBrowserExecutable(resolved: ResolvedBrowserConfig): BrowserExecu
   return resolveBrowserExecutableForPlatform(resolved, process.platform);
 }
 
-export function resolveHanzo BotUserDataDir(profileName = DEFAULT_BOT_BROWSER_PROFILE_NAME) {
+export function resolveHanzoBotUserDataDir(profileName = DEFAULT_BOT_BROWSER_PROFILE_NAME) {
   return path.join(CONFIG_DIR, "browser", profileName, "user-data");
 }
 
@@ -253,7 +253,7 @@ export async function isChromeCdpReady(
   return await canRunCdpHealthCommand(wsUrl, handshakeTimeoutMs);
 }
 
-export async function launchHanzo BotChrome(
+export async function launchHanzoBotChrome(
   resolved: ResolvedBrowserConfig,
   profile: ResolvedBrowserProfile,
 ): Promise<RunningChrome> {
@@ -269,7 +269,7 @@ export async function launchHanzo BotChrome(
     );
   }
 
-  const userDataDir = resolveHanzo BotUserDataDir(profile.name);
+  const userDataDir = resolveHanzoBotUserDataDir(profile.name);
   fs.mkdirSync(userDataDir, { recursive: true });
 
   const needsDecorate = !isProfileDecorated(
@@ -358,7 +358,7 @@ export async function launchHanzo BotChrome(
 
   if (needsDecorate) {
     try {
-      decorateHanzo BotProfile(userDataDir, {
+      decorateHanzoBotProfile(userDataDir, {
         name: profile.name,
         color: profile.color,
       });
@@ -432,7 +432,7 @@ export async function launchHanzo BotChrome(
   };
 }
 
-export async function stopHanzo BotChrome(
+export async function stopHanzoBotChrome(
   running: RunningChrome,
   timeoutMs = CHROME_STOP_TIMEOUT_MS,
 ) {

@@ -1,17 +1,17 @@
 import { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 import type {
-  Hanzo BotPluginApi,
-  Hanzo BotPluginCommandDefinition,
-  Hanzo BotPluginConfigSchema,
-  Hanzo BotPluginDefinition,
+  HanzoBotPluginApi,
+  HanzoBotPluginCommandDefinition,
+  HanzoBotPluginConfigSchema,
+  HanzoBotPluginDefinition,
   PluginInteractiveTelegramHandlerContext,
 } from "../plugins/types.js";
 
 export type {
   AnyAgentTool,
   MediaUnderstandingProviderPlugin,
-  Hanzo BotPluginApi,
-  Hanzo BotPluginConfigSchema,
+  HanzoBotPluginApi,
+  HanzoBotPluginConfigSchema,
   ProviderDiscoveryContext,
   ProviderCatalogContext,
   ProviderCatalogResult,
@@ -35,19 +35,19 @@ export type {
   SpeechProviderPlugin,
   ProviderThinkingPolicyContext,
   ProviderWrapStreamFnContext,
-  Hanzo BotPluginService,
-  Hanzo BotPluginServiceContext,
+  HanzoBotPluginService,
+  HanzoBotPluginServiceContext,
   ProviderAuthContext,
   ProviderAuthDoctorHintContext,
   ProviderAuthMethodNonInteractiveContext,
   ProviderAuthMethod,
   ProviderAuthResult,
-  Hanzo BotPluginCommandDefinition,
-  Hanzo BotPluginDefinition,
+  HanzoBotPluginCommandDefinition,
+  HanzoBotPluginDefinition,
   PluginLogger,
   PluginInteractiveTelegramHandlerContext,
 } from "../plugins/types.js";
-export type { Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
 
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 
@@ -55,22 +55,22 @@ type DefinePluginEntryOptions = {
   id: string;
   name: string;
   description: string;
-  kind?: Hanzo BotPluginDefinition["kind"];
-  configSchema?: Hanzo BotPluginConfigSchema | (() => Hanzo BotPluginConfigSchema);
-  register: (api: Hanzo BotPluginApi) => void;
+  kind?: HanzoBotPluginDefinition["kind"];
+  configSchema?: HanzoBotPluginConfigSchema | (() => HanzoBotPluginConfigSchema);
+  register: (api: HanzoBotPluginApi) => void;
 };
 
 type DefinedPluginEntry = {
   id: string;
   name: string;
   description: string;
-  configSchema: Hanzo BotPluginConfigSchema;
-  register: NonNullable<Hanzo BotPluginDefinition["register"]>;
-} & Pick<Hanzo BotPluginDefinition, "kind">;
+  configSchema: HanzoBotPluginConfigSchema;
+  register: NonNullable<HanzoBotPluginDefinition["register"]>;
+} & Pick<HanzoBotPluginDefinition, "kind">;
 
 function resolvePluginConfigSchema(
   configSchema: DefinePluginEntryOptions["configSchema"] = emptyPluginConfigSchema,
-): Hanzo BotPluginConfigSchema {
+): HanzoBotPluginConfigSchema {
   return typeof configSchema === "function" ? configSchema() : configSchema;
 }
 

@@ -11,7 +11,7 @@ import {
   resolveReasoningDefault,
   resolveThinkingDefault,
 } from "../../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { type SessionEntry, updateSessionStore } from "../../config/sessions.js";
 import { applyModelOverrideToSessionEntry } from "../../sessions/model-overrides.js";
 import { resolveThreadParentSessionKey } from "../../sessions/session-key-utils.js";
@@ -262,9 +262,9 @@ function scoreFuzzyMatch(params: {
 }
 
 export async function createModelSelectionState(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId?: string;
-  agentCfg: NonNullable<NonNullable<Hanzo BotConfig["agents"]>["defaults"]> | undefined;
+  agentCfg: NonNullable<NonNullable<HanzoBotConfig["agents"]>["defaults"]> | undefined;
   sessionEntry?: SessionEntry;
   sessionStore?: Record<string, SessionEntry>;
   sessionKey?: string;
@@ -601,7 +601,7 @@ export function resolveModelDirectiveSelection(params: {
 }
 
 export function resolveContextTokens(params: {
-  agentCfg: NonNullable<NonNullable<Hanzo BotConfig["agents"]>["defaults"]> | undefined;
+  agentCfg: NonNullable<NonNullable<HanzoBotConfig["agents"]>["defaults"]> | undefined;
   model: string;
 }): number {
   return (

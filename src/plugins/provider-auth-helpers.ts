@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { OAuthCredentials } from "@mariozechner/pi-ai";
-import { resolveHanzo BotAgentDir } from "../agents/agent-paths.js";
+import { resolveHanzoBotAgentDir } from "../agents/agent-paths.js";
 import { upsertAuthProfile } from "../agents/auth-profiles.js";
 import { normalizeProviderIdForAuth } from "../agents/provider-id.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
 import {
   coerceSecretRef,
@@ -18,7 +18,7 @@ import type { SecretInputMode } from "./provider-auth-types.js";
 
 const ENV_REF_PATTERN = /^\$\{([A-Z][A-Z0-9_]*)\}$/;
 
-const resolveAuthAgentDir = (agentDir?: string) => agentDir ?? resolveHanzo BotAgentDir();
+const resolveAuthAgentDir = (agentDir?: string) => agentDir ?? resolveHanzoBotAgentDir();
 
 export type ApiKeyStorageOptions = {
   secretInputMode?: SecretInputMode;
@@ -101,7 +101,7 @@ export function buildApiKeyCredential(
 }
 
 export function applyAuthProfileConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   params: {
     profileId: string;
     provider: string;
@@ -109,7 +109,7 @@ export function applyAuthProfileConfig(
     email?: string;
     preferProfileFirst?: boolean;
   },
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const normalizedProvider = normalizeProviderIdForAuth(params.provider);
   const profiles = {
     ...cfg.auth?.profiles,

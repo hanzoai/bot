@@ -6,7 +6,7 @@
  */
 
 import { parseExplicitTargetForChannel } from "../channels/plugins/target-parsing.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { logVerbose } from "../globals.js";
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 import {
@@ -15,12 +15,12 @@ import {
   requestPluginConversationBinding,
 } from "./conversation-binding.js";
 import type {
-  Hanzo BotPluginCommandDefinition,
+  HanzoBotPluginCommandDefinition,
   PluginCommandContext,
   PluginCommandResult,
 } from "./types.js";
 
-type RegisteredPluginCommand = Hanzo BotPluginCommandDefinition & {
+type RegisteredPluginCommand = HanzoBotPluginCommandDefinition & {
   pluginId: string;
   pluginName?: string;
   pluginRoot?: string;
@@ -123,7 +123,7 @@ export type CommandRegistrationResult = {
  * Shared by both the global registration path and snapshot (non-activating) loads.
  */
 export function validatePluginCommandDefinition(
-  command: Hanzo BotPluginCommandDefinition,
+  command: HanzoBotPluginCommandDefinition,
 ): string | null {
   if (typeof command.handler !== "function") {
     return "Command handler must be a function";
@@ -153,7 +153,7 @@ export function validatePluginCommandDefinition(
   return null;
 }
 
-function listPluginInvocationKeys(command: Hanzo BotPluginCommandDefinition): string[] {
+function listPluginInvocationKeys(command: HanzoBotPluginCommandDefinition): string[] {
   const keys = new Set<string>();
   const push = (value: string | undefined) => {
     const normalized = value?.trim().toLowerCase();
@@ -177,7 +177,7 @@ function listPluginInvocationKeys(command: Hanzo BotPluginCommandDefinition): st
  */
 export function registerPluginCommand(
   pluginId: string,
-  command: Hanzo BotPluginCommandDefinition,
+  command: HanzoBotPluginCommandDefinition,
   opts?: { pluginName?: string; pluginRoot?: string },
 ): CommandRegistrationResult {
   // Prevent registration while commands are being processed
@@ -384,7 +384,7 @@ export async function executePluginCommand(params: {
   channelId?: PluginCommandContext["channelId"];
   isAuthorizedSender: boolean;
   commandBody: string;
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   from?: PluginCommandContext["from"];
   to?: PluginCommandContext["to"];
   accountId?: PluginCommandContext["accountId"];
@@ -494,7 +494,7 @@ export function listPluginCommands(): Array<{
 }
 
 function resolvePluginNativeName(
-  command: Hanzo BotPluginCommandDefinition,
+  command: HanzoBotPluginCommandDefinition,
   provider?: string,
 ): string {
   const providerName = provider?.trim().toLowerCase();
@@ -509,7 +509,7 @@ function resolvePluginNativeName(
   return command.name;
 }
 
-function listPluginInvocationNames(command: Hanzo BotPluginCommandDefinition): string[] {
+function listPluginInvocationNames(command: HanzoBotPluginCommandDefinition): string[] {
   return listPluginInvocationKeys(command);
 }
 

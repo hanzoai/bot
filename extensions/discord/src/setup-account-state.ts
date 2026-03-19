@@ -2,7 +2,7 @@ import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/acco
 import {
   hasConfiguredSecretInput,
   normalizeSecretInputString,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/config-runtime";
 import type { DiscordAccountConfig } from "./runtime-api.js";
 import { resolveDiscordToken } from "./token.js";
@@ -18,7 +18,7 @@ export type InspectedDiscordSetupAccount = {
 };
 
 function resolveDiscordAccountEntry(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
 ): DiscordAccountConfig | undefined {
   const accounts = cfg.channels?.discord?.accounts;
@@ -57,7 +57,7 @@ function inspectConfiguredToken(value: unknown): {
   return null;
 }
 
-export function listDiscordSetupAccountIds(cfg: Hanzo BotConfig): string[] {
+export function listDiscordSetupAccountIds(cfg: HanzoBotConfig): string[] {
   const accounts = cfg.channels?.discord?.accounts;
   const ids =
     accounts && typeof accounts === "object" && !Array.isArray(accounts)
@@ -68,12 +68,12 @@ export function listDiscordSetupAccountIds(cfg: Hanzo BotConfig): string[] {
   return [...new Set([DEFAULT_ACCOUNT_ID, ...ids])];
 }
 
-export function resolveDefaultDiscordSetupAccountId(cfg: Hanzo BotConfig): string {
+export function resolveDefaultDiscordSetupAccountId(cfg: HanzoBotConfig): string {
   return listDiscordSetupAccountIds(cfg)[0] ?? DEFAULT_ACCOUNT_ID;
 }
 
 export function resolveDiscordSetupAccountConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
 }): { accountId: string; config: DiscordAccountConfig } {
   const accountId = normalizeAccountId(params.accountId ?? DEFAULT_ACCOUNT_ID);
@@ -91,7 +91,7 @@ export function resolveDiscordSetupAccountConfig(params: {
 }
 
 export function inspectDiscordSetupAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
 }): InspectedDiscordSetupAccount {
   const { accountId, config } = resolveDiscordSetupAccountConfig(params);

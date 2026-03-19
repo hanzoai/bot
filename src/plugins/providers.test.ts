@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const loadHanzo BotPluginsMock = vi.fn();
+const loadHanzoBotPluginsMock = vi.fn();
 const loadPluginManifestRegistryMock = vi.fn();
 
 vi.mock("./loader.js", () => ({
-  loadHanzo BotPlugins: (...args: unknown[]) => loadHanzo BotPluginsMock(...args),
+  loadHanzoBotPlugins: (...args: unknown[]) => loadHanzoBotPluginsMock(...args),
 }));
 
 vi.mock("./manifest-registry.js", () => ({
@@ -17,8 +17,8 @@ let resolvePluginProviders: typeof import("./providers.js").resolvePluginProvide
 describe("resolvePluginProviders", () => {
   beforeEach(async () => {
     vi.resetModules();
-    loadHanzo BotPluginsMock.mockReset();
-    loadHanzo BotPluginsMock.mockReturnValue({
+    loadHanzoBotPluginsMock.mockReset();
+    loadHanzoBotPluginsMock.mockReturnValue({
       providers: [{ pluginId: "google", provider: { id: "demo-provider" } }],
     });
     loadPluginManifestRegistryMock.mockReset();
@@ -45,7 +45,7 @@ describe("resolvePluginProviders", () => {
     });
 
     expect(providers).toEqual([{ id: "demo-provider", pluginId: "google" }]);
-    expect(loadHanzo BotPluginsMock).toHaveBeenCalledWith(
+    expect(loadHanzoBotPluginsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         workspaceDir: "/workspace/explicit",
         env,
@@ -65,7 +65,7 @@ describe("resolvePluginProviders", () => {
       bundledProviderAllowlistCompat: true,
     });
 
-    expect(loadHanzo BotPluginsMock).toHaveBeenCalledWith(
+    expect(loadHanzoBotPluginsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         config: expect.objectContaining({
           plugins: expect.objectContaining({
@@ -88,7 +88,7 @@ describe("resolvePluginProviders", () => {
       bundledProviderVitestCompat: true,
     });
 
-    expect(loadHanzo BotPluginsMock).toHaveBeenCalledWith(
+    expect(loadHanzoBotPluginsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         config: expect.objectContaining({
           plugins: expect.objectContaining({
@@ -116,7 +116,7 @@ describe("resolvePluginProviders", () => {
       bundledProviderAllowlistCompat: true,
     });
 
-    const call = loadHanzo BotPluginsMock.mock.calls.at(-1)?.[0];
+    const call = loadHanzoBotPluginsMock.mock.calls.at(-1)?.[0];
     const allow = call?.config?.plugins?.allow;
 
     expect(allow).toContain("google");
@@ -133,7 +133,7 @@ describe("resolvePluginProviders", () => {
       bundledProviderAllowlistCompat: true,
     });
 
-    const call = loadHanzo BotPluginsMock.mock.calls.at(-1)?.[0];
+    const call = loadHanzoBotPluginsMock.mock.calls.at(-1)?.[0];
     const allow = call?.config?.plugins?.allow;
 
     expect(allow).not.toContain("workspace-provider");
@@ -150,7 +150,7 @@ describe("resolvePluginProviders", () => {
       onlyPluginIds: ["moonshot"],
     });
 
-    expect(loadHanzo BotPluginsMock).toHaveBeenCalledWith(
+    expect(loadHanzoBotPluginsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         onlyPluginIds: ["moonshot"],
         config: expect.objectContaining({
@@ -161,7 +161,7 @@ describe("resolvePluginProviders", () => {
       }),
     );
 
-    const call = loadHanzo BotPluginsMock.mock.calls.at(-1)?.[0];
+    const call = loadHanzoBotPluginsMock.mock.calls.at(-1)?.[0];
     const allow = call?.config?.plugins?.allow;
     expect(allow).not.toContain("google");
     expect(allow).not.toContain("kilocode");

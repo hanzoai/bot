@@ -1,5 +1,5 @@
 import type * as Lark from "@larksuiteoapi/node-sdk";
-import type { Hanzo BotPluginApi } from "../runtime-api.js";
+import type { HanzoBotPluginApi } from "../runtime-api.js";
 import { resolveFeishuAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import { resolveToolsConfig } from "./tools-config.js";
@@ -12,7 +12,7 @@ function normalizeOptionalAccountId(value: string | undefined): string | undefin
   return trimmed ? trimmed : undefined;
 }
 
-function readConfiguredDefaultAccountId(config: Hanzo BotPluginApi["config"]): string | undefined {
+function readConfiguredDefaultAccountId(config: HanzoBotPluginApi["config"]): string | undefined {
   const value = (config?.channels?.feishu as { defaultAccount?: unknown } | undefined)
     ?.defaultAccount;
   if (typeof value !== "string") {
@@ -22,7 +22,7 @@ function readConfiguredDefaultAccountId(config: Hanzo BotPluginApi["config"]): s
 }
 
 export function resolveFeishuToolAccount(params: {
-  api: Pick<Hanzo BotPluginApi, "config">;
+  api: Pick<HanzoBotPluginApi, "config">;
   executeParams?: AccountAwareParams;
   defaultAccountId?: string;
 }): ResolvedFeishuAccount {
@@ -39,7 +39,7 @@ export function resolveFeishuToolAccount(params: {
 }
 
 export function createFeishuToolClient(params: {
-  api: Pick<Hanzo BotPluginApi, "config">;
+  api: Pick<HanzoBotPluginApi, "config">;
   executeParams?: AccountAwareParams;
   defaultAccountId?: string;
 }): Lark.Client {

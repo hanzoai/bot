@@ -1,8 +1,8 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { MemoryIndexManager } from "./index.js";
 
 export async function getRequiredMemoryIndexManager(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId?: string;
 }): Promise<MemoryIndexManager> {
   await import("./embedding.test-mocks.js");

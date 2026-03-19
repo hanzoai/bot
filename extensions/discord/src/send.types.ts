@@ -1,5 +1,5 @@
 import type { RequestClient } from "@buape/carbon";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { RetryConfig } from "openclaw/plugin-sdk/infra-runtime";
 
 export class DiscordSendError extends Error {
@@ -29,7 +29,7 @@ export type DiscordSendResult = {
 };
 
 export type DiscordReactOpts = {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   token?: string;
   accountId?: string;
   rest?: RequestClient;

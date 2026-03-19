@@ -2,4 +2,4 @@
 // Keep this list additive and scoped to symbols used under extensions/talk-voice.
 
 export { definePluginEntry } from "./plugin-entry.js";
-export type { Hanzo BotPluginApi } from "../plugins/types.js";
+export type { HanzoBotPluginApi } from "../plugins/types.js";

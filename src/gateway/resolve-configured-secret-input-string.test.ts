@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/types.js";
+import type { HanzoBotConfig } from "../config/types.js";
 import {
   resolveConfiguredSecretInputWithFallback,
   resolveRequiredConfiguredSecretRefInputString,
 } from "./resolve-configured-secret-input-string.js";
 
-function createConfig(value: unknown): Hanzo BotConfig {
+function createConfig(value: unknown): HanzoBotConfig {
   return {
     gateway: {
       auth: {
@@ -17,7 +17,7 @@ function createConfig(value: unknown): Hanzo BotConfig {
         default: { source: "env" },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 describe("resolveConfiguredSecretInputWithFallback", () => {

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
-describe("Hanzo BotSchema logging levels", () => {
+describe("HanzoBotSchema logging levels", () => {
   it("accepts valid logging level values for level and consoleLevel", () => {
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         logging: {
           level: "debug",
           consoleLevel: "warn",
@@ -15,14 +15,14 @@ describe("Hanzo BotSchema logging levels", () => {
 
   it("rejects invalid logging level values", () => {
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         logging: {
           level: "loud",
         },
       }),
     ).toThrow();
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         logging: {
           consoleLevel: "verbose",
         },

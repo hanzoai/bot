@@ -2,14 +2,14 @@ import type {
   AnyAgentTool,
   ImageGenerationProviderPlugin,
   MediaUnderstandingProviderPlugin,
-  Hanzo BotPluginApi,
+  HanzoBotPluginApi,
   ProviderPlugin,
   SpeechProviderPlugin,
   WebSearchProviderPlugin,
 } from "./types.js";
 
 export type CapturedPluginRegistration = {
-  api: Hanzo BotPluginApi;
+  api: HanzoBotPluginApi;
   providers: ProviderPlugin[];
   speechProviders: SpeechProviderPlugin[];
   mediaUnderstandingProviders: MediaUnderstandingProviderPlugin[];
@@ -52,12 +52,12 @@ export function createCapturedPluginRegistration(): CapturedPluginRegistration {
       registerTool(tool: AnyAgentTool) {
         tools.push(tool);
       },
-    } as Hanzo BotPluginApi,
+    } as HanzoBotPluginApi,
   };
 }
 
 export function capturePluginRegistration(params: {
-  register(api: Hanzo BotPluginApi): void;
+  register(api: HanzoBotPluginApi): void;
 }): CapturedPluginRegistration {
   const captured = createCapturedPluginRegistration();
   params.register(captured.api);

@@ -5,7 +5,7 @@ import {
   createTestWizardPrompter,
   type WizardPrompter,
 } from "../../../test/helpers/extensions/setup-wizard.js";
-import type { Hanzo BotConfig, RuntimeEnv } from "../api.js";
+import type { HanzoBotConfig, RuntimeEnv } from "../api.js";
 import { tlonPlugin } from "./channel.js";
 
 const tlonConfigureAdapter = buildChannelSetupWizardAdapterFromSetupWizard({
@@ -51,7 +51,7 @@ describe("tlon setup wizard", () => {
     const runtime: RuntimeEnv = createRuntimeEnv();
 
     const result = await tlonConfigureAdapter.configure({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       runtime,
       prompter,
       options: {},

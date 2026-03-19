@@ -3,7 +3,7 @@ import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   clearInternalHooks,
   createInternalHookEvent,
@@ -78,7 +78,7 @@ describe("bundle plugin hooks", () => {
     return bundleRoot;
   }
 
-  function createConfig(enabled: boolean): Hanzo BotConfig {
+  function createConfig(enabled: boolean): HanzoBotConfig {
     return {
       hooks: {
         internal: {

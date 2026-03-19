@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { DEFAULT_ACCOUNT_ID } from "../../routing/session-key.js";
 import {
   applySetupAccountConfigPatch,
@@ -9,8 +9,8 @@ import {
   prepareScopedSetupConfig,
 } from "./setup-helpers.js";
 
-function asConfig(value: unknown): Hanzo BotConfig {
-  return value as Hanzo BotConfig;
+function asConfig(value: unknown): HanzoBotConfig {
+  return value as HanzoBotConfig;
 }
 
 describe("applySetupAccountConfigPatch", () => {

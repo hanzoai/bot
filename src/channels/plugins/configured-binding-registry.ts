@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { ConversationRef } from "../../infra/outbound/session-binding-service.js";
 import type {
   ConfiguredBindingRecordResolution,
@@ -16,7 +16,7 @@ import {
 } from "./configured-binding-match.js";
 import { resolveConfiguredBindingRecordBySessionKeyFromRegistry } from "./configured-binding-session-lookup.js";
 
-export function primeConfiguredBindingRegistry(params: { cfg: Hanzo BotConfig }): {
+export function primeConfiguredBindingRegistry(params: { cfg: HanzoBotConfig }): {
   bindingCount: number;
   channelCount: number;
 } {
@@ -24,7 +24,7 @@ export function primeConfiguredBindingRegistry(params: { cfg: Hanzo BotConfig })
 }
 
 export function resolveConfiguredBindingRecord(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: string;
   accountId: string;
   conversationId: string;
@@ -46,7 +46,7 @@ export function resolveConfiguredBindingRecord(params: {
 }
 
 export function resolveConfiguredBindingRecordForConversation(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   conversation: ConversationRef;
 }): ConfiguredBindingRecordResolution | null {
   const conversation = toConfiguredBindingConversationRef(params.conversation);
@@ -73,7 +73,7 @@ export function resolveConfiguredBindingRecordForConversation(params: {
 }
 
 export function resolveConfiguredBinding(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   conversation: ConversationRef;
 }): ConfiguredBindingResolution | null {
   const conversation = toConfiguredBindingConversationRef(params.conversation);
@@ -106,7 +106,7 @@ export function resolveConfiguredBinding(params: {
 }
 
 export function resolveConfiguredBindingRecordBySessionKey(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   sessionKey: string;
 }): ConfiguredBindingRecordResolution | null {
   return resolveConfiguredBindingRecordBySessionKeyFromRegistry({

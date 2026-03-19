@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import path from "node:path";
 import type { AgentMessage, StreamFn } from "@mariozechner/pi-agent-core";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
 import { resolveUserPath } from "../utils.js";
 import { parseBooleanValue } from "../utils/boolean.js";
@@ -52,7 +52,7 @@ export type CacheTrace = {
 };
 
 type CacheTraceInit = {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
   runId?: string;
   sessionId?: string;

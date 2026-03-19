@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { scheduleDetachedLaunchdRestartHandoff } from "../daemon/launchd-restart-handoff.js";
-import { triggerHanzo BotRestart } from "./restart.js";
+import { triggerHanzoBotRestart } from "./restart.js";
 import { detectRespawnSupervisor } from "./supervisor-markers.js";
 
 type RespawnMode = "spawned" | "supervised" | "disabled" | "failed";
@@ -51,7 +51,7 @@ export function restartGatewayProcessWithFreshPid(): GatewayRespawnResult {
       };
     }
     if (supervisor === "schtasks") {
-      const restart = triggerHanzo BotRestart();
+      const restart = triggerHanzoBotRestart();
       if (!restart.ok) {
         return {
           mode: "failed",

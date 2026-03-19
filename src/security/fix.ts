@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { createConfigIO } from "../config/config.js";
 import { collectIncludePathsRecursive } from "../config/includes-scan.js";
 import { resolveConfigPath, resolveOAuthDir, resolveStateDir } from "../config/paths.js";
@@ -184,7 +184,7 @@ async function safeAclReset(params: {
 }
 
 function setGroupPolicyAllowlist(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: string;
   changes: string[];
   policyFlips: Set<string>;
@@ -192,7 +192,7 @@ function setGroupPolicyAllowlist(params: {
   if (!params.cfg.channels) {
     return;
   }
-  const section = params.cfg.channels[params.channel as keyof Hanzo BotConfig["channels"]] as
+  const section = params.cfg.channels[params.channel as keyof HanzoBotConfig["channels"]] as
     | Record<string, unknown>
     | undefined;
   if (!section || typeof section !== "object") {
@@ -229,7 +229,7 @@ function setGroupPolicyAllowlist(params: {
 }
 
 function setWhatsAppGroupAllowFromFromStore(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   storeAllowFrom: string[];
   changes: string[];
   policyFlips: Set<string>;
@@ -273,8 +273,8 @@ function setWhatsAppGroupAllowFromFromStore(params: {
   }
 }
 
-function applyConfigFixes(params: { cfg: Hanzo BotConfig; env: NodeJS.ProcessEnv }): {
-  cfg: Hanzo BotConfig;
+function applyConfigFixes(params: { cfg: HanzoBotConfig; env: NodeJS.ProcessEnv }): {
+  cfg: HanzoBotConfig;
   changes: string[];
   policyFlips: Set<string>;
 } {
@@ -305,7 +305,7 @@ function applyConfigFixes(params: { cfg: Hanzo BotConfig; env: NodeJS.ProcessEnv
 async function chmodCredentialsAndAgentState(params: {
   env: NodeJS.ProcessEnv;
   stateDir: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   actions: SecurityFixAction[];
   applyPerms: (params: {
     path: string;

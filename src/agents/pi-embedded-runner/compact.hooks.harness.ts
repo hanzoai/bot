@@ -68,7 +68,7 @@ export const resolveMemorySearchConfigMock = vi.fn(() => ({
 export const resolveSessionAgentIdMock = vi.fn(() => "main");
 export const estimateTokensMock = vi.fn((_message?: unknown) => 10);
 export const sessionAbortCompactionMock: Mock<(reason?: unknown) => void> = vi.fn();
-export const createHanzo BotCodingToolsMock = vi.fn(() => []);
+export const createHanzoBotCodingToolsMock = vi.fn(() => []);
 
 export function resetCompactHooksHarnessMocks(): void {
   hookRunner.hasHooks.mockReset();
@@ -135,8 +135,8 @@ export function resetCompactHooksHarnessMocks(): void {
   estimateTokensMock.mockReset();
   estimateTokensMock.mockReturnValue(10);
   sessionAbortCompactionMock.mockReset();
-  createHanzo BotCodingToolsMock.mockReset();
-  createHanzo BotCodingToolsMock.mockReturnValue([]);
+  createHanzoBotCodingToolsMock.mockReset();
+  createHanzoBotCodingToolsMock.mockReturnValue([]);
 }
 
 export async function loadCompactHooksHarness(): Promise<{
@@ -225,7 +225,7 @@ export async function loadCompactHooksHarness(): Promise<{
   }));
 
   vi.doMock("../models-config.js", () => ({
-    ensureHanzo BotModelsJson: vi.fn(async () => {}),
+    ensureHanzoBotModelsJson: vi.fn(async () => {}),
   }));
 
   vi.doMock("../model-auth.js", () => ({
@@ -271,7 +271,7 @@ export async function loadCompactHooksHarness(): Promise<{
   }));
 
   vi.doMock("../docs-path.js", () => ({
-    resolveHanzo BotDocsPath: vi.fn(async () => undefined),
+    resolveHanzoBotDocsPath: vi.fn(async () => undefined),
   }));
 
   vi.doMock("../channel-tools.js", () => ({
@@ -280,7 +280,7 @@ export async function loadCompactHooksHarness(): Promise<{
   }));
 
   vi.doMock("../pi-tools.js", () => ({
-    createHanzo BotCodingTools: createHanzo BotCodingToolsMock,
+    createHanzoBotCodingTools: createHanzoBotCodingToolsMock,
   }));
 
   vi.doMock("./google.js", () => ({
@@ -318,7 +318,7 @@ export async function loadCompactHooksHarness(): Promise<{
   }));
 
   vi.doMock("../agent-paths.js", () => ({
-    resolveHanzo BotAgentDir: vi.fn(() => "/tmp"),
+    resolveHanzoBotAgentDir: vi.fn(() => "/tmp"),
   }));
 
   vi.doMock("../agent-scope.js", () => ({

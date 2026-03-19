@@ -148,7 +148,7 @@ function matchesExpectedPluginId(params: {
   );
 }
 
-function ensureHanzo BotExtensions(params: { manifest: PackageManifest }):
+function ensureHanzoBotExtensions(params: { manifest: PackageManifest }):
   | {
       ok: true;
       entries: string[];
@@ -449,7 +449,7 @@ async function detectNativePackageInstallSource(packageDir: string): Promise<boo
 
   try {
     const manifest = await readJsonFile<PackageManifest>(manifestPath);
-    return ensureHanzo BotExtensions({ manifest }).ok;
+    return ensureHanzoBotExtensions({ manifest }).ok;
   } catch {
     return false;
   }
@@ -474,7 +474,7 @@ async function installPluginFromPackageDir(
     return { ok: false, error: `invalid package.json: ${String(err)}` };
   }
 
-  const extensionsResult = ensureHanzo BotExtensions({
+  const extensionsResult = ensureHanzoBotExtensions({
     manifest,
   });
   if (!extensionsResult.ok) {

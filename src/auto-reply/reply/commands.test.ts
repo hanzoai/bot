@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { updateSessionStore, type SessionEntry } from "../../config/sessions.js";
 import { typedCases } from "../../test-utils/typed-cases.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../../utils/message-channel.js";
@@ -187,7 +187,7 @@ async function readJsonFile<T>(filePath: string): Promise<T> {
   return JSON.parse(await fs.readFile(filePath, "utf-8")) as T;
 }
 
-function buildParams(commandBody: string, cfg: Hanzo BotConfig, ctxOverrides?: Partial<MsgContext>) {
+function buildParams(commandBody: string, cfg: HanzoBotConfig, ctxOverrides?: Partial<MsgContext>) {
   return buildCommandTestParams(commandBody, cfg, ctxOverrides, { workspaceDir: testWorkspaceDir });
 }
 
@@ -196,7 +196,7 @@ describe("handleCommands gating", () => {
     const cases = typedCases<{
       name: string;
       commandBody: string;
-      makeCfg: () => Hanzo BotConfig;
+      makeCfg: () => HanzoBotConfig;
       applyParams?: (params: ReturnType<typeof buildParams>) => void;
       expectedText: string;
     }>([
@@ -207,7 +207,7 @@ describe("handleCommands gating", () => {
           ({
             commands: { bash: false, text: true },
             whatsapp: { allowFrom: ["*"] },
-          }) as Hanzo BotConfig,
+          }) as HanzoBotConfig,
         expectedText: "bash is disabled",
       },
       {
@@ -217,7 +217,7 @@ describe("handleCommands gating", () => {
           ({
             commands: { bash: true, text: true },
             whatsapp: { allowFrom: ["*"] },
-          }) as Hanzo BotConfig,
+          }) as HanzoBotConfig,
         applyParams: (params: ReturnType<typeof buildParams>) => {
           params.elevated = {
             enabled: true,
@@ -234,7 +234,7 @@ describe("handleCommands gating", () => {
           ({
             commands: { config: false, debug: false, text: true },
             channels: { whatsapp: { allowFrom: ["*"] } },
-          }) as Hanzo BotConfig,
+          }) as HanzoBotConfig,
         applyParams: (params: ReturnType<typeof buildParams>) => {
           params.command.senderIsOwner = true;
         },
@@ -247,7 +247,7 @@ describe("handleCommands gating", () => {
           ({
             commands: { config: false, debug: false, text: true },
             channels: { whatsapp: { allowFrom: ["*"] } },
-          }) as Hanzo BotConfig,
+          }) as HanzoBotConfig,
         applyParams: (params: ReturnType<typeof buildParams>) => {
           params.command.senderIsOwner = true;
         },
@@ -265,7 +265,7 @@ describe("handleCommands gating", () => {
           return {
             commands: inheritedCommands as never,
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as Hanzo BotConfig;
+          } as HanzoBotConfig;
         },
         expectedText: "bash is disabled",
       },
@@ -281,7 +281,7 @@ describe("handleCommands gating", () => {
           return {
             commands: inheritedCommands as never,
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as Hanzo BotConfig;
+          } as HanzoBotConfig;
         },
         applyParams: (params: ReturnType<typeof buildParams>) => {
           params.command.senderIsOwner = true;
@@ -300,7 +300,7 @@ describe("handleCommands gating", () => {
           return {
             commands: inheritedCommands as never,
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as Hanzo BotConfig;
+          } as HanzoBotConfig;
         },
         applyParams: (params: ReturnType<typeof buildParams>) => {
           params.command.senderIsOwner = true;
@@ -331,7 +331,7 @@ describe("/approve command", () => {
       approvers: string[];
       target: "dm";
     } | null = { enabled: true, approvers: ["123"], target: "dm" },
-  ): Hanzo BotConfig {
+  ): HanzoBotConfig {
     return {
       commands: { text: true },
       channels: {
@@ -340,14 +340,14 @@ describe("/approve command", () => {
           ...(execApprovals ? { execApprovals } : {}),
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   it("rejects invalid usage", async () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/approve", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -358,7 +358,7 @@ describe("/approve command", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/approve abc allow-once", cfg, { SenderId: "123" });
 
     callGatewayMock.mockResolvedValue({ ok: true });
@@ -466,7 +466,7 @@ describe("/approve command", () => {
   it("enforces gateway approval scopes", async () => {
     const cfg = {
       commands: { text: true },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const cases = [
       {
         scopes: ["operator.write"],
@@ -520,7 +520,7 @@ describe("/compact command", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/status", cfg);
 
     const result = await handleCompactCommand(
@@ -538,7 +538,7 @@ describe("/compact command", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/compact", cfg);
 
     const result = await handleCompactCommand(
@@ -562,7 +562,7 @@ describe("/compact command", () => {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
       session: { store: "/tmp/openclaw-session-store.json" },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/compact: focus on decisions", cfg, {
       From: "+15550001",
       To: "+15550002",
@@ -619,7 +619,7 @@ describe("abort trigger command", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("stop", cfg);
     const sessionEntry: SessionEntry = {
       sessionId: "session-1",
@@ -741,7 +741,7 @@ describe("handleCommands owner gating for privileged show commands", () => {
           const params = buildParams("/config show", {
             commands: { config: true, text: true },
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as Hanzo BotConfig);
+          } as HanzoBotConfig);
           params.command.senderIsOwner = false;
           return params;
         },
@@ -760,7 +760,7 @@ describe("handleCommands owner gating for privileged show commands", () => {
           const params = buildParams("/config show messages.ackReaction", {
             commands: { config: true, text: true },
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as Hanzo BotConfig);
+          } as HanzoBotConfig);
           params.command.senderIsOwner = true;
           return params;
         },
@@ -775,7 +775,7 @@ describe("handleCommands owner gating for privileged show commands", () => {
           const params = buildParams("/debug show", {
             commands: { debug: true, text: true },
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as Hanzo BotConfig);
+          } as HanzoBotConfig);
           params.command.senderIsOwner = false;
           return params;
         },
@@ -790,7 +790,7 @@ describe("handleCommands owner gating for privileged show commands", () => {
           const params = buildParams("/debug show", {
             commands: { debug: true, text: true },
             channels: { whatsapp: { allowFrom: ["*"] } },
-          } as Hanzo BotConfig);
+          } as HanzoBotConfig);
           params.command.senderIsOwner = true;
           return params;
         },
@@ -817,7 +817,7 @@ describe("handleCommands /config configWrites gating", () => {
           const params = buildParams('/config set messages.ackReaction=":)"', {
             commands: { config: true, text: true },
             channels: { whatsapp: { allowFrom: ["*"], configWrites: false } },
-          } as Hanzo BotConfig);
+          } as HanzoBotConfig);
           params.command.senderIsOwner = true;
           return params;
         })(),
@@ -838,7 +838,7 @@ describe("handleCommands /config configWrites gating", () => {
                   },
                 },
               },
-            } as Hanzo BotConfig,
+            } as HanzoBotConfig,
             {
               AccountId: "default",
               Provider: "telegram",
@@ -858,7 +858,7 @@ describe("handleCommands /config configWrites gating", () => {
             {
               commands: { config: true, text: true },
               channels: { telegram: { configWrites: true } },
-            } as Hanzo BotConfig,
+            } as HanzoBotConfig,
             {
               Provider: "telegram",
               Surface: "telegram",
@@ -883,7 +883,7 @@ describe("handleCommands /config configWrites gating", () => {
   it("enforces gateway client permissions for /config commands", async () => {
     const baseCfg = {
       commands: { config: true, text: true },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const cases = [
       {
         name: "blocks /config set from gateway clients without operator.admin",
@@ -941,7 +941,7 @@ describe("handleCommands /config configWrites gating", () => {
             const result = await handleCommands(params);
             expect(result.shouldContinue).toBe(false);
             expect(result.reply?.text).toContain("Config updated");
-            const written = await readJsonFile<Hanzo BotConfig>(configPath);
+            const written = await readJsonFile<HanzoBotConfig>(configPath);
             expect(written.messages?.ackReaction).toBe(":D");
           });
         },
@@ -978,7 +978,7 @@ describe("handleCommands /config configWrites gating", () => {
                     },
                   },
                 },
-              } as Hanzo BotConfig,
+              } as HanzoBotConfig,
               {
                 Provider: INTERNAL_MESSAGE_CHANNEL,
                 Surface: INTERNAL_MESSAGE_CHANNEL,
@@ -990,7 +990,7 @@ describe("handleCommands /config configWrites gating", () => {
             const result = await handleCommands(params);
             expect(result.shouldContinue).toBe(false);
             expect(result.reply?.text).toContain("Config updated");
-            const written = await readJsonFile<Hanzo BotConfig>(configPath);
+            const written = await readJsonFile<HanzoBotConfig>(configPath);
             expect(written.channels?.telegram?.accounts?.work?.enabled).toBe(false);
           });
         },
@@ -1008,7 +1008,7 @@ describe("handleCommands bash alias", () => {
     const cfg = {
       commands: { bash: true, text: true },
       whatsapp: { allowFrom: ["*"] },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     for (const aliasCommand of ["!poll", "!stop"]) {
       resetBashChatCommandForTests();
       const params = buildParams(aliasCommand, cfg);
@@ -1021,7 +1021,7 @@ describe("handleCommands bash alias", () => {
 
 function buildPolicyParams(
   commandBody: string,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   ctxOverrides?: Partial<MsgContext>,
 ): HandleCommandsParams {
   const ctx = {
@@ -1074,7 +1074,7 @@ describe("handleCommands /allowlist", () => {
     const cfg = {
       commands: { text: true },
       channels: { telegram: { allowFrom: ["123", "@Alice"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildPolicyParams("/allowlist list dm", cfg);
     const result = await handleCommands(params);
 
@@ -1112,11 +1112,11 @@ describe("handleCommands /allowlist", () => {
               const params = buildPolicyParams("/allowlist add dm 789", {
                 commands: { text: true, config: true },
                 channels: { telegram: { allowFrom: ["123"] } },
-              } as Hanzo BotConfig);
+              } as HanzoBotConfig);
               const result = await handleCommands(params);
 
               expect(result.shouldContinue).toBe(false);
-              const written = await readJsonFile<Hanzo BotConfig>(configPath);
+              const written = await readJsonFile<HanzoBotConfig>(configPath);
               expect(written.channels?.telegram?.allowFrom, "default account").toEqual([
                 "123",
                 "789",
@@ -1150,7 +1150,7 @@ describe("handleCommands /allowlist", () => {
             {
               commands: { text: true, config: true },
               channels: { telegram: { accounts: { work: { allowFrom: ["123"] } } } },
-            } as Hanzo BotConfig,
+            } as HanzoBotConfig,
             {
               AccountId: "work",
             },
@@ -1184,7 +1184,7 @@ describe("handleCommands /allowlist", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     readConfigFileSnapshotMock.mockResolvedValueOnce({
       valid: true,
       parsed: structuredClone(cfg),
@@ -1215,7 +1215,7 @@ describe("handleCommands /allowlist", () => {
     const cfg = {
       commands: { text: true, config: true },
       channels: { telegram: { allowFrom: ["123"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildPolicyParams("/allowlist remove dm --store 789", cfg);
     const result = await handleCommands(params);
 
@@ -1237,7 +1237,7 @@ describe("handleCommands /allowlist", () => {
     const cfg = {
       commands: { text: true, config: true },
       channels: { telegram: { allowFrom: ["123"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildPolicyParams("/allowlist add dm --account __proto__ 789", cfg);
     const result = await handleCommands(params);
 
@@ -1292,7 +1292,7 @@ describe("handleCommands /allowlist", () => {
               configWrites: true,
             },
           },
-        } as Hanzo BotConfig;
+        } as HanzoBotConfig;
 
         const params = buildPolicyParams(`/allowlist remove dm ${testCase.removeId}`, cfg, {
           Provider: testCase.provider,
@@ -1301,7 +1301,7 @@ describe("handleCommands /allowlist", () => {
         const result = await handleCommands(params);
 
         expect(result.shouldContinue).toBe(false);
-        const written = await readJsonFile<Hanzo BotConfig>(configPath);
+        const written = await readJsonFile<HanzoBotConfig>(configPath);
         const channelConfig = written.channels?.[testCase.provider];
         expect(channelConfig?.allowFrom).toEqual(testCase.expectedAllowFrom);
         expect(channelConfig?.dm?.allowFrom).toBeUndefined();
@@ -1315,7 +1315,7 @@ describe("/models command", () => {
   const cfg = {
     commands: { text: true },
     agents: { defaults: { model: { primary: "anthropic/claude-opus-4-5" } } },
-  } as unknown as Hanzo BotConfig;
+  } as unknown as HanzoBotConfig;
 
   it.each(["discord", "whatsapp"])("lists providers on %s (text)", async (surface) => {
     const params = buildPolicyParams("/models", cfg, { Provider: surface, Surface: surface });
@@ -1414,7 +1414,7 @@ describe("/models command", () => {
           imageModel: "visionpro/studio-v1",
         },
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
 
     // Use discord surface for text-based output tests
     const providerList = await handleCommands(
@@ -1439,7 +1439,7 @@ describe("/models command", () => {
         defaults: { model: { primary: "anthropic/claude-opus-4-5" } },
         list: [{ id: "support", model: "localai/ultra-chat" }],
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
     const params = buildPolicyParams("/models", scopedCfg, {
       Provider: "discord",
       Surface: "discord",
@@ -1468,7 +1468,7 @@ describe("handleCommands plugin commands", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/card", cfg);
     const commandResult = await handleCommands(params);
 
@@ -1483,7 +1483,7 @@ describe("handleCommands identity", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/whoami", cfg, {
       SenderId: "12345",
       SenderUsername: "TestUser",
@@ -1506,7 +1506,7 @@ describe("handleCommands hooks", () => {
         params: buildParams("/new take notes", {
           commands: { text: true },
           channels: { whatsapp: { allowFrom: ["*"] } },
-        } as Hanzo BotConfig),
+        } as HanzoBotConfig),
         expectedCall: expect.objectContaining({ type: "command", action: "new" }),
       },
       {
@@ -1517,7 +1517,7 @@ describe("handleCommands hooks", () => {
             {
               commands: { text: true },
               channels: { telegram: { allowFrom: ["*"] } },
-            } as Hanzo BotConfig,
+            } as HanzoBotConfig,
             {
               Provider: "telegram",
               Surface: "telegram",
@@ -1557,7 +1557,7 @@ describe("handleCommands context", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const cases = [
       {
         commandBody: "/context",
@@ -1593,7 +1593,7 @@ describe("handleCommands subagents", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/subagents list", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -1618,7 +1618,7 @@ describe("handleCommands subagents", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/subagents list", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -1653,7 +1653,7 @@ describe("handleCommands subagents", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/subagents list", cfg, {
       CommandSource: "native",
       CommandTargetSessionKey: "agent:main:main",
@@ -1694,7 +1694,7 @@ describe("handleCommands subagents", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/subagents list", cfg);
     const result = await handleCommands(params);
 
@@ -1731,7 +1731,7 @@ describe("handleCommands subagents", () => {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
       session: { store: storePath },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/subagents list", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -1802,7 +1802,7 @@ describe("handleCommands subagents", () => {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
       session: { mainKey: "main", scope: "per-sender" },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/status", cfg);
     if (verboseLevel === "on") {
       params.resolvedVerboseLevel = "on";
@@ -1821,7 +1821,7 @@ describe("handleCommands subagents", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const cases = [
       { commandBody: "/subagents foo", expectedText: "/subagents" },
       { commandBody: "/subagents info", expectedText: "/subagents info" },
@@ -1852,7 +1852,7 @@ describe("handleCommands subagents", () => {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
       session: { mainKey: "main", scope: "per-sender" },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/subagents info 1", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -1875,7 +1875,7 @@ describe("handleCommands subagents", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/kill 1", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -1909,7 +1909,7 @@ describe("handleCommands subagents", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/kill 1", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -1946,7 +1946,7 @@ describe("handleCommands subagents", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/subagents send 1 continue with follow-up details", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -2009,7 +2009,7 @@ describe("handleCommands subagents", () => {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
       session: { store: storePath },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/subagents send 1 continue with follow-up details", cfg);
     params.sessionKey = leafKey;
 
@@ -2049,7 +2049,7 @@ describe("handleCommands subagents", () => {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
       session: { store: storePath },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/steer 1 check timer.ts instead", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -2108,7 +2108,7 @@ describe("handleCommands subagents", () => {
     const cfg = {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/steer 1 check timer.ts instead", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);
@@ -2127,7 +2127,7 @@ describe("handleCommands /tts", () => {
       commands: { text: true },
       channels: { whatsapp: { allowFrom: ["*"] } },
       messages: { tts: { prefsPath: path.join(testWorkspaceDir, "tts.json") } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const params = buildParams("/tts", cfg);
     const result = await handleCommands(params);
     expect(result.shouldContinue).toBe(false);

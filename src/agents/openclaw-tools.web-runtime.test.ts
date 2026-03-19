@@ -1,23 +1,23 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   activateSecretsRuntimeSnapshot,
   clearSecretsRuntimeSnapshot,
   prepareSecretsRuntimeSnapshot,
 } from "../secrets/runtime.js";
 import { withFetchPreconnect } from "../test-utils/fetch-mock.js";
-import { createHanzo BotTools } from "./openclaw-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
 
 vi.mock("../plugins/tools.js", () => ({
   resolvePluginTools: () => [],
 }));
 
-function asConfig(value: unknown): Hanzo BotConfig {
-  return value as Hanzo BotConfig;
+function asConfig(value: unknown): HanzoBotConfig {
+  return value as HanzoBotConfig;
 }
 
-function findTool(name: string, config: Hanzo BotConfig) {
-  const allTools = createHanzo BotTools({ config, sandboxed: true });
+function findTool(name: string, config: HanzoBotConfig) {
+  const allTools = createHanzoBotTools({ config, sandboxed: true });
   const tool = allTools.find((candidate) => candidate.name === name);
   expect(tool).toBeDefined();
   if (!tool) {
@@ -32,7 +32,7 @@ function makeHeaders(map: Record<string, string>): { get: (key: string) => strin
   };
 }
 
-async function prepareAndActivate(params: { config: Hanzo BotConfig; env?: NodeJS.ProcessEnv }) {
+async function prepareAndActivate(params: { config: HanzoBotConfig; env?: NodeJS.ProcessEnv }) {
   const snapshot = await prepareSecretsRuntimeSnapshot({
     config: params.config,
     env: params.env,

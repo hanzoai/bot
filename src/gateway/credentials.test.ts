@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   resolveGatewayCredentialsFromConfig,
   resolveGatewayCredentialsFromValues,
 } from "./credentials.js";
 
-function cfg(input: Partial<Hanzo BotConfig>): Hanzo BotConfig {
-  return input as Hanzo BotConfig;
+function cfg(input: Partial<HanzoBotConfig>): HanzoBotConfig {
+  return input as HanzoBotConfig;
 }
 
 type ResolveFromConfigInput = Parameters<typeof resolveGatewayCredentialsFromConfig>[0];
-type GatewayConfig = NonNullable<Hanzo BotConfig["gateway"]>;
+type GatewayConfig = NonNullable<HanzoBotConfig["gateway"]>;
 
 const DEFAULT_GATEWAY_AUTH = { token: "config-token", password: "config-password" }; // pragma: allowlist secret
 const DEFAULT_REMOTE_AUTH = { token: "remote-token", password: "remote-password" }; // pragma: allowlist secret
@@ -65,7 +65,7 @@ function resolveLocalModeWithUnresolvedPassword(mode: "none" | "trusted-proxy") 
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig,
+    } as unknown as HanzoBotConfig,
     env: {} as NodeJS.ProcessEnv,
     includeLegacyEnv: false,
   });
@@ -101,7 +101,7 @@ function expectUnresolvedLocalAuthSecretRefFailure(params: {
             default: { source: "env" },
           },
         },
-      } as unknown as Hanzo BotConfig,
+      } as unknown as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
       includeLegacyEnv: false,
     }),
@@ -403,7 +403,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
               default: { source: "env" },
             },
           },
-        } as unknown as Hanzo BotConfig,
+        } as unknown as HanzoBotConfig,
         env: {} as NodeJS.ProcessEnv,
         includeLegacyEnv: false,
         remoteTokenFallback: "remote-only",
@@ -428,7 +428,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
   }
 
   it("ignores unresolved local token ref in remote-only mode when local auth mode is token", () => {
@@ -474,7 +474,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
             default: { source: "env" },
           },
         },
-      } as unknown as Hanzo BotConfig,
+      } as unknown as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
       includeLegacyEnv: false,
     });
@@ -501,7 +501,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
               default: { source: "env" },
             },
           },
-        } as unknown as Hanzo BotConfig,
+        } as unknown as HanzoBotConfig,
         env: {} as NodeJS.ProcessEnv,
         includeLegacyEnv: false,
         remotePasswordFallback: "remote-only", // pragma: allowlist secret

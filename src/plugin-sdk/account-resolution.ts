@@ -1,4 +1,4 @@
-export type { Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
 
 export { createAccountActionGate } from "../channels/plugins/account-action-gate.js";
 export { createAccountListHelpers } from "../channels/plugins/account-helpers.js";
