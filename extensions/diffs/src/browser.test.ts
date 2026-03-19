@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../api.js";
+import type { HanzoBotConfig } from "../api.js";
 import { createTempDiffRoot } from "./test-helpers.js";
 
 const { launchMock } = vi.hoisted(() => ({
@@ -182,12 +182,12 @@ describe("PlaywrightDiffScreenshotter", () => {
   });
 });
 
-function createConfig(): Hanzo BotConfig {
+function createConfig(): HanzoBotConfig {
   return {
     browser: {
       executablePath: process.execPath,
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 async function createScreenshotterHarness(options?: {

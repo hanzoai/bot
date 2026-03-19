@@ -15,7 +15,7 @@ import { resolveMatrixRoomKeyBackupIssue } from "./matrix/backup-health.js";
 import { resolveMatrixAuthContext } from "./matrix/client.js";
 import { setMatrixSdkConsoleLogging, setMatrixSdkLogMode } from "./matrix/client/logging.js";
 import { resolveMatrixConfigPath, updateMatrixAccountConfig } from "./matrix/config-update.js";
-import { isHanzo BotManagedMatrixDevice } from "./matrix/device-health.js";
+import { isHanzoBotManagedMatrixDevice } from "./matrix/device-health.js";
 import {
   inspectMatrixDirectRooms,
   repairMatrixDirectRooms,
@@ -134,7 +134,7 @@ type MatrixCliAccountAddResult = {
   useEnv: boolean;
   deviceHealth: {
     currentDeviceId: string | null;
-    staleHanzo BotDeviceIds: string[];
+    staleHanzoBotDeviceIds: string[];
     error?: string;
   };
   verificationBootstrap: {
@@ -266,20 +266,20 @@ async function addMatrixAccount(params: {
 
   let deviceHealth: MatrixCliAccountAddResult["deviceHealth"] = {
     currentDeviceId: null,
-    staleHanzo BotDeviceIds: [],
+    staleHanzoBotDeviceIds: [],
   };
   try {
     const addedDevices = await listMatrixOwnDevices({ accountId });
     deviceHealth = {
       currentDeviceId: addedDevices.find((device) => device.current)?.deviceId ?? null,
-      staleHanzo BotDeviceIds: addedDevices
-        .filter((device) => !device.current && isHanzo BotManagedMatrixDevice(device.displayName))
+      staleHanzoBotDeviceIds: addedDevices
+        .filter((device) => !device.current && isHanzoBotManagedMatrixDevice(device.displayName))
         .map((device) => device.deviceId),
     };
   } catch (err) {
     deviceHealth = {
       currentDeviceId: null,
-      staleHanzo BotDeviceIds: [],
+      staleHanzoBotDeviceIds: [],
       error: toErrorMessage(err),
     };
   }
@@ -739,9 +739,9 @@ export function registerMatrixCli(params: { program: Command }): void {
             }
             if (result.deviceHealth.error) {
               console.error(`Matrix device health warning: ${result.deviceHealth.error}`);
-            } else if (result.deviceHealth.staleHanzo BotDeviceIds.length > 0) {
+            } else if (result.deviceHealth.staleHanzoBotDeviceIds.length > 0) {
               console.log(
-                `Matrix device hygiene warning: stale Hanzo Bot devices detected (${result.deviceHealth.staleHanzo BotDeviceIds.join(", ")}). Run 'openclaw matrix devices prune-stale --account ${result.accountId}'.`,
+                `Matrix device hygiene warning: stale Hanzo Bot devices detected (${result.deviceHealth.staleHanzoBotDeviceIds.join(", ")}). Run 'openclaw matrix devices prune-stale --account ${result.accountId}'.`,
               );
             }
             if (result.profile.attempted) {

@@ -1,5 +1,5 @@
 import { formatCliCommand } from "../cli/command-format.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { normalizeStoredCronJobs } from "../cron/store-migration.js";
 import { resolveCronStorePath, loadCronStore, saveCronStore } from "../cron/store.js";
 import type { CronJob } from "../cron/types.js";
@@ -119,7 +119,7 @@ function migrateLegacyNotifyFallback(params: {
 }
 
 export async function maybeRepairLegacyCronStore(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   options: DoctorOptions;
   prompter: Pick<DoctorPrompter, "confirm">;
 }) {

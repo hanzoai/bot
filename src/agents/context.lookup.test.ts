@@ -10,10 +10,10 @@ function mockContextDeps(params: {
     loadConfig: params.loadConfig,
   }));
   vi.doMock("./models-config.js", () => ({
-    ensureHanzo BotModelsJson: vi.fn(async () => {}),
+    ensureHanzoBotModelsJson: vi.fn(async () => {}),
   }));
   vi.doMock("./agent-paths.js", () => ({
-    resolveHanzo BotAgentDir: () => "/tmp/openclaw-agent",
+    resolveHanzoBotAgentDir: () => "/tmp/openclaw-agent",
   }));
   vi.doMock("./pi-model-discovery.js", () => ({
     discoverAuthStorage: vi.fn(() => ({})),

@@ -7,7 +7,7 @@ import { resolveBrowserControlAuth } from "../browser/control-auth.js";
 import { hasPotentialConfiguredChannels } from "../channels/config-presence.js";
 import type { listChannelPlugins } from "../channels/plugins/index.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { ConfigFileSnapshot, Hanzo BotConfig } from "../config/config.js";
+import type { ConfigFileSnapshot, HanzoBotConfig } from "../config/config.js";
 import { resolveConfigPath, resolveStateDir } from "../config/paths.js";
 import { hasConfiguredSecretInput } from "../config/types.secrets.js";
 import { resolveGatewayAuth } from "../gateway/auth.js";
@@ -61,8 +61,8 @@ export type SecurityAuditReport = {
 };
 
 export type SecurityAuditOptions = {
-  config: Hanzo BotConfig;
-  sourceConfig?: Hanzo BotConfig;
+  config: HanzoBotConfig;
+  sourceConfig?: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
   platform?: NodeJS.Platform;
   deep?: boolean;
@@ -91,8 +91,8 @@ export type SecurityAuditOptions = {
 };
 
 type AuditExecutionContext = {
-  cfg: Hanzo BotConfig;
-  sourceConfig: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
+  sourceConfig: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
   platform: NodeJS.Platform;
   includeFilesystem: boolean;
@@ -191,7 +191,7 @@ function hasNonEmptyString(value: unknown): boolean {
   return typeof value === "string" && value.trim().length > 0;
 }
 
-function isFeishuDocToolEnabled(cfg: Hanzo BotConfig): boolean {
+function isFeishuDocToolEnabled(cfg: HanzoBotConfig): boolean {
   const channels = asRecord(cfg.channels);
   const feishu = asRecord(channels?.feishu);
   if (!feishu || feishu.enabled === false) {
@@ -363,8 +363,8 @@ async function collectFilesystemFindings(params: {
 }
 
 function collectGatewayConfigFindings(
-  cfg: Hanzo BotConfig,
-  sourceConfig: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
+  sourceConfig: HanzoBotConfig,
   env: NodeJS.ProcessEnv,
 ): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
@@ -744,7 +744,7 @@ function isStrictLoopbackTrustedProxyEntry(entry: string): boolean {
 }
 
 function collectBrowserControlFindings(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv,
 ): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
@@ -840,7 +840,7 @@ function collectBrowserControlFindings(
   return findings;
 }
 
-function collectLoggingFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+function collectLoggingFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const redact = cfg.logging?.redactSensitive;
   if (redact !== "off") {
     return [];
@@ -856,7 +856,7 @@ function collectLoggingFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
   ];
 }
 
-function collectElevatedFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+function collectElevatedFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const enabled = cfg.tools?.elevated?.enabled;
   const allowFrom = cfg.tools?.elevated?.allowFrom ?? {};
@@ -891,7 +891,7 @@ function collectElevatedFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
   return findings;
 }
 
-function collectExecRuntimeFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+function collectExecRuntimeFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const globalExecHost = cfg.tools?.exec?.host;
   const defaultSandboxMode = resolveSandboxConfigForAgent(cfg).mode;
@@ -1083,7 +1083,7 @@ function collectExecRuntimeFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[
 }
 
 async function maybeProbeGateway(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
   timeoutMs: number;
   probe: ProbeGatewayFn;

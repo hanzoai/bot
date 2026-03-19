@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { resetInboundDedupe } from "openclaw/plugin-sdk/reply-runtime";
 import type { GetReplyOptions, MsgContext } from "openclaw/plugin-sdk/reply-runtime";
 import { beforeEach, vi, type Mock } from "vitest";
@@ -145,7 +145,7 @@ export const telegramBotDepsForTest: TelegramBotDeps = {
   loadConfig: (() =>
     ({
       channels: { telegram: { dmPolicy: "open", allowFrom: ["*"] } },
-    }) as Hanzo BotConfig) as TelegramBotDeps["loadConfig"],
+    }) as HanzoBotConfig) as TelegramBotDeps["loadConfig"],
   resolveStorePath: vi.fn(
     (storePath?: string) => storePath ?? "/tmp/telegram-media-sessions.json",
   ) as TelegramBotDeps["resolveStorePath"],

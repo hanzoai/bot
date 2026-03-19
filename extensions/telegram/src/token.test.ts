@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import { withStateDirEnv } from "../../../src/test-helpers/state-dir-env.js";
 import { resolveTelegramToken } from "./token.js";
 import { readTelegramUpdateOffset, writeTelegramUpdateOffset } from "./update-offset-store.js";
@@ -36,7 +36,7 @@ describe("resolveTelegramToken", () => {
       envToken: "env-token",
       cfg: {
         channels: { telegram: { botToken: "cfg-token" } },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       expected: { token: "cfg-token", source: "config" },
     },
     {
@@ -44,7 +44,7 @@ describe("resolveTelegramToken", () => {
       envToken: "env-token",
       cfg: {
         channels: { telegram: {} },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       expected: { token: "env-token", source: "env" },
     },
     {
@@ -52,11 +52,11 @@ describe("resolveTelegramToken", () => {
       envToken: "",
       cfg: {
         channels: { telegram: { tokenFile: "" } },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       resolveCfg: () =>
         ({
           channels: { telegram: { tokenFile: createTokenFile("token.txt") } },
-        }) as Hanzo BotConfig,
+        }) as HanzoBotConfig,
       expected: { token: "file-token", source: "tokenFile" },
     },
     {
@@ -64,7 +64,7 @@ describe("resolveTelegramToken", () => {
       envToken: "",
       cfg: {
         channels: { telegram: { botToken: "cfg-token" } },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       expected: { token: "cfg-token", source: "config" },
     },
   ])("$name", ({ envToken, cfg, resolveCfg, expected }) => {
@@ -81,7 +81,7 @@ describe("resolveTelegramToken", () => {
     fs.writeFileSync(tokenFile, "file-token\n", "utf-8");
     fs.symlinkSync(tokenFile, tokenLink);
 
-    const cfg = { channels: { telegram: { tokenFile: tokenLink } } } as Hanzo BotConfig;
+    const cfg = { channels: { telegram: { tokenFile: tokenLink } } } as HanzoBotConfig;
     const res = resolveTelegramToken(cfg);
     expect(res.token).toBe("");
     expect(res.source).toBe("none");
@@ -93,7 +93,7 @@ describe("resolveTelegramToken", () => {
     const tokenFile = path.join(dir, "missing-token.txt");
     const cfg = {
       channels: { telegram: { tokenFile, botToken: "cfg-token" } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const res = resolveTelegramToken(cfg);
     expect(res.token).toBe("");
     expect(res.source).toBe("none");
@@ -110,7 +110,7 @@ describe("resolveTelegramToken", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const res = resolveTelegramToken(cfg, { accountId: "careynotifications" });
     expect(res.token).toBe("acct-token");
@@ -127,7 +127,7 @@ describe("resolveTelegramToken", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const res = resolveTelegramToken(cfg, { accountId: "work" });
     expect(res.token).toBe("top-level-token");
@@ -147,7 +147,7 @@ describe("resolveTelegramToken", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const res = resolveTelegramToken(cfg, { accountId: "work" });
     expect(res.token).toBe("account-file-token");
@@ -164,7 +164,7 @@ describe("resolveTelegramToken", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const res = resolveTelegramToken(cfg, { accountId: "work" });
     expect(res.token).toBe("file-token");
@@ -181,7 +181,7 @@ describe("resolveTelegramToken", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const res = resolveTelegramToken(cfg, { accountId: "work" });
     expect(res.token).toBe("");
@@ -195,7 +195,7 @@ describe("resolveTelegramToken", () => {
           botToken: { source: "env", provider: "default", id: "TELEGRAM_BOT_TOKEN" },
         },
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
 
     expect(() => resolveTelegramToken(cfg)).toThrow(
       /channels\.telegram\.botToken: unresolved SecretRef/i,

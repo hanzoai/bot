@@ -1,13 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import { makeTempWorkspace, writeWorkspaceFile } from "../../../test-helpers/workspace.js";
 import type { AgentBootstrapHookContext } from "../../hooks.js";
 import { createHookEvent } from "../../hooks.js";
 import handler from "./handler.js";
 
-function createBootstrapExtraConfig(paths: string[]): Hanzo BotConfig {
+function createBootstrapExtraConfig(paths: string[]): HanzoBotConfig {
   return {
     hooks: {
       internal: {
@@ -24,7 +24,7 @@ function createBootstrapExtraConfig(paths: string[]): Hanzo BotConfig {
 
 async function createBootstrapContext(params: {
   workspaceDir: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   sessionKey: string;
   rootFiles: Array<{ name: string; content: string }>;
 }): Promise<AgentBootstrapHookContext> {

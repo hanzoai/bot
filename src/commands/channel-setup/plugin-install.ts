@@ -3,7 +3,7 @@ import path from "node:path";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import type { ChannelPluginCatalogEntry } from "../../channels/plugins/catalog.js";
 import { resolveBundledInstallPlanForCatalogEntry } from "../../cli/plugin-install-plan.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import {
   findBundledPluginSourceInMap,
@@ -13,7 +13,7 @@ import { clearPluginDiscoveryCache } from "../../plugins/discovery.js";
 import { enablePluginInConfig } from "../../plugins/enable.js";
 import { installPluginFromNpmSpec } from "../../plugins/install.js";
 import { buildNpmResolutionInstallFields, recordPluginInstall } from "../../plugins/installs.js";
-import { loadHanzo BotPlugins } from "../../plugins/loader.js";
+import { loadHanzoBotPlugins } from "../../plugins/loader.js";
 import { createPluginLoaderLogger } from "../../plugins/logger.js";
 import type { PluginRegistry } from "../../plugins/registry.js";
 import { getActivePluginRegistry } from "../../plugins/runtime.js";
@@ -23,7 +23,7 @@ import type { WizardPrompter } from "../../wizard/prompts.js";
 type InstallChoice = "npm" | "local" | "skip";
 
 type InstallResult = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   installed: boolean;
   pluginId?: string;
 };
@@ -67,7 +67,7 @@ function resolveLocalPath(
   return null;
 }
 
-function addPluginLoadPath(cfg: Hanzo BotConfig, pluginPath: string): Hanzo BotConfig {
+function addPluginLoadPath(cfg: HanzoBotConfig, pluginPath: string): HanzoBotConfig {
   const existing = cfg.plugins?.load?.paths ?? [];
   const merged = Array.from(new Set([...existing, pluginPath]));
   return {
@@ -113,7 +113,7 @@ async function promptInstallChoice(params: {
 }
 
 function resolveInstallDefaultChoice(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   entry: ChannelPluginCatalogEntry;
   localPath?: string | null;
   bundledLocalPath?: string | null;
@@ -140,7 +140,7 @@ function resolveInstallDefaultChoice(params: {
 }
 
 export async function ensureChannelSetupPluginInstalled(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   entry: ChannelPluginCatalogEntry;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
@@ -226,7 +226,7 @@ export async function ensureChannelSetupPluginInstalled(params: {
 }
 
 export function reloadChannelSetupPluginRegistry(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   workspaceDir?: string;
 }): void {
@@ -234,7 +234,7 @@ export function reloadChannelSetupPluginRegistry(params: {
 }
 
 function loadChannelSetupPluginRegistry(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   workspaceDir?: string;
   onlyPluginIds?: string[];
@@ -244,7 +244,7 @@ function loadChannelSetupPluginRegistry(params: {
   const workspaceDir =
     params.workspaceDir ?? resolveAgentWorkspaceDir(params.cfg, resolveDefaultAgentId(params.cfg));
   const log = createSubsystemLogger("plugins");
-  return loadHanzo BotPlugins({
+  return loadHanzoBotPlugins({
     config: params.cfg,
     workspaceDir,
     cache: false,
@@ -256,7 +256,7 @@ function loadChannelSetupPluginRegistry(params: {
 }
 
 export function reloadChannelSetupPluginRegistryForChannel(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   channel: string;
   pluginId?: string;
@@ -275,7 +275,7 @@ export function reloadChannelSetupPluginRegistryForChannel(params: {
 }
 
 export function loadChannelSetupPluginRegistrySnapshotForChannel(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   channel: string;
   pluginId?: string;

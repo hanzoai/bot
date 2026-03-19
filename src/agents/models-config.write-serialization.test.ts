@@ -5,7 +5,7 @@ import {
   installModelsConfigTestHooks,
   withModelsTempHome,
 } from "./models-config.e2e-harness.js";
-import { ensureHanzo BotModelsJson } from "./models-config.js";
+import { ensureHanzoBotModelsJson } from "./models-config.js";
 import { readGeneratedModelsJson } from "./models-config.test-utils.js";
 
 installModelsConfigTestHooks();
@@ -40,7 +40,7 @@ describe("models-config write serialization", () => {
       });
 
       try {
-        await Promise.all([ensureHanzo BotModelsJson(first), ensureHanzo BotModelsJson(second)]);
+        await Promise.all([ensureHanzoBotModelsJson(first), ensureHanzoBotModelsJson(second)]);
       } finally {
         writeSpy.mockRestore();
       }

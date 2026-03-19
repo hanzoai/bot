@@ -1,5 +1,5 @@
 import type { BaseTokenResolution } from "openclaw/plugin-sdk/channel-runtime";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/config-runtime";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/routing";
 
@@ -18,7 +18,7 @@ export function normalizeDiscordToken(raw: unknown, path: string): string | unde
 }
 
 export function resolveDiscordToken(
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
   opts: { accountId?: string | null; envToken?: string | null } = {},
 ): DiscordTokenResolution {
   const accountId = normalizeAccountId(opts.accountId);

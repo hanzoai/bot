@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { PluginSlotsConfig } from "../config/types.plugins.js";
 import type { PluginKind } from "./types.js";
 
@@ -31,13 +31,13 @@ export function defaultSlotIdForKey(slotKey: PluginSlotKey): string {
 }
 
 export type SlotSelectionResult = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   warnings: string[];
   changed: boolean;
 };
 
 export function applyExclusiveSlotSelection(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   selectedId: string;
   selectedKind?: PluginKind;
   registry?: { plugins: SlotPluginRecord[] };

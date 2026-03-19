@@ -1,6 +1,6 @@
 import os from "node:os";
 import { resolveGatewayPort } from "../config/paths.js";
-import type { Hanzo BotConfig } from "../config/types.js";
+import type { HanzoBotConfig } from "../config/types.js";
 import {
   hasConfiguredSecretInput,
   normalizeSecretInputString,
@@ -102,7 +102,7 @@ function normalizeUrl(raw: string, schemeFallback: "ws" | "wss"): string | null 
 }
 
 function resolveScheme(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   opts?: {
     forceSecure?: boolean;
   },
@@ -171,7 +171,7 @@ function resolveGatewayPasswordFromEnv(env: NodeJS.ProcessEnv): string | undefin
 }
 
 function resolvePairingSetupAuthLabel(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv,
 ): ResolveAuthLabelResult {
   const mode = cfg.gateway?.auth?.mode;
@@ -214,7 +214,7 @@ function resolvePairingSetupAuthLabel(
 }
 
 function resolvePairingSetupSharedAuth(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv,
 ): ResolveSharedAuthResult {
   const defaults = cfg.secrets?.defaults;
@@ -249,9 +249,9 @@ function resolvePairingSetupSharedAuth(
 }
 
 async function resolveGatewayTokenSecretRef(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv,
-): Promise<Hanzo BotConfig> {
+): Promise<HanzoBotConfig> {
   const hasTokenEnvCandidate = Boolean(resolveGatewayTokenFromEnv(env));
   if (hasTokenEnvCandidate) {
     return cfg;
@@ -290,9 +290,9 @@ async function resolveGatewayTokenSecretRef(
 }
 
 async function resolveGatewayPasswordSecretRef(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv,
-): Promise<Hanzo BotConfig> {
+): Promise<HanzoBotConfig> {
   const hasPasswordEnvCandidate = Boolean(resolveGatewayPasswordFromEnv(env));
   if (hasPasswordEnvCandidate) {
     return cfg;
@@ -331,15 +331,15 @@ async function resolveGatewayPasswordSecretRef(
 }
 
 async function materializePairingSetupAuthConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv,
-): Promise<Hanzo BotConfig> {
+): Promise<HanzoBotConfig> {
   const cfgWithToken = await resolveGatewayTokenSecretRef(cfg, env);
   return await resolveGatewayPasswordSecretRef(cfgWithToken, env);
 }
 
 async function resolveGatewayUrl(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   opts: {
     env: NodeJS.ProcessEnv;
     publicUrl?: string;
@@ -407,7 +407,7 @@ export function encodePairingSetupCode(payload: PairingSetupPayload): string {
 }
 
 export async function resolvePairingSetupFromConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   options: ResolvePairingSetupOptions = {},
 ): Promise<PairingSetupResolution> {
   assertExplicitGatewayAuthModeWhenBothConfigured(cfg);

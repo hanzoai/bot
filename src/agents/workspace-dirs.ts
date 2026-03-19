@@ -1,7 +1,7 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "./agent-scope.js";
 
-export function listAgentWorkspaceDirs(cfg: Hanzo BotConfig): string[] {
+export function listAgentWorkspaceDirs(cfg: HanzoBotConfig): string[] {
   const dirs = new Set<string>();
   const list = cfg.agents?.list;
   if (Array.isArray(list)) {

@@ -6,7 +6,7 @@ import {
   mockDoctorConfigSnapshot,
   note,
   readConfigFileSnapshot,
-  resolveHanzo BotPackageRoot,
+  resolveHanzoBotPackageRoot,
   runCommandWithTimeout,
   runGatewayUpdate,
   serviceInstall,
@@ -91,7 +91,7 @@ describe("doctor command", () => {
     delete process.env.BOT_UPDATE_IN_PROGRESS;
 
     const root = "/tmp/openclaw";
-    resolveHanzo BotPackageRoot.mockResolvedValueOnce(root);
+    resolveHanzoBotPackageRoot.mockResolvedValueOnce(root);
     runCommandWithTimeout.mockResolvedValueOnce({
       stdout: `${root}\n`,
       stderr: "",

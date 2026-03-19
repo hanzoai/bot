@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveSenderCommandAuthorization } from "./command-auth.js";
 
 const baseCfg = {
   commands: { useAccessGroups: true },
-} as unknown as Hanzo BotConfig;
+} as unknown as HanzoBotConfig;
 
 describe("plugin-sdk/command-auth", () => {
   it("authorizes group commands from explicit group allowlist", async () => {

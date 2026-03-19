@@ -5,7 +5,7 @@ import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { upsertAcpSessionMeta } from "../../acp/runtime/session-meta.js";
 import * as jsonFiles from "../../infra/json-files.js";
-import type { Hanzo BotConfig } from "../config.js";
+import type { HanzoBotConfig } from "../config.js";
 import {
   clearSessionStoreCacheForTest,
   loadSessionStore,
@@ -364,7 +364,7 @@ describe("session store lock (Promise chain mutex)", () => {
       session: {
         store: storePath,
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const result = await upsertAcpSessionMeta({
       cfg,

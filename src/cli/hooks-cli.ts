@@ -3,7 +3,7 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import type { Command } from "commander";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadConfig, writeConfigFile } from "../config/io.js";
 import {
   buildWorkspaceHookStatus,
@@ -63,7 +63,7 @@ function mergeHookEntries(pluginEntries: HookEntry[], workspaceEntries: HookEntr
   return Array.from(merged.values());
 }
 
-function buildHooksReport(config: Hanzo BotConfig): HookStatusReport {
+function buildHooksReport(config: HanzoBotConfig): HookStatusReport {
   const workspaceDir = resolveAgentWorkspaceDir(config, resolveDefaultAgentId(config));
   const workspaceEntries = loadWorkspaceHookEntries(workspaceDir, { config });
   const pluginReport = buildPluginStatusReport({ config, workspaceDir });
@@ -93,11 +93,11 @@ function resolveHookForToggle(
 }
 
 function buildConfigWithHookEnabled(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   hookName: string;
   enabled: boolean;
   ensureHooksEnabled?: boolean;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const entries = { ...params.config.hooks?.internal?.entries };
   entries[params.hookName] = { ...entries[params.hookName], enabled: params.enabled };
 
@@ -215,7 +215,7 @@ async function readInstalledPackageVersion(dir: string): Promise<string | undefi
 
 type HookInternalEntryLike = Record<string, unknown> & { enabled?: boolean };
 
-function enableInternalHookEntries(config: Hanzo BotConfig, hookNames: string[]): Hanzo BotConfig {
+function enableInternalHookEntries(config: HanzoBotConfig, hookNames: string[]): HanzoBotConfig {
   const entries = { ...config.hooks?.internal?.entries } as Record<string, HookInternalEntryLike>;
 
   for (const hookName of hookNames) {
@@ -596,7 +596,7 @@ export function registerHooksCli(program: Command): void {
             process.exit(1);
           }
 
-          let next: Hanzo BotConfig = {
+          let next: HanzoBotConfig = {
             ...cfg,
             hooks: {
               ...cfg.hooks,

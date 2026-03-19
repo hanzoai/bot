@@ -7,7 +7,7 @@ import {
   normalizeAccountId,
   TelegramConfigSchema,
   type ChannelPlugin,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "../runtime-api.js";
 import { inspectTelegramAccount } from "./account-inspect.js";
 import {
@@ -20,7 +20,7 @@ import {
 export const TELEGRAM_CHANNEL = "telegram" as const;
 
 export function findTelegramTokenOwnerAccountId(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
 }): string | null {
   const normalizedAccountId = normalizeAccountId(params.accountId);

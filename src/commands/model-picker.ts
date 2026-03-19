@@ -9,7 +9,7 @@ import {
   normalizeProviderId,
   resolveConfiguredModelRef,
 } from "../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
 import { applyPrimaryModel } from "../plugins/provider-model-primary.js";
 import type { ProviderPlugin } from "../plugins/types.js";
@@ -29,7 +29,7 @@ const PROVIDER_FILTER_THRESHOLD = 30;
 const HIDDEN_ROUTER_MODELS = new Set(["openrouter/auto"]);
 
 type PromptDefaultModelParams = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   prompter: WizardPrompter;
   allowKeep?: boolean;
   includeManual?: boolean;
@@ -43,7 +43,7 @@ type PromptDefaultModelParams = {
   message?: string;
 };
 
-type PromptDefaultModelResult = { model?: string; config?: Hanzo BotConfig };
+type PromptDefaultModelResult = { model?: string; config?: HanzoBotConfig };
 type PromptModelAllowlistResult = { models?: string[] };
 
 async function loadModelPickerRuntime() {
@@ -57,7 +57,7 @@ const loadResolvedModelPickerRuntime = createLazyRuntimeSurface(
 
 function hasAuthForProvider(
   provider: string,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   store: ReturnType<typeof ensureAuthProfileStore>,
 ) {
   if (listProfilesForProvider(store, provider).length > 0) {
@@ -73,7 +73,7 @@ function hasAuthForProvider(
 }
 
 function createProviderAuthChecker(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir?: string;
 }): (provider: string) => boolean {
   const authStore = ensureAuthProfileStore(params.agentDir, {
@@ -91,11 +91,11 @@ function createProviderAuthChecker(params: {
   };
 }
 
-function resolveConfiguredModelRaw(cfg: Hanzo BotConfig): string {
+function resolveConfiguredModelRaw(cfg: HanzoBotConfig): string {
   return resolveAgentModelPrimaryValue(cfg.agents?.defaults?.model) ?? "";
 }
 
-function resolveConfiguredModelKeys(cfg: Hanzo BotConfig): string[] {
+function resolveConfiguredModelKeys(cfg: HanzoBotConfig): string[] {
   const models = cfg.agents?.defaults?.models ?? {};
   return Object.keys(models)
     .map((key) => String(key ?? "").trim())
@@ -423,7 +423,7 @@ export async function promptDefaultModel(
 }
 
 export async function promptModelAllowlist(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   prompter: WizardPrompter;
   message?: string;
   agentDir?: string;
@@ -525,7 +525,7 @@ export async function promptModelAllowlist(params: {
   return { models: [] };
 }
 
-export function applyModelAllowlist(cfg: Hanzo BotConfig, models: string[]): Hanzo BotConfig {
+export function applyModelAllowlist(cfg: HanzoBotConfig, models: string[]): HanzoBotConfig {
   const defaults = cfg.agents?.defaults;
   const normalized = normalizeModelKeys(models);
   if (normalized.length === 0) {
@@ -561,9 +561,9 @@ export function applyModelAllowlist(cfg: Hanzo BotConfig, models: string[]): Han
 }
 
 export function applyModelFallbacksFromSelection(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   selection: string[],
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const normalized = normalizeModelKeys(selection);
   if (normalized.length <= 1) {
     return cfg;

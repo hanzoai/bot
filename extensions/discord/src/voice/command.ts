@@ -11,7 +11,7 @@ import {
   type APIApplicationCommandChannelOption,
 } from "discord-api-types/v10";
 import { resolveCommandAuthorizedFromAuthorizers } from "openclaw/plugin-sdk/channel-runtime";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/config-runtime";
 import type { DiscordAccountConfig } from "openclaw/plugin-sdk/config-runtime";
 import { formatMention } from "../mentions.js";
@@ -34,7 +34,7 @@ const VOICE_CHANNEL_TYPES: NonNullable<APIApplicationCommandChannelOption["chann
 ];
 
 type VoiceCommandContext = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   discordConfig: DiscordAccountConfig;
   accountId: string;
   groupPolicy: "open" | "disabled" | "allowlist";

@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveAgentConfig } from "./agent-scope.js";
 
 export type ToolFsPolicy = {
@@ -11,7 +11,7 @@ export function createToolFsPolicy(params: { workspaceOnly?: boolean }): ToolFsP
   };
 }
 
-export function resolveToolFsConfig(params: { cfg?: Hanzo BotConfig; agentId?: string }): {
+export function resolveToolFsConfig(params: { cfg?: HanzoBotConfig; agentId?: string }): {
   workspaceOnly?: boolean;
 } {
   const cfg = params.cfg;
@@ -24,7 +24,7 @@ export function resolveToolFsConfig(params: { cfg?: Hanzo BotConfig; agentId?: s
 }
 
 export function resolveEffectiveToolFsWorkspaceOnly(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   agentId?: string;
 }): boolean {
   return resolveToolFsConfig(params).workspaceOnly === true;

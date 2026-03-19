@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { getOrLoadBootstrapFiles } from "./bootstrap-cache.js";
 import { applyBootstrapHookOverrides } from "./bootstrap-hooks.js";
 import type { EmbeddedContextFile } from "./pi-embedded-helpers.js";
@@ -63,7 +63,7 @@ function applyContextModeFilter(params: {
 
 export async function resolveBootstrapFilesForRun(params: {
   workspaceDir: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   sessionKey?: string;
   sessionId?: string;
   agentId?: string;
@@ -97,7 +97,7 @@ export async function resolveBootstrapFilesForRun(params: {
 
 export async function resolveBootstrapContextForRun(params: {
   workspaceDir: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   sessionKey?: string;
   sessionId?: string;
   agentId?: string;

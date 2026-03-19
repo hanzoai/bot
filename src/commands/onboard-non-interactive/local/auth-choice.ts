@@ -1,5 +1,5 @@
 import type { ApiKeyCredential } from "../../../agents/auth-profiles/types.js";
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import type { SecretInput } from "../../../config/types.secrets.js";
 import { applyAuthProfileConfig } from "../../../plugins/provider-auth-helpers.js";
 import { setCloudflareAiGatewayConfig } from "../../../plugins/provider-auth-storage.js";
@@ -24,12 +24,12 @@ type ResolvedNonInteractiveApiKey = NonNullable<
 >;
 
 export async function applyNonInteractiveAuthChoice(params: {
-  nextConfig: Hanzo BotConfig;
+  nextConfig: HanzoBotConfig;
   authChoice: AuthChoice;
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: Hanzo BotConfig;
-}): Promise<Hanzo BotConfig | null> {
+  baseConfig: HanzoBotConfig;
+}): Promise<HanzoBotConfig | null> {
   const { opts, runtime, baseConfig } = params;
   const authChoice = normalizeApiKeyTokenProviderAuthChoice({
     authChoice: params.authChoice,

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { drainFormattedSystemEvents } from "../auto-reply/reply/session-updates.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveMainSessionKey } from "../config/sessions.js";
 import { isCronSystemEvent } from "./heartbeat-runner.js";
 import {
@@ -13,7 +13,7 @@ import {
   resetSystemEventsForTest,
 } from "./system-events.js";
 
-const cfg = {} as unknown as Hanzo BotConfig;
+const cfg = {} as unknown as HanzoBotConfig;
 const mainKey = resolveMainSessionKey(cfg);
 
 describe("system events (session routing)", () => {

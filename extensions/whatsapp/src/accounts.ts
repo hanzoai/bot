@@ -6,7 +6,7 @@ import {
   normalizeAccountId,
   resolveAccountEntry,
   resolveUserPath,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/account-resolution";
 import { resolveOAuthDir } from "openclaw/plugin-sdk/state-paths";
 import { hasWebCredsSync } from "./auth-store.js";
@@ -42,7 +42,7 @@ const { listConfiguredAccountIds, listAccountIds, resolveDefaultAccountId } =
 export const listWhatsAppAccountIds = listAccountIds;
 export const resolveDefaultWhatsAppAccountId = resolveDefaultAccountId;
 
-export function listWhatsAppAuthDirs(cfg: Hanzo BotConfig): string[] {
+export function listWhatsAppAuthDirs(cfg: HanzoBotConfig): string[] {
   const oauthDir = resolveOAuthDir();
   const whatsappDir = path.join(oauthDir, "whatsapp");
   const authDirs = new Set<string>([oauthDir, path.join(whatsappDir, DEFAULT_ACCOUNT_ID)]);
@@ -67,12 +67,12 @@ export function listWhatsAppAuthDirs(cfg: Hanzo BotConfig): string[] {
   return Array.from(authDirs);
 }
 
-export function hasAnyWhatsAppAuth(cfg: Hanzo BotConfig): boolean {
+export function hasAnyWhatsAppAuth(cfg: HanzoBotConfig): boolean {
   return listWhatsAppAuthDirs(cfg).some((authDir) => hasWebCredsSync(authDir));
 }
 
 function resolveAccountConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
 ): WhatsAppAccountConfig | undefined {
   return resolveAccountEntry(cfg.channels?.whatsapp?.accounts, accountId);
@@ -95,7 +95,7 @@ function legacyAuthExists(authDir: string): boolean {
   }
 }
 
-export function resolveWhatsAppAuthDir(params: { cfg: Hanzo BotConfig; accountId: string }): {
+export function resolveWhatsAppAuthDir(params: { cfg: HanzoBotConfig; accountId: string }): {
   authDir: string;
   isLegacy: boolean;
 } {
@@ -118,7 +118,7 @@ export function resolveWhatsAppAuthDir(params: { cfg: Hanzo BotConfig; accountId
 }
 
 export function resolveWhatsAppAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
 }): ResolvedWhatsAppAccount {
   const rootCfg = params.cfg.channels?.whatsapp;
@@ -164,7 +164,7 @@ export function resolveWhatsAppMediaMaxBytes(
   return mediaMaxMb * 1024 * 1024;
 }
 
-export function listEnabledWhatsAppAccounts(cfg: Hanzo BotConfig): ResolvedWhatsAppAccount[] {
+export function listEnabledWhatsAppAccounts(cfg: HanzoBotConfig): ResolvedWhatsAppAccount[] {
   return listWhatsAppAccountIds(cfg)
     .map((accountId) => resolveWhatsAppAccount({ cfg, accountId }))
     .filter((account) => account.enabled);

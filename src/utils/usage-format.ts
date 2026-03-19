@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { resolveHanzo BotAgentDir } from "../agents/agent-paths.js";
+import { resolveHanzoBotAgentDir } from "../agents/agent-paths.js";
 import { modelKey, normalizeModelRef, normalizeProviderId } from "../agents/model-selection.js";
 import type { NormalizedUsage } from "../agents/usage.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { ModelProviderConfig } from "../config/types.models.js";
 import { getCachedGatewayModelPricing } from "../gateway/model-pricing-cache.js";
 
@@ -90,7 +90,7 @@ function buildProviderCostIndex(
 }
 
 function loadModelsJsonCostIndex(): Map<string, ModelCostConfig> {
-  const modelsPath = path.join(resolveHanzo BotAgentDir(), "models.json");
+  const modelsPath = path.join(resolveHanzoBotAgentDir(), "models.json");
   try {
     const stat = fs.statSync(modelsPath);
     if (
@@ -125,7 +125,7 @@ function loadModelsJsonCostIndex(): Map<string, ModelCostConfig> {
 function findConfiguredProviderCost(params: {
   provider?: string;
   model?: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
 }): ModelCostConfig | undefined {
   const key = toResolvedModelKey(params);
   if (!key) {
@@ -137,7 +137,7 @@ function findConfiguredProviderCost(params: {
 export function resolveModelCostConfig(params: {
   provider?: string;
   model?: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
 }): ModelCostConfig | undefined {
   const key = toResolvedModelKey(params);
   if (!key) {

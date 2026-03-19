@@ -7,7 +7,7 @@ import {
   DEFAULT_ACCOUNT_ID,
   migrateBaseNameToDefaultAccount,
   normalizeAccountId,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "./runtime-api.js";
 import { hasConfiguredSecretInput } from "./secret-input.js";
 
@@ -19,7 +19,7 @@ export function isMattermostConfigured(account: ResolvedMattermostAccount): bool
   return tokenConfigured && Boolean(account.baseUrl);
 }
 
-export function resolveMattermostAccountWithSecrets(cfg: Hanzo BotConfig, accountId: string) {
+export function resolveMattermostAccountWithSecrets(cfg: HanzoBotConfig, accountId: string) {
   return resolveMattermostAccount({
     cfg,
     accountId,

@@ -19,7 +19,7 @@ import {
   getChatChannelMeta,
   SlackConfigSchema,
   type ChannelPlugin,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "./runtime-api.js";
 
 export const SLACK_CHANNEL = "slack" as const;
@@ -109,10 +109,10 @@ export function buildSlackSetupLines(botName = "Hanzo Bot"): string[] {
 }
 
 export function setSlackChannelAllowlist(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
   channelKeys: string[],
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const channels = Object.fromEntries(channelKeys.map((key) => [key, { allow: true }]));
   return patchChannelConfigForAccount({
     cfg,

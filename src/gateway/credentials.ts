@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   createGatewayCredentialPlan,
   type GatewayCredentialPlan,
@@ -251,7 +251,7 @@ function resolveRemoteGatewayCredentials(params: {
 }
 
 export function resolveGatewayCredentialsFromConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
   explicitAuth?: ExplicitGatewayAuth;
   urlOverride?: string;
@@ -323,7 +323,7 @@ export function resolveGatewayCredentialsFromConfig(params: {
 }
 
 export function resolveGatewayProbeCredentialsFromConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   mode: GatewayCredentialMode;
   env?: NodeJS.ProcessEnv;
   explicitAuth?: ExplicitGatewayAuth;
@@ -339,7 +339,7 @@ export function resolveGatewayProbeCredentialsFromConfig(params: {
 }
 
 export function resolveGatewayDriftCheckCredentialsFromConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
 }): ResolvedGatewayCredentials {
   return resolveGatewayCredentialsFromConfig({
     cfg: params.cfg,

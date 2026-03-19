@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { getPath } from "./path-utils.js";
 import { SECRET_TARGET_REGISTRY } from "./target-registry-data.js";
 import {
@@ -258,13 +258,13 @@ export function resolveConfigSecretTargetByPath(pathSegments: string[]): Resolve
 }
 
 export function discoverConfigSecretTargets(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
 ): DiscoveredConfigSecretTarget[] {
   return discoverConfigSecretTargetsByIds(config);
 }
 
 export function discoverConfigSecretTargetsByIds(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   targetIds?: Iterable<string>,
 ): DiscoveredConfigSecretTarget[] {
   const allowedTargetIds = normalizeAllowedTargetIds(targetIds);

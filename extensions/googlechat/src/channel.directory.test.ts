@@ -3,7 +3,7 @@ import {
   createDirectoryTestRuntime,
   expectDirectorySurface,
 } from "../../../test/helpers/extensions/directory.ts";
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 import { googlechatPlugin } from "./channel.js";
 
 describe("googlechat directory", () => {
@@ -21,7 +21,7 @@ describe("googlechat directory", () => {
           },
         },
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
 
     const directory = expectDirectorySurface(googlechatPlugin.directory);
 

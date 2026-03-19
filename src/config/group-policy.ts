@@ -1,7 +1,7 @@
 import type { ChannelId } from "../channels/plugins/types.js";
 import { resolveAccountEntry } from "../routing/account-lookup.js";
 import { normalizeAccountId } from "../routing/session-key.js";
-import type { Hanzo BotConfig } from "./config.js";
+import type { HanzoBotConfig } from "./config.js";
 import {
   parseToolsBySenderTypedKey,
   type GroupToolPolicyBySenderConfig,
@@ -280,7 +280,7 @@ export function resolveToolsBySender(
 }
 
 function resolveChannelGroups(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   channel: GroupPolicyChannel,
   accountId?: string | null,
 ): ChannelGroups | undefined {
@@ -301,7 +301,7 @@ function resolveChannelGroups(
 type ChannelGroupPolicyMode = "open" | "allowlist" | "disabled";
 
 function resolveChannelGroupPolicyMode(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   channel: GroupPolicyChannel,
   accountId?: string | null,
 ): ChannelGroupPolicyMode | undefined {
@@ -323,7 +323,7 @@ function resolveChannelGroupPolicyMode(
 }
 
 export function resolveChannelGroupPolicy(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: GroupPolicyChannel;
   groupId?: string | null;
   accountId?: string | null;
@@ -359,7 +359,7 @@ export function resolveChannelGroupPolicy(params: {
 }
 
 export function resolveChannelGroupRequireMention(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: GroupPolicyChannel;
   groupId?: string | null;
   accountId?: string | null;
@@ -390,7 +390,7 @@ export function resolveChannelGroupRequireMention(params: {
 
 export function resolveChannelGroupToolsPolicy(
   params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     channel: GroupPolicyChannel;
     groupId?: string | null;
     accountId?: string | null;

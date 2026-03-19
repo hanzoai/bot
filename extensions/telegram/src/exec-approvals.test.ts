@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import {
   isTelegramExecApprovalApprover,
   isTelegramExecApprovalClientEnabled,
@@ -9,8 +9,8 @@ import {
 } from "./exec-approvals.js";
 
 function buildConfig(
-  execApprovals?: NonNullable<NonNullable<Hanzo BotConfig["channels"]>["telegram"]>["execApprovals"],
-): Hanzo BotConfig {
+  execApprovals?: NonNullable<NonNullable<HanzoBotConfig["channels"]>["telegram"]>["execApprovals"],
+): HanzoBotConfig {
   return {
     channels: {
       telegram: {
@@ -18,7 +18,7 @@ function buildConfig(
         execApprovals,
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 describe("telegram exec approvals", () => {
@@ -71,7 +71,7 @@ describe("telegram exec approvals", () => {
           execApprovals: { enabled: true, approvers: ["123"], target: "dm" },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     expect(shouldEnableTelegramExecApprovalButtons({ cfg, to: "123" })).toBe(true);
   });
@@ -85,7 +85,7 @@ describe("telegram exec approvals", () => {
           execApprovals: { enabled: true, approvers: ["123"], target: "dm" },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     expect(shouldEnableTelegramExecApprovalButtons({ cfg, to: "123" })).toBe(false);
   });

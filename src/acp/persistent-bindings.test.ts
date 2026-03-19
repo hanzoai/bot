@@ -3,7 +3,7 @@ import { discordPlugin } from "../../extensions/discord/src/channel.js";
 import { feishuPlugin } from "../../extensions/feishu/src/channel.js";
 import { telegramPlugin } from "../../extensions/telegram/src/channel.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { createTestRegistry } from "../test-utils/channel-plugins.js";
 import * as persistentBindingsResolveModule from "./persistent-bindings.resolve.js";
@@ -40,7 +40,7 @@ type PersistentBindingsModule = Pick<
   >;
 let persistentBindings: PersistentBindingsModule;
 
-type ConfiguredBinding = NonNullable<Hanzo BotConfig["bindings"]>[number];
+type ConfiguredBinding = NonNullable<HanzoBotConfig["bindings"]>[number];
 type BindingRecordInput = Parameters<
   PersistentBindingsModule["resolveConfiguredAcpBindingRecord"]
 >[0];
@@ -53,20 +53,20 @@ const baseCfg = {
   agents: {
     list: [{ id: "codex" }, { id: "claude" }],
   },
-} satisfies Hanzo BotConfig;
+} satisfies HanzoBotConfig;
 
 const defaultDiscordConversationId = "1478836151241412759";
 const defaultDiscordAccountId = "default";
 
 function createCfgWithBindings(
   bindings: ConfiguredBinding[],
-  overrides?: Partial<Hanzo BotConfig>,
-): Hanzo BotConfig {
+  overrides?: Partial<HanzoBotConfig>,
+): HanzoBotConfig {
   return {
     ...baseCfg,
     ...overrides,
     bindings,
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 function createDiscordBinding(params: {
@@ -125,7 +125,7 @@ function createFeishuBinding(params: {
   } as ConfiguredBinding;
 }
 
-function resolveBindingRecord(cfg: Hanzo BotConfig, overrides: Partial<BindingRecordInput> = {}) {
+function resolveBindingRecord(cfg: HanzoBotConfig, overrides: Partial<BindingRecordInput> = {}) {
   return persistentBindings.resolveConfiguredAcpBindingRecord({
     cfg,
     channel: "discord",
@@ -136,7 +136,7 @@ function resolveBindingRecord(cfg: Hanzo BotConfig, overrides: Partial<BindingRe
 }
 
 function resolveDiscordBindingSpecBySession(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   conversationId = defaultDiscordConversationId,
 ) {
   const resolved = resolveBindingRecord(cfg, { conversationId });
@@ -797,7 +797,7 @@ describe("resetAcpSessionInPlace", () => {
       agents: {
         list: [{ id: "main" }, { id: "coding" }],
       },
-    } satisfies Hanzo BotConfig;
+    } satisfies HanzoBotConfig;
     const sessionKey = "agent:coding:acp:binding:discord:default:9373ab192b2317f4";
     sessionMetaMocks.readAcpSessionEntry.mockReturnValue({
       acp: {

@@ -1,5 +1,5 @@
 export type {
-  Hanzo BotPluginApi,
+  HanzoBotPluginApi,
   ProviderAuthContext,
   ProviderAuthMethodNonInteractiveContext,
   ProviderAuthResult,

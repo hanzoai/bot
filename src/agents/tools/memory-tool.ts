@@ -1,5 +1,5 @@
 import { Type } from "@sinclair/typebox";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { MemoryCitationsMode } from "../../config/types.memory.js";
 import { resolveMemoryBackendConfig } from "../../memory/backend-config.js";
 import { getMemorySearchManager } from "../../memory/index.js";
@@ -22,7 +22,7 @@ const MemoryGetSchema = Type.Object({
   lines: Type.Optional(Type.Number()),
 });
 
-function resolveMemoryToolContext(options: { config?: Hanzo BotConfig; agentSessionKey?: string }) {
+function resolveMemoryToolContext(options: { config?: HanzoBotConfig; agentSessionKey?: string }) {
   const cfg = options.config;
   if (!cfg) {
     return null;
@@ -37,7 +37,7 @@ function resolveMemoryToolContext(options: { config?: Hanzo BotConfig; agentSess
   return { cfg, agentId };
 }
 
-async function getMemoryManagerContext(params: { cfg: Hanzo BotConfig; agentId: string }): Promise<
+async function getMemoryManagerContext(params: { cfg: HanzoBotConfig; agentId: string }): Promise<
   | {
       manager: NonNullable<Awaited<ReturnType<typeof getMemorySearchManager>>["manager"]>;
     }
@@ -54,14 +54,14 @@ async function getMemoryManagerContext(params: { cfg: Hanzo BotConfig; agentId: 
 
 function createMemoryTool(params: {
   options: {
-    config?: Hanzo BotConfig;
+    config?: HanzoBotConfig;
     agentSessionKey?: string;
   };
   label: string;
   name: string;
   description: string;
   parameters: typeof MemorySearchSchema | typeof MemoryGetSchema;
-  execute: (ctx: { cfg: Hanzo BotConfig; agentId: string }) => AnyAgentTool["execute"];
+  execute: (ctx: { cfg: HanzoBotConfig; agentId: string }) => AnyAgentTool["execute"];
 }): AnyAgentTool | null {
   const ctx = resolveMemoryToolContext(params.options);
   if (!ctx) {
@@ -77,7 +77,7 @@ function createMemoryTool(params: {
 }
 
 export function createMemorySearchTool(options: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentSessionKey?: string;
 }): AnyAgentTool | null {
   return createMemoryTool({
@@ -133,7 +133,7 @@ export function createMemorySearchTool(options: {
 }
 
 export function createMemoryGetTool(options: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentSessionKey?: string;
 }): AnyAgentTool | null {
   return createMemoryTool({
@@ -168,7 +168,7 @@ export function createMemoryGetTool(options: {
   });
 }
 
-function resolveMemoryCitationsMode(cfg: Hanzo BotConfig): MemoryCitationsMode {
+function resolveMemoryCitationsMode(cfg: HanzoBotConfig): MemoryCitationsMode {
   const mode = cfg.memory?.citations;
   if (mode === "on" || mode === "off" || mode === "auto") {
     return mode;

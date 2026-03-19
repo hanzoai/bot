@@ -1,8 +1,8 @@
 import path from "node:path";
 import {
   definePluginEntry,
-  resolvePreferredHanzo BotTmpDir,
-  type Hanzo BotPluginApi,
+  resolvePreferredHanzoBotTmpDir,
+  type HanzoBotPluginApi,
 } from "./api.js";
 import {
   diffsPluginConfigSchema,
@@ -19,11 +19,11 @@ export default definePluginEntry({
   name: "Diffs",
   description: "Read-only diff viewer and PNG/PDF renderer for agents.",
   configSchema: diffsPluginConfigSchema,
-  register(api: Hanzo BotPluginApi) {
+  register(api: HanzoBotPluginApi) {
     const defaults = resolveDiffsPluginDefaults(api.pluginConfig);
     const security = resolveDiffsPluginSecurity(api.pluginConfig);
     const store = new DiffArtifactStore({
-      rootDir: path.join(resolvePreferredHanzo BotTmpDir(), "openclaw-diffs"),
+      rootDir: path.join(resolvePreferredHanzoBotTmpDir(), "openclaw-diffs"),
       logger: api.logger,
     });
 

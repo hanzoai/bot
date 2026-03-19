@@ -1,10 +1,10 @@
 import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { createCliRuntimeCapture } from "./test-runtime-capture.js";
 
-const loadConfig = vi.fn<() => Hanzo BotConfig>(() => ({}) as Hanzo BotConfig);
-const writeConfigFile = vi.fn<(config: Hanzo BotConfig) => Promise<void>>(async () => undefined);
+const loadConfig = vi.fn<() => HanzoBotConfig>(() => ({}) as HanzoBotConfig);
+const writeConfigFile = vi.fn<(config: HanzoBotConfig) => Promise<void>>(async () => undefined);
 const resolveStateDir = vi.fn(() => "/tmp/openclaw-state");
 const installPluginFromMarketplace = vi.fn();
 const listMarketplacePlugins = vi.fn();
@@ -32,7 +32,7 @@ vi.mock("../config/config.js", async (importOriginal) => {
   return {
     ...actual,
     loadConfig: () => loadConfig(),
-    writeConfigFile: (config: Hanzo BotConfig) => writeConfigFile(config),
+    writeConfigFile: (config: HanzoBotConfig) => writeConfigFile(config),
   };
 });
 
@@ -127,7 +127,7 @@ describe("plugins cli", () => {
     installPluginFromNpmSpec.mockReset();
     installPluginFromPath.mockReset();
 
-    loadConfig.mockReturnValue({} as Hanzo BotConfig);
+    loadConfig.mockReturnValue({} as HanzoBotConfig);
     writeConfigFile.mockResolvedValue(undefined);
     resolveStateDir.mockReturnValue("/tmp/openclaw-state");
     resolveMarketplaceInstallShortcut.mockResolvedValue(null);
@@ -135,19 +135,19 @@ describe("plugins cli", () => {
       ok: false,
       error: "marketplace install failed",
     });
-    enablePluginInConfig.mockImplementation((cfg: Hanzo BotConfig) => ({ config: cfg }));
-    recordPluginInstall.mockImplementation((cfg: Hanzo BotConfig) => cfg);
+    enablePluginInConfig.mockImplementation((cfg: HanzoBotConfig) => ({ config: cfg }));
+    recordPluginInstall.mockImplementation((cfg: HanzoBotConfig) => cfg);
     buildPluginStatusReport.mockReturnValue({
       plugins: [],
       diagnostics: [],
     });
-    applyExclusiveSlotSelection.mockImplementation(({ config }: { config: Hanzo BotConfig }) => ({
+    applyExclusiveSlotSelection.mockImplementation(({ config }: { config: HanzoBotConfig }) => ({
       config,
       warnings: [],
     }));
     uninstallPlugin.mockResolvedValue({
       ok: true,
-      config: {} as Hanzo BotConfig,
+      config: {} as HanzoBotConfig,
       warnings: [],
       actions: {
         entry: false,
@@ -161,7 +161,7 @@ describe("plugins cli", () => {
     updateNpmInstalledPlugins.mockResolvedValue({
       outcomes: [],
       changed: false,
-      config: {} as Hanzo BotConfig,
+      config: {} as HanzoBotConfig,
     });
     promptYesNo.mockResolvedValue(true);
     installPluginFromPath.mockResolvedValue({ ok: false, error: "path install disabled in test" });
@@ -199,7 +199,7 @@ describe("plugins cli", () => {
       plugins: {
         entries: {},
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const enabledCfg = {
       plugins: {
         entries: {
@@ -208,7 +208,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const installedCfg = {
       ...enabledCfg,
       plugins: {
@@ -220,7 +220,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     loadConfig.mockReturnValue(cfg);
     installPluginFromMarketplace.mockResolvedValue({
@@ -267,7 +267,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig);
+    } as HanzoBotConfig);
     buildPluginStatusReport.mockReturnValue({
       plugins: [{ id: "alpha", name: "alpha" }],
       diagnostics: [],
@@ -294,13 +294,13 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const nextConfig = {
       plugins: {
         entries: {},
         installs: {},
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     loadConfig.mockReturnValue(baseConfig);
     buildPluginStatusReport.mockReturnValue({
@@ -339,7 +339,7 @@ describe("plugins cli", () => {
         entries: {},
         installs: {},
       },
-    } as Hanzo BotConfig);
+    } as HanzoBotConfig);
     buildPluginStatusReport.mockReturnValue({
       plugins: [{ id: "alpha", name: "alpha" }],
       diagnostics: [],
@@ -358,7 +358,7 @@ describe("plugins cli", () => {
       plugins: {
         installs: {},
       },
-    } as Hanzo BotConfig);
+    } as HanzoBotConfig);
 
     await expect(runCommand(["plugins", "update"])).rejects.toThrow("__exit__:1");
 
@@ -371,7 +371,7 @@ describe("plugins cli", () => {
       plugins: {
         installs: {},
       },
-    } as Hanzo BotConfig);
+    } as HanzoBotConfig);
 
     await runCommand(["plugins", "update", "--all"]);
 
@@ -391,7 +391,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     loadConfig.mockReturnValue(config);
     updateNpmInstalledPlugins.mockResolvedValue({
       config,
@@ -424,7 +424,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     loadConfig.mockReturnValue(config);
     updateNpmInstalledPlugins.mockResolvedValue({
       config,
@@ -457,7 +457,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     loadConfig.mockReturnValue(config);
     updateNpmInstalledPlugins.mockResolvedValue({
       config,
@@ -490,7 +490,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     loadConfig.mockReturnValue(config);
     updateNpmInstalledPlugins.mockResolvedValue({
       config,
@@ -523,7 +523,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const nextConfig = {
       plugins: {
         installs: {
@@ -533,7 +533,7 @@ describe("plugins cli", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     loadConfig.mockReturnValue(cfg);
     updateNpmInstalledPlugins.mockResolvedValue({
       outcomes: [{ status: "ok", message: "Updated alpha -> 1.1.0" }],

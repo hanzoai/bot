@@ -1,7 +1,7 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
 export function buildEmbeddedMessageActionDiscoveryInput(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   channel: string;
   currentChannelId?: string | null;
   currentThreadTs?: string | null;

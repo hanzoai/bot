@@ -1,7 +1,7 @@
 import type {
   AcpRuntime,
-  Hanzo BotPluginService,
-  Hanzo BotPluginServiceContext,
+  HanzoBotPluginService,
+  HanzoBotPluginServiceContext,
   PluginLogger,
 } from "../runtime-api.js";
 import { registerAcpRuntimeBackend, unregisterAcpRuntimeBackend } from "../runtime-api.js";
@@ -34,13 +34,13 @@ function createDefaultRuntime(params: AcpxRuntimeFactoryParams): AcpxRuntimeLike
 
 export function createAcpxRuntimeService(
   params: CreateAcpxRuntimeServiceParams = {},
-): Hanzo BotPluginService {
+): HanzoBotPluginService {
   let runtime: AcpxRuntimeLike | null = null;
   let lifecycleRevision = 0;
 
   return {
     id: "acpx-runtime",
-    async start(ctx: Hanzo BotPluginServiceContext): Promise<void> {
+    async start(ctx: HanzoBotPluginServiceContext): Promise<void> {
       const pluginConfig = resolveAcpxPluginConfig({
         rawConfig: params.pluginConfig,
         workspaceDir: ctx.workspaceDir,
@@ -96,7 +96,7 @@ export function createAcpxRuntimeService(
         }
       })();
     },
-    async stop(_ctx: Hanzo BotPluginServiceContext): Promise<void> {
+    async stop(_ctx: HanzoBotPluginServiceContext): Promise<void> {
       lifecycleRevision += 1;
       unregisterAcpRuntimeBackend(ACPX_BACKEND_ID);
       runtime = null;

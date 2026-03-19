@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { MemoryIndexManager } from "./index.js";
 
 let shouldFail = false;
@@ -81,7 +81,7 @@ describe("memory manager atomic reindex", () => {
         },
         list: [{ id: "main", default: true }],
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     manager = await getRequiredMemoryIndexManager({ cfg, agentId: "main" });
 

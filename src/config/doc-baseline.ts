@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ChannelPlugin } from "../channels/plugins/index.js";
-import { resolveHanzo BotPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveHanzoBotPackageRootSync } from "../infra/openclaw-root.js";
 import { loadPluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { FIELD_HELP } from "./schema.help.js";
 import { buildConfigSchema, type ConfigSchemaResponse } from "./schema.js";
@@ -89,7 +89,7 @@ function logConfigDocBaselineDebug(message: string): void {
 }
 
 function resolveRepoRoot(): string {
-  const fromPackage = resolveHanzo BotPackageRootSync({
+  const fromPackage = resolveHanzoBotPackageRootSync({
     cwd: path.dirname(fileURLToPath(import.meta.url)),
     moduleUrl: import.meta.url,
   });

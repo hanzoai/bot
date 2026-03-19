@@ -1,5 +1,5 @@
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
 export type SessionHookContext = {
   sessionId: string;
@@ -10,7 +10,7 @@ export type SessionHookContext = {
 function buildSessionHookContext(params: {
   sessionId: string;
   sessionKey: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
 }): SessionHookContext {
   return {
     sessionId: params.sessionId,
@@ -22,7 +22,7 @@ function buildSessionHookContext(params: {
 export function buildSessionStartHookPayload(params: {
   sessionId: string;
   sessionKey: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   resumedFrom?: string;
 }): {
   event: { sessionId: string; sessionKey: string; resumedFrom?: string };
@@ -45,7 +45,7 @@ export function buildSessionStartHookPayload(params: {
 export function buildSessionEndHookPayload(params: {
   sessionId: string;
   sessionKey: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   messageCount?: number;
 }): {
   event: { sessionId: string; sessionKey: string; messageCount: number };

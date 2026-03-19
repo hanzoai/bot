@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createConfigIO } from "./io.js";
-import type { Hanzo BotConfig } from "./types.js";
+import type { HanzoBotConfig } from "./types.js";
 
 describe("config io write", () => {
   let fixtureRoot = "";
@@ -172,14 +172,14 @@ describe("config io write", () => {
         logger: silentLogger,
       });
 
-      const invalidConfig: Hanzo BotConfig = {
+      const invalidConfig: HanzoBotConfig = {
         channels: {
           telegram: {
             dmPolicy: "open",
             allowFrom: [],
           },
         },
-      } satisfies Hanzo BotConfig;
+      } satisfies HanzoBotConfig;
 
       await expect(io.writeConfigFile(invalidConfig)).rejects.toThrow(
         "hanzo-bot config set channels.telegram.allowFrom '[\"*\"]'",

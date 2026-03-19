@@ -4,7 +4,7 @@ import { resolveRequiredHomeDir } from "../infra/home-dir.js";
 import { DEFAULT_AGENT_ID, normalizeAgentId } from "../routing/session-key.js";
 import { resolveUserPath } from "../utils.js";
 import { resolveStateDir } from "./paths.js";
-import type { Hanzo BotConfig } from "./types.js";
+import type { HanzoBotConfig } from "./types.js";
 
 export type DuplicateAgentDir = {
   agentDir: string;
@@ -29,7 +29,7 @@ function canonicalizeAgentDir(agentDir: string): string {
   return resolved;
 }
 
-function collectReferencedAgentIds(cfg: Hanzo BotConfig): string[] {
+function collectReferencedAgentIds(cfg: HanzoBotConfig): string[] {
   const ids = new Set<string>();
 
   const agents = Array.isArray(cfg.agents?.list) ? cfg.agents?.list : [];
@@ -57,7 +57,7 @@ function collectReferencedAgentIds(cfg: Hanzo BotConfig): string[] {
 }
 
 function resolveEffectiveAgentDir(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
   deps?: { env?: NodeJS.ProcessEnv; homedir?: () => string },
 ): string {
@@ -78,7 +78,7 @@ function resolveEffectiveAgentDir(
 }
 
 export function findDuplicateAgentDirs(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   deps?: { env?: NodeJS.ProcessEnv; homedir?: () => string },
 ): DuplicateAgentDir[] {
   const byDir = new Map<string, { agentDir: string; agentIds: string[] }>();

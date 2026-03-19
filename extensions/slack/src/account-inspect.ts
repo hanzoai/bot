@@ -1,7 +1,7 @@
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/account-resolution";
 import {
   hasConfiguredSecretInput,
@@ -64,7 +64,7 @@ function inspectSlackToken(value: unknown): {
 }
 
 export function inspectSlackAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   envBotToken?: string | null;
   envAppToken?: string | null;

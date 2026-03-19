@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/matrix";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/matrix";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -38,7 +38,7 @@ describe("matrixOutbound cfg threading", () => {
           accessToken: "resolved-token",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await matrixOutbound.sendText!({
       cfg,
@@ -68,7 +68,7 @@ describe("matrixOutbound cfg threading", () => {
           accessToken: "resolved-token",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await matrixOutbound.sendMedia!({
       cfg,
@@ -97,7 +97,7 @@ describe("matrixOutbound cfg threading", () => {
           accessToken: "resolved-token",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const matrix = vi.fn(async () => ({
       messageId: "evt-injected",
       roomId: "!room:example",
@@ -132,7 +132,7 @@ describe("matrixOutbound cfg threading", () => {
           accessToken: "resolved-token",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await matrixOutbound.sendPoll!({
       cfg,

@@ -5,11 +5,11 @@ import type { ConfigUiHint, ConfigUiHints } from "./schema.hints.js";
 import { applySensitiveHints, buildBaseHints, mapSensitivePaths } from "./schema.hints.js";
 import { findWildcardHintMatch, schemaHasChildren } from "./schema.shared.js";
 import { applyDerivedTags } from "./schema.tags.js";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
 export type { ConfigUiHint, ConfigUiHints } from "./schema.hints.js";
 
-export type ConfigSchema = ReturnType<typeof Hanzo BotSchema.toJSONSchema>;
+export type ConfigSchema = ReturnType<typeof HanzoBotSchema.toJSONSchema>;
 
 type JsonSchemaNode = Record<string, unknown>;
 
@@ -431,12 +431,12 @@ function buildBaseConfigSchema(): ConfigSchemaResponse {
   if (cachedBase) {
     return cachedBase;
   }
-  const schema = Hanzo BotSchema.toJSONSchema({
+  const schema = HanzoBotSchema.toJSONSchema({
     target: "draft-07",
     unrepresentable: "any",
   });
-  schema.title = "Hanzo BotConfig";
-  const hints = applyDerivedTags(mapSensitivePaths(Hanzo BotSchema, "", buildBaseHints()));
+  schema.title = "HanzoBotConfig";
+  const hints = applyDerivedTags(mapSensitivePaths(HanzoBotSchema, "", buildBaseHints()));
   const next = {
     schema: stripChannelSchema(schema),
     uiHints: hints,

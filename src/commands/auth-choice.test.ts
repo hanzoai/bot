@@ -44,7 +44,7 @@ import {
   createExitThrowingRuntime,
   createWizardPrompter,
   readAuthProfilesForAgent,
-  requireHanzo BotAgentDir,
+  requireHanzoBotAgentDir,
   setupAuthTestEnv,
 } from "./test-wizard-helpers.js";
 
@@ -173,7 +173,7 @@ describe("applyAuthChoice", () => {
   async function readAuthProfiles() {
     return await readAuthProfilesForAgent<{
       profiles?: Record<string, StoredAuthProfile>;
-    }>(requireHanzo BotAgentDir());
+    }>(requireHanzoBotAgentDir());
   }
   async function readAuthProfile(profileId: string) {
     return (await readAuthProfiles()).profiles?.[profileId];
@@ -1147,7 +1147,7 @@ describe("applyAuthChoice", () => {
     await setupTempState();
     process.env.LITELLM_API_KEY = "sk-litellm-test"; // pragma: allowlist secret
 
-    const authProfilePath = authProfilePathForAgent(requireHanzo BotAgentDir());
+    const authProfilePath = authProfilePathForAgent(requireHanzoBotAgentDir());
     await fs.writeFile(
       authProfilePath,
       JSON.stringify(

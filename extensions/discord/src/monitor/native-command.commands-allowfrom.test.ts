@@ -2,7 +2,7 @@ import { ChannelType } from "discord-api-types/v10";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { NativeCommandSpec } from "../../../../src/auto-reply/commands-registry.js";
 import * as dispatcherModule from "../../../../src/auto-reply/reply/provider-dispatcher.js";
-import type { Hanzo BotConfig } from "../../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../../src/config/config.js";
 import type { DiscordAccountConfig } from "../../../../src/config/types.discord.js";
 import * as pluginCommandsModule from "../../../../src/plugins/commands.js";
 import { createDiscordNativeCommand } from "./native-command.js";
@@ -25,7 +25,7 @@ function createInteraction(params?: { userId?: string }): MockCommandInteraction
   });
 }
 
-function createConfig(): Hanzo BotConfig {
+function createConfig(): HanzoBotConfig {
   return {
     commands: {
       allowFrom: {
@@ -47,10 +47,10 @@ function createConfig(): Hanzo BotConfig {
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
-function createCommand(cfg: Hanzo BotConfig, discordConfig?: DiscordAccountConfig) {
+function createCommand(cfg: HanzoBotConfig, discordConfig?: DiscordAccountConfig) {
   const commandSpec: NativeCommandSpec = {
     name: "status",
     description: "Status",
@@ -79,7 +79,7 @@ function createDispatchSpy() {
 
 async function runGuildSlashCommand(params?: {
   userId?: string;
-  mutateConfig?: (cfg: Hanzo BotConfig) => void;
+  mutateConfig?: (cfg: HanzoBotConfig) => void;
   runtimeDiscordConfig?: DiscordAccountConfig;
 }) {
   const cfg = createConfig();

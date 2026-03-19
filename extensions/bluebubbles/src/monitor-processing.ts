@@ -35,7 +35,7 @@ import type {
 } from "./monitor-shared.js";
 import { isBlueBubblesPrivateApiEnabled } from "./probe.js";
 import { normalizeBlueBubblesReactionInput, sendBlueBubblesReaction } from "./reactions.js";
-import type { Hanzo BotConfig } from "./runtime-api.js";
+import type { HanzoBotConfig } from "./runtime-api.js";
 import {
   DM_GROUP_ACCESS_REASON,
   createChannelPairingController,
@@ -248,7 +248,7 @@ function logGroupAllowlistHint(params: {
 }
 
 function resolveBlueBubblesAckReaction(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId: string;
   core: BlueBubblesCoreRuntime;
   runtime: BlueBubblesRuntimeEnv;

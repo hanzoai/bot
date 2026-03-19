@@ -1,9 +1,9 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { loadWorkspaceSkillEntries, type SkillEntry, type SkillSnapshot } from "../skills.js";
 
 export function resolveEmbeddedRunSkillEntries(params: {
   workspaceDir: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   skillsSnapshot?: SkillSnapshot;
 }): {
   shouldLoadSkillEntries: boolean;

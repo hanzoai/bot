@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
-import { createHanzo BotCodingTools } from "./pi-tools.js";
+import type { HanzoBotConfig } from "../config/config.js";
+import { createHanzoBotCodingTools } from "./pi-tools.js";
 import {
   expectReadWriteEditTools,
   expectReadWriteTools,
@@ -18,7 +18,7 @@ vi.mock("../infra/shell-env.js", async (importOriginal) => {
 type ToolWithExecute = {
   execute: (toolCallId: string, args: unknown, signal?: AbortSignal) => Promise<unknown>;
 };
-type CodingToolsInput = NonNullable<Parameters<typeof createHanzo BotCodingTools>[0]>;
+type CodingToolsInput = NonNullable<Parameters<typeof createHanzoBotCodingTools>[0]>;
 
 const APPLY_PATCH_PAYLOAD = `*** Begin Patch
 *** Add File: /agent/pwned.txt
@@ -26,9 +26,9 @@ const APPLY_PATCH_PAYLOAD = `*** Begin Patch
 *** End Patch`;
 
 function resolveApplyPatchTool(
-  params: Pick<CodingToolsInput, "sandbox" | "workspaceDir"> & { config: Hanzo BotConfig },
+  params: Pick<CodingToolsInput, "sandbox" | "workspaceDir"> & { config: HanzoBotConfig },
 ): ToolWithExecute {
-  const tools = createHanzo BotCodingTools({
+  const tools = createHanzoBotCodingTools({
     sandbox: params.sandbox,
     workspaceDir: params.workspaceDir,
     config: params.config,
@@ -47,7 +47,7 @@ describe("tools.fs.workspaceOnly", () => {
     await withUnsafeMountedSandboxHarness(async ({ sandboxRoot, agentRoot, sandbox }) => {
       await fs.writeFile(path.join(agentRoot, "secret.txt"), "shh", "utf8");
 
-      const tools = createHanzo BotCodingTools({ sandbox, workspaceDir: sandboxRoot });
+      const tools = createHanzoBotCodingTools({ sandbox, workspaceDir: sandboxRoot });
       const { readTool, writeTool } = expectReadWriteTools(tools);
 
       const readResult = await readTool?.execute("t1", { path: "/agent/secret.txt" });
@@ -62,8 +62,8 @@ describe("tools.fs.workspaceOnly", () => {
     await withUnsafeMountedSandboxHarness(async ({ sandboxRoot, agentRoot, sandbox }) => {
       await fs.writeFile(path.join(agentRoot, "secret.txt"), "shh", "utf8");
 
-      const cfg = { tools: { fs: { workspaceOnly: true } } } as unknown as Hanzo BotConfig;
-      const tools = createHanzo BotCodingTools({ sandbox, workspaceDir: sandboxRoot, config: cfg });
+      const cfg = { tools: { fs: { workspaceOnly: true } } } as unknown as HanzoBotConfig;
+      const tools = createHanzoBotCodingTools({ sandbox, workspaceDir: sandboxRoot, config: cfg });
       const { readTool, writeTool, editTool } = expectReadWriteEditTools(tools);
 
       await expect(readTool?.execute("t1", { path: "/agent/secret.txt" })).rejects.toThrow(
@@ -94,7 +94,7 @@ describe("tools.fs.workspaceOnly", () => {
             allow: ["read", "exec"],
             exec: { applyPatch: { enabled: true } },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
       });
 
       await expect(applyPatchTool.execute("t1", { input: APPLY_PATCH_PAYLOAD })).rejects.toThrow(
@@ -116,7 +116,7 @@ describe("tools.fs.workspaceOnly", () => {
             allow: ["read", "exec"],
             exec: { applyPatch: { enabled: true, workspaceOnly: false } },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
       });
 
       await applyPatchTool.execute("t2", { input: APPLY_PATCH_PAYLOAD });

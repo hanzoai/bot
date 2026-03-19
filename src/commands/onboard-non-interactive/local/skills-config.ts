@@ -1,9 +1,9 @@
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import type { RuntimeEnv } from "../../../runtime.js";
 import type { OnboardOptions } from "../../onboard-types.js";
 
 export function applyNonInteractiveSkillsConfig(params: {
-  nextConfig: Hanzo BotConfig;
+  nextConfig: HanzoBotConfig;
   opts: OnboardOptions;
   runtime: RuntimeEnv;
 }) {

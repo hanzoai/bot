@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   buildAccountScopedDmSecurityPolicy,
   formatPairingApproveHint,
   parseOptionalDelimitedEntries,
 } from "./helpers.js";
 
-function cfgWithChannel(channelKey: string, accounts?: Record<string, unknown>): Hanzo BotConfig {
+function cfgWithChannel(channelKey: string, accounts?: Record<string, unknown>): HanzoBotConfig {
   return {
     channels: {
       [channelKey]: accounts ? { accounts } : {},
     },
-  } as unknown as Hanzo BotConfig;
+  } as unknown as HanzoBotConfig;
 }
 
 describe("buildAccountScopedDmSecurityPolicy", () => {

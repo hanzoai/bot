@@ -14,7 +14,7 @@ import {
 } from "../agents/auth-profiles.js";
 import { updateAuthProfileStoreWithLock } from "../agents/auth-profiles/store.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolvePluginProviders } from "../plugins/providers.js";
 import { note } from "../terminal/note.js";
 import type { DoctorPrompter } from "./doctor-prompter.js";
@@ -24,9 +24,9 @@ import {
 } from "./provider-auth-guidance.js";
 
 export async function maybeRepairAnthropicOAuthProfileId(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   prompter: DoctorPrompter,
-): Promise<Hanzo BotConfig> {
+): Promise<HanzoBotConfig> {
   const store = ensureAuthProfileStore();
   const repair = repairOAuthProfileIdMismatch({
     cfg,
@@ -71,9 +71,9 @@ function pruneAuthOrder(
 }
 
 function pruneAuthProfiles(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   profileIds: Set<string>,
-): { next: Hanzo BotConfig; changed: boolean } {
+): { next: HanzoBotConfig; changed: boolean } {
   const profiles = cfg.auth?.profiles;
   const order = cfg.auth?.order;
   const nextProfiles = profiles ? { ...profiles } : undefined;
@@ -116,9 +116,9 @@ function pruneAuthProfiles(
 }
 
 export async function maybeRemoveDeprecatedCliAuthProfiles(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   prompter: DoctorPrompter,
-): Promise<Hanzo BotConfig> {
+): Promise<HanzoBotConfig> {
   const store = ensureAuthProfileStore(undefined, { allowKeychainPrompt: false });
   const providers = resolvePluginProviders({
     config: cfg,
@@ -262,7 +262,7 @@ function formatAuthIssueLine(issue: AuthIssue): string {
 }
 
 export async function noteAuthProfileHealth(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: DoctorPrompter;
   allowKeychainPrompt: boolean;
 }): Promise<void> {

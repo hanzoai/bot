@@ -1,4 +1,4 @@
-import { type Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import { type HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-runtime";
 import { resolveAccountEntry } from "openclaw/plugin-sdk/routing";
 import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
@@ -8,7 +8,7 @@ const DEFAULT_DISCORD_DRAFT_STREAM_MIN = 200;
 const DEFAULT_DISCORD_DRAFT_STREAM_MAX = 800;
 
 export function resolveDiscordDraftStreamingChunking(
-  cfg: Hanzo BotConfig | undefined,
+  cfg: HanzoBotConfig | undefined,
   accountId?: string | null,
 ): {
   minChars: number;

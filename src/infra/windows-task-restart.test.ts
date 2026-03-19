@@ -5,13 +5,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { captureFullEnv } from "../test-utils/env.js";
 
 const spawnMock = vi.hoisted(() => vi.fn());
-const resolvePreferredHanzo BotTmpDirMock = vi.hoisted(() => vi.fn(() => os.tmpdir()));
+const resolvePreferredHanzoBotTmpDirMock = vi.hoisted(() => vi.fn(() => os.tmpdir()));
 
 vi.mock("node:child_process", () => ({
   spawn: (...args: unknown[]) => spawnMock(...args),
 }));
 vi.mock("./tmp-openclaw-dir.js", () => ({
-  resolvePreferredHanzo BotTmpDir: () => resolvePreferredHanzo BotTmpDirMock(),
+  resolvePreferredHanzoBotTmpDir: () => resolvePreferredHanzoBotTmpDirMock(),
 }));
 
 type WindowsTaskRestartModule = typeof import("./windows-task-restart.js");
@@ -32,8 +32,8 @@ function decodeCmdPathArg(value: string): string {
 afterEach(() => {
   envSnapshot.restore();
   spawnMock.mockReset();
-  resolvePreferredHanzo BotTmpDirMock.mockReset();
-  resolvePreferredHanzo BotTmpDirMock.mockReturnValue(os.tmpdir());
+  resolvePreferredHanzoBotTmpDirMock.mockReset();
+  resolvePreferredHanzoBotTmpDirMock.mockReturnValue(os.tmpdir());
   for (const scriptPath of createdScriptPaths) {
     try {
       fs.unlinkSync(scriptPath);
@@ -126,7 +126,7 @@ describe("relaunchGatewayScheduledTask", () => {
     const unref = vi.fn();
     const metacharTmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw&(restart)-"));
     createdTmpDirs.add(metacharTmpDir);
-    resolvePreferredHanzo BotTmpDirMock.mockReturnValue(metacharTmpDir);
+    resolvePreferredHanzoBotTmpDirMock.mockReturnValue(metacharTmpDir);
     spawnMock.mockReturnValue({ unref });
 
     relaunchGatewayScheduledTask({ BOT_PROFILE: "work" });

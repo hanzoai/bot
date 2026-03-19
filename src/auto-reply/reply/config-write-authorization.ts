@@ -4,10 +4,10 @@ import {
   formatConfigWriteDeniedMessage,
 } from "../../channels/plugins/config-writes.js";
 import type { ChannelId } from "../../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
 export function resolveConfigWriteDeniedText(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel?: string | null;
   channelId: ChannelId | null;
   accountId?: string;

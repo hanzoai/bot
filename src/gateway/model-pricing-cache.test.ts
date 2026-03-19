@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { modelKey } from "../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   __resetGatewayModelPricingCacheForTest,
   collectConfiguredModelPricingRefs,
@@ -64,7 +64,7 @@ describe("model-pricing-cache", () => {
           summaryModel: "openai/gpt-5.4",
         },
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
 
     const refs = collectConfiguredModelPricingRefs(config).map((ref) =>
       modelKey(ref.provider, ref.model),
@@ -106,7 +106,7 @@ describe("model-pricing-cache", () => {
       tools: {
         subagents: { model: { primary: "zai/glm-5" } },
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
 
     const fetchImpl: typeof fetch = async () =>
       new Response(

@@ -5,10 +5,10 @@ import Ajv from "ajv";
 import {
   formatXHighModelHint,
   normalizeThinkLevel,
-  resolvePreferredHanzo BotTmpDir,
+  resolvePreferredHanzoBotTmpDir,
   supportsXHighThinking,
 } from "../api.js";
-import type { Hanzo BotPluginApi } from "../api.js";
+import type { HanzoBotPluginApi } from "../api.js";
 
 const AjvCtor = Ajv as unknown as typeof import("ajv").default;
 
@@ -49,7 +49,7 @@ type PluginCfg = {
 const INVALID_THINKING_LEVELS_HINT =
   "off, minimal, low, medium, high, adaptive, and xhigh where supported";
 
-export function createLlmTaskTool(api: Hanzo BotPluginApi) {
+export function createLlmTaskTool(api: HanzoBotPluginApi) {
   return {
     name: "llm-task",
     label: "LLM Task",
@@ -177,7 +177,7 @@ export function createLlmTaskTool(api: Hanzo BotPluginApi) {
       let tmpDir: string | null = null;
       try {
         tmpDir = await fs.mkdtemp(
-          path.join(resolvePreferredHanzo BotTmpDir(), "openclaw-llm-task-"),
+          path.join(resolvePreferredHanzoBotTmpDir(), "openclaw-llm-task-"),
         );
         const sessionId = `llm-task-${Date.now()}`;
         const sessionFile = path.join(tmpDir, "session.json");

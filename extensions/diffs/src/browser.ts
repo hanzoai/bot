@@ -2,7 +2,7 @@ import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { chromium } from "playwright-core";
-import type { Hanzo BotConfig } from "../api.js";
+import type { HanzoBotConfig } from "../api.js";
 import type { DiffRenderOptions, DiffTheme } from "./types.js";
 import { VIEWER_ASSET_PREFIX, getServedViewerAsset } from "./viewer-assets.js";
 
@@ -45,10 +45,10 @@ let sharedBrowserState: SharedBrowserState | null = null;
 let executablePathCache: ExecutablePathCache | null = null;
 
 export class PlaywrightDiffScreenshotter implements DiffScreenshotter {
-  private readonly config: Hanzo BotConfig;
+  private readonly config: HanzoBotConfig;
   private readonly browserIdleMs: number;
 
-  constructor(params: { config: Hanzo BotConfig; browserIdleMs?: number }) {
+  constructor(params: { config: HanzoBotConfig; browserIdleMs?: number }) {
     this.config = params.config;
     this.browserIdleMs = params.browserIdleMs ?? DEFAULT_BROWSER_IDLE_MS;
   }
@@ -277,7 +277,7 @@ function injectBaseHref(html: string): string {
   return html.replace("<head>", '<head><base href="http://127.0.0.1/" />');
 }
 
-async function resolveBrowserExecutablePath(config: Hanzo BotConfig): Promise<string | undefined> {
+async function resolveBrowserExecutablePath(config: HanzoBotConfig): Promise<string | undefined> {
   const cacheKey = JSON.stringify({
     configPath: config.browser?.executablePath?.trim() || "",
     env: [
@@ -306,7 +306,7 @@ async function resolveBrowserExecutablePath(config: Hanzo BotConfig): Promise<st
 }
 
 async function resolveBrowserExecutablePathUncached(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
 ): Promise<string | undefined> {
   const configPath = config.browser?.executablePath?.trim();
   if (configPath) {
@@ -338,7 +338,7 @@ async function resolveBrowserExecutablePathUncached(
 }
 
 async function acquireSharedBrowser(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   idleMs: number;
 }): Promise<BrowserLease> {
   const executablePath = await resolveBrowserExecutablePath(params.config);

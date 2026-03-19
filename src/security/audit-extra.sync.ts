@@ -12,7 +12,7 @@ import { isToolAllowedByPolicies } from "../agents/tool-policy-match.js";
 import { resolveToolProfilePolicy } from "../agents/tool-policy.js";
 import { resolveBrowserConfig } from "../browser/config.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
@@ -41,7 +41,7 @@ const SMALL_MODEL_PARAM_B_MAX = 300;
 // Helpers
 // --------------------------------------------------------------------------
 
-function summarizeGroupPolicy(cfg: Hanzo BotConfig): {
+function summarizeGroupPolicy(cfg: HanzoBotConfig): {
   open: number;
   allowlist: number;
   other: number;
@@ -86,7 +86,7 @@ function looksLikeEnvRef(value: string): boolean {
   return v.startsWith("${") && v.endsWith("}");
 }
 
-function isGatewayRemotelyExposed(cfg: Hanzo BotConfig): boolean {
+function isGatewayRemotelyExposed(cfg: HanzoBotConfig): boolean {
   const bind = typeof cfg.gateway?.bind === "string" ? cfg.gateway.bind : "loopback";
   if (bind !== "loopback") {
     return true;
@@ -108,7 +108,7 @@ function addModel(models: ModelRef[], raw: unknown, source: string) {
   models.push({ id, source });
 }
 
-function collectModels(cfg: Hanzo BotConfig): ModelRef[] {
+function collectModels(cfg: HanzoBotConfig): ModelRef[] {
   const out: ModelRef[] = [];
   addModel(
     out,
@@ -197,8 +197,8 @@ function normalizeNodeCommand(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function listKnownNodeCommands(cfg: Hanzo BotConfig): Set<string> {
-  const baseCfg: Hanzo BotConfig = {
+function listKnownNodeCommands(cfg: HanzoBotConfig): Set<string> {
+  const baseCfg: HanzoBotConfig = {
     ...cfg,
     gateway: {
       ...cfg.gateway,
@@ -295,7 +295,7 @@ function suggestKnownNodeCommands(unknown: string, known: Set<string>): string[]
 }
 
 function resolveToolPolicies(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentTools?: AgentToolsConfig;
   sandboxMode?: "off" | "non-main" | "all";
   agentId?: string | null;
@@ -325,14 +325,14 @@ function resolveToolPolicies(params: {
   return policies;
 }
 
-function hasWebSearchKey(cfg: Hanzo BotConfig, env: NodeJS.ProcessEnv): boolean {
+function hasWebSearchKey(cfg: HanzoBotConfig, env: NodeJS.ProcessEnv): boolean {
   const search = cfg.tools?.web?.search;
   return Boolean(
     search?.apiKey || search?.perplexity?.apiKey || env.BRAVE_API_KEY || env.PERPLEXITY_API_KEY,
   );
 }
 
-function isWebSearchEnabled(cfg: Hanzo BotConfig, env: NodeJS.ProcessEnv): boolean {
+function isWebSearchEnabled(cfg: HanzoBotConfig, env: NodeJS.ProcessEnv): boolean {
   const enabled = cfg.tools?.web?.search?.enabled;
   if (enabled === false) {
     return false;
@@ -343,7 +343,7 @@ function isWebSearchEnabled(cfg: Hanzo BotConfig, env: NodeJS.ProcessEnv): boole
   return hasWebSearchKey(cfg, env);
 }
 
-function isWebFetchEnabled(cfg: Hanzo BotConfig): boolean {
+function isWebFetchEnabled(cfg: HanzoBotConfig): boolean {
   const enabled = cfg.tools?.web?.fetch?.enabled;
   if (enabled === false) {
     return false;
@@ -351,7 +351,7 @@ function isWebFetchEnabled(cfg: Hanzo BotConfig): boolean {
   return true;
 }
 
-function isBrowserEnabled(cfg: Hanzo BotConfig): boolean {
+function isBrowserEnabled(cfg: HanzoBotConfig): boolean {
   try {
     return resolveBrowserConfig(cfg.browser, cfg).enabled;
   } catch {
@@ -359,7 +359,7 @@ function isBrowserEnabled(cfg: Hanzo BotConfig): boolean {
   }
 }
 
-function listGroupPolicyOpen(cfg: Hanzo BotConfig): string[] {
+function listGroupPolicyOpen(cfg: HanzoBotConfig): string[] {
   const out: string[] = [];
   const channels = cfg.channels as Record<string, unknown> | undefined;
   if (!channels || typeof channels !== "object") {
@@ -397,7 +397,7 @@ function hasConfiguredGroupTargets(section: Record<string, unknown>): boolean {
   });
 }
 
-function listPotentialMultiUserSignals(cfg: Hanzo BotConfig): string[] {
+function listPotentialMultiUserSignals(cfg: HanzoBotConfig): string[] {
   const out = new Set<string>();
   const channels = cfg.channels as Record<string, unknown> | undefined;
   if (!channels || typeof channels !== "object") {
@@ -465,7 +465,7 @@ function listPotentialMultiUserSignals(cfg: Hanzo BotConfig): string[] {
   return Array.from(out);
 }
 
-function collectRiskyToolExposureContexts(cfg: Hanzo BotConfig): {
+function collectRiskyToolExposureContexts(cfg: HanzoBotConfig): {
   riskyContexts: string[];
   hasRuntimeRisk: boolean;
 } {
@@ -524,7 +524,7 @@ function collectRiskyToolExposureContexts(cfg: Hanzo BotConfig): {
 // Exported collectors
 // --------------------------------------------------------------------------
 
-export function collectAttackSurfaceSummaryFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+export function collectAttackSurfaceSummaryFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const group = summarizeGroupPolicy(cfg);
   const elevated = cfg.tools?.elevated?.enabled !== false;
   const webhooksEnabled = cfg.hooks?.enabled === true;
@@ -571,7 +571,7 @@ export function collectSyncedFolderFindings(params: {
   return findings;
 }
 
-export function collectSecretsInConfigFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+export function collectSecretsInConfigFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const password =
     typeof cfg.gateway?.auth?.password === "string" ? cfg.gateway.auth.password.trim() : "";
@@ -602,7 +602,7 @@ export function collectSecretsInConfigFindings(cfg: Hanzo BotConfig): SecurityAu
 }
 
 export function collectHooksHardeningFindings(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
@@ -721,7 +721,7 @@ export function collectHooksHardeningFindings(
 }
 
 export function collectGatewayHttpSessionKeyOverrideFindings(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const chatCompletionsEnabled = cfg.gateway?.http?.endpoints?.chatCompletions?.enabled === true;
@@ -748,7 +748,7 @@ export function collectGatewayHttpSessionKeyOverrideFindings(
 }
 
 export function collectGatewayHttpNoAuthFindings(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv,
 ): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
@@ -781,7 +781,7 @@ export function collectGatewayHttpNoAuthFindings(
   return findings;
 }
 
-export function collectSandboxDockerNoopFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+export function collectSandboxDockerNoopFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const configuredPaths: string[] = [];
   const agents = Array.isArray(cfg.agents?.list) ? cfg.agents.list : [];
@@ -831,7 +831,7 @@ export function collectSandboxDockerNoopFindings(cfg: Hanzo BotConfig): Security
   return findings;
 }
 
-export function collectSandboxDangerousConfigFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+export function collectSandboxDangerousConfigFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const agents = Array.isArray(cfg.agents?.list) ? cfg.agents.list : [];
 
@@ -979,7 +979,7 @@ export function collectSandboxDangerousConfigFindings(cfg: Hanzo BotConfig): Sec
   return findings;
 }
 
-export function collectNodeDenyCommandPatternFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+export function collectNodeDenyCommandPatternFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const denyListRaw = cfg.gateway?.nodes?.denyCommands;
   if (!Array.isArray(denyListRaw) || denyListRaw.length === 0) {
@@ -1037,7 +1037,7 @@ export function collectNodeDenyCommandPatternFindings(cfg: Hanzo BotConfig): Sec
 }
 
 export function collectNodeDangerousAllowCommandFindings(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const allowRaw = cfg.gateway?.nodes?.allowCommands;
@@ -1073,7 +1073,7 @@ export function collectNodeDangerousAllowCommandFindings(
   return findings;
 }
 
-export function collectMinimalProfileOverrideFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+export function collectMinimalProfileOverrideFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   if (cfg.tools?.profile !== "minimal") {
     return findings;
@@ -1109,7 +1109,7 @@ export function collectMinimalProfileOverrideFindings(cfg: Hanzo BotConfig): Sec
   return findings;
 }
 
-export function collectModelHygieneFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+export function collectModelHygieneFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const models = collectModels(cfg);
   if (models.length === 0) {
@@ -1195,7 +1195,7 @@ export function collectModelHygieneFindings(cfg: Hanzo BotConfig): SecurityAudit
 }
 
 export function collectSmallModelRiskFindings(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
 }): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
@@ -1289,7 +1289,7 @@ export function collectSmallModelRiskFindings(params: {
   return findings;
 }
 
-export function collectExposureMatrixFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+export function collectExposureMatrixFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const openGroups = listGroupPolicyOpen(cfg);
   if (openGroups.length === 0) {
@@ -1328,7 +1328,7 @@ export function collectExposureMatrixFindings(cfg: Hanzo BotConfig): SecurityAud
   return findings;
 }
 
-export function collectLikelyMultiUserSetupFindings(cfg: Hanzo BotConfig): SecurityAuditFinding[] {
+export function collectLikelyMultiUserSetupFindings(cfg: HanzoBotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
   const signals = listPotentialMultiUserSignals(cfg);
   if (signals.length === 0) {

@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 import type { ChannelPlugin } from "../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { isChannelConfigured } from "../config/plugin-auto-enable.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import type { GatewayRequestHandler } from "../gateway/server-methods/types.js";
@@ -19,7 +19,7 @@ import {
   resolveMemorySlotDecision,
   type NormalizedPluginsConfig,
 } from "./config-state.js";
-import { discoverHanzo BotPlugins } from "./discovery.js";
+import { discoverHanzoBotPlugins } from "./discovery.js";
 import { initializeGlobalHookRunner } from "./hook-runner-global.js";
 import { clearPluginInteractiveHandlers } from "./interactive.js";
 import { loadPluginManifestRegistry } from "./manifest-registry.js";
@@ -42,8 +42,8 @@ import {
   type LoaderModuleResolveParams,
 } from "./sdk-alias.js";
 import type {
-  Hanzo BotPluginDefinition,
-  Hanzo BotPluginModule,
+  HanzoBotPluginDefinition,
+  HanzoBotPluginModule,
   PluginDiagnostic,
   PluginBundleFormat,
   PluginFormat,
@@ -53,7 +53,7 @@ import type {
 export type PluginLoadResult = PluginRegistry;
 
 export type PluginLoadOptions = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   workspaceDir?: string;
   // Allows callers to resolve plugin roots and load paths against an explicit env
   // instead of the process-global environment.
@@ -245,8 +245,8 @@ function validatePluginConfig(params: {
 }
 
 function resolvePluginModuleExport(moduleExport: unknown): {
-  definition?: Hanzo BotPluginDefinition;
-  register?: Hanzo BotPluginDefinition["register"];
+  definition?: HanzoBotPluginDefinition;
+  register?: HanzoBotPluginDefinition["register"];
 } {
   const resolved =
     moduleExport &&
@@ -256,11 +256,11 @@ function resolvePluginModuleExport(moduleExport: unknown): {
       : moduleExport;
   if (typeof resolved === "function") {
     return {
-      register: resolved as Hanzo BotPluginDefinition["register"],
+      register: resolved as HanzoBotPluginDefinition["register"],
     };
   }
   if (resolved && typeof resolved === "object") {
-    const def = resolved as Hanzo BotPluginDefinition;
+    const def = resolved as HanzoBotPluginDefinition;
     const register = def.register ?? def.activate;
     return { definition: def, register };
   }
@@ -294,7 +294,7 @@ function shouldLoadChannelPluginInSetupRuntime(params: {
   manifestChannels: string[];
   setupSource?: string;
   startupDeferConfiguredChannelFullLoadUntilAfterListen?: boolean;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
   preferSetupRuntimeForChannelPlugins?: boolean;
 }): boolean {
@@ -451,7 +451,7 @@ function matchesPathMatcher(matcher: PathMatcher, sourcePath: string): boolean {
 }
 
 function buildProvenanceIndex(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   normalizedLoadPaths: string[];
   env: NodeJS.ProcessEnv;
 }): PluginProvenanceIndex {
@@ -517,7 +517,7 @@ function matchesExplicitInstallRule(params: {
 }
 
 function resolveCandidateDuplicateRank(params: {
-  candidate: ReturnType<typeof discoverHanzo BotPlugins>["candidates"][number];
+  candidate: ReturnType<typeof discoverHanzoBotPlugins>["candidates"][number];
   manifestByRoot: Map<string, ReturnType<typeof loadPluginManifestRegistry>["plugins"][number]>;
   provenance: PluginProvenanceIndex;
   env: NodeJS.ProcessEnv;
@@ -551,8 +551,8 @@ function resolveCandidateDuplicateRank(params: {
 }
 
 function compareDuplicateCandidateOrder(params: {
-  left: ReturnType<typeof discoverHanzo BotPlugins>["candidates"][number];
-  right: ReturnType<typeof discoverHanzo BotPlugins>["candidates"][number];
+  left: ReturnType<typeof discoverHanzoBotPlugins>["candidates"][number];
+  right: ReturnType<typeof discoverHanzoBotPlugins>["candidates"][number];
   manifestByRoot: Map<string, ReturnType<typeof loadPluginManifestRegistry>["plugins"][number]>;
   provenance: PluginProvenanceIndex;
   env: NodeJS.ProcessEnv;
@@ -646,12 +646,12 @@ function activatePluginRegistry(registry: PluginRegistry, cacheKey: string): voi
   initializeGlobalHookRunner(registry);
 }
 
-export function loadHanzo BotPlugins(options: PluginLoadOptions = {}): PluginRegistry {
+export function loadHanzoBotPlugins(options: PluginLoadOptions = {}): PluginRegistry {
   // Snapshot (non-activating) loads must disable the cache to avoid storing a registry
   // whose commands were never globally registered.
   if (options.activate === false && options.cache !== false) {
     throw new Error(
-      "loadHanzo BotPlugins: activate:false requires cache:false to prevent command registry divergence",
+      "loadHanzoBotPlugins: activate:false requires cache:false to prevent command registry divergence",
     );
   }
   const env = options.env ?? process.env;
@@ -807,7 +807,7 @@ export function loadHanzo BotPlugins(options: PluginLoadOptions = {}): PluginReg
     suppressGlobalCommands: !shouldActivate,
   });
 
-  const discovery = discoverHanzo BotPlugins({
+  const discovery = discoverHanzoBotPlugins({
     workspaceDir: options.workspaceDir,
     extraPaths: normalized.loadPaths,
     cache: options.cache,
@@ -1071,9 +1071,9 @@ export function loadHanzo BotPlugins(options: PluginLoadOptions = {}): PluginReg
     const safeSource = opened.path;
     fs.closeSync(opened.fd);
 
-    let mod: Hanzo BotPluginModule | null = null;
+    let mod: HanzoBotPluginModule | null = null;
     try {
-      mod = getJiti(safeSource)(safeSource) as Hanzo BotPluginModule;
+      mod = getJiti(safeSource)(safeSource) as HanzoBotPluginModule;
     } catch (err) {
       recordPluginError({
         logger,

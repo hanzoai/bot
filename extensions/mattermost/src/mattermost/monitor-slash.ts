@@ -1,7 +1,7 @@
 import {
   listSkillCommandsForAgents,
   parseStrictPositiveInteger,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type RuntimeEnv,
 } from "../runtime-api.js";
 import type { ResolvedMattermostAccount } from "./accounts.js";
@@ -27,7 +27,7 @@ function isLoopbackHost(hostname: string): boolean {
 }
 
 function buildSlashCommands(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   nativeSkills: boolean;
 }): MattermostCommandSpec[] {
@@ -134,7 +134,7 @@ async function registerSlashCommandsAcrossTeams(params: {
 
 export async function registerMattermostMonitorSlashCommands(params: {
   client: MattermostClient;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   account: ResolvedMattermostAccount;
   baseUrl: string;

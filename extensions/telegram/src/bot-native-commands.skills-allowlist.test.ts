@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { writeSkill } from "../../../src/agents/skills.e2e-test-helpers.js";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import {
   pluginCommandMocks,
   resetPluginCommandMocks,
@@ -49,7 +49,7 @@ describe("registerTelegramNativeCommands skill allowlist integration", () => {
     });
 
     const setMyCommands = vi.fn().mockResolvedValue(undefined);
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       agents: {
         list: [
           { id: "alpha", workspace: workspaceDir, skills: ["alpha-skill"] },

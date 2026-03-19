@@ -1,6 +1,6 @@
 import { Type } from "@sinclair/typebox";
 import { SILENT_REPLY_TOKEN } from "../../auto-reply/tokens.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { loadConfig } from "../../config/config.js";
 import { textToSpeech } from "../../tts/tts.js";
 import type { GatewayMessageChannel } from "../../utils/message-channel.js";
@@ -15,7 +15,7 @@ const TtsToolSchema = Type.Object({
 });
 
 export function createTtsTool(opts?: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentChannel?: GatewayMessageChannel;
 }): AnyAgentTool {
   return {

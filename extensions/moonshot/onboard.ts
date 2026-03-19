@@ -1,6 +1,6 @@
 import {
   applyProviderConfigWithDefaultModelPreset,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 import {
   buildMoonshotProvider,
@@ -11,19 +11,19 @@ import {
 export const MOONSHOT_CN_BASE_URL = "https://api.moonshot.cn/v1";
 export const MOONSHOT_DEFAULT_MODEL_REF = `moonshot/${MOONSHOT_DEFAULT_MODEL_ID}`;
 
-export function applyMoonshotProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyMoonshotProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyMoonshotProviderConfigWithBaseUrl(cfg, MOONSHOT_BASE_URL);
 }
 
-export function applyMoonshotProviderConfigCn(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyMoonshotProviderConfigCn(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyMoonshotProviderConfigWithBaseUrl(cfg, MOONSHOT_CN_BASE_URL);
 }
 
 function applyMoonshotProviderConfigWithBaseUrl(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   baseUrl: string,
   primaryModelRef?: string,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const defaultModel = buildMoonshotProvider().models[0];
   if (!defaultModel) {
     return cfg;
@@ -40,11 +40,11 @@ function applyMoonshotProviderConfigWithBaseUrl(
   });
 }
 
-export function applyMoonshotConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyMoonshotConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyMoonshotProviderConfigWithBaseUrl(cfg, MOONSHOT_BASE_URL, MOONSHOT_DEFAULT_MODEL_REF);
 }
 
-export function applyMoonshotConfigCn(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyMoonshotConfigCn(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyMoonshotProviderConfigWithBaseUrl(
     cfg,
     MOONSHOT_CN_BASE_URL,

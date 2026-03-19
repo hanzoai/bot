@@ -25,7 +25,7 @@ describe("matchesExecAllowlistPattern", () => {
   });
 
   it("expands home-prefix patterns", () => {
-    const prevHanzo BotHome = process.env.BOT_HOME;
+    const prevHanzoBotHome = process.env.BOT_HOME;
     const prevHome = process.env.HOME;
     process.env.BOT_HOME = "/srv/openclaw-home";
     process.env.HOME = "/home/other";
@@ -35,10 +35,10 @@ describe("matchesExecAllowlistPattern", () => {
       expect(matchesExecAllowlistPattern("~/bin/tool", openClawHome)).toBe(true);
       expect(matchesExecAllowlistPattern("~/bin/tool", fallbackHome)).toBe(false);
     } finally {
-      if (prevHanzo BotHome === undefined) {
+      if (prevHanzoBotHome === undefined) {
         delete process.env.BOT_HOME;
       } else {
-        process.env.BOT_HOME = prevHanzo BotHome;
+        process.env.BOT_HOME = prevHanzoBotHome;
       }
       if (prevHome === undefined) {
         delete process.env.HOME;

@@ -20,7 +20,7 @@ import {
 } from "../hooks/internal-hooks.js";
 import { loadInternalHooks } from "../hooks/loader.js";
 import { isTruthyEnvValue } from "../infra/env.js";
-import type { loadHanzo BotPlugins } from "../plugins/loader.js";
+import type { loadHanzoBotPlugins } from "../plugins/loader.js";
 import { type PluginServicesHandle, startPluginServices } from "../plugins/services.js";
 import { startBrowserControlServerIfEnabled } from "./server-browser.js";
 import {
@@ -33,7 +33,7 @@ const SESSION_LOCK_STALE_MS = 30 * 60 * 1000;
 
 export async function startGatewaySidecars(params: {
   cfg: ReturnType<typeof loadConfig>;
-  pluginRegistry: ReturnType<typeof loadHanzo BotPlugins>;
+  pluginRegistry: ReturnType<typeof loadHanzoBotPlugins>;
   defaultWorkspaceDir: string;
   deps: CliDeps;
   startChannels: () => Promise<void>;

@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
@@ -28,7 +28,7 @@ export type AuthProfileEligibility = {
 };
 
 export function resolveAuthProfileEligibility(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   store: AuthProfileStore;
   provider: string;
   profileId: string;
@@ -65,7 +65,7 @@ export function resolveAuthProfileEligibility(params: {
 }
 
 export function resolveAuthProfileOrder(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   store: AuthProfileStore;
   provider: string;
   preferredProfile?: string;

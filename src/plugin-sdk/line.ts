@@ -4,10 +4,10 @@ export type {
   ChannelStatusIssue,
 } from "../channels/plugins/types.js";
 export type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
-export type { Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
 export type { ReplyPayload } from "../auto-reply/types.js";
 export type { ChannelSetupAdapter } from "../channels/plugins/types.adapters.js";
-export type { Hanzo BotPluginApi, PluginRuntime } from "./channel-plugin-common.js";
+export type { HanzoBotPluginApi, PluginRuntime } from "./channel-plugin-common.js";
 
 export {
   DEFAULT_ACCOUNT_ID,

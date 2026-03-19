@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
-import { resolvePreferredHanzo BotTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-openclaw-dir.js";
 
 export function asRecord(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
@@ -23,7 +23,7 @@ export function resolveTempPathParts(opts: { ext: string; tmpDir?: string; id?: 
   tmpDir: string;
   id: string;
 } {
-  const tmpDir = opts.tmpDir ?? resolvePreferredHanzo BotTmpDir();
+  const tmpDir = opts.tmpDir ?? resolvePreferredHanzoBotTmpDir();
   if (!opts.tmpDir) {
     fs.mkdirSync(tmpDir, { recursive: true, mode: 0o700 });
   }

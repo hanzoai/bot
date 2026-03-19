@@ -7,7 +7,7 @@ import {
   createExitThrowingRuntime,
   createWizardPrompter,
   readAuthProfilesForAgent,
-  requireHanzo BotAgentDir,
+  requireHanzoBotAgentDir,
   setupAuthTestEnv,
 } from "./test-wizard-helpers.js";
 
@@ -32,7 +32,7 @@ describe("applyAuthChoice (moonshot)", () => {
   async function readAuthProfiles() {
     return await readAuthProfilesForAgent<{
       profiles?: Record<string, { key?: string }>;
-    }>(requireHanzo BotAgentDir());
+    }>(requireHanzoBotAgentDir());
   }
 
   async function runMoonshotCnFlow(params: {

@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
-import { resolvePreferredHanzo BotTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-openclaw-dir.js";
 import { resolveSandboxedMediaSource } from "./sandbox-paths.js";
 
 async function withSandboxRoot<T>(run: (sandboxDir: string) => Promise<T>) {
@@ -28,7 +28,7 @@ function makeTmpProbePath(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}.txt`;
 }
 
-async function withOutsideHardlinkInHanzo BotTmp<T>(
+async function withOutsideHardlinkInHanzoBotTmp<T>(
   params: {
     openClawTmpDir: string;
     hardlinkPrefix: string;
@@ -70,7 +70,7 @@ async function withOutsideHardlinkInHanzo BotTmp<T>(
 }
 
 describe("resolveSandboxedMediaSource", () => {
-  const openClawTmpDir = resolvePreferredHanzo BotTmpDir();
+  const openClawTmpDir = resolvePreferredHanzoBotTmpDir();
 
   // Group 1: /tmp paths (the bug fix)
   it.each([
@@ -219,7 +219,7 @@ describe("resolveSandboxedMediaSource", () => {
     if (process.platform === "win32") {
       return;
     }
-    await withOutsideHardlinkInHanzo BotTmp(
+    await withOutsideHardlinkInHanzoBotTmp(
       {
         openClawTmpDir,
         hardlinkPrefix: "sandbox-media-hardlink",
@@ -236,7 +236,7 @@ describe("resolveSandboxedMediaSource", () => {
     if (process.platform === "win32") {
       return;
     }
-    await withOutsideHardlinkInHanzo BotTmp(
+    await withOutsideHardlinkInHanzoBotTmp(
       {
         openClawTmpDir,
         hardlinkPrefix: "sandbox-media-hardlink-target",

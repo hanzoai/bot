@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolvePluginTools } from "../plugins/tools.js";
 import { getActiveRuntimeWebToolsMetadata } from "../secrets/runtime.js";
 import type { GatewayMessageChannel } from "../utils/message-channel.js";
@@ -28,7 +28,7 @@ import { createTtsTool } from "./tools/tts-tool.js";
 import { createWebFetchTool, createWebSearchTool } from "./tools/web-tools.js";
 import { resolveWorkspaceRoot } from "./workspace-dir.js";
 
-export function createHanzo BotTools(
+export function createHanzoBotTools(
   options?: {
     sandboxBrowserBridgeUrl?: string;
     allowHostBrowserControl?: boolean;
@@ -44,7 +44,7 @@ export function createHanzo BotTools(
     sandboxFsBridge?: SandboxFsBridge;
     fsPolicy?: ToolFsPolicy;
     sandboxed?: boolean;
-    config?: Hanzo BotConfig;
+    config?: HanzoBotConfig;
     pluginToolAllowlist?: string[];
     /** Current channel ID for auto-threading (Slack). */
     currentChannelId?: string;

@@ -24,7 +24,7 @@ import {
   readNumberParam,
   readReactionParams,
   readStringParam,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   withNormalizedTimestamp,
 } from "./runtime-api.js";
 import { recordSlackThreadParticipation } from "./sent-thread-cache.js";
@@ -123,7 +123,7 @@ function readSlackBlocksParam(params: Record<string, unknown>) {
 
 export async function handleSlackAction(
   params: Record<string, unknown>,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   context?: SlackActionContext,
 ): Promise<AgentToolResult<unknown>> {
   const resolveChannelId = () =>

@@ -1,16 +1,16 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { logWarn } from "../../logger.js";
 
 export type CreateTelegramTypingLeaseParams = {
   to: string;
   accountId?: string;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   intervalMs?: number;
   messageThreadId?: number;
   pulse: (params: {
     to: string;
     accountId?: string;
-    cfg?: Hanzo BotConfig;
+    cfg?: HanzoBotConfig;
     messageThreadId?: number;
   }) => Promise<unknown>;
 };

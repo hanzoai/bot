@@ -2,14 +2,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import { withEnv } from "../../../test/helpers/extensions/env.js";
 import { inspectTelegramAccount } from "./account-inspect.js";
 
 describe("inspectTelegramAccount SecretRef resolution", () => {
   it("resolves default env SecretRef templates in read-only status paths", () => {
     withEnv({ TG_STATUS_TOKEN: "123:token" }, () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           telegram: {
             botToken: "${TG_STATUS_TOKEN}",
@@ -26,7 +26,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
 
   it("respects env provider allowlists in read-only status paths", () => {
     withEnv({ TG_NOT_ALLOWED: "123:token" }, () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         secrets: {
           defaults: {
             env: "secure-env",
@@ -54,7 +54,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
 
   it("does not read env values for non-env providers", () => {
     withEnv({ TG_EXEC_PROVIDER: "123:token" }, () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         secrets: {
           defaults: {
             env: "exec-provider",
@@ -89,7 +89,7 @@ describe("inspectTelegramAccount SecretRef resolution", () => {
       fs.writeFileSync(tokenFile, "123:token\n", "utf8");
       fs.symlinkSync(tokenFile, tokenLink);
 
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           telegram: {
             tokenFile: tokenLink,

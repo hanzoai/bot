@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { runHeartbeatOnce, type HeartbeatDeps } from "./heartbeat-runner.js";
 import { installHeartbeatRunnerTestRuntime } from "./heartbeat-runner.test-harness.js";
 import {
@@ -24,7 +24,7 @@ describe("runHeartbeatOnce ack handling", () => {
     heartbeat: Record<string, unknown>;
     channels: Record<string, unknown>;
     messages?: Record<string, unknown>;
-  }): Hanzo BotConfig {
+  }): HanzoBotConfig {
     return {
       agents: {
         defaults: {
@@ -121,7 +121,7 @@ describe("runHeartbeatOnce ack handling", () => {
     storePath: string;
     heartbeat?: Record<string, unknown>;
     visibility?: Record<string, unknown>;
-  }): Hanzo BotConfig {
+  }): HanzoBotConfig {
     return createHeartbeatConfig({
       tmpDir: params.tmpDir,
       storePath: params.storePath,
@@ -144,7 +144,7 @@ describe("runHeartbeatOnce ack handling", () => {
     storePath: string;
     heartbeat?: Record<string, unknown>;
     visibility?: Record<string, unknown>;
-  }): Promise<Hanzo BotConfig> {
+  }): Promise<HanzoBotConfig> {
     const cfg = createWhatsAppHeartbeatConfig(params);
     await seedMainSessionStore(params.storePath, cfg, {
       lastChannel: "whatsapp",

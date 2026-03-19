@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { SandboxSshSettings } from "../../config/types.sandbox.js";
 import { normalizeSecretInputString } from "../../config/types.secrets.js";
 import { resolveAgentConfig } from "../agent-scope.js";
@@ -222,7 +222,7 @@ export function resolveSandboxSshConfig(params: {
 }
 
 export function resolveSandboxConfigForAgent(
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
   agentId?: string,
 ): SandboxConfig {
   const agent = cfg?.agents?.defaults?.sandbox;

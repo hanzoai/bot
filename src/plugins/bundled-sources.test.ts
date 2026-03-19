@@ -5,11 +5,11 @@ import {
   resolveBundledPluginSources,
 } from "./bundled-sources.js";
 
-const discoverHanzo BotPluginsMock = vi.fn();
+const discoverHanzoBotPluginsMock = vi.fn();
 const loadPluginManifestMock = vi.fn();
 
 vi.mock("./discovery.js", () => ({
-  discoverHanzo BotPlugins: (...args: unknown[]) => discoverHanzo BotPluginsMock(...args),
+  discoverHanzoBotPlugins: (...args: unknown[]) => discoverHanzoBotPluginsMock(...args),
 }));
 
 vi.mock("./manifest.js", () => ({
@@ -18,12 +18,12 @@ vi.mock("./manifest.js", () => ({
 
 describe("bundled plugin sources", () => {
   beforeEach(() => {
-    discoverHanzo BotPluginsMock.mockReset();
+    discoverHanzoBotPluginsMock.mockReset();
     loadPluginManifestMock.mockReset();
   });
 
   it("resolves bundled sources keyed by plugin id", () => {
-    discoverHanzo BotPluginsMock.mockReturnValue({
+    discoverHanzoBotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "global",
@@ -78,7 +78,7 @@ describe("bundled plugin sources", () => {
   });
 
   it("finds bundled source by npm spec", () => {
-    discoverHanzo BotPluginsMock.mockReturnValue({
+    discoverHanzoBotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "bundled",
@@ -104,7 +104,7 @@ describe("bundled plugin sources", () => {
   });
 
   it("forwards an explicit env to bundled discovery helpers", () => {
-    discoverHanzo BotPluginsMock.mockReturnValue({
+    discoverHanzoBotPluginsMock.mockReturnValue({
       candidates: [],
       diagnostics: [],
     });
@@ -121,18 +121,18 @@ describe("bundled plugin sources", () => {
       env,
     });
 
-    expect(discoverHanzo BotPluginsMock).toHaveBeenNthCalledWith(1, {
+    expect(discoverHanzoBotPluginsMock).toHaveBeenNthCalledWith(1, {
       workspaceDir: "/workspace",
       env,
     });
-    expect(discoverHanzo BotPluginsMock).toHaveBeenNthCalledWith(2, {
+    expect(discoverHanzoBotPluginsMock).toHaveBeenNthCalledWith(2, {
       workspaceDir: "/workspace",
       env,
     });
   });
 
   it("finds bundled source by plugin id", () => {
-    discoverHanzo BotPluginsMock.mockReturnValue({
+    discoverHanzoBotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "bundled",

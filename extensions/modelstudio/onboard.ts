@@ -1,6 +1,6 @@
 import {
   applyProviderConfigWithModelCatalogPreset,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 import {
   MODELSTUDIO_CN_BASE_URL,
@@ -12,10 +12,10 @@ import { buildModelStudioProvider } from "./provider-catalog.js";
 export { MODELSTUDIO_CN_BASE_URL, MODELSTUDIO_DEFAULT_MODEL_REF, MODELSTUDIO_GLOBAL_BASE_URL };
 
 function applyModelStudioProviderConfigWithBaseUrl(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   baseUrl: string,
   primaryModelRef?: string,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const provider = buildModelStudioProvider();
   return applyProviderConfigWithModelCatalogPreset(cfg, {
     providerId: "modelstudio",
@@ -30,15 +30,15 @@ function applyModelStudioProviderConfigWithBaseUrl(
   });
 }
 
-export function applyModelStudioProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyModelStudioProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyModelStudioProviderConfigWithBaseUrl(cfg, MODELSTUDIO_GLOBAL_BASE_URL);
 }
 
-export function applyModelStudioProviderConfigCn(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyModelStudioProviderConfigCn(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyModelStudioProviderConfigWithBaseUrl(cfg, MODELSTUDIO_CN_BASE_URL);
 }
 
-export function applyModelStudioConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyModelStudioConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyModelStudioProviderConfigWithBaseUrl(
     cfg,
     MODELSTUDIO_GLOBAL_BASE_URL,
@@ -46,7 +46,7 @@ export function applyModelStudioConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   );
 }
 
-export function applyModelStudioConfigCn(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyModelStudioConfigCn(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyModelStudioProviderConfigWithBaseUrl(
     cfg,
     MODELSTUDIO_CN_BASE_URL,

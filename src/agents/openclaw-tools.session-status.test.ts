@@ -99,7 +99,7 @@ vi.mock("../infra/provider-usage.js", () => ({
 }));
 
 import "./test-helpers/fast-core-tools.js";
-import { createHanzo BotTools } from "./openclaw-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
 
 function resetSessionStore(store: Record<string, unknown>) {
   loadSessionStoreMock.mockClear();
@@ -160,7 +160,7 @@ function expectSpawnedSessionLookupCalls(spawnedBy: string) {
 }
 
 function getSessionStatusTool(agentSessionKey = "main", options?: { sandboxed?: boolean }) {
-  const tool = createHanzo BotTools({
+  const tool = createHanzoBotTools({
     agentSessionKey,
     sandboxed: options?.sandboxed,
   }).find((candidate) => candidate.name === "session_status");

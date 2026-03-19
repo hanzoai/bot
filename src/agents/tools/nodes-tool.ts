@@ -16,7 +16,7 @@ import {
   writeScreenRecordToFile,
 } from "../../cli/nodes-screen.js";
 import { parseDurationMs } from "../../cli/parse-duration.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { parsePreparedSystemRunPayload } from "../../infra/system-run-approval-context.js";
 import { imageMimeFromFormat } from "../../media/mime.js";
 import type { GatewayMessageChannel } from "../../utils/message-channel.js";
@@ -158,7 +158,7 @@ export function createNodesTool(options?: {
   agentAccountId?: string;
   currentChannelId?: string;
   currentThreadTs?: string | number;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   modelHasVision?: boolean;
   allowMediaInvokeCommands?: boolean;
 }): AnyAgentTool {

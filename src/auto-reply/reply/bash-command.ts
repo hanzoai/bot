@@ -4,7 +4,7 @@ import { createExecTool } from "../../agents/bash-tools.js";
 import { resolveSandboxRuntimeStatus } from "../../agents/sandbox.js";
 import { killProcessTree } from "../../agents/shell-utils.js";
 import { isCommandFlagEnabled } from "../../config/commands.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { logVerbose } from "../../globals.js";
 import { clampInt } from "../../utils.js";
 import type { MsgContext } from "../templating.js";
@@ -35,7 +35,7 @@ type ActiveBashJob =
 
 let activeJob: ActiveBashJob | null = null;
 
-function resolveForegroundMs(cfg: Hanzo BotConfig): number {
+function resolveForegroundMs(cfg: HanzoBotConfig): number {
   const raw = cfg.commands?.bashForegroundMs;
   if (typeof raw !== "number" || Number.isNaN(raw)) {
     return DEFAULT_FOREGROUND_MS;
@@ -99,7 +99,7 @@ function parseBashRequest(raw: string): BashRequest | null {
 
 function resolveRawCommandBody(params: {
   ctx: MsgContext;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId?: string;
   isGroup: boolean;
 }) {
@@ -178,7 +178,7 @@ function buildUsageReply(): ReplyPayload {
 
 export async function handleBashChatCommand(params: {
   ctx: MsgContext;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId?: string;
   sessionKey: string;
   isGroup: boolean;

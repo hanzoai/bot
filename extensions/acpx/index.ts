@@ -1,4 +1,4 @@
-import type { Hanzo BotPluginApi } from "./runtime-api.js";
+import type { HanzoBotPluginApi } from "./runtime-api.js";
 import { createAcpxPluginConfigSchema } from "./src/config.js";
 import { createAcpxRuntimeService } from "./src/service.js";
 
@@ -7,7 +7,7 @@ const plugin = {
   name: "ACPX Runtime",
   description: "ACP runtime backend powered by the acpx CLI.",
   configSchema: createAcpxPluginConfigSchema(),
-  register(api: Hanzo BotPluginApi) {
+  register(api: HanzoBotPluginApi) {
     api.registerService(
       createAcpxRuntimeService({
         pluginConfig: api.pluginConfig,

@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import { resolveGatewayService } from "../../../daemon/service.js";
 import { isSystemdUserServiceAvailable } from "../../../daemon/systemd.js";
 import type { RuntimeEnv } from "../../../runtime.js";
@@ -9,7 +9,7 @@ import type { OnboardOptions } from "../../onboard-types.js";
 import { ensureSystemdUserLingerNonInteractive } from "../../systemd-linger.js";
 
 export async function installGatewayDaemonNonInteractive(params: {
-  nextConfig: Hanzo BotConfig;
+  nextConfig: HanzoBotConfig;
   opts: OnboardOptions;
   runtime: RuntimeEnv;
   port: number;

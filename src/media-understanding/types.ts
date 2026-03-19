@@ -96,7 +96,7 @@ export type ImageDescriptionRequest = {
   profile?: string;
   preferredProfile?: string;
   agentDir: string;
-  cfg: import("../config/config.js").Hanzo BotConfig;
+  cfg: import("../config/config.js").HanzoBotConfig;
   model: string;
   provider: string;
 };
@@ -117,7 +117,7 @@ export type ImagesDescriptionRequest = {
   profile?: string;
   preferredProfile?: string;
   agentDir: string;
-  cfg: import("../config/config.js").Hanzo BotConfig;
+  cfg: import("../config/config.js").HanzoBotConfig;
 };
 
 export type ImageDescriptionResult = {

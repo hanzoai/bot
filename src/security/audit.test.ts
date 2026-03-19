@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
   collectInstalledSkillsCodeSafetyFindings,
@@ -29,11 +29,11 @@ const execDockerRawUnavailable: NonNullable<SecurityAuditOptions["execDockerRawF
 function stubChannelPlugin(params: {
   id: "discord" | "slack" | "telegram" | "zalouser";
   label: string;
-  resolveAccount: (cfg: Hanzo BotConfig, accountId: string | null | undefined) => unknown;
-  inspectAccount?: (cfg: Hanzo BotConfig, accountId: string | null | undefined) => unknown;
-  listAccountIds?: (cfg: Hanzo BotConfig) => string[];
-  isConfigured?: (account: unknown, cfg: Hanzo BotConfig) => boolean;
-  isEnabled?: (account: unknown, cfg: Hanzo BotConfig) => boolean;
+  resolveAccount: (cfg: HanzoBotConfig, accountId: string | null | undefined) => unknown;
+  inspectAccount?: (cfg: HanzoBotConfig, accountId: string | null | undefined) => unknown;
+  listAccountIds?: (cfg: HanzoBotConfig) => string[];
+  isConfigured?: (account: unknown, cfg: HanzoBotConfig) => boolean;
+  isEnabled?: (account: unknown, cfg: HanzoBotConfig) => boolean;
 }): ChannelPlugin {
   return {
     id: params.id,
@@ -146,7 +146,7 @@ function successfulProbeResult(url: string) {
 }
 
 async function audit(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   extra?: Omit<SecurityAuditOptions, "config">,
 ): Promise<SecurityAuditReport> {
   return runSecurityAudit({
@@ -175,7 +175,7 @@ async function expectSeverityByExposureCases(params: {
   checkId: string;
   cases: Array<{
     name: string;
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     expectedSeverity: "warn" | "critical";
   }>;
 }) {
@@ -188,7 +188,7 @@ async function expectSeverityByExposureCases(params: {
 }
 
 async function runChannelSecurityAudit(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   plugins: ChannelPlugin[],
 ): Promise<SecurityAuditReport> {
   return runSecurityAudit({
@@ -200,7 +200,7 @@ async function runChannelSecurityAudit(
 }
 
 async function runInstallMetadataAudit(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   stateDir: string,
 ): Promise<SecurityAuditReport> {
   return runSecurityAudit({
@@ -250,7 +250,7 @@ describe("security audit", () => {
     );
   };
 
-  const runSharedExtensionsAudit = async (config: Hanzo BotConfig) => {
+  const runSharedExtensionsAudit = async (config: HanzoBotConfig) => {
     return runSecurityAudit({
       config,
       includeFilesystem: true,
@@ -330,7 +330,7 @@ description: test skill
   });
 
   it("includes an attack surface summary (info)", async () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       channels: { whatsapp: { groupPolicy: "open" }, telegram: { groupPolicy: "allowlist" } },
       tools: { elevated: { enabled: true, allowFrom: { whatsapp: ["+1"] } } },
       hooks: { enabled: true },
@@ -395,7 +395,7 @@ description: test skill
       {
         name: "does not flag missing gateway auth when read-only scrubbed config omits unavailable auth SecretRefs",
         run: async () => {
-          const sourceConfig: Hanzo BotConfig = {
+          const sourceConfig: HanzoBotConfig = {
             gateway: {
               bind: "lan",
               auth: {
@@ -412,7 +412,7 @@ description: test skill
               },
             },
           };
-          const resolvedConfig: Hanzo BotConfig = {
+          const resolvedConfig: HanzoBotConfig = {
             gateway: {
               bind: "lan",
               auth: {},
@@ -478,7 +478,7 @@ description: test skill
   it("scores dangerous gateway.tools.allow over HTTP by exposure", async () => {
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       expectedSeverity: "warn" | "critical";
     }> = [
       {
@@ -518,7 +518,7 @@ description: test skill
   it("warns when sandbox exec host is selected while sandbox mode is off", async () => {
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       checkId:
         | "tools.exec.host_sandbox_no_sandbox_defaults"
         | "tools.exec.host_sandbox_no_sandbox_agents";
@@ -581,7 +581,7 @@ description: test skill
   it("warns for interpreter safeBins only when explicit profiles are missing", async () => {
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       expected: boolean;
     }> = [
       {
@@ -678,7 +678,7 @@ description: test skill
               },
             ],
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           const finding = res.findings.find(
             (f) => f.checkId === "tools.exec.safe_bin_trusted_dirs_risky",
@@ -697,7 +697,7 @@ description: test skill
               safeBinTrustedDirs: ["/usr/libexec"],
             },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expectNoFinding(res, "tools.exec.safe_bin_trusted_dirs_risky");
         },
@@ -715,7 +715,7 @@ description: test skill
   it("evaluates loopback control UI and logging exposure findings", async () => {
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       checkId:
         | "gateway.trusted_proxies_missing"
         | "gateway.loopback_no_auth"
@@ -1128,7 +1128,7 @@ description: test skill
   it("scores small-model risk by tool/sandbox exposure", async () => {
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       expectedSeverity: "info" | "critical";
       detailIncludes: string[];
     }> = [
@@ -1180,7 +1180,7 @@ description: test skill
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectedFindings: [{ checkId: "sandbox.docker_config_mode_off" }],
       },
       {
@@ -1195,7 +1195,7 @@ description: test skill
             },
             list: [{ id: "ops", sandbox: { mode: "all" } }],
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectedFindings: [],
         expectedAbsent: ["sandbox.docker_config_mode_off"],
       },
@@ -1215,7 +1215,7 @@ description: test skill
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectedFindings: [
           { checkId: "sandbox.dangerous_bind_mount", severity: "critical" },
           { checkId: "sandbox.dangerous_network_mode", severity: "critical" },
@@ -1236,7 +1236,7 @@ description: test skill
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectedFindings: [
           {
             checkId: "sandbox.dangerous_network_mode",
@@ -1275,7 +1275,7 @@ description: test skill
               denyCommands: ["system.*", "system.runx"],
             },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         detailIncludes: ["system.*", "system.runx", "did you mean", "system.run"],
       },
       {
@@ -1286,7 +1286,7 @@ description: test skill
               denyCommands: ["system.run.prep"],
             },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         detailIncludes: ["system.run.prep", "did you mean", "system.run.prepare"],
       },
       {
@@ -1297,7 +1297,7 @@ description: test skill
               denyCommands: ["zzzzzzzzzzzzzz"],
             },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         detailIncludes: ["zzzzzzzzzzzzzz"],
         detailExcludes: ["did you mean"],
       },
@@ -1330,7 +1330,7 @@ description: test skill
             bind: "loopback",
             nodes: { allowCommands: ["camera.snap", "screen.record"] },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectedSeverity: "warn" as const,
       },
       {
@@ -1340,7 +1340,7 @@ description: test skill
             bind: "lan",
             nodes: { allowCommands: ["camera.snap", "screen.record"] },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectedSeverity: "critical" as const,
       },
       {
@@ -1352,7 +1352,7 @@ description: test skill
               denyCommands: ["camera.snap", "screen.record"],
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectedAbsent: true,
       },
     ] as const;
@@ -1381,7 +1381,7 @@ description: test skill
   });
 
   it("flags agent profile overrides when global tools.profile is minimal", async () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       tools: {
         profile: "minimal",
       },
@@ -1401,7 +1401,7 @@ description: test skill
   });
 
   it("flags tools.elevated allowFrom wildcard as critical", async () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       tools: {
         elevated: {
           allowFrom: { whatsapp: ["*"] },
@@ -1425,7 +1425,7 @@ description: test skill
         browser: {
           enabled: true,
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: { checkId: "browser.control_no_auth", severity: "critical" },
     },
     {
@@ -1438,7 +1438,7 @@ description: test skill
         browser: {
           enabled: true,
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedNoFinding: "browser.control_no_auth",
     },
     {
@@ -1457,7 +1457,7 @@ description: test skill
         browser: {
           enabled: true,
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedNoFinding: "browser.control_no_auth",
     },
     {
@@ -1468,7 +1468,7 @@ description: test skill
             remote: { cdpUrl: "http://example.com:9222", color: "#0066CC" },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: { checkId: "browser.remote_cdp_http", severity: "warn" },
     },
     {
@@ -1483,7 +1483,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: {
         checkId: "browser.remote_cdp_private_host",
         severity: "warn",
@@ -1511,7 +1511,7 @@ description: test skill
           gateway: {
             controlUi: { allowInsecureAuth: true },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         expectedFinding: {
           checkId: "gateway.control_ui.insecure_auth",
           severity: "warn",
@@ -1524,7 +1524,7 @@ description: test skill
           gateway: {
             controlUi: { dangerouslyDisableDeviceAuth: true },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         expectedFinding: {
           checkId: "gateway.control_ui.device_auth_disabled",
           severity: "critical",
@@ -1545,7 +1545,7 @@ description: test skill
               },
             },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         expectedDangerousDetails: [
           "hooks.gmail.allowUnsafeExternalContent=true",
           "hooks.mappings[0].allowUnsafeExternalContent=true",
@@ -1578,7 +1578,7 @@ description: test skill
           bind: "lan",
           auth: { mode: "token", token: "very-long-browser-token-0123456789" },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: {
         checkId: "gateway.control_ui.allowed_origins_required",
         severity: "critical",
@@ -1591,7 +1591,7 @@ description: test skill
           bind: "loopback",
           controlUi: { allowedOrigins: ["*"] },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: {
         checkId: "gateway.control_ui.allowed_origins_wildcard",
         severity: "warn",
@@ -1605,7 +1605,7 @@ description: test skill
           auth: { mode: "token", token: "very-long-browser-token-0123456789" },
           controlUi: { allowedOrigins: ["*"] },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: {
         checkId: "gateway.control_ui.allowed_origins_wildcard",
         severity: "critical",
@@ -1623,7 +1623,7 @@ description: test skill
   });
 
   it("flags dangerous host-header origin fallback and suppresses missing allowed-origins finding", async () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       gateway: {
         bind: "lan",
         auth: { mode: "token", token: "very-long-browser-token-0123456789" },
@@ -1652,7 +1652,7 @@ description: test skill
             appSecret: "secret_test", // pragma: allowlist secret
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: "channels.feishu.doc_owner_open_id",
     },
     {
@@ -1668,7 +1668,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: "channels.feishu.doc_owner_open_id",
     },
     {
@@ -1681,7 +1681,7 @@ description: test skill
             tools: { doc: false },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedNoFinding: "channels.feishu.doc_owner_open_id",
     },
   ])("$name", async (testCase) => {
@@ -1695,7 +1695,7 @@ description: test skill
   });
 
   it("scores X-Real-IP fallback risk by gateway exposure", async () => {
-    const trustedProxyCfg = (trustedProxies: string[]): Hanzo BotConfig => ({
+    const trustedProxyCfg = (trustedProxies: string[]): HanzoBotConfig => ({
       gateway: {
         bind: "loopback",
         allowRealIpFallback: true,
@@ -1711,7 +1711,7 @@ description: test skill
 
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       expectedSeverity: "warn" | "critical";
     }> = [
       {
@@ -1775,7 +1775,7 @@ description: test skill
   it("scores mDNS full mode risk by gateway bind mode", async () => {
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       expectedSeverity: "warn" | "critical";
     }> = [
       {
@@ -1821,7 +1821,7 @@ description: test skill
   it("evaluates trusted-proxy auth guardrails", async () => {
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       expectedCheckId: string;
       expectedSeverity: "warn" | "critical";
       suppressesGenericSharedSecretFindings?: boolean;
@@ -1908,7 +1908,7 @@ description: test skill
   });
 
   it("warns when multiple DM senders share the main session", async () => {
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       session: { dmScope: "main" },
       channels: { whatsapp: { enabled: true } },
     };
@@ -1978,7 +1978,7 @@ description: test skill
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectFinding: true,
       },
       {
@@ -1999,7 +1999,7 @@ description: test skill
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         expectFinding: false,
       },
     ] as const;
@@ -2042,7 +2042,7 @@ description: test skill
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         resolvedConfig: {
           channels: {
             discord: {
@@ -2057,7 +2057,7 @@ description: test skill
               },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         plugin: () =>
           stubChannelPlugin({
             id: "discord",
@@ -2107,7 +2107,7 @@ description: test skill
               slashCommand: { enabled: true },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         resolvedConfig: {
           channels: {
             slack: {
@@ -2117,8 +2117,8 @@ description: test skill
               slashCommand: { enabled: true },
             },
           },
-        } as Hanzo BotConfig,
-        plugin: (sourceConfig: Hanzo BotConfig) =>
+        } as HanzoBotConfig,
+        plugin: (sourceConfig: HanzoBotConfig) =>
           stubChannelPlugin({
             id: "slack",
             label: "Slack",
@@ -2165,7 +2165,7 @@ description: test skill
               slashCommand: { enabled: true },
             },
           },
-        } as Hanzo BotConfig,
+        } as HanzoBotConfig,
         resolvedConfig: {
           channels: {
             slack: {
@@ -2175,8 +2175,8 @@ description: test skill
               slashCommand: { enabled: true },
             },
           },
-        } as Hanzo BotConfig,
-        plugin: (sourceConfig: Hanzo BotConfig) =>
+        } as HanzoBotConfig,
+        plugin: (sourceConfig: HanzoBotConfig) =>
           stubChannelPlugin({
             id: "slack",
             label: "Slack",
@@ -2246,7 +2246,7 @@ description: test skill
       },
     });
 
-    const cfg: Hanzo BotConfig = {
+    const cfg: HanzoBotConfig = {
       channels: {
         zalouser: {
           enabled: true,
@@ -2297,7 +2297,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [discordPlugin],
       expectNameBasedSeverity: "warn",
       detailIncludes: [
@@ -2319,7 +2319,7 @@ description: test skill
             allowFrom: ["Alice#1234"],
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [discordPlugin],
       expectNameBasedSeverity: "info",
       detailIncludes: ["out-of-scope"],
@@ -2344,7 +2344,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [discordPlugin],
       expectNoNameBasedFinding: true,
       expectFindingMatch: {
@@ -2372,7 +2372,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [discordPlugin],
       expectNameBasedSeverity: "warn",
       detailIncludes: ["channels.discord.accounts.beta.allowFrom:Alice#1234"],
@@ -2403,7 +2403,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [discordPlugin],
       expectNoNameBasedFinding: true,
     },
@@ -2444,7 +2444,7 @@ description: test skill
 
   it("does not treat prototype properties as explicit Discord account config paths", async () => {
     await withChannelSecurityStateDir(async () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         channels: {
           discord: {
             enabled: true,
@@ -2500,7 +2500,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedSeverity: "warn",
       detailIncludes: ["channels.zalouser.groups:Ops Room"],
       detailExcludes: ["group:g-123"],
@@ -2517,7 +2517,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedSeverity: "info",
       detailIncludes: ["out-of-scope"],
       expectFindingMatch: {
@@ -2567,7 +2567,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [discordPlugin],
       expectedFinding: {
         checkId: "channels.discord.commands.native.unrestricted",
@@ -2586,7 +2586,7 @@ description: test skill
             slashCommand: { enabled: true },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [slackPlugin],
       expectedFinding: {
         checkId: "channels.slack.commands.slash.no_allowlists",
@@ -2606,7 +2606,7 @@ description: test skill
             slashCommand: { enabled: true },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [slackPlugin],
       expectedFinding: {
         checkId: "channels.slack.commands.slash.useAccessGroups_off",
@@ -2624,7 +2624,7 @@ description: test skill
             groups: { "-100123": {} },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [telegramPlugin],
       expectedFinding: {
         checkId: "channels.telegram.groups.allowFrom.missing",
@@ -2643,7 +2643,7 @@ description: test skill
             groups: { "-100123": {} },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       plugins: [telegramPlugin],
       expectedFinding: {
         checkId: "channels.telegram.allowFrom.invalid_entries",
@@ -2661,7 +2661,7 @@ description: test skill
   });
 
   it("adds probe_failed warnings for deep probe failure modes", async () => {
-    const cfg: Hanzo BotConfig = { gateway: { mode: "local" } };
+    const cfg: HanzoBotConfig = { gateway: { mode: "local" } };
     const cases: Array<{
       name: string;
       probeGatewayFn: NonNullable<SecurityAuditOptions["probeGatewayFn"]>;
@@ -2749,17 +2749,17 @@ description: test skill
       enabled: true,
       token: "shared-gateway-token-1234567890",
       defaultSessionKey: "hook:ingress",
-    } satisfies NonNullable<Hanzo BotConfig["hooks"]>;
+    } satisfies NonNullable<HanzoBotConfig["hooks"]>;
     const requestSessionKeyHooks = {
       ...unrestrictedBaseHooks,
       allowRequestSessionKey: true,
-    } satisfies NonNullable<Hanzo BotConfig["hooks"]>;
+    } satisfies NonNullable<HanzoBotConfig["hooks"]>;
     const cases = [
       {
         name: "warns when hooks token looks short",
         cfg: {
           hooks: { enabled: true, token: "short" },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         expectedFinding: "hooks.token_too_short",
         expectedSeverity: "warn" as const,
       },
@@ -2767,7 +2767,7 @@ description: test skill
         name: "flags hooks token reuse of the gateway env token as critical",
         cfg: {
           hooks: { enabled: true, token: "shared-gateway-token-1234567890" },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         env: {
           BOT_GATEWAY_TOKEN: "shared-gateway-token-1234567890",
         },
@@ -2778,7 +2778,7 @@ description: test skill
         name: "warns when hooks.defaultSessionKey is unset",
         cfg: {
           hooks: { enabled: true, token: "shared-gateway-token-1234567890" },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         expectedFinding: "hooks.default_session_key_unset",
         expectedSeverity: "warn" as const,
       },
@@ -2791,25 +2791,25 @@ description: test skill
             defaultSessionKey: "hook:ingress",
             allowedAgentIds: ["*"],
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         expectedFinding: "hooks.allowed_agent_ids_unrestricted",
         expectedSeverity: "warn" as const,
       },
       {
         name: "scores unrestricted hooks.allowedAgentIds by local exposure",
-        cfg: { hooks: unrestrictedBaseHooks } satisfies Hanzo BotConfig,
+        cfg: { hooks: unrestrictedBaseHooks } satisfies HanzoBotConfig,
         expectedFinding: "hooks.allowed_agent_ids_unrestricted",
         expectedSeverity: "warn" as const,
       },
       {
         name: "scores unrestricted hooks.allowedAgentIds by remote exposure",
-        cfg: { gateway: { bind: "lan" }, hooks: unrestrictedBaseHooks } satisfies Hanzo BotConfig,
+        cfg: { gateway: { bind: "lan" }, hooks: unrestrictedBaseHooks } satisfies HanzoBotConfig,
         expectedFinding: "hooks.allowed_agent_ids_unrestricted",
         expectedSeverity: "critical" as const,
       },
       {
         name: "scores hooks request sessionKey override by local exposure",
-        cfg: { hooks: requestSessionKeyHooks } satisfies Hanzo BotConfig,
+        cfg: { hooks: requestSessionKeyHooks } satisfies HanzoBotConfig,
         expectedFinding: "hooks.request_session_key_enabled",
         expectedSeverity: "warn" as const,
         expectedExtraFinding: {
@@ -2822,7 +2822,7 @@ description: test skill
         cfg: {
           gateway: { bind: "lan" },
           hooks: requestSessionKeyHooks,
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         expectedFinding: "hooks.request_session_key_enabled",
         expectedSeverity: "critical" as const,
       },
@@ -2853,7 +2853,7 @@ description: test skill
           auth: { mode: "none" },
           http: { endpoints: { chatCompletions: { enabled: true } } },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: { checkId: "gateway.http.no_auth", severity: "warn" },
       detailIncludes: ["/tools/invoke", "/v1/chat/completions"],
       auditOptions: { env: {} },
@@ -2866,7 +2866,7 @@ description: test skill
           auth: { mode: "none" },
           http: { endpoints: { responses: { enabled: true } } },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: { checkId: "gateway.http.no_auth", severity: "critical" },
       auditOptions: { env: {} },
     },
@@ -2883,7 +2883,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedNoFinding: "gateway.http.no_auth",
       auditOptions: { env: {} },
     },
@@ -2898,7 +2898,7 @@ description: test skill
             },
           },
         },
-      } satisfies Hanzo BotConfig,
+      } satisfies HanzoBotConfig,
       expectedFinding: { checkId: "gateway.http.session_key_override_enabled", severity: "info" },
     },
   ])("$name", async (testCase) => {
@@ -2923,7 +2923,7 @@ description: test skill
   });
 
   it("warns when state/config look like a synced folder", async () => {
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
 
     const res = await audit(cfg, {
       stateDir: "/Users/test/Dropbox/.openclaw",
@@ -2952,7 +2952,7 @@ description: test skill
     await fs.writeFile(configPath, `{ "$include": "./extra.json5" }\n`, "utf-8");
     await fs.chmod(configPath, 0o600);
 
-    const cfg: Hanzo BotConfig = { logging: { redactSensitive: "off" } };
+    const cfg: HanzoBotConfig = { logging: { redactSensitive: "off" } };
     const user = "DESKTOP-TEST\\Tester";
     const execIcacls = isWindows
       ? async (_cmd: string, args: string[]) => {
@@ -3019,7 +3019,7 @@ description: test skill
                   },
                 },
               },
-            } satisfies Hanzo BotConfig,
+            } satisfies HanzoBotConfig,
             sharedInstallMetadataStateDir,
           ),
         expectedPresent: [
@@ -3054,7 +3054,7 @@ description: test skill
                   },
                 },
               },
-            } satisfies Hanzo BotConfig,
+            } satisfies HanzoBotConfig,
             sharedInstallMetadataStateDir,
           ),
         expectedAbsent: [
@@ -3133,7 +3133,7 @@ description: test skill
     const cases = [
       {
         name: "flags extensions without plugins.allow",
-        cfg: {} satisfies Hanzo BotConfig,
+        cfg: {} satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expect(res.findings).toEqual(
             expect.arrayContaining([
@@ -3149,7 +3149,7 @@ description: test skill
         name: "flags enabled extensions when tool policy can expose plugin tools",
         cfg: {
           plugins: { allow: ["some-plugin"] },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expect(res.findings).toEqual(
             expect.arrayContaining([
@@ -3166,7 +3166,7 @@ description: test skill
         cfg: {
           plugins: { allow: ["some-plugin"] },
           tools: { profile: "coding" },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expect(
             res.findings.some((f) => f.checkId === "plugins.tools_reachable_permissive_policy"),
@@ -3179,7 +3179,7 @@ description: test skill
           channels: {
             discord: { enabled: true, token: "t" },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expect(res.findings).toEqual(
             expect.arrayContaining([
@@ -3204,7 +3204,7 @@ description: test skill
               } as unknown as string,
             },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expect(res.findings).toEqual(
             expect.arrayContaining([
@@ -3256,7 +3256,7 @@ description: test skill
       {
         name: "reports detailed code-safety issues for both plugins and skills",
         run: async () => {
-          const cfg: Hanzo BotConfig = {
+          const cfg: HanzoBotConfig = {
             agents: { defaults: { workspace: sharedCodeSafetyWorkspaceDir } },
           };
           const [pluginFindings, skillFindings] = await Promise.all([
@@ -3352,7 +3352,7 @@ description: test skill
         cfg: {
           tools: { elevated: { enabled: true, allowFrom: { whatsapp: ["+1"] } } },
           channels: { whatsapp: { groupPolicy: "open" } },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expect(res.findings).toEqual(
             expect.arrayContaining([
@@ -3369,7 +3369,7 @@ description: test skill
         cfg: {
           channels: { whatsapp: { groupPolicy: "open" } },
           tools: { elevated: { enabled: false } },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expect(res.findings).toEqual(
             expect.arrayContaining([
@@ -3394,7 +3394,7 @@ description: test skill
               sandbox: { mode: "all" },
             },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expect(
             res.findings.some(
@@ -3413,7 +3413,7 @@ description: test skill
             deny: ["group:runtime"],
             fs: { workspaceOnly: true },
           },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expect(
             res.findings.some(
@@ -3438,7 +3438,7 @@ description: test skill
             },
           },
           tools: { elevated: { enabled: false } },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           const finding = res.findings.find(
             (f) => f.checkId === "security.trust_model.multi_user_heuristic",
@@ -3460,7 +3460,7 @@ description: test skill
             },
           },
           tools: { elevated: { enabled: false } },
-        } satisfies Hanzo BotConfig,
+        } satisfies HanzoBotConfig,
         assert: (res: SecurityAuditReport) => {
           expectNoFinding(res, "security.trust_model.multi_user_heuristic");
         },
@@ -3504,7 +3504,7 @@ description: test skill
     it("applies gateway auth precedence across local/remote modes", async () => {
       const cases: Array<{
         name: string;
-        cfg: Hanzo BotConfig;
+        cfg: HanzoBotConfig;
         env?: { token?: string; password?: string };
         expectedAuth: { token?: string; password?: string };
       }> = [
@@ -3596,7 +3596,7 @@ description: test skill
     });
 
     it("adds warning finding when probe auth SecretRef is unavailable", async () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         gateway: {
           mode: "local",
           auth: {

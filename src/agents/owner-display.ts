@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 export type OwnerDisplaySetting = {
   ownerDisplay?: "raw" | "hash";
@@ -7,7 +7,7 @@ export type OwnerDisplaySetting = {
 };
 
 export type OwnerDisplaySecretResolution = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   generatedSecret?: string;
 };
 
@@ -20,7 +20,7 @@ function trimToUndefined(value?: string): string | undefined {
  * Resolve owner display settings for prompt rendering.
  * Keep auth secrets decoupled from owner hash secrets.
  */
-export function resolveOwnerDisplaySetting(config?: Hanzo BotConfig): OwnerDisplaySetting {
+export function resolveOwnerDisplaySetting(config?: HanzoBotConfig): OwnerDisplaySetting {
   const ownerDisplay = config?.commands?.ownerDisplay;
   if (ownerDisplay !== "hash") {
     return { ownerDisplay, ownerDisplaySecret: undefined };
@@ -36,7 +36,7 @@ export function resolveOwnerDisplaySetting(config?: Hanzo BotConfig): OwnerDispl
  * Returns updated config and generated secret when autofill was needed.
  */
 export function ensureOwnerDisplaySecret(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   generateSecret: () => string = () => crypto.randomBytes(32).toString("hex"),
 ): OwnerDisplaySecretResolution {
   const settings = resolveOwnerDisplaySetting(config);

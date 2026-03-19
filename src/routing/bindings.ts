@@ -1,7 +1,7 @@
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { normalizeChatChannelId } from "../channels/registry.js";
 import { listRouteBindings } from "../config/bindings.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { AgentRouteBinding } from "../config/types.agents.js";
 import { normalizeAccountId, normalizeAgentId } from "./session-key.js";
 
@@ -14,7 +14,7 @@ function normalizeBindingChannelId(raw?: string | null): string | null {
   return fallback || null;
 }
 
-export function listBindings(cfg: Hanzo BotConfig): AgentRouteBinding[] {
+export function listBindings(cfg: HanzoBotConfig): AgentRouteBinding[] {
   return listRouteBindings(cfg);
 }
 
@@ -45,7 +45,7 @@ function resolveNormalizedBindingMatch(binding: AgentRouteBinding): {
   };
 }
 
-export function listBoundAccountIds(cfg: Hanzo BotConfig, channelId: string): string[] {
+export function listBoundAccountIds(cfg: HanzoBotConfig, channelId: string): string[] {
   const normalizedChannel = normalizeBindingChannelId(channelId);
   if (!normalizedChannel) {
     return [];
@@ -62,7 +62,7 @@ export function listBoundAccountIds(cfg: Hanzo BotConfig, channelId: string): st
 }
 
 export function resolveDefaultAgentBoundAccountId(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   channelId: string,
 ): string | null {
   const normalizedChannel = normalizeBindingChannelId(channelId);
@@ -84,7 +84,7 @@ export function resolveDefaultAgentBoundAccountId(
   return null;
 }
 
-export function buildChannelAccountBindings(cfg: Hanzo BotConfig) {
+export function buildChannelAccountBindings(cfg: HanzoBotConfig) {
   const map = new Map<string, Map<string, string[]>>();
   for (const binding of listBindings(cfg)) {
     const resolved = resolveNormalizedBindingMatch(binding);

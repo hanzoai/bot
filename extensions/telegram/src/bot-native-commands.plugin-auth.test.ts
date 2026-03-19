@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import type { TelegramAccountConfig } from "../../../src/config/types.js";
 import {
   createNativeCommandsHarness,
@@ -41,7 +41,7 @@ describe("registerTelegramNativeCommands (plugin auth)", () => {
     getPluginCommandSpecsMock.mockReturnValue(specs);
 
     const { handlers, setMyCommands, log } = createNativeCommandsHarness({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       telegramCfg: {} as TelegramAccountConfig,
       nativeEnabled: false,
     });
@@ -67,7 +67,7 @@ describe("registerTelegramNativeCommands (plugin auth)", () => {
     executePluginCommandMock.mockResolvedValue({ text: "ok" });
 
     const { handlers, bot } = createNativeCommandsHarness({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       telegramCfg: {} as TelegramAccountConfig,
       allowFrom: ["999"],
       nativeEnabled: false,

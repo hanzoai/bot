@@ -72,7 +72,7 @@ vi.mock("../api.js", () => ({
     }
     return undefined;
   },
-  resolvePreferredHanzo BotTmpDir: () => "/tmp",
+  resolvePreferredHanzoBotTmpDir: () => "/tmp",
   supportsXHighThinking: () => false,
 }));
 

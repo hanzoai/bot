@@ -25,13 +25,13 @@ export type {
 } from "../channels/plugins/types.js";
 export type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 export { createChannelReplyPipeline } from "./channel-reply-pipeline.js";
-export type { Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
 export { MarkdownConfigSchema } from "../config/zod-schema.core.js";
 export type { OutboundDeliveryResult } from "../infra/outbound/deliver.js";
 export { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "./account-id.js";
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 export type { PluginRuntime } from "../plugins/runtime/types.js";
-export type { Hanzo BotPluginApi } from "../plugins/types.js";
+export type { HanzoBotPluginApi } from "../plugins/types.js";
 export type { RuntimeEnv } from "../runtime.js";
 export { formatDocsLink } from "../terminal/links.js";
 export type { WizardPrompter } from "../wizard/prompts.js";

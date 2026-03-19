@@ -79,8 +79,8 @@ export async function uploadToOneDrive(params: {
   tokenProvider: MSTeamsAccessTokenProvider;
   fetchFn?: typeof fetch;
 }): Promise<OneDriveUploadResult> {
-  // Use "Hanzo BotShared" folder to organize bot-uploaded files
-  const uploadPath = `/Hanzo BotShared/${encodeURIComponent(params.filename)}`;
+  // Use "HanzoBotShared" folder to organize bot-uploaded files
+  const uploadPath = `/HanzoBotShared/${encodeURIComponent(params.filename)}`;
   return await uploadDriveItem({
     ...params,
     url: `${GRAPH_ROOT}/me/drive/root:${uploadPath}:/content`,
@@ -194,8 +194,8 @@ export async function uploadToSharePoint(params: {
   siteId: string;
   fetchFn?: typeof fetch;
 }): Promise<OneDriveUploadResult> {
-  // Use "Hanzo BotShared" folder to organize bot-uploaded files
-  const uploadPath = `/Hanzo BotShared/${encodeURIComponent(params.filename)}`;
+  // Use "HanzoBotShared" folder to organize bot-uploaded files
+  const uploadPath = `/HanzoBotShared/${encodeURIComponent(params.filename)}`;
   return await uploadDriveItem({
     ...params,
     url: `${GRAPH_ROOT}/sites/${params.siteId}/drive/root:${uploadPath}:/content`,

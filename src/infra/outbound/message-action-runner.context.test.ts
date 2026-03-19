@@ -5,7 +5,7 @@ import type {
   ChannelOutboundAdapter,
   ChannelPlugin,
 } from "../../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
   createChannelTestPluginBase,
@@ -21,7 +21,7 @@ const slackConfig = {
       appToken: "xapp-test",
     },
   },
-} as Hanzo BotConfig;
+} as HanzoBotConfig;
 
 const whatsappConfig = {
   channels: {
@@ -29,10 +29,10 @@ const whatsappConfig = {
       allowFrom: ["*"],
     },
   },
-} as Hanzo BotConfig;
+} as HanzoBotConfig;
 
 const runDryAction = (params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   action: "send" | "thread-reply" | "broadcast";
   actionParams: Record<string, unknown>;
   toolContext?: Record<string, unknown>;
@@ -50,7 +50,7 @@ const runDryAction = (params: {
   });
 
 const runDrySend = (params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   actionParams: Record<string, unknown>;
   toolContext?: Record<string, unknown>;
   abortSignal?: AbortSignal;
@@ -88,7 +88,7 @@ function normalizeSlackTarget(raw: string): string {
 
 function createConfiguredTestPlugin(params: {
   id: "slack" | "telegram" | "whatsapp";
-  isConfigured: (cfg: Hanzo BotConfig) => boolean;
+  isConfigured: (cfg: HanzoBotConfig) => boolean;
   normalizeTarget: (raw: string) => string | undefined;
   resolveTarget: (input: string) => ResolvedTestTarget | null;
 }): ChannelPlugin {
@@ -283,7 +283,7 @@ describe("runMessageAction context isolation", () => {
             botToken: "telegram-test",
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       actionParams: {
         channel: "telegram",
         target: "123456",
@@ -451,7 +451,7 @@ describe("runMessageAction context isolation", () => {
             token: "tg-test",
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       action: "send" as const,
       actionParams: {
         message: "hi",
@@ -521,7 +521,7 @@ describe("runMessageAction context isolation", () => {
             },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       actionParams: {
         channel: "slack",
         target: "channel:C99999999",

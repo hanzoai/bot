@@ -1,6 +1,6 @@
 import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
 import { vi } from "vitest";
-import type { Hanzo BotConfig, TelegramAccountConfig } from "../runtime-api.js";
+import type { HanzoBotConfig, TelegramAccountConfig } from "../runtime-api.js";
 import type { RegisterTelegramNativeCommandsParams } from "./bot-native-commands.js";
 
 export type NativeCommandTestParams = RegisterTelegramNativeCommandsParams;
@@ -27,7 +27,7 @@ export function createNativeCommandTestParams(
         },
         command: vi.fn(),
       } as unknown as NativeCommandTestParams["bot"]),
-    cfg: params.cfg ?? ({} as Hanzo BotConfig),
+    cfg: params.cfg ?? ({} as HanzoBotConfig),
     runtime:
       params.runtime ??
       ({

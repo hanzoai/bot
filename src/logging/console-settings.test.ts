@@ -18,7 +18,7 @@ vi.mock("./logger.js", () => ({
 
 let loadConfigCalls = 0;
 let originalIsTty: boolean | undefined;
-let originalHanzo BotTestConsole: string | undefined;
+let originalHanzoBotTestConsole: string | undefined;
 let snapshot: ConsoleSnapshot;
 let logging: typeof import("../logging.js");
 let state: typeof import("./state.js");
@@ -32,7 +32,7 @@ beforeEach(() => {
   loadConfigCalls = 0;
   snapshot = captureConsoleSnapshot();
   originalIsTty = process.stdout.isTTY;
-  originalHanzo BotTestConsole = process.env.BOT_TEST_CONSOLE;
+  originalHanzoBotTestConsole = process.env.BOT_TEST_CONSOLE;
   process.env.BOT_TEST_CONSOLE = "1";
   Object.defineProperty(process.stdout, "isTTY", { value: false, configurable: true });
 });
@@ -44,10 +44,10 @@ afterEach(() => {
   console.error = snapshot.error;
   console.debug = snapshot.debug;
   console.trace = snapshot.trace;
-  if (originalHanzo BotTestConsole === undefined) {
+  if (originalHanzoBotTestConsole === undefined) {
     delete process.env.BOT_TEST_CONSOLE;
   } else {
-    process.env.BOT_TEST_CONSOLE = originalHanzo BotTestConsole;
+    process.env.BOT_TEST_CONSOLE = originalHanzoBotTestConsole;
   }
   Object.defineProperty(process.stdout, "isTTY", { value: originalIsTty, configurable: true });
   logging.setConsoleConfigLoaderForTests();

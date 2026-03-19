@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   loadConfig,
   resolveConfigPath,
@@ -8,7 +8,7 @@ import {
 import { buildCleanupPlan } from "./cleanup-utils.js";
 
 export function resolveCleanupPlanFromDisk(): {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   stateDir: string;
   configPath: string;
   oauthDir: string;

@@ -4,7 +4,7 @@
 export { definePluginEntry } from "./core.js";
 export { buildOauthProviderAuthResult } from "./provider-auth-result.js";
 export type {
-  Hanzo BotPluginApi,
+  HanzoBotPluginApi,
   ProviderAuthContext,
   ProviderCatalogContext,
 } from "../plugins/types.js";

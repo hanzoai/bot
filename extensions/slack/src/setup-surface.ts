@@ -2,7 +2,7 @@ import {
   noteChannelLookupFailure,
   noteChannelLookupSummary,
   resolveEntriesWithOptionalToken,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   parseMentionOrPrefixedId,
   promptLegacyChannelAllowFromForAccount,
   type WizardPrompter,
@@ -45,10 +45,10 @@ async function resolveSlackAllowFromEntries(params: {
 }
 
 async function promptSlackAllowFrom(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   const parseId = (value: string) =>
     parseMentionOrPrefixedId({
       value,
@@ -96,7 +96,7 @@ async function promptSlackAllowFrom(params: {
 }
 
 async function resolveSlackGroupAllowlist(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   credentialValues: { botToken?: string };
   entries: string[];

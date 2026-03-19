@@ -1,5 +1,5 @@
 import type { BaseTokenResolution } from "openclaw/plugin-sdk/channel-runtime";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/config-runtime";
 import { tryReadSecretFileSync } from "openclaw/plugin-sdk/infra-runtime";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/routing";
@@ -18,7 +18,7 @@ type ResolveTelegramTokenOpts = {
 };
 
 export function resolveTelegramToken(
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
   opts: ResolveTelegramTokenOpts = {},
 ): TelegramTokenResolution {
   const accountId = normalizeAccountId(opts.accountId);

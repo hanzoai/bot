@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { assertMediaNotDataUrl, resolveSandboxedMediaSource } from "../../agents/sandbox-paths.js";
 import { readStringParam } from "../../agents/tools/common.js";
 import type { ChannelId, ChannelMessageActionName } from "../../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { createRootScopedReadFile } from "../../infra/fs-safe.js";
 import { extensionForMime } from "../../media/mime.js";
 import { loadWebMedia } from "../../media/web-media.js";
@@ -12,7 +12,7 @@ import { readBooleanParam as readBooleanParamShared } from "../../plugin-sdk/boo
 export const readBooleanParam = readBooleanParamShared;
 
 function resolveAttachmentMaxBytes(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: ChannelId;
   accountId?: string | null;
 }): number | undefined {
@@ -149,7 +149,7 @@ function buildAttachmentMediaLoadOptions(params: {
 }
 
 async function hydrateAttachmentPayload(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: ChannelId;
   accountId?: string | null;
   args: Record<string, unknown>;
@@ -252,7 +252,7 @@ export async function normalizeSandboxMediaList(params: {
 }
 
 async function hydrateAttachmentActionPayload(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: ChannelId;
   accountId?: string | null;
   args: Record<string, unknown>;
@@ -290,7 +290,7 @@ async function hydrateAttachmentActionPayload(params: {
 }
 
 export async function hydrateAttachmentParamsForAction(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: ChannelId;
   accountId?: string | null;
   args: Record<string, unknown>;

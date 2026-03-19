@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { ChannelId } from "./plugins/types.js";
 
 type DiscordInspectModule = typeof import("./read-only-account-inspect.discord.runtime.js");
@@ -31,7 +31,7 @@ export type ReadOnlyInspectedAccount =
 
 export async function inspectReadOnlyChannelAccount(params: {
   channelId: ChannelId;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
 }): Promise<ReadOnlyInspectedAccount | null> {
   if (params.channelId === "discord") {

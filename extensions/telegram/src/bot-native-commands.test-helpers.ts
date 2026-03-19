@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { ChannelGroupPolicy } from "openclaw/plugin-sdk/config-runtime";
 import type { TelegramAccountConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
@@ -105,7 +105,7 @@ vi.mock("openclaw/plugin-sdk/conversation-runtime", async (importOriginal) => {
 export { createNativeCommandTestParams };
 
 export function createNativeCommandsHarness(params?: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   runtime?: RuntimeEnv;
   telegramCfg?: TelegramAccountConfig;
   allowFrom?: string[];
@@ -120,7 +120,7 @@ export function createNativeCommandsHarness(params?: {
   const setMyCommands: AnyAsyncMock = vi.fn(async () => undefined);
   const log: AnyMock = vi.fn();
   const telegramDeps = {
-    loadConfig: vi.fn(() => params?.cfg ?? ({} as Hanzo BotConfig)),
+    loadConfig: vi.fn(() => params?.cfg ?? ({} as HanzoBotConfig)),
     resolveStorePath: vi.fn((storePath?: string) => storePath ?? "/tmp/sessions.json"),
     readChannelAllowFromStore: vi.fn(async () => []),
     upsertChannelPairingRequest: vi.fn(async () => ({ code: "PAIRCODE", created: true })),
@@ -147,7 +147,7 @@ export function createNativeCommandsHarness(params?: {
 
   registerTelegramNativeCommands({
     bot,
-    cfg: params?.cfg ?? ({} as Hanzo BotConfig),
+    cfg: params?.cfg ?? ({} as HanzoBotConfig),
     runtime: params?.runtime ?? ({ log } as unknown as RuntimeEnv),
     accountId: "default",
     telegramCfg: params?.telegramCfg ?? ({} as TelegramAccountConfig),

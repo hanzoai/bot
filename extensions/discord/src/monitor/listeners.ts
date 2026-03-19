@@ -8,7 +8,7 @@ import {
   ThreadUpdateListener,
   type User,
 } from "@buape/carbon";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { formatDurationSeconds } from "openclaw/plugin-sdk/infra-runtime";
 import { enqueueSystemEvent } from "openclaw/plugin-sdk/infra-runtime";
 import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
@@ -729,7 +729,7 @@ type ThreadUpdateEvent = Parameters<ThreadUpdateListener["handle"]>[0];
 
 export class DiscordThreadUpdateListener extends ThreadUpdateListener {
   constructor(
-    private cfg: Hanzo BotConfig,
+    private cfg: HanzoBotConfig,
     private accountId: string,
     private logger?: Logger,
   ) {

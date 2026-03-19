@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { configureChannelAccessWithAllowlist } from "./setup-group-access-configure.js";
 import type { ChannelAccessPolicy } from "./setup-group-access.js";
 
@@ -13,13 +13,13 @@ function createPrompter(params: { confirm: boolean; policy?: ChannelAccessPolicy
 }
 
 async function runConfigureChannelAccess<TResolved>(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: ReturnType<typeof createPrompter>;
   label?: string;
   placeholder?: string;
-  setPolicy: (cfg: Hanzo BotConfig, policy: ChannelAccessPolicy) => Hanzo BotConfig;
-  resolveAllowlist: (params: { cfg: Hanzo BotConfig; entries: string[] }) => Promise<TResolved>;
-  applyAllowlist: (params: { cfg: Hanzo BotConfig; resolved: TResolved }) => Hanzo BotConfig;
+  setPolicy: (cfg: HanzoBotConfig, policy: ChannelAccessPolicy) => HanzoBotConfig;
+  resolveAllowlist: (params: { cfg: HanzoBotConfig; entries: string[] }) => Promise<TResolved>;
+  applyAllowlist: (params: { cfg: HanzoBotConfig; resolved: TResolved }) => HanzoBotConfig;
 }) {
   return await configureChannelAccessWithAllowlist({
     cfg: params.cfg,
@@ -38,11 +38,11 @@ async function runConfigureChannelAccess<TResolved>(params: {
 
 describe("configureChannelAccessWithAllowlist", () => {
   it("returns input config when user skips access configuration", async () => {
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
     const prompter = createPrompter({ confirm: false });
-    const setPolicy = vi.fn((next: Hanzo BotConfig) => next);
+    const setPolicy = vi.fn((next: HanzoBotConfig) => next);
     const resolveAllowlist = vi.fn(async () => [] as string[]);
-    const applyAllowlist = vi.fn((params: { cfg: Hanzo BotConfig }) => params.cfg);
+    const applyAllowlist = vi.fn((params: { cfg: HanzoBotConfig }) => params.cfg);
 
     const next = await runConfigureChannelAccess({
       cfg,
@@ -59,19 +59,19 @@ describe("configureChannelAccessWithAllowlist", () => {
   });
 
   it("applies non-allowlist policy directly", async () => {
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
     const prompter = createPrompter({
       confirm: true,
       policy: "open",
     });
     const setPolicy = vi.fn(
-      (next: Hanzo BotConfig, policy: ChannelAccessPolicy): Hanzo BotConfig => ({
+      (next: HanzoBotConfig, policy: ChannelAccessPolicy): HanzoBotConfig => ({
         ...next,
         channels: { discord: { groupPolicy: policy } },
       }),
     );
     const resolveAllowlist = vi.fn(async () => ["ignored"]);
-    const applyAllowlist = vi.fn((params: { cfg: Hanzo BotConfig }) => params.cfg);
+    const applyAllowlist = vi.fn((params: { cfg: HanzoBotConfig }) => params.cfg);
 
     const next = await runConfigureChannelAccess({
       cfg,
@@ -90,19 +90,19 @@ describe("configureChannelAccessWithAllowlist", () => {
   });
 
   it("supports allowlist policies without prompting for entries", async () => {
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
     const prompter = createPrompter({
       confirm: true,
       policy: "allowlist",
     });
     const setPolicy = vi.fn(
-      (next: Hanzo BotConfig, policy: ChannelAccessPolicy): Hanzo BotConfig => ({
+      (next: HanzoBotConfig, policy: ChannelAccessPolicy): HanzoBotConfig => ({
         ...next,
         channels: { twitch: { groupPolicy: policy } },
       }),
     );
     const resolveAllowlist = vi.fn(async () => ["ignored"]);
-    const applyAllowlist = vi.fn((params: { cfg: Hanzo BotConfig }) => params.cfg);
+    const applyAllowlist = vi.fn((params: { cfg: HanzoBotConfig }) => params.cfg);
 
     const next = await configureChannelAccessWithAllowlist({
       cfg,
@@ -125,27 +125,27 @@ describe("configureChannelAccessWithAllowlist", () => {
   });
 
   it("resolves allowlist entries and applies them after forcing allowlist policy", async () => {
-    const cfg: Hanzo BotConfig = {};
+    const cfg: HanzoBotConfig = {};
     const prompter = createPrompter({
       confirm: true,
       policy: "allowlist",
       text: "#general, #support",
     });
     const calls: string[] = [];
-    const setPolicy = vi.fn((next: Hanzo BotConfig, policy: ChannelAccessPolicy): Hanzo BotConfig => {
+    const setPolicy = vi.fn((next: HanzoBotConfig, policy: ChannelAccessPolicy): HanzoBotConfig => {
       calls.push("setPolicy");
       return {
         ...next,
         channels: { slack: { groupPolicy: policy } },
       };
     });
-    const resolveAllowlist = vi.fn(async (params: { cfg: Hanzo BotConfig; entries: string[] }) => {
+    const resolveAllowlist = vi.fn(async (params: { cfg: HanzoBotConfig; entries: string[] }) => {
       calls.push("resolve");
       expect(params.cfg).toBe(cfg);
       expect(params.entries).toEqual(["#general", "#support"]);
       return ["C1", "C2"];
     });
-    const applyAllowlist = vi.fn((params: { cfg: Hanzo BotConfig; resolved: string[] }) => {
+    const applyAllowlist = vi.fn((params: { cfg: HanzoBotConfig; resolved: string[] }) => {
       calls.push("apply");
       expect(params.cfg.channels?.slack?.groupPolicy).toBe("allowlist");
       return {

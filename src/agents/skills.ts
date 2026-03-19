@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { SkillsInstallPreferences } from "./skills/types.js";
 
 export {
@@ -15,7 +15,7 @@ export {
   applySkillEnvOverridesFromSnapshot,
 } from "./skills/env-overrides.js";
 export type {
-  Hanzo BotSkillMetadata,
+  HanzoBotSkillMetadata,
   SkillEligibilityContext,
   SkillCommandSpec,
   SkillEntry,
@@ -33,7 +33,7 @@ export {
   syncSkillsToWorkspace,
 } from "./skills/workspace.js";
 
-export function resolveSkillsInstallPreferences(config?: Hanzo BotConfig): SkillsInstallPreferences {
+export function resolveSkillsInstallPreferences(config?: HanzoBotConfig): SkillsInstallPreferences {
   const raw = config?.skills?.install;
   const preferBrew = raw?.preferBrew ?? true;
   const managerRaw = typeof raw?.nodeManager === "string" ? raw.nodeManager.trim() : "";

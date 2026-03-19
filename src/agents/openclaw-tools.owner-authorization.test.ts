@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import "./test-helpers/fast-core-tools.js";
-import { createHanzo BotTools } from "./openclaw-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
 
 function readToolByName() {
-  return new Map(createHanzo BotTools().map((tool) => [tool.name, tool]));
+  return new Map(createHanzoBotTools().map((tool) => [tool.name, tool]));
 }
 
-describe("createHanzo BotTools owner authorization", () => {
+describe("createHanzoBotTools owner authorization", () => {
   it("marks owner-only core tools in raw registration", () => {
     const tools = readToolByName();
     expect(tools.get("cron")?.ownerOnly).toBe(true);

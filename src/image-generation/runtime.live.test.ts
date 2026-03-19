@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { resolveHanzo BotAgentDir } from "../agents/agent-paths.js";
+import { resolveHanzoBotAgentDir } from "../agents/agent-paths.js";
 import { collectProviderApiKeys } from "../agents/live-auth-keys.js";
 import { resolveApiKeyForProvider } from "../agents/model-auth.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadConfig } from "../config/config.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { getShellEnvAppliedKeys, loadShellEnvFallback } from "../infra/shell-env.js";
@@ -62,7 +62,7 @@ function createEditReferencePng(): Buffer {
   return encodePngRgba(buf, width, height);
 }
 
-function withPluginsEnabled(cfg: Hanzo BotConfig): Hanzo BotConfig {
+function withPluginsEnabled(cfg: HanzoBotConfig): HanzoBotConfig {
   return {
     ...cfg,
     plugins: {
@@ -112,7 +112,7 @@ async function resolveLiveAuthForProvider(
 describeLive("image generation live (provider sweep)", () => {
   it("generates images for every configured image-generation variant with available auth", async () => {
     const cfg = withPluginsEnabled(loadConfig());
-    const agentDir = resolveHanzo BotAgentDir();
+    const agentDir = resolveHanzoBotAgentDir();
     const providerFilter = parseCsvFilter(process.env.BOT_LIVE_IMAGE_GENERATION_PROVIDERS);
     const caseFilter = parseCaseFilter(process.env.BOT_LIVE_IMAGE_GENERATION_CASES);
     const envModelMap = parseProviderModelMap(process.env.BOT_LIVE_IMAGE_GENERATION_MODELS);

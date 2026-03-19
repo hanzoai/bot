@@ -4,7 +4,7 @@ import {
   withBundledPluginEnablementCompat,
 } from "./bundled-compat.js";
 import { resolveBundledWebSearchPluginIds } from "./bundled-web-search.js";
-import { loadHanzo BotPlugins, type PluginLoadOptions } from "./loader.js";
+import { loadHanzoBotPlugins, type PluginLoadOptions } from "./loader.js";
 import { createPluginLoaderLogger } from "./logger.js";
 import { getActivePluginRegistry } from "./runtime.js";
 import type { PluginWebSearchProviderEntry } from "./types.js";
@@ -115,7 +115,7 @@ export function resolvePluginWebSearchProviders(params: {
     pluginIds: bundledCompatPluginIds,
     env: params.env,
   });
-  const registry = loadHanzo BotPlugins({
+  const registry = loadHanzoBotPlugins({
     config,
     workspaceDir: params.workspaceDir,
     env: params.env,

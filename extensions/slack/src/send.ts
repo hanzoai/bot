@@ -1,5 +1,5 @@
 import { type Block, type KnownBlock, type WebClient } from "@slack/web-api";
-import { loadConfig, type Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import { loadConfig, type HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/config-runtime";
 import {
   fetchWithSsrFGuard,
@@ -46,7 +46,7 @@ export type SlackSendIdentity = {
 };
 
 type SlackSendOpts = {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   token?: string;
   accountId?: string;
   mediaUrl?: string;

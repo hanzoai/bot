@@ -1,10 +1,10 @@
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { resolveThreadSessionKeys } from "openclaw/plugin-sdk/routing";
 import { describe, expect, it } from "vitest";
 import { resolveTelegramConversationBaseSessionKey } from "./conversation-route.js";
 
 describe("resolveTelegramConversationBaseSessionKey", () => {
-  const cfg: Hanzo BotConfig = {};
+  const cfg: HanzoBotConfig = {};
 
   it("keeps the routed session key for the default account", () => {
     expect(

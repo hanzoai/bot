@@ -1,6 +1,6 @@
 import type { Model, SimpleStreamOptions } from "@mariozechner/pi-ai";
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { runExtraParamsCase } from "./extra-params.test-support.js";
 
 // Mock streamSimple for testing
@@ -15,7 +15,7 @@ type ToolStreamCase = {
   applyProvider: string;
   applyModelId: string;
   model: Model<"openai-completions">;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   options?: SimpleStreamOptions;
 };
 

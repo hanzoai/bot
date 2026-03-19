@@ -1,8 +1,8 @@
 import path from "node:path";
 import type { ZodIssue } from "zod";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { CONFIG_PATH } from "../config/config.js";
-import { Hanzo BotSchema } from "../config/zod-schema.js";
+import { HanzoBotSchema } from "../config/zod-schema.js";
 import { note } from "../terminal/note.js";
 import { isRecord } from "../utils.js";
 
@@ -59,11 +59,11 @@ export function resolveConfigPathTarget(root: unknown, path: Array<string | numb
   return current;
 }
 
-export function stripUnknownConfigKeys(config: Hanzo BotConfig): {
-  config: Hanzo BotConfig;
+export function stripUnknownConfigKeys(config: HanzoBotConfig): {
+  config: HanzoBotConfig;
   removed: string[];
 } {
-  const parsed = Hanzo BotSchema.safeParse(config);
+  const parsed = HanzoBotSchema.safeParse(config);
   if (parsed.success) {
     return { config, removed: [] };
   }
@@ -92,7 +92,7 @@ export function stripUnknownConfigKeys(config: Hanzo BotConfig): {
   return { config: next, removed };
 }
 
-export function noteOpencodeProviderOverrides(cfg: Hanzo BotConfig): void {
+export function noteOpencodeProviderOverrides(cfg: HanzoBotConfig): void {
   const providers = cfg.models?.providers;
   if (!providers) {
     return;

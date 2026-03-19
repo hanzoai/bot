@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { noteMacLaunchctlGatewayEnvOverrides } from "./doctor-platform-notes.js";
 
 describe("noteMacLaunchctlGatewayEnvOverrides", () => {
@@ -14,7 +14,7 @@ describe("noteMacLaunchctlGatewayEnvOverrides", () => {
           token: "config-token",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await noteMacLaunchctlGatewayEnvOverrides(cfg, { platform: "darwin", getenv, noteFn });
 
@@ -32,7 +32,7 @@ describe("noteMacLaunchctlGatewayEnvOverrides", () => {
   it("does nothing when config has no gateway credentials", async () => {
     const noteFn = vi.fn();
     const getenv = vi.fn(async () => "launchctl-token");
-    const cfg = {} as Hanzo BotConfig;
+    const cfg = {} as HanzoBotConfig;
 
     await noteMacLaunchctlGatewayEnvOverrides(cfg, { platform: "darwin", getenv, noteFn });
 
@@ -56,7 +56,7 @@ describe("noteMacLaunchctlGatewayEnvOverrides", () => {
           default: { source: "env" },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await noteMacLaunchctlGatewayEnvOverrides(cfg, { platform: "darwin", getenv, noteFn });
 
@@ -74,7 +74,7 @@ describe("noteMacLaunchctlGatewayEnvOverrides", () => {
           token: "config-token",
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await noteMacLaunchctlGatewayEnvOverrides(cfg, { platform: "linux", getenv, noteFn });
 

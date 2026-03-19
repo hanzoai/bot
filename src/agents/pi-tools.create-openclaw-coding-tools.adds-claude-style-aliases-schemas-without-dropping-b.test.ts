@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import "./test-helpers/fast-coding-tools.js";
-import { createHanzo BotCodingTools } from "./pi-tools.js";
+import { createHanzoBotCodingTools } from "./pi-tools.js";
 
-const defaultTools = createHanzo BotCodingTools({ senderIsOwner: true });
+const defaultTools = createHanzoBotCodingTools({ senderIsOwner: true });
 
-describe("createHanzo BotCodingTools", () => {
+describe("createHanzoBotCodingTools", () => {
   it("preserves action enums in normalized schemas", () => {
     const toolNames = ["browser", "canvas", "nodes", "cron", "gateway", "message"];
 
@@ -56,49 +56,49 @@ describe("createHanzo BotCodingTools", () => {
     expect(defaultTools.some((tool) => tool.name === "process")).toBe(true);
     expect(defaultTools.some((tool) => tool.name === "apply_patch")).toBe(false);
 
-    const enabledConfig: Hanzo BotConfig = {
+    const enabledConfig: HanzoBotConfig = {
       tools: {
         exec: {
           applyPatch: { enabled: true },
         },
       },
     };
-    const openAiTools = createHanzo BotCodingTools({
+    const openAiTools = createHanzoBotCodingTools({
       config: enabledConfig,
       modelProvider: "openai",
       modelId: "gpt-5.2",
     });
     expect(openAiTools.some((tool) => tool.name === "apply_patch")).toBe(true);
 
-    const anthropicTools = createHanzo BotCodingTools({
+    const anthropicTools = createHanzoBotCodingTools({
       config: enabledConfig,
       modelProvider: "anthropic",
       modelId: "claude-opus-4-5",
     });
     expect(anthropicTools.some((tool) => tool.name === "apply_patch")).toBe(false);
 
-    const allowModelsConfig: Hanzo BotConfig = {
+    const allowModelsConfig: HanzoBotConfig = {
       tools: {
         exec: {
           applyPatch: { enabled: true, allowModels: ["gpt-5.2"] },
         },
       },
     };
-    const allowed = createHanzo BotCodingTools({
+    const allowed = createHanzoBotCodingTools({
       config: allowModelsConfig,
       modelProvider: "openai",
       modelId: "gpt-5.2",
     });
     expect(allowed.some((tool) => tool.name === "apply_patch")).toBe(true);
 
-    const denied = createHanzo BotCodingTools({
+    const denied = createHanzoBotCodingTools({
       config: allowModelsConfig,
       modelProvider: "openai",
       modelId: "gpt-5-mini",
     });
     expect(denied.some((tool) => tool.name === "apply_patch")).toBe(false);
 
-    const oauthTools = createHanzo BotCodingTools({
+    const oauthTools = createHanzoBotCodingTools({
       modelProvider: "anthropic",
       modelAuthMode: "oauth",
     });
@@ -110,7 +110,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(names.has("apply_patch")).toBe(false);
   });
   it("provides top-level object schemas for all tools", () => {
-    const tools = createHanzo BotCodingTools();
+    const tools = createHanzoBotCodingTools();
     const offenders = tools
       .map((tool) => {
         const schema =

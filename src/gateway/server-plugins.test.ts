@@ -5,7 +5,7 @@ import type { PluginRuntime } from "../plugins/runtime/types.js";
 import type { PluginDiagnostic } from "../plugins/types.js";
 import type { GatewayRequestContext, GatewayRequestOptions } from "./server-methods/types.js";
 
-const loadHanzo BotPlugins = vi.hoisted(() => vi.fn());
+const loadHanzoBotPlugins = vi.hoisted(() => vi.fn());
 const primeConfiguredBindingRegistry = vi.hoisted(() =>
   vi.fn(() => ({ bindingCount: 0, channelCount: 0 })),
 );
@@ -17,7 +17,7 @@ const handleGatewayRequest = vi.hoisted(() =>
 );
 
 vi.mock("../plugins/loader.js", () => ({
-  loadHanzo BotPlugins,
+  loadHanzoBotPlugins,
 }));
 
 vi.mock("../channels/plugins/binding-registry.js", () => ({
@@ -109,7 +109,7 @@ async function createSubagentRuntime(
     error: vi.fn(),
     debug: vi.fn(),
   };
-  loadHanzo BotPlugins.mockReturnValue(createRegistry([]));
+  loadHanzoBotPlugins.mockReturnValue(createRegistry([]));
   serverPlugins.loadGatewayPlugins({
     cfg,
     workspaceDir: "/tmp",
@@ -117,7 +117,7 @@ async function createSubagentRuntime(
     coreGatewayHandlers: {},
     baseMethods: [],
   });
-  const call = loadHanzo BotPlugins.mock.calls.at(-1)?.[0] as
+  const call = loadHanzoBotPlugins.mock.calls.at(-1)?.[0] as
     | { runtimeOptions?: { allowGatewaySubagentBinding?: boolean } }
     | undefined;
   if (call?.runtimeOptions?.allowGatewaySubagentBinding !== true) {
@@ -137,7 +137,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  loadHanzo BotPlugins.mockReset();
+  loadHanzoBotPlugins.mockReset();
   primeConfiguredBindingRegistry.mockClear().mockReturnValue({ bindingCount: 0, channelCount: 0 });
   handleGatewayRequest.mockReset();
   runtimeModule.clearGatewaySubagentRuntime();
@@ -176,7 +176,7 @@ describe("loadGatewayPlugins", () => {
         message: "failed to load plugin: boom",
       },
     ];
-    loadHanzo BotPlugins.mockReturnValue(createRegistry(diagnostics));
+    loadHanzoBotPlugins.mockReturnValue(createRegistry(diagnostics));
 
     const log = {
       info: vi.fn(),
@@ -201,7 +201,7 @@ describe("loadGatewayPlugins", () => {
 
   test("provides subagent runtime with sessions.get method aliases", async () => {
     const { loadGatewayPlugins } = serverPluginsModule;
-    loadHanzo BotPlugins.mockReturnValue(createRegistry([]));
+    loadHanzoBotPlugins.mockReturnValue(createRegistry([]));
 
     const log = {
       info: vi.fn(),
@@ -218,7 +218,7 @@ describe("loadGatewayPlugins", () => {
       baseMethods: [],
     });
 
-    const call = loadHanzo BotPlugins.mock.calls.at(-1)?.[0] as
+    const call = loadHanzoBotPlugins.mock.calls.at(-1)?.[0] as
       | { runtimeOptions?: { allowGatewaySubagentBinding?: boolean } }
       | undefined;
     expect(call?.runtimeOptions?.allowGatewaySubagentBinding).toBe(true);
@@ -452,7 +452,7 @@ describe("loadGatewayPlugins", () => {
 
   test("can prefer setup-runtime channel plugins during startup loads", async () => {
     const { loadGatewayPlugins } = serverPluginsModule;
-    loadHanzo BotPlugins.mockReturnValue(createRegistry([]));
+    loadHanzoBotPlugins.mockReturnValue(createRegistry([]));
 
     const log = {
       info: vi.fn(),
@@ -470,7 +470,7 @@ describe("loadGatewayPlugins", () => {
       preferSetupRuntimeForChannelPlugins: true,
     });
 
-    expect(loadHanzo BotPlugins).toHaveBeenCalledWith(
+    expect(loadHanzoBotPlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         preferSetupRuntimeForChannelPlugins: true,
       }),
@@ -479,7 +479,7 @@ describe("loadGatewayPlugins", () => {
 
   test("primes configured bindings during gateway startup", async () => {
     const { loadGatewayPlugins } = serverPluginsModule;
-    loadHanzo BotPlugins.mockReturnValue(createRegistry([]));
+    loadHanzoBotPlugins.mockReturnValue(createRegistry([]));
 
     const log = {
       info: vi.fn(),
@@ -510,7 +510,7 @@ describe("loadGatewayPlugins", () => {
         message: "failed to load plugin: boom",
       },
     ];
-    loadHanzo BotPlugins.mockReturnValue(createRegistry(diagnostics));
+    loadHanzoBotPlugins.mockReturnValue(createRegistry(diagnostics));
 
     const log = {
       info: vi.fn(),

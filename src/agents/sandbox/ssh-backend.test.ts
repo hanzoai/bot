@@ -1,7 +1,7 @@
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
 const sshMocks = vi.hoisted(() => ({
   createSshSandboxSessionFromSettings: vi.fn(),
@@ -25,7 +25,7 @@ vi.mock("./ssh.js", async (importOriginal) => {
 
 import { createSshSandboxBackend, sshSandboxBackendManager } from "./ssh-backend.js";
 
-function createConfig(): Hanzo BotConfig {
+function createConfig(): HanzoBotConfig {
   return {
     agents: {
       defaults: {

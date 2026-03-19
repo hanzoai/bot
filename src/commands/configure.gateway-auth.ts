@@ -1,6 +1,6 @@
 import { ensureAuthProfileStore } from "../agents/auth-profiles.js";
 import { resolveDefaultAgentWorkspaceDir } from "../agents/workspace.js";
-import type { Hanzo BotConfig, GatewayAuthConfig } from "../config/config.js";
+import type { HanzoBotConfig, GatewayAuthConfig } from "../config/config.js";
 import { isSecretRef, type SecretInput } from "../config/types.secrets.js";
 import { resolveProviderPluginChoice } from "../plugins/provider-wizard.js";
 import { resolvePluginProviders } from "../plugins/providers.js";
@@ -34,7 +34,7 @@ function sanitizeTokenValue(value: unknown): string | undefined {
 
 function resolveProviderChoiceModelAllowlist(params: {
   authChoice: string;
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }):
@@ -96,10 +96,10 @@ export function buildGatewayAuthConfig(params: {
 }
 
 export async function promptAuthConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   runtime: RuntimeEnv,
   prompter: WizardPrompter,
-): Promise<Hanzo BotConfig> {
+): Promise<HanzoBotConfig> {
   const authChoice = await promptAuthChoiceGrouped({
     prompter,
     store: ensureAuthProfileStore(undefined, {

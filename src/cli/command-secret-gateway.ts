@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { callGateway } from "../gateway/call.js";
 import { validateSecretsResolveResult } from "../gateway/protocol/index.js";
@@ -20,7 +20,7 @@ import {
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 
 type ResolveCommandSecretsResult = {
-  resolvedConfig: Hanzo BotConfig;
+  resolvedConfig: HanzoBotConfig;
   diagnostics: string[];
   targetStatesByPath: Record<string, CommandSecretTargetState>;
   hadUnresolvedTargets: boolean;
@@ -98,7 +98,7 @@ function targetsRuntimeWebPath(path: string): boolean {
 }
 
 function classifyRuntimeWebTargetPathState(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   path: string;
 }): "active" | "inactive" | "unknown" {
   if (params.path === "tools.web.fetch.firecrawl.apiKey") {
@@ -130,7 +130,7 @@ function classifyRuntimeWebTargetPathState(params: {
 }
 
 function describeInactiveRuntimeWebTargetPath(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   path: string;
 }): string | undefined {
   if (params.path === "tools.web.fetch.firecrawl.apiKey") {
@@ -190,7 +190,7 @@ function targetsRuntimeWebResolution(params: {
 }
 
 function collectConfiguredTargetRefPaths(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   targetIds: Set<string>;
   allowedPaths?: ReadonlySet<string>;
 }): Set<string> {
@@ -213,7 +213,7 @@ function collectConfiguredTargetRefPaths(params: {
 }
 
 function classifyConfiguredTargetRefs(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   configuredTargetRefPaths: Set<string>;
 }): {
   hasActiveConfiguredRef: boolean;
@@ -321,7 +321,7 @@ function isDirectRuntimeWebTargetPath(path: string): boolean {
 }
 
 async function resolveCommandSecretRefsLocally(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   commandName: string;
   targetIds: Set<string>;
   preflightDiagnostics: string[];
@@ -484,7 +484,7 @@ function buildUnresolvedDiagnostics(
 }
 
 function scrubUnresolvedAssignments(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   unresolved: UnresolvedCommandSecretAssignment[],
 ): void {
   for (const entry of unresolved) {
@@ -509,8 +509,8 @@ function filterInactiveSurfaceDiagnostics(params: {
 
 async function resolveTargetSecretLocally(params: {
   target: DiscoveredConfigSecretTarget;
-  sourceConfig: Hanzo BotConfig;
-  resolvedConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
+  resolvedConfig: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
   cache: ReturnType<typeof createResolverContext>["cache"];
   activePaths: ReadonlySet<string>;
@@ -560,7 +560,7 @@ async function resolveTargetSecretLocally(params: {
 }
 
 export async function resolveCommandSecretRefsViaGateway(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   commandName: string;
   targetIds: Set<string>;
   mode?: CommandSecretResolutionModeInput;

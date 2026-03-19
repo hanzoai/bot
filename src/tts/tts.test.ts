@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ensureCustomApiRegistered } from "../agents/custom-api-registry.js";
 import { getApiKeyForModel } from "../agents/model-auth.js";
 import { resolveModelAsync } from "../agents/pi-embedded-runner/model.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { withEnv } from "../test-utils/env.js";
 import * as tts from "./tts.js";
 
@@ -100,7 +100,7 @@ const mockAssistantMessage = (content: AssistantMessage["content"]): AssistantMe
   timestamp: Date.now(),
 });
 
-function createOpenAiTelephonyCfg(model: "tts-1" | "gpt-4o-mini-tts"): Hanzo BotConfig {
+function createOpenAiTelephonyCfg(model: "tts-1" | "gpt-4o-mini-tts"): HanzoBotConfig {
   return {
     messages: {
       tts: {
@@ -263,7 +263,7 @@ describe("tts", () => {
   });
 
   describe("resolveEdgeOutputFormat", () => {
-    const baseCfg: Hanzo BotConfig = {
+    const baseCfg: HanzoBotConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
       messages: { tts: {} },
     };
@@ -284,7 +284,7 @@ describe("tts", () => {
                 edge: { outputFormat: "audio-24khz-96kbitrate-mono-mp3" },
               },
             },
-          } as Hanzo BotConfig,
+          } as HanzoBotConfig,
           expected: "audio-24khz-96kbitrate-mono-mp3",
         },
       ] as const;
@@ -369,7 +369,7 @@ describe("tts", () => {
     let resolveModelAsyncForTest: typeof resolveModelAsync;
     let ensureCustomApiRegisteredForTest: typeof ensureCustomApiRegistered;
 
-    const baseCfg: Hanzo BotConfig = {
+    const baseCfg: HanzoBotConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
       messages: { tts: {} },
     };
@@ -433,7 +433,7 @@ describe("tts", () => {
     });
 
     it("uses summaryModel override when configured", async () => {
-      const cfg: Hanzo BotConfig = {
+      const cfg: HanzoBotConfig = {
         agents: { defaults: { model: { primary: "anthropic/claude-opus-4-5" } } },
         messages: { tts: { summaryModel: "openai/gpt-4.1-mini" } },
       };
@@ -527,7 +527,7 @@ describe("tts", () => {
   });
 
   describe("getTtsProvider", () => {
-    const baseCfg: Hanzo BotConfig = {
+    const baseCfg: HanzoBotConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
       messages: { tts: {} },
     };
@@ -593,7 +593,7 @@ describe("tts", () => {
   });
 
   describe("resolveTtsConfig – openai.baseUrl", () => {
-    const baseCfg: Hanzo BotConfig = {
+    const baseCfg: HanzoBotConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
       messages: { tts: {} },
     };
@@ -619,7 +619,7 @@ describe("tts", () => {
             messages: {
               tts: { openai: { baseUrl: "http://my-server:9000/v1" } },
             },
-          } as Hanzo BotConfig,
+          } as HanzoBotConfig,
           env: { OPENAI_TTS_BASE_URL: "http://localhost:8880/v1" },
           expected: "http://my-server:9000/v1",
         },
@@ -630,7 +630,7 @@ describe("tts", () => {
             messages: {
               tts: { openai: { baseUrl: "http://my-server:9000/v1///" } },
             },
-          } as Hanzo BotConfig,
+          } as HanzoBotConfig,
           env: { OPENAI_TTS_BASE_URL: undefined },
           expected: "http://my-server:9000/v1",
         },
@@ -696,7 +696,7 @@ describe("tts", () => {
   });
 
   describe("maybeApplyTtsToPayload", () => {
-    const baseCfg: Hanzo BotConfig = {
+    const baseCfg: HanzoBotConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
       messages: {
         tts: {
@@ -726,7 +726,7 @@ describe("tts", () => {
       }
     };
 
-    const taggedCfg: Hanzo BotConfig = {
+    const taggedCfg: HanzoBotConfig = {
       ...baseCfg,
       messages: {
         ...baseCfg.messages!,

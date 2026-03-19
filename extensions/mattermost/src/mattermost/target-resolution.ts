@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 import { resolveMattermostAccount } from "./accounts.js";
 import {
   createMattermostClient,
@@ -50,7 +50,7 @@ export function parseMattermostApiStatus(err: unknown): number | undefined {
 
 export async function resolveMattermostOpaqueTarget(params: {
   input: string;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   accountId?: string | null;
   token?: string;
   baseUrl?: string;

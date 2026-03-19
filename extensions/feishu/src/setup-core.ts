@@ -1,15 +1,15 @@
 import {
   DEFAULT_ACCOUNT_ID,
   type ChannelSetupAdapter,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/setup";
 import type { FeishuConfig } from "./types.js";
 
 export function setFeishuNamedAccountEnabled(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
   enabled: boolean,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const feishuCfg = cfg.channels?.feishu as FeishuConfig | undefined;
   return {
     ...cfg,

@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 import { buildGatewayConnectionDetails } from "./call.js";
 import { GatewayClient, type GatewayClientOptions } from "./client.js";
@@ -9,7 +9,7 @@ export async function createOperatorApprovalsGatewayClient(
     GatewayClientOptions,
     "clientDisplayName" | "onClose" | "onConnectError" | "onEvent" | "onHelloOk"
   > & {
-    config: Hanzo BotConfig;
+    config: HanzoBotConfig;
     gatewayUrl?: string;
   },
 ): Promise<GatewayClient> {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotPluginApi } from "./runtime-api.js";
+import type { HanzoBotPluginApi } from "./runtime-api.js";
 
 const registerFeishuDocToolsMock = vi.hoisted(() => vi.fn());
 const registerFeishuChatToolsMock = vi.hoisted(() => vi.fn());
@@ -52,7 +52,7 @@ describe("feishu plugin register", () => {
       on: vi.fn(),
       config: {},
       registrationMode: "full",
-    } as unknown as Hanzo BotPluginApi;
+    } as unknown as HanzoBotPluginApi;
 
     plugin.register(api);
 

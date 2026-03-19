@@ -2,4 +2,4 @@
 // Keep this list additive and scoped to symbols used under extensions/memory-core.
 
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
-export type { Hanzo BotPluginApi } from "../plugins/types.js";
+export type { HanzoBotPluginApi } from "../plugins/types.js";

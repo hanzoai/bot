@@ -18,7 +18,7 @@ import {
   WEBHOOK_ANOMALY_COUNTER_DEFAULTS,
   WEBHOOK_RATE_LIMIT_DEFAULTS,
   resolveClientIp,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "./runtime-api.js";
 
 const ZALO_WEBHOOK_REPLAY_WINDOW_MS = 5 * 60_000;
@@ -26,7 +26,7 @@ const ZALO_WEBHOOK_REPLAY_WINDOW_MS = 5 * 60_000;
 export type ZaloWebhookTarget = {
   token: string;
   account: ResolvedZaloAccount;
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   runtime: ZaloRuntimeEnv;
   core: unknown;
   secret: string;

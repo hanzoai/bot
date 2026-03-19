@@ -4,15 +4,15 @@ import type {
 } from "../channels/plugins/types.core.js";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import { getChatChannelMeta } from "../channels/registry.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { buildOutboundBaseSessionKey } from "../infra/outbound/base-session-key.js";
 import { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
 import type {
-  Hanzo BotPluginApi,
-  Hanzo BotPluginCommandDefinition,
-  Hanzo BotPluginConfigSchema,
-  Hanzo BotPluginDefinition,
+  HanzoBotPluginApi,
+  HanzoBotPluginCommandDefinition,
+  HanzoBotPluginConfigSchema,
+  HanzoBotPluginDefinition,
   PluginCommandContext,
   PluginInteractiveTelegramHandlerContext,
 } from "../plugins/types.js";
@@ -20,7 +20,7 @@ import type {
 export type {
   AnyAgentTool,
   MediaUnderstandingProviderPlugin,
-  Hanzo BotPluginConfigSchema,
+  HanzoBotPluginConfigSchema,
   ProviderDiscoveryContext,
   ProviderCatalogContext,
   ProviderCatalogResult,
@@ -44,20 +44,20 @@ export type {
   SpeechProviderPlugin,
   ProviderThinkingPolicyContext,
   ProviderWrapStreamFnContext,
-  Hanzo BotPluginService,
-  Hanzo BotPluginServiceContext,
+  HanzoBotPluginService,
+  HanzoBotPluginServiceContext,
   ProviderAuthContext,
   ProviderAuthDoctorHintContext,
   ProviderAuthMethodNonInteractiveContext,
   ProviderAuthMethod,
   ProviderAuthResult,
-  Hanzo BotPluginCommandDefinition,
-  Hanzo BotPluginDefinition,
+  HanzoBotPluginCommandDefinition,
+  HanzoBotPluginDefinition,
   PluginCommandContext,
   PluginLogger,
   PluginInteractiveTelegramHandlerContext,
 } from "../plugins/types.js";
-export type { Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
 export { isSecretRef } from "../config/types.secrets.js";
 export type { GatewayRequestHandlerOptions } from "../gateway/server-methods/types.js";
 export type {
@@ -71,7 +71,7 @@ export type {
 } from "../infra/provider-usage.types.js";
 export type { ChannelMessageActionContext } from "../channels/plugins/types.js";
 export type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
-export type { Hanzo BotPluginApi } from "../plugins/types.js";
+export type { HanzoBotPluginApi } from "../plugins/types.js";
 export type { PluginRuntime } from "../plugins/runtime/types.js";
 
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
@@ -144,7 +144,7 @@ export function stripTargetKindPrefix(raw: string): string {
 }
 
 export function buildChannelOutboundSessionRoute(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId: string;
   channel: string;
   accountId?: string | null;
@@ -179,25 +179,25 @@ type DefineChannelPluginEntryOptions<TPlugin extends ChannelPlugin = ChannelPlug
   plugin: TPlugin;
   configSchema?: DefinePluginEntryOptions["configSchema"];
   setRuntime?: (runtime: PluginRuntime) => void;
-  registerFull?: (api: Hanzo BotPluginApi) => void;
+  registerFull?: (api: HanzoBotPluginApi) => void;
 };
 
 type DefinePluginEntryOptions = {
   id: string;
   name: string;
   description: string;
-  kind?: Hanzo BotPluginDefinition["kind"];
-  configSchema?: Hanzo BotPluginConfigSchema | (() => Hanzo BotPluginConfigSchema);
-  register: (api: Hanzo BotPluginApi) => void;
+  kind?: HanzoBotPluginDefinition["kind"];
+  configSchema?: HanzoBotPluginConfigSchema | (() => HanzoBotPluginConfigSchema);
+  register: (api: HanzoBotPluginApi) => void;
 };
 
 type DefinedPluginEntry = {
   id: string;
   name: string;
   description: string;
-  configSchema: Hanzo BotPluginConfigSchema;
-  register: NonNullable<Hanzo BotPluginDefinition["register"]>;
-} & Pick<Hanzo BotPluginDefinition, "kind">;
+  configSchema: HanzoBotPluginConfigSchema;
+  register: NonNullable<HanzoBotPluginDefinition["register"]>;
+} & Pick<HanzoBotPluginDefinition, "kind">;
 
 type CreateChannelPluginBaseOptions<TResolvedAccount> = {
   id: ChannelPlugin<TResolvedAccount>["id"];
@@ -237,7 +237,7 @@ type CreatedChannelPluginBase<TResolvedAccount> = Pick<
 
 function resolvePluginConfigSchema(
   configSchema: DefinePluginEntryOptions["configSchema"] = emptyPluginConfigSchema,
-): Hanzo BotPluginConfigSchema {
+): HanzoBotPluginConfigSchema {
   return typeof configSchema === "function" ? configSchema() : configSchema;
 }
 
@@ -275,7 +275,7 @@ export function defineChannelPluginEntry<TPlugin extends ChannelPlugin>({
     name,
     description,
     configSchema,
-    register(api: Hanzo BotPluginApi) {
+    register(api: HanzoBotPluginApi) {
       setRuntime?.(api.runtime);
       api.registerChannel({ plugin });
       if (api.registrationMode !== "full") {

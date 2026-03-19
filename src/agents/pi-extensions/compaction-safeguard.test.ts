@@ -5,7 +5,7 @@ import type { AgentMessage } from "@mariozechner/pi-agent-core";
 import type { Api, Model } from "@mariozechner/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import * as compactionModule from "../compaction.js";
 import { buildEmbeddedExtensionFactories } from "../pi-embedded-runner/extensions.js";
 import { castAgentMessage } from "../test-helpers/agent-message-fixtures.js";
@@ -441,7 +441,7 @@ describe("compaction-safeguard runtime registry", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     buildEmbeddedExtensionFactories({
       cfg,

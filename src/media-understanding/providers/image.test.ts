@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const completeMock = vi.fn();
 const minimaxUnderstandImageMock = vi.fn();
-const ensureHanzo BotModelsJsonMock = vi.fn(async () => {});
+const ensureHanzoBotModelsJsonMock = vi.fn(async () => {});
 const getApiKeyForModelMock = vi.fn(async () => ({
   apiKey: "oauth-test", // pragma: allowlist secret
   source: "test",
@@ -39,7 +39,7 @@ describe("describeImageWithModel", () => {
       minimaxUnderstandImage: minimaxUnderstandImageMock,
     }));
     vi.doMock("../../agents/models-config.js", () => ({
-      ensureHanzo BotModelsJson: ensureHanzo BotModelsJsonMock,
+      ensureHanzoBotModelsJson: ensureHanzoBotModelsJsonMock,
     }));
     vi.doMock("../../agents/model-auth.js", () => ({
       getApiKeyForModel: getApiKeyForModelMock,
@@ -81,7 +81,7 @@ describe("describeImageWithModel", () => {
       text: "portal ok",
       model: "MiniMax-VL-01",
     });
-    expect(ensureHanzo BotModelsJsonMock).toHaveBeenCalled();
+    expect(ensureHanzoBotModelsJsonMock).toHaveBeenCalled();
     expect(getApiKeyForModelMock).toHaveBeenCalled();
     expect(requireApiKeyMock).toHaveBeenCalled();
     expect(setRuntimeApiKeyMock).toHaveBeenCalledWith("minimax-portal", "oauth-test");

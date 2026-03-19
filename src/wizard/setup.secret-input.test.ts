@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveSetupSecretInputString } from "./setup.secret-input.js";
 
-function makeConfig(): Hanzo BotConfig {
+function makeConfig(): HanzoBotConfig {
   return {
     secrets: {
       providers: {
         default: { source: "env" },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 describe("resolveSetupSecretInputString", () => {

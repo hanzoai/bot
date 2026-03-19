@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveDefaultChannelAccountContext } from "./channel-account-context.js";
 
 describe("resolveDefaultChannelAccountContext", () => {
@@ -14,7 +14,7 @@ describe("resolveDefaultChannelAccountContext", () => {
       },
     } as unknown as ChannelPlugin;
 
-    const result = await resolveDefaultChannelAccountContext(plugin, {} as Hanzo BotConfig);
+    const result = await resolveDefaultChannelAccountContext(plugin, {} as HanzoBotConfig);
 
     expect(result.accountIds).toEqual(["acc-1"]);
     expect(result.defaultAccountId).toBe("acc-1");
@@ -39,7 +39,7 @@ describe("resolveDefaultChannelAccountContext", () => {
       },
     } as unknown as ChannelPlugin;
 
-    const result = await resolveDefaultChannelAccountContext(plugin, {} as Hanzo BotConfig);
+    const result = await resolveDefaultChannelAccountContext(plugin, {} as HanzoBotConfig);
 
     expect(isEnabled).toHaveBeenCalledWith(account, {});
     expect(isConfigured).toHaveBeenCalledWith(account, {});
@@ -60,7 +60,7 @@ describe("resolveDefaultChannelAccountContext", () => {
       },
     } as unknown as ChannelPlugin;
 
-    await expect(resolveDefaultChannelAccountContext(plugin, {} as Hanzo BotConfig)).rejects.toThrow(
+    await expect(resolveDefaultChannelAccountContext(plugin, {} as HanzoBotConfig)).rejects.toThrow(
       /missing secret/i,
     );
   });
@@ -76,7 +76,7 @@ describe("resolveDefaultChannelAccountContext", () => {
       },
     } as unknown as ChannelPlugin;
 
-    const result = await resolveDefaultChannelAccountContext(plugin, {} as Hanzo BotConfig, {
+    const result = await resolveDefaultChannelAccountContext(plugin, {} as HanzoBotConfig, {
       mode: "read_only",
       commandName: "status",
     });
@@ -101,7 +101,7 @@ describe("resolveDefaultChannelAccountContext", () => {
       },
     } as unknown as ChannelPlugin;
 
-    const result = await resolveDefaultChannelAccountContext(plugin, {} as Hanzo BotConfig, {
+    const result = await resolveDefaultChannelAccountContext(plugin, {} as HanzoBotConfig, {
       mode: "read_only",
     });
 

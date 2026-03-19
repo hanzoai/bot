@@ -3,10 +3,10 @@ import {
   resolveChannelGroupToolsPolicy,
   type GroupToolPolicyConfig,
 } from "openclaw/plugin-sdk/channel-policy";
-import type { Hanzo BotConfig } from "./runtime-api.js";
+import type { HanzoBotConfig } from "./runtime-api.js";
 
 type WhatsAppGroupContext = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   groupId?: string | null;
   senderId?: string | null;

@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
-  ensureHanzo BotExecMarkerOnProcess,
-  markHanzo BotExecEnv,
+  ensureHanzoBotExecMarkerOnProcess,
+  markHanzoBotExecEnv,
   BOT_CLI_ENV_VALUE,
   BOT_CLI_ENV_VAR,
 } from "./openclaw-exec-env.js";
 
-describe("markHanzo BotExecEnv", () => {
+describe("markHanzoBotExecEnv", () => {
   it("returns a cloned env object with the exec marker set", () => {
     const env = { PATH: "/usr/bin", BOT_CLI: "0" };
-    const marked = markHanzo BotExecEnv(env);
+    const marked = markHanzoBotExecEnv(env);
 
     expect(marked).toEqual({
       PATH: "/usr/bin",
@@ -20,11 +20,11 @@ describe("markHanzo BotExecEnv", () => {
   });
 });
 
-describe("ensureHanzo BotExecMarkerOnProcess", () => {
+describe("ensureHanzoBotExecMarkerOnProcess", () => {
   it("mutates and returns the provided process env", () => {
     const env: NodeJS.ProcessEnv = { PATH: "/usr/bin" };
 
-    expect(ensureHanzo BotExecMarkerOnProcess(env)).toBe(env);
+    expect(ensureHanzoBotExecMarkerOnProcess(env)).toBe(env);
     expect(env[BOT_CLI_ENV_VAR]).toBe(BOT_CLI_ENV_VALUE);
   });
 
@@ -33,7 +33,7 @@ describe("ensureHanzo BotExecMarkerOnProcess", () => {
     delete process.env[BOT_CLI_ENV_VAR];
 
     try {
-      expect(ensureHanzo BotExecMarkerOnProcess()).toBe(process.env);
+      expect(ensureHanzoBotExecMarkerOnProcess()).toBe(process.env);
       expect(process.env[BOT_CLI_ENV_VAR]).toBe(BOT_CLI_ENV_VALUE);
     } finally {
       if (previous === undefined) {
