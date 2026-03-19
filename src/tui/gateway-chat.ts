@@ -331,7 +331,7 @@ export async function resolveGatewayConnection(
     return { url, token, password };
   }
 
-  if (gatewayAuthMode === "none" || gatewayAuthMode === "trusted-proxy") {
+  if (gatewayAuthMode === "none" || gatewayAuthMode === "trusted-proxy" || gatewayAuthMode === "iam") {
     return {
       url,
       token: explicitAuth.token ?? envToken,

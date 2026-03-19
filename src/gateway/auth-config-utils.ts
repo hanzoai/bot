@@ -26,7 +26,12 @@ function shouldResolveGatewayPasswordSecretRef(params: {
   if (params.mode === "password") {
     return true;
   }
-  if (params.mode === "token" || params.mode === "none" || params.mode === "trusted-proxy") {
+  if (
+    params.mode === "token" ||
+    params.mode === "none" ||
+    params.mode === "trusted-proxy" ||
+    params.mode === "iam"
+  ) {
     return false;
   }
   return !params.hasTokenCandidate;
