@@ -8,6 +8,7 @@ import {
   withGatewayServer,
 } from "./server-http.test-harness.js";
 import type { ReadinessChecker } from "./server/readiness.js";
+import { VERSION } from "../version.js";
 
 describe("gateway probe endpoints", () => {
   it("returns detailed readiness payload for local /ready requests", async () => {
@@ -126,7 +127,11 @@ describe("gateway probe endpoints", () => {
         await dispatchRequest(server, req, res);
 
         expect(res.statusCode).toBe(200);
-        expect(getBody()).toBe(JSON.stringify({ ok: true, status: "live" }));
+        const parsed = JSON.parse(getBody());
+        expect(parsed.status).toBe("ok");
+        expect(parsed.version).toBe(VERSION);
+        expect(typeof parsed.uptime).toBe("number");
+        expect(parsed.gateway).toEqual({ mode: "local", auth: "none" });
       },
     });
   });
