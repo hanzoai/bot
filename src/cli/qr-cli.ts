@@ -51,7 +51,7 @@ function shouldResolveLocalGatewayPasswordSecret(
   if (authMode === "password") {
     return true;
   }
-  if (authMode === "token" || authMode === "none" || authMode === "trusted-proxy") {
+  if (authMode === "token" || authMode === "none" || authMode === "trusted-proxy" || authMode === "iam") {
     return false;
   }
   const envToken = readGatewayTokenEnv(env);
