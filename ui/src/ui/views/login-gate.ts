@@ -5,6 +5,20 @@ import { icons } from "../icons.ts";
 import { normalizeBasePath } from "../navigation.ts";
 import { agentLogoUrl } from "./agents-utils.ts";
 
+const HANZO_IAM_BASE = "https://hanzo.id";
+const HANZO_IAM_CLIENT_ID = "hanzo-bot";
+
+function buildHanzoOAuthUrl(): string {
+  const redirectUri = `${window.location.origin}/oauth-callback`;
+  const params = new URLSearchParams({
+    client_id: HANZO_IAM_CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    scope: "openid email profile",
+  });
+  return `${HANZO_IAM_BASE}/oauth/authorize?${params.toString()}`;
+}
+
 export function renderLoginGate(state: AppViewState) {
   const basePath = normalizeBasePath(state.basePath ?? "");
   const faviconSrc = agentLogoUrl(basePath);
@@ -18,6 +32,16 @@ export function renderLoginGate(state: AppViewState) {
           <div class="login-gate__sub">${t("login.subtitle")}</div>
         </div>
         <div class="login-gate__form">
+          <a
+            class="btn primary login-gate__connect"
+            href=${buildHanzoOAuthUrl()}
+            style="display: block; text-align: center; text-decoration: none; margin-bottom: 12px;"
+          >
+            Sign in with Hanzo
+          </a>
+          <div class="login-gate__divider" style="text-align: center; margin: 12px 0; color: var(--muted); font-size: 13px;">
+            or connect directly
+          </div>
           <label class="field">
             <span>${t("overview.access.wsUrl")}</span>
             <input
@@ -123,6 +147,13 @@ export function renderLoginGate(state: AppViewState) {
               target="_blank"
               rel="noreferrer"
             >${t("overview.connection.docsLink")}</a>
+            <span style="margin: 0 8px; color: var(--muted);">|</span>
+            <a
+              class="session-link"
+              href="${HANZO_IAM_BASE}/signup"
+              target="_blank"
+              rel="noreferrer"
+            >Sign up</a>
           </div>
         </div>
       </div>
