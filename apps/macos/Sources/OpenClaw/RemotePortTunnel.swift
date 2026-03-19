@@ -136,7 +136,7 @@ final class RemotePortTunnel {
     }
 
     private static func resolveRemotePortOverride(for sshHost: String) -> Int? {
-        let root = OpenClawConfigFile.loadDict()
+        let root = Hanzo BotConfigFile.loadDict()
         guard let gateway = root["gateway"] as? [String: Any],
               let remote = gateway["remote"] as? [String: Any],
               let urlRaw = remote["url"] as? String
@@ -152,8 +152,8 @@ final class RemotePortTunnel {
         else {
             return nil
         }
-        let sshKey = OpenClawConfigFile.hostKey(sshHost)
-        let urlKey = OpenClawConfigFile.hostKey(host)
+        let sshKey = Hanzo BotConfigFile.hostKey(sshHost)
+        let urlKey = Hanzo BotConfigFile.hostKey(host)
         guard !sshKey.isEmpty, !urlKey.isEmpty else { return nil }
         guard sshKey == urlKey else {
             Self.logger.debug(
@@ -175,7 +175,7 @@ final class RemotePortTunnel {
         }
 
         return try await withCheckedThrowingContinuation { cont in
-            let queue = DispatchQueue(label: "ai.openclaw.remote.tunnel.port", qos: .utility)
+            let queue = DispatchQueue(label: "ai.hanzo.bot.remote.tunnel.port", qos: .utility)
             do {
                 let listener = try NWListener(using: .tcp, on: .any)
                 listener.newConnectionHandler = { connection in connection.cancel() }

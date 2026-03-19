@@ -62,7 +62,7 @@ describe("maybeRestoreLegacyMatrixBackup", () => {
         stateDir,
         env: {
           ...process.env,
-          OPENCLAW_STATE_DIR: stateDir,
+          BOT_STATE_DIR: stateDir,
           HOME: home,
         },
       });
@@ -125,7 +125,7 @@ describe("maybeRestoreLegacyMatrixBackup", () => {
         stateDir,
         env: {
           ...process.env,
-          OPENCLAW_STATE_DIR: stateDir,
+          BOT_STATE_DIR: stateDir,
           HOME: home,
         },
       });
@@ -193,7 +193,7 @@ describe("maybeRestoreLegacyMatrixBackup", () => {
         stateDir,
         env: {
           ...process.env,
-          OPENCLAW_STATE_DIR: stateDir,
+          BOT_STATE_DIR: stateDir,
           HOME: home,
         },
       });

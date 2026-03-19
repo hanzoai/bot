@@ -62,8 +62,8 @@ describe("config cli integration", () => {
     const configPath = path.join(tempDir, "openclaw.json");
     const batchPath = path.join(tempDir, "batch.json");
     const envSnapshot = captureEnv([
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_TEST_FAST",
+      "BOT_CONFIG_PATH",
+      "BOT_TEST_FAST",
       "DISCORD_BOT_TOKEN",
     ]);
     try {
@@ -101,8 +101,8 @@ describe("config cli integration", () => {
         "utf8",
       );
 
-      process.env.OPENCLAW_TEST_FAST = "1";
-      process.env.OPENCLAW_CONFIG_PATH = configPath;
+      process.env.BOT_TEST_FAST = "1";
+      process.env.BOT_CONFIG_PATH = configPath;
       process.env.DISCORD_BOT_TOKEN = "test-token";
       clearConfigCache();
       clearRuntimeConfigSnapshot();
@@ -150,8 +150,8 @@ describe("config cli integration", () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-config-cli-int-fail-"));
     const configPath = path.join(tempDir, "openclaw.json");
     const envSnapshot = captureEnv([
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_TEST_FAST",
+      "BOT_CONFIG_PATH",
+      "BOT_TEST_FAST",
       "MISSING_TEST_SECRET",
     ]);
     try {
@@ -172,8 +172,8 @@ describe("config cli integration", () => {
         "utf8",
       );
 
-      process.env.OPENCLAW_TEST_FAST = "1";
-      process.env.OPENCLAW_CONFIG_PATH = configPath;
+      process.env.BOT_TEST_FAST = "1";
+      process.env.BOT_CONFIG_PATH = configPath;
       delete process.env.MISSING_TEST_SECRET;
       clearConfigCache();
       clearRuntimeConfigSnapshot();
@@ -222,7 +222,7 @@ describe("config cli integration", () => {
     const configPath = path.join(tempDir, "openclaw.json");
     const batchPath = path.join(tempDir, "batch.json");
     const markerPath = path.join(tempDir, "marker.txt");
-    const envSnapshot = captureEnv(["OPENCLAW_CONFIG_PATH", "OPENCLAW_TEST_FAST"]);
+    const envSnapshot = captureEnv(["BOT_CONFIG_PATH", "BOT_TEST_FAST"]);
     try {
       fs.writeFileSync(
         configPath,
@@ -241,8 +241,8 @@ describe("config cli integration", () => {
         "utf8",
       );
 
-      process.env.OPENCLAW_TEST_FAST = "1";
-      process.env.OPENCLAW_CONFIG_PATH = configPath;
+      process.env.BOT_TEST_FAST = "1";
+      process.env.BOT_CONFIG_PATH = configPath;
       clearConfigCache();
       clearRuntimeConfigSnapshot();
 
@@ -277,7 +277,7 @@ describe("config cli integration", () => {
     const configPath = path.join(tempDir, "openclaw.json");
     const batchPath = path.join(tempDir, "batch.json");
     const markerPath = path.join(tempDir, "marker.txt");
-    const envSnapshot = captureEnv(["OPENCLAW_CONFIG_PATH", "OPENCLAW_TEST_FAST"]);
+    const envSnapshot = captureEnv(["BOT_CONFIG_PATH", "BOT_TEST_FAST"]);
     try {
       fs.writeFileSync(
         configPath,
@@ -296,8 +296,8 @@ describe("config cli integration", () => {
         "utf8",
       );
 
-      process.env.OPENCLAW_TEST_FAST = "1";
-      process.env.OPENCLAW_CONFIG_PATH = configPath;
+      process.env.BOT_TEST_FAST = "1";
+      process.env.BOT_CONFIG_PATH = configPath;
       clearConfigCache();
       clearRuntimeConfigSnapshot();
 

@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import type {
   CreateSandboxBackendParams,
-  OpenClawConfig,
+  Hanzo BotConfig,
   RemoteShellSandboxHandle,
   SandboxBackendCommandParams,
   SandboxBackendCommandResult,
@@ -15,7 +15,7 @@ import type {
 import {
   createRemoteShellSandboxFsBridge,
   disposeSshSandboxSession,
-  resolvePreferredOpenClawTmpDir,
+  resolvePreferredHanzo BotTmpDir,
   runSshSandboxCommand,
 } from "openclaw/plugin-sdk/sandbox";
 import {
@@ -460,7 +460,7 @@ class OpenShellSandboxBackendImpl {
 }
 
 function resolveOpenShellPluginConfigFromConfig(
-  config: OpenClawConfig,
+  config: Hanzo BotConfig,
   fallback: ResolvedOpenShellPluginConfig,
 ): ResolvedOpenShellPluginConfig {
   const pluginConfig = config.plugins?.entries?.openshell?.config;
@@ -485,5 +485,5 @@ function buildOpenShellSandboxName(scopeKey: string): string {
 }
 
 function resolveOpenShellTmpRoot(): string {
-  return path.resolve(resolvePreferredOpenClawTmpDir() ?? os.tmpdir());
+  return path.resolve(resolvePreferredHanzo BotTmpDir() ?? os.tmpdir());
 }

@@ -4,7 +4,7 @@ import type { AuthProfileStore } from "../../agents/auth-profiles.js";
 import { loadModelCatalog } from "../../agents/model-catalog.js";
 import { shouldSuppressBuiltInModel } from "../../agents/model-suppression.js";
 import { resolveModelWithRegistry } from "../../agents/pi-embedded-runner/model.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import { loadModelRegistry, toModelRow } from "./list.registry.js";
 import type { ConfiguredEntry, ModelRow } from "./list.types.js";
 import { isLocalBaseUrl, modelKey } from "./shared.js";
@@ -17,7 +17,7 @@ type RowFilter = {
 };
 
 type RowBuilderContext = {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   authStore: AuthProfileStore;
   availableKeys?: Set<string>;
   configuredByKey: ConfiguredByKey;
@@ -55,8 +55,8 @@ function buildRow(params: {
 }
 
 export async function loadListModelRegistry(
-  cfg: OpenClawConfig,
-  opts?: { sourceConfig?: OpenClawConfig },
+  cfg: Hanzo BotConfig,
+  opts?: { sourceConfig?: Hanzo BotConfig },
 ) {
   const loaded = await loadModelRegistry(cfg, opts);
   return {

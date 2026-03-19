@@ -1,6 +1,6 @@
 import CoreGraphics
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 
 enum SystemPresenceInfo {
     static func lastInputSeconds() -> Int? {

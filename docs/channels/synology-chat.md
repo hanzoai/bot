@@ -1,7 +1,7 @@
 ---
-summary: "Synology Chat webhook setup and OpenClaw config"
+summary: "Synology Chat webhook setup and Hanzo Bot config"
 read_when:
-  - Setting up Synology Chat with OpenClaw
+  - Setting up Synology Chat with Hanzo Bot
   - Debugging Synology Chat webhook routing
 title: "Synology Chat"
 ---
@@ -27,17 +27,17 @@ Details: [Plugins](/tools/plugin)
 ## Quick setup
 
 1. Install and enable the Synology Chat plugin.
-   - `openclaw onboard` now shows Synology Chat in the same channel setup list as `openclaw channels add`.
-   - Non-interactive setup: `openclaw channels add --channel synology-chat --token <token> --url <incoming-webhook-url>`
+   - `hanzo-bot onboard` now shows Synology Chat in the same channel setup list as `hanzo-bot channels add`.
+   - Non-interactive setup: `hanzo-bot channels add --channel synology-chat --token <token> --url <incoming-webhook-url>`
 2. In Synology Chat integrations:
    - Create an incoming webhook and copy its URL.
    - Create an outgoing webhook with your secret token.
-3. Point the outgoing webhook URL to your OpenClaw gateway:
+3. Point the outgoing webhook URL to your Hanzo Bot gateway:
    - `https://gateway-host/webhook/synology` by default.
    - Or your custom `channels.synology-chat.webhookPath`.
-4. Finish setup in OpenClaw.
-   - Guided: `openclaw onboard`
-   - Direct: `openclaw channels add --channel synology-chat --token <token> --url <incoming-webhook-url>`
+4. Finish setup in Hanzo Bot.
+   - Guided: `hanzo-bot onboard`
+   - Direct: `hanzo-bot channels add --channel synology-chat --token <token> --url <incoming-webhook-url>`
 5. Restart gateway and send a DM to the Synology Chat bot.
 
 Minimal config:
@@ -68,7 +68,7 @@ For the default account, you can use env vars:
 - `SYNOLOGY_NAS_HOST`
 - `SYNOLOGY_ALLOWED_USER_IDS` (comma-separated)
 - `SYNOLOGY_RATE_LIMIT`
-- `OPENCLAW_BOT_NAME`
+- `BOT_BOT_NAME`
 
 Config values override env vars.
 
@@ -80,8 +80,8 @@ Config values override env vars.
 - `dmPolicy: "open"` allows any sender.
 - `dmPolicy: "disabled"` blocks DMs.
 - Pairing approvals work with:
-  - `openclaw pairing list synology-chat`
-  - `openclaw pairing approve synology-chat <CODE>`
+  - `hanzo-bot pairing list synology-chat`
+  - `hanzo-bot pairing approve synology-chat <CODE>`
 
 ## Outbound delivery
 
@@ -90,7 +90,7 @@ Use numeric Synology Chat user IDs as targets.
 Examples:
 
 ```bash
-openclaw message send --channel synology-chat --target 123456 --text "Hello from OpenClaw"
+openclaw message send --channel synology-chat --target 123456 --text "Hello from Hanzo Bot"
 openclaw message send --channel synology-chat --target synology-chat:123456 --text "Hello again"
 ```
 

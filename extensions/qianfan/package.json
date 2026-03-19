@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/qianfan-provider",
+  "name": "@hanzo/bot-qianfan-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Qianfan provider plugin",
+  "description": "Hanzo Bot Qianfan provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

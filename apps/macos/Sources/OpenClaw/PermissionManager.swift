@@ -5,7 +5,7 @@ import CoreGraphics
 import CoreLocation
 import Foundation
 import Observation
-import OpenClawIPC
+import Hanzo BotIPC
 import Speech
 import UserNotifications
 

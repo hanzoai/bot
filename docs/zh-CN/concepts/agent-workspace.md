@@ -17,26 +17,26 @@ x-i18n:
 
 工作区是智能体的“家”。它是文件工具和工作区上下文所使用的唯一工作目录。请将其保持为私有，并将其视为记忆。
 
-这与存储配置、凭证和会话的 `~/.openclaw/` 是分开的。
+这与存储配置、凭证和会话的 `~/.hanzo/bot/` 是分开的。
 
-**重要：**工作区是**默认 cwd**，而不是硬性沙箱。工具会相对于工作区解析相对路径，但除非启用沙箱隔离，否则绝对路径仍然可以访问主机上的其他位置。如果你需要隔离，请使用 [`agents.defaults.sandbox`](/gateway/sandboxing)（和/或按智能体配置的沙箱）。启用沙箱隔离后，如果 `workspaceAccess` 不是 `"rw"`，工具会在 `~/.openclaw/sandboxes` 下的沙箱工作区中运行，而不是在你的主机工作区中运行。
+**重要：**工作区是**默认 cwd**，而不是硬性沙箱。工具会相对于工作区解析相对路径，但除非启用沙箱隔离，否则绝对路径仍然可以访问主机上的其他位置。如果你需要隔离，请使用 [`agents.defaults.sandbox`](/gateway/sandboxing)（和/或按智能体配置的沙箱）。启用沙箱隔离后，如果 `workspaceAccess` 不是 `"rw"`，工具会在 `~/.hanzo/bot/sandboxes` 下的沙箱工作区中运行，而不是在你的主机工作区中运行。
 
 ## 默认位置
 
-- 默认值：`~/.openclaw/workspace`
-- 如果设置了 `OPENCLAW_PROFILE` 且其值不是 `"default"`，默认值将变为
-  `~/.openclaw/workspace-<profile>`。
-- 在 `~/.openclaw/openclaw.json` 中覆盖：
+- 默认值：`~/.hanzo/bot/workspace`
+- 如果设置了 `BOT_PROFILE` 且其值不是 `"default"`，默认值将变为
+  `~/.hanzo/bot/workspace-<profile>`。
+- 在 `~/.hanzoai/bot.json` 中覆盖：
 
 ```json5
 {
   agent: {
-    workspace: "~/.openclaw/workspace",
+    workspace: "~/.hanzo/bot/workspace",
   },
 }
 ```
 
-`openclaw onboard`、`openclaw configure` 或 `openclaw setup` 会在工作区缺失时创建工作区并植入引导文件。
+`hanzo-bot onboard`、`hanzo-bot configure` 或 `hanzo-bot setup` 会在工作区缺失时创建工作区并植入引导文件。
 沙箱种子复制仅接受工作区内的常规文件；解析到源工作区外部的符号链接/硬链接别名会被忽略。
 
 如果你已经自行管理工作区文件，可以禁用引导文件创建：
@@ -53,11 +53,11 @@ x-i18n:
 如果你有意保留多个工作区，请确保
 `agents.defaults.workspace` 指向当前活动的那个。
 
-当 `openclaw doctor` 检测到额外的工作区目录时，会发出警告。
+当 `hanzo-bot doctor` 检测到额外的工作区目录时，会发出警告。
 
 ## 工作区文件映射（每个文件的含义）
 
-以下是 OpenClaw 在工作区内预期的标准文件：
+以下是 Hanzo Bot 在工作区内预期的标准文件：
 
 - `AGENTS.md`
   - 智能体的操作说明，以及它应如何使用记忆。
@@ -110,17 +110,17 @@ x-i18n:
 - `canvas/`（可选）
   - 用于节点显示的 Canvas UI 文件（例如 `canvas/index.html`）。
 
-如果任何引导文件缺失，OpenClaw 会在会话中注入一个“缺失文件”标记并继续执行。注入时，大型引导文件会被截断；可使用 `agents.defaults.bootstrapMaxChars`（默认：20000）和 `agents.defaults.bootstrapTotalMaxChars`（默认：150000）调整限制。
-`openclaw setup` 可以重新创建缺失的默认文件，而不会覆盖现有文件。
+如果任何引导文件缺失，Hanzo Bot 会在会话中注入一个“缺失文件”标记并继续执行。注入时，大型引导文件会被截断；可使用 `agents.defaults.bootstrapMaxChars`（默认：20000）和 `agents.defaults.bootstrapTotalMaxChars`（默认：150000）调整限制。
+`hanzo-bot setup` 可以重新创建缺失的默认文件，而不会覆盖现有文件。
 
 ## 不在工作区中的内容
 
-这些内容位于 `~/.openclaw/` 下，**不应**提交到工作区仓库：
+这些内容位于 `~/.hanzo/bot/` 下，**不应**提交到工作区仓库：
 
-- `~/.openclaw/openclaw.json`（配置）
-- `~/.openclaw/credentials/`（OAuth 令牌、API 密钥）
-- `~/.openclaw/agents/<agentId>/sessions/`（会话记录和元数据）
-- `~/.openclaw/skills/`（托管 Skills）
+- `~/.hanzoai/bot.json`（配置）
+- `~/.hanzo/bot/credentials/`（OAuth 令牌、API 密钥）
+- `~/.hanzo/bot/agents/<agentId>/sessions/`（会话记录和元数据）
+- `~/.hanzo/bot/skills/`（托管 Skills）
 
 如果你需要迁移会话或配置，请单独复制它们，并确保不要将其纳入版本控制。
 
@@ -135,7 +135,7 @@ x-i18n:
 如果已安装 git，全新工作区会自动初始化。如果这个工作区还不是仓库，请运行：
 
 ```bash
-cd ~/.openclaw/workspace
+cd ~/.hanzo/bot/workspace
 git init
 git add AGENTS.md SOUL.md TOOLS.md IDENTITY.md USER.md HEARTBEAT.md memory/
 git commit -m "Add agent workspace"
@@ -190,10 +190,10 @@ git push
 即使在私有仓库中，也应避免在工作区中存储密钥：
 
 - API 密钥、OAuth 令牌、密码或私有凭证。
-- `~/.openclaw/` 下的任何内容。
+- `~/.hanzo/bot/` 下的任何内容。
 - 聊天原始转储或敏感附件。
 
-如果你必须存储敏感引用，请使用占位符，并将真实密钥保存在其他地方（密码管理器、环境变量或 `~/.openclaw/`）。
+如果你必须存储敏感引用，请使用占位符，并将真实密钥保存在其他地方（密码管理器、环境变量或 `~/.hanzo/bot/`）。
 
 建议的 `.gitignore` 起始内容：
 
@@ -207,10 +207,10 @@ git push
 
 ## 将工作区迁移到新机器
 
-1. 将仓库克隆到所需路径（默认是 `~/.openclaw/workspace`）。
-2. 在 `~/.openclaw/openclaw.json` 中将 `agents.defaults.workspace` 设置为该路径。
-3. 运行 `openclaw setup --workspace <path>` 以植入任何缺失的文件。
-4. 如果你需要会话，请将旧机器上的 `~/.openclaw/agents/<agentId>/sessions/` 单独复制过来。
+1. 将仓库克隆到所需路径（默认是 `~/.hanzo/bot/workspace`）。
+2. 在 `~/.hanzoai/bot.json` 中将 `agents.defaults.workspace` 设置为该路径。
+3. 运行 `hanzo-bot setup --workspace <path>` 以植入任何缺失的文件。
+4. 如果你需要会话，请将旧机器上的 `~/.hanzo/bot/agents/<agentId>/sessions/` 单独复制过来。
 
 ## 高级说明
 

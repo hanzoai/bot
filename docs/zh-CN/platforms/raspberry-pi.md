@@ -1,9 +1,9 @@
 ---
 read_when:
-  - 在 Raspberry Pi 上设置 OpenClaw
-  - 在 ARM 设备上运行 OpenClaw
+  - 在 Raspberry Pi 上设置 Hanzo Bot
+  - 在 ARM 设备上运行 Hanzo Bot
   - 构建一个低成本、始终在线的个人 AI
-summary: 在 Raspberry Pi 上运行 OpenClaw（低预算自托管方案）
+summary: 在 Raspberry Pi 上运行 Hanzo Bot（低预算自托管方案）
 title: Raspberry Pi
 x-i18n:
   generated_at: "2026-03-16T06:24:58Z"
@@ -14,11 +14,11 @@ x-i18n:
   workflow: 15
 ---
 
-# 在 Raspberry Pi 上运行 OpenClaw
+# 在 Raspberry Pi 上运行 Hanzo Bot
 
 ## 目标
 
-在 Raspberry Pi 上以 **约 35–80 美元**的一次性成本（无月费）运行一个持久化、始终在线的 OpenClaw Gateway 网关。
+在 Raspberry Pi 上以 **约 35–80 美元**的一次性成本（无月费）运行一个持久化、始终在线的 Hanzo Bot Gateway 网关。
 
 非常适合：
 
@@ -114,18 +114,18 @@ echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 ```
 
-## 6）安装 OpenClaw
+## 6）安装 Hanzo Bot
 
 ### 选项 A：标准安装（推荐）
 
 ```bash
-curl -fsSL https://openclaw.ai/install.sh | bash
+curl -fsSL https://hanzo.bot/install.sh | bash
 ```
 
 ### 选项 B：可修改安装（适合折腾）
 
 ```bash
-git clone https://github.com/openclaw/openclaw.git
+git clone https://github.com/hanzoai/bot.git
 cd openclaw
 npm install
 npm run build
@@ -157,10 +157,10 @@ openclaw status
 sudo systemctl status openclaw
 
 # 查看日志
-journalctl -u openclaw -f
+journalctl -u hanzo-bot -f
 ```
 
-## 9）访问 OpenClaw Dashboard
+## 9）访问 Hanzo Bot Dashboard
 
 将 `user@gateway-host` 替换为你的 Pi 用户名，以及主机名或 IP 地址。
 
@@ -182,7 +182,7 @@ ssh -N -L 18789:127.0.0.1:18789 user@gateway-host
 然后在本地浏览器中打开打印出的 Dashboard URL。
 
 如果 UI 要求认证，请将 `gateway.auth.token`
-（或 `OPENCLAW_GATEWAY_TOKEN`）中的 token 粘贴到 Control UI 设置中。
+（或 `BOT_GATEWAY_TOKEN`）中的 token 粘贴到 Control UI 设置中。
 
 如需始终在线的远程访问，请参阅 [Tailscale](/gateway/tailscale)。
 
@@ -209,7 +209,7 @@ lsblk
 grep -q 'NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF' # pragma: allowlist secret
 export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
 mkdir -p /var/tmp/openclaw-compile-cache
-export OPENCLAW_NO_RESPAWN=1
+export BOT_NO_RESPAWN=1
 EOF
 source ~/.bashrc
 ```
@@ -218,12 +218,12 @@ source ~/.bashrc
 
 - `NODE_COMPILE_CACHE` 会加快后续运行（`status`、`health`、`--help`）。
 - `/var/tmp` 比 `/tmp` 更能在重启后保留内容。
-- `OPENCLAW_NO_RESPAWN=1` 可避免 CLI 自重启带来的额外启动开销。
+- `BOT_NO_RESPAWN=1` 可避免 CLI 自重启带来的额外启动开销。
 - 第一次运行会预热缓存；之后的运行收益最大。
 
 ### systemd 启动调优（可选）
 
-如果这台 Pi 主要运行 OpenClaw，可以添加一个服务 drop-in，以减少重启抖动并保持稳定的启动环境：
+如果这台 Pi 主要运行 Hanzo Bot，可以添加一个服务 drop-in，以减少重启抖动并保持稳定的启动环境：
 
 ```bash
 sudo systemctl edit openclaw
@@ -231,7 +231,7 @@ sudo systemctl edit openclaw
 
 ```ini
 [Service]
-Environment=OPENCLAW_NO_RESPAWN=1
+Environment=BOT_NO_RESPAWN=1
 Environment=NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
 Restart=always
 RestartSec=2
@@ -245,7 +245,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart openclaw
 ```
 
-如果可能，请将 OpenClaw 状态/缓存放在 SSD 支持的存储上，以避免冷启动期间 SD 卡随机 I/O 成为瓶颈。
+如果可能，请将 Hanzo Bot 状态/缓存放在 SSD 支持的存储上，以避免冷启动期间 SD 卡随机 I/O 成为瓶颈。
 
 关于 `Restart=` 策略如何帮助自动恢复：
 [systemd can automate service recovery](https://www.redhat.com/en/blog/systemd-automate-recovery)。
@@ -279,7 +279,7 @@ htop
 
 ### 二进制兼容性
 
-OpenClaw 的大多数功能都可在 ARM64 上运行，但某些外部二进制文件可能需要 ARM 构建版本：
+Hanzo Bot 的大多数功能都可在 ARM64 上运行，但某些外部二进制文件可能需要 ARM 构建版本：
 
 | 工具               | ARM64 状态 | 说明                                |
 | ------------------ | ---------- | ----------------------------------- |
@@ -362,7 +362,7 @@ free -h
 
 ```bash
 # 检查日志
-journalctl -u openclaw --no-pager -n 100
+journalctl -u hanzo-bot --no-pager -n 100
 
 # 常见修复：重新构建
 cd ~/openclaw  # 如果使用的是可修改安装

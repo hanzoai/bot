@@ -15,7 +15,7 @@ vi.mock("@mariozechner/pi-ai/oauth", () => ({
   getOAuthProviders: () => [],
 }));
 
-import { createOpenClawCodingTools } from "./pi-tools.js";
+import { createHanzo BotCodingTools } from "./pi-tools.js";
 
 describe("FS tools with workspaceOnly=false", () => {
   let tmpDir: string;
@@ -31,7 +31,7 @@ describe("FS tools with workspaceOnly=false", () => {
     });
 
   const toolsFor = (workspaceOnly: boolean | undefined) =>
-    createOpenClawCodingTools({
+    createHanzo BotCodingTools({
       workspaceDir,
       config:
         workspaceOnly === undefined
@@ -201,7 +201,7 @@ describe("FS tools with workspaceOnly=false", () => {
     await fs.mkdir(path.dirname(allowedAbsolutePath), { recursive: true });
     await fs.writeFile(allowedAbsolutePath, "seed");
 
-    const tools = createOpenClawCodingTools({
+    const tools = createHanzo BotCodingTools({
       workspaceDir,
       trigger: "memory",
       memoryFlushWritePath: allowedRelativePath,

@@ -1,9 +1,9 @@
-import OpenClawProtocol
+import Hanzo BotProtocol
 import SwiftUI
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
-private typealias SnapshotAnyCodable = OpenClaw.AnyCodable
+private typealias SnapshotAnyCodable = Hanzo Bot.AnyCodable
 
 private let channelOrder = ["whatsapp", "telegram", "signal", "imessage"]
 private let channelLabels = [

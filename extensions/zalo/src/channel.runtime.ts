@@ -4,12 +4,12 @@ import { resolveZaloProxyFetch } from "./proxy.js";
 import {
   PAIRING_APPROVED_MESSAGE,
   type ChannelPlugin,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "./runtime-api.js";
 import { normalizeSecretInputString } from "./secret-input.js";
 import { sendMessageZalo } from "./send.js";
 
-export async function notifyZaloPairingApproval(params: { cfg: OpenClawConfig; id: string }) {
+export async function notifyZaloPairingApproval(params: { cfg: Hanzo BotConfig; id: string }) {
   const { resolveZaloAccount } = await import("./accounts.js");
   const account = resolveZaloAccount({ cfg: params.cfg });
   if (!account.token) {

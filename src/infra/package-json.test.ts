@@ -9,12 +9,12 @@ describe("package-json helpers", () => {
     await withTempDir({ prefix: "openclaw-package-json-" }, async (root) => {
       await fs.writeFile(
         path.join(root, "package.json"),
-        JSON.stringify({ version: " 1.2.3 ", name: "  @openclaw/demo  " }),
+        JSON.stringify({ version: " 1.2.3 ", name: "  @hanzo/bot-demo  " }),
         "utf8",
       );
 
       await expect(readPackageVersion(root)).resolves.toBe("1.2.3");
-      await expect(readPackageName(root)).resolves.toBe("@openclaw/demo");
+      await expect(readPackageName(root)).resolves.toBe("@hanzo/bot-demo");
     });
   });
 
@@ -37,7 +37,7 @@ describe("package-json helpers", () => {
 
       await fs.writeFile(
         path.join(root, "package.json"),
-        JSON.stringify({ version: "   ", name: "@openclaw/demo" }),
+        JSON.stringify({ version: "   ", name: "@hanzo/bot-demo" }),
         "utf8",
       );
       await expect(readPackageVersion(root)).resolves.toBeNull();

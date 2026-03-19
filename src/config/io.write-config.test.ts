@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createConfigIO } from "./io.js";
-import type { OpenClawConfig } from "./types.js";
+import type { Hanzo BotConfig } from "./types.js";
 
 describe("config io write", () => {
   let fixtureRoot = "";
@@ -172,17 +172,17 @@ describe("config io write", () => {
         logger: silentLogger,
       });
 
-      const invalidConfig: OpenClawConfig = {
+      const invalidConfig: Hanzo BotConfig = {
         channels: {
           telegram: {
             dmPolicy: "open",
             allowFrom: [],
           },
         },
-      } satisfies OpenClawConfig;
+      } satisfies Hanzo BotConfig;
 
       await expect(io.writeConfigFile(invalidConfig)).rejects.toThrow(
-        "openclaw config set channels.telegram.allowFrom '[\"*\"]'",
+        "hanzo-bot config set channels.telegram.allowFrom '[\"*\"]'",
       );
       await expect(io.writeConfigFile(invalidConfig)).rejects.toThrow(
         'openclaw config set channels.telegram.dmPolicy "pairing"',
@@ -538,9 +538,9 @@ describe("config io write", () => {
         initialConfig: { gateway: { mode: "local" } },
         gatewayPatch: { bind: "loopback" },
         env: {
-          OPENCLAW_WATCH_MODE: "1",
-          OPENCLAW_WATCH_SESSION: "watch-session-1",
-          OPENCLAW_WATCH_COMMAND: "gateway --force",
+          BOT_WATCH_MODE: "1",
+          BOT_WATCH_SESSION: "watch-session-1",
+          BOT_WATCH_COMMAND: "gateway --force",
         } as NodeJS.ProcessEnv,
       });
       expect(last.watchMode).toBe(true);

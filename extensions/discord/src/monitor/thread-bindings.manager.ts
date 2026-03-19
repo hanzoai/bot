@@ -1,6 +1,6 @@
 import { Routes } from "discord-api-types/v10";
 import { resolveThreadBindingConversationIdFromBindingId } from "openclaw/plugin-sdk/channel-runtime";
-import { getRuntimeConfigSnapshot, type OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import { getRuntimeConfigSnapshot, type Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import {
   registerSessionBindingAdapter,
   unregisterSessionBindingAdapter,
@@ -171,7 +171,7 @@ export function createThreadBindingManager(
   params: {
     accountId?: string;
     token?: string;
-    cfg?: OpenClawConfig;
+    cfg?: Hanzo BotConfig;
     persist?: boolean;
     enableSweeper?: boolean;
     idleTimeoutMs?: number;

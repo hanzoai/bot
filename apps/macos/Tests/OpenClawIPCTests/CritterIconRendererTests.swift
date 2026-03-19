@@ -1,6 +1,6 @@
 import AppKit
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @MainActor
 struct CritterIconRendererTests {

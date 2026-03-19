@@ -55,7 +55,7 @@ describe("matchesMentionWithExplicit", () => {
       },
       {
         name: "falls back to regex when explicit cannot resolve",
-        text: "openclaw please",
+        text: "hanzo-bot please",
         mentionRegexes,
         explicit: {
           hasAnyMention: true,
@@ -449,14 +449,14 @@ describe("resolveResponsePrefixTemplate", () => {
       {
         name: "identity.name",
         template: "[{identity.name}]",
-        values: { identityName: "OpenClaw" },
-        expected: "[OpenClaw]",
+        values: { identityName: "Hanzo Bot" },
+        expected: "[Hanzo Bot]",
       },
       {
         name: "identityName alias",
         template: "[{identityName}]",
-        values: { identityName: "OpenClaw" },
-        expected: "[OpenClaw]",
+        values: { identityName: "Hanzo Bot" },
+        expected: "[Hanzo Bot]",
       },
       {
         name: "case-insensitive variables",
@@ -468,12 +468,12 @@ describe("resolveResponsePrefixTemplate", () => {
         name: "all variables",
         template: "[{identity.name}] {provider}/{model} (think:{thinkingLevel})",
         values: {
-          identityName: "OpenClaw",
+          identityName: "Hanzo Bot",
           provider: "anthropic",
           model: "claude-opus-4-5",
           thinkingLevel: "high",
         },
-        expected: "[OpenClaw] anthropic/claude-opus-4-5 (think:high)",
+        expected: "[Hanzo Bot] anthropic/claude-opus-4-5 (think:high)",
       },
     ] as const;
     expectResolvedTemplateCases(cases);

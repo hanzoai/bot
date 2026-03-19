@@ -109,7 +109,7 @@ describe("channelsCapabilitiesCommand", () => {
         userToken: "xoxp-user",
         config: { userToken: "xoxp-user" },
       },
-      probe: { ok: true, bot: { name: "openclaw" }, team: { name: "team" } },
+      probe: { ok: true, bot: { name: "@hanzo/bot" }, team: { name: "team" } },
     });
     plugin.status = {
       ...plugin.status,

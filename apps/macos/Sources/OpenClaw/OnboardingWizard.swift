@@ -1,7 +1,7 @@
 import Foundation
 import Observation
-import OpenClawKit
-import OpenClawProtocol
+import Hanzo BotKit
+import Hanzo BotProtocol
 import OSLog
 import SwiftUI
 
@@ -9,10 +9,10 @@ private let onboardingWizardLogger = Logger(subsystem: "ai.openclaw", category: 
 
 // MARK: - Swift 6 AnyCodable Bridging Helpers
 
-// Bridge between OpenClawProtocol.AnyCodable and the local module to avoid
+// Bridge between Hanzo BotProtocol.AnyCodable and the local module to avoid
 // Swift 6 strict concurrency type conflicts.
 
-private typealias ProtocolAnyCodable = OpenClawProtocol.AnyCodable
+private typealias ProtocolAnyCodable = Hanzo BotProtocol.AnyCodable
 
 private func bridgeToLocal(_ value: ProtocolAnyCodable) -> AnyCodable {
     if let data = try? JSONEncoder().encode(value),
@@ -192,7 +192,7 @@ final class OnboardingWizardModel {
     }
 
     private func shouldSkipWizard() -> Bool {
-        let root = OpenClawConfigFile.loadDict()
+        let root = Hanzo BotConfigFile.loadDict()
         if let wizard = root["wizard"] as? [String: Any], !wizard.isEmpty {
             return true
         }

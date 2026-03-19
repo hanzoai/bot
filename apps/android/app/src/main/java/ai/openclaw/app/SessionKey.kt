@@ -1,4 +1,4 @@
-package ai.openclaw.app
+package ai.hanzo.bot.app
 
 internal fun normalizeMainKey(raw: String?): String {
   val trimmed = raw?.trim()

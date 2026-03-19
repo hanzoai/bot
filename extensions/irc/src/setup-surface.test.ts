@@ -28,10 +28,10 @@ describe("irc setup wizard", () => {
           return "openclaw-bot";
         }
         if (message === "IRC username") {
-          return "openclaw";
+          return "@hanzo/bot";
         }
         if (message === "IRC real name") {
-          return "OpenClaw Bot";
+          return "Hanzo Bot";
         }
         if (message.startsWith("Auto-join IRC channels")) {
           return "#openclaw, #ops";

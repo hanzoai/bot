@@ -1,4 +1,4 @@
-package ai.openclaw.app.voice
+package ai.hanzo.bot.app.voice
 
 import java.io.File
 import kotlinx.serialization.SerialName

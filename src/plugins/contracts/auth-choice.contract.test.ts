@@ -4,7 +4,7 @@ import {
   createExitThrowingRuntime,
   createWizardPrompter,
   readAuthProfilesForAgent,
-  requireOpenClawAgentDir,
+  requireHanzo BotAgentDir,
   setupAuthTestEnv,
 } from "../../../test/helpers/auth-wizard.js";
 import { clearRuntimeAuthProfileStoreSnapshots } from "../../agents/auth-profiles/store.js";
@@ -52,8 +52,8 @@ type StoredAuthProfile = {
 
 describe("provider auth-choice contract", () => {
   const lifecycle = createAuthTestLifecycle([
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_AGENT_DIR",
+    "BOT_STATE_DIR",
+    "BOT_AGENT_DIR",
     "PI_CODING_AGENT_DIR",
   ]);
   let activeStateDir: string | null = null;
@@ -170,7 +170,7 @@ describe("provider auth-choice contract", () => {
     );
 
     const stored = await readAuthProfilesForAgent<{ profiles?: Record<string, StoredAuthProfile> }>(
-      requireOpenClawAgentDir(),
+      requireHanzo BotAgentDir(),
     );
     expect(stored.profiles?.["qwen-portal:default"]).toMatchObject({
       type: "oauth",
@@ -233,7 +233,7 @@ describe("provider auth-choice contract", () => {
 
     const stored = await readAuthProfilesForAgent<{
       profiles?: Record<string, StoredAuthProfile>;
-    }>(requireOpenClawAgentDir());
+    }>(requireHanzo BotAgentDir());
     expect(stored.profiles?.["qwen-portal:default"]).toMatchObject({
       type: "oauth",
       provider: "qwen-portal",

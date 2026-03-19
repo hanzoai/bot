@@ -309,7 +309,7 @@ export const ircSetupWizard: ChannelSetupWizard = {
       initialValue: ({ cfg, accountId, credentialValues }) =>
         resolveIrcAccount({ cfg: cfg as CoreConfig, accountId }).config.username ||
         credentialValues.token ||
-        "openclaw",
+        "@hanzo/bot",
       validate: ({ value }) => (String(value ?? "").trim() ? undefined : "Required"),
       normalizeValue: ({ value }) => String(value).trim(),
       applySet: async ({ cfg, accountId, value }) =>
@@ -325,7 +325,7 @@ export const ircSetupWizard: ChannelSetupWizard = {
         resolveIrcAccount({ cfg: cfg as CoreConfig, accountId }).config.realname || undefined,
       shouldPrompt: ({ credentialValues }) => credentialValues[USE_ENV_FLAG] !== "1",
       initialValue: ({ cfg, accountId }) =>
-        resolveIrcAccount({ cfg: cfg as CoreConfig, accountId }).config.realname || "OpenClaw",
+        resolveIrcAccount({ cfg: cfg as CoreConfig, accountId }).config.realname || "Hanzo Bot",
       validate: ({ value }) => (String(value ?? "").trim() ? undefined : "Required"),
       normalizeValue: ({ value }) => String(value).trim(),
       applySet: async ({ cfg, accountId, value }) =>
@@ -436,7 +436,7 @@ export const ircSetupWizard: ChannelSetupWizard = {
     title: "IRC next steps",
     lines: [
       "Next: restart gateway and verify status.",
-      "Command: openclaw channels status --probe",
+      "Command: hanzo-bot channels status --probe",
       `Docs: ${formatDocsLink("/channels/irc", "channels/irc")}`,
     ],
   },

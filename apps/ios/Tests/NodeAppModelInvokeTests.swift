@@ -1,8 +1,8 @@
-import OpenClawKit
+import Hanzo BotKit
 import Foundation
 import Testing
 import UIKit
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 private func makeAgentDeepLinkURL(
     message: String,
@@ -12,7 +12,7 @@ private func makeAgentDeepLinkURL(
     key: String? = nil) -> URL
 {
     var components = URLComponents()
-    components.scheme = "openclaw"
+    components.scheme = "@hanzo/bot"
     components.host = "agent"
     var queryItems: [URLQueryItem] = [URLQueryItem(name: "message", value: message)]
     if deliver {
@@ -44,7 +44,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
         queuedForDelivery: false,
         transport: "sendMessage")
     var sendError: Error?
-    var lastSent: (id: String, params: OpenClawWatchNotifyParams)?
+    var lastSent: (id: String, params: Hanzo BotWatchNotifyParams)?
     private var replyHandler: (@Sendable (WatchQuickReplyEvent) -> Void)?
 
     func status() async -> WatchMessagingStatus {
@@ -55,7 +55,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
         self.replyHandler = handler
     }
 
-    func sendNotification(id: String, params: OpenClawWatchNotifyParams) async throws -> WatchNotificationSendResult {
+    func sendNotification(id: String, params: Hanzo BotWatchNotifyParams) async throws -> WatchNotificationSendResult {
         self.lastSent = (id: id, params: params)
         if let sendError = self.sendError {
             throw sendError
@@ -71,7 +71,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
 @Suite(.serialized) struct NodeAppModelInvokeTests {
     @Test @MainActor func decodeParamsFailsWithoutJSON() {
         #expect(throws: Error.self) {
-            _ = try NodeAppModel._test_decodeParams(OpenClawCanvasNavigateParams.self, from: nil)
+            _ = try NodeAppModel._test_decodeParams(Hanzo BotCanvasNavigateParams.self, from: nil)
         }
     }
 
@@ -100,7 +100,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
         let appModel = NodeAppModel()
         appModel.setScenePhase(.background)
 
-        let req = BridgeInvokeRequest(id: "bg", command: OpenClawCanvasCommand.present.rawValue)
+        let req = BridgeInvokeRequest(id: "bg", command: Hanzo BotCanvasCommand.present.rawValue)
         let res = await appModel._test_handleInvoke(req)
         #expect(res.ok == false)
         #expect(res.error?.code == .backgroundUnavailable)
@@ -108,7 +108,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
 
     @Test @MainActor func handleInvokeRejectsCameraWhenDisabled() async {
         let appModel = NodeAppModel()
-        let req = BridgeInvokeRequest(id: "cam", command: OpenClawCameraCommand.snap.rawValue)
+        let req = BridgeInvokeRequest(id: "cam", command: Hanzo BotCameraCommand.snap.rawValue)
 
         let defaults = UserDefaults.standard
         let key = "camera.enabled"
@@ -130,13 +130,13 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
 
     @Test @MainActor func handleInvokeRejectsInvalidScreenFormat() async {
         let appModel = NodeAppModel()
-        let params = OpenClawScreenRecordParams(format: "gif")
+        let params = Hanzo BotScreenRecordParams(format: "gif")
         let data = try? JSONEncoder().encode(params)
         let json = data.flatMap { String(data: $0, encoding: .utf8) }
 
         let req = BridgeInvokeRequest(
             id: "screen",
-            command: OpenClawScreenCommand.record.rawValue,
+            command: Hanzo BotScreenCommand.record.rawValue,
             paramsJSON: json)
 
         let res = await appModel._test_handleInvoke(req)
@@ -148,29 +148,29 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
         let appModel = NodeAppModel()
         appModel.screen.navigate(to: "http://example.com")
 
-        let present = BridgeInvokeRequest(id: "present", command: OpenClawCanvasCommand.present.rawValue)
+        let present = BridgeInvokeRequest(id: "present", command: Hanzo BotCanvasCommand.present.rawValue)
         let presentRes = await appModel._test_handleInvoke(present)
         #expect(presentRes.ok == true)
         #expect(appModel.screen.urlString.isEmpty)
 
         // Loopback URLs are rejected (they are not meaningful for a remote gateway).
-        let navigateParams = OpenClawCanvasNavigateParams(url: "http://example.com/")
+        let navigateParams = Hanzo BotCanvasNavigateParams(url: "http://example.com/")
         let navData = try JSONEncoder().encode(navigateParams)
         let navJSON = String(decoding: navData, as: UTF8.self)
         let navigate = BridgeInvokeRequest(
             id: "nav",
-            command: OpenClawCanvasCommand.navigate.rawValue,
+            command: Hanzo BotCanvasCommand.navigate.rawValue,
             paramsJSON: navJSON)
         let navRes = await appModel._test_handleInvoke(navigate)
         #expect(navRes.ok == true)
         #expect(appModel.screen.urlString == "http://example.com/")
 
-        let evalParams = OpenClawCanvasEvalParams(javaScript: "1+1")
+        let evalParams = Hanzo BotCanvasEvalParams(javaScript: "1+1")
         let evalData = try JSONEncoder().encode(evalParams)
         let evalJSON = String(decoding: evalData, as: UTF8.self)
         let eval = BridgeInvokeRequest(
             id: "eval",
-            command: OpenClawCanvasCommand.evalJS.rawValue,
+            command: Hanzo BotCanvasCommand.evalJS.rawValue,
             paramsJSON: evalJSON)
         let evalRes = await appModel._test_handleInvoke(eval)
         #expect(evalRes.ok == true)
@@ -181,14 +181,14 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
 
     @Test @MainActor func pendingForegroundActionsReplayCanvasNavigate() async throws {
         let appModel = NodeAppModel()
-        let navigateParams = OpenClawCanvasNavigateParams(url: "http://example.com/")
+        let navigateParams = Hanzo BotCanvasNavigateParams(url: "http://example.com/")
         let navData = try JSONEncoder().encode(navigateParams)
         let navJSON = String(decoding: navData, as: UTF8.self)
 
         await appModel._test_applyPendingForegroundNodeActions([
             (
                 id: "pending-nav-1",
-                command: OpenClawCanvasCommand.navigate.rawValue,
+                command: Hanzo BotCanvasCommand.navigate.rawValue,
                 paramsJSON: navJSON
             ),
         ])
@@ -199,14 +199,14 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     @Test @MainActor func pendingForegroundActionsDoNotApplyWhileBackgrounded() async throws {
         let appModel = NodeAppModel()
         appModel.setScenePhase(.background)
-        let navigateParams = OpenClawCanvasNavigateParams(url: "http://example.com/")
+        let navigateParams = Hanzo BotCanvasNavigateParams(url: "http://example.com/")
         let navData = try JSONEncoder().encode(navigateParams)
         let navJSON = String(decoding: navData, as: UTF8.self)
 
         await appModel._test_applyPendingForegroundNodeActions([
             (
                 id: "pending-nav-bg",
-                command: OpenClawCanvasCommand.navigate.rawValue,
+                command: Hanzo BotCanvasCommand.navigate.rawValue,
                 paramsJSON: navJSON
             ),
         ])
@@ -217,18 +217,18 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     @Test @MainActor func handleInvokeA2UICommandsFailWhenHostMissing() async throws {
         let appModel = NodeAppModel()
 
-        let reset = BridgeInvokeRequest(id: "reset", command: OpenClawCanvasA2UICommand.reset.rawValue)
+        let reset = BridgeInvokeRequest(id: "reset", command: Hanzo BotCanvasA2UICommand.reset.rawValue)
         let resetRes = await appModel._test_handleInvoke(reset)
         #expect(resetRes.ok == false)
         #expect(resetRes.error?.message.contains("A2UI_HOST_NOT_CONFIGURED") == true)
 
         let jsonl = "{\"beginRendering\":{}}"
-        let pushParams = OpenClawCanvasA2UIPushJSONLParams(jsonl: jsonl)
+        let pushParams = Hanzo BotCanvasA2UIPushJSONLParams(jsonl: jsonl)
         let pushData = try JSONEncoder().encode(pushParams)
         let pushJSON = String(decoding: pushData, as: UTF8.self)
         let push = BridgeInvokeRequest(
             id: "push",
-            command: OpenClawCanvasA2UICommand.pushJSONL.rawValue,
+            command: Hanzo BotCanvasA2UICommand.pushJSONL.rawValue,
             paramsJSON: pushJSON)
         let pushRes = await appModel._test_handleInvoke(push)
         #expect(pushRes.ok == false)
@@ -252,13 +252,13 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
             reachable: false,
             activationState: "inactive")
         let appModel = NodeAppModel(watchMessagingService: watchService)
-        let req = BridgeInvokeRequest(id: "watch-status", command: OpenClawWatchCommand.status.rawValue)
+        let req = BridgeInvokeRequest(id: "watch-status", command: Hanzo BotWatchCommand.status.rawValue)
 
         let res = await appModel._test_handleInvoke(req)
         #expect(res.ok == true)
 
         let payloadData = try #require(res.payloadJSON?.data(using: .utf8))
-        let payload = try JSONDecoder().decode(OpenClawWatchStatusPayload.self, from: payloadData)
+        let payload = try JSONDecoder().decode(Hanzo BotWatchStatusPayload.self, from: payloadData)
         #expect(payload.supported == true)
         #expect(payload.reachable == false)
         #expect(payload.activationState == "inactive")
@@ -271,25 +271,25 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
             queuedForDelivery: true,
             transport: "transferUserInfo")
         let appModel = NodeAppModel(watchMessagingService: watchService)
-        let params = OpenClawWatchNotifyParams(
-            title: "OpenClaw",
+        let params = Hanzo BotWatchNotifyParams(
+            title: "Hanzo Bot",
             body: "Meeting with Peter is at 4pm",
             priority: .timeSensitive)
         let paramsData = try JSONEncoder().encode(params)
         let paramsJSON = String(decoding: paramsData, as: UTF8.self)
         let req = BridgeInvokeRequest(
             id: "watch-notify",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: Hanzo BotWatchCommand.notify.rawValue,
             paramsJSON: paramsJSON)
 
         let res = await appModel._test_handleInvoke(req)
         #expect(res.ok == true)
-        #expect(watchService.lastSent?.params.title == "OpenClaw")
+        #expect(watchService.lastSent?.params.title == "Hanzo Bot")
         #expect(watchService.lastSent?.params.body == "Meeting with Peter is at 4pm")
         #expect(watchService.lastSent?.params.priority == .timeSensitive)
 
         let payloadData = try #require(res.payloadJSON?.data(using: .utf8))
-        let payload = try JSONDecoder().decode(OpenClawWatchNotifyPayload.self, from: payloadData)
+        let payload = try JSONDecoder().decode(Hanzo BotWatchNotifyPayload.self, from: payloadData)
         #expect(payload.deliveredImmediately == false)
         #expect(payload.queuedForDelivery == true)
         #expect(payload.transport == "transferUserInfo")
@@ -298,12 +298,12 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     @Test @MainActor func handleInvokeWatchNotifyRejectsEmptyMessage() async throws {
         let watchService = MockWatchMessagingService()
         let appModel = NodeAppModel(watchMessagingService: watchService)
-        let params = OpenClawWatchNotifyParams(title: "   ", body: "\n")
+        let params = Hanzo BotWatchNotifyParams(title: "   ", body: "\n")
         let paramsData = try JSONEncoder().encode(params)
         let paramsJSON = String(decoding: paramsData, as: UTF8.self)
         let req = BridgeInvokeRequest(
             id: "watch-notify-empty",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: Hanzo BotWatchCommand.notify.rawValue,
             paramsJSON: paramsJSON)
 
         let res = await appModel._test_handleInvoke(req)
@@ -315,7 +315,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     @Test @MainActor func handleInvokeWatchNotifyAddsDefaultActionsForPrompt() async throws {
         let watchService = MockWatchMessagingService()
         let appModel = NodeAppModel(watchMessagingService: watchService)
-        let params = OpenClawWatchNotifyParams(
+        let params = Hanzo BotWatchNotifyParams(
             title: "Task",
             body: "Action needed",
             priority: .passive,
@@ -324,7 +324,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
         let paramsJSON = String(decoding: paramsData, as: UTF8.self)
         let req = BridgeInvokeRequest(
             id: "watch-notify-default-actions",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: Hanzo BotWatchCommand.notify.rawValue,
             paramsJSON: paramsJSON)
 
         let res = await appModel._test_handleInvoke(req)
@@ -337,7 +337,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     @Test @MainActor func handleInvokeWatchNotifyAddsApprovalDefaults() async throws {
         let watchService = MockWatchMessagingService()
         let appModel = NodeAppModel(watchMessagingService: watchService)
-        let params = OpenClawWatchNotifyParams(
+        let params = Hanzo BotWatchNotifyParams(
             title: "Approval",
             body: "Allow command?",
             promptId: "prompt-approval",
@@ -346,7 +346,7 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
         let paramsJSON = String(decoding: paramsData, as: UTF8.self)
         let req = BridgeInvokeRequest(
             id: "watch-notify-approval-defaults",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: Hanzo BotWatchCommand.notify.rawValue,
             paramsJSON: paramsJSON)
 
         let res = await appModel._test_handleInvoke(req)
@@ -359,22 +359,22 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
     @Test @MainActor func handleInvokeWatchNotifyDerivesPriorityFromRiskAndCapsActions() async throws {
         let watchService = MockWatchMessagingService()
         let appModel = NodeAppModel(watchMessagingService: watchService)
-        let params = OpenClawWatchNotifyParams(
+        let params = Hanzo BotWatchNotifyParams(
             title: "Urgent",
             body: "Check now",
             risk: .high,
             actions: [
-                OpenClawWatchAction(id: "a1", label: "A1"),
-                OpenClawWatchAction(id: "a2", label: "A2"),
-                OpenClawWatchAction(id: "a3", label: "A3"),
-                OpenClawWatchAction(id: "a4", label: "A4"),
-                OpenClawWatchAction(id: "a5", label: "A5"),
+                Hanzo BotWatchAction(id: "a1", label: "A1"),
+                Hanzo BotWatchAction(id: "a2", label: "A2"),
+                Hanzo BotWatchAction(id: "a3", label: "A3"),
+                Hanzo BotWatchAction(id: "a4", label: "A4"),
+                Hanzo BotWatchAction(id: "a5", label: "A5"),
             ])
         let paramsData = try JSONEncoder().encode(params)
         let paramsJSON = String(decoding: paramsData, as: UTF8.self)
         let req = BridgeInvokeRequest(
             id: "watch-notify-derive-priority",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: Hanzo BotWatchCommand.notify.rawValue,
             paramsJSON: paramsJSON)
 
         let res = await appModel._test_handleInvoke(req)
@@ -392,12 +392,12 @@ private final class MockWatchMessagingService: @preconcurrency WatchMessagingSer
             code: 1,
             userInfo: [NSLocalizedDescriptionKey: "WATCH_UNAVAILABLE: no paired Apple Watch"])
         let appModel = NodeAppModel(watchMessagingService: watchService)
-        let params = OpenClawWatchNotifyParams(title: "OpenClaw", body: "Delivery check")
+        let params = Hanzo BotWatchNotifyParams(title: "Hanzo Bot", body: "Delivery check")
         let paramsData = try JSONEncoder().encode(params)
         let paramsJSON = String(decoding: paramsData, as: UTF8.self)
         let req = BridgeInvokeRequest(
             id: "watch-notify-fail",
-            command: OpenClawWatchCommand.notify.rawValue,
+            command: Hanzo BotWatchCommand.notify.rawValue,
             paramsJSON: paramsJSON)
 
         let res = await appModel._test_handleInvoke(req)

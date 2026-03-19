@@ -3,7 +3,7 @@ read_when:
   - 从 CLI 运行 Gateway 网关（开发或服务器）
   - 调试 Gateway 网关认证、绑定模式和连接性
   - 通过 Bonjour 发现 Gateway 网关（局域网 + tailnet）
-summary: OpenClaw Gateway 网关 CLI（`openclaw gateway`）— 运行、查询和发现 Gateway 网关
+summary: Hanzo Bot Gateway 网关 CLI（`hanzo-bot gateway`）— 运行、查询和发现 Gateway 网关
 title: gateway
 x-i18n:
   generated_at: "2026-02-03T07:45:15Z"
@@ -16,9 +16,9 @@ x-i18n:
 
 # Gateway 网关 CLI
 
-Gateway 网关是 OpenClaw 的 WebSocket 服务器（渠道、节点、会话、hooks）。
+Gateway 网关是 Hanzo Bot 的 WebSocket 服务器（渠道、节点、会话、hooks）。
 
-本页中的子命令位于 `openclaw gateway …` 下。
+本页中的子命令位于 `hanzo-bot gateway …` 下。
 
 相关文档：
 
@@ -42,7 +42,7 @@ openclaw gateway run
 
 注意事项：
 
-- 默认情况下，除非在 `~/.openclaw/openclaw.json` 中设置了 `gateway.mode=local`，否则 Gateway 网关将拒绝启动。使用 `--allow-unconfigured` 进行临时/开发运行。
+- 默认情况下，除非在 `~/.hanzoai/bot.json` 中设置了 `gateway.mode=local`，否则 Gateway 网关将拒绝启动。使用 `--allow-unconfigured` 进行临时/开发运行。
 - 在没有认证的情况下绑定到 loopback 之外的地址会被阻止（安全护栏）。
 - `SIGUSR1` 在授权时触发进程内重启（启用 `commands.restart` 或使用 gateway 工具/config apply/update）。
 - `SIGINT`/`SIGTERM` 处理程序会停止 Gateway 网关进程，但不会恢复任何自定义终端状态。如果你用 TUI 或 raw-mode 输入包装 CLI，请在退出前恢复终端。
@@ -52,8 +52,8 @@ openclaw gateway run
 - `--port <port>`：WebSocket 端口（默认来自配置/环境变量；通常为 `18789`）。
 - `--bind <loopback|lan|tailnet|auto|custom>`：监听器绑定模式。
 - `--auth <token|password>`：认证模式覆盖。
-- `--token <token>`：令牌覆盖（同时为进程设置 `OPENCLAW_GATEWAY_TOKEN`）。
-- `--password <password>`：密码覆盖（同时为进程设置 `OPENCLAW_GATEWAY_PASSWORD`）。
+- `--token <token>`：令牌覆盖（同时为进程设置 `BOT_GATEWAY_TOKEN`）。
+- `--password <password>`：密码覆盖（同时为进程设置 `BOT_GATEWAY_PASSWORD`）。
 - `--tailscale <off|serve|funnel>`：通过 Tailscale 暴露 Gateway 网关。
 - `--tailscale-reset-on-exit`：关闭时重置 Tailscale serve/funnel 配置。
 - `--allow-unconfigured`：允许在配置中没有 `gateway.mode=local` 的情况下启动 Gateway 网关。

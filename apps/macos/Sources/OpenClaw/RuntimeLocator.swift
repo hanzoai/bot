@@ -91,7 +91,7 @@ enum RuntimeLocator {
         switch error {
         case let .notFound(searchPaths):
             [
-                "openclaw needs Node >=22.16.0 but found no runtime.",
+                "hanzo-bot needs Node >=22.16.0 but found no runtime.",
                 "PATH searched: \(searchPaths.joined(separator: ":"))",
                 "Install Node: https://nodejs.org/en/download",
             ].joined(separator: "\n")

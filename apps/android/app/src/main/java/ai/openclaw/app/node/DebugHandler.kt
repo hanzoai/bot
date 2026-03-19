@@ -1,9 +1,9 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
 import android.content.Context
-import ai.openclaw.app.BuildConfig
-import ai.openclaw.app.gateway.DeviceIdentityStore
-import ai.openclaw.app.gateway.GatewaySession
+import ai.hanzo.bot.app.BuildConfig
+import ai.hanzo.bot.app.gateway.DeviceIdentityStore
+import ai.hanzo.bot.app.gateway.GatewaySession
 import kotlinx.serialization.json.JsonPrimitive
 
 class DebugHandler(

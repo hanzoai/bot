@@ -1,4 +1,4 @@
-package ai.openclaw.app.ui.chat
+package ai.hanzo.bot.app.ui.chat
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

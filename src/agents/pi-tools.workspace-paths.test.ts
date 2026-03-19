@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
-import { createOpenClawCodingTools } from "./pi-tools.js";
+import type { Hanzo BotConfig } from "../config/config.js";
+import { createHanzo BotCodingTools } from "./pi-tools.js";
 import { createHostSandboxFsBridge } from "./test-helpers/host-sandbox-fs-bridge.js";
 import { expectReadWriteEditTools, getTextContent } from "./test-helpers/pi-tools-fs-helpers.js";
 import { createPiToolsSandboxContext } from "./test-helpers/pi-tools-sandbox-context.js";
@@ -22,7 +22,7 @@ async function withTempDir<T>(prefix: string, fn: (dir: string) => Promise<T>) {
 }
 
 function createExecTool(workspaceDir: string) {
-  const tools = createOpenClawCodingTools({
+  const tools = createHanzo BotCodingTools({
     workspaceDir,
     exec: { host: "gateway", ask: "off", security: "full" },
   });
@@ -56,7 +56,7 @@ describe("workspace path resolution", () => {
       await withTempDir("openclaw-cwd-", async (otherDir) => {
         const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(otherDir);
         try {
-          const tools = createOpenClawCodingTools({ workspaceDir });
+          const tools = createHanzo BotCodingTools({ workspaceDir });
           const { readTool, writeTool, editTool } = expectReadWriteEditTools(tools);
 
           const readFile = "read.txt";
@@ -78,7 +78,7 @@ describe("workspace path resolution", () => {
           await editTool.execute("ws-edit", {
             path: editFile,
             oldText: "world",
-            newText: "openclaw",
+            newText: "@hanzo/bot",
           });
           expect(await fs.readFile(path.join(workspaceDir, editFile), "utf8")).toBe(
             "hello openclaw",
@@ -98,7 +98,7 @@ describe("workspace path resolution", () => {
 
         const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(otherDir);
         try {
-          const tools = createOpenClawCodingTools({ workspaceDir });
+          const tools = createHanzo BotCodingTools({ workspaceDir });
           const { editTool } = expectReadWriteEditTools(tools);
 
           await editTool.execute("ws-edit-delete", {
@@ -138,8 +138,8 @@ describe("workspace path resolution", () => {
 
   it("rejects @-prefixed absolute paths outside workspace when workspaceOnly is enabled", async () => {
     await withTempDir("openclaw-ws-", async (workspaceDir) => {
-      const cfg: OpenClawConfig = { tools: { fs: { workspaceOnly: true } } };
-      const tools = createOpenClawCodingTools({ workspaceDir, config: cfg });
+      const cfg: Hanzo BotConfig = { tools: { fs: { workspaceOnly: true } } };
+      const tools = createHanzo BotCodingTools({ workspaceDir, config: cfg });
       const { readTool } = expectReadWriteEditTools(tools);
 
       const outsideAbsolute = path.resolve(path.parse(workspaceDir).root, "outside-openclaw.txt");
@@ -154,8 +154,8 @@ describe("workspace path resolution", () => {
       return;
     }
     await withTempDir("openclaw-ws-", async (workspaceDir) => {
-      const cfg: OpenClawConfig = { tools: { fs: { workspaceOnly: true } } };
-      const tools = createOpenClawCodingTools({ workspaceDir, config: cfg });
+      const cfg: Hanzo BotConfig = { tools: { fs: { workspaceOnly: true } } };
+      const tools = createHanzo BotCodingTools({ workspaceDir, config: cfg });
       const { readTool, writeTool } = expectReadWriteEditTools(tools);
       const outsidePath = path.join(
         path.dirname(workspaceDir),
@@ -206,7 +206,7 @@ describe("sandboxed workspace paths", () => {
         await fs.writeFile(path.join(sandboxDir, testFile), "sandbox read", "utf8");
         await fs.writeFile(path.join(workspaceDir, testFile), "workspace read", "utf8");
 
-        const tools = createOpenClawCodingTools({ workspaceDir, sandbox });
+        const tools = createHanzo BotCodingTools({ workspaceDir, sandbox });
         const { readTool, writeTool, editTool } = expectReadWriteEditTools(tools);
 
         const result = await readTool?.execute("sbx-read", { path: testFile });

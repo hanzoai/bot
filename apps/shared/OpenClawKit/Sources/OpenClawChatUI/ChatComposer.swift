@@ -8,11 +8,11 @@ import UniformTypeIdentifiers
 #endif
 
 @MainActor
-struct OpenClawChatComposer: View {
+struct Hanzo BotChatComposer: View {
     private static let menuThinkingLevels = ["off", "low", "medium", "high"]
 
-    @Bindable var viewModel: OpenClawChatViewModel
-    let style: OpenClawChatView.Style
+    @Bindable var viewModel: Hanzo BotChatViewModel
+    let style: Hanzo BotChatView.Style
     let showsSessionSwitcher: Bool
 
     #if !os(macOS)
@@ -60,21 +60,21 @@ struct OpenClawChatComposer: View {
                         topTrailing: 0),
                     style: .continuous)
                 shape
-                    .fill(OpenClawChatTheme.composerBackground)
-                    .overlay(shape.strokeBorder(OpenClawChatTheme.composerBorder, lineWidth: 1))
+                    .fill(Hanzo BotChatTheme.composerBackground)
+                    .overlay(shape.strokeBorder(Hanzo BotChatTheme.composerBorder, lineWidth: 1))
                     .shadow(color: .black.opacity(0.12), radius: 12, y: 6)
             } else {
                 let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 shape
-                    .fill(OpenClawChatTheme.composerBackground)
-                    .overlay(shape.strokeBorder(OpenClawChatTheme.composerBorder, lineWidth: 1))
+                    .fill(Hanzo BotChatTheme.composerBackground)
+                    .overlay(shape.strokeBorder(Hanzo BotChatTheme.composerBorder, lineWidth: 1))
                     .shadow(color: .black.opacity(0.12), radius: 12, y: 6)
             }
             #else
             let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             shape
-                .fill(OpenClawChatTheme.composerBackground)
-                .overlay(shape.strokeBorder(OpenClawChatTheme.composerBorder, lineWidth: 1))
+                .fill(Hanzo BotChatTheme.composerBackground)
+                .overlay(shape.strokeBorder(Hanzo BotChatTheme.composerBorder, lineWidth: 1))
                 .shadow(color: .black.opacity(0.12), radius: 12, y: 6)
             #endif
         }
@@ -116,7 +116,7 @@ struct OpenClawChatComposer: View {
                 get: { self.viewModel.modelSelectionID },
                 set: { next in self.viewModel.selectModel(next) }))
         {
-            Text(self.viewModel.defaultModelLabel).tag(OpenClawChatViewModel.defaultModelSelectionID)
+            Text(self.viewModel.defaultModelLabel).tag(Hanzo BotChatViewModel.defaultModelSelectionID)
             ForEach(self.viewModel.modelChoices) { model in
                 Text(model.displayLabel).tag(model.selectionID)
             }
@@ -177,11 +177,11 @@ struct OpenClawChatComposer: View {
             HStack(spacing: 6) {
                 ForEach(
                     self.viewModel.attachments,
-                    id: \OpenClawPendingAttachment.id)
-                { (att: OpenClawPendingAttachment) in
+                    id: \Hanzo BotPendingAttachment.id)
+                { (att: Hanzo BotPendingAttachment) in
                     HStack(spacing: 6) {
                         if let img = att.preview {
-                            OpenClawPlatformImageFactory.image(img)
+                            Hanzo BotPlatformImageFactory.image(img)
                                 .resizable()
                                 .scaledToFill()
                                 .frame(width: 22, height: 22)
@@ -215,7 +215,7 @@ struct OpenClawChatComposer: View {
 
             if !self.isComposerCompacted {
                 Rectangle()
-                    .fill(OpenClawChatTheme.divider)
+                    .fill(Hanzo BotChatTheme.divider)
                     .frame(height: 1)
                     .padding(.horizontal, 2)
             }
@@ -232,10 +232,10 @@ struct OpenClawChatComposer: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(OpenClawChatTheme.composerField)
+                .fill(Hanzo BotChatTheme.composerField)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .strokeBorder(OpenClawChatTheme.composerBorder)))
+                        .strokeBorder(Hanzo BotChatTheme.composerBorder)))
         .padding(self.editorPadding)
     }
 
@@ -252,7 +252,7 @@ struct OpenClawChatComposer: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(OpenClawChatTheme.subtleCard)
+        .background(Hanzo BotChatTheme.subtleCard)
         .clipShape(Capsule())
     }
 
@@ -265,7 +265,7 @@ struct OpenClawChatComposer: View {
     private var editorOverlay: some View {
         ZStack(alignment: .topLeading) {
             if self.viewModel.input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Text("Message OpenClaw…")
+                Text("Message Hanzo Bot…")
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 4)
                     .padding(.vertical, 4)

@@ -338,7 +338,7 @@ describe("gateway server hooks", () => {
 
   test("dedupes hook retries even when trusted-proxy client IP changes", async () => {
     testState.hooksConfig = { enabled: true, token: HOOK_TOKEN };
-    const configPath = process.env.OPENCLAW_CONFIG_PATH;
+    const configPath = process.env.BOT_CONFIG_PATH;
     expect(configPath).toBeTruthy();
     await fs.writeFile(
       configPath!,

@@ -1,7 +1,7 @@
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 
 const sshMocks = vi.hoisted(() => ({
   createSshSandboxSessionFromSettings: vi.fn(),
@@ -25,7 +25,7 @@ vi.mock("./ssh.js", async (importOriginal) => {
 
 import { createSshSandboxBackend, sshSandboxBackendManager } from "./ssh-backend.js";
 
-function createConfig(): OpenClawConfig {
+function createConfig(): Hanzo BotConfig {
   return {
     agents: {
       defaults: {
@@ -108,7 +108,7 @@ describe("ssh sandbox backend", () => {
     );
     expect(sshMocks.runSshSandboxCommand).toHaveBeenCalledWith(
       expect.objectContaining({
-        remoteCommand: expect.stringContaining("/remote/openclaw/openclaw-ssh-agent-worker"),
+        remoteCommand: expect.stringContaining("/remote/hanzoai/bot-ssh-agent-worker"),
       }),
     );
   });
@@ -164,7 +164,7 @@ describe("ssh sandbox backend", () => {
         backend: "ssh",
         scope: "session",
         workspaceAccess: "rw",
-        workspaceRoot: "~/.openclaw/sandboxes",
+        workspaceRoot: "~/.hanzo/bot/sandboxes",
         docker: {
           image: "openclaw-sandbox:bookworm-slim",
           containerPrefix: "openclaw-sbx-",
@@ -210,7 +210,7 @@ describe("ssh sandbox backend", () => {
     expect(execSpec.argv).toEqual(
       expect.arrayContaining(["ssh", "-F", createSession().configPath, "-T", createSession().host]),
     );
-    expect(execSpec.argv.at(-1)).toContain("/remote/openclaw/openclaw-ssh-agent-worker");
+    expect(execSpec.argv.at(-1)).toContain("/remote/hanzoai/bot-ssh-agent-worker");
     expect(sshMocks.uploadDirectoryToSshTarget).toHaveBeenCalledTimes(2);
     expect(sshMocks.uploadDirectoryToSshTarget).toHaveBeenNthCalledWith(
       1,
@@ -248,7 +248,7 @@ describe("ssh sandbox backend", () => {
           backend: "ssh",
           scope: "session",
           workspaceAccess: "rw",
-          workspaceRoot: "~/.openclaw/sandboxes",
+          workspaceRoot: "~/.hanzo/bot/sandboxes",
           docker: {
             image: "img",
             containerPrefix: "prefix-",
@@ -298,7 +298,7 @@ describe("ssh sandbox backend", () => {
           backend: "ssh",
           scope: "session",
           workspaceAccess: "rw",
-          workspaceRoot: "~/.openclaw/sandboxes",
+          workspaceRoot: "~/.hanzo/bot/sandboxes",
           docker: {
             image: "img",
             containerPrefix: "prefix-",

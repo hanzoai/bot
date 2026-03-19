@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/nvidia-provider",
+  "name": "@hanzo/bot-nvidia-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw NVIDIA provider plugin",
+  "description": "Hanzo Bot NVIDIA provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

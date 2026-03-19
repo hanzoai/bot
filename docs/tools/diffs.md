@@ -181,7 +181,7 @@ Mode behavior summary:
 
 ## Plugin defaults
 
-Set plugin-wide defaults in `~/.openclaw/openclaw.json`:
+Set plugin-wide defaults in `~/.hanzoai/bot.json`:
 
 ```json5
 {
@@ -320,9 +320,9 @@ File rendering hardening:
 
 Resolution order:
 
-1. `browser.executablePath` in OpenClaw config.
+1. `browser.executablePath` in Hanzo Bot config.
 2. Environment variables:
-   - `OPENCLAW_BROWSER_EXECUTABLE_PATH`
+   - `BOT_BROWSER_EXECUTABLE_PATH`
    - `BROWSER_EXECUTABLE_PATH`
    - `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`
 3. Platform command/path discovery fallback.

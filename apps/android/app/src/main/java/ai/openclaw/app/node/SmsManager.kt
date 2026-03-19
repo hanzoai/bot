@@ -1,4 +1,4 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
 import android.Manifest
 import android.content.Context
@@ -17,7 +17,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.Serializable
-import ai.openclaw.app.PermissionRequester
+import ai.hanzo.bot.app.PermissionRequester
 
 /**
  * Sends SMS messages via the Android SMS API.

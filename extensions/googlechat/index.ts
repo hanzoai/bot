@@ -8,7 +8,7 @@ export { setGoogleChatRuntime } from "./src/runtime.js";
 export default defineChannelPluginEntry({
   id: "googlechat",
   name: "Google Chat",
-  description: "OpenClaw Google Chat channel plugin",
+  description: "Hanzo Bot Google Chat channel plugin",
   plugin: googlechatPlugin,
   setRuntime: setGoogleChatRuntime,
 });

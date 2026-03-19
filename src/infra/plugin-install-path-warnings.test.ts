@@ -65,13 +65,13 @@ describe("plugin install path warnings", () => {
       formatPluginInstallPathIssue({
         issue: issue!,
         pluginLabel: "Matrix",
-        defaultInstallCommand: "openclaw plugins install @openclaw/matrix",
-        repoInstallCommand: "openclaw plugins install ./extensions/matrix",
+        defaultInstallCommand: "hanzo-bot plugins install @hanzo/bot-matrix",
+        repoInstallCommand: "hanzo-bot plugins install ./extensions/matrix",
       }),
     ).toEqual([
       "Matrix is installed from a custom path that no longer exists: /tmp/openclaw-matrix-missing",
-      'Reinstall with "openclaw plugins install @openclaw/matrix".',
-      'If you are running from a repo checkout, you can also use "openclaw plugins install ./extensions/matrix".',
+      'Reinstall with "hanzo-bot plugins install @hanzo/bot-matrix".',
+      'If you are running from a repo checkout, you can also use "hanzo-bot plugins install ./extensions/matrix".',
     ]);
   });
 
@@ -104,14 +104,14 @@ describe("plugin install path warnings", () => {
           path: "/tmp/matrix-plugin",
         },
         pluginLabel: "Matrix",
-        defaultInstallCommand: "openclaw plugins install @openclaw/matrix",
-        repoInstallCommand: "openclaw plugins install ./extensions/matrix",
+        defaultInstallCommand: "hanzo-bot plugins install @hanzo/bot-matrix",
+        repoInstallCommand: "hanzo-bot plugins install ./extensions/matrix",
         formatCommand: (command) => `<${command}>`,
       }),
     ).toEqual([
       "Matrix is installed from a custom path: /tmp/matrix-plugin",
       "Main updates will not automatically replace that plugin with the repo's default Matrix package.",
-      'Reinstall with "<openclaw plugins install @openclaw/matrix>" when you want to return to the standard Matrix plugin.',
+      'Reinstall with "<openclaw plugins install @hanzo/bot-matrix>" when you want to return to the standard Matrix plugin.',
       'If you are intentionally running from a repo checkout, reinstall that checkout explicitly with "<openclaw plugins install ./extensions/matrix>" after updates.',
     ]);
   });

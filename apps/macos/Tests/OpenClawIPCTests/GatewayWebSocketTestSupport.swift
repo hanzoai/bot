@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 
 extension WebSocketTasking {
     /// Keep unit-test doubles resilient to protocol additions.

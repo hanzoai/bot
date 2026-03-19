@@ -12,9 +12,9 @@ import {
   setRuntimeConfigSnapshot,
   writeConfigFile,
 } from "./io.js";
-import type { OpenClawConfig } from "./types.js";
+import type { Hanzo BotConfig } from "./types.js";
 
-function createSourceConfig(): OpenClawConfig {
+function createSourceConfig(): Hanzo BotConfig {
   return {
     models: {
       providers: {
@@ -28,7 +28,7 @@ function createSourceConfig(): OpenClawConfig {
   };
 }
 
-function createRuntimeConfig(): OpenClawConfig {
+function createRuntimeConfig(): Hanzo BotConfig {
   return {
     models: {
       providers: {
@@ -64,7 +64,7 @@ describe("runtime config snapshot writes", () => {
 
   it("skips source projection for non-runtime-derived configs", async () => {
     await withTempHome("openclaw-config-runtime-projection-shape-", async () => {
-      const sourceConfig: OpenClawConfig = {
+      const sourceConfig: Hanzo BotConfig = {
         ...createSourceConfig(),
         gateway: {
           auth: {
@@ -72,7 +72,7 @@ describe("runtime config snapshot writes", () => {
           },
         },
       };
-      const runtimeConfig: OpenClawConfig = {
+      const runtimeConfig: Hanzo BotConfig = {
         ...createRuntimeConfig(),
         gateway: {
           auth: {
@@ -80,7 +80,7 @@ describe("runtime config snapshot writes", () => {
           },
         },
       };
-      const independentConfig: OpenClawConfig = {
+      const independentConfig: Hanzo BotConfig = {
         models: {
           providers: {
             openai: {
@@ -143,7 +143,7 @@ describe("runtime config snapshot writes", () => {
   it("refreshes the runtime snapshot after writes so follow-up reads see persisted changes", async () => {
     await withTempHome("openclaw-config-runtime-write-refresh-", async (home) => {
       const configPath = path.join(home, ".openclaw", "openclaw.json");
-      const sourceConfig: OpenClawConfig = {
+      const sourceConfig: Hanzo BotConfig = {
         models: {
           providers: {
             openai: {
@@ -154,7 +154,7 @@ describe("runtime config snapshot writes", () => {
           },
         },
       };
-      const runtimeConfig: OpenClawConfig = {
+      const runtimeConfig: Hanzo BotConfig = {
         models: {
           providers: {
             openai: {
@@ -165,7 +165,7 @@ describe("runtime config snapshot writes", () => {
           },
         },
       };
-      const nextRuntimeConfig: OpenClawConfig = {
+      const nextRuntimeConfig: Hanzo BotConfig = {
         ...runtimeConfig,
         gateway: { auth: { mode: "token" as const } },
       };
@@ -218,7 +218,7 @@ describe("runtime config snapshot writes", () => {
       const configPath = path.join(home, ".openclaw", "openclaw.json");
       const sourceConfig = createSourceConfig();
       const runtimeConfig = createRuntimeConfig();
-      const nextRuntimeConfig: OpenClawConfig = {
+      const nextRuntimeConfig: Hanzo BotConfig = {
         ...runtimeConfig,
         gateway: { auth: { mode: "token" as const } },
       };

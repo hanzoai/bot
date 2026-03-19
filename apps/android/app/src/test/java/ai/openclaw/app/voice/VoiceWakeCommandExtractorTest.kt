@@ -1,4 +1,4 @@
-package ai.openclaw.app.voice
+package ai.hanzo.bot.app.voice
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -7,13 +7,13 @@ import org.junit.Test
 class VoiceWakeCommandExtractorTest {
   @Test
   fun extractsCommandAfterTriggerWord() {
-    val res = VoiceWakeCommandExtractor.extractCommand("Claude take a photo", listOf("openclaw", "claude"))
+    val res = VoiceWakeCommandExtractor.extractCommand("Claude take a photo", listOf("@hanzo/bot", "claude"))
     assertEquals("take a photo", res)
   }
 
   @Test
   fun extractsCommandWithPunctuation() {
-    val res = VoiceWakeCommandExtractor.extractCommand("hey openclaw, what's the weather?", listOf("openclaw"))
+    val res = VoiceWakeCommandExtractor.extractCommand("hey openclaw, what's the weather?", listOf("@hanzo/bot"))
     assertEquals("what's the weather?", res)
   }
 

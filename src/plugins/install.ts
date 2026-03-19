@@ -48,12 +48,12 @@ type PackageManifest = PluginPackageManifest & {
 };
 
 const MISSING_EXTENSIONS_ERROR =
-  'package.json missing openclaw.extensions; update the plugin package to include openclaw.extensions (for example ["./dist/index.js"]). See https://docs.openclaw.ai/help/troubleshooting#plugin-install-fails-with-missing-openclaw-extensions';
+  'package.json missing openclaw.extensions; update the plugin package to include openclaw.extensions (for example ["./dist/index.js"]). See https://docs.hanzo.bot/help/troubleshooting#plugin-install-fails-with-missing-openclaw-extensions';
 
 export const PLUGIN_INSTALL_ERROR_CODE = {
   INVALID_NPM_SPEC: "invalid_npm_spec",
-  MISSING_OPENCLAW_EXTENSIONS: "missing_openclaw_extensions",
-  EMPTY_OPENCLAW_EXTENSIONS: "empty_openclaw_extensions",
+  MISSING_BOT_EXTENSIONS: "missing_openclaw_extensions",
+  EMPTY_BOT_EXTENSIONS: "empty_openclaw_extensions",
   NPM_PACKAGE_NOT_FOUND: "npm_package_not_found",
   PLUGIN_ID_MISMATCH: "plugin_id_mismatch",
 } as const;
@@ -148,7 +148,7 @@ function matchesExpectedPluginId(params: {
   );
 }
 
-function ensureOpenClawExtensions(params: { manifest: PackageManifest }):
+function ensureHanzo BotExtensions(params: { manifest: PackageManifest }):
   | {
       ok: true;
       entries: string[];
@@ -163,14 +163,14 @@ function ensureOpenClawExtensions(params: { manifest: PackageManifest }):
     return {
       ok: false,
       error: MISSING_EXTENSIONS_ERROR,
-      code: PLUGIN_INSTALL_ERROR_CODE.MISSING_OPENCLAW_EXTENSIONS,
+      code: PLUGIN_INSTALL_ERROR_CODE.MISSING_BOT_EXTENSIONS,
     };
   }
   if (resolved.status === "empty") {
     return {
       ok: false,
       error: "package.json openclaw.extensions is empty",
-      code: PLUGIN_INSTALL_ERROR_CODE.EMPTY_OPENCLAW_EXTENSIONS,
+      code: PLUGIN_INSTALL_ERROR_CODE.EMPTY_BOT_EXTENSIONS,
     };
   }
   return {
@@ -390,12 +390,12 @@ async function installBundleFromSourceDir(
       );
     } else if (scanSummary.warn > 0) {
       logger.warn?.(
-        `Bundle "${pluginId}" has ${scanSummary.warn} suspicious code pattern(s). Run "openclaw security audit --deep" for details.`,
+        `Bundle "${pluginId}" has ${scanSummary.warn} suspicious code pattern(s). Run "hanzo-bot security audit --deep" for details.`,
       );
     }
   } catch (err) {
     logger.warn?.(
-      `Bundle "${pluginId}" code safety scan failed (${String(err)}). Installation continues; run "openclaw security audit --deep" after install.`,
+      `Bundle "${pluginId}" code safety scan failed (${String(err)}). Installation continues; run "hanzo-bot security audit --deep" after install.`,
     );
   }
 
@@ -449,7 +449,7 @@ async function detectNativePackageInstallSource(packageDir: string): Promise<boo
 
   try {
     const manifest = await readJsonFile<PackageManifest>(manifestPath);
-    return ensureOpenClawExtensions({ manifest }).ok;
+    return ensureHanzo BotExtensions({ manifest }).ok;
   } catch {
     return false;
   }
@@ -474,7 +474,7 @@ async function installPluginFromPackageDir(
     return { ok: false, error: `invalid package.json: ${String(err)}` };
   }
 
-  const extensionsResult = ensureOpenClawExtensions({
+  const extensionsResult = ensureHanzo BotExtensions({
     manifest,
   });
   if (!extensionsResult.ok) {
@@ -556,12 +556,12 @@ async function installPluginFromPackageDir(
       );
     } else if (scanSummary.warn > 0) {
       logger.warn?.(
-        `Plugin "${pluginId}" has ${scanSummary.warn} suspicious code pattern(s). Run "openclaw security audit --deep" for details.`,
+        `Plugin "${pluginId}" has ${scanSummary.warn} suspicious code pattern(s). Run "hanzo-bot security audit --deep" for details.`,
       );
     }
   } catch (err) {
     logger.warn?.(
-      `Plugin "${pluginId}" code safety scan failed (${String(err)}). Installation continues; run "openclaw security audit --deep" after install.`,
+      `Plugin "${pluginId}" code safety scan failed (${String(err)}). Installation continues; run "hanzo-bot security audit --deep" after install.`,
     );
   }
 

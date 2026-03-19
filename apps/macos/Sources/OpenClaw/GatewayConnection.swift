@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import Hanzo BotChatUI
+import Hanzo BotKit
+import Hanzo BotProtocol
 import OSLog
 
 private let gatewayConnectionLogger = Logger(subsystem: "ai.openclaw", category: "gateway.connection")
@@ -315,7 +315,7 @@ actor GatewayConnection {
         return trimmed.isEmpty ? nil : trimmed
     }
 
-    private func sessionDefaultString(_ defaults: [String: OpenClawProtocol.AnyCodable]?, key: String) -> String {
+    private func sessionDefaultString(_ defaults: [String: Hanzo BotProtocol.AnyCodable]?, key: String) -> String {
         let raw = defaults?[key]?.value as? String
         return (raw ?? "").trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
     }
@@ -546,7 +546,7 @@ extension GatewayConnection {
 
     func healthOK(timeoutMs: Int = 8000) async throws -> Bool {
         let data = try await self.requestRaw(method: .health, timeoutMs: Double(timeoutMs))
-        return (try? self.decoder.decode(OpenClawGatewayHealthOK.self, from: data))?.ok ?? true
+        return (try? self.decoder.decode(Hanzo BotGatewayHealthOK.self, from: data))?.ok ?? true
     }
 
     // MARK: - Skills
@@ -591,13 +591,13 @@ extension GatewayConnection {
         keys: [String],
         limit: Int? = nil,
         maxChars: Int? = nil,
-        timeoutMs: Int? = nil) async throws -> OpenClawSessionsPreviewPayload
+        timeoutMs: Int? = nil) async throws -> Hanzo BotSessionsPreviewPayload
     {
         let resolvedKeys = keys
             .map { self.canonicalizeSessionKey($0) }
             .filter { !$0.isEmpty }
         if resolvedKeys.isEmpty {
-            return OpenClawSessionsPreviewPayload(ts: 0, previews: [])
+            return Hanzo BotSessionsPreviewPayload(ts: 0, previews: [])
         }
         var params: [String: AnyCodable] = ["keys": AnyCodable(resolvedKeys)]
         if let limit { params["limit"] = AnyCodable(limit) }
@@ -614,7 +614,7 @@ extension GatewayConnection {
     func chatHistory(
         sessionKey: String,
         limit: Int? = nil,
-        timeoutMs: Int? = nil) async throws -> OpenClawChatHistoryPayload
+        timeoutMs: Int? = nil) async throws -> Hanzo BotChatHistoryPayload
     {
         let resolvedKey = self.canonicalizeSessionKey(sessionKey)
         var params: [String: AnyCodable] = ["sessionKey": AnyCodable(resolvedKey)]
@@ -631,8 +631,8 @@ extension GatewayConnection {
         message: String,
         thinking: String,
         idempotencyKey: String,
-        attachments: [OpenClawChatAttachmentPayload],
-        timeoutMs: Int = 30000) async throws -> OpenClawChatSendResponse
+        attachments: [Hanzo BotChatAttachmentPayload],
+        timeoutMs: Int = 30000) async throws -> Hanzo BotChatSendResponse
     {
         let resolvedKey = self.canonicalizeSessionKey(sessionKey)
         var params: [String: AnyCodable] = [

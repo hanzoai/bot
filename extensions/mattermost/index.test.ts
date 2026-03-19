@@ -1,18 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
 import { createTestPluginApi } from "../../test/helpers/extensions/plugin-api.js";
 import plugin from "./index.js";
-import type { OpenClawPluginApi } from "./runtime-api.js";
+import type { Hanzo BotPluginApi } from "./runtime-api.js";
 
 function createApi(
-  registrationMode: OpenClawPluginApi["registrationMode"],
+  registrationMode: Hanzo BotPluginApi["registrationMode"],
   registerHttpRoute = vi.fn(),
-): OpenClawPluginApi {
+): Hanzo BotPluginApi {
   return createTestPluginApi({
     id: "mattermost",
     name: "Mattermost",
     source: "test",
     config: {},
-    runtime: {} as OpenClawPluginApi["runtime"],
+    runtime: {} as Hanzo BotPluginApi["runtime"],
     registrationMode,
     registerHttpRoute,
   });

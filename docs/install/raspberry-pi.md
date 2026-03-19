@@ -1,15 +1,15 @@
 ---
-summary: "Host OpenClaw on a Raspberry Pi for always-on self-hosting"
+summary: "Host Hanzo Bot on a Raspberry Pi for always-on self-hosting"
 read_when:
-  - Setting up OpenClaw on a Raspberry Pi
-  - Running OpenClaw on ARM devices
+  - Setting up Hanzo Bot on a Raspberry Pi
+  - Running Hanzo Bot on ARM devices
   - Building a cheap always-on personal AI
 title: "Raspberry Pi"
 ---
 
 # Raspberry Pi
 
-Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi. Since the Pi is just the gateway (models run in the cloud via API), even a modest Pi handles the workload well.
+Run a persistent, always-on Hanzo Bot Gateway on a Raspberry Pi. Since the Pi is just the gateway (models run in the cloud via API), even a modest Pi handles the workload well.
 
 ## Prerequisites
 
@@ -77,15 +77,15 @@ Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi. Since the Pi is 
 
   </Step>
 
-  <Step title="Install OpenClaw">
+  <Step title="Install Hanzo Bot">
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash
+    curl -fsSL https://hanzo.bot/install.sh | bash
     ```
   </Step>
 
   <Step title="Run onboarding">
     ```bash
-    openclaw onboard --install-daemon
+    hanzo-bot onboard --install-daemon
     ```
 
     Follow the wizard. API keys are recommended over OAuth for headless devices. Telegram is the easiest channel to start with.
@@ -94,9 +94,9 @@ Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi. Since the Pi is 
 
   <Step title="Verify">
     ```bash
-    openclaw status
+    hanzo-bot status
     sudo systemctl status openclaw
-    journalctl -u openclaw -f
+    journalctl -u hanzo-bot -f
     ```
   </Step>
 
@@ -128,7 +128,7 @@ Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi. Since the Pi is 
 grep -q 'NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF' # pragma: allowlist secret
 export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
 mkdir -p /var/tmp/openclaw-compile-cache
-export OPENCLAW_NO_RESPAWN=1
+export BOT_NO_RESPAWN=1
 EOF
 source ~/.bashrc
 ```
@@ -146,7 +146,7 @@ sudo systemctl disable bluetooth
 
 **Slow performance** -- Use a USB SSD instead of an SD card. Check for CPU throttling with `vcgencmd get_throttled` (should return `0x0`).
 
-**Service will not start** -- Check logs with `journalctl -u openclaw --no-pager -n 100` and run `openclaw doctor --non-interactive`.
+**Service will not start** -- Check logs with `journalctl -u hanzo-bot --no-pager -n 100` and run `hanzo-bot doctor --non-interactive`.
 
 **ARM binary issues** -- If a skill fails with "exec format error", check whether the binary has an ARM64 build. Verify architecture with `uname -m` (should show `aarch64`).
 
@@ -156,4 +156,4 @@ sudo systemctl disable bluetooth
 
 - [Channels](/channels) -- connect Telegram, WhatsApp, Discord, and more
 - [Gateway configuration](/gateway/configuration) -- all config options
-- [Updating](/install/updating) -- keep OpenClaw up to date
+- [Updating](/install/updating) -- keep Hanzo Bot up to date

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
   discoverAllSessions,
@@ -14,7 +14,7 @@ import {
 
 describe("session cost usage", () => {
   const withStateDir = async <T>(stateDir: string, fn: () => Promise<T>): Promise<T> =>
-    await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, fn);
+    await withEnvAsync({ BOT_STATE_DIR: stateDir }, fn);
 
   it("aggregates daily totals with log cost and pricing fallback", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cost-"));
@@ -100,7 +100,7 @@ describe("session cost usage", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as Hanzo BotConfig;
 
     await withStateDir(root, async () => {
       const summary = await loadCostUsageSummary({ days: 30, config });

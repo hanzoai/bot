@@ -4,7 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import { stageBundledPluginRuntime } from "../../scripts/stage-bundled-plugin-runtime.mjs";
-import { discoverOpenClawPlugins } from "./discovery.js";
+import { discoverHanzo BotPlugins } from "./discovery.js";
 import { loadPluginManifestRegistry } from "./manifest-registry.js";
 
 const tempDirs: string[] = [];
@@ -191,7 +191,7 @@ describe("stageBundledPluginRuntime", () => {
     fs.writeFileSync(
       path.join(distPluginDir, "package.json"),
       JSON.stringify(
-        { name: "@openclaw/diffs", openclaw: { extensions: ["./index.js"] } },
+        { name: "@hanzo/bot-diffs", openclaw: { extensions: ["./index.js"] } },
         null,
         2,
       ),
@@ -242,7 +242,7 @@ describe("stageBundledPluginRuntime", () => {
       path.join(distPluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/demo",
+          name: "@hanzo/bot-demo",
           openclaw: {
             extensions: ["./main.js"],
             setupEntry: "./setup.js",
@@ -276,9 +276,9 @@ describe("stageBundledPluginRuntime", () => {
 
     const env = {
       ...process.env,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: runtimeExtensionsDir,
+      BOT_BUNDLED_PLUGINS_DIR: runtimeExtensionsDir,
     };
-    const discovery = discoverOpenClawPlugins({
+    const discovery = discoverHanzo BotPlugins({
       env,
       cache: false,
     });

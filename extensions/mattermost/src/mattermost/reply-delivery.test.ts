@@ -2,14 +2,14 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import type { Hanzo BotConfig } from "../../runtime-api.js";
 import { deliverMattermostReplyPayload } from "./reply-delivery.js";
 
 describe("deliverMattermostReplyPayload", () => {
   it("passes agent-scoped mediaLocalRoots when sending media paths", async () => {
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
+    const previousStateDir = process.env.BOT_STATE_DIR;
     const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mm-state-"));
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.BOT_STATE_DIR = stateDir;
 
     try {
       const sendMessage = vi.fn(async () => undefined);
@@ -25,7 +25,7 @@ describe("deliverMattermostReplyPayload", () => {
 
       const agentId = "agent-1";
       const mediaUrl = `file://${path.join(stateDir, `workspace-${agentId}`, "photo.png")}`;
-      const cfg = {} satisfies OpenClawConfig;
+      const cfg = {} satisfies Hanzo BotConfig;
 
       await deliverMattermostReplyPayload({
         core,
@@ -53,9 +53,9 @@ describe("deliverMattermostReplyPayload", () => {
       );
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.BOT_STATE_DIR = previousStateDir;
       }
       await fs.rm(stateDir, { recursive: true, force: true });
     }
@@ -75,7 +75,7 @@ describe("deliverMattermostReplyPayload", () => {
 
     await deliverMattermostReplyPayload({
       core,
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies Hanzo BotConfig,
       payload: { text: "hello" },
       to: "channel:town-square",
       accountId: "default",

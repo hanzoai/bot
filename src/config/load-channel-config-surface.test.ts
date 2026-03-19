@@ -27,7 +27,7 @@ describe("loadChannelConfigSurfaceModule", () => {
     fs.mkdirSync(path.join(packageRoot, "src"), { recursive: true });
     fs.writeFileSync(
       path.join(packageRoot, "package.json"),
-      JSON.stringify({ name: "@openclaw/demo", type: "module" }, null, 2),
+      JSON.stringify({ name: "@hanzo/bot-demo", type: "module" }, null, 2),
       "utf8",
     );
     fs.writeFileSync(

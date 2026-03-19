@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { captureFullEnv } from "../test-utils/env.js";
 import { resolveSandboxContext } from "./sandbox/context.js";
 import { writeSkill } from "./skills.e2e-test-helpers.js";
@@ -34,7 +34,7 @@ describe("sandbox skill mirroring", () => {
     const bundledDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bundled-skills-"));
     await fs.mkdir(bundledDir, { recursive: true });
 
-    process.env.OPENCLAW_BUNDLED_SKILLS_DIR = bundledDir;
+    process.env.BOT_BUNDLED_SKILLS_DIR = bundledDir;
 
     const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-"));
     await writeSkill({
@@ -43,7 +43,7 @@ describe("sandbox skill mirroring", () => {
       description: "Demo skill",
     });
 
-    const cfg: OpenClawConfig = {
+    const cfg: Hanzo BotConfig = {
       agents: {
         defaults: {
           sandbox: {

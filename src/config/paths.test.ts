@@ -12,10 +12,10 @@ import {
 } from "./paths.js";
 
 describe("oauth paths", () => {
-  it("prefers OPENCLAW_OAUTH_DIR over OPENCLAW_STATE_DIR", () => {
+  it("prefers BOT_OAUTH_DIR over BOT_STATE_DIR", () => {
     const env = {
-      OPENCLAW_OAUTH_DIR: "/custom/oauth",
-      OPENCLAW_STATE_DIR: "/custom/state",
+      BOT_OAUTH_DIR: "/custom/oauth",
+      BOT_STATE_DIR: "/custom/state",
     } as NodeJS.ProcessEnv;
 
     expect(resolveOAuthDir(env, "/custom/state")).toBe(path.resolve("/custom/oauth"));
@@ -24,9 +24,9 @@ describe("oauth paths", () => {
     );
   });
 
-  it("derives oauth path from OPENCLAW_STATE_DIR when unset", () => {
+  it("derives oauth path from BOT_STATE_DIR when unset", () => {
     const env = {
-      OPENCLAW_STATE_DIR: "/custom/state",
+      BOT_STATE_DIR: "/custom/state",
     } as NodeJS.ProcessEnv;
 
     expect(resolveOAuthDir(env, "/custom/state")).toBe(path.join("/custom/state", "credentials"));
@@ -37,10 +37,10 @@ describe("oauth paths", () => {
 });
 
 describe("state + config path candidates", () => {
-  function expectOpenClawHomeDefaults(env: NodeJS.ProcessEnv): void {
-    const configuredHome = env.OPENCLAW_HOME;
+  function expectHanzo BotHomeDefaults(env: NodeJS.ProcessEnv): void {
+    const configuredHome = env.BOT_HOME;
     if (!configuredHome) {
-      throw new Error("OPENCLAW_HOME must be set for this assertion helper");
+      throw new Error("BOT_HOME must be set for this assertion helper");
     }
     const resolvedHome = path.resolve(configuredHome);
     expect(resolveStateDir(env)).toBe(path.join(resolvedHome, ".openclaw"));
@@ -49,27 +49,27 @@ describe("state + config path candidates", () => {
     expect(candidates[0]).toBe(path.join(resolvedHome, ".openclaw", "openclaw.json"));
   }
 
-  it("uses OPENCLAW_STATE_DIR when set", () => {
+  it("uses BOT_STATE_DIR when set", () => {
     const env = {
-      OPENCLAW_STATE_DIR: "/new/state",
+      BOT_STATE_DIR: "/new/state",
     } as NodeJS.ProcessEnv;
 
     expect(resolveStateDir(env, () => "/home/test")).toBe(path.resolve("/new/state"));
   });
 
-  it("uses OPENCLAW_HOME for default state/config locations", () => {
+  it("uses BOT_HOME for default state/config locations", () => {
     const env = {
-      OPENCLAW_HOME: "/srv/openclaw-home",
+      BOT_HOME: "/srv/openclaw-home",
     } as NodeJS.ProcessEnv;
-    expectOpenClawHomeDefaults(env);
+    expectHanzo BotHomeDefaults(env);
   });
 
-  it("prefers OPENCLAW_HOME over HOME for default state/config locations", () => {
+  it("prefers BOT_HOME over HOME for default state/config locations", () => {
     const env = {
-      OPENCLAW_HOME: "/srv/openclaw-home",
+      BOT_HOME: "/srv/openclaw-home",
       HOME: "/home/other",
     } as NodeJS.ProcessEnv;
-    expectOpenClawHomeDefaults(env);
+    expectHanzo BotHomeDefaults(env);
   });
 
   it("orders default config candidates in a stable order", () => {
@@ -135,7 +135,7 @@ describe("state + config path candidates", () => {
       await fs.writeFile(legacyConfig, "{}", "utf-8");
 
       const overrideDir = path.join(root, "override");
-      const env = { OPENCLAW_STATE_DIR: overrideDir } as NodeJS.ProcessEnv;
+      const env = { BOT_STATE_DIR: overrideDir } as NodeJS.ProcessEnv;
       const resolved = resolveConfigPath(env, overrideDir, () => root);
       expect(resolved).toBe(path.join(overrideDir, "openclaw.json"));
     });

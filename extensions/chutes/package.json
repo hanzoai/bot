@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/chutes-provider",
+  "name": "@hanzo/bot-chutes-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Chutes.ai provider plugin",
+  "description": "Hanzo Bot Chutes.ai provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

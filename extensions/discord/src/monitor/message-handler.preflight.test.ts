@@ -58,7 +58,7 @@ function createThreadBinding(
 }
 
 function createPreflightArgs(params: {
-  cfg: import("../../../../src/config/config.js").OpenClawConfig;
+  cfg: import("../../../../src/config/config.js").Hanzo BotConfig;
   discordConfig: DiscordConfig;
   data: DiscordMessageEvent;
   client: DiscordClient;
@@ -150,7 +150,7 @@ async function runGuildPreflight(params: {
   guildId: string;
   message: import("@buape/carbon").Message;
   discordConfig: DiscordConfig;
-  cfg?: import("../../../../src/config/config.js").OpenClawConfig;
+  cfg?: import("../../../../src/config/config.js").Hanzo BotConfig;
   guildEntries?: Parameters<typeof preflightDiscordMessage>[0]["guildEntries"];
   includeGuildObject?: boolean;
 }) {
@@ -274,7 +274,7 @@ describe("preflightDiscordMessage", () => {
       author: {
         id: "relay-bot-1",
         bot: true,
-        username: "OpenClaw",
+        username: "Hanzo Bot",
       },
     });
 
@@ -467,7 +467,7 @@ describe("preflightDiscordMessage", () => {
       createPreflightArgs({
         cfg: {
           ...DEFAULT_PREFLIGHT_CFG,
-        } as import("../../../../src/config/config.js").OpenClawConfig,
+        } as import("../../../../src/config/config.js").Hanzo BotConfig,
         discordConfig: {
           allowBots: true,
         } as DiscordConfig,
@@ -723,10 +723,10 @@ describe("preflightDiscordMessage", () => {
           ...DEFAULT_PREFLIGHT_CFG,
           messages: {
             groupChat: {
-              mentionPatterns: ["openclaw"],
+              mentionPatterns: ["@hanzo/bot"],
             },
           },
-        } as import("../../../../src/config/config.js").OpenClawConfig,
+        } as import("../../../../src/config/config.js").Hanzo BotConfig,
         discordConfig: {} as DiscordConfig,
         data: createGuildEvent({
           channelId,

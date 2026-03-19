@@ -1,4 +1,4 @@
-package ai.openclaw.app.gateway
+package ai.hanzo.bot.app.gateway
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope

@@ -1,13 +1,13 @@
 import Foundation
 
-public enum OpenClawTalkCommand: String, Codable, Sendable {
+public enum Hanzo BotTalkCommand: String, Codable, Sendable {
     case pttStart = "talk.ptt.start"
     case pttStop = "talk.ptt.stop"
     case pttCancel = "talk.ptt.cancel"
     case pttOnce = "talk.ptt.once"
 }
 
-public struct OpenClawTalkPTTStartPayload: Codable, Sendable, Equatable {
+public struct Hanzo BotTalkPTTStartPayload: Codable, Sendable, Equatable {
     public var captureId: String
 
     public init(captureId: String) {
@@ -15,7 +15,7 @@ public struct OpenClawTalkPTTStartPayload: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawTalkPTTStopPayload: Codable, Sendable, Equatable {
+public struct Hanzo BotTalkPTTStopPayload: Codable, Sendable, Equatable {
     public var captureId: String
     public var transcript: String?
     public var status: String

@@ -51,8 +51,8 @@ const RUNTIME_API_EXPORT_GUARDS: Record<string, readonly string[]> = {
     'export * from "./src/resolve-users.js";',
   ],
   "extensions/telegram/runtime-api.ts": [
-    'export type { ChannelMessageActionAdapter, ChannelPlugin, OpenClawConfig, OpenClawPluginApi, PluginRuntime, TelegramAccountConfig, TelegramActionConfig, TelegramNetworkConfig } from "openclaw/plugin-sdk/telegram";',
-    'export type { OpenClawPluginService, OpenClawPluginServiceContext, PluginLogger } from "openclaw/plugin-sdk/core";',
+    'export type { ChannelMessageActionAdapter, ChannelPlugin, Hanzo BotConfig, Hanzo BotPluginApi, PluginRuntime, TelegramAccountConfig, TelegramActionConfig, TelegramNetworkConfig } from "openclaw/plugin-sdk/telegram";',
+    'export type { Hanzo BotPluginService, Hanzo BotPluginServiceContext, PluginLogger } from "openclaw/plugin-sdk/core";',
     'export type { AcpRuntime, AcpRuntimeCapabilities, AcpRuntimeDoctorReport, AcpRuntimeEnsureInput, AcpRuntimeEvent, AcpRuntimeHandle, AcpRuntimeStatus, AcpRuntimeTurnInput, AcpRuntimeErrorCode, AcpSessionUpdateTag } from "openclaw/plugin-sdk/acp-runtime";',
     'export { AcpRuntimeError } from "openclaw/plugin-sdk/acp-runtime";',
     'export { buildTokenChannelStatusSummary, clearAccountEntryFields, DEFAULT_ACCOUNT_ID, normalizeAccountId, PAIRING_APPROVED_MESSAGE, parseTelegramTopicConversation, projectCredentialSnapshotFields, resolveConfiguredFromCredentialStatuses, resolveTelegramPollVisibility } from "openclaw/plugin-sdk/telegram";',

@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 
 struct TailscaleServeGatewayBeacon: Equatable {
     var displayName: String

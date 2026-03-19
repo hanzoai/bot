@@ -1,8 +1,8 @@
 ---
 read_when:
-  - 你想在 OpenClaw 中使用 Z.AI / GLM 模型
+  - 你想在 Hanzo Bot 中使用 Z.AI / GLM 模型
   - 你需要简单的 `ZAI_API_KEY` 设置
-summary: 在 OpenClaw 中使用 Z.AI（GLM 模型）
+summary: 在 Hanzo Bot 中使用 Z.AI（GLM 模型）
 title: Z.AI
 x-i18n:
   generated_at: "2026-03-16T06:27:34Z"
@@ -16,7 +16,7 @@ x-i18n:
 # Z.AI
 
 Z.AI 是 **GLM** 模型的 API 平台。它为 GLM 提供 REST API，并使用 API key
-进行认证。请在 Z.AI 控制台中创建你的 API key。OpenClaw 使用 `zai` 提供商
+进行认证。请在 Z.AI 控制台中创建你的 API key。Hanzo Bot 使用 `zai` 提供商
 配合 Z.AI API key。
 
 ## CLI 设置

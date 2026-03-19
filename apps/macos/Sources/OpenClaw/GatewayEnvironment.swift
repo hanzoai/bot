@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawIPC
+import Hanzo BotIPC
 import OSLog
 
 /// Lightweight SemVer helper (major.minor.patch only) for gateway compatibility checks.
@@ -74,11 +74,11 @@ enum GatewayEnvironment {
     private static let supportedBindModes: Set<String> = ["loopback", "tailnet", "lan", "auto"]
 
     static func gatewayPort() -> Int {
-        if let raw = ProcessInfo.processInfo.environment["OPENCLAW_GATEWAY_PORT"] {
+        if let raw = ProcessInfo.processInfo.environment["BOT_GATEWAY_PORT"] {
             let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
             if let parsed = Int(trimmed), parsed > 0 { return parsed }
         }
-        if let configPort = OpenClawConfigFile.gatewayPort(), configPort > 0 {
+        if let configPort = Hanzo BotConfigFile.gatewayPort(), configPort > 0 {
             return configPort
         }
         let stored = UserDefaults.standard.integer(forKey: "gatewayPort")
@@ -133,7 +133,7 @@ enum GatewayEnvironment {
                     nodeVersion: runtime.version.description,
                     gatewayVersion: nil,
                     requiredGateway: expectedString,
-                    message: "openclaw CLI not found in PATH; install the CLI.")
+                    message: "hanzo-bot CLI not found in PATH; install the CLI.")
             }
 
             let installed = gatewayBin.flatMap { self.readGatewayVersion(binary: $0) }
@@ -212,14 +212,14 @@ enum GatewayEnvironment {
         if CommandResolver.connectionModeIsRemote() {
             return nil
         }
-        if let env = ProcessInfo.processInfo.environment["OPENCLAW_GATEWAY_BIND"] {
+        if let env = ProcessInfo.processInfo.environment["BOT_GATEWAY_BIND"] {
             let trimmed = env.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             if self.supportedBindModes.contains(trimmed) {
                 return trimmed
             }
         }
 
-        let root = OpenClawConfigFile.loadDict()
+        let root = Hanzo BotConfigFile.loadDict()
         if let gateway = root["gateway"] as? [String: Any],
            let bind = gateway["bind"] as? String
         {

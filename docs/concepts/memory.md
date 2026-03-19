@@ -1,6 +1,6 @@
 ---
 title: "Memory"
-summary: "How OpenClaw memory works (workspace files + automatic memory flush)"
+summary: "How Hanzo Bot memory works (workspace files + automatic memory flush)"
 read_when:
   - You want the memory file layout and workflow
   - You want to tune the automatic pre-compaction memory flush
@@ -8,7 +8,7 @@ read_when:
 
 # Memory
 
-OpenClaw memory is **plain Markdown in the agent workspace**. The files are the
+Hanzo Bot memory is **plain Markdown in the agent workspace**. The files are the
 source of truth; the model only "remembers" what gets written to disk.
 
 Memory search tools are provided by the active memory plugin (default:
@@ -23,16 +23,16 @@ The default workspace layout uses two memory layers:
   - Read today + yesterday at session start.
 - `MEMORY.md` (optional)
   - Curated long-term memory.
-  - If both `MEMORY.md` and `memory.md` exist at the workspace root, OpenClaw only loads `MEMORY.md`.
+  - If both `MEMORY.md` and `memory.md` exist at the workspace root, Hanzo Bot only loads `MEMORY.md`.
   - Lowercase `memory.md` is only used as a fallback when `MEMORY.md` is absent.
   - **Only load in the main, private session** (never in group contexts).
 
 These files live under the workspace (`agents.defaults.workspace`, default
-`~/.openclaw/workspace`). See [Agent workspace](/concepts/agent-workspace) for the full layout.
+`~/.hanzo/bot/workspace`). See [Agent workspace](/concepts/agent-workspace) for the full layout.
 
 ## Memory tools
 
-OpenClaw exposes two agent-facing tools for these Markdown files:
+Hanzo Bot exposes two agent-facing tools for these Markdown files:
 
 - `memory_search` -- semantic recall over indexed snippets.
 - `memory_get` -- targeted read of a specific Markdown file/line range.
@@ -53,7 +53,7 @@ tool call in try/catch logic.
 
 ## Automatic memory flush (pre-compaction ping)
 
-When a session is **close to auto-compaction**, OpenClaw triggers a **silent,
+When a session is **close to auto-compaction**, Hanzo Bot triggers a **silent,
 agentic turn** that reminds the model to write durable memory **before** the
 context is compacted. The default prompts explicitly say the model _may reply_,
 but usually `NO_REPLY` is the correct response so the user never sees this turn.
@@ -93,7 +93,7 @@ For the full compaction lifecycle, see
 
 ## Vector memory search
 
-OpenClaw can build a small vector index over `MEMORY.md` and `memory/*.md` so
+Hanzo Bot can build a small vector index over `MEMORY.md` and `memory/*.md` so
 semantic queries can find related notes even when wording differs. Hybrid search
 (BM25 + vector) is available for combining semantic matching with exact keyword
 lookups.

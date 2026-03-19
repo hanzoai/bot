@@ -106,7 +106,7 @@ await build(${JSON.stringify({
         expect(module).toBeTypeOf("object");
       }
 
-      const packageDir = path.join(fixtureDir, "openclaw");
+      const packageDir = path.join(fixtureDir, "@hanzo/bot");
       const consumerDir = path.join(fixtureDir, "consumer");
       const consumerEntry = path.join(consumerDir, "import-plugin-sdk.mjs");
 
@@ -123,7 +123,7 @@ await build(${JSON.stringify({
         JSON.stringify(
           {
             exports: buildPluginSdkPackageExports(),
-            name: "openclaw",
+            name: "@hanzo/bot",
             type: "module",
           },
           null,
@@ -132,7 +132,7 @@ await build(${JSON.stringify({
       );
 
       await fs.mkdir(path.join(consumerDir, "node_modules"), { recursive: true });
-      await fs.symlink(packageDir, path.join(consumerDir, "node_modules", "openclaw"), "dir");
+      await fs.symlink(packageDir, path.join(consumerDir, "node_modules", "@hanzo/bot"), "dir");
       await fs.writeFile(
         consumerEntry,
         [

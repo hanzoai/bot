@@ -1,7 +1,7 @@
 import {
   applyProviderConfigWithDefaultModelsPreset,
   type ModelApi,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 import {
   buildQianfanProvider,
@@ -11,7 +11,7 @@ import {
 
 export const QIANFAN_DEFAULT_MODEL_REF = `qianfan/${QIANFAN_DEFAULT_MODEL_ID}`;
 
-function resolveQianfanPreset(cfg: OpenClawConfig): {
+function resolveQianfanPreset(cfg: Hanzo BotConfig): {
   api: ModelApi;
   baseUrl: string;
   defaultModels: NonNullable<ReturnType<typeof buildQianfanProvider>["models"]>;
@@ -37,7 +37,7 @@ function resolveQianfanPreset(cfg: OpenClawConfig): {
   };
 }
 
-function applyQianfanPreset(cfg: OpenClawConfig, primaryModelRef?: string): OpenClawConfig {
+function applyQianfanPreset(cfg: Hanzo BotConfig, primaryModelRef?: string): Hanzo BotConfig {
   const preset = resolveQianfanPreset(cfg);
   return applyProviderConfigWithDefaultModelsPreset(cfg, {
     providerId: "qianfan",
@@ -50,10 +50,10 @@ function applyQianfanPreset(cfg: OpenClawConfig, primaryModelRef?: string): Open
   });
 }
 
-export function applyQianfanProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyQianfanProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyQianfanPreset(cfg);
 }
 
-export function applyQianfanConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyQianfanConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyQianfanPreset(cfg, QIANFAN_DEFAULT_MODEL_REF);
 }

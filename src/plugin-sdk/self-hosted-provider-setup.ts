@@ -1,5 +1,5 @@
 export type {
-  OpenClawPluginApi,
+  Hanzo BotPluginApi,
   ProviderAuthContext,
   ProviderAuthMethodNonInteractiveContext,
   ProviderAuthResult,

@@ -6,7 +6,7 @@ import {
 } from "openclaw/plugin-sdk/agent-runtime";
 import {
   definePluginEntry,
-  type OpenClawPluginApi,
+  type Hanzo BotPluginApi,
   type ProviderAuthMethodNonInteractiveContext,
 } from "openclaw/plugin-sdk/core";
 
@@ -20,7 +20,7 @@ export default definePluginEntry({
   id: "sglang",
   name: "SGLang Provider",
   description: "Bundled SGLang provider plugin",
-  register(api: OpenClawPluginApi) {
+  register(api: Hanzo BotPluginApi) {
     api.registerProvider({
       id: PROVIDER_ID,
       label: "SGLang",

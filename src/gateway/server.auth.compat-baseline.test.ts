@@ -65,9 +65,9 @@ describe("gateway auth compatibility baseline", () => {
     let prevToken: string | undefined;
 
     beforeAll(async () => {
-      prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
+      prevToken = process.env.BOT_GATEWAY_TOKEN;
       testState.gatewayAuth = { mode: "token", token: "secret" };
-      process.env.OPENCLAW_GATEWAY_TOKEN = "secret";
+      process.env.BOT_GATEWAY_TOKEN = "secret";
       port = await getFreePort();
       server = await startGatewayServer(port);
     });
@@ -201,9 +201,9 @@ describe("gateway auth compatibility baseline", () => {
     let prevToken: string | undefined;
 
     beforeAll(async () => {
-      prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
+      prevToken = process.env.BOT_GATEWAY_TOKEN;
       testState.gatewayAuth = { mode: "password", password: "secret" };
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
+      delete process.env.BOT_GATEWAY_TOKEN;
       port = await getFreePort();
       server = await startGatewayServer(port);
     });
@@ -250,9 +250,9 @@ describe("gateway auth compatibility baseline", () => {
     let prevToken: string | undefined;
 
     beforeAll(async () => {
-      prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
+      prevToken = process.env.BOT_GATEWAY_TOKEN;
       testState.gatewayAuth = { mode: "none" };
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
+      delete process.env.BOT_GATEWAY_TOKEN;
       port = await getFreePort();
       server = await startGatewayServer(port);
     });

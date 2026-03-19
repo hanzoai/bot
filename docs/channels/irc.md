@@ -1,20 +1,20 @@
 ---
 title: IRC
-description: Connect OpenClaw to IRC channels and direct messages.
+description: Connect Hanzo Bot to IRC channels and direct messages.
 summary: "IRC plugin setup, access controls, and troubleshooting"
 read_when:
-  - You want to connect OpenClaw to IRC channels or DMs
+  - You want to connect Hanzo Bot to IRC channels or DMs
   - You are configuring IRC allowlists, group policy, or mention gating
 ---
 
 # IRC
 
-Use IRC when you want OpenClaw in classic channels (`#room`) and direct messages.
+Use IRC when you want Hanzo Bot in classic channels (`#room`) and direct messages.
 IRC ships as an extension plugin, but it is configured in the main config under `channels.irc`.
 
 ## Quick start
 
-1. Enable IRC config in `~/.openclaw/openclaw.json`.
+1. Enable IRC config in `~/.hanzoai/bot.json`.
 2. Set at least:
 
 ```json5
@@ -90,7 +90,7 @@ Example (allow anyone in `#tuirc-dev` to talk to the bot):
 
 ## Reply triggering (mentions)
 
-Even if a channel is allowed (via `groupPolicy` + `groups`) and the sender is allowed, OpenClaw defaults to **mention-gating** in group contexts.
+Even if a channel is allowed (via `groupPolicy` + `groups`) and the sender is allowed, Hanzo Bot defaults to **mention-gating** in group contexts.
 
 That means you may see logs like `drop channel … (missing-mention)` unless the message includes a mention pattern that matches the bot.
 

@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { withEnvAsync } from "../test-utils/env.js";
 import "./test-helpers/fast-core-tools.js";
-import { createOpenClawTools } from "./openclaw-tools.js";
+import { createHanzo BotTools } from "./openclaw-tools.js";
 
 vi.mock("./tools/gateway.js", () => ({
   callGatewayTool: vi.fn(async (method: string) => {
@@ -38,7 +38,7 @@ vi.mock("./tools/gateway.js", () => ({
 }));
 
 function requireGatewayTool(agentSessionKey?: string) {
-  const tool = createOpenClawTools({
+  const tool = createHanzo BotTools({
     ...(agentSessionKey ? { agentSessionKey } : {}),
     config: { commands: { restart: true } },
   }).find((candidate) => candidate.name === "gateway");
@@ -84,7 +84,7 @@ describe("gateway tool", () => {
 
     try {
       await withEnvAsync(
-        { OPENCLAW_STATE_DIR: stateDir, OPENCLAW_PROFILE: "isolated" },
+        { BOT_STATE_DIR: stateDir, BOT_PROFILE: "isolated" },
         async () => {
           const tool = requireGatewayTool();
 
@@ -106,7 +106,7 @@ describe("gateway tool", () => {
           };
           expect(parsed.payload?.kind).toBe("restart");
           expect(parsed.payload?.doctorHint).toBe(
-            "Run: openclaw --profile isolated doctor --non-interactive",
+            "Run: hanzo-bot --profile isolated doctor --non-interactive",
           );
 
           expect(kill).not.toHaveBeenCalled();

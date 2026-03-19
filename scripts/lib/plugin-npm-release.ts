@@ -158,9 +158,9 @@ export function collectPublishablePluginPackageErrors(
   const packageVersion = packageJson.version?.trim() ?? "";
   const extensions = packageJson.openclaw?.extensions ?? [];
 
-  if (!packageName.startsWith("@openclaw/")) {
+  if (!packageName.startsWith("@hanzo/bot-")) {
     errors.push(
-      `package name must start with "@openclaw/"; found "${packageName || "<missing>"}".`,
+      `package name must start with "@hanzo/bot-"; found "${packageName || "<missing>"}".`,
     );
   }
   if (packageJson.private === true) {

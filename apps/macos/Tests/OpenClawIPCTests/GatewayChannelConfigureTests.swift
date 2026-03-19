@@ -1,8 +1,8 @@
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 import os
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct GatewayConnectionTests {
     private func makeConnection(

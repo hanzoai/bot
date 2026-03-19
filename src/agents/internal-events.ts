@@ -54,7 +54,7 @@ export function formatAgentInternalEventsForPrompt(events?: AgentInternalEvent[]
     return "";
   }
   return [
-    "OpenClaw runtime context (internal):",
+    "Hanzo Bot runtime context (internal):",
     "This context is runtime-generated, not user-authored. Keep internal details private.",
     "",
     blocks.join("\n\n---\n\n"),

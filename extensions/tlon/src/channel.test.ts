@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../api.js";
+import type { Hanzo BotConfig } from "../api.js";
 import { tlonPlugin } from "./channel.js";
 
 describe("tlonPlugin config", () => {
   it("formats dm allowlist entries through the shared hybrid adapter", () => {
     expect(
       tlonPlugin.config.formatAllowFrom?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as Hanzo BotConfig,
         allowFrom: ["zod", " ~nec "],
       }),
     ).toEqual(["~zod", "~nec"]);
@@ -24,7 +24,7 @@ describe("tlonPlugin config", () => {
               dmAllowlist: ["~zod"],
             },
           },
-        } as OpenClawConfig,
+        } as Hanzo BotConfig,
         accountId: "default",
       }),
     ).toEqual(["~zod"]);

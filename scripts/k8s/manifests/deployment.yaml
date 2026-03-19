@@ -29,9 +29,9 @@ spec:
             - sh
             - -c
             - |
-              cp /config/openclaw.json /home/node/.openclaw/openclaw.json
-              mkdir -p /home/node/.openclaw/workspace
-              cp /config/AGENTS.md /home/node/.openclaw/workspace/AGENTS.md
+              cp /config/openclaw.json /home/node/.hanzoai/bot.json
+              mkdir -p /home/node/.hanzo/bot/workspace
+              cp /config/AGENTS.md /home/node/.hanzo/bot/workspace/AGENTS.md
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -49,7 +49,7 @@ spec:
               mountPath: /config
       containers:
         - name: gateway
-          image: ghcr.io/openclaw/openclaw:slim
+          image: ghcr.io/hanzoai/bot:slim
           imagePullPolicy: IfNotPresent
           command:
             - node
@@ -63,15 +63,15 @@ spec:
           env:
             - name: HOME
               value: /home/node
-            - name: OPENCLAW_CONFIG_DIR
+            - name: BOT_CONFIG_DIR
               value: /home/node/.openclaw
             - name: NODE_ENV
               value: production
-            - name: OPENCLAW_GATEWAY_TOKEN
+            - name: BOT_GATEWAY_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: openclaw-secrets
-                  key: OPENCLAW_GATEWAY_TOKEN
+                  key: BOT_GATEWAY_TOKEN
             - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:

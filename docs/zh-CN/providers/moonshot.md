@@ -174,9 +174,9 @@ Moonshot Kimi 支持二元原生 thinking：
 }
 ```
 
-OpenClaw 还会为 Moonshot 映射运行时 `/think` 级别：
+Hanzo Bot 还会为 Moonshot 映射运行时 `/think` 级别：
 
 - `/think off` -> `thinking.type=disabled`
 - 任何非 off 的 thinking 级别 -> `thinking.type=enabled`
 
-当启用 Moonshot thinking 时，`tool_choice` 必须为 `auto` 或 `none`。为保持兼容性，OpenClaw 会将不兼容的 `tool_choice` 值标准化为 `auto`。
+当启用 Moonshot thinking 时，`tool_choice` 必须为 `auto` 或 `none`。为保持兼容性，Hanzo Bot 会将不兼容的 `tool_choice` 值标准化为 `auto`。

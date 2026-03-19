@@ -1,9 +1,9 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized)
-struct OpenClawConfigFileTests {
+struct Hanzo BotConfigFileTests {
     private func makeConfigOverridePath() -> String {
         FileManager().temporaryDirectory
             .appendingPathComponent("openclaw-config-\(UUID().uuidString)")
@@ -15,8 +15,8 @@ struct OpenClawConfigFileTests {
     func `config path respects env override`() async {
         let override = self.makeConfigOverridePath()
 
-        await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
-            #expect(OpenClawConfigFile.url().path == override)
+        await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
+            #expect(Hanzo BotConfigFile.url().path == override)
         }
     }
 
@@ -25,18 +25,18 @@ struct OpenClawConfigFileTests {
     func `remote gateway port parses and matches host`() async {
         let override = self.makeConfigOverridePath()
 
-        await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
-            OpenClawConfigFile.saveDict([
+        await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
+            Hanzo BotConfigFile.saveDict([
                 "gateway": [
                     "remote": [
                         "url": "ws://gateway.ts.net:19999",
                     ],
                 ],
             ])
-            #expect(OpenClawConfigFile.remoteGatewayPort() == 19999)
-            #expect(OpenClawConfigFile.remoteGatewayPort(matchingHost: "gateway.ts.net") == 19999)
-            #expect(OpenClawConfigFile.remoteGatewayPort(matchingHost: "gateway") == 19999)
-            #expect(OpenClawConfigFile.remoteGatewayPort(matchingHost: "other.ts.net") == nil)
+            #expect(Hanzo BotConfigFile.remoteGatewayPort() == 19999)
+            #expect(Hanzo BotConfigFile.remoteGatewayPort(matchingHost: "gateway.ts.net") == 19999)
+            #expect(Hanzo BotConfigFile.remoteGatewayPort(matchingHost: "gateway") == 19999)
+            #expect(Hanzo BotConfigFile.remoteGatewayPort(matchingHost: "other.ts.net") == nil)
         }
     }
 
@@ -45,16 +45,16 @@ struct OpenClawConfigFileTests {
     func `set remote gateway url preserves scheme`() async {
         let override = self.makeConfigOverridePath()
 
-        await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
-            OpenClawConfigFile.saveDict([
+        await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
+            Hanzo BotConfigFile.saveDict([
                 "gateway": [
                     "remote": [
                         "url": "wss://old-host:111",
                     ],
                 ],
             ])
-            OpenClawConfigFile.setRemoteGatewayUrl(host: "new-host", port: 2222)
-            let root = OpenClawConfigFile.loadDict()
+            Hanzo BotConfigFile.setRemoteGatewayUrl(host: "new-host", port: 2222)
+            let root = Hanzo BotConfigFile.loadDict()
             let url = ((root["gateway"] as? [String: Any])?["remote"] as? [String: Any])?["url"] as? String
             #expect(url == "wss://new-host:2222")
         }
@@ -65,8 +65,8 @@ struct OpenClawConfigFileTests {
     func `clear remote gateway url removes only url field`() async {
         let override = self.makeConfigOverridePath()
 
-        await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
-            OpenClawConfigFile.saveDict([
+        await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
+            Hanzo BotConfigFile.saveDict([
                 "gateway": [
                     "remote": [
                         "url": "wss://old-host:111",
@@ -74,8 +74,8 @@ struct OpenClawConfigFileTests {
                     ],
                 ],
             ])
-            OpenClawConfigFile.clearRemoteGatewayUrl()
-            let root = OpenClawConfigFile.loadDict()
+            Hanzo BotConfigFile.clearRemoteGatewayUrl()
+            let root = Hanzo BotConfigFile.loadDict()
             let remote = ((root["gateway"] as? [String: Any])?["remote"] as? [String: Any]) ?? [:]
             #expect((remote["url"] as? String) == nil)
             #expect((remote["token"] as? String) == "tok")
@@ -89,11 +89,11 @@ struct OpenClawConfigFileTests {
             .path
 
         await TestIsolation.withEnvValues([
-            "OPENCLAW_CONFIG_PATH": nil,
-            "OPENCLAW_STATE_DIR": dir,
+            "BOT_CONFIG_PATH": nil,
+            "BOT_STATE_DIR": dir,
         ]) {
-            #expect(OpenClawConfigFile.stateDirURL().path == dir)
-            #expect(OpenClawConfigFile.url().path == "\(dir)/openclaw.json")
+            #expect(Hanzo BotConfigFile.stateDirURL().path == dir)
+            #expect(Hanzo BotConfigFile.url().path == "\(dir)/openclaw.json")
         }
     }
 
@@ -108,10 +108,10 @@ struct OpenClawConfigFileTests {
         defer { try? FileManager().removeItem(at: stateDir) }
 
         try await TestIsolation.withEnvValues([
-            "OPENCLAW_STATE_DIR": stateDir.path,
-            "OPENCLAW_CONFIG_PATH": configPath.path,
+            "BOT_STATE_DIR": stateDir.path,
+            "BOT_CONFIG_PATH": configPath.path,
         ]) {
-            OpenClawConfigFile.saveDict([
+            Hanzo BotConfigFile.saveDict([
                 "gateway": ["mode": "local"],
             ])
 

@@ -1,6 +1,6 @@
 ---
 read_when:
-  - 你想在 OpenClaw 中使用 Together AI
+  - 你想在 Hanzo Bot 中使用 Together AI
   - 你需要 API 密钥环境变量或 CLI 身份验证选项
 summary: Together AI 设置（身份验证 + 模型选择）
 x-i18n:
@@ -54,7 +54,7 @@ openclaw onboard --non-interactive \
 ## 环境说明
 
 如果 Gateway 网关作为守护进程运行（launchd/systemd），请确保 `TOGETHER_API_KEY`
-对该进程可用（例如在 `~/.openclaw/.env` 中，或通过
+对该进程可用（例如在 `~/.hanzo/bot/.env` 中，或通过
 `env.shellEnv`）。
 
 ## 可用模型

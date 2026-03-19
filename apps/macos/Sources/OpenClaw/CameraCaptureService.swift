@@ -1,8 +1,8 @@
 import AVFoundation
 import CoreGraphics
 import Foundation
-import OpenClawIPC
-import OpenClawKit
+import Hanzo BotIPC
+import Hanzo BotKit
 import OSLog
 
 actor CameraCaptureService {

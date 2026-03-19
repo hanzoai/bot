@@ -1,4 +1,4 @@
-import OpenClawProtocol
+import Hanzo BotProtocol
 import Foundation
 
 public enum GatewayConnectAuthDetailCode: String, Sendable {

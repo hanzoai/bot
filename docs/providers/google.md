@@ -2,7 +2,7 @@
 title: "Google (Gemini)"
 summary: "Google Gemini setup (API key + OAuth, image generation, media understanding, web search)"
 read_when:
-  - You want to use Google Gemini models with OpenClaw
+  - You want to use Google Gemini models with Hanzo Bot
   - You need the API key or OAuth auth flow
 ---
 
@@ -54,8 +54,8 @@ restrictions. Use at your own risk.
 
 Environment variables:
 
-- `OPENCLAW_GEMINI_OAUTH_CLIENT_ID`
-- `OPENCLAW_GEMINI_OAUTH_CLIENT_SECRET`
+- `BOT_GEMINI_OAUTH_CLIENT_ID`
+- `BOT_GEMINI_OAUTH_CLIENT_SECRET`
 
 (Or the `GEMINI_CLI_*` variants.)
 
@@ -74,5 +74,5 @@ Environment variables:
 ## Environment note
 
 If the Gateway runs as a daemon (launchd/systemd), make sure `GEMINI_API_KEY`
-is available to that process (for example, in `~/.openclaw/.env` or via
+is available to that process (for example, in `~/.hanzo/bot/.env` or via
 `env.shellEnv`).

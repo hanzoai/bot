@@ -59,4 +59,4 @@ When using the native Perplexity API (`pplx-` key), searches support:
 
 If the Gateway runs as a daemon (launchd/systemd), make sure
 `PERPLEXITY_API_KEY` is available to that process (for example, in
-`~/.openclaw/.env` or via `env.shellEnv`).
+`~/.hanzo/bot/.env` or via `env.shellEnv`).

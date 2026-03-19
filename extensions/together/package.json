@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/together-provider",
+  "name": "@hanzo/bot-together-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Together provider plugin",
+  "description": "Hanzo Bot Together provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]
