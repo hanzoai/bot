@@ -417,7 +417,7 @@ function collectGatewayConfigFindings(
       ? tokenConfigured
       : explicitAuthMode === "password"
         ? passwordConfigured
-        : explicitAuthMode === "none" || explicitAuthMode === "trusted-proxy"
+        : explicitAuthMode === "none" || explicitAuthMode === "trusted-proxy" || explicitAuthMode === "iam"
           ? false
           : tokenConfigured || passwordConfigured;
   const hasTailscaleAuth = auth.allowTailscale && tailscaleMode === "serve";
@@ -536,7 +536,8 @@ function collectGatewayConfigFindings(
       (proxy) => !isStrictLoopbackTrustedProxyEntry(proxy),
     );
     const exposed =
-      bind !== "loopback" || (auth.mode === "trusted-proxy" && hasNonLoopbackTrustedProxy);
+      bind !== "loopback" ||
+      ((auth.mode === "trusted-proxy" || auth.mode === "iam") && hasNonLoopbackTrustedProxy);
     findings.push({
       checkId: "gateway.real_ip_fallback_enabled",
       severity: exposed ? "critical" : "warn",

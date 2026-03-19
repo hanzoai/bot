@@ -120,7 +120,7 @@ export type GatewayControlUiConfig = {
   dangerouslyDisableDeviceAuth?: boolean;
 };
 
-export type GatewayAuthMode = "none" | "token" | "password" | "trusted-proxy";
+export type GatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
 
 /**
  * Configuration for trusted reverse proxy authentication.
@@ -147,6 +147,21 @@ export type GatewayTrustedProxyConfig = {
   allowUsers?: string[];
 };
 
+/**
+ * Configuration for Hanzo IAM (hanzo.id) JWT authentication.
+ * Used when gateway auth mode is "iam".
+ */
+export type GatewayIAMAuthConfig = {
+  /** OIDC issuer URL. Default: "https://hanzo.id". */
+  issuer?: string;
+  /** Expected JWT audience claim. Default: "hanzo-bot". */
+  audience?: string;
+  /** JWKS endpoint for key retrieval. Default: "https://hanzo.id/.well-known/jwks.json". */
+  jwksUri?: string;
+  /** Application name for display/logging. */
+  appName?: string;
+};
+
 export type GatewayAuthConfig = {
   /** Authentication mode for Gateway connections. Defaults to token when unset. */
   mode?: GatewayAuthMode;
@@ -163,6 +178,11 @@ export type GatewayAuthConfig = {
    * Required when mode is "trusted-proxy".
    */
   trustedProxy?: GatewayTrustedProxyConfig;
+  /**
+   * Configuration for IAM (hanzo.id) JWT auth mode.
+   * Optional overrides for issuer, audience, and JWKS endpoint.
+   */
+  iam?: GatewayIAMAuthConfig;
 };
 
 export type GatewayAuthRateLimitConfig = {

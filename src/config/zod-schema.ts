@@ -684,6 +684,7 @@ export const Hanzo BotSchema = z
                 z.literal("token"),
                 z.literal("password"),
                 z.literal("trusted-proxy"),
+                z.literal("iam"),
               ])
               .optional(),
             token: SecretInputSchema.optional().register(sensitive),
@@ -703,6 +704,15 @@ export const Hanzo BotSchema = z
                 userHeader: z.string().min(1, "userHeader is required for trusted-proxy mode"),
                 requiredHeaders: z.array(z.string()).optional(),
                 allowUsers: z.array(z.string()).optional(),
+              })
+              .strict()
+              .optional(),
+            iam: z
+              .object({
+                issuer: z.string().optional(),
+                audience: z.string().optional(),
+                jwksUri: z.string().optional(),
+                appName: z.string().optional(),
               })
               .strict()
               .optional(),
