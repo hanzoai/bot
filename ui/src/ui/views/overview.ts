@@ -58,6 +58,18 @@ export type OverviewProps = {
   onRefreshLogs: () => void;
 };
 
+function resolveBillingTierLabel(
+  authMode: "none" | "token" | "password" | "trusted-proxy" | undefined,
+): string {
+  if (authMode === "trusted-proxy") {
+    return "Enterprise";
+  }
+  if (authMode === "token" || authMode === "password") {
+    return "Pro";
+  }
+  return "Free";
+}
+
 export function renderOverview(props: OverviewProps) {
   const snapshot = props.hello?.snapshot as
     | {
@@ -195,6 +207,26 @@ export function renderOverview(props: OverviewProps) {
     : i18n.getLocale();
 
   return html`
+    ${
+      !props.connected
+        ? html`
+            <section class="grid" style="margin-bottom: 18px;">
+              <div class="card" style="text-align: center; padding: 32px 24px;">
+                <div class="card-title" style="font-size: 20px; margin-bottom: 8px;">Get started with Hanzo Bot</div>
+                <div class="card-sub" style="margin-bottom: 16px;">AI-powered multi-channel gateway with extensible messaging.</div>
+                <a
+                  class="btn primary"
+                  href="https://hanzo.id/signup"
+                  target="_blank"
+                  rel="noreferrer"
+                  style="display: inline-block; text-decoration: none; padding: 10px 28px; font-size: 15px;"
+                >Try Hanzo</a>
+              </div>
+            </section>
+          `
+        : nothing
+    }
+
     <section class="grid">
       <div class="card">
         <div class="card-title">${t("overview.access.title")}</div>
@@ -360,6 +392,10 @@ export function renderOverview(props: OverviewProps) {
             <div class="stat-value">
               ${props.lastChannelsRefresh ? formatRelativeTimestamp(props.lastChannelsRefresh) : t("common.na")}
             </div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Billing Tier</div>
+            <div class="stat-value">${resolveBillingTierLabel(authMode)}</div>
           </div>
         </div>
         ${
