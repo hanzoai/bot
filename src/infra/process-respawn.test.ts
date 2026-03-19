@@ -3,14 +3,14 @@ import { captureFullEnv } from "../test-utils/env.js";
 import { SUPERVISOR_HINT_ENV_VARS } from "./supervisor-markers.js";
 
 const spawnMock = vi.hoisted(() => vi.fn());
-const triggerHanzo BotRestartMock = vi.hoisted(() => vi.fn());
+const triggerHanzoBotRestartMock = vi.hoisted(() => vi.fn());
 const scheduleDetachedLaunchdRestartHandoffMock = vi.hoisted(() => vi.fn());
 
 vi.mock("node:child_process", () => ({
   spawn: (...args: unknown[]) => spawnMock(...args),
 }));
 vi.mock("./restart.js", () => ({
-  triggerHanzo BotRestart: (...args: unknown[]) => triggerHanzo BotRestartMock(...args),
+  triggerHanzoBotRestart: (...args: unknown[]) => triggerHanzoBotRestartMock(...args),
 }));
 vi.mock("../daemon/launchd-restart-handoff.js", () => ({
   scheduleDetachedLaunchdRestartHandoff: (...args: unknown[]) =>
@@ -39,7 +39,7 @@ afterEach(() => {
   process.argv = [...originalArgv];
   process.execArgv = [...originalExecArgv];
   spawnMock.mockClear();
-  triggerHanzo BotRestartMock.mockClear();
+  triggerHanzoBotRestartMock.mockClear();
   scheduleDetachedLaunchdRestartHandoffMock.mockReset();
   scheduleDetachedLaunchdRestartHandoffMock.mockReturnValue({ ok: true, pid: 8123 });
   if (originalPlatformDescriptor) {
@@ -72,7 +72,7 @@ function expectLaunchdSupervisedWithoutKickstart(params?: {
     mode: "start-after-exit",
     waitForPid: process.pid,
   });
-  expect(triggerHanzo BotRestartMock).not.toHaveBeenCalled();
+  expect(triggerHanzoBotRestartMock).not.toHaveBeenCalled();
   expect(spawnMock).not.toHaveBeenCalled();
 }
 
@@ -96,12 +96,12 @@ describe("restartGatewayProcessWithFreshPid", () => {
     expectLaunchdSupervisedWithoutKickstart({ launchJobLabel: "ai.hanzo.bot.gateway" });
   });
 
-  it("launchd supervisor never returns failed regardless of triggerHanzo BotRestart outcome", () => {
+  it("launchd supervisor never returns failed regardless of triggerHanzoBotRestart outcome", () => {
     clearSupervisorHints();
     setPlatform("darwin");
     process.env.BOT_LAUNCHD_LABEL = "ai.hanzo.bot.gateway";
-    // Even if triggerHanzo BotRestart *would* fail, launchd path must not call it.
-    triggerHanzo BotRestartMock.mockReturnValue({
+    // Even if triggerHanzoBotRestart *would* fail, launchd path must not call it.
+    triggerHanzoBotRestartMock.mockReturnValue({
       ok: false,
       method: "launchctl",
       detail: "Bootstrap failed: 5: Input/output error",
@@ -109,7 +109,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
     const result = restartGatewayProcessWithFreshPid();
     expect(result.mode).toBe("supervised");
     expect(result.mode).not.toBe("failed");
-    expect(triggerHanzo BotRestartMock).not.toHaveBeenCalled();
+    expect(triggerHanzoBotRestartMock).not.toHaveBeenCalled();
   });
 
   it("falls back to plain supervised exit when launchd handoff scheduling fails", () => {
@@ -127,7 +127,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
       mode: "supervised",
       detail: "launchd exit fallback (spawn failed)",
     });
-    expect(triggerHanzo BotRestartMock).not.toHaveBeenCalled();
+    expect(triggerHanzoBotRestartMock).not.toHaveBeenCalled();
     expect(spawnMock).not.toHaveBeenCalled();
   });
 
@@ -139,7 +139,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
     const result = restartGatewayProcessWithFreshPid();
 
     expect(result.mode).toBe("supervised");
-    expect(triggerHanzo BotRestartMock).not.toHaveBeenCalled();
+    expect(triggerHanzoBotRestartMock).not.toHaveBeenCalled();
     expect(spawnMock).not.toHaveBeenCalled();
   });
 
@@ -149,7 +149,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
     process.env.XPC_SERVICE_NAME = "ai.hanzo.bot.gateway";
     const result = restartGatewayProcessWithFreshPid();
     expect(result.mode).toBe("supervised");
-    expect(triggerHanzo BotRestartMock).not.toHaveBeenCalled();
+    expect(triggerHanzoBotRestartMock).not.toHaveBeenCalled();
     expect(spawnMock).not.toHaveBeenCalled();
   });
 
@@ -193,10 +193,10 @@ describe("restartGatewayProcessWithFreshPid", () => {
     setPlatform("win32");
     process.env.BOT_SERVICE_MARKER = "@hanzo/bot";
     process.env.BOT_SERVICE_KIND = "gateway";
-    triggerHanzo BotRestartMock.mockReturnValue({ ok: true, method: "schtasks" });
+    triggerHanzoBotRestartMock.mockReturnValue({ ok: true, method: "schtasks" });
     const result = restartGatewayProcessWithFreshPid();
     expect(result.mode).toBe("supervised");
-    expect(triggerHanzo BotRestartMock).toHaveBeenCalledOnce();
+    expect(triggerHanzoBotRestartMock).toHaveBeenCalledOnce();
     expect(spawnMock).not.toHaveBeenCalled();
   });
 
@@ -210,7 +210,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
     const result = restartGatewayProcessWithFreshPid();
 
     expect(result).toEqual({ mode: "spawned", pid: 4242 });
-    expect(triggerHanzo BotRestartMock).not.toHaveBeenCalled();
+    expect(triggerHanzoBotRestartMock).not.toHaveBeenCalled();
   });
 
   it("returns disabled on Windows without Scheduled Task markers", () => {
@@ -235,7 +235,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
     const result = restartGatewayProcessWithFreshPid();
 
     expect(result.mode).toBe("disabled");
-    expect(triggerHanzo BotRestartMock).not.toHaveBeenCalled();
+    expect(triggerHanzoBotRestartMock).not.toHaveBeenCalled();
     expect(spawnMock).not.toHaveBeenCalled();
   });
 

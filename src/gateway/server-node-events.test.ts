@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { loadSessionEntry as loadSessionEntryType } from "./session-utils.js";
 
 const buildSessionLookup = (
@@ -11,7 +11,7 @@ const buildSessionLookup = (
     updatedAt?: number;
   } = {},
 ): ReturnType<typeof loadSessionEntryType> => ({
-  cfg: { session: { mainKey: "agent:main:main" } } as Hanzo BotConfig,
+  cfg: { session: { mainKey: "agent:main:main" } } as HanzoBotConfig,
   storePath: "/tmp/sessions.json",
   store: {} as ReturnType<typeof loadSessionEntryType>["store"],
   entry: {

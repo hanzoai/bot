@@ -2,9 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { MANIFEST_KEY } from "../../compat/legacy-names.js";
 import { resolveBundledPluginsDir } from "../../plugins/bundled-dir.js";
-import { discoverHanzo BotPlugins } from "../../plugins/discovery.js";
+import { discoverHanzoBotPlugins } from "../../plugins/discovery.js";
 import { loadPluginManifest } from "../../plugins/manifest.js";
-import type { Hanzo BotPackageManifest } from "../../plugins/manifest.js";
+import type { HanzoBotPackageManifest } from "../../plugins/manifest.js";
 import type { PackageManifest as PluginPackageManifest } from "../../plugins/manifest.js";
 import type { PluginOrigin } from "../../plugins/types.js";
 import { isRecord, resolveConfigDir, resolveUserPath } from "../../utils.js";
@@ -54,7 +54,7 @@ type ExternalCatalogEntry = {
   name?: string;
   version?: string;
   description?: string;
-} & Partial<Record<ManifestKey, Hanzo BotPackageManifest>>;
+} & Partial<Record<ManifestKey, HanzoBotPackageManifest>>;
 
 const ENV_CATALOG_PATHS = ["BOT_PLUGIN_CATALOG_PATHS", "BOT_MPM_CATALOG_PATHS"];
 
@@ -129,7 +129,7 @@ function loadExternalCatalogEntries(options: CatalogOptions): ExternalCatalogEnt
 }
 
 function toChannelMeta(params: {
-  channel: NonNullable<Hanzo BotPackageManifest["channel"]>;
+  channel: NonNullable<HanzoBotPackageManifest["channel"]>;
   id: string;
 }): ChannelMeta | null {
   const label = params.channel.label?.trim();
@@ -179,7 +179,7 @@ function toChannelMeta(params: {
 }
 
 function resolveInstallInfo(params: {
-  manifest: Hanzo BotPackageManifest;
+  manifest: HanzoBotPackageManifest;
   packageName?: string;
   packageDir?: string;
   workspaceDir?: string;
@@ -221,7 +221,7 @@ function buildCatalogEntry(candidate: {
   rootDir?: string;
   origin?: PluginOrigin;
   workspaceDir?: string;
-  packageManifest?: Hanzo BotPackageManifest;
+  packageManifest?: HanzoBotPackageManifest;
 }): ChannelPluginCatalogEntry | null {
   const manifest = candidate.packageManifest;
   if (!manifest?.channel) {
@@ -336,7 +336,7 @@ export function buildChannelUiCatalog(
 export function listChannelPluginCatalogEntries(
   options: CatalogOptions = {},
 ): ChannelPluginCatalogEntry[] {
-  const discovery = discoverHanzo BotPlugins({
+  const discovery = discoverHanzoBotPlugins({
     workspaceDir: options.workspaceDir,
     env: options.env,
   });

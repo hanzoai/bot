@@ -9,7 +9,7 @@ import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { ParentBasedSampler, TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
-import type { DiagnosticEventPayload, Hanzo BotPluginService } from "../api.js";
+import type { DiagnosticEventPayload, HanzoBotPluginService } from "../api.js";
 import { onDiagnosticEvent, redactSensitiveText, registerLogTransport } from "../api.js";
 
 const DEFAULT_SERVICE_NAME = "@hanzo/bot";
@@ -62,7 +62,7 @@ function redactOtelAttributes(attributes: Record<string, string | number | boole
   return redactedAttributes;
 }
 
-export function createDiagnosticsOtelService(): Hanzo BotPluginService {
+export function createDiagnosticsOtelService(): HanzoBotPluginService {
   let sdk: NodeSDK | null = null;
   let logProvider: LoggerProvider | null = null;
   let stopLogTransport: (() => void) | null = null;
@@ -674,5 +674,5 @@ export function createDiagnosticsOtelService(): Hanzo BotPluginService {
         sdk = null;
       }
     },
-  } satisfies Hanzo BotPluginService;
+  } satisfies HanzoBotPluginService;
 }

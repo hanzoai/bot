@@ -1,7 +1,7 @@
 import { listChannelPlugins } from "../channels/plugins/index.js";
 import type { ChannelId } from "../channels/plugins/types.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { Hanzo BotConfig, GatewayBindMode } from "../config/config.js";
+import type { HanzoBotConfig, GatewayBindMode } from "../config/config.js";
 import type { AgentConfig } from "../config/types.agents.js";
 import { hasConfiguredSecretInput } from "../config/types.secrets.js";
 import { resolveGatewayAuth } from "../gateway/auth.js";
@@ -10,7 +10,7 @@ import { resolveDmAllowState } from "../security/dm-policy-shared.js";
 import { note } from "../terminal/note.js";
 import { resolveDefaultChannelAccountContext } from "./channel-account-context.js";
 
-function collectImplicitHeartbeatDirectPolicyWarnings(cfg: Hanzo BotConfig): string[] {
+function collectImplicitHeartbeatDirectPolicyWarnings(cfg: HanzoBotConfig): string[] {
   const warnings: string[] = [];
 
   const maybeWarn = (params: {
@@ -48,7 +48,7 @@ function collectImplicitHeartbeatDirectPolicyWarnings(cfg: Hanzo BotConfig): str
   return warnings;
 }
 
-export async function noteSecurityWarnings(cfg: Hanzo BotConfig) {
+export async function noteSecurityWarnings(cfg: HanzoBotConfig) {
   const warnings: string[] = [];
   const auditHint = `- Run: ${formatCliCommand("hanzo-bot security audit --deep")}`;
 

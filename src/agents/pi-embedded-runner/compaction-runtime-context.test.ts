@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { buildEmbeddedCompactionRuntimeContext } from "./compaction-runtime-context.js";
 
 describe("buildEmbeddedCompactionRuntimeContext", () => {
@@ -16,7 +16,7 @@ describe("buildEmbeddedCompactionRuntimeContext", () => {
         authProfileId: "openai:p1",
         workspaceDir: "/tmp/workspace",
         agentDir: "/tmp/agent",
-        config: {} as Hanzo BotConfig,
+        config: {} as HanzoBotConfig,
         senderIsOwner: true,
         senderId: "user-123",
         provider: "openai-codex",

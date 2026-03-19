@@ -6,12 +6,12 @@ import {
 } from "openclaw/plugin-sdk/provider-models";
 import {
   applyProviderConfigWithModelCatalogPreset,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export { SYNTHETIC_DEFAULT_MODEL_REF };
 
-function applySyntheticPreset(cfg: Hanzo BotConfig, primaryModelRef?: string): Hanzo BotConfig {
+function applySyntheticPreset(cfg: HanzoBotConfig, primaryModelRef?: string): HanzoBotConfig {
   return applyProviderConfigWithModelCatalogPreset(cfg, {
     providerId: "synthetic",
     api: "anthropic-messages",
@@ -22,10 +22,10 @@ function applySyntheticPreset(cfg: Hanzo BotConfig, primaryModelRef?: string): H
   });
 }
 
-export function applySyntheticProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applySyntheticProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applySyntheticPreset(cfg);
 }
 
-export function applySyntheticConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applySyntheticConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applySyntheticPreset(cfg, SYNTHETIC_DEFAULT_MODEL_REF);
 }

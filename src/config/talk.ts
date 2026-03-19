@@ -7,7 +7,7 @@ import type {
   TalkConfigResponse,
   TalkProviderConfig,
 } from "./types.gateway.js";
-import type { Hanzo BotConfig } from "./types.js";
+import type { HanzoBotConfig } from "./types.js";
 import { coerceSecretRef } from "./types.secrets.js";
 
 type TalkApiKeyDeps = {
@@ -242,7 +242,7 @@ export function normalizeTalkSection(value: TalkConfig | undefined): TalkConfig 
   return Object.keys(normalized).length > 0 ? normalized : undefined;
 }
 
-export function normalizeTalkConfig(config: Hanzo BotConfig): Hanzo BotConfig {
+export function normalizeTalkConfig(config: HanzoBotConfig): HanzoBotConfig {
   if (!config.talk) {
     return config;
   }

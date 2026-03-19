@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolveHanzo BotAgentDir } from "./agent-paths.js";
+import { resolveHanzoBotAgentDir } from "./agent-paths.js";
 
 export async function readGeneratedModelsJson<T>(): Promise<T> {
-  const modelPath = path.join(resolveHanzo BotAgentDir(), "models.json");
+  const modelPath = path.join(resolveHanzoBotAgentDir(), "models.json");
   const raw = await fs.readFile(modelPath, "utf8");
   return JSON.parse(raw) as T;
 }

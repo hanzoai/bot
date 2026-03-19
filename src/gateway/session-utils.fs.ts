@@ -72,7 +72,7 @@ function setCachedSessionTitleFields(cacheKey: string, stat: fs.Stats, value: Se
   }
 }
 
-export function attachHanzo BotTranscriptMeta(
+export function attachHanzoBotTranscriptMeta(
   message: unknown,
   meta: Record<string, unknown>,
 ): unknown {
@@ -117,7 +117,7 @@ export function readSessionMessages(
       if (parsed?.message) {
         messageSeq += 1;
         messages.push(
-          attachHanzo BotTranscriptMeta(parsed.message, {
+          attachHanzoBotTranscriptMeta(parsed.message, {
             ...(typeof parsed.id === "string" ? { id: parsed.id } : {}),
             seq: messageSeq,
           }),

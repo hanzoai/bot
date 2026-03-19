@@ -1,8 +1,8 @@
 import { resolveChannelGroupRequireMention } from "openclaw/plugin-sdk/channel-policy";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/core";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/core";
 
 type GoogleChatGroupContext = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   groupId?: string | null;
 };

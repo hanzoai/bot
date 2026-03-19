@@ -1,4 +1,4 @@
-import { loadOutboundMediaFromUrl, type Hanzo BotConfig } from "../runtime-api.js";
+import { loadOutboundMediaFromUrl, type HanzoBotConfig } from "../runtime-api.js";
 import { getMattermostRuntime } from "../runtime.js";
 import { resolveMattermostAccount } from "./accounts.js";
 import {
@@ -23,7 +23,7 @@ import {
 import { isMattermostId, resolveMattermostOpaqueTarget } from "./target-resolution.js";
 
 export type MattermostSendOpts = {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   botToken?: string;
   baseUrl?: string;
   accountId?: string;
@@ -265,7 +265,7 @@ async function resolveTargetChannelId(params: ResolveTargetChannelIdParams): Pro
 }
 
 type MattermostSendContext = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   token: string;
   baseUrl: string;

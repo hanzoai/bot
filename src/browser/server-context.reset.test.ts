@@ -19,7 +19,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function localHanzo BotProfile(): Parameters<typeof createProfileResetOps>[0]["profile"] {
+function localHanzoBotProfile(): Parameters<typeof createProfileResetOps>[0]["profile"] {
   return {
     name: "@hanzo/bot",
     cdpUrl: "http://127.0.0.1:18800",
@@ -32,10 +32,10 @@ function localHanzo BotProfile(): Parameters<typeof createProfileResetOps>[0]["p
   };
 }
 
-function createLocalHanzo BotResetOps(
+function createLocalHanzoBotResetOps(
   params: Omit<Parameters<typeof createProfileResetOps>[0], "profile">,
 ) {
-  return createProfileResetOps({ profile: localHanzo BotProfile(), ...params });
+  return createProfileResetOps({ profile: localHanzoBotProfile(), ...params });
 }
 
 function createStatelessResetOps(profile: Parameters<typeof createProfileResetOps>[0]["profile"]) {
@@ -44,14 +44,14 @@ function createStatelessResetOps(profile: Parameters<typeof createProfileResetOp
     getProfileState: () => ({ profile: {} as never, running: null }),
     stopRunningBrowser: vi.fn(async () => ({ stopped: false })),
     isHttpReachable: vi.fn(async () => false),
-    resolveHanzo BotUserDataDir: (name: string) => `/tmp/${name}`,
+    resolveHanzoBotUserDataDir: (name: string) => `/tmp/${name}`,
   });
 }
 
 describe("createProfileResetOps", () => {
   it("rejects remote non-extension profiles", async () => {
     const ops = createStatelessResetOps({
-      ...localHanzo BotProfile(),
+      ...localHanzoBotProfile(),
       name: "remote",
       cdpUrl: "https://browserless.example/chrome",
       cdpHost: "browserless.example",
@@ -75,11 +75,11 @@ describe("createProfileResetOps", () => {
       running: { pid: 1 } as never,
     }));
 
-    const ops = createLocalHanzo BotResetOps({
+    const ops = createLocalHanzoBotResetOps({
       getProfileState,
       stopRunningBrowser,
       isHttpReachable,
-      resolveHanzo BotUserDataDir: () => profileDir,
+      resolveHanzoBotUserDataDir: () => profileDir,
     });
 
     const result = await ops.resetProfile();
@@ -102,11 +102,11 @@ describe("createProfileResetOps", () => {
     fs.mkdirSync(profileDir, { recursive: true });
 
     const stopRunningBrowser = vi.fn(async () => ({ stopped: false }));
-    const ops = createLocalHanzo BotResetOps({
+    const ops = createLocalHanzoBotResetOps({
       getProfileState: () => ({ profile: {} as never, running: null }),
       stopRunningBrowser,
       isHttpReachable: vi.fn(async () => true),
-      resolveHanzo BotUserDataDir: () => profileDir,
+      resolveHanzoBotUserDataDir: () => profileDir,
     });
 
     await ops.resetProfile();

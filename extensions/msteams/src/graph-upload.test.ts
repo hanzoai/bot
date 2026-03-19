@@ -27,7 +27,7 @@ describe("graph upload helpers", () => {
     });
 
     expect(fetchFn).toHaveBeenCalledWith(
-      "https://graph.microsoft.com/v1.0/me/drive/root:/Hanzo BotShared/a.txt:/content",
+      "https://graph.microsoft.com/v1.0/me/drive/root:/HanzoBotShared/a.txt:/content",
       expect.objectContaining({
         method: "PUT",
         headers: expect.objectContaining({
@@ -64,7 +64,7 @@ describe("graph upload helpers", () => {
     });
 
     expect(fetchFn).toHaveBeenCalledWith(
-      "https://graph.microsoft.com/v1.0/sites/site-123/drive/root:/Hanzo BotShared/b.txt:/content",
+      "https://graph.microsoft.com/v1.0/sites/site-123/drive/root:/HanzoBotShared/b.txt:/content",
       expect.objectContaining({
         method: "PUT",
         headers: expect.objectContaining({

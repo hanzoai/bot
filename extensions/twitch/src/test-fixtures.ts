@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, vi } from "vitest";
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 
 export const BASE_TWITCH_TEST_ACCOUNT = {
   username: "testbot",
@@ -7,7 +7,7 @@ export const BASE_TWITCH_TEST_ACCOUNT = {
   channel: "#testchannel",
 };
 
-export function makeTwitchTestConfig(account: Record<string, unknown>): Hanzo BotConfig {
+export function makeTwitchTestConfig(account: Record<string, unknown>): HanzoBotConfig {
   return {
     channels: {
       twitch: {
@@ -16,7 +16,7 @@ export function makeTwitchTestConfig(account: Record<string, unknown>): Hanzo Bo
         },
       },
     },
-  } as unknown as Hanzo BotConfig;
+  } as unknown as HanzoBotConfig;
 }
 
 export function installTwitchTestHooks() {

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getChannelPlugin: vi.fn(),
-  loadHanzo BotPlugins: vi.fn(),
+  loadHanzoBotPlugins: vi.fn(),
 }));
 
 const TEST_WORKSPACE_ROOT = "/tmp/openclaw-test-workspace";
@@ -37,7 +37,7 @@ vi.mock("../../agents/agent-scope.js", () => ({
 }));
 
 vi.mock("../../plugins/loader.js", () => ({
-  loadHanzo BotPlugins: mocks.loadHanzo BotPlugins,
+  loadHanzoBotPlugins: mocks.loadHanzoBotPlugins,
 }));
 
 vi.mock("../../config/plugin-auto-enable.js", () => ({
@@ -67,7 +67,7 @@ describe("resolveOutboundTarget channel resolution", () => {
     registrySeq += 1;
     setActivePluginRegistry(createTestRegistry([]), `targets-test-${registrySeq}`);
     mocks.getChannelPlugin.mockReset();
-    mocks.loadHanzo BotPlugins.mockReset();
+    mocks.loadHanzoBotPlugins.mockReset();
   });
 
   it("recovers telegram plugin resolution so announce delivery does not fail with Unsupported channel: telegram", () => {
@@ -80,7 +80,7 @@ describe("resolveOutboundTarget channel resolution", () => {
     const result = resolveTelegramTarget();
 
     expect(result).toEqual({ ok: true, to: "123456" });
-    expect(mocks.loadHanzo BotPlugins).toHaveBeenCalledTimes(1);
+    expect(mocks.loadHanzoBotPlugins).toHaveBeenCalledTimes(1);
   });
 
   it("retries bootstrap on subsequent resolve when the first bootstrap attempt fails", () => {
@@ -91,7 +91,7 @@ describe("resolveOutboundTarget channel resolution", () => {
       .mockReturnValueOnce(undefined)
       .mockReturnValueOnce(telegramPlugin)
       .mockReturnValue(telegramPlugin);
-    mocks.loadHanzo BotPlugins
+    mocks.loadHanzoBotPlugins
       .mockImplementationOnce(() => {
         throw new Error("bootstrap failed");
       })
@@ -102,6 +102,6 @@ describe("resolveOutboundTarget channel resolution", () => {
 
     expect(first.ok).toBe(false);
     expect(second).toEqual({ ok: true, to: "123456" });
-    expect(mocks.loadHanzo BotPlugins).toHaveBeenCalledTimes(2);
+    expect(mocks.loadHanzoBotPlugins).toHaveBeenCalledTimes(2);
   });
 });

@@ -4,7 +4,7 @@ import {
   createExitThrowingRuntime,
   createWizardPrompter,
   readAuthProfilesForAgent,
-  requireHanzo BotAgentDir,
+  requireHanzoBotAgentDir,
   setupAuthTestEnv,
 } from "../../../test/helpers/auth-wizard.js";
 import { clearRuntimeAuthProfileStoreSnapshots } from "../../agents/auth-profiles/store.js";
@@ -170,7 +170,7 @@ describe("provider auth-choice contract", () => {
     );
 
     const stored = await readAuthProfilesForAgent<{ profiles?: Record<string, StoredAuthProfile> }>(
-      requireHanzo BotAgentDir(),
+      requireHanzoBotAgentDir(),
     );
     expect(stored.profiles?.["qwen-portal:default"]).toMatchObject({
       type: "oauth",
@@ -233,7 +233,7 @@ describe("provider auth-choice contract", () => {
 
     const stored = await readAuthProfilesForAgent<{
       profiles?: Record<string, StoredAuthProfile>;
-    }>(requireHanzo BotAgentDir());
+    }>(requireHanzoBotAgentDir());
     expect(stored.profiles?.["qwen-portal:default"]).toMatchObject({
       type: "oauth",
       provider: "qwen-portal",

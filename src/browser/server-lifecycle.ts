@@ -1,4 +1,4 @@
-import { stopHanzo BotChrome } from "./chrome.js";
+import { stopHanzoBotChrome } from "./chrome.js";
 import type { ResolvedBrowserConfig } from "./config.js";
 import {
   type BrowserServerState,
@@ -32,7 +32,7 @@ export async function stopKnownBrowserProfiles(params: {
       try {
         const runtime = current.profiles.get(name);
         if (runtime?.running) {
-          await stopHanzo BotChrome(runtime.running);
+          await stopHanzoBotChrome(runtime.running);
           runtime.running = null;
           continue;
         }

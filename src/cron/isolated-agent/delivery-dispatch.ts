@@ -2,7 +2,7 @@ import { countActiveDescendantRuns } from "../../agents/subagent-registry.js";
 import { SILENT_REPLY_TOKEN } from "../../auto-reply/tokens.js";
 import type { ReplyPayload } from "../../auto-reply/types.js";
 import { createOutboundSendDeps, type CliDeps } from "../../cli/outbound-send-deps.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { callGateway } from "../../gateway/call.js";
 import { sleepWithAbort } from "../../infra/backoff.js";
 import {
@@ -73,8 +73,8 @@ export function resolveCronDeliveryBestEffort(job: CronJob): boolean {
 export type SuccessfulDeliveryTarget = Extract<DeliveryTargetResolution, { ok: true }>;
 
 type DispatchCronDeliveryParams = {
-  cfg: Hanzo BotConfig;
-  cfgWithAgentDefaults: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
+  cfgWithAgentDefaults: HanzoBotConfig;
   deps: CliDeps;
   job: CronJob;
   agentId: string;

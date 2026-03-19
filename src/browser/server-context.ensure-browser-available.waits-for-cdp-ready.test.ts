@@ -39,11 +39,11 @@ function makeBrowserState(): BrowserServerState {
 }
 
 function mockLaunchedChrome(
-  launchHanzo BotChrome: { mockResolvedValue: (value: RunningChrome) => unknown },
+  launchHanzoBotChrome: { mockResolvedValue: (value: RunningChrome) => unknown },
   pid: number,
 ) {
   const proc = new EventEmitter() as unknown as ChildProcessWithoutNullStreams;
-  launchHanzo BotChrome.mockResolvedValue({
+  launchHanzoBotChrome.mockResolvedValue({
     pid,
     exe: { kind: "chromium", path: "/usr/bin/chromium" },
     userDataDir: "/tmp/openclaw-test",
@@ -56,8 +56,8 @@ function mockLaunchedChrome(
 function setupEnsureBrowserAvailableHarness() {
   vi.useFakeTimers();
 
-  const launchHanzo BotChrome = vi.mocked(chromeModule.launchHanzo BotChrome);
-  const stopHanzo BotChrome = vi.mocked(chromeModule.stopHanzo BotChrome);
+  const launchHanzoBotChrome = vi.mocked(chromeModule.launchHanzoBotChrome);
+  const stopHanzoBotChrome = vi.mocked(chromeModule.stopHanzoBotChrome);
   const isChromeReachable = vi.mocked(chromeModule.isChromeReachable);
   const isChromeCdpReady = vi.mocked(chromeModule.isChromeCdpReady);
   isChromeReachable.mockResolvedValue(false);
@@ -66,7 +66,7 @@ function setupEnsureBrowserAvailableHarness() {
   const ctx = createBrowserRouteContext({ getState: () => state });
   const profile = ctx.forProfile("@hanzo/bot");
 
-  return { launchHanzo BotChrome, stopHanzo BotChrome, isChromeCdpReady, profile };
+  return { launchHanzoBotChrome, stopHanzoBotChrome, isChromeCdpReady, profile };
 }
 
 afterEach(() => {
@@ -77,32 +77,32 @@ afterEach(() => {
 
 describe("browser server-context ensureBrowserAvailable", () => {
   it("waits for CDP readiness after launching to avoid follow-up PortInUseError races (#21149)", async () => {
-    const { launchHanzo BotChrome, stopHanzo BotChrome, isChromeCdpReady, profile } =
+    const { launchHanzoBotChrome, stopHanzoBotChrome, isChromeCdpReady, profile } =
       setupEnsureBrowserAvailableHarness();
     isChromeCdpReady.mockResolvedValueOnce(false).mockResolvedValue(true);
-    mockLaunchedChrome(launchHanzo BotChrome, 123);
+    mockLaunchedChrome(launchHanzoBotChrome, 123);
 
     const promise = profile.ensureBrowserAvailable();
     await vi.advanceTimersByTimeAsync(100);
     await expect(promise).resolves.toBeUndefined();
 
-    expect(launchHanzo BotChrome).toHaveBeenCalledTimes(1);
+    expect(launchHanzoBotChrome).toHaveBeenCalledTimes(1);
     expect(isChromeCdpReady).toHaveBeenCalled();
-    expect(stopHanzo BotChrome).not.toHaveBeenCalled();
+    expect(stopHanzoBotChrome).not.toHaveBeenCalled();
   });
 
   it("stops launched chrome when CDP readiness never arrives", async () => {
-    const { launchHanzo BotChrome, stopHanzo BotChrome, isChromeCdpReady, profile } =
+    const { launchHanzoBotChrome, stopHanzoBotChrome, isChromeCdpReady, profile } =
       setupEnsureBrowserAvailableHarness();
     isChromeCdpReady.mockResolvedValue(false);
-    mockLaunchedChrome(launchHanzo BotChrome, 321);
+    mockLaunchedChrome(launchHanzoBotChrome, 321);
 
     const promise = profile.ensureBrowserAvailable();
     const rejected = expect(promise).rejects.toThrow("not reachable after start");
     await vi.advanceTimersByTimeAsync(8100);
     await rejected;
 
-    expect(launchHanzo BotChrome).toHaveBeenCalledTimes(1);
-    expect(stopHanzo BotChrome).toHaveBeenCalledTimes(1);
+    expect(launchHanzoBotChrome).toHaveBeenCalledTimes(1);
+    expect(stopHanzoBotChrome).toHaveBeenCalledTimes(1);
   });
 });

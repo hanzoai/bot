@@ -15,7 +15,7 @@ import {
   resolveDefaultModelForAgent,
   resolveModelRefFromString,
 } from "../../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import type { ReplyPayload } from "../types.js";
 import { rejectUnauthorizedCommand } from "./command-gates.js";
@@ -35,7 +35,7 @@ export type ModelsProviderData = {
  * Exported for reuse by callback handlers.
  */
 export async function buildModelsProviderData(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId?: string,
 ): Promise<ModelsProviderData> {
   const resolvedDefault = resolveDefaultModelForAgent({
@@ -185,7 +185,7 @@ function parseModelsArgs(raw: string): {
 
 function resolveProviderLabel(params: {
   provider: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir?: string;
   sessionEntry?: SessionEntry;
 }): string {
@@ -204,7 +204,7 @@ function resolveProviderLabel(params: {
 export function formatModelsAvailableHeader(params: {
   provider: string;
   total: number;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir?: string;
   sessionEntry?: SessionEntry;
 }): string {
@@ -218,7 +218,7 @@ export function formatModelsAvailableHeader(params: {
 }
 
 export async function resolveModelsCommandReply(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   commandBodyNormalized: string;
   surface?: string;
   currentModel?: string;

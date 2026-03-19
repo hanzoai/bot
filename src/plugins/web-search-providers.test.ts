@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { createEmptyPluginRegistry } from "./registry.js";
 import { setActivePluginRegistry } from "./runtime.js";
 import {
@@ -16,8 +16,8 @@ const BUNDLED_WEB_SEARCH_PROVIDERS = [
   { pluginId: "firecrawl", id: "firecrawl", order: 60 },
 ] as const;
 
-const { loadHanzo BotPluginsMock } = vi.hoisted(() => ({
-  loadHanzo BotPluginsMock: vi.fn((params?: { config?: { plugins?: Record<string, unknown> } }) => {
+const { loadHanzoBotPluginsMock } = vi.hoisted(() => ({
+  loadHanzoBotPluginsMock: vi.fn((params?: { config?: { plugins?: Record<string, unknown> } }) => {
     const plugins = params?.config?.plugins as
       | {
           enabled?: boolean;
@@ -54,7 +54,7 @@ const { loadHanzo BotPluginsMock } = vi.hoisted(() => ({
         getCredentialValue: () => "configured",
         setCredentialValue: () => {},
         applySelectionConfig:
-          provider.id === "firecrawl" ? (config: Hanzo BotConfig) => config : undefined,
+          provider.id === "firecrawl" ? (config: HanzoBotConfig) => config : undefined,
         resolveRuntimeMetadata:
           provider.id === "perplexity"
             ? () => ({
@@ -73,12 +73,12 @@ const { loadHanzo BotPluginsMock } = vi.hoisted(() => ({
 }));
 
 vi.mock("./loader.js", () => ({
-  loadHanzo BotPlugins: loadHanzo BotPluginsMock,
+  loadHanzoBotPlugins: loadHanzoBotPluginsMock,
 }));
 
 describe("resolvePluginWebSearchProviders", () => {
   beforeEach(() => {
-    loadHanzo BotPluginsMock.mockClear();
+    loadHanzoBotPluginsMock.mockClear();
   });
 
   afterEach(() => {

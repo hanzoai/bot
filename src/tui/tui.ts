@@ -9,7 +9,7 @@ import {
   TUI,
 } from "@mariozechner/pi-tui";
 import { resolveAgentIdByWorkspacePath, resolveDefaultAgentId } from "../agents/agent-scope.js";
-import { loadConfig, type Hanzo BotConfig } from "../config/config.js";
+import { loadConfig, type HanzoBotConfig } from "../config/config.js";
 import {
   buildAgentMainSessionKey,
   normalizeAgentId,
@@ -209,7 +209,7 @@ export function resolveTuiSessionKey(params: {
 }
 
 export function resolveInitialTuiAgentId(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   fallbackAgentId: string;
   initialSessionInput?: string;
   cwd?: string;

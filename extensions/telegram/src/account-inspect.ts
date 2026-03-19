@@ -1,5 +1,5 @@
 import { resolveAccountWithDefaultFallback } from "openclaw/plugin-sdk/account-resolution";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import {
   coerceSecretRef,
   hasConfiguredSecretInput,
@@ -48,7 +48,7 @@ function inspectTokenFile(pathValue: unknown): {
 }
 
 function canResolveEnvSecretRefInReadOnlyPath(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   provider: string;
   id: string;
 }): boolean {
@@ -63,7 +63,7 @@ function canResolveEnvSecretRefInReadOnlyPath(params: {
   return !allowlist || allowlist.includes(params.id);
 }
 
-function inspectTokenValue(params: { cfg: Hanzo BotConfig; value: unknown }): {
+function inspectTokenValue(params: { cfg: HanzoBotConfig; value: unknown }): {
   token: string;
   tokenSource: "config" | "env" | "none";
   tokenStatus: TelegramCredentialStatus;
@@ -117,7 +117,7 @@ function inspectTokenValue(params: { cfg: Hanzo BotConfig; value: unknown }): {
 }
 
 function inspectTelegramAccountPrimary(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   envToken?: string | null;
 }): InspectedTelegramAccount {
@@ -213,7 +213,7 @@ function inspectTelegramAccountPrimary(params: {
 }
 
 export function inspectTelegramAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   envToken?: string | null;
 }): InspectedTelegramAccount {

@@ -7,10 +7,10 @@ type MockRegistryToolEntry = {
   factory: (ctx: unknown) => unknown;
 };
 
-const loadHanzo BotPluginsMock = vi.fn();
+const loadHanzoBotPluginsMock = vi.fn();
 
 vi.mock("./loader.js", () => ({
-  loadHanzo BotPlugins: (params: unknown) => loadHanzo BotPluginsMock(params),
+  loadHanzoBotPlugins: (params: unknown) => loadHanzoBotPluginsMock(params),
 }));
 
 let resolvePluginTools: typeof import("./tools.js").resolvePluginTools;
@@ -49,7 +49,7 @@ function setRegistry(entries: MockRegistryToolEntry[]) {
       message: string;
     }>,
   };
-  loadHanzo BotPluginsMock.mockReturnValue(registry);
+  loadHanzoBotPluginsMock.mockReturnValue(registry);
   return registry;
 }
 
@@ -93,7 +93,7 @@ function resolveOptionalDemoTools(toolAllowlist?: string[]) {
 describe("resolvePluginTools optional tools", () => {
   beforeEach(async () => {
     vi.resetModules();
-    loadHanzo BotPluginsMock.mockClear();
+    loadHanzoBotPluginsMock.mockClear();
     ({ resolvePluginTools } = await import("./tools.js"));
   });
 
@@ -167,7 +167,7 @@ describe("resolvePluginTools optional tools", () => {
       toolAllowlist: ["optional_tool"],
     });
 
-    expect(loadHanzo BotPluginsMock).toHaveBeenCalledWith(
+    expect(loadHanzoBotPluginsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         env,
       }),
@@ -183,7 +183,7 @@ describe("resolvePluginTools optional tools", () => {
       toolAllowlist: ["optional_tool"],
     });
 
-    expect(loadHanzo BotPluginsMock).toHaveBeenCalledWith(
+    expect(loadHanzoBotPluginsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         runtimeOptions: {
           allowGatewaySubagentBinding: true,

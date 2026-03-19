@@ -2,7 +2,7 @@ import {
   createAllowFromSection,
   DEFAULT_ACCOUNT_ID,
   hasConfiguredSecretInput,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   patchChannelConfigForAccount,
   setChannelDmPolicyWithAllowFrom,
   setSetupChannelEnabled,

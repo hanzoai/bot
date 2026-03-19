@@ -7,7 +7,7 @@ import {
 import {
   applyAgentDefaultModelPrimary,
   applyProviderConfigWithModelCatalogPreset,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export { CHUTES_DEFAULT_MODEL_REF };
@@ -16,7 +16,7 @@ export { CHUTES_DEFAULT_MODEL_REF };
  * Apply Chutes provider configuration without changing the default model.
  * Registers all catalog models and sets provider aliases (chutes-fast, etc.).
  */
-export function applyChutesProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyChutesProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyProviderConfigWithModelCatalogPreset(cfg, {
     providerId: "chutes",
     api: "openai-completions",
@@ -37,7 +37,7 @@ export function applyChutesProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig
 /**
  * Apply Chutes provider configuration AND set Chutes as the default model.
  */
-export function applyChutesConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyChutesConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   const next = applyChutesProviderConfig(cfg);
   return {
     ...next,
@@ -58,6 +58,6 @@ export function applyChutesConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   };
 }
 
-export function applyChutesApiKeyConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyChutesApiKeyConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyAgentDefaultModelPrimary(applyChutesProviderConfig(cfg), CHUTES_DEFAULT_MODEL_REF);
 }

@@ -1,6 +1,6 @@
-import type { Hanzo BotConfig } from "./config.js";
+import type { HanzoBotConfig } from "./config.js";
 
-export function ensurePluginAllowlisted(cfg: Hanzo BotConfig, pluginId: string): Hanzo BotConfig {
+export function ensurePluginAllowlisted(cfg: HanzoBotConfig, pluginId: string): HanzoBotConfig {
   const allow = cfg.plugins?.allow;
   if (!Array.isArray(allow) || allow.includes(pluginId)) {
     return cfg;

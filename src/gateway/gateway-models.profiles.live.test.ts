@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import type { Api, Model } from "@mariozechner/pi-ai";
 import { describe, it } from "vitest";
-import { resolveHanzo BotAgentDir } from "../agents/agent-paths.js";
+import { resolveHanzoBotAgentDir } from "../agents/agent-paths.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import {
   type AuthProfileStore,
@@ -21,11 +21,11 @@ import {
 import { isModernModelRef } from "../agents/live-model-filter.js";
 import { getApiKeyForModel } from "../agents/model-auth.js";
 import { shouldSuppressBuiltInModel } from "../agents/model-suppression.js";
-import { ensureHanzo BotModelsJson } from "../agents/models-config.js";
+import { ensureHanzoBotModelsJson } from "../agents/models-config.js";
 import { isRateLimitErrorMessage } from "../agents/pi-embedded-helpers/errors.js";
 import { discoverAuthStorage, discoverModels } from "../agents/pi-model-discovery.js";
 import { clearRuntimeConfigSnapshot, loadConfig } from "../config/config.js";
-import type { ModelsConfig, Hanzo BotConfig, ModelProviderConfig } from "../config/types.js";
+import type { ModelsConfig, HanzoBotConfig, ModelProviderConfig } from "../config/types.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { DEFAULT_AGENT_ID } from "../routing/session-key.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
@@ -623,7 +623,7 @@ async function requestGatewayAgentText(params: {
 
 type GatewayModelSuiteParams = {
   label: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   candidates: Array<Model<Api>>;
   extraToolProbes: boolean;
   extraImageProbes: boolean;
@@ -632,10 +632,10 @@ type GatewayModelSuiteParams = {
 };
 
 function buildLiveGatewayConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   candidates: Array<Model<Api>>;
   providerOverrides?: Record<string, ModelProviderConfig>;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const providerOverrides = params.providerOverrides ?? {};
   const lmstudioProvider = params.cfg.models?.providers?.lmstudio;
   const baseProviders = params.cfg.models?.providers ?? {};
@@ -677,9 +677,9 @@ function buildLiveGatewayConfig(params: {
 }
 
 function sanitizeAuthConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir: string;
-}): Hanzo BotConfig["auth"] | undefined {
+}): HanzoBotConfig["auth"] | undefined {
   const auth = params.cfg.auth;
   if (!auth) {
     return auth;
@@ -688,7 +688,7 @@ function sanitizeAuthConfig(params: {
     allowKeychainPrompt: false,
   });
 
-  let profiles: NonNullable<Hanzo BotConfig["auth"]>["profiles"] | undefined;
+  let profiles: NonNullable<HanzoBotConfig["auth"]>["profiles"] | undefined;
   if (auth.profiles) {
     profiles = {};
     for (const [profileId, profile] of Object.entries(auth.profiles)) {
@@ -728,7 +728,7 @@ function sanitizeAuthConfig(params: {
 }
 
 function buildMinimaxProviderOverride(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   api: "openai-completions" | "anthropic-messages";
   baseUrl: string;
 }): ModelProviderConfig | null {
@@ -769,7 +769,7 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
   process.env.BOT_GATEWAY_TOKEN = token;
   const agentId = "dev";
 
-  const hostAgentDir = resolveHanzo BotAgentDir();
+  const hostAgentDir = resolveHanzoBotAgentDir();
   const hostStore = ensureAuthProfileStore(hostAgentDir, {
     allowKeychainPrompt: false,
   });
@@ -800,8 +800,8 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
   const toolProbePath = path.join(workspaceDir, `.openclaw-live-tool-probe.${nonceA}.txt`);
   await fs.writeFile(toolProbePath, `nonceA=${nonceA}\nnonceB=${nonceB}\n`);
 
-  const agentDir = resolveHanzo BotAgentDir();
-  const sanitizedCfg: Hanzo BotConfig = {
+  const agentDir = resolveHanzoBotAgentDir();
+  const sanitizedCfg: HanzoBotConfig = {
     ...params.cfg,
     auth: sanitizeAuthConfig({ cfg: params.cfg, agentDir }),
   };
@@ -1346,9 +1346,9 @@ describeLive("gateway live (dev agent, profile keys)", () => {
     async () => {
       clearRuntimeConfigSnapshot();
       const cfg = loadConfig();
-      await ensureHanzo BotModelsJson(cfg);
+      await ensureHanzoBotModelsJson(cfg);
 
-      const agentDir = resolveHanzo BotAgentDir();
+      const agentDir = resolveHanzoBotAgentDir();
       const authStore = ensureAuthProfileStore(agentDir, {
         allowKeychainPrompt: false,
       });
@@ -1470,9 +1470,9 @@ describeLive("gateway live (dev agent, profile keys)", () => {
     process.env.BOT_GATEWAY_TOKEN = token;
 
     const cfg = loadConfig();
-    await ensureHanzo BotModelsJson(cfg);
+    await ensureHanzoBotModelsJson(cfg);
 
-    const agentDir = resolveHanzo BotAgentDir();
+    const agentDir = resolveHanzoBotAgentDir();
     const authStorage = discoverAuthStorage(agentDir);
     const modelRegistry = discoverModels(authStorage, agentDir);
     const anthropic = modelRegistry.find("anthropic", "claude-opus-4-5") as Model<Api> | null;

@@ -36,7 +36,7 @@ import {
 import { applyXiaomiConfig, applyXiaomiProviderConfig } from "../../extensions/xiaomi/onboard.js";
 import { applyZaiConfig, applyZaiProviderConfig } from "../../extensions/zai/onboard.js";
 import { SYNTHETIC_DEFAULT_MODEL_ID } from "../agents/synthetic-models.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
@@ -67,7 +67,7 @@ function createLegacyProviderConfig(params: {
   modelName?: string;
   baseUrl?: string;
   apiKey?: string;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   return {
     models: {
       providers: {
@@ -89,7 +89,7 @@ function createLegacyProviderConfig(params: {
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 const EXPECTED_FALLBACKS = ["anthropic/claude-opus-4-5"] as const;

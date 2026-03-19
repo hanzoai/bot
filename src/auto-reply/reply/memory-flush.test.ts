@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   DEFAULT_MEMORY_FLUSH_PROMPT,
   resolveMemoryFlushPromptForRun,
@@ -14,7 +14,7 @@ describe("resolveMemoryFlushPromptForRun", () => {
         timeFormat: "12",
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 
   it("replaces YYYY-MM-DD using user timezone and appends current time", () => {
     const prompt = resolveMemoryFlushPromptForRun({

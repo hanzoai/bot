@@ -1,4 +1,4 @@
-import type { Hanzo BotPluginConfigSchema } from "../api.js";
+import type { HanzoBotPluginConfigSchema } from "../api.js";
 import {
   DIFF_IMAGE_QUALITY_PRESETS,
   DIFF_INDICATORS,
@@ -197,7 +197,7 @@ const DIFFS_PLUGIN_CONFIG_JSON_SCHEMA = {
   },
 } as const;
 
-export const diffsPluginConfigSchema: Hanzo BotPluginConfigSchema = {
+export const diffsPluginConfigSchema: HanzoBotPluginConfigSchema = {
   safeParse(value: unknown) {
     if (value === undefined) {
       return { success: true, data: undefined };

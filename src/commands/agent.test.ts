@@ -10,7 +10,7 @@ import { loadModelCatalog } from "../agents/model-catalog.js";
 import * as modelSelectionModule from "../agents/model-selection.js";
 import { runEmbeddedPiAgent } from "../agents/pi-embedded.js";
 import * as commandSecretGatewayModule from "../cli/command-secret-gateway.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import * as configModule from "../config/config.js";
 import * as sessionPathsModule from "../config/sessions/paths.js";
 import { emitAgentEvent, onAgentEvent } from "../infra/agent-events.js";
@@ -86,8 +86,8 @@ async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
 function mockConfig(
   home: string,
   storePath: string,
-  agentOverrides?: Partial<NonNullable<NonNullable<Hanzo BotConfig["agents"]>["defaults"]>>,
-  telegramOverrides?: Partial<NonNullable<NonNullable<Hanzo BotConfig["channels"]>["telegram"]>>,
+  agentOverrides?: Partial<NonNullable<NonNullable<HanzoBotConfig["agents"]>["defaults"]>>,
+  telegramOverrides?: Partial<NonNullable<NonNullable<HanzoBotConfig["channels"]>["telegram"]>>,
   agentsList?: Array<{ id: string; default?: boolean }>,
 ) {
   configSpy.mockReturnValue({
@@ -120,8 +120,8 @@ async function runWithDefaultAgentConfig(params: {
 
 async function runEmbeddedWithTempConfig(params: {
   args: Parameters<typeof agentCommand>[0];
-  agentOverrides?: Partial<NonNullable<NonNullable<Hanzo BotConfig["agents"]>["defaults"]>>;
-  telegramOverrides?: Partial<NonNullable<NonNullable<Hanzo BotConfig["channels"]>["telegram"]>>;
+  agentOverrides?: Partial<NonNullable<NonNullable<HanzoBotConfig["agents"]>["defaults"]>>;
+  telegramOverrides?: Partial<NonNullable<NonNullable<HanzoBotConfig["channels"]>["telegram"]>>;
   agentsList?: Array<{ id: string; default?: boolean }>;
 }) {
   return withTempHome(async (home) => {
@@ -224,7 +224,7 @@ async function runAgentWithSessionKey(sessionKey: string): Promise<void> {
 }
 
 async function expectDefaultThinkLevel(params: {
-  agentOverrides?: Partial<NonNullable<NonNullable<Hanzo BotConfig["agents"]>["defaults"]>>;
+  agentOverrides?: Partial<NonNullable<NonNullable<HanzoBotConfig["agents"]>["defaults"]>>;
   catalogEntry: Record<string, unknown>;
   expected: string;
 }) {
@@ -284,7 +284,7 @@ beforeEach(() => {
   vi.mocked(loadModelCatalog).mockResolvedValue([]);
   vi.mocked(modelSelectionModule.isCliProvider).mockImplementation(() => false);
   readConfigFileSnapshotForWriteSpy.mockResolvedValue({
-    snapshot: { valid: false, resolved: {} as Hanzo BotConfig },
+    snapshot: { valid: false, resolved: {} as HanzoBotConfig },
     writeOptions: {},
   } as Awaited<ReturnType<typeof configModule.readConfigFileSnapshotForWrite>>);
 });
@@ -311,7 +311,7 @@ describe("agentCommand", () => {
             },
           },
         },
-      } as unknown as Hanzo BotConfig;
+      } as unknown as HanzoBotConfig;
       const sourceConfig = {
         ...loadedConfig,
         models: {
@@ -323,7 +323,7 @@ describe("agentCommand", () => {
             },
           },
         },
-      } as unknown as Hanzo BotConfig;
+      } as unknown as HanzoBotConfig;
       const resolvedConfig = {
         ...loadedConfig,
         models: {
@@ -335,7 +335,7 @@ describe("agentCommand", () => {
             },
           },
         },
-      } as unknown as Hanzo BotConfig;
+      } as unknown as HanzoBotConfig;
 
       configSpy.mockReturnValue(loadedConfig);
       readConfigFileSnapshotForWriteSpy.mockResolvedValue({

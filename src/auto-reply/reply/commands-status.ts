@@ -10,7 +10,7 @@ import {
   resolveInternalSessionKey,
   resolveMainSessionAlias,
 } from "../../agents/tools/sessions-helpers.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { toAgentModelListLike } from "../../config/model-input.js";
 import type { SessionEntry, SessionScope } from "../../config/sessions.js";
 import { logVerbose } from "../../globals.js";
@@ -30,7 +30,7 @@ import { getFollowupQueueDepth, resolveQueueSettings } from "./queue.js";
 import { resolveSubagentLabel } from "./subagents-utils.js";
 
 export async function buildStatusReply(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   command: CommandContext;
   sessionEntry?: SessionEntry;
   sessionKey: string;

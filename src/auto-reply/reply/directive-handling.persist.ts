@@ -10,7 +10,7 @@ import {
   type ModelAliasIndex,
   resolveDefaultModelForAgent,
 } from "../../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { type SessionEntry, updateSessionStore } from "../../config/sessions.js";
 import { enqueueSystemEvent } from "../../infra/system-events.js";
 import { applyVerboseOverride } from "../../sessions/level-overrides.js";
@@ -23,7 +23,7 @@ import type { ElevatedLevel, ReasoningLevel } from "./directives.js";
 export async function persistInlineDirectives(params: {
   directives: InlineDirectives;
   effectiveModelDirective?: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir?: string;
   sessionEntry?: SessionEntry;
   sessionStore?: Record<string, SessionEntry>;
@@ -39,7 +39,7 @@ export async function persistInlineDirectives(params: {
   model: string;
   initialModelLabel: string;
   formatModelSwitchEvent: (label: string, alias?: string) => string;
-  agentCfg: NonNullable<Hanzo BotConfig["agents"]>["defaults"] | undefined;
+  agentCfg: NonNullable<HanzoBotConfig["agents"]>["defaults"] | undefined;
 }): Promise<{ provider: string; model: string; contextTokens: number }> {
   const {
     directives,
@@ -206,7 +206,7 @@ export async function persistInlineDirectives(params: {
   };
 }
 
-export function resolveDefaultModel(params: { cfg: Hanzo BotConfig; agentId?: string }): {
+export function resolveDefaultModel(params: { cfg: HanzoBotConfig; agentId?: string }): {
   defaultProvider: string;
   defaultModel: string;
   aliasIndex: ModelAliasIndex;

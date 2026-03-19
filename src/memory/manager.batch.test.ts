@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { useFastShortTimeouts } from "../../test/helpers/fast-short-timeouts.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { createOpenAIEmbeddingProviderMock } from "./test-embeddings-mock.js";
 import { mockPublicPinnedHostname } from "./test-helpers/ssrf.js";
 
@@ -92,7 +92,7 @@ describe("memory indexing with OpenAI batches", () => {
     return { fetchMock, state };
   }
 
-  function createBatchCfg(): Hanzo BotConfig {
+  function createBatchCfg(): HanzoBotConfig {
     return {
       agents: {
         defaults: {
@@ -108,7 +108,7 @@ describe("memory indexing with OpenAI batches", () => {
         },
         list: [{ id: "main", default: true }],
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   beforeAll(async () => {

@@ -1,8 +1,8 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { buildAgentSessionKey, type RoutePeer } from "../../routing/resolve-route.js";
 
 export function buildOutboundBaseSessionKey(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId: string;
   channel: string;
   accountId?: string | null;

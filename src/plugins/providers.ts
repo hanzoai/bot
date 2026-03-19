@@ -5,7 +5,7 @@ import {
   withBundledPluginEnablementCompat,
 } from "./bundled-compat.js";
 import { normalizePluginsConfig, resolveEffectiveEnableState } from "./config-state.js";
-import { loadHanzo BotPlugins, type PluginLoadOptions } from "./loader.js";
+import { loadHanzoBotPlugins, type PluginLoadOptions } from "./loader.js";
 import { createPluginLoaderLogger } from "./logger.js";
 import { loadPluginManifestRegistry } from "./manifest-registry.js";
 import type { ProviderPlugin } from "./types.js";
@@ -182,7 +182,7 @@ export function resolvePluginProviders(params: {
           pluginIds: bundledProviderCompatPluginIds,
         })
       : maybeVitestCompat;
-  const registry = loadHanzo BotPlugins({
+  const registry = loadHanzoBotPlugins({
     config,
     workspaceDir: params.workspaceDir,
     env: params.env,

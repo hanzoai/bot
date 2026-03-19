@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import * as directoryLive from "./directory-live.js";
 import { normalizeDiscordMessagingTarget } from "./normalize.js";
 import { parseDiscordTarget, resolveDiscordChannelId, resolveDiscordTarget } from "./targets.js";
@@ -68,7 +68,7 @@ describe("resolveDiscordChannelId", () => {
 });
 
 describe("resolveDiscordTarget", () => {
-  const cfg = { channels: { discord: {} } } as Hanzo BotConfig;
+  const cfg = { channels: { discord: {} } } as HanzoBotConfig;
 
   beforeEach(() => {
     vi.restoreAllMocks();

@@ -1,7 +1,7 @@
 import { sendMessageTelegram } from "../../extensions/telegram/src/send.js";
 import { loadConfig } from "../../src/config/config.js";
 import { matchPluginCommand, executePluginCommand } from "../../src/plugins/commands.js";
-import { loadHanzo BotPlugins } from "../../src/plugins/loader.js";
+import { loadHanzoBotPlugins } from "../../src/plugins/loader.js";
 
 const args = process.argv.slice(2);
 const getArg = (flag: string, short?: string) => {
@@ -29,7 +29,7 @@ if (!chatId) {
 }
 
 const cfg = loadConfig();
-loadHanzo BotPlugins({ config: cfg });
+loadHanzoBotPlugins({ config: cfg });
 
 const match = matchPluginCommand("/pair");
 if (!match) {

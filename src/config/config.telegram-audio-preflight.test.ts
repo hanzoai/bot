@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
 describe("telegram disableAudioPreflight schema", () => {
   it("accepts disableAudioPreflight for groups and topics", () => {
-    const res = Hanzo BotSchema.safeParse({
+    const res = HanzoBotSchema.safeParse({
       channels: {
         telegram: {
           groups: {
@@ -32,7 +32,7 @@ describe("telegram disableAudioPreflight schema", () => {
   });
 
   it("rejects non-boolean disableAudioPreflight values", () => {
-    const res = Hanzo BotSchema.safeParse({
+    const res = HanzoBotSchema.safeParse({
       channels: {
         telegram: {
           groups: {

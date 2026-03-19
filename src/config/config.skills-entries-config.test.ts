@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
 describe("skills entries config schema", () => {
   it("accepts custom fields under config", () => {
-    const res = Hanzo BotSchema.safeParse({
+    const res = HanzoBotSchema.safeParse({
       skills: {
         entries: {
           "custom-skill": {
@@ -21,7 +21,7 @@ describe("skills entries config schema", () => {
   });
 
   it("rejects unknown top-level fields", () => {
-    const res = Hanzo BotSchema.safeParse({
+    const res = HanzoBotSchema.safeParse({
       skills: {
         entries: {
           "custom-skill": {

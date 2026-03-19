@@ -1,6 +1,6 @@
 import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { isSecretRef, type Hanzo BotConfig } from "openclaw/plugin-sdk/core";
+import { isSecretRef, type HanzoBotConfig } from "openclaw/plugin-sdk/core";
 import type { GoogleChatAccountConfig } from "./types.config.js";
 
 export type GoogleChatCredentialSource = "file" | "inline" | "env" | "none";
@@ -25,7 +25,7 @@ const {
 export { listGoogleChatAccountIds, resolveDefaultGoogleChatAccountId };
 
 function resolveAccountConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
 ): GoogleChatAccountConfig | undefined {
   const accounts = cfg.channels?.["googlechat"]?.accounts;
@@ -36,7 +36,7 @@ function resolveAccountConfig(
 }
 
 function mergeGoogleChatAccountConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
 ): GoogleChatAccountConfig {
   const raw = cfg.channels?.["googlechat"] ?? {};
@@ -127,7 +127,7 @@ function resolveCredentialsFromConfig(params: {
 }
 
 export function resolveGoogleChatAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
 }): ResolvedGoogleChatAccount {
   const accountId = normalizeAccountId(params.accountId);
@@ -148,7 +148,7 @@ export function resolveGoogleChatAccount(params: {
   };
 }
 
-export function listEnabledGoogleChatAccounts(cfg: Hanzo BotConfig): ResolvedGoogleChatAccount[] {
+export function listEnabledGoogleChatAccounts(cfg: HanzoBotConfig): ResolvedGoogleChatAccount[] {
   return listGoogleChatAccountIds(cfg)
     .map((accountId) => resolveGoogleChatAccount({ cfg, accountId }))
     .filter((account) => account.enabled);

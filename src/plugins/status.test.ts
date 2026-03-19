@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const loadConfigMock = vi.fn();
-const loadHanzo BotPluginsMock = vi.fn();
+const loadHanzoBotPluginsMock = vi.fn();
 let buildPluginStatusReport: typeof import("./status.js").buildPluginStatusReport;
 let buildPluginInspectReport: typeof import("./status.js").buildPluginInspectReport;
 let buildAllPluginInspectReports: typeof import("./status.js").buildAllPluginInspectReports;
@@ -15,7 +15,7 @@ vi.mock("../config/config.js", () => ({
 }));
 
 vi.mock("./loader.js", () => ({
-  loadHanzo BotPlugins: (...args: unknown[]) => loadHanzo BotPluginsMock(...args),
+  loadHanzoBotPlugins: (...args: unknown[]) => loadHanzoBotPluginsMock(...args),
 }));
 
 vi.mock("../agents/agent-scope.js", () => ({
@@ -31,9 +31,9 @@ describe("buildPluginStatusReport", () => {
   beforeEach(async () => {
     vi.resetModules();
     loadConfigMock.mockReset();
-    loadHanzo BotPluginsMock.mockReset();
+    loadHanzoBotPluginsMock.mockReset();
     loadConfigMock.mockReturnValue({});
-    loadHanzo BotPluginsMock.mockReturnValue({
+    loadHanzoBotPluginsMock.mockReturnValue({
       plugins: [],
       diagnostics: [],
       channels: [],
@@ -72,7 +72,7 @@ describe("buildPluginStatusReport", () => {
       env,
     });
 
-    expect(loadHanzo BotPluginsMock).toHaveBeenCalledWith(
+    expect(loadHanzoBotPluginsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         config: {},
         workspaceDir: "/workspace",
@@ -95,7 +95,7 @@ describe("buildPluginStatusReport", () => {
         },
       },
     });
-    loadHanzo BotPluginsMock.mockReturnValue({
+    loadHanzoBotPluginsMock.mockReturnValue({
       plugins: [
         {
           id: "google",
@@ -180,7 +180,7 @@ describe("buildPluginStatusReport", () => {
   });
 
   it("builds inspect reports for every loaded plugin", () => {
-    loadHanzo BotPluginsMock.mockReturnValue({
+    loadHanzoBotPluginsMock.mockReturnValue({
       plugins: [
         {
           id: "lca",
@@ -279,7 +279,7 @@ describe("buildPluginStatusReport", () => {
   });
 
   it("builds compatibility warnings for legacy compatibility paths", () => {
-    loadHanzo BotPluginsMock.mockReturnValue({
+    loadHanzoBotPluginsMock.mockReturnValue({
       plugins: [
         {
           id: "lca",
@@ -338,7 +338,7 @@ describe("buildPluginStatusReport", () => {
   });
 
   it("builds structured compatibility notices with deterministic ordering", () => {
-    loadHanzo BotPluginsMock.mockReturnValue({
+    loadHanzoBotPluginsMock.mockReturnValue({
       plugins: [
         {
           id: "hook-only",
@@ -444,7 +444,7 @@ describe("buildPluginStatusReport", () => {
   });
 
   it("returns no compatibility warnings for modern capability plugins", () => {
-    loadHanzo BotPluginsMock.mockReturnValue({
+    loadHanzoBotPluginsMock.mockReturnValue({
       plugins: [
         {
           id: "modern",
@@ -494,7 +494,7 @@ describe("buildPluginStatusReport", () => {
   });
 
   it("populates bundleCapabilities from plugin record", () => {
-    loadHanzo BotPluginsMock.mockReturnValue({
+    loadHanzoBotPluginsMock.mockReturnValue({
       plugins: [
         {
           id: "claude-bundle",
@@ -552,7 +552,7 @@ describe("buildPluginStatusReport", () => {
   });
 
   it("returns empty bundleCapabilities and mcpServers for non-bundle plugins", () => {
-    loadHanzo BotPluginsMock.mockReturnValue({
+    loadHanzoBotPluginsMock.mockReturnValue({
       plugins: [
         {
           id: "plain-plugin",

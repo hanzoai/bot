@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
 import type { SessionScope } from "../config/sessions.js";
 import { normalizeAgentId, normalizeMainKey } from "../routing/session-key.js";
@@ -25,7 +25,7 @@ function listExistingAgentIdsFromDisk(): string[] {
   }
 }
 
-function listConfiguredAgentIds(cfg: Hanzo BotConfig): string[] {
+function listConfiguredAgentIds(cfg: HanzoBotConfig): string[] {
   const ids = new Set<string>();
   const defaultId = normalizeAgentId(resolveDefaultAgentId(cfg));
   ids.add(defaultId);
@@ -47,7 +47,7 @@ function listConfiguredAgentIds(cfg: Hanzo BotConfig): string[] {
     : sorted;
 }
 
-export function listGatewayAgentsBasic(cfg: Hanzo BotConfig): {
+export function listGatewayAgentsBasic(cfg: HanzoBotConfig): {
   defaultId: string;
   mainKey: string;
   scope: SessionScope;

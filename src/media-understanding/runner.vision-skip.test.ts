@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 const catalog = [
   {
@@ -43,7 +43,7 @@ describe("runCapability image skip", () => {
     const ctx: MsgContext = { MediaPath: "/tmp/image.png", MediaType: "image/png" };
     const media = normalizeMediaAttachments(ctx);
     const cache = createMediaAttachmentCache(media);
-    const cfg = {} as Hanzo BotConfig;
+    const cfg = {} as HanzoBotConfig;
 
     try {
       const result = await runCapability({

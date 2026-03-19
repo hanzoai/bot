@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { clearPluginManifestRegistryCache } from "../../plugins/manifest-registry.js";
 import { writePluginWithSkill } from "../test-helpers/skill-plugin-fixtures.js";
 import { resolveEmbeddedRunSkillEntries } from "./skills-runtime.js";
@@ -31,7 +31,7 @@ async function setupBundledDiffsPlugin() {
   return { bundledPluginsDir, workspaceDir };
 }
 
-async function resolveBundledDiffsSkillEntries(config?: Hanzo BotConfig) {
+async function resolveBundledDiffsSkillEntries(config?: HanzoBotConfig) {
   const { bundledPluginsDir, workspaceDir } = await setupBundledDiffsPlugin();
   process.env.BOT_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
   clearPluginManifestRegistryCache();
@@ -49,7 +49,7 @@ afterEach(async () => {
 
 describe("resolveEmbeddedRunSkillEntries (integration)", () => {
   it("loads bundled diffs skill when explicitly enabled in config", async () => {
-    const config: Hanzo BotConfig = {
+    const config: HanzoBotConfig = {
       plugins: {
         entries: {
           diffs: { enabled: true },

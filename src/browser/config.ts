@@ -1,4 +1,4 @@
-import type { BrowserConfig, BrowserProfileConfig, Hanzo BotConfig } from "../config/config.js";
+import type { BrowserConfig, BrowserProfileConfig, HanzoBotConfig } from "../config/config.js";
 import { resolveGatewayPort } from "../config/paths.js";
 import {
   deriveDefaultBrowserCdpPortRange,
@@ -200,7 +200,7 @@ function ensureDefaultUserBrowserProfile(
 
 export function resolveBrowserConfig(
   cfg: BrowserConfig | undefined,
-  rootConfig?: Hanzo BotConfig,
+  rootConfig?: HanzoBotConfig,
 ): ResolvedBrowserConfig {
   const enabled = cfg?.enabled ?? DEFAULT_BOT_BROWSER_ENABLED;
   const evaluateEnabled = cfg?.evaluateEnabled ?? DEFAULT_BROWSER_EVALUATE_ENABLED;

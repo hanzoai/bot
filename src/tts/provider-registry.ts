@@ -1,5 +1,5 @@
-import type { Hanzo BotConfig } from "../config/config.js";
-import { loadHanzo BotPlugins } from "../plugins/loader.js";
+import type { HanzoBotConfig } from "../config/config.js";
+import { loadHanzoBotPlugins } from "../plugins/loader.js";
 import { getActivePluginRegistry } from "../plugins/runtime.js";
 import type { SpeechProviderPlugin } from "../plugins/types.js";
 import type { SpeechProviderId } from "./provider-types.js";
@@ -28,16 +28,16 @@ export function normalizeSpeechProviderId(
   return normalized === "edge" ? "microsoft" : normalized;
 }
 
-function resolveSpeechProviderPluginEntries(cfg?: Hanzo BotConfig): SpeechProviderPlugin[] {
+function resolveSpeechProviderPluginEntries(cfg?: HanzoBotConfig): SpeechProviderPlugin[] {
   const active = getActivePluginRegistry();
   const registry =
     (active?.speechProviders?.length ?? 0) > 0 || !cfg
       ? active
-      : loadHanzo BotPlugins({ config: cfg });
+      : loadHanzoBotPlugins({ config: cfg });
   return registry?.speechProviders?.map((entry) => entry.provider) ?? [];
 }
 
-function buildProviderMaps(cfg?: Hanzo BotConfig): {
+function buildProviderMaps(cfg?: HanzoBotConfig): {
   canonical: Map<string, SpeechProviderPlugin>;
   aliases: Map<string, SpeechProviderPlugin>;
 } {
@@ -68,13 +68,13 @@ function buildProviderMaps(cfg?: Hanzo BotConfig): {
   return { canonical, aliases };
 }
 
-export function listSpeechProviders(cfg?: Hanzo BotConfig): SpeechProviderPlugin[] {
+export function listSpeechProviders(cfg?: HanzoBotConfig): SpeechProviderPlugin[] {
   return [...buildProviderMaps(cfg).canonical.values()];
 }
 
 export function getSpeechProvider(
   providerId: string | undefined,
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
 ): SpeechProviderPlugin | undefined {
   const normalized = normalizeSpeechProviderId(providerId);
   if (!normalized) {

@@ -1,4 +1,4 @@
-export type { Hanzo BotConfig } from "../../../src/config/config.js";
+export type { HanzoBotConfig } from "../../../src/config/config.js";
 export {
   __testing as sessionBindingTesting,
   registerSessionBindingAdapter,

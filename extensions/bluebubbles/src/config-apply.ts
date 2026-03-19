@@ -1,5 +1,5 @@
 import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/core";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/core";
 
 type BlueBubblesConfigPatch = {
   serverUrl?: string;
@@ -30,12 +30,12 @@ function normalizePatch(
 }
 
 export function applyBlueBubblesConnectionConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   patch: BlueBubblesConfigPatch;
   onlyDefinedFields?: boolean;
   accountEnabled?: AccountEnabledMode;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const patch = normalizePatch(params.patch, params.onlyDefinedFields === true);
   if (params.accountId === DEFAULT_ACCOUNT_ID) {
     return {

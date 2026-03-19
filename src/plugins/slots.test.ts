@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { applyExclusiveSlotSelection } from "./slots.js";
 
 describe("applyExclusiveSlotSelection", () => {
-  const createMemoryConfig = (plugins?: Hanzo BotConfig["plugins"]): Hanzo BotConfig => ({
+  const createMemoryConfig = (plugins?: HanzoBotConfig["plugins"]): HanzoBotConfig => ({
     plugins: {
       ...plugins,
       entries: {
@@ -16,7 +16,7 @@ describe("applyExclusiveSlotSelection", () => {
     },
   });
 
-  const runMemorySelection = (config: Hanzo BotConfig, selectedId = "memory") =>
+  const runMemorySelection = (config: HanzoBotConfig, selectedId = "memory") =>
     applyExclusiveSlotSelection({
       config,
       selectedId,
@@ -93,7 +93,7 @@ describe("applyExclusiveSlotSelection", () => {
   });
 
   it("skips changes when no exclusive slot applies", () => {
-    const config: Hanzo BotConfig = {};
+    const config: HanzoBotConfig = {};
     const result = applyExclusiveSlotSelection({
       config,
       selectedId: "custom",

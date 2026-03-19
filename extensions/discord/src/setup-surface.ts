@@ -1,5 +1,5 @@
 import {
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type WizardPrompter,
   type ChannelSetupWizard,
 } from "openclaw/plugin-sdk/setup-runtime";
@@ -48,10 +48,10 @@ async function resolveDiscordAllowFromEntries(params: { token?: string; entries:
 }
 
 async function promptDiscordAllowFrom(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   return await promptLegacyChannelAllowFromForAccount({
     cfg: params.cfg,
     prompter: params.prompter,
@@ -90,7 +90,7 @@ async function promptDiscordAllowFrom(params: {
 }
 
 async function resolveDiscordGroupAllowlist(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   credentialValues: { token?: string };
   entries: string[];

@@ -1,6 +1,6 @@
 import { listChannelPlugins } from "../channels/plugins/index.js";
 import type { ChannelAccountSnapshot, ChannelPlugin } from "../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveDefaultChannelAccountContext } from "./channel-account-context.js";
 
 export type LinkChannelContext = {
@@ -12,7 +12,7 @@ export type LinkChannelContext = {
 };
 
 export async function resolveLinkChannelContext(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): Promise<LinkChannelContext | null> {
   for (const plugin of listChannelPlugins()) {
     const { defaultAccountId, account, enabled, configured } =

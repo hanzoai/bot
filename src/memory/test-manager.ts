@@ -1,8 +1,8 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { getMemorySearchManager, type MemoryIndexManager } from "./index.js";
 
 export async function createMemoryManagerOrThrow(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId = "main",
 ): Promise<MemoryIndexManager> {
   const result = await getMemorySearchManager({ cfg, agentId });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   clearConfigCache,
   clearRuntimeConfigSnapshot,
@@ -11,12 +11,12 @@ import {
   installModelsConfigTestHooks,
   withModelsTempHome as withTempHome,
 } from "./models-config.e2e-harness.js";
-import { ensureHanzo BotModelsJson } from "./models-config.js";
+import { ensureHanzoBotModelsJson } from "./models-config.js";
 import { readGeneratedModelsJson } from "./models-config.test-utils.js";
 
 installModelsConfigTestHooks();
 
-function createOpenAiApiKeySourceConfig(): Hanzo BotConfig {
+function createOpenAiApiKeySourceConfig(): HanzoBotConfig {
   return {
     models: {
       providers: {
@@ -31,7 +31,7 @@ function createOpenAiApiKeySourceConfig(): Hanzo BotConfig {
   };
 }
 
-function createOpenAiApiKeyRuntimeConfig(): Hanzo BotConfig {
+function createOpenAiApiKeyRuntimeConfig(): HanzoBotConfig {
   return {
     models: {
       providers: {
@@ -46,7 +46,7 @@ function createOpenAiApiKeyRuntimeConfig(): Hanzo BotConfig {
   };
 }
 
-function createOpenAiHeaderSourceConfig(): Hanzo BotConfig {
+function createOpenAiHeaderSourceConfig(): HanzoBotConfig {
   return {
     models: {
       providers: {
@@ -72,7 +72,7 @@ function createOpenAiHeaderSourceConfig(): Hanzo BotConfig {
   };
 }
 
-function createOpenAiHeaderRuntimeConfig(): Hanzo BotConfig {
+function createOpenAiHeaderRuntimeConfig(): HanzoBotConfig {
   return {
     models: {
       providers: {
@@ -90,7 +90,7 @@ function createOpenAiHeaderRuntimeConfig(): Hanzo BotConfig {
   };
 }
 
-function withGatewayTokenMode(config: Hanzo BotConfig): Hanzo BotConfig {
+function withGatewayTokenMode(config: HanzoBotConfig): HanzoBotConfig {
   return {
     ...config,
     gateway: {
@@ -103,16 +103,16 @@ function withGatewayTokenMode(config: Hanzo BotConfig): Hanzo BotConfig {
 
 async function withGeneratedModelsFromRuntimeSource(
   params: {
-    sourceConfig: Hanzo BotConfig;
-    runtimeConfig: Hanzo BotConfig;
-    candidateConfig?: Hanzo BotConfig;
+    sourceConfig: HanzoBotConfig;
+    runtimeConfig: HanzoBotConfig;
+    candidateConfig?: HanzoBotConfig;
   },
   runAssertions: () => Promise<void>,
 ) {
   await withTempHome(async () => {
     try {
       setRuntimeConfigSnapshot(params.runtimeConfig, params.sourceConfig);
-      await ensureHanzo BotModelsJson(params.candidateConfig ?? loadConfig());
+      await ensureHanzoBotModelsJson(params.candidateConfig ?? loadConfig());
       await runAssertions();
     } finally {
       clearRuntimeConfigSnapshot();
@@ -151,7 +151,7 @@ describe("models-config runtime source snapshot", () => {
 
   it("uses non-env marker from runtime source snapshot for file refs", async () => {
     await withTempHome(async () => {
-      const sourceConfig: Hanzo BotConfig = {
+      const sourceConfig: HanzoBotConfig = {
         models: {
           providers: {
             moonshot: {
@@ -163,7 +163,7 @@ describe("models-config runtime source snapshot", () => {
           },
         },
       };
-      const runtimeConfig: Hanzo BotConfig = {
+      const runtimeConfig: HanzoBotConfig = {
         models: {
           providers: {
             moonshot: {
@@ -178,7 +178,7 @@ describe("models-config runtime source snapshot", () => {
 
       try {
         setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
-        await ensureHanzo BotModelsJson(loadConfig());
+        await ensureHanzoBotModelsJson(loadConfig());
 
         const parsed = await readGeneratedModelsJson<{
           providers: Record<string, { apiKey?: string }>;
@@ -195,7 +195,7 @@ describe("models-config runtime source snapshot", () => {
     await withTempHome(async () => {
       const sourceConfig = createOpenAiApiKeySourceConfig();
       const runtimeConfig = createOpenAiApiKeyRuntimeConfig();
-      const clonedRuntimeConfig: Hanzo BotConfig = {
+      const clonedRuntimeConfig: HanzoBotConfig = {
         ...runtimeConfig,
         agents: {
           defaults: {
@@ -206,7 +206,7 @@ describe("models-config runtime source snapshot", () => {
 
       try {
         setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
-        await ensureHanzo BotModelsJson(clonedRuntimeConfig);
+        await ensureHanzoBotModelsJson(clonedRuntimeConfig);
         await expectGeneratedProviderApiKey("openai", "OPENAI_API_KEY"); // pragma: allowlist secret
       } finally {
         clearRuntimeConfigSnapshot();
@@ -229,13 +229,13 @@ describe("models-config runtime source snapshot", () => {
     await withTempHome(async () => {
       const sourceConfig = withGatewayTokenMode(createOpenAiApiKeySourceConfig());
       const runtimeConfig = withGatewayTokenMode(createOpenAiApiKeyRuntimeConfig());
-      const incompatibleCandidate: Hanzo BotConfig = {
+      const incompatibleCandidate: HanzoBotConfig = {
         ...createOpenAiApiKeyRuntimeConfig(),
       };
 
       try {
         setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
-        await ensureHanzo BotModelsJson(incompatibleCandidate);
+        await ensureHanzoBotModelsJson(incompatibleCandidate);
         await expectGeneratedProviderApiKey("openai", "OPENAI_API_KEY"); // pragma: allowlist secret
       } finally {
         clearRuntimeConfigSnapshot();
@@ -248,13 +248,13 @@ describe("models-config runtime source snapshot", () => {
     await withTempHome(async () => {
       const sourceConfig = withGatewayTokenMode(createOpenAiHeaderSourceConfig());
       const runtimeConfig = withGatewayTokenMode(createOpenAiHeaderRuntimeConfig());
-      const incompatibleCandidate: Hanzo BotConfig = {
+      const incompatibleCandidate: HanzoBotConfig = {
         ...createOpenAiHeaderRuntimeConfig(),
       };
 
       try {
         setRuntimeConfigSnapshot(runtimeConfig, sourceConfig);
-        await ensureHanzo BotModelsJson(incompatibleCandidate);
+        await ensureHanzoBotModelsJson(incompatibleCandidate);
         await expectGeneratedOpenAiHeaderMarkers();
       } finally {
         clearRuntimeConfigSnapshot();

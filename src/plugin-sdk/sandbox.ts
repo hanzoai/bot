@@ -19,7 +19,7 @@ export type {
   SshSandboxSession,
   SshSandboxSettings,
 } from "../agents/sandbox.js";
-export type { Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
 
 export {
   buildExecRemoteCommand,
@@ -43,4 +43,4 @@ export {
   type PluginCommandRunOptions,
   type PluginCommandRunResult,
 } from "./run-command.js";
-export { resolvePreferredHanzo BotTmpDir } from "../infra/tmp-openclaw-dir.js";
+export { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-openclaw-dir.js";

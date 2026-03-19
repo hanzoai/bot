@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { LITELLM_DEFAULT_MODEL_REF } from "../plugins/provider-auth-storage.js";
 import {
   applyAgentDefaultModelPrimary,
@@ -36,7 +36,7 @@ function buildLitellmModelDefinition(): {
   };
 }
 
-export function applyLitellmProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyLitellmProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   const models = { ...cfg.agents?.defaults?.models };
   models[LITELLM_DEFAULT_MODEL_REF] = {
     ...models[LITELLM_DEFAULT_MODEL_REF],
@@ -59,7 +59,7 @@ export function applyLitellmProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfi
   });
 }
 
-export function applyLitellmConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyLitellmConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   const next = applyLitellmProviderConfig(cfg);
   return applyAgentDefaultModelPrimary(next, LITELLM_DEFAULT_MODEL_REF);
 }

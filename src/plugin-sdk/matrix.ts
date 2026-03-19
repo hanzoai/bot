@@ -88,7 +88,7 @@ export {
 } from "../../extensions/matrix/thread-bindings-runtime.js";
 export { createTypingCallbacks } from "../channels/typing.js";
 export { createChannelReplyPipeline } from "./channel-reply-pipeline.js";
-export type { Hanzo BotConfig } from "../config/config.js";
+export type { HanzoBotConfig } from "../config/config.js";
 export {
   GROUP_POLICY_BLOCKED_LABEL,
   resolveAllowlistProviderRuntimeGroupPolicy,
@@ -127,7 +127,7 @@ export { isPrivateOrLoopbackHost } from "../gateway/net.js";
 export { getAgentScopedMediaLocalRoots } from "../media/local-roots.js";
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 export type { PluginRuntime, RuntimeLogger } from "../plugins/runtime/types.js";
-export type { Hanzo BotPluginApi } from "../plugins/types.js";
+export type { HanzoBotPluginApi } from "../plugins/types.js";
 export type { PollInput } from "../polls.js";
 export { normalizePollInput } from "../polls.js";
 export {

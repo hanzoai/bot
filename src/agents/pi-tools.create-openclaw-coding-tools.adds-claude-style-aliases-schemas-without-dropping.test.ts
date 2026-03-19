@@ -6,14 +6,14 @@ import { Type } from "@sinclair/typebox";
 import { describe, expect, it, vi } from "vitest";
 import "./test-helpers/fast-coding-tools.js";
 import { applyXaiModelCompat } from "./model-compat.js";
-import { createHanzo BotTools } from "./openclaw-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
 import { findUnsupportedSchemaKeywords } from "./pi-embedded-runner/google.js";
-import { __testing, createHanzo BotCodingTools } from "./pi-tools.js";
-import { createHanzo BotReadTool, createSandboxedReadTool } from "./pi-tools.read.js";
+import { __testing, createHanzoBotCodingTools } from "./pi-tools.js";
+import { createHanzoBotReadTool, createSandboxedReadTool } from "./pi-tools.read.js";
 import { createHostSandboxFsBridge } from "./test-helpers/host-sandbox-fs-bridge.js";
 import { createBrowserTool } from "./tools/browser-tool.js";
 
-const defaultTools = createHanzo BotCodingTools();
+const defaultTools = createHanzoBotCodingTools();
 
 function findUnionKeywordOffenders(
   tools: Array<{ name: string; parameters: unknown }>,
@@ -79,7 +79,7 @@ function extractToolText(result: unknown): string {
   return textBlock?.text ?? "";
 }
 
-describe("createHanzo BotCodingTools", () => {
+describe("createHanzoBotCodingTools", () => {
   describe("Claude/Gemini alias support", () => {
     it("adds Claude-style aliases to schemas without dropping metadata", () => {
       const base: AgentTool = {
@@ -177,7 +177,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(parameters.required ?? []).toContain("action");
   });
   it("exposes raw for gateway config.apply tool calls", () => {
-    const gateway = createHanzo BotCodingTools({ senderIsOwner: true }).find(
+    const gateway = createHanzoBotCodingTools({ senderIsOwner: true }).find(
       (tool) => tool.name === "gateway",
     );
     expect(gateway).toBeDefined();
@@ -293,7 +293,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(findUnionKeywordOffenders(defaultTools)).toEqual([]);
   });
   it("keeps raw core tool schemas union-free", () => {
-    const tools = createHanzo BotTools();
+    const tools = createHanzoBotTools();
     const coreTools = new Set([
       "browser",
       "canvas",
@@ -313,7 +313,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(findUnionKeywordOffenders(tools, { onlyNames: coreTools })).toEqual([]);
   });
   it("does not expose provider-specific message tools", () => {
-    const tools = createHanzo BotCodingTools({ messageProvider: "discord" });
+    const tools = createHanzoBotCodingTools({ messageProvider: "discord" });
     const names = new Set(tools.map((tool) => tool.name));
     expect(names.has("discord")).toBe(false);
     expect(names.has("slack")).toBe(false);
@@ -321,7 +321,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(names.has("whatsapp")).toBe(false);
   });
   it("filters session tools for sub-agent sessions by default", () => {
-    const tools = createHanzo BotCodingTools({
+    const tools = createHanzoBotCodingTools({
       sessionKey: "agent:main:subagent:test",
     });
     const names = new Set(tools.map((tool) => tool.name));
@@ -358,7 +358,7 @@ describe("createHanzo BotCodingTools", () => {
       "utf-8",
     );
 
-    const tools = createHanzo BotCodingTools({
+    const tools = createHanzoBotCodingTools({
       sessionKey: "agent:main:subagent:flat",
       config: {
         session: {
@@ -380,7 +380,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(names.has("subagents")).toBe(true);
   });
   it("supports allow-only sub-agent tool policy", () => {
-    const tools = createHanzo BotCodingTools({
+    const tools = createHanzoBotCodingTools({
       sessionKey: "agent:main:subagent:test",
       // Intentionally partial config; only fields used by pi-tools are provided.
       config: {
@@ -398,7 +398,7 @@ describe("createHanzo BotCodingTools", () => {
   });
 
   it("applies tool profiles before allow/deny policies", () => {
-    const tools = createHanzo BotCodingTools({
+    const tools = createHanzoBotCodingTools({
       config: { tools: { profile: "messaging" } },
     });
     const names = new Set(tools.map((tool) => tool.name));
@@ -409,7 +409,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(names.has("browser")).toBe(false);
   });
   it("expands group shorthands in global tool policy", () => {
-    const tools = createHanzo BotCodingTools({
+    const tools = createHanzoBotCodingTools({
       config: { tools: { allow: ["group:fs"] } },
     });
     const names = new Set(tools.map((tool) => tool.name));
@@ -420,7 +420,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(names.has("browser")).toBe(false);
   });
   it("expands group shorthands in global tool deny policy", () => {
-    const tools = createHanzo BotCodingTools({
+    const tools = createHanzoBotCodingTools({
       config: { tools: { deny: ["group:fs"] } },
     });
     const names = new Set(tools.map((tool) => tool.name));
@@ -430,7 +430,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(names.has("exec")).toBe(true);
   });
   it("lets agent profiles override global profiles", () => {
-    const tools = createHanzo BotCodingTools({
+    const tools = createHanzoBotCodingTools({
       sessionKey: "agent:work:main",
       config: {
         tools: { profile: "coding" },
@@ -445,7 +445,7 @@ describe("createHanzo BotCodingTools", () => {
     expect(names.has("read")).toBe(false);
   });
   it("removes unsupported JSON Schema keywords for Cloud Code Assist API compatibility", () => {
-    const googleTools = createHanzo BotCodingTools({
+    const googleTools = createHanzoBotCodingTools({
       modelProvider: "google",
       senderIsOwner: true,
     });
@@ -455,7 +455,7 @@ describe("createHanzo BotCodingTools", () => {
     }
   });
   it("applies xai model compat for direct Grok tool cleanup", () => {
-    const xaiTools = createHanzo BotCodingTools({
+    const xaiTools = createHanzoBotCodingTools({
       modelProvider: "xai",
       modelCompat: applyXaiModelCompat({ compat: {} }).compat,
       senderIsOwner: true,
@@ -557,8 +557,8 @@ describe("createHanzo BotCodingTools", () => {
       execute: vi.fn(async () => readResult),
     };
 
-    const wrapped = createHanzo BotReadTool(
-      baseRead as unknown as Parameters<typeof createHanzo BotReadTool>[0],
+    const wrapped = createHanzoBotReadTool(
+      baseRead as unknown as Parameters<typeof createHanzoBotReadTool>[0],
     );
     const result = await wrapped.execute("read-strip-1", { path: "demo.txt", limit: 1 });
 

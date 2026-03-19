@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { resolveBlueBubblesAccount } from "./accounts.js";
 import { sendBlueBubblesAttachment } from "./attachments.js";
 import { resolveBlueBubblesMessageId } from "./monitor.js";
-import { resolveChannelMediaMaxBytes, type Hanzo BotConfig } from "./runtime-api.js";
+import { resolveChannelMediaMaxBytes, type HanzoBotConfig } from "./runtime-api.js";
 import { getBlueBubblesRuntime } from "./runtime.js";
 import { sendMessageBlueBubbles } from "./send.js";
 
@@ -85,7 +85,7 @@ function isPathInsideRoot(candidate: string, root: string): boolean {
   return normalizedCandidate === normalizedRoot || normalizedCandidate.startsWith(rootWithSep);
 }
 
-function resolveMediaLocalRoots(params: { cfg: Hanzo BotConfig; accountId?: string }): string[] {
+function resolveMediaLocalRoots(params: { cfg: HanzoBotConfig; accountId?: string }): string[] {
   const account = resolveBlueBubblesAccount({
     cfg: params.cfg,
     accountId: params.accountId,
@@ -194,7 +194,7 @@ function resolveFilenameFromSource(source?: string): string | undefined {
 }
 
 export async function sendBlueBubblesMedia(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   to: string;
   mediaUrl?: string;
   mediaPath?: string;

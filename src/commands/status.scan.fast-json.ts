@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { hasPotentialConfiguredChannels } from "../channels/config-presence.js";
 import { resolveConfigPath, resolveStateDir } from "../config/paths.js";
-import type { Hanzo BotConfig } from "../config/types.js";
+import type { HanzoBotConfig } from "../config/types.js";
 import { resolveOsSummary } from "../infra/os-summary.js";
 import { buildPluginCompatibilityNotices } from "../plugins/status.js";
 import { runExec } from "../process/exec.js";
@@ -78,7 +78,7 @@ function resolveDefaultMemoryStorePath(agentId: string): string {
 }
 
 async function resolveMemoryStatusSnapshot(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentStatus: Awaited<ReturnType<typeof getAgentLocalStatuses>>;
   memoryPlugin: MemoryPluginStatus;
 }): Promise<MemoryStatusSnapshot | null> {
@@ -94,7 +94,7 @@ async function resolveMemoryStatusSnapshot(params: {
   });
 }
 
-async function readStatusSourceConfig(): Promise<Hanzo BotConfig> {
+async function readStatusSourceConfig(): Promise<HanzoBotConfig> {
   if (!shouldSkipMissingConfigFastPath() && !existsSync(resolveConfigPath(process.env))) {
     return {};
   }
@@ -103,9 +103,9 @@ async function readStatusSourceConfig(): Promise<Hanzo BotConfig> {
 }
 
 async function resolveStatusConfig(params: {
-  sourceConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
   commandName: "status --json";
-}): Promise<{ resolvedConfig: Hanzo BotConfig; diagnostics: string[] }> {
+}): Promise<{ resolvedConfig: HanzoBotConfig; diagnostics: string[] }> {
   if (!shouldSkipMissingConfigFastPath() && !existsSync(resolveConfigPath(process.env))) {
     return { resolvedConfig: params.sourceConfig, diagnostics: [] };
   }

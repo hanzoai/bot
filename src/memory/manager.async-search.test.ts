@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { MemoryIndexManager } from "./index.js";
 import { closeAllMemorySearchManagers } from "./index.js";
 import { createOpenAIEmbeddingProviderMock } from "./test-embeddings-mock.js";
@@ -24,7 +24,7 @@ describe("memory search async sync", () => {
   let indexPath: string;
   let manager: MemoryIndexManager | null = null;
 
-  const buildConfig = (): Hanzo BotConfig =>
+  const buildConfig = (): HanzoBotConfig =>
     ({
       agents: {
         defaults: {
@@ -40,7 +40,7 @@ describe("memory search async sync", () => {
         },
         list: [{ id: "main", default: true }],
       },
-    }) as Hanzo BotConfig;
+    }) as HanzoBotConfig;
 
   beforeEach(async () => {
     await closeAllMemorySearchManagers();

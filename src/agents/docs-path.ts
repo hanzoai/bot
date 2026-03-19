@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { resolveHanzo BotPackageRoot } from "../infra/openclaw-root.js";
+import { resolveHanzoBotPackageRoot } from "../infra/openclaw-root.js";
 
-export async function resolveHanzo BotDocsPath(params: {
+export async function resolveHanzoBotDocsPath(params: {
   workspaceDir?: string;
   argv1?: string;
   cwd?: string;
@@ -16,7 +16,7 @@ export async function resolveHanzo BotDocsPath(params: {
     }
   }
 
-  const packageRoot = await resolveHanzo BotPackageRoot({
+  const packageRoot = await resolveHanzoBotPackageRoot({
     cwd: params.cwd,
     argv1: params.argv1,
     moduleUrl: params.moduleUrl,

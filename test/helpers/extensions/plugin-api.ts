@@ -1,9 +1,9 @@
-import type { Hanzo BotPluginApi } from "openclaw/plugin-sdk/plugin-runtime";
+import type { HanzoBotPluginApi } from "openclaw/plugin-sdk/plugin-runtime";
 
-type TestPluginApiInput = Partial<Hanzo BotPluginApi> &
-  Pick<Hanzo BotPluginApi, "id" | "name" | "source" | "config" | "runtime">;
+type TestPluginApiInput = Partial<HanzoBotPluginApi> &
+  Pick<HanzoBotPluginApi, "id" | "name" | "source" | "config" | "runtime">;
 
-export function createTestPluginApi(api: TestPluginApiInput): Hanzo BotPluginApi {
+export function createTestPluginApi(api: TestPluginApiInput): HanzoBotPluginApi {
   return {
     registrationMode: "full",
     logger: { info() {}, warn() {}, error() {}, debug() {} },

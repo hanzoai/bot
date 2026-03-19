@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { readConfigFileSnapshot } from "../config/config.js";
 import { formatConfigIssueLines } from "../config/issue-format.js";
 import { note } from "../terminal/note.js";
@@ -56,7 +56,7 @@ async function maybeMigrateLegacyConfig(): Promise<string[]> {
 
 export type DoctorConfigPreflightResult = {
   snapshot: Awaited<ReturnType<typeof readConfigFileSnapshot>>;
-  baseConfig: Hanzo BotConfig;
+  baseConfig: HanzoBotConfig;
 };
 
 export async function runDoctorConfigPreflight(

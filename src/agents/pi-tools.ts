@@ -1,5 +1,5 @@
 import { codingTools, createReadTool, readTool } from "@mariozechner/pi-coding-agent";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { ModelCompatConfig } from "../config/types.models.js";
 import type { ToolLoopDetectionConfig } from "../config/types.tools.js";
 import { resolveMergedSafeBinProfileFixtures } from "../infra/exec-safe-bin-runtime-policy.js";
@@ -19,7 +19,7 @@ import { listChannelAgentTools } from "./channel-tools.js";
 import { resolveImageSanitizationLimits } from "./image-sanitization.js";
 import type { ModelAuthMode } from "./model-auth.js";
 import { hasNativeWebSearchTool } from "./model-compat.js";
-import { createHanzo BotTools } from "./openclaw-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
 import { wrapToolWithAbortSignal } from "./pi-tools.abort.js";
 import { wrapToolWithBeforeToolCallHook } from "./pi-tools.before-tool-call.js";
 import {
@@ -32,7 +32,7 @@ import {
   assertRequiredParams,
   createHostWorkspaceEditTool,
   createHostWorkspaceWriteTool,
-  createHanzo BotReadTool,
+  createHanzoBotReadTool,
   createSandboxedEditTool,
   createSandboxedReadTool,
   createSandboxedWriteTool,
@@ -131,7 +131,7 @@ function isApplyPatchAllowedForModel(params: {
   });
 }
 
-function resolveExecConfig(params: { cfg?: Hanzo BotConfig; agentId?: string }) {
+function resolveExecConfig(params: { cfg?: HanzoBotConfig; agentId?: string }) {
   const cfg = params.cfg;
   const globalExec = cfg?.tools?.exec;
   const agentExec =
@@ -161,7 +161,7 @@ function resolveExecConfig(params: { cfg?: Hanzo BotConfig; agentId?: string }) 
 }
 
 export function resolveToolLoopDetectionConfig(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   agentId?: string;
 }): ToolLoopDetectionConfig | undefined {
   const global = params.cfg?.tools?.loopDetection;
@@ -196,7 +196,7 @@ export const __testing = {
   applyModelProviderToolPolicy,
 } as const;
 
-export function createHanzo BotCodingTools(options?: {
+export function createHanzoBotCodingTools(options?: {
   agentId?: string;
   exec?: ExecToolDefaults & ProcessToolDefaults;
   messageProvider?: string;
@@ -222,7 +222,7 @@ export function createHanzo BotCodingTools(options?: {
    * Defaults to workspaceDir when not set.
    */
   spawnWorkspaceDir?: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   abortSignal?: AbortSignal;
   /**
    * Provider of the currently selected model (used for provider-specific tool quirks).
@@ -386,7 +386,7 @@ export function createHanzo BotCodingTools(options?: {
         ];
       }
       const freshReadTool = createReadTool(workspaceRoot);
-      const wrapped = createHanzo BotReadTool(freshReadTool, {
+      const wrapped = createHanzoBotReadTool(freshReadTool, {
         modelContextWindowTokens: options?.modelContextWindowTokens,
         imageSanitization,
       });
@@ -495,7 +495,7 @@ export function createHanzo BotCodingTools(options?: {
     processTool as unknown as AnyAgentTool,
     // Channel docking: include channel-defined agent tools (login, etc.).
     ...listChannelAgentTools({ cfg: options?.config }),
-    ...createHanzo BotTools({
+    ...createHanzoBotTools({
       sandboxBrowserBridgeUrl: sandbox?.browser?.bridgeUrl,
       allowHostBrowserControl: sandbox ? sandbox.browserAllowHostControl : true,
       agentSessionKey: options?.sessionKey,

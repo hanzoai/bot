@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { imessageOutbound } from "../../../../test/channel-outbounds.js";
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 
 describe("imessageOutbound", () => {
-  const cfg: Hanzo BotConfig = {
+  const cfg: HanzoBotConfig = {
     channels: {
       imessage: {
         mediaMaxMb: 2,

@@ -1,6 +1,6 @@
 import type { Api, Model } from "@mariozechner/pi-ai";
 import type { AuthStorage, ModelRegistry } from "@mariozechner/pi-coding-agent";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { ModelDefinitionConfig } from "../../config/types.js";
 import {
   prepareProviderDynamicModel,
@@ -8,7 +8,7 @@ import {
   runProviderDynamicModel,
   normalizeProviderResolvedModelWithPlugin,
 } from "../../plugins/provider-runtime.js";
-import { resolveHanzo BotAgentDir } from "../agent-paths.js";
+import { resolveHanzoBotAgentDir } from "../agent-paths.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../defaults.js";
 import { buildModelAliasLines } from "../model-alias-lines.js";
 import { isSecretRefHeaderValueMarker } from "../model-auth-markers.js";
@@ -56,7 +56,7 @@ function sanitizeModelHeaders(
 function normalizeResolvedModel(params: {
   provider: string;
   model: Model<Api>;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   agentDir?: string;
 }): Model<Api> {
   const pluginNormalized = normalizeProviderResolvedModelWithPlugin({
@@ -79,7 +79,7 @@ function normalizeResolvedModel(params: {
 export { buildModelAliasLines };
 
 function resolveConfiguredProviderConfig(
-  cfg: Hanzo BotConfig | undefined,
+  cfg: HanzoBotConfig | undefined,
   provider: string,
 ): InlineProviderConfig | undefined {
   const configuredProviders = cfg?.models?.providers;
@@ -185,7 +185,7 @@ function resolveExplicitModelWithRegistry(params: {
   provider: string;
   modelId: string;
   modelRegistry: ModelRegistry;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   agentDir?: string;
 }): { kind: "resolved"; model: Model<Api> } | { kind: "suppressed" } | undefined {
   const { provider, modelId, modelRegistry, cfg, agentDir } = params;
@@ -236,7 +236,7 @@ export function resolveModelWithRegistry(params: {
   provider: string;
   modelId: string;
   modelRegistry: ModelRegistry;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   agentDir?: string;
 }): Model<Api> | undefined {
   const explicitModel = resolveExplicitModelWithRegistry(params);
@@ -312,14 +312,14 @@ export function resolveModel(
   provider: string,
   modelId: string,
   agentDir?: string,
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
 ): {
   model?: Model<Api>;
   error?: string;
   authStorage: AuthStorage;
   modelRegistry: ModelRegistry;
 } {
-  const resolvedAgentDir = agentDir ?? resolveHanzo BotAgentDir();
+  const resolvedAgentDir = agentDir ?? resolveHanzoBotAgentDir();
   const authStorage = discoverAuthStorage(resolvedAgentDir);
   const modelRegistry = discoverModels(authStorage, resolvedAgentDir);
   const model = resolveModelWithRegistry({
@@ -344,14 +344,14 @@ export async function resolveModelAsync(
   provider: string,
   modelId: string,
   agentDir?: string,
-  cfg?: Hanzo BotConfig,
+  cfg?: HanzoBotConfig,
 ): Promise<{
   model?: Model<Api>;
   error?: string;
   authStorage: AuthStorage;
   modelRegistry: ModelRegistry;
 }> {
-  const resolvedAgentDir = agentDir ?? resolveHanzo BotAgentDir();
+  const resolvedAgentDir = agentDir ?? resolveHanzoBotAgentDir();
   const authStorage = discoverAuthStorage(resolvedAgentDir);
   const modelRegistry = discoverModels(authStorage, resolvedAgentDir);
   const explicitModel = resolveExplicitModelWithRegistry({

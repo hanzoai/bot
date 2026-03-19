@@ -38,9 +38,9 @@ vi.mock("../agents/workspace.js", () => ({
   resolveDefaultAgentWorkspaceDir,
 }));
 
-const resolveHanzo BotAgentDir = vi.hoisted(() => vi.fn(() => "/tmp/agent"));
+const resolveHanzoBotAgentDir = vi.hoisted(() => vi.fn(() => "/tmp/agent"));
 vi.mock("../agents/agent-paths.js", () => ({
-  resolveHanzo BotAgentDir,
+  resolveHanzoBotAgentDir,
 }));
 
 const applyAuthProfileConfig = vi.hoisted(() => vi.fn((config) => config));

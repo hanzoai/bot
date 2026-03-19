@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   resolveMessageChannelSelection: vi.fn(),
   sendPoll: vi.fn(async () => ({ messageId: "poll-1" })),
   getChannelPlugin: vi.fn(),
-  loadHanzo BotPlugins: vi.fn(),
+  loadHanzoBotPlugins: vi.fn(),
 }));
 
 vi.mock("../../config/config.js", async () => {
@@ -63,7 +63,7 @@ vi.mock("../../config/plugin-auto-enable.js", () => ({
 }));
 
 vi.mock("../../plugins/loader.js", () => ({
-  loadHanzo BotPlugins: mocks.loadHanzo BotPlugins,
+  loadHanzoBotPlugins: mocks.loadHanzoBotPlugins,
 }));
 
 vi.mock("../../infra/outbound/targets.js", () => ({
@@ -552,7 +552,7 @@ describe("gateway send mirroring", () => {
       idempotencyKey: "idem-cold-telegram-thread",
     });
 
-    expect(mocks.loadHanzo BotPlugins).toHaveBeenCalledTimes(1);
+    expect(mocks.loadHanzoBotPlugins).toHaveBeenCalledTimes(1);
     expect(mocks.deliverOutboundPayloads).toHaveBeenCalledWith(
       expect.objectContaining({
         channel: "telegram",

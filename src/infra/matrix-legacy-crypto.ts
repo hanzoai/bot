@@ -5,7 +5,7 @@ import {
   resolveConfiguredMatrixAccountIds,
   resolveMatrixLegacyFlatStoragePaths,
 } from "../../extensions/matrix/runtime-api.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
 import { writeJsonFileAtomically as writeJsonFileAtomicallyImpl } from "../plugin-sdk/json-store.js";
 import {
@@ -137,12 +137,12 @@ function detectLegacyBotSdkCryptoStore(cryptoRootDir: string): {
   }
 }
 
-function resolveMatrixAccountIds(cfg: Hanzo BotConfig): string[] {
+function resolveMatrixAccountIds(cfg: HanzoBotConfig): string[] {
   return resolveConfiguredMatrixAccountIds(cfg);
 }
 
 function resolveLegacyMatrixFlatStorePlan(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
 }): MatrixLegacyCryptoPlan | { warning: string } | null {
   const legacy = resolveMatrixLegacyFlatStoragePaths(resolveStateDir(params.env, os.homedir));
@@ -201,7 +201,7 @@ function loadLegacyBotSdkMetadata(cryptoRootDir: string): MatrixLegacyBotSdkMeta
 }
 
 function resolveMatrixLegacyCryptoPlans(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
 }): MatrixLegacyCryptoDetection {
   const warnings: string[] = [];
@@ -294,7 +294,7 @@ async function persistLegacyMigrationState(params: {
 }
 
 export function detectLegacyMatrixCrypto(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
 }): MatrixLegacyCryptoDetection {
   const detection = resolveMatrixLegacyCryptoPlans({
@@ -317,7 +317,7 @@ export function detectLegacyMatrixCrypto(params: {
 }
 
 export async function autoPrepareLegacyMatrixCrypto(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
   log?: { info?: (message: string) => void; warn?: (message: string) => void };
   deps?: Partial<MatrixLegacyCryptoPrepareDeps>;

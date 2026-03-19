@@ -2,7 +2,7 @@ import {
   createAccountListHelpers,
   normalizeAccountId,
   resolveAccountEntry,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/account-resolution";
 import type { SignalAccountConfig } from "openclaw/plugin-sdk/signal-core";
 
@@ -20,13 +20,13 @@ export const listSignalAccountIds = listAccountIds;
 export const resolveDefaultSignalAccountId = resolveDefaultAccountId;
 
 function resolveAccountConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
 ): SignalAccountConfig | undefined {
   return resolveAccountEntry(cfg.channels?.signal?.accounts, accountId);
 }
 
-function mergeSignalAccountConfig(cfg: Hanzo BotConfig, accountId: string): SignalAccountConfig {
+function mergeSignalAccountConfig(cfg: HanzoBotConfig, accountId: string): SignalAccountConfig {
   const { accounts: _ignored, ...base } = (cfg.channels?.signal ?? {}) as SignalAccountConfig & {
     accounts?: unknown;
   };
@@ -35,7 +35,7 @@ function mergeSignalAccountConfig(cfg: Hanzo BotConfig, accountId: string): Sign
 }
 
 export function resolveSignalAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
 }): ResolvedSignalAccount {
   const accountId = normalizeAccountId(params.accountId);
@@ -64,7 +64,7 @@ export function resolveSignalAccount(params: {
   };
 }
 
-export function listEnabledSignalAccounts(cfg: Hanzo BotConfig): ResolvedSignalAccount[] {
+export function listEnabledSignalAccounts(cfg: HanzoBotConfig): ResolvedSignalAccount[] {
   return listSignalAccountIds(cfg)
     .map((accountId) => resolveSignalAccount({ cfg, accountId }))
     .filter((account) => account.enabled);

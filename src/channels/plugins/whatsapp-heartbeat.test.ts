@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
 const loadSessionStoreMock = vi.hoisted(() => vi.fn());
 const readChannelAllowFromStoreSyncMock = vi.hoisted(() => vi.fn<() => string[]>(() => []));
@@ -8,12 +8,12 @@ type WhatsAppHeartbeatModule = typeof import("./whatsapp-heartbeat.js");
 
 let resolveWhatsAppHeartbeatRecipients: WhatsAppHeartbeatModule["resolveWhatsAppHeartbeatRecipients"];
 
-function makeCfg(overrides?: Partial<Hanzo BotConfig>): Hanzo BotConfig {
+function makeCfg(overrides?: Partial<HanzoBotConfig>): HanzoBotConfig {
   return {
     bindings: [],
     channels: {},
     ...overrides,
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 describe("resolveWhatsAppHeartbeatRecipients", () => {
@@ -26,7 +26,7 @@ describe("resolveWhatsAppHeartbeatRecipients", () => {
   }
 
   function resolveWith(
-    cfgOverrides: Partial<Hanzo BotConfig> = {},
+    cfgOverrides: Partial<HanzoBotConfig> = {},
     opts?: Parameters<typeof resolveWhatsAppHeartbeatRecipients>[1],
   ) {
     return resolveWhatsAppHeartbeatRecipients(makeCfg(cfgOverrides), opts);
@@ -132,7 +132,7 @@ describe("resolveWhatsAppHeartbeatRecipients", () => {
       a: { lastChannel: "whatsapp", lastTo: "+15550000001", updatedAt: 2, sessionId: "a" },
     });
     const result = resolveWith({
-      session: { scope: "global" } as Hanzo BotConfig["session"],
+      session: { scope: "global" } as HanzoBotConfig["session"],
       channels: { whatsapp: { allowFrom: ["*", "+15550000009"] } as never },
     });
     expect(result).toEqual({ recipients: ["+15550000009"], source: "allowFrom" });

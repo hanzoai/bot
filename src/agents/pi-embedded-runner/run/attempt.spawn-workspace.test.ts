@@ -124,7 +124,7 @@ vi.mock("../skills-runtime.js", () => ({
 }));
 
 vi.mock("../../docs-path.js", () => ({
-  resolveHanzo BotDocsPath: async () => undefined,
+  resolveHanzoBotDocsPath: async () => undefined,
 }));
 
 vi.mock("../../pi-project-settings.js", () => ({

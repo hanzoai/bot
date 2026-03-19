@@ -34,7 +34,7 @@ import {
   type ChannelMessageActionAdapter,
   type ChannelPlugin,
   type ChannelStatusIssue,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "../runtime-api.js";
 import { GoogleChatConfigSchema } from "../runtime-api.js";
 import {
@@ -126,7 +126,7 @@ const collectGoogleChatGroupPolicyWarnings =
   });
 
 const collectGoogleChatSecurityWarnings = composeWarningCollectors<{
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   account: ResolvedGoogleChatAccount;
 }>(
   collectGoogleChatGroupPolicyWarnings,

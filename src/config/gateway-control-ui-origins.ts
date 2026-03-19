@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "./config.js";
+import type { HanzoBotConfig } from "./config.js";
 import { DEFAULT_GATEWAY_PORT } from "./paths.js";
 
 export type GatewayNonLoopbackBindMode = "lan" | "tailnet" | "custom";
@@ -44,10 +44,10 @@ export function buildDefaultControlUiAllowedOrigins(params: {
 }
 
 export function ensureControlUiAllowedOriginsForNonLoopbackBind(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   opts?: { defaultPort?: number; requireControlUiEnabled?: boolean },
 ): {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   seededOrigins: string[] | null;
   bind: GatewayNonLoopbackBindMode | null;
 } {

@@ -245,7 +245,7 @@ export type PluginPackageInstall = {
   defaultChoice?: "npm" | "local";
 };
 
-export type Hanzo BotPackageStartup = {
+export type HanzoBotPackageStartup = {
   /**
    * Opt-in for channel plugins whose `setupEntry` fully covers the gateway
    * startup surface needed before the server starts listening.
@@ -253,12 +253,12 @@ export type Hanzo BotPackageStartup = {
   deferConfiguredChannelFullLoadUntilAfterListen?: boolean;
 };
 
-export type Hanzo BotPackageManifest = {
+export type HanzoBotPackageManifest = {
   extensions?: string[];
   setupEntry?: string;
   channel?: PluginPackageChannel;
   install?: PluginPackageInstall;
-  startup?: Hanzo BotPackageStartup;
+  startup?: HanzoBotPackageStartup;
 };
 
 export const DEFAULT_PLUGIN_ENTRY_CANDIDATES = [
@@ -279,11 +279,11 @@ export type PackageManifest = {
   name?: string;
   version?: string;
   description?: string;
-} & Partial<Record<ManifestKey, Hanzo BotPackageManifest>>;
+} & Partial<Record<ManifestKey, HanzoBotPackageManifest>>;
 
 export function getPackageManifestMetadata(
   manifest: PackageManifest | undefined,
-): Hanzo BotPackageManifest | undefined {
+): HanzoBotPackageManifest | undefined {
   if (!manifest) {
     return undefined;
   }

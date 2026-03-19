@@ -1,9 +1,9 @@
 import { listPotentialConfiguredChannelIds } from "../channels/config-presence.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadPluginManifestRegistry } from "./manifest-registry.js";
 
 export function resolveChannelPluginIds(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
 }): string[] {
@@ -17,7 +17,7 @@ export function resolveChannelPluginIds(params: {
 }
 
 export function resolveConfiguredChannelPluginIds(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
 }): string[] {
@@ -31,7 +31,7 @@ export function resolveConfiguredChannelPluginIds(params: {
 }
 
 export function resolveConfiguredDeferredChannelPluginIds(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
 }): string[] {

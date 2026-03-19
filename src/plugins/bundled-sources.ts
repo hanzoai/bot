@@ -1,4 +1,4 @@
-import { discoverHanzo BotPlugins } from "./discovery.js";
+import { discoverHanzoBotPlugins } from "./discovery.js";
 import { loadPluginManifest } from "./manifest.js";
 
 export type BundledPluginSource = {
@@ -35,7 +35,7 @@ export function resolveBundledPluginSources(params: {
   /** Use an explicit env when bundled roots should resolve independently from process.env. */
   env?: NodeJS.ProcessEnv;
 }): Map<string, BundledPluginSource> {
-  const discovery = discoverHanzo BotPlugins({
+  const discovery = discoverHanzoBotPlugins({
     workspaceDir: params.workspaceDir,
     env: params.env,
   });

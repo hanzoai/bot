@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { normalizeOptionalAccountId } from "../routing/session-key.js";
 import {
   discoverConfigSecretTargetsByIds,
@@ -72,7 +72,7 @@ function pathTargetsScopedChannelAccount(params: {
 }
 
 export function getScopedChannelsCommandSecretTargets(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   channel?: string | null;
   accountId?: string | null;
 }): {

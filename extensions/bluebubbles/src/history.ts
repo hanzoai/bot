@@ -1,5 +1,5 @@
 import { resolveBlueBubblesServerAccount } from "./account-resolve.js";
-import type { Hanzo BotConfig } from "./runtime-api.js";
+import type { HanzoBotConfig } from "./runtime-api.js";
 import { blueBubblesFetchWithTimeout, buildBlueBubblesApiUrl } from "./types.js";
 
 export type BlueBubblesHistoryEntry = {
@@ -37,7 +37,7 @@ export type BlueBubblesChatOpts = {
   password?: string;
   accountId?: string;
   timeoutMs?: number;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
 };
 
 function resolveAccount(params: BlueBubblesChatOpts) {

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
+import type { HanzoBotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import "./monitor.send-mocks.js";
 import { __testing } from "./monitor.js";
 import { sendMessageZalouserMock } from "./monitor.send-mocks.js";
@@ -58,7 +58,7 @@ describe("zalouser monitor pairing account scoping", () => {
       },
     };
 
-    const config: Hanzo BotConfig = {
+    const config: HanzoBotConfig = {
       channels: {
         zalouser: {
           accounts: {

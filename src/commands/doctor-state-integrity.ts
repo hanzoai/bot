@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveOAuthDir, resolveStateDir } from "../config/paths.js";
 import {
   formatSessionArchiveTimestamp,
@@ -456,7 +456,7 @@ function isSlashRoutingSessionKey(sessionKey: string): boolean {
   return /^[^:]+:slash:[^:]+(?:$|:)/.test(scoped);
 }
 
-function shouldRequireOAuthDir(cfg: Hanzo BotConfig, env: NodeJS.ProcessEnv): boolean {
+function shouldRequireOAuthDir(cfg: HanzoBotConfig, env: NodeJS.ProcessEnv): boolean {
   if (env.BOT_OAUTH_DIR?.trim()) {
     return true;
   }
@@ -481,7 +481,7 @@ function shouldRequireOAuthDir(cfg: Hanzo BotConfig, env: NodeJS.ProcessEnv): bo
 }
 
 export async function noteStateIntegrity(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   prompter: DoctorPrompterLike,
   configPath?: string,
 ) {

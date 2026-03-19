@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthProfileStore } from "../../agents/auth-profiles.js";
 import { OLLAMA_LOCAL_AUTH_MARKER } from "../../agents/model-auth-markers.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
 let mockStore: AuthProfileStore;
 let mockAllowedProfiles: string[];
@@ -48,7 +48,7 @@ async function buildAnthropicProbePlan(order: string[]) {
           anthropic: order,
         },
       },
-    } as Hanzo BotConfig,
+    } as HanzoBotConfig,
     providers: ["anthropic"],
     modelCandidates: ["anthropic/claude-sonnet-4-6"],
     options: {
@@ -93,7 +93,7 @@ async function buildAnthropicPlanFromModelsJsonApiKey(apiKey: string) {
           },
         },
       },
-    } as Hanzo BotConfig,
+    } as HanzoBotConfig,
     providers: ["anthropic"],
     modelCandidates: ["anthropic/claude-sonnet-4-6"],
     options: {

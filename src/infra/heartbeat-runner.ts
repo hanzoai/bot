@@ -24,7 +24,7 @@ import { HEARTBEAT_TOKEN } from "../auto-reply/tokens.js";
 import type { ReplyPayload } from "../auto-reply/types.js";
 import { getChannelPlugin } from "../channels/plugins/index.js";
 import type { ChannelHeartbeatDeps } from "../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadConfig } from "../config/config.js";
 import {
   canonicalizeMainSessionAlias,
@@ -117,16 +117,16 @@ type HeartbeatAgentState = {
 
 export type HeartbeatRunner = {
   stop: () => void;
-  updateConfig: (cfg: Hanzo BotConfig) => void;
+  updateConfig: (cfg: HanzoBotConfig) => void;
 };
 
-function hasExplicitHeartbeatAgents(cfg: Hanzo BotConfig) {
+function hasExplicitHeartbeatAgents(cfg: HanzoBotConfig) {
   const list = cfg.agents?.list ?? [];
   return list.some((entry) => Boolean(entry?.heartbeat));
 }
 
 function resolveHeartbeatConfig(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId?: string,
 ): HeartbeatConfig | undefined {
   const defaults = cfg.agents?.defaults?.heartbeat;
@@ -140,7 +140,7 @@ function resolveHeartbeatConfig(
   return { ...defaults, ...overrides };
 }
 
-function resolveHeartbeatAgents(cfg: Hanzo BotConfig): HeartbeatAgent[] {
+function resolveHeartbeatAgents(cfg: HanzoBotConfig): HeartbeatAgent[] {
   const list = cfg.agents?.list ?? [];
   if (hasExplicitHeartbeatAgents(cfg)) {
     return list
@@ -155,11 +155,11 @@ function resolveHeartbeatAgents(cfg: Hanzo BotConfig): HeartbeatAgent[] {
   return [{ agentId: fallbackId, heartbeat: resolveHeartbeatConfig(cfg, fallbackId) }];
 }
 
-export function resolveHeartbeatPrompt(cfg: Hanzo BotConfig, heartbeat?: HeartbeatConfig) {
+export function resolveHeartbeatPrompt(cfg: HanzoBotConfig, heartbeat?: HeartbeatConfig) {
   return resolveHeartbeatPromptText(heartbeat?.prompt ?? cfg.agents?.defaults?.heartbeat?.prompt);
 }
 
-function resolveHeartbeatAckMaxChars(cfg: Hanzo BotConfig, heartbeat?: HeartbeatConfig) {
+function resolveHeartbeatAckMaxChars(cfg: HanzoBotConfig, heartbeat?: HeartbeatConfig) {
   return Math.max(
     0,
     heartbeat?.ackMaxChars ??
@@ -169,7 +169,7 @@ function resolveHeartbeatAckMaxChars(cfg: Hanzo BotConfig, heartbeat?: Heartbeat
 }
 
 function resolveHeartbeatSession(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId?: string,
   heartbeat?: HeartbeatConfig,
   forcedSessionKey?: string,
@@ -413,7 +413,7 @@ function resolveHeartbeatReasonFlags(reason?: string): HeartbeatReasonFlags {
 }
 
 async function resolveHeartbeatPreflight(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId: string;
   heartbeat?: HeartbeatConfig;
   forcedSessionKey?: string;
@@ -491,7 +491,7 @@ function appendHeartbeatWorkspacePathHint(prompt: string, workspaceDir: string):
 }
 
 function resolveHeartbeatRunPrompt(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   heartbeat?: HeartbeatConfig;
   preflight: HeartbeatPreflight;
   canRelayToUser: boolean;
@@ -521,7 +521,7 @@ function resolveHeartbeatRunPrompt(params: {
 }
 
 export async function runHeartbeatOnce(opts: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   agentId?: string;
   sessionKey?: string;
   heartbeat?: HeartbeatConfig;
@@ -944,7 +944,7 @@ export async function runHeartbeatOnce(opts: {
 }
 
 export function startHeartbeatRunner(opts: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   runtime?: RuntimeEnv;
   abortSignal?: AbortSignal;
   runOnce?: typeof runHeartbeatOnce;
@@ -1004,7 +1004,7 @@ export function startHeartbeatRunner(opts: {
     state.timer.unref?.();
   };
 
-  const updateConfig = (cfg: Hanzo BotConfig) => {
+  const updateConfig = (cfg: HanzoBotConfig) => {
     if (state.stopped) {
       return;
     }

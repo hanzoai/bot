@@ -11,7 +11,7 @@ import {
 } from "@buape/carbon";
 import { ButtonStyle, Routes } from "discord-api-types/v10";
 import { normalizeMessageChannel } from "openclaw/plugin-sdk/channel-runtime";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { loadSessionStore, resolveStorePath } from "openclaw/plugin-sdk/config-runtime";
 import type { DiscordExecApprovalConfig } from "openclaw/plugin-sdk/config-runtime";
 import { GatewayClient } from "openclaw/plugin-sdk/gateway-runtime";
@@ -101,7 +101,7 @@ export function parseExecApprovalData(
 }
 
 type ExecApprovalContainerParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   title: string;
   description?: string;
@@ -191,7 +191,7 @@ class ExecApprovalActionRow extends Row<Button> {
 }
 
 function resolveExecApprovalAccountId(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   request: ExecApprovalRequest;
 }): string | null {
   const sessionKey = params.request.request.sessionKey?.trim();
@@ -267,7 +267,7 @@ function resolveExecApprovalPreviews(
 
 function createExecApprovalRequestContainer(params: {
   request: ExecApprovalRequest;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   actionRow?: Row<Button>;
 }): ExecApprovalContainer {
@@ -296,7 +296,7 @@ function createResolvedContainer(params: {
   request: ExecApprovalRequest;
   decision: ExecApprovalDecision;
   resolvedBy?: string | null;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
 }): ExecApprovalContainer {
   const { commandPreview, commandSecondaryPreview } = resolveExecApprovalPreviews(
@@ -333,7 +333,7 @@ function createResolvedContainer(params: {
 
 function createExpiredContainer(params: {
   request: ExecApprovalRequest;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
 }): ExecApprovalContainer {
   const { commandPreview, commandSecondaryPreview } = resolveExecApprovalPreviews(
@@ -359,7 +359,7 @@ export type DiscordExecApprovalHandlerOpts = {
   accountId: string;
   config: DiscordExecApprovalConfig;
   gatewayUrl?: string;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime?: RuntimeEnv;
   onResolve?: (id: string, decision: ExecApprovalDecision) => Promise<void>;
 };

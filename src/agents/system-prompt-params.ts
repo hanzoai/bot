@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { findGitRoot } from "../infra/git-root.js";
 import {
   formatUserTime,
@@ -33,7 +33,7 @@ export type SystemPromptRuntimeParams = {
 };
 
 export function buildSystemPromptParams(params: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentId?: string;
   runtime: Omit<RuntimeInfoInput, "agentId">;
   workspaceDir?: string;
@@ -60,7 +60,7 @@ export function buildSystemPromptParams(params: {
 }
 
 function resolveRepoRoot(params: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   workspaceDir?: string;
   cwd?: string;
 }): string | undefined {

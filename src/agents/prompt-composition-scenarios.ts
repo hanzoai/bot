@@ -7,7 +7,7 @@ import {
 } from "../auto-reply/reply/inbound-meta.js";
 import type { TemplateContext } from "../auto-reply/templating.js";
 import { SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { makeTempWorkspace, writeWorkspaceFile } from "../test-helpers/workspace.js";
 import {
   appendBootstrapPromptWarning,
@@ -126,7 +126,7 @@ function buildAutoReplySystemPrompt(params: {
     params.includeGroupChatContext ? buildGroupChatContext({ sessionCtx: params.sessionCtx }) : "",
     params.includeGroupIntro
       ? buildGroupIntro({
-          cfg: {} as Hanzo BotConfig,
+          cfg: {} as HanzoBotConfig,
           sessionCtx: params.sessionCtx,
           defaultActivation: "mention",
           silentToken: SILENT_REPLY_TOKEN,
@@ -473,7 +473,7 @@ async function createBootstrapWarningScenario(workspaceDir: string): Promise<Pro
         bootstrapTotalMaxChars: 2_200,
       },
     },
-  } satisfies Hanzo BotConfig;
+  } satisfies HanzoBotConfig;
   const largeAgents = "# AGENTS.md\n\n" + "Rules.\n".repeat(5_000);
   const largeTools = "# TOOLS.md\n\n" + "Notes.\n".repeat(3_000);
   await writeWorkspaceFile({ dir: workspaceDir, name: "AGENTS.md", content: largeAgents });

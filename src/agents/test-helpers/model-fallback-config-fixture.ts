@@ -1,6 +1,6 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
-export function makeModelFallbackCfg(overrides: Partial<Hanzo BotConfig> = {}): Hanzo BotConfig {
+export function makeModelFallbackCfg(overrides: Partial<HanzoBotConfig> = {}): HanzoBotConfig {
   return {
     agents: {
       defaults: {
@@ -11,5 +11,5 @@ export function makeModelFallbackCfg(overrides: Partial<Hanzo BotConfig> = {}): 
       },
     },
     ...overrides,
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }

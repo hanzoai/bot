@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   canonicalizeMainSessionAlias,
   resolveMainSessionKey,
@@ -51,7 +51,7 @@ export function normalizeSessionKey(sessionKey: string): string {
 }
 
 export function canonicalizeAcpSessionKey(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   sessionKey: string;
 }): string {
   const normalized = normalizeSessionKey(params.sessionKey);
@@ -104,7 +104,7 @@ export function createUnsupportedControlError(params: {
   );
 }
 
-export function resolveRuntimeIdleTtlMs(cfg: Hanzo BotConfig): number {
+export function resolveRuntimeIdleTtlMs(cfg: HanzoBotConfig): number {
   const ttlMinutes = cfg.acp?.runtime?.ttlMinutes;
   if (typeof ttlMinutes !== "number" || !Number.isFinite(ttlMinutes) || ttlMinutes <= 0) {
     return 0;

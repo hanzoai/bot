@@ -1,6 +1,6 @@
 import { resolveAgentAvatar } from "../../agents/identity-avatar.js";
 import { resolveAgentIdentity } from "../../agents/identity.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
 export type OutboundIdentity = {
   name?: string;
@@ -26,7 +26,7 @@ export function normalizeOutboundIdentity(
 }
 
 export function resolveAgentOutboundIdentity(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   agentId: string,
 ): OutboundIdentity | undefined {
   const agentIdentity = resolveAgentIdentity(cfg, agentId);

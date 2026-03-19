@@ -78,7 +78,7 @@ function hasGatewayServiceMarker(content: string): boolean {
   );
 }
 
-function isHanzo BotGatewayLaunchdService(label: string, contents: string): boolean {
+function isHanzoBotGatewayLaunchdService(label: string, contents: string): boolean {
   if (hasGatewayServiceMarker(contents)) {
     return true;
   }
@@ -89,7 +89,7 @@ function isHanzo BotGatewayLaunchdService(label: string, contents: string): bool
   return label.startsWith("ai.hanzo.bot.");
 }
 
-function isHanzo BotGatewaySystemdService(name: string, contents: string): boolean {
+function isHanzoBotGatewaySystemdService(name: string, contents: string): boolean {
   if (hasGatewayServiceMarker(contents)) {
     return true;
   }
@@ -99,7 +99,7 @@ function isHanzo BotGatewaySystemdService(name: string, contents: string): boole
   return contents.toLowerCase().includes("gateway");
 }
 
-function isHanzo BotGatewayTaskName(name: string): boolean {
+function isHanzoBotGatewayTaskName(name: string): boolean {
   const normalized = name.trim().toLowerCase();
   if (!normalized) {
     return false;
@@ -209,7 +209,7 @@ async function scanLaunchdDir(params: {
     if (isIgnoredLaunchdLabel(label)) {
       continue;
     }
-    if (marker === "@hanzo/bot" && isHanzo BotGatewayLaunchdService(label, contents)) {
+    if (marker === "@hanzo/bot" && isHanzoBotGatewayLaunchdService(label, contents)) {
       continue;
     }
     results.push({
@@ -241,7 +241,7 @@ async function scanSystemdDir(params: {
     if (!marker) {
       continue;
     }
-    if (marker === "@hanzo/bot" && isHanzo BotGatewaySystemdService(name, contents)) {
+    if (marker === "@hanzo/bot" && isHanzoBotGatewaySystemdService(name, contents)) {
       continue;
     }
     results.push({
@@ -394,7 +394,7 @@ export async function findExtraGatewayServices(
       if (!name) {
         continue;
       }
-      if (isHanzo BotGatewayTaskName(name)) {
+      if (isHanzoBotGatewayTaskName(name)) {
         continue;
       }
       const lowerName = name.toLowerCase();

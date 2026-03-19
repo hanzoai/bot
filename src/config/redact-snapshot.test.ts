@@ -8,10 +8,10 @@ import {
 import { __test__ } from "./schema.hints.js";
 import type { ConfigUiHints } from "./schema.js";
 import type { ConfigFileSnapshot } from "./types.openclaw.js";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
 const { mapSensitivePaths } = __test__;
-const mainSchemaHints = mapSensitivePaths(Hanzo BotSchema, "", {});
+const mainSchemaHints = mapSensitivePaths(HanzoBotSchema, "", {});
 
 type TestSnapshot<TConfig extends Record<string, unknown>> = ConfigFileSnapshot & {
   parsed: TConfig;
@@ -1147,11 +1147,11 @@ describe("restoreRedactedValues", () => {
 
 describe("realredactConfigSnapshot_real", () => {
   it("main schema redact works (samples)", () => {
-    const schema = Hanzo BotSchema.toJSONSchema({
+    const schema = HanzoBotSchema.toJSONSchema({
       target: "draft-07",
       unrepresentable: "any",
     });
-    schema.title = "Hanzo BotConfig";
+    schema.title = "HanzoBotConfig";
     const hints = mainSchemaHints;
 
     const snapshot = makeSnapshot({

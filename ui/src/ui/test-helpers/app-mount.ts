@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, vi } from "vitest";
 import { i18n } from "../../i18n/index.ts";
 import "../app.ts";
-import type { Hanzo BotApp } from "../app.ts";
+import type { HanzoBotApp } from "../app.ts";
 
 class MockWebSocket {
   static CONNECTING = 0;
@@ -22,7 +22,7 @@ class MockWebSocket {
 
 export function mountApp(pathname: string) {
   window.history.replaceState({}, "", pathname);
-  const app = document.createElement("openclaw-app") as Hanzo BotApp;
+  const app = document.createElement("openclaw-app") as HanzoBotApp;
   document.body.append(app);
   app.connected = true;
   app.requestUpdate();

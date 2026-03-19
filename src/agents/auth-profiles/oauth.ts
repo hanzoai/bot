@@ -4,7 +4,7 @@ import {
   type OAuthCredentials,
   type OAuthProvider,
 } from "@mariozechner/pi-ai/oauth";
-import { loadConfig, type Hanzo BotConfig } from "../../config/config.js";
+import { loadConfig, type HanzoBotConfig } from "../../config/config.js";
 import { coerceSecretRef } from "../../config/types.secrets.js";
 import { withFileLock } from "../../infra/file-lock.js";
 import { resolveSecretRefString, type SecretRefResolveCache } from "../../secrets/resolve.js";
@@ -49,7 +49,7 @@ const isCompatibleModeType = (mode: string | undefined, type: string | undefined
 };
 
 function isProfileConfigCompatible(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   profileId: string;
   provider: string;
   mode: "api_key" | "token" | "oauth";
@@ -99,13 +99,13 @@ function extractErrorMessage(error: unknown): string {
 }
 
 type ResolveApiKeyForProfileParams = {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   store: AuthProfileStore;
   profileId: string;
   agentDir?: string;
 };
 
-type SecretDefaults = NonNullable<Hanzo BotConfig["secrets"]>["defaults"];
+type SecretDefaults = NonNullable<HanzoBotConfig["secrets"]>["defaults"];
 
 function adoptNewerMainOAuthCredential(params: {
   store: AuthProfileStore;
@@ -254,7 +254,7 @@ async function resolveProfileSecretString(params: {
   value: string | undefined;
   valueRef: unknown;
   refDefaults: SecretDefaults | undefined;
-  configForRefResolution: Hanzo BotConfig;
+  configForRefResolution: HanzoBotConfig;
   cache: SecretRefResolveCache;
   inlineFailureMessage: string;
   refFailureMessage: string;

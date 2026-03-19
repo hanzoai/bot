@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEmptyPluginRegistry } from "../../../src/plugins/registry.js";
 import { setActivePluginRegistry } from "../../../src/plugins/runtime.js";
 import { createMockServerResponse } from "../../../test/helpers/extensions/mock-http-response.js";
-import type { Hanzo BotConfig, PluginRuntime } from "../runtime-api.js";
+import type { HanzoBotConfig, PluginRuntime } from "../runtime-api.js";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import { verifyGoogleChatRequest } from "./auth.js";
 import { handleGoogleChatWebhookRequest, registerGoogleChatWebhookTarget } from "./monitor.js";
@@ -86,7 +86,7 @@ function registerTwoTargets() {
   const sinkA = vi.fn();
   const sinkB = vi.fn();
   const core = {} as PluginRuntime;
-  const config = {} as Hanzo BotConfig;
+  const config = {} as HanzoBotConfig;
 
   const unregisterA = registerGoogleChatWebhookTarget({
     account: baseAccount("A"),
@@ -155,7 +155,7 @@ describe("Google Chat webhook routing", () => {
     setActivePluginRegistry(registry);
     const unregisterA = registerGoogleChatWebhookTarget({
       account: baseAccount("A"),
-      config: {} as Hanzo BotConfig,
+      config: {} as HanzoBotConfig,
       runtime: {},
       core: {} as PluginRuntime,
       path: "/googlechat",
@@ -164,7 +164,7 @@ describe("Google Chat webhook routing", () => {
     });
     const unregisterB = registerGoogleChatWebhookTarget({
       account: baseAccount("B"),
-      config: {} as Hanzo BotConfig,
+      config: {} as HanzoBotConfig,
       runtime: {},
       core: {} as PluginRuntime,
       path: "/googlechat",

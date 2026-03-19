@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, expect, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 // Avoid exporting vitest mock types (TS2742 under pnpm + d.ts emit).
 // oxlint-disable-next-line typescript/no-explicit-any
@@ -192,7 +192,7 @@ export async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise
   }
 }
 
-export function makeCfg(home: string): Hanzo BotConfig {
+export function makeCfg(home: string): HanzoBotConfig {
   return {
     agents: {
       defaults: {
@@ -215,7 +215,7 @@ export function makeCfg(home: string): Hanzo BotConfig {
       },
     },
     session: { store: join(home, "sessions.json") },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 export async function loadGetReplyFromConfig() {
@@ -251,7 +251,7 @@ export async function readSessionStore(cfg: {
 export function makeWhatsAppElevatedCfg(
   home: string,
   opts?: { elevatedEnabled?: boolean; requireMentionInGroups?: boolean },
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const cfg = makeCfg(home);
   cfg.channels ??= {};
   cfg.channels.whatsapp = {
@@ -273,7 +273,7 @@ export function makeWhatsAppElevatedCfg(
 }
 
 export async function runDirectElevatedToggleAndLoadStore(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   getReplyFromConfig: typeof import("./reply.js").getReplyFromConfig;
   body?: string;
 }): Promise<{

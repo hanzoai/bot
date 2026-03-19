@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import {
   definePluginEntry,
-  type Hanzo BotPluginApi,
-  type Hanzo BotPluginService,
+  type HanzoBotPluginApi,
+  type HanzoBotPluginService,
 } from "./runtime-api.js";
 
 type ArmGroup = "camera" | "screen" | "writes" | "all";
@@ -159,18 +159,18 @@ async function writeArmState(statePath: string, state: ArmStateFile | null): Pro
   await fs.writeFile(statePath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
 
-function normalizeDenyList(cfg: Hanzo BotPluginApi["config"]): string[] {
+function normalizeDenyList(cfg: HanzoBotPluginApi["config"]): string[] {
   return uniqSorted([...(cfg.gateway?.nodes?.denyCommands ?? [])]);
 }
 
-function normalizeAllowList(cfg: Hanzo BotPluginApi["config"]): string[] {
+function normalizeAllowList(cfg: HanzoBotPluginApi["config"]): string[] {
   return uniqSorted([...(cfg.gateway?.nodes?.allowCommands ?? [])]);
 }
 
 function patchConfigNodeLists(
-  cfg: Hanzo BotPluginApi["config"],
+  cfg: HanzoBotPluginApi["config"],
   next: { allowCommands: string[]; denyCommands: string[] },
-): Hanzo BotPluginApi["config"] {
+): HanzoBotPluginApi["config"] {
   return {
     ...cfg,
     gateway: {
@@ -185,7 +185,7 @@ function patchConfigNodeLists(
 }
 
 async function disarmNow(params: {
-  api: Hanzo BotPluginApi;
+  api: HanzoBotPluginApi;
   stateDir: string;
   statePath: string;
   reason: string;
@@ -291,10 +291,10 @@ export default definePluginEntry({
   id: "phone-control",
   name: "Phone Control",
   description: "Temporary allowlist control for phone automation commands",
-  register(api: Hanzo BotPluginApi) {
+  register(api: HanzoBotPluginApi) {
     let expiryInterval: ReturnType<typeof setInterval> | null = null;
 
-    const timerService: Hanzo BotPluginService = {
+    const timerService: HanzoBotPluginService = {
       id: "phone-control-expiry",
       start: async (ctx) => {
         const statePath = resolveStatePath(ctx.stateDir);

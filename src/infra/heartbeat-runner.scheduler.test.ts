@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { startHeartbeatRunner } from "./heartbeat-runner.js";
 import { requestHeartbeatNow, resetHeartbeatWakeStateForTests } from "./heartbeat-wake.js";
 
@@ -19,14 +19,14 @@ describe("startHeartbeatRunner", () => {
   }
 
   function heartbeatConfig(
-    list?: NonNullable<NonNullable<Hanzo BotConfig["agents"]>["list"]>,
-  ): Hanzo BotConfig {
+    list?: NonNullable<NonNullable<HanzoBotConfig["agents"]>["list"]>,
+  ): HanzoBotConfig {
     return {
       agents: {
         defaults: { heartbeat: { every: "30m" } },
         ...(list ? { list } : {}),
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
   }
 
   function createRequestsInFlightRunSpy(skipCount: number) {
@@ -41,7 +41,7 @@ describe("startHeartbeatRunner", () => {
   }
 
   async function expectWakeDispatch(params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     runSpy: RunOnce;
     wake: { reason: string; agentId?: string; sessionKey?: string; coalesceMs: number };
     expectedCall: Record<string, unknown>;
@@ -88,7 +88,7 @@ describe("startHeartbeatRunner", () => {
           { id: "ops", heartbeat: { every: "15m" } },
         ],
       },
-    } as Hanzo BotConfig);
+    } as HanzoBotConfig);
 
     await vi.advanceTimersByTimeAsync(10 * 60_000 + 1_000);
 
@@ -141,7 +141,7 @@ describe("startHeartbeatRunner", () => {
 
     const cfg = {
       agents: { defaults: { heartbeat: { every: "30m" } } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     // Start runner A
     const runnerA = startHeartbeatRunner({ cfg, runOnce: runSpy1 });
@@ -239,7 +239,7 @@ describe("startHeartbeatRunner", () => {
           { id: "main", heartbeat: { every: "30m" } },
           { id: "ops", heartbeat: { every: "15m" } },
         ]),
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       runSpy,
       wake: {
         reason: "cron:job-123",
@@ -266,7 +266,7 @@ describe("startHeartbeatRunner", () => {
           { id: "main", heartbeat: { every: "30m" } },
           { id: "finance", heartbeat: { every: "30m" } },
         ]),
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       runSpy,
       wake: {
         reason: "exec-event",

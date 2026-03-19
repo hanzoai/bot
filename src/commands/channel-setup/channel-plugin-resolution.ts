@@ -6,7 +6,7 @@ import {
 } from "../../channels/plugins/catalog.js";
 import { getChannelPlugin, normalizeChannelId } from "../../channels/plugins/index.js";
 import type { ChannelId, ChannelPlugin } from "../../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import { createClackPrompter } from "../../wizard/clack-prompter.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
@@ -21,14 +21,14 @@ type ChannelPluginSnapshot = {
 };
 
 type ResolveInstallableChannelPluginResult = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channelId?: ChannelId;
   plugin?: ChannelPlugin;
   catalogEntry?: ChannelPluginCatalogEntry;
   configChanged: boolean;
 };
 
-function resolveWorkspaceDir(cfg: Hanzo BotConfig) {
+function resolveWorkspaceDir(cfg: HanzoBotConfig) {
   return resolveAgentWorkspaceDir(cfg, resolveDefaultAgentId(cfg));
 }
 
@@ -46,7 +46,7 @@ function resolveResolvedChannelId(params: {
   return normalizeChannelId(params.catalogEntry.id) ?? (params.catalogEntry.id as ChannelId);
 }
 
-export function resolveCatalogChannelEntry(raw: string, cfg: Hanzo BotConfig | null) {
+export function resolveCatalogChannelEntry(raw: string, cfg: HanzoBotConfig | null) {
   const trimmed = raw.trim().toLowerCase();
   if (!trimmed) {
     return undefined;
@@ -71,7 +71,7 @@ function findScopedChannelPlugin(
 }
 
 function loadScopedChannelPlugin(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   channelId: ChannelId;
   pluginId?: string;
@@ -88,7 +88,7 @@ function loadScopedChannelPlugin(params: {
 }
 
 export async function resolveInstallableChannelPlugin(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   runtime: RuntimeEnv;
   rawChannel?: string | null;
   channelId?: ChannelId;

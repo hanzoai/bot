@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { DEFAULT_OLLAMA_EMBEDDING_MODEL } from "./embeddings-ollama.js";
 import type {
   EmbeddingProvider,
@@ -44,7 +44,7 @@ function buildConfig(params: {
   indexPath: string;
   provider: "openai" | "mistral";
   fallback?: "none" | "mistral" | "ollama";
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   return {
     agents: {
       defaults: {
@@ -60,7 +60,7 @@ function buildConfig(params: {
       },
       list: [{ id: "main", default: true }],
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 describe("memory manager mistral provider wiring", () => {

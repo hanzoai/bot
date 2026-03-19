@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { NON_ENV_SECRETREF_MARKER } from "./model-auth-markers.js";
 import {
   enforceSourceManagedProviderSecrets,
@@ -13,7 +13,7 @@ describe("normalizeProviders", () => {
   it("trims provider keys so image models remain discoverable for custom providers", async () => {
     const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
     try {
-      const providers: NonNullable<NonNullable<Hanzo BotConfig["models"]>["providers"]> = {
+      const providers: NonNullable<NonNullable<HanzoBotConfig["models"]>["providers"]> = {
         " dashscope-vision ": {
           baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
           api: "openai-completions",
@@ -43,7 +43,7 @@ describe("normalizeProviders", () => {
   it("keeps the latest provider config when duplicate keys only differ by whitespace", async () => {
     const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
     try {
-      const providers: NonNullable<NonNullable<Hanzo BotConfig["models"]>["providers"]> = {
+      const providers: NonNullable<NonNullable<HanzoBotConfig["models"]>["providers"]> = {
         openai: {
           baseUrl: "https://api.openai.com/v1",
           api: "openai-completions",
@@ -83,7 +83,7 @@ describe("normalizeProviders", () => {
     process.env.OPENAI_API_KEY = "sk-test-secret-value-12345"; // pragma: allowlist secret
     const secretRefManagedProviders = new Set<string>();
     try {
-      const providers: NonNullable<NonNullable<Hanzo BotConfig["models"]>["providers"]> = {
+      const providers: NonNullable<NonNullable<HanzoBotConfig["models"]>["providers"]> = {
         openai: {
           baseUrl: "https://api.openai.com/v1",
           apiKey: "sk-test-secret-value-12345", // pragma: allowlist secret; simulates resolved ${OPENAI_API_KEY}
@@ -117,7 +117,7 @@ describe("normalizeProviders", () => {
   it("normalizes SecretRef-backed provider headers to non-secret marker values", async () => {
     const agentDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-"));
     try {
-      const providers: NonNullable<NonNullable<Hanzo BotConfig["models"]>["providers"]> = {
+      const providers: NonNullable<NonNullable<HanzoBotConfig["models"]>["providers"]> = {
         openai: {
           baseUrl: "https://api.openai.com/v1",
           api: "openai-completions",
@@ -149,9 +149,9 @@ describe("normalizeProviders", () => {
         apiKey: "sk-runtime-moonshot", // pragma: allowlist secret
         models: [],
       },
-    } as unknown as NonNullable<NonNullable<Hanzo BotConfig["models"]>["providers"]>;
+    } as unknown as NonNullable<NonNullable<HanzoBotConfig["models"]>["providers"]>;
 
-    const sourceProviders: NonNullable<NonNullable<Hanzo BotConfig["models"]>["providers"]> = {
+    const sourceProviders: NonNullable<NonNullable<HanzoBotConfig["models"]>["providers"]> = {
       openai: {
         baseUrl: "https://api.openai.com/v1",
         api: "openai-completions",

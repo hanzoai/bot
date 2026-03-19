@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { SlackChannelConfig } from "openclaw/plugin-sdk/config-runtime";
 import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
 
@@ -13,7 +13,7 @@ export type SlackChannelMigrationResult = {
 };
 
 function resolveAccountChannels(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId?: string | null,
 ): { channels?: SlackChannels } {
   if (!accountId) {
@@ -57,7 +57,7 @@ export function migrateSlackChannelsInPlace(
 }
 
 export function migrateSlackChannelConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   oldChannelId: string;
   newChannelId: string;

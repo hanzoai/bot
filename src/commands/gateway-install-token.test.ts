@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 const readConfigFileSnapshotMock = vi.hoisted(() => vi.fn());
 const writeConfigFileMock = vi.hoisted(() => vi.fn());
@@ -85,7 +85,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { token: "config-token" } },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 
@@ -107,7 +107,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token", token: tokenRef } },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: { BOT_GATEWAY_TOKEN: "resolved-token" } as NodeJS.ProcessEnv,
     });
 
@@ -126,7 +126,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token", token: "${MISSING_GATEWAY_TOKEN}" } },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 
@@ -143,7 +143,7 @@ describe("resolveGatewayInstallToken", () => {
             password: "password-value", // pragma: allowlist secret
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
       persistGeneratedToken: true,
@@ -161,7 +161,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token" } },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
     });
@@ -178,7 +178,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token" } },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
       persistGeneratedToken: true,
@@ -217,7 +217,7 @@ describe("resolveGatewayInstallToken", () => {
     const result = await resolveGatewayInstallToken({
       config: {
         gateway: { auth: { mode: "token" } },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
       persistGeneratedToken: true,
@@ -245,7 +245,7 @@ describe("resolveGatewayInstallToken", () => {
             default: { source: "env" },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
       autoGenerateWhenMissing: true,
       persistGeneratedToken: true,
@@ -270,7 +270,7 @@ describe("resolveGatewayInstallToken", () => {
             token: tokenRef,
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       env: {} as NodeJS.ProcessEnv,
     });
 

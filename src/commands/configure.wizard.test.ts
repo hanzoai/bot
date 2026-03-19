@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 const mocks = vi.hoisted(() => ({
   clackIntro: vi.fn(),
@@ -49,7 +49,7 @@ vi.mock("../terminal/note.js", () => ({
 
 vi.mock("./onboard-helpers.js", () => ({
   DEFAULT_WORKSPACE: "~/.hanzo/bot/workspace",
-  applyWizardMetadata: (cfg: Hanzo BotConfig) => cfg,
+  applyWizardMetadata: (cfg: HanzoBotConfig) => cfg,
   ensureWorkspaceAndSessions: vi.fn(),
   guardCancel: <T>(value: T) => value,
   printWizardHeader: mocks.printWizardHeader,

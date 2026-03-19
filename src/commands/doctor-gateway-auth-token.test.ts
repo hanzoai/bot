@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
   resolveGatewayAuthTokenForService,
@@ -17,7 +17,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             token: "config-token",
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {} as NodeJS.ProcessEnv,
     );
 
@@ -41,7 +41,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {
         CUSTOM_GATEWAY_TOKEN: "resolved-token",
       } as NodeJS.ProcessEnv,
@@ -63,7 +63,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {
         CUSTOM_GATEWAY_TOKEN: "resolved-token",
       } as NodeJS.ProcessEnv,
@@ -89,7 +89,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {
         BOT_GATEWAY_TOKEN: "env-fallback-token",
       } as NodeJS.ProcessEnv,
@@ -115,7 +115,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {
         CUSTOM_GATEWAY_TOKEN: "   ",
         BOT_GATEWAY_TOKEN: "env-fallback-token",
@@ -142,7 +142,7 @@ describe("resolveGatewayAuthTokenForService", () => {
             default: { source: "env" },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {} as NodeJS.ProcessEnv,
     );
 
@@ -160,7 +160,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
             mode: "token",
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(true);
@@ -174,7 +174,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
             mode: "password",
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(false);
@@ -190,7 +190,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
             gateway: {
               auth: {},
             },
-          } as Hanzo BotConfig,
+          } as HanzoBotConfig,
           process.env,
         );
         expect(required).toBe(true);
@@ -215,7 +215,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
             default: { source: "env" },
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(false);
@@ -232,7 +232,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
             BOT_GATEWAY_PASSWORD: "configured-password", // pragma: allowlist secret
           },
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(false);
@@ -244,7 +244,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
         gateway: {
           auth: {},
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
       {} as NodeJS.ProcessEnv,
     );
     expect(required).toBe(true);

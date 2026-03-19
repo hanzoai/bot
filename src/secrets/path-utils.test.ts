@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import {
   deletePathStrict,
   getPath,
@@ -7,11 +7,11 @@ import {
   setPathExistingStrict,
 } from "./path-utils.js";
 
-function asConfig(value: unknown): Hanzo BotConfig {
-  return value as Hanzo BotConfig;
+function asConfig(value: unknown): HanzoBotConfig {
+  return value as HanzoBotConfig;
 }
 
-function createAgentListConfig(): Hanzo BotConfig {
+function createAgentListConfig(): HanzoBotConfig {
   return asConfig({
     agents: {
       list: [{ id: "a" }],

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import { clearPluginCommands, registerPluginCommand } from "../../../src/plugins/commands.js";
 const deliveryMocks = vi.hoisted(() => ({
   deliverReplies: vi.fn(async () => ({ delivered: true })),
@@ -131,7 +131,7 @@ describe("registerTelegramNativeCommands real plugin registry", () => {
 
     registerTelegramNativeCommands({
       ...createNativeCommandTestParams({
-        commands: { allowFrom: { telegram: ["999"] } } as Hanzo BotConfig["commands"],
+        commands: { allowFrom: { telegram: ["999"] } } as HanzoBotConfig["commands"],
       }),
       bot,
       allowFrom: ["999"],

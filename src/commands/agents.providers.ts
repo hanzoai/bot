@@ -5,7 +5,7 @@ import {
   normalizeChannelId,
 } from "../channels/plugins/index.js";
 import type { ChannelId } from "../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { AgentBinding } from "../config/types.js";
 import { DEFAULT_ACCOUNT_ID } from "../routing/session-key.js";
 
@@ -43,7 +43,7 @@ function formatProviderState(entry: ProviderAccountStatus): string {
 }
 
 export async function buildProviderStatusIndex(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ): Promise<Map<string, ProviderAccountStatus>> {
   const map = new Map<string, ProviderAccountStatus>();
 
@@ -91,7 +91,7 @@ export async function buildProviderStatusIndex(
   return map;
 }
 
-function resolveDefaultAccountId(cfg: Hanzo BotConfig, provider: ChannelId): string {
+function resolveDefaultAccountId(cfg: HanzoBotConfig, provider: ChannelId): string {
   const plugin = getChannelPlugin(provider);
   if (!plugin) {
     return DEFAULT_ACCOUNT_ID;
@@ -99,7 +99,7 @@ function resolveDefaultAccountId(cfg: Hanzo BotConfig, provider: ChannelId): str
   return resolveChannelDefaultAccountId({ plugin, cfg });
 }
 
-function shouldShowProviderEntry(entry: ProviderAccountStatus, cfg: Hanzo BotConfig): boolean {
+function shouldShowProviderEntry(entry: ProviderAccountStatus, cfg: HanzoBotConfig): boolean {
   const plugin = getChannelPlugin(entry.provider);
   if (!plugin) {
     return Boolean(entry.configured);
@@ -120,7 +120,7 @@ function formatProviderEntry(entry: ProviderAccountStatus): string {
   return `${label}: ${formatProviderState(entry)}`;
 }
 
-export function summarizeBindings(cfg: Hanzo BotConfig, bindings: AgentBinding[]): string[] {
+export function summarizeBindings(cfg: HanzoBotConfig, bindings: AgentBinding[]): string[] {
   if (bindings.length === 0) {
     return [];
   }
@@ -145,7 +145,7 @@ export function summarizeBindings(cfg: Hanzo BotConfig, bindings: AgentBinding[]
 
 export function listProvidersForAgent(params: {
   summaryIsDefault: boolean;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   bindings: AgentBinding[];
   providerStatus: Map<string, ProviderAccountStatus>;
 }): string[] {

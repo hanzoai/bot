@@ -3,7 +3,7 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEmptyPluginRegistry } from "../../../src/plugins/registry.js";
 import { setActivePluginRegistry } from "../../../src/plugins/runtime.js";
-import type { Hanzo BotConfig, PluginRuntime } from "../runtime-api.js";
+import type { HanzoBotConfig, PluginRuntime } from "../runtime-api.js";
 import {
   clearZaloWebhookSecurityStateForTest,
   getZaloWebhookRateLimitStateSizeForTest,
@@ -50,13 +50,13 @@ function registerTarget(params: {
   secret?: string;
   statusSink?: (patch: { lastInboundAt?: number; lastOutboundAt?: number }) => void;
   account?: ResolvedZaloAccount;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   core?: PluginRuntime;
 }): () => void {
   return registerZaloWebhookTarget({
     token: "tok",
     account: params.account ?? DEFAULT_ACCOUNT,
-    config: params.config ?? ({} as Hanzo BotConfig),
+    config: params.config ?? ({} as HanzoBotConfig),
     runtime: {},
     core: params.core ?? ({} as PluginRuntime),
     secret: params.secret ?? "secret",
@@ -355,7 +355,7 @@ describe("handleZaloWebhookRequest", () => {
         gateway: {
           trustedProxies: ["127.0.0.1"],
         },
-      } as Hanzo BotConfig,
+      } as HanzoBotConfig,
     });
 
     try {

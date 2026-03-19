@@ -12,16 +12,16 @@ import {
   resolveConfigPathFromTempState,
 } from "./config.backup-rotation.test-helpers.js";
 import { withTempHome } from "./test-helpers.js";
-import type { Hanzo BotConfig } from "./types.js";
+import type { HanzoBotConfig } from "./types.js";
 
 describe("config backup rotation", () => {
   it("keeps a 5-deep backup ring for config writes", async () => {
     await withTempHome(async () => {
       const configPath = resolveConfigPathFromTempState();
-      const buildConfig = (version: number): Hanzo BotConfig =>
+      const buildConfig = (version: number): HanzoBotConfig =>
         ({
           agents: { list: [{ id: `v${version}` }] },
-        }) as Hanzo BotConfig;
+        }) as HanzoBotConfig;
 
       const writeVersion = async (version: number) => {
         const json = JSON.stringify(buildConfig(version), null, 2).trimEnd().concat("\n");

@@ -331,7 +331,7 @@ export async function loadRunOverflowCompactionHarness(): Promise<{
   }));
 
   vi.doMock("../models-config.js", () => ({
-    ensureHanzo BotModelsJson: vi.fn(async () => {}),
+    ensureHanzoBotModelsJson: vi.fn(async () => {}),
   }));
 
   vi.doMock("../context-window-guard.js", () => ({
@@ -358,7 +358,7 @@ export async function loadRunOverflowCompactionHarness(): Promise<{
   }));
 
   vi.doMock("../agent-paths.js", () => ({
-    resolveHanzo BotAgentDir: vi.fn(() => "/tmp/agent-dir"),
+    resolveHanzoBotAgentDir: vi.fn(() => "/tmp/agent-dir"),
   }));
 
   vi.doMock("../defaults.js", () => ({

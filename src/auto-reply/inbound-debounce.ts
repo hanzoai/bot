@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { InboundDebounceByProvider } from "../config/types.messages.js";
 
 const resolveMs = (value: unknown): number | undefined => {
@@ -19,7 +19,7 @@ const resolveChannelOverride = (params: {
 };
 
 export function resolveInboundDebounceMs(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: string;
   overrideMs?: number;
 }): number {

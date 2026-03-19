@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { MemoryIndexManager } from "./index.js";
 
 vi.mock("./embeddings.js", () => {
@@ -78,7 +78,7 @@ describe("memory vector dedupe", () => {
         },
         list: [{ id: "main", default: true }],
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     manager = await createMemoryManagerOrThrow(cfg);
 

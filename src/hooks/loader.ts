@@ -7,7 +7,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { openBoundaryFile } from "../infra/boundary-file-read.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { sanitizeForLog } from "../terminal/ansi.js";
@@ -59,7 +59,7 @@ function maybeWarnTrustedHookSource(source: string): void {
  * ```
  */
 export async function loadInternalHooks(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   workspaceDir: string,
   opts?: {
     managedHooksDir?: string;
