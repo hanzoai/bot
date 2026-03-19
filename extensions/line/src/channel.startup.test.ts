@@ -3,7 +3,7 @@ import { createRuntimeEnv } from "../../../test/helpers/extensions/runtime-env.j
 import type {
   ChannelGatewayContext,
   ChannelAccountSnapshot,
-  OpenClawConfig,
+  Hanzo BotConfig,
   PluginRuntime,
   ResolvedLineAccount,
 } from "../api.js";
@@ -55,7 +55,7 @@ function createStartAccountCtx(params: {
       tokenSource: "config" as const,
       config: {} as ResolvedLineAccount["config"],
     },
-    cfg: {} as OpenClawConfig,
+    cfg: {} as Hanzo BotConfig,
     runtime: params.runtime,
     abortSignal: params.abortSignal ?? new AbortController().signal,
     log: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },

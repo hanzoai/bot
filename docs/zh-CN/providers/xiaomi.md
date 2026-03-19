@@ -1,8 +1,8 @@
 ---
 read_when:
-  - 你想在 OpenClaw 中使用 Xiaomi MiMo 模型
+  - 你想在 Hanzo Bot 中使用 Xiaomi MiMo 模型
   - 你需要设置 `XIAOMI_API_KEY`
-summary: 在 OpenClaw 中使用 Xiaomi MiMo（`mimo-v2-flash`）
+summary: 在 Hanzo Bot 中使用 Xiaomi MiMo（`mimo-v2-flash`）
 title: Xiaomi MiMo
 x-i18n:
   generated_at: "2026-03-16T06:27:26Z"
@@ -17,7 +17,7 @@ x-i18n:
 
 Xiaomi MiMo 是 **MiMo** 模型的 API 平台。它提供与
 OpenAI 和 Anthropic 格式兼容的 REST API，并使用 API key 进行认证。请在
-[Xiaomi MiMo console](https://platform.xiaomimimo.com/#/console/api-keys) 中创建你的 API key。OpenClaw 使用
+[Xiaomi MiMo console](https://platform.xiaomimimo.com/#/console/api-keys) 中创建你的 API key。Hanzo Bot 使用
 `xiaomi` 提供商配合 Xiaomi MiMo API key。
 
 ## 模型概览

@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import type { PluginManifestRegistry } from "../../plugins/manifest-registry.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 
@@ -52,7 +52,7 @@ function buildRegistry(params: { acpxRoot: string; helperRoot: string }): Plugin
 function createSinglePluginRegistry(params: {
   pluginRoot: string;
   skills: string[];
-  format?: "openclaw" | "bundle";
+  format?: "@hanzo/bot" | "bundle";
 }): PluginManifestRegistry {
   return {
     diagnostics: [],
@@ -127,7 +127,7 @@ describe("resolvePluginSkillDirs", () => {
             helper: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
     });
 
     expect(dirs).toEqual(expectedDirs({ acpxRoot, helperRoot }));
@@ -154,7 +154,7 @@ describe("resolvePluginSkillDirs", () => {
             helper: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
     });
 
     expect(dirs).toEqual([path.resolve(pluginRoot, "skills")]);
@@ -185,7 +185,7 @@ describe("resolvePluginSkillDirs", () => {
             helper: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
     });
 
     expect(dirs).toEqual([]);
@@ -213,7 +213,7 @@ describe("resolvePluginSkillDirs", () => {
             helper: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
     });
 
     expect(dirs).toEqual([

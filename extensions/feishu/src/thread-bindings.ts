@@ -3,7 +3,7 @@ import {
   resolveThreadBindingIdleTimeoutMsForChannel,
   resolveThreadBindingMaxAgeMsForChannel,
 } from "openclaw/plugin-sdk/channel-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import {
   registerSessionBindingAdapter,
   unregisterSessionBindingAdapter,
@@ -118,7 +118,7 @@ function toSessionBindingRecord(
 
 export function createFeishuThreadBindingManager(params: {
   accountId?: string;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
 }): FeishuThreadBindingManager {
   const accountId = normalizeAccountId(params.accountId);
   const existing = MANAGERS_BY_ACCOUNT_ID.get(accountId);

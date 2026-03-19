@@ -1,6 +1,6 @@
 import Foundation
 
-public struct OpenClawChatModelChoice: Identifiable, Codable, Sendable, Hashable {
+public struct Hanzo BotChatModelChoice: Identifiable, Codable, Sendable, Hashable {
     public var id: String { self.selectionID }
 
     public let modelID: String
@@ -31,7 +31,7 @@ public struct OpenClawChatModelChoice: Identifiable, Codable, Sendable, Hashable
     }
 }
 
-public struct OpenClawChatSessionsDefaults: Codable, Sendable {
+public struct Hanzo BotChatSessionsDefaults: Codable, Sendable {
     public let model: String?
     public let contextTokens: Int?
     public let mainSessionKey: String?
@@ -43,7 +43,7 @@ public struct OpenClawChatSessionsDefaults: Codable, Sendable {
     }
 }
 
-public struct OpenClawChatSessionEntry: Codable, Identifiable, Sendable, Hashable {
+public struct Hanzo BotChatSessionEntry: Codable, Identifiable, Sendable, Hashable {
     public var id: String { self.key }
 
     public let key: String
@@ -70,19 +70,19 @@ public struct OpenClawChatSessionEntry: Codable, Identifiable, Sendable, Hashabl
     public let contextTokens: Int?
 }
 
-public struct OpenClawChatSessionsListResponse: Codable, Sendable {
+public struct Hanzo BotChatSessionsListResponse: Codable, Sendable {
     public let ts: Double?
     public let path: String?
     public let count: Int?
-    public let defaults: OpenClawChatSessionsDefaults?
-    public let sessions: [OpenClawChatSessionEntry]
+    public let defaults: Hanzo BotChatSessionsDefaults?
+    public let sessions: [Hanzo BotChatSessionEntry]
 
     public init(
         ts: Double?,
         path: String?,
         count: Int?,
-        defaults: OpenClawChatSessionsDefaults?,
-        sessions: [OpenClawChatSessionEntry])
+        defaults: Hanzo BotChatSessionsDefaults?,
+        sessions: [Hanzo BotChatSessionEntry])
     {
         self.ts = ts
         self.path = path

@@ -1,8 +1,8 @@
 import Cocoa
 import Foundation
 import Observation
-import OpenClawKit
-import OpenClawProtocol
+import Hanzo BotKit
+import Hanzo BotProtocol
 import OSLog
 
 struct InstanceInfo: Identifiable, Codable {
@@ -231,7 +231,7 @@ final class InstancesStore {
         }
     }
 
-    func handlePresenceEventPayload(_ payload: OpenClawProtocol.AnyCodable) {
+    func handlePresenceEventPayload(_ payload: Hanzo BotProtocol.AnyCodable) {
         do {
             let wrapper = try GatewayPayloadDecoding.decode(payload, as: PresenceEventPayload.self)
             self.applyPresence(wrapper.presence)

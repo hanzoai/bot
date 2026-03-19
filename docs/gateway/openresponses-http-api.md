@@ -8,7 +8,7 @@ title: "OpenResponses API"
 
 # OpenResponses API (HTTP)
 
-OpenClaw’s Gateway can serve an OpenResponses-compatible `POST /v1/responses` endpoint.
+Hanzo Bot’s Gateway can serve an OpenResponses-compatible `POST /v1/responses` endpoint.
 
 This endpoint is **disabled by default**. Enable it in config first.
 
@@ -16,7 +16,7 @@ This endpoint is **disabled by default**. Enable it in config first.
 - Same port as the Gateway (WS + HTTP multiplex): `http://<gateway-host>:<port>/v1/responses`
 
 Under the hood, requests are executed as a normal Gateway agent run (same codepath as
-`openclaw agent`), so routing/permissions/config match your Gateway.
+`hanzo-bot agent`), so routing/permissions/config match your Gateway.
 
 ## Authentication, security, and routing
 
@@ -275,7 +275,7 @@ curl -sS http://127.0.0.1:18789/v1/responses \
   -H 'Content-Type: application/json' \
   -H 'x-openclaw-agent-id: main' \
   -d '{
-    "model": "openclaw",
+    "model": "@hanzo/bot",
     "input": "hi"
   }'
 ```
@@ -288,7 +288,7 @@ curl -N http://127.0.0.1:18789/v1/responses \
   -H 'Content-Type: application/json' \
   -H 'x-openclaw-agent-id: main' \
   -d '{
-    "model": "openclaw",
+    "model": "@hanzo/bot",
     "stream": true,
     "input": "hi"
   }'

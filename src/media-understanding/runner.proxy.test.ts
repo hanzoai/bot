@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { buildProviderRegistry, runCapability } from "./runner.js";
 import { withAudioFixture, withVideoFixture } from "./runner.test-utils.js";
 import type { AudioTranscriptionRequest, VideoDescriptionRequest } from "./types.js";
@@ -38,7 +38,7 @@ async function runAudioCapabilityWithFetchCapture(params: {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as Hanzo BotConfig;
 
     const result = await runCapability({
       capability: "audio",
@@ -93,7 +93,7 @@ describe("runCapability proxy fetch passthrough", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as Hanzo BotConfig,
         ctx,
         attachments: cache,
         media,

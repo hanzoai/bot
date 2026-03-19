@@ -246,10 +246,10 @@ describe("applyPluginAutoEnable", () => {
       },
       env: {
         ...process.env,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_STATE_DIR: stateDir,
-        CLAWDBOT_STATE_DIR: undefined,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
+        BOT_HOME: undefined,
+        BOT_STATE_DIR: stateDir,
+        BOT_STATE_DIR: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
       },
     });
 
@@ -266,7 +266,7 @@ describe("applyPluginAutoEnable", () => {
       JSON.stringify({
         entries: [
           {
-            name: "@openclaw/env-secondary",
+            name: "@hanzo/bot-env-secondary",
             openclaw: {
               channel: {
                 id: "env-secondary",
@@ -277,7 +277,7 @@ describe("applyPluginAutoEnable", () => {
                 preferOver: ["env-primary"],
               },
               install: {
-                npmSpec: "@openclaw/env-secondary",
+                npmSpec: "@hanzo/bot-env-secondary",
               },
             },
           },
@@ -295,8 +295,8 @@ describe("applyPluginAutoEnable", () => {
       },
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
-        CLAWDBOT_STATE_DIR: undefined,
+        BOT_STATE_DIR: stateDir,
+        BOT_STATE_DIR: undefined,
       },
       manifestRegistry: makeRegistry([]),
     });
@@ -385,7 +385,7 @@ describe("applyPluginAutoEnable", () => {
 
   describe("third-party channel plugins (pluginId ≠ channelId)", () => {
     it("uses the plugin manifest id, not the channel id, for plugins.entries", () => {
-      // Reproduces: https://github.com/openclaw/openclaw/issues/25261
+      // Reproduces: https://github.com/hanzoai/bot/issues/25261
       // Plugin "apn-channel" declares channels: ["apn"]. Doctor must write
       // plugins.entries["apn-channel"], not plugins.entries["apn"].
       const result = applyWithApnChannelConfig();
@@ -491,10 +491,10 @@ describe("applyPluginAutoEnable", () => {
         config: makeApnChannelConfig(),
         env: {
           ...process.env,
-          OPENCLAW_HOME: undefined,
-          OPENCLAW_STATE_DIR: stateDir,
-          CLAWDBOT_STATE_DIR: undefined,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
+          BOT_HOME: undefined,
+          BOT_STATE_DIR: stateDir,
+          BOT_STATE_DIR: undefined,
+          BOT_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
         },
       });
 

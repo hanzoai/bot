@@ -6,7 +6,7 @@ import {
   loadSkillsFromDir,
   type Skill,
 } from "@mariozechner/pi-coding-agent";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import { isPathInside } from "../../infra/path-guards.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { CONFIG_DIR, resolveUserPath } from "../../utils.js";
@@ -16,7 +16,7 @@ import { shouldIncludeSkill } from "./config.js";
 import { normalizeSkillFilter } from "./filter.js";
 import {
   parseFrontmatter,
-  resolveOpenClawMetadata,
+  resolveHanzo BotMetadata,
   resolveSkillInvocationPolicy,
 } from "./frontmatter.js";
 import { resolvePluginSkillDirs } from "./plugin-skills.js";
@@ -67,7 +67,7 @@ function debugSkillCommandOnce(
 
 function filterSkillEntries(
   entries: SkillEntry[],
-  config?: OpenClawConfig,
+  config?: Hanzo BotConfig,
   skillFilter?: string[],
   eligibility?: SkillEligibilityContext,
 ): SkillEntry[] {
@@ -136,7 +136,7 @@ type ResolvedSkillsLimits = {
   maxSkillFileBytes: number;
 };
 
-function resolveSkillsLimits(config?: OpenClawConfig): ResolvedSkillsLimits {
+function resolveSkillsLimits(config?: Hanzo BotConfig): ResolvedSkillsLimits {
   const limits = config?.skills?.limits;
   return {
     maxCandidatesPerRoot: limits?.maxCandidatesPerRoot ?? DEFAULT_MAX_CANDIDATES_PER_ROOT,
@@ -292,7 +292,7 @@ function unwrapLoadedSkills(loaded: unknown): Skill[] {
 function loadSkillEntries(
   workspaceDir: string,
   opts?: {
-    config?: OpenClawConfig;
+    config?: Hanzo BotConfig;
     managedSkillsDir?: string;
     bundledSkillsDir?: string;
   },
@@ -519,7 +519,7 @@ function loadSkillEntries(
     return {
       skill,
       frontmatter,
-      metadata: resolveOpenClawMetadata(frontmatter),
+      metadata: resolveHanzo BotMetadata(frontmatter),
       invocation: resolveSkillInvocationPolicy(frontmatter),
     };
   });
@@ -563,7 +563,7 @@ export function formatSkillsCompact(skills: Skill[]): string {
 // Budget reserved for the compact-mode warning line prepended by the caller.
 const COMPACT_WARNING_OVERHEAD = 150;
 
-function applySkillsPromptLimits(params: { skills: Skill[]; config?: OpenClawConfig }): {
+function applySkillsPromptLimits(params: { skills: Skill[]; config?: Hanzo BotConfig }): {
   skillsForPrompt: Skill[];
   truncated: boolean;
   compact: boolean;
@@ -638,7 +638,7 @@ export function buildWorkspaceSkillsPrompt(
 }
 
 type WorkspaceSkillBuildOptions = {
-  config?: OpenClawConfig;
+  config?: Hanzo BotConfig;
   managedSkillsDir?: string;
   bundledSkillsDir?: string;
   entries?: SkillEntry[];
@@ -677,9 +677,9 @@ function resolveWorkspaceSkillPromptState(
     config: opts?.config,
   });
   const truncationNote = truncated
-    ? `⚠️ Skills truncated: included ${skillsForPrompt.length} of ${resolvedSkills.length}${compact ? " (compact format, descriptions omitted)" : ""}. Run \`openclaw skills check\` to audit.`
+    ? `⚠️ Skills truncated: included ${skillsForPrompt.length} of ${resolvedSkills.length}${compact ? " (compact format, descriptions omitted)" : ""}. Run \`hanzo-bot skills check\` to audit.`
     : compact
-      ? `⚠️ Skills catalog using compact format (descriptions omitted). Run \`openclaw skills check\` to audit.`
+      ? `⚠️ Skills catalog using compact format (descriptions omitted). Run \`hanzo-bot skills check\` to audit.`
       : "";
   const prompt = [
     remoteNote,
@@ -694,7 +694,7 @@ function resolveWorkspaceSkillPromptState(
 export function resolveSkillsPromptForRun(params: {
   skillsSnapshot?: SkillSnapshot;
   entries?: SkillEntry[];
-  config?: OpenClawConfig;
+  config?: Hanzo BotConfig;
   workspaceDir: string;
 }): string {
   const snapshotPrompt = params.skillsSnapshot?.prompt?.trim();
@@ -714,7 +714,7 @@ export function resolveSkillsPromptForRun(params: {
 export function loadWorkspaceSkillEntries(
   workspaceDir: string,
   opts?: {
-    config?: OpenClawConfig;
+    config?: Hanzo BotConfig;
     managedSkillsDir?: string;
     bundledSkillsDir?: string;
   },
@@ -764,7 +764,7 @@ function resolveSyncedSkillDestinationPath(params: {
 export async function syncSkillsToWorkspace(params: {
   sourceWorkspaceDir: string;
   targetWorkspaceDir: string;
-  config?: OpenClawConfig;
+  config?: Hanzo BotConfig;
   managedSkillsDir?: string;
   bundledSkillsDir?: string;
 }) {
@@ -821,7 +821,7 @@ export async function syncSkillsToWorkspace(params: {
 
 export function filterWorkspaceSkillEntries(
   entries: SkillEntry[],
-  config?: OpenClawConfig,
+  config?: Hanzo BotConfig,
 ): SkillEntry[] {
   return filterSkillEntries(entries, config);
 }
@@ -829,7 +829,7 @@ export function filterWorkspaceSkillEntries(
 export function buildWorkspaceSkillCommandSpecs(
   workspaceDir: string,
   opts?: {
-    config?: OpenClawConfig;
+    config?: Hanzo BotConfig;
     managedSkillsDir?: string;
     bundledSkillsDir?: string;
     entries?: SkillEntry[];

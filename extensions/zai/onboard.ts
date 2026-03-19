@@ -1,6 +1,6 @@
 import {
   applyProviderConfigWithModelCatalogPreset,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 import {
   buildZaiModelDefinition,
@@ -18,7 +18,7 @@ const ZAI_DEFAULT_MODELS = [
   buildZaiModelDefinition({ id: "glm-4.7-flashx" }),
 ];
 
-function resolveZaiPresetBaseUrl(cfg: OpenClawConfig, endpoint?: string): string {
+function resolveZaiPresetBaseUrl(cfg: Hanzo BotConfig, endpoint?: string): string {
   const existingProvider = cfg.models?.providers?.zai;
   const existingBaseUrl =
     typeof existingProvider?.baseUrl === "string" ? existingProvider.baseUrl.trim() : "";
@@ -26,10 +26,10 @@ function resolveZaiPresetBaseUrl(cfg: OpenClawConfig, endpoint?: string): string
 }
 
 function applyZaiPreset(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   params?: { endpoint?: string; modelId?: string },
   primaryModelRef?: string,
-): OpenClawConfig {
+): Hanzo BotConfig {
   const modelId = params?.modelId?.trim() || ZAI_DEFAULT_MODEL_ID;
   const modelRef = `zai/${modelId}`;
   return applyProviderConfigWithModelCatalogPreset(cfg, {
@@ -43,16 +43,16 @@ function applyZaiPreset(
 }
 
 export function applyZaiProviderConfig(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   params?: { endpoint?: string; modelId?: string },
-): OpenClawConfig {
+): Hanzo BotConfig {
   return applyZaiPreset(cfg, params);
 }
 
 export function applyZaiConfig(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   params?: { endpoint?: string; modelId?: string },
-): OpenClawConfig {
+): Hanzo BotConfig {
   const modelId = params?.modelId?.trim() || ZAI_DEFAULT_MODEL_ID;
   const modelRef = modelId === ZAI_DEFAULT_MODEL_ID ? ZAI_DEFAULT_MODEL_REF : `zai/${modelId}`;
   return applyZaiPreset(cfg, params, modelRef);

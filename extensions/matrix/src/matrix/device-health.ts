@@ -6,14 +6,14 @@ export type MatrixManagedDeviceInfo = {
 
 export type MatrixDeviceHealthSummary = {
   currentDeviceId: string | null;
-  staleOpenClawDevices: MatrixManagedDeviceInfo[];
-  currentOpenClawDevices: MatrixManagedDeviceInfo[];
+  staleHanzo BotDevices: MatrixManagedDeviceInfo[];
+  currentHanzo BotDevices: MatrixManagedDeviceInfo[];
 };
 
-const OPENCLAW_DEVICE_NAME_PREFIX = "OpenClaw ";
+const BOT_DEVICE_NAME_PREFIX = "Hanzo Bot ";
 
-export function isOpenClawManagedMatrixDevice(displayName: string | null | undefined): boolean {
-  return displayName?.startsWith(OPENCLAW_DEVICE_NAME_PREFIX) === true;
+export function isHanzo BotManagedMatrixDevice(displayName: string | null | undefined): boolean {
+  return displayName?.startsWith(BOT_DEVICE_NAME_PREFIX) === true;
 }
 
 export function summarizeMatrixDeviceHealth(
@@ -21,11 +21,11 @@ export function summarizeMatrixDeviceHealth(
 ): MatrixDeviceHealthSummary {
   const currentDeviceId = devices.find((device) => device.current)?.deviceId ?? null;
   const openClawDevices = devices.filter((device) =>
-    isOpenClawManagedMatrixDevice(device.displayName),
+    isHanzo BotManagedMatrixDevice(device.displayName),
   );
   return {
     currentDeviceId,
-    staleOpenClawDevices: openClawDevices.filter((device) => !device.current),
-    currentOpenClawDevices: openClawDevices.filter((device) => device.current),
+    staleHanzo BotDevices: openClawDevices.filter((device) => !device.current),
+    currentHanzo BotDevices: openClawDevices.filter((device) => device.current),
   };
 }

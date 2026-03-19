@@ -1,7 +1,7 @@
 ---
 read_when:
   - 你想以非交互方式读取或编辑配置
-summary: "`openclaw config` 的 CLI 参考（获取/设置/取消设置配置值）"
+summary: "`hanzo-bot config` 的 CLI 参考（获取/设置/取消设置配置值）"
 title: config
 x-i18n:
   generated_at: "2026-02-03T10:04:13Z"
@@ -12,10 +12,10 @@ x-i18n:
   workflow: 15
 ---
 
-# `openclaw config`
+# `hanzo-bot config`
 
 配置辅助命令：通过路径获取/设置/取消设置值。不带子命令运行将打开
-配置向导（与 `openclaw configure` 相同）。
+配置向导（与 `hanzo-bot configure` 相同）。
 
 ## 示例
 

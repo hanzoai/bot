@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/openshell-sandbox",
+  "name": "@hanzo/bot-openshell-sandbox",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw OpenShell sandbox backend",
+  "description": "Hanzo Bot OpenShell sandbox backend",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

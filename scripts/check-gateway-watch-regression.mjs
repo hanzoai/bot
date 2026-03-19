@@ -213,13 +213,13 @@ function sleep(ms) {
 
 function buildTimedWatchCommand(pidFilePath, timeFilePath, isolatedHomeDir) {
   const shellSource = [
-    'echo "$$" > "$OPENCLAW_WATCH_PID_FILE"',
+    'echo "$$" > "$BOT_WATCH_PID_FILE"',
     "exec node scripts/watch-node.mjs gateway --force --allow-unconfigured",
   ].join("\n");
   const env = {
-    OPENCLAW_WATCH_PID_FILE: pidFilePath,
+    BOT_WATCH_PID_FILE: pidFilePath,
     HOME: isolatedHomeDir,
-    OPENCLAW_HOME: isolatedHomeDir,
+    BOT_HOME: isolatedHomeDir,
   };
 
   if (process.platform === "darwin") {

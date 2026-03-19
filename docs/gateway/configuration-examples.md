@@ -1,9 +1,9 @@
 ---
-summary: "Schema-accurate configuration examples for common OpenClaw setups"
+summary: "Schema-accurate configuration examples for common Hanzo Bot setups"
 read_when:
-  - Learning how to configure OpenClaw
+  - Learning how to configure Hanzo Bot
   - Looking for configuration examples
-  - Setting up OpenClaw for the first time
+  - Setting up Hanzo Bot for the first time
 title: "Configuration Examples"
 ---
 
@@ -17,12 +17,12 @@ Examples below are aligned with the current config schema. For the exhaustive re
 
 ```json5
 {
-  agent: { workspace: "~/.openclaw/workspace" },
+  agent: { workspace: "~/.hanzo/bot/workspace" },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
 
-Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
+Save to `~/.hanzoai/bot.json` and you can DM the bot from that number.
 
 ### Recommended starter
 
@@ -34,7 +34,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
     emoji: "🦞",
   },
   agent: {
-    workspace: "~/.openclaw/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     model: { primary: "anthropic/claude-sonnet-4-6" },
   },
   channels: {
@@ -93,7 +93,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
   // Logging
   logging: {
     level: "info",
-    file: "/tmp/openclaw/openclaw.log",
+    file: "/tmp/hanzoai/bot.log",
     consoleLevel: "info",
     consoleStyle: "pretty",
     redactSensitive: "tools",
@@ -110,7 +110,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
   // Routing + queue
   routing: {
     groupChat: {
-      mentionPatterns: ["@openclaw", "openclaw"],
+      mentionPatterns: ["@openclaw", "@hanzo/bot"],
       historyLimit: 50,
     },
     queue: {
@@ -163,7 +163,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
       discord: { mode: "idle", idleMinutes: 10080 },
     },
     resetTriggers: ["/new", "/reset"],
-    store: "~/.openclaw/agents/default/sessions/sessions.json",
+    store: "~/.hanzo/bot/agents/default/sessions/sessions.json",
     maintenance: {
       mode: "warn",
       pruneAfter: "30d",
@@ -225,7 +225,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
       dm: { enabled: true, allowFrom: ["U123"] },
       slashCommand: {
         enabled: true,
-        name: "openclaw",
+        name: "@hanzo/bot",
         sessionPrefix: "slack:slash",
         ephemeral: true,
       },
@@ -235,7 +235,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
   // Agent runtime
   agents: {
     defaults: {
-      workspace: "~/.openclaw/workspace",
+      workspace: "~/.hanzo/bot/workspace",
       userTimezone: "America/Chicago",
       model: {
         primary: "anthropic/claude-sonnet-4-6",
@@ -289,7 +289,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
       sandbox: {
         mode: "non-main",
         perSession: true,
-        workspaceRoot: "~/.openclaw/sandboxes",
+        workspaceRoot: "~/.hanzo/bot/sandboxes",
         docker: {
           image: "openclaw-sandbox:bookworm-slim",
           workdir: "/workspace",
@@ -356,7 +356,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
   // Cron jobs
   cron: {
     enabled: true,
-    store: "~/.openclaw/cron/cron.json",
+    store: "~/.hanzo/bot/cron/cron.json",
     maxConcurrentRuns: 2,
     sessionRetention: "24h",
     runLog: {
@@ -371,7 +371,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
     path: "/hooks",
     token: "shared-secret",
     presets: ["gmail"],
-    transformsDir: "~/.openclaw/hooks/transforms",
+    transformsDir: "~/.hanzo/bot/hooks/transforms",
     mappings: [
       {
         id: "gmail-hook",
@@ -451,7 +451,7 @@ Save to `~/.openclaw/openclaw.json` and you can DM the bot from that number.
 
 ```json5
 {
-  agent: { workspace: "~/.openclaw/workspace" },
+  agent: { workspace: "~/.hanzo/bot/workspace" },
   channels: {
     whatsapp: { allowFrom: ["+15555550123"] },
     telegram: {
@@ -518,7 +518,7 @@ Only enable direct mutable name/email/nick matching with each channel's `dangero
     },
   },
   agent: {
-    workspace: "~/.openclaw/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     model: {
       primary: "anthropic/claude-sonnet-4-6",
       fallbacks: ["anthropic/claude-opus-4-6"],
@@ -563,7 +563,7 @@ terms before depending on subscription auth.
     },
   },
   agent: {
-    workspace: "~/.openclaw/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     model: {
       primary: "anthropic/claude-opus-4-6",
       fallbacks: ["minimax/MiniMax-M2.5"],
@@ -602,7 +602,7 @@ terms before depending on subscription auth.
 ```json5
 {
   agent: {
-    workspace: "~/.openclaw/workspace",
+    workspace: "~/.hanzo/bot/workspace",
     model: { primary: "lmstudio/minimax-m2.5-gs32" },
   },
   models: {

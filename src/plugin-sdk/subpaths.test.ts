@@ -7,7 +7,7 @@ import * as channelSetupSdk from "openclaw/plugin-sdk/channel-setup";
 import * as coreSdk from "openclaw/plugin-sdk/core";
 import type {
   ChannelMessageActionContext as CoreChannelMessageActionContext,
-  OpenClawPluginApi as CoreOpenClawPluginApi,
+  Hanzo BotPluginApi as CoreHanzo BotPluginApi,
   PluginRuntime as CorePluginRuntime,
 } from "openclaw/plugin-sdk/core";
 import * as directoryRuntimeSdk from "openclaw/plugin-sdk/directory-runtime";
@@ -35,10 +35,10 @@ import * as whatsappLoginQrSdk from "openclaw/plugin-sdk/whatsapp-login-qr";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type { ChannelMessageActionContext } from "../channels/plugins/types.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
-import type { OpenClawPluginApi } from "../plugins/types.js";
+import type { Hanzo BotPluginApi } from "../plugins/types.js";
 import type {
   ChannelMessageActionContext as SharedChannelMessageActionContext,
-  OpenClawPluginApi as SharedOpenClawPluginApi,
+  Hanzo BotPluginApi as SharedHanzo BotPluginApi,
   PluginRuntime as SharedPluginRuntime,
 } from "./channel-plugin-common.js";
 import { pluginSdkSubpaths } from "./entrypoints.js";
@@ -193,7 +193,7 @@ describe("plugin-sdk subpath exports", () => {
   });
 
   it("exports shared core types used by bundled channels", () => {
-    expectTypeOf<CoreOpenClawPluginApi>().toMatchTypeOf<OpenClawPluginApi>();
+    expectTypeOf<CoreHanzo BotPluginApi>().toMatchTypeOf<Hanzo BotPluginApi>();
     expectTypeOf<CorePluginRuntime>().toMatchTypeOf<PluginRuntime>();
     expectTypeOf<CoreChannelMessageActionContext>().toMatchTypeOf<ChannelMessageActionContext>();
   });
@@ -204,7 +204,7 @@ describe("plugin-sdk subpath exports", () => {
   });
 
   it("keeps core shared types aligned with the channel prelude", () => {
-    expectTypeOf<CoreOpenClawPluginApi>().toMatchTypeOf<SharedOpenClawPluginApi>();
+    expectTypeOf<CoreHanzo BotPluginApi>().toMatchTypeOf<SharedHanzo BotPluginApi>();
     expectTypeOf<CorePluginRuntime>().toMatchTypeOf<SharedPluginRuntime>();
     expectTypeOf<CoreChannelMessageActionContext>().toMatchTypeOf<SharedChannelMessageActionContext>();
   });

@@ -4,7 +4,7 @@ import {
   normalizeAccountId,
   normalizeChatType,
   resolveAccountEntry,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/account-resolution";
 import type { SlackAccountSurfaceFields } from "./account-surface-fields.js";
 import type { SlackAccountConfig } from "./runtime-api.js";
@@ -30,14 +30,14 @@ export const listSlackAccountIds = listAccountIds;
 export const resolveDefaultSlackAccountId = resolveDefaultAccountId;
 
 function resolveAccountConfig(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   accountId: string,
 ): SlackAccountConfig | undefined {
   return resolveAccountEntry(cfg.channels?.slack?.accounts, accountId);
 }
 
 export function mergeSlackAccountConfig(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   accountId: string,
 ): SlackAccountConfig {
   const { accounts: _ignored, ...base } = (cfg.channels?.slack ?? {}) as SlackAccountConfig & {
@@ -48,7 +48,7 @@ export function mergeSlackAccountConfig(
 }
 
 export function resolveSlackAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
 }): ResolvedSlackAccount {
   const accountId = normalizeAccountId(params.accountId);
@@ -104,7 +104,7 @@ export function resolveSlackAccount(params: {
   };
 }
 
-export function listEnabledSlackAccounts(cfg: OpenClawConfig): ResolvedSlackAccount[] {
+export function listEnabledSlackAccounts(cfg: Hanzo BotConfig): ResolvedSlackAccount[] {
   return listSlackAccountIds(cfg)
     .map((accountId) => resolveSlackAccount({ cfg, accountId }))
     .filter((account) => account.enabled);

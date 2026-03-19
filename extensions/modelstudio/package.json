@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/modelstudio-provider",
+  "name": "@hanzo/bot-modelstudio-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Model Studio provider plugin",
+  "description": "Hanzo Bot Model Studio provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

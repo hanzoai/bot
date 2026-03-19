@@ -1,14 +1,14 @@
 {
-  "name": "@openclaw/msteams",
+  "name": "@hanzo/bot-msteams",
   "version": "2026.3.14",
-  "description": "OpenClaw Microsoft Teams channel plugin",
+  "description": "Hanzo Bot Microsoft Teams channel plugin",
   "type": "module",
   "dependencies": {
     "@microsoft/agents-hosting": "^1.3.1",
     "express": "^5.2.1",
     "uuid": "^11.1.0"
   },
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -26,7 +26,7 @@
       "order": 60
     },
     "install": {
-      "npmSpec": "@openclaw/msteams",
+      "npmSpec": "@hanzo/bot-msteams",
       "localPath": "extensions/msteams",
       "defaultChoice": "npm"
     },

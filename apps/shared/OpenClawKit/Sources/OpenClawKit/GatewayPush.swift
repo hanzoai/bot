@@ -1,4 +1,4 @@
-import OpenClawProtocol
+import Hanzo BotProtocol
 
 /// Server-push messages from the gateway websocket.
 ///

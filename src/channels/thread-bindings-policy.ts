@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { normalizeAccountId } from "../routing/session-key.js";
 
 export const DISCORD_THREAD_BINDING_CHANNEL = "discord";
@@ -83,7 +83,7 @@ export function resolveThreadBindingsEnabled(params: {
 }
 
 function resolveChannelThreadBindings(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   channel: string;
   accountId: string;
 }): {
@@ -108,7 +108,7 @@ function resolveSpawnFlagKey(
 }
 
 export function resolveThreadBindingSpawnPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   channel: string;
   accountId?: string;
   kind: ThreadBindingSpawnKind;
@@ -140,7 +140,7 @@ export function resolveThreadBindingSpawnPolicy(params: {
 }
 
 export function resolveThreadBindingIdleTimeoutMsForChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   channel: string;
   accountId?: string;
 }): number {
@@ -152,7 +152,7 @@ export function resolveThreadBindingIdleTimeoutMsForChannel(params: {
 }
 
 export function resolveThreadBindingMaxAgeMsForChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   channel: string;
   accountId?: string;
 }): number {
@@ -164,7 +164,7 @@ export function resolveThreadBindingMaxAgeMsForChannel(params: {
 }
 
 function resolveThreadBindingChannelScope(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   channel: string;
   accountId?: string;
 }) {

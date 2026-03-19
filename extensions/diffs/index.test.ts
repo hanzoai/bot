@@ -2,7 +2,7 @@ import type { IncomingMessage } from "node:http";
 import { describe, expect, it, vi } from "vitest";
 import { createMockServerResponse } from "../../test/helpers/extensions/mock-http-response.js";
 import { createTestPluginApi } from "../../test/helpers/extensions/plugin-api.js";
-import type { OpenClawPluginApi, OpenClawPluginToolContext } from "./api.js";
+import type { Hanzo BotPluginApi, Hanzo BotPluginToolContext } from "./api.js";
 import plugin from "./index.js";
 
 describe("diffs plugin registration", () => {
@@ -46,10 +46,10 @@ describe("diffs plugin registration", () => {
     type RegisteredTool = {
       execute?: (toolCallId: string, params: Record<string, unknown>) => Promise<unknown>;
     };
-    type RegisteredHttpRouteParams = Parameters<OpenClawPluginApi["registerHttpRoute"]>[0];
+    type RegisteredHttpRouteParams = Parameters<Hanzo BotPluginApi["registerHttpRoute"]>[0];
 
     let registeredToolFactory:
-      | ((ctx: OpenClawPluginToolContext) => RegisteredTool | RegisteredTool[] | null | undefined)
+      | ((ctx: Hanzo BotPluginToolContext) => RegisteredTool | RegisteredTool[] | null | undefined)
       | undefined;
     let registeredHttpRouteHandler: RegisteredHttpRouteParams["handler"] | undefined;
 
@@ -76,7 +76,7 @@ describe("diffs plugin registration", () => {
         },
       },
       runtime: {} as never,
-      registerTool(tool: Parameters<OpenClawPluginApi["registerTool"]>[0]) {
+      registerTool(tool: Parameters<Hanzo BotPluginApi["registerTool"]>[0]) {
         registeredToolFactory = typeof tool === "function" ? tool : () => tool;
       },
       registerHttpRoute(params: RegisteredHttpRouteParams) {
@@ -84,7 +84,7 @@ describe("diffs plugin registration", () => {
       },
     });
 
-    plugin.register?.(api as unknown as OpenClawPluginApi);
+    plugin.register?.(api as unknown as Hanzo BotPluginApi);
 
     const registeredTool = registeredToolFactory?.({
       agentId: "main",

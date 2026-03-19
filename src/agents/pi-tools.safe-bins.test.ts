@@ -2,15 +2,15 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import type { ExecApprovalsResolved } from "../infra/exec-approvals.js";
 import type { SafeBinProfileFixture } from "../infra/exec-safe-bin-policy.js";
 import { captureEnv } from "../test-utils/env.js";
 
-const bundledPluginsDirSnapshot = captureEnv(["OPENCLAW_BUNDLED_PLUGINS_DIR"]);
+const bundledPluginsDirSnapshot = captureEnv(["BOT_BUNDLED_PLUGINS_DIR"]);
 
 beforeAll(() => {
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = path.join(
+  process.env.BOT_BUNDLED_PLUGINS_DIR = path.join(
     os.tmpdir(),
     "openclaw-test-no-bundled-extensions",
   );
@@ -68,7 +68,7 @@ vi.mock("../infra/exec-approvals.js", async (importOriginal) => {
   return { ...mod, resolveExecApprovals: () => approvals };
 });
 
-const { createOpenClawCodingTools } = await import("./pi-tools.js");
+const { createHanzo BotCodingTools } = await import("./pi-tools.js");
 
 type ExecToolResult = {
   content: Array<{ type: string; text?: string }>;
@@ -97,7 +97,7 @@ async function createSafeBinsExecTool(params: {
     fs.writeFileSync(path.join(tmpDir, file.name), file.contents, "utf8");
   }
 
-  const cfg: OpenClawConfig = {
+  const cfg: Hanzo BotConfig = {
     tools: {
       exec: {
         host: "gateway",
@@ -109,7 +109,7 @@ async function createSafeBinsExecTool(params: {
     },
   };
 
-  const tools = createOpenClawCodingTools({
+  const tools = createHanzo BotCodingTools({
     config: cfg,
     sessionKey: "agent:main:main",
     workspaceDir: tmpDir,
@@ -137,7 +137,7 @@ async function withSafeBinsExecTool(
   }
 }
 
-describe("createOpenClawCodingTools safeBins", () => {
+describe("createHanzo BotCodingTools safeBins", () => {
   it("threads tools.exec.safeBins into exec allowlist checks", async () => {
     await withSafeBinsExecTool(
       {

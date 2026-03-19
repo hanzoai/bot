@@ -12,7 +12,7 @@ import {
 
 describe("unscopedPackageName", () => {
   it.each([
-    { value: "@openclaw/matrix", expected: "matrix" },
+    { value: "@hanzo/bot-matrix", expected: "matrix" },
     { value: " matrix ", expected: "matrix" },
     { value: "", expected: "" },
   ])("normalizes package names for %j", ({ value, expected }) => {
@@ -61,7 +61,7 @@ describe("resolveSafeInstallDir", () => {
     expect(
       resolveSafeInstallDir({
         baseDir: "/tmp/plugins",
-        id: "@openclaw/matrix",
+        id: "@hanzo/bot-matrix",
         invalidNameMessage: "invalid plugin name",
       }),
     ).toEqual({

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { TelegramGroupConfig } from "openclaw/plugin-sdk/config-runtime";
 import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
 
@@ -13,7 +13,7 @@ export type TelegramGroupMigrationResult = {
 };
 
 function resolveAccountGroups(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   accountId?: string | null,
 ): { groups?: TelegramGroups } {
   if (!accountId) {
@@ -57,7 +57,7 @@ export function migrateTelegramGroupsInPlace(
 }
 
 export function migrateTelegramGroupConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   oldChatId: string;
   newChatId: string;

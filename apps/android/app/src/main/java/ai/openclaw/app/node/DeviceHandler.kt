@@ -1,4 +1,4 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
 import android.Manifest
 import android.app.ActivityManager
@@ -15,8 +15,8 @@ import android.os.PowerManager
 import android.os.StatFs
 import android.os.SystemClock
 import androidx.core.content.ContextCompat
-import ai.openclaw.app.BuildConfig
-import ai.openclaw.app.gateway.GatewaySession
+import ai.hanzo.bot.app.BuildConfig
+import ai.hanzo.bot.app.gateway.GatewaySession
 import java.util.Locale
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray

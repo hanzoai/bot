@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { clearPluginDiscoveryCache, discoverOpenClawPlugins } from "./discovery.js";
+import { clearPluginDiscoveryCache, discoverHanzo BotPlugins } from "./discovery.js";
 import {
   cleanupTrackedTempDirs,
   makeTrackedTempDir,
@@ -35,18 +35,18 @@ function hasDiagnosticSourceSuffix(
 
 function buildDiscoveryEnv(stateDir: string): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_STATE_DIR: stateDir,
-    CLAWDBOT_STATE_DIR: undefined,
-    OPENCLAW_HOME: undefined,
-    OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
+    BOT_STATE_DIR: stateDir,
+    BOT_STATE_DIR: undefined,
+    BOT_HOME: undefined,
+    BOT_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
   };
 }
 
 async function discoverWithStateDir(
   stateDir: string,
-  params: Parameters<typeof discoverOpenClawPlugins>[0],
+  params: Parameters<typeof discoverHanzo BotPlugins>[0],
 ) {
-  return discoverOpenClawPlugins({ ...params, env: buildDiscoveryEnv(stateDir) });
+  return discoverHanzo BotPlugins({ ...params, env: buildDiscoveryEnv(stateDir) });
 }
 
 function writePluginPackageManifest(params: {
@@ -75,7 +75,7 @@ afterEach(() => {
   cleanupTrackedTempDirs(tempDirs);
 });
 
-describe("discoverOpenClawPlugins", () => {
+describe("discoverHanzo BotPlugins", () => {
   it("discovers global and workspace extensions", async () => {
     const stateDir = makeTempDir();
     const workspaceDir = path.join(stateDir, "workspace");
@@ -103,7 +103,7 @@ describe("discoverOpenClawPlugins", () => {
     mkdirSafe(workspaceExt);
     fs.writeFileSync(path.join(workspaceExt, "tilde-workspace.ts"), "export default {}", "utf-8");
 
-    const result = discoverOpenClawPlugins({
+    const result = discoverHanzo BotPlugins({
       workspaceDir: "~/workspace",
       env: {
         ...buildDiscoveryEnv(stateDir),
@@ -181,7 +181,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: globalExt,
-      packageName: "@openclaw/voice-call",
+      packageName: "@hanzo/bot-voice-call",
       extensions: ["./src/index.ts"],
     });
     fs.writeFileSync(
@@ -203,7 +203,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: globalExt,
-      packageName: "@openclaw/ollama-provider",
+      packageName: "@hanzo/bot-ollama-provider",
       extensions: ["./src/index.ts"],
     });
     fs.writeFileSync(
@@ -230,12 +230,12 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: elevenlabsDir,
-      packageName: "@openclaw/elevenlabs-speech",
+      packageName: "@hanzo/bot-elevenlabs-speech",
       extensions: ["./src/index.ts"],
     });
     writePluginPackageManifest({
       packageDir: microsoftDir,
-      packageName: "@openclaw/microsoft-speech",
+      packageName: "@hanzo/bot-microsoft-speech",
       extensions: ["./src/index.ts"],
     });
 
@@ -266,7 +266,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: packDir,
-      packageName: "@openclaw/demo-plugin-dir",
+      packageName: "@hanzo/bot-demo-plugin-dir",
       extensions: ["./index.js"],
     });
     fs.writeFileSync(path.join(packDir, "index.js"), "module.exports = {}", "utf-8");
@@ -354,7 +354,7 @@ describe("discoverOpenClawPlugins", () => {
     );
 
     expect(legacy).toBeDefined();
-    expect(legacy?.format).toBe("openclaw");
+    expect(legacy?.format).toBe("@hanzo/bot");
     expect(hasDiagnosticSourceSuffix(result.diagnostics, ".claude-plugin/plugin.json")).toBe(true);
   });
 
@@ -373,7 +373,7 @@ describe("discoverOpenClawPlugins", () => {
     );
 
     expect(legacy).toBeDefined();
-    expect(legacy?.format).toBe("openclaw");
+    expect(legacy?.format).toBe("@hanzo/bot");
     expect(hasDiagnosticSourceSuffix(result.diagnostics, ".codex-plugin/plugin.json")).toBe(true);
   });
 
@@ -385,7 +385,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: globalExt,
-      packageName: "@openclaw/escape-pack",
+      packageName: "@hanzo/bot-escape-pack",
       extensions: ["../../outside.js"],
     });
     fs.writeFileSync(outside, "export default function () {}", "utf-8");
@@ -412,7 +412,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: globalExt,
-      packageName: "@openclaw/pack",
+      packageName: "@hanzo/bot-pack",
       extensions: ["./linked/escape.ts"],
     });
 
@@ -445,7 +445,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: globalExt,
-      packageName: "@openclaw/pack",
+      packageName: "@hanzo/bot-pack",
       extensions: ["./escape.ts"],
     });
 
@@ -470,7 +470,7 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       outsideManifest,
       JSON.stringify({
-        name: "@openclaw/pack",
+        name: "@hanzo/bot-pack",
         openclaw: { extensions: ["./entry.ts"] },
       }),
       "utf-8",
@@ -515,12 +515,12 @@ describe("discoverOpenClawPlugins", () => {
       fs.writeFileSync(path.join(packDir, "index.ts"), "export default function () {}", "utf-8");
       fs.chmodSync(packDir, 0o777);
 
-      const result = discoverOpenClawPlugins({
+      const result = discoverHanzo BotPlugins({
         env: {
           ...process.env,
-          OPENCLAW_STATE_DIR: stateDir,
-          CLAWDBOT_STATE_DIR: undefined,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+          BOT_STATE_DIR: stateDir,
+          BOT_STATE_DIR: undefined,
+          BOT_BUNDLED_PLUGINS_DIR: bundledDir,
         },
       });
 
@@ -563,30 +563,30 @@ describe("discoverOpenClawPlugins", () => {
     const pluginPath = path.join(globalExt, "cached.ts");
     fs.writeFileSync(pluginPath, "export default function () {}", "utf-8");
 
-    const first = discoverOpenClawPlugins({
+    const first = discoverHanzo BotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDir),
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
     });
     expect(first.candidates.some((candidate) => candidate.idHint === "cached")).toBe(true);
 
     fs.rmSync(pluginPath, { force: true });
 
-    const second = discoverOpenClawPlugins({
+    const second = discoverHanzo BotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDir),
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
     });
     expect(second.candidates.some((candidate) => candidate.idHint === "cached")).toBe(true);
 
     clearPluginDiscoveryCache();
 
-    const third = discoverOpenClawPlugins({
+    const third = discoverHanzo BotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDir),
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
     });
     expect(third.candidates.some((candidate) => candidate.idHint === "cached")).toBe(false);
@@ -602,16 +602,16 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(path.join(globalExtA, "alpha.ts"), "export default function () {}", "utf-8");
     fs.writeFileSync(path.join(globalExtB, "beta.ts"), "export default function () {}", "utf-8");
 
-    const first = discoverOpenClawPlugins({
+    const first = discoverHanzo BotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDirA),
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
     });
-    const second = discoverOpenClawPlugins({
+    const second = discoverHanzo BotPlugins({
       env: {
         ...buildDiscoveryEnv(stateDirB),
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
     });
 
@@ -632,20 +632,20 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(pluginA, "export default {}", "utf-8");
     fs.writeFileSync(pluginB, "export default {}", "utf-8");
 
-    const first = discoverOpenClawPlugins({
+    const first = discoverHanzo BotPlugins({
       extraPaths: ["~/plugins/demo.ts"],
       env: {
         ...buildDiscoveryEnv(stateDir),
         HOME: homeA,
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
     });
-    const second = discoverOpenClawPlugins({
+    const second = discoverHanzo BotPlugins({
       extraPaths: ["~/plugins/demo.ts"],
       env: {
         ...buildDiscoveryEnv(stateDir),
         HOME: homeB,
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
     });
 
@@ -665,14 +665,14 @@ describe("discoverOpenClawPlugins", () => {
 
     const env = {
       ...buildDiscoveryEnv(stateDir),
-      OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+      BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
     };
 
-    const first = discoverOpenClawPlugins({
+    const first = discoverHanzo BotPlugins({
       extraPaths: [pluginA, pluginB],
       env,
     });
-    const second = discoverOpenClawPlugins({
+    const second = discoverHanzo BotPlugins({
       extraPaths: [pluginB, pluginA],
       env,
     });

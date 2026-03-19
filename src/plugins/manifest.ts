@@ -217,7 +217,7 @@ export function loadPluginManifest(
   };
 }
 
-// package.json "openclaw" metadata (used for setup/catalog)
+// package.json "@hanzo/bot" metadata (used for setup/catalog)
 export type PluginPackageChannel = {
   id?: string;
   label?: string;
@@ -245,7 +245,7 @@ export type PluginPackageInstall = {
   defaultChoice?: "npm" | "local";
 };
 
-export type OpenClawPackageStartup = {
+export type Hanzo BotPackageStartup = {
   /**
    * Opt-in for channel plugins whose `setupEntry` fully covers the gateway
    * startup surface needed before the server starts listening.
@@ -253,12 +253,12 @@ export type OpenClawPackageStartup = {
   deferConfiguredChannelFullLoadUntilAfterListen?: boolean;
 };
 
-export type OpenClawPackageManifest = {
+export type Hanzo BotPackageManifest = {
   extensions?: string[];
   setupEntry?: string;
   channel?: PluginPackageChannel;
   install?: PluginPackageInstall;
-  startup?: OpenClawPackageStartup;
+  startup?: Hanzo BotPackageStartup;
 };
 
 export const DEFAULT_PLUGIN_ENTRY_CANDIDATES = [
@@ -279,11 +279,11 @@ export type PackageManifest = {
   name?: string;
   version?: string;
   description?: string;
-} & Partial<Record<ManifestKey, OpenClawPackageManifest>>;
+} & Partial<Record<ManifestKey, Hanzo BotPackageManifest>>;
 
 export function getPackageManifestMetadata(
   manifest: PackageManifest | undefined,
-): OpenClawPackageManifest | undefined {
+): Hanzo BotPackageManifest | undefined {
   if (!manifest) {
     return undefined;
   }

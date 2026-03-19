@@ -259,7 +259,7 @@ function createKimiToolDefinition(
           return {
             error: name.startsWith("date_") ? "unsupported_date_filter" : `unsupported_${name}`,
             message: `${label} is not supported by the kimi provider. Only Brave and Perplexity support ${name === "country" ? "country filtering" : name === "language" ? "language filtering" : name === "freshness" ? "freshness" : "date filtering"}.`,
-            docs: "https://docs.openclaw.ai/tools/web",
+            docs: "https://docs.hanzo.bot/tools/web",
           };
         }
       }
@@ -271,7 +271,7 @@ function createKimiToolDefinition(
           error: "missing_kimi_api_key",
           message:
             "web_search (kimi) needs a Moonshot API key. Set KIMI_API_KEY or MOONSHOT_API_KEY in the Gateway environment, or configure tools.web.search.kimi.apiKey.",
-          docs: "https://docs.openclaw.ai/tools/web",
+          docs: "https://docs.hanzo.bot/tools/web",
         };
       }
 
@@ -330,7 +330,7 @@ export function createKimiWebSearchProvider(): WebSearchProviderPlugin {
     envVars: ["KIMI_API_KEY", "MOONSHOT_API_KEY"],
     placeholder: "sk-...",
     signupUrl: "https://platform.moonshot.cn/",
-    docsUrl: "https://docs.openclaw.ai/tools/web",
+    docsUrl: "https://docs.hanzo.bot/tools/web",
     autoDetectOrder: 40,
     credentialPath: "plugins.entries.moonshot.config.webSearch.apiKey",
     inactiveSecretPaths: ["plugins.entries.moonshot.config.webSearch.apiKey"],

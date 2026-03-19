@@ -4,9 +4,9 @@ export type {
   ChannelMessageActionAdapter,
   ChannelPlugin,
 } from "../channels/plugins/types.js";
-export type { OpenClawConfig } from "../config/config.js";
+export type { Hanzo BotConfig } from "../config/config.js";
 export type { PluginRuntime } from "../plugins/runtime/types.js";
-export type { OpenClawPluginApi } from "../plugins/types.js";
+export type { Hanzo BotPluginApi } from "../plugins/types.js";
 export type {
   TelegramAccountConfig,
   TelegramActionConfig,

@@ -1,5 +1,5 @@
-import OpenClawKit
-import OpenClawProtocol
+import Hanzo BotKit
+import Hanzo BotProtocol
 
-typealias ProtoAnyCodable = OpenClawProtocol.AnyCodable
-typealias KitAnyCodable = OpenClawKit.AnyCodable
+typealias ProtoAnyCodable = Hanzo BotProtocol.AnyCodable
+typealias KitAnyCodable = Hanzo BotKit.AnyCodable

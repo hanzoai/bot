@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 /// These cases cover optional `security=allowlist` behavior.
 /// Default install posture remains deny-by-default for exec on macOS node-host.

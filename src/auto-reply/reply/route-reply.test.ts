@@ -10,7 +10,7 @@ import {
   whatsappOutbound,
 } from "../../../test/channel-outbounds.js";
 import type { ChannelOutboundAdapter, ChannelPlugin } from "../../channels/plugins/types.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import type { PluginRegistry } from "../../plugins/registry.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
@@ -207,7 +207,7 @@ describe("routeReply", () => {
     mocks.sendMessageSlack.mockClear();
     const cfg = {
       messages: { responsePrefix: "[openclaw]" },
-    } as unknown as OpenClawConfig;
+    } as unknown as Hanzo BotConfig;
     await routeReply({
       payload: { text: "hi" },
       channel: "slack",
@@ -229,7 +229,7 @@ describe("routeReply", () => {
           capabilities: { interactiveReplies: true },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as Hanzo BotConfig;
     await routeReply({
       payload: { text: "[[slack_select: Choose one | Alpha:alpha]]" },
       channel: "slack",
@@ -273,7 +273,7 @@ describe("routeReply", () => {
         ],
       },
       messages: {},
-    } as unknown as OpenClawConfig;
+    } as unknown as Hanzo BotConfig;
     await routeReply({
       payload: { text: "hi" },
       channel: "slack",
@@ -411,7 +411,7 @@ describe("routeReply", () => {
             baseUrl: "https://chat.example.com",
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as Hanzo BotConfig,
     });
     expect(mocks.deliverOutboundPayloads).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -481,7 +481,7 @@ describe("routeReply", () => {
           enabled: true,
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as Hanzo BotConfig;
     await routeReply({
       payload: { text: "hi" },
       channel: "msteams",

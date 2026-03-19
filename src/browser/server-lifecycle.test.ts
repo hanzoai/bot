@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { stopOpenClawChromeMock } = vi.hoisted(() => ({
-  stopOpenClawChromeMock: vi.fn(async () => {}),
+const { stopHanzo BotChromeMock } = vi.hoisted(() => ({
+  stopHanzo BotChromeMock: vi.fn(async () => {}),
 }));
 
 const { createBrowserRouteContextMock, listKnownProfileNamesMock } = vi.hoisted(() => ({
@@ -10,7 +10,7 @@ const { createBrowserRouteContextMock, listKnownProfileNamesMock } = vi.hoisted(
 }));
 
 vi.mock("./chrome.js", () => ({
-  stopOpenClawChrome: stopOpenClawChromeMock,
+  stopHanzo BotChrome: stopHanzo BotChromeMock,
 }));
 
 vi.mock("./server-context.js", () => ({
@@ -35,11 +35,11 @@ describe("stopKnownBrowserProfiles", () => {
   beforeEach(() => {
     createBrowserRouteContextMock.mockClear();
     listKnownProfileNamesMock.mockClear();
-    stopOpenClawChromeMock.mockClear();
+    stopHanzo BotChromeMock.mockClear();
   });
 
   it("stops all known profiles and ignores per-profile failures", async () => {
-    listKnownProfileNamesMock.mockReturnValue(["openclaw", "user"]);
+    listKnownProfileNamesMock.mockReturnValue(["@hanzo/bot", "user"]);
     const stopMap: Record<string, ReturnType<typeof vi.fn>> = {
       openclaw: vi.fn(async () => {}),
       user: vi.fn(async () => {
@@ -74,7 +74,7 @@ describe("stopKnownBrowserProfiles", () => {
     const localRuntime = {
       profile: {
         name: "deleted-local",
-        driver: "openclaw",
+        driver: "@hanzo/bot",
       },
       running: {
         pid: 42,
@@ -93,7 +93,7 @@ describe("stopKnownBrowserProfiles", () => {
       onWarn: vi.fn(),
     });
 
-    expect(stopOpenClawChromeMock).toHaveBeenCalledWith(launchedBrowser);
+    expect(stopHanzo BotChromeMock).toHaveBeenCalledWith(launchedBrowser);
     expect(localRuntime.running).toBeNull();
   });
 
@@ -111,6 +111,6 @@ describe("stopKnownBrowserProfiles", () => {
       onWarn,
     });
 
-    expect(onWarn).toHaveBeenCalledWith("openclaw browser stop failed: Error: oops");
+    expect(onWarn).toHaveBeenCalledWith("hanzo-bot browser stop failed: Error: oops");
   });
 });

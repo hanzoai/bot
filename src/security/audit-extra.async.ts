@@ -17,7 +17,7 @@ import { listAgentWorkspaceDirs } from "../agents/workspace-dirs.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { MANIFEST_KEY } from "../compat/legacy-names.js";
 import { resolveNativeSkillsEnabled } from "../config/commands.js";
-import type { OpenClawConfig, ConfigFileSnapshot } from "../config/config.js";
+import type { Hanzo BotConfig, ConfigFileSnapshot } from "../config/config.js";
 import { collectIncludePathsRecursive } from "../config/includes-scan.js";
 import { resolveOAuthDir } from "../config/paths.js";
 import { hasConfiguredSecretInput } from "../config/types.secrets.js";
@@ -138,7 +138,7 @@ async function listInstalledPluginDirs(params: {
 }
 
 function resolveToolPolicies(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   agentTools?: AgentToolsConfig;
   sandboxMode?: "off" | "non-main" | "all";
   agentId?: string | null;
@@ -161,7 +161,7 @@ function normalizePluginIdSet(entries: string[]): Set<string> {
 }
 
 function resolveEnabledExtensionPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   pluginDirs: string[];
 }): string[] {
   const normalized = normalizePluginsConfig(params.cfg.plugins);
@@ -498,7 +498,7 @@ export async function collectSandboxBrowserHashLabelFindings(params?: {
       detail:
         `Containers: ${missingHash.join(", ")}. ` +
         "These browser containers predate hash-based drift checks and may miss security remediations until recreated.",
-      remediation: `${formatCliCommand("openclaw sandbox recreate --browser --all")} (add --force to skip prompt).`,
+      remediation: `${formatCliCommand("hanzo-bot sandbox recreate --browser --all")} (add --force to skip prompt).`,
     });
   }
 
@@ -510,7 +510,7 @@ export async function collectSandboxBrowserHashLabelFindings(params?: {
       detail:
         `Containers: ${staleEpoch.join(", ")}. ` +
         `Expected openclaw.browserConfigEpoch=${SANDBOX_BROWSER_SECURITY_HASH_EPOCH}.`,
-      remediation: `${formatCliCommand("openclaw sandbox recreate --browser --all")} (add --force to skip prompt).`,
+      remediation: `${formatCliCommand("hanzo-bot sandbox recreate --browser --all")} (add --force to skip prompt).`,
     });
   }
 
@@ -523,7 +523,7 @@ export async function collectSandboxBrowserHashLabelFindings(params?: {
         `Containers: ${nonLoopbackPublished.join(", ")}. ` +
         "Sandbox browser observer/control ports should stay loopback-only to avoid unintended remote access.",
       remediation:
-        `${formatCliCommand("openclaw sandbox recreate --browser --all")} (add --force to skip prompt), ` +
+        `${formatCliCommand("hanzo-bot sandbox recreate --browser --all")} (add --force to skip prompt), ` +
         "then verify published ports are bound to 127.0.0.1.",
     });
   }
@@ -532,7 +532,7 @@ export async function collectSandboxBrowserHashLabelFindings(params?: {
 }
 
 export async function collectPluginsTrustFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   stateDir: string;
 }): Promise<SecurityAuditFinding[]> {
   const findings: SecurityAuditFinding[] = [];
@@ -757,7 +757,7 @@ export async function collectPluginsTrustFindings(params: {
         title: "Plugin install records drift from installed package versions",
         detail: `Detected plugin install metadata drift:\n${pluginVersionDrift.map((entry) => `- ${entry}`).join("\n")}`,
         remediation:
-          "Run `openclaw plugins update --all` (or reinstall affected plugins) to refresh install metadata.",
+          "Run `hanzo-bot plugins update --all` (or reinstall affected plugins) to refresh install metadata.",
       });
     }
   }
@@ -820,7 +820,7 @@ export async function collectPluginsTrustFindings(params: {
         title: "Hook install records drift from installed package versions",
         detail: `Detected hook install metadata drift:\n${hookVersionDrift.map((entry) => `- ${entry}`).join("\n")}`,
         remediation:
-          "Run `openclaw hooks update --all` (or reinstall affected hooks) to refresh install metadata.",
+          "Run `hanzo-bot hooks update --all` (or reinstall affected hooks) to refresh install metadata.",
       });
     }
   }
@@ -829,7 +829,7 @@ export async function collectPluginsTrustFindings(params: {
 }
 
 export async function collectWorkspaceSkillSymlinkEscapeFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
 }): Promise<SecurityAuditFinding[]> {
   const findings: SecurityAuditFinding[] = [];
   const workspaceDirs = listAgentWorkspaceDirs(params.cfg);
@@ -979,7 +979,7 @@ export async function collectIncludeFilePermFindings(params: {
 }
 
 export async function collectStateDeepFilesystemFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
   platform?: NodeJS.Platform;
@@ -1159,7 +1159,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: "Plugin extensions directory scan failed",
         detail: `Static code scan could not list extensions directory: ${String(err)}`,
         remediation:
-          "Check file permissions and plugin layout, then rerun `openclaw security audit --deep`.",
+          "Check file permissions and plugin layout, then rerun `hanzo-bot security audit --deep`.",
       });
     },
   });
@@ -1210,7 +1210,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: `Plugin "${pluginName}" code scan failed`,
         detail: `Static code scan could not complete: ${String(err)}`,
         remediation:
-          "Check file permissions and plugin layout, then rerun `openclaw security audit --deep`.",
+          "Check file permissions and plugin layout, then rerun `hanzo-bot security audit --deep`.",
       });
       return null;
     });
@@ -1228,7 +1228,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
         title: `Plugin "${pluginName}" contains dangerous code patterns`,
         detail: `Found ${summary.critical} critical issue(s) in ${summary.scannedFiles} scanned file(s):\n${details}`,
         remediation:
-          "Review the plugin source code carefully before use. If untrusted, remove the plugin from your OpenClaw extensions state directory.",
+          "Review the plugin source code carefully before use. If untrusted, remove the plugin from your Hanzo Bot extensions state directory.",
       });
     } else if (summary.warn > 0) {
       const warnFindings = summary.findings.filter((f) => f.severity === "warn");
@@ -1248,7 +1248,7 @@ export async function collectPluginsCodeSafetyFindings(params: {
 }
 
 export async function collectInstalledSkillsCodeSafetyFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   stateDir: string;
   summaryCache?: CodeSafetySummaryCache;
 }): Promise<SecurityAuditFinding[]> {
@@ -1286,7 +1286,7 @@ export async function collectInstalledSkillsCodeSafetyFindings(params: {
           title: `Skill "${skillName}" code scan failed`,
           detail: `Static code scan could not complete for ${skillDir}: ${String(err)}`,
           remediation:
-            "Check file permissions and skill layout, then rerun `openclaw security audit --deep`.",
+            "Check file permissions and skill layout, then rerun `hanzo-bot security audit --deep`.",
         });
         return null;
       });

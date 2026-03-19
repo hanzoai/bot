@@ -1,4 +1,4 @@
-package ai.openclaw.app.ui.chat
+package ai.hanzo.bot.app.ui.chat
 
 import android.content.ContentResolver
 import android.graphics.Bitmap
@@ -7,7 +7,7 @@ import android.net.Uri
 import android.util.Base64
 import android.util.LruCache
 import androidx.core.graphics.scale
-import ai.openclaw.app.node.JpegSizeLimiter
+import ai.hanzo.bot.app.node.JpegSizeLimiter
 import java.io.ByteArrayOutputStream
 import kotlin.math.max
 import kotlin.math.roundToInt

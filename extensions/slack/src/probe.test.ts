@@ -35,7 +35,7 @@ describe("probeSlack", () => {
       user_id: "U123",
       user: "openclaw-bot",
       team_id: "T123",
-      team: "OpenClaw",
+      team: "Hanzo Bot",
     });
 
     await expect(probeSlack("xoxb-test", 2500)).resolves.toEqual({
@@ -43,7 +43,7 @@ describe("probeSlack", () => {
       status: 200,
       elapsedMs: 45,
       bot: { id: "U123", name: "openclaw-bot" },
-      team: { id: "T123", name: "OpenClaw" },
+      team: { id: "T123", name: "Hanzo Bot" },
     });
     expect(createSlackWebClientMock).toHaveBeenCalledWith("xoxb-test");
     expect(withTimeoutMock).toHaveBeenCalledWith(expect.any(Promise), 2500);

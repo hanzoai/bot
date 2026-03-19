@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { runEmbeddedPiAgentMock } from "./reply.directive.directive-behavior.e2e-mocks.js";
 import { createTempHomeHarness, makeReplyConfig } from "./reply.test-harness.js";
 
@@ -26,7 +26,7 @@ const { withTempHome } = createTempHomeHarness({ prefix: "openclaw-rawbody-" });
 
 describe("RawBody directive parsing", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
     runEmbeddedPiAgentMock.mockClear();
     agentMocks.loadModelCatalog.mockClear();
     agentMocks.loadModelCatalog.mockResolvedValue([
@@ -65,7 +65,7 @@ describe("RawBody directive parsing", () => {
       const res = await getReplyFromConfig(
         groupMessageCtx,
         {},
-        makeReplyConfig(home) as OpenClawConfig,
+        makeReplyConfig(home) as Hanzo BotConfig,
       );
 
       const text = Array.isArray(res) ? res[0]?.text : res?.text;

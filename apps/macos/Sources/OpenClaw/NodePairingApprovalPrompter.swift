@@ -1,10 +1,10 @@
 import AppKit
 import Foundation
 import Observation
-import OpenClawDiscovery
-import OpenClawIPC
-import OpenClawKit
-import OpenClawProtocol
+import Hanzo BotDiscovery
+import Hanzo BotIPC
+import Hanzo BotKit
+import Hanzo BotProtocol
 import OSLog
 import UserNotifications
 

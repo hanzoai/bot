@@ -12,7 +12,7 @@ import {
 import type { APISelectMenuOption } from "discord-api-types/v10";
 import { ButtonStyle } from "discord-api-types/v10";
 import { normalizeProviderId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import {
   buildModelsProviderData,
   type ModelsProviderData,
@@ -541,7 +541,7 @@ function buildModelRows(params: {
  * same provider/model resolver used by text and Telegram model commands.
  */
 export async function loadDiscordModelPickerData(
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   agentId?: string,
 ): Promise<ModelsProviderData> {
   return buildModelsProviderData(cfg, agentId);

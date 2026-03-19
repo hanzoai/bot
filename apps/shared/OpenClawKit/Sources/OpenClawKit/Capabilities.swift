@@ -1,6 +1,6 @@
 import Foundation
 
-public enum OpenClawCapability: String, Codable, Sendable {
+public enum Hanzo BotCapability: String, Codable, Sendable {
     case canvas
     case browser
     case camera

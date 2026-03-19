@@ -8,7 +8,7 @@ export { setSynologyRuntime } from "./src/runtime.js";
 export default defineChannelPluginEntry({
   id: "synology-chat",
   name: "Synology Chat",
-  description: "Native Synology Chat channel plugin for OpenClaw",
+  description: "Native Synology Chat channel plugin for Hanzo Bot",
   plugin: synologyChatPlugin,
   setRuntime: setSynologyRuntime,
 });

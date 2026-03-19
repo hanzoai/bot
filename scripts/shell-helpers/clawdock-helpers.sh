@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# ClawDock - Docker helpers for OpenClaw
-# Inspired by Simon Willison's "Running OpenClaw in Docker"
+# ClawDock - Docker helpers for Hanzo Bot
+# Inspired by Simon Willison's "Running Hanzo Bot in Docker"
 # https://til.simonwillison.net/llms/openclaw-docker
 #
 # Installation:
-#   mkdir -p ~/.clawdock && curl -sL https://raw.githubusercontent.com/openclaw/openclaw/main/scripts/shell-helpers/clawdock-helpers.sh -o ~/.clawdock/clawdock-helpers.sh
+#   mkdir -p ~/.clawdock && curl -sL https://raw.githubusercontent.com/hanzoai/bot/main/scripts/shell-helpers/clawdock-helpers.sh -o ~/.clawdock/clawdock-helpers.sh
 #   echo 'source ~/.clawdock/clawdock-helpers.sh' >> ~/.zshrc
 #
 # Usage:
@@ -38,7 +38,7 @@ _cmd() {
 # =============================================================================
 CLAWDOCK_CONFIG="${HOME}/.clawdock/config"
 
-# Common paths to check for OpenClaw
+# Common paths to check for Hanzo Bot
 CLAWDOCK_COMMON_PATHS=(
   "${HOME}/openclaw"
   "${HOME}/workspace/openclaw"
@@ -97,7 +97,7 @@ _clawdock_ensure_dir() {
 
   if [[ -n "$found_path" ]]; then
     echo ""
-    echo "🦞 Found OpenClaw at: $found_path"
+    echo "🦞 Found Hanzo Bot at: $found_path"
     echo -n "   Use this location? [Y/n] "
     read -r response
     if [[ "$response" =~ ^[Nn] ]]; then
@@ -109,11 +109,11 @@ _clawdock_ensure_dir() {
     CLAWDOCK_DIR="$found_path"
   else
     echo ""
-    echo "❌ OpenClaw not found in common locations."
+    echo "❌ Hanzo Bot not found in common locations."
     echo ""
     echo "Clone it first:"
     echo ""
-    echo "  git clone https://github.com/openclaw/openclaw.git ~/openclaw"
+    echo "  git clone https://github.com/hanzoai/bot.git ~/openclaw"
     echo "  cd ~/openclaw && ./docker-setup.sh"
     echo ""
     echo "Or set CLAWDOCK_DIR if it's elsewhere:"
@@ -149,7 +149,7 @@ _clawdock_read_env_token() {
     return 1
   fi
   local raw
-  raw=$(sed -n 's/^OPENCLAW_GATEWAY_TOKEN=//p' "${CLAWDOCK_DIR}/.env" | head -n 1)
+  raw=$(sed -n 's/^BOT_GATEWAY_TOKEN=//p' "${CLAWDOCK_DIR}/.env" | head -n 1)
   if [[ -z "$raw" ]]; then
     return 1
   fi
@@ -188,13 +188,13 @@ clawdock-config() {
 }
 
 clawdock-workspace() {
-  cd ~/.openclaw/workspace
+  cd ~/.hanzo/bot/workspace
 }
 
 # Container Access
 clawdock-shell() {
   _clawdock_compose exec openclaw-gateway \
-    bash -c 'echo "alias openclaw=\"./openclaw.mjs\"" > /tmp/.bashrc_openclaw && bash --rcfile /tmp/.bashrc_openclaw'
+    bash -c 'echo "alias openclaw=\"./hanzo-bot.mjs\"" > /tmp/.bashrc_openclaw && bash --rcfile /tmp/.bashrc_openclaw'
 }
 
 clawdock-exec() {
@@ -224,7 +224,7 @@ clawdock-health() {
     echo "   Check: ${CLAWDOCK_DIR}/.env"
     return 1
   fi
-  _clawdock_compose exec -e "OPENCLAW_GATEWAY_TOKEN=$token" openclaw-gateway \
+  _clawdock_compose exec -e "BOT_GATEWAY_TOKEN=$token" openclaw-gateway \
     node dist/index.js health
 }
 
@@ -249,12 +249,12 @@ clawdock-fix-token() {
   echo "📝 Setting token: ${token:0:20}..."
 
   _clawdock_compose exec -e "TOKEN=$token" openclaw-gateway \
-    bash -c './openclaw.mjs config set gateway.remote.token "$TOKEN" && ./openclaw.mjs config set gateway.auth.token "$TOKEN"' 2>&1 | _clawdock_filter_warnings
+    bash -c './hanzo-bot.mjs config set gateway.remote.token "$TOKEN" && ./hanzo-bot.mjs config set gateway.auth.token "$TOKEN"' 2>&1 | _clawdock_filter_warnings
 
   echo "🔍 Verifying token was saved..."
   local saved_token
   saved_token=$(_clawdock_compose exec openclaw-gateway \
-    bash -c "./openclaw.mjs config get gateway.remote.token 2>/dev/null" 2>&1 | _clawdock_filter_warnings | tr -d '\r\n' | head -c 64)
+    bash -c "./hanzo-bot.mjs config get gateway.remote.token 2>/dev/null" 2>&1 | _clawdock_filter_warnings | tr -d '\r\n' | head -c 64)
 
   if [[ "$saved_token" == "$token" ]]; then
     echo "✅ Token saved correctly!"
@@ -354,7 +354,7 @@ clawdock-approve() {
 
 # Show all available clawdock helper commands
 clawdock-help() {
-  echo -e "\n${_CLR_BOLD}${_CLR_CYAN}🦞 ClawDock - Docker Helpers for OpenClaw${_CLR_RESET}\n"
+  echo -e "\n${_CLR_BOLD}${_CLR_CYAN}🦞 ClawDock - Docker Helpers for Hanzo Bot${_CLR_RESET}\n"
 
   echo -e "${_CLR_BOLD}${_CLR_MAGENTA}⚡ Basic Operations${_CLR_RESET}"
   echo -e "  $(_cmd clawdock-start)       ${_CLR_DIM}Start the gateway${_CLR_RESET}"
@@ -388,7 +388,7 @@ clawdock-help() {
   echo -e "${_CLR_BOLD}${_CLR_MAGENTA}🛠️  Utilities${_CLR_RESET}"
   echo -e "  $(_cmd clawdock-health)      ${_CLR_DIM}Run health check${_CLR_RESET}"
   echo -e "  $(_cmd clawdock-token)       ${_CLR_DIM}Show gateway auth token${_CLR_RESET}"
-  echo -e "  $(_cmd clawdock-cd)          ${_CLR_DIM}Jump to openclaw project directory${_CLR_RESET}"
+  echo -e "  $(_cmd clawdock-cd)          ${_CLR_DIM}Jump to hanzo-bot project directory${_CLR_RESET}"
   echo -e "  $(_cmd clawdock-config)      ${_CLR_DIM}Open config directory (~/.openclaw)${_CLR_RESET}"
   echo -e "  $(_cmd clawdock-workspace)   ${_CLR_DIM}Open workspace directory${_CLR_RESET}"
   echo ""
@@ -412,6 +412,6 @@ clawdock-help() {
   echo ""
 
   echo -e "${_CLR_CYAN}💡 All commands guide you through next steps!${_CLR_RESET}"
-  echo -e "${_CLR_BLUE}📚 Docs: ${_CLR_RESET}${_CLR_CYAN}https://docs.openclaw.ai${_CLR_RESET}"
+  echo -e "${_CLR_BLUE}📚 Docs: ${_CLR_RESET}${_CLR_CYAN}https://docs.hanzo.bot${_CLR_RESET}"
   echo ""
 }

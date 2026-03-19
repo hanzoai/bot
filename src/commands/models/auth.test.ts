@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import type { ProviderPlugin } from "../../plugins/types.js";
 import type { RuntimeEnv } from "../../runtime.js";
 
@@ -125,8 +125,8 @@ function createProvider(params: {
 
 describe("modelsAuthLoginCommand", () => {
   let restoreStdin: (() => void) | null = null;
-  let currentConfig: OpenClawConfig;
-  let lastUpdatedConfig: OpenClawConfig | null;
+  let currentConfig: Hanzo BotConfig;
+  let lastUpdatedConfig: Hanzo BotConfig | null;
   let runProviderAuth: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
@@ -149,7 +149,7 @@ describe("modelsAuthLoginCommand", () => {
     mocks.resolveDefaultAgentWorkspaceDir.mockReturnValue("/tmp/openclaw/workspace");
     mocks.loadValidConfigOrThrow.mockImplementation(async () => currentConfig);
     mocks.updateConfig.mockImplementation(
-      async (mutator: (cfg: OpenClawConfig) => OpenClawConfig) => {
+      async (mutator: (cfg: Hanzo BotConfig) => Hanzo BotConfig) => {
         lastUpdatedConfig = mutator(currentConfig);
         currentConfig = lastUpdatedConfig;
         return lastUpdatedConfig;
@@ -287,7 +287,7 @@ describe("modelsAuthLoginCommand", () => {
     const runtime = createRuntime();
 
     await expect(modelsAuthLoginCommand({ provider: "anthropic" }, runtime)).rejects.toThrow(
-      'Unknown provider "anthropic". Loaded providers: openai-codex. Verify plugins via `openclaw plugins list --json`.',
+      'Unknown provider "anthropic". Loaded providers: openai-codex. Verify plugins via `hanzo-bot plugins list --json`.',
     );
   });
 

@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
-import OpenClawIPC
-import OpenClawKit
+import Hanzo BotIPC
+import Hanzo BotKit
 import OSLog
 
 @MainActor
@@ -26,7 +26,7 @@ final class CanvasManager {
 
     private nonisolated static let canvasRoot: URL = {
         let base = FileManager().urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        return base.appendingPathComponent("OpenClaw/canvas", isDirectory: true)
+        return base.appendingPathComponent("Hanzo Bot/canvas", isDirectory: true)
     }()
 
     func show(sessionKey: String, path: String? = nil, placement: CanvasPlacement? = nil) throws -> String {

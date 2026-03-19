@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import {
   resolveReactionLevel,
   type ReactionLevel,
@@ -19,7 +19,7 @@ export type ResolvedSignalReactionLevel = ResolvedReactionLevel;
  * - "extensive": Agent can react liberally
  */
 export function resolveSignalReactionLevel(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string;
 }): ResolvedSignalReactionLevel {
   const account = resolveSignalAccount({

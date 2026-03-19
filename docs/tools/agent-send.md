@@ -1,13 +1,13 @@
 ---
-summary: "Direct `openclaw agent` CLI runs (with optional delivery)"
+summary: "Direct `hanzo-bot agent` CLI runs (with optional delivery)"
 read_when:
   - Adding or modifying the agent CLI entrypoint
 title: "Agent Send"
 ---
 
-# `openclaw agent` (direct agent runs)
+# `hanzo-bot agent` (direct agent runs)
 
-`openclaw agent` runs a single agent turn without needing an inbound chat message.
+`hanzo-bot agent` runs a single agent turn without needing an inbound chat message.
 By default it goes **through the Gateway**; add `--local` to force the embedded
 runtime on the current machine.
 
@@ -23,7 +23,7 @@ runtime on the current machine.
 - Output:
   - default: prints reply text (plus `MEDIA:<url>` lines)
   - `--json`: prints structured payload + metadata
-- Optional delivery back to a channel with `--deliver` + `--channel` (target formats match `openclaw message --target`).
+- Optional delivery back to a channel with `--deliver` + `--channel` (target formats match `hanzo-bot message --target`).
 - Use `--reply-channel`/`--reply-to`/`--reply-account` to override delivery without changing the session.
 
 If the Gateway is unreachable, the CLI **falls back** to the embedded local run.

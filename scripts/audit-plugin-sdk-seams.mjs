@@ -397,7 +397,7 @@ async function buildMissingPackages() {
       continue;
     }
     const missing = Object.keys(pkg.dependencies ?? {})
-      .filter((dep) => dep !== "openclaw" && !rootDeps.has(dep))
+      .filter((dep) => dep !== "@hanzo/bot" && !rootDeps.has(dep))
       .toSorted(compareStrings);
     if (missing.length === 0) {
       continue;

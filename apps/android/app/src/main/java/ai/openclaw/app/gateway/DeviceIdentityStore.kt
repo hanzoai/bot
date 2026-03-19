@@ -1,4 +1,4 @@
-package ai.openclaw.app.gateway
+package ai.hanzo.bot.app.gateway
 
 import android.content.Context
 import android.util.Base64

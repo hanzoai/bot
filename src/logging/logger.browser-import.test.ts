@@ -7,16 +7,16 @@ const originalGetBuiltinModule = (
 ).getBuiltinModule;
 
 async function importBrowserSafeLogger(params?: {
-  resolvePreferredOpenClawTmpDir?: ReturnType<typeof vi.fn>;
+  resolvePreferredHanzo BotTmpDir?: ReturnType<typeof vi.fn>;
 }): Promise<{
   module: LoggerModule;
-  resolvePreferredOpenClawTmpDir: ReturnType<typeof vi.fn>;
+  resolvePreferredHanzo BotTmpDir: ReturnType<typeof vi.fn>;
 }> {
   vi.resetModules();
-  const resolvePreferredOpenClawTmpDir =
-    params?.resolvePreferredOpenClawTmpDir ??
+  const resolvePreferredHanzo BotTmpDir =
+    params?.resolvePreferredHanzo BotTmpDir ??
     vi.fn(() => {
-      throw new Error("resolvePreferredOpenClawTmpDir should not run during browser-safe import");
+      throw new Error("resolvePreferredHanzo BotTmpDir should not run during browser-safe import");
     });
 
   vi.doMock("../infra/tmp-openclaw-dir.js", async () => {
@@ -25,7 +25,7 @@ async function importBrowserSafeLogger(params?: {
     );
     return {
       ...actual,
-      resolvePreferredOpenClawTmpDir,
+      resolvePreferredHanzo BotTmpDir,
     };
   });
 
@@ -35,7 +35,7 @@ async function importBrowserSafeLogger(params?: {
   });
 
   const module = await import("./logger.js");
-  return { module, resolvePreferredOpenClawTmpDir };
+  return { module, resolvePreferredHanzo BotTmpDir };
 }
 
 describe("logging/logger browser-safe import", () => {
@@ -49,22 +49,22 @@ describe("logging/logger browser-safe import", () => {
   });
 
   it("does not resolve the preferred temp dir at import time when node fs is unavailable", async () => {
-    const { module, resolvePreferredOpenClawTmpDir } = await importBrowserSafeLogger();
+    const { module, resolvePreferredHanzo BotTmpDir } = await importBrowserSafeLogger();
 
-    expect(resolvePreferredOpenClawTmpDir).not.toHaveBeenCalled();
+    expect(resolvePreferredHanzo BotTmpDir).not.toHaveBeenCalled();
     expect(module.DEFAULT_LOG_DIR).toBe("/tmp/openclaw");
-    expect(module.DEFAULT_LOG_FILE).toBe("/tmp/openclaw/openclaw.log");
+    expect(module.DEFAULT_LOG_FILE).toBe("/tmp/hanzoai/bot.log");
   });
 
   it("disables file logging when imported in a browser-like environment", async () => {
-    const { module, resolvePreferredOpenClawTmpDir } = await importBrowserSafeLogger();
+    const { module, resolvePreferredHanzo BotTmpDir } = await importBrowserSafeLogger();
 
     expect(module.getResolvedLoggerSettings()).toMatchObject({
       level: "silent",
-      file: "/tmp/openclaw/openclaw.log",
+      file: "/tmp/hanzoai/bot.log",
     });
     expect(module.isFileLogLevelEnabled("info")).toBe(false);
     expect(() => module.getLogger().info("browser-safe")).not.toThrow();
-    expect(resolvePreferredOpenClawTmpDir).not.toHaveBeenCalled();
+    expect(resolvePreferredHanzo BotTmpDir).not.toHaveBeenCalled();
   });
 });

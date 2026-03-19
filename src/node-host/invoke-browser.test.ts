@@ -22,7 +22,7 @@ const configMocks = vi.hoisted(() => ({
 const browserConfigMocks = vi.hoisted(() => ({
   resolveBrowserConfig: vi.fn(() => ({
     enabled: true,
-    defaultProfile: "openclaw",
+    defaultProfile: "@hanzo/bot",
   })),
 }));
 
@@ -45,7 +45,7 @@ describe("runBrowserProxyCommand", () => {
     });
     browserConfigMocks.resolveBrowserConfig.mockReturnValue({
       enabled: true,
-      defaultProfile: "openclaw",
+      defaultProfile: "@hanzo/bot",
     });
     controlServiceMocks.startBrowserControlServiceFromConfig.mockResolvedValue(true);
   });
@@ -70,7 +70,7 @@ describe("runBrowserProxyCommand", () => {
         JSON.stringify({
           method: "GET",
           path: "/snapshot",
-          profile: "openclaw",
+          profile: "@hanzo/bot",
           timeoutMs: 5,
         }),
       ),
@@ -150,7 +150,7 @@ describe("runBrowserProxyCommand", () => {
         JSON.stringify({
           method: "POST",
           path: "/act",
-          profile: "openclaw",
+          profile: "@hanzo/bot",
           timeoutMs: 50,
         }),
       ),

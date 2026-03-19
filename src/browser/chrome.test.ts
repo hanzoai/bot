@@ -7,21 +7,21 @@ import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import {
-  decorateOpenClawProfile,
+  decorateHanzo BotProfile,
   ensureProfileCleanExit,
   findChromeExecutableMac,
   findChromeExecutableWindows,
   isChromeCdpReady,
   isChromeReachable,
   resolveBrowserExecutableForPlatform,
-  stopOpenClawChrome,
+  stopHanzo BotChrome,
 } from "./chrome.js";
 import {
-  DEFAULT_OPENCLAW_BROWSER_COLOR,
-  DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+  DEFAULT_BOT_BROWSER_COLOR,
+  DEFAULT_BOT_BROWSER_PROFILE_NAME,
 } from "./constants.js";
 
-type StopChromeTarget = Parameters<typeof stopOpenClawChrome>[0];
+type StopChromeTarget = Parameters<typeof stopHanzo BotChrome>[0];
 
 async function readJson(filePath: string): Promise<Record<string, unknown>> {
   const raw = await fsp.readFile(filePath, "utf-8");
@@ -81,7 +81,7 @@ async function withMockChromeCdpServer(params: {
 }
 
 async function stopChromeWithProc(proc: ReturnType<typeof makeChromeTestProc>, timeoutMs: number) {
-  await stopOpenClawChrome(
+  await stopHanzo BotChrome(
     {
       proc,
       cdpPort: 12345,
@@ -125,14 +125,14 @@ describe("browser chrome profile decoration", () => {
 
   it("writes expected name + signed ARGB seed to Chrome prefs", async () => {
     const userDataDir = await createUserDataDir();
-    decorateOpenClawProfile(userDataDir, { color: DEFAULT_OPENCLAW_BROWSER_COLOR });
+    decorateHanzo BotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
 
     const expectedSignedArgb = ((0xff << 24) | 0xff4500) >> 0;
 
     const def = await readDefaultProfileFromLocalState(userDataDir);
 
-    expect(def.name).toBe(DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME);
-    expect(def.shortcut_name).toBe(DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME);
+    expect(def.name).toBe(DEFAULT_BOT_BROWSER_PROFILE_NAME);
+    expect(def.shortcut_name).toBe(DEFAULT_BOT_BROWSER_PROFILE_NAME);
     expect(def.profile_color_seed).toBe(expectedSignedArgb);
     expect(def.profile_highlight_color).toBe(expectedSignedArgb);
     expect(def.default_avatar_fill_color).toBe(expectedSignedArgb);
@@ -156,10 +156,10 @@ describe("browser chrome profile decoration", () => {
 
   it("best-effort writes name when color is invalid", async () => {
     const userDataDir = await createUserDataDir();
-    decorateOpenClawProfile(userDataDir, { color: "lobster-orange" });
+    decorateHanzo BotProfile(userDataDir, { color: "lobster-orange" });
     const def = await readDefaultProfileFromLocalState(userDataDir);
 
-    expect(def.name).toBe(DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME);
+    expect(def.name).toBe(DEFAULT_BOT_BROWSER_PROFILE_NAME);
     expect(def.profile_color_seed).toBeUndefined();
   });
 
@@ -173,7 +173,7 @@ describe("browser chrome profile decoration", () => {
       "utf-8",
     );
 
-    decorateOpenClawProfile(userDataDir, { color: DEFAULT_OPENCLAW_BROWSER_COLOR });
+    decorateHanzo BotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
 
     const localState = await readJson(path.join(userDataDir, "Local State"));
     expect(typeof localState.profile).toBe("object");
@@ -192,12 +192,12 @@ describe("browser chrome profile decoration", () => {
 
   it("is idempotent when rerun on an existing profile", async () => {
     const userDataDir = await createUserDataDir();
-    decorateOpenClawProfile(userDataDir, { color: DEFAULT_OPENCLAW_BROWSER_COLOR });
-    decorateOpenClawProfile(userDataDir, { color: DEFAULT_OPENCLAW_BROWSER_COLOR });
+    decorateHanzo BotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
+    decorateHanzo BotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
 
     const prefs = await readJson(path.join(userDataDir, "Default", "Preferences"));
     const profile = prefs.profile as Record<string, unknown>;
-    expect(profile.name).toBe(DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME);
+    expect(profile.name).toBe(DEFAULT_BOT_BROWSER_PROFILE_NAME);
   });
 });
 
@@ -378,20 +378,20 @@ describe("browser chrome helpers", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("stopOpenClawChrome no-ops when process is already killed", async () => {
+  it("stopHanzo BotChrome no-ops when process is already killed", async () => {
     const proc = makeChromeTestProc({ killed: true });
     await stopChromeWithProc(proc, 10);
     expect(proc.kill).not.toHaveBeenCalled();
   });
 
-  it("stopOpenClawChrome sends SIGTERM and returns once CDP is down", async () => {
+  it("stopHanzo BotChrome sends SIGTERM and returns once CDP is down", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("down")));
     const proc = makeChromeTestProc();
     await stopChromeWithProc(proc, 10);
     expect(proc.kill).toHaveBeenCalledWith("SIGTERM");
   });
 
-  it("stopOpenClawChrome escalates to SIGKILL when CDP stays reachable", async () => {
+  it("stopHanzo BotChrome escalates to SIGKILL when CDP stays reachable", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({

@@ -4,7 +4,7 @@ import {
   type ChannelAccountSnapshot,
   type ChannelPlugin,
 } from "openclaw/plugin-sdk/channel-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
 import { tlonChannelConfigSchema } from "./config-schema.js";
 import { resolveTlonOutboundSessionRoute } from "./session-route.js";
@@ -45,8 +45,8 @@ const tlonSetupWizardProxy = createTlonSetupWizardBase({
 
 const tlonConfigAdapter = createHybridChannelConfigAdapter({
   sectionKey: TLON_CHANNEL_ID,
-  listAccountIds: (cfg: OpenClawConfig) => listTlonAccountIds(cfg),
-  resolveAccount: (cfg: OpenClawConfig, accountId?: string | null) =>
+  listAccountIds: (cfg: Hanzo BotConfig) => listTlonAccountIds(cfg),
+  resolveAccount: (cfg: Hanzo BotConfig, accountId?: string | null) =>
     resolveTlonAccount(cfg, accountId ?? undefined),
   defaultAccountId: () => "default",
   clearBaseFields: ["ship", "code", "url", "name"],

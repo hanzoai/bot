@@ -1,5 +1,5 @@
 [Unit]
-Description=OpenClaw Auth Expiry Monitor
+Description=Hanzo Bot Auth Expiry Monitor
 After=network.target
 
 [Service]

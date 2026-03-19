@@ -4,17 +4,17 @@ import {
   loadConfig,
   readConfigFileSnapshotForWrite,
   setRuntimeConfigSnapshot,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "../../config/config.js";
 import type { RuntimeEnv } from "../../runtime.js";
 
 export type LoadedModelsConfig = {
-  sourceConfig: OpenClawConfig;
-  resolvedConfig: OpenClawConfig;
+  sourceConfig: Hanzo BotConfig;
+  resolvedConfig: Hanzo BotConfig;
   diagnostics: string[];
 };
 
-async function loadSourceConfigSnapshot(fallback: OpenClawConfig): Promise<OpenClawConfig> {
+async function loadSourceConfigSnapshot(fallback: Hanzo BotConfig): Promise<Hanzo BotConfig> {
   try {
     const { snapshot } = await readConfigFileSnapshotForWrite();
     if (snapshot.valid) {
@@ -53,6 +53,6 @@ export async function loadModelsConfigWithSource(params: {
 export async function loadModelsConfig(params: {
   commandName: string;
   runtime?: RuntimeEnv;
-}): Promise<OpenClawConfig> {
+}): Promise<Hanzo BotConfig> {
   return (await loadModelsConfigWithSource(params)).resolvedConfig;
 }

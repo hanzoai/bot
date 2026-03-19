@@ -1,10 +1,10 @@
 import Darwin
 import Testing
-@testable import OpenClawDiscovery
+@testable import Hanzo BotDiscovery
 
 struct WideAreaGatewayDiscoveryTests {
     @Test func `discovers beacon from tailnet dns sd fallback`() {
-        setenv("OPENCLAW_WIDE_AREA_DOMAIN", "openclaw.internal", 1)
+        setenv("BOT_WIDE_AREA_DOMAIN", "openclaw.internal", 1)
         let statusJson = """
         {
           "Self": { "TailscaleIPs": ["100.69.232.64"] },
@@ -29,7 +29,7 @@ struct WideAreaGatewayDiscoveryTests {
                     return "0 0 18789 steipetacstudio.openclaw.internal."
                 }
                 if recordType == "TXT" {
-                    return "\"displayName=Peter\\226\\128\\153s Mac Studio (OpenClaw)\" \"gatewayPort=18789\" \"tailnetDns=peters-mac-studio-1.sheep-coho.ts.net\" \"cliPath=/Users/steipete/openclaw/src/entry.ts\""
+                    return "\"displayName=Peter\\226\\128\\153s Mac Studio (Hanzo Bot)\" \"gatewayPort=18789\" \"tailnetDns=peters-mac-studio-1.sheep-coho.ts.net\" \"cliPath=/Users/steipete/openclaw/src/entry.ts\""
                 }
                 return ""
             })
@@ -40,7 +40,7 @@ struct WideAreaGatewayDiscoveryTests {
 
         #expect(beacons.count == 1)
         let beacon = beacons[0]
-        let expectedDisplay = "Peter\u{2019}s Mac Studio (OpenClaw)"
+        let expectedDisplay = "Peter\u{2019}s Mac Studio (Hanzo Bot)"
         #expect(beacon.displayName == expectedDisplay)
         #expect(beacon.port == 18789)
         #expect(beacon.gatewayPort == 18789)

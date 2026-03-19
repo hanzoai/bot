@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { normalizeOptionalAccountId } from "../routing/session-key.js";
 import {
   discoverConfigSecretTargetsByIds,
@@ -72,7 +72,7 @@ function pathTargetsScopedChannelAccount(params: {
 }
 
 export function getScopedChannelsCommandSecretTargets(params: {
-  config: OpenClawConfig;
+  config: Hanzo BotConfig;
   channel?: string | null;
   accountId?: string | null;
 }): {

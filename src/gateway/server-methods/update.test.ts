@@ -33,7 +33,7 @@ vi.mock("../../config/sessions.js", () => ({
 }));
 
 vi.mock("../../infra/openclaw-root.js", () => ({
-  resolveOpenClawPackageRoot: async () => "/tmp/openclaw",
+  resolveHanzo BotPackageRoot: async () => "/tmp/openclaw",
 }));
 
 vi.mock("../../infra/restart-sentinel.js", async (importOriginal) => {

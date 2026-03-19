@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 
 enum GatewayRemoteConfig {
     enum TokenValue: Equatable {

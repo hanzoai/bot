@@ -3,8 +3,8 @@
 
 export { definePluginEntry } from "./core.js";
 export type {
-  OpenClawPluginApi,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginService,
+  Hanzo BotPluginApi,
+  Hanzo BotPluginCommandDefinition,
+  Hanzo BotPluginService,
   PluginCommandContext,
 } from "../plugins/types.js";

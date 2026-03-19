@@ -220,7 +220,7 @@ describe("backupVerifyCommand", () => {
     const configPath = path.join(tempHome.home, "custom-config.json");
     const archiveDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-backup-verify-out-"));
     try {
-      process.env.OPENCLAW_CONFIG_PATH = configPath;
+      process.env.BOT_CONFIG_PATH = configPath;
       await fs.writeFile(
         configPath,
         JSON.stringify({
@@ -251,14 +251,14 @@ describe("backupVerifyCommand", () => {
       expect(verified.ok).toBe(true);
       expect(verified.assetCount).toBeGreaterThanOrEqual(2);
     } finally {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_CONFIG_PATH;
       await fs.rm(externalWorkspace, { recursive: true, force: true });
       await fs.rm(archiveDir, { recursive: true, force: true });
     }
   });
 
   it("fails when the archive contains duplicate root manifest entries", async () => {
-    const payloadArchivePath = `${TEST_ARCHIVE_ROOT}/payload/posix/tmp/.openclaw/payload.txt`;
+    const payloadArchivePath = `${TEST_ARCHIVE_ROOT}/payload/posix/tmp/.hanzo/bot/payload.txt`;
     await withBrokenArchiveFixture(
       {
         tempPrefix: "openclaw-backup-duplicate-manifest-",
@@ -280,7 +280,7 @@ describe("backupVerifyCommand", () => {
   });
 
   it("fails when the archive contains duplicate payload entries", async () => {
-    const payloadArchivePath = `${TEST_ARCHIVE_ROOT}/payload/posix/tmp/.openclaw/payload.txt`;
+    const payloadArchivePath = `${TEST_ARCHIVE_ROOT}/payload/posix/tmp/.hanzo/bot/payload.txt`;
     await withBrokenArchiveFixture(
       {
         tempPrefix: "openclaw-backup-duplicate-payload-",

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, expect, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 
 // Avoid exporting vitest mock types (TS2742 under pnpm + d.ts emit).
 // oxlint-disable-next-line typescript/no-explicit-any
@@ -123,8 +123,8 @@ function snapshotTempHomeEnv(): TempHomeEnvSnapshot {
     userProfile: process.env.USERPROFILE,
     homeDrive: process.env.HOMEDRIVE,
     homePath: process.env.HOMEPATH,
-    openclawHome: process.env.OPENCLAW_HOME,
-    stateDir: process.env.OPENCLAW_STATE_DIR,
+    openclawHome: process.env.BOT_HOME,
+    stateDir: process.env.BOT_STATE_DIR,
   };
 }
 
@@ -141,15 +141,15 @@ function restoreTempHomeEnv(snapshot: TempHomeEnvSnapshot): void {
   restoreKey("USERPROFILE", snapshot.userProfile);
   restoreKey("HOMEDRIVE", snapshot.homeDrive);
   restoreKey("HOMEPATH", snapshot.homePath);
-  restoreKey("OPENCLAW_HOME", snapshot.openclawHome);
-  restoreKey("OPENCLAW_STATE_DIR", snapshot.stateDir);
+  restoreKey("BOT_HOME", snapshot.openclawHome);
+  restoreKey("BOT_STATE_DIR", snapshot.stateDir);
 }
 
 function setTempHomeEnv(home: string): void {
   process.env.HOME = home;
   process.env.USERPROFILE = home;
-  delete process.env.OPENCLAW_HOME;
-  process.env.OPENCLAW_STATE_DIR = join(home, ".openclaw");
+  delete process.env.BOT_HOME;
+  process.env.BOT_STATE_DIR = join(home, ".openclaw");
 
   if (process.platform !== "win32") {
     return;
@@ -192,12 +192,12 @@ export async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise
   }
 }
 
-export function makeCfg(home: string): OpenClawConfig {
+export function makeCfg(home: string): Hanzo BotConfig {
   return {
     agents: {
       defaults: {
         model: { primary: "anthropic/claude-opus-4-5" },
-        workspace: join(home, "openclaw"),
+        workspace: join(home, "@hanzo/bot"),
         // Test harness: avoid 1s coalescer idle sleeps that dominate trigger suites.
         blockStreamingCoalesce: { idleMs: 1 },
         // Trigger tests assert routing/authorization behavior, not delivery pacing.
@@ -215,7 +215,7 @@ export function makeCfg(home: string): OpenClawConfig {
       },
     },
     session: { store: join(home, "sessions.json") },
-  } as OpenClawConfig;
+  } as Hanzo BotConfig;
 }
 
 export async function loadGetReplyFromConfig() {
@@ -251,7 +251,7 @@ export async function readSessionStore(cfg: {
 export function makeWhatsAppElevatedCfg(
   home: string,
   opts?: { elevatedEnabled?: boolean; requireMentionInGroups?: boolean },
-): OpenClawConfig {
+): Hanzo BotConfig {
   const cfg = makeCfg(home);
   cfg.channels ??= {};
   cfg.channels.whatsapp = {
@@ -273,7 +273,7 @@ export function makeWhatsAppElevatedCfg(
 }
 
 export async function runDirectElevatedToggleAndLoadStore(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   getReplyFromConfig: typeof import("./reply.js").getReplyFromConfig;
   body?: string;
 }): Promise<{

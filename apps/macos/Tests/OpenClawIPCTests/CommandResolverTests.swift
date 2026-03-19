@@ -1,7 +1,7 @@
 import Darwin
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized) struct CommandResolverTests {
     private func makeDefaults() -> UserDefaults {
@@ -70,7 +70,7 @@ import Testing
         CommandResolver.setProjectRoot(tmp.path)
 
         let binDir = tmp.appendingPathComponent("bin")
-        let openclawPath = binDir.appendingPathComponent("openclaw")
+        let openclawPath = binDir.appendingPathComponent("@hanzo/bot")
         let pnpmPath = binDir.appendingPathComponent("pnpm")
         try makeExecutableForTests(at: openclawPath)
         try makeExecutableForTests(at: pnpmPath)
@@ -91,7 +91,7 @@ import Testing
         CommandResolver.setProjectRoot(tmp.path)
 
         let binDir = tmp.appendingPathComponent("bin")
-        let openclawPath = binDir.appendingPathComponent("openclaw")
+        let openclawPath = binDir.appendingPathComponent("@hanzo/bot")
         try makeExecutableForTests(at: openclawPath)
 
         let cmd = CommandResolver.openclawCommand(
@@ -113,7 +113,7 @@ import Testing
             configRoot: [:],
             searchPaths: [tmp.appendingPathComponent("node_modules/.bin").path])
 
-        #expect(cmd.prefix(4).elementsEqual([pnpmPath.path, "--silent", "openclaw", "rpc"]))
+        #expect(cmd.prefix(4).elementsEqual([pnpmPath.path, "--silent", "@hanzo/bot", "rpc"]))
     }
 
     @Test func `pnpm keeps extra args after subcommand`() throws {
@@ -127,7 +127,7 @@ import Testing
             configRoot: [:],
             searchPaths: [tmp.appendingPathComponent("node_modules/.bin").path])
 
-        #expect(cmd.prefix(5).elementsEqual([pnpmPath.path, "--silent", "openclaw", "health", "--json"]))
+        #expect(cmd.prefix(5).elementsEqual([pnpmPath.path, "--silent", "@hanzo/bot", "health", "--json"]))
         #expect(cmd.suffix(2).elementsEqual(["--timeout", "5"]))
     }
 
@@ -163,7 +163,7 @@ import Testing
         if let script = cmd.last {
             #expect(script.contains("PRJ='/srv/openclaw'"))
             #expect(script.contains("cd \"$PRJ\""))
-            #expect(script.contains("openclaw"))
+            #expect(script.contains("@hanzo/bot"))
             #expect(script.contains("status"))
             #expect(script.contains("--json"))
             #expect(script.contains("CLI="))

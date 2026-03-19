@@ -5,7 +5,7 @@ import {
   resolveStateDir,
 } from "../../config/config.js";
 import type {
-  OpenClawConfig,
+  Hanzo BotConfig,
   GatewayBindMode,
   GatewayControlUiConfig,
 } from "../../config/types.js";
@@ -60,8 +60,8 @@ type PortStatusSummary = {
 
 type DaemonConfigContext = {
   mergedDaemonEnv: Record<string, string | undefined>;
-  cliCfg: OpenClawConfig;
-  daemonCfg: OpenClawConfig;
+  cliCfg: Hanzo BotConfig;
+  daemonCfg: Hanzo BotConfig;
   cliConfigSummary: ConfigSummary;
   daemonConfigSummary: ConfigSummary;
   configMismatch: boolean;
@@ -188,8 +188,8 @@ async function loadDaemonConfigContext(
 }
 
 async function resolveGatewayStatusSummary(params: {
-  daemonCfg: OpenClawConfig;
-  cliCfg: OpenClawConfig;
+  daemonCfg: Hanzo BotConfig;
+  cliCfg: Hanzo BotConfig;
   mergedDaemonEnv: Record<string, string | undefined>;
   commandProgramArguments?: string[];
   rpcUrlOverride?: string;

@@ -9,7 +9,7 @@ import type {
   WizardProgress,
   WizardSelectParams,
 } from "../../wizard/prompts.js";
-import type { OpenClawPluginApi, ProviderPlugin } from "../types.js";
+import type { Hanzo BotPluginApi, ProviderPlugin } from "../types.js";
 
 type LoginOpenAICodexOAuth =
   (typeof import("openclaw/plugin-sdk/provider-auth-login"))["loginOpenAICodexOAuth"];
@@ -56,7 +56,7 @@ import githubCopilotPlugin from "../../../extensions/github-copilot/index.js";
 import openAIPlugin from "../../../extensions/openai/index.js";
 import qwenPortalPlugin from "../../../extensions/qwen-portal-auth/index.js";
 
-function registerProviders(...plugins: Array<{ register(api: OpenClawPluginApi): void }>) {
+function registerProviders(...plugins: Array<{ register(api: Hanzo BotPluginApi): void }>) {
   const captured = createCapturedPluginRegistration();
   for (const plugin of plugins) {
     plugin.register(captured.api);

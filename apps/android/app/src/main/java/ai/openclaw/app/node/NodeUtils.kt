@@ -1,6 +1,6 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
-import ai.openclaw.app.gateway.parseInvokeErrorFromThrowable
+import ai.hanzo.bot.app.gateway.parseInvokeErrorFromThrowable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull

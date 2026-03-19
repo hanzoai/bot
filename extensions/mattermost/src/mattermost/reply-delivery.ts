@@ -2,7 +2,7 @@ import {
   deliverTextOrMediaReply,
   resolveSendableOutboundReplyParts,
 } from "openclaw/plugin-sdk/reply-payload";
-import type { OpenClawConfig, PluginRuntime, ReplyPayload } from "../runtime-api.js";
+import type { Hanzo BotConfig, PluginRuntime, ReplyPayload } from "../runtime-api.js";
 import { getAgentScopedMediaLocalRoots } from "../runtime-api.js";
 
 type MarkdownTableMode = Parameters<PluginRuntime["channel"]["text"]["convertMarkdownTables"]>[1];
@@ -20,7 +20,7 @@ type SendMattermostMessage = (
 
 export async function deliverMattermostReplyPayload(params: {
   core: PluginRuntime;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   payload: ReplyPayload;
   to: string;
   accountId: string;

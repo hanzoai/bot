@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/minimax-provider",
+  "name": "@hanzo/bot-minimax-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw MiniMax provider and OAuth plugin",
+  "description": "Hanzo Bot MiniMax provider and OAuth plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

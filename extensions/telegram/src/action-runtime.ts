@@ -10,7 +10,7 @@ import {
   readStringOrNumberParam,
   readStringParam,
   resolvePollMaxSelections,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
   type TelegramActionConfig,
 } from "../runtime-api.js";
 import { createTelegramActionGate, resolveTelegramPollActionGateState } from "./accounts.js";
@@ -179,7 +179,7 @@ function readTelegramSendContent(params: {
 
 export async function handleTelegramAction(
   params: Record<string, unknown>,
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   options?: {
     mediaLocalRoots?: readonly string[];
   },

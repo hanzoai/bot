@@ -1,18 +1,18 @@
 import AppKit
 import Foundation
-import OpenClawChatUI
+import Hanzo BotChatUI
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized)
 @MainActor
 struct WebChatSwiftUISmokeTests {
-    private struct TestTransport: OpenClawChatTransport {
-        func requestHistory(sessionKey: String) async throws -> OpenClawChatHistoryPayload {
+    private struct TestTransport: Hanzo BotChatTransport {
+        func requestHistory(sessionKey: String) async throws -> Hanzo BotChatHistoryPayload {
             let json = """
             {"sessionKey":"\(sessionKey)","sessionId":null,"messages":[],"thinkingLevel":"off"}
             """
-            return try JSONDecoder().decode(OpenClawChatHistoryPayload.self, from: Data(json.utf8))
+            return try JSONDecoder().decode(Hanzo BotChatHistoryPayload.self, from: Data(json.utf8))
         }
 
         func sendMessage(
@@ -20,19 +20,19 @@ struct WebChatSwiftUISmokeTests {
             message _: String,
             thinking _: String,
             idempotencyKey _: String,
-            attachments _: [OpenClawChatAttachmentPayload]) async throws -> OpenClawChatSendResponse
+            attachments _: [Hanzo BotChatAttachmentPayload]) async throws -> Hanzo BotChatSendResponse
         {
             let json = """
             {"runId":"\(UUID().uuidString)","status":"ok"}
             """
-            return try JSONDecoder().decode(OpenClawChatSendResponse.self, from: Data(json.utf8))
+            return try JSONDecoder().decode(Hanzo BotChatSendResponse.self, from: Data(json.utf8))
         }
 
         func requestHealth(timeoutMs _: Int) async throws -> Bool {
             true
         }
 
-        func events() -> AsyncStream<OpenClawChatTransportEvent> {
+        func events() -> AsyncStream<Hanzo BotChatTransportEvent> {
             AsyncStream { continuation in
                 continuation.finish()
             }

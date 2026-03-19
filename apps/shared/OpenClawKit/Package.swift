@@ -3,15 +3,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "OpenClawKit",
+    name: "Hanzo BotKit",
     platforms: [
         .iOS(.v18),
         .macOS(.v15),
     ],
     products: [
-        .library(name: "OpenClawProtocol", targets: ["OpenClawProtocol"]),
-        .library(name: "OpenClawKit", targets: ["OpenClawKit"]),
-        .library(name: "OpenClawChatUI", targets: ["OpenClawChatUI"]),
+        .library(name: "Hanzo BotProtocol", targets: ["Hanzo BotProtocol"]),
+        .library(name: "Hanzo BotKit", targets: ["Hanzo BotKit"]),
+        .library(name: "Hanzo BotChatUI", targets: ["Hanzo BotChatUI"]),
     ],
     dependencies: [
         .package(url: "https://github.com/steipete/ElevenLabsKit", exact: "0.1.0"),
@@ -19,18 +19,18 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "OpenClawProtocol",
-            path: "Sources/OpenClawProtocol",
+            name: "Hanzo BotProtocol",
+            path: "Sources/Hanzo BotProtocol",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .target(
-            name: "OpenClawKit",
+            name: "Hanzo BotKit",
             dependencies: [
-                "OpenClawProtocol",
+                "Hanzo BotProtocol",
                 .product(name: "ElevenLabsKit", package: "ElevenLabsKit"),
             ],
-            path: "Sources/OpenClawKit",
+            path: "Sources/Hanzo BotKit",
             resources: [
                 .process("Resources"),
             ],
@@ -38,22 +38,22 @@ let package = Package(
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .target(
-            name: "OpenClawChatUI",
+            name: "Hanzo BotChatUI",
             dependencies: [
-                "OpenClawKit",
+                "Hanzo BotKit",
                 .product(
                     name: "Textual",
                     package: "textual",
                     condition: .when(platforms: [.macOS, .iOS])),
             ],
-            path: "Sources/OpenClawChatUI",
+            path: "Sources/Hanzo BotChatUI",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .testTarget(
-            name: "OpenClawKitTests",
-            dependencies: ["OpenClawKit", "OpenClawChatUI"],
-            path: "Tests/OpenClawKitTests",
+            name: "Hanzo BotKitTests",
+            dependencies: ["Hanzo BotKit", "Hanzo BotChatUI"],
+            path: "Tests/Hanzo BotKitTests",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
                 .enableExperimentalFeature("SwiftTesting"),

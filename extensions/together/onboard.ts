@@ -5,12 +5,12 @@ import {
 } from "openclaw/plugin-sdk/provider-models";
 import {
   applyProviderConfigWithModelCatalogPreset,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export const TOGETHER_DEFAULT_MODEL_REF = "together/moonshotai/Kimi-K2.5";
 
-function applyTogetherPreset(cfg: OpenClawConfig, primaryModelRef?: string): OpenClawConfig {
+function applyTogetherPreset(cfg: Hanzo BotConfig, primaryModelRef?: string): Hanzo BotConfig {
   return applyProviderConfigWithModelCatalogPreset(cfg, {
     providerId: "together",
     api: "openai-completions",
@@ -21,10 +21,10 @@ function applyTogetherPreset(cfg: OpenClawConfig, primaryModelRef?: string): Ope
   });
 }
 
-export function applyTogetherProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyTogetherProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyTogetherPreset(cfg);
 }
 
-export function applyTogetherConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyTogetherConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyTogetherPreset(cfg, TOGETHER_DEFAULT_MODEL_REF);
 }

@@ -1,4 +1,4 @@
-package ai.openclaw.app.ui
+package ai.hanzo.bot.app.ui
 
 import android.Manifest
 import android.content.Context
@@ -93,9 +93,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import ai.openclaw.app.LocationMode
-import ai.openclaw.app.MainViewModel
-import ai.openclaw.app.node.DeviceNotificationListenerService
+import ai.hanzo.bot.app.LocationMode
+import ai.hanzo.bot.app.MainViewModel
+import ai.hanzo.bot.app.node.DeviceNotificationListenerService
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
@@ -525,7 +525,7 @@ fun OnboardingFlow(viewModel: MainViewModel, modifier: Modifier = Modifier) {
           verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           Text(
-            "OpenClaw",
+            "Hanzo Bot",
             style = onboardingDisplayStyle,
             color = onboardingText,
           )
@@ -1013,11 +1013,11 @@ private fun GatewayStep(
 
   StepShell(title = "Gateway Connection") {
     Text(
-      "Run `openclaw qr` on your gateway host, then scan the code with this device.",
+      "Run `hanzo-bot qr` on your gateway host, then scan the code with this device.",
       style = onboardingCalloutStyle,
       color = onboardingTextSecondary,
     )
-    CommandBlock("openclaw qr")
+    CommandBlock("hanzo-bot qr")
     Button(
       onClick = onScanQrClick,
       modifier = Modifier.fillMaxWidth().height(48.dp),
@@ -1064,7 +1064,7 @@ private fun GatewayStep(
           OutlinedTextField(
             value = setupCode,
             onValueChange = onSetupCodeChange,
-            placeholder = { Text("Paste code from `openclaw qr --setup-code-only`", color = onboardingTextTertiary, style = onboardingBodyStyle) },
+            placeholder = { Text("Paste code from `hanzo-bot qr --setup-code-only`", color = onboardingTextTertiary, style = onboardingBodyStyle) },
             modifier = Modifier.fillMaxWidth(),
             minLines = 3,
             maxLines = 5,
@@ -1680,7 +1680,7 @@ private fun FinalStep(
               )
             }
             Text(
-              "OpenClaw Android ${openClawAndroidVersionLabel()}",
+              "Hanzo Bot Android ${openClawAndroidVersionLabel()}",
               style = onboardingCaption1Style,
               color = onboardingTextSecondary,
             )
@@ -1704,8 +1704,8 @@ private fun FinalStep(
             }
           }
           if (pairingRequired) {
-            CommandBlock("openclaw devices list")
-            CommandBlock("openclaw devices approve <requestId>")
+            CommandBlock("hanzo-bot devices list")
+            CommandBlock("hanzo-bot devices approve <requestId>")
             Text("Then tap Connect again.", style = onboardingCalloutStyle, color = onboardingTextSecondary)
           }
         }

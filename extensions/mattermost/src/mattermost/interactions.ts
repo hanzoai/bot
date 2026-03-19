@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { isTrustedProxyAddress, resolveClientIp, type OpenClawConfig } from "../runtime-api.js";
+import { isTrustedProxyAddress, resolveClientIp, type Hanzo BotConfig } from "../runtime-api.js";
 import { getMattermostRuntime } from "../runtime.js";
 import { updateMattermostPost, type MattermostClient, type MattermostPost } from "./client.js";
 
@@ -59,7 +59,7 @@ export function getInteractionCallbackUrl(accountId: string): string | undefined
   return callbackUrls.get(accountId);
 }
 
-type InteractionCallbackConfig = Pick<OpenClawConfig, "gateway" | "channels"> & {
+type InteractionCallbackConfig = Pick<Hanzo BotConfig, "gateway" | "channels"> & {
   interactions?: {
     callbackBaseUrl?: string;
   };

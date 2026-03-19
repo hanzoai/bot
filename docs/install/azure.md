@@ -1,23 +1,23 @@
 ---
-summary: "Run OpenClaw Gateway 24/7 on an Azure Linux VM with durable state"
+summary: "Run Hanzo Bot Gateway 24/7 on an Azure Linux VM with durable state"
 read_when:
-  - You want OpenClaw running 24/7 on Azure with Network Security Group hardening
-  - You want a production-grade, always-on OpenClaw Gateway on your own Azure Linux VM
+  - You want Hanzo Bot running 24/7 on Azure with Network Security Group hardening
+  - You want a production-grade, always-on Hanzo Bot Gateway on your own Azure Linux VM
   - You want secure administration with Azure Bastion SSH
   - You want repeatable deployments with Azure Resource Manager templates
 title: "Azure"
 ---
 
-# OpenClaw on Azure Linux VM
+# Hanzo Bot on Azure Linux VM
 
-This guide sets up an Azure Linux VM, applies Network Security Group (NSG) hardening, configures Azure Bastion (managed Azure SSH entry point), and installs OpenClaw.
+This guide sets up an Azure Linux VM, applies Network Security Group (NSG) hardening, configures Azure Bastion (managed Azure SSH entry point), and installs Hanzo Bot.
 
 ## What you’ll do
 
 - Deploy Azure compute and network resources with Azure Resource Manager (ARM) templates
 - Apply Azure Network Security Group (NSG) rules so VM SSH is allowed only from Azure Bastion
 - Use Azure Bastion for SSH access
-- Install OpenClaw with the installer script
+- Install Hanzo Bot with the installer script
 - Verify the Gateway
 
 ## Before you start
@@ -54,8 +54,8 @@ You’ll need:
     ```bash
     RG="rg-openclaw"
     LOCATION="westus2"
-    TEMPLATE_URI="https://raw.githubusercontent.com/openclaw/openclaw/main/infra/azure/templates/azuredeploy.json"
-    PARAMS_URI="https://raw.githubusercontent.com/openclaw/openclaw/main/infra/azure/templates/azuredeploy.parameters.json"
+    TEMPLATE_URI="https://raw.githubusercontent.com/hanzoai/bot/main/infra/azure/templates/azuredeploy.json"
+    PARAMS_URI="https://raw.githubusercontent.com/hanzoai/bot/main/infra/azure/templates/azuredeploy.parameters.json"
     ```
   </Step>
 
@@ -130,7 +130,7 @@ You’ll need:
     RG="rg-openclaw"
     VM_NAME="vm-openclaw"
     BASTION_NAME="bas-openclaw"
-    ADMIN_USERNAME="openclaw"
+    ADMIN_USERNAME="@hanzo/bot"
     VM_ID="$(az vm show -g "${RG}" -n "${VM_NAME}" --query id -o tsv)"
 
     az network bastion ssh \
@@ -144,12 +144,12 @@ You’ll need:
 
   </Step>
 
-  <Step title="Install OpenClaw (in the VM shell)">
+  <Step title="Install Hanzo Bot (in the VM shell)">
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh -o /tmp/openclaw-install.sh
+    curl -fsSL https://hanzo.bot/install.sh -o /tmp/openclaw-install.sh
     bash /tmp/openclaw-install.sh
     rm -f /tmp/openclaw-install.sh
-    openclaw --version
+    hanzo-bot --version
     ```
 
     The installer script handles Node detection/installation and runs onboarding by default.
@@ -160,10 +160,10 @@ You’ll need:
     After onboarding completes:
 
     ```bash
-    openclaw gateway status
+    hanzo-bot gateway status
     ```
 
-    Most enterprise Azure teams already have GitHub Copilot licenses. If that is your case, we recommend choosing the GitHub Copilot provider in the OpenClaw onboarding wizard. See [GitHub Copilot provider](/providers/github-copilot).
+    Most enterprise Azure teams already have GitHub Copilot licenses. If that is your case, we recommend choosing the GitHub Copilot provider in the Hanzo Bot onboarding wizard. See [GitHub Copilot provider](/providers/github-copilot).
 
     The included ARM template uses Ubuntu image `version: "latest"` for convenience. If you need reproducible builds, pin a specific image version in `infra/azure/templates/azuredeploy.json` (you can list versions with `az vm image list --publisher Canonical --offer ubuntu-24_04-lts --sku server --all -o table`).
 
@@ -175,4 +175,4 @@ You’ll need:
 - Set up messaging channels: [Channels](/channels)
 - Pair local devices as nodes: [Nodes](/nodes)
 - Configure the Gateway: [Gateway configuration](/gateway/configuration)
-- For more details on OpenClaw Azure deployment with the GitHub Copilot model provider: [OpenClaw on Azure with GitHub Copilot](https://github.com/johnsonshi/openclaw-azure-github-copilot)
+- For more details on Hanzo Bot Azure deployment with the GitHub Copilot model provider: [Hanzo Bot on Azure with GitHub Copilot](https://github.com/johnsonshi/openclaw-azure-github-copilot)

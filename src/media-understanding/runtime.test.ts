@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { createEmptyPluginRegistry } from "../plugins/registry.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { describeImageFile, runMediaUnderstandingFile } from "./runtime.js";
@@ -38,7 +38,7 @@ describe("media-understanding runtime helpers", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
 
     const result = await describeImageFile({
       filePath: imagePath,
@@ -78,7 +78,7 @@ describe("media-understanding runtime helpers", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       agentDir: "/tmp/agent",
     });
 

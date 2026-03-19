@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { evaluateEntryRequirementsForCurrentPlatform } from "../shared/entry-status.js";
 import type { RequirementConfigCheck, Requirements } from "../shared/requirements.js";
 import { CONFIG_DIR } from "../utils.js";
@@ -168,7 +168,7 @@ function normalizeInstallOptions(
 
 function buildSkillStatus(
   entry: SkillEntry,
-  config?: OpenClawConfig,
+  config?: Hanzo BotConfig,
   prefs?: SkillsInstallPreferences,
   eligibility?: SkillEligibilityContext,
   bundledNames?: Set<string>,
@@ -227,7 +227,7 @@ function buildSkillStatus(
 export function buildWorkspaceSkillStatus(
   workspaceDir: string,
   opts?: {
-    config?: OpenClawConfig;
+    config?: Hanzo BotConfig;
     managedSkillsDir?: string;
     entries?: SkillEntry[];
     eligibility?: SkillEligibilityContext;

@@ -1,4 +1,4 @@
-export type { OpenClawConfig } from "../config/config.js";
+export type { Hanzo BotConfig } from "../config/config.js";
 export type { LineConfig } from "../line/types.js";
 export {
   createTopLevelChannelDmPolicy,

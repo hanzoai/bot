@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/huggingface-provider",
+  "name": "@hanzo/bot-huggingface-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Hugging Face provider plugin",
+  "description": "Hanzo Bot Hugging Face provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

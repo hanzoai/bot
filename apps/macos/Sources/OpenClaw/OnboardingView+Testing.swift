@@ -1,4 +1,4 @@
-import OpenClawDiscovery
+import Hanzo BotDiscovery
 import SwiftUI
 
 #if DEBUG

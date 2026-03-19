@@ -1,4 +1,4 @@
-import { loadConfig, type OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import { loadConfig, type Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/config-runtime";
 import { generateSecureUuid } from "openclaw/plugin-sdk/infra-runtime";
 import { normalizePollInput, type PollInput } from "openclaw/plugin-sdk/media-runtime";
@@ -19,7 +19,7 @@ export async function sendMessageWhatsApp(
   body: string,
   options: {
     verbose: boolean;
-    cfg?: OpenClawConfig;
+    cfg?: Hanzo BotConfig;
     mediaUrl?: string;
     mediaLocalRoots?: readonly string[];
     gifPlayback?: boolean;
@@ -160,7 +160,7 @@ export async function sendReactionWhatsApp(
 export async function sendPollWhatsApp(
   to: string,
   poll: PollInput,
-  options: { verbose: boolean; accountId?: string; cfg?: OpenClawConfig },
+  options: { verbose: boolean; accountId?: string; cfg?: Hanzo BotConfig },
 ): Promise<{ messageId: string; toJid: string }> {
   const correlationId = generateSecureUuid();
   const startedAt = Date.now();

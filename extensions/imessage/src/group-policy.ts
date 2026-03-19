@@ -3,10 +3,10 @@ import {
   resolveChannelGroupToolsPolicy,
   type GroupToolPolicyConfig,
 } from "openclaw/plugin-sdk/channel-policy";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/core";
 
 type IMessageGroupContext = {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
   groupId?: string | null;
   senderId?: string | null;

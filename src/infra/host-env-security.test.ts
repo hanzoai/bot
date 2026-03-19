@@ -10,7 +10,7 @@ import {
   sanitizeHostExecEnv,
   sanitizeSystemRunEnvOverrides,
 } from "./host-env-security.js";
-import { OPENCLAW_CLI_ENV_VALUE } from "./openclaw-exec-env.js";
+import { BOT_CLI_ENV_VALUE } from "./openclaw-exec-env.js";
 
 function getSystemGitPath() {
   if (process.platform === "win32") {
@@ -89,7 +89,7 @@ describe("sanitizeHostExecEnv", () => {
     });
 
     expect(env).toEqual({
-      OPENCLAW_CLI: OPENCLAW_CLI_ENV_VALUE,
+      BOT_CLI: BOT_CLI_ENV_VALUE,
       PATH: "/usr/bin:/bin",
       OK: "1",
     });
@@ -119,7 +119,7 @@ describe("sanitizeHostExecEnv", () => {
     });
 
     expect(env.PATH).toBe("/usr/bin:/bin");
-    expect(env.OPENCLAW_CLI).toBe(OPENCLAW_CLI_ENV_VALUE);
+    expect(env.BOT_CLI).toBe(BOT_CLI_ENV_VALUE);
     expect(env.BASH_ENV).toBeUndefined();
     expect(env.GIT_SSH_COMMAND).toBeUndefined();
     expect(env.GIT_EXEC_PATH).toBeUndefined();
@@ -144,7 +144,7 @@ describe("sanitizeHostExecEnv", () => {
     });
 
     expect(env.PATH).toBe("/usr/bin:/bin");
-    expect(env.OPENCLAW_CLI).toBe(OPENCLAW_CLI_ENV_VALUE);
+    expect(env.BOT_CLI).toBe(BOT_CLI_ENV_VALUE);
     expect(env.OK).toBe("1");
     expect(env.SHELLOPTS).toBeUndefined();
     expect(env.PS4).toBeUndefined();
@@ -163,7 +163,7 @@ describe("sanitizeHostExecEnv", () => {
     });
 
     expect(env.GOOD_KEY).toBe("ok");
-    expect(env.OPENCLAW_CLI).toBe(OPENCLAW_CLI_ENV_VALUE);
+    expect(env.BOT_CLI).toBe(BOT_CLI_ENV_VALUE);
     expect(env[" BAD KEY"]).toBeUndefined();
     expect(env["NOT-PORTABLE"]).toBeUndefined();
   });
@@ -180,7 +180,7 @@ describe("sanitizeHostExecEnv", () => {
     });
 
     expect(env.PATH).toBe("/custom/bin");
-    expect(env.OPENCLAW_CLI).toBe(OPENCLAW_CLI_ENV_VALUE);
+    expect(env.BOT_CLI).toBe(BOT_CLI_ENV_VALUE);
   });
 
   it("drops non-string inherited values and non-portable inherited keys", () => {
@@ -195,7 +195,7 @@ describe("sanitizeHostExecEnv", () => {
     });
 
     expect(env).toEqual({
-      OPENCLAW_CLI: OPENCLAW_CLI_ENV_VALUE,
+      BOT_CLI: BOT_CLI_ENV_VALUE,
       PATH: "/usr/bin:/bin",
       GOOD: "1",
     });
@@ -231,12 +231,12 @@ describe("sanitizeSystemRunEnvOverrides", () => {
     const overrides = sanitizeSystemRunEnvOverrides({
       shellWrapper: false,
       overrides: {
-        OPENCLAW_TEST: "1",
+        BOT_TEST: "1",
         TOKEN: "abc",
       },
     });
     expect(overrides).toEqual({
-      OPENCLAW_TEST: "1",
+      BOT_TEST: "1",
       TOKEN: "abc",
     });
   });
@@ -245,7 +245,7 @@ describe("sanitizeSystemRunEnvOverrides", () => {
     const overrides = sanitizeSystemRunEnvOverrides({
       shellWrapper: true,
       overrides: {
-        OPENCLAW_TEST: "1",
+        BOT_TEST: "1",
         TOKEN: "abc",
         LANG: "C",
         LC_ALL: "C",

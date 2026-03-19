@@ -1,4 +1,4 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/discord";
+import type { Hanzo BotPluginApi } from "openclaw/plugin-sdk/discord";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getRequiredHookHandler,
@@ -59,7 +59,7 @@ function registerHandlersForTest(
     },
   },
 ) {
-  return registerHookHandlersForTest<OpenClawPluginApi>({
+  return registerHookHandlersForTest<Hanzo BotPluginApi>({
     config,
     register: registerDiscordSubagentHooks,
   });

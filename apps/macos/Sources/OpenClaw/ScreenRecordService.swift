@@ -1,6 +1,6 @@
 import AVFoundation
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 import OSLog
 @preconcurrency import ScreenCaptureKit
 
@@ -100,7 +100,7 @@ final class ScreenRecordService {
 }
 
 private final class StreamRecorder: NSObject, SCStreamOutput, SCStreamDelegate, @unchecked Sendable {
-    let queue = DispatchQueue(label: "ai.openclaw.screenRecord.writer")
+    let queue = DispatchQueue(label: "ai.hanzo.bot.screenRecord.writer")
 
     private let logger: Logger
     private let writer: AVAssetWriter

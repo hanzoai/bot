@@ -12,7 +12,7 @@ final class PeekabooBridgeHostCoordinator {
     private let logger = Logger(subsystem: "ai.openclaw", category: "PeekabooBridge")
 
     private var host: PeekabooBridgeHost?
-    private var services: OpenClawPeekabooBridgeServices?
+    private var services: Hanzo BotPeekabooBridgeServices?
 
     private static let legacySocketDirectoryNames = ["clawdbot", "clawdis", "moltbot"]
 
@@ -20,7 +20,7 @@ final class PeekabooBridgeHostCoordinator {
         let fileManager = FileManager.default
         let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? fileManager.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
-        return Self.makeSocketPath(for: "OpenClaw", in: base)
+        return Self.makeSocketPath(for: "Hanzo Bot", in: base)
     }
 
     private static func makeSocketPath(for directoryName: String, in baseDirectory: URL) -> String {
@@ -64,7 +64,7 @@ final class PeekabooBridgeHostCoordinator {
 
         self.ensureLegacySocketSymlinks()
 
-        let services = OpenClawPeekabooBridgeServices()
+        let services = Hanzo BotPeekabooBridgeServices()
         let server = PeekabooBridgeServer(
             services: services,
             hostKind: .gui,
@@ -153,7 +153,7 @@ final class PeekabooBridgeHostCoordinator {
 }
 
 @MainActor
-private final class OpenClawPeekabooBridgeServices: PeekabooBridgeServiceProviding {
+private final class Hanzo BotPeekabooBridgeServices: PeekabooBridgeServiceProviding {
     let permissions: PermissionsService
     let screenCapture: any ScreenCaptureServiceProtocol
     let automation: any UIAutomationServiceProtocol
@@ -165,7 +165,7 @@ private final class OpenClawPeekabooBridgeServices: PeekabooBridgeServiceProvidi
     let snapshots: any SnapshotManagerProtocol
 
     init() {
-        let logging = LoggingService(subsystem: "ai.openclaw.peekaboo")
+        let logging = LoggingService(subsystem: "ai.hanzo.bot.peekaboo")
         let feedbackClient: any AutomationFeedbackClient = NoopAutomationFeedbackClient()
 
         let snapshots = InMemorySnapshotManager(options: .init(

@@ -6,7 +6,7 @@ import { resolveBundledPluginsDir } from "./bundled-dir.js";
 
 const tempDirs: string[] = [];
 const originalCwd = process.cwd();
-const originalBundledDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+const originalBundledDir = process.env.BOT_BUNDLED_PLUGINS_DIR;
 const originalVitest = process.env.VITEST;
 
 function makeRepoRoot(prefix: string): string {
@@ -18,9 +18,9 @@ function makeRepoRoot(prefix: string): string {
 afterEach(() => {
   process.chdir(originalCwd);
   if (originalBundledDir === undefined) {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.BOT_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = originalBundledDir;
+    process.env.BOT_BUNDLED_PLUGINS_DIR = originalBundledDir;
   }
   if (originalVitest === undefined) {
     delete process.env.VITEST;
@@ -39,7 +39,7 @@ describe("resolveBundledPluginsDir", () => {
     fs.mkdirSync(path.join(repoRoot, "dist", "extensions"), { recursive: true });
     fs.writeFileSync(
       path.join(repoRoot, "package.json"),
-      `${JSON.stringify({ name: "openclaw" }, null, 2)}\n`,
+      `${JSON.stringify({ name: "@hanzo/bot" }, null, 2)}\n`,
       "utf8",
     );
 
@@ -55,7 +55,7 @@ describe("resolveBundledPluginsDir", () => {
     fs.mkdirSync(path.join(repoRoot, "dist", "extensions"), { recursive: true });
     fs.writeFileSync(
       path.join(repoRoot, "package.json"),
-      `${JSON.stringify({ name: "openclaw" }, null, 2)}\n`,
+      `${JSON.stringify({ name: "@hanzo/bot" }, null, 2)}\n`,
       "utf8",
     );
 
@@ -73,7 +73,7 @@ describe("resolveBundledPluginsDir", () => {
     fs.mkdirSync(path.join(repoRoot, "dist", "extensions"), { recursive: true });
     fs.writeFileSync(
       path.join(repoRoot, "package.json"),
-      `${JSON.stringify({ name: "openclaw" }, null, 2)}\n`,
+      `${JSON.stringify({ name: "@hanzo/bot" }, null, 2)}\n`,
       "utf8",
     );
 
@@ -94,7 +94,7 @@ describe("resolveBundledPluginsDir", () => {
     fs.writeFileSync(path.join(repoRoot, ".git"), "gitdir: /tmp/fake.git\n", "utf8");
     fs.writeFileSync(
       path.join(repoRoot, "package.json"),
-      `${JSON.stringify({ name: "openclaw" }, null, 2)}\n`,
+      `${JSON.stringify({ name: "@hanzo/bot" }, null, 2)}\n`,
       "utf8",
     );
 
