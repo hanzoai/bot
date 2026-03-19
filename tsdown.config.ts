@@ -26,7 +26,7 @@ const env = {
 };
 
 function buildInputOptions(options: InputOptionsArg): InputOptionsReturn {
-  if (process.env.OPENCLAW_BUILD_VERBOSE === "1") {
+  if (process.env.BOT_BUILD_VERBOSE === "1") {
     return undefined;
   }
 

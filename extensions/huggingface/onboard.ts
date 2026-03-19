@@ -5,12 +5,12 @@ import {
 } from "openclaw/plugin-sdk/provider-models";
 import {
   applyProviderConfigWithModelCatalogPreset,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export const HUGGINGFACE_DEFAULT_MODEL_REF = "huggingface/deepseek-ai/DeepSeek-R1";
 
-function applyHuggingfacePreset(cfg: OpenClawConfig, primaryModelRef?: string): OpenClawConfig {
+function applyHuggingfacePreset(cfg: Hanzo BotConfig, primaryModelRef?: string): Hanzo BotConfig {
   return applyProviderConfigWithModelCatalogPreset(cfg, {
     providerId: "huggingface",
     api: "openai-completions",
@@ -21,10 +21,10 @@ function applyHuggingfacePreset(cfg: OpenClawConfig, primaryModelRef?: string): 
   });
 }
 
-export function applyHuggingfaceProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyHuggingfaceProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyHuggingfacePreset(cfg);
 }
 
-export function applyHuggingfaceConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyHuggingfaceConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyHuggingfacePreset(cfg, HUGGINGFACE_DEFAULT_MODEL_REF);
 }

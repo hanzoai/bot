@@ -9,7 +9,7 @@ title: "Secrets Management"
 
 # Secrets management
 
-OpenClaw supports additive SecretRefs so supported credentials do not need to be stored as plaintext in configuration.
+Hanzo Bot supports additive SecretRefs so supported credentials do not need to be stored as plaintext in configuration.
 
 Plaintext still works. SecretRefs are opt-in per credential.
 
@@ -51,7 +51,7 @@ Examples of inactive surfaces:
   - In local mode without those remote surfaces:
     - `gateway.remote.token` is active when token auth can win and no env/auth token is configured.
     - `gateway.remote.password` is active only when password auth can win and no env/auth password is configured.
-- `gateway.auth.token` SecretRef is inactive for startup auth resolution when `OPENCLAW_GATEWAY_TOKEN` (or `CLAWDBOT_GATEWAY_TOKEN`) is set, because env token input wins for that runtime.
+- `gateway.auth.token` SecretRef is inactive for startup auth resolution when `BOT_GATEWAY_TOKEN` (or `BOT_GATEWAY_TOKEN`) is set, because env token input wins for that runtime.
 
 ## Gateway auth surface diagnostics
 
@@ -68,7 +68,7 @@ active-surface policy, so you can see why a credential was treated as active or 
 
 ## Onboarding reference preflight
 
-When onboarding runs in interactive mode and you choose SecretRef storage, OpenClaw runs preflight validation before saving:
+When onboarding runs in interactive mode and you choose SecretRef storage, Hanzo Bot runs preflight validation before saving:
 
 - Env refs: validates env var name and confirms a non-empty value is visible during setup.
 - Provider refs (`file` or `exec`): validates provider selection, resolves `id`, and checks resolved value type.
@@ -130,7 +130,7 @@ Define providers under `secrets.providers`:
       default: { source: "env" },
       filemain: {
         source: "file",
-        path: "~/.openclaw/secrets.json",
+        path: "~/.hanzo/bot/secrets.json",
         mode: "json", // or "singleValue"
       },
       vault: {
@@ -172,7 +172,7 @@ Define providers under `secrets.providers`:
 
 - Runs configured absolute binary path, no shell.
 - By default, `command` must point to a regular file (not a symlink).
-- Set `allowSymlinkCommand: true` to allow symlink command paths (for example Homebrew shims). OpenClaw validates the resolved target path.
+- Set `allowSymlinkCommand: true` to allow symlink command paths (for example Homebrew shims). Hanzo Bot validates the resolved target path.
 - Pair `allowSymlinkCommand` with `trustedDirs` for package-manager paths (for example `["/opt/homebrew"]`).
 - Supports timeout, no-output timeout, output byte limits, env allowlist, and trusted dirs.
 - Windows fail-closed note: if ACL verification is unavailable for the command path, resolution fails. For trusted paths only, set `allowInsecurePath: true` on that provider to bypass path security checks.
@@ -212,7 +212,7 @@ Optional per-id errors:
         command: "/opt/homebrew/bin/op",
         allowSymlinkCommand: true, // required for Homebrew symlinked binaries
         trustedDirs: ["/opt/homebrew"],
-        args: ["read", "op://Personal/OpenClaw QA API Key/password"],
+        args: ["read", "op://Personal/Hanzo Bot QA API Key/password"],
         passEnv: ["HOME"],
         jsonOnly: false,
       },
@@ -313,7 +313,7 @@ The core `ssh` sandbox backend also supports SecretRefs for SSH auth material:
 
 Runtime behavior:
 
-- OpenClaw resolves these refs during sandbox activation, not lazily during each SSH call.
+- Hanzo Bot resolves these refs during sandbox activation, not lazily during each SSH call.
 - Resolved values are written to temp files with restrictive permissions and used in generated SSH config.
 - If the effective sandbox backend is not `ssh`, these refs stay inactive and do not block startup.
 
@@ -359,7 +359,7 @@ Activation contract:
 
 ## Degraded and recovered signals
 
-When reload-time activation fails after a healthy state, OpenClaw enters degraded secrets state.
+When reload-time activation fails after a healthy state, Hanzo Bot enters degraded secrets state.
 
 One-shot system event and log codes:
 
@@ -379,8 +379,8 @@ Command paths can opt into supported SecretRef resolution via gateway snapshot R
 
 There are two broad behaviors:
 
-- Strict command paths (for example `openclaw memory` remote-memory paths and `openclaw qr --remote`) read from the active snapshot and fail fast when a required SecretRef is unavailable.
-- Read-only command paths (for example `openclaw status`, `openclaw status --all`, `openclaw channels status`, `openclaw channels resolve`, `openclaw security audit`, and read-only doctor/config repair flows) also prefer the active snapshot, but degrade instead of aborting when a targeted SecretRef is unavailable in that command path.
+- Strict command paths (for example `hanzo-bot memory` remote-memory paths and `hanzo-bot qr --remote`) read from the active snapshot and fail fast when a required SecretRef is unavailable.
+- Read-only command paths (for example `hanzo-bot status`, `hanzo-bot status --all`, `hanzo-bot channels status`, `hanzo-bot channels resolve`, `hanzo-bot security audit`, and read-only doctor/config repair flows) also prefer the active snapshot, but degrade instead of aborting when a targeted SecretRef is unavailable in that command path.
 
 Read-only behavior:
 
@@ -391,7 +391,7 @@ Read-only behavior:
 
 Other notes:
 
-- Snapshot refresh after backend secret rotation is handled by `openclaw secrets reload`.
+- Snapshot refresh after backend secret rotation is handled by `hanzo-bot secrets reload`.
 - Gateway RPC method used by these command paths: `secrets.resolve`.
 
 ## Audit and configure workflow
@@ -417,7 +417,7 @@ Findings include:
 Exec note:
 
 - By default, audit skips exec SecretRef resolvability checks to avoid command side effects.
-- Use `openclaw secrets audit --allow-exec` to execute exec providers during audit.
+- Use `hanzo-bot secrets audit --allow-exec` to execute exec providers during audit.
 
 Header residue note:
 
@@ -441,9 +441,9 @@ Exec note:
 
 Helpful modes:
 
-- `openclaw secrets configure --providers-only`
-- `openclaw secrets configure --skip-provider-setup`
-- `openclaw secrets configure --agent <id>`
+- `hanzo-bot secrets configure --providers-only`
+- `hanzo-bot secrets configure --skip-provider-setup`
+- `hanzo-bot secrets configure --agent <id>`
 
 `configure` apply defaults:
 
@@ -473,7 +473,7 @@ For strict target/path contract details and exact rejection rules, see:
 
 ## One-way safety policy
 
-OpenClaw intentionally does not write rollback backups containing historical plaintext secret values.
+Hanzo Bot intentionally does not write rollback backups containing historical plaintext secret values.
 
 Safety model:
 

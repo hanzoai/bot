@@ -1,15 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/bash
-# OpenClaw Auth Widget for Termux
+# Hanzo Bot Auth Widget for Termux
 # Place in ~/.shortcuts/ for Termux:Widget
 #
 # This widget checks auth status and helps with re-auth if needed.
 # It's designed for quick one-tap checking from phone home screen.
 
 # Server hostname (via Tailscale or SSH config)
-SERVER="${OPENCLAW_SERVER:-${CLAWDBOT_SERVER:-l36}}"
+SERVER="${BOT_SERVER:-${BOT_SERVER:-l36}}"
 
 # Check auth status
-termux-toast "Checking OpenClaw auth..."
+termux-toast "Checking Hanzo Bot auth..."
 
 STATUS=$(ssh "$SERVER" '$HOME/openclaw/scripts/claude-auth-status.sh simple' 2>&1)
 EXIT_CODE=$?
@@ -24,7 +24,7 @@ case "$STATUS" in
         termux-toast "Auth OK (${HOURS}h left)"
         ;;
 
-    CLAUDE_EXPIRING|OPENCLAW_EXPIRING|CLAWDBOT_EXPIRING)
+    CLAUDE_EXPIRING|BOT_EXPIRING|BOT_EXPIRING)
         termux-vibrate -d 100
 
         # Ask if user wants to re-auth now
@@ -51,7 +51,7 @@ case "$STATUS" in
         esac
         ;;
 
-    CLAUDE_EXPIRED|OPENCLAW_EXPIRED|CLAWDBOT_EXPIRED)
+    CLAUDE_EXPIRED|BOT_EXPIRED|BOT_EXPIRED)
         termux-vibrate -d 300
 
         CHOICE=$(termux-dialog radio -t "Auth Expired!" -v "Re-auth now,Dismiss")
@@ -69,7 +69,7 @@ case "$STATUS" in
                 termux-toast "Run: ssh $SERVER '$HOME/openclaw/scripts/mobile-reauth.sh'"
                 ;;
             *)
-                termux-toast "Warning: OpenClaw won't work until re-auth"
+                termux-toast "Warning: Hanzo Bot won't work until re-auth"
                 ;;
         esac
         ;;

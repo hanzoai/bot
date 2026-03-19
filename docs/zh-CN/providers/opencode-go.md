@@ -44,7 +44,7 @@ openclaw onboard --opencode-go-api-key "$OPENCODE_API_KEY"
 
 ## 路由行为
 
-当模型引用使用 `opencode-go/...` 时，OpenClaw 会自动处理按模型路由。
+当模型引用使用 `opencode-go/...` 时，Hanzo Bot 会自动处理按模型路由。
 
 ## 说明
 

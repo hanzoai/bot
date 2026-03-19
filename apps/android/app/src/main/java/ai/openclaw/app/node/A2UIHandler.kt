@@ -1,6 +1,6 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
-import ai.openclaw.app.gateway.GatewaySession
+import ai.hanzo.bot.app.gateway.GatewaySession
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

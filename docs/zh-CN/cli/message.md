@@ -2,7 +2,7 @@
 read_when:
   - 添加或修改消息 CLI 操作
   - 更改出站渠道行为
-summary: "`openclaw message`（发送 + 渠道操作）的 CLI 参考"
+summary: "`hanzo-bot message`（发送 + 渠道操作）的 CLI 参考"
 title: message
 x-i18n:
   generated_at: "2026-02-01T20:21:30Z"
@@ -13,7 +13,7 @@ x-i18n:
   workflow: 14
 ---
 
-# `openclaw message`
+# `hanzo-bot message`
 
 用于发送消息和渠道操作的单一出站命令
 （Discord/Google Chat/Slack/Mattermost（插件）/Telegram/WhatsApp/Signal/iMessage/MS Teams）。
@@ -45,7 +45,7 @@ openclaw message <subcommand> [flags]
 名称查找：
 
 - 对于支持的提供商（Discord/Slack 等），如 `Help` 或 `#help` 之类的频道名称会通过目录缓存进行解析。
-- 缓存未命中时，如果提供商支持，OpenClaw 将尝试实时目录查找。
+- 缓存未命中时，如果提供商支持，Hanzo Bot 将尝试实时目录查找。
 
 ## 通用标志
 

@@ -1,11 +1,11 @@
 #!/bin/bash
 # Claude Code Authentication Status Checker
-# Checks both Claude Code and OpenClaw auth status
+# Checks both Claude Code and Hanzo Bot auth status
 
 set -euo pipefail
 
 CLAUDE_CREDS="$HOME/.claude/.credentials.json"
-OPENCLAW_AUTH="$HOME/.openclaw/agents/main/agent/auth-profiles.json"
+BOT_AUTH="$HOME/.hanzo/bot/agents/main/agent/auth-profiles.json"
 
 # Colors for terminal output
 RED='\033[0;31m'
@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 OUTPUT_MODE="${1:-full}"
 
 fetch_models_status_json() {
-    openclaw models status --json 2>/dev/null || true
+    hanzo-bot models status --json 2>/dev/null || true
 }
 
 STATUS_JSON="$(fetch_models_status_json)"
@@ -122,7 +122,7 @@ check_openclaw_auth() {
         return $?
     fi
 
-    if [ ! -f "$OPENCLAW_AUTH" ]; then
+    if [ ! -f "$BOT_AUTH" ]; then
         echo "MISSING"
         return 1
     fi
@@ -131,7 +131,7 @@ check_openclaw_auth() {
     expires=$(jq -r '
         [.profiles | to_entries[] | select(.value.provider == "anthropic") | .value.expires]
         | max // 0
-    ' "$OPENCLAW_AUTH" 2>/dev/null || echo "0")
+    ' "$BOT_AUTH" 2>/dev/null || echo "0")
 
     calc_status_from_expires "$expires"
 }
@@ -148,7 +148,7 @@ if [ "$OUTPUT_MODE" = "json" ]; then
         openclaw_expires=$(json_expires_for_anthropic_any)
     else
         claude_expires=$(jq -r '.claudeAiOauth.expiresAt // 0' "$CLAUDE_CREDS" 2>/dev/null || echo "0")
-        openclaw_expires=$(jq -r '.profiles["anthropic:default"].expires // 0' "$OPENCLAW_AUTH" 2>/dev/null || echo "0")
+        openclaw_expires=$(jq -r '.profiles["anthropic:default"].expires // 0' "$BOT_AUTH" 2>/dev/null || echo "0")
     fi
 
     jq -n \
@@ -173,13 +173,13 @@ if [ "$OUTPUT_MODE" = "simple" ]; then
         echo "CLAUDE_EXPIRED"
         exit 1
     elif [[ "$openclaw_status" == EXPIRED* ]] || [[ "$openclaw_status" == MISSING* ]]; then
-        echo "OPENCLAW_EXPIRED"
+        echo "BOT_EXPIRED"
         exit 1
     elif [[ "$claude_status" == EXPIRING* ]]; then
         echo "CLAUDE_EXPIRING"
         exit 2
     elif [[ "$openclaw_status" == EXPIRING* ]]; then
-        echo "OPENCLAW_EXPIRING"
+        echo "BOT_EXPIRING"
         exit 2
     else
         echo "OK"
@@ -228,7 +228,7 @@ else
 fi
 
 echo ""
-echo "OpenClaw Auth (~/.openclaw/agents/main/agent/auth-profiles.json):"
+echo "Hanzo Bot Auth (~/.hanzo/bot/agents/main/agent/auth-profiles.json):"
 if [ "$USE_JSON" -eq 1 ]; then
     best_profile=$(json_best_anthropic_profile)
     expires=$(json_expires_for_anthropic_any)
@@ -239,11 +239,11 @@ else
         | map(select(.value.provider == "anthropic"))
         | sort_by(.value.expires) | reverse
         | .[0].key // "none"
-    ' "$OPENCLAW_AUTH" 2>/dev/null || echo "none")
+    ' "$BOT_AUTH" 2>/dev/null || echo "none")
     expires=$(jq -r '
         [.profiles | to_entries[] | select(.value.provider == "anthropic") | .value.expires]
         | max // 0
-    ' "$OPENCLAW_AUTH" 2>/dev/null || echo "0")
+    ' "$BOT_AUTH" 2>/dev/null || echo "0")
     api_keys=0
 fi
 
@@ -273,8 +273,8 @@ fi
 
 echo ""
 echo "=== Service Status ==="
-if systemctl --user is-active openclaw >/dev/null 2>&1; then
-    echo -e "OpenClaw service: ${GREEN}running${NC}"
+if systemctl --user is-active hanzo-bot >/dev/null 2>&1; then
+    echo -e "Hanzo Bot service: ${GREEN}running${NC}"
 else
-    echo -e "OpenClaw service: ${RED}NOT running${NC}"
+    echo -e "Hanzo Bot service: ${RED}NOT running${NC}"
 fi

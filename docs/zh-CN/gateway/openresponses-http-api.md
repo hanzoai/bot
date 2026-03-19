@@ -15,14 +15,14 @@ x-i18n:
 
 # OpenResponses API（HTTP）
 
-OpenClaw 的 Gateway 网关可以提供兼容 OpenResponses 的 `POST /v1/responses` 端点。
+Hanzo Bot 的 Gateway 网关可以提供兼容 OpenResponses 的 `POST /v1/responses` 端点。
 
 此端点**默认禁用**。请先在配置中启用。
 
 - `POST /v1/responses`
 - 与 Gateway 网关相同的端口（WS + HTTP 多路复用）：`http://<gateway-host>:<port>/v1/responses`
 
-底层实现中，请求作为正常的 Gateway 网关智能体运行执行（与 `openclaw agent` 相同的代码路径），因此路由/权限/配置与你的 Gateway 网关一致。
+底层实现中，请求作为正常的 Gateway 网关智能体运行执行（与 `hanzo-bot agent` 相同的代码路径），因此路由/权限/配置与你的 Gateway 网关一致。
 
 ## 认证
 
@@ -32,8 +32,8 @@ OpenClaw 的 Gateway 网关可以提供兼容 OpenResponses 的 `POST /v1/respon
 
 说明：
 
-- 当 `gateway.auth.mode="token"` 时，使用 `gateway.auth.token`（或 `OPENCLAW_GATEWAY_TOKEN`）。
-- 当 `gateway.auth.mode="password"` 时，使用 `gateway.auth.password`（或 `OPENCLAW_GATEWAY_PASSWORD`）。
+- 当 `gateway.auth.mode="token"` 时，使用 `gateway.auth.token`（或 `BOT_GATEWAY_TOKEN`）。
+- 当 `gateway.auth.mode="password"` 时，使用 `gateway.auth.password`（或 `BOT_GATEWAY_PASSWORD`）。
 
 ## 选择智能体
 
@@ -42,7 +42,7 @@ OpenClaw 的 Gateway 网关可以提供兼容 OpenResponses 的 `POST /v1/respon
 - `model: "openclaw:<agentId>"`（示例：`"openclaw:main"`、`"openclaw:beta"`）
 - `model: "agent:<agentId>"`（别名）
 
-或通过头指定特定的 OpenClaw 智能体：
+或通过头指定特定的 Hanzo Bot 智能体：
 
 - `x-openclaw-agent-id: <agentId>`（默认：`main`）
 
@@ -297,7 +297,7 @@ curl -sS http://127.0.0.1:18789/v1/responses \
   -H 'Content-Type: application/json' \
   -H 'x-openclaw-agent-id: main' \
   -d '{
-    "model": "openclaw",
+    "model": "@hanzo/bot",
     "input": "hi"
   }'
 ```
@@ -310,7 +310,7 @@ curl -N http://127.0.0.1:18789/v1/responses \
   -H 'Content-Type: application/json' \
   -H 'x-openclaw-agent-id: main' \
   -d '{
-    "model": "openclaw",
+    "model": "@hanzo/bot",
     "stream": true,
     "input": "hi"
   }'

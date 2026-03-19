@@ -18,7 +18,7 @@ export {
   type DiscordAccountConfig,
   type DiscordActionConfig,
   type DiscordConfig,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/discord-core";
 export { DiscordConfigSchema } from "openclaw/plugin-sdk/discord-core";
 export { readBooleanParam } from "openclaw/plugin-sdk/boolean-param";

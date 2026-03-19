@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { buildProviderRegistry, runCapability } from "./runner.js";
 import { withAudioFixture } from "./runner.test-utils.js";
@@ -19,7 +19,7 @@ function createOpenAiAudioProvider(
   });
 }
 
-function createOpenAiAudioCfg(extra?: Partial<OpenClawConfig>): OpenClawConfig {
+function createOpenAiAudioCfg(extra?: Partial<Hanzo BotConfig>): Hanzo BotConfig {
   return {
     models: {
       providers: {
@@ -30,12 +30,12 @@ function createOpenAiAudioCfg(extra?: Partial<OpenClawConfig>): OpenClawConfig {
       },
     },
     ...extra,
-  } as unknown as OpenClawConfig;
+  } as unknown as Hanzo BotConfig;
 }
 
 async function runAutoAudioCase(params: {
   transcribeAudio: (req: { model?: string }) => Promise<{ text: string; model: string }>;
-  cfgExtra?: Partial<OpenClawConfig>;
+  cfgExtra?: Partial<Hanzo BotConfig>;
 }) {
   let runResult: Awaited<ReturnType<typeof runCapability>> | undefined;
   await withAudioFixture("openclaw-auto-audio", async ({ ctx, media, cache }) => {
@@ -124,7 +124,7 @@ describe("runCapability auto audio entries", () => {
           GEMINI_API_KEY: undefined,
           GOOGLE_API_KEY: undefined,
           MISTRAL_API_KEY: "mistral-test-key", // pragma: allowlist secret
-          OPENCLAW_AGENT_DIR: isolatedAgentDir,
+          BOT_AGENT_DIR: isolatedAgentDir,
           PI_CODING_AGENT_DIR: isolatedAgentDir,
         },
         async () => {
@@ -163,7 +163,7 @@ describe("runCapability auto audio entries", () => {
                   },
                 },
               },
-            } as unknown as OpenClawConfig;
+            } as unknown as Hanzo BotConfig;
 
             runResult = await runCapability({
               capability: "audio",

@@ -1,6 +1,6 @@
 import Foundation
 import Network
-import OpenClawKit
+import Hanzo BotKit
 
 enum A2UIReadyState {
     case ready(String)

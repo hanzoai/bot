@@ -48,7 +48,7 @@ describe("MatrixRecoveryKeyStore", () => {
     callbacks.cacheSecretStorageKey?.(
       "KEY123",
       {
-        name: "openclaw",
+        name: "@hanzo/bot",
       },
       new Uint8Array([9, 8, 7]),
     );

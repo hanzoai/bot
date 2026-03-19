@@ -60,7 +60,7 @@ jobs:
 
       - name: Run root Dockerfile CLI smoke
         run: |
-          docker run --rm --entrypoint sh openclaw-dockerfile-smoke:local -lc 'which openclaw && openclaw --version'
+          docker run --rm --entrypoint sh openclaw-dockerfile-smoke:local -lc 'which hanzo-bot && hanzo-bot --version'
 
       # This smoke validates that the build-arg path preinstalls the matrix
       # runtime deps declared by the plugin and that matrix discovery stays
@@ -71,7 +71,7 @@ jobs:
           context: .
           file: ./Dockerfile
           build-args: |
-            OPENCLAW_EXTENSIONS=matrix
+            BOT_EXTENSIONS=matrix
           tags: openclaw-ext-smoke:local
           load: true
           push: false
@@ -80,8 +80,8 @@ jobs:
       - name: Smoke test Dockerfile with matrix extension build arg
         run: |
           docker run --rm --entrypoint sh openclaw-ext-smoke:local -lc '
-            which openclaw &&
-            openclaw --version &&
+            which hanzo-bot &&
+            hanzo-bot --version &&
             node -e "
               const Module = require(\"node:module\");
               const matrixPackage = require(\"/app/extensions/matrix/package.json\");
@@ -145,12 +145,12 @@ jobs:
 
       - name: Run installer docker tests
         env:
-          CLAWDBOT_INSTALL_URL: https://openclaw.ai/install.sh
-          CLAWDBOT_INSTALL_CLI_URL: https://openclaw.ai/install-cli.sh
-          CLAWDBOT_NO_ONBOARD: "1"
-          CLAWDBOT_INSTALL_SMOKE_SKIP_CLI: "1"
-          CLAWDBOT_INSTALL_SMOKE_SKIP_IMAGE_BUILD: "1"
-          CLAWDBOT_INSTALL_NONROOT_SKIP_IMAGE_BUILD: ${{ github.event_name == 'pull_request' && '0' || '1' }}
-          CLAWDBOT_INSTALL_SMOKE_SKIP_NONROOT: ${{ github.event_name == 'pull_request' && '1' || '0' }}
-          CLAWDBOT_INSTALL_SMOKE_SKIP_PREVIOUS: "1"
+          BOT_INSTALL_URL: https://hanzo.bot/install.sh
+          BOT_INSTALL_CLI_URL: https://hanzo.bot/install-cli.sh
+          BOT_NO_ONBOARD: "1"
+          BOT_INSTALL_SMOKE_SKIP_CLI: "1"
+          BOT_INSTALL_SMOKE_SKIP_IMAGE_BUILD: "1"
+          BOT_INSTALL_NONROOT_SKIP_IMAGE_BUILD: ${{ github.event_name == 'pull_request' && '0' || '1' }}
+          BOT_INSTALL_SMOKE_SKIP_NONROOT: ${{ github.event_name == 'pull_request' && '1' || '0' }}
+          BOT_INSTALL_SMOKE_SKIP_PREVIOUS: "1"
         run: bash scripts/test-install-sh-docker.sh

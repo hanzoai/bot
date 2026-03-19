@@ -2,7 +2,7 @@ import ActivityKit
 import Foundation
 
 /// Shared schema used by iOS app + Live Activity widget extension.
-struct OpenClawActivityAttributes: ActivityAttributes {
+struct Hanzo BotActivityAttributes: ActivityAttributes {
     var agentName: String
     var sessionKey: String
 
@@ -16,26 +16,26 @@ struct OpenClawActivityAttributes: ActivityAttributes {
 }
 
 #if DEBUG
-extension OpenClawActivityAttributes {
-    static let preview = OpenClawActivityAttributes(agentName: "main", sessionKey: "main")
+extension Hanzo BotActivityAttributes {
+    static let preview = Hanzo BotActivityAttributes(agentName: "main", sessionKey: "main")
 }
 
-extension OpenClawActivityAttributes.ContentState {
-    static let connecting = OpenClawActivityAttributes.ContentState(
+extension Hanzo BotActivityAttributes.ContentState {
+    static let connecting = Hanzo BotActivityAttributes.ContentState(
         statusText: "Connecting...",
         isIdle: false,
         isDisconnected: false,
         isConnecting: true,
         startedAt: .now)
 
-    static let idle = OpenClawActivityAttributes.ContentState(
+    static let idle = Hanzo BotActivityAttributes.ContentState(
         statusText: "Idle",
         isIdle: true,
         isDisconnected: false,
         isConnecting: false,
         startedAt: .now)
 
-    static let disconnected = OpenClawActivityAttributes.ContentState(
+    static let disconnected = Hanzo BotActivityAttributes.ContentState(
         statusText: "Disconnected",
         isIdle: false,
         isDisconnected: true,

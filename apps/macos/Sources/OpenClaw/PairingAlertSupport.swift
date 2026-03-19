@@ -1,5 +1,5 @@
 import AppKit
-import OpenClawKit
+import Hanzo BotKit
 import OSLog
 
 final class PairingAlertHostWindow: NSWindow {

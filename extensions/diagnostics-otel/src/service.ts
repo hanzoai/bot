@@ -9,10 +9,10 @@ import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { ParentBasedSampler, TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
-import type { DiagnosticEventPayload, OpenClawPluginService } from "../api.js";
+import type { DiagnosticEventPayload, Hanzo BotPluginService } from "../api.js";
 import { onDiagnosticEvent, redactSensitiveText, registerLogTransport } from "../api.js";
 
-const DEFAULT_SERVICE_NAME = "openclaw";
+const DEFAULT_SERVICE_NAME = "@hanzo/bot";
 
 function normalizeEndpoint(endpoint?: string): string | undefined {
   const trimmed = endpoint?.trim();
@@ -62,7 +62,7 @@ function redactOtelAttributes(attributes: Record<string, string | number | boole
   return redactedAttributes;
 }
 
-export function createDiagnosticsOtelService(): OpenClawPluginService {
+export function createDiagnosticsOtelService(): Hanzo BotPluginService {
   let sdk: NodeSDK | null = null;
   let logProvider: LoggerProvider | null = null;
   let stopLogTransport: (() => void) | null = null;
@@ -157,8 +157,8 @@ export function createDiagnosticsOtelService(): OpenClawPluginService {
         FATAL: 21 as SeverityNumber,
       };
 
-      const meter = metrics.getMeter("openclaw");
-      const tracer = trace.getTracer("openclaw");
+      const meter = metrics.getMeter("@hanzo/bot");
+      const tracer = trace.getTracer("@hanzo/bot");
 
       const tokensCounter = meter.createCounter("openclaw.tokens", {
         unit: "1",
@@ -248,7 +248,7 @@ export function createDiagnosticsOtelService(): OpenClawPluginService {
           resource,
           processors: [logProcessor],
         });
-        const otelLogger = logProvider.getLogger("openclaw");
+        const otelLogger = logProvider.getLogger("@hanzo/bot");
 
         stopLogTransport = registerLogTransport((logObj) => {
           try {
@@ -674,5 +674,5 @@ export function createDiagnosticsOtelService(): OpenClawPluginService {
         sdk = null;
       }
     },
-  } satisfies OpenClawPluginService;
+  } satisfies Hanzo BotPluginService;
 }

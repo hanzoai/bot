@@ -1,20 +1,20 @@
 import Foundation
-import OpenClawProtocol
+import Hanzo BotProtocol
 
-enum OpenClawConfigFile {
+enum Hanzo BotConfigFile {
     private static let logger = Logger(subsystem: "ai.openclaw", category: "config")
     private static let configAuditFileName = "config-audit.jsonl"
 
     static func url() -> URL {
-        OpenClawPaths.configURL
+        Hanzo BotPaths.configURL
     }
 
     static func stateDirURL() -> URL {
-        OpenClawPaths.stateDirURL
+        Hanzo BotPaths.stateDirURL
     }
 
     static func defaultWorkspaceURL() -> URL {
-        OpenClawPaths.workspaceURL
+        Hanzo BotPaths.workspaceURL
     }
 
     static func loadDict() -> [String: Any] {

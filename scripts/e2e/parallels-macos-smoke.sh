@@ -7,7 +7,7 @@ VM_NAME="macOS Tahoe"
 SNAPSHOT_HINT="macOS 26.3.1 fresh"
 MODE="both"
 OPENAI_API_KEY_ENV="OPENAI_API_KEY"
-INSTALL_URL="https://openclaw.ai/install.sh"
+INSTALL_URL="https://hanzo.bot/install.sh"
 HOST_PORT="18425"
 HOST_PORT_EXPLICIT=0
 HOST_IP=""
@@ -24,8 +24,8 @@ DISCORD_CHANNEL_ID=""
 SNAPSHOT_ID=""
 SNAPSHOT_STATE=""
 SNAPSHOT_NAME=""
-GUEST_OPENCLAW_BIN="/opt/homebrew/bin/openclaw"
-GUEST_OPENCLAW_ENTRY="/opt/homebrew/lib/node_modules/openclaw/openclaw.mjs"
+GUEST_BOT_BIN="/opt/homebrew/bin/openclaw"
+GUEST_BOT_ENTRY="/opt/homebrew/lib/node_modules/hanzoai/bot.mjs"
 GUEST_NODE_BIN="/opt/homebrew/bin/node"
 GUEST_NPM_BIN="/opt/homebrew/bin/npm"
 
@@ -109,7 +109,7 @@ Options:
                              both    = run both lanes
   --openai-api-key-env <var> Host env var name for OpenAI API key.
                              Default: OPENAI_API_KEY
-  --install-url <url>        Installer URL for latest release. Default: https://openclaw.ai/install.sh
+  --install-url <url>        Installer URL for latest release. Default: https://hanzo.bot/install.sh
   --host-port <port>         Host HTTP port for current-main tgz. Default: 18425
   --host-ip <ip>             Override Parallels host IP.
   --latest-version <ver>     Override npm latest version lookup.
@@ -456,24 +456,24 @@ if {$mode eq "current-user"} {
 }
 
 spawn {*}$cmd
-send -- "printf '__OPENCLAW_READY__\\n'\r"
-expect "__OPENCLAW_READY__"
+send -- "printf '__BOT_READY__\\n'\r"
+expect "__BOT_READY__"
 log_user 0
 send -- "export PS1='' PROMPT='' PROMPT2='' RPROMPT=''\r"
 send -- "stty -echo\r"
 
-send -- "cat >/tmp/openclaw-prl.sh <<'__OPENCLAW_SCRIPT__'\r"
+send -- "cat >/tmp/openclaw-prl.sh <<'__BOT_SCRIPT__'\r"
 send -- $script
 if {![string match "*\n" $script]} {
   send -- "\r"
 }
-send -- "__OPENCLAW_SCRIPT__\r"
-send -- "/bin/bash /tmp/openclaw-prl.sh; rc=\$?; rm -f /tmp/openclaw-prl.sh; printf '__OPENCLAW_RC__:%s\\n' \"\$rc\"; exit \"\$rc\"\r"
+send -- "__BOT_SCRIPT__\r"
+send -- "/bin/bash /tmp/openclaw-prl.sh; rc=\$?; rm -f /tmp/openclaw-prl.sh; printf '__BOT_RC__:%s\\n' \"\$rc\"; exit \"\$rc\"\r"
 log_user 1
 
 set rc 1
 expect {
-  -re {__OPENCLAW_RC__:(-?[0-9]+)} {
+  -re {__BOT_RC__:(-?[0-9]+)} {
     set rc $expect_out(1,string)
     exp_continue
   }
@@ -514,7 +514,7 @@ resolve_latest_version() {
     printf '%s\n' "$LATEST_VERSION"
     return
   fi
-  npm view openclaw version --userconfig "$(mktemp)"
+  npm view hanzo-bot version --userconfig "$(mktemp)"
 }
 
 install_latest_release() {
@@ -525,10 +525,10 @@ install_latest_release() {
     version_arg_q=" --version $(shell_quote "$INSTALL_VERSION")"
   fi
   guest_current_user_sh "$(cat <<EOF
-export OPENCLAW_NO_ONBOARD=1
+export BOT_NO_ONBOARD=1
 curl -fsSL $install_url_q -o /tmp/openclaw-install.sh
 bash /tmp/openclaw-install.sh${version_arg_q}
-$GUEST_OPENCLAW_BIN --version
+$GUEST_BOT_BIN --version
 EOF
 )"
 }
@@ -537,7 +537,7 @@ verify_version_contains() {
   local needle="$1"
   local version
   version="$(
-    guest_current_user_exec "$GUEST_OPENCLAW_BIN" --version
+    guest_current_user_exec "$GUEST_BOT_BIN" --version
   )"
   printf '%s\n' "$version"
   case "$version" in
@@ -659,7 +659,7 @@ install_main_tgz() {
   guest_current_user_sh "$(cat <<EOF
 curl -fsSL $tgz_url_q -o /tmp/$temp_name
 $GUEST_NPM_BIN install -g /tmp/$temp_name
-$GUEST_OPENCLAW_BIN --version
+$GUEST_BOT_BIN --version
 EOF
 )"
 }
@@ -677,7 +677,7 @@ EOF
 run_ref_onboard() {
   guest_current_user_exec \
     /usr/bin/env "OPENAI_API_KEY=$OPENAI_API_KEY_VALUE" \
-    "$GUEST_NODE_BIN" "$GUEST_OPENCLAW_ENTRY" onboard \
+    "$GUEST_NODE_BIN" "$GUEST_BOT_ENTRY" onboard \
     --non-interactive \
     --mode local \
     --auth-choice openai-api-key \
@@ -691,19 +691,19 @@ run_ref_onboard() {
 }
 
 verify_gateway() {
-  guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_OPENCLAW_ENTRY" gateway status --deep --require-rpc
+  guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_BOT_ENTRY" gateway status --deep --require-rpc
 }
 
 show_gateway_status_compat() {
-  if guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_OPENCLAW_ENTRY" gateway status --help | grep -Fq -- "--require-rpc"; then
-    guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_OPENCLAW_ENTRY" gateway status --deep --require-rpc
+  if guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_BOT_ENTRY" gateway status --help | grep -Fq -- "--require-rpc"; then
+    guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_BOT_ENTRY" gateway status --deep --require-rpc
     return
   fi
-  guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_OPENCLAW_ENTRY" gateway status --deep
+  guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_BOT_ENTRY" gateway status --deep
 }
 
 verify_turn() {
-  guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_OPENCLAW_ENTRY" agent --agent main --message ping --json
+  guest_current_user_exec "$GUEST_NODE_BIN" "$GUEST_BOT_ENTRY" agent --agent main --message ping --json
 }
 
 configure_discord_smoke() {
@@ -730,26 +730,26 @@ print(
 PY
   )"
   script="$(cat <<EOF
-cat >/tmp/openclaw-discord-token <<'__OPENCLAW_TOKEN__'
+cat >/tmp/openclaw-discord-token <<'__BOT_TOKEN__'
 $DISCORD_TOKEN_VALUE
-__OPENCLAW_TOKEN__
-cat >/tmp/openclaw-discord-guilds.json <<'__OPENCLAW_GUILDS__'
+__BOT_TOKEN__
+cat >/tmp/openclaw-discord-guilds.json <<'__BOT_GUILDS__'
 $guilds_json
-__OPENCLAW_GUILDS__
+__BOT_GUILDS__
 token="\$(tr -d '\n' </tmp/openclaw-discord-token)"
 guilds_json="\$(cat /tmp/openclaw-discord-guilds.json)"
-$GUEST_NODE_BIN $GUEST_OPENCLAW_ENTRY config set channels.discord.token "\$token"
-$GUEST_NODE_BIN $GUEST_OPENCLAW_ENTRY config set channels.discord.enabled true
-$GUEST_NODE_BIN $GUEST_OPENCLAW_ENTRY config set channels.discord.groupPolicy allowlist
-$GUEST_NODE_BIN $GUEST_OPENCLAW_ENTRY config set channels.discord.guilds "\$guilds_json" --strict-json
-$GUEST_NODE_BIN $GUEST_OPENCLAW_ENTRY gateway restart
+$GUEST_NODE_BIN $GUEST_BOT_ENTRY config set channels.discord.token "\$token"
+$GUEST_NODE_BIN $GUEST_BOT_ENTRY config set channels.discord.enabled true
+$GUEST_NODE_BIN $GUEST_BOT_ENTRY config set channels.discord.groupPolicy allowlist
+$GUEST_NODE_BIN $GUEST_BOT_ENTRY config set channels.discord.guilds "\$guilds_json" --strict-json
+$GUEST_NODE_BIN $GUEST_BOT_ENTRY gateway restart
 for _ in 1 2 3 4 5 6 7 8; do
-  if $GUEST_NODE_BIN $GUEST_OPENCLAW_ENTRY gateway status --deep --require-rpc >/dev/null 2>&1; then
+  if $GUEST_NODE_BIN $GUEST_BOT_ENTRY gateway status --deep --require-rpc >/dev/null 2>&1; then
     break
   fi
   sleep 2
 done
-$GUEST_NODE_BIN $GUEST_OPENCLAW_ENTRY channels status --probe --json
+$GUEST_NODE_BIN $GUEST_BOT_ENTRY channels status --probe --json
 rm -f /tmp/openclaw-discord-token /tmp/openclaw-discord-guilds.json
 EOF
 )"
@@ -834,7 +834,7 @@ wait_for_guest_discord_readback() {
     set +e
     response="$(
       guest_current_user_exec \
-      "$GUEST_OPENCLAW_BIN" \
+      "$GUEST_BOT_BIN" \
       message read \
       --channel discord \
       --target "channel:$DISCORD_CHANNEL_ID" \
@@ -866,7 +866,7 @@ run_discord_roundtrip_smoke() {
   host_id_file="$RUN_DIR/$phase.discord-host-message-id"
 
   guest_current_user_exec \
-    "$GUEST_OPENCLAW_BIN" \
+    "$GUEST_BOT_BIN" \
     message send \
     --channel discord \
     --target "channel:$DISCORD_CHANNEL_ID" \
@@ -892,7 +892,7 @@ import re
 import sys
 
 text = pathlib.Path(sys.argv[1]).read_text(errors="replace")
-matches = re.findall(r"OpenClaw [^\r\n]+ \([0-9a-f]{7,}\)", text)
+matches = re.findall(r"Hanzo Bot [^\r\n]+ \([0-9a-f]{7,}\)", text)
 print(matches[-1] if matches else "")
 PY
 }

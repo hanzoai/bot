@@ -1,6 +1,6 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
-import ai.openclaw.app.gateway.GatewaySession
+import ai.hanzo.bot.app.gateway.GatewaySession
 
 class SmsHandler(
   private val sms: SmsManager,

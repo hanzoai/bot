@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import {
   resolveLineAccount,
   resolveDefaultLineAccountId,
@@ -37,7 +37,7 @@ describe("LINE accounts", () => {
 
   describe("resolveLineAccount", () => {
     it("resolves account from config", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: Hanzo BotConfig = {
         channels: {
           line: {
             enabled: true,
@@ -62,7 +62,7 @@ describe("LINE accounts", () => {
       process.env.LINE_CHANNEL_ACCESS_TOKEN = "env-token";
       process.env.LINE_CHANNEL_SECRET = "env-secret";
 
-      const cfg: OpenClawConfig = {
+      const cfg: Hanzo BotConfig = {
         channels: {
           line: {
             enabled: true,
@@ -78,7 +78,7 @@ describe("LINE accounts", () => {
     });
 
     it("resolves named account", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: Hanzo BotConfig = {
         channels: {
           line: {
             enabled: true,
@@ -104,7 +104,7 @@ describe("LINE accounts", () => {
     });
 
     it("returns empty token when not configured", () => {
-      const cfg: OpenClawConfig = {};
+      const cfg: Hanzo BotConfig = {};
 
       const account = resolveLineAccount({ cfg });
 
@@ -114,7 +114,7 @@ describe("LINE accounts", () => {
     });
 
     it("resolves default account credentials from files", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: Hanzo BotConfig = {
         channels: {
           line: {
             tokenFile: createSecretFile("token.txt", "file-token\n"),
@@ -131,7 +131,7 @@ describe("LINE accounts", () => {
     });
 
     it("resolves named account credentials from account-level files", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: Hanzo BotConfig = {
         channels: {
           line: {
             accounts: {
@@ -163,7 +163,7 @@ describe("LINE accounts", () => {
       fs.symlinkSync(tokenFile, tokenLink);
       fs.symlinkSync(secretFile, secretLink);
 
-      const cfg: OpenClawConfig = {
+      const cfg: Hanzo BotConfig = {
         channels: {
           line: {
             tokenFile: tokenLink,
@@ -193,7 +193,7 @@ describe("LINE accounts", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies Hanzo BotConfig,
         expected: "business",
       },
       {
@@ -207,7 +207,7 @@ describe("LINE accounts", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies Hanzo BotConfig,
         expected: "business-ops",
       },
       {
@@ -220,7 +220,7 @@ describe("LINE accounts", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies Hanzo BotConfig,
         expected: "business",
       },
       {
@@ -234,7 +234,7 @@ describe("LINE accounts", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies Hanzo BotConfig,
         expected: "business",
       },
       {
@@ -248,7 +248,7 @@ describe("LINE accounts", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies Hanzo BotConfig,
         expected: DEFAULT_ACCOUNT_ID,
       },
     ])("$name", ({ cfg, expected }) => {

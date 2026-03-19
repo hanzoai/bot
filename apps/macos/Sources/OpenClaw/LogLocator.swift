@@ -2,7 +2,7 @@ import Foundation
 
 enum LogLocator {
     private static var logDir: URL {
-        if let override = ProcessInfo.processInfo.environment["OPENCLAW_LOG_DIR"],
+        if let override = ProcessInfo.processInfo.environment["BOT_LOG_DIR"],
            !override.isEmpty
         {
             return URL(fileURLWithPath: override)
@@ -35,7 +35,7 @@ enum LogLocator {
             includingPropertiesForKeys: [.contentModificationDateKey],
             options: [.skipsHiddenFiles])) ?? []
 
-        let prefixes = ["openclaw"]
+        let prefixes = ["@hanzo/bot"]
         return files
             .filter { file in
                 prefixes.contains { file.lastPathComponent.hasPrefix($0) } && file.pathExtension == "log"

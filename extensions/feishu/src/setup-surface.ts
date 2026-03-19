@@ -13,7 +13,7 @@ import {
   splitSetupEntries,
   type ChannelSetupDmPolicy,
   type ChannelSetupWizard,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
   type SecretInput,
 } from "openclaw/plugin-sdk/setup";
 import { listFeishuAccountIds, resolveFeishuCredentials } from "./accounts.js";
@@ -38,7 +38,7 @@ function normalizeString(value: unknown): string | undefined {
   return trimmed || undefined;
 }
 
-function setFeishuGroupAllowFrom(cfg: OpenClawConfig, groupAllowFrom: string[]): OpenClawConfig {
+function setFeishuGroupAllowFrom(cfg: Hanzo BotConfig, groupAllowFrom: string[]): Hanzo BotConfig {
   return {
     ...cfg,
     channels: {
@@ -51,7 +51,7 @@ function setFeishuGroupAllowFrom(cfg: OpenClawConfig, groupAllowFrom: string[]):
   };
 }
 
-function isFeishuConfigured(cfg: OpenClawConfig): boolean {
+function isFeishuConfigured(cfg: Hanzo BotConfig): boolean {
   const feishuCfg = cfg.channels?.feishu as FeishuConfig | undefined;
 
   const isAppIdConfigured = (value: unknown): boolean => {
@@ -94,9 +94,9 @@ function isFeishuConfigured(cfg: OpenClawConfig): boolean {
 }
 
 async function promptFeishuAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   prompter: Parameters<NonNullable<ChannelSetupDmPolicy["promptAllowFrom"]>>[0]["prompter"];
-}): Promise<OpenClawConfig> {
+}): Promise<Hanzo BotConfig> {
   return await promptParsedAllowFromForAccount({
     cfg: params.cfg,
     defaultAccountId: DEFAULT_ACCOUNT_ID,
@@ -238,7 +238,7 @@ export const feishuSetupWizard: ChannelSetupWizard = {
         channel,
         enabled: true,
         patch: {},
-      }) as OpenClawConfig;
+      }) as Hanzo BotConfig;
     } else if (appSecretResult.action === "set") {
       appSecret = appSecretResult.value;
       appSecretProbeValue = appSecretResult.resolvedValue;
@@ -258,7 +258,7 @@ export const feishuSetupWizard: ChannelSetupWizard = {
           appId,
           appSecret,
         },
-      }) as OpenClawConfig;
+      }) as Hanzo BotConfig;
 
       try {
         const probe = await probeFeishu({
@@ -296,7 +296,7 @@ export const feishuSetupWizard: ChannelSetupWizard = {
       cfg: next,
       channel,
       patch: { connectionMode },
-    }) as OpenClawConfig;
+    }) as Hanzo BotConfig;
 
     if (connectionMode === "webhook") {
       const currentVerificationToken = (next.channels?.feishu as FeishuConfig | undefined)
@@ -322,7 +322,7 @@ export const feishuSetupWizard: ChannelSetupWizard = {
           cfg: next,
           channel,
           patch: { verificationToken: verificationTokenResult.value },
-        }) as OpenClawConfig;
+        }) as Hanzo BotConfig;
       }
 
       const currentEncryptKey = (next.channels?.feishu as FeishuConfig | undefined)?.encryptKey;
@@ -347,7 +347,7 @@ export const feishuSetupWizard: ChannelSetupWizard = {
           cfg: next,
           channel,
           patch: { encryptKey: encryptKeyResult.value },
-        }) as OpenClawConfig;
+        }) as Hanzo BotConfig;
       }
 
       const currentWebhookPath = (next.channels?.feishu as FeishuConfig | undefined)?.webhookPath;
@@ -362,7 +362,7 @@ export const feishuSetupWizard: ChannelSetupWizard = {
         cfg: next,
         channel,
         patch: { webhookPath },
-      }) as OpenClawConfig;
+      }) as Hanzo BotConfig;
     }
 
     const currentDomain = (next.channels?.feishu as FeishuConfig | undefined)?.domain ?? "feishu";
@@ -378,7 +378,7 @@ export const feishuSetupWizard: ChannelSetupWizard = {
       cfg: next,
       channel,
       patch: { domain: domain as "feishu" | "lark" },
-    }) as OpenClawConfig;
+    }) as Hanzo BotConfig;
 
     const groupPolicy = (await prompter.select({
       message: "Group chat policy",

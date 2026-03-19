@@ -1,4 +1,4 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/core";
+import type { Hanzo BotPluginApi } from "openclaw/plugin-sdk/core";
 import { registerSandboxBackend } from "openclaw/plugin-sdk/sandbox";
 import {
   createOpenShellSandboxBackendFactory,
@@ -11,7 +11,7 @@ const plugin = {
   name: "OpenShell Sandbox",
   description: "OpenShell-backed sandbox runtime for agent exec and file tools.",
   configSchema: createOpenShellPluginConfigSchema(),
-  register(api: OpenClawPluginApi) {
+  register(api: Hanzo BotPluginApi) {
     if (api.registrationMode !== "full") {
       return;
     }

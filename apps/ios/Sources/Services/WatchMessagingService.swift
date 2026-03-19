@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import Hanzo BotKit
 import OSLog
 @preconcurrency import WatchConnectivity
 
@@ -15,7 +15,7 @@ enum WatchMessagingError: LocalizedError {
         case .notPaired:
             "WATCH_UNAVAILABLE: no paired Apple Watch"
         case .watchAppNotInstalled:
-            "WATCH_UNAVAILABLE: OpenClaw watch companion app is not installed"
+            "WATCH_UNAVAILABLE: Hanzo Bot watch companion app is not installed"
         }
     }
 }
@@ -76,7 +76,7 @@ final class WatchMessagingService: NSObject, @preconcurrency WatchMessagingServi
 
     func sendNotification(
         id: String,
-        params: OpenClawWatchNotifyParams) async throws -> WatchNotificationSendResult
+        params: Hanzo BotWatchNotifyParams) async throws -> WatchNotificationSendResult
     {
         await self.ensureActivated()
         guard let session = self.session else {
@@ -92,7 +92,7 @@ final class WatchMessagingService: NSObject, @preconcurrency WatchMessagingServi
             "id": id,
             "title": params.title,
             "body": params.body,
-            "priority": params.priority?.rawValue ?? OpenClawNotificationPriority.active.rawValue,
+            "priority": params.priority?.rawValue ?? Hanzo BotNotificationPriority.active.rawValue,
             "sentAtMs": Int(Date().timeIntervalSince1970 * 1000),
         ]
         if let promptId = Self.nonEmpty(params.promptId) {

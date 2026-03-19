@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "./config.js";
+import type { Hanzo BotConfig } from "./config.js";
 import { migrateLegacyConfig, validateConfigObject } from "./config.js";
 import { WHISPER_BASE_AUDIO_MODEL } from "./legacy-migrate.test-helpers.js";
 
@@ -606,7 +606,7 @@ describe("legacy config detection", () => {
             },
           },
         },
-        assert: (config: NonNullable<OpenClawConfig>) => {
+        assert: (config: NonNullable<Hanzo BotConfig>) => {
           expect(config.channels?.discord?.accounts?.work?.streaming).toBe("partial");
           expect(config.channels?.discord?.accounts?.work?.streamMode).toBeUndefined();
         },
@@ -620,7 +620,7 @@ describe("legacy config detection", () => {
             },
           },
         },
-        assert: (config: NonNullable<OpenClawConfig>) => {
+        assert: (config: NonNullable<Hanzo BotConfig>) => {
           expect(config.channels?.slack?.streaming).toBe("progress");
           expect(config.channels?.slack?.streamMode).toBeUndefined();
           expect(config.channels?.slack?.nativeStreaming).toBe(true);
@@ -635,7 +635,7 @@ describe("legacy config detection", () => {
             },
           },
         },
-        assert: (config: NonNullable<OpenClawConfig>) => {
+        assert: (config: NonNullable<Hanzo BotConfig>) => {
           expect(config.channels?.slack?.streaming).toBe("off");
           expect(config.channels?.slack?.nativeStreaming).toBe(false);
         },

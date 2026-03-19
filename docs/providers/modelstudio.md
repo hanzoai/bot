@@ -2,7 +2,7 @@
 title: "Model Studio"
 summary: "Alibaba Cloud Model Studio setup (Coding Plan, dual region endpoints)"
 read_when:
-  - You want to use Alibaba Cloud Model Studio with OpenClaw
+  - You want to use Alibaba Cloud Model Studio with Hanzo Bot
   - You need the API key env var for Model Studio
 ---
 
@@ -63,4 +63,4 @@ Most models support image input. Context windows range from 200K to 1M tokens.
 
 If the Gateway runs as a daemon (launchd/systemd), make sure
 `MODELSTUDIO_API_KEY` is available to that process (for example, in
-`~/.openclaw/.env` or via `env.shellEnv`).
+`~/.hanzo/bot/.env` or via `env.shellEnv`).

@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawProtocol
+import Hanzo BotProtocol
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @MainActor
 struct AgentEventStoreTests {
@@ -15,7 +15,7 @@ struct AgentEventStoreTests {
             seq: 1,
             stream: "test",
             ts: 0,
-            data: [:] as [String: OpenClawProtocol.AnyCodable],
+            data: [:] as [String: Hanzo BotProtocol.AnyCodable],
             summary: nil))
         #expect(store.events.count == 1)
 
@@ -32,7 +32,7 @@ struct AgentEventStoreTests {
                 seq: i,
                 stream: "test",
                 ts: Double(i),
-                data: [:] as [String: OpenClawProtocol.AnyCodable],
+                data: [:] as [String: Hanzo BotProtocol.AnyCodable],
                 summary: nil))
         }
 

@@ -1,4 +1,4 @@
-import OpenClawProtocol
+import Hanzo BotProtocol
 
-public typealias AnyCodable = OpenClawProtocol.AnyCodable
+public typealias AnyCodable = Hanzo BotProtocol.AnyCodable
 

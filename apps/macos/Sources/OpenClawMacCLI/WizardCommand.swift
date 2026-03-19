@@ -1,7 +1,7 @@
 import Darwin
 import Foundation
-import OpenClawKit
-import OpenClawProtocol
+import Hanzo BotKit
+import Hanzo BotProtocol
 
 struct WizardCliOptions {
     var url: String?
@@ -248,7 +248,7 @@ actor GatewayWizardClient {
         let scopes = defaultOperatorConnectScopes
         let client: [String: ProtoAnyCodable] = [
             "id": ProtoAnyCodable(clientId),
-            "displayName": ProtoAnyCodable(Host.current().localizedName ?? "OpenClaw macOS Wizard CLI"),
+            "displayName": ProtoAnyCodable(Host.current().localizedName ?? "Hanzo Bot macOS Wizard CLI"),
             "version": ProtoAnyCodable("dev"),
             "platform": ProtoAnyCodable(platform),
             "deviceFamily": ProtoAnyCodable("Mac"),

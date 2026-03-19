@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../../../src/config/config.js";
+import type { Hanzo BotConfig } from "../../../../src/config/config.js";
 import type { ResolvedAgentRoute } from "../../../../src/routing/resolve-route.js";
 import {
   buildDiscordRoutePeer,
@@ -11,7 +11,7 @@ import {
 function buildWorkerBindingConfig(peer: {
   kind: "channel" | "direct";
   id: string;
-}): OpenClawConfig {
+}): Hanzo BotConfig {
   return {
     agents: {
       list: [{ id: "worker" }],

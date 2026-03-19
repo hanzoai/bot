@@ -1,7 +1,7 @@
 import Foundation
 import Testing
-@testable import OpenClawKit
-import OpenClawProtocol
+@testable import Hanzo BotKit
+import Hanzo BotProtocol
 
 private extension NSLock {
     func withLock<T>(_ body: () -> T) -> T {

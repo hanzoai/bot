@@ -1,6 +1,6 @@
-# OpenClaw Installer for Windows (PowerShell)
-# Usage: iwr -useb https://openclaw.ai/install.ps1 | iex
-# Or: & ([scriptblock]::Create((iwr -useb https://openclaw.ai/install.ps1))) -NoOnboard
+# Hanzo Bot Installer for Windows (PowerShell)
+# Usage: iwr -useb https://hanzo.bot/install.ps1 | iex
+# Or: & ([scriptblock]::Create((iwr -useb https://hanzo.bot/install.ps1))) -NoOnboard
 
 param(
     [string]$InstallMethod = "npm",
@@ -34,8 +34,8 @@ function Write-Host {
 
 function Write-Banner {
     Write-Host ""
-    Write-Host "${ACCENT}  🦞 OpenClaw Installer$NC" -Level info
-    Write-Host "${MUTED}  All your chats, one OpenClaw.$NC" -Level info
+    Write-Host "${ACCENT}  🦞 Hanzo Bot Installer$NC" -Level info
+    Write-Host "${MUTED}  All your chats, one Hanzo Bot.$NC" -Level info
     Write-Host ""
 }
 
@@ -199,17 +199,17 @@ function Ensure-Git {
     return Install-Git
 }
 
-function Install-OpenClawNpm {
+function Install-Hanzo BotNpm {
     param([string]$Target = "latest")
 
     $installSpec = Resolve-PackageInstallSpec -Target $Target
     
-    Write-Host "Installing OpenClaw ($installSpec)..." -Level info
+    Write-Host "Installing Hanzo Bot ($installSpec)..." -Level info
     
     try {
         # Use -ExecutionPolicy Bypass to handle restricted execution policy
         npm install -g $installSpec --no-fund --no-audit 2>&1
-        Write-Host "OpenClaw installed" -Level success
+        Write-Host "Hanzo Bot installed" -Level success
         return $true
     } catch {
         Write-Host "npm install failed: $_" -Level error
@@ -217,14 +217,14 @@ function Install-OpenClawNpm {
     }
 }
 
-function Install-OpenClawGit {
+function Install-Hanzo BotGit {
     param([string]$RepoDir, [switch]$Update)
     
-    Write-Host "Installing OpenClaw from git..." -Level info
+    Write-Host "Installing Hanzo Bot from git..." -Level info
     
     if (!(Test-Path $RepoDir)) {
         Write-Host "  Cloning repository..." -Level info
-        git clone https://github.com/openclaw/openclaw.git $RepoDir 2>&1
+        git clone https://github.com/hanzoai/bot.git $RepoDir 2>&1
     } elseif ($Update) {
         Write-Host "  Updating repository..." -Level info
         git -C $RepoDir pull --rebase 2>&1
@@ -255,7 +255,7 @@ function Install-OpenClawGit {
 node "%~dp0..\openclaw\dist\entry.js" %*
 "@ | Out-File -FilePath "$wrapperDir\openclaw.cmd" -Encoding ASCII -Force
     
-    Write-Host "OpenClaw installed" -Level success
+    Write-Host "Hanzo Bot installed" -Level success
     return $true
 }
 
@@ -279,7 +279,7 @@ function Resolve-PackageInstallSpec {
         return "openclaw@latest"
     }
     if ($trimmed.ToLowerInvariant() -eq "main") {
-        return "github:openclaw/openclaw#main"
+        return "github:hanzoai/bot#main"
     }
     if (Test-ExplicitPackageInstallSpec -Target $trimmed) {
         return $trimmed
@@ -320,9 +320,9 @@ function Main {
         }
         
         if ($DryRun) {
-            Write-Host "[DRY RUN] Would install OpenClaw from git to $GitDir" -Level info
+            Write-Host "[DRY RUN] Would install Hanzo Bot from git to $GitDir" -Level info
         } else {
-            Install-OpenClawGit -RepoDir $GitDir -Update:(-not $NoGitUpdate)
+            Install-Hanzo BotGit -RepoDir $GitDir -Update:(-not $NoGitUpdate)
         }
     } else {
         # npm method
@@ -331,9 +331,9 @@ function Main {
         }
         
         if ($DryRun) {
-            Write-Host "[DRY RUN] Would install OpenClaw via npm ($((Resolve-PackageInstallSpec -Target $Tag)))" -Level info
+            Write-Host "[DRY RUN] Would install Hanzo Bot via npm ($((Resolve-PackageInstallSpec -Target $Tag)))" -Level info
         } else {
-            if (!(Install-OpenClawNpm -Target $Tag)) {
+            if (!(Install-Hanzo BotNpm -Target $Tag)) {
                 exit 1
             }
         }
@@ -353,7 +353,7 @@ function Main {
     }
     
     Write-Host ""
-    Write-Host "🦞 OpenClaw installed successfully!" -Level success
+    Write-Host "🦞 Hanzo Bot installed successfully!" -Level success
 }
 
 Main

@@ -1,27 +1,27 @@
 import Foundation
 
-public enum OpenClawRemindersCommand: String, Codable, Sendable {
+public enum Hanzo BotRemindersCommand: String, Codable, Sendable {
     case list = "reminders.list"
     case add = "reminders.add"
 }
 
-public enum OpenClawReminderStatusFilter: String, Codable, Sendable {
+public enum Hanzo BotReminderStatusFilter: String, Codable, Sendable {
     case incomplete
     case completed
     case all
 }
 
-public struct OpenClawRemindersListParams: Codable, Sendable, Equatable {
-    public var status: OpenClawReminderStatusFilter?
+public struct Hanzo BotRemindersListParams: Codable, Sendable, Equatable {
+    public var status: Hanzo BotReminderStatusFilter?
     public var limit: Int?
 
-    public init(status: OpenClawReminderStatusFilter? = nil, limit: Int? = nil) {
+    public init(status: Hanzo BotReminderStatusFilter? = nil, limit: Int? = nil) {
         self.status = status
         self.limit = limit
     }
 }
 
-public struct OpenClawRemindersAddParams: Codable, Sendable, Equatable {
+public struct Hanzo BotRemindersAddParams: Codable, Sendable, Equatable {
     public var title: String
     public var dueISO: String?
     public var notes: String?
@@ -43,7 +43,7 @@ public struct OpenClawRemindersAddParams: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawReminderPayload: Codable, Sendable, Equatable {
+public struct Hanzo BotReminderPayload: Codable, Sendable, Equatable {
     public var identifier: String
     public var title: String
     public var dueISO: String?
@@ -65,18 +65,18 @@ public struct OpenClawReminderPayload: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawRemindersListPayload: Codable, Sendable, Equatable {
-    public var reminders: [OpenClawReminderPayload]
+public struct Hanzo BotRemindersListPayload: Codable, Sendable, Equatable {
+    public var reminders: [Hanzo BotReminderPayload]
 
-    public init(reminders: [OpenClawReminderPayload]) {
+    public init(reminders: [Hanzo BotReminderPayload]) {
         self.reminders = reminders
     }
 }
 
-public struct OpenClawRemindersAddPayload: Codable, Sendable, Equatable {
-    public var reminder: OpenClawReminderPayload
+public struct Hanzo BotRemindersAddPayload: Codable, Sendable, Equatable {
+    public var reminder: Hanzo BotReminderPayload
 
-    public init(reminder: OpenClawReminderPayload) {
+    public init(reminder: Hanzo BotReminderPayload) {
         self.reminder = reminder
     }
 }

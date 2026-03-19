@@ -1,6 +1,6 @@
 import {
   definePluginEntry,
-  type OpenClawPluginApi,
+  type Hanzo BotPluginApi,
   type ProviderAuthContext,
   type ProviderAuthMethodNonInteractiveContext,
   type ProviderAuthResult,
@@ -19,7 +19,7 @@ export default definePluginEntry({
   id: "ollama",
   name: "Ollama Provider",
   description: "Bundled Ollama provider plugin",
-  register(api: OpenClawPluginApi) {
+  register(api: Hanzo BotPluginApi) {
     api.registerProvider({
       id: PROVIDER_ID,
       label: "Ollama",

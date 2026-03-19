@@ -2,7 +2,7 @@
 read_when:
   - 你正在进行首次运行设置，但不使用完整的 CLI 新手引导
   - 你想设置默认工作区路径
-summary: "`openclaw setup` 的 CLI 参考（初始化配置 + 工作区）"
+summary: "`hanzo-bot setup` 的 CLI 参考（初始化配置 + 工作区）"
 title: setup
 x-i18n:
   generated_at: "2026-03-16T06:21:20Z"
@@ -13,9 +13,9 @@ x-i18n:
   workflow: 15
 ---
 
-# `openclaw setup`
+# `hanzo-bot setup`
 
-初始化 `~/.openclaw/openclaw.json` 和智能体工作区。
+初始化 `~/.hanzoai/bot.json` 和智能体工作区。
 
 相关内容：
 
@@ -26,7 +26,7 @@ x-i18n:
 
 ```bash
 openclaw setup
-openclaw setup --workspace ~/.openclaw/workspace
+openclaw setup --workspace ~/.hanzo/bot/workspace
 ```
 
 通过 setup 运行新手引导：

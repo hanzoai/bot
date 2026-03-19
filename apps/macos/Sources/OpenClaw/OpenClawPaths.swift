@@ -1,6 +1,6 @@
 import Foundation
 
-enum OpenClawEnv {
+enum Hanzo BotEnv {
     static func path(_ key: String) -> String? {
         // Normalize env overrides once so UI + file IO stay consistent.
         guard let raw = getenv(key) else { return nil }
@@ -13,13 +13,13 @@ enum OpenClawEnv {
     }
 }
 
-enum OpenClawPaths {
-    private static let configPathEnv = ["OPENCLAW_CONFIG_PATH"]
-    private static let stateDirEnv = ["OPENCLAW_STATE_DIR"]
+enum Hanzo BotPaths {
+    private static let configPathEnv = ["BOT_CONFIG_PATH"]
+    private static let stateDirEnv = ["BOT_STATE_DIR"]
 
     static var stateDirURL: URL {
         for key in self.stateDirEnv {
-            if let override = OpenClawEnv.path(key) {
+            if let override = Hanzo BotEnv.path(key) {
                 return URL(fileURLWithPath: override, isDirectory: true)
             }
         }
@@ -36,7 +36,7 @@ enum OpenClawPaths {
 
     static var configURL: URL {
         for key in self.configPathEnv {
-            if let override = OpenClawEnv.path(key) {
+            if let override = Hanzo BotEnv.path(key) {
                 return URL(fileURLWithPath: override)
             }
         }

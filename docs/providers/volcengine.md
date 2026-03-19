@@ -2,7 +2,7 @@
 title: "Volcengine (Doubao)"
 summary: "Volcano Engine setup (Doubao models, general + coding endpoints)"
 read_when:
-  - You want to use Volcano Engine or Doubao models with OpenClaw
+  - You want to use Volcano Engine or Doubao models with Hanzo Bot
   - You need the Volcengine API key setup
 ---
 
@@ -71,4 +71,4 @@ tokens.
 
 If the Gateway runs as a daemon (launchd/systemd), make sure
 `VOLCANO_ENGINE_API_KEY` is available to that process (for example, in
-`~/.openclaw/.env` or via `env.shellEnv`).
+`~/.hanzo/bot/.env` or via `env.shellEnv`).

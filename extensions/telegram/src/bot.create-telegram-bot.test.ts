@@ -61,7 +61,7 @@ const TELEGRAM_TEST_TIMINGS = {
 
 async function withIsolatedStateDirAsync<T>(fn: () => Promise<T>): Promise<T> {
   const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-telegram-state-"));
-  return await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+  return await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
     try {
       return await fn();
     } finally {
@@ -74,7 +74,7 @@ async function withConfigPathAsync<T>(cfg: unknown, fn: () => Promise<T>): Promi
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-telegram-cfg-"));
   const configPath = path.join(dir, "openclaw.json");
   fs.writeFileSync(configPath, JSON.stringify(cfg), "utf-8");
-  return await withEnvAsync({ OPENCLAW_CONFIG_PATH: configPath }, async () => {
+  return await withEnvAsync({ BOT_CONFIG_PATH: configPath }, async () => {
     try {
       return await fn();
     } finally {
@@ -333,7 +333,7 @@ describe("createTelegramBot", () => {
         expect(pairingText, testCase.name).toContain("Pairing code:");
         const code = pairingText.match(/Pairing code:\s*([A-Z2-9]{8})/)?.[1];
         expect(code, testCase.name).toBeDefined();
-        expect(pairingText, testCase.name).toContain(`openclaw pairing approve telegram ${code}`);
+        expect(pairingText, testCase.name).toContain(`hanzo-bot pairing approve telegram ${code}`);
         expect(pairingText, testCase.name).not.toContain("<code>");
       }
     });

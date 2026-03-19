@@ -53,7 +53,7 @@ export default defineConfig({
       "apps/macos/.build/**",
       "**/node_modules/**",
       "**/vendor/**",
-      "dist/OpenClaw.app/**",
+      "dist/Hanzo Bot.app/**",
       "**/*.live.test.ts",
       "**/*.e2e.test.ts",
     ],

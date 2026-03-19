@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import { applyMergePatch } from "../../config/merge-patch.js";
 import type { CliBackendConfig } from "../../config/types.js";
 import {
@@ -66,7 +66,7 @@ export async function prepareCliBundleMcpConfig(params: {
   backendId: string;
   backend: CliBackendConfig;
   workspaceDir: string;
-  config?: OpenClawConfig;
+  config?: Hanzo BotConfig;
   warn?: (message: string) => void;
 }): Promise<PreparedCliBundleMcpConfig> {
   if (params.backendId !== "claude-cli") {

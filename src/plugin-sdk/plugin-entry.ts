@@ -1,17 +1,17 @@
 import { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginConfigSchema,
-  OpenClawPluginDefinition,
+  Hanzo BotPluginApi,
+  Hanzo BotPluginCommandDefinition,
+  Hanzo BotPluginConfigSchema,
+  Hanzo BotPluginDefinition,
   PluginInteractiveTelegramHandlerContext,
 } from "../plugins/types.js";
 
 export type {
   AnyAgentTool,
   MediaUnderstandingProviderPlugin,
-  OpenClawPluginApi,
-  OpenClawPluginConfigSchema,
+  Hanzo BotPluginApi,
+  Hanzo BotPluginConfigSchema,
   ProviderDiscoveryContext,
   ProviderCatalogContext,
   ProviderCatalogResult,
@@ -35,19 +35,19 @@ export type {
   SpeechProviderPlugin,
   ProviderThinkingPolicyContext,
   ProviderWrapStreamFnContext,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  Hanzo BotPluginService,
+  Hanzo BotPluginServiceContext,
   ProviderAuthContext,
   ProviderAuthDoctorHintContext,
   ProviderAuthMethodNonInteractiveContext,
   ProviderAuthMethod,
   ProviderAuthResult,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginDefinition,
+  Hanzo BotPluginCommandDefinition,
+  Hanzo BotPluginDefinition,
   PluginLogger,
   PluginInteractiveTelegramHandlerContext,
 } from "../plugins/types.js";
-export type { OpenClawConfig } from "../config/config.js";
+export type { Hanzo BotConfig } from "../config/config.js";
 
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 
@@ -55,22 +55,22 @@ type DefinePluginEntryOptions = {
   id: string;
   name: string;
   description: string;
-  kind?: OpenClawPluginDefinition["kind"];
-  configSchema?: OpenClawPluginConfigSchema | (() => OpenClawPluginConfigSchema);
-  register: (api: OpenClawPluginApi) => void;
+  kind?: Hanzo BotPluginDefinition["kind"];
+  configSchema?: Hanzo BotPluginConfigSchema | (() => Hanzo BotPluginConfigSchema);
+  register: (api: Hanzo BotPluginApi) => void;
 };
 
 type DefinedPluginEntry = {
   id: string;
   name: string;
   description: string;
-  configSchema: OpenClawPluginConfigSchema;
-  register: NonNullable<OpenClawPluginDefinition["register"]>;
-} & Pick<OpenClawPluginDefinition, "kind">;
+  configSchema: Hanzo BotPluginConfigSchema;
+  register: NonNullable<Hanzo BotPluginDefinition["register"]>;
+} & Pick<Hanzo BotPluginDefinition, "kind">;
 
 function resolvePluginConfigSchema(
   configSchema: DefinePluginEntryOptions["configSchema"] = emptyPluginConfigSchema,
-): OpenClawPluginConfigSchema {
+): Hanzo BotPluginConfigSchema {
   return typeof configSchema === "function" ? configSchema() : configSchema;
 }
 

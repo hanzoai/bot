@@ -15,14 +15,14 @@ type JsonSchema = {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const outPaths = [
-  path.join(repoRoot, "apps", "macos", "Sources", "OpenClawProtocol", "GatewayModels.swift"),
+  path.join(repoRoot, "apps", "macos", "Sources", "Hanzo BotProtocol", "GatewayModels.swift"),
   path.join(
     repoRoot,
     "apps",
     "shared",
-    "OpenClawKit",
+    "Hanzo BotKit",
     "Sources",
-    "OpenClawProtocol",
+    "Hanzo BotProtocol",
     "GatewayModels.swift",
   ),
 ];

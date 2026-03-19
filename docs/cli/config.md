@@ -1,15 +1,15 @@
 ---
-summary: "CLI reference for `openclaw config` (get/set/unset/file/validate)"
+summary: "CLI reference for `hanzo-bot config` (get/set/unset/file/validate)"
 read_when:
   - You want to read or edit config non-interactively
 title: "config"
 ---
 
-# `openclaw config`
+# `hanzo-bot config`
 
 Config helpers for non-interactive edits in `openclaw.json`: get/set/unset/validate
 values by path and print the active config file. Run without a subcommand to
-open the configure wizard (same as `openclaw configure`).
+open the configure wizard (same as `hanzo-bot configure`).
 
 ## Examples
 
@@ -56,9 +56,9 @@ openclaw config set channels.whatsapp.groups '["*"]' --strict-json
 
 ## `config set` modes
 
-`openclaw config set` supports four assignment styles:
+`hanzo-bot config set` supports four assignment styles:
 
-1. Value mode: `openclaw config set <path> <value>`
+1. Value mode: `hanzo-bot config set <path> <value>`
 2. SecretRef builder mode:
 
 ```bash
@@ -234,7 +234,7 @@ Success example:
 {
   "ok": true,
   "operations": 1,
-  "configPath": "~/.openclaw/openclaw.json",
+  "configPath": "~/.hanzoai/bot.json",
   "inputModes": ["builder"],
   "checks": {
     "schema": false,
@@ -252,7 +252,7 @@ Failure example:
 {
   "ok": false,
   "operations": 1,
-  "configPath": "~/.openclaw/openclaw.json",
+  "configPath": "~/.hanzoai/bot.json",
   "inputModes": ["builder"],
   "checks": {
     "schema": false,
@@ -280,7 +280,7 @@ If dry-run fails:
 
 ## Subcommands
 
-- `config file`: Print the active config file path (resolved from `OPENCLAW_CONFIG_PATH` or default location).
+- `config file`: Print the active config file path (resolved from `BOT_CONFIG_PATH` or default location).
 
 Restart the gateway after edits.
 

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/whatsapp";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/whatsapp";
 import { describe, expect, it } from "vitest";
 import {
   createDirectoryTestRuntime,
@@ -25,7 +25,7 @@ describe("whatsapp directory", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as Hanzo BotConfig;
 
     const directory = expectDirectorySurface(whatsappPlugin.directory);
 

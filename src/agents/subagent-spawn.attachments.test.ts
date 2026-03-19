@@ -33,7 +33,7 @@ let configOverride: Record<string, unknown> = {
 };
 let workspaceDirOverride = "";
 let configPathOverride = "";
-let previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
+let previousConfigPath = process.env.BOT_CONFIG_PATH;
 
 vi.mock("./subagent-registry.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./subagent-registry.js")>();
@@ -157,15 +157,15 @@ describe("spawnSubagentDirect filename validation", () => {
     );
     configPathOverride = path.join(workspaceDirOverride, "openclaw.test.json");
     fs.writeFileSync(configPathOverride, JSON.stringify(configOverride, null, 2));
-    previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
-    process.env.OPENCLAW_CONFIG_PATH = configPathOverride;
+    previousConfigPath = process.env.BOT_CONFIG_PATH;
+    process.env.BOT_CONFIG_PATH = configPathOverride;
   });
 
   afterEach(() => {
     if (previousConfigPath === undefined) {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_CONFIG_PATH;
     } else {
-      process.env.OPENCLAW_CONFIG_PATH = previousConfigPath;
+      process.env.BOT_CONFIG_PATH = previousConfigPath;
     }
     configPathOverride = "";
     if (workspaceDirOverride) {

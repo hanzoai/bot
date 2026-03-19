@@ -1,17 +1,17 @@
 ---
-summary: "OpenClaw on Raspberry Pi (budget self-hosted setup)"
+summary: "Hanzo Bot on Raspberry Pi (budget self-hosted setup)"
 read_when:
-  - Setting up OpenClaw on a Raspberry Pi
-  - Running OpenClaw on ARM devices
+  - Setting up Hanzo Bot on a Raspberry Pi
+  - Running Hanzo Bot on ARM devices
   - Building a cheap always-on personal AI
 title: "Raspberry Pi"
 ---
 
-# OpenClaw on Raspberry Pi
+# Hanzo Bot on Raspberry Pi
 
 ## Goal
 
-Run a persistent, always-on OpenClaw Gateway on a Raspberry Pi for **~$35-80** one-time cost (no monthly fees).
+Run a persistent, always-on Hanzo Bot Gateway on a Raspberry Pi for **~$35-80** one-time cost (no monthly fees).
 
 Perfect for:
 
@@ -107,18 +107,18 @@ echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 ```
 
-## 6) Install OpenClaw
+## 6) Install Hanzo Bot
 
 ### Option A: Standard Install (Recommended)
 
 ```bash
-curl -fsSL https://openclaw.ai/install.sh | bash
+curl -fsSL https://hanzo.bot/install.sh | bash
 ```
 
 ### Option B: Hackable Install (For tinkering)
 
 ```bash
-git clone https://github.com/openclaw/openclaw.git
+git clone https://github.com/hanzoai/bot.git
 cd openclaw
 npm install
 npm run build
@@ -150,10 +150,10 @@ openclaw status
 sudo systemctl status openclaw
 
 # View logs
-journalctl -u openclaw -f
+journalctl -u hanzo-bot -f
 ```
 
-## 9) Access the OpenClaw Dashboard
+## 9) Access the Hanzo Bot Dashboard
 
 Replace `user@gateway-host` with your Pi username and hostname or IP address.
 
@@ -176,7 +176,7 @@ ssh -N -L 18789:127.0.0.1:18789 user@gateway-host
 Then open the printed Dashboard URL in your local browser.
 
 If the UI asks for auth, paste the token from `gateway.auth.token`
-(or `OPENCLAW_GATEWAY_TOKEN`) into Control UI settings.
+(or `BOT_GATEWAY_TOKEN`) into Control UI settings.
 
 For always-on remote access, see [Tailscale](/gateway/tailscale).
 
@@ -203,7 +203,7 @@ On lower-power Pi hosts, enable Node's module compile cache so repeated CLI runs
 grep -q 'NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache' ~/.bashrc || cat >> ~/.bashrc <<'EOF' # pragma: allowlist secret
 export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
 mkdir -p /var/tmp/openclaw-compile-cache
-export OPENCLAW_NO_RESPAWN=1
+export BOT_NO_RESPAWN=1
 EOF
 source ~/.bashrc
 ```
@@ -212,12 +212,12 @@ Notes:
 
 - `NODE_COMPILE_CACHE` speeds up subsequent runs (`status`, `health`, `--help`).
 - `/var/tmp` survives reboots better than `/tmp`.
-- `OPENCLAW_NO_RESPAWN=1` avoids extra startup cost from CLI self-respawn.
+- `BOT_NO_RESPAWN=1` avoids extra startup cost from CLI self-respawn.
 - First run warms the cache; later runs benefit most.
 
 ### systemd startup tuning (optional)
 
-If this Pi is mostly running OpenClaw, add a service drop-in to reduce restart
+If this Pi is mostly running Hanzo Bot, add a service drop-in to reduce restart
 jitter and keep startup env stable:
 
 ```bash
@@ -226,7 +226,7 @@ sudo systemctl edit openclaw
 
 ```ini
 [Service]
-Environment=OPENCLAW_NO_RESPAWN=1
+Environment=BOT_NO_RESPAWN=1
 Environment=NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache
 Restart=always
 RestartSec=2
@@ -240,7 +240,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart openclaw
 ```
 
-If possible, keep OpenClaw state/cache on SSD-backed storage to avoid SD-card
+If possible, keep Hanzo Bot state/cache on SSD-backed storage to avoid SD-card
 random-I/O bottlenecks during cold starts.
 
 How `Restart=` policies help automated recovery:
@@ -275,7 +275,7 @@ htop
 
 ### Binary Compatibility
 
-Most OpenClaw features work on ARM64, but some external binaries may need ARM builds:
+Most Hanzo Bot features work on ARM64, but some external binaries may need ARM builds:
 
 | Tool               | ARM64 Status | Notes                               |
 | ------------------ | ------------ | ----------------------------------- |
@@ -358,7 +358,7 @@ free -h
 
 ```bash
 # Check logs
-journalctl -u openclaw --no-pager -n 100
+journalctl -u hanzo-bot --no-pager -n 100
 
 # Common fix: rebuild
 cd ~/openclaw  # if using hackable install

@@ -1,6 +1,6 @@
 // Public config patch helpers for provider onboarding flows.
 
-export type { OpenClawConfig } from "../config/config.js";
+export type { Hanzo BotConfig } from "../config/config.js";
 export type {
   ModelApi,
   ModelDefinitionConfig,

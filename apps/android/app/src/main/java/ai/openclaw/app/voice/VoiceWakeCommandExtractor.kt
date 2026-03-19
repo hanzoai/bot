@@ -1,4 +1,4 @@
-package ai.openclaw.app.voice
+package ai.hanzo.bot.app.voice
 
 object VoiceWakeCommandExtractor {
   fun extractCommand(text: String, triggerWords: List<String>): String? {

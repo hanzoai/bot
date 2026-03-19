@@ -34,7 +34,7 @@ function createRemoteStageParams(home: string): {
   vi.mocked(sandboxMocks.ensureSandboxWorkspaceForSession).mockResolvedValue(null);
   return {
     cfg: createSandboxMediaStageConfig(home),
-    workspaceDir: join(home, "openclaw"),
+    workspaceDir: join(home, "@hanzo/bot"),
     sessionKey,
     remoteCacheDir: join(home, ".openclaw", "media", "remote-cache", sessionKey),
   };

@@ -59,8 +59,8 @@ async function createAuditFixture(): Promise<AuditFixture> {
     modelsPath,
     envPath,
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
+      BOT_STATE_DIR: stateDir,
+      BOT_CONFIG_PATH: configPath,
       OPENAI_API_KEY: "env-openai-key", // pragma: allowlist secret
       PATH: resolveRuntimePathEnv(),
     },
@@ -509,7 +509,7 @@ describe("secrets audit", () => {
     const report = await runSecretsAudit({
       env: {
         ...fixture.env,
-        OPENCLAW_AGENT_DIR: externalAgentDir,
+        BOT_AGENT_DIR: externalAgentDir,
       },
     });
     expect(
@@ -524,7 +524,7 @@ describe("secrets audit", () => {
     expect(report.filesScanned).toContain(externalModelsPath);
   });
 
-  it("does not flag non-sensitive routing headers in openclaw config", async () => {
+  it("does not flag non-sensitive routing headers in hanzo-bot config", async () => {
     await writeJsonFile(fixture.configPath, {
       models: {
         providers: {

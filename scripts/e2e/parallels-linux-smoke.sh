@@ -5,7 +5,7 @@ VM_NAME="Ubuntu 24.04.3 ARM64"
 SNAPSHOT_HINT="fresh"
 MODE="both"
 OPENAI_API_KEY_ENV="OPENAI_API_KEY"
-INSTALL_URL="https://openclaw.ai/install.sh"
+INSTALL_URL="https://hanzo.bot/install.sh"
 HOST_PORT="18427"
 HOST_PORT_EXPLICIT=0
 HOST_IP=""
@@ -81,7 +81,7 @@ Options:
   --snapshot-hint <name>     Snapshot name substring/fuzzy match. Default: "fresh"
   --mode <fresh|upgrade|both>
   --openai-api-key-env <var> Host env var name for OpenAI API key. Default: OPENAI_API_KEY
-  --install-url <url>        Installer URL for latest release. Default: https://openclaw.ai/install.sh
+  --install-url <url>        Installer URL for latest release. Default: https://hanzo.bot/install.sh
   --host-port <port>         Host HTTP port for current-main tgz. Default: 18427
   --host-ip <ip>             Override Parallels host IP.
   --latest-version <ver>     Override npm latest version lookup.
@@ -328,7 +328,7 @@ resolve_latest_version() {
     printf '%s\n' "$LATEST_VERSION"
     return
   fi
-  npm view openclaw version --userconfig "$(mktemp)"
+  npm view hanzo-bot version --userconfig "$(mktemp)"
 }
 
 current_build_commit() {
@@ -456,8 +456,8 @@ install_latest_release() {
     version_args=(--version "$INSTALL_VERSION")
   fi
   guest_exec curl -fsSL "$INSTALL_URL" -o /tmp/openclaw-install.sh
-  guest_exec /usr/bin/env OPENCLAW_NO_ONBOARD=1 bash /tmp/openclaw-install.sh "${version_args[@]}" --no-onboard
-  guest_exec openclaw --version
+  guest_exec /usr/bin/env BOT_NO_ONBOARD=1 bash /tmp/openclaw-install.sh "${version_args[@]}" --no-onboard
+  guest_exec hanzo-bot --version
 }
 
 install_main_tgz() {
@@ -466,13 +466,13 @@ install_main_tgz() {
   local tgz_url="http://$host_ip:$HOST_PORT/$(basename "$MAIN_TGZ_PATH")"
   guest_exec curl -fsSL "$tgz_url" -o "/tmp/$temp_name"
   guest_exec npm install -g "/tmp/$temp_name" --no-fund --no-audit
-  guest_exec openclaw --version
+  guest_exec hanzo-bot --version
 }
 
 verify_version_contains() {
   local needle="$1"
   local version
-  version="$(guest_exec openclaw --version)"
+  version="$(guest_exec hanzo-bot --version)"
   printf '%s\n' "$version"
   case "$version" in
     *"$needle"*) ;;
@@ -484,7 +484,7 @@ verify_version_contains() {
 }
 
 run_ref_onboard() {
-  guest_exec /usr/bin/env "OPENAI_API_KEY=$OPENAI_API_KEY_VALUE" openclaw onboard \
+  guest_exec /usr/bin/env "OPENAI_API_KEY=$OPENAI_API_KEY_VALUE" hanzo-bot onboard \
     --non-interactive \
     --mode local \
     --auth-choice openai-api-key \
@@ -498,7 +498,7 @@ run_ref_onboard() {
 }
 
 verify_local_turn() {
-  guest_exec /usr/bin/env "OPENAI_API_KEY=$OPENAI_API_KEY_VALUE" openclaw agent \
+  guest_exec /usr/bin/env "OPENAI_API_KEY=$OPENAI_API_KEY_VALUE" hanzo-bot agent \
     --local \
     --agent main \
     --message ping \
@@ -517,7 +517,7 @@ import re
 import sys
 
 text = pathlib.Path(sys.argv[1]).read_text(errors="replace")
-matches = re.findall(r"OpenClaw [^\r\n]+ \([0-9a-f]{7,}\)", text)
+matches = re.findall(r"Hanzo Bot [^\r\n]+ \([0-9a-f]{7,}\)", text)
 print(matches[-1] if matches else "")
 PY
 }

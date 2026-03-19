@@ -1,12 +1,12 @@
 import { resolveBlueBubblesAccount } from "./accounts.js";
-import type { OpenClawConfig } from "./runtime-api.js";
+import type { Hanzo BotConfig } from "./runtime-api.js";
 import { normalizeResolvedSecretInputString } from "./secret-input.js";
 
 export type BlueBubblesAccountResolveOpts = {
   serverUrl?: string;
   password?: string;
   accountId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: Hanzo BotConfig;
 };
 
 export function resolveBlueBubblesServerAccount(params: BlueBubblesAccountResolveOpts): {

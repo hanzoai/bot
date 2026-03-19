@@ -15,7 +15,7 @@
 set -euo pipefail
 
 # Defaults
-CLUSTER_NAME="openclaw"
+CLUSTER_NAME="@hanzo/bot"
 CONTAINER_CMD=""
 DELETE=false
 

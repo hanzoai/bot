@@ -2,7 +2,7 @@
 read_when:
   - 你正在管理已配对的节点（摄像头、屏幕、画布）
   - 你需要批准请求或调用节点命令
-summary: "`openclaw nodes` 的 CLI 参考（列表/状态/批准/调用，摄像头/画布/屏幕）"
+summary: "`hanzo-bot nodes` 的 CLI 参考（列表/状态/批准/调用，摄像头/画布/屏幕）"
 title: nodes
 x-i18n:
   generated_at: "2026-02-03T10:04:26Z"
@@ -13,7 +13,7 @@ x-i18n:
   workflow: 15
 ---
 
-# `openclaw nodes`
+# `hanzo-bot nodes`
 
 管理已配对的节点（设备）并调用节点功能。
 

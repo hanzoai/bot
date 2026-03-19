@@ -1,4 +1,4 @@
-package ai.openclaw.app
+package ai.hanzo.bot.app
 
 import android.content.Context
 import android.os.Build

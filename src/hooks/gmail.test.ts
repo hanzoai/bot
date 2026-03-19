@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type OpenClawConfig, DEFAULT_GATEWAY_PORT } from "../config/config.js";
+import { type Hanzo BotConfig, DEFAULT_GATEWAY_PORT } from "../config/config.js";
 import {
   buildDefaultHookUrl,
   buildTopicPath,
@@ -16,11 +16,11 @@ const baseConfig = {
       pushToken: "push-token",
     },
   },
-} satisfies OpenClawConfig;
+} satisfies Hanzo BotConfig;
 
 describe("gmail hook config", () => {
   function resolveWithGmailOverrides(
-    overrides: Partial<NonNullable<OpenClawConfig["hooks"]>["gmail"]>,
+    overrides: Partial<NonNullable<Hanzo BotConfig["hooks"]>["gmail"]>,
   ) {
     return resolveGmailHookRuntimeConfig(
       {

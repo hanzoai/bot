@@ -25,8 +25,8 @@ export const DEFAULT_HANDSHAKE_TIMEOUT_MS = 10_000;
 export const getHandshakeTimeoutMs = () => {
   // User-facing env var (works in all environments); test-only var gated behind VITEST
   const envKey =
-    process.env.OPENCLAW_HANDSHAKE_TIMEOUT_MS ||
-    (process.env.VITEST && process.env.OPENCLAW_TEST_HANDSHAKE_TIMEOUT_MS);
+    process.env.BOT_HANDSHAKE_TIMEOUT_MS ||
+    (process.env.VITEST && process.env.BOT_TEST_HANDSHAKE_TIMEOUT_MS);
   if (envKey) {
     const parsed = Number(envKey);
     if (Number.isFinite(parsed) && parsed > 0) {

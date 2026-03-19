@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import type { AuthProfileStore } from "../agents/auth-profiles.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import {
   resolveSecretInputRef,
   type SecretProviderConfig,
@@ -37,14 +37,14 @@ export type ConfigureProviderChanges = {
   deletes: string[];
 };
 
-function getSecretProviders(config: OpenClawConfig): Record<string, SecretProviderConfig> {
+function getSecretProviders(config: Hanzo BotConfig): Record<string, SecretProviderConfig> {
   if (!isRecord(config.secrets?.providers)) {
     return {};
   }
   return config.secrets.providers;
 }
 
-export function buildConfigureCandidates(config: OpenClawConfig): ConfigureCandidate[] {
+export function buildConfigureCandidates(config: Hanzo BotConfig): ConfigureCandidate[] {
   return buildConfigureCandidatesForScope({ config });
 }
 
@@ -73,14 +73,14 @@ function resolveAuthProfileProvider(
 }
 
 export function buildConfigureCandidatesForScope(params: {
-  config: OpenClawConfig;
-  authoredOpenClawConfig?: OpenClawConfig;
+  config: Hanzo BotConfig;
+  authoredHanzo BotConfig?: Hanzo BotConfig;
   authProfiles?: {
     agentId: string;
     store: AuthProfileStore;
   };
 }): ConfigureCandidate[] {
-  const authoredConfig = params.authoredOpenClawConfig ?? params.config;
+  const authoredConfig = params.authoredHanzo BotConfig ?? params.config;
 
   const hasPathInAuthoredConfig = (pathSegments: string[]): boolean =>
     hasPath(authoredConfig, pathSegments);
@@ -184,8 +184,8 @@ function hasPath(root: unknown, segments: string[]): boolean {
 }
 
 export function collectConfigureProviderChanges(params: {
-  original: OpenClawConfig;
-  next: OpenClawConfig;
+  original: Hanzo BotConfig;
+  next: Hanzo BotConfig;
 }): ConfigureProviderChanges {
   const originalProviders = getSecretProviders(params.original);
   const nextProviders = getSecretProviders(params.next);
@@ -233,7 +233,7 @@ export function buildSecretsConfigurePlan(params: {
     version: 1,
     protocolVersion: 1,
     generatedAt: params.generatedAt ?? new Date().toISOString(),
-    generatedBy: "openclaw secrets configure",
+    generatedBy: "hanzo-bot secrets configure",
     targets: [...params.selectedTargets.values()].map((entry) => ({
       type: entry.type,
       path: entry.path,

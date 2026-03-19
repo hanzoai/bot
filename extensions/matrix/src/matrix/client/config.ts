@@ -452,7 +452,7 @@ export async function resolveMatrixAuth(params?: {
     identifier: { type: "m.id.user", user: resolved.userId },
     password: resolved.password,
     device_id: resolved.deviceId,
-    initial_device_display_name: resolved.deviceName ?? "OpenClaw Gateway",
+    initial_device_display_name: resolved.deviceName ?? "Hanzo Bot Gateway",
   })) as {
     access_token?: string;
     user_id?: string;

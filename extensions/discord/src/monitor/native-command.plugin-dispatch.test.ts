@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { NativeCommandSpec } from "../../../../src/auto-reply/commands-registry.js";
 import * as dispatcherModule from "../../../../src/auto-reply/reply/provider-dispatcher.js";
 import { setDefaultChannelPluginRegistryForTests } from "../../../../src/commands/channel-test-helpers.js";
-import type { OpenClawConfig } from "../../../../src/config/config.js";
+import type { Hanzo BotConfig } from "../../../../src/config/config.js";
 import * as pluginCommandsModule from "../../../../src/plugins/commands.js";
 import { clearPluginCommands, registerPluginCommand } from "../../../../src/plugins/commands.js";
 import {
@@ -50,21 +50,21 @@ function createInteraction(params?: {
   });
 }
 
-function createConfig(): OpenClawConfig {
+function createConfig(): Hanzo BotConfig {
   return {
     channels: {
       discord: {
         dm: { enabled: true, policy: "open" },
       },
     },
-  } as OpenClawConfig;
+  } as Hanzo BotConfig;
 }
 
 async function loadCreateDiscordNativeCommand() {
   return (await import("./native-command.js")).createDiscordNativeCommand;
 }
 
-async function createNativeCommand(cfg: OpenClawConfig, commandSpec: NativeCommandSpec) {
+async function createNativeCommand(cfg: Hanzo BotConfig, commandSpec: NativeCommandSpec) {
   const createDiscordNativeCommand = await loadCreateDiscordNativeCommand();
   return createDiscordNativeCommand({
     command: commandSpec,
@@ -77,7 +77,7 @@ async function createNativeCommand(cfg: OpenClawConfig, commandSpec: NativeComma
   });
 }
 
-async function createPluginCommand(params: { cfg: OpenClawConfig; name: string }) {
+async function createPluginCommand(params: { cfg: Hanzo BotConfig; name: string }) {
   const createDiscordNativeCommand = await loadCreateDiscordNativeCommand();
   return createDiscordNativeCommand({
     command: {
@@ -115,7 +115,7 @@ function registerPairPlugin(params?: { discordNativeName?: string }) {
 }
 
 async function expectPairCommandReply(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   commandName: string;
   interaction: MockCommandInteraction;
 }) {
@@ -143,7 +143,7 @@ async function expectPairCommandReply(params: {
   );
 }
 
-async function createStatusCommand(cfg: OpenClawConfig) {
+async function createStatusCommand(cfg: Hanzo BotConfig) {
   return await createNativeCommand(cfg, {
     name: "status",
     description: "Status",
@@ -175,7 +175,7 @@ function expectBoundSessionDispatch(
 }
 
 async function expectBoundStatusCommandDispatch(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   interaction: MockCommandInteraction;
   expectedPattern: RegExp;
 }) {
@@ -248,7 +248,7 @@ describe("Discord native plugin command dispatch", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const commandSpec: NativeCommandSpec = {
       name: "pair",
       description: "Pair",
@@ -362,7 +362,7 @@ describe("Discord native plugin command dispatch", () => {
           },
         },
       ],
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const interaction = createInteraction({
       channelType: ChannelType.GuildText,
       channelId,
@@ -406,7 +406,7 @@ describe("Discord native plugin command dispatch", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const command = await createStatusCommand(cfg);
     const interaction = createInteraction({
       channelType: ChannelType.GuildText,
@@ -456,7 +456,7 @@ describe("Discord native plugin command dispatch", () => {
           dm: { enabled: true, policy: "open" },
         },
       },
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const interaction = createInteraction({
       channelType: ChannelType.DM,
       channelId,
@@ -490,7 +490,7 @@ describe("Discord native plugin command dispatch", () => {
           },
         },
       ],
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
     const interaction = createInteraction({
       channelType: ChannelType.GuildText,
       channelId,

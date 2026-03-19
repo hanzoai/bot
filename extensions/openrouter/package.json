@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/openrouter-provider",
+  "name": "@hanzo/bot-openrouter-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw OpenRouter provider plugin",
+  "description": "Hanzo Bot OpenRouter provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

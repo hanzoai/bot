@@ -2,12 +2,12 @@ import Foundation
 
 enum CommandResolver {
     private static let projectRootDefaultsKey = "openclaw.gatewayProjectRootPath"
-    private static let helperName = "openclaw"
+    private static let helperName = "@hanzo/bot"
 
     static func gatewayEntrypoint(in root: URL) -> String? {
         let distEntry = root.appendingPathComponent("dist/index.js").path
         if FileManager().isReadableFile(atPath: distEntry) { return distEntry }
-        let openclawEntry = root.appendingPathComponent("openclaw.mjs").path
+        let openclawEntry = root.appendingPathComponent("hanzo-bot.mjs").path
         if FileManager().isReadableFile(atPath: openclawEntry) { return openclawEntry }
         let binEntry = root.appendingPathComponent("bin/openclaw.js").path
         if FileManager().isReadableFile(atPath: binEntry) { return binEntry }
@@ -38,9 +38,9 @@ enum CommandResolver {
 
     static func errorCommand(with message: String) -> [String] {
         let script = """
-        cat <<'__OPENCLAW_ERR__' >&2
+        cat <<'__BOT_ERR__' >&2
         \(message)
-        __OPENCLAW_ERR__
+        __BOT_ERR__
         exit 1
         """
         return ["/bin/sh", "-c", script]
@@ -197,7 +197,7 @@ enum CommandResolver {
         self.findExecutable(named: self.helperName, searchPaths: searchPaths)
     }
 
-    static func projectOpenClawExecutable(projectRoot: URL? = nil) -> String? {
+    static func projectHanzo BotExecutable(projectRoot: URL? = nil) -> String? {
         #if DEBUG
         let root = projectRoot ?? self.projectRoot()
         let candidate = root.appendingPathComponent("node_modules/.bin").appendingPathComponent(self.helperName).path
@@ -210,7 +210,7 @@ enum CommandResolver {
     static func nodeCliPath() -> String? {
         let root = self.projectRoot()
         let candidates = [
-            root.appendingPathComponent("openclaw.mjs").path,
+            root.appendingPathComponent("hanzo-bot.mjs").path,
             root.appendingPathComponent("bin/openclaw.js").path,
         ]
         for candidate in candidates where FileManager().isReadableFile(atPath: candidate) {
@@ -219,7 +219,7 @@ enum CommandResolver {
         return nil
     }
 
-    static func hasAnyOpenClawInvoker(searchPaths: [String]? = nil) -> Bool {
+    static func hasAnyHanzo BotInvoker(searchPaths: [String]? = nil) -> Bool {
         if self.openclawExecutable(searchPaths: searchPaths) != nil { return true }
         if self.findExecutable(named: "pnpm", searchPaths: searchPaths) != nil { return true }
         if self.findExecutable(named: "node", searchPaths: searchPaths) != nil,
@@ -247,7 +247,7 @@ enum CommandResolver {
         }
 
         let root = self.projectRoot()
-        if let openclawPath = self.projectOpenClawExecutable(projectRoot: root) {
+        if let openclawPath = self.projectHanzo BotExecutable(projectRoot: root) {
             return [openclawPath, subcommand] + extraArgs
         }
         if let openclawPath = self.openclawExecutable(searchPaths: searchPaths) {
@@ -270,13 +270,13 @@ enum CommandResolver {
 
         if let pnpm = self.findExecutable(named: "pnpm", searchPaths: searchPaths) {
             // Use --silent to avoid pnpm lifecycle banners that would corrupt JSON outputs.
-            return [pnpm, "--silent", "openclaw", subcommand] + extraArgs
+            return [pnpm, "--silent", "@hanzo/bot", subcommand] + extraArgs
         }
 
         switch runtimeResult {
         case .success:
             let missingEntry = """
-            openclaw entrypoint missing (looked for dist/index.js or openclaw.mjs); run pnpm build.
+            hanzo-bot entrypoint missing (looked for dist/index.js or hanzo-bot.mjs); run pnpm build.
             """
             return self.errorCommand(with: missingEntry)
         case let .failure(error):
@@ -305,7 +305,7 @@ enum CommandResolver {
         guard !settings.target.isEmpty else { return nil }
         guard let parsed = self.parseSSHTarget(settings.target) else { return nil }
 
-        // Run the real openclaw CLI on the remote host.
+        // Run the real hanzo-bot CLI on the remote host.
         let exportedPath = [
             "/opt/homebrew/bin",
             "/usr/local/bin",
@@ -361,9 +361,9 @@ enum CommandResolver {
         CLI="";
         \(cliSection)
         \(projectSection)
-        if command -v openclaw >/dev/null 2>&1; then
+        if command -v hanzo-bot >/dev/null 2>&1; then
           CLI="$(command -v openclaw)"
-          openclaw \(quotedArgs);
+          hanzo-bot \(quotedArgs);
         elif [ -n "${PRJ:-}" ] && [ -f "$PRJ/dist/index.js" ]; then
           if command -v node >/dev/null 2>&1; then
             CLI="node $PRJ/dist/index.js"
@@ -371,10 +371,10 @@ enum CommandResolver {
           else
             echo "Node >=22 required on remote host"; exit 127;
           fi
-        elif [ -n "${PRJ:-}" ] && [ -f "$PRJ/openclaw.mjs" ]; then
+        elif [ -n "${PRJ:-}" ] && [ -f "$PRJ/hanzo-bot.mjs" ]; then
           if command -v node >/dev/null 2>&1; then
-            CLI="node $PRJ/openclaw.mjs"
-            node "$PRJ/openclaw.mjs" \(quotedArgs);
+            CLI="node $PRJ/hanzo-bot.mjs"
+            node "$PRJ/hanzo-bot.mjs" \(quotedArgs);
           else
             echo "Node >=22 required on remote host"; exit 127;
           fi
@@ -387,9 +387,9 @@ enum CommandResolver {
           fi
         elif command -v pnpm >/dev/null 2>&1; then
           CLI="pnpm --silent openclaw"
-          pnpm --silent openclaw \(quotedArgs);
+          pnpm --silent hanzo-bot \(quotedArgs);
         else
-          echo "openclaw CLI missing on remote host"; exit 127;
+          echo "hanzo-bot CLI missing on remote host"; exit 127;
         fi
         """
         let options: [String] = [
@@ -417,7 +417,7 @@ enum CommandResolver {
         defaults: UserDefaults = .standard,
         configRoot: [String: Any]? = nil) -> RemoteSettings
     {
-        let root = configRoot ?? OpenClawConfigFile.loadDict()
+        let root = configRoot ?? Hanzo BotConfigFile.loadDict()
         let mode = ConnectionModeResolver.resolve(root: root, defaults: defaults).mode
         let target = defaults.string(forKey: remoteTargetKey) ?? ""
         let identity = defaults.string(forKey: remoteIdentityKey) ?? ""

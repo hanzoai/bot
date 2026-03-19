@@ -1,4 +1,4 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
 import kotlin.math.max
 import kotlin.math.min

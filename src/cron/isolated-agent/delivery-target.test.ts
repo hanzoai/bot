@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 
 vi.mock("../../config/sessions.js", () => ({
   loadSessionStore: vi.fn().mockReturnValue({}),
@@ -32,15 +32,15 @@ import { maybeResolveIdLikeTarget } from "../../infra/outbound/target-resolver.j
 import { readChannelAllowFromStoreSync } from "../../pairing/pairing-store.js";
 import { resolveDeliveryTarget } from "./delivery-target.js";
 
-function makeCfg(overrides?: Partial<OpenClawConfig>): OpenClawConfig {
+function makeCfg(overrides?: Partial<Hanzo BotConfig>): Hanzo BotConfig {
   return {
     bindings: [],
     channels: {},
     ...overrides,
-  } as OpenClawConfig;
+  } as Hanzo BotConfig;
 }
 
-function makeTelegramBoundCfg(accountId = "account-b"): OpenClawConfig {
+function makeTelegramBoundCfg(accountId = "account-b"): Hanzo BotConfig {
   return makeCfg({
     bindings: [
       {
@@ -92,7 +92,7 @@ function setStoredWhatsAppAllowFrom(allowFrom: string[]) {
 }
 
 async function resolveForAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   target?: { channel?: "last" | "telegram"; to?: string };
 }) {
   const channel = params.target ? params.target.channel : DEFAULT_TARGET.channel;
@@ -103,7 +103,7 @@ async function resolveForAgent(params: {
   });
 }
 
-async function resolveLastTarget(cfg: OpenClawConfig) {
+async function resolveLastTarget(cfg: Hanzo BotConfig) {
   return resolveForAgent({
     cfg,
     target: { channel: "last", to: undefined },

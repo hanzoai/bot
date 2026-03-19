@@ -1,14 +1,14 @@
 ---
-summary: "CLI reference for `openclaw setup` (initialize config + workspace)"
+summary: "CLI reference for `hanzo-bot setup` (initialize config + workspace)"
 read_when:
   - You’re doing first-run setup without full CLI onboarding
   - You want to set the default workspace path
 title: "setup"
 ---
 
-# `openclaw setup`
+# `hanzo-bot setup`
 
-Initialize `~/.openclaw/openclaw.json` and the agent workspace.
+Initialize `~/.hanzoai/bot.json` and the agent workspace.
 
 Related:
 
@@ -19,7 +19,7 @@ Related:
 
 ```bash
 openclaw setup
-openclaw setup --workspace ~/.openclaw/workspace
+openclaw setup --workspace ~/.hanzo/bot/workspace
 ```
 
 To run onboarding via setup:

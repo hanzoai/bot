@@ -6,7 +6,7 @@ import {
   DEFAULT_ACCOUNT_ID,
   createEnvPatchedAccountSetupAdapter,
   hasConfiguredSecretInput,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
   parseMentionOrPrefixedId,
   patchChannelConfigForAccount,
   setSetupChannelEnabled,
@@ -27,7 +27,7 @@ import {
   SLACK_CHANNEL as channel,
 } from "./shared.js";
 
-function enableSlackAccount(cfg: OpenClawConfig, accountId: string): OpenClawConfig {
+function enableSlackAccount(cfg: Hanzo BotConfig, accountId: string): Hanzo BotConfig {
   return patchChannelConfigForAccount({
     cfg,
     channel,
@@ -53,7 +53,7 @@ function createSlackTokenCredential(params: {
     keepPrompt: params.keepPrompt,
     inputPrompt: params.inputPrompt,
     allowEnv: ({ accountId }: { accountId: string }) => accountId === DEFAULT_ACCOUNT_ID,
-    inspect: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId: string }) => {
+    inspect: ({ cfg, accountId }: { cfg: Hanzo BotConfig; accountId: string }) => {
       const resolved = resolveSlackAccount({ cfg, accountId });
       const configuredValue =
         params.inputKey === "botToken" ? resolved.config.botToken : resolved.config.appToken;
@@ -68,14 +68,14 @@ function createSlackTokenCredential(params: {
             : undefined,
       };
     },
-    applyUseEnv: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId: string }) =>
+    applyUseEnv: ({ cfg, accountId }: { cfg: Hanzo BotConfig; accountId: string }) =>
       enableSlackAccount(cfg, accountId),
     applySet: ({
       cfg,
       accountId,
       value,
     }: {
-      cfg: OpenClawConfig;
+      cfg: Hanzo BotConfig;
       accountId: string;
       value: unknown;
     }) =>
@@ -196,13 +196,13 @@ export function createSlackSetupWizardBase(handlers: {
       channel,
       label: "Slack channels",
       placeholder: "#general, #private, C123",
-      currentPolicy: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId: string }) =>
+      currentPolicy: ({ cfg, accountId }: { cfg: Hanzo BotConfig; accountId: string }) =>
         resolveSlackAccount({ cfg, accountId }).config.groupPolicy ?? "allowlist",
-      currentEntries: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId: string }) =>
+      currentEntries: ({ cfg, accountId }: { cfg: Hanzo BotConfig; accountId: string }) =>
         Object.entries(resolveSlackAccount({ cfg, accountId }).config.channels ?? {})
           .filter(([, value]) => value?.allow !== false && value?.enabled !== false)
           .map(([key]) => key),
-      updatePrompt: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId: string }) =>
+      updatePrompt: ({ cfg, accountId }: { cfg: Hanzo BotConfig; accountId: string }) =>
         Boolean(resolveSlackAccount({ cfg, accountId }).config.channels),
       resolveAllowlist: handlers.resolveGroupAllowlist,
       fallbackResolved: (entries) => entries,
@@ -211,12 +211,12 @@ export function createSlackSetupWizardBase(handlers: {
         accountId,
         resolved,
       }: {
-        cfg: OpenClawConfig;
+        cfg: Hanzo BotConfig;
         accountId: string;
         resolved: unknown;
       }) => setSlackChannelAllowlist(cfg, accountId, resolved as string[]),
     }),
-    disable: (cfg: OpenClawConfig) => setSetupChannelEnabled(cfg, channel, false),
+    disable: (cfg: Hanzo BotConfig) => setSetupChannelEnabled(cfg, channel, false),
   } satisfies ChannelSetupWizard;
 }
 export function createSlackSetupWizardProxy(

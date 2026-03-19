@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/venice-provider",
+  "name": "@hanzo/bot-venice-provider",
   "version": "2026.3.14",
   "private": true,
-  "description": "OpenClaw Venice provider plugin",
+  "description": "Hanzo Bot Venice provider plugin",
   "type": "module",
-  "openclaw": {
+  "@hanzo/bot": {
     "extensions": [
       "./index.ts"
     ]

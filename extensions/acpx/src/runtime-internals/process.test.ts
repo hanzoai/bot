@@ -333,7 +333,7 @@ describe("spawnAndCollect", () => {
       command: process.execPath,
       args: [
         "-e",
-        `process.stdout.write(JSON.stringify({openai:process.env.${openAiEnvKey},github:process.env.${githubEnvKey},hf:process.env.${hfEnvKey},openclaw:process.env.OPENCLAW_API_KEY,shell:process.env.OPENCLAW_SHELL}))`,
+        `process.stdout.write(JSON.stringify({openai:process.env.${openAiEnvKey},github:process.env.${githubEnvKey},hf:process.env.${hfEnvKey},openclaw:process.env.BOT_API_KEY,shell:process.env.BOT_SHELL}))`,
       ],
       cwd: process.cwd(),
       stripProviderAuthEnvVars: options?.stripProviderAuthEnvVars,
@@ -386,7 +386,7 @@ describe("spawnAndCollect", () => {
       OPENAI_API_KEY: "openai-secret",
       GITHUB_TOKEN: "gh-secret",
       HF_TOKEN: "hf-secret",
-      OPENCLAW_API_KEY: "keep-me",
+      BOT_API_KEY: "keep-me",
     });
     const parsed = await collectSpawnedEnvSnapshot({
       stripProviderAuthEnvVars: true,
@@ -402,7 +402,7 @@ describe("spawnAndCollect", () => {
     stubProviderAuthEnv({
       OpenAI_Api_Key: "openai-secret",
       Github_Token: "gh-secret",
-      OPENCLAW_API_KEY: "keep-me",
+      BOT_API_KEY: "keep-me",
     });
     const parsed = await collectSpawnedEnvSnapshot({
       stripProviderAuthEnvVars: true,
@@ -420,7 +420,7 @@ describe("spawnAndCollect", () => {
       OPENAI_API_KEY: "openai-secret",
       GITHUB_TOKEN: "gh-secret",
       HF_TOKEN: "hf-secret",
-      OPENCLAW_API_KEY: "keep-me",
+      BOT_API_KEY: "keep-me",
     });
     const parsed = await collectSpawnedEnvSnapshot();
     expect(parsed.openai).toBe("openai-secret");

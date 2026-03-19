@@ -7,11 +7,11 @@ describe("buildPlatformRuntimeLogHints", () => {
       buildPlatformRuntimeLogHints({
         platform: "darwin",
         env: {
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-state",
-          OPENCLAW_LOG_PREFIX: "gateway",
+          BOT_STATE_DIR: "/tmp/openclaw-state",
+          BOT_LOG_PREFIX: "gateway",
         },
         systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        windowsTaskName: "Hanzo Bot Gateway",
       }),
     ).toEqual([
       "Launchd stdout (if installed): /tmp/openclaw-state/logs/gateway.log",
@@ -24,16 +24,16 @@ describe("buildPlatformRuntimeLogHints", () => {
       buildPlatformRuntimeLogHints({
         platform: "linux",
         systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        windowsTaskName: "Hanzo Bot Gateway",
       }),
     ).toEqual(["Logs: journalctl --user -u openclaw-gateway.service -n 200 --no-pager"]);
     expect(
       buildPlatformRuntimeLogHints({
         platform: "win32",
         systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        windowsTaskName: "Hanzo Bot Gateway",
       }),
-    ).toEqual(['Logs: schtasks /Query /TN "OpenClaw Gateway" /V /FO LIST']);
+    ).toEqual(['Logs: schtasks /Query /TN "Hanzo Bot Gateway" /V /FO LIST']);
   });
 });
 
@@ -42,29 +42,29 @@ describe("buildPlatformServiceStartHints", () => {
     expect(
       buildPlatformServiceStartHints({
         platform: "darwin",
-        installCommand: "openclaw gateway install",
-        startCommand: "openclaw gateway",
+        installCommand: "hanzo-bot gateway install",
+        startCommand: "hanzo-bot gateway",
         launchAgentPlistPath: "~/Library/LaunchAgents/com.openclaw.gateway.plist",
         systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        windowsTaskName: "Hanzo Bot Gateway",
       }),
     ).toEqual([
-      "openclaw gateway install",
-      "openclaw gateway",
+      "hanzo-bot gateway install",
+      "hanzo-bot gateway",
       "launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.openclaw.gateway.plist",
     ]);
     expect(
       buildPlatformServiceStartHints({
         platform: "linux",
-        installCommand: "openclaw gateway install",
-        startCommand: "openclaw gateway",
+        installCommand: "hanzo-bot gateway install",
+        startCommand: "hanzo-bot gateway",
         launchAgentPlistPath: "~/Library/LaunchAgents/com.openclaw.gateway.plist",
         systemdServiceName: "openclaw-gateway",
-        windowsTaskName: "OpenClaw Gateway",
+        windowsTaskName: "Hanzo Bot Gateway",
       }),
     ).toEqual([
-      "openclaw gateway install",
-      "openclaw gateway",
+      "hanzo-bot gateway install",
+      "hanzo-bot gateway",
       "systemctl --user start openclaw-gateway.service",
     ]);
   });
