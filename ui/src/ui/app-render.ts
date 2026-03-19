@@ -97,6 +97,7 @@ import { renderExecApprovalPrompt } from "./views/exec-approval.ts";
 import { renderGatewayUrlConfirmation } from "./views/gateway-url-confirmation.ts";
 import { renderLoginGate } from "./views/login-gate.ts";
 import { renderMarketplace } from "./views/marketplace.ts";
+import { renderSiteLock } from "./views/site-lock.ts";
 import { renderOverview } from "./views/overview.ts";
 
 // Lazy-loaded view modules – deferred so the initial bundle stays small.
@@ -292,6 +293,11 @@ export function renderApp(state: AppViewState) {
       ? () => updatableState.requestUpdate?.()
       : undefined;
   _pendingUpdate = requestHostUpdate;
+
+  // Site lock: require email + password before showing anything.
+  if (!state.siteUnlocked) {
+    return renderSiteLock(state);
+  }
 
   // Gate: require successful gateway connection before showing the dashboard.
   // The gateway URL confirmation overlay is always rendered so URL-param flows still work.

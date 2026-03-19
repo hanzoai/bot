@@ -38,6 +38,8 @@ import type { NostrProfileFormState } from "./views/channels.nostr-profile-form.
 import type { SessionLogEntry } from "./views/usage.ts";
 
 export type AppViewState = {
+  siteUnlocked: boolean;
+  unlockSite: () => void;
   settings: UiSettings;
   password: string;
   loginShowGatewayToken: boolean;
