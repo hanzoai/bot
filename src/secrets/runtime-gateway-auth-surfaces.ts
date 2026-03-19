@@ -112,7 +112,8 @@ export function evaluateGatewayAuthSurfaceStates(params: {
     if (
       plan.authMode === "token" ||
       plan.authMode === "none" ||
-      plan.authMode === "trusted-proxy"
+      plan.authMode === "trusted-proxy" ||
+      plan.authMode === "iam"
     ) {
       return `gateway.auth.mode is "${plan.authMode}".`;
     }
@@ -140,7 +141,8 @@ export function evaluateGatewayAuthSurfaceStates(params: {
     if (
       plan.authMode === "password" ||
       plan.authMode === "none" ||
-      plan.authMode === "trusted-proxy"
+      plan.authMode === "trusted-proxy" ||
+      plan.authMode === "iam"
     ) {
       return `gateway.auth.mode is "${plan.authMode}".`;
     }
@@ -198,7 +200,8 @@ export function evaluateGatewayAuthSurfaceStates(params: {
       if (
         plan.authMode === "token" ||
         plan.authMode === "none" ||
-        plan.authMode === "trusted-proxy"
+        plan.authMode === "trusted-proxy" ||
+        plan.authMode === "iam"
       ) {
         return `password auth cannot win with gateway.auth.mode="${plan.authMode}".`;
       }
