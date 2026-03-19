@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type Hanzo BotConfig, DEFAULT_GATEWAY_PORT } from "../config/config.js";
+import { type HanzoBotConfig, DEFAULT_GATEWAY_PORT } from "../config/config.js";
 import {
   buildDefaultHookUrl,
   buildTopicPath,
@@ -16,11 +16,11 @@ const baseConfig = {
       pushToken: "push-token",
     },
   },
-} satisfies Hanzo BotConfig;
+} satisfies HanzoBotConfig;
 
 describe("gmail hook config", () => {
   function resolveWithGmailOverrides(
-    overrides: Partial<NonNullable<Hanzo BotConfig["hooks"]>["gmail"]>,
+    overrides: Partial<NonNullable<HanzoBotConfig["hooks"]>["gmail"]>,
   ) {
     return resolveGmailHookRuntimeConfig(
       {

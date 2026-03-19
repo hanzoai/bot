@@ -3,7 +3,7 @@ import { normalizeModelRef, parseModelRef } from "../agents/model-selection.js";
 import { primeConfiguredBindingRegistry } from "../channels/plugins/binding-registry.js";
 import type { loadConfig } from "../config/config.js";
 import { normalizePluginsConfig } from "../plugins/config-state.js";
-import { loadHanzo BotPlugins } from "../plugins/loader.js";
+import { loadHanzoBotPlugins } from "../plugins/loader.js";
 import { getPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.js";
 import { setGatewaySubagentRuntime } from "../plugins/runtime/index.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
@@ -405,7 +405,7 @@ export function loadGatewayPlugins(params: {
   const gatewaySubagent = createGatewaySubagentRuntime();
   setGatewaySubagentRuntime(gatewaySubagent);
 
-  const pluginRegistry = loadHanzo BotPlugins({
+  const pluginRegistry = loadHanzoBotPlugins({
     config: params.cfg,
     workspaceDir: params.workspaceDir,
     logger: {

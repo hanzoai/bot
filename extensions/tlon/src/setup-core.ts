@@ -7,7 +7,7 @@ import {
   type ChannelSetupAdapter,
   type ChannelSetupInput,
   type ChannelSetupWizard,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/setup";
 import { buildTlonAccountFields } from "./account-fields.js";
 import { normalizeShip } from "./targets.js";
@@ -34,9 +34,9 @@ function isConfigured(account: TlonResolvedAccount): boolean {
 }
 
 type TlonSetupWizardBaseParams = {
-  resolveConfigured: (params: { cfg: Hanzo BotConfig }) => boolean | Promise<boolean>;
+  resolveConfigured: (params: { cfg: HanzoBotConfig }) => boolean | Promise<boolean>;
   resolveStatusLines?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     configured: boolean;
   }) => string[] | Promise<string[]>;
   finalize: NonNullable<ChannelSetupWizard["finalize"]>;
@@ -121,23 +121,23 @@ export function createTlonSetupWizardBase(params: TlonSetupWizardBaseParams): Ch
   };
 }
 
-export async function resolveTlonSetupConfigured(cfg: Hanzo BotConfig): Promise<boolean> {
+export async function resolveTlonSetupConfigured(cfg: HanzoBotConfig): Promise<boolean> {
   const accountIds = listTlonAccountIds(cfg);
   return accountIds.length > 0
     ? accountIds.some((accountId) => isConfigured(resolveTlonAccount(cfg, accountId)))
     : isConfigured(resolveTlonAccount(cfg, DEFAULT_ACCOUNT_ID));
 }
 
-export async function resolveTlonSetupStatusLines(cfg: Hanzo BotConfig): Promise<string[]> {
+export async function resolveTlonSetupStatusLines(cfg: HanzoBotConfig): Promise<string[]> {
   const configured = await resolveTlonSetupConfigured(cfg);
   return [`Tlon: ${configured ? "configured" : "needs setup"}`];
 }
 
 export function applyTlonSetupConfig(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   input: TlonSetupInput;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const { cfg, accountId, input } = params;
   const useDefault = accountId === DEFAULT_ACCOUNT_ID;
   const namedConfig = prepareScopedSetupConfig({

@@ -5,7 +5,7 @@ import {
   createTestWizardPrompter,
   type WizardPrompter,
 } from "../../../test/helpers/extensions/setup-wizard.js";
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 import { nostrPlugin } from "./channel.js";
 
 const nostrConfigureAdapter = buildChannelSetupWizardAdapterFromSetupWizard({
@@ -28,7 +28,7 @@ describe("nostr setup wizard", () => {
     });
 
     const result = await nostrConfigureAdapter.configure({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       runtime: createRuntimeEnv(),
       prompter,
       options: {},

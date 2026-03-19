@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveMemorySearchConfig } from "./memory-search.js";
 
-const asConfig = (cfg: Hanzo BotConfig): Hanzo BotConfig => cfg;
+const asConfig = (cfg: HanzoBotConfig): HanzoBotConfig => cfg;
 
 describe("memory search config", () => {
   function configWithDefaultProvider(
     provider: "openai" | "local" | "gemini" | "mistral" | "ollama",
-  ): Hanzo BotConfig {
+  ): HanzoBotConfig {
     return asConfig({
       agents: {
         defaults: {

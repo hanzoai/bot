@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AcpRuntimeError } from "../../acp/runtime/errors.js";
 import { setDefaultChannelPluginRegistryForTests } from "../../commands/channel-test-helpers.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { SessionBindingRecord } from "../../infra/outbound/session-binding-service.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../../utils/message-channel.js";
 
@@ -171,9 +171,9 @@ const baseCfg = {
       },
     },
   },
-} satisfies Hanzo BotConfig;
+} satisfies HanzoBotConfig;
 
-function createDiscordParams(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+function createDiscordParams(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   const params = buildCommandTestParams(commandBody, cfg, {
     Provider: "discord",
     Surface: "discord",
@@ -323,13 +323,13 @@ function mockBoundThreadSession(options?: {
   );
 }
 
-function createThreadParams(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+function createThreadParams(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   const params = createDiscordParams(commandBody, cfg);
   params.ctx.MessageThreadId = defaultThreadId;
   return params;
 }
 
-function createTelegramTopicParams(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+function createTelegramTopicParams(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   const params = buildCommandTestParams(commandBody, cfg, {
     Provider: "telegram",
     Surface: "telegram",
@@ -342,7 +342,7 @@ function createTelegramTopicParams(commandBody: string, cfg: Hanzo BotConfig = b
   return params;
 }
 
-function createTelegramDmParams(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+function createTelegramDmParams(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   const params = buildCommandTestParams(commandBody, cfg, {
     Provider: "telegram",
     Surface: "telegram",
@@ -354,23 +354,23 @@ function createTelegramDmParams(commandBody: string, cfg: Hanzo BotConfig = base
   return params;
 }
 
-async function runDiscordAcpCommand(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+async function runDiscordAcpCommand(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   return handleAcpCommand(createDiscordParams(commandBody, cfg), true);
 }
 
-async function runThreadAcpCommand(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+async function runThreadAcpCommand(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   return handleAcpCommand(createThreadParams(commandBody, cfg), true);
 }
 
-async function runTelegramAcpCommand(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+async function runTelegramAcpCommand(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   return handleAcpCommand(createTelegramTopicParams(commandBody, cfg), true);
 }
 
-async function runTelegramDmAcpCommand(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+async function runTelegramDmAcpCommand(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   return handleAcpCommand(createTelegramDmParams(commandBody, cfg), true);
 }
 
-function createMatrixRoomParams(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+function createMatrixRoomParams(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   const params = buildCommandTestParams(commandBody, cfg, {
     Provider: "matrix",
     Surface: "matrix",
@@ -382,21 +382,21 @@ function createMatrixRoomParams(commandBody: string, cfg: Hanzo BotConfig = base
   return params;
 }
 
-function createMatrixThreadParams(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+function createMatrixThreadParams(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   const params = createMatrixRoomParams(commandBody, cfg);
   params.ctx.MessageThreadId = "$thread-root";
   return params;
 }
 
-async function runMatrixAcpCommand(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+async function runMatrixAcpCommand(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   return handleAcpCommand(createMatrixRoomParams(commandBody, cfg), true);
 }
 
-async function runMatrixThreadAcpCommand(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+async function runMatrixThreadAcpCommand(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   return handleAcpCommand(createMatrixThreadParams(commandBody, cfg), true);
 }
 
-function createFeishuDmParams(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+function createFeishuDmParams(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   const params = buildCommandTestParams(commandBody, cfg, {
     Provider: "feishu",
     Surface: "feishu",
@@ -409,14 +409,14 @@ function createFeishuDmParams(commandBody: string, cfg: Hanzo BotConfig = baseCf
   return params;
 }
 
-async function runFeishuDmAcpCommand(commandBody: string, cfg: Hanzo BotConfig = baseCfg) {
+async function runFeishuDmAcpCommand(commandBody: string, cfg: HanzoBotConfig = baseCfg) {
   return handleAcpCommand(createFeishuDmParams(commandBody, cfg), true);
 }
 
 async function runInternalAcpCommand(params: {
   commandBody: string;
   scopes: string[];
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
 }) {
   const commandParams = buildCommandTestParams(params.commandBody, params.cfg ?? baseCfg, {
     Provider: INTERNAL_MESSAGE_CHANNEL,
@@ -646,7 +646,7 @@ describe("/acp command", () => {
           },
         },
       },
-    } satisfies Hanzo BotConfig;
+    } satisfies HanzoBotConfig;
 
     const result = await runMatrixAcpCommand("/acp spawn codex", cfg);
 
@@ -674,7 +674,7 @@ describe("/acp command", () => {
           },
         },
       },
-    } satisfies Hanzo BotConfig;
+    } satisfies HanzoBotConfig;
 
     const result = await runMatrixThreadAcpCommand("/acp spawn codex --thread here", cfg);
 
@@ -727,7 +727,7 @@ describe("/acp command", () => {
           },
         },
       },
-    } satisfies Hanzo BotConfig;
+    } satisfies HanzoBotConfig;
 
     const result = await runDiscordAcpCommand("/acp spawn codex", cfg);
 
@@ -758,7 +758,7 @@ describe("/acp command", () => {
           },
         },
       },
-    } satisfies Hanzo BotConfig;
+    } satisfies HanzoBotConfig;
 
     const result = await runMatrixAcpCommand("/acp spawn codex", cfg);
 
@@ -774,7 +774,7 @@ describe("/acp command", () => {
           sandbox: { mode: "all" },
         },
       },
-    } satisfies Hanzo BotConfig;
+    } satisfies HanzoBotConfig;
 
     const result = await runDiscordAcpCommand("/acp spawn codex", cfg);
 
@@ -869,7 +869,7 @@ describe("/acp command", () => {
         ...baseCfg.acp,
         dispatch: { enabled: false },
       },
-    } satisfies Hanzo BotConfig;
+    } satisfies HanzoBotConfig;
     const result = await runDiscordAcpCommand("/acp steer tighten logging", cfg);
     expect(result?.reply?.text).toContain("ACP dispatch is disabled by policy");
     expect(hoisted.runTurnMock).not.toHaveBeenCalled();

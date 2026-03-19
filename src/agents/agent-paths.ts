@@ -3,7 +3,7 @@ import { resolveStateDir } from "../config/paths.js";
 import { DEFAULT_AGENT_ID } from "../routing/session-key.js";
 import { resolveUserPath } from "../utils.js";
 
-export function resolveHanzo BotAgentDir(env: NodeJS.ProcessEnv = process.env): string {
+export function resolveHanzoBotAgentDir(env: NodeJS.ProcessEnv = process.env): string {
   const override = env.BOT_AGENT_DIR?.trim() || env.PI_CODING_AGENT_DIR?.trim();
   if (override) {
     return resolveUserPath(override, env);
@@ -12,8 +12,8 @@ export function resolveHanzo BotAgentDir(env: NodeJS.ProcessEnv = process.env): 
   return resolveUserPath(defaultAgentDir, env);
 }
 
-export function ensureHanzo BotAgentEnv(): string {
-  const dir = resolveHanzo BotAgentDir();
+export function ensureHanzoBotAgentEnv(): string {
+  const dir = resolveHanzoBotAgentDir();
   if (!process.env.BOT_AGENT_DIR) {
     process.env.BOT_AGENT_DIR = dir;
   }

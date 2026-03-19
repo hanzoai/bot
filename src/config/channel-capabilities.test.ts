@@ -3,7 +3,7 @@ import type { ChannelPlugin } from "../channels/plugins/types.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { createTestRegistry } from "../test-utils/channel-plugins.js";
 import { resolveChannelCapabilities } from "./channel-capabilities.js";
-import type { Hanzo BotConfig } from "./config.js";
+import type { HanzoBotConfig } from "./config.js";
 
 describe("resolveChannelCapabilities", () => {
   beforeEach(() => {
@@ -32,7 +32,7 @@ describe("resolveChannelCapabilities", () => {
           },
         },
       },
-    } satisfies Partial<Hanzo BotConfig>;
+    } satisfies Partial<HanzoBotConfig>;
 
     expect(
       resolveChannelCapabilities({
@@ -53,7 +53,7 @@ describe("resolveChannelCapabilities", () => {
           },
         },
       },
-    } satisfies Partial<Hanzo BotConfig>;
+    } satisfies Partial<HanzoBotConfig>;
 
     expect(
       resolveChannelCapabilities({
@@ -73,7 +73,7 @@ describe("resolveChannelCapabilities", () => {
           },
         },
       },
-    } satisfies Partial<Hanzo BotConfig>;
+    } satisfies Partial<HanzoBotConfig>;
 
     expect(
       resolveChannelCapabilities({
@@ -96,7 +96,7 @@ describe("resolveChannelCapabilities", () => {
     );
     const cfg = {
       channels: { msteams: { capabilities: [" polls ", ""] } },
-    } satisfies Partial<Hanzo BotConfig>;
+    } satisfies Partial<HanzoBotConfig>;
 
     expect(
       resolveChannelCapabilities({
@@ -115,7 +115,7 @@ describe("resolveChannelCapabilities", () => {
           capabilities: { inlineButtons: "dm" },
         },
       },
-    } as unknown as Partial<Hanzo BotConfig>;
+    } as unknown as Partial<HanzoBotConfig>;
 
     // Should return undefined (not crash), allowing channel-specific handlers to process it.
     expect(
@@ -133,7 +133,7 @@ describe("resolveChannelCapabilities", () => {
           capabilities: { interactiveReplies: true },
         },
       },
-    } as unknown as Partial<Hanzo BotConfig>;
+    } as unknown as Partial<HanzoBotConfig>;
 
     expect(
       resolveChannelCapabilities({

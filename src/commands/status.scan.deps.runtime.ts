@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { getTailnetHostname } from "../infra/tailscale.js";
 import { getMemorySearchManager as getMemorySearchManagerImpl } from "../memory/index.js";
 import type { MemoryProviderStatus } from "../memory/types.js";
@@ -12,7 +12,7 @@ type StatusMemoryManager = {
 };
 
 export async function getMemorySearchManager(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentId: string;
   purpose: "status";
 }): Promise<{ manager: StatusMemoryManager | null }> {

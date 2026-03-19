@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
-describe("Hanzo BotSchema talk validation", () => {
+describe("HanzoBotSchema talk validation", () => {
   it("accepts a positive integer talk.silenceTimeoutMs", () => {
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         talk: {
           silenceTimeoutMs: 1500,
         },
@@ -18,7 +18,7 @@ describe("Hanzo BotSchema talk validation", () => {
     ["float", 1500.5],
   ])("rejects %s talk.silenceTimeoutMs", (_label, value) => {
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         talk: {
           silenceTimeoutMs: value,
         },
@@ -28,7 +28,7 @@ describe("Hanzo BotSchema talk validation", () => {
 
   it("rejects talk.provider when it does not match talk.providers", () => {
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         talk: {
           provider: "acme",
           providers: {
@@ -43,7 +43,7 @@ describe("Hanzo BotSchema talk validation", () => {
 
   it("rejects multi-provider talk config without talk.provider", () => {
     expect(() =>
-      Hanzo BotSchema.parse({
+      HanzoBotSchema.parse({
         talk: {
           providers: {
             acme: {

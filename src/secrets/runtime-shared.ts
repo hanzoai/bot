@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { coerceSecretRef, type SecretRef } from "../config/types.secrets.js";
 import { secretRefKey } from "./ref-contract.js";
 import type { SecretRefResolveCache } from "./resolve.js";
@@ -28,7 +28,7 @@ export type SecretAssignment = {
 };
 
 export type ResolverContext = {
-  sourceConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
   cache: SecretRefResolveCache;
   warnings: SecretResolverWarning[];
@@ -36,10 +36,10 @@ export type ResolverContext = {
   assignments: SecretAssignment[];
 };
 
-export type SecretDefaults = NonNullable<Hanzo BotConfig["secrets"]>["defaults"];
+export type SecretDefaults = NonNullable<HanzoBotConfig["secrets"]>["defaults"];
 
 export function createResolverContext(params: {
-  sourceConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
   env: NodeJS.ProcessEnv;
 }): ResolverContext {
   return {

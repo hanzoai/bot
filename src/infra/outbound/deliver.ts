@@ -14,7 +14,7 @@ import type {
   ChannelOutboundAdapter,
   ChannelOutboundContext,
 } from "../../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   appendAssistantMessageToSessionTranscript,
   resolveMirroredTranscriptText,
@@ -113,7 +113,7 @@ type ChannelHandler = {
 };
 
 type ChannelHandlerParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: Exclude<OutboundChannel, "none">;
   to: string;
   accountId?: string;
@@ -249,7 +249,7 @@ function createChannelOutboundContextBase(
 const isAbortError = (err: unknown): boolean => err instanceof Error && err.name === "AbortError";
 
 type DeliverOutboundPayloadsCoreParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: Exclude<OutboundChannel, "none">;
   to: string;
   accountId?: string;

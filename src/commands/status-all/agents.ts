@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { resolveAgentWorkspaceDir } from "../../agents/agent-scope.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { loadSessionStore, resolveStorePath } from "../../config/sessions.js";
 import { listGatewayAgentsBasic } from "../../gateway/agent-list.js";
 
@@ -14,7 +14,7 @@ async function fileExists(p: string): Promise<boolean> {
   }
 }
 
-export async function getAgentLocalStatuses(cfg: Hanzo BotConfig) {
+export async function getAgentLocalStatuses(cfg: HanzoBotConfig) {
   const agentList = listGatewayAgentsBasic(cfg);
   const now = Date.now();
 

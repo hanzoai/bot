@@ -1,8 +1,8 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { resolveDmGroupAccessWithLists } from "../security/dm-policy-shared.js";
 
 export type ResolveSenderCommandAuthorizationParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   rawBody: string;
   isGroup: boolean;
   dmPolicy: string;
@@ -11,7 +11,7 @@ export type ResolveSenderCommandAuthorizationParams = {
   senderId: string;
   isSenderAllowed: (senderId: string, allowFrom: string[]) => boolean;
   readAllowFromStore: () => Promise<string[]>;
-  shouldComputeCommandAuthorized: (rawBody: string, cfg: Hanzo BotConfig) => boolean;
+  shouldComputeCommandAuthorized: (rawBody: string, cfg: HanzoBotConfig) => boolean;
   resolveCommandAuthorizedFromAuthorizers: (params: {
     useAccessGroups: boolean;
     authorizers: Array<{ configured: boolean; allowed: boolean }>;
@@ -19,7 +19,7 @@ export type ResolveSenderCommandAuthorizationParams = {
 };
 
 export type CommandAuthorizationRuntime = {
-  shouldComputeCommandAuthorized: (rawBody: string, cfg: Hanzo BotConfig) => boolean;
+  shouldComputeCommandAuthorized: (rawBody: string, cfg: HanzoBotConfig) => boolean;
   resolveCommandAuthorizedFromAuthorizers: (params: {
     useAccessGroups: boolean;
     authorizers: Array<{ configured: boolean; allowed: boolean }>;

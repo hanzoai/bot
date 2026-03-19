@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../src/config/config.js";
 import { resolveAgentRoute } from "../../../src/routing/resolve-route.js";
 import { normalizeE164 } from "../../../src/utils.js";
 import type { SignalDaemonExitEvent } from "./daemon.js";
@@ -49,7 +49,7 @@ function setSignalAutoStartConfig(overrides: Record<string, unknown> = {}) {
 }
 
 function createSignalConfig(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  const base = config as Hanzo BotConfig;
+  const base = config as HanzoBotConfig;
   const channels = (base.channels ?? {}) as Record<string, unknown>;
   const signal = (channels.signal ?? {}) as Record<string, unknown>;
   return {
@@ -78,7 +78,7 @@ function createAutoAbortController() {
 
 async function runMonitorWithMocks(opts: MonitorSignalProviderOptions) {
   return monitorSignalProvider({
-    config: config as Hanzo BotConfig,
+    config: config as HanzoBotConfig,
     waitForTransportReady: waitForTransportReadyMock as any,
     ...opts,
   });
@@ -111,7 +111,7 @@ async function receiveSignalPayloads(params: {
 
 function getDirectSignalEventsFor(sender: string) {
   const route = resolveAgentRoute({
-    cfg: config as Hanzo BotConfig,
+    cfg: config as HanzoBotConfig,
     channel: "signal",
     accountId: "default",
     peer: { kind: "direct", id: normalizeE164(sender) },

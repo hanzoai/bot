@@ -3,7 +3,7 @@ import {
   QIANFAN_DEFAULT_MODEL_ID,
 } from "../../extensions/qianfan/provider-catalog.js";
 import { XIAOMI_DEFAULT_MODEL_ID } from "../../extensions/xiaomi/provider-catalog.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { coerceSecretRef, resolveSecretInputRef } from "../config/types.secrets.js";
 import { isRecord } from "../utils.js";
 import { normalizeOptionalSecretInput } from "../utils/normalize-secret-input.js";
@@ -44,7 +44,7 @@ import { resolveAwsSdkEnvVarName, resolveEnvApiKey } from "./model-auth.js";
 export { resolveOllamaApiBase } from "./models-config.providers.discovery.js";
 export { normalizeGoogleModelId };
 
-type ModelsConfig = NonNullable<Hanzo BotConfig["models"]>;
+type ModelsConfig = NonNullable<HanzoBotConfig["models"]>;
 export type ProviderConfig = NonNullable<ModelsConfig["providers"]>[string];
 type SecretDefaults = {
   env?: string;
@@ -606,7 +606,7 @@ export function normalizeProviders(params: {
 
 type ImplicitProviderParams = {
   agentDir: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
   workspaceDir?: string;
   explicitProviders?: Record<string, ProviderConfig> | null;
@@ -817,7 +817,7 @@ export async function resolveImplicitProviders(
 
 export async function resolveImplicitBedrockProvider(params: {
   agentDir: string;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<ProviderConfig | null> {
   const env = params.env ?? process.env;

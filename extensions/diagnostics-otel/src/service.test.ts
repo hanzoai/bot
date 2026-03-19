@@ -106,7 +106,7 @@ vi.mock("../api.js", async () => {
   };
 });
 
-import type { Hanzo BotPluginServiceContext } from "../api.js";
+import type { HanzoBotPluginServiceContext } from "../api.js";
 import { emitDiagnosticEvent } from "../api.js";
 import { createDiagnosticsOtelService } from "./service.js";
 
@@ -131,7 +131,7 @@ type OtelContextFlags = {
 function createOtelContext(
   endpoint: string,
   { traces = false, metrics = false, logs = false }: OtelContextFlags = {},
-): Hanzo BotPluginServiceContext {
+): HanzoBotPluginServiceContext {
   return {
     config: {
       diagnostics: {
@@ -151,7 +151,7 @@ function createOtelContext(
   };
 }
 
-function createTraceOnlyContext(endpoint: string): Hanzo BotPluginServiceContext {
+function createTraceOnlyContext(endpoint: string): HanzoBotPluginServiceContext {
   return createOtelContext(endpoint, { traces: true });
 }
 

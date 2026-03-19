@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 
 const hoisted = vi.hoisted(() => {
   const resolveAllAgentSessionStoreTargetsMock = vi.fn();
@@ -16,7 +16,7 @@ vi.mock("../../config/sessions.js", async () => {
   );
   return {
     ...actual,
-    resolveAllAgentSessionStoreTargets: (cfg: Hanzo BotConfig, opts: unknown) =>
+    resolveAllAgentSessionStoreTargets: (cfg: HanzoBotConfig, opts: unknown) =>
       hoisted.resolveAllAgentSessionStoreTargetsMock(cfg, opts),
     loadSessionStore: (storePath: string) => hoisted.loadSessionStoreMock(storePath),
   };
@@ -38,7 +38,7 @@ describe("listAcpSessionEntries", () => {
       session: {
         store: "/custom/sessions/{agentId}.json",
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     hoisted.resolveAllAgentSessionStoreTargetsMock.mockResolvedValue([
       {
         agentId: "ops",

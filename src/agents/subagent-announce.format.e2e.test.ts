@@ -3,7 +3,7 @@ import { SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "../config/config.js";
 import * as configSessions from "../config/sessions.js";
 import type { SessionEntry } from "../config/sessions/types.js";
@@ -122,7 +122,7 @@ const chatHistoryMock = vi.fn(async (_sessionKey?: string) => ({
   messages: [] as Array<unknown>,
 }));
 let sessionStore: SessionStoreFixture = {};
-let configOverride: Hanzo BotConfig = {
+let configOverride: HanzoBotConfig = {
   session: {
     mainKey: "main",
     scope: "per-sender",
@@ -144,7 +144,7 @@ async function getSingleAgentCallParams() {
   return call?.params ?? {};
 }
 
-function setConfigOverride(next: Hanzo BotConfig): void {
+function setConfigOverride(next: HanzoBotConfig): void {
   configOverride = next;
   setRuntimeConfigSnapshot(configOverride);
 }

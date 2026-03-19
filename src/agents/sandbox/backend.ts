@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { SandboxFsBridge } from "./fs-bridge.js";
 import type { SandboxRegistryEntry } from "./registry.js";
 import type { SandboxConfig, SandboxContext } from "./types.js";
@@ -62,12 +62,12 @@ export type SandboxBackendRuntimeInfo = {
 export type SandboxBackendManager = {
   describeRuntime(params: {
     entry: SandboxRegistryEntry;
-    config: Hanzo BotConfig;
+    config: HanzoBotConfig;
     agentId?: string;
   }): Promise<SandboxBackendRuntimeInfo>;
   removeRuntime(params: {
     entry: SandboxRegistryEntry;
-    config: Hanzo BotConfig;
+    config: HanzoBotConfig;
     agentId?: string;
   }): Promise<void>;
 };

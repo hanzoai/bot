@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveHanzo BotMetadata, resolveSkillInvocationPolicy } from "./frontmatter.js";
+import { resolveHanzoBotMetadata, resolveSkillInvocationPolicy } from "./frontmatter.js";
 
 describe("resolveSkillInvocationPolicy", () => {
   it("defaults to enabled behaviors", () => {
@@ -18,9 +18,9 @@ describe("resolveSkillInvocationPolicy", () => {
   });
 });
 
-describe("resolveHanzo BotMetadata install validation", () => {
+describe("resolveHanzoBotMetadata install validation", () => {
   function resolveInstall(frontmatter: Record<string, string>) {
-    return resolveHanzo BotMetadata(frontmatter)?.install;
+    return resolveHanzoBotMetadata(frontmatter)?.install;
   }
 
   it("accepts safe install specs", () => {

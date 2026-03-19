@@ -1,16 +1,16 @@
 export type {
   ChannelMessageActionAdapter,
   ChannelPlugin,
-  Hanzo BotConfig,
-  Hanzo BotPluginApi,
+  HanzoBotConfig,
+  HanzoBotPluginApi,
   PluginRuntime,
   TelegramAccountConfig,
   TelegramActionConfig,
   TelegramNetworkConfig,
 } from "openclaw/plugin-sdk/telegram";
 export type {
-  Hanzo BotPluginService,
-  Hanzo BotPluginServiceContext,
+  HanzoBotPluginService,
+  HanzoBotPluginServiceContext,
   PluginLogger,
 } from "openclaw/plugin-sdk/core";
 export type {

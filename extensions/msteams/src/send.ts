@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 import { loadOutboundMediaFromUrl } from "../runtime-api.js";
 import { createMSTeamsConversationStoreFs } from "./conversation-store-fs.js";
 import {
@@ -21,7 +21,7 @@ import { resolveMSTeamsSendContext, type MSTeamsProactiveContext } from "./send-
 
 export type SendMSTeamsMessageParams = {
   /** Full config (for credentials) */
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   /** Conversation ID or user ID to send to */
   to: string;
   /** Message text */
@@ -49,7 +49,7 @@ const MSTEAMS_MAX_MEDIA_BYTES = 100 * 1024 * 1024;
 
 export type SendMSTeamsPollParams = {
   /** Full config (for credentials) */
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   /** Conversation ID or user ID to send to */
   to: string;
   /** Poll question */
@@ -68,7 +68,7 @@ export type SendMSTeamsPollResult = {
 
 export type SendMSTeamsCardParams = {
   /** Full config (for credentials) */
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   /** Conversation ID or user ID to send to */
   to: string;
   /** Adaptive Card JSON object */

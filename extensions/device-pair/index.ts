@@ -8,7 +8,7 @@ import {
   resolveGatewayBindUrl,
   runPluginCommandWithTimeout,
   resolveTailnetHostWithRunner,
-  type Hanzo BotPluginApi,
+  type HanzoBotPluginApi,
 } from "./api.js";
 import {
   armPairNotifyOnce,
@@ -85,7 +85,7 @@ function parsePositiveInteger(raw: string | undefined): number | null {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
-function resolveGatewayPort(cfg: Hanzo BotPluginApi["config"]): number {
+function resolveGatewayPort(cfg: HanzoBotPluginApi["config"]): number {
   const envPort =
     parsePositiveInteger(process.env.BOT_GATEWAY_PORT?.trim()) ??
     parsePositiveInteger(process.env.BOT_GATEWAY_PORT?.trim());
@@ -100,7 +100,7 @@ function resolveGatewayPort(cfg: Hanzo BotPluginApi["config"]): number {
 }
 
 function resolveScheme(
-  cfg: Hanzo BotPluginApi["config"],
+  cfg: HanzoBotPluginApi["config"],
   opts?: { forceSecure?: boolean },
 ): "ws" | "wss" {
   if (opts?.forceSecure) {
@@ -190,7 +190,7 @@ async function resolveTailnetHost(): Promise<string | null> {
   );
 }
 
-function resolveAuthLabel(cfg: Hanzo BotPluginApi["config"]): ResolveAuthLabelResult {
+function resolveAuthLabel(cfg: HanzoBotPluginApi["config"]): ResolveAuthLabelResult {
   const mode = cfg.gateway?.auth?.mode;
   const token =
     pickFirstDefined([
@@ -244,7 +244,7 @@ function resolveRequiredAuthLabel(
     : { error: "Gateway auth is set to password, but no password is configured." };
 }
 
-async function resolveGatewayUrl(api: Hanzo BotPluginApi): Promise<ResolveUrlResult> {
+async function resolveGatewayUrl(api: HanzoBotPluginApi): Promise<ResolveUrlResult> {
   const cfg = api.config;
   const pluginCfg = (api.pluginConfig ?? {}) as DevicePairPluginConfig;
   const scheme = resolveScheme(cfg);
@@ -330,7 +330,7 @@ export default definePluginEntry({
   id: "device-pair",
   name: "Device Pair",
   description: "QR/bootstrap pairing helpers for Hanzo Bot devices",
-  register(api: Hanzo BotPluginApi) {
+  register(api: HanzoBotPluginApi) {
     registerPairingNotifierService(api);
 
     api.registerCommand({

@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "../../../../src/config/config.js";
 import { getSessionBindingService } from "../../../../src/infra/outbound/session-binding-service.js";
 
@@ -756,7 +756,7 @@ describe("thread binding lifecycle", () => {
   it("passes manager token when resolving parent channels for auto-bind", async () => {
     const cfg = {
       channels: { discord: { token: "tok" } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     createThreadBindingManager({
       accountId: "runtime",
       token: "runtime-token",
@@ -809,10 +809,10 @@ describe("thread binding lifecycle", () => {
   it("uses the active runtime snapshot cfg for manager operations", async () => {
     const startupCfg = {
       channels: { discord: { token: "startup-token" } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const refreshedCfg = {
       channels: { discord: { token: "refreshed-token" } },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const manager = createThreadBindingManager({
       accountId: "runtime",
       token: "runtime-token",
@@ -1062,7 +1062,7 @@ describe("thread binding lifecycle", () => {
     });
 
     const result = await reconcileAcpThreadBindingsOnStartup({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       accountId: "default",
     });
 
@@ -1098,7 +1098,7 @@ describe("thread binding lifecycle", () => {
     hoisted.readAcpSessionEntry.mockReturnValue({
       sessionKey: "agent:codex:acp:uncertain",
       storeSessionKey: "agent:codex:acp:uncertain",
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       storePath: "/tmp/mock-sessions.json",
       storeReadFailed: true,
       entry: undefined,
@@ -1106,7 +1106,7 @@ describe("thread binding lifecycle", () => {
     });
 
     const result = await reconcileAcpThreadBindingsOnStartup({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       accountId: "default",
     });
 
@@ -1141,7 +1141,7 @@ describe("thread binding lifecycle", () => {
     hoisted.readAcpSessionEntry.mockReturnValue(null);
 
     const result = await reconcileAcpThreadBindingsOnStartup({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       accountId: "default",
     });
 
@@ -1190,7 +1190,7 @@ describe("thread binding lifecycle", () => {
     });
 
     const result = await reconcileAcpThreadBindingsOnStartup({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       accountId: "default",
       healthProbe: async () => ({ status: "stale", reason: "status-timeout-running-stale" }),
     });
@@ -1234,7 +1234,7 @@ describe("thread binding lifecycle", () => {
     });
 
     const result = await reconcileAcpThreadBindingsOnStartup({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       accountId: "default",
       healthProbe: async () => ({ status: "uncertain", reason: "status-timeout" }),
     });
@@ -1278,7 +1278,7 @@ describe("thread binding lifecycle", () => {
     });
 
     const result = await reconcileAcpThreadBindingsOnStartup({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       accountId: "default",
     });
 
@@ -1340,7 +1340,7 @@ describe("thread binding lifecycle", () => {
     let secondProbeStartedBeforeFirstResolved = false;
 
     const reconcilePromise = reconcileAcpThreadBindingsOnStartup({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       accountId: "default",
       healthProbe: async () => {
         probeCallCount += 1;
@@ -1412,7 +1412,7 @@ describe("thread binding lifecycle", () => {
     });
 
     const reconcilePromise = reconcileAcpThreadBindingsOnStartup({
-      cfg: {} as Hanzo BotConfig,
+      cfg: {} as HanzoBotConfig,
       accountId: "default",
       healthProbe: async () => {
         probeCalls += 1;

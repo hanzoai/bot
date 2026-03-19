@@ -2,7 +2,7 @@ import { Type } from "@sinclair/typebox";
 import {
   definePluginEntry,
   type GatewayRequestHandlerOptions,
-  type Hanzo BotPluginApi,
+  type HanzoBotPluginApi,
 } from "./api.js";
 import { registerVoiceCallCli } from "./src/cli.js";
 import {
@@ -149,7 +149,7 @@ export default definePluginEntry({
   name: "Voice Call",
   description: "Voice-call plugin with Telnyx/Twilio/Plivo providers",
   configSchema: voiceCallConfigSchema,
-  register(api: Hanzo BotPluginApi) {
+  register(api: HanzoBotPluginApi) {
     const config = resolveVoiceCallConfig(voiceCallConfigSchema.parse(api.pluginConfig));
     const validation = validateProviderConfig(config);
 

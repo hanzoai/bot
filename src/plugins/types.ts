@@ -20,7 +20,7 @@ import type {
   ChannelPlugin,
   ChannelStructuredComponents,
 } from "../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { ModelProviderConfig } from "../config/types.js";
 import type { GatewayRequestHandler } from "../gateway/server-methods/types.js";
 import type { InternalHookHandler } from "../hooks/internal-hooks.js";
@@ -77,7 +77,7 @@ export type PluginConfigValidation =
   | { ok: true; value?: unknown }
   | { ok: false; errors: string[] };
 
-export type Hanzo BotPluginConfigSchema = {
+export type HanzoBotPluginConfigSchema = {
   safeParse?: (value: unknown) => {
     success: boolean;
     data?: unknown;
@@ -91,8 +91,8 @@ export type Hanzo BotPluginConfigSchema = {
   jsonSchema?: Record<string, unknown>;
 };
 
-export type Hanzo BotPluginToolContext = {
-  config?: Hanzo BotConfig;
+export type HanzoBotPluginToolContext = {
+  config?: HanzoBotConfig;
   workspaceDir?: string;
   agentDir?: string;
   agentId?: string;
@@ -108,17 +108,17 @@ export type Hanzo BotPluginToolContext = {
   sandboxed?: boolean;
 };
 
-export type Hanzo BotPluginToolFactory = (
-  ctx: Hanzo BotPluginToolContext,
+export type HanzoBotPluginToolFactory = (
+  ctx: HanzoBotPluginToolContext,
 ) => AnyAgentTool | AnyAgentTool[] | null | undefined;
 
-export type Hanzo BotPluginToolOptions = {
+export type HanzoBotPluginToolOptions = {
   name?: string;
   names?: string[];
   optional?: boolean;
 };
 
-export type Hanzo BotPluginHookOptions = {
+export type HanzoBotPluginHookOptions = {
   entry?: HookEntry;
   name?: string;
   description?: string;
@@ -136,13 +136,13 @@ export type ProviderAuthResult = {
    * `models.providers.<id>` entries, default aliases, or agent model helpers.
    * The caller still persists auth-profile bindings separately.
    */
-  configPatch?: Partial<Hanzo BotConfig>;
+  configPatch?: Partial<HanzoBotConfig>;
   defaultModel?: string;
   notes?: string[];
 };
 
 export type ProviderAuthContext = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   prompter: WizardPrompter;
@@ -205,8 +205,8 @@ export type ProviderNonInteractiveApiKeyCredentialParams = {
 
 export type ProviderAuthMethodNonInteractiveContext = {
   authChoice: string;
-  config: Hanzo BotConfig;
-  baseConfig: Hanzo BotConfig;
+  config: HanzoBotConfig;
+  baseConfig: HanzoBotConfig;
   opts: ProviderAuthOptionBag;
   runtime: RuntimeEnv;
   agentDir?: string;
@@ -235,13 +235,13 @@ export type ProviderAuthMethod = {
   run: (ctx: ProviderAuthContext) => Promise<ProviderAuthResult>;
   runNonInteractive?: (
     ctx: ProviderAuthMethodNonInteractiveContext,
-  ) => Promise<Hanzo BotConfig | null>;
+  ) => Promise<HanzoBotConfig | null>;
 };
 
 export type ProviderCatalogOrder = "simple" | "profile" | "paired" | "late";
 
 export type ProviderCatalogContext = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
@@ -299,7 +299,7 @@ export type ProviderRuntimeProviderConfig = {
  * belong in `prepareDynamicModel`.
  */
 export type ProviderResolveDynamicModelContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   provider: string;
@@ -325,7 +325,7 @@ export type ProviderPrepareDynamicModelContext = ProviderResolveDynamicModelCont
  * patch provider-specific compat bits.
  */
 export type ProviderNormalizeResolvedModelContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   provider: string;
@@ -340,7 +340,7 @@ export type ProviderNormalizeResolvedModelContext = {
  * for the request.
  */
 export type ProviderPrepareRuntimeAuthContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
@@ -382,7 +382,7 @@ export type ProviderPreparedRuntimeAuth = {
  * token blob, read a legacy credential file, or pick between aliases).
  */
 export type ProviderResolveUsageAuthContext = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
@@ -414,7 +414,7 @@ export type ProviderResolvedUsageAuth = {
  * owns the provider-specific HTTP request + response normalization.
  */
 export type ProviderFetchUsageSnapshotContext = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
@@ -433,7 +433,7 @@ export type ProviderFetchUsageSnapshotContext = {
  * migrations or other provider-owned auth-store cleanup guidance.
  */
 export type ProviderAuthDoctorHintContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   store: AuthProfileStore;
   provider: string;
   profileId?: string;
@@ -447,7 +447,7 @@ export type ProviderAuthDoctorHintContext = {
  * into the merged `extraParams` object. Return the full next extraParams object.
  */
 export type ProviderPrepareExtraParamsContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   provider: string;
@@ -486,7 +486,7 @@ export type ProviderCacheTtlEligibilityContext = {
  * "No API key found" error.
  */
 export type ProviderBuildMissingAuthMessageContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
@@ -502,7 +502,7 @@ export type ProviderBuildMissingAuthMessageContext = {
  * resolution, model listing, and catalog loading.
  */
 export type ProviderBuiltInModelSuppressionContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
@@ -558,7 +558,7 @@ export type ProviderModernModelPolicyContext = {
  * upstream registry has not caught up yet.
  */
 export type ProviderAugmentModelCatalogContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentDir?: string;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
@@ -619,7 +619,7 @@ export type ProviderPluginWizard = {
 };
 
 export type ProviderModelSelectedContext = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   model: string;
   prompter: WizardPrompter;
   agentDir?: string;
@@ -864,7 +864,7 @@ export type WebSearchProviderToolDefinition = {
 };
 
 export type WebSearchProviderContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   searchConfig?: Record<string, unknown>;
   runtimeMetadata?: RuntimeWebSearchMetadata;
 };
@@ -872,7 +872,7 @@ export type WebSearchProviderContext = {
 export type WebSearchCredentialResolutionSource = "config" | "secretRef" | "env" | "missing";
 
 export type WebSearchRuntimeMetadataContext = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   searchConfig?: Record<string, unknown>;
   runtimeMetadata?: RuntimeWebSearchMetadata;
   resolvedCredential?: {
@@ -895,9 +895,9 @@ export type WebSearchProviderPlugin = {
   inactiveSecretPaths?: string[];
   getCredentialValue: (searchConfig?: Record<string, unknown>) => unknown;
   setCredentialValue: (searchConfigTarget: Record<string, unknown>, value: unknown) => void;
-  getConfiguredCredentialValue?: (config?: Hanzo BotConfig) => unknown;
-  setConfiguredCredentialValue?: (configTarget: Hanzo BotConfig, value: unknown) => void;
-  applySelectionConfig?: (config: Hanzo BotConfig) => Hanzo BotConfig;
+  getConfiguredCredentialValue?: (config?: HanzoBotConfig) => unknown;
+  setConfiguredCredentialValue?: (configTarget: HanzoBotConfig, value: unknown) => void;
+  applySelectionConfig?: (config: HanzoBotConfig) => HanzoBotConfig;
   resolveRuntimeMetadata?: (
     ctx: WebSearchRuntimeMetadataContext,
   ) => Partial<RuntimeWebSearchMetadata> | Promise<Partial<RuntimeWebSearchMetadata>>;
@@ -929,7 +929,7 @@ export type PluginSpeechProviderEntry = SpeechProviderPlugin & {
 export type MediaUnderstandingProviderPlugin = MediaUnderstandingProvider;
 export type ImageGenerationProviderPlugin = ImageGenerationProvider;
 
-export type Hanzo BotPluginGatewayMethod = {
+export type HanzoBotPluginGatewayMethod = {
   method: string;
   handler: GatewayRequestHandler;
 };
@@ -955,7 +955,7 @@ export type PluginCommandContext = {
   /** The full normalized command body */
   commandBody: string;
   /** Current Hanzo Bot configuration */
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   /** Raw "From" value (channel-scoped id) */
   from?: string;
   /** Raw "To" value (channel-scoped id) */
@@ -1041,7 +1041,7 @@ export type PluginCommandHandler = (
 /**
  * Definition for a plugin-registered command.
  */
-export type Hanzo BotPluginCommandDefinition = {
+export type HanzoBotPluginCommandDefinition = {
   /** Command name without leading slash (e.g., "tts") */
   name: string;
   /**
@@ -1224,66 +1224,66 @@ export type PluginInteractiveHandlerRegistration =
   | PluginInteractiveDiscordHandlerRegistration
   | PluginInteractiveSlackHandlerRegistration;
 
-export type Hanzo BotPluginHttpRouteAuth = "gateway" | "plugin";
-export type Hanzo BotPluginHttpRouteMatch = "exact" | "prefix";
+export type HanzoBotPluginHttpRouteAuth = "gateway" | "plugin";
+export type HanzoBotPluginHttpRouteMatch = "exact" | "prefix";
 
-export type Hanzo BotPluginHttpRouteHandler = (
+export type HanzoBotPluginHttpRouteHandler = (
   req: IncomingMessage,
   res: ServerResponse,
 ) => Promise<boolean | void> | boolean | void;
 
-export type Hanzo BotPluginHttpRouteParams = {
+export type HanzoBotPluginHttpRouteParams = {
   path: string;
-  handler: Hanzo BotPluginHttpRouteHandler;
-  auth: Hanzo BotPluginHttpRouteAuth;
-  match?: Hanzo BotPluginHttpRouteMatch;
+  handler: HanzoBotPluginHttpRouteHandler;
+  auth: HanzoBotPluginHttpRouteAuth;
+  match?: HanzoBotPluginHttpRouteMatch;
   replaceExisting?: boolean;
 };
 
-export type Hanzo BotPluginCliContext = {
+export type HanzoBotPluginCliContext = {
   program: Command;
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   workspaceDir?: string;
   logger: PluginLogger;
 };
 
-export type Hanzo BotPluginCliRegistrar = (ctx: Hanzo BotPluginCliContext) => void | Promise<void>;
+export type HanzoBotPluginCliRegistrar = (ctx: HanzoBotPluginCliContext) => void | Promise<void>;
 
-export type Hanzo BotPluginServiceContext = {
-  config: Hanzo BotConfig;
+export type HanzoBotPluginServiceContext = {
+  config: HanzoBotConfig;
   workspaceDir?: string;
   stateDir: string;
   logger: PluginLogger;
 };
 
-export type Hanzo BotPluginService = {
+export type HanzoBotPluginService = {
   id: string;
-  start: (ctx: Hanzo BotPluginServiceContext) => void | Promise<void>;
-  stop?: (ctx: Hanzo BotPluginServiceContext) => void | Promise<void>;
+  start: (ctx: HanzoBotPluginServiceContext) => void | Promise<void>;
+  stop?: (ctx: HanzoBotPluginServiceContext) => void | Promise<void>;
 };
 
-export type Hanzo BotPluginChannelRegistration = {
+export type HanzoBotPluginChannelRegistration = {
   plugin: ChannelPlugin;
 };
 
-export type Hanzo BotPluginDefinition = {
+export type HanzoBotPluginDefinition = {
   id?: string;
   name?: string;
   description?: string;
   version?: string;
   kind?: PluginKind;
-  configSchema?: Hanzo BotPluginConfigSchema;
-  register?: (api: Hanzo BotPluginApi) => void | Promise<void>;
-  activate?: (api: Hanzo BotPluginApi) => void | Promise<void>;
+  configSchema?: HanzoBotPluginConfigSchema;
+  register?: (api: HanzoBotPluginApi) => void | Promise<void>;
+  activate?: (api: HanzoBotPluginApi) => void | Promise<void>;
 };
 
-export type Hanzo BotPluginModule =
-  | Hanzo BotPluginDefinition
-  | ((api: Hanzo BotPluginApi) => void | Promise<void>);
+export type HanzoBotPluginModule =
+  | HanzoBotPluginDefinition
+  | ((api: HanzoBotPluginApi) => void | Promise<void>);
 
 export type PluginRegistrationMode = "full" | "setup-only" | "setup-runtime";
 
-export type Hanzo BotPluginApi = {
+export type HanzoBotPluginApi = {
   id: string;
   name: string;
   version?: string;
@@ -1291,7 +1291,7 @@ export type Hanzo BotPluginApi = {
   source: string;
   rootDir?: string;
   registrationMode: PluginRegistrationMode;
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   pluginConfig?: Record<string, unknown>;
   /**
    * In-process runtime helpers for trusted native plugins.
@@ -1302,20 +1302,20 @@ export type Hanzo BotPluginApi = {
   runtime: PluginRuntime;
   logger: PluginLogger;
   registerTool: (
-    tool: AnyAgentTool | Hanzo BotPluginToolFactory,
-    opts?: Hanzo BotPluginToolOptions,
+    tool: AnyAgentTool | HanzoBotPluginToolFactory,
+    opts?: HanzoBotPluginToolOptions,
   ) => void;
   registerHook: (
     events: string | string[],
     handler: InternalHookHandler,
-    opts?: Hanzo BotPluginHookOptions,
+    opts?: HanzoBotPluginHookOptions,
   ) => void;
-  registerHttpRoute: (params: Hanzo BotPluginHttpRouteParams) => void;
+  registerHttpRoute: (params: HanzoBotPluginHttpRouteParams) => void;
   /** Register a native messaging channel plugin (channel capability). */
-  registerChannel: (registration: Hanzo BotPluginChannelRegistration | ChannelPlugin) => void;
+  registerChannel: (registration: HanzoBotPluginChannelRegistration | ChannelPlugin) => void;
   registerGatewayMethod: (method: string, handler: GatewayRequestHandler) => void;
-  registerCli: (registrar: Hanzo BotPluginCliRegistrar, opts?: { commands?: string[] }) => void;
-  registerService: (service: Hanzo BotPluginService) => void;
+  registerCli: (registrar: HanzoBotPluginCliRegistrar, opts?: { commands?: string[] }) => void;
+  registerService: (service: HanzoBotPluginService) => void;
   /** Register a native model/provider plugin (text inference capability). */
   registerProvider: (provider: ProviderPlugin) => void;
   /** Register a speech synthesis provider (speech capability). */
@@ -1335,7 +1335,7 @@ export type Hanzo BotPluginApi = {
    * Plugin commands are processed before built-in commands and before agent invocation.
    * Use this for simple state-toggling or status commands that don't need AI reasoning.
    */
-  registerCommand: (command: Hanzo BotPluginCommandDefinition) => void;
+  registerCommand: (command: HanzoBotPluginCommandDefinition) => void;
   /** Register a context engine implementation (exclusive slot — only one active at a time). */
   registerContextEngine: (
     id: string,

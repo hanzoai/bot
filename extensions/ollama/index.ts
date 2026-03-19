@@ -1,6 +1,6 @@
 import {
   definePluginEntry,
-  type Hanzo BotPluginApi,
+  type HanzoBotPluginApi,
   type ProviderAuthContext,
   type ProviderAuthMethodNonInteractiveContext,
   type ProviderAuthResult,
@@ -19,7 +19,7 @@ export default definePluginEntry({
   id: "ollama",
   name: "Ollama Provider",
   description: "Bundled Ollama provider plugin",
-  register(api: Hanzo BotPluginApi) {
+  register(api: HanzoBotPluginApi) {
     api.registerProvider({
       id: PROVIDER_ID,
       label: "Ollama",

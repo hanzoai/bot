@@ -8,7 +8,7 @@ import {
   resolveActiveTalkProviderConfig,
   resolveTalkApiKey,
 } from "./talk.js";
-import type { Hanzo BotConfig } from "./types.js";
+import type { HanzoBotConfig } from "./types.js";
 import type { ModelDefinitionConfig } from "./types.models.js";
 import { hasConfiguredSecretInput } from "./types.secrets.js";
 
@@ -76,7 +76,7 @@ function resolveModelCost(
   };
 }
 
-function resolveAnthropicDefaultAuthMode(cfg: Hanzo BotConfig): AnthropicAuthDefaultsMode | null {
+function resolveAnthropicDefaultAuthMode(cfg: HanzoBotConfig): AnthropicAuthDefaultsMode | null {
   const profiles = cfg.auth?.profiles ?? {};
   const anthropicProfiles = Object.entries(profiles).filter(
     ([, profile]) => profile?.provider === "anthropic",
@@ -133,7 +133,7 @@ export type SessionDefaultsOptions = {
   warnState?: WarnState;
 };
 
-export function applyMessageDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyMessageDefaults(cfg: HanzoBotConfig): HanzoBotConfig {
   const messages = cfg.messages;
   const hasAckScope = messages?.ackReactionScope !== undefined;
   if (hasAckScope) {
@@ -149,9 +149,9 @@ export function applyMessageDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
 }
 
 export function applySessionDefaults(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   options: SessionDefaultsOptions = {},
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const session = cfg.session;
   if (!session || session.mainKey === undefined) {
     return cfg;
@@ -161,7 +161,7 @@ export function applySessionDefaults(
   const warn = options.warn ?? console.warn;
   const warnState = options.warnState ?? defaultWarnState;
 
-  const next: Hanzo BotConfig = {
+  const next: HanzoBotConfig = {
     ...cfg,
     session: { ...session, mainKey: "main" },
   };
@@ -174,7 +174,7 @@ export function applySessionDefaults(
   return next;
 }
 
-export function applyTalkApiKey(config: Hanzo BotConfig): Hanzo BotConfig {
+export function applyTalkApiKey(config: HanzoBotConfig): HanzoBotConfig {
   const normalized = normalizeTalkConfig(config);
   const resolved = resolveTalkApiKey();
   if (!resolved) {
@@ -211,11 +211,11 @@ export function applyTalkApiKey(config: Hanzo BotConfig): Hanzo BotConfig {
   };
 }
 
-export function applyTalkConfigNormalization(config: Hanzo BotConfig): Hanzo BotConfig {
+export function applyTalkConfigNormalization(config: HanzoBotConfig): HanzoBotConfig {
   return normalizeTalkConfig(config);
 }
 
-export function applyModelDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyModelDefaults(cfg: HanzoBotConfig): HanzoBotConfig {
   let mutated = false;
   let nextCfg = cfg;
 
@@ -351,7 +351,7 @@ export function applyModelDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
   };
 }
 
-export function applyAgentDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyAgentDefaults(cfg: HanzoBotConfig): HanzoBotConfig {
   const agents = cfg.agents;
   const defaults = agents?.defaults;
   const hasMax =
@@ -392,7 +392,7 @@ export function applyAgentDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
   };
 }
 
-export function applyLoggingDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyLoggingDefaults(cfg: HanzoBotConfig): HanzoBotConfig {
   const logging = cfg.logging;
   if (!logging) {
     return cfg;
@@ -409,7 +409,7 @@ export function applyLoggingDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
   };
 }
 
-export function applyContextPruningDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyContextPruningDefaults(cfg: HanzoBotConfig): HanzoBotConfig {
   const defaults = cfg.agents?.defaults;
   if (!defaults) {
     return cfg;
@@ -511,7 +511,7 @@ export function applyContextPruningDefaults(cfg: Hanzo BotConfig): Hanzo BotConf
   };
 }
 
-export function applyCompactionDefaults(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyCompactionDefaults(cfg: HanzoBotConfig): HanzoBotConfig {
   const defaults = cfg.agents?.defaults;
   if (!defaults) {
     return cfg;

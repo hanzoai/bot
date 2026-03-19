@@ -37,9 +37,9 @@ vi.mock("./env.js", () => ({
   isTruthyEnvValue: (value?: string) => value === "1" || value === "true",
 }));
 
-let ensureHanzo BotCliOnPath: typeof import("./path-env.js").ensureHanzo BotCliOnPath;
+let ensureHanzoBotCliOnPath: typeof import("./path-env.js").ensureHanzoBotCliOnPath;
 
-describe("ensureHanzo BotCliOnPath", () => {
+describe("ensureHanzoBotCliOnPath", () => {
   const envKeys = [
     "PATH",
     "BOT_PATH_BOOTSTRAPPED",
@@ -52,7 +52,7 @@ describe("ensureHanzo BotCliOnPath", () => {
   let envSnapshot: Record<(typeof envKeys)[number], string | undefined>;
 
   beforeAll(async () => {
-    ({ ensureHanzo BotCliOnPath } = await import("./path-env.js"));
+    ({ ensureHanzoBotCliOnPath } = await import("./path-env.js"));
   });
 
   beforeEach(() => {
@@ -93,7 +93,7 @@ describe("ensureHanzo BotCliOnPath", () => {
     platform: NodeJS.Platform;
     allowProjectLocalBin?: boolean;
   }) {
-    ensureHanzo BotCliOnPath(params);
+    ensureHanzoBotCliOnPath(params);
     return (process.env.PATH ?? "").split(path.delimiter);
   }
 
@@ -114,7 +114,7 @@ describe("ensureHanzo BotCliOnPath", () => {
   it("is idempotent", () => {
     process.env.PATH = "/bin";
     process.env.BOT_PATH_BOOTSTRAPPED = "1";
-    ensureHanzo BotCliOnPath({
+    ensureHanzoBotCliOnPath({
       execPath: "/tmp/does-not-matter",
       cwd: "/tmp",
       homeDir: "/tmp",

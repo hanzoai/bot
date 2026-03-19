@@ -1,12 +1,12 @@
 import { DEFAULT_PROVIDER } from "../agents/defaults.js";
 import { resolveAllowlistModelKey } from "../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 
 export function ensureModelAllowlistEntry(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   modelRef: string;
   defaultProvider?: string;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const rawModelRef = params.modelRef.trim();
   if (!rawModelRef) {
     return params.cfg;

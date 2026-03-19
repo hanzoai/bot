@@ -4,7 +4,7 @@ import type {
   ChannelAccountSnapshot,
   ChannelOutboundAdapter,
 } from "openclaw/plugin-sdk/channel-runtime";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
 import { createLoggerBackedRuntime } from "openclaw/plugin-sdk/runtime";
 import { monitorTlonProvider } from "./monitor/index.js";
@@ -92,7 +92,7 @@ async function createHttpPokeApi(params: {
 }
 
 function resolveOutboundContext(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   to: string;
 }) {

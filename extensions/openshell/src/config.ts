@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { Hanzo BotPluginConfigSchema } from "openclaw/plugin-sdk/core";
+import type { HanzoBotPluginConfigSchema } from "openclaw/plugin-sdk/core";
 
 export type OpenShellPluginConfig = {
   mode?: string;
@@ -90,7 +90,7 @@ function normalizeRemotePath(value: string | undefined, fallback: string): strin
   return normalized;
 }
 
-export function createOpenShellPluginConfigSchema(): Hanzo BotPluginConfigSchema {
+export function createOpenShellPluginConfigSchema(): HanzoBotPluginConfigSchema {
   const safeParse = (value: unknown): ParseSuccess | ParseFailure => {
     if (value === undefined) {
       return { success: true, data: undefined };

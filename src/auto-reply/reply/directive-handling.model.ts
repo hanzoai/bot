@@ -11,7 +11,7 @@ import {
   resolveConfiguredModelRef,
   resolveModelRefFromString,
 } from "../../agents/model-selection.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { shortenHomePath } from "../../utils.js";
 import { resolveSelectedAndActiveModel } from "../model-runtime.js";
@@ -56,7 +56,7 @@ function pushUniqueCatalogEntry(params: {
 }
 
 function buildModelPickerCatalog(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   defaultProvider: string;
   defaultModel: string;
   aliasIndex: ModelAliasIndex;
@@ -193,7 +193,7 @@ function buildModelPickerCatalog(params: {
 
 export async function maybeHandleModelDirectiveInfo(params: {
   directives: InlineDirectives;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir: string;
   activeAgentId: string;
   provider: string;
@@ -392,7 +392,7 @@ function resolveStoredNumericProfileModelDirective(params: { raw: string; agentD
 
 export function resolveModelSelectionFromDirective(params: {
   directives: InlineDirectives;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   agentDir: string;
   defaultProvider: string;
   defaultModel: string;

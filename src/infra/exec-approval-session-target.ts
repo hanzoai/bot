@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadSessionStore, resolveStorePath } from "../config/sessions.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
 import type { ExecApprovalRequest } from "./exec-approvals.js";
@@ -28,7 +28,7 @@ function normalizeOptionalThreadId(value?: string | number | null): number | und
 }
 
 export function resolveExecApprovalSessionTarget(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   request: ExecApprovalRequest;
   turnSourceChannel?: string | null;
   turnSourceTo?: string | null;

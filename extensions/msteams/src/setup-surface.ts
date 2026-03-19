@@ -8,7 +8,7 @@ import {
   splitSetupEntries,
   type ChannelSetupDmPolicy,
   type ChannelSetupWizard,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type WizardPrompter,
 } from "openclaw/plugin-sdk/setup";
 import type { MSTeamsTeamConfig } from "../runtime-api.js";
@@ -61,9 +61,9 @@ async function promptMSTeamsCredentials(prompter: WizardPrompter): Promise<{
 }
 
 async function promptMSTeamsAllowFrom(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   const existing = params.cfg.channels?.msteams?.allowFrom ?? [];
   await params.prompter.note(
     [
@@ -137,9 +137,9 @@ async function noteMSTeamsCredentialHelp(prompter: WizardPrompter): Promise<void
 }
 
 function setMSTeamsTeamsAllowlist(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   entries: Array<{ teamKey: string; channelKey?: string }>,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const baseTeams = cfg.channels?.msteams?.teams ?? {};
   const teams: Record<string, { channels?: Record<string, unknown> }> = { ...baseTeams };
   for (const entry of entries) {
@@ -169,7 +169,7 @@ function setMSTeamsTeamsAllowlist(
   };
 }
 
-function listMSTeamsGroupEntries(cfg: Hanzo BotConfig): string[] {
+function listMSTeamsGroupEntries(cfg: HanzoBotConfig): string[] {
   return Object.entries(cfg.channels?.msteams?.teams ?? {}).flatMap(([teamKey, value]) => {
     const channels = value?.channels ?? {};
     const channelKeys = Object.keys(channels);
@@ -181,7 +181,7 @@ function listMSTeamsGroupEntries(cfg: Hanzo BotConfig): string[] {
 }
 
 async function resolveMSTeamsGroupAllowlist(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   entries: string[];
   prompter: Pick<WizardPrompter, "note">;
 }): Promise<Array<{ teamKey: string; channelKey?: string }>> {

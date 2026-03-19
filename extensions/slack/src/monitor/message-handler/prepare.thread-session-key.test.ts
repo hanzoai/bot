@@ -1,6 +1,6 @@
 import type { App } from "@slack/bolt";
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../../../../src/config/config.js";
+import type { HanzoBotConfig } from "../../../../../src/config/config.js";
 import type { SlackMessageEvent } from "../../types.js";
 import { prepareSlackMessage } from "./prepare.js";
 import { createInboundSlackTestContext, createSlackTestAccount } from "./prepare.test-helpers.js";
@@ -12,7 +12,7 @@ function buildCtx(overrides?: { replyToMode?: "all" | "first" | "off" }) {
       channels: {
         slack: { enabled: true, replyToMode },
       },
-    } as Hanzo BotConfig,
+    } as HanzoBotConfig,
     appClient: {} as App["client"],
     defaultRequireMention: false,
     replyToMode,

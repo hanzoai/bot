@@ -1,7 +1,7 @@
 import { normalizeChannelId } from "../channels/plugins/index.js";
 import { resolveAccountEntry } from "../routing/account-lookup.js";
 import { normalizeAccountId } from "../routing/session-key.js";
-import type { Hanzo BotConfig } from "./config.js";
+import type { HanzoBotConfig } from "./config.js";
 import type { SlackCapabilitiesConfig } from "./types.slack.js";
 import type { TelegramCapabilitiesConfig } from "./types.telegram.js";
 
@@ -44,7 +44,7 @@ function resolveAccountCapabilities(params: {
 }
 
 export function resolveChannelCapabilities(params: {
-  cfg?: Partial<Hanzo BotConfig>;
+  cfg?: Partial<HanzoBotConfig>;
   channel?: string | null;
   accountId?: string | null;
 }): string[] | undefined {

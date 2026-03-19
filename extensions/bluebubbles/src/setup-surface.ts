@@ -5,7 +5,7 @@ import {
   promptParsedAllowFromForAccount,
   type ChannelSetupDmPolicy,
   type ChannelSetupWizard,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type WizardPrompter,
 } from "openclaw/plugin-sdk/setup";
 import {
@@ -50,10 +50,10 @@ function validateBlueBubblesAllowFromEntry(value: string): string | null {
 }
 
 async function promptBlueBubblesAllowFrom(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<Hanzo BotConfig> {
+}): Promise<HanzoBotConfig> {
   return await promptParsedAllowFromForAccount({
     cfg: params.cfg,
     accountId: params.accountId,
@@ -103,14 +103,14 @@ function validateBlueBubblesServerUrlInput(value: unknown): string | undefined {
 }
 
 function applyBlueBubblesSetupPatch(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   accountId: string,
   patch: {
     serverUrl?: string;
     password?: unknown;
     webhookPath?: string;
   },
-): Hanzo BotConfig {
+): HanzoBotConfig {
   return applyBlueBubblesConnectionConfig({
     cfg,
     accountId,
@@ -120,11 +120,11 @@ function applyBlueBubblesSetupPatch(
   });
 }
 
-function resolveBlueBubblesServerUrl(cfg: Hanzo BotConfig, accountId: string): string | undefined {
+function resolveBlueBubblesServerUrl(cfg: HanzoBotConfig, accountId: string): string | undefined {
   return resolveBlueBubblesAccount({ cfg, accountId }).config.serverUrl?.trim() || undefined;
 }
 
-function resolveBlueBubblesWebhookPath(cfg: Hanzo BotConfig, accountId: string): string | undefined {
+function resolveBlueBubblesWebhookPath(cfg: HanzoBotConfig, accountId: string): string | undefined {
   return resolveBlueBubblesAccount({ cfg, accountId }).config.webhookPath?.trim() || undefined;
 }
 

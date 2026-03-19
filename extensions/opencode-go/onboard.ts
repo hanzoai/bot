@@ -2,7 +2,7 @@ import { OPENCODE_GO_DEFAULT_MODEL_REF } from "openclaw/plugin-sdk/provider-mode
 import {
   applyAgentDefaultModelPrimary,
   withAgentModelAliases,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export { OPENCODE_GO_DEFAULT_MODEL_REF };
@@ -13,7 +13,7 @@ const OPENCODE_GO_ALIAS_DEFAULTS: Record<string, string> = {
   "opencode-go/minimax-m2.5": "MiniMax",
 };
 
-export function applyOpencodeGoProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyOpencodeGoProviderConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return {
     ...cfg,
     agents: {
@@ -32,7 +32,7 @@ export function applyOpencodeGoProviderConfig(cfg: Hanzo BotConfig): Hanzo BotCo
   };
 }
 
-export function applyOpencodeGoConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
+export function applyOpencodeGoConfig(cfg: HanzoBotConfig): HanzoBotConfig {
   return applyAgentDefaultModelPrimary(
     applyOpencodeGoProviderConfig(cfg),
     OPENCODE_GO_DEFAULT_MODEL_REF,

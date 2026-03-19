@@ -1,17 +1,17 @@
 import { expect } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { createMemoryGetTool, createMemorySearchTool } from "./memory-tool.js";
 
-export function asHanzo BotConfig(config: Partial<Hanzo BotConfig>): Hanzo BotConfig {
-  return config as Hanzo BotConfig;
+export function asHanzoBotConfig(config: Partial<HanzoBotConfig>): HanzoBotConfig {
+  return config as HanzoBotConfig;
 }
 
-export function createDefaultMemoryToolConfig(): Hanzo BotConfig {
-  return asHanzo BotConfig({ agents: { list: [{ id: "main", default: true }] } });
+export function createDefaultMemoryToolConfig(): HanzoBotConfig {
+  return asHanzoBotConfig({ agents: { list: [{ id: "main", default: true }] } });
 }
 
 export function createMemorySearchToolOrThrow(params?: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   agentSessionKey?: string;
 }) {
   const tool = createMemorySearchTool({
@@ -25,7 +25,7 @@ export function createMemorySearchToolOrThrow(params?: {
 }
 
 export function createMemoryGetToolOrThrow(
-  config: Hanzo BotConfig = createDefaultMemoryToolConfig(),
+  config: HanzoBotConfig = createDefaultMemoryToolConfig(),
 ) {
   const tool = createMemoryGetTool({ config });
   if (!tool) {
@@ -36,7 +36,7 @@ export function createMemoryGetToolOrThrow(
 
 export function createAutoCitationsMemorySearchTool(agentSessionKey: string) {
   return createMemorySearchToolOrThrow({
-    config: asHanzo BotConfig({
+    config: asHanzoBotConfig({
       memory: { citations: "auto" },
       agents: { list: [{ id: "main", default: true }] },
     }),

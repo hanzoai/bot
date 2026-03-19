@@ -1,7 +1,7 @@
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageActionName,
-  Hanzo BotConfig,
+  HanzoBotConfig,
 } from "../runtime-api.js";
 import {
   createActionGate,
@@ -24,13 +24,13 @@ import { resolveGoogleChatOutboundSpace } from "./targets.js";
 
 const providerId = "googlechat";
 
-function listEnabledAccounts(cfg: Hanzo BotConfig) {
+function listEnabledAccounts(cfg: HanzoBotConfig) {
   return listEnabledGoogleChatAccounts(cfg).filter(
     (account) => account.enabled && account.credentialSource !== "none",
   );
 }
 
-function isReactionsEnabled(accounts: ReturnType<typeof listEnabledAccounts>, cfg: Hanzo BotConfig) {
+function isReactionsEnabled(accounts: ReturnType<typeof listEnabledAccounts>, cfg: HanzoBotConfig) {
   for (const account of accounts) {
     const gate = createActionGate(
       (account.config.actions ??

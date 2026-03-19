@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { isWithinActiveHours } from "./heartbeat-active-hours.js";
 
-function cfgWithUserTimezone(userTimezone = "UTC"): Hanzo BotConfig {
+function cfgWithUserTimezone(userTimezone = "UTC"): HanzoBotConfig {
   return {
     agents: {
       defaults: {

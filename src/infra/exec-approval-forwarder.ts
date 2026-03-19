@@ -1,6 +1,6 @@
 import type { ReplyPayload } from "../auto-reply/types.js";
 import { getChannelPlugin } from "../channels/plugins/index.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { loadConfig } from "../config/config.js";
 import type {
   ExecApprovalForwardingConfig,
@@ -42,11 +42,11 @@ export type ExecApprovalForwarder = {
 };
 
 export type ExecApprovalForwarderDeps = {
-  getConfig?: () => Hanzo BotConfig;
+  getConfig?: () => HanzoBotConfig;
   deliver?: typeof deliverOutboundPayloads;
   nowMs?: () => number;
   resolveSessionTarget?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     request: ExecApprovalRequest;
   }) => ExecApprovalForwardTarget | null;
 };
@@ -111,7 +111,7 @@ function buildTargetKey(target: ExecApprovalForwardTarget): string {
 
 function shouldSkipForwardingFallback(params: {
   target: ExecApprovalForwardTarget;
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   request: ExecApprovalRequest;
 }): boolean {
   const channel = normalizeMessageChannel(params.target.channel) ?? params.target.channel;
@@ -208,7 +208,7 @@ function normalizeTurnSourceChannel(value?: string | null): DeliverableMessageCh
 }
 
 function defaultResolveSessionTarget(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   request: ExecApprovalRequest;
 }): ExecApprovalForwardTarget | null {
   const resolvedTarget = resolveExecApprovalSessionTarget({
@@ -235,7 +235,7 @@ function defaultResolveSessionTarget(params: {
 }
 
 async function deliverToTargets(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   targets: ForwardTarget[];
   buildPayload: (target: ForwardTarget) => ReplyPayload;
   deliver: typeof deliverOutboundPayloads;
@@ -269,7 +269,7 @@ async function deliverToTargets(params: {
 }
 
 function buildRequestPayloadForTarget(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   request: ExecApprovalRequest,
   nowMsValue: number,
   target: ForwardTarget,
@@ -290,7 +290,7 @@ function buildRequestPayloadForTarget(
 }
 
 function buildResolvedPayloadForTarget(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   resolved: ExecApprovalResolved,
   target: ForwardTarget,
 ): ReplyPayload {
@@ -309,11 +309,11 @@ function buildResolvedPayloadForTarget(
 }
 
 function resolveForwardTargets(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   config?: ExecApprovalForwardingConfig;
   request: ExecApprovalRequest;
   resolveSessionTarget: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     request: ExecApprovalRequest;
   }) => ExecApprovalForwardTarget | null;
 }): ForwardTarget[] {

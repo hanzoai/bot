@@ -1,7 +1,7 @@
 import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
 import { expect, vi } from "vitest";
 import type { SkillCommandSpec } from "../../../src/agents/skills.js";
-import type { Hanzo BotConfig } from "../runtime-api.js";
+import type { HanzoBotConfig } from "../runtime-api.js";
 import type { TelegramBotDeps } from "./bot-deps.js";
 import {
   createNativeCommandTestParams as createBaseNativeCommandTestParams,
@@ -23,7 +23,7 @@ type CreateCommandBotResult = {
 
 const skillCommandMocks = vi.hoisted(() => ({
   listSkillCommandsForAgents: vi.fn<
-    (params: { cfg: Hanzo BotConfig; agentIds?: string[] }) => SkillCommandSpec[]
+    (params: { cfg: HanzoBotConfig; agentIds?: string[] }) => SkillCommandSpec[]
   >(() => []),
 }));
 
@@ -79,7 +79,7 @@ export function createCommandBot(): CreateCommandBotResult {
 }
 
 export function createNativeCommandTestParams(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   params: Partial<RegisterTelegramNativeCommandsParams> = {},
 ): RegisterTelegramNativeCommandsParams {
   const dispatchResult: Awaited<
@@ -89,7 +89,7 @@ export function createNativeCommandTestParams(
     counts: { block: 0, final: 0, tool: 0 },
   };
   const telegramDeps: TelegramBotDeps = {
-    loadConfig: vi.fn(() => ({}) as Hanzo BotConfig) as TelegramBotDeps["loadConfig"],
+    loadConfig: vi.fn(() => ({}) as HanzoBotConfig) as TelegramBotDeps["loadConfig"],
     resolveStorePath: vi.fn(
       (storePath?: string) => storePath ?? "/tmp/sessions.json",
     ) as TelegramBotDeps["resolveStorePath"],

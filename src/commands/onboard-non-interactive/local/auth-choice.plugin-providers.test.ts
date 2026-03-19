@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import { applyNonInteractivePluginProviderChoice } from "./auth-choice.plugin-providers.js";
 
 const resolvePreferredProviderForAuthChoice = vi.hoisted(() => vi.fn(async () => undefined));
@@ -41,11 +41,11 @@ describe("applyNonInteractivePluginProviderChoice", () => {
     });
 
     const result = await applyNonInteractivePluginProviderChoice({
-      nextConfig: { agents: { defaults: {} } } as Hanzo BotConfig,
+      nextConfig: { agents: { defaults: {} } } as HanzoBotConfig,
       authChoice: "provider-plugin:vllm:custom",
       opts: {} as never,
       runtime: runtime as never,
-      baseConfig: { agents: { defaults: {} } } as Hanzo BotConfig,
+      baseConfig: { agents: { defaults: {} } } as HanzoBotConfig,
       resolveApiKey: vi.fn(),
       toApiKeyCredential: vi.fn(),
     });

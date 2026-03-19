@@ -2,13 +2,13 @@ import { resolveZaloAccount } from "./accounts.js";
 import type { ZaloFetch } from "./api.js";
 import { sendMessage, sendPhoto } from "./api.js";
 import { resolveZaloProxyFetch } from "./proxy.js";
-import type { Hanzo BotConfig } from "./runtime-api.js";
+import type { HanzoBotConfig } from "./runtime-api.js";
 import { resolveZaloToken } from "./token.js";
 
 export type ZaloSendOptions = {
   token?: string;
   accountId?: string;
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   mediaUrl?: string;
   caption?: string;
   verbose?: boolean;

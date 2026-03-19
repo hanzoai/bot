@@ -15,7 +15,7 @@ vi.mock("../config/config.js", async (importOriginal) => {
 });
 
 import "./test-helpers/fast-core-tools.js";
-import { createHanzo BotTools } from "./openclaw-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
 
 describe("agents_list", () => {
   type AgentConfig = NonNullable<NonNullable<typeof configOverride.agents>["list"]>[number];
@@ -30,7 +30,7 @@ describe("agents_list", () => {
   }
 
   function requireAgentsListTool() {
-    const tool = createHanzo BotTools({
+    const tool = createHanzoBotTools({
       agentSessionKey: "main",
     }).find((candidate) => candidate.name === "agents_list");
     if (!tool) {

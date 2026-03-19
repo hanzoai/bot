@@ -2,10 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { Logger as TsLogger } from "tslog";
 import { getCommandPathWithRootOptions } from "../cli/argv.js";
-import type { Hanzo BotConfig } from "../config/types.js";
+import type { HanzoBotConfig } from "../config/types.js";
 import {
   POSIX_BOT_TMP_DIR,
-  resolvePreferredHanzo BotTmpDir,
+  resolvePreferredHanzoBotTmpDir,
 } from "../infra/tmp-openclaw-dir.js";
 import { readLoggingConfig } from "./config.js";
 import type { ConsoleStyle } from "./console.js";
@@ -32,7 +32,7 @@ function canUseNodeFs(): boolean {
 }
 
 function resolveDefaultLogDir(): string {
-  return canUseNodeFs() ? resolvePreferredHanzo BotTmpDir() : POSIX_BOT_TMP_DIR;
+  return canUseNodeFs() ? resolvePreferredHanzoBotTmpDir() : POSIX_BOT_TMP_DIR;
 }
 
 function resolveDefaultLogFile(defaultLogDir: string): string {
@@ -119,13 +119,13 @@ function resolveSettings(): ResolvedSettings {
     };
   }
 
-  let cfg: Hanzo BotConfig["logging"] | undefined =
+  let cfg: HanzoBotConfig["logging"] | undefined =
     (loggingState.overrideSettings as LoggerSettings | null) ?? readLoggingConfig();
   if (!cfg && !shouldSkipLoadConfigFallback()) {
     try {
       const loaded = requireConfig?.("../config/config.js") as
         | {
-            loadConfig?: () => Hanzo BotConfig;
+            loadConfig?: () => HanzoBotConfig;
           }
         | undefined;
       cfg = loaded?.loadConfig?.().logging;

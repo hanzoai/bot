@@ -17,7 +17,7 @@ import {
 describe("exec approvals wildcard agent", () => {
   it("merges wildcard allowlist entries with agent entries", () => {
     const dir = makeTempDir();
-    const prevHanzo BotHome = process.env.BOT_HOME;
+    const prevHanzoBotHome = process.env.BOT_HOME;
 
     try {
       process.env.BOT_HOME = dir;
@@ -44,10 +44,10 @@ describe("exec approvals wildcard agent", () => {
         "/usr/bin/uname",
       ]);
     } finally {
-      if (prevHanzo BotHome === undefined) {
+      if (prevHanzoBotHome === undefined) {
         delete process.env.BOT_HOME;
       } else {
-        process.env.BOT_HOME = prevHanzo BotHome;
+        process.env.BOT_HOME = prevHanzoBotHome;
       }
     }
   });

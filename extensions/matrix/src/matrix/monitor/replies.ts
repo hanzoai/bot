@@ -1,6 +1,6 @@
 import type {
   MarkdownTableMode,
-  Hanzo BotConfig,
+  HanzoBotConfig,
   ReplyPayload,
   RuntimeEnv,
 } from "../../runtime-api.js";
@@ -34,7 +34,7 @@ function shouldSuppressReasoningReplyText(text?: string): boolean {
 }
 
 export async function deliverMatrixReplies(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   replies: ReplyPayload[];
   roomId: string;
   client: MatrixClient;

@@ -18,10 +18,10 @@ vi.mock("../config/config.js", async (importOriginal) => {
 });
 
 import "./test-helpers/fast-core-tools.js";
-import { createHanzo BotTools } from "./openclaw-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
 
 function getSessionsHistoryTool(options?: { sandboxed?: boolean }) {
-  const tool = createHanzo BotTools({
+  const tool = createHanzoBotTools({
     agentSessionKey: "main",
     sandboxed: options?.sandboxed,
   }).find((candidate) => candidate.name === "sessions_history");

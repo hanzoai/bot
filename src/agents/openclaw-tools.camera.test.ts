@@ -15,7 +15,7 @@ vi.mock("../media/image-ops.js", () => ({
 }));
 
 import "./test-helpers/fast-core-tools.js";
-import { createHanzo BotTools } from "./openclaw-tools.js";
+import { createHanzoBotTools } from "./openclaw-tools.js";
 
 const NODE_ID = "mac-1";
 const BASE_RUN_INPUT = { action: "run", node: NODE_ID, command: ["echo", "hi"] } as const;
@@ -60,7 +60,7 @@ function getNodesTool(options?: { modelHasVision?: boolean; allowMediaInvokeComm
   if (options?.allowMediaInvokeCommands !== undefined) {
     toolOptions.allowMediaInvokeCommands = options.allowMediaInvokeCommands;
   }
-  const tool = createHanzo BotTools(toolOptions).find((candidate) => candidate.name === "nodes");
+  const tool = createHanzoBotTools(toolOptions).find((candidate) => candidate.name === "nodes");
   if (!tool) {
     throw new Error("missing nodes tool");
   }

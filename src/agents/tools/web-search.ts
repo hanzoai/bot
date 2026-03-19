@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { normalizeResolvedSecretInputString } from "../../config/types.secrets.js";
 import { logVerbose } from "../../globals.js";
 import type { PluginWebSearchProviderEntry } from "../../plugins/types.js";
@@ -70,7 +70,7 @@ function resolveSearchProvider(search?: WebSearchConfig): string {
 }
 
 export function createWebSearchTool(options?: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   sandboxed?: boolean;
   runtimeWebSearch?: RuntimeWebSearchMetadata;
 }): AnyAgentTool | null {

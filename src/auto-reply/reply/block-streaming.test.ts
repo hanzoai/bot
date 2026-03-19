@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import {
   resolveBlockStreamingChunking,
   resolveEffectiveBlockStreamingConfig,
@@ -7,7 +7,7 @@ import {
 
 describe("resolveEffectiveBlockStreamingConfig", () => {
   it("applies ACP-style overrides while preserving chunk/coalescer bounds", () => {
-    const cfg = {} as Hanzo BotConfig;
+    const cfg = {} as HanzoBotConfig;
     const baseChunking = resolveBlockStreamingChunking(cfg, "discord");
     const resolved = resolveEffectiveBlockStreamingConfig({
       cfg,
@@ -60,7 +60,7 @@ describe("resolveEffectiveBlockStreamingConfig", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const resolved = resolveEffectiveBlockStreamingConfig({
       cfg,
@@ -79,7 +79,7 @@ describe("resolveEffectiveBlockStreamingConfig", () => {
           textChunkLimit: 4096,
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     const baseChunking = resolveBlockStreamingChunking(cfg, "discord");
     expect(baseChunking.maxChars).toBeLessThan(1800);

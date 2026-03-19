@@ -3,7 +3,7 @@ import "./reply.directive.directive-behavior.e2e-mocks.js";
 import { describe, expect, it, vi } from "vitest";
 import { withTempHome as withTempHomeBase } from "../../test/helpers/temp-home.js";
 import { runEmbeddedPiAgent } from "../agents/pi-embedded.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { getReplyFromConfig } from "./reply.js";
 
 function makeResult(text: string) {
@@ -41,7 +41,7 @@ function makeCfg(home: string) {
     },
     channels: { whatsapp: { allowFrom: ["*"] } },
     session: { store: path.join(home, "sessions.json") },
-  } as unknown as Hanzo BotConfig;
+  } as unknown as HanzoBotConfig;
 }
 
 describe("getReplyFromConfig media note plumbing", () => {

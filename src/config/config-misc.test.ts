@@ -6,12 +6,12 @@ import {
   unsetConfigValueAtPath,
 } from "./config-paths.js";
 import { readConfigFileSnapshot, validateConfigObject } from "./config.js";
-import { buildWebSearchProviderConfig, withTempHome, writeHanzo BotConfig } from "./test-helpers.js";
-import { Hanzo BotSchema } from "./zod-schema.js";
+import { buildWebSearchProviderConfig, withTempHome, writeHanzoBotConfig } from "./test-helpers.js";
+import { HanzoBotSchema } from "./zod-schema.js";
 
 describe("$schema key in config (#14998)", () => {
   it("accepts config with $schema string", () => {
-    const result = Hanzo BotSchema.safeParse({
+    const result = HanzoBotSchema.safeParse({
       $schema: "https://hanzo.bot/config.json",
     });
     expect(result.success).toBe(true);
@@ -21,19 +21,19 @@ describe("$schema key in config (#14998)", () => {
   });
 
   it("accepts config without $schema", () => {
-    const result = Hanzo BotSchema.safeParse({});
+    const result = HanzoBotSchema.safeParse({});
     expect(result.success).toBe(true);
   });
 
   it("rejects non-string $schema", () => {
-    const result = Hanzo BotSchema.safeParse({ $schema: 123 });
+    const result = HanzoBotSchema.safeParse({ $schema: 123 });
     expect(result.success).toBe(false);
   });
 });
 
 describe("plugins.slots.contextEngine", () => {
   it("accepts a contextEngine slot id", () => {
-    const result = Hanzo BotSchema.safeParse({
+    const result = HanzoBotSchema.safeParse({
       plugins: {
         slots: {
           contextEngine: "my-context-engine",
@@ -63,7 +63,7 @@ describe("ui.seamColor", () => {
 
 describe("plugins.entries.*.hooks.allowPromptInjection", () => {
   it("accepts boolean values", () => {
-    const result = Hanzo BotSchema.safeParse({
+    const result = HanzoBotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -78,7 +78,7 @@ describe("plugins.entries.*.hooks.allowPromptInjection", () => {
   });
 
   it("rejects non-boolean values", () => {
-    const result = Hanzo BotSchema.safeParse({
+    const result = HanzoBotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -95,7 +95,7 @@ describe("plugins.entries.*.hooks.allowPromptInjection", () => {
 
 describe("plugins.entries.*.subagent", () => {
   it("accepts trusted subagent override settings", () => {
-    const result = Hanzo BotSchema.safeParse({
+    const result = HanzoBotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -111,7 +111,7 @@ describe("plugins.entries.*.subagent", () => {
   });
 
   it("rejects invalid trusted subagent override settings", () => {
-    const result = Hanzo BotSchema.safeParse({
+    const result = HanzoBotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -293,7 +293,7 @@ describe("gateway.channelHealthCheckMinutes", () => {
 
 describe("cron webhook schema", () => {
   it("accepts cron.webhookToken and legacy cron.webhook", () => {
-    const res = Hanzo BotSchema.safeParse({
+    const res = HanzoBotSchema.safeParse({
       cron: {
         enabled: true,
         webhook: "https://example.invalid/legacy-cron-webhook",
@@ -305,7 +305,7 @@ describe("cron webhook schema", () => {
   });
 
   it("accepts cron.webhookToken SecretRef values", () => {
-    const res = Hanzo BotSchema.safeParse({
+    const res = HanzoBotSchema.safeParse({
       cron: {
         webhook: "https://example.invalid/legacy-cron-webhook",
         webhookToken: {
@@ -320,7 +320,7 @@ describe("cron webhook schema", () => {
   });
 
   it("rejects non-http cron.webhook URLs", () => {
-    const res = Hanzo BotSchema.safeParse({
+    const res = HanzoBotSchema.safeParse({
       cron: {
         webhook: "ftp://example.invalid/legacy-cron-webhook",
       },
@@ -330,7 +330,7 @@ describe("cron webhook schema", () => {
   });
 
   it("accepts cron.retry config", () => {
-    const res = Hanzo BotSchema.safeParse({
+    const res = HanzoBotSchema.safeParse({
       cron: {
         retry: {
           maxAttempts: 5,
@@ -467,7 +467,7 @@ describe("config strict validation", () => {
 
   it("flags legacy config entries without auto-migrating", async () => {
     await withTempHome(async (home) => {
-      await writeHanzo BotConfig(home, {
+      await writeHanzoBotConfig(home, {
         agents: { list: [{ id: "pi" }] },
         routing: { allowFrom: ["+15555550123"] },
       });
@@ -481,7 +481,7 @@ describe("config strict validation", () => {
 
   it("does not mark resolved-only gateway.bind aliases as auto-migratable legacy", async () => {
     await withTempHome(async (home) => {
-      await writeHanzo BotConfig(home, {
+      await writeHanzoBotConfig(home, {
         gateway: { bind: "${BOT_BIND}" },
       });
 
@@ -504,7 +504,7 @@ describe("config strict validation", () => {
 
   it("still marks literal gateway.bind host aliases as legacy", async () => {
     await withTempHome(async (home) => {
-      await writeHanzo BotConfig(home, {
+      await writeHanzoBotConfig(home, {
         gateway: { bind: "0.0.0.0" },
       });
 

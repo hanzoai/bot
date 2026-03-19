@@ -1,18 +1,18 @@
 import { readConfigFileSnapshot, writeConfigFile } from "./io.js";
-import type { Hanzo BotConfig } from "./types.openclaw.js";
+import type { HanzoBotConfig } from "./types.openclaw.js";
 import { validateConfigObjectWithPlugins } from "./validation.js";
 
 export type ConfigMcpServers = Record<string, Record<string, unknown>>;
 
 type ConfigMcpReadResult =
-  | { ok: true; path: string; config: Hanzo BotConfig; mcpServers: ConfigMcpServers }
+  | { ok: true; path: string; config: HanzoBotConfig; mcpServers: ConfigMcpServers }
   | { ok: false; path: string; error: string };
 
 type ConfigMcpWriteResult =
   | {
       ok: true;
       path: string;
-      config: Hanzo BotConfig;
+      config: HanzoBotConfig;
       mcpServers: ConfigMcpServers;
       removed?: boolean;
     }

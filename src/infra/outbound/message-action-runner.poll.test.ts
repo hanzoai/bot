@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { runMessageAction } from "./message-action-runner.js";
@@ -25,7 +25,7 @@ const telegramConfig = {
       botToken: "telegram-test",
     },
   },
-} as Hanzo BotConfig;
+} as HanzoBotConfig;
 
 const telegramPollTestPlugin: ChannelPlugin = {
   id: "telegram",
@@ -66,7 +66,7 @@ const telegramPollTestPlugin: ChannelPlugin = {
 };
 
 async function runPollAction(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   actionParams: Record<string, unknown>;
   toolContext?: Record<string, unknown>;
 }) {

@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { ConversationRef } from "../../infra/outbound/session-binding-service.js";
 import type { ResolvedAgentRoute } from "../../routing/resolve-route.js";
 import { deriveLastRoutePolicy } from "../../routing/resolve-route.js";
@@ -41,7 +41,7 @@ function resolveConfiguredBindingConversationRef(
 
 export function resolveConfiguredBindingRoute(
   params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     route: ResolvedAgentRoute;
   } & ConfiguredBindingRouteConversationInput,
 ): ConfiguredBindingRouteResult {
@@ -84,7 +84,7 @@ export function resolveConfiguredBindingRoute(
 }
 
 export async function ensureConfiguredBindingRouteReady(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   bindingResolution: ConfiguredBindingResolution | null;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   return await ensureConfiguredBindingTargetReady(params);

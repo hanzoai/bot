@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { resolveNodeHostGatewayCredentials } from "./runner.js";
 
-function createRemoteGatewayTokenRefConfig(tokenId: string): Hanzo BotConfig {
+function createRemoteGatewayTokenRefConfig(tokenId: string): HanzoBotConfig {
   return {
     secrets: {
       providers: {
@@ -16,11 +16,11 @@ function createRemoteGatewayTokenRefConfig(tokenId: string): Hanzo BotConfig {
         token: { source: "env", provider: "default", id: tokenId },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 async function expectNoGatewayCredentials(
-  config: Hanzo BotConfig,
+  config: HanzoBotConfig,
   env: Record<string, string | undefined>,
 ) {
   await withEnvAsync(env, async () => {
@@ -37,7 +37,7 @@ describe("resolveNodeHostGatewayCredentials", () => {
         mode: "local",
         remote: { token: "remote-only-token" },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await expectNoGatewayCredentials(config, {
       BOT_GATEWAY_TOKEN: undefined,
@@ -58,7 +58,7 @@ describe("resolveNodeHostGatewayCredentials", () => {
           token: { source: "env", provider: "default", id: "MISSING_REMOTE_GATEWAY_TOKEN" },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await expectNoGatewayCredentials(config, {
       BOT_GATEWAY_TOKEN: undefined,
@@ -130,7 +130,7 @@ describe("resolveNodeHostGatewayCredentials", () => {
           password: { source: "env", provider: "default", id: "MISSING_REMOTE_GATEWAY_PASSWORD" },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
 
     await withEnvAsync(
       {

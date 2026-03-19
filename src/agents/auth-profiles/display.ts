@@ -1,8 +1,8 @@
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { AuthProfileStore } from "./types.js";
 
 export function resolveAuthProfileDisplayLabel(params: {
-  cfg?: Hanzo BotConfig;
+  cfg?: HanzoBotConfig;
   store: AuthProfileStore;
   profileId: string;
 }): string {

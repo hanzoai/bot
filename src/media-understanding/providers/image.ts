@@ -7,7 +7,7 @@ import {
   resolveApiKeyForProvider,
 } from "../../agents/model-auth.js";
 import { normalizeModelRef } from "../../agents/model-selection.js";
-import { ensureHanzo BotModelsJson } from "../../agents/models-config.js";
+import { ensureHanzoBotModelsJson } from "../../agents/models-config.js";
 import { coerceImageAssistantText } from "../../agents/tools/image-tool.helpers.js";
 import type {
   ImageDescriptionRequest,
@@ -44,7 +44,7 @@ async function resolveImageRuntime(params: {
   profile?: string;
   preferredProfile?: string;
 }): Promise<{ apiKey: string; model: Model<Api> }> {
-  await ensureHanzo BotModelsJson(params.cfg, params.agentDir);
+  await ensureHanzoBotModelsJson(params.cfg, params.agentDir);
   const { discoverAuthStorage, discoverModels } = await loadPiModelDiscoveryRuntime();
   const authStorage = discoverAuthStorage(params.agentDir);
   const modelRegistry = discoverModels(authStorage, params.agentDir);

@@ -10,8 +10,8 @@ const readConfigFileSnapshotForWrite = vi.fn().mockResolvedValue({
   writeOptions: {},
 });
 const setRuntimeConfigSnapshot = vi.fn();
-const ensureHanzo BotModelsJson = vi.fn().mockResolvedValue(undefined);
-const resolveHanzo BotAgentDir = vi.fn().mockReturnValue("/tmp/openclaw-agent");
+const ensureHanzoBotModelsJson = vi.fn().mockResolvedValue(undefined);
+const resolveHanzoBotAgentDir = vi.fn().mockReturnValue("/tmp/openclaw-agent");
 const ensureAuthProfileStore = vi.fn().mockReturnValue({ version: 1, profiles: {} });
 const listProfilesForProvider = vi.fn().mockReturnValue([]);
 const resolveAuthProfileDisplayLabel = vi.fn(({ profileId }: { profileId: string }) => profileId);
@@ -41,11 +41,11 @@ vi.mock("../config/config.js", () => ({
 }));
 
 vi.mock("../agents/models-config.js", () => ({
-  ensureHanzo BotModelsJson,
+  ensureHanzoBotModelsJson,
 }));
 
 vi.mock("../agents/agent-paths.js", () => ({
-  resolveHanzo BotAgentDir,
+  resolveHanzoBotAgentDir,
 }));
 
 vi.mock("../agents/auth-profiles.js", () => ({
@@ -133,7 +133,7 @@ beforeEach(() => {
   modelRegistryState.getAllError = undefined;
   modelRegistryState.getAvailableError = undefined;
   listProfilesForProvider.mockReturnValue([]);
-  ensureHanzo BotModelsJson.mockClear();
+  ensureHanzoBotModelsJson.mockClear();
   readConfigFileSnapshotForWrite.mockClear();
   readConfigFileSnapshotForWrite.mockResolvedValue({
     snapshot: { valid: false, resolved: {} },
@@ -384,7 +384,7 @@ describe("models list/status", () => {
 
     await loadModelRegistry(resolvedConfig as never);
 
-    expect(ensureHanzo BotModelsJson).not.toHaveBeenCalled();
+    expect(ensureHanzoBotModelsJson).not.toHaveBeenCalled();
   });
 
   it("filters stale direct OpenAI spark rows from models list and registry views", async () => {
@@ -433,8 +433,8 @@ describe("models list/status", () => {
 
     await modelsListCommand({ all: true, json: true }, runtime);
 
-    expect(ensureHanzo BotModelsJson).toHaveBeenCalled();
-    expect(ensureHanzo BotModelsJson.mock.calls[0]?.[0]).toEqual(resolvedConfig);
+    expect(ensureHanzoBotModelsJson).toHaveBeenCalled();
+    expect(ensureHanzoBotModelsJson.mock.calls[0]?.[0]).toEqual(resolvedConfig);
   });
 
   it("toModelRow does not crash without cfg/authStore when availability is undefined", async () => {

@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { normalizeResolvedSecretInputString } from "../config/types.secrets.js";
 import { logVerbose } from "../globals.js";
 import type {
@@ -12,14 +12,14 @@ import {
 import type { RuntimeWebSearchMetadata } from "../secrets/runtime-web-tools.types.js";
 import { normalizeSecretInput } from "../utils/normalize-secret-input.js";
 
-type WebSearchConfig = NonNullable<Hanzo BotConfig["tools"]>["web"] extends infer Web
+type WebSearchConfig = NonNullable<HanzoBotConfig["tools"]>["web"] extends infer Web
   ? Web extends { search?: infer Search }
     ? Search
     : undefined
   : undefined;
 
 export type ResolveWebSearchDefinitionParams = {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   sandboxed?: boolean;
   runtimeWebSearch?: RuntimeWebSearchMetadata;
   providerId?: string;
@@ -30,7 +30,7 @@ export type RunWebSearchParams = ResolveWebSearchDefinitionParams & {
   args: Record<string, unknown>;
 };
 
-function resolveSearchConfig(cfg?: Hanzo BotConfig): WebSearchConfig {
+function resolveSearchConfig(cfg?: HanzoBotConfig): WebSearchConfig {
   const search = cfg?.tools?.web?.search;
   if (!search || typeof search !== "object") {
     return undefined;
@@ -66,7 +66,7 @@ function hasEntryCredential(
     PluginWebSearchProviderEntry,
     "credentialPath" | "envVars" | "getConfiguredCredentialValue" | "getCredentialValue"
   >,
-  config: Hanzo BotConfig | undefined,
+  config: HanzoBotConfig | undefined,
   search: WebSearchConfig | undefined,
 ): boolean {
   const rawValue =
@@ -82,7 +82,7 @@ function hasEntryCredential(
 }
 
 export function listWebSearchProviders(params?: {
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
 }): PluginWebSearchProviderEntry[] {
   return resolveRuntimeWebSearchProviders({
     config: params?.config,
@@ -92,7 +92,7 @@ export function listWebSearchProviders(params?: {
 
 export function resolveWebSearchProviderId(params: {
   search?: WebSearchConfig;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   providers?: PluginWebSearchProviderEntry[];
 }): string {
   const providers =

@@ -1,4 +1,4 @@
-import type { Hanzo BotPluginApi } from "../runtime-api.js";
+import type { HanzoBotPluginApi } from "../runtime-api.js";
 import { buildFeishuConversationId, parseFeishuConversationId } from "./conversation-id.js";
 import { normalizeFeishuTarget } from "./targets.js";
 import { getFeishuThreadBindingManager } from "./thread-bindings.js";
@@ -232,7 +232,7 @@ function resolveMatchingChildBinding(params: {
   return childBindings.length === 1 ? childBindings[0] : null;
 }
 
-export function registerFeishuSubagentHooks(api: Hanzo BotPluginApi) {
+export function registerFeishuSubagentHooks(api: HanzoBotPluginApi) {
   api.on("subagent_spawning", async (event, ctx) => {
     if (!event.threadRequested) {
       return;

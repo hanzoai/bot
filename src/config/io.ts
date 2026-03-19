@@ -48,12 +48,12 @@ import { normalizeConfigPaths } from "./normalize-paths.js";
 import { resolveConfigPath, resolveDefaultConfigCandidates, resolveStateDir } from "./paths.js";
 import { isBlockedObjectKey } from "./prototype-keys.js";
 import { applyConfigOverrides } from "./runtime-overrides.js";
-import type { Hanzo BotConfig, ConfigFileSnapshot, LegacyConfigIssue } from "./types.js";
+import type { HanzoBotConfig, ConfigFileSnapshot, LegacyConfigIssue } from "./types.js";
 import {
   validateConfigObjectRawWithPlugins,
   validateConfigObjectWithPlugins,
 } from "./validation.js";
-import { compareHanzo BotVersions } from "./version.js";
+import { compareHanzoBotVersions } from "./version.js";
 
 // Re-export for backwards compatibility
 export { CircularIncludeError, ConfigIncludeError } from "./includes.js";
@@ -142,7 +142,7 @@ export type ReadConfigFileSnapshotForWriteResult = {
 };
 
 export type RuntimeConfigSnapshotRefreshParams = {
-  sourceConfig: Hanzo BotConfig;
+  sourceConfig: HanzoBotConfig;
 };
 
 export type RuntimeConfigSnapshotRefreshHandler = {
@@ -300,9 +300,9 @@ function unsetPathForWriteAt(
 }
 
 function unsetPathForWrite(
-  root: Hanzo BotConfig,
+  root: HanzoBotConfig,
   pathSegments: string[],
-): { changed: boolean; next: Hanzo BotConfig } {
+): { changed: boolean; next: HanzoBotConfig } {
   if (pathSegments.length === 0) {
     return { changed: false, next: root };
   }
@@ -335,11 +335,11 @@ export function resolveConfigSnapshotHash(snapshot: {
   return hashConfigRaw(snapshot.raw);
 }
 
-function coerceConfig(value: unknown): Hanzo BotConfig {
+function coerceConfig(value: unknown): HanzoBotConfig {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
   }
-  return value as Hanzo BotConfig;
+  return value as HanzoBotConfig;
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -604,7 +604,7 @@ function warnOnConfigMiskeys(raw: unknown, logger: Pick<typeof console, "warn">)
   }
 }
 
-function stampConfigVersion(cfg: Hanzo BotConfig): Hanzo BotConfig {
+function stampConfigVersion(cfg: HanzoBotConfig): HanzoBotConfig {
   const now = new Date().toISOString();
   return {
     ...cfg,
@@ -616,12 +616,12 @@ function stampConfigVersion(cfg: Hanzo BotConfig): Hanzo BotConfig {
   };
 }
 
-function warnIfConfigFromFuture(cfg: Hanzo BotConfig, logger: Pick<typeof console, "warn">): void {
+function warnIfConfigFromFuture(cfg: HanzoBotConfig, logger: Pick<typeof console, "warn">): void {
   const touched = cfg.meta?.lastTouchedVersion;
   if (!touched) {
     return;
   }
-  const cmp = compareHanzo BotVersions(VERSION, touched);
+  const cmp = compareHanzoBotVersions(VERSION, touched);
   if (cmp === null) {
     return;
   }
@@ -701,7 +701,7 @@ function resolveConfigForRead(
 ): ConfigReadResolution {
   // Apply config.env to process.env BEFORE substitution so ${VAR} can reference config-defined vars.
   if (resolvedIncludes && typeof resolvedIncludes === "object" && "env" in resolvedIncludes) {
-    applyConfigEnvVars(resolvedIncludes as Hanzo BotConfig, env);
+    applyConfigEnvVars(resolvedIncludes as HanzoBotConfig, env);
   }
 
   // Collect missing env var references as warnings instead of throwing,
@@ -731,7 +731,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
   const configPath =
     candidatePaths.find((candidate) => deps.fs.existsSync(candidate)) ?? requestedConfigPath;
 
-  function loadConfig(): Hanzo BotConfig {
+  function loadConfig(): HanzoBotConfig {
     try {
       maybeLoadDotEnvForConfig(deps.env);
       if (!deps.fs.existsSync(configPath)) {
@@ -762,7 +762,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       if (typeof resolvedConfig !== "object" || resolvedConfig === null) {
         return {};
       }
-      const preValidationDuplicates = findDuplicateAgentDirs(resolvedConfig as Hanzo BotConfig, {
+      const preValidationDuplicates = findDuplicateAgentDirs(resolvedConfig as HanzoBotConfig, {
         env: deps.env,
         homedir: deps.homedir,
       });
@@ -1083,7 +1083,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
     };
   }
 
-  async function writeConfigFile(cfg: Hanzo BotConfig, options: ConfigWriteOptions = {}) {
+  async function writeConfigFile(cfg: HanzoBotConfig, options: ConfigWriteOptions = {}) {
     clearConfigCache();
     let persistCandidate: unknown = cfg;
     const { snapshot } = await readConfigFileSnapshotInternal();
@@ -1153,7 +1153,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
             cfgToWrite,
             parsedRes.parsed,
             envForRestore,
-          ) as Hanzo BotConfig;
+          ) as HanzoBotConfig;
         }
       }
     } catch {
@@ -1170,7 +1170,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
     });
     const outputConfigBase =
       envRefMap && changedPaths
-        ? (restoreEnvRefsFromMap(cfgToWrite, "", envRefMap, changedPaths) as Hanzo BotConfig)
+        ? (restoreEnvRefsFromMap(cfgToWrite, "", envRefMap, changedPaths) as HanzoBotConfig)
         : cfgToWrite;
     let outputConfig = outputConfigBase;
     if (options.unsetPaths?.length) {
@@ -1351,10 +1351,10 @@ const AUTO_OWNER_DISPLAY_SECRET_PERSIST_WARNED = new Set<string>();
 let configCache: {
   configPath: string;
   expiresAt: number;
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
 } | null = null;
-let runtimeConfigSnapshot: Hanzo BotConfig | null = null;
-let runtimeConfigSourceSnapshot: Hanzo BotConfig | null = null;
+let runtimeConfigSnapshot: HanzoBotConfig | null = null;
+let runtimeConfigSourceSnapshot: HanzoBotConfig | null = null;
 let runtimeConfigSnapshotRefreshHandler: RuntimeConfigSnapshotRefreshHandler | null = null;
 
 function resolveConfigCacheMs(env: NodeJS.ProcessEnv): number {
@@ -1384,8 +1384,8 @@ export function clearConfigCache(): void {
 }
 
 export function setRuntimeConfigSnapshot(
-  config: Hanzo BotConfig,
-  sourceConfig?: Hanzo BotConfig,
+  config: HanzoBotConfig,
+  sourceConfig?: HanzoBotConfig,
 ): void {
   runtimeConfigSnapshot = config;
   runtimeConfigSourceSnapshot = sourceConfig ?? null;
@@ -1398,17 +1398,17 @@ export function clearRuntimeConfigSnapshot(): void {
   clearConfigCache();
 }
 
-export function getRuntimeConfigSnapshot(): Hanzo BotConfig | null {
+export function getRuntimeConfigSnapshot(): HanzoBotConfig | null {
   return runtimeConfigSnapshot;
 }
 
-export function getRuntimeConfigSourceSnapshot(): Hanzo BotConfig | null {
+export function getRuntimeConfigSourceSnapshot(): HanzoBotConfig | null {
   return runtimeConfigSourceSnapshot;
 }
 
 function isCompatibleTopLevelRuntimeProjectionShape(params: {
-  runtimeSnapshot: Hanzo BotConfig;
-  candidate: Hanzo BotConfig;
+  runtimeSnapshot: HanzoBotConfig;
+  candidate: HanzoBotConfig;
 }): boolean {
   const runtime = params.runtimeSnapshot as Record<string, unknown>;
   const candidate = params.candidate as Record<string, unknown>;
@@ -1435,7 +1435,7 @@ function isCompatibleTopLevelRuntimeProjectionShape(params: {
   return true;
 }
 
-export function projectConfigOntoRuntimeSourceSnapshot(config: Hanzo BotConfig): Hanzo BotConfig {
+export function projectConfigOntoRuntimeSourceSnapshot(config: HanzoBotConfig): HanzoBotConfig {
   if (!runtimeConfigSnapshot || !runtimeConfigSourceSnapshot) {
     return config;
   }
@@ -1464,7 +1464,7 @@ export function setRuntimeConfigSnapshotRefreshHandler(
   runtimeConfigSnapshotRefreshHandler = refreshHandler;
 }
 
-export function loadConfig(): Hanzo BotConfig {
+export function loadConfig(): HanzoBotConfig {
   if (runtimeConfigSnapshot) {
     return runtimeConfigSnapshot;
   }
@@ -1491,7 +1491,7 @@ export function loadConfig(): Hanzo BotConfig {
   return config;
 }
 
-export async function readBestEffortConfig(): Promise<Hanzo BotConfig> {
+export async function readBestEffortConfig(): Promise<HanzoBotConfig> {
   const snapshot = await readConfigFileSnapshot();
   return snapshot.valid ? loadConfig() : snapshot.config;
 }
@@ -1505,7 +1505,7 @@ export async function readConfigFileSnapshotForWrite(): Promise<ReadConfigFileSn
 }
 
 export async function writeConfigFile(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   options: ConfigWriteOptions = {},
 ): Promise<void> {
   const io = createConfigIO();

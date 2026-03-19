@@ -17,7 +17,7 @@ import {
   shouldEnforceGatewayAuthForPluginPath,
 } from "./plugins-http.js";
 
-const loadHanzo BotPlugins = vi.hoisted(() => vi.fn());
+const loadHanzoBotPlugins = vi.hoisted(() => vi.fn());
 type HandleGatewayRequestOptions = GatewayRequestOptions & {
   extraHandlers?: Record<string, unknown>;
 };
@@ -26,7 +26,7 @@ const handleGatewayRequest = vi.hoisted(() =>
 );
 
 vi.mock("../../plugins/loader.js", () => ({
-  loadHanzo BotPlugins,
+  loadHanzoBotPlugins,
 }));
 
 vi.mock("../server-methods.js", () => ({
@@ -70,7 +70,7 @@ function createSubagentRuntimeRegistry() {
 
 async function createSubagentRuntime(): Promise<PluginRuntime["subagent"]> {
   const serverPlugins = await import("../server-plugins.js");
-  loadHanzo BotPlugins.mockReturnValue(createSubagentRuntimeRegistry());
+  loadHanzoBotPlugins.mockReturnValue(createSubagentRuntimeRegistry());
   serverPlugins.loadGatewayPlugins({
     cfg: {},
     workspaceDir: "/tmp",
@@ -84,7 +84,7 @@ async function createSubagentRuntime(): Promise<PluginRuntime["subagent"]> {
     baseMethods: [],
   });
   serverPlugins.setFallbackGatewayContext({} as GatewayRequestContext);
-  const call = loadHanzo BotPlugins.mock.calls.at(-1)?.[0] as
+  const call = loadHanzoBotPlugins.mock.calls.at(-1)?.[0] as
     | { runtimeOptions?: { subagent?: PluginRuntime["subagent"] } }
     | undefined;
   if (!call?.runtimeOptions?.subagent) {
@@ -142,7 +142,7 @@ describe("createGatewayPluginRequestHandler", () => {
   });
 
   it("caps unauthenticated plugin routes to non-admin subagent scopes", async () => {
-    loadHanzo BotPlugins.mockReset();
+    loadHanzoBotPlugins.mockReset();
     handleGatewayRequest.mockReset();
     handleGatewayRequest.mockImplementation(async (opts: HandleGatewayRequestOptions) => {
       const scopes = opts.client?.connect.scopes ?? [];

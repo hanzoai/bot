@@ -1,4 +1,4 @@
-import type { Hanzo BotConfig, HookConfig } from "../config/config.js";
+import type { HanzoBotConfig, HookConfig } from "../config/config.js";
 import {
   evaluateRuntimeEligibility,
   hasBinary,
@@ -17,12 +17,12 @@ const DEFAULT_CONFIG_VALUES: Record<string, boolean> = {
 
 export { hasBinary, resolveConfigPath, resolveRuntimePlatform };
 
-export function isConfigPathTruthy(config: Hanzo BotConfig | undefined, pathStr: string): boolean {
+export function isConfigPathTruthy(config: HanzoBotConfig | undefined, pathStr: string): boolean {
   return isConfigPathTruthyWithDefaults(config, pathStr, DEFAULT_CONFIG_VALUES);
 }
 
 export function resolveHookConfig(
-  config: Hanzo BotConfig | undefined,
+  config: HanzoBotConfig | undefined,
   hookKey: string,
 ): HookConfig | undefined {
   const hooks = config?.hooks?.internal?.entries;
@@ -38,7 +38,7 @@ export function resolveHookConfig(
 
 function evaluateHookRuntimeEligibility(params: {
   entry: HookEntry;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   hookConfig?: HookConfig;
   eligibility?: HookEligibilityContext;
 }): boolean {
@@ -62,7 +62,7 @@ function evaluateHookRuntimeEligibility(params: {
 
 export function shouldIncludeHook(params: {
   entry: HookEntry;
-  config?: Hanzo BotConfig;
+  config?: HanzoBotConfig;
   eligibility?: HookEligibilityContext;
 }): boolean {
   const { entry, config, eligibility } = params;

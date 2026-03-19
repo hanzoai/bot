@@ -1,7 +1,7 @@
 import {
   formatInboundFromLabel as formatInboundFromLabelShared,
   resolveThreadSessionKeys as resolveThreadSessionKeysShared,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
 } from "../runtime-api.js";
 export { createDedupeCache, rawDataToString } from "../runtime-api.js";
 
@@ -39,22 +39,22 @@ function normalizeAgentId(value: string | undefined | null): string {
   );
 }
 
-type AgentEntry = NonNullable<NonNullable<Hanzo BotConfig["agents"]>["list"]>[number];
+type AgentEntry = NonNullable<NonNullable<HanzoBotConfig["agents"]>["list"]>[number];
 
 function isAgentEntry(entry: unknown): entry is AgentEntry {
   return Boolean(entry && typeof entry === "object");
 }
 
-function listAgents(cfg: Hanzo BotConfig): AgentEntry[] {
+function listAgents(cfg: HanzoBotConfig): AgentEntry[] {
   return Array.isArray(cfg.agents?.list) ? cfg.agents.list.filter(isAgentEntry) : [];
 }
 
-function resolveAgentEntry(cfg: Hanzo BotConfig, agentId: string): AgentEntry | undefined {
+function resolveAgentEntry(cfg: HanzoBotConfig, agentId: string): AgentEntry | undefined {
   const id = normalizeAgentId(agentId);
   return listAgents(cfg).find((entry) => normalizeAgentId(entry.id) === id);
 }
 
-export function resolveIdentityName(cfg: Hanzo BotConfig, agentId: string): string | undefined {
+export function resolveIdentityName(cfg: HanzoBotConfig, agentId: string): string | undefined {
   const entry = resolveAgentEntry(cfg, agentId);
   return entry?.identity?.name?.trim() || undefined;
 }

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import type { Hanzo BotConfig, PluginRuntime } from "openclaw/plugin-sdk/bluebubbles";
+import type { HanzoBotConfig, PluginRuntime } from "openclaw/plugin-sdk/bluebubbles";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sendBlueBubblesMedia } from "./media-send.js";
 import { setBlueBubblesRuntime } from "./runtime.js";
@@ -54,14 +54,14 @@ function createMockRuntime(): { runtime: PluginRuntime; mocks: RuntimeMocks } {
   };
 }
 
-function createConfig(overrides?: Record<string, unknown>): Hanzo BotConfig {
+function createConfig(overrides?: Record<string, unknown>): HanzoBotConfig {
   return {
     channels: {
       bluebubbles: {
         ...overrides,
       },
     },
-  } as unknown as Hanzo BotConfig;
+  } as unknown as HanzoBotConfig;
 }
 
 async function makeTempDir(): Promise<string> {
@@ -82,7 +82,7 @@ async function makeTempFile(
 }
 
 async function sendLocalMedia(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   mediaPath: string;
   accountId?: string;
 }) {
@@ -95,7 +95,7 @@ async function sendLocalMedia(params: {
 }
 
 async function expectRejectedLocalMedia(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   mediaPath: string;
   error: RegExp;
   accountId?: string;
@@ -112,7 +112,7 @@ async function expectRejectedLocalMedia(params: {
 }
 
 async function expectAllowedLocalMedia(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   mediaPath: string;
   expectedAttachment: Record<string, unknown>;
   accountId?: string;

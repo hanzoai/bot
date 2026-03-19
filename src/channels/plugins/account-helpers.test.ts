@@ -1,21 +1,21 @@
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { normalizeAccountId } from "../../routing/session-key.js";
 import { createAccountListHelpers } from "./account-helpers.js";
 
 const { listConfiguredAccountIds, listAccountIds, resolveDefaultAccountId } =
   createAccountListHelpers("testchannel");
 
-function cfg(accounts?: Record<string, unknown> | null, defaultAccount?: string): Hanzo BotConfig {
+function cfg(accounts?: Record<string, unknown> | null, defaultAccount?: string): HanzoBotConfig {
   if (accounts === null) {
     return {
       channels: {
         testchannel: defaultAccount ? { defaultAccount } : {},
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
   }
   if (accounts === undefined && !defaultAccount) {
-    return {} as unknown as Hanzo BotConfig;
+    return {} as unknown as HanzoBotConfig;
   }
   return {
     channels: {
@@ -24,13 +24,13 @@ function cfg(accounts?: Record<string, unknown> | null, defaultAccount?: string)
         ...(defaultAccount ? { defaultAccount } : {}),
       },
     },
-  } as unknown as Hanzo BotConfig;
+  } as unknown as HanzoBotConfig;
 }
 
 describe("createAccountListHelpers", () => {
   describe("listConfiguredAccountIds", () => {
     it("returns empty for missing config", () => {
-      expect(listConfiguredAccountIds({} as Hanzo BotConfig)).toEqual([]);
+      expect(listConfiguredAccountIds({} as HanzoBotConfig)).toEqual([]);
     });
 
     it("returns empty when no accounts key", () => {
@@ -71,7 +71,7 @@ describe("createAccountListHelpers", () => {
 
   describe("listAccountIds", () => {
     it('returns ["default"] for empty config', () => {
-      expect(listAccountIds({} as Hanzo BotConfig)).toEqual(["default"]);
+      expect(listAccountIds({} as HanzoBotConfig)).toEqual(["default"]);
     });
 
     it('returns ["default"] for empty accounts', () => {
@@ -105,7 +105,7 @@ describe("createAccountListHelpers", () => {
     });
 
     it('returns "default" for empty config', () => {
-      expect(resolveDefaultAccountId({} as Hanzo BotConfig)).toBe("default");
+      expect(resolveDefaultAccountId({} as HanzoBotConfig)).toBe("default");
     });
   });
 });

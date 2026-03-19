@@ -4,7 +4,7 @@ import {
   patchChannelConfigForAccount,
   promptResolvedAllowFrom,
   splitSetupEntries,
-  type Hanzo BotConfig,
+  type HanzoBotConfig,
   type WizardPrompter,
 } from "openclaw/plugin-sdk/setup";
 import type { ChannelSetupAdapter, ChannelSetupDmPolicy } from "openclaw/plugin-sdk/setup";
@@ -68,7 +68,7 @@ export async function resolveTelegramAllowFromEntries(params: {
 }
 
 export async function promptTelegramAllowFromForAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
   accountId?: string;
 }) {

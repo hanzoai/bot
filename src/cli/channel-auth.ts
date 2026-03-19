@@ -1,7 +1,7 @@
 import { resolveChannelDefaultAccountId } from "../channels/plugins/helpers.js";
 import { getChannelPlugin, normalizeChannelId } from "../channels/plugins/index.js";
 import { resolveInstallableChannelPlugin } from "../commands/channel-setup/channel-plugin-resolution.js";
-import { loadConfig, writeConfigFile, type Hanzo BotConfig } from "../config/config.js";
+import { loadConfig, writeConfigFile, type HanzoBotConfig } from "../config/config.js";
 import { setVerbose } from "../globals.js";
 import { resolveMessageChannelSelection } from "../infra/outbound/channel-selection.js";
 import { defaultRuntime, type RuntimeEnv } from "../runtime.js";
@@ -18,10 +18,10 @@ type ChannelAuthMode = "login" | "logout";
 async function resolveChannelPluginForMode(
   opts: ChannelAuthOptions,
   mode: ChannelAuthMode,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   runtime: RuntimeEnv,
 ): Promise<{
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   configChanged: boolean;
   channelInput: string;
   channelId: string;
@@ -62,7 +62,7 @@ async function resolveChannelPluginForMode(
 function resolveAccountContext(
   plugin: ChannelPlugin,
   opts: ChannelAuthOptions,
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
 ) {
   const accountId = opts.account?.trim() || resolveChannelDefaultAccountId({ plugin, cfg });
   return { accountId };

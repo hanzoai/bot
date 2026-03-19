@@ -1,7 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import { jsonResult, readNumberParam, readStringParam } from "openclaw/plugin-sdk/agent-runtime";
 import { optionalStringEnum } from "openclaw/plugin-sdk/core";
-import type { Hanzo BotPluginApi } from "openclaw/plugin-sdk/plugin-runtime";
+import type { HanzoBotPluginApi } from "openclaw/plugin-sdk/plugin-runtime";
 import { runFirecrawlScrape } from "./firecrawl-client.js";
 
 const FirecrawlScrapeToolSchema = Type.Object(
@@ -45,7 +45,7 @@ const FirecrawlScrapeToolSchema = Type.Object(
   { additionalProperties: false },
 );
 
-export function createFirecrawlScrapeTool(api: Hanzo BotPluginApi) {
+export function createFirecrawlScrapeTool(api: HanzoBotPluginApi) {
   return {
     name: "firecrawl_scrape",
     label: "Firecrawl Scrape",

@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { captureEnv } from "../test-utils/env.js";
 import { isRecord } from "../utils.js";
 import { loadEnabledBundleMcpConfig } from "./bundle-mcp.js";
@@ -30,7 +30,7 @@ describe("loadEnabledBundleMcpConfig", () => {
 
       const { pluginRoot, serverPath } = await createBundleProbePlugin(homeDir);
 
-      const config: Hanzo BotConfig = {
+      const config: HanzoBotConfig = {
         plugins: {
           entries: {
             "bundle-probe": { enabled: true },
@@ -111,7 +111,7 @@ describe("loadEnabledBundleMcpConfig", () => {
         "utf-8",
       );
 
-      const config: Hanzo BotConfig = {
+      const config: HanzoBotConfig = {
         plugins: {
           entries: {
             "inline-enabled": { enabled: true },

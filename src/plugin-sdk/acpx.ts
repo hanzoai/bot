@@ -16,10 +16,10 @@ export type {
   AcpSessionUpdateTag,
 } from "../acp/runtime/types.js";
 export type {
-  Hanzo BotPluginApi,
-  Hanzo BotPluginConfigSchema,
-  Hanzo BotPluginService,
-  Hanzo BotPluginServiceContext,
+  HanzoBotPluginApi,
+  HanzoBotPluginConfigSchema,
+  HanzoBotPluginService,
+  HanzoBotPluginServiceContext,
   PluginLogger,
 } from "../plugins/types.js";
 export type {

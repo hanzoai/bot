@@ -1,5 +1,5 @@
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { HanzoBotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type {
   ChannelSetupDmPolicy,
   ChannelSetupWizard,
@@ -56,10 +56,10 @@ function mergeAllowFromEntries(
 }
 
 function patchDiscordChannelConfigForAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   patch: Record<string, unknown>;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   const accountId = normalizeAccountId(params.accountId);
   const channelConfig = (params.cfg.channels?.discord as Record<string, unknown> | undefined) ?? {};
   if (accountId === DEFAULT_ACCOUNT_ID) {
@@ -99,10 +99,10 @@ function patchDiscordChannelConfigForAccount(params: {
 }
 
 export function setSetupChannelEnabled(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   channel: string,
   enabled: boolean,
-): Hanzo BotConfig {
+): HanzoBotConfig {
   const channelConfig = (cfg.channels?.[channel] as Record<string, unknown> | undefined) ?? {};
   return {
     ...cfg,
@@ -117,11 +117,11 @@ export function setSetupChannelEnabled(
 }
 
 export function patchChannelConfigForAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   channel: "discord";
   accountId: string;
   patch: Record<string, unknown>;
-}): Hanzo BotConfig {
+}): HanzoBotConfig {
   return patchDiscordChannelConfigForAccount({
     cfg: params.cfg,
     accountId: params.accountId,
@@ -238,10 +238,10 @@ export function createAccountScopedGroupAccessSection<TResolved>(params: {
   >;
   fallbackResolved: (entries: string[]) => TResolved;
   applyAllowlist: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId: string;
     resolved: TResolved;
-  }) => Hanzo BotConfig;
+  }) => HanzoBotConfig;
 }): NonNullable<ChannelSetupWizard["groupAccess"]> {
   return {
     label: params.label,
@@ -361,7 +361,7 @@ export async function resolveEntriesWithOptionalToken<TResult>(params: {
 }
 
 export async function promptLegacyChannelAllowFromForAccount(params: {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   prompter: WizardPrompter;
   accountId?: string;
   noteTitle: string;
@@ -375,8 +375,8 @@ export async function promptLegacyChannelAllowFromForAccount(params: {
     entries: string[];
   }) => Promise<Array<{ input: string; resolved: boolean; id?: string | null }>>;
   resolveToken: (accountId: string) => string | null | undefined;
-  resolveExisting: (accountId: string, cfg: Hanzo BotConfig) => Array<string | number>;
-}): Promise<Hanzo BotConfig> {
+  resolveExisting: (accountId: string, cfg: HanzoBotConfig) => Array<string | number>;
+}): Promise<HanzoBotConfig> {
   const accountId = normalizeAccountId(
     params.accountId ?? resolveDefaultDiscordSetupAccountId(params.cfg),
   );

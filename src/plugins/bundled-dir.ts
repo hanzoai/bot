@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveHanzo BotPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveHanzoBotPackageRootSync } from "../infra/openclaw-root.js";
 import { resolveUserPath } from "../utils.js";
 
 function isSourceCheckoutRoot(packageRoot: string): boolean {
@@ -22,8 +22,8 @@ export function resolveBundledPluginsDir(env: NodeJS.ProcessEnv = process.env): 
 
   try {
     const packageRoots = [
-      resolveHanzo BotPackageRootSync({ cwd: process.cwd() }),
-      resolveHanzo BotPackageRootSync({ moduleUrl: import.meta.url }),
+      resolveHanzoBotPackageRootSync({ cwd: process.cwd() }),
+      resolveHanzoBotPackageRootSync({ moduleUrl: import.meta.url }),
     ].filter(
       (entry, index, all): entry is string => Boolean(entry) && all.indexOf(entry) === index,
     );

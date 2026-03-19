@@ -1,4 +1,4 @@
-import { resolveHanzo BotAgentDir } from "../agents/agent-paths.js";
+import { resolveHanzoBotAgentDir } from "../agents/agent-paths.js";
 import {
   resolveDefaultAgentId,
   resolveAgentDir,
@@ -6,7 +6,7 @@ import {
 } from "../agents/agent-scope.js";
 import { upsertAuthProfile } from "../agents/auth-profiles.js";
 import { resolveDefaultAgentWorkspaceDir } from "../agents/workspace.js";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import { enablePluginInConfig } from "./enable.js";
@@ -23,7 +23,7 @@ import type { ProviderAuthMethod, ProviderAuthOptionBag } from "./types.js";
 
 export type ApplyProviderAuthChoiceParams = {
   authChoice: string;
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
   agentDir?: string;
@@ -33,7 +33,7 @@ export type ApplyProviderAuthChoiceParams = {
 };
 
 export type ApplyProviderAuthChoiceResult = {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   agentModelOverride?: string;
 };
 
@@ -46,9 +46,9 @@ export type PluginProviderAuthChoiceOptions = {
 };
 
 function restoreConfiguredPrimaryModel(
-  nextConfig: Hanzo BotConfig,
-  originalConfig: Hanzo BotConfig,
-): Hanzo BotConfig {
+  nextConfig: HanzoBotConfig,
+  originalConfig: HanzoBotConfig,
+): HanzoBotConfig {
   const originalModel = originalConfig.agents?.defaults?.model;
   const nextAgents = nextConfig.agents;
   const nextDefaults = nextAgents?.defaults;
@@ -82,7 +82,7 @@ async function loadPluginProviderRuntime() {
 }
 
 export async function runProviderPluginAuthMethod(params: {
-  config: Hanzo BotConfig;
+  config: HanzoBotConfig;
   runtime: RuntimeEnv;
   prompter: WizardPrompter;
   method: ProviderAuthMethod;
@@ -93,13 +93,13 @@ export async function runProviderPluginAuthMethod(params: {
   secretInputMode?: ProviderAuthOptionBag["secretInputMode"];
   allowSecretRefPrompt?: boolean;
   opts?: Partial<ProviderAuthOptionBag>;
-}): Promise<{ config: Hanzo BotConfig; defaultModel?: string }> {
+}): Promise<{ config: HanzoBotConfig; defaultModel?: string }> {
   const agentId = params.agentId ?? resolveDefaultAgentId(params.config);
   const defaultAgentId = resolveDefaultAgentId(params.config);
   const agentDir =
     params.agentDir ??
     (agentId === defaultAgentId
-      ? resolveHanzo BotAgentDir()
+      ? resolveHanzoBotAgentDir()
       : resolveAgentDir(params.config, agentId));
   const workspaceDir =
     params.workspaceDir ??
@@ -238,7 +238,7 @@ export async function applyAuthChoicePluginProvider(
   const defaultAgentId = resolveDefaultAgentId(nextConfig);
   const agentDir =
     params.agentDir ??
-    (agentId === defaultAgentId ? resolveHanzo BotAgentDir() : resolveAgentDir(nextConfig, agentId));
+    (agentId === defaultAgentId ? resolveHanzoBotAgentDir() : resolveAgentDir(nextConfig, agentId));
   const workspaceDir =
     resolveAgentWorkspaceDir(nextConfig, agentId) ?? resolveDefaultAgentWorkspaceDir();
 

@@ -4,7 +4,7 @@ import path from "node:path";
 import sharp from "sharp";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { resolveStateDir } from "../../../src/config/paths.js";
-import { resolvePreferredHanzo BotTmpDir } from "../../../src/infra/tmp-openclaw-dir.js";
+import { resolvePreferredHanzoBotTmpDir } from "../../../src/infra/tmp-openclaw-dir.js";
 import { optimizeImageToPng } from "../../../src/media/image-ops.js";
 import { mockPinnedHostnameResolution } from "../../../src/test-helpers/ssrf.js";
 import { captureEnv } from "../../../test/helpers/extensions/env.js";
@@ -69,7 +69,7 @@ function cloneStatWithDev<T extends { dev: number | bigint }>(stat: T, dev: numb
 
 beforeAll(async () => {
   fixtureRoot = await fs.mkdtemp(
-    path.join(resolvePreferredHanzo BotTmpDir(), "openclaw-media-test-"),
+    path.join(resolvePreferredHanzoBotTmpDir(), "openclaw-media-test-"),
   );
   largeJpegBuffer = await sharp({
     create: {
@@ -386,7 +386,7 @@ describe("local media root guard", () => {
 
   it("allows local paths under an explicit root", async () => {
     const result = await loadWebMedia(tinyPngFile, 1024 * 1024, {
-      localRoots: [resolvePreferredHanzo BotTmpDir()],
+      localRoots: [resolvePreferredHanzoBotTmpDir()],
     });
     expect(result.kind).toBe("image");
   });
@@ -404,7 +404,7 @@ describe("local media root guard", () => {
 
     try {
       const result = await loadWebMedia(tinyPngFile, 1024 * 1024, {
-        localRoots: [resolvePreferredHanzo BotTmpDir()],
+        localRoots: [resolvePreferredHanzoBotTmpDir()],
       });
       expect(result.kind).toBe("image");
       expect(result.buffer.length).toBeGreaterThan(0);

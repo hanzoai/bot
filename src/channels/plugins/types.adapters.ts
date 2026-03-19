@@ -1,6 +1,6 @@
 import type { ReplyPayload } from "../../auto-reply/types.js";
 import type { ConfiguredBindingRule } from "../../config/bindings.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import type { GroupToolPolicyConfig } from "../../config/types.tools.js";
 import type { ExecApprovalRequest, ExecApprovalResolved } from "../../infra/exec-approvals.js";
 import type { OutboundDeliveryResult, OutboundSendDeps } from "../../infra/outbound/deliver.js";
@@ -55,66 +55,66 @@ type BivariantCallback<T extends (...args: never[]) => unknown> = {
 
 export type ChannelSetupAdapter = {
   resolveAccountId?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string;
     input?: ChannelSetupInput;
   }) => string;
   resolveBindingAccountId?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     agentId: string;
     accountId?: string;
   }) => string | undefined;
   applyAccountName?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId: string;
     name?: string;
-  }) => Hanzo BotConfig;
+  }) => HanzoBotConfig;
   applyAccountConfig: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId: string;
     input: ChannelSetupInput;
-  }) => Hanzo BotConfig;
+  }) => HanzoBotConfig;
   afterAccountConfigWritten?: (params: {
-    previousCfg: Hanzo BotConfig;
-    cfg: Hanzo BotConfig;
+    previousCfg: HanzoBotConfig;
+    cfg: HanzoBotConfig;
     accountId: string;
     input: ChannelSetupInput;
     runtime: RuntimeEnv;
   }) => Promise<void> | void;
   validateInput?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId: string;
     input: ChannelSetupInput;
   }) => string | null;
 };
 
 export type ChannelConfigAdapter<ResolvedAccount> = {
-  listAccountIds: (cfg: Hanzo BotConfig) => string[];
-  resolveAccount: (cfg: Hanzo BotConfig, accountId?: string | null) => ResolvedAccount;
-  inspectAccount?: (cfg: Hanzo BotConfig, accountId?: string | null) => unknown;
-  defaultAccountId?: (cfg: Hanzo BotConfig) => string;
+  listAccountIds: (cfg: HanzoBotConfig) => string[];
+  resolveAccount: (cfg: HanzoBotConfig, accountId?: string | null) => ResolvedAccount;
+  inspectAccount?: (cfg: HanzoBotConfig, accountId?: string | null) => unknown;
+  defaultAccountId?: (cfg: HanzoBotConfig) => string;
   setAccountEnabled?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId: string;
     enabled: boolean;
-  }) => Hanzo BotConfig;
-  deleteAccount?: (params: { cfg: Hanzo BotConfig; accountId: string }) => Hanzo BotConfig;
-  isEnabled?: (account: ResolvedAccount, cfg: Hanzo BotConfig) => boolean;
-  disabledReason?: (account: ResolvedAccount, cfg: Hanzo BotConfig) => string;
-  isConfigured?: (account: ResolvedAccount, cfg: Hanzo BotConfig) => boolean | Promise<boolean>;
-  unconfiguredReason?: (account: ResolvedAccount, cfg: Hanzo BotConfig) => string;
-  describeAccount?: (account: ResolvedAccount, cfg: Hanzo BotConfig) => ChannelAccountSnapshot;
+  }) => HanzoBotConfig;
+  deleteAccount?: (params: { cfg: HanzoBotConfig; accountId: string }) => HanzoBotConfig;
+  isEnabled?: (account: ResolvedAccount, cfg: HanzoBotConfig) => boolean;
+  disabledReason?: (account: ResolvedAccount, cfg: HanzoBotConfig) => string;
+  isConfigured?: (account: ResolvedAccount, cfg: HanzoBotConfig) => boolean | Promise<boolean>;
+  unconfiguredReason?: (account: ResolvedAccount, cfg: HanzoBotConfig) => string;
+  describeAccount?: (account: ResolvedAccount, cfg: HanzoBotConfig) => ChannelAccountSnapshot;
   resolveAllowFrom?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
   }) => Array<string | number> | undefined;
   formatAllowFrom?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
     allowFrom: Array<string | number>;
   }) => string[];
   resolveDefaultTo?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
   }) => string | undefined;
 };
@@ -126,7 +126,7 @@ export type ChannelGroupAdapter = {
 };
 
 export type ChannelOutboundContext = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   to: string;
   text: string;
   mediaUrl?: string;
@@ -159,12 +159,12 @@ export type ChannelOutboundAdapter = {
   normalizePayload?: (params: { payload: ReplyPayload }) => ReplyPayload | null;
   shouldSkipPlainTextSanitization?: (params: { payload: ReplyPayload }) => boolean;
   resolveEffectiveTextChunkLimit?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
     fallbackLimit?: number;
   }) => number | undefined;
   resolveTarget?: (params: {
-    cfg?: Hanzo BotConfig;
+    cfg?: HanzoBotConfig;
     to?: string;
     allowFrom?: string[];
     accountId?: string | null;
@@ -184,14 +184,14 @@ export type ChannelStatusAdapter<ResolvedAccount, Probe = unknown, Audit = unkno
   defaultRuntime?: ChannelAccountSnapshot;
   buildChannelSummary?: (params: {
     account: ResolvedAccount;
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     defaultAccountId: string;
     snapshot: ChannelAccountSnapshot;
   }) => Record<string, unknown> | Promise<Record<string, unknown>>;
   probeAccount?: (params: {
     account: ResolvedAccount;
     timeoutMs: number;
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
   }) => Promise<Probe>;
   formatCapabilitiesProbe?: BivariantCallback<
     (params: { probe: Probe }) => ChannelCapabilitiesDisplayLine[]
@@ -199,14 +199,14 @@ export type ChannelStatusAdapter<ResolvedAccount, Probe = unknown, Audit = unkno
   auditAccount?: (params: {
     account: ResolvedAccount;
     timeoutMs: number;
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     probe?: Probe;
   }) => Promise<Audit>;
   buildCapabilitiesDiagnostics?: BivariantCallback<
     (params: {
       account: ResolvedAccount;
       timeoutMs: number;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       probe?: Probe;
       audit?: Audit;
       target?: string;
@@ -214,20 +214,20 @@ export type ChannelStatusAdapter<ResolvedAccount, Probe = unknown, Audit = unkno
   >;
   buildAccountSnapshot?: (params: {
     account: ResolvedAccount;
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     runtime?: ChannelAccountSnapshot;
     probe?: Probe;
     audit?: Audit;
   }) => ChannelAccountSnapshot | Promise<ChannelAccountSnapshot>;
   logSelfId?: (params: {
     account: ResolvedAccount;
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     runtime: RuntimeEnv;
     includeChannelPrefix?: boolean;
   }) => void;
   resolveAccountState?: (params: {
     account: ResolvedAccount;
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     configured: boolean;
     enabled: boolean;
   }) => ChannelAccountState;
@@ -235,7 +235,7 @@ export type ChannelStatusAdapter<ResolvedAccount, Probe = unknown, Audit = unkno
 };
 
 export type ChannelGatewayContext<ResolvedAccount = unknown> = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   account: ResolvedAccount;
   runtime: RuntimeEnv;
@@ -324,7 +324,7 @@ export type ChannelLoginWithQrWaitResult = {
 };
 
 export type ChannelLogoutContext<ResolvedAccount = unknown> = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId: string;
   account: ResolvedAccount;
   runtime: RuntimeEnv;
@@ -335,7 +335,7 @@ export type ChannelPairingAdapter = {
   idLabel: string;
   normalizeAllowEntry?: (entry: string) => string;
   notifyApproval?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     id: string;
     accountId?: string;
     runtime?: RuntimeEnv;
@@ -360,7 +360,7 @@ export type ChannelGatewayAdapter<ResolvedAccount = unknown> = {
 
 export type ChannelAuthAdapter = {
   login?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
     runtime: RuntimeEnv;
     verbose?: boolean;
@@ -370,24 +370,24 @@ export type ChannelAuthAdapter = {
 
 export type ChannelHeartbeatAdapter = {
   checkReady?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
     deps?: ChannelHeartbeatDeps;
   }) => Promise<{ ok: boolean; reason: string }>;
-  resolveRecipients?: (params: { cfg: Hanzo BotConfig; opts?: { to?: string; all?: boolean } }) => {
+  resolveRecipients?: (params: { cfg: HanzoBotConfig; opts?: { to?: string; all?: boolean } }) => {
     recipients: string[];
     source: string;
   };
 };
 
 type ChannelDirectorySelfParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   runtime: RuntimeEnv;
 };
 
 type ChannelDirectoryListParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   query?: string | null;
   limit?: number | null;
@@ -395,7 +395,7 @@ type ChannelDirectoryListParams = {
 };
 
 type ChannelDirectoryListGroupMembersParams = {
-  cfg: Hanzo BotConfig;
+  cfg: HanzoBotConfig;
   accountId?: string | null;
   groupId: string;
   limit?: number | null;
@@ -425,7 +425,7 @@ export type ChannelResolveResult = {
 
 export type ChannelResolverAdapter = {
   resolveTargets: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
     inputs: string[];
     kind: ChannelResolveKind;
@@ -435,7 +435,7 @@ export type ChannelResolverAdapter = {
 
 export type ChannelElevatedAdapter = {
   allowFromFallback?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
   }) => Array<string | number> | undefined;
 };
@@ -447,13 +447,13 @@ export type ChannelCommandAdapter = {
 
 export type ChannelLifecycleAdapter = {
   onAccountConfigChanged?: (params: {
-    prevCfg: Hanzo BotConfig;
-    nextCfg: Hanzo BotConfig;
+    prevCfg: HanzoBotConfig;
+    nextCfg: HanzoBotConfig;
     accountId: string;
     runtime: RuntimeEnv;
   }) => Promise<void> | void;
   onAccountRemoved?: (params: {
-    prevCfg: Hanzo BotConfig;
+    prevCfg: HanzoBotConfig;
     accountId: string;
     runtime: RuntimeEnv;
   }) => Promise<void> | void;
@@ -461,33 +461,33 @@ export type ChannelLifecycleAdapter = {
 
 export type ChannelExecApprovalAdapter = {
   getInitiatingSurfaceState?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
   }) => ChannelExecApprovalInitiatingSurfaceState;
   shouldSuppressLocalPrompt?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
     payload: ReplyPayload;
   }) => boolean;
-  hasConfiguredDmRoute?: (params: { cfg: Hanzo BotConfig }) => boolean;
+  hasConfiguredDmRoute?: (params: { cfg: HanzoBotConfig }) => boolean;
   shouldSuppressForwardingFallback?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     target: ChannelExecApprovalForwardTarget;
     request: ExecApprovalRequest;
   }) => boolean;
   buildPendingPayload?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     request: ExecApprovalRequest;
     target: ChannelExecApprovalForwardTarget;
     nowMs: number;
   }) => ReplyPayload | null;
   buildResolvedPayload?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     resolved: ExecApprovalResolved;
     target: ChannelExecApprovalForwardTarget;
   }) => ReplyPayload | null;
   beforeDeliverPending?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     target: ChannelExecApprovalForwardTarget;
     payload: ReplyPayload;
   }) => Promise<void> | void;
@@ -495,7 +495,7 @@ export type ChannelExecApprovalAdapter = {
 
 export type ChannelAllowlistAdapter = {
   applyConfigEdit?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     parsedConfig: Record<string, unknown>;
     accountId?: string | null;
     scope: "dm" | "group";
@@ -523,7 +523,7 @@ export type ChannelAllowlistAdapter = {
           }
       >
     | null;
-  readConfig?: (params: { cfg: Hanzo BotConfig; accountId?: string | null }) =>
+  readConfig?: (params: { cfg: HanzoBotConfig; accountId?: string | null }) =>
     | {
         dmAllowFrom?: Array<string | number>;
         groupAllowFrom?: Array<string | number>;
@@ -539,7 +539,7 @@ export type ChannelAllowlistAdapter = {
         groupOverrides?: Array<{ label: string; entries: Array<string | number> }>;
       }>;
   resolveNames?: (params: {
-    cfg: Hanzo BotConfig;
+    cfg: HanzoBotConfig;
     accountId?: string | null;
     scope: "dm" | "group";
     entries: string[];

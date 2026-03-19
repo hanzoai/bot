@@ -3,7 +3,7 @@ import {
   createDirectoryTestRuntime,
   expectDirectorySurface,
 } from "../../../test/helpers/extensions/directory.js";
-import type { Hanzo BotConfig, RuntimeEnv } from "../runtime-api.js";
+import type { HanzoBotConfig, RuntimeEnv } from "../runtime-api.js";
 import { msteamsPlugin } from "./channel.js";
 
 describe("msteams directory", () => {
@@ -25,7 +25,7 @@ describe("msteams directory", () => {
           },
         },
       },
-    } as unknown as Hanzo BotConfig;
+    } as unknown as HanzoBotConfig;
 
     const directory = expectDirectorySurface(msteamsPlugin.directory);
 

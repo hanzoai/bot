@@ -1,5 +1,5 @@
 import { readConfigFileSnapshot, resolveGatewayPort } from "../config/config.js";
-import type { Hanzo BotConfig } from "../config/types.js";
+import type { HanzoBotConfig } from "../config/types.js";
 import { readGatewayTokenEnv } from "../gateway/credentials.js";
 import { resolveConfiguredSecretInputWithFallback } from "../gateway/resolve-configured-secret-input-string.js";
 import { copyToClipboard } from "../infra/clipboard.js";
@@ -17,7 +17,7 @@ type DashboardOptions = {
 };
 
 async function resolveDashboardToken(
-  cfg: Hanzo BotConfig,
+  cfg: HanzoBotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<{
   token?: string;

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { setDefaultChannelPluginRegistryForTests } from "../../commands/channel-test-helpers.js";
-import type { Hanzo BotConfig } from "../../config/config.js";
+import type { HanzoBotConfig } from "../../config/config.js";
 import { resolveOutboundSessionRoute } from "./outbound-session.js";
 
 describe("resolveOutboundSessionRoute", () => {
@@ -8,10 +8,10 @@ describe("resolveOutboundSessionRoute", () => {
     setDefaultChannelPluginRegistryForTests();
   });
 
-  const baseConfig = {} as Hanzo BotConfig;
+  const baseConfig = {} as HanzoBotConfig;
 
   it("resolves provider-specific session routes", async () => {
-    const perChannelPeerCfg = { session: { dmScope: "per-channel-peer" } } as Hanzo BotConfig;
+    const perChannelPeerCfg = { session: { dmScope: "per-channel-peer" } } as HanzoBotConfig;
     const identityLinksCfg = {
       session: {
         dmScope: "per-peer",
@@ -19,7 +19,7 @@ describe("resolveOutboundSessionRoute", () => {
           alice: ["discord:123"],
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const slackMpimCfg = {
       channels: {
         slack: {
@@ -28,10 +28,10 @@ describe("resolveOutboundSessionRoute", () => {
           },
         },
       },
-    } as Hanzo BotConfig;
+    } as HanzoBotConfig;
     const cases: Array<{
       name: string;
-      cfg: Hanzo BotConfig;
+      cfg: HanzoBotConfig;
       channel: string;
       target: string;
       replyToId?: string;
@@ -294,7 +294,7 @@ describe("resolveOutboundSessionRoute", () => {
 
   it("uses resolved Discord user targets to route bare numeric ids as DMs", async () => {
     const route = await resolveOutboundSessionRoute({
-      cfg: { session: { dmScope: "per-channel-peer" } } as Hanzo BotConfig,
+      cfg: { session: { dmScope: "per-channel-peer" } } as HanzoBotConfig,
       channel: "discord",
       agentId: "main",
       target: "123",
@@ -316,7 +316,7 @@ describe("resolveOutboundSessionRoute", () => {
   it("uses resolved Mattermost user targets to route bare ids as DMs", async () => {
     const userId = "dthcxgoxhifn3pwh65cut3ud3w";
     const route = await resolveOutboundSessionRoute({
-      cfg: { session: { dmScope: "per-channel-peer" } } as Hanzo BotConfig,
+      cfg: { session: { dmScope: "per-channel-peer" } } as HanzoBotConfig,
       channel: "mattermost",
       agentId: "main",
       target: userId,
@@ -338,7 +338,7 @@ describe("resolveOutboundSessionRoute", () => {
   it("rejects bare numeric Discord targets when the caller has no kind hint", async () => {
     await expect(
       resolveOutboundSessionRoute({
-        cfg: { session: { dmScope: "per-channel-peer" } } as Hanzo BotConfig,
+        cfg: { session: { dmScope: "per-channel-peer" } } as HanzoBotConfig,
         channel: "discord",
         agentId: "main",
         target: "123",

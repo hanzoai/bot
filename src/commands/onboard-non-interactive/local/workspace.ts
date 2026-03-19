@@ -1,10 +1,10 @@
-import type { Hanzo BotConfig } from "../../../config/config.js";
+import type { HanzoBotConfig } from "../../../config/config.js";
 import { resolveUserPath } from "../../../utils.js";
 import type { OnboardOptions } from "../../onboard-types.js";
 
 export function resolveNonInteractiveWorkspaceDir(params: {
   opts: OnboardOptions;
-  baseConfig: Hanzo BotConfig;
+  baseConfig: HanzoBotConfig;
   defaultWorkspaceDir: string;
 }) {
   const raw = (

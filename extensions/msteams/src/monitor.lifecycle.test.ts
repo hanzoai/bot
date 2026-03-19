@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Hanzo BotConfig, RuntimeEnv } from "../runtime-api.js";
+import type { HanzoBotConfig, RuntimeEnv } from "../runtime-api.js";
 import type { MSTeamsConversationStore } from "./conversation-store.js";
 import type { MSTeamsPollStore } from "./polls.js";
 
@@ -134,7 +134,7 @@ vi.mock("./runtime.js", () => ({
 
 import { monitorMSTeamsProvider } from "./monitor.js";
 
-function createConfig(port: number): Hanzo BotConfig {
+function createConfig(port: number): HanzoBotConfig {
   return {
     channels: {
       msteams: {
@@ -148,7 +148,7 @@ function createConfig(port: number): Hanzo BotConfig {
         },
       },
     },
-  } as Hanzo BotConfig;
+  } as HanzoBotConfig;
 }
 
 function createRuntime(): RuntimeEnv {

@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { Hanzo BotConfig } from "../config/config.js";
+import type { HanzoBotConfig } from "../config/config.js";
 import { captureEnv } from "../test-utils/env.js";
 import { runCliAgent } from "./cli-runner.js";
 
@@ -161,7 +161,7 @@ describe("runCliAgent bundle MCP e2e", () => {
       await writeFakeClaudeCli(fakeClaudePath);
       await writeClaudeBundle({ pluginRoot, serverScriptPath });
 
-      const config: Hanzo BotConfig = {
+      const config: HanzoBotConfig = {
         agents: {
           defaults: {
             workspace: workspaceDir,
