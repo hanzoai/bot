@@ -442,7 +442,7 @@ function localAuthModeAllowsGatewaySecretInputPath(params: {
   path: SupportedGatewaySecretInputPath;
 }): boolean {
   const { authMode, path } = params;
-  if (authMode === "none" || authMode === "trusted-proxy") {
+  if (authMode === "none" || authMode === "trusted-proxy" || authMode === "iam") {
     return false;
   }
   if (authMode === "token") {

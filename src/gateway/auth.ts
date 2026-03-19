@@ -1,9 +1,11 @@
 import type { IncomingMessage } from "node:http";
 import type {
   GatewayAuthConfig,
+  GatewayIAMAuthConfig,
   GatewayTailscaleMode,
   GatewayTrustedProxyConfig,
 } from "../config/config.js";
+import { verifyIAMToken } from "./auth-iam.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { readTailscaleWhoisIdentity, type TailscaleWhoisIdentity } from "../infra/tailscale.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
@@ -21,7 +23,7 @@ import {
   resolveClientIp,
 } from "./net.js";
 
-export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy";
+export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
 export type ResolvedGatewayAuthModeSource =
   | "override"
   | "config"
@@ -36,6 +38,7 @@ export type ResolvedGatewayAuth = {
   password?: string;
   allowTailscale: boolean;
   trustedProxy?: GatewayTrustedProxyConfig;
+  iam?: GatewayIAMAuthConfig;
 };
 
 export type GatewayAuthResult = {
@@ -47,7 +50,8 @@ export type GatewayAuthResult = {
     | "tailscale"
     | "device-token"
     | "bootstrap-token"
-    | "trusted-proxy";
+    | "trusted-proxy"
+    | "iam";
   user?: string;
   reason?: string;
   /** Present when the request was blocked by the rate limiter. */
@@ -233,6 +237,9 @@ export function resolveGatewayAuth(params: {
     if (authOverride.trustedProxy !== undefined) {
       authConfig.trustedProxy = authOverride.trustedProxy;
     }
+    if (authOverride.iam !== undefined) {
+      authConfig.iam = authOverride.iam;
+    }
   }
   const env = params.env ?? process.env;
   const tokenRef = resolveSecretInputRef({ value: authConfig.token }).ref;
@@ -270,7 +277,11 @@ export function resolveGatewayAuth(params: {
 
   const allowTailscale =
     authConfig.allowTailscale ??
-    (params.tailscaleMode === "serve" && mode !== "password" && mode !== "trusted-proxy");
+    (params.tailscaleMode === "serve" &&
+      mode !== "password" &&
+      mode !== "trusted-proxy" &&
+      mode !== "iam");
+  const iam = authConfig.iam;
 
   return {
     mode,
@@ -279,6 +290,7 @@ export function resolveGatewayAuth(params: {
     password,
     allowTailscale,
     trustedProxy,
+    iam,
   };
 }
 
@@ -317,6 +329,8 @@ export function assertGatewayAuthConfigured(
       );
     }
   }
+  // IAM mode requires no local credentials; the JWKS endpoint is validated
+  // at token-verification time. No assertion needed beyond mode recognition.
 }
 
 /**
@@ -362,6 +376,18 @@ function authorizeTrustedProxy(params: {
   return { user };
 }
 
+function extractBearerTokenFromRequest(req?: IncomingMessage): string | undefined {
+  if (!req) {
+    return undefined;
+  }
+  const raw = headerValue(req.headers?.authorization)?.trim() ?? "";
+  if (!raw.toLowerCase().startsWith("bearer ")) {
+    return undefined;
+  }
+  const token = raw.slice(7).trim();
+  return token || undefined;
+}
+
 function shouldAllowTailscaleHeaderAuth(authSurface: GatewayAuthSurface): boolean {
   return authSurface === "ws-control-ui";
 }
@@ -397,6 +423,23 @@ export async function authorizeGatewayConnect(
       return { ok: true, method: "trusted-proxy", user: result.user };
     }
     return { ok: false, reason: result.reason };
+  }
+
+  if (auth.mode === "iam") {
+    const bearerToken = extractBearerTokenFromRequest(req);
+    if (!bearerToken) {
+      return { ok: false, reason: "iam_token_missing" };
+    }
+    try {
+      const payload = await verifyIAMToken(bearerToken, auth.iam);
+      return {
+        ok: true,
+        method: "iam",
+        user: payload.email ?? payload.sub,
+      };
+    } catch {
+      return { ok: false, reason: "iam_token_invalid" };
+    }
   }
 
   if (auth.mode === "none") {

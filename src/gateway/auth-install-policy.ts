@@ -10,7 +10,7 @@ export function shouldRequireGatewayTokenForInstall(
   if (mode === "token") {
     return true;
   }
-  if (mode === "password" || mode === "none" || mode === "trusted-proxy") {
+  if (mode === "password" || mode === "none" || mode === "trusted-proxy" || mode === "iam") {
     return false;
   }
 

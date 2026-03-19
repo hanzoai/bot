@@ -193,7 +193,7 @@ export async function resolveAuthForTarget(
     return withDiagnostics({ token, password });
   }
 
-  const authDisabled = authMode === "none" || authMode === "trusted-proxy";
+  const authDisabled = authMode === "none" || authMode === "trusted-proxy" || authMode === "iam";
   if (authDisabled) {
     return {};
   }
