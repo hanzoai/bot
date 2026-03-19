@@ -1,0 +1,15 @@
+[service]
+name = "bot"
+port = 18789
+
+[build]
+dockerfile = "Dockerfile"
+
+[deploy]
+strategy = "rolling"
+min_instances = 2
+
+[env]
+BOT_GATEWAY_AUTH_MODE = "iam"
+BILLING_GATE_MODE = "enforce"
+COMMERCE_API_URL = "https://commerce.hanzo.ai/api/v1"
