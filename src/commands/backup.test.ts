@@ -53,7 +53,7 @@ describe("backup commands", () => {
   async function withInvalidWorkspaceBackupConfig<T>(fn: (runtime: RuntimeEnv) => Promise<T>) {
     const stateDir = path.join(tempHome.home, ".openclaw");
     const configPath = path.join(tempHome.home, "custom-config.json");
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
+    process.env.BOT_CONFIG_PATH = configPath;
     await fs.writeFile(path.join(stateDir, "openclaw.json"), JSON.stringify({}), "utf8");
     await fs.writeFile(configPath, '{"agents": { defaults: { workspace: ', "utf8");
     const runtime = createRuntime();
@@ -61,7 +61,7 @@ describe("backup commands", () => {
     try {
       return await fn(runtime);
     } finally {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_CONFIG_PATH;
     }
   }
 
@@ -125,7 +125,7 @@ describe("backup commands", () => {
     const configPath = path.join(tempHome.home, "custom-config.json");
     const backupDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-backups-"));
     try {
-      process.env.OPENCLAW_CONFIG_PATH = configPath;
+      process.env.BOT_CONFIG_PATH = configPath;
       await fs.writeFile(
         configPath,
         JSON.stringify({
@@ -194,7 +194,7 @@ describe("backup commands", () => {
         await fs.rm(extractDir, { recursive: true, force: true });
       }
     } finally {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_CONFIG_PATH;
       await fs.rm(externalWorkspace, { recursive: true, force: true });
       await fs.rm(backupDir, { recursive: true, force: true });
     }
@@ -374,7 +374,7 @@ describe("backup commands", () => {
 
   it("allows config-only backups even when the config file is invalid", async () => {
     const configPath = path.join(tempHome.home, "custom-config.json");
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
+    process.env.BOT_CONFIG_PATH = configPath;
     await fs.writeFile(configPath, '{"agents": { defaults: { workspace: ', "utf8");
 
     const runtime = createRuntime();
@@ -388,7 +388,7 @@ describe("backup commands", () => {
       expect(result.assets).toHaveLength(1);
       expect(result.assets[0]?.kind).toBe("config");
     } finally {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_CONFIG_PATH;
     }
   });
 });

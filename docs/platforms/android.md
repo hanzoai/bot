@@ -9,7 +9,7 @@ title: "Android App"
 
 # Android App (Node)
 
-> **Note:** The Android app has not been publicly released yet. The source code is available in the [OpenClaw repository](https://github.com/openclaw/openclaw) under `apps/android`. You can build it yourself using Java 17 and the Android SDK (`./gradlew :app:assembleDebug`). See [apps/android/README.md](https://github.com/openclaw/openclaw/blob/main/apps/android/README.md) for build instructions.
+> **Note:** The Android app has not been publicly released yet. The source code is available in the [Hanzo Bot repository](https://github.com/hanzoai/bot) under `apps/android`. You can build it yourself using Java 17 and the Android SDK (`./gradlew :app:assembleDebug`). See [apps/android/README.md](https://github.com/hanzoai/bot/blob/main/apps/android/README.md) for build instructions.
 
 ## Support snapshot
 
@@ -50,7 +50,7 @@ Confirm in logs you see something like:
 
 For tailnet-only setups (recommended for Vienna ⇄ London), bind the gateway to the tailnet IP:
 
-- Set `gateway.bind: "tailnet"` in `~/.openclaw/openclaw.json` on the gateway host.
+- Set `gateway.bind: "tailnet"` in `~/.hanzoai/bot.json` on the gateway host.
 - Restart the Gateway / macOS menubar app.
 
 ### 2) Verify discovery (optional)
@@ -103,13 +103,13 @@ Pairing details: [Pairing](/channels/pairing).
 - Via nodes status:
 
   ```bash
-  openclaw nodes status
+  hanzo-bot nodes status
   ```
 
 - Via Gateway:
 
   ```bash
-  openclaw gateway call node.list --params "{}"
+  hanzo-bot gateway call node.list --params "{}"
   ```
 
 ### 6) Chat + history
@@ -128,7 +128,7 @@ If you want the node to show real HTML/CSS/JS that the agent can edit on disk, p
 
 Note: nodes load canvas from the Gateway HTTP server (same port as `gateway.port`, default `18789`).
 
-1. Create `~/.openclaw/workspace/canvas/index.html` on the gateway host.
+1. Create `~/.hanzo/bot/workspace/canvas/index.html` on the gateway host.
 
 2. Navigate the node to it (LAN):
 

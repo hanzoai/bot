@@ -4,7 +4,7 @@ import path from "node:path";
 import { vi } from "vitest";
 import { telegramPlugin, setTelegramRuntime } from "../../extensions/telegram/index.js";
 import * as replyModule from "../auto-reply/reply.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { resolveMainSessionKey } from "../config/sessions.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { createPluginRuntime } from "../plugins/runtime/index.js";
@@ -37,7 +37,7 @@ export async function seedSessionStore(
 
 export async function seedMainSessionStore(
   storePath: string,
-  cfg: OpenClawConfig,
+  cfg: Hanzo BotConfig,
   session: HeartbeatSessionSeed,
 ): Promise<string> {
   const sessionKey = resolveMainSessionKey(cfg);

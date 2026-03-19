@@ -2,7 +2,7 @@
 read_when:
   - 在同一台机器上运行多个 Gateway 网关
   - 你需要为每个 Gateway 网关隔离配置/状态/端口
-summary: 在一台主机上运行多个 OpenClaw Gateway 网关（隔离、端口和配置档案）
+summary: 在一台主机上运行多个 Hanzo Bot Gateway 网关（隔离、端口和配置档案）
 title: 多个 Gateway 网关
 x-i18n:
   generated_at: "2026-03-16T06:23:07Z"
@@ -19,8 +19,8 @@ x-i18n:
 
 ## 隔离检查清单（必需）
 
-- `OPENCLAW_CONFIG_PATH` — 每个实例单独的配置文件
-- `OPENCLAW_STATE_DIR` — 每个实例单独的会话、凭证、缓存
+- `BOT_CONFIG_PATH` — 每个实例单独的配置文件
+- `BOT_STATE_DIR` — 每个实例单独的会话、凭证、缓存
 - `agents.defaults.workspace` — 每个实例单独的工作区根目录
 - `gateway.port`（或 `--port`）— 每个实例唯一
 - 派生端口（browser/canvas）不得重叠
@@ -29,7 +29,7 @@ x-i18n:
 
 ## 推荐：配置档案（`--profile`）
 
-配置档案会自动限定 `OPENCLAW_STATE_DIR` + `OPENCLAW_CONFIG_PATH`，并为服务名称添加后缀。
+配置档案会自动限定 `BOT_STATE_DIR` + `BOT_CONFIG_PATH`，并为服务名称添加后缀。
 
 ```bash
 # main
@@ -83,7 +83,7 @@ openclaw --profile rescue gateway install
 
 ## 端口映射（派生）
 
-基础端口 = `gateway.port`（或 `OPENCLAW_GATEWAY_PORT` / `--port`）。
+基础端口 = `gateway.port`（或 `BOT_GATEWAY_PORT` / `--port`）。
 
 - browser 控制服务端口 = 基础端口 + 2（仅 loopback）
 - canvas host 由 Gateway 网关 HTTP 服务器提供（与 `gateway.port` 使用相同端口）
@@ -101,12 +101,12 @@ openclaw --profile rescue gateway install
 ## 手动环境变量示例
 
 ```bash
-OPENCLAW_CONFIG_PATH=~/.openclaw/main.json \
-OPENCLAW_STATE_DIR=~/.openclaw-main \
+BOT_CONFIG_PATH=~/.hanzo/bot/main.json \
+BOT_STATE_DIR=~/.openclaw-main \
 openclaw gateway --port 18789
 
-OPENCLAW_CONFIG_PATH=~/.openclaw/rescue.json \
-OPENCLAW_STATE_DIR=~/.openclaw-rescue \
+BOT_CONFIG_PATH=~/.hanzo/bot/rescue.json \
+BOT_STATE_DIR=~/.openclaw-rescue \
 openclaw gateway --port 19001
 ```
 

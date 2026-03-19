@@ -2,12 +2,12 @@ import { OPENCODE_ZEN_DEFAULT_MODEL_REF } from "openclaw/plugin-sdk/provider-mod
 import {
   applyAgentDefaultModelPrimary,
   withAgentModelAliases,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 
 export { OPENCODE_ZEN_DEFAULT_MODEL_REF };
 
-export function applyOpencodeZenProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyOpencodeZenProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return {
     ...cfg,
     agents: {
@@ -22,7 +22,7 @@ export function applyOpencodeZenProviderConfig(cfg: OpenClawConfig): OpenClawCon
   };
 }
 
-export function applyOpencodeZenConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyOpencodeZenConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyAgentDefaultModelPrimary(
     applyOpencodeZenProviderConfig(cfg),
     OPENCODE_ZEN_DEFAULT_MODEL_REF,

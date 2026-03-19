@@ -1,8 +1,8 @@
 ---
 read_when:
-  - 你想在 OpenClaw 中使用 NVIDIA 模型
+  - 你想在 Hanzo Bot 中使用 NVIDIA 模型
   - 你需要设置 `NVIDIA_API_KEY`
-summary: 在 OpenClaw 中使用 NVIDIA 的 OpenAI 兼容 API
+summary: 在 Hanzo Bot 中使用 NVIDIA 的 OpenAI 兼容 API
 title: NVIDIA
 x-i18n:
   generated_at: "2026-03-16T06:26:11Z"

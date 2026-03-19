@@ -1,18 +1,18 @@
 ---
-summary: "Deploy OpenClaw Gateway to a Kubernetes cluster with Kustomize"
+summary: "Deploy Hanzo Bot Gateway to a Kubernetes cluster with Kustomize"
 read_when:
-  - You want to run OpenClaw on a Kubernetes cluster
-  - You want to test OpenClaw in a Kubernetes environment
+  - You want to run Hanzo Bot on a Kubernetes cluster
+  - You want to test Hanzo Bot in a Kubernetes environment
 title: "Kubernetes"
 ---
 
-# OpenClaw on Kubernetes
+# Hanzo Bot on Kubernetes
 
-A minimal starting point for running OpenClaw on Kubernetes — not a production-ready deployment. It covers the core resources and is meant to be adapted to your environment.
+A minimal starting point for running Hanzo Bot on Kubernetes — not a production-ready deployment. It covers the core resources and is meant to be adapted to your environment.
 
 ## Why not Helm?
 
-OpenClaw is a single container with some config files. The interesting customization is in agent content (markdown files, skills, config overrides), not infrastructure templating. Kustomize handles overlays without the overhead of a Helm chart. If your deployment grows more complex, a Helm chart can be layered on top of these manifests.
+Hanzo Bot is a single container with some config files. The interesting customization is in agent content (markdown files, skills, config overrides), not infrastructure templating. Kustomize handles overlays without the overhead of a Helm chart. If your deployment grows more complex, a Helm chart can be layered on top of these manifests.
 
 ## What you need
 
@@ -34,7 +34,7 @@ open http://localhost:18789
 Retrieve the gateway token and paste it into the Control UI:
 
 ```bash
-kubectl get secret openclaw-secrets -n openclaw -o jsonpath='{.data.OPENCLAW_GATEWAY_TOKEN}' | base64 -d
+kubectl get secret openclaw-secrets -n hanzo-bot -o jsonpath='{.data.BOT_GATEWAY_TOKEN}' | base64 -d
 ```
 
 For local debugging, `./scripts/k8s/deploy.sh --show-token` prints the token after deploy.
@@ -84,7 +84,7 @@ open http://localhost:18789
 ## What gets deployed
 
 ```
-Namespace: openclaw (configurable via OPENCLAW_NAMESPACE)
+Namespace: hanzo-bot (configurable via BOT_NAMESPACE)
 ├── Deployment/openclaw        # Single pod, init container + gateway
 ├── Service/openclaw           # ClusterIP on port 18789
 ├── PersistentVolumeClaim      # 10Gi for agent state and config
@@ -122,7 +122,7 @@ Existing provider keys stay in the Secret unless you overwrite them.
 Or patch the Secret directly:
 
 ```bash
-kubectl patch secret openclaw-secrets -n openclaw \
+kubectl patch secret openclaw-secrets -n hanzo-bot \
   -p '{"stringData":{"<PROVIDER>_API_KEY":"..."}}'
 kubectl rollout restart deployment/openclaw -n openclaw
 ```
@@ -130,7 +130,7 @@ kubectl rollout restart deployment/openclaw -n openclaw
 ### Custom namespace
 
 ```bash
-OPENCLAW_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
+BOT_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
 ```
 
 ### Custom image
@@ -138,7 +138,7 @@ OPENCLAW_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
 Edit the `image` field in `scripts/k8s/manifests/deployment.yaml`:
 
 ```yaml
-image: ghcr.io/openclaw/openclaw:latest # or pin to a specific version from https://github.com/openclaw/openclaw/releases
+image: ghcr.io/hanzoai/bot:latest # or pin to a specific version from https://github.com/hanzoai/bot/releases
 ```
 
 ### Expose beyond port-forward

@@ -11,7 +11,7 @@ Manage sandbox runtimes for isolated agent execution.
 
 ## Overview
 
-OpenClaw can run agents in isolated sandbox runtimes for security. The `sandbox` commands help you inspect and recreate those runtimes after updates or configuration changes.
+Hanzo Bot can run agents in isolated sandbox runtimes for security. The `sandbox` commands help you inspect and recreate those runtimes after updates or configuration changes.
 
 Today that usually means:
 
@@ -22,12 +22,12 @@ Today that usually means:
 For `ssh` and OpenShell `remote`, recreate matters more than with Docker:
 
 - the remote workspace is canonical after the initial seed
-- `openclaw sandbox recreate` deletes that canonical remote workspace for the selected scope
+- `hanzo-bot sandbox recreate` deletes that canonical remote workspace for the selected scope
 - next use seeds it again from the current local workspace
 
 ## Commands
 
-### `openclaw sandbox explain`
+### `hanzo-bot sandbox explain`
 
 Inspect the **effective** sandbox mode/scope/workspace access, sandbox tool policy, and elevated gates (with fix-it config key paths).
 
@@ -38,7 +38,7 @@ openclaw sandbox explain --agent work
 openclaw sandbox explain --json
 ```
 
-### `openclaw sandbox list`
+### `hanzo-bot sandbox list`
 
 List all sandbox runtimes with their status and configuration.
 
@@ -57,7 +57,7 @@ openclaw sandbox list --json     # JSON output
 - Idle time (time since last use)
 - Associated session/agent
 
-### `openclaw sandbox recreate`
+### `hanzo-bot sandbox recreate`
 
 Remove sandbox runtimes to force recreation with updated config.
 
@@ -158,14 +158,14 @@ openclaw sandbox recreate --agent alfred
 - Runtimes are only pruned after 24h of inactivity
 - Regularly-used agents keep old runtimes alive indefinitely
 
-**Solution:** Use `openclaw sandbox recreate` to force removal of old runtimes. They'll be recreated automatically with current settings when next needed.
+**Solution:** Use `hanzo-bot sandbox recreate` to force removal of old runtimes. They'll be recreated automatically with current settings when next needed.
 
-Tip: prefer `openclaw sandbox recreate` over manual backend-specific cleanup.
+Tip: prefer `hanzo-bot sandbox recreate` over manual backend-specific cleanup.
 It uses the Gateway’s runtime registry and avoids mismatches when scope/session keys change.
 
 ## Configuration
 
-Sandbox settings live in `~/.openclaw/openclaw.json` under `agents.defaults.sandbox` (per-agent overrides go in `agents.list[].sandbox`):
+Sandbox settings live in `~/.hanzoai/bot.json` under `agents.defaults.sandbox` (per-agent overrides go in `agents.list[].sandbox`):
 
 ```jsonc
 {

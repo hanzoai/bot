@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `openclaw channels` (accounts, status, login/logout, logs)"
+summary: "CLI reference for `hanzo-bot channels` (accounts, status, login/logout, logs)"
 read_when:
   - You want to add/remove channel accounts (WhatsApp/Telegram/Discord/Google Chat/Slack/Mattermost (plugin)/Signal/iMessage)
   - You want to check channel status or tail channel logs
 title: "channels"
 ---
 
-# `openclaw channels`
+# `hanzo-bot channels`
 
 Manage chat channel accounts and their runtime status on the Gateway.
 
@@ -34,9 +34,9 @@ openclaw channels add --channel nostr --private-key "$NOSTR_PRIVATE_KEY"
 openclaw channels remove --channel telegram --delete
 ```
 
-Tip: `openclaw channels add --help` shows per-channel flags (token, private key, app token, signal-cli paths, etc).
+Tip: `hanzo-bot channels add --help` shows per-channel flags (token, private key, app token, signal-cli paths, etc).
 
-When you run `openclaw channels add` without flags, the interactive wizard can prompt:
+When you run `hanzo-bot channels add` without flags, the interactive wizard can prompt:
 
 - account ids per selected channel
 - optional display names for those accounts
@@ -44,9 +44,9 @@ When you run `openclaw channels add` without flags, the interactive wizard can p
 
 If you confirm bind now, the wizard asks which agent should own each configured channel account and writes account-scoped routing bindings.
 
-You can also manage the same routing rules later with `openclaw agents bindings`, `openclaw agents bind`, and `openclaw agents unbind` (see [agents](/cli/agents)).
+You can also manage the same routing rules later with `hanzo-bot agents bindings`, `hanzo-bot agents bind`, and `hanzo-bot agents unbind` (see [agents](/cli/agents)).
 
-When you add a non-default account to a channel that is still using single-account top-level settings (no `channels.<channel>.accounts` entries yet), OpenClaw moves account-scoped single-account top-level values into `channels.<channel>.accounts.default`, then writes the new account. This preserves the original account behavior while moving to the multi-account shape.
+When you add a non-default account to a channel that is still using single-account top-level settings (no `channels.<channel>.accounts` entries yet), Hanzo Bot moves account-scoped single-account top-level values into `channels.<channel>.accounts.default`, then writes the new account. This preserves the original account behavior while moving to the multi-account shape.
 
 Routing behavior stays consistent:
 
@@ -54,7 +54,7 @@ Routing behavior stays consistent:
 - `channels add` does not auto-create or rewrite bindings in non-interactive mode.
 - Interactive setup can optionally add account-scoped bindings.
 
-If your config was already in a mixed state (named accounts present, missing `default`, and top-level single-account values still set), run `openclaw doctor --fix` to move account-scoped values into `accounts.default`.
+If your config was already in a mixed state (named accounts present, missing `default`, and top-level single-account values still set), run `hanzo-bot doctor --fix` to move account-scoped values into `accounts.default`.
 
 ## Login / logout (interactive)
 
@@ -65,10 +65,10 @@ openclaw channels logout --channel whatsapp
 
 ## Troubleshooting
 
-- Run `openclaw status --deep` for a broad probe.
-- Use `openclaw doctor` for guided fixes.
-- `openclaw channels list` prints `Claude: HTTP 403 ... user:profile` → usage snapshot needs the `user:profile` scope. Use `--no-usage`, or provide a claude.ai session key (`CLAUDE_WEB_SESSION_KEY` / `CLAUDE_WEB_COOKIE`), or re-auth via Claude Code CLI.
-- `openclaw channels status` falls back to config-only summaries when the gateway is unreachable. If a supported channel credential is configured via SecretRef but unavailable in the current command path, it reports that account as configured with degraded notes instead of showing it as not configured.
+- Run `hanzo-bot status --deep` for a broad probe.
+- Use `hanzo-bot doctor` for guided fixes.
+- `hanzo-bot channels list` prints `Claude: HTTP 403 ... user:profile` → usage snapshot needs the `user:profile` scope. Use `--no-usage`, or provide a claude.ai session key (`CLAUDE_WEB_SESSION_KEY` / `CLAUDE_WEB_COOKIE`), or re-auth via Claude Code CLI.
+- `hanzo-bot channels status` falls back to config-only summaries when the gateway is unreachable. If a supported channel credential is configured via SecretRef but unavailable in the current command path, it reports that account as configured with degraded notes instead of showing it as not configured.
 
 ## Capabilities probe
 

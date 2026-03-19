@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../src/config/config.js";
+import type { Hanzo BotConfig } from "../../../src/config/config.js";
 
 const readConfigFileSnapshotForWrite = vi.fn();
 const writeConfigFile = vi.fn();
@@ -35,7 +35,7 @@ describe("maybePersistResolvedTelegramTarget", () => {
 
   it("skips writeback when target is already numeric", async () => {
     await maybePersistResolvedTelegramTarget({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as Hanzo BotConfig,
       rawTarget: "-100123",
       resolvedChatId: "-100123",
     });
@@ -73,7 +73,7 @@ describe("maybePersistResolvedTelegramTarget", () => {
     await maybePersistResolvedTelegramTarget({
       cfg: {
         cron: { store: "/tmp/cron/jobs.json" },
-      } as OpenClawConfig,
+      } as Hanzo BotConfig,
       rawTarget: "t.me/mychannel",
       resolvedChatId: "-100123",
     });
@@ -122,7 +122,7 @@ describe("maybePersistResolvedTelegramTarget", () => {
     loadCronStore.mockResolvedValue({ version: 1, jobs: [] });
 
     await maybePersistResolvedTelegramTarget({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as Hanzo BotConfig,
       rawTarget: "t.me/mychannel:topic:9",
       resolvedChatId: "-100123",
     });
@@ -158,7 +158,7 @@ describe("maybePersistResolvedTelegramTarget", () => {
     });
 
     await maybePersistResolvedTelegramTarget({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as Hanzo BotConfig,
       rawTarget: "@MyChannel",
       resolvedChatId: "-100123",
     });

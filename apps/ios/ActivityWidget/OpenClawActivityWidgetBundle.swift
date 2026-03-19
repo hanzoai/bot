@@ -2,8 +2,8 @@ import SwiftUI
 import WidgetKit
 
 @main
-struct OpenClawActivityWidgetBundle: WidgetBundle {
+struct Hanzo BotActivityWidgetBundle: WidgetBundle {
     var body: some Widget {
-        OpenClawLiveActivity()
+        Hanzo BotLiveActivity()
     }
 }

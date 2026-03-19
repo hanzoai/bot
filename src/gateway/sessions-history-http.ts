@@ -15,7 +15,7 @@ import {
 } from "./http-common.js";
 import { getBearerToken, getHeader } from "./http-utils.js";
 import {
-  attachOpenClawTranscriptMeta,
+  attachHanzo BotTranscriptMeta,
   readSessionMessages,
   resolveGatewaySessionStoreTarget,
   resolveSessionTranscriptCandidates,
@@ -236,7 +236,7 @@ export async function handleSessionHistoryHttpRequest(
     }
     if (update.message !== undefined) {
       const previousSeq = resolveMessageSeq(sentHistory.items.at(-1));
-      const nextMessage = attachOpenClawTranscriptMeta(update.message, {
+      const nextMessage = attachHanzo BotTranscriptMeta(update.message, {
         ...(typeof update.messageId === "string" ? { id: update.messageId } : {}),
         seq:
           typeof previousSeq === "number"

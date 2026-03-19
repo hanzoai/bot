@@ -57,7 +57,7 @@ const DYNAMIC_ARCHIVE_TEMPLATE_PRESETS = [
     outName: "bad.tgz",
     withDistIndex: false,
     packageJson: {
-      name: "@openclaw/nope",
+      name: "@hanzo/bot-nope",
       version: "0.0.1",
     } as Record<string, unknown>,
   },
@@ -310,7 +310,7 @@ function setupDualFormatInstallFixture(params: { bundleFormat: "codex" | "claude
   fs.writeFileSync(
     path.join(pluginDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/native-dual",
+      name: "@hanzo/bot-native-dual",
       version: "0.0.1",
       openclaw: { extensions: ["./dist/index.js"] },
       dependencies: { "left-pad": "1.3.0" },
@@ -451,7 +451,7 @@ beforeAll(async () => {
   fs.writeFileSync(
     path.join(installPluginFromDirTemplateDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/test-plugin",
+      name: "@hanzo/bot-test-plugin",
       version: "0.0.1",
       openclaw: { extensions: ["./dist/index.js"] },
       dependencies: { "left-pad": "1.3.0" },
@@ -469,7 +469,7 @@ beforeAll(async () => {
   fs.writeFileSync(
     path.join(manifestInstallTemplateDir, "package.json"),
     JSON.stringify({
-      name: "@openclaw/cognee-openclaw",
+      name: "@hanzo/bot-cognee-openclaw",
       version: "0.0.1",
       openclaw: { extensions: ["./dist/index.js"] },
     }),
@@ -503,7 +503,7 @@ beforeEach(() => {
 });
 
 describe("installPluginFromArchive", () => {
-  it("installs into ~/.openclaw/extensions and preserves scoped package ids", async () => {
+  it("installs into ~/.hanzo/bot/extensions and preserves scoped package ids", async () => {
     const { stateDir, archivePath, extensionsDir } = await setupVoiceCallArchiveInstall({
       outName: "plugin.tgz",
       version: "0.0.1",
@@ -513,7 +513,7 @@ describe("installPluginFromArchive", () => {
       archivePath,
       extensionsDir,
     });
-    expectSuccessfulArchiveInstall({ result, stateDir, pluginId: "@openclaw/voice-call" });
+    expectSuccessfulArchiveInstall({ result, stateDir, pluginId: "@hanzo/bot-voice-call" });
   });
 
   it("rejects installing when plugin already exists", async () => {
@@ -552,7 +552,7 @@ describe("installPluginFromArchive", () => {
       archivePath,
       extensionsDir,
     });
-    expectSuccessfulArchiveInstall({ result, stateDir, pluginId: "@openclaw/zipper" });
+    expectSuccessfulArchiveInstall({ result, stateDir, pluginId: "@hanzo/bot-zipper" });
   });
 
   it("allows updates when mode is update", async () => {
@@ -606,7 +606,7 @@ describe("installPluginFromArchive", () => {
 
   it("rejects packages without openclaw.extensions", async () => {
     const result = await installArchivePackageAndReturnResult({
-      packageJson: { name: "@openclaw/nope", version: "0.0.1" },
+      packageJson: { name: "@hanzo/bot-nope", version: "0.0.1" },
       outName: "bad.tgz",
     });
     expect(result.ok).toBe(false);
@@ -614,7 +614,7 @@ describe("installPluginFromArchive", () => {
       return;
     }
     expect(result.error).toContain("openclaw.extensions");
-    expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_OPENCLAW_EXTENSIONS);
+    expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_BOT_EXTENSIONS);
   });
 
   it("rejects legacy plugin package shape when openclaw.extensions is missing", async () => {
@@ -622,7 +622,7 @@ describe("installPluginFromArchive", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/legacy-entry-fallback",
+        name: "@hanzo/bot-legacy-entry-fallback",
         version: "0.0.1",
       }),
       "utf-8",
@@ -646,7 +646,7 @@ describe("installPluginFromArchive", () => {
     if (!result.ok) {
       expect(result.error).toContain("package.json missing openclaw.extensions");
       expect(result.error).toContain("update the plugin package");
-      expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_OPENCLAW_EXTENSIONS);
+      expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_BOT_EXTENSIONS);
       return;
     }
     expect.unreachable("expected install to fail without openclaw.extensions");
@@ -803,7 +803,7 @@ describe("installPluginFromDir", () => {
     expect(
       infoMessages.some((msg) =>
         msg.includes(
-          'Plugin manifest id "memory-cognee" differs from npm package name "@openclaw/cognee-openclaw"',
+          'Plugin manifest id "memory-cognee" differs from npm package name "@hanzo/bot-cognee-openclaw"',
         ),
       ),
     ).toBe(true);
@@ -832,7 +832,7 @@ describe("installPluginFromDir", () => {
       extensionsDir,
     });
 
-    expectInstalledWithPluginId(res, extensionsDir, "@openclaw/test-plugin");
+    expectInstalledWithPluginId(res, extensionsDir, "@hanzo/bot-test-plugin");
   });
 
   it("accepts legacy unscoped expected ids for scoped package names without manifest ids", async () => {
@@ -844,7 +844,7 @@ describe("installPluginFromDir", () => {
       expectedPluginId: "test-plugin",
     });
 
-    expectInstalledWithPluginId(res, extensionsDir, "@openclaw/test-plugin");
+    expectInstalledWithPluginId(res, extensionsDir, "@hanzo/bot-test-plugin");
   });
 
   it("rejects bare @ as an invalid scoped id", () => {
@@ -1079,8 +1079,8 @@ describe("installPluginFromNpmSpec", () => {
           code: 0,
           stdout: JSON.stringify([
             {
-              id: "@openclaw/voice-call@0.0.1",
-              name: "@openclaw/voice-call",
+              id: "@hanzo/bot-voice-call@0.0.1",
+              name: "@hanzo/bot-voice-call",
               version: "0.0.1",
               filename: packedName,
               integrity: "sha512-plugin-test",
@@ -1097,7 +1097,7 @@ describe("installPluginFromNpmSpec", () => {
     });
 
     const result = await installPluginFromNpmSpec({
-      spec: "@openclaw/voice-call@0.0.1",
+      spec: "@hanzo/bot-voice-call@0.0.1",
       extensionsDir,
       logger: { info: () => {}, warn: () => {} },
     });
@@ -1105,12 +1105,12 @@ describe("installPluginFromNpmSpec", () => {
     if (!result.ok) {
       return;
     }
-    expect(result.npmResolution?.resolvedSpec).toBe("@openclaw/voice-call@0.0.1");
+    expect(result.npmResolution?.resolvedSpec).toBe("@hanzo/bot-voice-call@0.0.1");
     expect(result.npmResolution?.integrity).toBe("sha512-plugin-test");
 
     expectSingleNpmPackIgnoreScriptsCall({
       calls: run.mock.calls,
-      expectedSpec: "@openclaw/voice-call@0.0.1",
+      expectedSpec: "@hanzo/bot-voice-call@0.0.1",
     });
 
     expect(packTmpDir).not.toBe("");
@@ -1129,8 +1129,8 @@ describe("installPluginFromNpmSpec", () => {
   it("aborts when integrity drift callback rejects the fetched artifact", async () => {
     const run = vi.mocked(runCommandWithTimeout);
     mockNpmPackMetadataResult(run, {
-      id: "@openclaw/voice-call@0.0.1",
-      name: "@openclaw/voice-call",
+      id: "@hanzo/bot-voice-call@0.0.1",
+      name: "@hanzo/bot-voice-call",
       version: "0.0.1",
       filename: "voice-call-0.0.1.tgz",
       integrity: "sha512-new",
@@ -1139,7 +1139,7 @@ describe("installPluginFromNpmSpec", () => {
 
     const onIntegrityDrift = vi.fn(async () => false);
     const result = await installPluginFromNpmSpec({
-      spec: "@openclaw/voice-call@0.0.1",
+      spec: "@hanzo/bot-voice-call@0.0.1",
       expectedIntegrity: "sha512-old",
       onIntegrityDrift,
     });
@@ -1163,7 +1163,7 @@ describe("installPluginFromNpmSpec", () => {
     });
 
     const result = await installPluginFromNpmSpec({
-      spec: "@openclaw/not-found",
+      spec: "@hanzo/bot-not-found",
       logger: { info: () => {}, warn: () => {} },
     });
     expect(result.ok).toBe(false);
@@ -1175,8 +1175,8 @@ describe("installPluginFromNpmSpec", () => {
   it("rejects bare npm specs that resolve to prerelease versions", async () => {
     const run = vi.mocked(runCommandWithTimeout);
     mockNpmPackMetadataResult(run, {
-      id: "@openclaw/voice-call@0.0.2-beta.1",
-      name: "@openclaw/voice-call",
+      id: "@hanzo/bot-voice-call@0.0.2-beta.1",
+      name: "@hanzo/bot-voice-call",
       version: "0.0.2-beta.1",
       filename: "voice-call-0.0.2-beta.1.tgz",
       integrity: "sha512-beta",
@@ -1184,13 +1184,13 @@ describe("installPluginFromNpmSpec", () => {
     });
 
     const result = await installPluginFromNpmSpec({
-      spec: "@openclaw/voice-call",
+      spec: "@hanzo/bot-voice-call",
       logger: { info: () => {}, warn: () => {} },
     });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error).toContain("prerelease version 0.0.2-beta.1");
-      expect(result.error).toContain('"@openclaw/voice-call@beta"');
+      expect(result.error).toContain('"@hanzo/bot-voice-call@beta"');
     }
   });
 
@@ -1207,8 +1207,8 @@ describe("installPluginFromNpmSpec", () => {
           code: 0,
           stdout: JSON.stringify([
             {
-              id: "@openclaw/voice-call@0.0.2-beta.1",
-              name: "@openclaw/voice-call",
+              id: "@hanzo/bot-voice-call@0.0.2-beta.1",
+              name: "@hanzo/bot-voice-call",
               version: "0.0.2-beta.1",
               filename: packedName,
               integrity: "sha512-beta",
@@ -1229,7 +1229,7 @@ describe("installPluginFromNpmSpec", () => {
       version: "0.0.1",
     });
     const result = await installPluginFromNpmSpec({
-      spec: "@openclaw/voice-call@beta",
+      spec: "@hanzo/bot-voice-call@beta",
       extensionsDir,
       logger: { info: () => {}, warn: () => {} },
     });
@@ -1238,10 +1238,10 @@ describe("installPluginFromNpmSpec", () => {
       return;
     }
     expect(result.npmResolution?.version).toBe("0.0.2-beta.1");
-    expect(result.npmResolution?.resolvedSpec).toBe("@openclaw/voice-call@0.0.2-beta.1");
+    expect(result.npmResolution?.resolvedSpec).toBe("@hanzo/bot-voice-call@0.0.2-beta.1");
     expectSingleNpmPackIgnoreScriptsCall({
       calls: run.mock.calls,
-      expectedSpec: "@openclaw/voice-call@beta",
+      expectedSpec: "@hanzo/bot-voice-call@beta",
     });
     expect(packTmpDir).not.toBe("");
   });

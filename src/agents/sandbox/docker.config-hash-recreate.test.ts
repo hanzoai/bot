@@ -94,7 +94,7 @@ function createSandboxConfig(
     backend: "docker",
     scope: "shared",
     workspaceAccess,
-    workspaceRoot: "~/.openclaw/sandboxes",
+    workspaceRoot: "~/.hanzo/bot/sandboxes",
     docker: {
       image: "openclaw-sandbox:test",
       containerPrefix: "oc-test-",

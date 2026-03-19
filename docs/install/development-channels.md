@@ -10,7 +10,7 @@ sidebarTitle: "Release Channels"
 
 # Development channels
 
-OpenClaw ships three update channels:
+Hanzo Bot ships three update channels:
 
 - **stable**: npm dist-tag `latest`. Recommended for most users.
 - **beta**: npm dist-tag `beta` (builds under test).
@@ -35,7 +35,7 @@ install method:
 - **`stable`/`beta`** (package installs): updates via the matching npm dist-tag.
 - **`stable`/`beta`** (git installs): checks out the latest matching git tag.
 - **`dev`**: ensures a git checkout (default `~/openclaw`, override with
-  `OPENCLAW_GIT_DIR`), switches to `main`, rebases on upstream, builds, and
+  `BOT_GIT_DIR`), switches to `main`, rebases on upstream, builds, and
   installs the global CLI from that checkout.
 
 Tip: if you want stable + dev in parallel, keep two clones and point your
@@ -63,14 +63,14 @@ openclaw update --tag openclaw@2026.3.12
 Notes:
 
 - `--tag` applies to **package (npm) installs only**. Git installs ignore it.
-- The tag is not persisted. Your next `openclaw update` uses your configured
+- The tag is not persisted. Your next `hanzo-bot update` uses your configured
   channel as usual.
 - Downgrade protection: if the target version is older than your current version,
-  OpenClaw prompts for confirmation (skip with `--yes`).
+  Hanzo Bot prompts for confirmation (skip with `--yes`).
 
 ## Dry run
 
-Preview what `openclaw update` would do without making changes:
+Preview what `hanzo-bot update` would do without making changes:
 
 ```bash
 openclaw update --dry-run
@@ -84,7 +84,7 @@ whether a downgrade confirmation would be required.
 
 ## Plugins and channels
 
-When you switch channels with `openclaw update`, OpenClaw also syncs plugin
+When you switch channels with `hanzo-bot update`, Hanzo Bot also syncs plugin
 sources:
 
 - `dev` prefers bundled plugins from the git checkout.

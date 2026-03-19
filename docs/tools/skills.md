@@ -6,31 +6,31 @@ read_when:
 title: "Skills"
 ---
 
-# Skills (OpenClaw)
+# Skills (Hanzo Bot)
 
-OpenClaw uses **[AgentSkills](https://agentskills.io)-compatible** skill folders to teach the agent how to use tools. Each skill is a directory containing a `SKILL.md` with YAML frontmatter and instructions. OpenClaw loads **bundled skills** plus optional local overrides, and filters them at load time based on environment, config, and binary presence.
+Hanzo Bot uses **[AgentSkills](https://agentskills.io)-compatible** skill folders to teach the agent how to use tools. Each skill is a directory containing a `SKILL.md` with YAML frontmatter and instructions. Hanzo Bot loads **bundled skills** plus optional local overrides, and filters them at load time based on environment, config, and binary presence.
 
 ## Locations and precedence
 
 Skills are loaded from **three** places:
 
-1. **Bundled skills**: shipped with the install (npm package or OpenClaw.app)
-2. **Managed/local skills**: `~/.openclaw/skills`
+1. **Bundled skills**: shipped with the install (npm package or Hanzo Bot.app)
+2. **Managed/local skills**: `~/.hanzo/bot/skills`
 3. **Workspace skills**: `<workspace>/skills`
 
 If a skill name conflicts, precedence is:
 
-`<workspace>/skills` (highest) → `~/.openclaw/skills` → bundled skills (lowest)
+`<workspace>/skills` (highest) → `~/.hanzo/bot/skills` → bundled skills (lowest)
 
 Additionally, you can configure extra skill folders (lowest precedence) via
-`skills.load.extraDirs` in `~/.openclaw/openclaw.json`.
+`skills.load.extraDirs` in `~/.hanzoai/bot.json`.
 
 ## Per-agent vs shared skills
 
 In **multi-agent** setups, each agent has its own workspace. That means:
 
 - **Per-agent skills** live in `<workspace>/skills` for that agent only.
-- **Shared skills** live in `~/.openclaw/skills` (managed/local) and are visible
+- **Shared skills** live in `~/.hanzo/bot/skills` (managed/local) and are visible
   to **all agents** on the same machine.
 - **Shared folders** can also be added via `skills.load.extraDirs` (lowest
   precedence) if you want a common skills pack used by multiple agents.
@@ -49,8 +49,8 @@ tool surface those skills teach.
 
 ## ClawHub (install + sync)
 
-ClawHub is the public skills registry for OpenClaw. Browse at
-[https://clawhub.com](https://clawhub.com). Use it to discover, install, update, and back up skills.
+ClawHub is the public skills registry for Hanzo Bot. Browse at
+[https://skills.hanzo.bot](https://skills.hanzo.bot). Use it to discover, install, update, and back up skills.
 Full guide: [ClawHub](/tools/clawhub).
 
 Common flows:
@@ -63,7 +63,7 @@ Common flows:
   - `clawhub sync --all`
 
 By default, `clawhub` installs into `./skills` under your current working
-directory (or falls back to the configured OpenClaw workspace). OpenClaw picks
+directory (or falls back to the configured Hanzo Bot workspace). Hanzo Bot picks
 that up as `<workspace>/skills` on the next session.
 
 ## Security notes
@@ -105,7 +105,7 @@ Notes:
 
 ## Gating (load-time filters)
 
-OpenClaw **filters skills at load time** using `metadata` (single-line JSON):
+Hanzo Bot **filters skills at load time** using `metadata` (single-line JSON):
 
 ```markdown
 ---
@@ -113,7 +113,7 @@ name: image-lab
 description: Generate or edit images via a provider-backed image workflow
 metadata:
   {
-    "openclaw":
+    "@hanzo/bot":
       {
         "requires": { "bins": ["uv"], "env": ["GEMINI_API_KEY"], "config": ["browser.enabled"] },
         "primaryEnv": "GEMINI_API_KEY",
@@ -153,7 +153,7 @@ name: gemini
 description: Use Gemini CLI for coding assistance and Google search lookups.
 metadata:
   {
-    "openclaw":
+    "@hanzo/bot":
       {
         "emoji": "♊️",
         "requires": { "bins": ["gemini"] },
@@ -175,18 +175,18 @@ metadata:
 Notes:
 
 - If multiple installers are listed, the gateway picks a **single** preferred option (brew when available, otherwise node).
-- If all installers are `download`, OpenClaw lists each entry so you can see the available artifacts.
+- If all installers are `download`, Hanzo Bot lists each entry so you can see the available artifacts.
 - Installer specs can include `os: ["darwin"|"linux"|"win32"]` to filter options by platform.
 - Node installs honor `skills.install.nodeManager` in `openclaw.json` (default: npm; options: npm/pnpm/yarn/bun).
   This only affects **skill installs**; the Gateway runtime should still be Node
   (Bun is not recommended for WhatsApp/Telegram).
 - Go installs: if `go` is missing and `brew` is available, the gateway installs Go via Homebrew first and sets `GOBIN` to Homebrew’s `bin` when possible.
-- Download installs: `url` (required), `archive` (`tar.gz` | `tar.bz2` | `zip`), `extract` (default: auto when archive detected), `stripComponents`, `targetDir` (default: `~/.openclaw/tools/<skillKey>`).
+- Download installs: `url` (required), `archive` (`tar.gz` | `tar.bz2` | `zip`), `extract` (default: auto when archive detected), `stripComponents`, `targetDir` (default: `~/.hanzo/bot/tools/<skillKey>`).
 
 If no `metadata.openclaw` is present, the skill is always eligible (unless
 disabled in config or blocked by `skills.allowBundled` for bundled skills).
 
-## Config overrides (`~/.openclaw/openclaw.json`)
+## Config overrides (`~/.hanzoai/bot.json`)
 
 Bundled/managed skills can be toggled and supplied with env values:
 
@@ -214,7 +214,7 @@ Bundled/managed skills can be toggled and supplied with env values:
 
 Note: if the skill name contains hyphens, quote the key (JSON5 allows quoted keys).
 
-If you want stock image generation/editing inside OpenClaw itself, use the core
+If you want stock image generation/editing inside Hanzo Bot itself, use the core
 `image_generate` tool with `agents.defaults.imageGenerationModel` instead of a
 bundled skill. Skill examples here are for custom or third-party workflows.
 
@@ -233,7 +233,7 @@ Rules:
 
 ## Environment injection (per agent run)
 
-When an agent run starts, OpenClaw:
+When an agent run starts, Hanzo Bot:
 
 1. Reads skill metadata.
 2. Applies any `skills.entries.<key>.env` or `skills.entries.<key>.apiKey` to
@@ -245,19 +245,19 @@ This is **scoped to the agent run**, not a global shell environment.
 
 ## Session snapshot (performance)
 
-OpenClaw snapshots the eligible skills **when a session starts** and reuses that list for subsequent turns in the same session. Changes to skills or config take effect on the next new session.
+Hanzo Bot snapshots the eligible skills **when a session starts** and reuses that list for subsequent turns in the same session. Changes to skills or config take effect on the next new session.
 
 Skills can also refresh mid-session when the skills watcher is enabled or when a new eligible remote node appears (see below). Think of this as a **hot reload**: the refreshed list is picked up on the next agent turn.
 
 ## Remote macOS nodes (Linux gateway)
 
-If the Gateway is running on Linux but a **macOS node** is connected **with `system.run` allowed** (Exec approvals security not set to `deny`), OpenClaw can treat macOS-only skills as eligible when the required binaries are present on that node. The agent should execute those skills via the `nodes` tool (typically `nodes.run`).
+If the Gateway is running on Linux but a **macOS node** is connected **with `system.run` allowed** (Exec approvals security not set to `deny`), Hanzo Bot can treat macOS-only skills as eligible when the required binaries are present on that node. The agent should execute those skills via the `nodes` tool (typically `nodes.run`).
 
 This relies on the node reporting its command support and on a bin probe via `system.run`. If the macOS node goes offline later, the skills remain visible; invocations may fail until the node reconnects.
 
 ## Skills watcher (auto-refresh)
 
-By default, OpenClaw watches skill folders and bumps the skills snapshot when `SKILL.md` files change. Configure this under `skills.load`:
+By default, Hanzo Bot watches skill folders and bumps the skills snapshot when `SKILL.md` files change. Configure this under `skills.load`:
 
 ```json5
 {
@@ -272,7 +272,7 @@ By default, OpenClaw watches skill folders and bumps the skills snapshot when `S
 
 ## Token impact (skills list)
 
-When skills are eligible, OpenClaw injects a compact XML list of available skills into the system prompt (via `formatSkillsForPrompt` in `pi-coding-agent`). The cost is deterministic:
+When skills are eligible, Hanzo Bot injects a compact XML list of available skills into the system prompt (via `formatSkillsForPrompt` in `pi-coding-agent`). The cost is deterministic:
 
 - **Base overhead (only when ≥1 skill):** 195 characters.
 - **Per skill:** 97 characters + the length of the XML-escaped `<name>`, `<description>`, and `<location>` values.
@@ -290,8 +290,8 @@ Notes:
 
 ## Managed skills lifecycle
 
-OpenClaw ships a baseline set of skills as **bundled skills** as part of the
-install (npm package or OpenClaw.app). `~/.openclaw/skills` exists for local
+Hanzo Bot ships a baseline set of skills as **bundled skills** as part of the
+install (npm package or Hanzo Bot.app). `~/.hanzo/bot/skills` exists for local
 overrides (for example, pinning/patching a skill without changing the bundled
 copy). Workspace skills are user-owned and override both on name conflicts.
 
@@ -301,6 +301,6 @@ See [Skills config](/tools/skills-config) for the full configuration schema.
 
 ## Looking for more skills?
 
-Browse [https://clawhub.com](https://clawhub.com).
+Browse [https://skills.hanzo.bot](https://skills.hanzo.bot).
 
 ---

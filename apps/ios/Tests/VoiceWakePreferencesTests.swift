@@ -1,10 +1,10 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite struct VoiceWakePreferencesTests {
     @Test func sanitizeTriggerWordsTrimsAndDropsEmpty() {
-        #expect(VoiceWakePreferences.sanitizeTriggerWords([" openclaw ", "", " \nclaude\t"]) == ["openclaw", "claude"])
+        #expect(VoiceWakePreferences.sanitizeTriggerWords([" hanzo-bot ", "", " \nclaude\t"]) == ["@hanzo/bot", "claude"])
     }
 
     @Test func sanitizeTriggerWordsFallsBackToDefaultsWhenEmpty() {

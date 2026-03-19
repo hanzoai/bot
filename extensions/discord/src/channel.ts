@@ -55,7 +55,7 @@ import {
   PAIRING_APPROVED_MESSAGE,
   projectCredentialSnapshotFields,
   resolveConfiguredFromCredentialStatuses,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "./runtime-api.js";
 import { getDiscordRuntime } from "./runtime.js";
 import { fetchChannelPermissionsDiscord } from "./send.js";
@@ -114,7 +114,7 @@ const discordMessageActions: ChannelMessageActionAdapter = {
 function buildDiscordCrossContextComponents(params: {
   originLabel: string;
   message: string;
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   accountId?: string | null;
 }) {
   const trimmed = params.message.trim();
@@ -127,7 +127,7 @@ function buildDiscordCrossContextComponents(params: {
   return [new DiscordUiContainer({ cfg: params.cfg, accountId: params.accountId, components })];
 }
 
-function hasDiscordExecApprovalDmRoute(cfg: OpenClawConfig): boolean {
+function hasDiscordExecApprovalDmRoute(cfg: Hanzo BotConfig): boolean {
   return listDiscordAccountIds(cfg).some((accountId) => {
     const execApprovals = resolveDiscordAccount({ cfg, accountId }).config.execApprovals;
     if (!execApprovals?.enabled || (execApprovals.approvers?.length ?? 0) === 0) {
@@ -215,7 +215,7 @@ function parseDiscordExplicitTarget(raw: string) {
 }
 
 function buildDiscordBaseSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   agentId: string;
   accountId?: string | null;
   peer: RoutePeer;
@@ -246,7 +246,7 @@ function resolveDiscordOutboundTargetKindHint(params: {
 }
 
 function resolveDiscordOutboundSessionRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   agentId: string;
   accountId?: string | null;
   target: string;
@@ -330,7 +330,7 @@ export const discordPlugin: ChannelPlugin<ResolvedDiscordAccount> = {
   agentPrompt: {
     messageToolHints: () => [
       "- Discord components: set `components` when sending messages to include buttons, selects, or v2 containers.",
-      "- Forms: add `components.modal` (title, fields). OpenClaw adds a trigger button and routes submissions as new messages.",
+      "- Forms: add `components.modal` (title, fields). Hanzo Bot adds a trigger button and routes submissions as new messages.",
     ],
   },
   messaging: {

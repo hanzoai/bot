@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `openclaw directory` (self, peers, groups)"
+summary: "CLI reference for `hanzo-bot directory` (self, peers, groups)"
 read_when:
   - You want to look up contacts/groups/self ids for a channel
   - You are developing a channel directory adapter
 title: "directory"
 ---
 
-# `openclaw directory`
+# `hanzo-bot directory`
 
 Directory lookups for channels that support it (contacts/peers, groups, and “me”).
 
@@ -18,7 +18,7 @@ Directory lookups for channels that support it (contacts/peers, groups, and “m
 
 ## Notes
 
-- `directory` is meant to help you find IDs you can paste into other commands (especially `openclaw message send --target ...`).
+- `directory` is meant to help you find IDs you can paste into other commands (especially `hanzo-bot message send --target ...`).
 - For many channels, results are config-backed (allowlists / configured groups) rather than a live provider directory.
 - Default output is `id` (and sometimes `name`) separated by a tab; use `--json` for scripting.
 

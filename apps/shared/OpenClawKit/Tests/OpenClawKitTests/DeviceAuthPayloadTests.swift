@@ -1,5 +1,5 @@
 import Testing
-@testable import OpenClawKit
+@testable import Hanzo BotKit
 
 @Suite("DeviceAuthPayload")
 struct DeviceAuthPayloadTests {

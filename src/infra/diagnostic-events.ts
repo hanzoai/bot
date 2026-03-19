@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 
 export type DiagnosticSessionState = "idle" | "processing" | "waiting";
 
@@ -188,7 +188,7 @@ function getDiagnosticEventsState(): DiagnosticEventsGlobalState {
   return globalStore.__openclawDiagnosticEventsState;
 }
 
-export function isDiagnosticsEnabled(config?: OpenClawConfig): boolean {
+export function isDiagnosticsEnabled(config?: Hanzo BotConfig): boolean {
   return config?.diagnostics?.enabled === true;
 }
 

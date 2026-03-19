@@ -6,8 +6,8 @@ import { captureEnv } from "../test-utils/env.js";
 let envSnapshot: ReturnType<typeof captureEnv>;
 
 beforeAll(() => {
-  envSnapshot = captureEnv(["OPENCLAW_PROFILE"]);
-  process.env.OPENCLAW_PROFILE = "isolated";
+  envSnapshot = captureEnv(["BOT_PROFILE"]);
+  process.env.BOT_PROFILE = "isolated";
 });
 
 afterAll(() => {
@@ -316,7 +316,7 @@ vi.mock("../gateway/session-utils.js", async (importOriginal) => {
   };
 });
 vi.mock("../infra/openclaw-root.js", () => ({
-  resolveOpenClawPackageRoot: vi.fn().mockResolvedValue("/tmp/openclaw"),
+  resolveHanzo BotPackageRoot: vi.fn().mockResolvedValue("/tmp/openclaw"),
 }));
 vi.mock("../infra/os-summary.js", () => ({
   resolveOsSummary: () => ({
@@ -367,7 +367,7 @@ vi.mock("../daemon/service.js", () => ({
     readRuntime: async () => ({ status: "running", pid: 1234 }),
     readCommand: async () => ({
       programArguments: ["node", "dist/entry.js", "gateway"],
-      sourcePath: "/tmp/Library/LaunchAgents/ai.openclaw.gateway.plist",
+      sourcePath: "/tmp/Library/LaunchAgents/ai.hanzo.bot.gateway.plist",
     }),
   }),
 }));
@@ -380,7 +380,7 @@ vi.mock("../daemon/node-service.js", () => ({
     readRuntime: async () => ({ status: "running", pid: 4321 }),
     readCommand: async () => ({
       programArguments: ["node", "dist/entry.js", "node-host"],
-      sourcePath: "/tmp/Library/LaunchAgents/ai.openclaw.node.plist",
+      sourcePath: "/tmp/Library/LaunchAgents/ai.hanzo.bot.node.plist",
     }),
   }),
 }));
@@ -489,7 +489,7 @@ describe("statusCommand", () => {
     ]);
     const logs = await runStatusAndGetLogs();
     for (const token of [
-      "OpenClaw status",
+      "Hanzo Bot status",
       "Overview",
       "Security audit",
       "Summary:",
@@ -518,14 +518,14 @@ describe("statusCommand", () => {
     expect(
       logs.some(
         (line) =>
-          line.includes("openclaw status --all") ||
-          line.includes("openclaw --profile isolated status --all"),
+          line.includes("hanzo-bot status --all") ||
+          line.includes("hanzo-bot --profile isolated status --all"),
       ),
     ).toBe(true);
   });
 
   it("shows gateway auth when reachable", async () => {
-    await withEnvVar("OPENCLAW_GATEWAY_TOKEN", "abcd1234", async () => {
+    await withEnvVar("BOT_GATEWAY_TOKEN", "abcd1234", async () => {
       mockProbeGatewayResult({
         ok: true,
         connectLatencyMs: 123,

@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { runCapability } from "./runner.js";
 import { withVideoFixture } from "./runner.test-utils.js";
@@ -41,7 +41,7 @@ describe("runCapability video provider wiring", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as Hanzo BotConfig;
 
       const result = await runCapability({
         capability: "video",
@@ -84,7 +84,7 @@ describe("runCapability video provider wiring", () => {
           GEMINI_API_KEY: undefined,
           GOOGLE_API_KEY: undefined,
           MOONSHOT_API_KEY: undefined,
-          OPENCLAW_AGENT_DIR: isolatedAgentDir,
+          BOT_AGENT_DIR: isolatedAgentDir,
           PI_CODING_AGENT_DIR: isolatedAgentDir,
         },
         async () => {
@@ -105,7 +105,7 @@ describe("runCapability video provider wiring", () => {
                   },
                 },
               },
-            } as unknown as OpenClawConfig;
+            } as unknown as Hanzo BotConfig;
 
             const result = await runCapability({
               capability: "video",

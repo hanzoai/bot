@@ -9,12 +9,12 @@ import { shouldSkipRespawnForArgv } from "./cli/respawn-policy.js";
 import { normalizeWindowsArgv } from "./cli/windows-argv.js";
 import { isTruthyEnvValue, normalizeEnv } from "./infra/env.js";
 import { isMainModule } from "./infra/is-main.js";
-import { ensureOpenClawExecMarkerOnProcess } from "./infra/openclaw-exec-env.js";
+import { ensureHanzo BotExecMarkerOnProcess } from "./infra/openclaw-exec-env.js";
 import { installProcessWarningFilter } from "./infra/warning-filter.js";
 import { attachChildProcessBridge } from "./process/child-process-bridge.js";
 
 const ENTRY_WRAPPER_PAIRS = [
-  { wrapperBasename: "openclaw.mjs", entryBasename: "entry.js" },
+  { wrapperBasename: "hanzo-bot.mjs", entryBasename: "entry.js" },
   { wrapperBasename: "openclaw.js", entryBasename: "entry.js" },
 ] as const;
 
@@ -44,8 +44,8 @@ if (
   const { installGaxiosFetchCompat } = await import("./infra/gaxios-fetch-compat.js");
 
   await installGaxiosFetchCompat();
-  process.title = "openclaw";
-  ensureOpenClawExecMarkerOnProcess();
+  process.title = "@hanzo/bot";
+  ensureHanzo BotExecMarkerOnProcess();
   installProcessWarningFilter();
   normalizeEnv();
   if (!isTruthyEnvValue(process.env.NODE_DISABLE_COMPILE_CACHE)) {
@@ -57,7 +57,7 @@ if (
   }
 
   if (shouldForceReadOnlyAuthStore(process.argv)) {
-    process.env.OPENCLAW_AUTH_STORE_READONLY = "1";
+    process.env.BOT_AUTH_STORE_READONLY = "1";
   }
 
   if (process.argv.includes("--no-color")) {
@@ -84,10 +84,10 @@ if (
     if (shouldSkipRespawnForArgv(process.argv)) {
       return false;
     }
-    if (isTruthyEnvValue(process.env.OPENCLAW_NO_RESPAWN)) {
+    if (isTruthyEnvValue(process.env.BOT_NO_RESPAWN)) {
       return false;
     }
-    if (isTruthyEnvValue(process.env.OPENCLAW_NODE_OPTIONS_READY)) {
+    if (isTruthyEnvValue(process.env.BOT_NODE_OPTIONS_READY)) {
       return false;
     }
     if (hasExperimentalWarningSuppressed()) {
@@ -95,7 +95,7 @@ if (
     }
 
     // Respawn guard (and keep recursion bounded if something goes wrong).
-    process.env.OPENCLAW_NODE_OPTIONS_READY = "1";
+    process.env.BOT_NODE_OPTIONS_READY = "1";
     // Pass flag as a Node CLI option, not via NODE_OPTIONS (--disable-warning is disallowed in NODE_OPTIONS).
     const child = spawn(
       process.execPath,
@@ -135,7 +135,7 @@ if (
     Promise.all([import("./version.js"), import("./infra/git-commit.js")])
       .then(([{ VERSION }, { resolveCommitHash }]) => {
         const commit = resolveCommitHash({ moduleUrl: import.meta.url });
-        console.log(commit ? `OpenClaw ${VERSION} (${commit})` : `OpenClaw ${VERSION}`);
+        console.log(commit ? `Hanzo Bot ${VERSION} (${commit})` : `Hanzo Bot ${VERSION}`);
         process.exit(0);
       })
       .catch((error) => {

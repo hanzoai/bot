@@ -1,6 +1,6 @@
 import {
   applyProviderConfigWithDefaultModelPreset,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 import {
   buildKimiCodingProvider,
@@ -15,7 +15,7 @@ function resolveKimiCodingDefaultModel() {
   return buildKimiCodingProvider().models[0];
 }
 
-function applyKimiCodingPreset(cfg: OpenClawConfig, primaryModelRef?: string): OpenClawConfig {
+function applyKimiCodingPreset(cfg: Hanzo BotConfig, primaryModelRef?: string): Hanzo BotConfig {
   const defaultModel = resolveKimiCodingDefaultModel();
   if (!defaultModel) {
     return cfg;
@@ -31,10 +31,10 @@ function applyKimiCodingPreset(cfg: OpenClawConfig, primaryModelRef?: string): O
   });
 }
 
-export function applyKimiCodeProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyKimiCodeProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyKimiCodingPreset(cfg);
 }
 
-export function applyKimiCodeConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyKimiCodeConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyKimiCodingPreset(cfg, KIMI_MODEL_REF);
 }

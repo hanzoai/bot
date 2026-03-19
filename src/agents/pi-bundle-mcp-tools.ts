@@ -2,7 +2,7 @@ import type { AgentToolResult } from "@mariozechner/pi-agent-core";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { logDebug, logWarn } from "../logger.js";
 import { loadEmbeddedPiMcpConfig } from "./embedded-pi-mcp.js";
 import {
@@ -121,7 +121,7 @@ async function disposeSession(session: BundleMcpSession) {
 
 export async function createBundleMcpToolRuntime(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: Hanzo BotConfig;
   reservedToolNames?: Iterable<string>;
 }): Promise<BundleMcpToolRuntime> {
   const loaded = loadEmbeddedPiMcpConfig({

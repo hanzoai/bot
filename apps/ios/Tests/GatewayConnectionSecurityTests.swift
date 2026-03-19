@@ -1,8 +1,8 @@
 import Foundation
 import Network
-import OpenClawKit
+import Hanzo BotKit
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 @Suite(.serialized) struct GatewayConnectionSecurityTests {
     private func makeController() -> GatewayConnectionController {
@@ -32,7 +32,7 @@ import Testing
     }
 
     private func clearTLSFingerprint(stableID: String) {
-        let suite = UserDefaults(suiteName: "ai.openclaw.shared") ?? .standard
+        let suite = UserDefaults(suiteName: "ai.hanzo.bot.shared") ?? .standard
         suite.removeObject(forKey: "gateway.tls.\(stableID)")
     }
 

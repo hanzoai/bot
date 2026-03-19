@@ -8,7 +8,7 @@ title: "Tools Invoke API"
 
 # Tools Invoke (HTTP)
 
-OpenClaw’s Gateway exposes a simple HTTP endpoint for invoking a single tool directly. It is always enabled, but gated by Gateway auth and tool policy.
+Hanzo Bot’s Gateway exposes a simple HTTP endpoint for invoking a single tool directly. It is always enabled, but gated by Gateway auth and tool policy.
 
 - `POST /tools/invoke`
 - Same port as the Gateway (WS + HTTP multiplex): `http://<gateway-host>:<port>/tools/invoke`
@@ -23,8 +23,8 @@ Uses the Gateway auth configuration. Send a bearer token:
 
 Notes:
 
-- When `gateway.auth.mode="token"`, use `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`).
-- When `gateway.auth.mode="password"`, use `gateway.auth.password` (or `OPENCLAW_GATEWAY_PASSWORD`).
+- When `gateway.auth.mode="token"`, use `gateway.auth.token` (or `BOT_GATEWAY_TOKEN`).
+- When `gateway.auth.mode="password"`, use `gateway.auth.password` (or `BOT_GATEWAY_PASSWORD`).
 - If `gateway.auth.rateLimit` is configured and too many auth failures occur, the endpoint returns `429` with `Retry-After`.
 
 ## Request body

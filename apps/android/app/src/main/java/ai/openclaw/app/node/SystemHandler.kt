@@ -1,4 +1,4 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -9,7 +9,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import ai.openclaw.app.gateway.GatewaySession
+import ai.hanzo.bot.app.gateway.GatewaySession
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -70,9 +70,9 @@ private class AndroidSystemNotificationPoster(
     val normalizedPriority = priority.orEmpty().trim().lowercase()
     val (suffix, importance, name) =
       when (normalizedPriority) {
-        "passive" -> Triple("passive", NotificationManager.IMPORTANCE_LOW, "OpenClaw Passive")
-        "timesensitive" -> Triple("timesensitive", NotificationManager.IMPORTANCE_HIGH, "OpenClaw Time Sensitive")
-        else -> Triple("active", NotificationManager.IMPORTANCE_DEFAULT, "OpenClaw Active")
+        "passive" -> Triple("passive", NotificationManager.IMPORTANCE_LOW, "Hanzo Bot Passive")
+        "timesensitive" -> Triple("timesensitive", NotificationManager.IMPORTANCE_HIGH, "Hanzo Bot Time Sensitive")
+        else -> Triple("active", NotificationManager.IMPORTANCE_DEFAULT, "Hanzo Bot Active")
       }
     val channelId = "$NOTIFICATION_CHANNEL_BASE_ID.$suffix"
     val manager = appContext.getSystemService(NotificationManager::class.java)

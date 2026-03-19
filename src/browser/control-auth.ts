@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { loadConfig } from "../config/config.js";
 import { resolveGatewayAuth } from "../gateway/auth.js";
 import { ensureGatewayStartupAuth } from "../gateway/startup-auth.js";
@@ -9,7 +9,7 @@ export type BrowserControlAuth = {
 };
 
 export function resolveBrowserControlAuth(
-  cfg: OpenClawConfig | undefined,
+  cfg: Hanzo BotConfig | undefined,
   env: NodeJS.ProcessEnv = process.env,
 ): BrowserControlAuth {
   const auth = resolveGatewayAuth({
@@ -38,7 +38,7 @@ function shouldAutoGenerateBrowserAuth(env: NodeJS.ProcessEnv): boolean {
 }
 
 export async function ensureBrowserControlAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<{
   auth: BrowserControlAuth;

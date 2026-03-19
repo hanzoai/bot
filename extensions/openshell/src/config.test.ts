@@ -8,7 +8,7 @@ describe("openshell plugin config", () => {
       command: "openshell",
       gateway: undefined,
       gatewayEndpoint: undefined,
-      from: "openclaw",
+      from: "@hanzo/bot",
       policy: undefined,
       providers: [],
       gpu: false,

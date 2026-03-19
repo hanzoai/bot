@@ -3,7 +3,7 @@ import {
   createDirectoryTestRuntime,
   expectDirectorySurface,
 } from "../../../test/helpers/extensions/directory.js";
-import type { OpenClawConfig, RuntimeEnv } from "../runtime-api.js";
+import type { Hanzo BotConfig, RuntimeEnv } from "../runtime-api.js";
 import { zaloPlugin } from "./channel.js";
 
 describe("zalo directory", () => {
@@ -16,7 +16,7 @@ describe("zalo directory", () => {
           allowFrom: ["zalo:123", "zl:234", "345"],
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as Hanzo BotConfig;
 
     const directory = expectDirectorySurface(zaloPlugin.directory);
 

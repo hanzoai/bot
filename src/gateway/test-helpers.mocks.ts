@@ -7,7 +7,7 @@ import { Mock, vi } from "vitest";
 import type { MsgContext } from "../auto-reply/templating.js";
 import type { GetReplyOptions, ReplyPayload } from "../auto-reply/types.js";
 import type { ChannelPlugin, ChannelOutboundAdapter } from "../channels/plugins/types.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import type { AgentBinding } from "../config/types.agents.js";
 import type { HooksConfig } from "../config/types.hooks.js";
@@ -25,7 +25,7 @@ type StubChannelOptions = {
 type GetReplyFromConfigFn = (
   ctx: MsgContext,
   opts?: GetReplyOptions,
-  configOverride?: OpenClawConfig,
+  configOverride?: Hanzo BotConfig,
 ) => Promise<ReplyPayload | ReplyPayload[] | undefined>;
 
 const createStubOutboundAdapter = (channelId: ChannelPlugin["id"]): ChannelOutboundAdapter => ({
@@ -208,7 +208,7 @@ const testConfigRoot = {
 
 export const setTestConfigRoot = (root: string) => {
   testConfigRoot.value = root;
-  process.env.OPENCLAW_CONFIG_PATH = path.join(root, "openclaw.json");
+  process.env.BOT_CONFIG_PATH = path.join(root, "openclaw.json");
 };
 
 export const testTailnetIPv4 = hoisted.testTailnetIPv4;
@@ -492,7 +492,7 @@ vi.mock("../config/config.js", async () => {
       canvasHost,
       hooks,
       cron,
-    } as OpenClawConfig;
+    } as Hanzo BotConfig;
   };
 
   const writeConfigFile = vi.fn(async (cfg: Record<string, unknown>) => {
@@ -517,7 +517,7 @@ vi.mock("../config/config.js", async () => {
       config: testState.migrationConfig ?? (raw as Record<string, unknown>),
       changes: testState.migrationChanges,
     }),
-    applyConfigOverrides: (cfg: OpenClawConfig) =>
+    applyConfigOverrides: (cfg: Hanzo BotConfig) =>
       composeTestConfig(cfg as Record<string, unknown>),
     loadConfig: () => {
       const configPath = resolveConfigPath();
@@ -616,11 +616,11 @@ vi.mock("../plugins/loader.js", async () => {
     await vi.importActual<typeof import("../plugins/loader.js")>("../plugins/loader.js");
   return {
     ...actual,
-    loadOpenClawPlugins: () => pluginRegistryState.registry,
+    loadHanzo BotPlugins: () => pluginRegistryState.registry,
   };
 });
 
-process.env.OPENCLAW_SKIP_CHANNELS = "1";
-process.env.OPENCLAW_SKIP_CRON = "1";
-process.env.OPENCLAW_SKIP_CHANNELS = "1";
-process.env.OPENCLAW_SKIP_CRON = "1";
+process.env.BOT_SKIP_CHANNELS = "1";
+process.env.BOT_SKIP_CRON = "1";
+process.env.BOT_SKIP_CHANNELS = "1";
+process.env.BOT_SKIP_CRON = "1";

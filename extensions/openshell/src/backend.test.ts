@@ -20,7 +20,7 @@ describe("openshell backend manager", () => {
     vi.clearAllMocks();
   });
 
-  it("checks runtime status with config override from OpenClaw config", async () => {
+  it("checks runtime status with config override from Hanzo Bot config", async () => {
     cliMocks.runOpenShellCli.mockResolvedValue({
       code: 0,
       stdout: "{}",
@@ -30,7 +30,7 @@ describe("openshell backend manager", () => {
     const manager = createOpenShellSandboxBackendManager({
       pluginConfig: resolveOpenShellPluginConfig({
         command: "openshell",
-        from: "openclaw",
+        from: "@hanzo/bot",
       }),
     });
 
@@ -98,7 +98,7 @@ describe("openshell backend manager", () => {
         sessionKey: "agent:main",
         createdAtMs: 1,
         lastUsedAtMs: 1,
-        image: "openclaw",
+        image: "@hanzo/bot",
         configLabelKind: "Source",
       },
       config: {},

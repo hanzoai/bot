@@ -1,7 +1,7 @@
 import Foundation
 import Observation
-import OpenClawKit
-import OpenClawProtocol
+import Hanzo BotKit
+import Hanzo BotProtocol
 import OSLog
 
 @MainActor

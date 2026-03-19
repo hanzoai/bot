@@ -24,7 +24,7 @@ let resolveExecApprovalsPath: ExecApprovalsModule["resolveExecApprovalsPath"];
 let resolveExecApprovalsSocketPath: ExecApprovalsModule["resolveExecApprovalsSocketPath"];
 
 const tempDirs: string[] = [];
-const originalOpenClawHome = process.env.OPENCLAW_HOME;
+const originalHanzo BotHome = process.env.BOT_HOME;
 
 beforeEach(async () => {
   vi.resetModules();
@@ -44,10 +44,10 @@ beforeEach(async () => {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  if (originalOpenClawHome === undefined) {
-    delete process.env.OPENCLAW_HOME;
+  if (originalHanzo BotHome === undefined) {
+    delete process.env.BOT_HOME;
   } else {
-    process.env.OPENCLAW_HOME = originalOpenClawHome;
+    process.env.BOT_HOME = originalHanzo BotHome;
   }
   for (const dir of tempDirs.splice(0)) {
     fs.rmSync(dir, { recursive: true, force: true });
@@ -57,7 +57,7 @@ afterEach(() => {
 function createHomeDir(): string {
   const dir = makeTempDir();
   tempDirs.push(dir);
-  process.env.OPENCLAW_HOME = dir;
+  process.env.BOT_HOME = dir;
   return dir;
 }
 

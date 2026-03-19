@@ -48,7 +48,7 @@ vi.mock("../agents/openclaw-tools.js", () => {
     },
   ];
   return {
-    createOpenClawTools: () => tools,
+    createHanzo BotTools: () => tools,
   };
 });
 

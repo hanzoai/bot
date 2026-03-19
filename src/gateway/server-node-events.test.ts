@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import type { loadSessionEntry as loadSessionEntryType } from "./session-utils.js";
 
 const buildSessionLookup = (
@@ -11,7 +11,7 @@ const buildSessionLookup = (
     updatedAt?: number;
   } = {},
 ): ReturnType<typeof loadSessionEntryType> => ({
-  cfg: { session: { mainKey: "agent:main:main" } } as OpenClawConfig,
+  cfg: { session: { mainKey: "agent:main:main" } } as Hanzo BotConfig,
   storePath: "/tmp/sessions.json",
   store: {} as ReturnType<typeof loadSessionEntryType>["store"],
   entry: {
@@ -287,7 +287,7 @@ describe("node exec events", () => {
       event: "push.apns.register",
       payloadJSON: JSON.stringify({
         token: "abcd1234abcd1234abcd1234abcd1234",
-        topic: "ai.openclaw.ios",
+        topic: "ai.hanzo.bot.ios",
         environment: "sandbox",
       }),
     });
@@ -296,7 +296,7 @@ describe("node exec events", () => {
       nodeId: "node-direct",
       transport: "direct",
       token: "abcd1234abcd1234abcd1234abcd1234",
-      topic: "ai.openclaw.ios",
+      topic: "ai.hanzo.bot.ios",
       environment: "sandbox",
     });
   });
@@ -311,7 +311,7 @@ describe("node exec events", () => {
         sendGrant: "send-grant-123",
         gatewayDeviceId: "gateway-device-1",
         installationId: "install-123",
-        topic: "ai.openclaw.ios",
+        topic: "ai.hanzo.bot.ios",
         environment: "production",
         distribution: "official",
         tokenDebugSuffix: "abcd1234",
@@ -324,7 +324,7 @@ describe("node exec events", () => {
       relayHandle: "relay-handle-123",
       sendGrant: "send-grant-123",
       installationId: "install-123",
-      topic: "ai.openclaw.ios",
+      topic: "ai.hanzo.bot.ios",
       environment: "production",
       distribution: "official",
       tokenDebugSuffix: "abcd1234",
@@ -341,7 +341,7 @@ describe("node exec events", () => {
         sendGrant: "send-grant-123",
         gatewayDeviceId: "gateway-device-other",
         installationId: "install-123",
-        topic: "ai.openclaw.ios",
+        topic: "ai.hanzo.bot.ios",
         environment: "production",
         distribution: "official",
       }),

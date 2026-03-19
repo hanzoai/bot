@@ -9,7 +9,7 @@ import {
   attachChannelToResult,
   createAttachedChannelResultAdapter,
 } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type { OutboundIdentity } from "openclaw/plugin-sdk/infra-runtime";
 import type { DiscordComponentMessageSpec } from "./components.js";
 import { getThreadBindingManager, type ThreadBindingRecord } from "./monitor/thread-bindings.js";
@@ -50,7 +50,7 @@ function resolveDiscordWebhookIdentity(params: {
 }
 
 async function maybeSendDiscordWebhookText(params: {
-  cfg?: OpenClawConfig;
+  cfg?: Hanzo BotConfig;
   text: string;
   threadId?: string | number | null;
   accountId?: string | null;

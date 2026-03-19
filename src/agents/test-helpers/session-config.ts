@@ -1,8 +1,8 @@
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 
 export function createPerSenderSessionConfig(
-  overrides: Partial<NonNullable<OpenClawConfig["session"]>> = {},
-): NonNullable<OpenClawConfig["session"]> {
+  overrides: Partial<NonNullable<Hanzo BotConfig["session"]>> = {},
+): NonNullable<Hanzo BotConfig["session"]> {
   return {
     mainKey: "main",
     scope: "per-sender",

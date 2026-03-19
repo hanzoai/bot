@@ -8,7 +8,7 @@ import {
   setAccountAllowFromForChannel,
   setChannelDmPolicyWithAllowFrom,
   setSetupChannelEnabled,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
   type WizardPrompter,
 } from "openclaw/plugin-sdk/setup";
 import type {
@@ -71,10 +71,10 @@ function buildIMessageSetupPatch(input: {
 }
 
 export async function promptIMessageAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<OpenClawConfig> {
+}): Promise<Hanzo BotConfig> {
   return promptParsedAllowFromForAccount({
     cfg: params.cfg,
     accountId: params.accountId,
@@ -111,8 +111,8 @@ export const imessageDmPolicy: ChannelSetupDmPolicy = {
   channel,
   policyKey: "channels.imessage.dmPolicy",
   allowFromKey: "channels.imessage.allowFrom",
-  getCurrent: (cfg: OpenClawConfig) => cfg.channels?.imessage?.dmPolicy ?? "pairing",
-  setPolicy: (cfg: OpenClawConfig, policy) =>
+  getCurrent: (cfg: Hanzo BotConfig) => cfg.channels?.imessage?.dmPolicy ?? "pairing",
+  setPolicy: (cfg: Hanzo BotConfig, policy) =>
     setChannelDmPolicyWithAllowFrom({
       cfg,
       channel,
@@ -121,7 +121,7 @@ export const imessageDmPolicy: ChannelSetupDmPolicy = {
   promptAllowFrom: promptIMessageAllowFrom,
 };
 
-function resolveIMessageCliPath(params: { cfg: OpenClawConfig; accountId: string }) {
+function resolveIMessageCliPath(params: { cfg: Hanzo BotConfig; accountId: string }) {
   return resolveIMessageAccount(params).config.cliPath ?? "imsg";
 }
 
@@ -142,7 +142,7 @@ export const imessageCompletionNote = {
   title: "iMessage next steps",
   lines: [
     "This is still a work in progress.",
-    "Ensure OpenClaw has Full Disk Access to Messages DB.",
+    "Ensure Hanzo Bot has Full Disk Access to Messages DB.",
     "Grant Automation permission for Messages when prompted.",
     "List chats with: imsg chats --limit 20",
     `Docs: ${formatDocsLink("/imessage", "imessage")}`,
@@ -161,7 +161,7 @@ export const imessageSetupStatusBase = {
   unconfiguredHint: "imsg missing",
   configuredScore: 1,
   unconfiguredScore: 0,
-  resolveConfigured: ({ cfg }: { cfg: OpenClawConfig }) =>
+  resolveConfigured: ({ cfg }: { cfg: Hanzo BotConfig }) =>
     listIMessageAccountIds(cfg).some((accountId) => {
       const account = resolveIMessageAccount({ cfg, accountId });
       return Boolean(
@@ -197,6 +197,6 @@ export function createIMessageSetupWizardProxy(loadWizard: () => Promise<Channel
     ],
     completionNote: imessageCompletionNote,
     dmPolicy: imessageDmPolicy,
-    disable: (cfg: OpenClawConfig) => setSetupChannelEnabled(cfg, channel, false),
+    disable: (cfg: Hanzo BotConfig) => setSetupChannelEnabled(cfg, channel, false),
   });
 }

@@ -1,4 +1,4 @@
-package ai.openclaw.app.gateway
+package ai.hanzo.bot.app.gateway
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

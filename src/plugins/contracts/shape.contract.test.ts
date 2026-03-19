@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import { createPluginRegistry, type PluginRecord } from "../registry.js";
 import type { PluginRuntime } from "../runtime/types.js";
 import { buildAllPluginInspectReports } from "../status.js";
-import type { OpenClawPluginApi } from "../types.js";
+import type { Hanzo BotPluginApi } from "../types.js";
 
 function createPluginRecord(id: string, name: string): PluginRecord {
   return {
@@ -33,9 +33,9 @@ function createPluginRecord(id: string, name: string): PluginRecord {
 
 function registerTestPlugin(params: {
   registry: ReturnType<typeof createPluginRegistry>;
-  config: OpenClawConfig;
+  config: Hanzo BotConfig;
   record: PluginRecord;
-  register(api: OpenClawPluginApi): void;
+  register(api: Hanzo BotPluginApi): void;
 }) {
   params.registry.registry.plugins.push(params.record);
   params.register(
@@ -47,7 +47,7 @@ function registerTestPlugin(params: {
 
 describe("plugin shape compatibility matrix", () => {
   it("keeps legacy hook-only, plain capability, and hybrid capability shapes explicit", () => {
-    const config = {} as OpenClawConfig;
+    const config = {} as Hanzo BotConfig;
     const registry = createPluginRegistry({
       logger: {
         info() {},

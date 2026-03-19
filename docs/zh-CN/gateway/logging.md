@@ -17,7 +17,7 @@ x-i18n:
 
 面向用户的概览（CLI + Control UI + 配置），请参阅 [/logging](/logging)。
 
-OpenClaw 有两个日志"界面"：
+Hanzo Bot 有两个日志"界面"：
 
 - **控制台输出**（你在终端 / Debug UI 中看到的内容）。
 - **文件日志**（JSON 行）由 Gateway 网关日志记录器写入。
@@ -26,7 +26,7 @@ OpenClaw 有两个日志"界面"：
 
 - 默认滚动日志文件位于 `/tmp/openclaw/` 下（每天一个文件）：`openclaw-YYYY-MM-DD.log`
   - 日期使用 Gateway 网关主机的本地时区。
-- 日志文件路径和级别可以通过 `~/.openclaw/openclaw.json` 配置：
+- 日志文件路径和级别可以通过 `~/.hanzoai/bot.json` 配置：
   - `logging.file`
   - `logging.level`
 
@@ -75,7 +75,7 @@ Gateway 网关以两种模式打印 WebSocket 协议日志：
 
 ### WS 日志样式
 
-`openclaw gateway` 支持每个 Gateway 网关的样式切换：
+`hanzo-bot gateway` 支持每个 Gateway 网关的样式切换：
 
 - `--ws-log auto`（默认）：普通模式已优化；详细模式使用紧凑输出
 - `--ws-log compact`：详细时使用紧凑输出（配对的请求/响应）

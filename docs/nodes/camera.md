@@ -8,7 +8,7 @@ title: "Camera Capture"
 
 # Camera capture (agent)
 
-OpenClaw supports **camera capture** for agent workflows:
+Hanzo Bot supports **camera capture** for agent workflows:
 
 - **iOS node** (paired via Gateway): capture a **photo** (`jpg`) or **short video clip** (`mp4`, with optional audio) via `node.invoke`.
 - **Android node** (paired via Gateway): capture a **photo** (`jpg`) or **short video clip** (`mp4`, with optional audio) via `node.invoke`.
@@ -140,7 +140,7 @@ openclaw nodes camera clip --node <id> --no-audio
 
 Notes:
 
-- `openclaw nodes camera snap` defaults to `maxWidth=1600` unless overridden.
+- `hanzo-bot nodes camera snap` defaults to `maxWidth=1600` unless overridden.
 - On macOS, `camera.snap` waits `delayMs` (default 2000ms) after warm-up/exposure settle before capturing.
 - Photo payloads are recompressed to keep base64 under 5 MB.
 

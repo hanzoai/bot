@@ -1,13 +1,13 @@
 import {
   applyAgentDefaultModelPrimary,
   applyProviderConfigWithDefaultModels,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "openclaw/plugin-sdk/provider-onboard";
 import { buildXiaomiProvider, XIAOMI_DEFAULT_MODEL_ID } from "./provider-catalog.js";
 
 export const XIAOMI_DEFAULT_MODEL_REF = `xiaomi/${XIAOMI_DEFAULT_MODEL_ID}`;
 
-export function applyXiaomiProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyXiaomiProviderConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   const models = { ...cfg.agents?.defaults?.models };
   models[XIAOMI_DEFAULT_MODEL_REF] = {
     ...models[XIAOMI_DEFAULT_MODEL_REF],
@@ -25,6 +25,6 @@ export function applyXiaomiProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
   });
 }
 
-export function applyXiaomiConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyXiaomiConfig(cfg: Hanzo BotConfig): Hanzo BotConfig {
   return applyAgentDefaultModelPrimary(applyXiaomiProviderConfig(cfg), XIAOMI_DEFAULT_MODEL_REF);
 }

@@ -2,10 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { Logger as TsLogger } from "tslog";
 import { getCommandPathWithRootOptions } from "../cli/argv.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { Hanzo BotConfig } from "../config/types.js";
 import {
-  POSIX_OPENCLAW_TMP_DIR,
-  resolvePreferredOpenClawTmpDir,
+  POSIX_BOT_TMP_DIR,
+  resolvePreferredHanzo BotTmpDir,
 } from "../infra/tmp-openclaw-dir.js";
 import { readLoggingConfig } from "./config.js";
 import type { ConsoleStyle } from "./console.js";
@@ -32,19 +32,19 @@ function canUseNodeFs(): boolean {
 }
 
 function resolveDefaultLogDir(): string {
-  return canUseNodeFs() ? resolvePreferredOpenClawTmpDir() : POSIX_OPENCLAW_TMP_DIR;
+  return canUseNodeFs() ? resolvePreferredHanzo BotTmpDir() : POSIX_BOT_TMP_DIR;
 }
 
 function resolveDefaultLogFile(defaultLogDir: string): string {
   return canUseNodeFs()
     ? path.join(defaultLogDir, "openclaw.log")
-    : `${POSIX_OPENCLAW_TMP_DIR}/openclaw.log`;
+    : `${POSIX_BOT_TMP_DIR}/openclaw.log`;
 }
 
 export const DEFAULT_LOG_DIR = resolveDefaultLogDir();
 export const DEFAULT_LOG_FILE = resolveDefaultLogFile(DEFAULT_LOG_DIR); // legacy single-file path
 
-const LOG_PREFIX = "openclaw";
+const LOG_PREFIX = "@hanzo/bot";
 const LOG_SUFFIX = ".log";
 const MAX_LOG_AGE_MS = 24 * 60 * 60 * 1000; // 24h
 const DEFAULT_MAX_LOG_FILE_BYTES = 500 * 1024 * 1024; // 500 MB
@@ -93,7 +93,7 @@ function attachExternalTransport(logger: TsLogger<LogObj>, transport: LogTranspo
 function canUseSilentVitestFileLogFastPath(envLevel: LogLevel | undefined): boolean {
   return (
     process.env.VITEST === "true" &&
-    process.env.OPENCLAW_TEST_FILE_LOG !== "1" &&
+    process.env.BOT_TEST_FILE_LOG !== "1" &&
     !envLevel &&
     !loggingState.overrideSettings
   );
@@ -119,13 +119,13 @@ function resolveSettings(): ResolvedSettings {
     };
   }
 
-  let cfg: OpenClawConfig["logging"] | undefined =
+  let cfg: Hanzo BotConfig["logging"] | undefined =
     (loggingState.overrideSettings as LoggerSettings | null) ?? readLoggingConfig();
   if (!cfg && !shouldSkipLoadConfigFallback()) {
     try {
       const loaded = requireConfig?.("../config/config.js") as
         | {
-            loadConfig?: () => OpenClawConfig;
+            loadConfig?: () => Hanzo BotConfig;
           }
         | undefined;
       cfg = loaded?.loadConfig?.().logging;
@@ -134,7 +134,7 @@ function resolveSettings(): ResolvedSettings {
     }
   }
   const defaultLevel =
-    process.env.VITEST === "true" && process.env.OPENCLAW_TEST_FILE_LOG !== "1" ? "silent" : "info";
+    process.env.VITEST === "true" && process.env.BOT_TEST_FILE_LOG !== "1" ? "silent" : "info";
   const fromConfig = normalizeLogLevel(cfg?.level, defaultLevel);
   const level = envLevel ?? fromConfig;
   const file = cfg?.file ?? defaultRollingPathForToday();
@@ -162,7 +162,7 @@ export function isFileLogLevelEnabled(level: LogLevel): boolean {
 
 function buildLogger(settings: ResolvedSettings): TsLogger<LogObj> {
   const logger = new TsLogger<LogObj>({
-    name: "openclaw",
+    name: "@hanzo/bot",
     minLevel: levelToMinLevel(settings.level),
     type: "hidden", // no ansi formatting
   });

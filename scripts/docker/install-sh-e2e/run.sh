@@ -9,34 +9,34 @@ fi
 # shellcheck source=../install-sh-common/version-parse.sh
 source "$VERIFY_HELPER_PATH"
 
-INSTALL_URL="${OPENCLAW_INSTALL_URL:-${CLAWDBOT_INSTALL_URL:-https://openclaw.bot/install.sh}}"
-MODELS_MODE="${OPENCLAW_E2E_MODELS:-${CLAWDBOT_E2E_MODELS:-both}}" # both|openai|anthropic
-INSTALL_TAG="${OPENCLAW_INSTALL_TAG:-${CLAWDBOT_INSTALL_TAG:-latest}}"
-E2E_PREVIOUS_VERSION="${OPENCLAW_INSTALL_E2E_PREVIOUS:-${CLAWDBOT_INSTALL_E2E_PREVIOUS:-}}"
-SKIP_PREVIOUS="${OPENCLAW_INSTALL_E2E_SKIP_PREVIOUS:-${CLAWDBOT_INSTALL_E2E_SKIP_PREVIOUS:-0}}"
+INSTALL_URL="${BOT_INSTALL_URL:-${BOT_INSTALL_URL:-https://openclaw.bot/install.sh}}"
+MODELS_MODE="${BOT_E2E_MODELS:-${BOT_E2E_MODELS:-both}}" # both|openai|anthropic
+INSTALL_TAG="${BOT_INSTALL_TAG:-${BOT_INSTALL_TAG:-latest}}"
+E2E_PREVIOUS_VERSION="${BOT_INSTALL_E2E_PREVIOUS:-${BOT_INSTALL_E2E_PREVIOUS:-}}"
+SKIP_PREVIOUS="${BOT_INSTALL_E2E_SKIP_PREVIOUS:-${BOT_INSTALL_E2E_SKIP_PREVIOUS:-0}}"
 OPENAI_API_KEY="${OPENAI_API_KEY:-}"
 ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"
 ANTHROPIC_API_TOKEN="${ANTHROPIC_API_TOKEN:-}"
 
 if [[ "$MODELS_MODE" != "both" && "$MODELS_MODE" != "openai" && "$MODELS_MODE" != "anthropic" ]]; then
-  echo "ERROR: OPENCLAW_E2E_MODELS must be one of: both|openai|anthropic" >&2
+  echo "ERROR: BOT_E2E_MODELS must be one of: both|openai|anthropic" >&2
   exit 2
 fi
 
 if [[ "$MODELS_MODE" == "both" ]]; then
   if [[ -z "$OPENAI_API_KEY" ]]; then
-    echo "ERROR: OPENCLAW_E2E_MODELS=both requires OPENAI_API_KEY." >&2
+    echo "ERROR: BOT_E2E_MODELS=both requires OPENAI_API_KEY." >&2
     exit 2
   fi
   if [[ -z "$ANTHROPIC_API_TOKEN" && -z "$ANTHROPIC_API_KEY" ]]; then
-    echo "ERROR: OPENCLAW_E2E_MODELS=both requires ANTHROPIC_API_TOKEN or ANTHROPIC_API_KEY." >&2
+    echo "ERROR: BOT_E2E_MODELS=both requires ANTHROPIC_API_TOKEN or ANTHROPIC_API_KEY." >&2
     exit 2
   fi
 elif [[ "$MODELS_MODE" == "openai" && -z "$OPENAI_API_KEY" ]]; then
-  echo "ERROR: OPENCLAW_E2E_MODELS=openai requires OPENAI_API_KEY." >&2
+  echo "ERROR: BOT_E2E_MODELS=openai requires OPENAI_API_KEY." >&2
   exit 2
 elif [[ "$MODELS_MODE" == "anthropic" && -z "$ANTHROPIC_API_TOKEN" && -z "$ANTHROPIC_API_KEY" ]]; then
-  echo "ERROR: OPENCLAW_E2E_MODELS=anthropic requires ANTHROPIC_API_TOKEN or ANTHROPIC_API_KEY." >&2
+  echo "ERROR: BOT_E2E_MODELS=anthropic requires ANTHROPIC_API_TOKEN or ANTHROPIC_API_KEY." >&2
   exit 2
 fi
 
@@ -51,7 +51,7 @@ if [[ -n "$E2E_PREVIOUS_VERSION" ]]; then
 else
   PREVIOUS_VERSION="$(node - <<'NODE'
 const { execSync } = require("node:child_process");
-const versions = JSON.parse(execSync("npm view openclaw versions --json", { encoding: "utf8" }));
+const versions = JSON.parse(execSync("npm view hanzo-bot versions --json", { encoding: "utf8" }));
 if (!Array.isArray(versions) || versions.length === 0) process.exit(1);
 process.stdout.write(versions.length >= 2 ? versions[versions.length - 2] : versions[0]);
 NODE
@@ -60,7 +60,7 @@ fi
 echo "expected=$EXPECTED_VERSION previous=$PREVIOUS_VERSION"
 
 if [[ "$SKIP_PREVIOUS" == "1" ]]; then
-  echo "==> Skip preinstall previous (OPENCLAW_INSTALL_E2E_SKIP_PREVIOUS=1)"
+  echo "==> Skip preinstall previous (BOT_INSTALL_E2E_SKIP_PREVIOUS=1)"
 else
   echo "==> Preinstall previous (forces installer upgrade path; avoids read() prompt)"
   npm install -g "openclaw@${PREVIOUS_VERSION}"
@@ -68,9 +68,9 @@ fi
 
 echo "==> Run official installer one-liner"
 if [[ "$INSTALL_TAG" == "beta" ]]; then
-  OPENCLAW_BETA=1 CLAWDBOT_BETA=1 curl -fsSL "$INSTALL_URL" | bash
+  BOT_BETA=1 BOT_BETA=1 curl -fsSL "$INSTALL_URL" | bash
 elif [[ "$INSTALL_TAG" != "latest" ]]; then
-  OPENCLAW_VERSION="$INSTALL_TAG" CLAWDBOT_VERSION="$INSTALL_TAG" curl -fsSL "$INSTALL_URL" | bash
+  BOT_VERSION="$INSTALL_TAG" BOT_VERSION="$INSTALL_TAG" curl -fsSL "$INSTALL_URL" | bash
 else
   curl -fsSL "$INSTALL_URL" | bash
 fi
@@ -89,7 +89,7 @@ set_image_model() {
   shift
   local candidate
   for candidate in "$@"; do
-    if openclaw --profile "$profile" models set-image "$candidate" >/dev/null 2>&1; then
+    if hanzo-bot --profile "$profile" models set-image "$candidate" >/dev/null 2>&1; then
       echo "$candidate"
       return 0
     fi
@@ -103,7 +103,7 @@ set_agent_model() {
   local candidate
   shift
   for candidate in "$@"; do
-    if openclaw --profile "$profile" models set "$candidate" >/dev/null 2>&1; then
+    if hanzo-bot --profile "$profile" models set "$candidate" >/dev/null 2>&1; then
       echo "$candidate"
       return 0
     fi
@@ -186,7 +186,7 @@ run_agent_turn() {
   local session_id="$2"
   local prompt="$3"
   local out_json="$4"
-  openclaw --profile "$profile" agent \
+  hanzo-bot --profile "$profile" agent \
     --session-id "$session_id" \
     --message "$prompt" \
     --thinking off \
@@ -348,7 +348,7 @@ run_profile() {
 
 	  echo "==> Onboard ($profile)"
 	  if [[ "$agent_model_provider" == "openai" ]]; then
-	    openclaw --profile "$profile" onboard \
+	    hanzo-bot --profile "$profile" onboard \
 	      --non-interactive \
 	      --accept-risk \
 	      --flow quickstart \
@@ -360,7 +360,7 @@ run_profile() {
       --workspace "$workspace" \
       --skip-health
 	  elif [[ -n "$ANTHROPIC_API_TOKEN" ]]; then
-	    openclaw --profile "$profile" onboard \
+	    hanzo-bot --profile "$profile" onboard \
 	      --non-interactive \
 	      --accept-risk \
 	      --flow quickstart \
@@ -373,7 +373,7 @@ run_profile() {
       --workspace "$workspace" \
       --skip-health
 	  else
-	    openclaw --profile "$profile" onboard \
+	    hanzo-bot --profile "$profile" onboard \
 	      --non-interactive \
 	      --accept-risk \
 	      --flow quickstart \
@@ -438,7 +438,7 @@ run_profile() {
 
   echo "==> Start gateway ($profile)"
   GATEWAY_LOG="$workspace/gateway.log"
-  openclaw --profile "$profile" gateway --port "$port" --bind loopback >"$GATEWAY_LOG" 2>&1 &
+  hanzo-bot --profile "$profile" gateway --port "$port" --bind loopback >"$GATEWAY_LOG" 2>&1 &
   GATEWAY_PID="$!"
   cleanup_profile() {
     if kill -0 "$GATEWAY_PID" 2>/dev/null; then
@@ -450,12 +450,12 @@ run_profile() {
 
   echo "==> Wait for health ($profile)"
   for _ in $(seq 1 60); do
-    if openclaw --profile "$profile" health --timeout 2000 --json >/dev/null 2>&1; then
+    if hanzo-bot --profile "$profile" health --timeout 2000 --json >/dev/null 2>&1; then
       break
     fi
     sleep 0.25
   done
-  openclaw --profile "$profile" health --timeout 10000 --json >/dev/null
+  hanzo-bot --profile "$profile" health --timeout 10000 --json >/dev/null
 
   echo "==> Agent turns ($profile)"
   TURN1_JSON="/tmp/agent-${profile}-1.json"

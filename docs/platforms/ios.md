@@ -95,14 +95,14 @@ Expected operator flow:
 
 Compatibility note:
 
-- `OPENCLAW_APNS_RELAY_BASE_URL` still works as a temporary env override for the gateway.
+- `BOT_APNS_RELAY_BASE_URL` still works as a temporary env override for the gateway.
 
 ## Authentication and trust flow
 
 The relay exists to enforce two constraints that direct APNs-on-gateway cannot provide for
 official iOS builds:
 
-- Only genuine OpenClaw iOS builds distributed through Apple can use the hosted relay.
+- Only genuine Hanzo Bot iOS builds distributed through Apple can use the hosted relay.
 - A gateway can send relay-backed pushes only for iOS devices that paired with that specific
   gateway.
 
@@ -145,16 +145,16 @@ Why this design was created:
 
 - To keep production APNs credentials out of user gateways.
 - To avoid storing raw official-build APNs tokens on the gateway.
-- To allow hosted relay usage only for official/TestFlight OpenClaw builds.
+- To allow hosted relay usage only for official/TestFlight Hanzo Bot builds.
 - To prevent one gateway from sending wake pushes to iOS devices owned by a different gateway.
 
 Local/manual builds remain on direct APNs. If you are testing those builds without the relay, the
 gateway still needs direct APNs credentials:
 
 ```bash
-export OPENCLAW_APNS_TEAM_ID="TEAMID"
-export OPENCLAW_APNS_KEY_ID="KEYID"
-export OPENCLAW_APNS_PRIVATE_KEY_P8="$(cat /path/to/AuthKey_KEYID.p8)"
+export BOT_APNS_TEAM_ID="TEAMID"
+export BOT_APNS_KEY_ID="KEYID"
+export BOT_APNS_PRIVATE_KEY_P8="$(cat /path/to/AuthKey_KEYID.p8)"
 ```
 
 ## Discovery paths
@@ -206,7 +206,7 @@ openclaw nodes invoke --node "iOS Node" --command canvas.snapshot --params '{"ma
 
 - `NODE_BACKGROUND_UNAVAILABLE`: bring the iOS app to the foreground (canvas/camera/screen commands require it).
 - `A2UI_HOST_NOT_CONFIGURED`: the Gateway did not advertise a canvas host URL; check `canvasHost` in [Gateway configuration](/gateway/configuration).
-- Pairing prompt never appears: run `openclaw devices list` and approve manually.
+- Pairing prompt never appears: run `hanzo-bot devices list` and approve manually.
 - Reconnect fails after reinstall: the Keychain pairing token was cleared; re-pair the node.
 
 ## Related docs

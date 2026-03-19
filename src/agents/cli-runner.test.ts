@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { runCliAgent } from "./cli-runner.js";
 import { resolveCliNoOutputTimeoutMs } from "./cli-runner/helpers.js";
 import type { EmbeddedContextFile } from "./pi-embedded-helpers.js";
@@ -167,7 +167,7 @@ describe("runCliAgent with process supervisor", () => {
             bootstrapTotalMaxChars: 50,
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies Hanzo BotConfig,
       prompt: "hi",
       provider: "codex-cli",
       model: "gpt-5.2-codex",
@@ -339,7 +339,7 @@ describe("runCliAgent with process supervisor", () => {
           workspace: fallbackWorkspace,
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies Hanzo BotConfig;
 
     supervisorSpawnMock.mockResolvedValueOnce(
       createManagedRun({

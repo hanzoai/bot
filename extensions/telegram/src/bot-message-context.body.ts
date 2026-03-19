@@ -8,7 +8,7 @@ import { resolveControlCommandGate } from "openclaw/plugin-sdk/channel-runtime";
 import { formatLocationText, type NormalizedLocation } from "openclaw/plugin-sdk/channel-runtime";
 import { logInboundDrop } from "openclaw/plugin-sdk/channel-runtime";
 import { resolveMentionGatingWithBypass } from "openclaw/plugin-sdk/channel-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import type {
   TelegramDirectConfig,
   TelegramGroupConfig,
@@ -54,7 +54,7 @@ export type TelegramInboundBodyResult = {
 };
 
 async function resolveStickerVisionSupport(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   agentId?: string;
 }): Promise<boolean> {
   try {
@@ -74,7 +74,7 @@ async function resolveStickerVisionSupport(params: {
 }
 
 export async function resolveTelegramInboundBody(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   primaryCtx: TelegramContext;
   msg: TelegramContext["message"];
   allMedia: TelegramMediaRef[];

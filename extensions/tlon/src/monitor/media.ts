@@ -8,7 +8,7 @@ import { pipeline } from "node:stream/promises";
 import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/infra-runtime";
 import { getDefaultSsrFPolicy } from "../urbit/context.js";
 
-// Default to OpenClaw workspace media directory
+// Default to Hanzo Bot workspace media directory
 const DEFAULT_MEDIA_DIR = path.join(homedir(), ".openclaw", "workspace", "media", "inbound");
 
 export interface ExtractedImage {
@@ -139,7 +139,7 @@ function getExtensionFromUrl(url: string): string | null {
 
 /**
  * Download all images from a message and return attachment metadata.
- * Format matches OpenClaw's expected attachment structure.
+ * Format matches Hanzo Bot's expected attachment structure.
  */
 export async function downloadMessageImages(
   content: unknown,

@@ -1,4 +1,4 @@
-package ai.openclaw.app.voice
+package ai.hanzo.bot.app.voice
 
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals

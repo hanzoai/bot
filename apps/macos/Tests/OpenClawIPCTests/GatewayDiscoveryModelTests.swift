@@ -1,5 +1,5 @@
 import Testing
-@testable import OpenClawDiscovery
+@testable import Hanzo BotDiscovery
 
 @MainActor
 struct GatewayDiscoveryModelTests {
@@ -34,7 +34,7 @@ struct GatewayDiscoveryModelTests {
         #expect(GatewayDiscoveryModel.isLocalGateway(
             lanHost: nil,
             tailnetDns: nil,
-            displayName: "Peter's Mac Studio (OpenClaw)",
+            displayName: "Peter's Mac Studio (Hanzo Bot)",
             serviceName: nil,
             local: local))
     }
@@ -71,13 +71,13 @@ struct GatewayDiscoveryModelTests {
             lanHost: nil,
             tailnetDns: nil,
             displayName: nil,
-            serviceName: "steipetacstudio (OpenClaw)",
+            serviceName: "steipetacstudio (Hanzo Bot)",
             local: local))
         #expect(GatewayDiscoveryModel.isLocalGateway(
             lanHost: nil,
             tailnetDns: nil,
             displayName: nil,
-            serviceName: "steipete (OpenClaw)",
+            serviceName: "steipete (Hanzo Bot)",
             local: local))
     }
 

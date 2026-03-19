@@ -251,7 +251,7 @@ describe("whatsapp setup wizard", () => {
 
     expect(loginWebMock).not.toHaveBeenCalled();
     expect(harness.note).not.toHaveBeenCalledWith(
-      expect.stringContaining("openclaw channels login"),
+      expect.stringContaining("hanzo-bot channels login"),
       "WhatsApp",
     );
   });
@@ -267,7 +267,7 @@ describe("whatsapp setup wizard", () => {
     });
 
     expect(harness.note).toHaveBeenCalledWith(
-      expect.stringContaining("openclaw channels login"),
+      expect.stringContaining("hanzo-bot channels login"),
       "WhatsApp",
     );
   });

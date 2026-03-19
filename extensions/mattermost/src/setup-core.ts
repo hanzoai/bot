@@ -7,7 +7,7 @@ import {
   DEFAULT_ACCOUNT_ID,
   migrateBaseNameToDefaultAccount,
   normalizeAccountId,
-  type OpenClawConfig,
+  type Hanzo BotConfig,
 } from "./runtime-api.js";
 import { hasConfiguredSecretInput } from "./secret-input.js";
 
@@ -19,7 +19,7 @@ export function isMattermostConfigured(account: ResolvedMattermostAccount): bool
   return tokenConfigured && Boolean(account.baseUrl);
 }
 
-export function resolveMattermostAccountWithSecrets(cfg: OpenClawConfig, accountId: string) {
+export function resolveMattermostAccountWithSecrets(cfg: Hanzo BotConfig, accountId: string) {
   return resolveMattermostAccount({
     cfg,
     accountId,

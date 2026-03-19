@@ -4,15 +4,15 @@ import type {
 } from "../channels/plugins/types.core.js";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import { getChatChannelMeta } from "../channels/registry.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { buildOutboundBaseSessionKey } from "../infra/outbound/base-session-key.js";
 import { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginConfigSchema,
-  OpenClawPluginDefinition,
+  Hanzo BotPluginApi,
+  Hanzo BotPluginCommandDefinition,
+  Hanzo BotPluginConfigSchema,
+  Hanzo BotPluginDefinition,
   PluginCommandContext,
   PluginInteractiveTelegramHandlerContext,
 } from "../plugins/types.js";
@@ -20,7 +20,7 @@ import type {
 export type {
   AnyAgentTool,
   MediaUnderstandingProviderPlugin,
-  OpenClawPluginConfigSchema,
+  Hanzo BotPluginConfigSchema,
   ProviderDiscoveryContext,
   ProviderCatalogContext,
   ProviderCatalogResult,
@@ -44,20 +44,20 @@ export type {
   SpeechProviderPlugin,
   ProviderThinkingPolicyContext,
   ProviderWrapStreamFnContext,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  Hanzo BotPluginService,
+  Hanzo BotPluginServiceContext,
   ProviderAuthContext,
   ProviderAuthDoctorHintContext,
   ProviderAuthMethodNonInteractiveContext,
   ProviderAuthMethod,
   ProviderAuthResult,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginDefinition,
+  Hanzo BotPluginCommandDefinition,
+  Hanzo BotPluginDefinition,
   PluginCommandContext,
   PluginLogger,
   PluginInteractiveTelegramHandlerContext,
 } from "../plugins/types.js";
-export type { OpenClawConfig } from "../config/config.js";
+export type { Hanzo BotConfig } from "../config/config.js";
 export { isSecretRef } from "../config/types.secrets.js";
 export type { GatewayRequestHandlerOptions } from "../gateway/server-methods/types.js";
 export type {
@@ -71,7 +71,7 @@ export type {
 } from "../infra/provider-usage.types.js";
 export type { ChannelMessageActionContext } from "../channels/plugins/types.js";
 export type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
-export type { OpenClawPluginApi } from "../plugins/types.js";
+export type { Hanzo BotPluginApi } from "../plugins/types.js";
 export type { PluginRuntime } from "../plugins/runtime/types.js";
 
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
@@ -144,7 +144,7 @@ export function stripTargetKindPrefix(raw: string): string {
 }
 
 export function buildChannelOutboundSessionRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   agentId: string;
   channel: string;
   accountId?: string | null;
@@ -179,25 +179,25 @@ type DefineChannelPluginEntryOptions<TPlugin extends ChannelPlugin = ChannelPlug
   plugin: TPlugin;
   configSchema?: DefinePluginEntryOptions["configSchema"];
   setRuntime?: (runtime: PluginRuntime) => void;
-  registerFull?: (api: OpenClawPluginApi) => void;
+  registerFull?: (api: Hanzo BotPluginApi) => void;
 };
 
 type DefinePluginEntryOptions = {
   id: string;
   name: string;
   description: string;
-  kind?: OpenClawPluginDefinition["kind"];
-  configSchema?: OpenClawPluginConfigSchema | (() => OpenClawPluginConfigSchema);
-  register: (api: OpenClawPluginApi) => void;
+  kind?: Hanzo BotPluginDefinition["kind"];
+  configSchema?: Hanzo BotPluginConfigSchema | (() => Hanzo BotPluginConfigSchema);
+  register: (api: Hanzo BotPluginApi) => void;
 };
 
 type DefinedPluginEntry = {
   id: string;
   name: string;
   description: string;
-  configSchema: OpenClawPluginConfigSchema;
-  register: NonNullable<OpenClawPluginDefinition["register"]>;
-} & Pick<OpenClawPluginDefinition, "kind">;
+  configSchema: Hanzo BotPluginConfigSchema;
+  register: NonNullable<Hanzo BotPluginDefinition["register"]>;
+} & Pick<Hanzo BotPluginDefinition, "kind">;
 
 type CreateChannelPluginBaseOptions<TResolvedAccount> = {
   id: ChannelPlugin<TResolvedAccount>["id"];
@@ -237,7 +237,7 @@ type CreatedChannelPluginBase<TResolvedAccount> = Pick<
 
 function resolvePluginConfigSchema(
   configSchema: DefinePluginEntryOptions["configSchema"] = emptyPluginConfigSchema,
-): OpenClawPluginConfigSchema {
+): Hanzo BotPluginConfigSchema {
   return typeof configSchema === "function" ? configSchema() : configSchema;
 }
 
@@ -275,7 +275,7 @@ export function defineChannelPluginEntry<TPlugin extends ChannelPlugin>({
     name,
     description,
     configSchema,
-    register(api: OpenClawPluginApi) {
+    register(api: Hanzo BotPluginApi) {
       setRuntime?.(api.runtime);
       api.registerChannel({ plugin });
       if (api.registrationMode !== "full") {

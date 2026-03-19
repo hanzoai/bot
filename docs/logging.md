@@ -9,7 +9,7 @@ title: "Logging"
 
 # Logging
 
-OpenClaw logs in two places:
+Hanzo Bot logs in two places:
 
 - **File logs** (JSON lines) written by the Gateway.
 - **Console output** shown in terminals and the Control UI.
@@ -21,11 +21,11 @@ levels and formats.
 
 By default, the Gateway writes a rolling log file under:
 
-`/tmp/openclaw/openclaw-YYYY-MM-DD.log`
+`/tmp/hanzoai/bot-YYYY-MM-DD.log`
 
 The date uses the gateway host's local timezone.
 
-You can override this in `~/.openclaw/openclaw.json`:
+You can override this in `~/.hanzoai/bot.json`:
 
 ```json
 {
@@ -98,13 +98,13 @@ Console formatting is controlled by `logging.consoleStyle`.
 
 ## Configuring logging
 
-All logging configuration lives under `logging` in `~/.openclaw/openclaw.json`.
+All logging configuration lives under `logging` in `~/.hanzoai/bot.json`.
 
 ```json
 {
   "logging": {
     "level": "info",
-    "file": "/tmp/openclaw/openclaw-YYYY-MM-DD.log",
+    "file": "/tmp/hanzoai/bot-YYYY-MM-DD.log",
     "consoleLevel": "info",
     "consoleStyle": "pretty",
     "redactSensitive": "tools",
@@ -118,7 +118,7 @@ All logging configuration lives under `logging` in `~/.openclaw/openclaw.json`.
 - `logging.level`: **file logs** (JSONL) level.
 - `logging.consoleLevel`: **console** verbosity level.
 
-You can override both via the **`OPENCLAW_LOG_LEVEL`** environment variable (e.g. `OPENCLAW_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `openclaw.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `openclaw --log-level debug gateway run`), which overrides the environment variable for that command.
+You can override both via the **`BOT_LOG_LEVEL`** environment variable (e.g. `BOT_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `openclaw.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `hanzo-bot --log-level debug gateway run`), which overrides the environment variable for that command.
 
 `--verbose` only affects console output; it does not change file log levels.
 
@@ -152,7 +152,7 @@ diagnostics + the exporter plugin are enabled.
 
 - **OpenTelemetry (OTel)**: the data model + SDKs for traces, metrics, and logs.
 - **OTLP**: the wire protocol used to export OTel data to a collector/backend.
-- OpenClaw exports via **OTLP/HTTP (protobuf)** today.
+- Hanzo Bot exports via **OTLP/HTTP (protobuf)** today.
 
 ### Signals exported
 
@@ -212,7 +212,7 @@ Flags are case-insensitive and support wildcards (e.g. `telegram.*` or `*`).
 Env override (one-off):
 
 ```
-OPENCLAW_DIAGNOSTICS=telegram.http,telegram.payload
+BOT_DIAGNOSTICS=telegram.http,telegram.payload
 ```
 
 Notes:
@@ -255,7 +255,7 @@ works with any OpenTelemetry collector/backend that accepts OTLP/HTTP.
 
 Notes:
 
-- You can also enable the plugin with `openclaw plugins enable diagnostics-otel`.
+- You can also enable the plugin with `hanzo-bot plugins enable diagnostics-otel`.
 - `protocol` currently supports `http/protobuf` only. `grpc` is ignored.
 - Metrics include token usage, cost, context size, run duration, and message-flow
   counters/histograms (webhooks, queueing, session state, queue depth/wait).
@@ -346,7 +346,7 @@ Queues + sessions:
 
 ## Troubleshooting tips
 
-- **Gateway not reachable?** Run `openclaw doctor` first.
+- **Gateway not reachable?** Run `hanzo-bot doctor` first.
 - **Logs empty?** Check that the Gateway is running and writing to the file path
   in `logging.file`.
 - **Need more detail?** Set `logging.level` to `debug` or `trace` and retry.

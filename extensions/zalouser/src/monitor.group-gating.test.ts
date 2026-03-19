@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
+import type { Hanzo BotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import "./monitor.send-mocks.js";
 import { resolveZalouserAccountSync } from "./accounts.js";
 import { __testing } from "./monitor.js";
@@ -28,7 +28,7 @@ function createAccount(): ResolvedZalouserAccount {
   };
 }
 
-function createConfig(): OpenClawConfig {
+function createConfig(): Hanzo BotConfig {
   return {
     channels: {
       zalouser: {
@@ -133,7 +133,7 @@ function installRuntime(params: {
       },
       groups: {
         resolveRequireMention: vi.fn((input) => {
-          const cfg = input.cfg as OpenClawConfig;
+          const cfg = input.cfg as Hanzo BotConfig;
           const groupCfg = cfg.channels?.zalouser?.groups ?? {};
           const groupEntry = input.groupId ? groupCfg[input.groupId] : undefined;
           const defaultEntry = groupCfg["*"];
@@ -381,7 +381,7 @@ describe("zalouser monitor group mention gating", () => {
     const { dispatchReplyWithBufferedBlockDispatcher } = installRuntime({
       commandAuthorized: false,
     });
-    const cfg: OpenClawConfig = {
+    const cfg: Hanzo BotConfig = {
       channels: {
         zalouser: {
           enabled: true,

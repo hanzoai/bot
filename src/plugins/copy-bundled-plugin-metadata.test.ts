@@ -51,7 +51,7 @@ describe("copyBundledPluginMetadata", () => {
       skills: ["./skills"],
     });
     writeJson(path.join(pluginDir, "package.json"), {
-      name: "@openclaw/acpx",
+      name: "@hanzo/bot-acpx",
       openclaw: { extensions: ["./index.ts"] },
     });
 
@@ -111,7 +111,7 @@ describe("copyBundledPluginMetadata", () => {
       skills: ["node_modules/@tloncorp/tlon-skill"],
     });
     writeJson(path.join(pluginDir, "package.json"), {
-      name: "@openclaw/tlon",
+      name: "@hanzo/bot-tlon",
       openclaw: { extensions: ["./index.ts"] },
     });
     const staleNodeModulesSkillDir = path.join(
@@ -165,7 +165,7 @@ describe("copyBundledPluginMetadata", () => {
       skills: ["node_modules/@tloncorp/tlon-skill"],
     });
     writeJson(path.join(pluginDir, "package.json"), {
-      name: "@openclaw/tlon",
+      name: "@hanzo/bot-tlon",
       openclaw: { extensions: ["./index.ts"] },
     });
 
@@ -205,7 +205,7 @@ describe("copyBundledPluginMetadata", () => {
       skills: ["node_modules/@tloncorp/tlon-skill"],
     });
     writeJson(path.join(pluginDir, "package.json"), {
-      name: "@openclaw/tlon",
+      name: "@hanzo/bot-tlon",
       openclaw: { extensions: ["./index.ts"] },
     });
     const staleBundledSkillDir = path.join(
@@ -248,7 +248,7 @@ describe("copyBundledPluginMetadata", () => {
       skills: ["./skills"],
     });
     writeJson(path.join(pluginDir, "package.json"), {
-      name: "@openclaw/diffs",
+      name: "@hanzo/bot-diffs",
       openclaw: { extensions: ["./index.ts"] },
     });
 
@@ -310,7 +310,7 @@ describe("copyBundledPluginMetadata", () => {
       skills: ["./bundled-skills/@scope/skill"],
     });
     writeJson(path.join(repoRoot, "dist", "extensions", "removed-plugin", "package.json"), {
-      name: "@openclaw/removed-plugin",
+      name: "@hanzo/bot-removed-plugin",
     });
     fs.mkdirSync(path.join(repoRoot, "extensions"), { recursive: true });
 
@@ -331,7 +331,7 @@ describe("copyBundledPluginMetadata", () => {
       configSchema: { type: "object" },
     });
     writeJson(path.join(staleDistDir, "package.json"), {
-      name: "@openclaw/google-gemini-cli-auth",
+      name: "@hanzo/bot-google-gemini-cli-auth",
     });
 
     copyBundledPluginMetadata({ repoRoot });

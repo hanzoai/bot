@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Hanzo Bot
 
 struct HealthStoreStateTests {
     @Test @MainActor func `linked channel probe failure degrades state`() {

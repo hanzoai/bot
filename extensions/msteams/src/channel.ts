@@ -18,7 +18,7 @@ import type {
 } from "openclaw/plugin-sdk/channel-runtime";
 import { listDirectoryEntriesFromSources } from "openclaw/plugin-sdk/directory-runtime";
 import { createLazyRuntimeNamedExport } from "openclaw/plugin-sdk/lazy-runtime";
-import type { ChannelMessageActionName, ChannelPlugin, OpenClawConfig } from "../runtime-api.js";
+import type { ChannelMessageActionName, ChannelPlugin, Hanzo BotConfig } from "../runtime-api.js";
 import {
   buildProbeChannelStatusSummary,
   buildRuntimeAccountStatusSnapshot,
@@ -72,7 +72,7 @@ const TEAMS_GRAPH_PERMISSION_HINTS: Record<string, string> = {
 };
 
 const collectMSTeamsSecurityWarnings = createAllowlistProviderGroupPolicyWarningCollector<{
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
 }>({
   providerConfigPresent: (cfg) => cfg.channels?.msteams !== undefined,
   resolveGroupPolicy: ({ cfg }) => cfg.channels?.msteams?.groupPolicy,
@@ -89,7 +89,7 @@ const loadMSTeamsChannelRuntime = createLazyRuntimeNamedExport(
   "msTeamsChannelRuntime",
 );
 
-const resolveMSTeamsChannelConfig = (cfg: OpenClawConfig) => ({
+const resolveMSTeamsChannelConfig = (cfg: Hanzo BotConfig) => ({
   allowFrom: cfg.channels?.msteams?.allowFrom,
   defaultTo: cfg.channels?.msteams?.defaultTo,
 });
@@ -189,7 +189,7 @@ export const msteamsPlugin: ChannelPlugin<ResolvedMSTeamsAccount> = {
   },
   security: {
     collectWarnings: projectWarningCollector(
-      ({ cfg }: { cfg: OpenClawConfig }) => ({ cfg }),
+      ({ cfg }: { cfg: Hanzo BotConfig }) => ({ cfg }),
       collectMSTeamsSecurityWarnings,
     ),
   },

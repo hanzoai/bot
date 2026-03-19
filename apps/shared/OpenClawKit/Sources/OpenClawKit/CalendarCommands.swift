@@ -1,13 +1,13 @@
 import Foundation
 
-public enum OpenClawCalendarCommand: String, Codable, Sendable {
+public enum Hanzo BotCalendarCommand: String, Codable, Sendable {
     case events = "calendar.events"
     case add = "calendar.add"
 }
 
-public typealias OpenClawCalendarEventsParams = OpenClawDateRangeLimitParams
+public typealias Hanzo BotCalendarEventsParams = Hanzo BotDateRangeLimitParams
 
-public struct OpenClawCalendarAddParams: Codable, Sendable, Equatable {
+public struct Hanzo BotCalendarAddParams: Codable, Sendable, Equatable {
     public var title: String
     public var startISO: String
     public var endISO: String
@@ -38,7 +38,7 @@ public struct OpenClawCalendarAddParams: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawCalendarEventPayload: Codable, Sendable, Equatable {
+public struct Hanzo BotCalendarEventPayload: Codable, Sendable, Equatable {
     public var identifier: String
     public var title: String
     public var startISO: String
@@ -66,18 +66,18 @@ public struct OpenClawCalendarEventPayload: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawCalendarEventsPayload: Codable, Sendable, Equatable {
-    public var events: [OpenClawCalendarEventPayload]
+public struct Hanzo BotCalendarEventsPayload: Codable, Sendable, Equatable {
+    public var events: [Hanzo BotCalendarEventPayload]
 
-    public init(events: [OpenClawCalendarEventPayload]) {
+    public init(events: [Hanzo BotCalendarEventPayload]) {
         self.events = events
     }
 }
 
-public struct OpenClawCalendarAddPayload: Codable, Sendable, Equatable {
-    public var event: OpenClawCalendarEventPayload
+public struct Hanzo BotCalendarAddPayload: Codable, Sendable, Equatable {
+    public var event: Hanzo BotCalendarEventPayload
 
-    public init(event: OpenClawCalendarEventPayload) {
+    public init(event: Hanzo BotCalendarEventPayload) {
         self.event = event
     }
 }

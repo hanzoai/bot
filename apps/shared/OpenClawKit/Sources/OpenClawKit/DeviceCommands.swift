@@ -1,58 +1,58 @@
 import Foundation
 
-public enum OpenClawDeviceCommand: String, Codable, Sendable {
+public enum Hanzo BotDeviceCommand: String, Codable, Sendable {
     case status = "device.status"
     case info = "device.info"
 }
 
-public enum OpenClawBatteryState: String, Codable, Sendable {
+public enum Hanzo BotBatteryState: String, Codable, Sendable {
     case unknown
     case unplugged
     case charging
     case full
 }
 
-public enum OpenClawThermalState: String, Codable, Sendable {
+public enum Hanzo BotThermalState: String, Codable, Sendable {
     case nominal
     case fair
     case serious
     case critical
 }
 
-public enum OpenClawNetworkPathStatus: String, Codable, Sendable {
+public enum Hanzo BotNetworkPathStatus: String, Codable, Sendable {
     case satisfied
     case unsatisfied
     case requiresConnection
 }
 
-public enum OpenClawNetworkInterfaceType: String, Codable, Sendable {
+public enum Hanzo BotNetworkInterfaceType: String, Codable, Sendable {
     case wifi
     case cellular
     case wired
     case other
 }
 
-public struct OpenClawBatteryStatusPayload: Codable, Sendable, Equatable {
+public struct Hanzo BotBatteryStatusPayload: Codable, Sendable, Equatable {
     public var level: Double?
-    public var state: OpenClawBatteryState
+    public var state: Hanzo BotBatteryState
     public var lowPowerModeEnabled: Bool
 
-    public init(level: Double?, state: OpenClawBatteryState, lowPowerModeEnabled: Bool) {
+    public init(level: Double?, state: Hanzo BotBatteryState, lowPowerModeEnabled: Bool) {
         self.level = level
         self.state = state
         self.lowPowerModeEnabled = lowPowerModeEnabled
     }
 }
 
-public struct OpenClawThermalStatusPayload: Codable, Sendable, Equatable {
-    public var state: OpenClawThermalState
+public struct Hanzo BotThermalStatusPayload: Codable, Sendable, Equatable {
+    public var state: Hanzo BotThermalState
 
-    public init(state: OpenClawThermalState) {
+    public init(state: Hanzo BotThermalState) {
         self.state = state
     }
 }
 
-public struct OpenClawStorageStatusPayload: Codable, Sendable, Equatable {
+public struct Hanzo BotStorageStatusPayload: Codable, Sendable, Equatable {
     public var totalBytes: Int64
     public var freeBytes: Int64
     public var usedBytes: Int64
@@ -64,17 +64,17 @@ public struct OpenClawStorageStatusPayload: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawNetworkStatusPayload: Codable, Sendable, Equatable {
-    public var status: OpenClawNetworkPathStatus
+public struct Hanzo BotNetworkStatusPayload: Codable, Sendable, Equatable {
+    public var status: Hanzo BotNetworkPathStatus
     public var isExpensive: Bool
     public var isConstrained: Bool
-    public var interfaces: [OpenClawNetworkInterfaceType]
+    public var interfaces: [Hanzo BotNetworkInterfaceType]
 
     public init(
-        status: OpenClawNetworkPathStatus,
+        status: Hanzo BotNetworkPathStatus,
         isExpensive: Bool,
         isConstrained: Bool,
-        interfaces: [OpenClawNetworkInterfaceType])
+        interfaces: [Hanzo BotNetworkInterfaceType])
     {
         self.status = status
         self.isExpensive = isExpensive
@@ -83,18 +83,18 @@ public struct OpenClawNetworkStatusPayload: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawDeviceStatusPayload: Codable, Sendable, Equatable {
-    public var battery: OpenClawBatteryStatusPayload
-    public var thermal: OpenClawThermalStatusPayload
-    public var storage: OpenClawStorageStatusPayload
-    public var network: OpenClawNetworkStatusPayload
+public struct Hanzo BotDeviceStatusPayload: Codable, Sendable, Equatable {
+    public var battery: Hanzo BotBatteryStatusPayload
+    public var thermal: Hanzo BotThermalStatusPayload
+    public var storage: Hanzo BotStorageStatusPayload
+    public var network: Hanzo BotNetworkStatusPayload
     public var uptimeSeconds: Double
 
     public init(
-        battery: OpenClawBatteryStatusPayload,
-        thermal: OpenClawThermalStatusPayload,
-        storage: OpenClawStorageStatusPayload,
-        network: OpenClawNetworkStatusPayload,
+        battery: Hanzo BotBatteryStatusPayload,
+        thermal: Hanzo BotThermalStatusPayload,
+        storage: Hanzo BotStorageStatusPayload,
+        network: Hanzo BotNetworkStatusPayload,
         uptimeSeconds: Double)
     {
         self.battery = battery
@@ -105,7 +105,7 @@ public struct OpenClawDeviceStatusPayload: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawDeviceInfoPayload: Codable, Sendable, Equatable {
+public struct Hanzo BotDeviceInfoPayload: Codable, Sendable, Equatable {
     public var deviceName: String
     public var modelIdentifier: String
     public var systemName: String

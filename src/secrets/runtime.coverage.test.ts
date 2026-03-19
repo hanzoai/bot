@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AuthProfileStore } from "../agents/auth-profiles.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import type { PluginWebSearchProviderEntry } from "../plugins/types.js";
 import { getPath, setPathCreateStrict } from "./path-utils.js";
 import { clearSecretsRuntimeSnapshot, prepareSecretsRuntimeSnapshot } from "./runtime.js";
@@ -97,8 +97,8 @@ function toConcretePathSegments(pathPattern: string): string[] {
   return out;
 }
 
-function buildConfigForOpenClawTarget(entry: SecretRegistryEntry, envId: string): OpenClawConfig {
-  const config = {} as OpenClawConfig;
+function buildConfigForHanzo BotTarget(entry: SecretRegistryEntry, envId: string): Hanzo BotConfig {
+  const config = {} as Hanzo BotConfig;
   const refTargetPath =
     entry.secretShape === "sibling_ref" && entry.refPathPattern // pragma: allowlist secret
       ? entry.refPathPattern
@@ -239,10 +239,10 @@ describe("secrets runtime target coverage", () => {
       (entry) => entry.configFile === "openclaw.json",
     );
     for (const [index, entry] of entries.entries()) {
-      const envId = `OPENCLAW_SECRET_TARGET_${index}`;
+      const envId = `BOT_SECRET_TARGET_${index}`;
       const expectedValue = `resolved-${entry.id}`;
       const snapshot = await prepareSecretsRuntimeSnapshot({
-        config: buildConfigForOpenClawTarget(entry, envId),
+        config: buildConfigForHanzo BotTarget(entry, envId),
         env: { [envId]: expectedValue },
         agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
@@ -263,10 +263,10 @@ describe("secrets runtime target coverage", () => {
       (entry) => entry.configFile === "auth-profiles.json",
     );
     for (const [index, entry] of entries.entries()) {
-      const envId = `OPENCLAW_AUTH_SECRET_TARGET_${index}`;
+      const envId = `BOT_AUTH_SECRET_TARGET_${index}`;
       const expectedValue = `resolved-${entry.id}`;
       const snapshot = await prepareSecretsRuntimeSnapshot({
-        config: {} as OpenClawConfig,
+        config: {} as Hanzo BotConfig,
         env: { [envId]: expectedValue },
         agentDirs: ["/tmp/openclaw-agent-main"],
         loadAuthStore: () => buildAuthStoreForTarget(entry, envId),

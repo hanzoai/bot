@@ -1,4 +1,4 @@
-package ai.openclaw.app.voice
+package ai.hanzo.bot.app.voice
 
 import android.media.AudioAttributes
 import android.media.AudioFormat

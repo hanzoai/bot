@@ -1,9 +1,9 @@
-import type { OpenClawConfig } from "../../config/config.js";
+import type { Hanzo BotConfig } from "../../config/config.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
 import { promptChannelAccessConfig, type ChannelAccessPolicy } from "./setup-group-access.js";
 
 export async function configureChannelAccessWithAllowlist<TResolved>(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   prompter: WizardPrompter;
   label: string;
   currentPolicy: ChannelAccessPolicy;
@@ -11,10 +11,10 @@ export async function configureChannelAccessWithAllowlist<TResolved>(params: {
   placeholder: string;
   updatePrompt: boolean;
   skipAllowlistEntries?: boolean;
-  setPolicy: (cfg: OpenClawConfig, policy: ChannelAccessPolicy) => OpenClawConfig;
-  resolveAllowlist?: (params: { cfg: OpenClawConfig; entries: string[] }) => Promise<TResolved>;
-  applyAllowlist?: (params: { cfg: OpenClawConfig; resolved: TResolved }) => OpenClawConfig;
-}): Promise<OpenClawConfig> {
+  setPolicy: (cfg: Hanzo BotConfig, policy: ChannelAccessPolicy) => Hanzo BotConfig;
+  resolveAllowlist?: (params: { cfg: Hanzo BotConfig; entries: string[] }) => Promise<TResolved>;
+  applyAllowlist?: (params: { cfg: Hanzo BotConfig; resolved: TResolved }) => Hanzo BotConfig;
+}): Promise<Hanzo BotConfig> {
   let next = params.cfg;
   const accessConfig = await promptChannelAccessConfig({
     prompter: params.prompter,

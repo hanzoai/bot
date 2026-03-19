@@ -1,4 +1,4 @@
-import OpenClawProtocol
+import Hanzo BotProtocol
 import Foundation
 import OSLog
 
@@ -142,7 +142,7 @@ public actor GatewayNodeSession {
                 latch.resume(BridgeInvokeResponse(
                     id: request.id,
                     ok: false,
-                    error: OpenClawNodeError(
+                    error: Hanzo BotNodeError(
                         code: .unavailable,
                         message: "node invoke timed out")
                 ))
@@ -465,7 +465,7 @@ public actor GatewayNodeSession {
         }
     }
 
-    private func decodeInvokeRequest(from payload: OpenClawProtocol.AnyCodable) throws -> NodeInvokeRequestPayload {
+    private func decodeInvokeRequest(from payload: Hanzo BotProtocol.AnyCodable) throws -> NodeInvokeRequestPayload {
         do {
             let data = try self.encoder.encode(payload)
             return try self.decoder.decode(NodeInvokeRequestPayload.self, from: data)

@@ -1,18 +1,18 @@
-package ai.openclaw.app.node
+package ai.hanzo.bot.app.node
 
-import ai.openclaw.app.gateway.GatewaySession
-import ai.openclaw.app.protocol.OpenClawCalendarCommand
-import ai.openclaw.app.protocol.OpenClawCanvasA2UICommand
-import ai.openclaw.app.protocol.OpenClawCanvasCommand
-import ai.openclaw.app.protocol.OpenClawCameraCommand
-import ai.openclaw.app.protocol.OpenClawCallLogCommand
-import ai.openclaw.app.protocol.OpenClawContactsCommand
-import ai.openclaw.app.protocol.OpenClawDeviceCommand
-import ai.openclaw.app.protocol.OpenClawLocationCommand
-import ai.openclaw.app.protocol.OpenClawMotionCommand
-import ai.openclaw.app.protocol.OpenClawNotificationsCommand
-import ai.openclaw.app.protocol.OpenClawSmsCommand
-import ai.openclaw.app.protocol.OpenClawSystemCommand
+import ai.hanzo.bot.app.gateway.GatewaySession
+import ai.hanzo.bot.app.protocol.Hanzo BotCalendarCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotCanvasA2UICommand
+import ai.hanzo.bot.app.protocol.Hanzo BotCanvasCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotCameraCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotCallLogCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotContactsCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotDeviceCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotLocationCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotMotionCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotNotificationsCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotSmsCommand
+import ai.hanzo.bot.app.protocol.Hanzo BotSystemCommand
 
 class InvokeDispatcher(
   private val canvas: CanvasController,
@@ -58,18 +58,18 @@ class InvokeDispatcher(
 
     return when (command) {
       // Canvas commands
-      OpenClawCanvasCommand.Present.rawValue -> {
+      Hanzo BotCanvasCommand.Present.rawValue -> {
         val url = CanvasController.parseNavigateUrl(paramsJson)
         canvas.navigate(url)
         GatewaySession.InvokeResult.ok(null)
       }
-      OpenClawCanvasCommand.Hide.rawValue -> GatewaySession.InvokeResult.ok(null)
-      OpenClawCanvasCommand.Navigate.rawValue -> {
+      Hanzo BotCanvasCommand.Hide.rawValue -> GatewaySession.InvokeResult.ok(null)
+      Hanzo BotCanvasCommand.Navigate.rawValue -> {
         val url = CanvasController.parseNavigateUrl(paramsJson)
         canvas.navigate(url)
         GatewaySession.InvokeResult.ok(null)
       }
-      OpenClawCanvasCommand.Eval.rawValue -> {
+      Hanzo BotCanvasCommand.Eval.rawValue -> {
         val js =
           CanvasController.parseEvalJs(paramsJson)
             ?: return GatewaySession.InvokeResult.error(
@@ -81,7 +81,7 @@ class InvokeDispatcher(
           GatewaySession.InvokeResult.ok("""{"result":${result.toJsonString()}}""")
         }
       }
-      OpenClawCanvasCommand.Snapshot.rawValue -> {
+      Hanzo BotCanvasCommand.Snapshot.rawValue -> {
         val snapshotParams = CanvasController.parseSnapshotParams(paramsJson)
         withCanvasAvailable {
           val base64 =
@@ -95,7 +95,7 @@ class InvokeDispatcher(
       }
 
       // A2UI commands
-      OpenClawCanvasA2UICommand.Reset.rawValue ->
+      Hanzo BotCanvasA2UICommand.Reset.rawValue ->
         withReadyA2ui {
           withCanvasAvailable {
             val res = canvas.eval(A2UIHandler.a2uiResetJS)
@@ -103,7 +103,7 @@ class InvokeDispatcher(
             GatewaySession.InvokeResult.ok(res)
           }
         }
-      OpenClawCanvasA2UICommand.Push.rawValue, OpenClawCanvasA2UICommand.PushJSONL.rawValue -> {
+      Hanzo BotCanvasA2UICommand.Push.rawValue, Hanzo BotCanvasA2UICommand.PushJSONL.rawValue -> {
         val messages =
           try {
             a2uiHandler.decodeA2uiMessages(command, paramsJson)
@@ -124,49 +124,49 @@ class InvokeDispatcher(
       }
 
       // Camera commands
-      OpenClawCameraCommand.List.rawValue -> cameraHandler.handleList(paramsJson)
-      OpenClawCameraCommand.Snap.rawValue -> cameraHandler.handleSnap(paramsJson)
-      OpenClawCameraCommand.Clip.rawValue -> cameraHandler.handleClip(paramsJson)
+      Hanzo BotCameraCommand.List.rawValue -> cameraHandler.handleList(paramsJson)
+      Hanzo BotCameraCommand.Snap.rawValue -> cameraHandler.handleSnap(paramsJson)
+      Hanzo BotCameraCommand.Clip.rawValue -> cameraHandler.handleClip(paramsJson)
 
       // Location command
-      OpenClawLocationCommand.Get.rawValue -> locationHandler.handleLocationGet(paramsJson)
+      Hanzo BotLocationCommand.Get.rawValue -> locationHandler.handleLocationGet(paramsJson)
 
       // Device commands
-      OpenClawDeviceCommand.Status.rawValue -> deviceHandler.handleDeviceStatus(paramsJson)
-      OpenClawDeviceCommand.Info.rawValue -> deviceHandler.handleDeviceInfo(paramsJson)
-      OpenClawDeviceCommand.Permissions.rawValue -> deviceHandler.handleDevicePermissions(paramsJson)
-      OpenClawDeviceCommand.Health.rawValue -> deviceHandler.handleDeviceHealth(paramsJson)
+      Hanzo BotDeviceCommand.Status.rawValue -> deviceHandler.handleDeviceStatus(paramsJson)
+      Hanzo BotDeviceCommand.Info.rawValue -> deviceHandler.handleDeviceInfo(paramsJson)
+      Hanzo BotDeviceCommand.Permissions.rawValue -> deviceHandler.handleDevicePermissions(paramsJson)
+      Hanzo BotDeviceCommand.Health.rawValue -> deviceHandler.handleDeviceHealth(paramsJson)
 
       // Notifications command
-      OpenClawNotificationsCommand.List.rawValue -> notificationsHandler.handleNotificationsList(paramsJson)
-      OpenClawNotificationsCommand.Actions.rawValue -> notificationsHandler.handleNotificationsActions(paramsJson)
+      Hanzo BotNotificationsCommand.List.rawValue -> notificationsHandler.handleNotificationsList(paramsJson)
+      Hanzo BotNotificationsCommand.Actions.rawValue -> notificationsHandler.handleNotificationsActions(paramsJson)
 
       // System command
-      OpenClawSystemCommand.Notify.rawValue -> systemHandler.handleSystemNotify(paramsJson)
+      Hanzo BotSystemCommand.Notify.rawValue -> systemHandler.handleSystemNotify(paramsJson)
 
       // Photos command
-      ai.openclaw.app.protocol.OpenClawPhotosCommand.Latest.rawValue -> photosHandler.handlePhotosLatest(
+      ai.hanzo.bot.app.protocol.Hanzo BotPhotosCommand.Latest.rawValue -> photosHandler.handlePhotosLatest(
         paramsJson,
       )
 
       // Contacts command
-      OpenClawContactsCommand.Search.rawValue -> contactsHandler.handleContactsSearch(paramsJson)
-      OpenClawContactsCommand.Add.rawValue -> contactsHandler.handleContactsAdd(paramsJson)
+      Hanzo BotContactsCommand.Search.rawValue -> contactsHandler.handleContactsSearch(paramsJson)
+      Hanzo BotContactsCommand.Add.rawValue -> contactsHandler.handleContactsAdd(paramsJson)
 
       // Calendar command
-      OpenClawCalendarCommand.Events.rawValue -> calendarHandler.handleCalendarEvents(paramsJson)
-      OpenClawCalendarCommand.Add.rawValue -> calendarHandler.handleCalendarAdd(paramsJson)
+      Hanzo BotCalendarCommand.Events.rawValue -> calendarHandler.handleCalendarEvents(paramsJson)
+      Hanzo BotCalendarCommand.Add.rawValue -> calendarHandler.handleCalendarAdd(paramsJson)
 
       // Motion command
-      OpenClawMotionCommand.Activity.rawValue -> motionHandler.handleMotionActivity(paramsJson)
-      OpenClawMotionCommand.Pedometer.rawValue -> motionHandler.handleMotionPedometer(paramsJson)
+      Hanzo BotMotionCommand.Activity.rawValue -> motionHandler.handleMotionActivity(paramsJson)
+      Hanzo BotMotionCommand.Pedometer.rawValue -> motionHandler.handleMotionPedometer(paramsJson)
 
       // SMS command
-      OpenClawSmsCommand.Send.rawValue -> smsHandler.handleSmsSend(paramsJson)
-      OpenClawSmsCommand.Search.rawValue -> smsHandler.handleSmsSearch(paramsJson)
+      Hanzo BotSmsCommand.Send.rawValue -> smsHandler.handleSmsSend(paramsJson)
+      Hanzo BotSmsCommand.Search.rawValue -> smsHandler.handleSmsSearch(paramsJson)
 
       // CallLog command
-      OpenClawCallLogCommand.Search.rawValue -> callLogHandler.handleCallLogSearch(paramsJson)
+      Hanzo BotCallLogCommand.Search.rawValue -> callLogHandler.handleCallLogSearch(paramsJson)
 
       // Debug commands
       "debug.ed25519" -> debugHandler.handleEd25519()

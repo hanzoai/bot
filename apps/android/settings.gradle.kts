@@ -14,6 +14,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "OpenClawNodeAndroid"
+rootProject.name = "Hanzo BotNodeAndroid"
 include(":app")
 include(":benchmark")

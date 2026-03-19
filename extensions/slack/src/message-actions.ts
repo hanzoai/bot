@@ -3,10 +3,10 @@ import type {
   ChannelMessageActionName,
   ChannelToolSend,
 } from "openclaw/plugin-sdk/channel-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { listEnabledSlackAccounts } from "./accounts.js";
 
-export function listSlackMessageActions(cfg: OpenClawConfig): ChannelMessageActionName[] {
+export function listSlackMessageActions(cfg: Hanzo BotConfig): ChannelMessageActionName[] {
   const accounts = listEnabledSlackAccounts(cfg).filter(
     (account) => account.botTokenSource !== "none",
   );

@@ -8,7 +8,7 @@ title: "Skills Config"
 
 # Skills Config
 
-All skills-related configuration lives under `skills` in `~/.openclaw/openclaw.json`.
+All skills-related configuration lives under `skills` in `~/.hanzoai/bot.json`.
 
 ```json5
 {

@@ -1,5 +1,5 @@
 import type { ChannelSetupAdapter } from "openclaw/plugin-sdk/channel-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-runtime";
+import type { Hanzo BotConfig } from "openclaw/plugin-sdk/config-runtime";
 import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/routing";
 import {
   createTopLevelChannelAllowFromSetter,
@@ -69,9 +69,9 @@ function parseNostrAllowFrom(raw: string): { entries: string[]; error?: string }
 }
 
 async function promptNostrAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: Hanzo BotConfig;
   prompter: WizardPrompter;
-}): Promise<OpenClawConfig> {
+}): Promise<Hanzo BotConfig> {
   return await promptParsedAllowFromForAccount({
     cfg: params.cfg,
     defaultAccountId: DEFAULT_ACCOUNT_ID,

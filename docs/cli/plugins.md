@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `openclaw plugins` (list, install, marketplace, uninstall, enable/disable, doctor)"
+summary: "CLI reference for `hanzo-bot plugins` (list, install, marketplace, uninstall, enable/disable, doctor)"
 read_when:
   - You want to install or manage Gateway plugins or compatible bundles
   - You want to debug plugin load failures
 title: "plugins"
 ---
 
-# `openclaw plugins`
+# `hanzo-bot plugins`
 
 Manage Gateway plugins/extensions and compatible bundles.
 
@@ -32,10 +32,10 @@ openclaw plugins update --all
 openclaw plugins marketplace list <marketplace>
 ```
 
-Bundled plugins ship with OpenClaw but start disabled. Use `plugins enable` to
+Bundled plugins ship with Hanzo Bot but start disabled. Use `plugins enable` to
 activate them.
 
-Native OpenClaw plugins must ship `openclaw.plugin.json` with an inline JSON
+Native Hanzo Bot plugins must ship `openclaw.plugin.json` with an inline JSON
 Schema (`configSchema`, even if empty). Compatible bundles use their own bundle
 manifests instead.
 
@@ -59,11 +59,11 @@ Npm specs are **registry-only** (package name + optional **exact version** or
 installs run with `--ignore-scripts` for safety.
 
 Bare specs and `@latest` stay on the stable track. If npm resolves either of
-those to a prerelease, OpenClaw stops and asks you to opt in explicitly with a
+those to a prerelease, Hanzo Bot stops and asks you to opt in explicitly with a
 prerelease tag such as `@beta`/`@rc` or an exact prerelease version such as
 `@1.2.3-beta.4`.
 
-If a bare install spec matches a bundled plugin id (for example `diffs`), OpenClaw
+If a bare install spec matches a bundled plugin id (for example `diffs`), Hanzo Bot
 installs the bundled plugin directly. To install an npm package with the same
 name, use an explicit scoped spec (for example `@scope/diffs`).
 
@@ -94,9 +94,9 @@ Marketplace sources can be:
 - a GitHub repo shorthand such as `owner/repo`
 - a git URL
 
-For local paths and archives, OpenClaw auto-detects:
+For local paths and archives, Hanzo Bot auto-detects:
 
-- native OpenClaw plugins (`openclaw.plugin.json`)
+- native Hanzo Bot plugins (`openclaw.plugin.json`)
 - Codex-compatible bundles (`.codex-plugin/plugin.json`)
 - Claude-compatible bundles (`.claude-plugin/plugin.json` or the default Claude
   component layout)
@@ -130,7 +130,7 @@ the plugin allowlist, and linked `plugins.load.paths` entries when applicable.
 For active memory plugins, the memory slot resets to `memory-core`.
 
 By default, uninstall also removes the plugin install directory under the active
-state dir extensions root (`$OPENCLAW_STATE_DIR/extensions/<id>`). Use
+state dir extensions root (`$BOT_STATE_DIR/extensions/<id>`). Use
 `--keep-files` to keep files on disk.
 
 `--keep-config` is supported as a deprecated alias for `--keep-files`.
@@ -141,23 +141,23 @@ state dir extensions root (`$OPENCLAW_STATE_DIR/extensions/<id>`). Use
 openclaw plugins update <id-or-npm-spec>
 openclaw plugins update --all
 openclaw plugins update <id-or-npm-spec> --dry-run
-openclaw plugins update @openclaw/voice-call@beta
+openclaw plugins update @hanzo/bot-voice-call@beta
 ```
 
 Updates apply to tracked installs in `plugins.installs`, currently npm and
 marketplace installs.
 
-When you pass a plugin id, OpenClaw reuses the recorded install spec for that
+When you pass a plugin id, Hanzo Bot reuses the recorded install spec for that
 plugin. That means previously stored dist-tags such as `@beta` and exact pinned
 versions continue to be used on later `update <id>` runs.
 
 For npm installs, you can also pass an explicit npm package spec with a dist-tag
-or exact version. OpenClaw resolves that package name back to the tracked plugin
+or exact version. Hanzo Bot resolves that package name back to the tracked plugin
 record, updates that installed plugin, and records the new npm spec for future
 id-based updates.
 
 When a stored integrity hash exists and the fetched artifact hash changes,
-OpenClaw prints a warning and asks for confirmation before proceeding. Use
+Hanzo Bot prints a warning and asks for confirmation before proceeding. Use
 global `--yes` to bypass prompts in CI/non-interactive runs.
 
 ### Inspect

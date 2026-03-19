@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { Hanzo BotConfig } from "../config/config.js";
 import { withEnvAsync } from "../test-utils/env.js";
 
 const fsMocks = vi.hoisted(() => ({
@@ -61,9 +61,9 @@ vi.mock("../daemon/service-audit.js", () => ({
       environmentValueSources?: Record<string, "inline" | "file">;
     } | null,
   ) =>
-    command?.environmentValueSources?.OPENCLAW_GATEWAY_TOKEN === "file"
+    command?.environmentValueSources?.BOT_GATEWAY_TOKEN === "file"
       ? undefined
-      : command?.environment?.OPENCLAW_GATEWAY_TOKEN?.trim() || undefined,
+      : command?.environment?.BOT_GATEWAY_TOKEN?.trim() || undefined,
   SERVICE_AUDIT_CODES: {
     gatewayEntrypointMismatch: "gateway-entrypoint-mismatch",
   },
@@ -113,7 +113,7 @@ function makeDoctorPrompts() {
   };
 }
 
-async function runRepair(cfg: OpenClawConfig) {
+async function runRepair(cfg: Hanzo BotConfig) {
   await maybeRepairGatewayServiceConfig(cfg, "local", makeDoctorIo(), makeDoctorPrompts());
 }
 
@@ -129,7 +129,7 @@ function setupGatewayTokenRepairScenario() {
   mocks.readCommand.mockResolvedValue({
     programArguments: gatewayProgramArguments,
     environment: {
-      OPENCLAW_GATEWAY_TOKEN: "stale-token",
+      BOT_GATEWAY_TOKEN: "stale-token",
     },
   });
   mocks.auditGatewayServiceConfig.mockResolvedValue({
@@ -137,7 +137,7 @@ function setupGatewayTokenRepairScenario() {
     issues: [
       {
         code: "gateway-token-mismatch",
-        message: "Gateway service OPENCLAW_GATEWAY_TOKEN does not match gateway.auth.token",
+        message: "Gateway service BOT_GATEWAY_TOKEN does not match gateway.auth.token",
         level: "recommended",
       },
     ],
@@ -154,10 +154,10 @@ describe("maybeRepairGatewayServiceConfig", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fsMocks.realpath.mockImplementation(async (value: string) => value);
-    mocks.resolveGatewayAuthTokenForService.mockImplementation(async (cfg: OpenClawConfig, env) => {
+    mocks.resolveGatewayAuthTokenForService.mockImplementation(async (cfg: Hanzo BotConfig, env) => {
       const configToken =
         typeof cfg.gateway?.auth?.token === "string" ? cfg.gateway.auth.token.trim() : undefined;
-      const envToken = env.OPENCLAW_GATEWAY_TOKEN?.trim() || undefined;
+      const envToken = env.BOT_GATEWAY_TOKEN?.trim() || undefined;
       return { token: configToken || envToken };
     });
   });
@@ -165,7 +165,7 @@ describe("maybeRepairGatewayServiceConfig", () => {
   it("treats gateway.auth.token as source of truth for service token repairs", async () => {
     setupGatewayTokenRepairScenario();
 
-    const cfg: OpenClawConfig = {
+    const cfg: Hanzo BotConfig = {
       gateway: {
         auth: {
           mode: "token",
@@ -196,11 +196,11 @@ describe("maybeRepairGatewayServiceConfig", () => {
     expect(mocks.install).toHaveBeenCalledTimes(1);
   });
 
-  it("uses OPENCLAW_GATEWAY_TOKEN when config token is missing", async () => {
-    await withEnvAsync({ OPENCLAW_GATEWAY_TOKEN: "env-token" }, async () => {
+  it("uses BOT_GATEWAY_TOKEN when config token is missing", async () => {
+    await withEnvAsync({ BOT_GATEWAY_TOKEN: "env-token" }, async () => {
       setupGatewayTokenRepairScenario();
 
-      const cfg: OpenClawConfig = {
+      const cfg: Hanzo BotConfig = {
         gateway: {},
       };
 
@@ -354,7 +354,7 @@ describe("maybeRepairGatewayServiceConfig", () => {
     mocks.readCommand.mockResolvedValue({
       programArguments: gatewayProgramArguments,
       environment: {
-        OPENCLAW_GATEWAY_TOKEN: "stale-token",
+        BOT_GATEWAY_TOKEN: "stale-token",
       },
     });
     mocks.auditGatewayServiceConfig.mockResolvedValue({
@@ -368,14 +368,14 @@ describe("maybeRepairGatewayServiceConfig", () => {
     });
     mocks.install.mockResolvedValue(undefined);
 
-    const cfg: OpenClawConfig = {
+    const cfg: Hanzo BotConfig = {
       gateway: {
         auth: {
           mode: "token",
           token: {
             source: "env",
             provider: "default",
-            id: "OPENCLAW_GATEWAY_TOKEN",
+            id: "BOT_GATEWAY_TOKEN",
           },
         },
       },
@@ -399,13 +399,13 @@ describe("maybeRepairGatewayServiceConfig", () => {
   it("falls back to embedded service token when config and env tokens are missing", async () => {
     await withEnvAsync(
       {
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        CLAWDBOT_GATEWAY_TOKEN: undefined,
+        BOT_GATEWAY_TOKEN: undefined,
+        BOT_GATEWAY_TOKEN: undefined,
       },
       async () => {
         setupGatewayTokenRepairScenario();
 
-        const cfg: OpenClawConfig = {
+        const cfg: Hanzo BotConfig = {
           gateway: {},
         };
 
@@ -444,17 +444,17 @@ describe("maybeRepairGatewayServiceConfig", () => {
   it("does not persist EnvironmentFile-backed service tokens into config", async () => {
     await withEnvAsync(
       {
-        OPENCLAW_GATEWAY_TOKEN: undefined,
-        CLAWDBOT_GATEWAY_TOKEN: undefined,
+        BOT_GATEWAY_TOKEN: undefined,
+        BOT_GATEWAY_TOKEN: undefined,
       },
       async () => {
         mocks.readCommand.mockResolvedValue({
           programArguments: gatewayProgramArguments,
           environment: {
-            OPENCLAW_GATEWAY_TOKEN: "env-file-token",
+            BOT_GATEWAY_TOKEN: "env-file-token",
           },
           environmentValueSources: {
-            OPENCLAW_GATEWAY_TOKEN: "file",
+            BOT_GATEWAY_TOKEN: "file",
           },
         });
         mocks.auditGatewayServiceConfig.mockResolvedValue({
@@ -468,7 +468,7 @@ describe("maybeRepairGatewayServiceConfig", () => {
         });
         mocks.install.mockResolvedValue(undefined);
 
-        const cfg: OpenClawConfig = {
+        const cfg: Hanzo BotConfig = {
           gateway: {},
         };
 
@@ -535,7 +535,7 @@ describe("maybeScanExtraGatewayServices", () => {
       "Legacy gateway removed",
     );
     expect(runtime.log).toHaveBeenCalledWith(
-      "Legacy gateway services removed. Installing OpenClaw gateway next.",
+      "Legacy gateway services removed. Installing Hanzo Bot gateway next.",
     );
   });
 });
