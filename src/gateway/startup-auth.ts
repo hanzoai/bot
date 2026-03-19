@@ -41,6 +41,9 @@ export function mergeGatewayAuthConfig(
   if (override.trustedProxy !== undefined) {
     merged.trustedProxy = override.trustedProxy;
   }
+  if (override.iam !== undefined) {
+    merged.iam = override.iam;
+  }
   return merged;
 }
 
@@ -148,7 +151,12 @@ function shouldResolveGatewayTokenSecretRef(params: {
   if (explicitMode === "token") {
     return true;
   }
-  if (explicitMode === "password" || explicitMode === "none" || explicitMode === "trusted-proxy") {
+  if (
+    explicitMode === "password" ||
+    explicitMode === "none" ||
+    explicitMode === "trusted-proxy" ||
+    explicitMode === "iam"
+  ) {
     return false;
   }
 
@@ -189,7 +197,12 @@ function shouldResolveGatewayPasswordSecretRef(params: {
   if (explicitMode === "password") {
     return true;
   }
-  if (explicitMode === "token" || explicitMode === "none" || explicitMode === "trusted-proxy") {
+  if (
+    explicitMode === "token" ||
+    explicitMode === "none" ||
+    explicitMode === "trusted-proxy" ||
+    explicitMode === "iam"
+  ) {
     return false;
   }
 

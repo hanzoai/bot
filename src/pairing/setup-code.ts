@@ -257,7 +257,7 @@ async function resolveGatewayTokenSecretRef(
     return cfg;
   }
   const mode = cfg.gateway?.auth?.mode;
-  if (mode === "password" || mode === "none" || mode === "trusted-proxy") {
+  if (mode === "password" || mode === "none" || mode === "trusted-proxy" || mode === "iam") {
     return cfg;
   }
   if (mode !== "token") {
@@ -298,7 +298,7 @@ async function resolveGatewayPasswordSecretRef(
     return cfg;
   }
   const mode = cfg.gateway?.auth?.mode;
-  if (mode === "token" || mode === "none" || mode === "trusted-proxy") {
+  if (mode === "token" || mode === "none" || mode === "trusted-proxy" || mode === "iam") {
     return cfg;
   }
   if (mode !== "password") {
