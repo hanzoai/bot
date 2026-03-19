@@ -111,7 +111,7 @@ function resolveOnboardingMode(): boolean {
 }
 
 @customElement("openclaw-app")
-export class Hanzo BotApp extends LitElement {
+export class HanzoBotApp extends LitElement {
   private i18nController = new I18nController(this);
   clientInstanceId = generateUUID();
   connectGeneration = 0;
@@ -122,6 +122,13 @@ export class Hanzo BotApp extends LitElement {
       void i18n.setLocale(this.settings.locale);
     }
   }
+  @state() siteUnlocked = (() => {
+    try {
+      return sessionStorage.getItem("hanzo.bot.site-lock.session") === "1";
+    } catch {
+      return false;
+    }
+  })();
   @state() password = "";
   @state() loginShowGatewayToken = false;
   @state() loginShowGatewayPassword = false;
@@ -499,6 +506,15 @@ export class Hanzo BotApp extends LitElement {
 
   connect() {
     connectGatewayInternal(this as unknown as Parameters<typeof connectGatewayInternal>[0]);
+  }
+
+  unlockSite() {
+    this.siteUnlocked = true;
+    try {
+      sessionStorage.setItem("hanzo.bot.site-lock.session", "1");
+    } catch {
+      // best-effort
+    }
   }
 
   handleChatScroll(event: Event) {
