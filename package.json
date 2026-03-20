@@ -49,6 +49,10 @@
       "types": "./dist/plugin-sdk/compat.d.ts",
       "default": "./dist/plugin-sdk/compat.js"
     },
+    "./plugin-sdk/team": {
+      "types": "./dist/plugin-sdk/team.d.ts",
+      "default": "./dist/plugin-sdk/team.js"
+    },
     "./plugin-sdk/telegram": {
       "types": "./dist/plugin-sdk/telegram.d.ts",
       "default": "./dist/plugin-sdk/telegram.js"
