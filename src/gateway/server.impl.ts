@@ -112,6 +112,11 @@ import {
   mergeGatewayAuthConfig,
   mergeGatewayTailscaleConfig,
 } from "./startup-auth.js";
+import {
+  type PlaygroundRegistrationHandle,
+  resolvePlaygroundRegistrationConfig,
+  startPlaygroundRegistration,
+} from "./playground-registration.js";
 import { maybeSeedControlUiAllowedOriginsAtStartup } from "./startup-control-ui-origins.js";
 
 export { __resetModelCatalogCacheForTest } from "./server-model-catalog.js";
@@ -131,6 +136,7 @@ const logHooks = log.child("hooks");
 const logPlugins = log.child("plugins");
 const logWsControl = log.child("ws");
 const logSecrets = log.child("secrets");
+const logPlayground = log.child("playground");
 const gatewayRuntime = runtimeForLogger(log);
 const canvasRuntime = runtimeForLogger(logCanvas);
 
@@ -921,6 +927,22 @@ export async function startGatewayServer(
     }
   }
 
+  // -- Playground control-plane registration --------------------------------
+  let playgroundRegistration: PlaygroundRegistrationHandle | null = null;
+  if (!minimalTestGateway) {
+    const pgConfig = resolvePlaygroundRegistrationConfig({
+      env: process.env,
+      gatewayPort: port,
+      log: logPlayground,
+    });
+    if (pgConfig) {
+      playgroundRegistration = await startPlaygroundRegistration(pgConfig).catch((err) => {
+        logPlayground.warn(`playground registration failed: ${String(err)}`);
+        return null;
+      });
+    }
+  }
+
   const configReloader = minimalTestGateway
     ? { stop: async () => {} }
     : (() => {
@@ -1032,6 +1054,9 @@ export async function startGatewayServer(
       authRateLimiter?.dispose();
       browserAuthRateLimiter.dispose();
       channelHealthMonitor?.stop();
+      if (playgroundRegistration) {
+        await playgroundRegistration.stop().catch(() => {});
+      }
       clearSecretsRuntimeSnapshot();
       await close(opts);
     },
