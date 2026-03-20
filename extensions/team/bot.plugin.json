@@ -1,0 +1,8 @@
+{
+  "id": "team",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}
