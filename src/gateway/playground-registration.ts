@@ -77,7 +77,7 @@ export async function startPlaygroundRegistration(
   // -- register -------------------------------------------------------------
 
   const registerPayload = {
-    node_id: nodeId,
+    id: nodeId,
     base_url: baseUrl,
     deployment_type: "long_running",
     bots,
