@@ -52,6 +52,7 @@ const pluginSdkSubpaths = [
   "zalo",
   "zalouser",
   "keyed-async-queue",
+  "team",
 ] as const;
 
 export default defineConfig({
@@ -64,6 +65,15 @@ export default defineConfig({
       })),
       {
         find: "openclaw/plugin-sdk",
+        replacement: path.join(repoRoot, "src", "plugin-sdk", "index.ts"),
+      },
+      // @hanzo/bot self-reference aliases for bundled extensions
+      ...pluginSdkSubpaths.map((subpath) => ({
+        find: `@hanzo/bot/plugin-sdk/${subpath}`,
+        replacement: path.join(repoRoot, "src", "plugin-sdk", `${subpath}.ts`),
+      })),
+      {
+        find: "@hanzo/bot/plugin-sdk",
         replacement: path.join(repoRoot, "src", "plugin-sdk", "index.ts"),
       },
     ],
