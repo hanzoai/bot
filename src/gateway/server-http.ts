@@ -53,6 +53,7 @@ import {
   resolveHookDeliver,
 } from "./hooks.js";
 import { sendGatewayAuthFailure, setDefaultSecurityHeaders } from "./http-common.js";
+import { handleLlmProxyHttpRequest } from "./llm-proxy-http.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
 import {
@@ -628,6 +629,16 @@ export function createGatewayHttpServer(opts: {
             handleOpenAiHttpRequest(req, res, {
               auth: resolvedAuth,
               config: openAiChatCompletionsConfig,
+              trustedProxies,
+              allowRealIpFallback,
+              rateLimiter,
+            }),
+        });
+        requestStages.push({
+          name: "llm-proxy",
+          run: () =>
+            handleLlmProxyHttpRequest(req, res, {
+              auth: resolvedAuth,
               trustedProxies,
               allowRealIpFallback,
               rateLimiter,
