@@ -104,9 +104,10 @@ jobs:
           ANTHROPIC_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)
           HANZO_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.HANZO_API_KEY}' | base64 -d)
 
-          # Write a startup wrapper script into the pod via ConfigMap patch
+          # Write auth-profiles.json to the CORRECT main agent dir: ~/.openclaw/agents/main/agent/
+          # The bot resolves main agent dir as: $OPENCLAW_STATE_DIR/agents/main/agent/
           kubectl patch deploy/cloud-agent -n hanzo --type=json -p="[
-            {\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/command\", \"value\": [\"sh\", \"-c\", \"mkdir -p /home/node/.openclaw/agent && echo '{\\\"profiles\\\":{\\\"anthropic:default\\\":{\\\"type\\\":\\\"api_key\\\",\\\"provider\\\":\\\"anthropic\\\",\\\"key\\\":\\\"$ANTHROPIC_KEY\\\"},\\\"hanzo:default\\\":{\\\"type\\\":\\\"api_key\\\",\\\"provider\\\":\\\"hanzo\\\",\\\"key\\\":\\\"$HANZO_KEY\\\"}},\\\"default\\\":\\\"anthropic:default\\\"}' > /home/node/.openclaw/agent/auth-profiles.json && exec node hanzo-bot.mjs gateway --allow-unconfigured --bind lan\"]}
+            {\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/command\", \"value\": [\"sh\", \"-c\", \"mkdir -p /home/node/.openclaw/agents/main/agent && echo '{\\\"version\\\":1,\\\"profiles\\\":{\\\"anthropic:default\\\":{\\\"type\\\":\\\"api_key\\\",\\\"provider\\\":\\\"anthropic\\\",\\\"key\\\":\\\"$ANTHROPIC_KEY\\\"},\\\"hanzo:default\\\":{\\\"type\\\":\\\"api_key\\\",\\\"provider\\\":\\\"hanzo\\\",\\\"key\\\":\\\"$HANZO_KEY\\\"}},\\\"default\\\":\\\"anthropic:default\\\"}' > /home/node/.openclaw/agents/main/agent/auth-profiles.json && exec node hanzo-bot.mjs gateway --allow-unconfigured --bind lan\"]}
           ]" 2>&1 || echo "Patch failed"
 
           echo "=== Wait for rollout ==="
