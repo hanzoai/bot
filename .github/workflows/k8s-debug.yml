@@ -19,124 +19,21 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-
-      - name: Fix operative image and cloud-agent sidecar
+      - name: Check pod status
         run: |
-          echo "=== 1. Check available operative images ==="
-          kubectl get deploy operative -n hanzo -o jsonpath='{.spec.template.spec.containers[0].image}' && echo ""
-          # Check what tags exist
-          kubectl get pods -n hanzo -l app=operative -o jsonpath='{.items[0].status.containerStatuses[0].state}' 2>/dev/null && echo ""
-
-          echo ""
-          echo "=== 2. Fix operative deployment with correct image tag ==="
-          kubectl set image deploy/operative -n hanzo operative=ghcr.io/hanzoai/operative:latest
-          kubectl rollout status deploy/operative -n hanzo --timeout=120s || echo "Operative rollout timed out"
-
-          echo ""
-          echo "=== 3. Check operative status ==="
-          kubectl get pods -n hanzo -l app=operative -o wide
-
-          echo ""
-          echo "=== 4. Recreate cloud-agent with operative sidecar ==="
-          kubectl delete deploy cloud-agent -n hanzo --ignore-not-found
-          cat <<'EOF' | kubectl apply -f -
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: cloud-agent
-            namespace: hanzo
-            labels:
-              app: cloud-agent
-          spec:
-            replicas: 1
-            selector:
-              matchLabels:
-                app: cloud-agent
-            template:
-              metadata:
-                labels:
-                  app: cloud-agent
-              spec:
-                imagePullSecrets:
-                - name: ghcr-secret
-                containers:
-                - name: cloud-agent
-                  image: ghcr.io/hanzoai/bot:latest
-                  imagePullPolicy: Always
-                  command: ["node", "hanzo-bot.mjs", "node", "run", "--node-id", "cloud-agent-default", "--security", "full"]
-                  env:
-                  - name: BOT_GATEWAY_TOKEN
-                    valueFrom:
-                      secretKeyRef:
-                        name: bot-secrets
-                        key: BOT_GATEWAY_TOKEN
-                  - name: BOT_NODE_GATEWAY_URL
-                    value: "ws://bot-gateway/v1/tunnel"
-                  - name: AGENT_NODE_ID
-                    value: "cloud-agent-default"
-                  - name: PLAYGROUND_SERVER
-                    value: "http://hanzo-playground.hanzo.svc:8080"
-                  - name: AGENT_NODE_TYPE
-                    value: "cloud"
-                  - name: HOME
-                    value: /home/node
-                  - name: NODE_ENV
-                    value: production
-                  - name: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
-                    value: "1"
-                  - name: OPERATIVE_URL
-                    value: "http://localhost:8501"
-                  resources:
-                    requests:
-                      cpu: 100m
-                      memory: 256Mi
-                    limits:
-                      cpu: "1"
-                      memory: 2Gi
-                - name: operative
-                  image: ghcr.io/hanzoai/operative:latest
-                  imagePullPolicy: Always
-                  ports:
-                  - containerPort: 8080
-                    name: ui
-                  - containerPort: 6080
-                    name: vnc-web
-                  - containerPort: 5900
-                    name: vnc
-                  - containerPort: 8501
-                    name: streamlit
-                  env:
-                  - name: ANTHROPIC_API_KEY
-                    valueFrom:
-                      secretKeyRef:
-                        name: bot-secrets
-                        key: ANTHROPIC_API_KEY
-                        optional: true
-                  - name: WIDTH
-                    value: "1280"
-                  - name: HEIGHT
-                    value: "800"
-                  - name: DISPLAY_NUM
-                    value: "1"
-                  resources:
-                    requests:
-                      memory: "1Gi"
-                      cpu: "500m"
-                    limits:
-                      memory: "4Gi"
-                      cpu: "2000m"
-          EOF
-
-          echo ""
-          echo "=== 5. Wait for cloud-agent rollout ==="
-          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=180s || echo "Cloud-agent rollout timed out"
-
-          echo ""
-          echo "=== 6. Check pod status ==="
+          echo "=== Cloud-agent pods ==="
           kubectl get pods -n hanzo -l app=cloud-agent -o wide
+
+          echo ""
+          echo "=== Operative pods ==="
           kubectl get pods -n hanzo -l app=operative -o wide
 
           echo ""
-          echo "=== 7. Cloud-agent logs ==="
-          sleep 10
+          echo "=== Describe cloud-agent pod ==="
+          kubectl describe pod -n hanzo -l app=cloud-agent 2>&1 | tail -20
+
+          echo ""
+          echo "=== Cloud-agent logs (if available) ==="
           kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=15 2>&1 | head -20
+          echo "---"
+          kubectl logs -n hanzo -l app=cloud-agent -c operative --tail=5 2>&1 | head -10
