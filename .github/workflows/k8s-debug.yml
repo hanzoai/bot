@@ -19,45 +19,51 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix bot-gateway service endpoints
+      - name: Fix service selector mismatch
         run: |
-          echo "=== Service selector ==="
+          echo "=== Current service selector ==="
           kubectl get svc bot-gateway -n hanzo -o jsonpath='{.spec.selector}' && echo ""
 
           echo ""
-          echo "=== Pod labels ==="
-          kubectl get pods -n hanzo -l app=bot-gateway --show-labels
+          echo "=== Fix: Delete and recreate service with correct selector ==="
+          kubectl delete svc bot-gateway -n hanzo --ignore-not-found
+
+          cat <<'SVCEOF' | kubectl apply -f -
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: bot-gateway
+            namespace: hanzo
+          spec:
+            selector:
+              app: bot-gateway
+            sessionAffinity: ClientIP
+            sessionAffinityConfig:
+              clientIP:
+                timeoutSeconds: 3600
+            ports:
+            - name: http
+              port: 80
+              targetPort: 18789
+            - name: ws
+              port: 18790
+              targetPort: 18790
+          SVCEOF
 
           echo ""
-          echo "=== EndpointSlice ==="
-          kubectl get endpointslice -n hanzo -l kubernetes.io/service-name=bot-gateway -o yaml 2>/dev/null | head -40 || echo "No endpointslice found"
+          echo "=== New service ==="
+          kubectl get svc bot-gateway -n hanzo -o wide
+          kubectl get svc bot-gateway -n hanzo -o jsonpath='{.spec.selector}' && echo ""
 
           echo ""
-          echo "=== Deployment replicas ==="
-          kubectl get deploy bot-gateway -n hanzo
+          echo "=== Wait for endpoints ==="
+          sleep 5
+          kubectl get endpoints bot-gateway -n hanzo
 
           echo ""
-          echo "=== Scale to 2 replicas ==="
-          kubectl scale deploy/bot-gateway -n hanzo --replicas=2
-          sleep 15
-
-          echo ""
-          echo "=== Pod status after scale ==="
-          kubectl get pods -n hanzo -l app=bot-gateway -o wide
-
-          echo ""
-          echo "=== Endpoints after scale ==="
-          kubectl get endpoints bot-gateway -n hanzo 2>/dev/null || true
-          kubectl get endpointslice -n hanzo -l kubernetes.io/service-name=bot-gateway 2>/dev/null || true
-
-          echo ""
-          echo "=== Direct pod health check ==="
-          POD_IP=$(kubectl get pods -n hanzo -l app=bot-gateway -o jsonpath='{.items[0].status.podIP}' 2>/dev/null)
-          if [ -n "$POD_IP" ]; then
-            echo "Pod IP: $POD_IP"
-            kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://${POD_IP}:18789/health" 2>&1 | head -5 || echo "Direct pod check failed"
-          fi
-
-          echo ""
-          echo "=== Service health check ==="
+          echo "=== Health check via service ==="
           kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -5 || echo "Service check failed"
+
+          echo ""
+          echo "=== Test WebSocket upgrade path ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/__bot__/" 2>&1 | head -5 || echo "Control UI path check failed"
