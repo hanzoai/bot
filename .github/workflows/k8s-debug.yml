@@ -20,39 +20,38 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Add ANTHROPIC_API_KEY to playground-secrets and restart
+      - name: Deploy new playground image and full status
         run: |
-          echo "=== 1. Copy ANTHROPIC_API_KEY from bot-secrets to playground-secrets ==="
-          AKEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}')
-          echo "Key exists: $([ -n "$AKEY" ] && echo yes || echo no)"
-
-          # Check if playground-secrets already has it
-          EXISTING=$(kubectl get secret playground-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' 2>/dev/null || echo "")
-          if [ -n "$EXISTING" ]; then
-            echo "ANTHROPIC_API_KEY already in playground-secrets"
-          else
-            echo "Adding ANTHROPIC_API_KEY to playground-secrets..."
-            kubectl patch secret playground-secrets -n hanzo --type=json \
-              -p "[{\"op\":\"add\",\"path\":\"/data/ANTHROPIC_API_KEY\",\"value\":\"$AKEY\"}]"
-          fi
-
-          echo ""
-          echo "=== 2. Apply updated agents-control-plane deployment ==="
-          # Checkout universe and apply
-          git clone --depth 1 --sparse https://${{ secrets.UNIVERSE_DISPATCH_TOKEN }}@github.com/hanzoai/universe.git /tmp/universe
-          cd /tmp/universe && git sparse-checkout set infra/k8s/bot
-          kubectl apply -f /tmp/universe/infra/k8s/bot/agents-control-plane.yaml
-
-          echo ""
-          echo "=== 3. Restart playground ==="
+          echo "=== 1. Restart playground with latest image ==="
           kubectl rollout restart deploy/hanzo-playground -n hanzo
           kubectl rollout status deploy/hanzo-playground -n hanzo --timeout=120s || echo "Timed out"
 
           echo ""
-          echo "=== 4. Verify playground has ANTHROPIC_API_KEY ==="
-          kubectl exec -n hanzo deploy/hanzo-playground -- env 2>/dev/null | grep ANTHROPIC | sed 's/=.\{8\}.*/=<set>/' || echo "Can't verify"
+          echo "=== 2. Verify playground has ANTHROPIC_API_KEY ==="
+          sleep 5
+          POD=$(kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{.items[0].metadata.name}')
+          kubectl exec -n hanzo "$POD" -- env 2>/dev/null | grep -E "ANTHROPIC" | sed 's/=.\{8\}.*/=<set>/' || echo "Not found"
 
           echo ""
-          echo "=== 5. Gateway + playground health ==="
+          echo "=== 3. All services health ==="
+          echo "Gateway:"
           kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3
+          echo ""
+          echo "Playground:"
           kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/health" 2>&1 | head -3
+
+          echo ""
+          echo "=== 4. Cloud-agent status ==="
+          kubectl get pods -n hanzo -l app=cloud-agent -o wide
+          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=5 2>&1 | head -8
+
+          echo ""
+          echo "=== 5. Pre-puller DaemonSet status ==="
+          kubectl get ds image-prepull -n hanzo 2>/dev/null || echo "No pre-puller"
+
+          echo ""
+          echo "=== 6. External endpoints ==="
+          echo "app.hanzo.bot:"
+          curl -skI -H "Host: app.hanzo.bot" "https://64.225.91.229/" 2>&1 | head -3
+          echo "gw.hanzo.bot WS:"
+          timeout 3 curl -sNi -k -H "Host: gw.hanzo.bot" -H "Upgrade: websocket" -H "Connection: Upgrade" -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" "https://64.225.91.229/" 2>&1 | head -3 || true
