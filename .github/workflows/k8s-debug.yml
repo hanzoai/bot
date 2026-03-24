@@ -19,114 +19,56 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix app.hanzo.bot with dedicated ingress
+      - name: Fix app.hanzo.bot via Traefik IngressRoute
         run: |
-          echo "=== 1. Find ALL resources matching app.hanzo.bot ==="
-          echo "Ingresses:"
-          kubectl get ingress -n hanzo -o json | python3 -c "
-          import sys, json
-          data = json.loads(sys.stdin.read())
-          for item in data.get('items', []):
-            name = item['metadata']['name']
-            for rule in item['spec'].get('rules', []):
-              if 'app.hanzo' in rule.get('host', ''):
-                print(f'  {name}: {rule[\"host\"]} -> {rule[\"http\"][\"paths\"][0][\"backend\"][\"service\"][\"name\"]}')
-          " 2>/dev/null || echo "parse error"
-
-          echo "IngressRoutes:"
-          kubectl get ingressroute -n hanzo -o json 2>/dev/null | python3 -c "
-          import sys, json
-          data = json.loads(sys.stdin.read())
-          for item in data.get('items', []):
-            name = item['metadata']['name']
-            for route in item['spec'].get('routes', []):
-              if 'app.hanzo' in route.get('match', ''):
-                print(f'  {name}: {route[\"match\"]}')
-          " 2>/dev/null || echo "No IngressRoutes"
+          echo "=== 1. Check gateway controller config ==="
+          kubectl get deploy gateway -n hanzo -o yaml 2>/dev/null | grep -A5 "env\|args\|command" | head -30 || echo "no gateway deploy"
 
           echo ""
-          echo "=== 2. Find the gateway controller pods ==="
-          kubectl get pods -A -o wide | grep -iE "gateway|traefik|ingress" | head -10
+          echo "=== 2. Check gateway ConfigMaps ==="
+          kubectl get configmap -n hanzo | grep -i gateway
 
           echo ""
-          echo "=== 3. Check gateway controller for redirect config ==="
-          # Check all middlewares
-          for kind in middleware middlewaretcp; do
-            echo "-- $kind --"
-            kubectl get $kind -A -o yaml 2>/dev/null | grep -B5 -A10 "redirect\|app\.hanzo\|hanzo\.bot" || echo "none"
+          echo "=== 3. Check for redirect in gateway configmap ==="
+          for cm in $(kubectl get configmap -n hanzo -o name | grep gateway); do
+            echo "--- $cm ---"
+            kubectl get $cm -n hanzo -o yaml 2>/dev/null | grep -i "redirect\|app\.hanzo\|308\|permanent" || echo "no redirect config"
           done
 
           echo ""
-          echo "=== 4. Try: create a Traefik IngressRoute (traefik.io CRD) ==="
-          kubectl get crd | grep traefik 2>/dev/null || echo "No traefik CRDs"
-          kubectl get crd | grep "hanzo.ai" 2>/dev/null || echo "No hanzo.ai CRDs"
-
-          echo ""
-          echo "=== 5. Delete hanzo-playground ingress, create fresh with just app.hanzo.bot ==="
-          kubectl delete ingress hanzo-playground -n hanzo --ignore-not-found
-
-          cat <<'IEOF' | kubectl apply -f -
-          apiVersion: networking.k8s.io/v1
-          kind: Ingress
+          echo "=== 4. Create traefik.io IngressRoute for app.hanzo.bot ==="
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: traefik.io/v1alpha1
+          kind: IngressRoute
           metadata:
-            name: app-hanzo-bot-playground
+            name: app-hanzo-bot-traefik
             namespace: hanzo
-            labels:
-              app: hanzo-playground
           spec:
-            ingressClassName: gateway
+            entryPoints:
+            - websecure
+            routes:
+            - kind: Rule
+              match: Host(`app.hanzo.bot`)
+              services:
+              - name: hanzo-playground
+                port: 8080
             tls:
-            - hosts:
-              - app.hanzo.bot
               secretName: app-hanzo-bot-tls
-            rules:
-            - host: app.hanzo.bot
-              http:
-                paths:
-                - path: /
-                  pathType: Prefix
-                  backend:
-                    service:
-                      name: hanzo-playground
-                      port:
-                        number: 8080
-          IEOF
-
-          cat <<'IEOF2' | kubectl apply -f -
-          apiVersion: networking.k8s.io/v1
-          kind: Ingress
-          metadata:
-            name: playground-hanzo-bot
-            namespace: hanzo
-            labels:
-              app: hanzo-playground
-          spec:
-            ingressClassName: gateway
-            tls:
-            - hosts:
-              - playground.hanzo.bot
-              secretName: playground-hanzo-bot-tls
-            rules:
-            - host: playground.hanzo.bot
-              http:
-                paths:
-                - path: /
-                  pathType: Prefix
-                  backend:
-                    service:
-                      name: hanzo-playground
-                      port:
-                        number: 8080
-          IEOF2
+          EOF
 
           echo ""
-          echo "=== 6. Wait and test ==="
+          echo "=== 5. Delete the k8s ingress (may conflict) ==="
+          kubectl delete ingress app-hanzo-bot-playground -n hanzo --ignore-not-found
+
+          echo ""
+          echo "=== 6. Test after 5s ==="
           sleep 5
-          echo "Test app.hanzo.bot:"
+          echo "app.hanzo.bot:"
           curl -skI -H "Host: app.hanzo.bot" "https://64.225.91.229/" 2>&1 | head -5
           echo ""
-          echo "Test app.hanzo.bot/api/v1/health:"
+          echo "app.hanzo.bot/api/v1/health:"
           curl -sk -H "Host: app.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -3
+
           echo ""
-          echo "Test playground.hanzo.bot:"
-          curl -skI -H "Host: playground.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -3
+          echo "=== 7. Restore playground.hanzo.bot ingress ==="
+          kubectl get ingress playground-hanzo-bot -n hanzo 2>/dev/null && echo "exists" || echo "need to recreate"
