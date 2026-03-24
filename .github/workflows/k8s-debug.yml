@@ -98,26 +98,45 @@ jobs:
           kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | head -200 || echo "Cannot get"
 
           echo ""
-          echo "===== 16. Write auth-profiles to ALL cloud-agent dirs ====="
+          echo "===== 16. Write auth-profiles and debug env resolution ====="
           ANTHROPIC_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)
           HANZO_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.HANZO_API_KEY}' | base64 -d)
-          AUTH_JSON="{\"profiles\":{\"anthropic:default\":{\"type\":\"api_key\",\"provider\":\"anthropic\",\"key\":\"$ANTHROPIC_KEY\"},\"hanzo:default\":{\"type\":\"api_key\",\"provider\":\"hanzo\",\"key\":\"$HANZO_KEY\"}},\"default\":\"anthropic:default\"}"
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- sh -c "
-            # Write to main agent dir
-            mkdir -p /home/node/.openclaw/agent
-            echo '$AUTH_JSON' > /home/node/.openclaw/agent/auth-profiles.json
 
-            # Write to ALL per-agent dirs
-            if [ -d /home/node/.openclaw/agents ]; then
-              for agentDir in /home/node/.openclaw/agents/*/agent; do
-                if [ -d \"\$agentDir\" ]; then
-                  echo '$AUTH_JSON' > \"\$agentDir/auth-profiles.json\"
-                  echo \"Written to \$agentDir\"
-                fi
-              done
-            fi
-            echo 'Done writing auth-profiles'
-            find /home/node/.openclaw -name auth-profiles.json 2>/dev/null
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- node -e "
+            // Test the actual resolveEnvApiKey function path
+            const key = process.env.ANTHROPIC_API_KEY;
+            console.log('RAW env ANTHROPIC_API_KEY:', JSON.stringify(key));
+            console.log('Length:', key?.length);
+            console.log('First 20 chars:', key?.substring(0, 20));
+            console.log('Has whitespace:', /\s/.test(key || ''));
+            console.log('Has null bytes:', key?.includes('\0'));
+
+            // Try normalizeOptionalSecretInput
+            function normalizeSecretInput(value) {
+              if (typeof value !== 'string' || !value.trim()) return '';
+              const collapsed = value.replace(/[\r\n]+/g, '');
+              let latin1Only = '';
+              for (const char of collapsed) {
+                const cp = char.codePointAt(0);
+                if (typeof cp === 'number' && cp <= 0xff) latin1Only += char;
+              }
+              return latin1Only.trim();
+            }
+            const normalized = normalizeSecretInput(key);
+            console.log('After normalize:', normalized ? normalized.substring(0, 20) + '...' : 'EMPTY');
+            console.log('Normalized length:', normalized?.length);
+          " 2>&1 || echo "Node exec failed"
+
+          echo ""
+          echo "=== Write auth-profiles to all dirs ==="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- sh -c "
+            AUTH='{\"profiles\":{\"anthropic:default\":{\"type\":\"api_key\",\"provider\":\"anthropic\",\"key\":\"$ANTHROPIC_KEY\"},\"hanzo:default\":{\"type\":\"api_key\",\"provider\":\"hanzo\",\"key\":\"$HANZO_KEY\"}},\"default\":\"anthropic:default\"}'
+            mkdir -p /home/node/.openclaw/agent
+            echo \"\$AUTH\" > /home/node/.openclaw/agent/auth-profiles.json
+            for d in /home/node/.openclaw/agents/*/agent; do
+              [ -d \"\$d\" ] && echo \"\$AUTH\" > \"\$d/auth-profiles.json\" && echo \"Written \$d\"
+            done
+            find /home/node/.openclaw -name auth-profiles.json
           " 2>&1 || echo "Failed"
 
           echo ""
