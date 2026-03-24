@@ -106,15 +106,34 @@ jobs:
           echo "=== Wait for rollout ==="
           kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || true
 
-          # 2. Write auth-profiles into the running pod
-          sleep 10
+          # 2. Write auth-profiles into ALL agent dirs in the running pod
+          sleep 15
           kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- node -e "
             const fs=require('fs');
-            const dir='/home/node/.openclaw/agents/main/agent';
-            fs.mkdirSync(dir,{recursive:true});
+            const path=require('path');
+            const baseDir='/home/node/.openclaw/agents';
             const p={version:1,profiles:{'anthropic:default':{type:'api_key',provider:'anthropic',key:process.env.ANTHROPIC_API_KEY},'hanzo:default':{type:'api_key',provider:'hanzo',key:process.env.HANZO_API_KEY}},default:'anthropic:default'};
-            fs.writeFileSync(dir+'/auth-profiles.json',JSON.stringify(p));
-            console.log('Written auth-profiles, ANTHROPIC key length:',process.env.ANTHROPIC_API_KEY?.length);
+            const json=JSON.stringify(p);
+
+            // Write to main/agent
+            const mainDir=path.join(baseDir,'main','agent');
+            fs.mkdirSync(mainDir,{recursive:true});
+            fs.writeFileSync(path.join(mainDir,'auth-profiles.json'),json);
+            console.log('Written to',mainDir);
+
+            // Write to ALL existing per-agent dirs
+            if(fs.existsSync(baseDir)){
+              for(const entry of fs.readdirSync(baseDir)){
+                const agentDir=path.join(baseDir,entry,'agent');
+                if(fs.existsSync(agentDir)&&fs.statSync(agentDir).isDirectory()){
+                  fs.writeFileSync(path.join(agentDir,'auth-profiles.json'),json);
+                  console.log('Written to',agentDir);
+                }
+              }
+            }
+            console.log('ANTHROPIC key length:',process.env.ANTHROPIC_API_KEY?.length);
+            const {execSync}=require('child_process');
+            console.log(execSync('find /home/node/.openclaw -name auth-profiles.json').toString().trim());
           " 2>&1 || echo "Auth write failed"
 
           echo ""
