@@ -20,68 +20,73 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Investigate gw.hanzo.bot WebSocket
+      - name: Fix gw.hanzo.bot WebSocket
         run: |
-          echo "=== 1. All ingresses for gw.hanzo.bot ==="
-          kubectl get ingress -n hanzo -o json | python3 -c "
-          import sys, json
-          data = json.loads(sys.stdin.read())
-          for item in data.get('items', []):
-            name = item['metadata']['name']
-            cls = item['spec'].get('ingressClassName', 'none')
-            for rule in item['spec'].get('rules', []):
-              if 'gw.hanzo' in rule.get('host', ''):
-                svc = rule['http']['paths'][0]['backend']['service']
-                print(f'  {name} (class={cls}): {rule[\"host\"]} -> {svc[\"name\"]}:{svc[\"port\"][\"number\"]}')
+          echo "=== 1. Check ingress-routes ConfigMap for gw.hanzo.bot ==="
+          kubectl get configmap ingress-routes -n hanzo -o jsonpath='{.data.routes\.yaml}' | python3 -c "
+          import yaml, sys
+          data = yaml.safe_load(sys.stdin.read())
+          routers = data.get('http', {}).get('routers', {})
+          services = data.get('http', {}).get('services', {})
+          for name, router in routers.items():
+            if 'gw.hanzo' in router.get('rule', ''):
+              print(f'Router: {name}')
+              print(f'  Rule: {router.get(\"rule\")}')
+              print(f'  Service: {router.get(\"service\")}')
+              print(f'  Middlewares: {router.get(\"middlewares\", [])}')
+              print(f'  TLS: {router.get(\"tls\", {})}')
+              svc_name = router.get('service', '')
+              if svc_name in services:
+                print(f'  Service config: {services[svc_name]}')
           "
 
           echo ""
-          echo "=== 2. IngressRoutes for gw.hanzo.bot ==="
+          echo "=== 2. Delete ALL duplicate gw.hanzo.bot ingresses ==="
+          kubectl delete ingress bot-gateway-ws -n hanzo --ignore-not-found
+          # Keep bot-gateway-ingress (class=ingress, which Traefik watches)
+
+          echo ""
+          echo "=== 3. Check all gw.hanzo.bot IngressRoutes ==="
           kubectl get ingressroute -n hanzo -o json 2>/dev/null | python3 -c "
           import sys, json
           data = json.loads(sys.stdin.read())
           for item in data.get('items', []):
             name = item['metadata']['name']
+            api = item['apiVersion']
             for route in item['spec'].get('routes', []):
               if 'gw.hanzo' in route.get('match', ''):
-                svcs = route.get('services', [{}])
-                print(f'  {name}: {route[\"match\"]} -> {svcs[0].get(\"name\",\"?\")}:{svcs[0].get(\"port\",\"?\")}')
-          " 2>/dev/null || echo "No IngressRoutes for gw.hanzo.bot"
+                print(f'  {name} ({api}): {route[\"match\"]}')
+          " 2>/dev/null || echo "No IngressRoutes"
 
           echo ""
-          echo "=== 3. Delete duplicate ingresses for gw.hanzo.bot ==="
-          echo "Keeping only one clean ingress for gw.hanzo.bot -> bot-gateway:80"
-          # Delete the old nginx-annotated one
-          kubectl delete ingress bot-gateway-ws -n hanzo --ignore-not-found
-          # Keep bot-gateway-ingress but check its config
+          echo "=== 4. Delete hanzo.ai IngressRoutes (custom CRDs conflict with file provider) ==="
+          kubectl delete ingressroute gw-hanzo-bot -n hanzo --ignore-not-found 2>/dev/null || true
+
+          echo ""
+          echo "=== 5. Ensure bot-gateway ingress has correct class and WebSocket support ==="
           kubectl get ingress bot-gateway-ingress -n hanzo -o jsonpath='{.spec.ingressClassName}' && echo ""
+          # Traefik watches class=ingress, so make sure bot-gateway-ingress uses class=ingress
+          # Traefik automatically supports WebSocket when the route matches
+          kubectl get ingress bot-gateway-ingress -n hanzo -o yaml | grep -A2 "rules:" | head -5
 
           echo ""
-          echo "=== 4. Check TLS cert for gw.hanzo.bot ==="
-          kubectl get secret gw-hanzo-bot-tls -n hanzo 2>/dev/null && echo "EXISTS" || echo "MISSING"
-          kubectl get secret bot-gateway-tls -n hanzo 2>/dev/null && echo "bot-gateway-tls EXISTS" || echo "bot-gateway-tls MISSING"
-          kubectl get certificate -n hanzo 2>/dev/null | grep -i "gw-hanzo\|bot-gateway" || echo "No matching certs"
+          echo "=== 6. Restart hanzo-ingress to pick up clean config ==="
+          kubectl rollout restart daemonset/hanzo-ingress -n hanzo
+          sleep 15
 
           echo ""
-          echo "=== 5. Test WebSocket from within cluster ==="
-          # Install websocat or use python for WS test
-          kubectl exec -n hanzo deploy/console -- python3 -c "
-          import asyncio, websockets
-          async def test():
-              try:
-                  async with websockets.connect('ws://bot-gateway:80/') as ws:
-                      msg = await asyncio.wait_for(ws.recv(), timeout=5)
-                      print(f'WS connected, first msg: {msg[:100]}')
-              except Exception as e:
-                  print(f'WS error: {e}')
-          asyncio.run(test())
-          " 2>&1 || echo "Python WS test failed, trying wget"
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3
+          echo "=== 7. Test WS handshake via internal ==="
+          kubectl exec -n hanzo deploy/cloud-agent -- node -e "
+            const ws = new (require('ws'))('ws://bot-gateway:80/');
+            ws.on('open', () => { console.log('WS OPEN'); setTimeout(() => { ws.close(); process.exit(0); }, 1000); });
+            ws.on('message', (d) => console.log('MSG:', d.toString().substring(0, 80)));
+            ws.on('error', (e) => { console.log('ERR:', e.message); process.exit(1); });
+            setTimeout(() => { console.log('TIMEOUT'); process.exit(1); }, 5000);
+          " 2>&1 | head -10
 
           echo ""
-          echo "=== 6. Bot gateway WebSocket port check ==="
-          kubectl get svc bot-gateway -n hanzo -o yaml | grep -A3 "ports:" | head -10
-
-          echo ""
-          echo "=== 7. Check if bot-gateway is actually serving WebSocket on port 80 ==="
-          kubectl exec -n hanzo deploy/console -- sh -c 'echo "GET / HTTP/1.1\r\nHost: bot-gateway\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n\r\n" | timeout 3 nc bot-gateway 80' 2>&1 | head -10 || echo "nc test failed"
+          echo "=== 8. Test WS via Traefik externally ==="
+          curl -sN --connect-timeout 5 -H "Host: gw.hanzo.bot" \
+            -H "Upgrade: websocket" -H "Connection: Upgrade" \
+            -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
+            "https://64.225.91.229/" 2>&1 | timeout 3 head -5 || echo "curl WS test done"
