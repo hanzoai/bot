@@ -1,0 +1,49 @@
+name: K8s Debug
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  HANZO_CLUSTER_ID: 1a153000-90a6-48ad-9375-7ef901a9bf7f
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+      - name: Configure kubectl
+        run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
+      - name: Debug nginx ingress for bot WebSocket
+        run: |
+          echo "=== Nginx ingress controller pods ==="
+          kubectl get pods --all-namespaces | grep -i "nginx\|ingress-controller" | grep -v "cm-acme"
+
+          echo ""
+          echo "=== Nginx ingress controller services ==="
+          kubectl get svc --all-namespaces -o wide | grep -i "nginx\|ingress" | grep -v "cm-acme"
+
+          echo ""
+          echo "=== Which LB has IP 24.199.71.111? ==="
+          kubectl get svc --all-namespaces -o json 2>/dev/null | grep -B 20 "24.199.71.111" | grep -E "name|namespace" | head -5
+
+          echo ""
+          echo "=== hanzo-playground service? ==="
+          kubectl get svc -n hanzo | grep playground || echo "No playground service"
+
+          echo ""
+          echo "=== Ingress class 'ingress' controller ==="
+          kubectl get ingressclass 2>/dev/null || echo "No ingress classes"
+
+          echo ""
+          echo "=== Nginx ingress controller logs ==="
+          NS=$(kubectl get pods --all-namespaces | grep "nginx.*ingress" | head -1 | awk '{print $1}')
+          POD=$(kubectl get pods --all-namespaces | grep "nginx.*ingress" | head -1 | awk '{print $2}')
+          if [ -n "$POD" ]; then
+            echo "Pod: $NS/$POD"
+            kubectl logs "$POD" -n "$NS" --tail=10 2>&1 | head -10
+          else
+            echo "No nginx ingress controller found"
+          fi
