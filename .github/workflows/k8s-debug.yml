@@ -98,6 +98,17 @@ jobs:
           kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | head -200 || echo "Cannot get"
 
           echo ""
-          echo "===== 16. Playground provisioned pods ====="
+          echo "===== 16. Write auth-profiles to cloud-agent ====="
+          ANTHROPIC_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)
+          HANZO_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.HANZO_API_KEY}' | base64 -d)
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- sh -c "
+            mkdir -p /home/node/.openclaw/agent
+            echo '{\"profiles\":{\"anthropic:default\":{\"type\":\"api_key\",\"provider\":\"anthropic\",\"key\":\"$ANTHROPIC_KEY\"},\"hanzo:default\":{\"type\":\"api_key\",\"provider\":\"hanzo\",\"key\":\"$HANZO_KEY\"}},\"default\":\"anthropic:default\"}' > /home/node/.openclaw/agent/auth-profiles.json
+            echo 'Written auth-profiles.json'
+            ls -la /home/node/.openclaw/agent/
+          " 2>&1 || echo "Failed"
+
+          echo ""
+          echo "===== 17. Playground provisioned pods ====="
           kubectl get pods -n hanzo -l 'app.kubernetes.io/managed-by=hanzo-playground' -o wide 2>/dev/null || true
           kubectl get pods -n hanzo | grep -E 'cloud-|agent-cloud' || true
