@@ -1,40 +1,22 @@
 name: K8s Debug
 on:
   workflow_dispatch:
-
 permissions:
   contents: read
-
 env:
   HANZO_CLUSTER_ID: 1a153000-90a6-48ad-9375-7ef901a9bf7f
-
 jobs:
   debug:
     runs-on: ubuntu-latest
-    timeout-minutes: 7
+    timeout-minutes: 5
     steps:
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
+      - uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_API_TOKEN }}
-      - name: Configure kubectl
-        run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-
-      - name: Restart playground with new image
-        run: |
-          echo "=== 1. Force pull new image ==="
-          kubectl rollout restart deploy/hanzo-playground -n hanzo
-          kubectl rollout status deploy/hanzo-playground -n hanzo --timeout=120s || echo "Timed out"
-
-          echo ""
-          echo "=== 2. Verify new image digest ==="
-          kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{.items[0].status.containerStatuses[0].imageID}' && echo ""
-
-          echo ""
-          echo "=== 3. Check ANTHROPIC_API_KEY in env ==="
+      - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
+      - run: |
+          kubectl set env deploy/hanzo-playground -n hanzo ANTHROPIC_API_KEY- 2>/dev/null || true
+          kubectl set env deploy/hanzo-playground -n hanzo --from=secret/playground-secrets --keys=ANTHROPIC_API_KEY
+          kubectl rollout status deploy/hanzo-playground -n hanzo --timeout=120s
           POD=$(kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{.items[0].metadata.name}')
-          kubectl exec -n hanzo "$POD" -- env 2>/dev/null | grep ANTHROPIC | sed 's/=.\{8\}.*/=<set>/' || echo "ANTHROPIC not in env"
-
-          echo ""
-          echo "=== 4. Health check ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/health" 2>&1 | head -3
+          kubectl exec -n hanzo "$POD" -- env | grep ANTHROPIC | sed 's/=.\{8\}.*/=<set>/'
