@@ -48,13 +48,44 @@ jobs:
             kubectl delete "$pod" -n hanzo --grace-period=10 || true
           done
 
-      - name: Patch cloud-agent with ANTHROPIC_API_KEY
+      - name: Patch cloud-agent with API keys and auth-profiles
         run: |
-          echo "=== Add ANTHROPIC_API_KEY env var to cloud-agent ==="
+          ANTHROPIC_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)
+          HANZO_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.HANZO_API_KEY}' | base64 -d)
+
+          echo "=== Set env vars ==="
           kubectl set env deploy/cloud-agent -n hanzo -c cloud-agent \
-            ANTHROPIC_API_KEY="$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)"
+            ANTHROPIC_API_KEY="$ANTHROPIC_KEY" \
+            HANZO_API_KEY="$HANZO_KEY"
+
           echo "=== Wait for rollout ==="
           kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || true
+
+          echo "=== Write auth-profiles.json to main agent dir ==="
+          # The bot creates per-agent dirs under ~/.openclaw/agents/<id>/agent/
+          # but checks the MAIN agent dir first. Write auth-profiles.json there.
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- sh -c "
+            mkdir -p /home/node/.openclaw/agent
+            cat > /home/node/.openclaw/agent/auth-profiles.json << 'AUTHEOF'
+{
+  \"profiles\": {
+    \"anthropic:default\": {
+      \"type\": \"api_key\",
+      \"provider\": \"anthropic\",
+      \"key\": \"$ANTHROPIC_KEY\"
+    },
+    \"hanzo:default\": {
+      \"type\": \"api_key\",
+      \"provider\": \"hanzo\",
+      \"key\": \"$HANZO_KEY\"
+    }
+  },
+  \"default\": \"anthropic:default\"
+}
+AUTHEOF
+            echo 'auth-profiles.json written'
+            cat /home/node/.openclaw/agent/auth-profiles.json | head -5
+          " 2>&1 || echo "Failed to write auth-profiles"
 
           echo ""
           echo "=== Wait for node to register ==="
