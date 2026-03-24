@@ -1,6 +1,6 @@
 name: Deploy Bot Stack
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
 permissions:
   contents: read
 env:
