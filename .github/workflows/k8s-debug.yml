@@ -20,59 +20,87 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Clean up stale bots and check status
+      - name: Fix model and check HANZO_API_KEY
         run: |
-          echo "=== 1. List all playground nodes ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>&1 | python3 -c "
+          echo "=== 1. Check current model config ==="
+          kubectl get configmap bot-gateway-config -n hanzo -o jsonpath='{.data.bot\.json}' | python3 -c "
           import sys, json
-          data = json.loads(sys.stdin.read())
-          nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
-          for n in nodes:
-            print(json.dumps(n, indent=2)[:300])
-            print('---')
-          " 2>&1 | head -60
+          cfg = json.loads(sys.stdin.read())
+          print('Model:', cfg.get('agents', {}).get('defaults', {}).get('model', 'NOT SET'))
+          " 2>/dev/null
 
           echo ""
-          echo "=== 2. Delete stale nodes via playground API ==="
-          for NODE_ID in cloud-9c1519a7 cloud-1a606135 cloud-63e77f17 cloud-eddbe940 cloud-a429c34d; do
-            echo "Deleting $NODE_ID..."
-            kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 \
-              --method=DELETE "http://hanzo-playground:8080/api/v1/nodes/$NODE_ID" 2>&1 | head -3 || echo "  delete failed"
-          done
+          echo "=== 2. Check HANZO_API_KEY ==="
+          KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.HANZO_API_KEY}' | base64 -d)
+          echo "HANZO_API_KEY length: ${#KEY}, prefix: ${KEY:0:8}..."
 
           echo ""
-          echo "=== 3. Clean up old operative pod ==="
-          kubectl delete pod operative-5cc674f6d6-dtdsg -n hanzo --ignore-not-found --force --grace-period=0 2>/dev/null || true
+          echo "=== 3. Check if hanzo API resolves ==="
+          kubectl exec -n hanzo deploy/bot-gateway -- wget -q -O - --timeout=5 "https://api.hanzo.ai/v1/models" 2>&1 | head -5 || echo "Hanzo API check failed"
 
           echo ""
-          echo "=== 4. Check cloud-agent pod status ==="
-          kubectl get pods -n hanzo -l app=cloud-agent -o wide
-          kubectl describe pod -n hanzo -l app=cloud-agent 2>&1 | grep -E "Status:|Ready:|Containers:|State:|Image:|pulling|pulled|started" | head -15
+          echo "=== 4. Check ANTHROPIC_API_KEY ==="
+          AKEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' 2>/dev/null | base64 -d 2>/dev/null)
+          echo "ANTHROPIC_API_KEY length: ${#AKEY}"
 
           echo ""
-          echo "=== 5. Check operative status ==="
-          kubectl get pods -n hanzo -l app=operative -o wide
+          echo "=== 5. Update model to claude-sonnet-4-6 (direct Anthropic) ==="
+          cat <<'CMEOF' | kubectl apply -f -
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: bot-gateway-config
+            namespace: hanzo
+            labels:
+              app: bot-gateway
+          data:
+            bot.json: |
+              {
+                "canvasHost": {
+                  "liveReload": false
+                },
+                "agents": {
+                  "defaults": {
+                    "model": "claude-sonnet-4-6"
+                  }
+                },
+                "gateway": {
+                  "trustedProxies": ["10.0.0.0/8", "172.16.0.0/12"],
+                  "auth": {
+                    "mode": "iam",
+                    "iam": {
+                      "serverUrl": "https://hanzo.id",
+                      "clientId": "hanzo-bot",
+                      "orgName": "hanzo",
+                      "appName": "hanzo-bot"
+                    }
+                  },
+                  "controlUi": {
+                    "allowedOrigins": ["https://hanzo.bot", "https://bot.hanzo.ai", "https://gw.hanzo.bot", "https://market.hanzo.bot", "https://app.hanzo.bot"],
+                    "allowInsecureAuth": true,
+                    "dangerouslyDisableDeviceAuth": true,
+                    "basePath": "/__bot__"
+                  },
+                  "nodes": {
+                    "allowCommands": ["chat.send", "chat.abort", "status.get", "exec.run", "exec.approve",
+                                 "session.checkpoint", "session.restore", "session.list"]
+                  },
+                  "marketplace": {
+                    "enabled": true,
+                    "platformFeePct": 20,
+                    "priceFraction": 0.6,
+                    "minPayoutCents": 1000,
+                    "aiTokenBonusPct": 10
+                  }
+                }
+              }
+          CMEOF
 
           echo ""
-          echo "=== 6. List remaining nodes ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>&1 | python3 -c "
-          import sys, json
-          data = json.loads(sys.stdin.read())
-          nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
-          print(f'Total nodes: {len(nodes)}')
-          for n in nodes:
-            nid = n.get('id', '?')
-            status = n.get('status', '?')
-            ntype = n.get('type', '?')
-            print(f'  {nid}: status={status} type={ntype}')
-          " 2>&1 | head -15
+          echo "=== 6. Restart bot-gateway ==="
+          kubectl rollout restart deploy/bot-gateway -n hanzo
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s || echo "Timed out"
 
           echo ""
-          echo "=== 7. Gateway health and node count ==="
+          echo "=== 7. Verify ==="
           kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3
-
-          echo ""
-          echo "=== 8. Cloud-agent logs ==="
-          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=15 2>&1 | head -20
-          echo "--- operative ---"
-          kubectl logs -n hanzo -l app=cloud-agent -c operative --tail=5 2>&1 | head -10
