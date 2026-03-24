@@ -18,32 +18,33 @@ jobs:
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
       - name: Debug nginx ingress for bot WebSocket
         run: |
-          echo "=== Nginx ingress controller pods ==="
-          kubectl get pods --all-namespaces | grep -i "nginx\|ingress-controller" | grep -v "cm-acme"
+          echo "=== All pods with 'nginx' or 'ingress' ==="
+          kubectl get pods --all-namespaces 2>/dev/null | grep -iE "nginx|ingress" || echo "None found"
 
           echo ""
-          echo "=== Nginx ingress controller services ==="
-          kubectl get svc --all-namespaces -o wide | grep -i "nginx\|ingress" | grep -v "cm-acme"
+          echo "=== All namespaces ==="
+          kubectl get ns 2>/dev/null
 
           echo ""
-          echo "=== Which LB has IP 24.199.71.111? ==="
-          kubectl get svc --all-namespaces -o json 2>/dev/null | grep -B 20 "24.199.71.111" | grep -E "name|namespace" | head -5
-
-          echo ""
-          echo "=== hanzo-playground service? ==="
-          kubectl get svc -n hanzo | grep playground || echo "No playground service"
-
-          echo ""
-          echo "=== Ingress class 'ingress' controller ==="
+          echo "=== Ingress classes ==="
           kubectl get ingressclass 2>/dev/null || echo "No ingress classes"
 
           echo ""
-          echo "=== Nginx ingress controller logs ==="
-          NS=$(kubectl get pods --all-namespaces | grep "nginx.*ingress" | head -1 | awk '{print $1}')
-          POD=$(kubectl get pods --all-namespaces | grep "nginx.*ingress" | head -1 | awk '{print $2}')
-          if [ -n "$POD" ]; then
-            echo "Pod: $NS/$POD"
-            kubectl logs "$POD" -n "$NS" --tail=10 2>&1 | head -10
-          else
-            echo "No nginx ingress controller found"
-          fi
+          echo "=== All LB services with IPs ==="
+          kubectl get svc --all-namespaces --field-selector spec.type=LoadBalancer -o custom-columns='NS:.metadata.namespace,NAME:.metadata.name,IP:.status.loadBalancer.ingress[0].ip' 2>/dev/null
+
+          echo ""
+          echo "=== Pods in ingress-nginx namespace ==="
+          kubectl get pods -n ingress-nginx 2>/dev/null || echo "No ingress-nginx namespace"
+
+          echo ""
+          echo "=== hanzo-playground service ==="
+          kubectl get svc -n hanzo 2>/dev/null | grep -i playground || echo "No playground service"
+
+          echo ""
+          echo "=== Deployments with 'nginx' ==="
+          kubectl get deploy --all-namespaces 2>/dev/null | grep -i nginx || echo "No nginx deployments"
+
+          echo ""
+          echo "=== Helm releases (nginx) ==="
+          kubectl get helmrelease --all-namespaces 2>/dev/null | grep -i nginx || echo "No helm releases"
