@@ -1,0 +1,83 @@
+name: Deploy Bot Stack
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  HANZO_CLUSTER_ID: 1a153000-90a6-48ad-9375-7ef901a9bf7f
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: hanzoai/universe
+          token: ${{ secrets.GH_PAT }}
+          sparse-checkout: infra/k8s/bot
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+      - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
+
+      - name: Clean up old conflicting nginx-class ingresses
+        run: |
+          echo "=== Removing old nginx-class bot ingresses that conflict with Traefik ==="
+          # These use ingressClassName: ingress (nginx) which has no controller
+          # They shadow the Traefik ingresses and cause routing failures
+          for ing in bot-gateway bot-hub bot-hub-ingress hanzo-bot-site hanzo-market-site bot-docs-ingress bot-skills-ingress hanzo-api-bot; do
+            CLASS=$(kubectl get ingress -n hanzo "$ing" -o jsonpath='{.spec.ingressClassName}' 2>/dev/null || echo "")
+            if [ "$CLASS" = "ingress" ]; then
+              echo "Deleting $ing (class=ingress, nginx not running)"
+              kubectl delete ingress -n hanzo "$ing" --wait=false
+            else
+              echo "Keeping $ing (class=$CLASS)"
+            fi
+          done
+
+      - name: Apply universe bot manifests
+        run: |
+          echo "=== Applying bot gateway deployment + ingress ==="
+          kubectl apply -f infra/k8s/bot/deployment.yaml
+          echo ""
+          echo "=== Applying bot ingresses (gateway + WS) ==="
+          kubectl apply -f infra/k8s/bot/ingress.yaml
+          echo ""
+          echo "=== Applying agents control plane ==="
+          kubectl apply -f infra/k8s/bot/agents-control-plane.yaml
+
+      - name: Restart gateway to clear stale node registry
+        run: |
+          kubectl rollout restart deploy/bot-gateway -n hanzo
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s
+
+      - name: Verify deployment
+        run: |
+          echo "=== Deployments ==="
+          kubectl get deploy -n hanzo bot-gateway operative cloud-agent hanzo-playground -o wide
+
+          echo ""
+          echo "=== Ingresses ==="
+          kubectl get ingress -n hanzo -o wide
+
+          echo ""
+          echo "=== Test gateway health ==="
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/health
+
+          echo ""
+          echo "=== Test WS internally ==="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- timeout 5 node -e "
+            const ws = new (require('ws'))('ws://bot-gateway:80/');
+            ws.on('open', () => { console.log('WS OPEN'); ws.close(); process.exit(0); });
+            ws.on('error', e => { console.log('WS ERROR:', e.message); process.exit(1); });
+            setTimeout(() => { console.log('WS TIMEOUT'); process.exit(1); }, 4000);
+          " 2>&1
+
+          echo ""
+          echo "=== Check gw.hanzo.bot ingress exists ==="
+          kubectl get ingress -n hanzo bot-gateway-ws -o wide
+
+          echo ""
+          echo "=== Node registry after restart ==="
+          sleep 10
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | head -100 || echo "Cannot get nodes"
