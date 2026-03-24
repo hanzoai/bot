@@ -48,10 +48,12 @@ jobs:
             kubectl delete "$pod" -n hanzo --grace-period=10 || true
           done
 
-      - name: Restart cloud-agent to force gateway reconnection
+      - name: Patch cloud-agent with ANTHROPIC_API_KEY
         run: |
-          echo "=== Restart cloud-agent ==="
-          kubectl rollout restart deploy/cloud-agent -n hanzo
+          echo "=== Add ANTHROPIC_API_KEY env var to cloud-agent ==="
+          kubectl set env deploy/cloud-agent -n hanzo -c cloud-agent \
+            ANTHROPIC_API_KEY="$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)"
+          echo "=== Wait for rollout ==="
           kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || true
 
           echo ""
