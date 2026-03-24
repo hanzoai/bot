@@ -19,30 +19,66 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix bot-gateway with hanzo-bot.mjs and --bind lan
+      - name: Apply ConfigMap and restart
         run: |
-          echo "=== Fix command to: node hanzo-bot.mjs gateway --allow-unconfigured --bind lan ==="
-          kubectl patch deploy bot-gateway -n hanzo --type json \
-            -p '[{"op":"replace","path":"/spec/template/spec/containers/0/command","value":["node","hanzo-bot.mjs","gateway","--allow-unconfigured","--bind","lan"]}]'
+          echo "=== Apply bot-gateway-config ConfigMap ==="
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: bot-gateway-config
+            namespace: hanzo
+            labels:
+              app: bot-gateway
+          data:
+            bot.json: |
+              {
+                "canvasHost": { "liveReload": false },
+                "agents": { "defaults": { "model": "hanzo/claude-sonnet-4-6" } },
+                "gateway": {
+                  "trustedProxies": ["10.0.0.0/8", "172.16.0.0/12"],
+                  "auth": {
+                    "mode": "iam",
+                    "iam": {
+                      "serverUrl": "https://hanzo.id",
+                      "clientId": "hanzo-bot",
+                      "orgName": "hanzo",
+                      "appName": "hanzo-bot"
+                    }
+                  },
+                  "controlUi": {
+                    "allowedOrigins": ["https://hanzo.bot", "https://bot.hanzo.ai", "https://gw.hanzo.bot", "https://market.hanzo.bot", "https://app.hanzo.bot"],
+                    "allowInsecureAuth": true,
+                    "dangerouslyDisableDeviceAuth": true,
+                    "basePath": "/__bot__"
+                  },
+                  "nodes": {
+                    "allowCommands": ["chat.send", "chat.abort", "status.get", "exec.run", "exec.approve",
+                                 "session.checkpoint", "session.restore", "session.list"]
+                  },
+                  "marketplace": {
+                    "enabled": true, "platformFeePct": 20, "priceFraction": 0.6,
+                    "minPayoutCents": 1000, "aiTokenBonusPct": 10
+                  }
+                }
+              }
+          EOF
 
           echo ""
-          echo "=== Scale 0 then 1 ==="
+          echo "=== Ensure volume mount exists ==="
+          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{.spec.template.spec.volumes}' | grep -q "bot-config" && echo "Volume exists" || echo "Volume missing"
+
+          echo ""
+          echo "=== Restart ==="
           kubectl scale deploy/bot-gateway -n hanzo --replicas=0
           sleep 10
           kubectl scale deploy/bot-gateway -n hanzo --replicas=1
-
-          echo ""
-          echo "=== Wait up to 5 min ==="
           kubectl rollout status deploy/bot-gateway -n hanzo --timeout=300s || echo "Timed out"
 
           echo ""
           echo "=== Check logs ==="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=10 2>&1 | grep -iE "listen|bind|0\.0\.0\.0|lan|error|fatal" | head -5 || echo "No relevant logs yet"
+          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | grep -iE "listen|bind|0\.0\.0\.0|lan|error|fatal" | head -5 || echo "Check later"
 
           echo ""
-          echo "=== Test /health ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3 || echo "Health check failed"
-
-          echo ""
-          echo "=== Test via Traefik ==="
-          curl -sk --connect-timeout 5 --resolve "gw.hanzo.bot:443:64.225.91.229" "https://gw.hanzo.bot/health" -D - 2>&1 | head -8
+          echo "=== Test ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3 || echo "Not ready"
