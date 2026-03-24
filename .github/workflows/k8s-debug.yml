@@ -19,18 +19,25 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix bot-gateway bind via CLI flag
+      - name: Fix bot-gateway bind
         run: |
-          echo "=== Current container command/args ==="
-          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{.spec.template.spec.containers[0].command}'
-          echo ""
-          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{.spec.template.spec.containers[0].args}'
-          echo ""
+          echo "=== Patch container command to include --bind lan ==="
+          kubectl patch deploy bot-gateway -n hanzo --type json \
+            -p '[{"op":"replace","path":"/spec/template/spec/containers/0/command","value":["openclaw","--bind","lan"]}]'
 
           echo ""
-          echo "=== Full container spec ==="
-          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{.spec.template.spec.containers[0]}' | python3 -m json.tool 2>/dev/null | grep -E "command|args|image" | head -5
+          echo "=== Wait for rollout ==="
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s || echo "Timed out"
 
           echo ""
-          echo "=== Dockerfile CMD/ENTRYPOINT ==="
-          kubectl exec -n hanzo deploy/bot-gateway -- cat /proc/1/cmdline 2>&1 | tr '\0' ' ' | head -1 || echo "Can't read cmdline"
+          echo "=== Check new logs ==="
+          sleep 10
+          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | grep -i "listen\|bind" || echo "No listen/bind in logs yet"
+
+          echo ""
+          echo "=== Test connectivity ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/" 2>&1 | head -3 || echo "Port 80 still failing"
+
+          echo ""
+          echo "=== Test via Traefik ==="
+          curl -sk --connect-timeout 5 --resolve "gw.hanzo.bot:443:64.225.91.229" "https://gw.hanzo.bot/" -D - 2>&1 | head -8
