@@ -19,42 +19,48 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Check routing for app.hanzo.bot and hanzo.bot
+      - name: Find app.hanzo.bot redirect source
         run: |
-          echo "=== All ingresses with hanzo.bot hosts ==="
-          kubectl get ingress -A -o wide 2>&1 | grep -iE "NAME|hanzo\.bot|app\.hanzo"
+          echo "=== All Traefik IngressRoutes ==="
+          kubectl get ingressroute -A -o yaml 2>/dev/null | grep -B3 -A20 "app\.hanzo\|hanzo\.bot" || echo "No matching IngressRoutes"
 
           echo ""
-          echo "=== Detailed ingress rules for hanzo.bot ==="
-          kubectl get ingress -n hanzo -o yaml 2>&1 | grep -B5 -A10 "hanzo\.bot"
+          echo "=== Traefik Middlewares ==="
+          kubectl get middleware -A -o yaml 2>/dev/null | head -60 || echo "No middlewares"
 
           echo ""
-          echo "=== All IngressRoutes (Traefik CRDs) ==="
-          kubectl get ingressroute -A 2>/dev/null || echo "No IngressRoute CRD"
-          kubectl get ingressroute -A -o yaml 2>/dev/null | grep -B5 -A15 "hanzo\.bot" || true
+          echo "=== Traefik redirectregex/redirectscheme ==="
+          kubectl get middleware -A -o yaml 2>/dev/null | grep -B5 -A10 "redirect\|hanzo\.bot" || echo "No redirects"
 
           echo ""
-          echo "=== Check what Traefik sees for app.hanzo.bot ==="
-          kubectl get ingressroute -A -o yaml 2>/dev/null | grep -B5 -A15 "app\.hanzo" || echo "No app.hanzo.bot IngressRoute"
+          echo "=== Check for hanzo-bot-site IngressRoute ==="
+          kubectl get ingressroute -A 2>/dev/null | grep -i "bot\|site\|hanzo" || echo "No bot IngressRoutes"
 
           echo ""
-          echo "=== Bot hub deployment and service ==="
-          kubectl get deploy hanzo-bot-site -n hanzo
-          kubectl get svc hanzo-bot-site -n hanzo
+          echo "=== Check if there are multiple ingresses claiming app.hanzo.bot ==="
+          kubectl get ingress -A -o yaml 2>/dev/null | grep -B5 "app\.hanzo\.bot" || echo "No matches"
 
           echo ""
-          echo "=== Direct test: app.hanzo.bot through ingress ==="
-          # Test from inside cluster what the bot-hub returns
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-bot-site/playground" 2>&1 | head -5 || echo "Bot site /playground failed"
+          echo "=== Traefik routers (HTTP config) ==="
+          TRAEFIK_POD=$(kubectl get pods -n hanzo -l app.kubernetes.io/name=traefik -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+          if [ -z "$TRAEFIK_POD" ]; then
+            TRAEFIK_POD=$(kubectl get pods -A -l app.kubernetes.io/name=traefik -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+            TRAEFIK_NS=$(kubectl get pods -A -l app.kubernetes.io/name=traefik -o jsonpath='{.items[0].metadata.namespace}' 2>/dev/null || echo "")
+          else
+            TRAEFIK_NS=hanzo
+          fi
+          if [ -n "$TRAEFIK_POD" ]; then
+            echo "Traefik pod: $TRAEFIK_NS/$TRAEFIK_POD"
+            kubectl exec -n "$TRAEFIK_NS" "$TRAEFIK_POD" -- wget -qO- http://127.0.0.1:8080/api/http/routers 2>/dev/null | python3 -c "import sys,json; [print(r['rule'],'->',r.get('service','?')) for r in json.loads(sys.stdin.read()) if 'app.hanzo' in r.get('rule','') or 'hanzo.bot' in r.get('rule','')]" 2>/dev/null || echo "Could not query Traefik API"
+          else
+            echo "No Traefik pod found by label"
+            kubectl get pods -A | grep traefik
+          fi
 
           echo ""
-          echo "=== Test playground service directly ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/" 2>&1 | head -10 || echo "Playground service failed"
-
+          echo "=== Verify: direct test playground.hanzo.bot vs app.hanzo.bot ==="
+          echo "playground.hanzo.bot/api/v1/health:"
+          curl -sk -H "Host: playground.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -3
           echo ""
-          echo "=== Bot-gateway ConfigMap verify ==="
-          kubectl get configmap bot-gateway-config -n hanzo -o jsonpath='{.data.bot\.json}' 2>&1 | head -30
-
-          echo ""
-          echo "=== Gateway logs (last 5 lines) ==="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | head -10
+          echo "app.hanzo.bot/api/v1/health:"
+          curl -skI -H "Host: app.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -5
