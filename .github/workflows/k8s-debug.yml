@@ -19,51 +19,41 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix service selector mismatch
+      - name: Check bot ecosystem status
         run: |
-          echo "=== Current service selector ==="
-          kubectl get svc bot-gateway -n hanzo -o jsonpath='{.spec.selector}' && echo ""
+          echo "=== Bot gateway pods ==="
+          kubectl get pods -n hanzo -l app=bot-gateway -o wide
 
           echo ""
-          echo "=== Fix: Delete and recreate service with correct selector ==="
-          kubectl delete svc bot-gateway -n hanzo --ignore-not-found
-
-          cat <<'SVCEOF' | kubectl apply -f -
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: bot-gateway
-            namespace: hanzo
-          spec:
-            selector:
-              app: bot-gateway
-            sessionAffinity: ClientIP
-            sessionAffinityConfig:
-              clientIP:
-                timeoutSeconds: 3600
-            ports:
-            - name: http
-              port: 80
-              targetPort: 18789
-            - name: ws
-              port: 18790
-              targetPort: 18790
-          SVCEOF
+          echo "=== Cloud agent pods ==="
+          kubectl get pods -n hanzo -l app=cloud-agent -o wide 2>/dev/null || echo "No cloud-agent pods"
+          kubectl get deploy cloud-agent -n hanzo 2>/dev/null || echo "No cloud-agent deployment"
 
           echo ""
-          echo "=== New service ==="
-          kubectl get svc bot-gateway -n hanzo -o wide
-          kubectl get svc bot-gateway -n hanzo -o jsonpath='{.spec.selector}' && echo ""
+          echo "=== All bot-related deployments ==="
+          kubectl get deploy -n hanzo | grep -iE "bot|agent|cloud|operative|playground"
 
           echo ""
-          echo "=== Wait for endpoints ==="
-          sleep 5
-          kubectl get endpoints bot-gateway -n hanzo
+          echo "=== Playground pods ==="
+          kubectl get pods -n hanzo -l app=hanzo-playground -o wide 2>/dev/null || echo "No playground pods"
 
           echo ""
-          echo "=== Health check via service ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -5 || echo "Service check failed"
+          echo "=== Cloud agent logs ==="
+          kubectl logs -n hanzo -l app=cloud-agent --tail=30 2>&1 | head -40 || echo "No cloud-agent logs"
 
           echo ""
-          echo "=== Test WebSocket upgrade path ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/__bot__/" 2>&1 | head -5 || echo "Control UI path check failed"
+          echo "=== Gateway connected nodes ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/__bot__/api/nodes" 2>&1 | head -20 || echo "Nodes API failed"
+
+          echo ""
+          echo "=== Gateway tunnel status ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -5
+
+          echo ""
+          echo "=== Operative pods ==="
+          kubectl get pods -n hanzo -l app=operative -o wide 2>/dev/null || echo "No operative pods"
+          kubectl logs -n hanzo -l app=operative --tail=10 2>&1 | head -15 || echo "No operative logs"
+
+          echo ""
+          echo "=== Playground logs ==="
+          kubectl logs -n hanzo -l app=hanzo-playground --tail=20 2>&1 | head -30 || echo "No playground logs"
