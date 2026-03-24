@@ -20,88 +20,95 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Fix app.hanzo.bot redirect
+      - name: Fix cloud-agent with correct image and auth
         run: |
-          echo "=== 1. Patch ingress-routes ConfigMap to remove redirect ==="
-          # Get current ConfigMap, remove the redirect middleware from app.hanzo.bot router
-          kubectl get configmap ingress-routes -n hanzo -o jsonpath='{.data.routes\.yaml}' > /tmp/routes.yaml
-
-          echo "Before fix - app.hanzo.bot router:"
-          grep -A5 "app-hanzo-bot:" /tmp/routes.yaml || true
-
-          # Use python to modify the YAML
-          python3 << 'PYEOF'
-          import yaml, sys
-
-          with open("/tmp/routes.yaml") as f:
-              data = yaml.safe_load(f)
-
-          # Remove redirect middleware from app.hanzo.bot router
-          routers = data.get("http", {}).get("routers", {})
-          if "app-hanzo-bot" in routers:
-              router = routers["app-hanzo-bot"]
-              mws = router.get("middlewares", [])
-              if "app-bot-redirect-to-hanzo-bot" in mws:
-                  mws.remove("app-bot-redirect-to-hanzo-bot")
-                  print(f"Removed redirect middleware. Remaining: {mws}")
-              if not mws:
-                  router.pop("middlewares", None)
-              router["middlewares"] = mws if mws else []
-
-          # Also remove the redirect middleware definition
-          middlewares = data.get("http", {}).get("middlewares", {})
-          if "app-bot-redirect-to-hanzo-bot" in middlewares:
-              del middlewares["app-bot-redirect-to-hanzo-bot"]
-              print("Deleted redirect middleware definition")
-
-          with open("/tmp/routes-fixed.yaml", "w") as f:
-              yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
-          PYEOF
+          echo "=== 1. Delete broken cloud-agent deployment ==="
+          kubectl delete deploy cloud-agent -n hanzo --ignore-not-found
 
           echo ""
-          echo "After fix - app.hanzo.bot router:"
-          grep -A5 "app-hanzo-bot:" /tmp/routes-fixed.yaml || true
+          echo "=== 2. Get gateway token from bot-secrets ==="
+          GW_TOKEN=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.BOT_GATEWAY_TOKEN}' | base64 -d)
+          echo "Token length: ${#GW_TOKEN}"
 
           echo ""
-          echo "=== 2. Apply fixed ConfigMap ==="
-          kubectl create configmap ingress-routes -n hanzo \
-            --from-file=routes.yaml=/tmp/routes-fixed.yaml \
-            --dry-run=client -o yaml | kubectl apply -f -
+          echo "=== 3. Check GATEWAY_TOKEN in playground-secrets ==="
+          PG_TOKEN=$(kubectl get secret playground-secrets -n hanzo -o jsonpath='{.data.GATEWAY_TOKEN}' 2>/dev/null | base64 -d 2>/dev/null || echo "")
+          echo "Playground token length: ${#PG_TOKEN}"
+          if [ "$GW_TOKEN" = "$PG_TOKEN" ]; then
+            echo "Tokens MATCH"
+          else
+            echo "Tokens DIFFER - syncing playground token to match gateway"
+            kubectl patch secret playground-secrets -n hanzo --type=json \
+              -p "[{\"op\":\"replace\",\"path\":\"/data/GATEWAY_TOKEN\",\"value\":\"$(echo -n "$GW_TOKEN" | base64 -w0)\"}]" 2>/dev/null || echo "Patch failed"
+          fi
 
           echo ""
-          echo "=== 3. Restart hanzo-ingress to pick up changes ==="
-          kubectl rollout restart daemonset/hanzo-ingress -n hanzo
-          sleep 15
+          echo "=== 4. Create cloud-agent with correct bot image ==="
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: cloud-agent
+            namespace: hanzo
+            labels:
+              app: cloud-agent
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: cloud-agent
+            template:
+              metadata:
+                labels:
+                  app: cloud-agent
+              spec:
+                imagePullSecrets:
+                - name: ghcr-secret
+                containers:
+                - name: cloud-agent
+                  image: ghcr.io/hanzoai/bot:latest
+                  imagePullPolicy: Always
+                  command: ["node", "hanzo-bot.mjs", "node", "run", "--node-id", "cloud-agent-default", "--security", "full"]
+                  env:
+                  - name: BOT_GATEWAY_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: bot-secrets
+                        key: BOT_GATEWAY_TOKEN
+                  - name: BOT_NODE_GATEWAY_URL
+                    value: "ws://bot-gateway/v1/tunnel"
+                  - name: AGENT_NODE_ID
+                    value: "cloud-agent-default"
+                  - name: PLAYGROUND_SERVER
+                    value: "http://hanzo-playground.hanzo.svc:8080"
+                  - name: AGENT_NODE_TYPE
+                    value: "cloud"
+                  - name: HOME
+                    value: /home/node
+                  - name: NODE_ENV
+                    value: production
+                  resources:
+                    requests:
+                      cpu: 100m
+                      memory: 256Mi
+                    limits:
+                      cpu: "1"
+                      memory: 2Gi
+          EOF
 
           echo ""
-          echo "=== 4. Test app.hanzo.bot ==="
-          echo "app.hanzo.bot:"
-          curl -skI -H "Host: app.hanzo.bot" "https://64.225.91.229/" 2>&1 | head -5
+          echo "=== 5. Wait for rollout ==="
+          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || echo "Timed out"
+
           echo ""
-          echo "app.hanzo.bot/api/v1/health:"
+          echo "=== 6. Check logs ==="
+          sleep 10
+          kubectl logs -n hanzo -l app=cloud-agent --tail=30 2>&1 | head -40
+
+      - name: Verify app.hanzo.bot
+        run: |
+          echo "=== app.hanzo.bot health ==="
           curl -sk -H "Host: app.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -3
-
-      - name: Fix cloud-agent auth
-        run: |
-          echo "=== 5. Check connect-policy for allow-unconfigured ==="
-          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{.spec.template.spec.containers[0].command}' && echo ""
-
           echo ""
-          echo "=== 6. Check if BOT_GATEWAY_TOKEN matches between gateway and agent ==="
-          # Check gateway token value (redacted)
-          GW_TOKEN=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.BOT_GATEWAY_TOKEN}' 2>/dev/null | base64 -d 2>/dev/null | head -c 8)
-          echo "Gateway token prefix: ${GW_TOKEN}..."
-
-          echo ""
-          echo "=== 7. Check cloud-agent current env ==="
-          kubectl get deploy cloud-agent -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' | head -20
-
-          echo ""
-          echo "=== 8. Check cloud-agent image for expected env var ==="
-          kubectl exec -n hanzo deploy/cloud-agent -- env 2>/dev/null | grep -iE "TOKEN|GATEWAY|AUTH|SECRET" | head -10 || echo "Can't exec into cloud-agent"
-
-          echo ""
-          echo "=== 9. Check cloud-agent help/entrypoint ==="
-          kubectl get deploy cloud-agent -n hanzo -o jsonpath='{.spec.template.spec.containers[0].command}' && echo ""
-          kubectl get deploy cloud-agent -n hanzo -o jsonpath='{.spec.template.spec.containers[0].args}' && echo ""
-          kubectl get deploy cloud-agent -n hanzo -o jsonpath='{.spec.template.spec.containers[0].image}' && echo ""
+          echo "=== Gateway health ==="
+          curl -sk -H "Host: gw.hanzo.bot" "https://64.225.91.229/health" 2>&1 | head -3
