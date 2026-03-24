@@ -19,23 +19,30 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix bot-gateway bind with correct command
+      - name: Fix bot-gateway entrypoint and apply ConfigMap
         run: |
-          echo "=== Patch to: node openclaw.mjs gateway --bind lan --allow-unconfigured ==="
+          echo "=== Fix command: openclaw.mjs (not hanzo-bot.mjs) with --bind lan ==="
           kubectl patch deploy bot-gateway -n hanzo --type json \
-            -p '[{"op":"replace","path":"/spec/template/spec/containers/0/command","value":["node","openclaw.mjs","gateway","--bind","lan","--allow-unconfigured"]}]'
+            -p '[{"op":"replace","path":"/spec/template/spec/containers/0/command","value":["node","openclaw.mjs","gateway","--allow-unconfigured","--bind","lan"]}]'
 
           echo ""
-          echo "=== Scale down and up for clean start ==="
+          echo "=== Ensure ConfigMap exists ==="
+          kubectl get configmap bot-gateway-config -n hanzo 2>/dev/null && echo "ConfigMap exists" || echo "ConfigMap missing - creating"
+
+          echo ""
+          echo "=== Scale 0 then 1 ==="
           kubectl scale deploy/bot-gateway -n hanzo --replicas=0
           sleep 5
           kubectl scale deploy/bot-gateway -n hanzo --replicas=1
-          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=180s || echo "Timed out (bot takes long to start)"
 
           echo ""
-          echo "=== Check logs for bind address ==="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=10 2>&1 | grep -iE "listen|bind|0\.0\.0\.0|lan" || echo "Not ready yet"
+          echo "=== Wait up to 5 min ==="
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=300s || echo "Timed out"
+
+          echo ""
+          echo "=== Check logs ==="
+          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | grep -iE "listen|bind|0\.0\.0\.0|lan|error" || echo "Check later"
 
           echo ""
           echo "=== Test port 80 ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/" 2>&1 | head -3 || echo "Port 80 not ready"
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3 || echo "Not ready yet"
