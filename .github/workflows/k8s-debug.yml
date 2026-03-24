@@ -20,28 +20,89 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Add ANTHROPIC_API_KEY to cloud-agent
+      - name: Recreate cloud-agent without operative sidecar for fast restart
         run: |
-          echo "=== Add ANTHROPIC_API_KEY from bot-secrets to cloud-agent ==="
-          kubectl set env deploy/cloud-agent -n hanzo \
-            --from=secret/bot-secrets \
-            --keys=ANTHROPIC_API_KEY
+          echo "=== Recreate cloud-agent (bot only, no operative sidecar) ==="
+          echo "The operative image is too large and pulling takes forever."
+          echo "For chat/terminal, bot-only is sufficient. VNC needs the standalone operative."
+          kubectl delete deploy cloud-agent -n hanzo --ignore-not-found
 
-          echo ""
-          echo "=== Also add HANZO_API_KEY for hanzo model routing ==="
-          kubectl set env deploy/cloud-agent -n hanzo \
-            --from=secret/bot-secrets \
-            --keys=HANZO_API_KEY
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: cloud-agent
+            namespace: hanzo
+            labels:
+              app: cloud-agent
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: cloud-agent
+            template:
+              metadata:
+                labels:
+                  app: cloud-agent
+              spec:
+                imagePullSecrets:
+                - name: ghcr-secret
+                containers:
+                - name: cloud-agent
+                  image: ghcr.io/hanzoai/bot:latest
+                  imagePullPolicy: Always
+                  command: ["node", "hanzo-bot.mjs", "node", "run", "--node-id", "cloud-agent-default", "--security", "full"]
+                  env:
+                  - name: BOT_GATEWAY_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: bot-secrets
+                        key: BOT_GATEWAY_TOKEN
+                  - name: ANTHROPIC_API_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: bot-secrets
+                        key: ANTHROPIC_API_KEY
+                        optional: true
+                  - name: HANZO_API_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: bot-secrets
+                        key: HANZO_API_KEY
+                  - name: BOT_NODE_GATEWAY_URL
+                    value: "ws://bot-gateway/v1/tunnel"
+                  - name: AGENT_NODE_ID
+                    value: "cloud-agent-default"
+                  - name: PLAYGROUND_SERVER
+                    value: "http://hanzo-playground.hanzo.svc:8080"
+                  - name: AGENT_NODE_TYPE
+                    value: "cloud"
+                  - name: HOME
+                    value: /home/node
+                  - name: NODE_ENV
+                    value: production
+                  - name: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
+                    value: "1"
+                  - name: OPERATIVE_URL
+                    value: "http://operative.hanzo.svc:8501"
+                  resources:
+                    requests:
+                      cpu: 100m
+                      memory: 256Mi
+                    limits:
+                      cpu: "1"
+                      memory: 2Gi
+          EOF
 
           echo ""
           echo "=== Wait for rollout ==="
           kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || echo "Timed out"
 
           echo ""
-          echo "=== Check cloud-agent env has the keys ==="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- env 2>/dev/null | grep -E "ANTHROPIC_API_KEY|HANZO_API_KEY" | sed 's/=.*/=<set>/' || echo "Can't check env"
+          echo "=== Check env ==="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- env 2>/dev/null | grep -E "ANTHROPIC|HANZO_API" | sed 's/=.\{8\}.*/=<redacted>/' || echo "Can't check"
 
           echo ""
-          echo "=== Cloud-agent logs ==="
-          sleep 10
-          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=15 2>&1 | head -20
+          echo "=== Logs ==="
+          sleep 5
+          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=10 2>&1 | head -15
