@@ -11,7 +11,7 @@ env:
 jobs:
   debug:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -19,19 +19,28 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Check bot-gateway health
+      - name: Fix bot-gateway bind to network
         run: |
-          echo "=== bot-gateway pod details ==="
-          kubectl describe pod -n hanzo -l app=bot-gateway 2>&1 | grep -E "State:|Ready|Restart|Image:|Port:|Container ID" | head -10
+          echo "=== Current bot-gateway container args ==="
+          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{.spec.template.spec.containers[0].command}' 2>/dev/null
+          echo ""
+          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{.spec.template.spec.containers[0].args}' 2>/dev/null
+          echo ""
 
           echo ""
-          echo "=== bot-gateway logs (last 30) ==="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=30 2>&1
+          echo "=== Add OPENCLAW_BIND=lan env var ==="
+          kubectl set env deploy/bot-gateway -n hanzo "OPENCLAW_BIND=lan"
 
           echo ""
-          echo "=== bot-gateway env (listening ports) ==="
-          kubectl exec -n hanzo deploy/bot-gateway -- env 2>&1 | grep -iE "PORT|HOST|LISTEN|BIND" | head -10 || echo "exec failed"
+          echo "=== Restart bot-gateway ==="
+          kubectl rollout restart deploy/bot-gateway -n hanzo
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s || echo "Timed out"
 
           echo ""
-          echo "=== bot-gateway netstat ==="
-          kubectl exec -n hanzo deploy/bot-gateway -- sh -c "ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || echo 'no ss/netstat'" 2>&1 | head -10 || echo "exec failed"
+          echo "=== Test connectivity ==="
+          sleep 10
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/" 2>&1 | head -3 || echo "Still failing on port 80"
+
+          echo ""
+          echo "=== Check new logs ==="
+          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | grep -i "listen\|bind\|host" | head -5
