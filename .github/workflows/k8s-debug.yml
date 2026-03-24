@@ -14,41 +14,45 @@ jobs:
         with:
           token: ${{ secrets.DO_API_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
-      - name: Clean restart everything
+      - name: Fix WS routing
         run: |
-          echo "===== 1. Restart bot-gateway (clears all stale connections) ====="
-          kubectl rollout restart deploy/bot-gateway -n hanzo
-          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s
+          echo "===== 1. Current gw.hanzo.bot ingresses ====="
+          kubectl get ingress -n hanzo -o json | python3 -c "
+          import sys, json
+          for item in json.loads(sys.stdin.read()).get('items', []):
+            for rule in item['spec'].get('rules', []):
+              if 'gw.hanzo' in rule.get('host', ''):
+                print(f'{item[\"metadata\"][\"name\"]} class={item[\"spec\"].get(\"ingressClassName\",\"?\")} -> {rule[\"http\"][\"paths\"][0][\"backend\"][\"service\"][\"name\"]}')
+          "
 
           echo ""
-          echo "===== 2. Restart cloud-agent (will reconnect to fresh gateway) ====="
-          kubectl rollout restart deploy/cloud-agent -n hanzo
-          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=180s || echo "Timed out (operative image pull)"
+          echo "===== 2. Check ingress-routes ConfigMap for gw.hanzo.bot ====="
+          kubectl get configmap ingress-routes -n hanzo -o jsonpath='{.data.routes\.yaml}' | python3 -c "
+          import yaml, sys
+          data = yaml.safe_load(sys.stdin.read())
+          for name, r in data.get('http', {}).get('routers', {}).items():
+            if 'gw.hanzo' in r.get('rule', ''):
+              print(f'Router {name}: rule={r[\"rule\"]} svc={r.get(\"service\")} tls={r.get(\"tls\")}')
+          for name, s in data.get('http', {}).get('services', {}).items():
+            if 'gw-hanzo' in name or 'bot-gateway' in name:
+              print(f'Service {name}: {s}')
+          "
 
           echo ""
-          echo "===== 3. Wait for connections to establish ====="
+          echo "===== 3. Test WS internally (via bot service) ====="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- node -e "
+            const ws = new (require('ws'))('ws://bot-gateway:80/');
+            ws.on('open', () => console.log('WS INTERNAL: OPEN'));
+            ws.on('message', d => { console.log('MSG:', d.toString().substring(0,60)); ws.close(); process.exit(0); });
+            ws.on('error', e => { console.log('ERR:', e.message); process.exit(1); });
+            setTimeout(() => { console.log('TIMEOUT'); process.exit(1); }, 5000);
+          " 2>&1 | head -5
+
+          echo ""
+          echo "===== 4. Restart hanzo-ingress to reload routes ====="
+          kubectl rollout restart daemonset/hanzo-ingress -n hanzo
           sleep 15
 
           echo ""
-          echo "===== 4. Status check ====="
-          echo "Pods:"
-          kubectl get pods -n hanzo | grep -iE "bot-gateway|cloud-agent|operative|playground"
-          echo ""
-          echo "Gateway health:"
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1
-          echo ""
-          echo "Cloud-agent logs:"
-          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=8 2>&1 | head -10
-          echo ""
-          echo "Nodes registered:"
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>&1 | python3 -c "
-          import sys, json
-          data = json.loads(sys.stdin.read())
-          nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
-          print(f'Total: {len(nodes)}')
-          for n in nodes:
-            print(f'  {n.get(\"id\",\"?\")}')
-          " 2>/dev/null
-          echo ""
-          echo "External WS:"
-          timeout 3 curl -sNi -k -H "Host: gw.hanzo.bot" -H "Upgrade: websocket" -H "Connection: Upgrade" -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" "https://64.225.91.229/" 2>&1 | head -3 || true
+          echo "===== 5. Test WS after ingress restart ====="
+          timeout 3 curl -sNi -k -H "Host: gw.hanzo.bot" -H "Upgrade: websocket" -H "Connection: Upgrade" -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" "https://64.225.91.229/" 2>&1 | head -5 || true
