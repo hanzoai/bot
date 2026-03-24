@@ -19,56 +19,17 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix app.hanzo.bot via Traefik IngressRoute
+      - name: Dump gateway-config and find redirect
         run: |
-          echo "=== 1. Check gateway controller config ==="
-          kubectl get deploy gateway -n hanzo -o yaml 2>/dev/null | grep -A5 "env\|args\|command" | head -30 || echo "no gateway deploy"
-
-          echo ""
-          echo "=== 2. Check gateway ConfigMaps ==="
-          kubectl get configmap -n hanzo | grep -i gateway
-
-          echo ""
-          echo "=== 3. Check for redirect in gateway configmap ==="
-          for cm in $(kubectl get configmap -n hanzo -o name | grep gateway); do
-            echo "--- $cm ---"
-            kubectl get $cm -n hanzo -o yaml 2>/dev/null | grep -i "redirect\|app\.hanzo\|308\|permanent" || echo "no redirect config"
-          done
-
-          echo ""
-          echo "=== 4. Create traefik.io IngressRoute for app.hanzo.bot ==="
-          cat <<'EOF' | kubectl apply -f -
-          apiVersion: traefik.io/v1alpha1
-          kind: IngressRoute
-          metadata:
-            name: app-hanzo-bot-traefik
-            namespace: hanzo
-          spec:
-            entryPoints:
-            - websecure
-            routes:
-            - kind: Rule
-              match: Host(`app.hanzo.bot`)
-              services:
-              - name: hanzo-playground
-                port: 8080
-            tls:
-              secretName: app-hanzo-bot-tls
-          EOF
-
-          echo ""
-          echo "=== 5. Delete the k8s ingress (may conflict) ==="
-          kubectl delete ingress app-hanzo-bot-playground -n hanzo --ignore-not-found
-
-          echo ""
-          echo "=== 6. Test after 5s ==="
-          sleep 5
-          echo "app.hanzo.bot:"
-          curl -skI -H "Host: app.hanzo.bot" "https://64.225.91.229/" 2>&1 | head -5
-          echo ""
-          echo "app.hanzo.bot/api/v1/health:"
-          curl -sk -H "Host: app.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -3
-
-          echo ""
-          echo "=== 7. Restore playground.hanzo.bot ingress ==="
-          kubectl get ingress playground-hanzo-bot -n hanzo 2>/dev/null && echo "exists" || echo "need to recreate"
+          echo "=== Full gateway-config ==="
+          kubectl get configmap gateway-config -n hanzo -o jsonpath='{.data}' 2>&1 | python3 -c "
+          import sys, json
+          data = json.loads(sys.stdin.read())
+          for key, val in data.items():
+            print(f'--- {key} ---')
+            try:
+              parsed = json.loads(val)
+              print(json.dumps(parsed, indent=2))
+            except:
+              print(val)
+          " 2>/dev/null || kubectl get configmap gateway-config -n hanzo -o yaml
