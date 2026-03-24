@@ -98,21 +98,24 @@ jobs:
           kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | head -200 || echo "Cannot get"
 
           echo ""
-          echo "===== 16. Patch cloud-agent command to write auth-profiles at startup ====="
-          # The bot creates per-agent dirs at runtime but doesn't copy auth-profiles.
-          # Fix: wrap the command with an init script that writes auth-profiles before starting.
-          ANTHROPIC_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)
-          HANZO_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.HANZO_API_KEY}' | base64 -d)
+          echo "===== 16. Fix cloud-agent: restore command, add config volume, write auth ====="
 
-          # Write auth-profiles using env vars at runtime, then start gateway
-          # The sh -c reads $ANTHROPIC_API_KEY and $HANZO_API_KEY from the pod's env
-          PATCH_CMD='mkdir -p /home/node/.openclaw/agents/main/agent && node -e "const fs=require(\"fs\");const p={version:1,profiles:{\"anthropic:default\":{type:\"api_key\",provider:\"anthropic\",key:process.env.ANTHROPIC_API_KEY},\"hanzo:default\":{type:\"api_key\",provider:\"hanzo\",key:process.env.HANZO_API_KEY}},default:\"anthropic:default\"};fs.writeFileSync(\"/home/node/.openclaw/agents/main/agent/auth-profiles.json\",JSON.stringify(p));console.log(\"auth-profiles written\")" && exec node hanzo-bot.mjs gateway --allow-unconfigured --bind lan'
-          kubectl patch deploy/cloud-agent -n hanzo --type=json -p="[
-            {\"op\": \"replace\", \"path\": \"/spec/template/spec/containers/0/command\", \"value\": [\"sh\", \"-c\", \"$PATCH_CMD\"]}
-          ]" 2>&1 || echo "Patch failed"
+          # 1. Restore original gateway command and add config volume mount
+          kubectl patch deploy/cloud-agent -n hanzo --type=strategic -p '{"spec":{"template":{"spec":{"volumes":[{"name":"bot-config","configMap":{"name":"bot-gateway-config"}}],"containers":[{"name":"cloud-agent","command":["node","hanzo-bot.mjs","gateway","--allow-unconfigured","--bind","lan"],"volumeMounts":[{"name":"bot-config","mountPath":"/etc/bot/bot.json","subPath":"bot.json"}]}]}}}}' 2>&1 || echo "Patch failed"
 
           echo "=== Wait for rollout ==="
           kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || true
+
+          # 2. Write auth-profiles into the running pod
+          sleep 10
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- node -e "
+            const fs=require('fs');
+            const dir='/home/node/.openclaw/agents/main/agent';
+            fs.mkdirSync(dir,{recursive:true});
+            const p={version:1,profiles:{'anthropic:default':{type:'api_key',provider:'anthropic',key:process.env.ANTHROPIC_API_KEY},'hanzo:default':{type:'api_key',provider:'hanzo',key:process.env.HANZO_API_KEY}},default:'anthropic:default'};
+            fs.writeFileSync(dir+'/auth-profiles.json',JSON.stringify(p));
+            console.log('Written auth-profiles, ANTHROPIC key length:',process.env.ANTHROPIC_API_KEY?.length);
+          " 2>&1 || echo "Auth write failed"
 
           echo ""
           echo "===== 17. Playground provisioned pods ====="
