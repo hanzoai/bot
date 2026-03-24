@@ -16,33 +16,36 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix bot ingresses to use Traefik
+      - name: Debug bot-gateway backend
         run: |
-          echo "=== Current bot-gateway-ws ingress class ==="
-          kubectl get ingress bot-gateway-ws -n hanzo -o jsonpath='{.spec.ingressClassName}'
-          echo ""
-
-          echo "=== Patch bot-gateway-ws to use gateway class ==="
-          kubectl patch ingress bot-gateway-ws -n hanzo --type merge \
-            -p '{"spec":{"ingressClassName":"gateway"}}'
-
-          echo "=== Patch hanzo-playground to use gateway class ==="
-          kubectl patch ingress hanzo-playground -n hanzo --type merge \
-            -p '{"spec":{"ingressClassName":"gateway"}}'
-
-          echo "=== Patch bot-gateway to use gateway class ==="
-          kubectl patch ingress bot-gateway -n hanzo --type merge \
-            -p '{"spec":{"ingressClassName":"gateway"}}'
-
-          echo "=== Patch bot-hub to use gateway class ==="
-          kubectl patch ingress bot-hub -n hanzo --type merge \
-            -p '{"spec":{"ingressClassName":"gateway"}}'
+          echo "=== bot-gateway service ports ==="
+          kubectl get svc bot-gateway -n hanzo -o jsonpath='{.spec.ports[*]}' | python3 -c "import json,sys; [print(f\"port={p['port']} target={p.get('targetPort','?')} name={p.get('name','?')}\") for p in json.loads('['+sys.stdin.read().replace('} {','},{').replace('map','\"map\"')+']')]" 2>&1 || kubectl get svc bot-gateway -n hanzo -o yaml | grep -A 3 "ports:"
 
           echo ""
-          echo "=== Verify ==="
-          kubectl get ingress -n hanzo -o custom-columns='NAME:.metadata.name,CLASS:.spec.ingressClassName,HOSTS:.spec.rules[*].host' | grep -i "bot\|playground\|gateway-ws"
+          echo "=== bot-gateway pod container ports ==="
+          kubectl get pods -n hanzo -l app=bot-gateway -o jsonpath='{.items[0].spec.containers[0].ports[*]}' 2>&1
 
           echo ""
-          echo "=== Test gw.hanzo.bot through Traefik LB ==="
-          sleep 5
-          curl -sk --connect-timeout 5 --resolve "gw.hanzo.bot:443:64.225.91.229" "https://gw.hanzo.bot/" -D - 2>&1 | head -10
+          echo "=== Test bot-gateway internally from console pod ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/" 2>&1 | head -5 || echo "Port 80 failed"
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:18790/" 2>&1 | head -5 || echo "Port 18790 failed"
+
+          echo ""
+          echo "=== hanzo-playground service ports ==="
+          kubectl get svc hanzo-playground -n hanzo -o yaml | grep -A 5 "ports:"
+
+          echo ""
+          echo "=== Test hanzo-playground internally ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/" 2>&1 | head -5 || echo "Playground port 8080 failed"
+
+          echo ""
+          echo "=== Traefik routers for gw.hanzo.bot ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-ingress:8080/api/http/routers" 2>&1 | python3 -c "
+import json,sys
+try:
+  data=json.load(sys.stdin)
+  for r in data:
+    if 'gw.hanzo' in str(r.get('rule','')) or 'bot' in str(r.get('rule','')).lower():
+      print(f\"{r.get('name','')} -> {r.get('rule','')} service={r.get('service','')}\")
+except: print('Could not parse Traefik API')
+" 2>&1
