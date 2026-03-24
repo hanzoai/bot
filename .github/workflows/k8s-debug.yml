@@ -20,66 +20,52 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Remove gw-bot-root-rewrite from ingress-routes
+      - name: Investigate tunnel timeout
         run: |
-          echo "=== 1. Remove the root path rewrite router ==="
-          kubectl get configmap ingress-routes -n hanzo -o jsonpath='{.data.routes\.yaml}' > /tmp/routes.yaml
-
-          python3 << 'PYEOF'
-          import yaml
-
-          with open("/tmp/routes.yaml") as f:
-              data = yaml.safe_load(f)
-
-          routers = data.get("http", {}).get("routers", {})
-
-          # Remove the gw-hanzo-bot-root router that rewrites / to /health
-          if "gw-hanzo-bot-root" in routers:
-              del routers["gw-hanzo-bot-root"]
-              print("Deleted gw-hanzo-bot-root router (was rewriting / to /health)")
-
-          # Also remove the gw-bot-root-rewrite middleware
-          middlewares = data.get("http", {}).get("middlewares", {})
-          if "gw-bot-root-rewrite" in middlewares:
-              del middlewares["gw-bot-root-rewrite"]
-              print("Deleted gw-bot-root-rewrite middleware")
-
-          # Verify gw-hanzo-bot router still exists without rewrite
-          if "gw-hanzo-bot" in routers:
-              print(f"Kept gw-hanzo-bot router: {routers['gw-hanzo-bot']}")
-
-          with open("/tmp/routes-fixed.yaml", "w") as f:
-              yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
-          PYEOF
+          echo "=== 1. Gateway logs - tunnel related ==="
+          kubectl logs -n hanzo -l app=bot-gateway --tail=50 2>&1 | grep -iE "tunnel|vnc|connect|node|9c1519|1a606|cloud" | head -20
 
           echo ""
-          echo "=== 2. Apply fixed ConfigMap ==="
-          kubectl create configmap ingress-routes -n hanzo \
-            --from-file=routes.yaml=/tmp/routes-fixed.yaml \
-            --dry-run=client -o yaml | kubectl apply -f -
+          echo "=== 2. All cloud agent pods ==="
+          kubectl get pods -n hanzo | grep -iE "cloud\|agent" | head -15
 
           echo ""
-          echo "=== 3. Restart hanzo-ingress ==="
-          kubectl rollout restart daemonset/hanzo-ingress -n hanzo
-          sleep 20
+          echo "=== 3. Check if agent-cloud-9c1519a7 is a registered node ==="
+          # The node ID format used by playground
+          kubectl get pods -n hanzo -o wide | grep -iE "9c1519\|1a606\|cloud-865" | head -10
 
           echo ""
-          echo "=== 4. Test WS externally ==="
-          echo "Health check (should work):"
-          curl -sk -H "Host: gw.hanzo.bot" "https://64.225.91.229/health" 2>&1 | head -3
-          echo ""
-          echo "WebSocket upgrade test:"
-          timeout 5 curl -sNi -H "Host: gw.hanzo.bot" \
-            -H "Upgrade: websocket" -H "Connection: Upgrade" \
-            -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
-            "https://64.225.91.229/" 2>&1 | head -10 || echo "WS curl done"
+          echo "=== 4. Cloud-agent (our static one) - does it have VNC? ==="
+          kubectl get deploy cloud-agent -n hanzo -o jsonpath='{.spec.template.spec.containers[*].name}' && echo ""
+          echo "Containers count: $(kubectl get deploy cloud-agent -n hanzo -o jsonpath='{.spec.template.spec.containers}' | python3 -c 'import sys,json; print(len(json.loads(sys.stdin.read())))' 2>/dev/null)"
 
           echo ""
-          echo "=== 5. Internal WS test ==="
-          kubectl exec -n hanzo deploy/cloud-agent -- node -e "
-            const ws = new (require('ws'))('ws://bot-gateway:80/');
-            ws.on('open', () => { console.log('WS OPEN'); });
-            ws.on('message', (d) => { console.log('MSG:', d.toString().substring(0, 80)); ws.close(); process.exit(0); });
-            ws.on('error', (e) => { console.log('ERR:', e.message); process.exit(1); });
-            setTimeout(() => { console.log('TIMEOUT'); process.exit(1); }, 5000);
-          " 2>&1 | head -5
+          echo "=== 5. Gateway full logs last 30 lines ==="
+          kubectl logs -n hanzo -l app=bot-gateway --tail=30 2>&1 | head -35
+
+          echo ""
+          echo "=== 6. Cloud-agent logs ==="
+          kubectl logs -n hanzo -l app=cloud-agent --tail=20 2>&1 | head -25
+
+          echo ""
+          echo "=== 7. Operative pod status ==="
+          kubectl get pods -n hanzo -l app=operative -o wide
+          kubectl get deploy operative -n hanzo
+
+          echo ""
+          echo "=== 8. All playground-managed agent pods ==="
+          kubectl get pods -n hanzo -o wide --show-labels | grep -iE "agent-cloud\|bot-node\|node-cloud" | head -10
+
+          echo ""
+          echo "=== 9. Playground API - list nodes ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>&1 | python3 -c "
+          import sys, json
+          try:
+            data = json.loads(sys.stdin.read())
+            nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
+            for n in (nodes[:10] if isinstance(nodes, list) else []):
+              print(f'  {n.get(\"id\",\"?\")}: status={n.get(\"status\",\"?\")} type={n.get(\"type\",\"?\")} connected={n.get(\"connected\",\"?\")}')
+          except Exception as e:
+            print(f'Parse error: {e}')
+            print(sys.stdin.read()[:200] if hasattr(sys.stdin, 'read') else '')
+          " 2>&1 | head -15
