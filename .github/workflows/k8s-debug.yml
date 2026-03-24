@@ -20,52 +20,123 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Investigate tunnel timeout
+      - name: Fix operative image and cloud-agent sidecar
         run: |
-          echo "=== 1. Gateway logs - tunnel related ==="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=50 2>&1 | grep -iE "tunnel|vnc|connect|node|9c1519|1a606|cloud" | head -20
+          echo "=== 1. Check available operative images ==="
+          kubectl get deploy operative -n hanzo -o jsonpath='{.spec.template.spec.containers[0].image}' && echo ""
+          # Check what tags exist
+          kubectl get pods -n hanzo -l app=operative -o jsonpath='{.items[0].status.containerStatuses[0].state}' 2>/dev/null && echo ""
 
           echo ""
-          echo "=== 2. All cloud agent pods ==="
-          kubectl get pods -n hanzo | grep -iE "cloud\|agent" | head -15
+          echo "=== 2. Fix operative deployment with correct image tag ==="
+          kubectl set image deploy/operative -n hanzo operative=ghcr.io/hanzoai/operative:latest
+          kubectl rollout status deploy/operative -n hanzo --timeout=120s || echo "Operative rollout timed out"
 
           echo ""
-          echo "=== 3. Check if agent-cloud-9c1519a7 is a registered node ==="
-          # The node ID format used by playground
-          kubectl get pods -n hanzo -o wide | grep -iE "9c1519\|1a606\|cloud-865" | head -10
-
-          echo ""
-          echo "=== 4. Cloud-agent (our static one) - does it have VNC? ==="
-          kubectl get deploy cloud-agent -n hanzo -o jsonpath='{.spec.template.spec.containers[*].name}' && echo ""
-          echo "Containers count: $(kubectl get deploy cloud-agent -n hanzo -o jsonpath='{.spec.template.spec.containers}' | python3 -c 'import sys,json; print(len(json.loads(sys.stdin.read())))' 2>/dev/null)"
-
-          echo ""
-          echo "=== 5. Gateway full logs last 30 lines ==="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=30 2>&1 | head -35
-
-          echo ""
-          echo "=== 6. Cloud-agent logs ==="
-          kubectl logs -n hanzo -l app=cloud-agent --tail=20 2>&1 | head -25
-
-          echo ""
-          echo "=== 7. Operative pod status ==="
+          echo "=== 3. Check operative status ==="
           kubectl get pods -n hanzo -l app=operative -o wide
-          kubectl get deploy operative -n hanzo
 
           echo ""
-          echo "=== 8. All playground-managed agent pods ==="
-          kubectl get pods -n hanzo -o wide --show-labels | grep -iE "agent-cloud\|bot-node\|node-cloud" | head -10
+          echo "=== 4. Recreate cloud-agent with operative sidecar ==="
+          kubectl delete deploy cloud-agent -n hanzo --ignore-not-found
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: cloud-agent
+            namespace: hanzo
+            labels:
+              app: cloud-agent
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: cloud-agent
+            template:
+              metadata:
+                labels:
+                  app: cloud-agent
+              spec:
+                imagePullSecrets:
+                - name: ghcr-secret
+                containers:
+                - name: cloud-agent
+                  image: ghcr.io/hanzoai/bot:latest
+                  imagePullPolicy: Always
+                  command: ["node", "hanzo-bot.mjs", "node", "run", "--node-id", "cloud-agent-default", "--security", "full"]
+                  env:
+                  - name: BOT_GATEWAY_TOKEN
+                    valueFrom:
+                      secretKeyRef:
+                        name: bot-secrets
+                        key: BOT_GATEWAY_TOKEN
+                  - name: BOT_NODE_GATEWAY_URL
+                    value: "ws://bot-gateway/v1/tunnel"
+                  - name: AGENT_NODE_ID
+                    value: "cloud-agent-default"
+                  - name: PLAYGROUND_SERVER
+                    value: "http://hanzo-playground.hanzo.svc:8080"
+                  - name: AGENT_NODE_TYPE
+                    value: "cloud"
+                  - name: HOME
+                    value: /home/node
+                  - name: NODE_ENV
+                    value: production
+                  - name: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
+                    value: "1"
+                  - name: OPERATIVE_URL
+                    value: "http://localhost:8501"
+                  resources:
+                    requests:
+                      cpu: 100m
+                      memory: 256Mi
+                    limits:
+                      cpu: "1"
+                      memory: 2Gi
+                - name: operative
+                  image: ghcr.io/hanzoai/operative:latest
+                  imagePullPolicy: Always
+                  ports:
+                  - containerPort: 8080
+                    name: ui
+                  - containerPort: 6080
+                    name: vnc-web
+                  - containerPort: 5900
+                    name: vnc
+                  - containerPort: 8501
+                    name: streamlit
+                  env:
+                  - name: ANTHROPIC_API_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: bot-secrets
+                        key: ANTHROPIC_API_KEY
+                        optional: true
+                  - name: WIDTH
+                    value: "1280"
+                  - name: HEIGHT
+                    value: "800"
+                  - name: DISPLAY_NUM
+                    value: "1"
+                  resources:
+                    requests:
+                      memory: "1Gi"
+                      cpu: "500m"
+                    limits:
+                      memory: "4Gi"
+                      cpu: "2000m"
+          EOF
 
           echo ""
-          echo "=== 9. Playground API - list nodes ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>&1 | python3 -c "
-          import sys, json
-          try:
-            data = json.loads(sys.stdin.read())
-            nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
-            for n in (nodes[:10] if isinstance(nodes, list) else []):
-              print(f'  {n.get(\"id\",\"?\")}: status={n.get(\"status\",\"?\")} type={n.get(\"type\",\"?\")} connected={n.get(\"connected\",\"?\")}')
-          except Exception as e:
-            print(f'Parse error: {e}')
-            print(sys.stdin.read()[:200] if hasattr(sys.stdin, 'read') else '')
-          " 2>&1 | head -15
+          echo "=== 5. Wait for cloud-agent rollout ==="
+          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=180s || echo "Cloud-agent rollout timed out"
+
+          echo ""
+          echo "=== 6. Check pod status ==="
+          kubectl get pods -n hanzo -l app=cloud-agent -o wide
+          kubectl get pods -n hanzo -l app=operative -o wide
+
+          echo ""
+          echo "=== 7. Cloud-agent logs ==="
+          sleep 10
+          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=15 2>&1 | head -20
