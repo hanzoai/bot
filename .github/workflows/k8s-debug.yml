@@ -19,10 +19,17 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix BOT_CONFIG_PATH and restart
+      - name: Checkout universe
+        uses: actions/checkout@v4
+        with:
+          repository: hanzoai/universe
+          token: ${{ secrets.UNIVERSE_DISPATCH_TOKEN }}
+          path: universe
+          sparse-checkout: infra/k8s/bot
+      - name: Apply full bot deployment from universe
         run: |
-          echo "=== Add BOT_CONFIG_PATH env var ==="
-          kubectl set env deploy/bot-gateway -n hanzo "BOT_CONFIG_PATH=/etc/bot/bot.json"
+          echo "=== Apply bot deployment from universe ==="
+          kubectl apply -f universe/infra/k8s/bot/deployment.yaml
 
           echo ""
           echo "=== Restart ==="
@@ -33,12 +40,8 @@ jobs:
 
           echo ""
           echo "=== Check logs ==="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | grep -iE "listen|bind|0\.0\.0\.0|lan|error|fatal|config" | head -5 || echo "Check later"
+          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | head -10
 
           echo ""
           echo "=== Test ==="
           kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3 || echo "Not ready"
-
-          echo ""
-          echo "=== Test via Traefik ==="
-          curl -sk --connect-timeout 5 --resolve "gw.hanzo.bot:443:64.225.91.229" "https://gw.hanzo.bot/health" -D - 2>&1 | head -5
