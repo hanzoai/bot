@@ -1,10 +1,13 @@
 name: K8s Debug
 on:
   workflow_dispatch:
+
 permissions:
   contents: read
+
 env:
   HANZO_CLUSTER_ID: 1a153000-90a6-48ad-9375-7ef901a9bf7f
+
 jobs:
   debug:
     runs-on: ubuntu-latest
@@ -16,36 +19,23 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Debug bot-gateway backend
+      - name: Debug bot backend
         run: |
-          echo "=== bot-gateway service ports ==="
-          kubectl get svc bot-gateway -n hanzo -o jsonpath='{.spec.ports[*]}' | python3 -c "import json,sys; [print(f\"port={p['port']} target={p.get('targetPort','?')} name={p.get('name','?')}\") for p in json.loads('['+sys.stdin.read().replace('} {','},{').replace('map','\"map\"')+']')]" 2>&1 || kubectl get svc bot-gateway -n hanzo -o yaml | grep -A 3 "ports:"
+          echo "=== bot-gateway svc ==="
+          kubectl get svc bot-gateway -n hanzo -o yaml | grep -A 10 "ports:"
 
           echo ""
-          echo "=== bot-gateway pod container ports ==="
-          kubectl get pods -n hanzo -l app=bot-gateway -o jsonpath='{.items[0].spec.containers[0].ports[*]}' 2>&1
+          echo "=== Test bot-gateway port 80 ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/" 2>&1 | head -3 || echo "FAILED on 80"
 
           echo ""
-          echo "=== Test bot-gateway internally from console pod ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/" 2>&1 | head -5 || echo "Port 80 failed"
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:18790/" 2>&1 | head -5 || echo "Port 18790 failed"
+          echo "=== Test bot-gateway port 18790 ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:18790/" 2>&1 | head -3 || echo "FAILED on 18790"
 
           echo ""
-          echo "=== hanzo-playground service ports ==="
-          kubectl get svc hanzo-playground -n hanzo -o yaml | grep -A 5 "ports:"
+          echo "=== Test hanzo-playground port 8080 ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/" 2>&1 | head -3 || echo "FAILED on 8080"
 
           echo ""
-          echo "=== Test hanzo-playground internally ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/" 2>&1 | head -5 || echo "Playground port 8080 failed"
-
-          echo ""
-          echo "=== Traefik routers for gw.hanzo.bot ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-ingress:8080/api/http/routers" 2>&1 | python3 -c "
-import json,sys
-try:
-  data=json.load(sys.stdin)
-  for r in data:
-    if 'gw.hanzo' in str(r.get('rule','')) or 'bot' in str(r.get('rule','')).lower():
-      print(f\"{r.get('name','')} -> {r.get('rule','')} service={r.get('service','')}\")
-except: print('Could not parse Traefik API')
-" 2>&1
+          echo "=== Test gw.hanzo.bot via Traefik ==="
+          curl -sk --connect-timeout 5 --resolve "gw.hanzo.bot:443:64.225.91.229" "https://gw.hanzo.bot/" -D - 2>&1 | head -8
