@@ -19,21 +19,60 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Check pod status
+
+      - name: Clean up stale bots and check status
         run: |
-          echo "=== Cloud-agent pods ==="
-          kubectl get pods -n hanzo -l app=cloud-agent -o wide
+          echo "=== 1. List all playground nodes ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>&1 | python3 -c "
+          import sys, json
+          data = json.loads(sys.stdin.read())
+          nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
+          for n in nodes:
+            print(json.dumps(n, indent=2)[:300])
+            print('---')
+          " 2>&1 | head -60
 
           echo ""
-          echo "=== Operative pods ==="
+          echo "=== 2. Delete stale nodes via playground API ==="
+          for NODE_ID in cloud-9c1519a7 cloud-1a606135 cloud-63e77f17 cloud-eddbe940 cloud-a429c34d; do
+            echo "Deleting $NODE_ID..."
+            kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 \
+              --method=DELETE "http://hanzo-playground:8080/api/v1/nodes/$NODE_ID" 2>&1 | head -3 || echo "  delete failed"
+          done
+
+          echo ""
+          echo "=== 3. Clean up old operative pod ==="
+          kubectl delete pod operative-5cc674f6d6-dtdsg -n hanzo --ignore-not-found --force --grace-period=0 2>/dev/null || true
+
+          echo ""
+          echo "=== 4. Check cloud-agent pod status ==="
+          kubectl get pods -n hanzo -l app=cloud-agent -o wide
+          kubectl describe pod -n hanzo -l app=cloud-agent 2>&1 | grep -E "Status:|Ready:|Containers:|State:|Image:|pulling|pulled|started" | head -15
+
+          echo ""
+          echo "=== 5. Check operative status ==="
           kubectl get pods -n hanzo -l app=operative -o wide
 
           echo ""
-          echo "=== Describe cloud-agent pod ==="
-          kubectl describe pod -n hanzo -l app=cloud-agent 2>&1 | tail -20
+          echo "=== 6. List remaining nodes ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>&1 | python3 -c "
+          import sys, json
+          data = json.loads(sys.stdin.read())
+          nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
+          print(f'Total nodes: {len(nodes)}')
+          for n in nodes:
+            nid = n.get('id', '?')
+            status = n.get('status', '?')
+            ntype = n.get('type', '?')
+            print(f'  {nid}: status={status} type={ntype}')
+          " 2>&1 | head -15
 
           echo ""
-          echo "=== Cloud-agent logs (if available) ==="
+          echo "=== 7. Gateway health and node count ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3
+
+          echo ""
+          echo "=== 8. Cloud-agent logs ==="
           kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=15 2>&1 | head -20
-          echo "---"
+          echo "--- operative ---"
           kubectl logs -n hanzo -l app=cloud-agent -c operative --tail=5 2>&1 | head -10
