@@ -98,14 +98,26 @@ jobs:
           kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | head -200 || echo "Cannot get"
 
           echo ""
-          echo "===== 16. Write auth-profiles to cloud-agent ====="
+          echo "===== 16. Write auth-profiles to ALL cloud-agent dirs ====="
           ANTHROPIC_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)
           HANZO_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.HANZO_API_KEY}' | base64 -d)
+          AUTH_JSON="{\"profiles\":{\"anthropic:default\":{\"type\":\"api_key\",\"provider\":\"anthropic\",\"key\":\"$ANTHROPIC_KEY\"},\"hanzo:default\":{\"type\":\"api_key\",\"provider\":\"hanzo\",\"key\":\"$HANZO_KEY\"}},\"default\":\"anthropic:default\"}"
           kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- sh -c "
+            # Write to main agent dir
             mkdir -p /home/node/.openclaw/agent
-            echo '{\"profiles\":{\"anthropic:default\":{\"type\":\"api_key\",\"provider\":\"anthropic\",\"key\":\"$ANTHROPIC_KEY\"},\"hanzo:default\":{\"type\":\"api_key\",\"provider\":\"hanzo\",\"key\":\"$HANZO_KEY\"}},\"default\":\"anthropic:default\"}' > /home/node/.openclaw/agent/auth-profiles.json
-            echo 'Written auth-profiles.json'
-            ls -la /home/node/.openclaw/agent/
+            echo '$AUTH_JSON' > /home/node/.openclaw/agent/auth-profiles.json
+
+            # Write to ALL per-agent dirs
+            if [ -d /home/node/.openclaw/agents ]; then
+              for agentDir in /home/node/.openclaw/agents/*/agent; do
+                if [ -d \"\$agentDir\" ]; then
+                  echo '$AUTH_JSON' > \"\$agentDir/auth-profiles.json\"
+                  echo \"Written to \$agentDir\"
+                fi
+              done
+            fi
+            echo 'Done writing auth-profiles'
+            find /home/node/.openclaw -name auth-profiles.json 2>/dev/null
           " 2>&1 || echo "Failed"
 
           echo ""
