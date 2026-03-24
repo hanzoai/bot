@@ -255,6 +255,25 @@ export async function resolveApiKeyForProvider(params: {
     }
   }
 
+  // Last-resort: direct env var check as a safety net for containerized deployments
+  // where the normal env resolution may miss keys due to bundling or module caching.
+  const lastResortEnvMap: Record<string, string> = {
+    anthropic: "ANTHROPIC_API_KEY",
+    hanzo: "HANZO_API_KEY",
+    openai: "OPENAI_API_KEY",
+  };
+  const lastResortEnvVar = lastResortEnvMap[normalized];
+  if (lastResortEnvVar) {
+    const rawValue = process.env[lastResortEnvVar];
+    if (rawValue && rawValue.trim()) {
+      return {
+        apiKey: rawValue.trim(),
+        source: `env-fallback: ${lastResortEnvVar}`,
+        mode: "api-key",
+      };
+    }
+  }
+
   const authStorePath = resolveAuthStorePathForDisplay(params.agentDir);
   const resolvedAgentDir = path.dirname(authStorePath);
   throw new Error(
@@ -262,6 +281,7 @@ export async function resolveApiKeyForProvider(params: {
       `No API key found for provider "${provider}".`,
       `Auth store: ${authStorePath} (agentDir: ${resolvedAgentDir}).`,
       `Configure auth for this agent (${formatCliCommand("openclaw agents add <id>")}) or copy auth-profiles.json from the main agentDir.`,
+      `Logs: ${formatCliCommand("openclaw logs --follow")}`,
     ].join(" "),
   );
 }
