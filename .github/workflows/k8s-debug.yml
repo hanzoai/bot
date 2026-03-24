@@ -20,95 +20,24 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Fix cloud-agent with correct image and auth
+      - name: Fix cloud-agent insecure ws
         run: |
-          echo "=== 1. Delete broken cloud-agent deployment ==="
-          kubectl delete deploy cloud-agent -n hanzo --ignore-not-found
+          echo "=== Allow insecure WS for in-cluster communication ==="
+          kubectl set env deploy/cloud-agent -n hanzo OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1
 
           echo ""
-          echo "=== 2. Get gateway token from bot-secrets ==="
-          GW_TOKEN=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.BOT_GATEWAY_TOKEN}' | base64 -d)
-          echo "Token length: ${#GW_TOKEN}"
-
-          echo ""
-          echo "=== 3. Check GATEWAY_TOKEN in playground-secrets ==="
-          PG_TOKEN=$(kubectl get secret playground-secrets -n hanzo -o jsonpath='{.data.GATEWAY_TOKEN}' 2>/dev/null | base64 -d 2>/dev/null || echo "")
-          echo "Playground token length: ${#PG_TOKEN}"
-          if [ "$GW_TOKEN" = "$PG_TOKEN" ]; then
-            echo "Tokens MATCH"
-          else
-            echo "Tokens DIFFER - syncing playground token to match gateway"
-            kubectl patch secret playground-secrets -n hanzo --type=json \
-              -p "[{\"op\":\"replace\",\"path\":\"/data/GATEWAY_TOKEN\",\"value\":\"$(echo -n "$GW_TOKEN" | base64 -w0)\"}]" 2>/dev/null || echo "Patch failed"
-          fi
-
-          echo ""
-          echo "=== 4. Create cloud-agent with correct bot image ==="
-          cat <<'EOF' | kubectl apply -f -
-          apiVersion: apps/v1
-          kind: Deployment
-          metadata:
-            name: cloud-agent
-            namespace: hanzo
-            labels:
-              app: cloud-agent
-          spec:
-            replicas: 1
-            selector:
-              matchLabels:
-                app: cloud-agent
-            template:
-              metadata:
-                labels:
-                  app: cloud-agent
-              spec:
-                imagePullSecrets:
-                - name: ghcr-secret
-                containers:
-                - name: cloud-agent
-                  image: ghcr.io/hanzoai/bot:latest
-                  imagePullPolicy: Always
-                  command: ["node", "hanzo-bot.mjs", "node", "run", "--node-id", "cloud-agent-default", "--security", "full"]
-                  env:
-                  - name: BOT_GATEWAY_TOKEN
-                    valueFrom:
-                      secretKeyRef:
-                        name: bot-secrets
-                        key: BOT_GATEWAY_TOKEN
-                  - name: BOT_NODE_GATEWAY_URL
-                    value: "ws://bot-gateway/v1/tunnel"
-                  - name: AGENT_NODE_ID
-                    value: "cloud-agent-default"
-                  - name: PLAYGROUND_SERVER
-                    value: "http://hanzo-playground.hanzo.svc:8080"
-                  - name: AGENT_NODE_TYPE
-                    value: "cloud"
-                  - name: HOME
-                    value: /home/node
-                  - name: NODE_ENV
-                    value: production
-                  resources:
-                    requests:
-                      cpu: 100m
-                      memory: 256Mi
-                    limits:
-                      cpu: "1"
-                      memory: 2Gi
-          EOF
-
-          echo ""
-          echo "=== 5. Wait for rollout ==="
+          echo "=== Wait for rollout ==="
           kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || echo "Timed out"
 
           echo ""
-          echo "=== 6. Check logs ==="
-          sleep 10
+          echo "=== Check logs ==="
+          sleep 15
           kubectl logs -n hanzo -l app=cloud-agent --tail=30 2>&1 | head -40
 
-      - name: Verify app.hanzo.bot
-        run: |
-          echo "=== app.hanzo.bot health ==="
-          curl -sk -H "Host: app.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -3
           echo ""
-          echo "=== Gateway health ==="
-          curl -sk -H "Host: gw.hanzo.bot" "https://64.225.91.229/health" 2>&1 | head -3
+          echo "=== Check gateway connected nodes ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3
+
+          echo ""
+          echo "=== Verify app.hanzo.bot ==="
+          curl -sk -H "Host: app.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -3
