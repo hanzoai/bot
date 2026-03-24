@@ -20,14 +20,18 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Fix all bot issues
+      - name: Fix cloud-agent with SHA-pinned operative
         run: |
-          echo "=== 1. Find node with cached operative image ==="
-          OPERATIVE_NODE=$(kubectl get pods -n hanzo -l app=operative -o jsonpath='{.items[0].spec.nodeName}')
-          echo "Operative running on: $OPERATIVE_NODE"
+          echo "=== 1. Get SHA-pinned operative image from playground config ==="
+          OPERATIVE_IMAGE=$(kubectl get deploy hanzo-playground -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' | grep OPERATIVE_IMAGE | head -1 | cut -d= -f2-)
+          echo "Operative image: $OPERATIVE_IMAGE"
 
           echo ""
-          echo "=== 2. Recreate cloud-agent with operative sidecar, pinned to same node ==="
+          echo "=== 2. Check why pending - describe ==="
+          kubectl describe pod -n hanzo -l app=cloud-agent 2>&1 | grep -E "Events:|Warning|FailedScheduling|Insufficient|node" | head -5
+
+          echo ""
+          echo "=== 3. Delete and recreate WITHOUT nodeSelector ==="
           kubectl delete deploy cloud-agent -n hanzo --ignore-not-found
           cat <<EOF | kubectl apply -f -
           apiVersion: apps/v1
@@ -47,8 +51,6 @@ jobs:
                 labels:
                   app: cloud-agent
               spec:
-                nodeSelector:
-                  kubernetes.io/hostname: "$OPERATIVE_NODE"
                 imagePullSecrets:
                 - name: ghcr-secret
                 containers:
@@ -97,7 +99,7 @@ jobs:
                       cpu: "1"
                       memory: 2Gi
                 - name: operative
-                  image: ghcr.io/hanzoai/operative:latest
+                  image: "${OPERATIVE_IMAGE}"
                   imagePullPolicy: IfNotPresent
                   ports:
                   - containerPort: 8080
@@ -131,24 +133,16 @@ jobs:
           EOF
 
           echo ""
-          echo "=== 3. Wait for rollout (should be fast - images cached on $OPERATIVE_NODE) ==="
-          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || echo "Timed out"
+          echo "=== 4. Wait for rollout ==="
+          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=180s || echo "Timed out"
 
           echo ""
-          echo "=== 4. Check pod status ==="
+          echo "=== 5. Status ==="
           kubectl get pods -n hanzo -l app=cloud-agent -o wide
 
           echo ""
-          echo "=== 5. Check playground provisioner config ==="
-          kubectl get deploy hanzo-playground -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' | grep -iE "GATEWAY|TOKEN|CLOUD|AGENT"
-
-          echo ""
-          echo "=== 6. Cloud-agent logs ==="
+          echo "=== 6. Logs ==="
           sleep 10
-          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=15 2>&1 | head -20
+          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=10 2>&1 | head -15
           echo "--- operative ---"
           kubectl logs -n hanzo -l app=cloud-agent -c operative --tail=5 2>&1 | head -10
-
-          echo ""
-          echo "=== 7. Test VNC tunnel from gateway ==="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=10 2>&1 | grep -iE "tunnel|vnc|cloud-agent" | head -5
