@@ -8,51 +8,81 @@ env:
 jobs:
   debug:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_API_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
-      - name: Fix WS routing
+
+      - name: Full bot stack diagnostic
         run: |
-          echo "===== 1. Current gw.hanzo.bot ingresses ====="
-          kubectl get ingress -n hanzo -o json | python3 -c "
-          import sys, json
-          for item in json.loads(sys.stdin.read()).get('items', []):
-            for rule in item['spec'].get('rules', []):
-              if 'gw.hanzo' in rule.get('host', ''):
-                print(f'{item[\"metadata\"][\"name\"]} class={item[\"spec\"].get(\"ingressClassName\",\"?\")} -> {rule[\"http\"][\"paths\"][0][\"backend\"][\"service\"][\"name\"]}')
-          "
+          echo "===== 1. All bot-related deployments ====="
+          kubectl get deploy -n hanzo bot-gateway operative cloud-agent hanzo-playground -o wide 2>/dev/null || true
 
           echo ""
-          echo "===== 2. Check ingress-routes ConfigMap for gw.hanzo.bot ====="
-          kubectl get configmap ingress-routes -n hanzo -o jsonpath='{.data.routes\.yaml}' | python3 -c "
-          import yaml, sys
-          data = yaml.safe_load(sys.stdin.read())
-          for name, r in data.get('http', {}).get('routers', {}).items():
-            if 'gw.hanzo' in r.get('rule', ''):
-              print(f'Router {name}: rule={r[\"rule\"]} svc={r.get(\"service\")} tls={r.get(\"tls\")}')
-          for name, s in data.get('http', {}).get('services', {}).items():
-            if 'gw-hanzo' in name or 'bot-gateway' in name:
-              print(f'Service {name}: {s}')
-          "
+          echo "===== 2. All bot-related pods ====="
+          kubectl get pods -n hanzo -l 'app in (bot-gateway,operative,cloud-agent,hanzo-playground)' -o wide 2>/dev/null || true
 
           echo ""
-          echo "===== 3. Test WS internally (via bot service) ====="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- node -e "
+          echo "===== 3. All bot-related services ====="
+          kubectl get svc -n hanzo bot-gateway operative hanzo-playground -o wide 2>/dev/null || true
+
+          echo ""
+          echo "===== 4. All ingresses ====="
+          kubectl get ingress -n hanzo -o wide 2>/dev/null || true
+
+          echo ""
+          echo "===== 5. Bot gateway logs (last 30) ====="
+          kubectl logs -n hanzo deploy/bot-gateway -c bot-gateway --tail=30 2>/dev/null || echo "No logs"
+
+          echo ""
+          echo "===== 6. Cloud-agent logs (last 20) ====="
+          kubectl logs -n hanzo deploy/cloud-agent -c cloud-agent --tail=20 2>/dev/null || echo "No logs"
+
+          echo ""
+          echo "===== 7. Playground logs (last 20) ====="
+          kubectl logs -n hanzo deploy/hanzo-playground --tail=20 2>/dev/null || echo "No logs"
+
+          echo ""
+          echo "===== 8. Gateway env ====="
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- env 2>/dev/null | grep -E '^(BOT_|HANZO_|NODE_|PLAYGROUND_|OPERATIVE_|KV_)' | sort || true
+
+          echo ""
+          echo "===== 9. Cloud-agent env ====="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- env 2>/dev/null | grep -E '^(ANTHROPIC_|HANZO_|GATEWAY_|BOT_)' | sort || true
+
+          echo ""
+          echo "===== 10. Gateway health ====="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- curl -s http://bot-gateway:80/health 2>/dev/null || echo "Cannot reach"
+
+          echo ""
+          echo "===== 11. Internal WS test ====="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- timeout 5 node -e "
             const ws = new (require('ws'))('ws://bot-gateway:80/');
-            ws.on('open', () => console.log('WS INTERNAL: OPEN'));
-            ws.on('message', d => { console.log('MSG:', d.toString().substring(0,60)); ws.close(); process.exit(0); });
-            ws.on('error', e => { console.log('ERR:', e.message); process.exit(1); });
-            setTimeout(() => { console.log('TIMEOUT'); process.exit(1); }, 5000);
-          " 2>&1 | head -5
+            ws.on('open', () => { console.log('WS OPEN'); ws.close(); process.exit(0); });
+            ws.on('error', e => { console.log('WS ERROR:', e.message); process.exit(1); });
+            setTimeout(() => { console.log('WS TIMEOUT'); process.exit(1); }, 4000);
+          " 2>&1 || echo "WS test failed"
 
           echo ""
-          echo "===== 4. Restart hanzo-ingress to reload routes ====="
-          kubectl rollout restart daemonset/hanzo-ingress -n hanzo
-          sleep 15
+          echo "===== 12. gw.hanzo.bot ingress ====="
+          kubectl get ingress -n hanzo bot-gateway-ws -o yaml 2>/dev/null || echo "NOT FOUND"
 
           echo ""
-          echo "===== 5. Test WS after ingress restart ====="
-          timeout 3 curl -sNi -k -H "Host: gw.hanzo.bot" -H "Upgrade: websocket" -H "Connection: Upgrade" -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" "https://64.225.91.229/" 2>&1 | head -5 || true
+          echo "===== 13. ConfigMap ====="
+          kubectl get cm -n hanzo bot-gateway-config -o jsonpath='{.data.bot\.json}' 2>/dev/null | python3 -m json.tool 2>/dev/null || echo "Cannot read"
+
+          echo ""
+          echo "===== 14. Secrets keys ====="
+          echo -n "bot-secrets: " && kubectl get secret -n hanzo bot-secrets -o jsonpath='{.data}' 2>/dev/null | python3 -c "import sys,json; print(' '.join(json.loads(sys.stdin.read()).keys()))" 2>/dev/null || echo "n/a"
+          echo -n "playground-secrets: " && kubectl get secret -n hanzo playground-secrets -o jsonpath='{.data}' 2>/dev/null | python3 -c "import sys,json; print(' '.join(json.loads(sys.stdin.read()).keys()))" 2>/dev/null || echo "n/a"
+
+          echo ""
+          echo "===== 15. Node registry ====="
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | head -200 || echo "Cannot get"
+
+          echo ""
+          echo "===== 16. Playground provisioned pods ====="
+          kubectl get pods -n hanzo -l 'app.kubernetes.io/managed-by=hanzo-playground' -o wide 2>/dev/null || true
+          kubectl get pods -n hanzo | grep -E 'cloud-|agent-cloud' || true
