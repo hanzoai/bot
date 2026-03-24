@@ -20,38 +20,43 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Deploy new playground image and full status
+      - name: Check deployed images
         run: |
-          echo "=== 1. Restart playground with latest image ==="
-          kubectl rollout restart deploy/hanzo-playground -n hanzo
-          kubectl rollout status deploy/hanzo-playground -n hanzo --timeout=120s || echo "Timed out"
+          echo "=== Playground deployed image ==="
+          kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\t"}{.status.containerStatuses[0].imageID}{"\n"}{end}'
 
           echo ""
-          echo "=== 2. Verify playground has ANTHROPIC_API_KEY ==="
-          sleep 5
+          echo "=== Playground image digest ==="
+          kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{.items[0].status.containerStatuses[0].imageID}' | sed 's/.*@//'
+
+          echo ""
+          echo "=== Latest image from GHCR ==="
+          # Check the latest tag on ghcr
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=10 "https://ghcr.io/v2/hanzoai/playground/tags/list" 2>&1 | head -3 || echo "Can't query GHCR directly"
+
+          echo ""
+          echo "=== Playground pod age + restart count ==="
+          kubectl get pods -n hanzo -l app=hanzo-playground -o wide --show-labels | head -5
+
+          echo ""
+          echo "=== Bot gateway deployed image ==="
+          kubectl get pods -n hanzo -l app=bot-gateway -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\t"}{.status.containerStatuses[0].imageID}{"\n"}{end}'
+
+          echo ""
+          echo "=== Cloud-agent deployed image ==="
+          kubectl get pods -n hanzo -l app=cloud-agent -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.containerStatuses[*]}{.name}={.imageID}{"\t"}{end}{"\n"}{end}'
+
+          echo ""
+          echo "=== Check if playground image was updated after our commit ==="
+          echo "Pod creation times:"
+          kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}'
+          echo ""
+          echo "Deploy last update:"
+          kubectl get deploy hanzo-playground -n hanzo -o jsonpath='{.metadata.annotations.deployment\.kubernetes\.io/revision}' && echo " (revision)"
+          kubectl get deploy hanzo-playground -n hanzo -o jsonpath='{.spec.template.metadata.annotations}' 2>/dev/null && echo ""
+
+          echo ""
+          echo "=== Does the new image have ANTHROPIC_API_KEY provisioner code? ==="
           POD=$(kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{.items[0].metadata.name}')
-          kubectl exec -n hanzo "$POD" -- env 2>/dev/null | grep -E "ANTHROPIC" | sed 's/=.\{8\}.*/=<set>/' || echo "Not found"
-
-          echo ""
-          echo "=== 3. All services health ==="
-          echo "Gateway:"
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3
-          echo ""
-          echo "Playground:"
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/health" 2>&1 | head -3
-
-          echo ""
-          echo "=== 4. Cloud-agent status ==="
-          kubectl get pods -n hanzo -l app=cloud-agent -o wide
-          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=5 2>&1 | head -8
-
-          echo ""
-          echo "=== 5. Pre-puller DaemonSet status ==="
-          kubectl get ds image-prepull -n hanzo 2>/dev/null || echo "No pre-puller"
-
-          echo ""
-          echo "=== 6. External endpoints ==="
-          echo "app.hanzo.bot:"
-          curl -skI -H "Host: app.hanzo.bot" "https://64.225.91.229/" 2>&1 | head -3
-          echo "gw.hanzo.bot WS:"
-          timeout 3 curl -sNi -k -H "Host: gw.hanzo.bot" -H "Upgrade: websocket" -H "Connection: Upgrade" -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" "https://64.225.91.229/" 2>&1 | head -3 || true
+          kubectl exec -n hanzo "$POD" -- grep -r "ANTHROPIC_API_KEY" /app/ 2>/dev/null | head -3 || kubectl exec -n hanzo "$POD" -- grep -r "AnthropicAPIKey" /app/ 2>/dev/null | head -3 || echo "Can't grep binary - checking env instead"
+          kubectl exec -n hanzo "$POD" -- env 2>/dev/null | grep ANTHROPIC | sed 's/=.\{8\}.*/=<set>/' || echo "ANTHROPIC not in env"
