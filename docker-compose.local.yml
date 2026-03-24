@@ -1,0 +1,144 @@
+# Local development stack: Bot Gateway + Playground Control Plane + Postgres
+# Usage:
+#   docker compose -f docker-compose.local.yml up
+#   UI: http://localhost:8080        (Playground — /nodes page)
+#   Bot: http://localhost:18789      (Bot Gateway — /healthz)
+#   Bot Control UI: http://localhost:18789/__bot__/
+
+services:
+  # ── PostgreSQL (required by Playground) ────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: playground
+      POSTGRES_PASSWORD: playground
+      POSTGRES_DB: playground
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U playground"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Playground Control Plane (app.hanzo.bot equivalent) ────────────
+  playground:
+    image: ghcr.io/hanzoai/playground:latest
+    restart: unless-stopped
+    networks:
+      - default
+      - hanzo-network
+    environment:
+      # Core
+      PLAYGROUND_HOME: /data
+      PLAYGROUND_HTTP_ADDR: 0.0.0.0:8080
+      PLAYGROUND_MODE: development
+      GIN_MODE: debug
+      # Storage
+      PLAYGROUND_STORAGE_MODE: postgres
+      PLAYGROUND_POSTGRES_URL: postgres://playground:playground@postgres:5432/playground?sslmode=disable
+      PLAYGROUND_STORAGE_POSTGRES_URL: postgres://playground:playground@postgres:5432/playground?sslmode=disable
+      PLAYGROUND_DATABASE_URL: postgres://playground:playground@postgres:5432/playground?sslmode=disable
+      # UI
+      AGENTS_UI_ENABLED: "true"
+      AGENTS_UI_MODE: embedded
+      # Gateway integration — points to bot-gateway in this compose
+      HANZO_AGENTS_CLOUD_GATEWAY_URL: ws://bot-gateway:18789
+      HANZO_AGENTS_CLOUD_GATEWAY_TOKEN: local-dev-token
+      # Cloud provisioning disabled (no K8s locally)
+      HANZO_AGENTS_CLOUD_ENABLED: "false"
+      HANZO_AGENTS_CLOUD_K8S_ENABLED: "false"
+      # DID/VC
+      HANZO_AGENTS_DID_ENABLED: "false"
+      # IAM — UI bundle has https://hanzo.id baked in, so token proxy must
+      # forward to production IAM (where the auth codes are issued)
+      HANZO_AGENTS_IAM_ENABLED: "true"
+      HANZO_AGENTS_IAM_ENDPOINT: https://hanzo.id
+      HANZO_AGENTS_IAM_PUBLIC_ENDPOINT: https://hanzo.id
+      HANZO_AGENTS_IAM_CLIENT_ID: hanzo-bot
+      HANZO_AGENTS_IAM_ORGANIZATION: hanzo
+      HANZO_AGENTS_IAM_APPLICATION: app-hanzobot
+      IAM_CLIENT_SECRET: 0de7acbc7b9fd070dc7f514e12dafa708b35d70f
+      # CORS — allow local dev origins
+      AGENTS_API_CORS_ALLOWED_ORIGINS: "http://localhost:8080,http://localhost:3000,http://localhost:18789,http://localhost:8000"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - playground-data:/data
+
+  # ── Bot Gateway (bot.hanzo.ai equivalent) ──────────────────────────
+  bot-gateway:
+    image: ghcr.io/hanzoai/bot:latest
+    restart: unless-stopped
+    environment:
+      HOME: /home/node
+      NODE_ENV: development
+      TERM: xterm-256color
+      # Auth
+      OPENCLAW_GATEWAY_TOKEN: local-dev-token
+      # Config file with controlUi.allowedOrigins
+      OPENCLAW_CONFIG_PATH: /etc/bot/config.json
+      # Model providers — set at least one to enable chat
+      HANZO_API_KEY: "hk-0d2eb9cfafd049389f2904cad770a9d8"
+      # ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Playground integration
+      PLAYGROUND_URL: http://playground:8080
+      HANZO_NODE_ID: local-bot-gateway
+      HANZO_PUBLIC_URL: http://bot-gateway:18789
+    ports:
+      - "18789:18789"
+      - "18790:18790"
+    volumes:
+      - ./local-dev-config.json:/etc/bot/config.json:ro
+    init: true
+    command:
+      [
+        "node",
+        "openclaw.mjs",
+        "gateway",
+        "--allow-unconfigured",
+        "--bind",
+        "lan",
+        "--port",
+        "18789",
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── WSS Proxy (gw.hanzo.bot → bot-gateway:18789) ──────────────────
+  gw-proxy:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - ./local-ssl/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./local-ssl/gw.crt:/etc/nginx/ssl/gw.crt:ro
+      - ./local-ssl/gw.key:/etc/nginx/ssl/gw.key:ro
+    depends_on:
+      - bot-gateway
+
+networks:
+  hanzo-network:
+    external: true
+
+volumes:
+  pgdata:
+  playground-data:
