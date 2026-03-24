@@ -20,15 +20,23 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
 
-      - name: Fix gateway rollout (undo stuck restart)
+      - name: Fix gateway (single replica for in-memory registry)
         run: |
-          echo "=== Undo stuck gateway rollout ==="
-          kubectl rollout undo deploy/bot-gateway -n hanzo || true
+          echo "=== Scale gateway to 1 replica (in-memory registry requires single instance) ==="
+          kubectl scale deploy/bot-gateway -n hanzo --replicas=1
+          sleep 5
+
+          echo "=== Delete any non-ready gateway pods ==="
+          kubectl get pods -n hanzo -l app=bot-gateway --no-headers | while read name ready status rest; do
+            if [ "$ready" != "1/1" ]; then
+              echo "Deleting non-ready pod $name"
+              kubectl delete pod -n hanzo "$name" --grace-period=0 --force || true
+            fi
+          done
           sleep 10
-          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=60s || true
 
           echo ""
-          echo "=== Gateway pods after undo ==="
+          echo "=== Gateway pods after fix ==="
           kubectl get pods -n hanzo -l app=bot-gateway -o wide
 
       - name: Delete stale provisioned bot pods
