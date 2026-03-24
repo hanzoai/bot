@@ -19,34 +19,45 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Check bot-gateway status and logs
+      - name: Fix bot-gateway service endpoints
         run: |
-          echo "=== Pod status ==="
+          echo "=== Service selector ==="
+          kubectl get svc bot-gateway -n hanzo -o jsonpath='{.spec.selector}' && echo ""
+
+          echo ""
+          echo "=== Pod labels ==="
+          kubectl get pods -n hanzo -l app=bot-gateway --show-labels
+
+          echo ""
+          echo "=== EndpointSlice ==="
+          kubectl get endpointslice -n hanzo -l kubernetes.io/service-name=bot-gateway -o yaml 2>/dev/null | head -40 || echo "No endpointslice found"
+
+          echo ""
+          echo "=== Deployment replicas ==="
+          kubectl get deploy bot-gateway -n hanzo
+
+          echo ""
+          echo "=== Scale to 2 replicas ==="
+          kubectl scale deploy/bot-gateway -n hanzo --replicas=2
+          sleep 15
+
+          echo ""
+          echo "=== Pod status after scale ==="
           kubectl get pods -n hanzo -l app=bot-gateway -o wide
 
           echo ""
-          echo "=== Describe deployment ==="
-          kubectl describe deploy/bot-gateway -n hanzo | tail -20
+          echo "=== Endpoints after scale ==="
+          kubectl get endpoints bot-gateway -n hanzo 2>/dev/null || true
+          kubectl get endpointslice -n hanzo -l kubernetes.io/service-name=bot-gateway 2>/dev/null || true
 
           echo ""
-          echo "=== Logs from running pod ==="
-          RUNNING_POD=$(kubectl get pods -n hanzo -l app=bot-gateway --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
-          if [ -n "$RUNNING_POD" ]; then
-            echo "Pod: $RUNNING_POD"
-            kubectl logs -n hanzo "$RUNNING_POD" --tail=40 2>&1 | head -50
-          else
-            echo "No running pod found"
-            kubectl logs -n hanzo -l app=bot-gateway --tail=40 2>&1 | head -50
+          echo "=== Direct pod health check ==="
+          POD_IP=$(kubectl get pods -n hanzo -l app=bot-gateway -o jsonpath='{.items[0].status.podIP}' 2>/dev/null)
+          if [ -n "$POD_IP" ]; then
+            echo "Pod IP: $POD_IP"
+            kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://${POD_IP}:18789/health" 2>&1 | head -5 || echo "Direct pod check failed"
           fi
 
           echo ""
-          echo "=== Service endpoints ==="
-          kubectl get endpoints bot-gateway -n hanzo
-
-          echo ""
-          echo "=== Health check ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=10 "http://bot-gateway:80/health" 2>&1 | head -5 || echo "Health check failed"
-
-          echo ""
-          echo "=== Env vars on deployment ==="
-          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' 2>&1 | grep -E "CONFIG_PATH|BIND|BOT_CONFIG"
+          echo "=== Service health check ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -5 || echo "Service check failed"
