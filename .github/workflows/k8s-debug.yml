@@ -11,7 +11,7 @@ env:
 jobs:
   debug:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 7
     steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -19,19 +19,26 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Check config mounting
+      - name: Fix BOT_CONFIG_PATH and restart
         run: |
-          echo "=== BOT_CONFIG_PATH env ==="
-          kubectl exec -n hanzo deploy/bot-gateway -- env 2>&1 | grep BOT_CONFIG || echo "BOT_CONFIG_PATH not set"
+          echo "=== Add BOT_CONFIG_PATH env var ==="
+          kubectl set env deploy/bot-gateway -n hanzo "BOT_CONFIG_PATH=/etc/bot/bot.json"
 
           echo ""
-          echo "=== Cat config file ==="
-          kubectl exec -n hanzo deploy/bot-gateway -- cat /etc/bot/bot.json 2>&1 | head -20 || echo "Config file not found"
+          echo "=== Restart ==="
+          kubectl scale deploy/bot-gateway -n hanzo --replicas=0
+          sleep 10
+          kubectl scale deploy/bot-gateway -n hanzo --replicas=1
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=300s || echo "Timed out"
 
           echo ""
-          echo "=== Volume mounts ==="
-          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{.spec.template.spec.containers[0].volumeMounts}' 2>&1
+          echo "=== Check logs ==="
+          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | grep -iE "listen|bind|0\.0\.0\.0|lan|error|fatal|config" | head -5 || echo "Check later"
 
           echo ""
-          echo "=== Volumes ==="
-          kubectl get deploy bot-gateway -n hanzo -o jsonpath='{.spec.template.spec.volumes}' 2>&1
+          echo "=== Test ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3 || echo "Not ready"
+
+          echo ""
+          echo "=== Test via Traefik ==="
+          curl -sk --connect-timeout 5 --resolve "gw.hanzo.bot:443:64.225.91.229" "https://gw.hanzo.bot/health" -D - 2>&1 | head -5
