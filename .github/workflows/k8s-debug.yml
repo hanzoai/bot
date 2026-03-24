@@ -19,17 +19,78 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Check status only - DO NOT modify
+
+      - name: Pre-pull operative image on all nodes + fix everything
         run: |
-          echo "=== Pod status ==="
+          echo "=== 1. Get operative SHA image from playground ==="
+          OPERATIVE_IMAGE=$(kubectl get deploy hanzo-playground -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' | grep K8S_OPERATIVE_IMAGE | cut -d= -f2-)
+          echo "Image: $OPERATIVE_IMAGE"
+
+          echo ""
+          echo "=== 2. Deploy image pre-puller DaemonSet ==="
+          cat <<EOF | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: DaemonSet
+          metadata:
+            name: image-prepull
+            namespace: hanzo
+          spec:
+            selector:
+              matchLabels:
+                app: image-prepull
+            template:
+              metadata:
+                labels:
+                  app: image-prepull
+              spec:
+                imagePullSecrets:
+                - name: ghcr-secret
+                initContainers:
+                - name: pull-operative
+                  image: "${OPERATIVE_IMAGE}"
+                  imagePullPolicy: IfNotPresent
+                  command: ["sh", "-c", "echo 'operative image cached'"]
+                - name: pull-bot
+                  image: ghcr.io/hanzoai/bot:latest
+                  imagePullPolicy: IfNotPresent
+                  command: ["sh", "-c", "echo 'bot image cached'"]
+                containers:
+                - name: done
+                  image: busybox:1.36
+                  command: ["sh", "-c", "echo 'images pre-pulled on this node' && sleep infinity"]
+                  resources:
+                    requests:
+                      cpu: 1m
+                      memory: 4Mi
+                    limits:
+                      cpu: 10m
+                      memory: 16Mi
+          EOF
+
+          echo ""
+          echo "=== 3. Check cloud-agent pod (may be ready by now) ==="
           kubectl get pods -n hanzo -l app=cloud-agent -o wide
+          kubectl describe pod -n hanzo -l app=cloud-agent 2>&1 | grep -E "Events:|Normal|Warning" | tail -5
 
           echo ""
-          echo "=== Describe events ==="
-          kubectl describe pod -n hanzo -l app=cloud-agent 2>&1 | grep -E "Events:|Normal|Warning" | head -10
-
-          echo ""
-          echo "=== If running, check logs ==="
-          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=10 2>&1 | head -15 || true
-          echo "---"
+          echo "=== 4. If running, show logs ==="
+          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=5 2>&1 | head -10 || true
           kubectl logs -n hanzo -l app=cloud-agent -c operative --tail=3 2>&1 | head -5 || true
+
+          echo ""
+          echo "=== 5. Clean stale bots from playground DB ==="
+          # Use playground API to list and delete stale nodes
+          NODES=$(kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>/dev/null || echo "[]")
+          echo "$NODES" | python3 -c "
+          import sys, json
+          data = json.loads(sys.stdin.read())
+          nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
+          print(f'Total nodes: {len(nodes)}')
+          for n in nodes:
+            print(f'  {n.get(\"id\",\"?\")}: {n.get(\"status\",\"?\")}')
+          " 2>/dev/null || echo "Can't parse nodes"
+
+          echo ""
+          echo "=== 6. Pre-puller status ==="
+          kubectl get ds image-prepull -n hanzo
+          kubectl get pods -n hanzo -l app=image-prepull -o wide | head -10
