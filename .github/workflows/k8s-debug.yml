@@ -16,35 +16,33 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Debug nginx ingress for bot WebSocket
+      - name: Fix bot ingresses to use Traefik
         run: |
-          echo "=== All pods with 'nginx' or 'ingress' ==="
-          kubectl get pods --all-namespaces 2>/dev/null | grep -iE "nginx|ingress" || echo "None found"
+          echo "=== Current bot-gateway-ws ingress class ==="
+          kubectl get ingress bot-gateway-ws -n hanzo -o jsonpath='{.spec.ingressClassName}'
+          echo ""
+
+          echo "=== Patch bot-gateway-ws to use gateway class ==="
+          kubectl patch ingress bot-gateway-ws -n hanzo --type merge \
+            -p '{"spec":{"ingressClassName":"gateway"}}'
+
+          echo "=== Patch hanzo-playground to use gateway class ==="
+          kubectl patch ingress hanzo-playground -n hanzo --type merge \
+            -p '{"spec":{"ingressClassName":"gateway"}}'
+
+          echo "=== Patch bot-gateway to use gateway class ==="
+          kubectl patch ingress bot-gateway -n hanzo --type merge \
+            -p '{"spec":{"ingressClassName":"gateway"}}'
+
+          echo "=== Patch bot-hub to use gateway class ==="
+          kubectl patch ingress bot-hub -n hanzo --type merge \
+            -p '{"spec":{"ingressClassName":"gateway"}}'
 
           echo ""
-          echo "=== All namespaces ==="
-          kubectl get ns 2>/dev/null
+          echo "=== Verify ==="
+          kubectl get ingress -n hanzo -o custom-columns='NAME:.metadata.name,CLASS:.spec.ingressClassName,HOSTS:.spec.rules[*].host' | grep -i "bot\|playground\|gateway-ws"
 
           echo ""
-          echo "=== Ingress classes ==="
-          kubectl get ingressclass 2>/dev/null || echo "No ingress classes"
-
-          echo ""
-          echo "=== All LB services with IPs ==="
-          kubectl get svc --all-namespaces --field-selector spec.type=LoadBalancer -o custom-columns='NS:.metadata.namespace,NAME:.metadata.name,IP:.status.loadBalancer.ingress[0].ip' 2>/dev/null
-
-          echo ""
-          echo "=== Pods in ingress-nginx namespace ==="
-          kubectl get pods -n ingress-nginx 2>/dev/null || echo "No ingress-nginx namespace"
-
-          echo ""
-          echo "=== hanzo-playground service ==="
-          kubectl get svc -n hanzo 2>/dev/null | grep -i playground || echo "No playground service"
-
-          echo ""
-          echo "=== Deployments with 'nginx' ==="
-          kubectl get deploy --all-namespaces 2>/dev/null | grep -i nginx || echo "No nginx deployments"
-
-          echo ""
-          echo "=== Helm releases (nginx) ==="
-          kubectl get helmrelease --all-namespaces 2>/dev/null | grep -i nginx || echo "No helm releases"
+          echo "=== Test gw.hanzo.bot through Traefik LB ==="
+          sleep 5
+          curl -sk --connect-timeout 5 --resolve "gw.hanzo.bot:443:64.225.91.229" "https://gw.hanzo.bot/" -D - 2>&1 | head -10
