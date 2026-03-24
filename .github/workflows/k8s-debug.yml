@@ -26,16 +26,18 @@ jobs:
           token: ${{ secrets.UNIVERSE_DISPATCH_TOKEN }}
           path: universe
           sparse-checkout: infra/k8s/bot
-      - name: Apply full bot deployment from universe
+      - name: Delete and recreate bot-gateway from universe
         run: |
-          echo "=== Apply bot deployment from universe ==="
+          echo "=== Delete existing bot-gateway deployment ==="
+          kubectl delete deploy bot-gateway -n hanzo --ignore-not-found
+          sleep 5
+
+          echo ""
+          echo "=== Apply fresh from universe ==="
           kubectl apply -f universe/infra/k8s/bot/deployment.yaml
 
           echo ""
-          echo "=== Restart ==="
-          kubectl scale deploy/bot-gateway -n hanzo --replicas=0
-          sleep 10
-          kubectl scale deploy/bot-gateway -n hanzo --replicas=1
+          echo "=== Wait for rollout ==="
           kubectl rollout status deploy/bot-gateway -n hanzo --timeout=300s || echo "Timed out"
 
           echo ""
