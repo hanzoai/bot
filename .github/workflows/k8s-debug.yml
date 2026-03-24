@@ -14,61 +14,46 @@ jobs:
         with:
           token: ${{ secrets.DO_API_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
-      - name: Full diagnostic
+      - name: Delete stale nodes via correct API + direct DB
         run: |
-          echo "===== 1. ALL BOT PODS ====="
-          kubectl get pods -n hanzo | grep -iE "bot-gateway|cloud-agent|operative|playground"
+          echo "===== 1. List spaces ====="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/spaces" 2>&1 | python3 -m json.tool 2>/dev/null | head -20
 
           echo ""
-          echo "===== 2. GATEWAY LOGS (last 10) ====="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=10 2>&1 | head -15
+          echo "===== 2. List nodes in default space ====="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/spaces/default/bots" 2>&1 | python3 -m json.tool 2>/dev/null | head -30
 
           echo ""
-          echo "===== 3. CLOUD-AGENT LOGS ====="
-          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=10 2>&1 | head -15
-
-          echo ""
-          echo "===== 4. GATEWAY HEALTH ====="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1
-
-          echo ""
-          echo "===== 5. EXTERNAL WS TEST ====="
-          timeout 3 curl -sNi -k -H "Host: gw.hanzo.bot" -H "Upgrade: websocket" -H "Connection: Upgrade" -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" "https://64.225.91.229/" 2>&1 | head -5 || echo "done"
-
-          echo ""
-          echo "===== 6. PLAYGROUND NODES IN DB ====="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>&1 | python3 -c "
-          import sys, json
-          data = json.loads(sys.stdin.read())
-          nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
-          print(f'Total nodes in DB: {len(nodes)}')
-          for n in nodes:
-            print(f'  {n.get(\"id\",\"?\")}: status={n.get(\"status\",\"?\")} type={n.get(\"type\",\"?\")}')
-          " 2>/dev/null
-
-          echo ""
-          echo "===== 7. DELETE ALL STALE NODES FROM DB ====="
-          NODES_JSON=$(kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>/dev/null)
-          echo "$NODES_JSON" | python3 -c "
-          import sys, json
-          data = json.loads(sys.stdin.read())
-          nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
-          for n in nodes:
-            print(n.get('id', ''))
-          " 2>/dev/null | while read NODE_ID; do
-            if [ -n "$NODE_ID" ]; then
-              echo "Deleting: $NODE_ID"
-              kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 --method=DELETE "http://hanzo-playground:8080/api/v1/nodes/$NODE_ID" 2>&1 | head -1
-            fi
+          echo "===== 3. Try cloud delete API ====="
+          for NODE_ID in cloud-b0bb6d83 cloud-a429c34d cloud-4cc75086 cloud-88dfa2c1 cloud-b06b2c1 team-sec team-vi team-dev team-des team-opera; do
+            echo -n "DELETE cloud/$NODE_ID: "
+            kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 --method=DELETE "http://hanzo-playground:8080/api/v1/cloud/nodes/$NODE_ID" 2>&1 | head -1
           done
 
           echo ""
-          echo "===== 8. VERIFY NODES AFTER CLEANUP ====="
+          echo "===== 4. Try space delete API ====="
+          for NODE_ID in cloud-b0bb6d83 cloud-a429c34d cloud-4cc75086 cloud-88dfa2c1 cloud-b06b2c1 team-sec team-vi team-dev team-des team-opera hanzo-bot-gateway; do
+            echo -n "DELETE space/default/$NODE_ID: "
+            kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 --method=DELETE "http://hanzo-playground:8080/api/v1/spaces/default/nodes/$NODE_ID" 2>&1 | head -1
+          done
+
+          echo ""
+          echo "===== 5. Direct DB cleanup (nuclear option) ====="
+          # Get postgres DSN
+          PG_DSN=$(kubectl get secret playground-secrets -n hanzo -o jsonpath='{.data.POSTGRES_DSN}' | base64 -d)
+          echo "DB accessible: $([ -n "$PG_DSN" ] && echo yes || echo no)"
+          if [ -n "$PG_DSN" ]; then
+            echo "Tables:"
+            kubectl exec -n hanzo deploy/hanzo-playground -- /bin/sh -c "echo 'SELECT tablename FROM pg_tables WHERE schemaname='\''public'\''' | timeout 5 psql '$PG_DSN' -t" 2>/dev/null | head -10 || echo "psql not available in container"
+          fi
+
+          echo ""
+          echo "===== 6. Remaining nodes check ====="
           kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/nodes" 2>&1 | python3 -c "
           import sys, json
           data = json.loads(sys.stdin.read())
           nodes = data if isinstance(data, list) else data.get('nodes', data.get('data', []))
-          print(f'Remaining nodes: {len(nodes)}')
+          print(f'Remaining: {len(nodes)}')
           for n in nodes:
             print(f'  {n.get(\"id\",\"?\")}')
           " 2>/dev/null
