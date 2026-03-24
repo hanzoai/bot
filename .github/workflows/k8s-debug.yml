@@ -50,7 +50,22 @@ jobs:
 
           echo ""
           echo "===== 9. Cloud-agent env ====="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- env 2>/dev/null | grep -E '^(ANTHROPIC_|HANZO_|GATEWAY_|BOT_)' | sort || true
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- env 2>/dev/null | grep -E '^(ANTHROPIC_|HANZO_|GATEWAY_|BOT_|HOME)' | sort || true
+          echo ""
+          echo "===== 9b. Cloud-agent auth test ====="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- node -e "
+            console.log('ANTHROPIC_API_KEY set:', !!process.env.ANTHROPIC_API_KEY, 'length:', (process.env.ANTHROPIC_API_KEY||'').length);
+            console.log('HANZO_API_KEY set:', !!process.env.HANZO_API_KEY, 'length:', (process.env.HANZO_API_KEY||'').length);
+            console.log('HOME:', process.env.HOME);
+            const fs = require('fs');
+            const authDir = '/home/node/.openclaw/agent';
+            try {
+              const files = fs.readdirSync(authDir);
+              console.log('Auth dir files:', files);
+              const ap = fs.readFileSync(authDir + '/auth-profiles.json', 'utf8');
+              console.log('auth-profiles.json:', ap.substring(0,300));
+            } catch(e) { console.log('Auth dir error:', e.message); }
+          " 2>&1 || true
 
           echo ""
           echo "===== 10. Gateway health ====="
