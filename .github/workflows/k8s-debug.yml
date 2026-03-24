@@ -19,25 +19,23 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix bot-gateway bind
+      - name: Fix bot-gateway bind with correct command
         run: |
-          echo "=== Patch container command to include --bind lan ==="
+          echo "=== Patch to: node openclaw.mjs gateway --bind lan --allow-unconfigured ==="
           kubectl patch deploy bot-gateway -n hanzo --type json \
-            -p '[{"op":"replace","path":"/spec/template/spec/containers/0/command","value":["openclaw","--bind","lan"]}]'
+            -p '[{"op":"replace","path":"/spec/template/spec/containers/0/command","value":["node","openclaw.mjs","gateway","--bind","lan","--allow-unconfigured"]}]'
 
           echo ""
-          echo "=== Wait for rollout ==="
-          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s || echo "Timed out"
+          echo "=== Scale down and up for clean start ==="
+          kubectl scale deploy/bot-gateway -n hanzo --replicas=0
+          sleep 5
+          kubectl scale deploy/bot-gateway -n hanzo --replicas=1
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=180s || echo "Timed out (bot takes long to start)"
 
           echo ""
-          echo "=== Check new logs ==="
-          sleep 10
-          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | grep -i "listen\|bind" || echo "No listen/bind in logs yet"
+          echo "=== Check logs for bind address ==="
+          kubectl logs -n hanzo -l app=bot-gateway --tail=10 2>&1 | grep -iE "listen|bind|0\.0\.0\.0|lan" || echo "Not ready yet"
 
           echo ""
-          echo "=== Test connectivity ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/" 2>&1 | head -3 || echo "Port 80 still failing"
-
-          echo ""
-          echo "=== Test via Traefik ==="
-          curl -sk --connect-timeout 5 --resolve "gw.hanzo.bot:443:64.225.91.229" "https://gw.hanzo.bot/" -D - 2>&1 | head -8
+          echo "=== Test port 80 ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/" 2>&1 | head -3 || echo "Port 80 not ready"
