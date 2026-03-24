@@ -19,39 +19,34 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Investigate hanzo-ingress and cloud-agent
+      - name: Dump ingress-routes ConfigMap
         run: |
-          echo "=== 1. hanzo-ingress DaemonSet spec ==="
-          kubectl get daemonset hanzo-ingress -n hanzo -o jsonpath='{.spec.template.spec.containers[0].image}' && echo ""
-          kubectl get daemonset hanzo-ingress -n hanzo -o jsonpath='{.spec.template.spec.containers[0].args}' && echo ""
-          kubectl get daemonset hanzo-ingress -n hanzo -o jsonpath='{.spec.template.spec.containers[0].command}' && echo ""
+          echo "=== ingress-routes ConfigMap ==="
+          kubectl get configmap ingress-routes -n hanzo -o yaml
 
-          echo ""
-          echo "=== 2. hanzo-ingress env vars ==="
-          kubectl get daemonset hanzo-ingress -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}'
-
-          echo ""
-          echo "=== 3. hanzo-ingress volumes/configmaps ==="
-          kubectl get daemonset hanzo-ingress -n hanzo -o jsonpath='{.spec.template.spec.volumes}' | python3 -c "import sys,json; [print(json.dumps(v,indent=2)) for v in json.loads(sys.stdin.read())]" 2>/dev/null || echo "parse error"
-
-          echo ""
-          echo "=== 4. hanzo-ingress static config (if any) ==="
-          kubectl get configmap -n hanzo | grep -i "ingress\|traefik\|proxy" || echo "none"
-
-          echo ""
-          echo "=== 5. Check hanzo-ingress full args ==="
-          kubectl get daemonset hanzo-ingress -n hanzo -o yaml 2>/dev/null | grep -A30 "containers:" | head -40
-
-          echo ""
-          echo "=== 6. Cloud-agent details ==="
-          kubectl get deploy cloud-agent -n hanzo -o jsonpath='{.spec.template.spec.containers[0].image}' && echo ""
+      - name: Fix cloud-agent gateway token
+        run: |
+          echo "=== Current cloud-agent env ==="
           kubectl get deploy cloud-agent -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}'
 
           echo ""
-          echo "=== 7. Cloud-agent full logs ==="
-          kubectl logs -n hanzo -l app=cloud-agent --tail=50 2>&1 | head -60
+          echo "=== Add GATEWAY_TOKEN env to cloud-agent ==="
+          kubectl set env deploy/cloud-agent -n hanzo \
+            GATEWAY_TOKEN_FROM_SECRET=true \
+            --from=secret/bot-secrets \
+            2>/dev/null || echo "set env from secret failed"
 
           echo ""
-          echo "=== 8. Check gateway token secrets ==="
-          kubectl get secret playground-secrets -n hanzo -o jsonpath='{.data}' 2>/dev/null | python3 -c "import sys,json; [print(k) for k in json.loads(sys.stdin.read()).keys()]" 2>/dev/null || echo "No playground-secrets"
-          kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data}' 2>/dev/null | python3 -c "import sys,json; [print(k) for k in json.loads(sys.stdin.read()).keys()]" 2>/dev/null || echo "No bot-secrets"
+          echo "=== Alternative: patch directly ==="
+          kubectl patch deploy cloud-agent -n hanzo --type=json -p '[
+            {"op":"add","path":"/spec/template/spec/containers/0/env/-","value":{"name":"GATEWAY_TOKEN","valueFrom":{"secretKeyRef":{"name":"bot-secrets","key":"BOT_GATEWAY_TOKEN"}}}}
+          ]' 2>/dev/null || echo "patch failed (may already exist)"
+
+          echo ""
+          echo "=== Wait for rollout ==="
+          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || echo "Timed out"
+
+          echo ""
+          echo "=== Cloud-agent logs after restart ==="
+          sleep 10
+          kubectl logs -n hanzo -l app=cloud-agent --tail=20 2>&1 | head -30
