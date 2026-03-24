@@ -11,7 +11,7 @@ env:
 jobs:
   debug:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     steps:
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -19,20 +19,16 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix bot-gateway entrypoint and apply ConfigMap
+      - name: Fix bot-gateway with hanzo-bot.mjs and --bind lan
         run: |
-          echo "=== Fix command: openclaw.mjs (not hanzo-bot.mjs) with --bind lan ==="
+          echo "=== Fix command to: node hanzo-bot.mjs gateway --allow-unconfigured --bind lan ==="
           kubectl patch deploy bot-gateway -n hanzo --type json \
-            -p '[{"op":"replace","path":"/spec/template/spec/containers/0/command","value":["node","openclaw.mjs","gateway","--allow-unconfigured","--bind","lan"]}]'
-
-          echo ""
-          echo "=== Ensure ConfigMap exists ==="
-          kubectl get configmap bot-gateway-config -n hanzo 2>/dev/null && echo "ConfigMap exists" || echo "ConfigMap missing - creating"
+            -p '[{"op":"replace","path":"/spec/template/spec/containers/0/command","value":["node","hanzo-bot.mjs","gateway","--allow-unconfigured","--bind","lan"]}]'
 
           echo ""
           echo "=== Scale 0 then 1 ==="
           kubectl scale deploy/bot-gateway -n hanzo --replicas=0
-          sleep 5
+          sleep 10
           kubectl scale deploy/bot-gateway -n hanzo --replicas=1
 
           echo ""
@@ -41,8 +37,12 @@ jobs:
 
           echo ""
           echo "=== Check logs ==="
-          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | grep -iE "listen|bind|0\.0\.0\.0|lan|error" || echo "Check later"
+          kubectl logs -n hanzo -l app=bot-gateway --tail=10 2>&1 | grep -iE "listen|bind|0\.0\.0\.0|lan|error|fatal" | head -5 || echo "No relevant logs yet"
 
           echo ""
-          echo "=== Test port 80 ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3 || echo "Not ready yet"
+          echo "=== Test /health ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -3 || echo "Health check failed"
+
+          echo ""
+          echo "=== Test via Traefik ==="
+          curl -sk --connect-timeout 5 --resolve "gw.hanzo.bot:443:64.225.91.229" "https://gw.hanzo.bot/health" -D - 2>&1 | head -8
