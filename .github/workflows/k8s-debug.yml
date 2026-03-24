@@ -20,14 +20,16 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Recreate cloud-agent without operative sidecar for fast restart
+      - name: Fix all bot issues
         run: |
-          echo "=== Recreate cloud-agent (bot only, no operative sidecar) ==="
-          echo "The operative image is too large and pulling takes forever."
-          echo "For chat/terminal, bot-only is sufficient. VNC needs the standalone operative."
-          kubectl delete deploy cloud-agent -n hanzo --ignore-not-found
+          echo "=== 1. Find node with cached operative image ==="
+          OPERATIVE_NODE=$(kubectl get pods -n hanzo -l app=operative -o jsonpath='{.items[0].spec.nodeName}')
+          echo "Operative running on: $OPERATIVE_NODE"
 
-          cat <<'EOF' | kubectl apply -f -
+          echo ""
+          echo "=== 2. Recreate cloud-agent with operative sidecar, pinned to same node ==="
+          kubectl delete deploy cloud-agent -n hanzo --ignore-not-found
+          cat <<EOF | kubectl apply -f -
           apiVersion: apps/v1
           kind: Deployment
           metadata:
@@ -45,12 +47,14 @@ jobs:
                 labels:
                   app: cloud-agent
               spec:
+                nodeSelector:
+                  kubernetes.io/hostname: "$OPERATIVE_NODE"
                 imagePullSecrets:
                 - name: ghcr-secret
                 containers:
                 - name: cloud-agent
                   image: ghcr.io/hanzoai/bot:latest
-                  imagePullPolicy: Always
+                  imagePullPolicy: IfNotPresent
                   command: ["node", "hanzo-bot.mjs", "node", "run", "--node-id", "cloud-agent-default", "--security", "full"]
                   env:
                   - name: BOT_GATEWAY_TOKEN
@@ -84,7 +88,7 @@ jobs:
                   - name: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
                     value: "1"
                   - name: OPERATIVE_URL
-                    value: "http://operative.hanzo.svc:8501"
+                    value: "http://localhost:8501"
                   resources:
                     requests:
                       cpu: 100m
@@ -92,17 +96,59 @@ jobs:
                     limits:
                       cpu: "1"
                       memory: 2Gi
+                - name: operative
+                  image: ghcr.io/hanzoai/operative:latest
+                  imagePullPolicy: IfNotPresent
+                  ports:
+                  - containerPort: 8080
+                    name: ui
+                  - containerPort: 6080
+                    name: vnc-web
+                  - containerPort: 5900
+                    name: vnc
+                  - containerPort: 8501
+                    name: streamlit
+                  env:
+                  - name: ANTHROPIC_API_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: bot-secrets
+                        key: ANTHROPIC_API_KEY
+                        optional: true
+                  - name: WIDTH
+                    value: "1280"
+                  - name: HEIGHT
+                    value: "800"
+                  - name: DISPLAY_NUM
+                    value: "1"
+                  resources:
+                    requests:
+                      memory: "1Gi"
+                      cpu: "500m"
+                    limits:
+                      memory: "4Gi"
+                      cpu: "2000m"
           EOF
 
           echo ""
-          echo "=== Wait for rollout ==="
+          echo "=== 3. Wait for rollout (should be fast - images cached on $OPERATIVE_NODE) ==="
           kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || echo "Timed out"
 
           echo ""
-          echo "=== Check env ==="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- env 2>/dev/null | grep -E "ANTHROPIC|HANZO_API" | sed 's/=.\{8\}.*/=<redacted>/' || echo "Can't check"
+          echo "=== 4. Check pod status ==="
+          kubectl get pods -n hanzo -l app=cloud-agent -o wide
 
           echo ""
-          echo "=== Logs ==="
-          sleep 5
-          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=10 2>&1 | head -15
+          echo "=== 5. Check playground provisioner config ==="
+          kubectl get deploy hanzo-playground -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' | grep -iE "GATEWAY|TOKEN|CLOUD|AGENT"
+
+          echo ""
+          echo "=== 6. Cloud-agent logs ==="
+          sleep 10
+          kubectl logs -n hanzo -l app=cloud-agent -c cloud-agent --tail=15 2>&1 | head -20
+          echo "--- operative ---"
+          kubectl logs -n hanzo -l app=cloud-agent -c operative --tail=5 2>&1 | head -10
+
+          echo ""
+          echo "=== 7. Test VNC tunnel from gateway ==="
+          kubectl logs -n hanzo -l app=bot-gateway --tail=10 2>&1 | grep -iE "tunnel|vnc|cloud-agent" | head -5
