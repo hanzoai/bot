@@ -20,43 +20,21 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Check deployed images
+      - name: Restart playground with new image
         run: |
-          echo "=== Playground deployed image ==="
-          kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\t"}{.status.containerStatuses[0].imageID}{"\n"}{end}'
+          echo "=== 1. Force pull new image ==="
+          kubectl rollout restart deploy/hanzo-playground -n hanzo
+          kubectl rollout status deploy/hanzo-playground -n hanzo --timeout=120s || echo "Timed out"
 
           echo ""
-          echo "=== Playground image digest ==="
-          kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{.items[0].status.containerStatuses[0].imageID}' | sed 's/.*@//'
+          echo "=== 2. Verify new image digest ==="
+          kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{.items[0].status.containerStatuses[0].imageID}' && echo ""
 
           echo ""
-          echo "=== Latest image from GHCR ==="
-          # Check the latest tag on ghcr
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=10 "https://ghcr.io/v2/hanzoai/playground/tags/list" 2>&1 | head -3 || echo "Can't query GHCR directly"
-
-          echo ""
-          echo "=== Playground pod age + restart count ==="
-          kubectl get pods -n hanzo -l app=hanzo-playground -o wide --show-labels | head -5
-
-          echo ""
-          echo "=== Bot gateway deployed image ==="
-          kubectl get pods -n hanzo -l app=bot-gateway -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\t"}{.status.containerStatuses[0].imageID}{"\n"}{end}'
-
-          echo ""
-          echo "=== Cloud-agent deployed image ==="
-          kubectl get pods -n hanzo -l app=cloud-agent -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.containerStatuses[*]}{.name}={.imageID}{"\t"}{end}{"\n"}{end}'
-
-          echo ""
-          echo "=== Check if playground image was updated after our commit ==="
-          echo "Pod creation times:"
-          kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}'
-          echo ""
-          echo "Deploy last update:"
-          kubectl get deploy hanzo-playground -n hanzo -o jsonpath='{.metadata.annotations.deployment\.kubernetes\.io/revision}' && echo " (revision)"
-          kubectl get deploy hanzo-playground -n hanzo -o jsonpath='{.spec.template.metadata.annotations}' 2>/dev/null && echo ""
-
-          echo ""
-          echo "=== Does the new image have ANTHROPIC_API_KEY provisioner code? ==="
+          echo "=== 3. Check ANTHROPIC_API_KEY in env ==="
           POD=$(kubectl get pods -n hanzo -l app=hanzo-playground -o jsonpath='{.items[0].metadata.name}')
-          kubectl exec -n hanzo "$POD" -- grep -r "ANTHROPIC_API_KEY" /app/ 2>/dev/null | head -3 || kubectl exec -n hanzo "$POD" -- grep -r "AnthropicAPIKey" /app/ 2>/dev/null | head -3 || echo "Can't grep binary - checking env instead"
           kubectl exec -n hanzo "$POD" -- env 2>/dev/null | grep ANTHROPIC | sed 's/=.\{8\}.*/=<set>/' || echo "ANTHROPIC not in env"
+
+          echo ""
+          echo "=== 4. Health check ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/health" 2>&1 | head -3
