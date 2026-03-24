@@ -19,45 +19,66 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-      - name: Fix app.hanzo.bot routing
+      - name: Fix app.hanzo.bot with dedicated ingress
         run: |
-          echo "=== 1. Check TLS certs ==="
-          kubectl get secret app-hanzo-bot-tls -n hanzo 2>/dev/null && echo "EXISTS" || echo "MISSING"
-          kubectl get secret playground-hanzo-bot-tls -n hanzo 2>/dev/null && echo "EXISTS" || echo "MISSING"
-          kubectl get certificate -n hanzo 2>/dev/null | grep -E "app-hanzo|playground-hanzo" || echo "No certificates found"
+          echo "=== 1. Find ALL resources matching app.hanzo.bot ==="
+          echo "Ingresses:"
+          kubectl get ingress -n hanzo -o json | python3 -c "
+          import sys, json
+          data = json.loads(sys.stdin.read())
+          for item in data.get('items', []):
+            name = item['metadata']['name']
+            for rule in item['spec'].get('rules', []):
+              if 'app.hanzo' in rule.get('host', ''):
+                print(f'  {name}: {rule[\"host\"]} -> {rule[\"http\"][\"paths\"][0][\"backend\"][\"service\"][\"name\"]}')
+          " 2>/dev/null || echo "parse error"
+
+          echo "IngressRoutes:"
+          kubectl get ingressroute -n hanzo -o json 2>/dev/null | python3 -c "
+          import sys, json
+          data = json.loads(sys.stdin.read())
+          for item in data.get('items', []):
+            name = item['metadata']['name']
+            for route in item['spec'].get('routes', []):
+              if 'app.hanzo' in route.get('match', ''):
+                print(f'  {name}: {route[\"match\"]}')
+          " 2>/dev/null || echo "No IngressRoutes"
 
           echo ""
-          echo "=== 2. Check cert-manager challenges ==="
-          kubectl get challenges -n hanzo 2>/dev/null | head -10 || echo "No challenges"
+          echo "=== 2. Find the gateway controller pods ==="
+          kubectl get pods -A -o wide | grep -iE "gateway|traefik|ingress" | head -10
 
           echo ""
-          echo "=== 3. Delete conflicting hanzo-bot-site ingress (conflicts with playground) ==="
-          kubectl get ingress hanzo-bot-site -n hanzo -o jsonpath='{.spec.rules[*].host}' 2>/dev/null && echo ""
-          # Don't delete yet, let's check what hosts it has
+          echo "=== 3. Check gateway controller for redirect config ==="
+          # Check all middlewares
+          for kind in middleware middlewaretcp; do
+            echo "-- $kind --"
+            kubectl get $kind -A -o yaml 2>/dev/null | grep -B5 -A10 "redirect\|app\.hanzo\|hanzo\.bot" || echo "none"
+          done
 
           echo ""
-          echo "=== 4. Fix: Recreate hanzo-playground ingress without TLS ==="
-          echo "Cloudflare handles SSL termination, so k8s ingress doesn't need TLS"
+          echo "=== 4. Try: create a Traefik IngressRoute (traefik.io CRD) ==="
+          kubectl get crd | grep traefik 2>/dev/null || echo "No traefik CRDs"
+          kubectl get crd | grep "hanzo.ai" 2>/dev/null || echo "No hanzo.ai CRDs"
+
+          echo ""
+          echo "=== 5. Delete hanzo-playground ingress, create fresh with just app.hanzo.bot ==="
           kubectl delete ingress hanzo-playground -n hanzo --ignore-not-found
-          cat <<'EOF' | kubectl apply -f -
+
+          cat <<'IEOF' | kubectl apply -f -
           apiVersion: networking.k8s.io/v1
           kind: Ingress
           metadata:
-            name: hanzo-playground
+            name: app-hanzo-bot-playground
             namespace: hanzo
             labels:
               app: hanzo-playground
-            annotations:
-              cert-manager.io/cluster-issuer: letsencrypt-prod
           spec:
             ingressClassName: gateway
             tls:
             - hosts:
               - app.hanzo.bot
               secretName: app-hanzo-bot-tls
-            - hosts:
-              - playground.hanzo.bot
-              secretName: playground-hanzo-bot-tls
             rules:
             - host: app.hanzo.bot
               http:
@@ -69,6 +90,23 @@ jobs:
                       name: hanzo-playground
                       port:
                         number: 8080
+          IEOF
+
+          cat <<'IEOF2' | kubectl apply -f -
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: playground-hanzo-bot
+            namespace: hanzo
+            labels:
+              app: hanzo-playground
+          spec:
+            ingressClassName: gateway
+            tls:
+            - hosts:
+              - playground.hanzo.bot
+              secretName: playground-hanzo-bot-tls
+            rules:
             - host: playground.hanzo.bot
               http:
                 paths:
@@ -79,24 +117,16 @@ jobs:
                       name: hanzo-playground
                       port:
                         number: 8080
-          EOF
+          IEOF2
 
           echo ""
-          echo "=== 5. Also delete the custom IngressRoute (may conflict) ==="
-          kubectl delete ingressroute app-hanzo-bot -n hanzo --ignore-not-found 2>/dev/null || echo "IngressRoute delete skipped"
-
-          echo ""
-          echo "=== 6. Check Traefik namespace and pods ==="
-          kubectl get pods -A -o wide 2>/dev/null | grep -i traefik | head -5
-
-          echo ""
-          echo "=== 7. Test direct routing ==="
-          sleep 3
+          echo "=== 6. Wait and test ==="
+          sleep 5
           echo "Test app.hanzo.bot:"
           curl -skI -H "Host: app.hanzo.bot" "https://64.225.91.229/" 2>&1 | head -5
           echo ""
-          echo "Test playground.hanzo.bot:"
-          curl -skI -H "Host: playground.hanzo.bot" "https://64.225.91.229/" 2>&1 | head -5
-          echo ""
           echo "Test app.hanzo.bot/api/v1/health:"
           curl -sk -H "Host: app.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -3
+          echo ""
+          echo "Test playground.hanzo.bot:"
+          curl -skI -H "Host: playground.hanzo.bot" "https://64.225.91.229/api/v1/health" 2>&1 | head -3
