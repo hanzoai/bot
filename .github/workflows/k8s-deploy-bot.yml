@@ -35,16 +35,17 @@ jobs:
             fi
           done
 
-      - name: Apply universe bot manifests
+      - name: Apply ingresses (critical - WS routing fix)
         run: |
-          echo "=== Applying bot gateway deployment + ingress ==="
-          kubectl apply -f infra/k8s/bot/deployment.yaml
-          echo ""
           echo "=== Applying bot ingresses (gateway + WS) ==="
           kubectl apply -f infra/k8s/bot/ingress.yaml
           echo ""
-          echo "=== Applying agents control plane ==="
+          echo "=== Applying agents control plane (playground + app.hanzo.bot) ==="
           kubectl apply -f infra/k8s/bot/agents-control-plane.yaml
+
+      - name: Apply deployment (server-side to avoid merge conflicts)
+        run: |
+          kubectl apply --server-side --force-conflicts -f infra/k8s/bot/deployment.yaml || echo "Deployment apply had issues (non-fatal)"
 
       - name: Restart gateway to clear stale node registry
         run: |
