@@ -20,53 +20,51 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
 
-      - name: Clean up old conflicting nginx-class ingresses
+      - name: Fix gateway rollout (undo stuck restart)
         run: |
-          echo "=== Removing old nginx-class bot ingresses that conflict with Traefik ==="
-          # These use ingressClassName: ingress (nginx) which has no controller
-          # They shadow the Traefik ingresses and cause routing failures
-          for ing in bot-gateway bot-hub bot-hub-ingress hanzo-bot-site hanzo-market-site bot-docs-ingress bot-skills-ingress hanzo-api-bot; do
-            CLASS=$(kubectl get ingress -n hanzo "$ing" -o jsonpath='{.spec.ingressClassName}' 2>/dev/null || echo "")
-            if [ "$CLASS" = "ingress" ]; then
-              echo "Deleting $ing (class=ingress, nginx not running)"
-              kubectl delete ingress -n hanzo "$ing" --wait=false
-            else
-              echo "Keeping $ing (class=$CLASS)"
-            fi
+          echo "=== Undo stuck gateway rollout ==="
+          kubectl rollout undo deploy/bot-gateway -n hanzo || true
+          sleep 10
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=60s || true
+
+          echo ""
+          echo "=== Gateway pods after undo ==="
+          kubectl get pods -n hanzo -l app=bot-gateway -o wide
+
+      - name: Delete stale provisioned bot pods
+        run: |
+          echo "=== Cleaning up stale provisioned agent pods ==="
+          # Delete agent-cloud pods that are orphaned (provisioned by playground but not connected)
+          kubectl get pods -n hanzo -o name | grep 'agent-cloud-' | while read pod; do
+            echo "Deleting orphaned $pod"
+            kubectl delete "$pod" -n hanzo --grace-period=10 || true
           done
 
-      - name: Apply ingresses (critical - WS routing fix)
+      - name: Restart cloud-agent to force gateway reconnection
         run: |
-          echo "=== Applying bot ingresses (gateway + WS) ==="
-          kubectl apply -f infra/k8s/bot/ingress.yaml
+          echo "=== Restart cloud-agent ==="
+          kubectl rollout restart deploy/cloud-agent -n hanzo
+          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || true
+
           echo ""
-          echo "=== Applying agents control plane (playground + app.hanzo.bot) ==="
-          kubectl apply -f infra/k8s/bot/agents-control-plane.yaml
+          echo "=== Wait for node to register ==="
+          sleep 15
 
-      - name: Apply deployment (server-side to avoid merge conflicts)
+      - name: Verify everything
         run: |
-          kubectl apply --server-side --force-conflicts -f infra/k8s/bot/deployment.yaml || echo "Deployment apply had issues (non-fatal)"
-
-      - name: Restart gateway to clear stale node registry
-        run: |
-          kubectl rollout restart deploy/bot-gateway -n hanzo
-          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s
-
-      - name: Verify deployment
-        run: |
-          echo "=== Deployments ==="
-          kubectl get deploy -n hanzo bot-gateway operative cloud-agent hanzo-playground -o wide
+          echo "=== Pods ==="
+          kubectl get pods -n hanzo -l 'app in (bot-gateway,operative,cloud-agent,hanzo-playground)' -o wide
 
           echo ""
           echo "=== Ingresses ==="
-          kubectl get ingress -n hanzo -o wide
+          kubectl get ingress -n hanzo bot-gateway-ingress bot-gateway-ws hanzo-playground -o wide 2>/dev/null || true
 
           echo ""
-          echo "=== Test gateway health ==="
+          echo "=== Gateway health ==="
           kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/health
 
           echo ""
-          echo "=== Test WS internally ==="
+          echo "=== Internal WS test ==="
           kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- timeout 5 node -e "
             const ws = new (require('ws'))('ws://bot-gateway:80/');
             ws.on('open', () => { console.log('WS OPEN'); ws.close(); process.exit(0); });
@@ -75,10 +73,27 @@ jobs:
           " 2>&1
 
           echo ""
-          echo "=== Check gw.hanzo.bot ingress exists ==="
-          kubectl get ingress -n hanzo bot-gateway-ws -o wide
+          echo "=== Gateway logs (last 15) ==="
+          kubectl logs -n hanzo deploy/bot-gateway -c bot-gateway --tail=15
 
           echo ""
-          echo "=== Node registry after restart ==="
-          sleep 10
-          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | head -100 || echo "Cannot get nodes"
+          echo "=== Cloud-agent logs (last 15) ==="
+          kubectl logs -n hanzo deploy/cloud-agent -c cloud-agent --tail=15
+
+          echo ""
+          echo "=== Node registry ==="
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | python3 -c "
+          import sys, json
+          try:
+            data = json.loads(sys.stdin.read())
+            if isinstance(data, list):
+              for n in data:
+                print(f'  {n.get(\"id\",\"?\")} status={n.get(\"status\",\"?\")} connected={n.get(\"connected\",\"?\")}')
+            elif isinstance(data, dict) and 'nodes' in data:
+              for n in data['nodes']:
+                print(f'  {n.get(\"id\",\"?\")} status={n.get(\"status\",\"?\")} connected={n.get(\"connected\",\"?\")}')
+            else:
+              print(json.dumps(data, indent=2)[:500])
+          except:
+            print(sys.stdin.read()[:500] if hasattr(sys.stdin, 'read') else 'parse error')
+          " 2>/dev/null || echo "Cannot get nodes"
