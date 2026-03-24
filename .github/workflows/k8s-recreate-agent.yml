@@ -1,0 +1,183 @@
+name: Recreate Cloud Agent
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+env:
+  HANZO_CLUSTER_ID: 1a153000-90a6-48ad-9375-7ef901a9bf7f
+jobs:
+  recreate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+      - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
+
+      - name: Delete and recreate cloud-agent from scratch
+        run: |
+          echo "=== Delete cloud-agent deployment ==="
+          kubectl delete deploy/cloud-agent -n hanzo --wait=true 2>/dev/null || true
+          sleep 5
+
+          echo "=== Get API keys ==="
+          ANTHROPIC_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)
+          HANZO_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.HANZO_API_KEY}' | base64 -d)
+
+          echo "=== Create cloud-agent deployment with config + auth ==="
+          cat <<'YAML' | kubectl apply -f -
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: cloud-agent
+            namespace: hanzo
+            labels:
+              app: cloud-agent
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: cloud-agent
+            template:
+              metadata:
+                labels:
+                  app: cloud-agent
+              spec:
+                imagePullSecrets:
+                  - name: ghcr-secret
+                initContainers:
+                  - name: write-auth
+                    image: ghcr.io/hanzoai/bot:latest
+                    command: ["node", "-e"]
+                    args:
+                      - |
+                        const fs=require('fs');
+                        const dir='/home/node/.openclaw/agents/main/agent';
+                        fs.mkdirSync(dir,{recursive:true});
+                        const p={version:1,profiles:{'anthropic:default':{type:'api_key',provider:'anthropic',key:process.env.ANTHROPIC_API_KEY},'hanzo:default':{type:'api_key',provider:'hanzo',key:process.env.HANZO_API_KEY}},default:'anthropic:default'};
+                        fs.writeFileSync(dir+'/auth-profiles.json',JSON.stringify(p));
+                        console.log('auth-profiles written');
+                    env:
+                      - name: ANTHROPIC_API_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: bot-secrets
+                            key: ANTHROPIC_API_KEY
+                      - name: HANZO_API_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: bot-secrets
+                            key: HANZO_API_KEY
+                    volumeMounts:
+                      - name: openclaw-state
+                        mountPath: /home/node/.openclaw
+                containers:
+                  - name: cloud-agent
+                    image: ghcr.io/hanzoai/bot:latest
+                    imagePullPolicy: Always
+                    command: ["node", "hanzo-bot.mjs", "gateway", "--allow-unconfigured", "--bind", "lan"]
+                    env:
+                      - name: HOME
+                        value: /home/node
+                      - name: NODE_ENV
+                        value: production
+                      - name: BOT_CONFIG_PATH
+                        value: /etc/bot/bot.json
+                      - name: BOT_GATEWAY_TOKEN
+                        valueFrom:
+                          secretKeyRef:
+                            name: bot-secrets
+                            key: BOT_GATEWAY_TOKEN
+                      - name: HANZO_API_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: bot-secrets
+                            key: HANZO_API_KEY
+                      - name: ANTHROPIC_API_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: bot-secrets
+                            key: ANTHROPIC_API_KEY
+                      - name: KV_URL
+                        valueFrom:
+                          secretKeyRef:
+                            name: bot-secrets
+                            key: KV_URL
+                      - name: PLAYGROUND_URL
+                        value: http://hanzo-playground.hanzo.svc:8080
+                      - name: OPERATIVE_URL
+                        value: http://localhost:8501
+                    volumeMounts:
+                      - name: bot-config
+                        mountPath: /etc/bot/bot.json
+                        subPath: bot.json
+                      - name: openclaw-state
+                        mountPath: /home/node/.openclaw
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 512Mi
+                      limits:
+                        cpu: "1"
+                        memory: 2Gi
+                    startupProbe:
+                      httpGet:
+                        path: /health
+                        port: 18789
+                      initialDelaySeconds: 10
+                      periodSeconds: 5
+                      failureThreshold: 30
+                    readinessProbe:
+                      httpGet:
+                        path: /health
+                        port: 18789
+                      initialDelaySeconds: 10
+                      periodSeconds: 10
+                  - name: operative
+                    image: ghcr.io/hanzoai/operative:latest
+                    imagePullPolicy: IfNotPresent
+                    env:
+                      - name: ANTHROPIC_API_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            name: bot-secrets
+                            key: ANTHROPIC_API_KEY
+                      - name: WIDTH
+                        value: "1280"
+                      - name: HEIGHT
+                        value: "800"
+                    resources:
+                      requests:
+                        memory: 1Gi
+                        cpu: 500m
+                      limits:
+                        memory: 4Gi
+                        cpu: "2"
+                volumes:
+                  - name: bot-config
+                    configMap:
+                      name: bot-gateway-config
+                  - name: openclaw-state
+                    emptyDir: {}
+          YAML
+
+          echo "=== Wait for rollout ==="
+          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=180s || true
+
+      - name: Verify
+        run: |
+          echo "=== Pod status ==="
+          kubectl get pods -n hanzo -l app=cloud-agent -o wide
+
+          echo ""
+          echo "=== Cloud-agent logs (last 10) ==="
+          kubectl logs -n hanzo deploy/cloud-agent -c cloud-agent --tail=10 2>/dev/null || echo "No logs"
+
+          echo ""
+          echo "=== Auth-profiles check ==="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- cat /home/node/.openclaw/agents/main/agent/auth-profiles.json 2>/dev/null | head -1 || echo "No auth-profiles"
+
+          echo ""
+          echo "=== Gateway health ==="
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- curl -s http://localhost:18789/health 2>/dev/null || echo "Not healthy"
