@@ -20,73 +20,66 @@ jobs:
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
 
-      - name: Fix gw.hanzo.bot WebSocket
+      - name: Remove gw-bot-root-rewrite from ingress-routes
         run: |
-          echo "=== 1. Check ingress-routes ConfigMap for gw.hanzo.bot ==="
-          kubectl get configmap ingress-routes -n hanzo -o jsonpath='{.data.routes\.yaml}' | python3 -c "
-          import yaml, sys
-          data = yaml.safe_load(sys.stdin.read())
-          routers = data.get('http', {}).get('routers', {})
-          services = data.get('http', {}).get('services', {})
-          for name, router in routers.items():
-            if 'gw.hanzo' in router.get('rule', ''):
-              print(f'Router: {name}')
-              print(f'  Rule: {router.get(\"rule\")}')
-              print(f'  Service: {router.get(\"service\")}')
-              print(f'  Middlewares: {router.get(\"middlewares\", [])}')
-              print(f'  TLS: {router.get(\"tls\", {})}')
-              svc_name = router.get('service', '')
-              if svc_name in services:
-                print(f'  Service config: {services[svc_name]}')
-          "
+          echo "=== 1. Remove the root path rewrite router ==="
+          kubectl get configmap ingress-routes -n hanzo -o jsonpath='{.data.routes\.yaml}' > /tmp/routes.yaml
+
+          python3 << 'PYEOF'
+          import yaml
+
+          with open("/tmp/routes.yaml") as f:
+              data = yaml.safe_load(f)
+
+          routers = data.get("http", {}).get("routers", {})
+
+          # Remove the gw-hanzo-bot-root router that rewrites / to /health
+          if "gw-hanzo-bot-root" in routers:
+              del routers["gw-hanzo-bot-root"]
+              print("Deleted gw-hanzo-bot-root router (was rewriting / to /health)")
+
+          # Also remove the gw-bot-root-rewrite middleware
+          middlewares = data.get("http", {}).get("middlewares", {})
+          if "gw-bot-root-rewrite" in middlewares:
+              del middlewares["gw-bot-root-rewrite"]
+              print("Deleted gw-bot-root-rewrite middleware")
+
+          # Verify gw-hanzo-bot router still exists without rewrite
+          if "gw-hanzo-bot" in routers:
+              print(f"Kept gw-hanzo-bot router: {routers['gw-hanzo-bot']}")
+
+          with open("/tmp/routes-fixed.yaml", "w") as f:
+              yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
+          PYEOF
 
           echo ""
-          echo "=== 2. Delete ALL duplicate gw.hanzo.bot ingresses ==="
-          kubectl delete ingress bot-gateway-ws -n hanzo --ignore-not-found
-          # Keep bot-gateway-ingress (class=ingress, which Traefik watches)
+          echo "=== 2. Apply fixed ConfigMap ==="
+          kubectl create configmap ingress-routes -n hanzo \
+            --from-file=routes.yaml=/tmp/routes-fixed.yaml \
+            --dry-run=client -o yaml | kubectl apply -f -
 
           echo ""
-          echo "=== 3. Check all gw.hanzo.bot IngressRoutes ==="
-          kubectl get ingressroute -n hanzo -o json 2>/dev/null | python3 -c "
-          import sys, json
-          data = json.loads(sys.stdin.read())
-          for item in data.get('items', []):
-            name = item['metadata']['name']
-            api = item['apiVersion']
-            for route in item['spec'].get('routes', []):
-              if 'gw.hanzo' in route.get('match', ''):
-                print(f'  {name} ({api}): {route[\"match\"]}')
-          " 2>/dev/null || echo "No IngressRoutes"
-
-          echo ""
-          echo "=== 4. Delete hanzo.ai IngressRoutes (custom CRDs conflict with file provider) ==="
-          kubectl delete ingressroute gw-hanzo-bot -n hanzo --ignore-not-found 2>/dev/null || true
-
-          echo ""
-          echo "=== 5. Ensure bot-gateway ingress has correct class and WebSocket support ==="
-          kubectl get ingress bot-gateway-ingress -n hanzo -o jsonpath='{.spec.ingressClassName}' && echo ""
-          # Traefik watches class=ingress, so make sure bot-gateway-ingress uses class=ingress
-          # Traefik automatically supports WebSocket when the route matches
-          kubectl get ingress bot-gateway-ingress -n hanzo -o yaml | grep -A2 "rules:" | head -5
-
-          echo ""
-          echo "=== 6. Restart hanzo-ingress to pick up clean config ==="
+          echo "=== 3. Restart hanzo-ingress ==="
           kubectl rollout restart daemonset/hanzo-ingress -n hanzo
-          sleep 15
+          sleep 20
 
           echo ""
-          echo "=== 7. Test WS handshake via internal ==="
-          kubectl exec -n hanzo deploy/cloud-agent -- node -e "
-            const ws = new (require('ws'))('ws://bot-gateway:80/');
-            ws.on('open', () => { console.log('WS OPEN'); setTimeout(() => { ws.close(); process.exit(0); }, 1000); });
-            ws.on('message', (d) => console.log('MSG:', d.toString().substring(0, 80)));
-            ws.on('error', (e) => { console.log('ERR:', e.message); process.exit(1); });
-            setTimeout(() => { console.log('TIMEOUT'); process.exit(1); }, 5000);
-          " 2>&1 | head -10
-
+          echo "=== 4. Test WS externally ==="
+          echo "Health check (should work):"
+          curl -sk -H "Host: gw.hanzo.bot" "https://64.225.91.229/health" 2>&1 | head -3
           echo ""
-          echo "=== 8. Test WS via Traefik externally ==="
-          curl -sN --connect-timeout 5 -H "Host: gw.hanzo.bot" \
+          echo "WebSocket upgrade test:"
+          timeout 5 curl -sNi -H "Host: gw.hanzo.bot" \
             -H "Upgrade: websocket" -H "Connection: Upgrade" \
             -H "Sec-WebSocket-Version: 13" -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
-            "https://64.225.91.229/" 2>&1 | timeout 3 head -5 || echo "curl WS test done"
+            "https://64.225.91.229/" 2>&1 | head -10 || echo "WS curl done"
+
+          echo ""
+          echo "=== 5. Internal WS test ==="
+          kubectl exec -n hanzo deploy/cloud-agent -- node -e "
+            const ws = new (require('ws'))('ws://bot-gateway:80/');
+            ws.on('open', () => { console.log('WS OPEN'); });
+            ws.on('message', (d) => { console.log('MSG:', d.toString().substring(0, 80)); ws.close(); process.exit(0); });
+            ws.on('error', (e) => { console.log('ERR:', e.message); process.exit(1); });
+            setTimeout(() => { console.log('TIMEOUT'); process.exit(1); }, 5000);
+          " 2>&1 | head -5
