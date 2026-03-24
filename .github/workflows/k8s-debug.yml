@@ -111,20 +111,23 @@ jobs:
             console.log('Has whitespace:', /\s/.test(key || ''));
             console.log('Has null bytes:', key?.includes('\0'));
 
-            // Try normalizeOptionalSecretInput
-            function normalizeSecretInput(value) {
-              if (typeof value !== 'string' || !value.trim()) return '';
-              const collapsed = value.replace(/[\r\n]+/g, '');
-              let latin1Only = '';
-              for (const char of collapsed) {
-                const cp = char.codePointAt(0);
-                if (typeof cp === 'number' && cp <= 0xff) latin1Only += char;
-              }
-              return latin1Only.trim();
+            // Try to actually call the real resolveEnvApiKey
+            try {
+              const { resolveEnvApiKey } = await import('./dist/agents/model-auth.js');
+              const result = resolveEnvApiKey('anthropic');
+              console.log('resolveEnvApiKey(anthropic):', JSON.stringify(result));
+            } catch(e) {
+              console.log('Cannot import resolveEnvApiKey:', e.message);
             }
-            const normalized = normalizeSecretInput(key);
-            console.log('After normalize:', normalized ? normalized.substring(0, 20) + '...' : 'EMPTY');
-            console.log('Normalized length:', normalized?.length);
+
+            // Try the actual resolveApiKeyForProvider
+            try {
+              const { resolveApiKeyForProvider } = await import('./dist/agents/model-auth.js');
+              const result = await resolveApiKeyForProvider({ provider: 'anthropic' });
+              console.log('resolveApiKeyForProvider:', JSON.stringify({apiKey: result.apiKey?.substring(0,20), source: result.source}));
+            } catch(e) {
+              console.log('resolveApiKeyForProvider error:', e.message.substring(0, 200));
+            }
           " 2>&1 || echo "Node exec failed"
 
           echo ""
