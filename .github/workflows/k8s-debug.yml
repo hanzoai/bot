@@ -19,150 +19,42 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - name: Configure kubectl
         run: doctl kubernetes cluster kubeconfig save "${{ env.HANZO_CLUSTER_ID }}"
-
-      - name: Fix playground CORS + ingress + gateway controlUi origins
+      - name: Check routing for app.hanzo.bot and hanzo.bot
         run: |
-          echo "=== 1. Update playground CORS config to include app.hanzo.bot ==="
-          cat <<'EOF' | kubectl apply -f -
-          apiVersion: v1
-          kind: ConfigMap
-          metadata:
-            name: agents-config
-            namespace: hanzo
-            labels:
-              app: hanzo-playground
-          data:
-            agents.yaml: |
-              agents:
-                port: 8080
-              storage:
-                mode: postgres
-              ui:
-                enabled: true
-                mode: embedded
-              features:
-                did:
-                  enabled: true
-              cloud:
-                enabled: true
-                kubernetes:
-                  enabled: true
-                  namespace: hanzo
-                  agent_image: "ghcr.io/hanzoai/bot:latest"
-                  image_pull_secret: "ghcr-secret"
-                  service_account: "playground-agent"
-                  max_agents_per_org: 20
-                  default_cpu: "250m"
-                  default_memory: "512Mi"
-                  limit_cpu: "2000m"
-                  limit_memory: "4Gi"
-                  pod_ttl: "168h"
-                  operative_enabled: true
-                  operative_image: "ghcr.io/hanzoai/operative:latest"
-                  cloud_api_endpoint: "http://cloud-api.hanzo.svc:8000/api"
-                visor:
-                  enabled: true
-                  endpoint: "http://visor.hanzo.svc:19000"
-              api:
-                cors:
-                  allow_credentials: true
-                  allowed_origins:
-                    - "https://playground.hanzo.bot"
-                    - "https://api.hanzo.bot"
-                    - "https://hanzo.bot"
-                    - "https://app.hanzo.bot"
-                    - "https://gw.hanzo.bot"
-                    - "https://market.hanzo.bot"
-          EOF
+          echo "=== All ingresses with hanzo.bot hosts ==="
+          kubectl get ingress -A -o wide 2>&1 | grep -iE "NAME|hanzo\.bot|app\.hanzo"
 
           echo ""
-          echo "=== 2. Patch playground ingress to use Traefik (gateway class) ==="
-          kubectl get ingress hanzo-playground -n hanzo -o jsonpath='{.spec.ingressClassName}' && echo ""
-          kubectl patch ingress hanzo-playground -n hanzo --type=json \
-            -p '[{"op":"replace","path":"/spec/ingressClassName","value":"gateway"}]' || echo "Ingress patch failed"
+          echo "=== Detailed ingress rules for hanzo.bot ==="
+          kubectl get ingress -n hanzo -o yaml 2>&1 | grep -B5 -A10 "hanzo\.bot"
 
           echo ""
-          echo "=== 3. Patch bot-gateway-ingress to use Traefik ==="
-          kubectl patch ingress bot-gateway-ingress -n hanzo --type=json \
-            -p '[{"op":"replace","path":"/spec/ingressClassName","value":"gateway"}]' 2>/dev/null || echo "bot-gateway-ingress patch skipped"
+          echo "=== All IngressRoutes (Traefik CRDs) ==="
+          kubectl get ingressroute -A 2>/dev/null || echo "No IngressRoute CRD"
+          kubectl get ingressroute -A -o yaml 2>/dev/null | grep -B5 -A15 "hanzo\.bot" || true
 
           echo ""
-          echo "=== 4. Restart playground to pick up new ConfigMap ==="
-          kubectl rollout restart deploy/hanzo-playground -n hanzo
-          kubectl rollout status deploy/hanzo-playground -n hanzo --timeout=120s || echo "Timed out"
+          echo "=== Check what Traefik sees for app.hanzo.bot ==="
+          kubectl get ingressroute -A -o yaml 2>/dev/null | grep -B5 -A15 "app\.hanzo" || echo "No app.hanzo.bot IngressRoute"
 
           echo ""
-          echo "=== 5. Check ingresses ==="
-          kubectl get ingress -n hanzo -o wide
+          echo "=== Bot hub deployment and service ==="
+          kubectl get deploy hanzo-bot-site -n hanzo
+          kubectl get svc hanzo-bot-site -n hanzo
 
           echo ""
-          echo "=== 6. Health check ==="
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/health" 2>&1 | head -5 || echo "Playground health failed"
+          echo "=== Direct test: app.hanzo.bot through ingress ==="
+          # Test from inside cluster what the bot-hub returns
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-bot-site/playground" 2>&1 | head -5 || echo "Bot site /playground failed"
 
           echo ""
-          echo "=== 7. Check gateway controlUi config ==="
-          kubectl exec -n hanzo deploy/bot-gateway -- cat /etc/bot/bot.json 2>&1 | head -30
+          echo "=== Test playground service directly ==="
+          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/" 2>&1 | head -10 || echo "Playground service failed"
 
           echo ""
-          echo "=== 8. Update bot-gateway ConfigMap with app.hanzo.bot origin ==="
-          cat <<'CMEOF' | kubectl apply -f -
-          apiVersion: v1
-          kind: ConfigMap
-          metadata:
-            name: bot-gateway-config
-            namespace: hanzo
-            labels:
-              app: bot-gateway
-          data:
-            bot.json: |
-              {
-                "canvasHost": {
-                  "liveReload": false
-                },
-                "agents": {
-                  "defaults": {
-                    "model": "hanzo/claude-sonnet-4-6"
-                  }
-                },
-                "gateway": {
-                  "trustedProxies": ["10.0.0.0/8", "172.16.0.0/12"],
-                  "auth": {
-                    "mode": "iam",
-                    "iam": {
-                      "serverUrl": "https://hanzo.id",
-                      "clientId": "hanzo-bot",
-                      "orgName": "hanzo",
-                      "appName": "hanzo-bot"
-                    }
-                  },
-                  "controlUi": {
-                    "allowedOrigins": ["https://hanzo.bot", "https://bot.hanzo.ai", "https://gw.hanzo.bot", "https://market.hanzo.bot", "https://app.hanzo.bot"],
-                    "allowInsecureAuth": true,
-                    "dangerouslyDisableDeviceAuth": true,
-                    "basePath": "/__bot__"
-                  },
-                  "nodes": {
-                    "allowCommands": ["chat.send", "chat.abort", "status.get", "exec.run", "exec.approve",
-                                 "session.checkpoint", "session.restore", "session.list"]
-                  },
-                  "marketplace": {
-                    "enabled": true,
-                    "platformFeePct": 20,
-                    "priceFraction": 0.6,
-                    "minPayoutCents": 1000,
-                    "aiTokenBonusPct": 10
-                  }
-                }
-              }
-          CMEOF
+          echo "=== Bot-gateway ConfigMap verify ==="
+          kubectl get configmap bot-gateway-config -n hanzo -o jsonpath='{.data.bot\.json}' 2>&1 | head -30
 
           echo ""
-          echo "=== 9. Restart bot-gateway to pick up ConfigMap ==="
-          kubectl rollout restart deploy/bot-gateway -n hanzo
-          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s || echo "Timed out"
-
-          echo ""
-          echo "=== 10. Final health checks ==="
-          sleep 5
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://bot-gateway:80/health" 2>&1 | head -5 || echo "Gateway health failed"
-          kubectl exec -n hanzo deploy/console -- wget -q -O - --timeout=5 "http://hanzo-playground:8080/api/v1/health" 2>&1 | head -5 || echo "Playground health failed"
+          echo "=== Gateway logs (last 5 lines) ==="
+          kubectl logs -n hanzo -l app=bot-gateway --tail=5 2>&1 | head -10
