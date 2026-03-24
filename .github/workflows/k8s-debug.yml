@@ -111,23 +111,26 @@ jobs:
             console.log('Has whitespace:', /\s/.test(key || ''));
             console.log('Has null bytes:', key?.includes('\0'));
 
-            // Try to actually call the real resolveEnvApiKey
-            try {
-              const { resolveEnvApiKey } = await import('./dist/agents/model-auth.js');
-              const result = resolveEnvApiKey('anthropic');
-              console.log('resolveEnvApiKey(anthropic):', JSON.stringify(result));
-            } catch(e) {
-              console.log('Cannot import resolveEnvApiKey:', e.message);
+            // Find the actual module path
+            const fs = require('fs');
+            const possiblePaths = ['/app/dist', '/app/build', '/app/lib', '/app/src', '/app'];
+            for (const p of possiblePaths) {
+              try {
+                const files = fs.readdirSync(p).slice(0, 10);
+                console.log(p + ':', files.join(', '));
+              } catch(e) { console.log(p + ': not found'); }
             }
-
-            // Try the actual resolveApiKeyForProvider
+            // Check if it's an ESM build
             try {
-              const { resolveApiKeyForProvider } = await import('./dist/agents/model-auth.js');
-              const result = await resolveApiKeyForProvider({ provider: 'anthropic' });
-              console.log('resolveApiKeyForProvider:', JSON.stringify({apiKey: result.apiKey?.substring(0,20), source: result.source}));
-            } catch(e) {
-              console.log('resolveApiKeyForProvider error:', e.message.substring(0, 200));
-            }
+              const pkg = JSON.parse(fs.readFileSync('/app/package.json', 'utf8'));
+              console.log('type:', pkg.type, 'main:', pkg.main);
+            } catch(e) { console.log('No package.json'); }
+            // Find model-auth
+            try {
+              const { execSync } = require('child_process');
+              const result = execSync('find /app -name model-auth.js -o -name model-auth.mjs 2>/dev/null | head -5').toString();
+              console.log('model-auth files:', result);
+            } catch(e) { console.log('find failed'); }
           " 2>&1 || echo "Node exec failed"
 
           echo ""
