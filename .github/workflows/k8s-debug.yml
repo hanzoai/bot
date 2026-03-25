@@ -152,6 +152,30 @@ jobs:
           echo "Gateway pods after fix:"
           kubectl get pods -n hanzo -l app=bot-gateway
           echo ""
+          echo "=== Remove TLS from gw.hanzo.bot ingress (Cloudflare handles TLS) ==="
+          kubectl apply -f - <<'GWEOF'
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: bot-gateway-ws
+            namespace: hanzo
+            labels:
+              app: bot-gateway
+          spec:
+            ingressClassName: gateway
+            rules:
+              - host: gw.hanzo.bot
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: bot-gateway
+                          port:
+                            number: 80
+          GWEOF
+          echo ""
           echo "=== Delete conflicting nginx ingresses and restart Traefik ==="
           # Delete old nginx-class bot-gateway ingress that conflicts
           for ing in bot-gateway; do
