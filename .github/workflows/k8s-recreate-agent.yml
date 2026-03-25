@@ -26,7 +26,8 @@ jobs:
           HANZO_KEY=$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.HANZO_API_KEY}' | base64 -d)
 
           echo "=== Create cloud-agent deployment with config + auth ==="
-          cat <<'YAML' | kubectl apply -f -
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          cat <<YAML | kubectl apply -f -
           apiVersion: apps/v1
           kind: Deployment
           metadata:
@@ -34,6 +35,8 @@ jobs:
             namespace: hanzo
             labels:
               app: cloud-agent
+            annotations:
+              deploy.hanzo.ai/last-recreated: "$TIMESTAMP"
           spec:
             replicas: 1
             selector:
@@ -43,6 +46,8 @@ jobs:
               metadata:
                 labels:
                   app: cloud-agent
+                annotations:
+                  deploy.hanzo.ai/image-refresh: "$TIMESTAMP"
               spec:
                 imagePullSecrets:
                   - name: ghcr-secret
