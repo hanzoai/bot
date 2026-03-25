@@ -152,7 +152,7 @@ jobs:
           echo "Gateway pods after fix:"
           kubectl get pods -n hanzo -l app=bot-gateway
           echo ""
-          echo "=== Restore TLS on gw.hanzo.bot ingress (CF full mode needs HTTPS on origin) ==="
+          echo "=== Apply gw.hanzo.bot ingress without TLS (CF flexible mode) ==="
           kubectl apply -f - <<'GWEOF'
           apiVersion: networking.k8s.io/v1
           kind: Ingress
@@ -161,14 +161,8 @@ jobs:
             namespace: hanzo
             labels:
               app: bot-gateway
-            annotations:
-              cert-manager.io/cluster-issuer: letsencrypt-prod
           spec:
             ingressClassName: gateway
-            tls:
-              - hosts:
-                  - gw.hanzo.bot
-                secretName: gw-hanzo-bot-tls
             rules:
               - host: gw.hanzo.bot
                 http:
