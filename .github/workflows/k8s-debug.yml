@@ -5,6 +5,7 @@ permissions:
   contents: read
 env:
   HANZO_CLUSTER_ID: 1a153000-90a6-48ad-9375-7ef901a9bf7f
+  GH_TOKEN: ${{ secrets.GH_PAT }}
 jobs:
   debug:
     runs-on: ubuntu-latest
@@ -137,11 +138,25 @@ jobs:
           " 2>&1 || echo "Auth write failed"
 
           echo ""
-          echo "===== 17. Add ANTHROPIC_API_KEY to bot-gateway and restart ==="
-          kubectl set env deploy/bot-gateway -n hanzo -c bot-gateway \
-            ANTHROPIC_API_KEY="$(kubectl get secret bot-secrets -n hanzo -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d)"
-          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s || true
-          echo "Gateway updated with ANTHROPIC_API_KEY"
+          echo "===== 17. Delete and recreate bot-gateway from universe manifests ==="
+          kubectl delete deploy/bot-gateway -n hanzo --wait=true 2>/dev/null || true
+          sleep 5
+
+          # Apply fresh from universe (checkout sparse)
+          git clone --depth=1 --filter=blob:none --sparse https://$GH_TOKEN@github.com/hanzoai/universe.git /tmp/universe 2>/dev/null
+          cd /tmp/universe && git sparse-checkout set infra/k8s/bot && cd -
+          kubectl apply -f /tmp/universe/infra/k8s/bot/deployment.yaml
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=180s || true
+
+          echo "=== Gateway pods ==="
+          kubectl get pods -n hanzo -l app=bot-gateway -o wide
+
+          echo "=== Gateway health ==="
+          sleep 10
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/health 2>/dev/null || echo "Not healthy yet"
+
+          echo "=== ANTHROPIC_API_KEY check ==="
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- node -e "console.log('ANTHROPIC_API_KEY length:', (process.env.ANTHROPIC_API_KEY||'').length)" 2>/dev/null || echo "Cannot check"
 
           echo ""
           echo "===== 18. Playground provisioned pods ====="
