@@ -138,7 +138,22 @@ jobs:
           " 2>&1 || echo "Auth write failed"
 
           echo ""
-          echo "===== 17. Delete and recreate bot-gateway from universe manifests ==="
+          echo "===== 17. Restart Traefik ingress and delete conflicting nginx ingresses ==="
+          # Delete old nginx-class bot-gateway ingress that conflicts
+          for ing in bot-gateway; do
+            CLASS=$(kubectl get ingress -n hanzo "$ing" -o jsonpath='{.spec.ingressClassName}' 2>/dev/null || echo "")
+            if [ "$CLASS" = "ingress" ] || [ -z "$CLASS" ]; then
+              echo "Deleting conflicting ingress $ing (class=$CLASS)"
+              kubectl delete ingress -n hanzo "$ing" --wait=false 2>/dev/null || true
+            fi
+          done
+          # Restart Traefik to pick up route changes
+          kubectl rollout restart daemonset/hanzo-ingress -n hanzo 2>/dev/null || true
+          sleep 15
+          echo "Traefik restarted"
+
+          echo ""
+          echo "===== 18. SKIP gateway recreate (already done) ==="
           kubectl delete deploy/bot-gateway -n hanzo --wait=true 2>/dev/null || true
           sleep 5
 
