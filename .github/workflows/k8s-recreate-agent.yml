@@ -76,15 +76,13 @@ jobs:
                   - name: cloud-agent
                     image: ghcr.io/hanzoai/bot:latest
                     imagePullPolicy: Always
-                    command: ["node", "hanzo-bot.mjs", "gateway", "--allow-unconfigured", "--bind", "lan"]
+                    command: ["node", "hanzo-bot.mjs", "node", "run", "--host", "bot-gateway.hanzo.svc", "--port", "18789", "--name", "cloud-agent-default"]
                     env:
                       - name: HOME
                         value: /home/node
                       - name: NODE_ENV
                         value: production
-                      - name: BOT_CONFIG_PATH
-                        value: /etc/bot/bot.json
-                      - name: BOT_GATEWAY_TOKEN
+                      - name: OPENCLAW_GATEWAY_TOKEN
                         valueFrom:
                           secretKeyRef:
                             name: bot-secrets
@@ -109,9 +107,6 @@ jobs:
                       - name: OPERATIVE_URL
                         value: http://localhost:8501
                     volumeMounts:
-                      - name: bot-config
-                        mountPath: /etc/bot/bot.json
-                        subPath: bot.json
                       - name: openclaw-state
                         mountPath: /home/node/.openclaw
                     resources:
@@ -155,9 +150,6 @@ jobs:
                         memory: 4Gi
                         cpu: "2"
                 volumes:
-                  - name: bot-config
-                    configMap:
-                      name: bot-gateway-config
                   - name: openclaw-state
                     emptyDir: {}
           YAML
