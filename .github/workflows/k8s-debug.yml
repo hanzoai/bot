@@ -152,18 +152,19 @@ jobs:
           echo "Gateway pods after fix:"
           kubectl get pods -n hanzo -l app=bot-gateway
           echo ""
-          echo "=== Create self-signed TLS cert for gw.hanzo.bot ==="
-          # Generate self-signed cert if secret doesn't exist
-          if ! kubectl get secret gw-hanzo-bot-tls -n hanzo > /dev/null 2>&1; then
-            openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-              -keyout /tmp/tls.key -out /tmp/tls.crt \
-              -subj "/CN=gw.hanzo.bot" 2>/dev/null
-            kubectl create secret tls gw-hanzo-bot-tls -n hanzo \
-              --cert=/tmp/tls.crt --key=/tmp/tls.key 2>/dev/null || true
-            echo "Created self-signed cert"
-          else
-            echo "Cert already exists"
-          fi
+          echo "=== Nuclear fix: delete and recreate gw.hanzo.bot cert + ingress ==="
+          kubectl delete secret gw-hanzo-bot-tls -n hanzo 2>/dev/null || true
+          kubectl delete ingress bot-gateway-ws -n hanzo 2>/dev/null || true
+          kubectl delete certificate gw-hanzo-bot-tls -n hanzo 2>/dev/null || true
+          sleep 5
+
+          # Create fresh self-signed cert
+          openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout /tmp/tls.key -out /tmp/tls.crt \
+            -subj "/CN=gw.hanzo.bot" -addext "subjectAltName=DNS:gw.hanzo.bot" 2>/dev/null
+          kubectl create secret tls gw-hanzo-bot-tls -n hanzo \
+            --cert=/tmp/tls.crt --key=/tmp/tls.key
+          echo "Created fresh self-signed cert"
 
           echo "=== Apply gw.hanzo.bot ingress with TLS ==="
           kubectl apply -f - <<'GWEOF'
