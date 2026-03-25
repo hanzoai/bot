@@ -1,17 +1,17 @@
 import { randomUUID } from "node:crypto";
 import type { loadConfig } from "../config/config.js";
+import { loadBotPlugins } from "../plugins/loader.js";
+import { getPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
+import { GATEWAY_CLIENT_IDS, GATEWAY_CLIENT_MODES } from "./protocol/client-info.js";
 import type { ErrorShape } from "./protocol/index.js";
+import { PROTOCOL_VERSION } from "./protocol/index.js";
+import { handleGatewayRequest } from "./server-methods.js";
 import type {
   GatewayRequestContext,
   GatewayRequestHandler,
   GatewayRequestOptions,
 } from "./server-methods/types.js";
-import { loadBotPlugins } from "../plugins/loader.js";
-import { getPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.js";
-import { GATEWAY_CLIENT_IDS, GATEWAY_CLIENT_MODES } from "./protocol/client-info.js";
-import { PROTOCOL_VERSION } from "./protocol/index.js";
-import { handleGatewayRequest } from "./server-methods.js";
 
 // ── Fallback gateway context for non-WS paths (Telegram, WhatsApp, etc.) ──
 // The WS path sets a per-request scope via AsyncLocalStorage, but channel
@@ -41,7 +41,6 @@ const fallbackGatewayContextState = (() => {
 })();
 
 export function setFallbackGatewayContext(ctx: GatewayRequestContext): void {
-  // TODO: This startup snapshot can become stale if runtime config/context changes.
   fallbackGatewayContextState.context = ctx;
 }
 
