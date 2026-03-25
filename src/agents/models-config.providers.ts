@@ -198,6 +198,21 @@ const NVIDIA_DEFAULT_COST = {
   cacheWrite: 0,
 };
 
+/**
+ * Hanzo LLM Gateway — OpenAI-compatible proxy at api.hanzo.ai that routes to
+ * 100+ providers.  All model calls should go through the gateway by default so
+ * billing, o11y and rate-limiting are enforced centrally.
+ *
+ * The gateway accepts model IDs like "claude-sonnet-4-6" or with a provider
+ * prefix "anthropic/claude-sonnet-4-6" — both forms work.
+ */
+export const HANZO_BASE_URL =
+  process.env.LLM_BASE_URL?.trim() ||
+  process.env.HANZO_LLM_URL?.trim() ||
+  "https://api.hanzo.ai/v1";
+const HANZO_DEFAULT_CONTEXT_WINDOW = 200_000;
+const HANZO_DEFAULT_MAX_TOKENS = 8192;
+
 const log = createSubsystemLogger("agents/model-providers");
 
 interface OllamaModel {
@@ -904,6 +919,40 @@ export function buildNvidiaProvider(): ProviderConfig {
   };
 }
 
+/**
+ * Build the Hanzo LLM Gateway provider config.
+ *
+ * The gateway is an OpenAI-compatible proxy. Model IDs are passed through
+ * as-is (e.g. "claude-sonnet-4-6", "gpt-5.4").  No static model catalog is
+ * needed because the gateway routes any supported model.
+ */
+export function buildHanzoProvider(): ProviderConfig {
+  return {
+    baseUrl: HANZO_BASE_URL,
+    api: "openai-responses",
+    models: [
+      {
+        id: "claude-sonnet-4-6",
+        name: "Claude Sonnet 4.6 (via Hanzo Gateway)",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: HANZO_DEFAULT_CONTEXT_WINDOW,
+        maxTokens: HANZO_DEFAULT_MAX_TOKENS,
+      },
+      {
+        id: "claude-opus-4-6",
+        name: "Claude Opus 4.6 (via Hanzo Gateway)",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: HANZO_DEFAULT_CONTEXT_WINDOW,
+        maxTokens: HANZO_DEFAULT_MAX_TOKENS,
+      },
+    ],
+  };
+}
+
 export function buildKilocodeProvider(): ProviderConfig {
   return {
     baseUrl: KILOCODE_BASE_URL,
@@ -1134,6 +1183,15 @@ export async function resolveImplicitProviders(params: {
     resolveApiKeyFromProfiles({ provider: "kilocode", store: authStore });
   if (kilocodeKey) {
     providers.kilocode = { ...buildKilocodeProvider(), apiKey: kilocodeKey };
+  }
+
+  // Hanzo LLM Gateway — routes ALL model calls through api.hanzo.ai for
+  // centralized billing, observability and rate-limiting.
+  const hanzoKey =
+    resolveEnvApiKeyVarName("hanzo") ??
+    resolveApiKeyFromProfiles({ provider: "hanzo", store: authStore });
+  if (hanzoKey) {
+    providers.hanzo = { ...buildHanzoProvider(), apiKey: hanzoKey };
   }
 
   return providers;
