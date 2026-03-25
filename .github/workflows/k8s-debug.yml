@@ -137,6 +137,12 @@ jobs:
           " 2>&1 || echo "Auth write failed"
 
           echo ""
-          echo "===== 17. Playground provisioned pods ====="
+          echo "===== 17. Restart bot-gateway to pick up new image ==="
+          kubectl rollout restart deploy/bot-gateway -n hanzo
+          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=120s || true
+          echo "Gateway restarted"
+
+          echo ""
+          echo "===== 18. Playground provisioned pods ====="
           kubectl get pods -n hanzo -l 'app.kubernetes.io/managed-by=hanzo-playground' -o wide 2>/dev/null || true
           kubectl get pods -n hanzo | grep -E 'cloud-|agent-cloud' || true
