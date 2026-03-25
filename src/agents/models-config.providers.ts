@@ -931,9 +931,29 @@ export function buildHanzoProvider(): ProviderConfig {
     baseUrl: HANZO_BASE_URL,
     api: "openai-responses",
     models: [
+      // Zen models (Hanzo's own frontier models)
+      {
+        id: "zen4.1",
+        name: "Zen 4.1",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: HANZO_DEFAULT_CONTEXT_WINDOW,
+        maxTokens: HANZO_DEFAULT_MAX_TOKENS,
+      },
+      {
+        id: "zen4-pro",
+        name: "Zen 4 Pro",
+        reasoning: true,
+        input: ["text", "image"],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: HANZO_DEFAULT_CONTEXT_WINDOW,
+        maxTokens: HANZO_DEFAULT_MAX_TOKENS,
+      },
+      // Third-party models routed through gateway
       {
         id: "claude-sonnet-4-6",
-        name: "Claude Sonnet 4.6 (via Hanzo Gateway)",
+        name: "Claude Sonnet 4.6",
         reasoning: true,
         input: ["text", "image"],
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -942,7 +962,7 @@ export function buildHanzoProvider(): ProviderConfig {
       },
       {
         id: "claude-opus-4-6",
-        name: "Claude Opus 4.6 (via Hanzo Gateway)",
+        name: "Claude Opus 4.6",
         reasoning: true,
         input: ["text", "image"],
         cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
@@ -1191,7 +1211,10 @@ export async function resolveImplicitProviders(params: {
     resolveEnvApiKeyVarName("hanzo") ??
     resolveApiKeyFromProfiles({ provider: "hanzo", store: authStore });
   if (hanzoKey) {
-    providers.hanzo = { ...buildHanzoProvider(), apiKey: hanzoKey };
+    const hanzoProvider = { ...buildHanzoProvider(), apiKey: hanzoKey };
+    providers.hanzo = hanzoProvider;
+    // zen/* is an alias for hanzo/* — Zen models route through the same gateway
+    providers.zen = hanzoProvider;
   }
 
   return providers;

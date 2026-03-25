@@ -164,7 +164,7 @@ export function resolveModelWithRegistry(params: {
   // Hanzo LLM Gateway is an OpenAI-compatible proxy at api.hanzo.ai that
   // routes to 100+ providers. Any model ID is accepted — the gateway handles
   // provider routing internally.
-  if (normalizedProvider === "hanzo") {
+  if (normalizedProvider === "hanzo" || normalizedProvider === "zen") {
     return normalizeModelCompat({
       id: modelId,
       name: modelId,
