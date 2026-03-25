@@ -263,6 +263,10 @@ export async function resolveApiKeyForProvider(params: {
     openai: "OPENAI_API_KEY",
   };
   const lastResortEnvVar = lastResortEnvMap[normalized];
+  // eslint-disable-next-line no-console
+  console.error(
+    `[auth-debug] provider=${provider} normalized=${normalized} envVar=${lastResortEnvVar} hasValue=${!!process.env[lastResortEnvVar ?? ""]} length=${(process.env[lastResortEnvVar ?? ""] ?? "").length}`,
+  );
   if (lastResortEnvVar) {
     const rawValue = process.env[lastResortEnvVar];
     if (rawValue && rawValue.trim()) {
