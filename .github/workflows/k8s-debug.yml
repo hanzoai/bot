@@ -16,158 +16,63 @@ jobs:
           token: ${{ secrets.DO_API_TOKEN }}
       - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
 
-      - name: Full bot stack diagnostic
+      - name: Diagnose and fix bot stack
         run: |
-          echo "===== 1. All bot-related deployments ====="
-          kubectl get deploy -n hanzo bot-gateway operative cloud-agent hanzo-playground -o wide 2>/dev/null || true
+          set -x
+
+          echo "===== 1. Playground deployment env vars ====="
+          kubectl get deploy/hanzo-playground -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' 2>/dev/null | grep -E '(CLOUD|K8S|ANTHROPIC|GATEWAY|ENABLED)' || echo "No matching env vars"
+          echo ""
+          kubectl get deploy/hanzo-playground -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].envFrom[*]}{.secretRef.name}{"\n"}{end}' 2>/dev/null || true
 
           echo ""
-          echo "===== 2. All bot-related pods ====="
-          kubectl get pods -n hanzo -l 'app in (bot-gateway,operative,cloud-agent,hanzo-playground)' -o wide 2>/dev/null || true
+          echo "===== 2. Playground logs (last 50) ====="
+          kubectl logs -n hanzo deploy/hanzo-playground --tail=50 2>/dev/null || echo "No logs"
 
           echo ""
-          echo "===== 3. All bot-related services ====="
-          kubectl get svc -n hanzo bot-gateway operative hanzo-playground -o wide 2>/dev/null || true
+          echo "===== 3. All cloud/agent pods ====="
+          kubectl get pods -n hanzo | grep -E 'cloud-|agent-|playground' || echo "None found"
 
           echo ""
-          echo "===== 4. All ingresses ====="
-          kubectl get ingress -n hanzo -o wide 2>/dev/null || true
+          echo "===== 4. Bot gateway status ====="
+          kubectl get pods -n hanzo -l app=bot-gateway -o wide 2>/dev/null || true
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/health 2>/dev/null || echo "Not healthy"
 
           echo ""
-          echo "===== 5. Bot gateway logs (last 30) ====="
-          kubectl logs -n hanzo deploy/bot-gateway -c bot-gateway --tail=30 2>/dev/null || echo "No logs"
+          echo "===== 5. Gateway node registry ====="
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | python3 -m json.tool 2>/dev/null | head -50 || echo "Cannot get"
 
           echo ""
-          echo "===== 6. Cloud-agent logs (last 20) ====="
-          kubectl logs -n hanzo deploy/cloud-agent -c cloud-agent --tail=20 2>/dev/null || echo "No logs"
+          echo "===== 6. All ingresses for bot domains ====="
+          kubectl get ingress -n hanzo -o custom-columns='NAME:.metadata.name,CLASS:.spec.ingressClassName,HOSTS:.spec.rules[*].host' | grep -E 'bot|gw|NAME' || true
 
           echo ""
-          echo "===== 7. Playground logs (last 20) ====="
-          kubectl logs -n hanzo deploy/hanzo-playground --tail=20 2>/dev/null || echo "No logs"
+          echo "===== 7. Fix: Delete conflicting nginx bot-gateway ingress ====="
+          # The universe deployment.yaml creates an ingress with ingressClassName: ingress (nginx)
+          # which conflicts with our Traefik bot-gateway-ws ingress
+          CLASS=$(kubectl get ingress -n hanzo bot-gateway -o jsonpath='{.spec.ingressClassName}' 2>/dev/null || echo "")
+          if [ -n "$CLASS" ]; then
+            echo "Found bot-gateway ingress with class=$CLASS - deleting it"
+            kubectl delete ingress -n hanzo bot-gateway 2>/dev/null || true
+          fi
 
           echo ""
-          echo "===== 8. Gateway env ====="
-          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- env 2>/dev/null | grep -E '^(BOT_|HANZO_|NODE_|PLAYGROUND_|OPERATIVE_|KV_)' | sort || true
-
-          echo ""
-          echo "===== 9. Cloud-agent env ====="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- env 2>/dev/null | grep -E '^(ANTHROPIC_|HANZO_|GATEWAY_|BOT_|HOME)' | sort || true
-          echo ""
-          echo "===== 9b. Cloud-agent auth test ====="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- node -e "
-            console.log('ANTHROPIC_API_KEY set:', !!process.env.ANTHROPIC_API_KEY, 'length:', (process.env.ANTHROPIC_API_KEY||'').length);
-            console.log('HANZO_API_KEY set:', !!process.env.HANZO_API_KEY, 'length:', (process.env.HANZO_API_KEY||'').length);
-            console.log('HOME:', process.env.HOME);
-            const fs = require('fs');
-            const authDir = '/home/node/.openclaw/agent';
-            try {
-              const files = fs.readdirSync(authDir);
-              console.log('Auth dir files:', files);
-              const ap = fs.readFileSync(authDir + '/auth-profiles.json', 'utf8');
-              console.log('auth-profiles.json:', ap.substring(0,300));
-            } catch(e) { console.log('Auth dir error:', e.message); }
-          " 2>&1 || true
-
-          echo ""
-          echo "===== 10. Gateway health ====="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- curl -s http://bot-gateway:80/health 2>/dev/null || echo "Cannot reach"
-
-          echo ""
-          echo "===== 11. Internal WS test ====="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- timeout 5 node -e "
-            const ws = new (require('ws'))('ws://bot-gateway:80/');
-            ws.on('open', () => { console.log('WS OPEN'); ws.close(); process.exit(0); });
-            ws.on('error', e => { console.log('WS ERROR:', e.message); process.exit(1); });
-            setTimeout(() => { console.log('WS TIMEOUT'); process.exit(1); }, 4000);
-          " 2>&1 || echo "WS test failed"
-
-          echo ""
-          echo "===== 12. gw.hanzo.bot ingress ====="
-          kubectl get ingress -n hanzo bot-gateway-ws -o yaml 2>/dev/null || echo "NOT FOUND"
-
-          echo ""
-          echo "===== 13. ConfigMap ====="
-          kubectl get cm -n hanzo bot-gateway-config -o jsonpath='{.data.bot\.json}' 2>/dev/null | python3 -m json.tool 2>/dev/null || echo "Cannot read"
-
-          echo ""
-          echo "===== 14. Secrets keys ====="
-          echo -n "bot-secrets: " && kubectl get secret -n hanzo bot-secrets -o jsonpath='{.data}' 2>/dev/null | python3 -c "import sys,json; print(' '.join(json.loads(sys.stdin.read()).keys()))" 2>/dev/null || echo "n/a"
-          echo -n "playground-secrets: " && kubectl get secret -n hanzo playground-secrets -o jsonpath='{.data}' 2>/dev/null | python3 -c "import sys,json; print(' '.join(json.loads(sys.stdin.read()).keys()))" 2>/dev/null || echo "n/a"
-
-          echo ""
-          echo "===== 15. Node registry ====="
-          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/__bot__/api/v1/nodes 2>/dev/null | head -200 || echo "Cannot get"
-
-          echo ""
-          echo "===== 16. Fix cloud-agent: restore command, add config volume, write auth ====="
-
-          # 1. Restore original gateway command and add config volume mount
-          kubectl patch deploy/cloud-agent -n hanzo --type=strategic -p '{"spec":{"template":{"spec":{"volumes":[{"name":"bot-config","configMap":{"name":"bot-gateway-config"}}],"containers":[{"name":"cloud-agent","command":["node","hanzo-bot.mjs","gateway","--allow-unconfigured","--bind","lan"],"volumeMounts":[{"name":"bot-config","mountPath":"/etc/bot/bot.json","subPath":"bot.json"}]}]}}}}' 2>&1 || echo "Patch failed"
-
-          echo "=== Wait for rollout ==="
-          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || true
-
-          # 2. Write auth-profiles into ALL agent dirs in the running pod
-          sleep 15
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- node -e "
-            const fs=require('fs');
-            const path=require('path');
-            const baseDir='/home/node/.openclaw/agents';
-            const p={version:1,profiles:{'anthropic:default':{type:'api_key',provider:'anthropic',key:process.env.ANTHROPIC_API_KEY},'hanzo:default':{type:'api_key',provider:'hanzo',key:process.env.HANZO_API_KEY}},default:'anthropic:default'};
-            const json=JSON.stringify(p);
-
-            // Write to main/agent
-            const mainDir=path.join(baseDir,'main','agent');
-            fs.mkdirSync(mainDir,{recursive:true});
-            fs.writeFileSync(path.join(mainDir,'auth-profiles.json'),json);
-            console.log('Written to',mainDir);
-
-            // Write to ALL existing per-agent dirs
-            if(fs.existsSync(baseDir)){
-              for(const entry of fs.readdirSync(baseDir)){
-                const agentDir=path.join(baseDir,entry,'agent');
-                if(fs.existsSync(agentDir)&&fs.statSync(agentDir).isDirectory()){
-                  fs.writeFileSync(path.join(agentDir,'auth-profiles.json'),json);
-                  console.log('Written to',agentDir);
-                }
-              }
-            }
-            console.log('ANTHROPIC key length:',process.env.ANTHROPIC_API_KEY?.length);
-            const {execSync}=require('child_process');
-            console.log(execSync('find /home/node/.openclaw -name auth-profiles.json').toString().trim());
-          " 2>&1 || echo "Auth write failed"
-
-          echo ""
-          echo "===== 17. Fix bot-gateway: scale to 1, delete bad pods, restart Traefik ==="
-          kubectl scale deploy/bot-gateway -n hanzo --replicas=1
-          sleep 5
-          # Delete any non-ready gateway pods
-          kubectl get pods -n hanzo -l app=bot-gateway --no-headers | while read name ready status rest; do
-            if [ "$ready" != "1/1" ]; then
-              echo "Deleting non-ready: $name ($status)"
-              kubectl delete pod -n hanzo "$name" --grace-period=0 --force 2>/dev/null || true
-            fi
-          done
-          sleep 5
-          echo "Gateway pods after fix:"
-          kubectl get pods -n hanzo -l app=bot-gateway
-          echo ""
-          echo "=== Nuclear fix: delete and recreate gw.hanzo.bot cert + ingress ==="
+          echo "===== 8. Fix: Ensure gw.hanzo.bot TLS ingress exists ====="
+          # Delete any stale cert/ingress and recreate
           kubectl delete secret gw-hanzo-bot-tls -n hanzo 2>/dev/null || true
           kubectl delete ingress bot-gateway-ws -n hanzo 2>/dev/null || true
-          kubectl delete certificate gw-hanzo-bot-tls -n hanzo 2>/dev/null || true
-          sleep 5
+          sleep 3
 
-          # Create fresh self-signed cert
+          # Self-signed cert for Traefik TLS termination
           openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
             -keyout /tmp/tls.key -out /tmp/tls.crt \
             -subj "/CN=gw.hanzo.bot" -addext "subjectAltName=DNS:gw.hanzo.bot" 2>/dev/null
           kubectl create secret tls gw-hanzo-bot-tls -n hanzo \
             --cert=/tmp/tls.crt --key=/tmp/tls.key
-          echo "Created fresh self-signed cert"
+          echo "Created self-signed TLS cert"
 
-          echo "=== Apply gw.hanzo.bot ingress with TLS ==="
-          kubectl apply -f - <<'GWEOF'
+          # Create Traefik ingress
+          cat <<'EOF' | kubectl apply -f -
           apiVersion: networking.k8s.io/v1
           kind: Ingress
           metadata:
@@ -175,6 +80,8 @@ jobs:
             namespace: hanzo
             labels:
               app: bot-gateway
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
           spec:
             ingressClassName: gateway
             tls:
@@ -192,44 +99,97 @@ jobs:
                           name: bot-gateway
                           port:
                             number: 80
-          GWEOF
+          EOF
+          echo "Applied gw.hanzo.bot Traefik ingress"
+
           echo ""
-          echo "=== Delete conflicting nginx ingresses and restart Traefik ==="
-          # Delete old nginx-class bot-gateway ingress that conflicts
-          for ing in bot-gateway; do
-            CLASS=$(kubectl get ingress -n hanzo "$ing" -o jsonpath='{.spec.ingressClassName}' 2>/dev/null || echo "")
-            if [ "$CLASS" = "ingress" ] || [ -z "$CLASS" ]; then
-              echo "Deleting conflicting ingress $ing (class=$CLASS)"
-              kubectl delete ingress -n hanzo "$ing" --wait=false 2>/dev/null || true
-            fi
-          done
-          # Restart Traefik to pick up route changes
+          echo "===== 9. Fix: Enable cloud provisioning on playground ====="
+          # Check if playground has the cloud env vars
+          HAS_CLOUD=$(kubectl get deploy/hanzo-playground -n hanzo -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}{"\n"}{end}' | grep -c 'CLOUD_ENABLED' || echo "0")
+          if [ "$HAS_CLOUD" = "0" ]; then
+            echo "Cloud provisioning NOT configured on playground. Adding env vars..."
+            # Get ANTHROPIC_API_KEY from bot-secrets
+            ANTHRO_KEY=$(kubectl get secret -n hanzo bot-secrets -o jsonpath='{.data.ANTHROPIC_API_KEY}' | base64 -d 2>/dev/null || echo "")
+            GW_TOKEN=$(kubectl get secret -n hanzo bot-secrets -o jsonpath='{.data.BOT_GATEWAY_TOKEN}' | base64 -d 2>/dev/null || echo "")
+
+            kubectl set env deploy/hanzo-playground -n hanzo \
+              HANZO_PLAYGROUND_CLOUD_ENABLED=true \
+              HANZO_PLAYGROUND_CLOUD_K8S_ENABLED=true \
+              HANZO_PLAYGROUND_CLOUD_K8S_NAMESPACE=hanzo \
+              HANZO_PLAYGROUND_CLOUD_K8S_AGENT_IMAGE=ghcr.io/hanzoai/bot:main \
+              HANZO_PLAYGROUND_CLOUD_K8S_IMAGE_PULL_SECRET=ghcr-secret \
+              HANZO_PLAYGROUND_CLOUD_K8S_OPERATIVE_ENABLED=true \
+              HANZO_PLAYGROUND_CLOUD_K8S_OPERATIVE_IMAGE=ghcr.io/hanzoai/operative:latest \
+              HANZO_PLAYGROUND_CLOUD_GATEWAY_URL=ws://bot-gateway.hanzo.svc:80 \
+              HANZO_PLAYGROUND_CLOUD_GATEWAY_TOKEN="$GW_TOKEN" \
+              ANTHROPIC_API_KEY="$ANTHRO_KEY" \
+              2>&1 || echo "Failed to set env"
+            echo "Waiting for playground rollout..."
+            kubectl rollout status deploy/hanzo-playground -n hanzo --timeout=120s || true
+          else
+            echo "Cloud provisioning already configured"
+          fi
+
+          echo ""
+          echo "===== 10. Fix: Create ServiceAccount + RBAC for playground pod provisioning ====="
+          cat <<'EOF' | kubectl apply -f -
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: playground-agent
+            namespace: hanzo
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: Role
+          metadata:
+            name: playground-agent-role
+            namespace: hanzo
+          rules:
+            - apiGroups: [""]
+              resources: ["pods", "pods/log"]
+              verbs: ["get", "list", "create", "delete", "watch"]
+            - apiGroups: [""]
+              resources: ["secrets"]
+              verbs: ["get"]
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: RoleBinding
+          metadata:
+            name: playground-agent-binding
+            namespace: hanzo
+          subjects:
+            - kind: ServiceAccount
+              name: playground-agent
+              namespace: hanzo
+          roleRef:
+            kind: Role
+            name: playground-agent-role
+            apiGroup: rbac.authorization.k8s.io
+          EOF
+          echo "RBAC configured"
+
+          # Ensure playground deployment uses this service account
+          kubectl patch deploy/hanzo-playground -n hanzo --type=json \
+            -p='[{"op":"add","path":"/spec/template/spec/serviceAccountName","value":"playground-agent"}]' 2>/dev/null || true
+          kubectl rollout status deploy/hanzo-playground -n hanzo --timeout=120s 2>/dev/null || true
+
+          echo ""
+          echo "===== 11. Restart Traefik ====="
           kubectl rollout restart daemonset/hanzo-ingress -n hanzo 2>/dev/null || true
           sleep 15
           echo "Traefik restarted"
 
           echo ""
-          echo "===== 18. SKIP gateway recreate (already done) ==="
-          kubectl delete deploy/bot-gateway -n hanzo --wait=true 2>/dev/null || true
-          sleep 5
-
-          # Apply fresh from universe (checkout sparse)
-          git clone --depth=1 --filter=blob:none --sparse https://$GH_TOKEN@github.com/hanzoai/universe.git /tmp/universe 2>/dev/null
-          cd /tmp/universe && git sparse-checkout set infra/k8s/bot && cd -
-          kubectl apply -f /tmp/universe/infra/k8s/bot/deployment.yaml
-          kubectl rollout status deploy/bot-gateway -n hanzo --timeout=180s || true
-
-          echo "=== Gateway pods ==="
-          kubectl get pods -n hanzo -l app=bot-gateway -o wide
-
-          echo "=== Gateway health ==="
-          sleep 10
-          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/health 2>/dev/null || echo "Not healthy yet"
-
-          echo "=== ANTHROPIC_API_KEY check ==="
-          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- node -e "console.log('ANTHROPIC_API_KEY length:', (process.env.ANTHROPIC_API_KEY||'').length)" 2>/dev/null || echo "Cannot check"
-
-          echo ""
-          echo "===== 18. Playground provisioned pods ====="
-          kubectl get pods -n hanzo -l 'app.kubernetes.io/managed-by=hanzo-playground' -o wide 2>/dev/null || true
-          kubectl get pods -n hanzo | grep -E 'cloud-|agent-cloud' || true
+          echo "===== 12. Final verification ====="
+          echo "--- Playground pod ---"
+          kubectl get pods -n hanzo -l app=hanzo-playground -o wide
+          echo "--- Playground env (cloud) ---"
+          kubectl exec -n hanzo deploy/hanzo-playground -- env 2>/dev/null | grep -E '(CLOUD|K8S|ANTHROPIC|GATEWAY)' | sort || true
+          echo "--- Gateway ingresses ---"
+          kubectl get ingress -n hanzo -o custom-columns='NAME:.metadata.name,CLASS:.spec.ingressClassName,HOSTS:.spec.rules[*].host' | grep -E 'bot|gw|NAME'
+          echo "--- Gateway health ---"
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/health 2>/dev/null || echo "Not healthy"
+          echo "--- Playground health ---"
+          kubectl exec -n hanzo deploy/hanzo-playground -- curl -s http://localhost:18788/health 2>/dev/null || echo "Not healthy"
+          echo "--- Playground logs (last 10) ---"
+          kubectl logs -n hanzo deploy/hanzo-playground --tail=10 2>/dev/null || true
