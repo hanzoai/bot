@@ -1,0 +1,88 @@
+name: Create IAM App
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  HANZO_CLUSTER_ID: 1a153000-90a6-48ad-9375-7ef901a9bf7f
+jobs:
+  create-app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+      - run: doctl kubernetes cluster kubeconfig save "$HANZO_CLUSTER_ID"
+
+      - name: Create app-kms in IAM database
+        run: |
+          echo "=== Finding IAM pod ==="
+          IAM_POD=$(kubectl get pods -n hanzo -l app=iam --no-headers | awk '{print $1}' | head -1)
+          echo "IAM pod: $IAM_POD"
+
+          if [ -z "$IAM_POD" ]; then
+            echo "No IAM pod found, trying deploy/iam"
+            IAM_POD=$(kubectl get pods -n hanzo | grep iam | awk '{print $1}' | head -1)
+            echo "Found: $IAM_POD"
+          fi
+
+          echo "=== Check current apps ==="
+          # Check if IAM uses postgres or sqlite
+          DB_TYPE=$(kubectl exec -n hanzo "$IAM_POD" -- env 2>/dev/null | grep -i 'DB_' | head -5)
+          echo "DB env: $DB_TYPE"
+
+          echo "=== Create app-kms via IAM API (internal) ==="
+          # Use the internal IAM API to create the app
+          kubectl exec -n hanzo "$IAM_POD" -- sh -c '
+            # Try to create app-kms via the IAM API from inside the pod
+            curl -s http://localhost:8000/api/add-application -X POST \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"owner\": \"admin\",
+                \"name\": \"app-kms\",
+                \"displayName\": \"Hanzo KMS\",
+                \"organization\": \"hanzo\",
+                \"homepageUrl\": \"https://kms.hanzo.ai\",
+                \"description\": \"Hanzo Key Management Service\",
+                \"logo\": \"https://cdn.hanzo.ai/img/logo-white.svg\",
+                \"cert\": \"cert-hanzo\",
+                \"enablePassword\": true,
+                \"enableSignUp\": true,
+                \"enableSigninSession\": true,
+                \"enableCodeSignin\": true,
+                \"enableWebAuthn\": true,
+                \"grantTypes\": [\"authorization_code\", \"refresh_token\"],
+                \"responseTypes\": [\"code\", \"token\", \"id_token\"],
+                \"clientId\": \"hanzo-kms-client-id\",
+                \"clientSecret\": \"hanzo-kms-client-secret\",
+                \"redirectUris\": [
+                  \"https://kms.hanzo.ai/api/v1/sso/oidc/callback\",
+                  \"https://stg.kms.hanzo.ai/api/v1/sso/oidc/callback\",
+                  \"http://localhost:8080/api/v1/sso/oidc/callback\",
+                  \"http://localhost:3000/api/v1/sso/oidc/callback\"
+                ],
+                \"tokenFormat\": \"JWT\",
+                \"expireInHours\": 168,
+                \"refreshExpireInHours\": 720,
+                \"termsOfUse\": \"https://hanzo.ai/terms\"
+              }"
+          ' 2>&1 || echo "API call failed"
+
+          echo ""
+          echo "=== Verify app-kms exists ==="
+          kubectl exec -n hanzo "$IAM_POD" -- sh -c '
+            curl -s http://localhost:8000/api/get-application?id=admin/app-kms
+          ' 2>&1 | python3 -c "
+          import sys, json
+          try:
+              d = json.loads(sys.stdin.read())
+              if d.get('data') and d['data'].get('name') == 'app-kms':
+                  print('SUCCESS: app-kms created')
+                  print(f\"  clientId: {d['data'].get('clientId','')}\")
+                  print(f\"  redirectUris: {d['data'].get('redirectUris','')}\")
+              else:
+                  print('FAILED:', json.dumps(d)[:300])
+          except Exception as e:
+              print('Parse error:', e)
+          " 2>&1
