@@ -76,12 +76,14 @@ jobs:
                   - name: cloud-agent
                     image: ghcr.io/hanzoai/bot:latest
                     imagePullPolicy: Always
-                    command: ["node", "hanzo-bot.mjs", "node", "run", "--host", "bot-gateway.hanzo.svc", "--port", "18789", "--name", "cloud-agent-default"]
+                    command: ["node", "hanzo-bot.mjs", "node", "run", "--host", "bot-gateway.hanzo.svc", "--port", "80", "--name", "cloud-agent-default"]
                     env:
                       - name: HOME
                         value: /home/node
                       - name: NODE_ENV
                         value: production
+                      - name: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
+                        value: "1"
                       - name: OPENCLAW_GATEWAY_TOKEN
                         valueFrom:
                           secretKeyRef:
