@@ -8,6 +8,7 @@ import { buildModelAliasLines } from "../model-alias-lines.js";
 import { normalizeModelCompat } from "../model-compat.js";
 import { resolveForwardCompatModel } from "../model-forward-compat.js";
 import { findNormalizedProviderValue, normalizeProviderId } from "../model-selection.js";
+import { HANZO_BASE_URL } from "../models-config.providers.js";
 import { discoverAuthStorage, discoverModels } from "../pi-model-discovery.js";
 
 type InlineModelEntry = ModelDefinitionConfig & {
@@ -156,6 +157,24 @@ export function resolveModelWithRegistry(params: {
       cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
       contextWindow: DEFAULT_CONTEXT_TOKENS,
       // Align with OPENROUTER_DEFAULT_MAX_TOKENS in models-config.providers.ts
+      maxTokens: 8192,
+    } as Model<Api>);
+  }
+
+  // Hanzo LLM Gateway is an OpenAI-compatible proxy at api.hanzo.ai that
+  // routes to 100+ providers. Any model ID is accepted — the gateway handles
+  // provider routing internally.
+  if (normalizedProvider === "hanzo") {
+    return normalizeModelCompat({
+      id: modelId,
+      name: modelId,
+      api: "openai-responses",
+      provider,
+      baseUrl: providerConfig?.baseUrl ?? HANZO_BASE_URL,
+      reasoning: true,
+      input: ["text", "image"],
+      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+      contextWindow: DEFAULT_CONTEXT_TOKENS,
       maxTokens: 8192,
     } as Model<Api>);
   }
