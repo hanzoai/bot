@@ -124,14 +124,14 @@ services:
 
   # ── WSS Proxy (gw.hanzo.bot → bot-gateway:18789) ──────────────────
   gw-proxy:
-    image: nginx:alpine
+    image: ghcr.io/hanzoai/ingress:latest
     restart: unless-stopped
     ports:
       - "443:443"
     volumes:
-      - ./local-ssl/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./local-ssl/gw.crt:/etc/nginx/ssl/gw.crt:ro
-      - ./local-ssl/gw.key:/etc/nginx/ssl/gw.key:ro
+      - ./local-ssl/ingress.yml:/etc/ingress/config.yml:ro
+      - ./local-ssl/gw.crt:/etc/ingress/ssl/gw.crt:ro
+      - ./local-ssl/gw.key:/etc/ingress/ssl/gw.key:ro
     depends_on:
       - bot-gateway
 
