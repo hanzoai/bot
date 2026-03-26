@@ -5,10 +5,16 @@ import { generateSecureToken } from "../infra/secure-random.js";
 import { runExec } from "../process/exec.js";
 
 export async function movePathToTrash(targetPath: string): Promise<string> {
+  // 1. Try system trash command
   try {
     await runExec("trash", [targetPath], { timeoutMs: 10_000 });
     return targetPath;
   } catch {
+    // trash CLI not available
+  }
+
+  // 2. Try moving to ~/.Trash (works on macOS / desktop Linux)
+  try {
     const trashDir = path.join(os.homedir(), ".Trash");
     fs.mkdirSync(trashDir, { recursive: true });
     const base = path.basename(targetPath);
@@ -18,5 +24,11 @@ export async function movePathToTrash(targetPath: string): Promise<string> {
     }
     fs.renameSync(targetPath, dest);
     return dest;
+  } catch {
+    // rename can fail across filesystems (e.g. K8s containers)
   }
+
+  // 3. Fallback: remove directly (containers / headless servers)
+  await fs.promises.rm(targetPath, { recursive: true, force: true });
+  return targetPath;
 }
