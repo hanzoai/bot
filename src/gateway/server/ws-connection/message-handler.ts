@@ -561,6 +561,15 @@ export function attachGatewayWsMessageHandler(params: {
           rateLimiter: authRateLimiter,
           clientIp: browserRateLimitClientIp,
         });
+        // When dangerouslyDisableDeviceAuth is set for control UI, also allow
+        // unauthenticated control-UI connections. The flag signals a relaxed
+        // security environment (staging/dev) where the gateway is accessed by
+        // an external frontend that may not yet have an IAM token.
+        if (isControlUi && controlUiAuthPolicy.allowBypass && !authOk) {
+          authOk = true;
+          authMethod = "control-ui-bypass";
+          sharedAuthOk = false;
+        }
         const rejectUnauthorized = (failedAuth: GatewayAuthResult) => {
           markHandshakeFailure("unauthorized", {
             authMode: resolvedAuth.mode,
