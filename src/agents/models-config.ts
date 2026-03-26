@@ -241,7 +241,7 @@ export async function ensureOpenClawModelsJson(
       if (normalizedProviders[name]) {
         normalizedProviders[name]!.baseUrl = envBaseUrl;
         // Hanzo gateway uses OpenAI chat completions, not responses API
-        normalizedProviders[name]!.api = "openai-chat";
+        normalizedProviders[name]!.api = "openai-completions";
       }
     }
   }
