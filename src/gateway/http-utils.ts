@@ -16,11 +16,19 @@ export function getHeader(req: IncomingMessage, name: string): string | undefine
 
 export function getBearerToken(req: IncomingMessage): string | undefined {
   const raw = getHeader(req, "authorization")?.trim() ?? "";
-  if (!raw.toLowerCase().startsWith("bearer ")) {
-    return undefined;
+  if (raw.toLowerCase().startsWith("bearer ")) {
+    const token = raw.slice(7).trim();
+    if (token) return token;
   }
-  const token = raw.slice(7).trim();
-  return token || undefined;
+  // Fallback: check ?token= query parameter (used by iframes that can't set headers)
+  try {
+    const url = new URL(req.url ?? "", `http://${req.headers.host ?? "localhost"}`);
+    const qToken = url.searchParams.get("token")?.trim();
+    if (qToken) return qToken;
+  } catch {
+    // ignore URL parse errors
+  }
+  return undefined;
 }
 
 export function resolveAgentIdFromHeader(req: IncomingMessage): string | undefined {
