@@ -236,9 +236,11 @@ export async function ensureOpenClawModelsJson(
   // Env-var baseUrl always wins — ensures all agents (including dynamically
   // provisioned cloud agents) route through the correct LLM gateway.
   const envBaseUrl = HANZO_BASE_URL;
-  for (const name of ["hanzo", "zen"]) {
-    if (normalizedProviders[name] && envBaseUrl) {
-      normalizedProviders[name].baseUrl = envBaseUrl;
+  if (normalizedProviders && envBaseUrl) {
+    for (const name of ["hanzo", "zen"]) {
+      if (normalizedProviders[name]) {
+        normalizedProviders[name]!.baseUrl = envBaseUrl;
+      }
     }
   }
 
