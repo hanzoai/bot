@@ -639,15 +639,41 @@ export const agentsHandlers: GatewayRequestHandlers = {
       );
       return;
     }
-    if (!isConfiguredAgent(cfg, agentId)) {
-      respondAgentNotFound(respond, agentId);
-      return;
-    }
-
+    const inConfig = isConfiguredAgent(cfg, agentId);
     const deleteFiles = typeof params.deleteFiles === "boolean" ? params.deleteFiles : true;
     const workspaceDir = resolveAgentWorkspaceDir(cfg, agentId);
     const agentDir = resolveAgentDir(cfg, agentId);
     const sessionsDir = resolveSessionTranscriptsDirForAgent(agentId);
+
+    // For agents that only exist on disk (cloud-provisioned nodes that left
+    // workspace directories but were never added to the config), still allow
+    // deletion by cleaning up the directories.
+    if (!inConfig) {
+      if (!deleteFiles) {
+        respondAgentNotFound(respond, agentId);
+        return;
+      }
+      let anyExists = false;
+      for (const dir of [workspaceDir, agentDir, sessionsDir]) {
+        try {
+          await fs.access(dir);
+          anyExists = true;
+        } catch {
+          // doesn't exist
+        }
+      }
+      if (!anyExists) {
+        respondAgentNotFound(respond, agentId);
+        return;
+      }
+      await Promise.all([
+        moveToTrashBestEffort(workspaceDir),
+        moveToTrashBestEffort(agentDir),
+        moveToTrashBestEffort(sessionsDir),
+      ]);
+      respond(true, { ok: true, agentId, removedBindings: 0 }, undefined);
+      return;
+    }
 
     const result = pruneAgentConfig(cfg, agentId);
     await writeConfigFile(result.config);
