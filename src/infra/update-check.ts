@@ -300,8 +300,10 @@ export async function fetchNpmTagVersion(params: {
   const timeoutMs = params?.timeoutMs ?? 3500;
   const tag = params.tag;
   try {
+    // Use @hanzo/bot package name for update checks (our fork)
+    const pkgName = process.env.OPENCLAW_UPDATE_PKG ?? "@hanzo/bot";
     const res = await fetchWithTimeout(
-      `https://registry.npmjs.org/openclaw/${encodeURIComponent(tag)}`,
+      `https://registry.npmjs.org/${pkgName.replace("/", "%2F")}/${encodeURIComponent(tag)}`,
       {},
       Math.max(250, timeoutMs),
     );
