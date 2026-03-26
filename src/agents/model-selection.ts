@@ -287,11 +287,9 @@ export function resolveConfiguredModelRef(params: {
   defaultProvider: string;
   defaultModel: string;
 }): ModelRef {
-  const rawModel = resolveAgentModelPrimaryValue(params.cfg.agents?.defaults?.model) ?? "";
-  // Debug: log what rawModel is resolved to
-  if (typeof process !== "undefined" && process.env.OPENCLAW_DEBUG_MODEL) {
-    console.log(`[model-selection] rawModel="${rawModel}" defaultProvider="${params.defaultProvider}" defaultModel="${params.defaultModel}"`);
-  }
+  // Allow env override: OPENCLAW_DEFAULT_MODEL_REF="hanzo/claude-sonnet-4-6" takes priority
+  const envModelRef = typeof process !== "undefined" ? process.env.OPENCLAW_DEFAULT_MODEL_REF : undefined;
+  const rawModel = envModelRef?.trim() || resolveAgentModelPrimaryValue(params.cfg.agents?.defaults?.model) ?? "";
   if (rawModel) {
     const trimmed = rawModel.trim();
     const aliasIndex = buildModelAliasIndex({
