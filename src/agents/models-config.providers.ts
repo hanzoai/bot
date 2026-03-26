@@ -929,7 +929,7 @@ export function buildNvidiaProvider(): ProviderConfig {
 export function buildHanzoProvider(): ProviderConfig {
   return {
     baseUrl: HANZO_BASE_URL,
-    api: "openai-chat",
+    api: "openai-completions",
     models: [
       // Zen models (Hanzo's own frontier models)
       {
