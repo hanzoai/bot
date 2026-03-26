@@ -240,6 +240,8 @@ export async function ensureOpenClawModelsJson(
     for (const name of ["hanzo", "zen"]) {
       if (normalizedProviders[name]) {
         normalizedProviders[name]!.baseUrl = envBaseUrl;
+        // Hanzo gateway uses OpenAI chat completions, not responses API
+        normalizedProviders[name]!.api = "openai-chat";
       }
     }
   }
