@@ -168,7 +168,7 @@ export function resolveModelWithRegistry(params: {
     return normalizeModelCompat({
       id: modelId,
       name: modelId,
-      api: "openai-responses",
+      api: providerConfig?.api ?? "openai-completions",
       provider,
       baseUrl: providerConfig?.baseUrl ?? HANZO_BASE_URL,
       reasoning: true,
