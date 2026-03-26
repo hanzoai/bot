@@ -301,11 +301,11 @@ export function resolveConfiguredModelRef(params: {
         return aliasMatch.ref;
       }
 
-      // Default to anthropic if no provider is specified, but warn as this is deprecated.
+      // Default to configured provider if no provider prefix is specified.
       log.warn(
-        `Model "${trimmed}" specified without provider. Falling back to "anthropic/${trimmed}". Please use "anthropic/${trimmed}" in your config.`,
+        `Model "${trimmed}" specified without provider. Falling back to "${params.defaultProvider}/${trimmed}". Please use "${params.defaultProvider}/${trimmed}" in your config.`,
       );
-      return { provider: "anthropic", model: trimmed };
+      return { provider: params.defaultProvider, model: trimmed };
     }
 
     const resolved = resolveModelRefFromString({
