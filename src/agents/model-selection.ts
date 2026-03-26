@@ -288,6 +288,10 @@ export function resolveConfiguredModelRef(params: {
   defaultModel: string;
 }): ModelRef {
   const rawModel = resolveAgentModelPrimaryValue(params.cfg.agents?.defaults?.model) ?? "";
+  // Debug: log what rawModel is resolved to
+  if (typeof process !== "undefined" && process.env.OPENCLAW_DEBUG_MODEL) {
+    console.log(`[model-selection] rawModel="${rawModel}" defaultProvider="${params.defaultProvider}" defaultModel="${params.defaultModel}"`);
+  }
   if (rawModel) {
     const trimmed = rawModel.trim();
     const aliasIndex = buildModelAliasIndex({
