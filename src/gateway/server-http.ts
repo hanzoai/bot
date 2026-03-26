@@ -85,11 +85,12 @@ function sendJson(res: ServerResponse, status: number, body: unknown) {
   res.end(JSON.stringify(body));
 }
 
-const GATEWAY_PROBE_STATUS_BY_PATH = new Map<string, "live" | "ready">([
+const GATEWAY_PROBE_STATUS_BY_PATH = new Map<string, "live" | "ready" | "running">([
   ["/health", "live"],
   ["/healthz", "live"],
   ["/ready", "ready"],
   ["/readyz", "ready"],
+  ["/status", "running"],
 ]);
 const MATTERMOST_SLASH_CALLBACK_PATH = "/api/channels/mattermost/command";
 
