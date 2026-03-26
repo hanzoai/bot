@@ -64,28 +64,8 @@ jobs:
           echo "=== Write auth-profiles.json to main agent dir ==="
           # The bot creates per-agent dirs under ~/.openclaw/agents/<id>/agent/
           # but checks the MAIN agent dir first. Write auth-profiles.json there.
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- sh -c "
-            mkdir -p /home/node/.openclaw/agent
-            cat > /home/node/.openclaw/agent/auth-profiles.json << 'AUTHEOF'
-{
-  \"profiles\": {
-    \"anthropic:default\": {
-      \"type\": \"api_key\",
-      \"provider\": \"anthropic\",
-      \"key\": \"$ANTHROPIC_KEY\"
-    },
-    \"hanzo:default\": {
-      \"type\": \"api_key\",
-      \"provider\": \"hanzo\",
-      \"key\": \"$HANZO_KEY\"
-    }
-  },
-  \"default\": \"anthropic:default\"
-}
-AUTHEOF
-            echo 'auth-profiles.json written'
-            cat /home/node/.openclaw/agent/auth-profiles.json | head -5
-          " 2>&1 || echo "Failed to write auth-profiles"
+          AUTH_JSON='{"profiles":{"anthropic:default":{"type":"api_key","provider":"anthropic","key":"'"$ANTHROPIC_KEY"'"},"hanzo:default":{"type":"api_key","provider":"hanzo","key":"'"$HANZO_KEY"'"}},"default":"anthropic:default"}'
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- sh -c "mkdir -p /home/node/.openclaw/agent && echo '$AUTH_JSON' > /home/node/.openclaw/agent/auth-profiles.json && echo 'auth-profiles.json written'" 2>&1 || echo "Failed to write auth-profiles"
 
           echo ""
           echo "=== Wait for node to register ==="
