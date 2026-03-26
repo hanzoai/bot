@@ -4,7 +4,7 @@ node_modules
 docker-compose.extra.yml
 local-ssl/
 dist
-pnpm-lock.yaml
+# pnpm-lock.yaml is committed to ensure CI uses correct dependency resolutions
 bun.lock
 bun.lockb
 coverage
