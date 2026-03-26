@@ -7,6 +7,7 @@ import {
   rejectNodePairing,
   renamePairedNode,
   requestNodePairing,
+  unpairNode,
   verifyNodeToken,
 } from "../../infra/node-pairing.js";
 import {
@@ -426,6 +427,29 @@ export const nodeHandlers: GatewayRequestHandlers = {
         return;
       }
       respond(true, { nodeId: updated.nodeId, displayName: updated.displayName }, undefined);
+    });
+  },
+  "node.unpair": async ({ params, respond, context }) => {
+    const nodeId = (params as { nodeId?: string })?.nodeId;
+    if (!nodeId || typeof nodeId !== "string") {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "nodeId required"));
+      return;
+    }
+    await respondUnavailableOnThrow(respond, async () => {
+      const removed = await unpairNode(nodeId);
+      if (!removed) {
+        respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "unknown nodeId or not paired"));
+        return;
+      }
+      // Also disconnect the node from the live registry if it's connected
+      const registry = context.nodeRegistry;
+      if (registry) {
+        const node = registry.get(nodeId);
+        if (node) {
+          node.close?.();
+        }
+      }
+      respond(true, { nodeId, unpaired: true }, undefined);
     });
   },
   "node.list": async ({ params, respond, context }) => {
