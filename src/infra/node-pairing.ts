@@ -258,6 +258,23 @@ export async function updatePairedNodeMetadata(
   });
 }
 
+export async function unpairNode(
+  nodeId: string,
+  baseDir?: string,
+): Promise<boolean> {
+  return await withLock(async () => {
+    const state = await loadState(baseDir);
+    const normalized = normalizeNodeId(nodeId);
+    const existing = state.pairedByNodeId[normalized];
+    if (!existing) {
+      return false;
+    }
+    delete state.pairedByNodeId[normalized];
+    await persistState(state, baseDir);
+    return true;
+  });
+}
+
 export async function renamePairedNode(
   nodeId: string,
   displayName: string,
