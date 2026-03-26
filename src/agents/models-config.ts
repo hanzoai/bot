@@ -5,6 +5,7 @@ import { applyConfigEnvVars } from "../config/env-vars.js";
 import { isRecord } from "../utils.js";
 import { resolveOpenClawAgentDir } from "./agent-paths.js";
 import {
+  HANZO_BASE_URL,
   normalizeProviders,
   type ProviderConfig,
   resolveImplicitBedrockProvider,
@@ -231,6 +232,16 @@ export async function ensureOpenClawModelsJson(
     providers: mergedProviders,
     agentDir,
   });
+
+  // Env-var baseUrl always wins — ensures all agents (including dynamically
+  // provisioned cloud agents) route through the correct LLM gateway.
+  const envBaseUrl = HANZO_BASE_URL;
+  for (const name of ["hanzo", "zen"]) {
+    if (normalizedProviders[name] && envBaseUrl) {
+      normalizedProviders[name].baseUrl = envBaseUrl;
+    }
+  }
+
   const next = `${JSON.stringify({ providers: normalizedProviders }, null, 2)}\n`;
   const existingRaw = await readRawFile(targetPath);
 
