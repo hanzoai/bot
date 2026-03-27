@@ -120,7 +120,10 @@ export async function executeNodeHostCommand(
   const runAgentId = prepared.plan.agentId ?? params.agentId;
   const runSessionKey = prepared.plan.sessionKey ?? params.sessionKey;
 
-  const nodeEnv = params.requestedEnv ? { ...params.requestedEnv } : undefined;
+  // Cloud agents: inject DISPLAY=:0 so GUI apps render on the operative desktop
+  const isCloudNode = nodeId.startsWith("cloud-");
+  const displayEnv = isCloudNode && !params.requestedEnv?.DISPLAY ? { DISPLAY: ":0" } : {};
+  const nodeEnv = params.requestedEnv ? { ...displayEnv, ...params.requestedEnv } : (isCloudNode ? displayEnv : undefined);
   const baseAllowlistEval = evaluateShellAllowlist({
     command: params.command,
     allowlist: [],
