@@ -663,7 +663,9 @@ export const agentsHandlers: GatewayRequestHandlers = {
         }
       }
       if (!anyExists) {
-        respondAgentNotFound(respond, agentId);
+        // Cloud-provisioned agents may not have local dirs on the gateway.
+        // Return success so the frontend can proceed with cloud deprovision.
+        respond(true, { ok: true, agentId, removedBindings: 0 }, undefined);
         return;
       }
       await Promise.all([
