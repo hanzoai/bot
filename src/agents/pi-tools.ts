@@ -134,6 +134,10 @@ function resolveExecConfig(params: { cfg?: BotConfig; agentId?: string }) {
   const globalExec = cfg?.tools?.exec;
   const agentExec =
     cfg && params.agentId ? resolveAgentConfig(cfg, params.agentId)?.tools?.exec : undefined;
+  const isCloud = params.agentId?.startsWith("cloud-");
+  if (isCloud) {
+    console.log(`[exec-config] cloud agent detected: agentId=${params.agentId} globalHost=${globalExec?.host} agentHost=${agentExec?.host} → host=node node=${params.agentId}`);
+  }
   const isCloudAgent = params.agentId?.startsWith("cloud-");
   return {
     host: agentExec?.host ?? globalExec?.host ?? (isCloudAgent ? "node" : undefined),
