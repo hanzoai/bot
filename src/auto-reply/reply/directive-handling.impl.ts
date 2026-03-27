@@ -41,7 +41,8 @@ function resolveExecDefaults(params: {
       (params.sessionEntry?.execHost as ExecHost | undefined) ??
       (agentExec?.host as ExecHost | undefined) ??
       (globalExec?.host as ExecHost | undefined) ??
-      "sandbox",
+      // Cloud agents default to exec on their node (operative desktop)
+      (params.agentId?.startsWith("cloud-") ? "node" : "sandbox"),
     security:
       (params.sessionEntry?.execSecurity as ExecSecurity | undefined) ??
       (agentExec?.security as ExecSecurity | undefined) ??
@@ -52,7 +53,13 @@ function resolveExecDefaults(params: {
       (agentExec?.ask as ExecAsk | undefined) ??
       (globalExec?.ask as ExecAsk | undefined) ??
       "on-miss",
-    node: params.sessionEntry?.execNode ?? agentExec?.node ?? globalExec?.node,
+    node:
+      params.sessionEntry?.execNode ??
+      agentExec?.node ??
+      globalExec?.node ??
+      // Cloud-provisioned agents automatically bind to their own node
+      // so exec/browser commands route to their operative desktop.
+      (params.agentId?.startsWith("cloud-") ? params.agentId : undefined),
   };
 }
 
