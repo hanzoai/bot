@@ -137,8 +137,8 @@ function resolveExecConfig(params: { cfg?: BotConfig; agentId?: string }) {
   const isCloudAgent = params.agentId?.startsWith("cloud-");
   return {
     host: agentExec?.host ?? globalExec?.host ?? (isCloudAgent ? "node" : undefined),
-    security: agentExec?.security ?? globalExec?.security ?? (isCloudAgent ? "allowlist" : undefined),
-    ask: agentExec?.ask ?? globalExec?.ask,
+    security: agentExec?.security ?? globalExec?.security ?? (isCloudAgent ? "full" : undefined),
+    ask: agentExec?.ask ?? globalExec?.ask ?? (isCloudAgent ? "off" : undefined),
     node: agentExec?.node ?? globalExec?.node ?? (isCloudAgent ? params.agentId : undefined),
     pathPrepend: agentExec?.pathPrepend ?? globalExec?.pathPrepend,
     safeBins: agentExec?.safeBins ?? globalExec?.safeBins,
@@ -392,14 +392,9 @@ export function createOpenClawCodingTools(options?: {
     return [tool];
   });
   const { cleanupMs: cleanupMsOverride, ...execDefaults } = options?.exec ?? {};
-  const resolvedHost = options?.exec?.host ?? execConfig.host;
-  const resolvedNode = options?.exec?.node ?? execConfig.node;
-  if (agentId?.startsWith("cloud-")) {
-    console.log(`[pi-tools] cloud agent exec config: agentId=${agentId} host=${resolvedHost} node=${resolvedNode} execConfig.host=${execConfig.host} options.exec.host=${options?.exec?.host}`);
-  }
   const execTool = createExecTool({
     ...execDefaults,
-    host: resolvedHost,
+    host: options?.exec?.host ?? execConfig.host,
     security: options?.exec?.security ?? execConfig.security,
     ask: options?.exec?.ask ?? execConfig.ask,
     node: options?.exec?.node ?? execConfig.node,
