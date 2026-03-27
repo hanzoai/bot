@@ -134,11 +134,12 @@ function resolveExecConfig(params: { cfg?: BotConfig; agentId?: string }) {
   const globalExec = cfg?.tools?.exec;
   const agentExec =
     cfg && params.agentId ? resolveAgentConfig(cfg, params.agentId)?.tools?.exec : undefined;
+  const isCloudAgent = params.agentId?.startsWith("cloud-");
   return {
-    host: agentExec?.host ?? globalExec?.host,
-    security: agentExec?.security ?? globalExec?.security,
+    host: agentExec?.host ?? globalExec?.host ?? (isCloudAgent ? "node" : undefined),
+    security: agentExec?.security ?? globalExec?.security ?? (isCloudAgent ? "allowlist" : undefined),
     ask: agentExec?.ask ?? globalExec?.ask,
-    node: agentExec?.node ?? globalExec?.node,
+    node: agentExec?.node ?? globalExec?.node ?? (isCloudAgent ? params.agentId : undefined),
     pathPrepend: agentExec?.pathPrepend ?? globalExec?.pathPrepend,
     safeBins: agentExec?.safeBins ?? globalExec?.safeBins,
     safeBinTrustedDirs: agentExec?.safeBinTrustedDirs ?? globalExec?.safeBinTrustedDirs,
