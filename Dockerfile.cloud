@@ -1,0 +1,60 @@
+# Combined bot + desktop image for cloud agents.
+# Layers the bot gateway on top of the operative (desktop) image so that
+# exec commands from the chatbot run in the same environment as the VNC
+# desktop — no namespace hacks or sidecar coordination needed.
+#
+# The operative image already has: Ubuntu 22.04, Xvfb, Firefox, Chromium,
+# Node.js 20, Python 3.14, Go, Rust, VS Code, and many more tools.
+
+ARG OPERATIVE_IMAGE=ghcr.io/hanzoai/operative:latest
+FROM ${OPERATIVE_IMAGE}
+
+# Switch to root for system-level installs
+USER root
+
+# Install Node.js 22 (bot requires >=22) — upgrade from the base image's Node 20
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g corepack && \
+    corepack enable && \
+    corepack prepare pnpm@10.8.0 --activate
+
+# Install Bun (used by bot build scripts)
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+
+# Install nsenter (for any remaining cross-process needs)
+RUN apt-get install -y util-linux && apt-get clean
+
+# Create bot app directory
+RUN mkdir -p /app && chown operative:operative /app
+WORKDIR /app
+
+# Copy bot source and build
+COPY --chown=operative:operative . /app/
+
+USER operative
+
+# Install dependencies and build
+RUN pnpm install --no-frozen-lockfile && pnpm build
+
+# Build the control UI
+ENV OPENCLAW_PREFER_PNPM=1
+RUN pnpm canvas:a2ui:bundle 2>/dev/null || true
+
+# Desktop environment variables (inherited from operative base)
+ENV DISPLAY=:1
+ENV DISPLAY_NUM=1
+
+# Bot configuration for cloud mode
+ENV OPENCLAW_DEFAULT_PROVIDER=hanzo
+ENV OPENCLAW_DEFAULT_MODEL=claude-sonnet-4-5
+ENV HANZO_NODE_ID=""
+
+# The entrypoint starts both the desktop environment and the bot.
+# The desktop (Xvfb + VNC + window manager) starts first, then the bot
+# connects to the gateway as a node.
+COPY --chown=operative:operative docker/cloud-entrypoint.sh /app/cloud-entrypoint.sh
+RUN chmod +x /app/cloud-entrypoint.sh
+
+ENTRYPOINT ["/app/cloud-entrypoint.sh"]
