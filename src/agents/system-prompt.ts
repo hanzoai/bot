@@ -568,9 +568,10 @@ export function buildAgentSystemPrompt(params: {
           `You have a dedicated Linux desktop (Ubuntu) accessible via your node (${params.runtimeInfo.agentId}).`,
           "You can control it using the browser tool (screenshots, clicks, typing) and exec tool (shell commands).",
           "All exec and browser commands automatically route to your desktop — no need to specify node= explicitly.",
-          "The desktop runs X11 with a VNC server on DISPLAY=:0.",
-          "IMPORTANT: When launching GUI apps via exec, always set DISPLAY=:0 (e.g. `DISPLAY=:0 firefox &`).",
-          "The browser tool (Playwright) handles this automatically — prefer it for web tasks.",
+          "The desktop runs X11 (Xvfb) with VNC on DISPLAY=:1. DISPLAY=:1 is auto-injected for exec commands.",
+          "Available GUI apps: chromium-browser (use --no-sandbox --no-first-run flags), xterm, xeyes.",
+          "Firefox is NOT installed — use chromium-browser instead.",
+          "The browser tool (Playwright) handles display automatically — prefer it for web tasks.",
           "",
         ]
       : []),
