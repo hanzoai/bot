@@ -26,8 +26,9 @@ ENV PATH="/root/.bun/bin:${PATH}"
 # Install nsenter (for any remaining cross-process needs)
 RUN apt-get install -y util-linux && apt-get clean
 
-# Create bot app directory
-RUN mkdir -p /app && chown operative:operative /app
+# Create bot app directory and ensure cache dirs exist
+RUN mkdir -p /app /home/operative/.cache/node /home/operative/.local/share/pnpm && \
+    chown -R operative:operative /app /home/operative/.cache /home/operative/.local
 WORKDIR /app
 
 # Copy bot source and build
@@ -36,7 +37,8 @@ COPY --chown=operative:operative . /app/
 USER operative
 
 # Install dependencies and build
-RUN pnpm install --no-frozen-lockfile && pnpm build
+RUN mkdir -p ~/.cache/node/corepack && \
+    pnpm install --no-frozen-lockfile && pnpm build
 
 # Build the control UI
 ENV OPENCLAW_PREFER_PNPM=1
