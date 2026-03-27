@@ -561,6 +561,17 @@ export function buildAgentSystemPrompt(params: {
     ...buildTimeSection({
       userTimezone,
     }),
+    // Cloud agents get a desktop capability hint
+    ...(params.runtimeInfo?.agentId?.startsWith("cloud-")
+      ? [
+          "## Desktop Environment",
+          `You have a dedicated Linux desktop (Ubuntu) accessible via your node (${params.runtimeInfo.agentId}).`,
+          "You can control it using the browser tool (screenshots, clicks, typing) and exec tool (shell commands).",
+          "All exec and browser commands automatically route to your desktop — no need to specify node= explicitly.",
+          "The desktop runs X11 with a VNC server. Use the browser tool for web automation and exec for terminal commands.",
+          "",
+        ]
+      : []),
     "## Workspace Files (injected)",
     "These user-editable files are loaded by OpenClaw and included below in Project Context.",
     "",
