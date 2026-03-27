@@ -26,22 +26,24 @@ ENV PATH="/root/.bun/bin:${PATH}"
 # Install nsenter (for any remaining cross-process needs)
 RUN apt-get install -y util-linux && apt-get clean
 
-# Create bot app directory and ensure cache dirs exist
-RUN mkdir -p /app /home/operative/.cache/node /home/operative/.local/share/pnpm && \
-    chown -R operative:operative /app /home/operative/.cache /home/operative/.local
+# Create bot app directory and fix all cache/store ownership
+RUN mkdir -p /app /home/operative/.cache/node/corepack/v1 \
+    /home/operative/.local/share/pnpm /home/operative/.npm \
+    /home/operative/.pnpm-store && \
+    chown -R operative:operative /app /home/operative/.cache \
+    /home/operative/.local /home/operative/.npm /home/operative/.pnpm-store
 WORKDIR /app
 
-# Copy bot source and build
+# Copy bot source
 COPY --chown=operative:operative . /app/
 
 USER operative
 
-# Install dependencies and build.
-# pnpm has tar extraction bugs on Docker overlay-fs, so use npm for install
-# then pnpm for build (which only runs tsc/bundlers, no installs).
-RUN mkdir -p ~/.cache/node/corepack && \
-    npm install --legacy-peer-deps && \
-    npx pnpm build
+# Install dependencies and build with pnpm.
+# Use content-addressable store in /tmp to avoid overlay-fs tar bugs.
+RUN pnpm install --no-frozen-lockfile --store-dir /tmp/pnpm-store && \
+    pnpm build && \
+    rm -rf /tmp/pnpm-store
 
 # Build the control UI
 ENV OPENCLAW_PREFER_PNPM=1
