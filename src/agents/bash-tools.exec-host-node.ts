@@ -122,7 +122,7 @@ export async function executeNodeHostCommand(
 
   // Cloud agents: inject DISPLAY=:0 so GUI apps render on the operative desktop
   const isCloudNode = nodeId.startsWith("cloud-");
-  const cloudDisplayEnv: Record<string, string> = isCloudNode && !params.requestedEnv?.DISPLAY ? { DISPLAY: ":0" } : {};
+  const cloudDisplayEnv: Record<string, string> = isCloudNode && !params.requestedEnv?.DISPLAY ? { DISPLAY: ":1" } : {};
   const nodeEnv: Record<string, string> | undefined = params.requestedEnv
     ? { ...cloudDisplayEnv, ...params.requestedEnv }
     : Object.keys(cloudDisplayEnv).length > 0 ? cloudDisplayEnv : undefined;
