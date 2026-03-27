@@ -316,8 +316,18 @@ export function createBrowserTool(opts?: {
         target = "host";
       }
 
+      // Cloud agents auto-route browser commands to their own node's desktop
+      let cloudNodeId: string | undefined;
+      if (!requestedNode && !target && opts?.agentSessionKey) {
+        const match = opts.agentSessionKey.match(/agent:(cloud-[a-f0-9]+):/);
+        if (match) {
+          cloudNodeId = match[1];
+          target = "node";
+        }
+      }
+
       const nodeTarget = await resolveBrowserNodeTarget({
-        requestedNode: requestedNode ?? undefined,
+        requestedNode: cloudNodeId ?? requestedNode ?? undefined,
         target,
         sandboxBridgeUrl: opts?.sandboxBridgeUrl,
       });
