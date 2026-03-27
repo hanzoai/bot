@@ -122,8 +122,10 @@ export async function executeNodeHostCommand(
 
   // Cloud agents: inject DISPLAY=:0 so GUI apps render on the operative desktop
   const isCloudNode = nodeId.startsWith("cloud-");
-  const displayEnv = isCloudNode && !params.requestedEnv?.DISPLAY ? { DISPLAY: ":0" } : {};
-  const nodeEnv = params.requestedEnv ? { ...displayEnv, ...params.requestedEnv } : (isCloudNode ? displayEnv : undefined);
+  const cloudDisplayEnv: Record<string, string> = isCloudNode && !params.requestedEnv?.DISPLAY ? { DISPLAY: ":0" } : {};
+  const nodeEnv: Record<string, string> | undefined = params.requestedEnv
+    ? { ...cloudDisplayEnv, ...params.requestedEnv }
+    : Object.keys(cloudDisplayEnv).length > 0 ? cloudDisplayEnv : undefined;
   const baseAllowlistEval = evaluateShellAllowlist({
     command: params.command,
     allowlist: [],
