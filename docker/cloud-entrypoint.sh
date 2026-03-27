@@ -73,11 +73,13 @@ mkdir -p "$HOME/.openclaw/workspace"
 # - Exec (runs commands locally — same env as desktop)
 # - Browser control (Playwright on the desktop's browser)
 # - VNC tunnel (proxies VNC to gateway)
-# The bot reads config from env vars:
-#   BOT_NODE_GATEWAY_URL - gateway WebSocket URL
-#   HANZO_NODE_ID / AGENT_NODE_ID - node identifier
-# Ensure they're set
+# Gateway URL from env (read by bot's runner.ts)
 export BOT_NODE_GATEWAY_URL="${BOT_NODE_GATEWAY_URL:-${BOT_GATEWAY_URL:-ws://bot-gateway.hanzo.svc:80}}"
-export HANZO_NODE_ID="${HANZO_NODE_ID:-${AGENT_NODE_ID:-cloud-unknown}}"
 
-exec node hanzo-bot.mjs node run
+# Node ID: prefer AGENT_NODE_ID (set by playground provisioner)
+NODE_ID="${AGENT_NODE_ID:-${HANZO_NODE_ID:-cloud-unknown}}"
+
+exec node hanzo-bot.mjs node run \
+  --node-id "$NODE_ID" \
+  --security full \
+  --ask off
