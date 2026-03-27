@@ -36,9 +36,14 @@ COPY --chown=operative:operative . /app/
 
 USER operative
 
-# Install dependencies and build
-RUN mkdir -p ~/.cache/node/corepack && \
-    pnpm install --no-frozen-lockfile && pnpm build
+# Install dependencies and build.
+# Use a dedicated store dir to avoid overlay-fs tar extraction issues.
+ENV PNPM_HOME="/app/.pnpm-home"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN mkdir -p ~/.cache/node/corepack /app/.pnpm-store && \
+    pnpm install --no-frozen-lockfile --store-dir /app/.pnpm-store && \
+    pnpm build && \
+    rm -rf /app/.pnpm-store
 
 # Build the control UI
 ENV OPENCLAW_PREFER_PNPM=1
