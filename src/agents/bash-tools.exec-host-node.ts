@@ -346,11 +346,18 @@ export async function executeNodeHostCommand(
     };
   }
 
+  // When ask="off", pass approved=true so the node-side policy treats the
+  // command as pre-approved.  All node commands are wrapped in /bin/sh -lc
+  // which the node classifies as a "shell wrapper invocation" — without
+  // approved=true the policy unconditionally blocks shell wrappers under
+  // security="allowlist", making every ask=off node exec fail with
+  // "allowlist-miss" even when the inner command matches the allowlist.
+  const preApproved = hostAsk === "off";
   const startedAt = Date.now();
   const raw = await callGatewayTool(
     "node.invoke",
     { timeoutMs: invokeTimeoutMs },
-    buildInvokeParams(false, null),
+    buildInvokeParams(preApproved, null),
   );
   const payload =
     raw && typeof raw === "object" ? (raw as { payload?: unknown }).payload : undefined;
