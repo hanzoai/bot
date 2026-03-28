@@ -117,8 +117,13 @@ fi
 echo "[cloud-agent] Starting bot agent"
 cd /app
 
-# Create workspace directory
+# Create workspace directories.
+# The bot expects its workspace at /home/node/.openclaw/workspace-{nodeId}
+# (where node is the Node.js HOME). Create both the generic and node-specific
+# workspace paths so the exec tool's canonical cwd check succeeds.
+NODE_ID="${AGENT_NODE_ID:-${HANZO_NODE_ID:-cloud-unknown}}"
 mkdir -p "$HOME/.openclaw/workspace"
+mkdir -p "/home/node/.openclaw/workspace-${NODE_ID}"
 
 # The bot connects to the gateway as a node and handles:
 # - Chat (LLM calls via Hanzo API)
