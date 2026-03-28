@@ -131,7 +131,11 @@ export BOT_NODE_GATEWAY_URL="${BOT_NODE_GATEWAY_URL:-${BOT_GATEWAY_URL:-ws://bot
 # Node ID: prefer AGENT_NODE_ID (set by playground provisioner)
 NODE_ID="${AGENT_NODE_ID:-${HANZO_NODE_ID:-cloud-unknown}}"
 
+# Security mode: cloud agents need to execute desktop commands (firefox, etc.)
+# "allowlist" permits known-safe commands; "full" blocks everything pending approval.
+SECURITY_MODE="${AGENT_SECURITY_MODE:-allowlist}"
+
 exec node hanzo-bot.mjs node run \
   --node-id "$NODE_ID" \
-  --security full \
+  --security "$SECURITY_MODE" \
   --ask off
