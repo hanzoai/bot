@@ -26,8 +26,14 @@ for i in $(seq 1 20); do
   sleep 0.5
 done
 
-# Start window manager
-mutter --replace --display=$DISPLAY 2>/dev/null &
+# Start window manager (openbox works headless; mutter requires a session)
+if command -v openbox &>/dev/null; then
+  openbox --display=$DISPLAY &
+  echo "[cloud-agent] Window manager: openbox"
+elif command -v mutter &>/dev/null; then
+  mutter --replace --display=$DISPLAY 2>/dev/null &
+  echo "[cloud-agent] Window manager: mutter"
+fi
 
 # Start tint2 panel
 if [ -f "$HOME/.config/tint2/tint2rc" ]; then
