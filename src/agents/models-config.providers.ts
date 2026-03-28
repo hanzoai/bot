@@ -209,6 +209,12 @@ const NVIDIA_DEFAULT_COST = {
 export const HANZO_BASE_URL =
   process.env.LLM_BASE_URL?.trim() ||
   process.env.HANZO_LLM_URL?.trim() ||
+  // Cloud agent pods receive HANZO_API_BASE from the provisioner; derive
+  // the /v1 LLM endpoint from it so calls route through the internal
+  // cloud-api service instead of the public api.hanzo.ai.
+  (process.env.HANZO_API_BASE?.trim()
+    ? process.env.HANZO_API_BASE.trim().replace(/\/api\/?$/, "") + "/v1"
+    : undefined) ||
   "https://api.hanzo.ai/v1";
 const HANZO_DEFAULT_CONTEXT_WINDOW = 200_000;
 const HANZO_DEFAULT_MAX_TOKENS = 8192;
