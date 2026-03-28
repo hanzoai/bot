@@ -143,7 +143,7 @@ cat > "$HOME/.openclaw/exec-approvals.json" << 'APPROVALS'
       "security": "allowlist",
       "ask": "off",
       "allowlist": [
-        {"pattern": "**"}
+        {"pattern": "*"}
       ]
     }
   }
