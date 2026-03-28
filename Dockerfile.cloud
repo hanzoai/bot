@@ -23,8 +23,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
 
-# Install nsenter (for any remaining cross-process needs)
-RUN apt-get install -y util-linux && apt-get clean
+# Install openbox (lightweight WM that works headless — mutter requires a session)
+# and nsenter for any remaining cross-process needs
+RUN apt-get update && apt-get install -y openbox util-linux && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create bot app directory and fix all cache/store ownership
 RUN mkdir -p /app /home/operative/.cache/node/corepack/v1 \
