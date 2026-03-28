@@ -128,7 +128,10 @@ mkdir -p "/home/node/.openclaw/workspace-${NODE_ID}"
 # Create exec approvals file with permissive allowlist for cloud agents.
 # Cloud agents need to run desktop commands (firefox, ls, etc.) without
 # manual approval prompts.
-cat > /home/node/.openclaw/exec-approvals.json << 'APPROVALS'
+# Write to $HOME/.openclaw/ (the path the bot process actually reads).
+# HOME is /home/operative in the combined bot-cloud image.
+mkdir -p "$HOME/.openclaw"
+cat > "$HOME/.openclaw/exec-approvals.json" << 'APPROVALS'
 {
   "version": 1,
   "defaults": {
