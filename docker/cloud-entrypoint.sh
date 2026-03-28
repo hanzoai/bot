@@ -1,11 +1,9 @@
 #!/bin/bash
-set -e
+# Do NOT use set -e — background processes may return non-zero on warnings
 
 echo "[cloud-agent] Starting combined bot + desktop environment"
 
 # ── 1. Start the desktop environment (Xvfb + VNC + WM) ──────────────
-# The operative's start_all.sh launches Xvfb, window manager, tint2,
-# desktop icons, and VNC server. Run it in the background.
 export HOME=/home/operative
 export DISPLAY=:${DISPLAY_NUM:-1}
 
@@ -13,37 +11,49 @@ echo "[cloud-agent] Starting desktop on DISPLAY=$DISPLAY"
 cd "$HOME"
 
 # Start Xvfb
-Xvfb $DISPLAY -ac -screen 0 ${WIDTH:-1280}x${HEIGHT:-800}x24 -retro -dpi 96 \
+Xvfb $DISPLAY -ac -screen 0 ${WIDTH:-1920}x${HEIGHT:-1080}x24 -retro -dpi 96 \
   -nolisten tcp -nolisten unix &
 XVFB_PID=$!
 echo "[cloud-agent] Xvfb started (PID $XVFB_PID)"
 
-# Wait for X to be ready
+# Wait for X to be ready (up to 10 seconds)
 for i in $(seq 1 20); do
   if xdpyinfo -display $DISPLAY >/dev/null 2>&1; then
+    echo "[cloud-agent] X display ready"
     break
   fi
   sleep 0.5
 done
 
-# Start window manager (openbox works headless; mutter requires a session)
+# Start window manager — openbox works headless, mutter needs a full session
 if command -v openbox &>/dev/null; then
-  openbox --display=$DISPLAY &
-  echo "[cloud-agent] Window manager: openbox"
+  openbox --display=$DISPLAY 2>/dev/null &
+  sleep 1
+  if kill -0 $! 2>/dev/null; then
+    echo "[cloud-agent] Window manager: openbox (PID $!)"
+  else
+    echo "[cloud-agent] WARNING: openbox failed to start"
+  fi
 elif command -v mutter &>/dev/null; then
   mutter --replace --display=$DISPLAY 2>/dev/null &
+  sleep 1
   echo "[cloud-agent] Window manager: mutter"
 fi
 
 # Start tint2 panel
 if [ -f "$HOME/.config/tint2/tint2rc" ]; then
-  tint2 -c "$HOME/.config/tint2/tint2rc" &
+  tint2 -c "$HOME/.config/tint2/tint2rc" 2>/dev/null &
+  echo "[cloud-agent] tint2 panel started"
 fi
 
 # Setup desktop icons
 if command -v pcmanfm &>/dev/null; then
   pcmanfm --desktop --display=$DISPLAY 2>/dev/null &
+  echo "[cloud-agent] pcmanfm desktop icons started"
 fi
+
+# Give desktop components time to initialize
+sleep 2
 
 # Start VNC server
 echo "[cloud-agent] Starting VNC server on port 5900"
