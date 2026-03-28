@@ -77,7 +77,43 @@ for i in $(seq 1 10); do
   sleep 1
 done
 
-# ── 2. Start the bot agent ───────────────────────────────────────────
+# ── 2. Start the operative API (computer-use tools) ──────────────────
+# The operative Streamlit app provides screenshot, click, type tools
+# on port 8501. The bot's LLM uses these for desktop automation.
+if [ -d "$HOME/.operative" ] && [ -f "$HOME/.operative/operative/operative.py" ]; then
+  echo "[cloud-agent] Starting operative API on port 8501"
+  cd "$HOME/.operative"
+  if [ -d ".venv" ]; then
+    (
+      source .venv/bin/activate 2>/dev/null || . .venv/bin/activate 2>/dev/null
+      DISPLAY=$DISPLAY STREAMLIT_SERVER_PORT=8501 \
+        python -m streamlit run operative/operative.py \
+          --server.headless true \
+          --server.address 0.0.0.0 \
+          > /tmp/streamlit_stdout.log 2>&1 &
+      echo "[cloud-agent] operative Streamlit started (PID $!)"
+    )
+  else
+    echo "[cloud-agent] WARNING: operative venv not found, skipping"
+  fi
+  # Also start the operative HTTP server if present
+  if [ -f "http_server.py" ]; then
+    (
+      source .venv/bin/activate 2>/dev/null || . .venv/bin/activate 2>/dev/null
+      python http_server.py > /tmp/server_logs.txt 2>&1 &
+      echo "[cloud-agent] operative HTTP server started"
+    )
+  fi
+fi
+
+# Start noVNC websocket proxy (port 6080 → VNC 5900)
+if command -v websockify &>/dev/null || [ -f /usr/share/novnc/utils/novnc_proxy ]; then
+  echo "[cloud-agent] Starting noVNC on port 6080"
+  websockify --web /usr/share/novnc/ 6080 localhost:5900 > /tmp/novnc.log 2>&1 &
+  echo "[cloud-agent] noVNC started (PID $!)"
+fi
+
+# ── 3. Start the bot agent ───────────────────────────────────────────
 echo "[cloud-agent] Starting bot agent"
 cd /app
 
