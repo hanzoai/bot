@@ -125,6 +125,28 @@ NODE_ID="${AGENT_NODE_ID:-${HANZO_NODE_ID:-cloud-unknown}}"
 mkdir -p "$HOME/.openclaw/workspace"
 mkdir -p "/home/node/.openclaw/workspace-${NODE_ID}"
 
+# Create exec approvals file with permissive allowlist for cloud agents.
+# Cloud agents need to run desktop commands (firefox, ls, etc.) without
+# manual approval prompts.
+cat > /home/node/.openclaw/exec-approvals.json << 'APPROVALS'
+{
+  "version": 1,
+  "defaults": {
+    "security": "allowlist",
+    "ask": "off"
+  },
+  "agents": {
+    "*": {
+      "security": "allowlist",
+      "ask": "off",
+      "allowlist": [
+        {"pattern": "**"}
+      ]
+    }
+  }
+}
+APPROVALS
+
 # The bot connects to the gateway as a node and handles:
 # - Chat (LLM calls via Hanzo API)
 # - Exec (runs commands locally — same env as desktop)
