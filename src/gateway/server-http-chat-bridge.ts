@@ -105,27 +105,27 @@ async function handleChatBridge(
     channel: INTERNAL_MESSAGE_CHANNEL,
   });
 
-  // Collect the final reply via a promise — mirrors chat.send pattern
-  const replyPromise = new Promise<string>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("timeout")), timeoutMs);
-    const parts: string[] = [];
+  // Collect final reply parts via the dispatcher's deliver callback.
+  // dispatchInboundMessage is async and resolves when the agent run completes.
+  const parts: string[] = [];
+  const abortController = new AbortController();
+  const timer = setTimeout(() => abortController.abort(), timeoutMs);
 
-    const dispatcher = createReplyDispatcher({
-      ...prefixOptions,
-      onError: (err) => {
-        clearTimeout(timer);
-        reject(err instanceof Error ? err : new Error(String(err)));
-      },
-      deliver: async (payload, info) => {
-        if (info.kind !== "final") return;
-        const text = payload.text?.trim() ?? "";
-        if (text) parts.push(text);
-      },
-    });
+  const dispatcher = createReplyDispatcher({
+    ...prefixOptions,
+    onError: (err) => {
+      // eslint-disable-next-line no-console
+      console.error("[chat-bridge] dispatch error:", err);
+    },
+    deliver: async (payload, info) => {
+      if (info.kind !== "final") return;
+      const text = payload.text?.trim() ?? "";
+      if (text) parts.push(text);
+    },
+  });
 
-    const abortController = new AbortController();
-
-    void dispatchInboundMessage({
+  try {
+    await dispatchInboundMessage({
       ctx,
       cfg,
       dispatcher,
@@ -133,21 +133,14 @@ async function handleChatBridge(
         runId: clientRunId,
         abortSignal: abortController.signal,
         onAgentRunStart: () => {},
-        onAgentRunComplete: () => {
-          clearTimeout(timer);
-          resolve(parts.join("\n"));
-        },
       },
-    }).catch((err) => {
-      clearTimeout(timer);
-      reject(err);
     });
-  });
+    clearTimeout(timer);
 
-  try {
-    const response = await replyPromise;
+    const response = parts.join("\n");
     sendJson(res, 200, { ok: true, sessionKey, response });
   } catch (err) {
+    clearTimeout(timer);
     const msg = err instanceof Error ? err.message : String(err);
     sendJson(res, 502, { ok: false, error: msg });
   }
