@@ -129,6 +129,14 @@ export function sanitizeSystemRunParamsForForwarding(opts: {
 
   const runId = normalizeString(p.runId);
   if (!runId) {
+    // Trusted internal pre-approval: clients with operator.approvals scope (e.g.
+    // the embedded runner with ask=off) may send approved=true without a runId.
+    // This path is intentionally restricted to approval-scoped clients so that
+    // regular operator.write clients (browser, CLI) cannot bypass the approval guard.
+    if (approved && clientHasApprovals(opts.client)) {
+      next.approved = true;
+      return { ok: true, params: next };
+    }
     return systemRunApprovalGuardError({
       code: "MISSING_RUN_ID",
       message: "approval override requires params.runId",
