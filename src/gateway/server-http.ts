@@ -17,6 +17,7 @@ export type VncProxyHandlers = {
   handleTunnelUpgrade: (req: IncomingMessage, socket: Duplex, head: Buffer) => boolean;
 };
 import { resolveAgentAvatar } from "../agents/identity-avatar.js";
+import { handleChatBridgeHttpRequest } from "./server-http-chat-bridge.js";
 import { CANVAS_WS_PATH, handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
 import { loadConfig } from "../config/config.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
@@ -599,6 +600,16 @@ export function createGatewayHttpServer(opts: {
           name: "tools-invoke",
           run: () =>
             handleToolsInvokeHttpRequest(req, res, {
+              auth: resolvedAuth,
+              trustedProxies,
+              allowRealIpFallback,
+              rateLimiter,
+            }),
+        },
+        {
+          name: "chat-bridge",
+          run: () =>
+            handleChatBridgeHttpRequest(req, res, {
               auth: resolvedAuth,
               trustedProxies,
               allowRealIpFallback,
