@@ -223,6 +223,28 @@ export function resolveDefaultConfigCandidates(
   return candidates;
 }
 
+/**
+ * Writable config path override (optional).
+ *
+ * When BOT_CONFIG_PATH (or OPENCLAW_CONFIG_PATH) points to a read-only location
+ * (e.g., a K8s ConfigMap mount), set OPENCLAW_CONFIG_WRITE_PATH to a writable
+ * path where user changes should be persisted.
+ *
+ * The write path is also used as the highest-priority read candidate so that
+ * user overrides take precedence over the base ConfigMap config.
+ *
+ * Returns null when no write-path override is configured.
+ */
+export function resolveConfigWritePath(
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
+  const override = env.OPENCLAW_CONFIG_WRITE_PATH?.trim() || env.BOT_CONFIG_WRITE_PATH?.trim();
+  if (override) {
+    return resolveUserPath(override, env, envHomedir(env));
+  }
+  return null;
+}
+
 export const DEFAULT_GATEWAY_PORT = 18789;
 
 /**
