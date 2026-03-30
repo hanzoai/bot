@@ -520,7 +520,13 @@ export function renderNode(params: {
     return renderTextInput({ ...params, inputType: "text" });
   }
 
-  // Fallback
+  // Unknown/any type (e.g. from Zod z.any() → empty {} schema) — render as text input
+  // so the field is still editable without forcing Raw mode.
+  if (type === undefined) {
+    return renderTextInput({ ...params, inputType: "text" });
+  }
+
+  // Fallback for truly unrecognised named types
   return html`
     <div class="cfg-field cfg-field--error">
       <div class="cfg-field__label">${label}</div>
