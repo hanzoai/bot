@@ -19,6 +19,7 @@ const CACHE_TTL_MS = 60_000; // 1 minute
 const subscriptionCache = new Map<string, CacheEntry<SubscriptionStatus>>();
 const planCache = new Map<string, CacheEntry<CommercePlan | null>>();
 const balanceCache = new Map<string, CacheEntry<number>>();
+const billingStatusCache = new Map<string, CacheEntry<BillingStatus>>();
 
 function cached<T>(map: Map<string, CacheEntry<T>>, key: string): T | undefined {
   const entry = map.get(key);
@@ -65,6 +66,11 @@ export type SubscriptionStatus = {
   plan: CommercePlan | null;
 };
 
+export type BillingStatus = {
+  hasPaymentMethod: boolean;
+  creditBalance: number; // cents
+};
+
 // ---------------------------------------------------------------------------
 // Commerce URL resolution
 // ---------------------------------------------------------------------------
@@ -105,6 +111,7 @@ export function resetBillingClient(): void {
   subscriptionCache.clear();
   planCache.clear();
   balanceCache.clear();
+  billingStatusCache.clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -242,6 +249,55 @@ export async function getBalance(
     const available = data.available ?? 0;
     setCached(balanceCache, cacheKey, available);
     return available;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Get combined billing status (payment method presence + credit balance).
+ * Calls the single /billing/status endpoint to minimize round-trips.
+ * Cached for 60 seconds.
+ */
+export async function getBillingStatus(
+  cfg: GatewayIamConfig,
+  userId: string,
+  token?: string,
+): Promise<BillingStatus> {
+  const cacheKey = `billing-status:${userId}:${token ?? ""}`;
+  const hit = cached(billingStatusCache, cacheKey);
+  if (hit) {
+    return hit;
+  }
+
+  const base = commerceBaseUrl(cfg);
+  const headers = commerceHeaders(cfg);
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10_000);
+  try {
+    const res = await fetch(
+      `${base}/api/v1/billing/status?user=${encodeURIComponent(userId)}`,
+      { headers, signal: controller.signal },
+    );
+
+    if (!res.ok) {
+      throw new Error(`Commerce API returned ${res.status}`);
+    }
+
+    const data = (await res.json()) as {
+      hasPaymentMethod?: boolean;
+      creditBalance?: number;
+    };
+    const status: BillingStatus = {
+      hasPaymentMethod: data.hasPaymentMethod ?? false,
+      creditBalance: data.creditBalance ?? 0,
+    };
+    setCached(billingStatusCache, cacheKey, status);
+    return status;
   } finally {
     clearTimeout(timer);
   }

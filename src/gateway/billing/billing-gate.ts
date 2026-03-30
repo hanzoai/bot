@@ -151,7 +151,7 @@ export async function checkBillingAllowance(params: {
 
     return {
       allowed: false,
-      reason: `Insufficient funds — add credits to continue. Balance: $${(available / 100).toFixed(2)}`,
+      reason: `Insufficient funds — add credits or upgrade your plan to continue. Balance: $${(available / 100).toFixed(2)}`,
       status,
     };
   } catch (err) {
