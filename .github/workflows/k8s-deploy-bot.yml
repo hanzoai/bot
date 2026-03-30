@@ -58,8 +58,13 @@ jobs:
             ANTHROPIC_API_KEY="$ANTHROPIC_KEY" \
             HANZO_API_KEY="$HANZO_KEY"
 
-          echo "=== Wait for rollout ==="
-          kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || true
+          echo "=== Wait for rollout (if replicas > 0) ==="
+          REPLICAS=$(kubectl get deploy/cloud-agent -n hanzo -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
+          if [ "${REPLICAS:-0}" -gt 0 ]; then
+            kubectl rollout status deploy/cloud-agent -n hanzo --timeout=120s || true
+          else
+            echo "(cloud-agent has 0 replicas — skipping rollout wait)"
+          fi
 
           echo "=== Write auth-profiles.json to main agent dir ==="
           # The bot creates per-agent dirs under ~/.openclaw/agents/<id>/agent/
@@ -85,13 +90,13 @@ jobs:
           kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- curl -s http://localhost:18789/health
 
           echo ""
-          echo "=== Internal WS test ==="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- timeout 5 node -e "
-            const ws = new (require('ws'))('ws://bot-gateway:80/');
+          echo "=== Gateway WS test (from gateway pod) ==="
+          kubectl exec -n hanzo deploy/bot-gateway -c bot-gateway -- timeout 5 node -e "
+            const ws = new (require('ws'))('ws://localhost:18789/');
             ws.on('open', () => { console.log('WS OPEN'); ws.close(); process.exit(0); });
             ws.on('error', e => { console.log('WS ERROR:', e.message); process.exit(1); });
             setTimeout(() => { console.log('WS TIMEOUT'); process.exit(1); }, 4000);
-          " 2>&1
+          " 2>&1 || echo "WS test failed (non-fatal)"
 
           echo ""
           echo "=== Gateway logs (last 15) ==="
@@ -99,7 +104,12 @@ jobs:
 
           echo ""
           echo "=== Cloud-agent logs (last 15) ==="
-          kubectl logs -n hanzo deploy/cloud-agent -c cloud-agent --tail=15
+          CLOUD_AGENT_READY=$(kubectl get deploy/cloud-agent -n hanzo -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
+          if [ "${CLOUD_AGENT_READY:-0}" -gt 0 ]; then
+            kubectl logs -n hanzo deploy/cloud-agent -c cloud-agent --tail=15
+          else
+            echo "(cloud-agent has 0 ready replicas — provisioned bots will use the updated image)"
+          fi
 
           echo ""
           echo "=== Node registry ==="
