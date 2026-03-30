@@ -46,7 +46,73 @@ if [ -f "$HOME/.config/tint2/tint2rc" ]; then
   echo "[cloud-agent] tint2 panel started"
 fi
 
-# Setup desktop icons
+# Setup desktop icons — create .desktop shortcut files and libfm config
+# (ported from operative's start_all.sh)
+echo "[cloud-agent] Setting up desktop icons..."
+mkdir -p "$HOME/Desktop"
+mkdir -p "$HOME/.config/libfm"
+
+# Configure libfm to auto-execute .desktop files without prompting
+cat > "$HOME/.config/libfm/libfm.conf" << 'LIBFM'
+[config]
+quick_exec=1
+
+[ui]
+always_show_tabs=0
+LIBFM
+
+# Create desktop shortcut files
+cat > "$HOME/Desktop/Terminal.desktop" << 'DESK'
+[Desktop Entry]
+Name=Terminal
+Exec=xterm -fa "Monospace" -fs 14
+Icon=utilities-terminal
+Type=Application
+DESK
+
+cat > "$HOME/Desktop/Firefox.desktop" << 'DESK'
+[Desktop Entry]
+Name=Firefox
+Exec=firefox-esr
+Icon=firefox-esr
+Type=Application
+DESK
+
+cat > "$HOME/Desktop/Calculator.desktop" << 'DESK'
+[Desktop Entry]
+Name=Calculator
+Exec=galculator
+Icon=galculator
+Type=Application
+DESK
+
+cat > "$HOME/Desktop/TextEditor.desktop" << 'DESK'
+[Desktop Entry]
+Name=Text Editor
+Exec=gedit
+Icon=text-editor
+Type=Application
+DESK
+
+cat > "$HOME/Desktop/Spreadsheet.desktop" << 'DESK'
+[Desktop Entry]
+Name=Spreadsheet
+Exec=libreoffice --calc
+Icon=libreoffice-calc
+Type=Application
+DESK
+
+cat > "$HOME/Desktop/Files.desktop" << 'DESK'
+[Desktop Entry]
+Name=Files
+Exec=pcmanfm
+Icon=system-file-manager
+Type=Application
+DESK
+
+chmod +x "$HOME/Desktop/"*.desktop
+
+# Start pcmanfm desktop mode (manages root window with desktop icons)
 if command -v pcmanfm &>/dev/null; then
   pcmanfm --desktop --display=$DISPLAY 2>/dev/null &
   echo "[cloud-agent] pcmanfm desktop icons started"
@@ -135,12 +201,12 @@ cat > "$HOME/.openclaw/exec-approvals.json" << 'APPROVALS'
 {
   "version": 1,
   "defaults": {
-    "security": "allowlist",
+    "security": "full",
     "ask": "off"
   },
   "agents": {
     "*": {
-      "security": "allowlist",
+      "security": "full",
       "ask": "off",
       "allowlist": [
         {"pattern": "*"}
@@ -149,6 +215,23 @@ cat > "$HOME/.openclaw/exec-approvals.json" << 'APPROVALS'
   }
 }
 APPROVALS
+
+# Create bot config that routes exec to the local node (not sandbox).
+# Without this, the embedded LLM agent defaults to host="sandbox" which
+# fails because cloud pods don't have sandbox configured. Setting host="node"
+# makes the agent dispatch commands through the gateway back to this node,
+# where they execute in the same environment as the VNC desktop.
+cat > "$HOME/.openclaw/openclaw.json" << 'BOTCONFIG'
+{
+  "tools": {
+    "exec": {
+      "host": "node",
+      "security": "full",
+      "ask": "off"
+    }
+  }
+}
+BOTCONFIG
 
 # The bot connects to the gateway as a node and handles:
 # - Chat (LLM calls via Hanzo API)
@@ -161,9 +244,10 @@ export BOT_NODE_GATEWAY_URL="${BOT_NODE_GATEWAY_URL:-${BOT_GATEWAY_URL:-ws://bot
 # Node ID: prefer AGENT_NODE_ID (set by playground provisioner)
 NODE_ID="${AGENT_NODE_ID:-${HANZO_NODE_ID:-cloud-unknown}}"
 
-# Security mode: cloud agents need to execute desktop commands (firefox, etc.)
-# "allowlist" permits known-safe commands; "full" blocks everything pending approval.
-SECURITY_MODE="${AGENT_SECURITY_MODE:-allowlist}"
+# Security mode: cloud agents need full access to run desktop commands (firefox,
+# ls, etc.) without approval. "full" with ask=off allows all commands.
+# "allowlist" would block shell wrappers (sh -c) used by terminal and AI chat.
+SECURITY_MODE="${AGENT_SECURITY_MODE:-full}"
 
 exec node hanzo-bot.mjs node run \
   --node-id "$NODE_ID" \
