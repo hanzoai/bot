@@ -13,7 +13,7 @@ import { loadConfig } from "../config/config.js";
 import { dispatchInboundMessage } from "../auto-reply/dispatch.js";
 import { createReplyDispatcher } from "../auto-reply/reply/reply-dispatcher.js";
 import { createReplyPrefixOptions } from "../channels/reply-prefix.js";
-import { resolveSessionAgentId } from "../config/sessions.js";
+import { resolveSessionAgentId } from "../agents/agent-scope.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../utils/message-channel.js";
 import type { MsgContext } from "../auto-reply/templating.js";
 import { sendJson } from "./http-common.js";
