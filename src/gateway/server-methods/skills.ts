@@ -55,7 +55,7 @@ function collectSkillBins(entries: SkillEntry[]): string[] {
 }
 
 export const skillsHandlers: GatewayRequestHandlers = {
-  "skills.status": ({ params, respond }) => {
+  "skills.status": ({ params, respond, context }) => {
     if (!validateSkillsStatusParams(params)) {
       respond(
         false,
@@ -73,6 +73,17 @@ export const skillsHandlers: GatewayRequestHandlers = {
     if (agentIdRaw) {
       const knownAgents = listAgentIds(cfg);
       if (!knownAgents.includes(agentId)) {
+        // Cloud-provisioned agents are connected via NodeRegistry but have no
+        // local workspace on the gateway. Return an empty skill status rather
+        // than an error — workspace-specific skills live on the remote agent.
+        if (context.nodeRegistry.get(agentId)) {
+          const report = buildWorkspaceSkillStatus("", {
+            config: cfg,
+            eligibility: { remote: getRemoteSkillEligibility() },
+          });
+          respond(true, report, undefined);
+          return;
+        }
         respond(
           false,
           undefined,
