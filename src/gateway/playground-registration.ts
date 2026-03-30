@@ -25,6 +25,8 @@ export type PlaygroundRegistrationConfig = {
   baseUrl: string;
   /** Heartbeat interval in ms (default 30 000). */
   heartbeatIntervalMs?: number;
+  /** Bearer token for authenticating with the playground API. */
+  token?: string;
   log: SubsystemLogger;
 };
 
@@ -46,6 +48,7 @@ export async function startPlaygroundRegistration(
     skills,
     baseUrl,
     heartbeatIntervalMs = 30_000,
+    token,
     log,
   } = config;
 
@@ -54,10 +57,14 @@ export async function startPlaygroundRegistration(
   // -- helpers --------------------------------------------------------------
 
   async function post(path: string, body: unknown): Promise<boolean> {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
     try {
       const res = await fetch(`${apiBase}${path}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(10_000),
       });
@@ -147,11 +154,13 @@ export function resolvePlaygroundRegistrationConfig(params: {
   const baseUrl =
     params.env.HANZO_NODE_BASE_URL ||
     `http://bot-gateway.hanzo.svc:${params.gatewayPort === 18789 ? 80 : params.gatewayPort}`;
+  const token = params.env.BOT_GATEWAY_TOKEN || params.env.PLAYGROUND_TOKEN || undefined;
 
   return {
     playgroundUrl,
     nodeId,
     baseUrl,
+    token,
     bots: [
       { id: "chat", input_schema: { type: "object", properties: { message: { type: "string" } } } },
     ],
