@@ -26,7 +26,18 @@ export function schemaType(schema: JsonSchema): string | undefined {
     const filtered = schema.type.filter((t) => t !== "null");
     return filtered[0] ?? schema.type[0];
   }
-  return schema.type;
+  if (schema.type) {
+    return schema.type;
+  }
+  // Infer type from structure when `type` is absent (e.g. Zod `z.any()` / `z.unknown()`
+  // serialised as `{}` by toJSONSchema with unrepresentable:"any").
+  if (schema.properties || schema.additionalProperties) {
+    return "object";
+  }
+  if (schema.items) {
+    return "array";
+  }
+  return undefined;
 }
 
 export function defaultValue(schema?: JsonSchema): unknown {
