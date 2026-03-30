@@ -354,10 +354,14 @@ export async function executeNodeHostCommand(
   // "allowlist-miss" even when the inner command matches the allowlist.
   const preApproved = hostAsk === "off";
   const startedAt = Date.now();
+  // When pre-approved (ask=off), request operator.approvals scope so the
+  // gateway's system.run approval guard recognises this as a trusted
+  // internal pre-approval and allows approved=true without a runId.
   const raw = await callGatewayTool(
     "node.invoke",
     { timeoutMs: invokeTimeoutMs },
     buildInvokeParams(preApproved, null),
+    preApproved ? { extraScopes: ["operator.approvals"] } : undefined,
   );
   const payload =
     raw && typeof raw === "object" ? (raw as { payload?: unknown }).payload : undefined;
