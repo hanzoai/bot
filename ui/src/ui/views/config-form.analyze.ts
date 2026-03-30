@@ -87,8 +87,11 @@ function normalizeSchemaNode(
       if (!isAnySchema(schema.additionalProperties)) {
         const res = normalizeSchemaNode(schema.additionalProperties, [...path, "*"]);
         normalized.additionalProperties = res.schema ?? schema.additionalProperties;
-        if (res.unsupportedPaths.length > 0) {
-          unsupported.add(pathLabel);
+        // Propagate child unsupported paths (with wildcard) rather than marking
+        // the entire map/record as unsupported. This lets the map render and only
+        // blocks the specific unsupported sub-fields within each entry.
+        for (const p of res.unsupportedPaths) {
+          unsupported.add(p);
         }
       }
     }
