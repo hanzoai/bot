@@ -44,7 +44,7 @@ import { findLegacyConfigIssues } from "./legacy.js";
 import { applyMergePatch } from "./merge-patch.js";
 import { normalizeExecSafeBinProfilesInConfig } from "./normalize-exec-safe-bin.js";
 import { normalizeConfigPaths } from "./normalize-paths.js";
-import { resolveConfigPath, resolveDefaultConfigCandidates, resolveStateDir } from "./paths.js";
+import { resolveConfigPath, resolveConfigWritePath, resolveDefaultConfigCandidates, resolveStateDir } from "./paths.js";
 import { isBlockedObjectKey } from "./prototype-keys.js";
 import { applyConfigOverrides } from "./runtime-overrides.js";
 import {
@@ -676,8 +676,16 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
   const candidatePaths = deps.configPath
     ? [requestedConfigPath]
     : resolveDefaultConfigCandidates(deps.env, deps.homedir);
+  // When OPENCLAW_CONFIG_WRITE_PATH is set (e.g. K8s read-only ConfigMap scenario),
+  // writes go to the writable path and it is checked first for reads so user overrides
+  // take precedence over the base ConfigMap config.
+  const writePath = resolveConfigWritePath(deps.env);
   const configPath =
-    candidatePaths.find((candidate) => deps.fs.existsSync(candidate)) ?? requestedConfigPath;
+    (writePath && deps.fs.existsSync(writePath) ? writePath : null) ??
+    candidatePaths.find((candidate) => deps.fs.existsSync(candidate)) ??
+    requestedConfigPath;
+  // Effective write destination: prefer the writable path override, fall back to configPath.
+  const writeConfigPath = writePath ?? configPath;
 
   function loadConfig(): BotConfig {
     try {
@@ -1028,7 +1036,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       snapshot: result.snapshot,
       writeOptions: {
         envSnapshotForRestore: result.envSnapshotForRestore,
-        expectedConfigPath: configPath,
+        expectedConfigPath: writeConfigPath,
       },
     };
   }
@@ -1106,7 +1114,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       // If reading the current file fails, write cfg as-is (no env restoration)
     }
 
-    const dir = path.dirname(configPath);
+    const dir = path.dirname(writeConfigPath);
     await deps.fs.promises.mkdir(dir, { recursive: true, mode: 0o700 });
     const outputConfigBase =
       envRefMap && changedPaths
@@ -1158,7 +1166,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       const changeSummary =
         typeof changedPathCount === "number" ? `, changedPaths=${changedPathCount}` : "";
       deps.logger.warn(
-        `Config overwrite: ${configPath} (sha256 ${previousHash ?? "unknown"} -> ${nextHash}, backup=${configPath}.bak${changeSummary})`,
+        `Config overwrite: ${writeConfigPath} (sha256 ${previousHash ?? "unknown"} -> ${nextHash}, backup=${writeConfigPath}.bak${changeSummary})`,
       );
     };
     const logConfigWriteAnomalies = () => {
@@ -1171,13 +1179,13 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       if (isVitest && !shouldLogInVitest) {
         return;
       }
-      deps.logger.warn(`Config write anomaly: ${configPath} (${suspiciousReasons.join(", ")})`);
+      deps.logger.warn(`Config write anomaly: ${writeConfigPath} (${suspiciousReasons.join(", ")})`);
     };
     const auditRecordBase = {
       ts: new Date().toISOString(),
       source: "config-io" as const,
       event: "config.write" as const,
-      configPath,
+      configPath: writeConfigPath,
       pid: process.pid,
       ppid: process.ppid,
       cwd: process.cwd(),
@@ -1227,7 +1235,7 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
 
     const tmp = path.join(
       dir,
-      `${path.basename(configPath)}.${process.pid}.${crypto.randomUUID()}.tmp`,
+      `${path.basename(writeConfigPath)}.${process.pid}.${crypto.randomUUID()}.tmp`,
     );
 
     try {
@@ -1236,18 +1244,18 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
         mode: 0o600,
       });
 
-      if (deps.fs.existsSync(configPath)) {
-        await maintainConfigBackups(configPath, deps.fs.promises);
+      if (deps.fs.existsSync(writeConfigPath)) {
+        await maintainConfigBackups(writeConfigPath, deps.fs.promises);
       }
 
       try {
-        await deps.fs.promises.rename(tmp, configPath);
+        await deps.fs.promises.rename(tmp, writeConfigPath);
       } catch (err) {
         const code = (err as { code?: string }).code;
         // Windows doesn't reliably support atomic replace via rename when dest exists.
         if (code === "EPERM" || code === "EEXIST") {
-          await deps.fs.promises.copyFile(tmp, configPath);
-          await deps.fs.promises.chmod(configPath, 0o600).catch(() => {
+          await deps.fs.promises.copyFile(tmp, writeConfigPath);
+          await deps.fs.promises.chmod(writeConfigPath, 0o600).catch(() => {
             // best-effort
           });
           await deps.fs.promises.unlink(tmp).catch(() => {
