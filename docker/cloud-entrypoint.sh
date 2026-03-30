@@ -216,6 +216,29 @@ cat > "$HOME/.openclaw/exec-approvals.json" << 'APPROVALS'
 }
 APPROVALS
 
+# Write auth-profiles.json so the agent can authenticate LLM calls.
+# Provisioned pods get HANZO_API_KEY from the playground provisioner.
+# Writing to the "main" agent dir lets all per-agent dirs inherit it.
+mkdir -p "/home/node/.openclaw/agents/main/agent"
+AUTH_JSON="{\"version\":1,\"profiles\":{"
+FIRST=1
+if [ -n "$HANZO_API_KEY" ]; then
+  AUTH_JSON="${AUTH_JSON}\"hanzo:default\":{\"type\":\"api_key\",\"provider\":\"hanzo\",\"key\":\"${HANZO_API_KEY}\"}"
+  FIRST=0
+fi
+if [ -n "$ANTHROPIC_API_KEY" ]; then
+  [ $FIRST -eq 0 ] && AUTH_JSON="${AUTH_JSON},"
+  AUTH_JSON="${AUTH_JSON}\"anthropic:default\":{\"type\":\"api_key\",\"provider\":\"anthropic\",\"key\":\"${ANTHROPIC_API_KEY}\"}"
+  FIRST=0
+fi
+if [ -n "$OPENAI_API_KEY" ]; then
+  [ $FIRST -eq 0 ] && AUTH_JSON="${AUTH_JSON},"
+  AUTH_JSON="${AUTH_JSON}\"openai:default\":{\"type\":\"api_key\",\"provider\":\"openai\",\"key\":\"${OPENAI_API_KEY}\"}"
+fi
+AUTH_JSON="${AUTH_JSON}},\"default\":\"hanzo:default\"}"
+echo "$AUTH_JSON" > "/home/node/.openclaw/agents/main/agent/auth-profiles.json"
+echo "[cloud-agent] auth-profiles.json written to main agent dir"
+
 # Create bot config that routes exec to the local node (not sandbox).
 # Without this, the embedded LLM agent defaults to host="sandbox" which
 # fails because cloud pods don't have sandbox configured. Setting host="node"
