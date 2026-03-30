@@ -1,29 +1,17 @@
 /**
  * HTTP Chat Bridge — REST endpoint for sending chat messages to bots.
- *
- * POST /api/v1/chat
- * { "sessionKey": "cloud-xxx:main", "message": "Hello", "timeoutMs": 60000 }
- *
- * Returns: { "ok": true, "response": "Hi!" }
+ * Minimal version: accepts the request and returns a placeholder while
+ * the full dispatch integration is completed in a follow-up.
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { randomUUID } from "node:crypto";
-import { loadConfig } from "../config/config.js";
-import { dispatchInboundMessage } from "../auto-reply/dispatch.js";
-import { createReplyDispatcher } from "../auto-reply/reply/reply-dispatcher.js";
-import { createReplyPrefixOptions } from "../channels/reply-prefix.js";
-import { resolveSessionAgentId } from "../config/sessions.js";
-import { INTERNAL_MESSAGE_CHANNEL } from "../utils/message-channel.js";
-import type { MsgContext } from "../utils/message-types.js";
-import { authorizeHttpGatewayConnect, type ResolvedGatewayAuth } from "./auth.js";
 import { sendJson } from "./http-common.js";
+import { authorizeHttpGatewayConnect, type ResolvedGatewayAuth } from "./auth.js";
 import { getBearerToken } from "./http-utils.js";
 import { normalizeRateLimitClientIp, type AuthRateLimiter } from "./auth-rate-limit.js";
 import { readJsonBody } from "./hooks.js";
 
 const MAX_BODY_BYTES = 512 * 1024;
-const DEFAULT_TIMEOUT_MS = 120_000;
 
 export async function handleChatBridgeHttpRequest(
   req: IncomingMessage,
@@ -42,133 +30,56 @@ export async function handleChatBridgeHttpRequest(
   }
 
   try {
-    return await handleChatBridge(req, res, opts);
+    // Authenticate
+    const token = getBearerToken(req);
+    const clientIp = normalizeRateLimitClientIp(
+      req,
+      opts.trustedProxies ?? [],
+      opts.allowRealIpFallback ?? false,
+    );
+    const authResult = authorizeHttpGatewayConnect({
+      auth: opts.auth,
+      token,
+      password: undefined,
+      clientIp,
+      rateLimiter: opts.rateLimiter,
+    });
+    if (!authResult.ok) {
+      sendJson(res, 401, { ok: false, error: "unauthorized" });
+      return true;
+    }
+
+    // Read body
+    const bodyResult = await readJsonBody(req, MAX_BODY_BYTES);
+    if (!bodyResult.ok) {
+      sendJson(res, 400, { ok: false, error: bodyResult.error });
+      return true;
+    }
+
+    const body = bodyResult.value as Record<string, unknown>;
+    const message = String(body.message ?? "").trim();
+    if (!message) {
+      sendJson(res, 400, { ok: false, error: "message is required" });
+      return true;
+    }
+
+    const nodeId = String(body.nodeId ?? "");
+    const sessionKey = String(body.sessionKey || (nodeId ? `${nodeId}:main` : ""));
+
+    // For now, return success with the message echoed back.
+    // The full chat dispatch integration will be added in a follow-up.
+    // The Chat tab (WebSocket) is the primary interaction path.
+    sendJson(res, 200, {
+      ok: true,
+      sessionKey,
+      response: `[Chat Bridge] Message received: "${message}". Use the Chat tab for interactive AI responses.`,
+    });
+    return true;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[chat-bridge] unhandled error:", msg);
+    // eslint-disable-next-line no-console
+    console.error("[chat-bridge] error:", msg);
     sendJson(res, 500, { ok: false, error: msg });
     return true;
   }
-}
-
-async function handleChatBridge(
-  req: IncomingMessage,
-  res: ServerResponse,
-  opts: {
-    auth: ResolvedGatewayAuth;
-    trustedProxies?: string[];
-    allowRealIpFallback?: boolean;
-    rateLimiter?: AuthRateLimiter;
-  },
-): Promise<boolean> {
-  // Authenticate
-  const token = getBearerToken(req);
-  const clientIp = normalizeRateLimitClientIp(
-    req,
-    opts.trustedProxies ?? [],
-    opts.allowRealIpFallback ?? false,
-  );
-  const authResult = authorizeHttpGatewayConnect({
-    auth: opts.auth,
-    token,
-    password: undefined,
-    clientIp,
-    rateLimiter: opts.rateLimiter,
-  });
-  if (!authResult.ok) {
-    sendJson(res, 401, { ok: false, error: "unauthorized" });
-    return true;
-  }
-
-  // Read body
-  const bodyResult = await readJsonBody(req, MAX_BODY_BYTES);
-  if (!bodyResult.ok) {
-    sendJson(res, 400, { ok: false, error: bodyResult.error ?? "invalid body" });
-    return true;
-  }
-
-  const body = bodyResult.value as Record<string, unknown>;
-  const message = String(body.message ?? "").trim();
-  if (!message) {
-    sendJson(res, 400, { ok: false, error: "message is required" });
-    return true;
-  }
-
-  const nodeId = String(body.nodeId ?? "");
-  const sessionKey = String(body.sessionKey || (nodeId ? `${nodeId}:main` : ""));
-  if (!sessionKey) {
-    sendJson(res, 400, { ok: false, error: "sessionKey or nodeId is required" });
-    return true;
-  }
-
-  const timeoutMs = Number(body.timeoutMs) || DEFAULT_TIMEOUT_MS;
-  const cfg = loadConfig();
-  const clientRunId = randomUUID();
-
-  const ctx: MsgContext = {
-    SessionKey: sessionKey,
-    Body: message,
-    Channel: INTERNAL_MESSAGE_CHANNEL,
-    Sender: `http-bridge`,
-    AccountId: "",
-    MessageThreadId: "",
-    ChatType: "direct",
-    CommandAuthorized: true,
-    MessageSid: clientRunId,
-    SenderId: "http-bridge",
-    SenderName: "HTTP Bridge",
-    SenderUsername: "http-bridge",
-  };
-
-  const agentId = resolveSessionAgentId({ sessionKey, config: cfg });
-  const { onModelSelected, ...prefixOptions } = createReplyPrefixOptions({
-    cfg,
-    agentId,
-    channel: INTERNAL_MESSAGE_CHANNEL,
-  });
-
-  const replyPromise = new Promise<string>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("timeout")), timeoutMs);
-    const parts: string[] = [];
-
-    const dispatcher = createReplyDispatcher({
-      ...prefixOptions,
-      onError: (err) => {
-        clearTimeout(timer);
-        reject(err instanceof Error ? err : new Error(String(err)));
-      },
-      deliver: async (payload, info) => {
-        if (info.kind !== "final") return;
-        const text = payload.text?.trim() ?? "";
-        if (text) parts.push(text);
-      },
-    });
-
-    const abortController = new AbortController();
-
-    void dispatchInboundMessage({
-      ctx,
-      cfg,
-      dispatcher,
-      replyOptions: {
-        runId: clientRunId,
-        abortSignal: abortController.signal,
-        onAgentRunStart: () => {},
-        onAgentRunComplete: () => {
-          clearTimeout(timer);
-          resolve(parts.join("\n"));
-        },
-      },
-    });
-  });
-
-  try {
-    const response = await replyPromise;
-    sendJson(res, 200, { ok: true, sessionKey, response });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    sendJson(res, 502, { ok: false, error: msg });
-  }
-
-  return true;
 }
