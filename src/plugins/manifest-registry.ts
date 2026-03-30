@@ -172,7 +172,10 @@ export function loadPluginManifestRegistry(params: {
     const manifestRes = loadPluginManifest(candidate.rootDir, rejectHardlinks);
     if (!manifestRes.ok) {
       diagnostics.push({
-        level: "error",
+        // Bundled extensions without a manifest simply won't load — treat as a
+        // warning so the bot doesn't hard-fail when the extensions/ directory
+        // contains directories that are placeholders or work-in-progress.
+        level: candidate.origin === "bundled" ? "warn" : "error",
         message: manifestRes.error,
         source: manifestRes.manifestPath,
       });
