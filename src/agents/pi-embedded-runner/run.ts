@@ -256,13 +256,16 @@ export async function runEmbeddedPiAgent(
           return {
             payloads: [{ text: errorMsg, isError: true }],
             meta: {
-              sessionId: params.sessionId,
-              provider: params.provider ?? DEFAULT_PROVIDER,
-              model: params.model ?? DEFAULT_MODEL,
+              durationMs: 0,
+              agentMeta: {
+                sessionId: params.sessionId,
+                provider: params.provider ?? DEFAULT_PROVIDER,
+                model: params.model ?? DEFAULT_MODEL,
+              },
             },
             walletGated: true,
             walletError: errorMsg,
-          } as EmbeddedPiRunResult;
+          };
         }
       } catch {
         // fail-open
