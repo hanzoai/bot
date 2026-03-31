@@ -18,6 +18,7 @@ import type { TenantContext } from "../tenant-context.js";
 import {
   getSubscriptionStatus,
   getBalance,
+  getWalletBalance,
   type SubscriptionStatus,
 } from "./iam-billing-client.js";
 
@@ -92,10 +93,30 @@ export async function checkBillingAllowance(params: {
   nodeBudgetCents?: number;
   /** Node dedicated spent in cents (only for dedicated mode). */
   nodeSpentCents?: number;
+  /** Bot/agent ID for wallet balance check. */
+  botId?: string;
 }): Promise<BillingGateResult> {
   // Non-IAM mode — billing not enforced.
   if (!params.iamConfig || !params.tenant) {
     return { allowed: true };
+  }
+
+  // Bot wallet check — if the bot has an enabled wallet, enforce it.
+  // This runs BEFORE super-admin bypass so wallet is always the source of truth.
+  if (params.botId) {
+    try {
+      const walletBalance = await getWalletBalance(params.botId);
+      // walletBalance === -1 means wallet doesn't exist or is disabled → skip check
+      if (walletBalance >= 0 && walletBalance <= 0) {
+        return {
+          allowed: false,
+          reason: "Bot wallet has insufficient funds. Fund your bot wallet to continue.",
+          status: { active: false, subscription: null, plan: null },
+        };
+      }
+    } catch {
+      // Wallet check failed — don't gate (fail-open)
+    }
   }
 
   // Super admins bypass billing checks — enterprise tier.
