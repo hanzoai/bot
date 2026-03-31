@@ -74,6 +74,10 @@ export type EmbeddedPiRunResult = {
   messagingToolSentTargets?: MessagingToolSend[];
   // Count of successful cron.add tool calls in this run.
   successfulCronAdds?: number;
+  // True if the run was blocked by the bot wallet balance check.
+  walletGated?: boolean;
+  // User-facing wallet error message.
+  walletError?: string;
 };
 
 export type EmbeddedPiCompactResult = {
