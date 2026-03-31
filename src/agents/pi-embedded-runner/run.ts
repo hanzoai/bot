@@ -243,6 +243,33 @@ function buildErrorAgentMeta(params: {
 export async function runEmbeddedPiAgent(
   params: RunEmbeddedPiAgentParams,
 ): Promise<EmbeddedPiRunResult> {
+  // Bot wallet balance check — block the run if the bot has an enabled wallet with $0.
+  {
+    const { getWalletBalance } = await import("../../gateway/billing/iam-billing-client.js");
+    const keyParts = (params.sessionKey ?? "").split(":");
+    const walletBotId = keyParts.length >= 2 ? keyParts[1] : "";
+    if (walletBotId) {
+      try {
+        const walletBalance = await getWalletBalance(walletBotId);
+        if (walletBalance >= 0 && walletBalance <= 0) {
+          const errorMsg = "⚠️ Bot wallet has insufficient funds. Fund your bot wallet to continue.";
+          return {
+            payloads: [{ text: errorMsg, isError: true }],
+            meta: {
+              sessionId: params.sessionId,
+              provider: params.provider ?? DEFAULT_PROVIDER,
+              model: params.model ?? DEFAULT_MODEL,
+            },
+            walletGated: true,
+            walletError: errorMsg,
+          } as EmbeddedPiRunResult;
+        }
+      } catch {
+        // fail-open
+      }
+    }
+  }
+
   const sessionLane = resolveSessionLane(params.sessionKey?.trim() || params.sessionId);
   const globalLane = resolveGlobalLane(params.lane);
   const enqueueGlobal =
