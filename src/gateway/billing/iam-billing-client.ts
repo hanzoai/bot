@@ -112,6 +112,57 @@ export function resetBillingClient(): void {
   planCache.clear();
   balanceCache.clear();
   billingStatusCache.clear();
+  walletCache.clear();
+}
+
+// ---------------------------------------------------------------------------
+// Bot Wallet Balance (via Playground API)
+// ---------------------------------------------------------------------------
+
+const walletCache = new Map<string, CacheEntry<number>>();
+
+/**
+ * Get the bot wallet balance from the Playground API.
+ * Returns available USD balance in cents. Cached for 30 seconds.
+ * Returns -1 if wallet doesn't exist (not enabled, should not gate).
+ */
+export async function getWalletBalance(botId: string): Promise<number> {
+  const cacheKey = `wallet:${botId}`;
+  const hit = cached(walletCache, cacheKey);
+  if (hit !== undefined) {
+    return hit;
+  }
+
+  const playgroundUrl = process.env.PLAYGROUND_URL || "http://hanzo-playground.hanzo.svc:8080";
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5_000);
+  try {
+    const res = await fetch(`${playgroundUrl}/v1/bots/${encodeURIComponent(botId)}/wallet`, {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      // Wallet doesn't exist — return -1 (don't gate)
+      setCached(walletCache, cacheKey, -1);
+      return -1;
+    }
+
+    const data = (await res.json()) as { usd_balance_cents?: number; enabled?: boolean };
+    if (!data.enabled) {
+      setCached(walletCache, cacheKey, -1);
+      return -1;
+    }
+    const balance = data.usd_balance_cents ?? 0;
+    // Shorter TTL for wallet balance (30s)
+    walletCache.set(cacheKey, { value: balance, expiresAt: Date.now() + 30_000 });
+    return balance;
+  } catch {
+    // Playground unreachable — don't gate (fail-open for wallet)
+    return -1;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // ---------------------------------------------------------------------------
