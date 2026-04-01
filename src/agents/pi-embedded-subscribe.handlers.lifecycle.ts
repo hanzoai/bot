@@ -147,14 +147,15 @@ async function deductBotWalletUsage(
       /* no config */
     }
     let costConfig = resolveModelCostConfig({ provider, model, config: cfg });
-    if (!costConfig && provider === "anthropic") {
+    if (!costConfig) {
+      // Apply Claude model pricing regardless of provider (hanzo, anthropic, openai-compat, etc.)
       const m = model.toLowerCase();
       if (m.includes("opus")) {
         costConfig = { input: 15, output: 75, cacheRead: 1.5, cacheWrite: 18.75 };
       } else if (m.includes("haiku")) {
         costConfig = { input: 0.8, output: 4, cacheRead: 0.08, cacheWrite: 1 };
-      } else {
-        // sonnet / default
+      } else if (m.includes("claude") || m.includes("sonnet") || provider === "anthropic" || provider === "hanzo") {
+        // sonnet / default Claude rate
         costConfig = { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 };
       }
     }
