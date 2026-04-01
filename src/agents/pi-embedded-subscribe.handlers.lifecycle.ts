@@ -58,12 +58,23 @@ export function handleAgentEnd(ctx: EmbeddedPiSubscribeContext) {
     });
   } else {
     ctx.log.debug(`embedded run agent end: runId=${ctx.params.runId} isError=${isError}`);
+    const usageTotals = ctx.getUsageTotals();
+    const endModel =
+      isAssistantMessage(ctx.state.lastAssistant) ? (ctx.state.lastAssistant.model ?? "") : "";
+    const endProvider =
+      isAssistantMessage(ctx.state.lastAssistant) ? (ctx.state.lastAssistant.provider ?? "") : "";
     emitAgentEvent({
       runId: ctx.params.runId,
+      sessionKey: ctx.params.sessionKey,
       stream: "lifecycle",
       data: {
         phase: "end",
         endedAt: Date.now(),
+        ...(usageTotals && {
+          usage: usageTotals,
+          model: endModel,
+          provider: endProvider,
+        }),
       },
     });
     void ctx.params.onAgentEvent?.({
