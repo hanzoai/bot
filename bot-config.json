@@ -1,0 +1,27 @@
+{
+  "canvasHost": {
+    "liveReload": false
+  },
+  "agents": {
+    "defaults": {
+      "model": "anthropic/claude-sonnet-4-6"
+    }
+  },
+  "models": {
+    "providers": {
+      "anthropic": {
+        "baseUrl": "https://api.hanzo.ai",
+        "api": "anthropic-messages",
+        "models": []
+      }
+    }
+  },
+  "gateway": {
+    "controlUi": {
+      "allowedOrigins": ["http://localhost:18789", "http://localhost:3000"],
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true,
+      "basePath": "/__bot__"
+    }
+  }
+}
