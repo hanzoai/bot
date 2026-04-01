@@ -166,6 +166,75 @@ export async function getWalletBalance(botId: string): Promise<number> {
 }
 
 // ---------------------------------------------------------------------------
+// Bot Wallet Usage Deduction
+// ---------------------------------------------------------------------------
+
+/**
+ * Deduct LLM usage cost from a bot wallet via the Playground API.
+ * This is fire-and-forget — failures are logged but not thrown.
+ * Returns true if deduction succeeded.
+ */
+export async function deductWalletUsage(params: {
+  botId: string;
+  amountUsdCents: number;
+  model?: string;
+  provider?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  cacheReadTokens?: number;
+  cacheWriteTokens?: number;
+  description?: string;
+}): Promise<boolean> {
+  if (!params.botId || params.amountUsdCents <= 0) {
+    return false;
+  }
+
+  const playgroundUrl = process.env.PLAYGROUND_URL || "http://hanzo-playground.hanzo.svc:8080";
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10_000);
+  try {
+    const res = await fetch(
+      `${playgroundUrl}/v1/bots/${encodeURIComponent(params.botId)}/wallet/deduct-usage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          amount_usd_cents: params.amountUsdCents,
+          model: params.model ?? "unknown",
+          provider: params.provider ?? "unknown",
+          input_tokens: params.inputTokens ?? 0,
+          output_tokens: params.outputTokens ?? 0,
+          cache_read_tokens: params.cacheReadTokens ?? 0,
+          cache_write_tokens: params.cacheWriteTokens ?? 0,
+          description: params.description,
+        }),
+        signal: controller.signal,
+      },
+    );
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      console.warn(
+        `[wallet-usage] Failed to deduct ${params.amountUsdCents}c from bot ${params.botId}: ${res.status} ${errText.substring(0, 200)}`,
+      );
+      return false;
+    }
+
+    console.log(
+      `[wallet-usage] Deducted ${params.amountUsdCents}c from bot ${params.botId} (${params.model}, ${params.inputTokens ?? 0}in/${params.outputTokens ?? 0}out)`,
+    );
+    return true;
+  } catch (err) {
+    console.warn(
+      `[wallet-usage] Error deducting from bot ${params.botId}: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Queries
 // ---------------------------------------------------------------------------
 
