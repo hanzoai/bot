@@ -753,28 +753,29 @@ export const chatHandlers: GatewayRequestHandlers = {
       timeoutMs?: number;
       idempotencyKey: string;
     };
+    // Extract bot ID from session key for wallet operations.
+    // Session key format: "prefix:botId:rest" or "botId:rest"
+    const chatSendKeyParts = (p.sessionKey ?? "").split(":");
+    const chatSendWalletBotId = chatSendKeyParts.length >= 2 ? chatSendKeyParts[1] : "";
+
     // Bot wallet balance check — block if bot has an enabled wallet with $0 balance.
-    {
-      const { getWalletBalance } = await import("../../gateway/billing/iam-billing-client.js");
-      const keyParts = (p.sessionKey ?? "").split(":");
-      const walletBotId = keyParts.length >= 2 ? keyParts[1] : "";
-      if (walletBotId) {
-        try {
-          const walletBalance = await getWalletBalance(walletBotId);
-          if (walletBalance >= 0 && walletBalance <= 0) {
-            respond(
-              false,
-              undefined,
-              errorShape(
-                ErrorCodes.INVALID_REQUEST,
-                "Bot wallet has insufficient funds. Fund your bot wallet to continue.",
-              ),
-            );
-            return;
-          }
-        } catch {
-          // fail-open
+    if (chatSendWalletBotId) {
+      try {
+        const { getWalletBalance } = await import("../../gateway/billing/iam-billing-client.js");
+        const walletBalance = await getWalletBalance(chatSendWalletBotId);
+        if (walletBalance >= 0 && walletBalance <= 0) {
+          respond(
+            false,
+            undefined,
+            errorShape(
+              ErrorCodes.INVALID_REQUEST,
+              "Bot wallet has insufficient funds. Fund your bot wallet to continue.",
+            ),
+          );
+          return;
         }
+      } catch {
+        // fail-open
       }
     }
 
@@ -1031,7 +1032,7 @@ export const chatHandlers: GatewayRequestHandlers = {
           onModelSelected,
         },
       })
-        .then(() => {
+        .then(async () => {
           if (!agentRunStarted) {
             const combinedReply = finalReplyParts
               .map((part) => part.trim())
@@ -1085,6 +1086,68 @@ export const chatHandlers: GatewayRequestHandlers = {
               payload: { runId: clientRunId, status: "ok" as const },
             },
           });
+
+          // Bot wallet usage deduction — fire-and-forget after run completes.
+          // Reads updated session entry for token counts (inputTokens/outputTokens are
+          // per-run, overwritten each turn by persistRunSessionUsage).
+          if (chatSendWalletBotId) {
+            void (async () => {
+              try {
+                const { entry: freshEntry } = loadSessionEntry(sessionKey);
+                const inputTok = freshEntry?.inputTokens ?? 0;
+                const outputTok = freshEntry?.outputTokens ?? 0;
+                if (inputTok <= 0 && outputTok <= 0) {
+                  return;
+                }
+                const modelUsed = freshEntry?.model ?? "";
+                const providerUsed = freshEntry?.modelProvider ?? "";
+                const cacheRead = freshEntry?.cacheRead ?? 0;
+                const cacheWrite = freshEntry?.cacheWrite ?? 0;
+                const { resolveModelCostConfig, estimateUsageCost } = await import(
+                  "../../utils/usage-format.js"
+                );
+                let costConfig = resolveModelCostConfig({
+                  provider: providerUsed,
+                  model: modelUsed,
+                  config: cfg,
+                });
+                // Fallback pricing for Anthropic models (per million tokens, in USD).
+                if (!costConfig && providerUsed === "anthropic") {
+                  const m = modelUsed.toLowerCase();
+                  if (m.includes("opus")) {
+                    costConfig = { input: 15, output: 75, cacheRead: 1.5, cacheWrite: 18.75 };
+                  } else if (m.includes("haiku")) {
+                    costConfig = { input: 0.8, output: 4, cacheRead: 0.08, cacheWrite: 1 };
+                  } else {
+                    // Default: Sonnet pricing
+                    costConfig = { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 };
+                  }
+                }
+                const costUsd = estimateUsageCost({
+                  usage: { input: inputTok, output: outputTok, cacheRead, cacheWrite },
+                  cost: costConfig,
+                });
+                const costCents = costUsd ? Math.ceil(costUsd * 100) : 0;
+                if (costCents > 0) {
+                  const { deductWalletUsage } = await import(
+                    "../../gateway/billing/iam-billing-client.js"
+                  );
+                  await deductWalletUsage({
+                    botId: chatSendWalletBotId,
+                    amountUsdCents: costCents,
+                    model: modelUsed,
+                    provider: providerUsed,
+                    inputTokens: inputTok,
+                    outputTokens: outputTok,
+                    cacheReadTokens: cacheRead,
+                    cacheWriteTokens: cacheWrite,
+                  });
+                }
+              } catch {
+                // Best-effort — never block chat
+              }
+            })();
+          }
         })
         .catch((err) => {
           const error = errorShape(ErrorCodes.UNAVAILABLE, String(err));
