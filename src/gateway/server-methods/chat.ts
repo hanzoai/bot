@@ -1032,7 +1032,7 @@ export const chatHandlers: GatewayRequestHandlers = {
           onModelSelected,
         },
       })
-        .then(async () => {
+        .then(() => {
           if (!agentRunStarted) {
             const combinedReply = finalReplyParts
               .map((part) => part.trim())
@@ -1087,67 +1087,9 @@ export const chatHandlers: GatewayRequestHandlers = {
             },
           });
 
-          // Bot wallet usage deduction — fire-and-forget after run completes.
-          // Reads updated session entry for token counts (inputTokens/outputTokens are
-          // per-run, overwritten each turn by persistRunSessionUsage).
-          if (chatSendWalletBotId) {
-            void (async () => {
-              try {
-                const { entry: freshEntry } = loadSessionEntry(sessionKey);
-                const inputTok = freshEntry?.inputTokens ?? 0;
-                const outputTok = freshEntry?.outputTokens ?? 0;
-                if (inputTok <= 0 && outputTok <= 0) {
-                  return;
-                }
-                const modelUsed = freshEntry?.model ?? "";
-                const providerUsed = freshEntry?.modelProvider ?? "";
-                const cacheRead = freshEntry?.cacheRead ?? 0;
-                const cacheWrite = freshEntry?.cacheWrite ?? 0;
-                const { resolveModelCostConfig, estimateUsageCost } = await import(
-                  "../../utils/usage-format.js"
-                );
-                let costConfig = resolveModelCostConfig({
-                  provider: providerUsed,
-                  model: modelUsed,
-                  config: cfg,
-                });
-                // Fallback pricing for Anthropic models (per million tokens, in USD).
-                if (!costConfig && providerUsed === "anthropic") {
-                  const m = modelUsed.toLowerCase();
-                  if (m.includes("opus")) {
-                    costConfig = { input: 15, output: 75, cacheRead: 1.5, cacheWrite: 18.75 };
-                  } else if (m.includes("haiku")) {
-                    costConfig = { input: 0.8, output: 4, cacheRead: 0.08, cacheWrite: 1 };
-                  } else {
-                    // Default: Sonnet pricing
-                    costConfig = { input: 3, output: 15, cacheRead: 0.3, cacheWrite: 3.75 };
-                  }
-                }
-                const costUsd = estimateUsageCost({
-                  usage: { input: inputTok, output: outputTok, cacheRead, cacheWrite },
-                  cost: costConfig,
-                });
-                const costCents = costUsd ? Math.ceil(costUsd * 100) : 0;
-                if (costCents > 0) {
-                  const { deductWalletUsage } = await import(
-                    "../../gateway/billing/iam-billing-client.js"
-                  );
-                  await deductWalletUsage({
-                    botId: chatSendWalletBotId,
-                    amountUsdCents: costCents,
-                    model: modelUsed,
-                    provider: providerUsed,
-                    inputTokens: inputTok,
-                    outputTokens: outputTok,
-                    cacheReadTokens: cacheRead,
-                    cacheWriteTokens: cacheWrite,
-                  });
-                }
-              } catch {
-                // Best-effort — never block chat
-              }
-            })();
-          }
+          // Note: wallet deduction is handled in server-chat.ts createAgentEventHandler
+          // when the lifecycle "end" event fires with usage data. This works for both
+          // local runs (pi-embedded) and cloud agent pods.
         })
         .catch((err) => {
           const error = errorShape(ErrorCodes.UNAVAILABLE, String(err));
