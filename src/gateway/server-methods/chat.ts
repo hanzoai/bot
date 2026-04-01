@@ -753,6 +753,31 @@ export const chatHandlers: GatewayRequestHandlers = {
       timeoutMs?: number;
       idempotencyKey: string;
     };
+    // Bot wallet balance check — block if bot has an enabled wallet with $0 balance.
+    {
+      const { getWalletBalance } = await import("../../gateway/billing/iam-billing-client.js");
+      const keyParts = (p.sessionKey ?? "").split(":");
+      const walletBotId = keyParts.length >= 2 ? keyParts[1] : "";
+      if (walletBotId) {
+        try {
+          const walletBalance = await getWalletBalance(walletBotId);
+          if (walletBalance >= 0 && walletBalance <= 0) {
+            respond(
+              false,
+              undefined,
+              errorShape(
+                ErrorCodes.INVALID_REQUEST,
+                "Bot wallet has insufficient funds. Fund your bot wallet to continue.",
+              ),
+            );
+            return;
+          }
+        } catch {
+          // fail-open
+        }
+      }
+    }
+
     const sanitizedMessageResult = sanitizeChatSendMessageInput(p.message);
     if (!sanitizedMessageResult.ok) {
       respond(
