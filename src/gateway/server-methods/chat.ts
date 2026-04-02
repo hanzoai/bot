@@ -754,9 +754,16 @@ export const chatHandlers: GatewayRequestHandlers = {
       idempotencyKey: string;
     };
     // Extract bot ID from session key for wallet operations.
-    // Session key format: "prefix:botId:rest" or "botId:rest"
+    // Session key formats:
+    //   "agent:cloud-xxxx:main" → bot ID is parts[1]
+    //   "cloud-xxxx:main"       → bot ID is parts[0] (HTTP chat bridge)
     const chatSendKeyParts = (p.sessionKey ?? "").split(":");
-    const chatSendWalletBotId = chatSendKeyParts.length >= 2 ? chatSendKeyParts[1] : "";
+    const chatSendWalletBotId =
+      chatSendKeyParts.length >= 3 && chatSendKeyParts[0] === "agent"
+        ? (chatSendKeyParts[1] ?? "")
+        : (chatSendKeyParts[0] ?? "").startsWith("cloud-")
+          ? (chatSendKeyParts[0] ?? "")
+          : "";
 
     // Bot wallet balance check — block if bot has an enabled wallet with $0 balance.
     if (chatSendWalletBotId) {
