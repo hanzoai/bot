@@ -80,6 +80,24 @@ async function handleChatBridge(
   const cfg = loadConfig();
   const clientRunId = randomUUID();
 
+  // Bot wallet balance check — block if bot has an enabled wallet with $0 balance.
+  const walletBotId = sessionKey.split(":")[0] ?? "";
+  if (walletBotId.startsWith("cloud-")) {
+    try {
+      const { getWalletBalance } = await import("../gateway/billing/iam-billing-client.js");
+      const walletBalance = await getWalletBalance(walletBotId);
+      if (walletBalance >= 0 && walletBalance <= 0) {
+        sendJson(res, 402, {
+          ok: false,
+          error: "Bot wallet has insufficient funds. Fund your bot wallet to continue.",
+        });
+        return true;
+      }
+    } catch {
+      // Wallet check failed — don't gate (fail-open)
+    }
+  }
+
   // Build MsgContext — same pattern as chat.send in server-methods/chat.ts
   const ctx: MsgContext = {
     Body: message,
