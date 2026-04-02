@@ -260,7 +260,11 @@ export function handleMessageEnd(
 
   const assistantMessage = msg;
   ctx.noteLastAssistant(assistantMessage);
-  ctx.recordAssistantUsage((assistantMessage as { usage?: unknown }).usage);
+  const rawUsage = (assistantMessage as { usage?: unknown }).usage;
+  console.log(
+    `[wallet-deduct] message_end: role=${msg.role} hasUsage=${!!rawUsage} usage=${JSON.stringify(rawUsage ?? null)} model=${(assistantMessage as { model?: string }).model ?? "?"} provider=${(assistantMessage as { provider?: string }).provider ?? "?"}`,
+  );
+  ctx.recordAssistantUsage(rawUsage);
   promoteThinkingTagsToBlocks(assistantMessage);
 
   const rawText = extractAssistantText(assistantMessage);
