@@ -265,6 +265,41 @@ export function handleMessageEnd(
     `[wallet-deduct] message_end: role=${msg.role} hasUsage=${!!rawUsage} usage=${JSON.stringify(rawUsage ?? null)} model=${(assistantMessage as { model?: string }).model ?? "?"} provider=${(assistantMessage as { provider?: string }).provider ?? "?"}`,
   );
   ctx.recordAssistantUsage(rawUsage);
+
+  // ── Fallback usage estimation ────────────────────────────────────────
+  // The PI library's agent loop sometimes loses token counts from the
+  // upstream SSE usage chunk (all zeros).  When that happens, estimate
+  // from message text so wallet deduction still fires.
+  {
+    const u = rawUsage as
+      | { input?: number; output?: number; totalTokens?: number }
+      | undefined;
+    const hasReal =
+      (u?.input ?? 0) > 0 || (u?.output ?? 0) > 0 || (u?.totalTokens ?? 0) > 0;
+    if (!hasReal) {
+      const contentBlocks = (assistantMessage as { content?: { type: string; text?: string }[] })
+        .content ?? [];
+      const outputText = contentBlocks
+        .filter((b) => b.type === "text" && b.text)
+        .map((b) => b.text!)
+        .join("");
+      if (outputText.length > 0) {
+        // Rough estimate: ~4 chars per token, minimum 1
+        const estimatedOutput = Math.max(1, Math.ceil(outputText.length / 4));
+        // Assume a small system-prompt + user message (~50 tokens min)
+        const estimatedInput = Math.max(50, Math.ceil(estimatedOutput * 2));
+        const fallbackUsage = {
+          input: estimatedInput,
+          output: estimatedOutput,
+          totalTokens: estimatedInput + estimatedOutput,
+        };
+        console.log(
+          `[wallet-deduct] fallback estimation: outputLen=${outputText.length} est=${JSON.stringify(fallbackUsage)}`,
+        );
+        ctx.recordAssistantUsage(fallbackUsage);
+      }
+    }
+  }
   promoteThinkingTagsToBlocks(assistantMessage);
 
   const rawText = extractAssistantText(assistantMessage);
