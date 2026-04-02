@@ -115,13 +115,24 @@ export function handleAgentEnd(ctx: EmbeddedPiSubscribeContext) {
   }
 }
 
-/** Extract bot ID from session key (e.g. "agent:cloud-xxxx:main" → "cloud-xxxx"). */
+/**
+ * Extract bot ID from session key.
+ * Supports both formats:
+ *   "agent:cloud-xxxx:main" → "cloud-xxxx"
+ *   "cloud-xxxx:main"       → "cloud-xxxx"  (HTTP chat bridge format)
+ * Only returns IDs that look like cloud bot IDs (start with "cloud-").
+ */
 function extractBotIdFromSessionKey(sessionKey: string): string {
   const parts = sessionKey.split(":");
-  if (parts.length >= 2 && parts[0] === "agent") {
+  if (parts.length >= 3 && parts[0] === "agent") {
     return parts[1] ?? "";
   }
-  return parts[1] ?? parts[0] ?? "";
+  // HTTP chat bridge uses "cloud-xxxx:main" — bot ID is the first part
+  const candidate = parts[0] ?? "";
+  if (candidate.startsWith("cloud-")) {
+    return candidate;
+  }
+  return "";
 }
 
 /** Deduct LLM token cost from the bot wallet. Fire-and-forget — never throws. */
