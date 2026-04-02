@@ -86,7 +86,14 @@ export function handleAgentEnd(ctx: EmbeddedPiSubscribeContext) {
     // This is the canonical deduction point; it fires wherever the agent actually
     // ran, so it works for both local gateway runs and remote cloud-agent pods.
     if (usageTotals && ctx.params.sessionKey) {
+      console.log(
+        `[wallet-deduct] handleAgentEnd: sessionKey=${ctx.params.sessionKey} model=${endModel} provider=${endProvider} usage=${JSON.stringify(usageTotals)}`,
+      );
       void deductBotWalletUsage(ctx.params.sessionKey, usageTotals, endModel, endProvider);
+    } else {
+      console.log(
+        `[wallet-deduct] handleAgentEnd: skipped — usageTotals=${!!usageTotals} sessionKey=${!!ctx.params.sessionKey}`,
+      );
     }
   }
 
@@ -127,11 +134,13 @@ async function deductBotWalletUsage(
   try {
     const botId = extractBotIdFromSessionKey(sessionKey);
     if (!botId) {
+      console.log(`[wallet-deduct] skipped: no botId from sessionKey=${sessionKey}`);
       return;
     }
     const inputTok = usageTotals.input ?? 0;
     const outputTok = usageTotals.output ?? 0;
     if (inputTok <= 0 && outputTok <= 0) {
+      console.log(`[wallet-deduct] skipped: zero tokens botId=${botId} input=${inputTok} output=${outputTok}`);
       return;
     }
     const cacheRead = usageTotals.cacheRead ?? 0;
@@ -165,9 +174,13 @@ async function deductBotWalletUsage(
     });
     const costCents = costUsd ? Math.ceil(costUsd * 100) : 0;
     if (costCents <= 0) {
+      console.log(`[wallet-deduct] skipped: costCents=0 botId=${botId} costUsd=${costUsd}`);
       return;
     }
 
+    console.log(
+      `[wallet-deduct] deducting: botId=${botId} costCents=${costCents} model=${model} provider=${provider} in=${inputTok} out=${outputTok}`,
+    );
     const { deductWalletUsage } = await import("../gateway/billing/iam-billing-client.js");
     await deductWalletUsage({
       botId,
@@ -179,7 +192,7 @@ async function deductBotWalletUsage(
       cacheReadTokens: cacheRead,
       cacheWriteTokens: cacheWrite,
     });
-  } catch {
-    // Best-effort — never block agent teardown
+  } catch (err) {
+    console.warn(`[wallet-deduct] error: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
