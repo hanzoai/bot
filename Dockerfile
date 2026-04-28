@@ -98,12 +98,14 @@ RUN for dir in /app/extensions /app/.agent /app/.agents; do \
         find "$dir" -type f -exec chmod 644 {} +; \
       fi; \
     done
+# Admin SPA: the @hanzo/gui v7 admin-bot bundle is built externally in
+# the gui workspace (~/work/hanzo/gui/apps/admin-bot) and synced into
+# dist/control-ui/ before docker build by scripts/sync-admin-ui.sh.
+# The COPY above pulls the synced bundle into the image; if the sync
+# step was skipped, the static handler would silently serve a 404 for
+# every admin route. Fail the build loudly instead.
+RUN test -f /app/dist/control-ui/index.html || (echo 'admin-bot SPA not synced; run scripts/sync-admin-ui.sh' && exit 1)
 RUN pnpm build
-# Admin SPA: the @hanzo/gui v7 admin-bot bundle is built externally
-# in the gui workspace (~/work/hanzo/gui/apps/admin-bot) and synced
-# into dist/control-ui/ before the Docker context is sealed. The
-# `COPY . .` above already pulls the synced bundle. See
-# scripts/sync-admin-ui.sh and HANZO_BINARY.md for details.
 
 # Expose the CLI binary without requiring npm global writes as non-root.
 USER root

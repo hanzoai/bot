@@ -11,6 +11,37 @@ jobs:
     uses: hanzoai/.github/.github/workflows/docker-build.yml@main
     with:
       image: ghcr.io/hanzoai/bot
+      platforms: linux/amd64
+      # Build the @hanzo/gui v7 admin-bot SPA from the sibling gui
+      # repo, then run scripts/sync-admin-ui.sh to drop the bundle into
+      # dist/control-ui/ before docker buildx COPYs the source. The
+      # Dockerfile asserts dist/control-ui/index.html exists and fails
+      # the build loudly if this step is skipped or breaks.
+      #
+      # The token is interpolated at workflow-call time; the reusable
+      # workflow runs the resulting shell verbatim. A plain `${TOKEN}`
+      # would be empty because the reusable workflow does not export
+      # GITHUB_TOKEN to pre-build-command, so we substitute here.
+      pre-build-command: |
+        set -euo pipefail
+        GUI_REF="main"
+        TOKEN="${{ github.token }}"
+        echo "Cloning hanzoai/gui@${GUI_REF} for admin-bot SPA build"
+        git clone --depth=1 --branch="${GUI_REF}" \
+          "https://x-access-token:${TOKEN}@github.com/hanzoai/gui.git" \
+          /tmp/hanzoai-gui
+        pushd /tmp/hanzoai-gui >/dev/null
+        # gui is a Bun workspace (see gui/package.json). Use bun, not
+        # pnpm, to install + build the @hanzo/bot-admin SPA.
+        if ! command -v bun >/dev/null 2>&1; then
+          curl -fsSL https://bun.sh/install | bash
+          export PATH="${HOME}/.bun/bin:${PATH}"
+        fi
+        bun install --frozen-lockfile
+        bun --filter @hanzo/bot-admin run build
+        popd >/dev/null
+        ADMIN_BOT_DIR=/tmp/hanzoai-gui/apps/admin-bot bash scripts/sync-admin-ui.sh
+        test -f dist/control-ui/index.html
     secrets: inherit
 
   dispatch-to-universe:
