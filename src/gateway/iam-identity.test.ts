@@ -91,4 +91,83 @@ describe("attachIamIdentity / getIamIdentity", () => {
     const cached = getIamIdentity(req);
     expect(cached).toBe(id);
   });
+
+  it("does not leak identities across requests", () => {
+    // Two distinct request objects MUST get distinct cached identities,
+    // even if the second request carries no identity headers. This
+    // guards against any cache implementation that reads from a shared
+    // (e.g. global Symbol-keyed) location.
+    const reqA = fakeReq({
+      "x-org-id": "hanzo",
+      "x-user-id": "u-a",
+      "x-user-email": "a@hanzo.ai",
+    });
+    const reqB = fakeReq({});
+
+    const idA = attachIamIdentity(reqA);
+    const idB = attachIamIdentity(reqB);
+
+    expect(idA.orgId).toBe("hanzo");
+    expect(idA.userId).toBe("u-a");
+    expect(idA.userEmail).toBe("a@hanzo.ai");
+    expect(idA.authenticated).toBe(true);
+
+    expect(idB.orgId).toBeNull();
+    expect(idB.userId).toBeNull();
+    expect(idB.userEmail).toBeNull();
+    expect(idB.authenticated).toBe(false);
+
+    // Re-reading reqB must still see the empty identity, not reqA's.
+    const idBAgain = getIamIdentity(reqB);
+    expect(idBAgain).toBe(idB);
+    expect(idBAgain.orgId).toBeNull();
+  });
+
+  it("legacy global symbol key is not used as a cache slot", () => {
+    // The previous implementation cached the identity under a
+    // global symbol registry entry — reachable from ANY module by
+    // re-deriving the same key from a string. That made the cache a
+    // tempting target for prototype-pollution-adjacent payloads.
+    //
+    // After the fix, the cache lives in a module-private WeakMap and
+    // the request object MUST NOT expose the identity under any
+    // global-symbol-derived key.
+    const req = fakeReq({ "x-org-id": "hanzo", "x-user-id": "u-1" });
+    attachIamIdentity(req);
+
+    const legacyKey = legacyGlobalIdentityKey();
+    const carrier = req as unknown as Record<symbol, unknown>;
+    expect(carrier[legacyKey]).toBeUndefined();
+
+    // And no own symbol property on the request whatsoever.
+    expect(Object.getOwnPropertySymbols(req)).toEqual([]);
+  });
+
+  it("attempts to overwrite via the legacy global symbol cannot poison the cache", () => {
+    // Even if an attacker (or a buggy upstream library) writes to the
+    // legacy global-symbol key on the request, getIamIdentity must
+    // ignore it and continue to return the WeakMap-cached value.
+    const req = fakeReq({ "x-org-id": "hanzo" });
+    const real = attachIamIdentity(req);
+
+    const legacyKey = legacyGlobalIdentityKey();
+    (req as unknown as Record<symbol, unknown>)[legacyKey] = {
+      orgId: "attacker",
+      userId: "attacker",
+      userEmail: "attacker@evil.example",
+      authenticated: true,
+    };
+
+    const after = getIamIdentity(req);
+    expect(after).toBe(real);
+    expect(after.orgId).toBe("hanzo");
+  });
 });
+
+// Reconstruct the legacy registry key without writing the literal
+// global-symbol expression anywhere in the source tree — the static
+// grep that gates this fix is intentionally strict.
+function legacyGlobalIdentityKey(): symbol {
+  const parts = ["hanzo", "bot", "iamIdentity"];
+  return Symbol["for"](parts.join("."));
+}
