@@ -38,6 +38,14 @@ apps/macos/.build
 apps/ios/build
 **/*.trace
 
+# Admin SPA: synced from gui workspace by scripts/sync-admin-ui.sh
+# before docker build. The Node static handler in
+# src/gateway/control-ui.ts reads dist/control-ui/ at runtime, so the
+# image MUST include this directory. The general `dist` exclude above
+# would otherwise drop it from the build context.
+!dist/control-ui
+!dist/control-ui/**
+
 # large app trees not needed for CLI build
 apps/
 assets/
