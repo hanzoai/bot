@@ -64,15 +64,21 @@ export function extractIamIdentity(req: IncomingMessage): IamIdentity {
 }
 
 /**
- * Cross-realm Symbol used as the IncomingMessage property key for the
- * extracted identity. Symbol.for() so independently-loaded copies of
- * this module agree on the same key.
+ * Per-request identity cache.
+ *
+ * WeakMap keyed by the IncomingMessage gives us:
+ *   1. No global key surface — there is no Symbol.for() string an
+ *      attacker can guess, prototype-pollute, or overwrite from any
+ *      other module.
+ *   2. Automatic GC — entries vanish when the request object does,
+ *      so identities never leak across requests.
+ *   3. No mutation of the request shape — downstream code can't read
+ *      the cached identity by indexing into req with a known key.
+ *
+ * Module-private. The only access path is attachIamIdentity /
+ * getIamIdentity below.
  */
-const IAM_IDENTITY_KEY = Symbol.for("hanzo.bot.iamIdentity");
-
-interface IamIdentityCarrier {
-  [IAM_IDENTITY_KEY]?: IamIdentity;
-}
+const identityCache = new WeakMap<IncomingMessage, IamIdentity>();
 
 /**
  * Attach the extracted identity to the request object once per request
@@ -80,21 +86,20 @@ interface IamIdentityCarrier {
  * Idempotent — safe to call multiple times.
  */
 export function attachIamIdentity(req: IncomingMessage): IamIdentity {
-  const carrier = req as unknown as IamIdentityCarrier;
-  const cached = carrier[IAM_IDENTITY_KEY];
+  const cached = identityCache.get(req);
   if (cached) {
     return cached;
   }
   const id = extractIamIdentity(req);
-  carrier[IAM_IDENTITY_KEY] = id;
+  identityCache.set(req, id);
   return id;
 }
 
 /**
  * Read the previously-attached identity. Falls back to extracting it
- * if attachIamIdentity wasn't called for this request.
+ * (and caching the result) if attachIamIdentity wasn't called for
+ * this request.
  */
 export function getIamIdentity(req: IncomingMessage): IamIdentity {
-  const carrier = req as unknown as IamIdentityCarrier;
-  return carrier[IAM_IDENTITY_KEY] ?? attachIamIdentity(req);
+  return identityCache.get(req) ?? attachIamIdentity(req);
 }
