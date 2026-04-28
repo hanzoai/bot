@@ -40,7 +40,8 @@ jobs:
         # Skip workspace-wide postinstall build; admin-bot builds via Vite
         # which doesn't need the @hanzogui transform pipeline pre-compiled.
         bun install --frozen-lockfile --ignore-scripts
-        bun --filter @hanzo/bot-admin run build
+        cd apps/admin-bot
+        bun run build
         popd >/dev/null
         ADMIN_BOT_DIR=/tmp/hanzoai-gui/apps/admin-bot bash scripts/sync-admin-ui.sh
         test -f dist/control-ui/index.html
