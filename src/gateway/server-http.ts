@@ -17,7 +17,6 @@ export type VncProxyHandlers = {
   handleTunnelUpgrade: (req: IncomingMessage, socket: Duplex, head: Buffer) => boolean;
 };
 import { resolveAgentAvatar } from "../agents/identity-avatar.js";
-import { handleChatBridgeHttpRequest } from "./server-http-chat-bridge.js";
 import { CANVAS_WS_PATH, handleA2uiHttpRequest } from "../canvas-host/a2ui.js";
 import { loadConfig } from "../config/config.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
@@ -54,9 +53,11 @@ import {
   resolveHookDeliver,
 } from "./hooks.js";
 import { sendGatewayAuthFailure, setDefaultSecurityHeaders } from "./http-common.js";
+import { attachIamIdentity } from "./iam-identity.js";
 import { handleLlmProxyHttpRequest } from "./llm-proxy-http.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
+import { handleChatBridgeHttpRequest } from "./server-http-chat-bridge.js";
 import {
   authorizeCanvasRequest,
   enforcePluginRouteGatewayAuth,
@@ -566,6 +567,13 @@ export function createGatewayHttpServer(opts: {
     if (String(req.headers.upgrade ?? "").toLowerCase() === "websocket") {
       return;
     }
+
+    // Bot is the Node-runtime exception in the Hanzo binary contract
+    // (see ~/work/hanzo/HANZO_BINARY.md). Identity headers are set by
+    // hanzoai/gateway upstream after IAM JWT validation; we trust and
+    // surface them for downstream handlers via getIamIdentity(req).
+    // Pure-trust pattern: bot does NOT validate the JWT itself.
+    attachIamIdentity(req);
 
     try {
       const configSnapshot = loadConfig();
