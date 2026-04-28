@@ -35,6 +35,20 @@ export async function resolveControlUiDistIndexHealth(
   };
 }
 
+// Sentinel files that mark the bot repo root. The legacy Lit
+// "openclaw-control-ui" lived at ui/vite.config.ts; the React
+// admin SPA lives in the gui workspace and gets synced into
+// dist/control-ui/ via scripts/sync-admin-ui.sh — that script
+// is the new repo-root sentinel.
+const REPO_ROOT_SENTINEL = ["scripts", "sync-admin-ui.sh"] as const;
+
+function isBotRepoRoot(dir: string): boolean {
+  return (
+    fs.existsSync(path.join(dir, "package.json")) &&
+    fs.existsSync(path.join(dir, ...REPO_ROOT_SENTINEL))
+  );
+}
+
 export function resolveControlUiRepoRoot(
   argv1: string | undefined = process.argv[1],
 ): string | null {
@@ -46,17 +60,14 @@ export function resolveControlUiRepoRoot(
   const srcIndex = parts.lastIndexOf("src");
   if (srcIndex !== -1) {
     const root = parts.slice(0, srcIndex).join(path.sep);
-    if (fs.existsSync(path.join(root, "ui", "vite.config.ts"))) {
+    if (isBotRepoRoot(root)) {
       return root;
     }
   }
 
   let dir = path.dirname(normalized);
   for (let i = 0; i < 8; i++) {
-    if (
-      fs.existsSync(path.join(dir, "package.json")) &&
-      fs.existsSync(path.join(dir, "ui", "vite.config.ts"))
-    ) {
+    if (isBotRepoRoot(dir)) {
       return dir;
     }
     const parent = path.dirname(dir);

@@ -88,15 +88,7 @@ export default defineConfig({
     unstubGlobals: true,
     pool: "forks",
     maxWorkers: isCI ? ciWorkers : localWorkers,
-    include: [
-      "src/**/*.test.ts",
-      "extensions/**/*.test.ts",
-      "test/**/*.test.ts",
-      "ui/src/ui/views/agents-utils.test.ts",
-      "ui/src/ui/views/usage-render-details.test.ts",
-      "ui/src/ui/controllers/agents.test.ts",
-      "ui/src/ui/controllers/chat.test.ts",
-    ],
+    include: ["src/**/*.test.ts", "extensions/**/*.test.ts", "test/**/*.test.ts"],
     setupFiles: ["test/setup.ts"],
     exclude: [
       "dist/**",
@@ -127,7 +119,6 @@ export default defineConfig({
         // Never count workspace packages/apps toward core coverage thresholds.
         "extensions/**",
         "apps/**",
-        "ui/**",
         "test/**",
         "src/**/*.test.ts",
         // Entrypoints and wiring (covered by CI smoke + manual/e2e flows).
