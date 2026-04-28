@@ -371,7 +371,7 @@ export const FIELD_HELP: Record<string, string> = {
   "agents.list[].sandbox.browser.cdpSourceRange":
     "Per-agent override for CDP source CIDR allowlist.",
   "gateway.controlUi.basePath":
-    "Optional URL prefix where the Control UI is served (e.g. /openclaw).",
+    "Optional URL prefix where the admin SPA is served (e.g. /_/bot — the canonical mount across hanzo binaries; matches the Vite `base` baked into the @hanzo/gui v7 admin-bot bundle).",
   "gateway.controlUi.root":
     "Optional filesystem root for Control UI assets (defaults to dist/control-ui).",
   "gateway.controlUi.allowedOrigins":
