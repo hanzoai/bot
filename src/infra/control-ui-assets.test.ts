@@ -100,7 +100,8 @@ describe("control UI assets helpers (fs-mocked)", () => {
 
   it("resolves repo root from src argv1", () => {
     const root = abs("fixtures/ui-src");
-    setFile(path.join(root, "ui", "vite.config.ts"), "export {};\n");
+    setFile(path.join(root, "package.json"), "{}\n");
+    setFile(path.join(root, "scripts", "sync-admin-ui.sh"), "#!/bin/sh\n");
 
     const argv1 = path.join(root, "src", "index.ts");
     expect(resolveControlUiRepoRoot(argv1)).toBe(root);
@@ -109,7 +110,7 @@ describe("control UI assets helpers (fs-mocked)", () => {
   it("resolves repo root by traversing up (dist argv1)", () => {
     const root = abs("fixtures/ui-dist");
     setFile(path.join(root, "package.json"), "{}\n");
-    setFile(path.join(root, "ui", "vite.config.ts"), "export {};\n");
+    setFile(path.join(root, "scripts", "sync-admin-ui.sh"), "#!/bin/sh\n");
 
     const argv1 = path.join(root, "dist", "index.js");
     expect(resolveControlUiRepoRoot(argv1)).toBe(root);
