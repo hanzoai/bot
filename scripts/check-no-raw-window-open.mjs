@@ -79,7 +79,7 @@ export async function main() {
   for (const violation of violations) {
     console.error(`- ${violation}`);
   }
-  console.error("Use openExternalUrlSafe(...) from ui/src/ui/open-external-url.ts instead.");
+  console.error("Use openExternalUrlSafe(...) — admin SPA owns its own helper in apps/admin-bot.");
   process.exit(1);
 }
 
