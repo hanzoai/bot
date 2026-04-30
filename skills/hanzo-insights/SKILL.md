@@ -1,6 +1,6 @@
 ---
 name: hanzo-insights
-description: "Product analytics, feature flags, A/B testing, and session recording with Hanzo Insights (PostHog). Track events, create funnels, manage rollouts."
+description: "Product analytics, feature flags, A/B testing, and session recording with Hanzo Insights. Track events, create funnels, manage rollouts."
 metadata:
   {
     "bot":
@@ -12,7 +12,7 @@ metadata:
               "id": "pip",
               "kind": "pip",
               "package": "posthog",
-              "label": "Install PostHog Client (pip)",
+              "label": "Install Hanzo Insights Client (pip)",
             },
           ],
       },
