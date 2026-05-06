@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-tlon",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "OpenClaw Tlon/Urbit channel plugin",
   "type": "module",
   "dependencies": {

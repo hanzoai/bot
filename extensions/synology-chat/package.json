@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-synology-chat",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "Synology Chat channel plugin for OpenClaw",
   "type": "module",
   "dependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-googlechat",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "private": true,
   "description": "Hanzo Bot Google Chat channel plugin",
   "type": "module",
