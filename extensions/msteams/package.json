@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-msteams",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "OpenClaw Microsoft Teams channel plugin",
   "type": "module",
   "dependencies": {

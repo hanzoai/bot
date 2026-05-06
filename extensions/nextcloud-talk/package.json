@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-nextcloud-talk",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "OpenClaw Nextcloud Talk channel plugin",
   "type": "module",
   "dependencies": {
