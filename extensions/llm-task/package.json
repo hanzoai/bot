@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-llm-task",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "private": true,
   "description": "OpenClaw JSON-only LLM task plugin",
   "type": "module",
