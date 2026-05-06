@@ -39,7 +39,11 @@ if ! ls "${SRC}/dist"/index.html "${SRC}/dist"/assets/*.js >/dev/null 2>&1; then
 fi
 
 mkdir -p "${DST}"
-rsync -a --delete "${SRC}/dist/" "${DST}/"
+# rsync isn't available on the ARC build runner; emulate
+# `rsync -a --delete` with `rm -rf` + `cp -a`.
+rm -rf "${DST}"
+mkdir -p "${DST}"
+cp -a "${SRC}/dist/." "${DST}/"
 
 # Stamp the sync so binaries can be traced back to a build.
 {
