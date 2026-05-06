@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-diagnostics-otel",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "OpenClaw diagnostics OpenTelemetry exporter",
   "type": "module",
   "dependencies": {

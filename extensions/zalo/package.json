@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-zalo",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "OpenClaw Zalo channel plugin",
   "type": "module",
   "dependencies": {
