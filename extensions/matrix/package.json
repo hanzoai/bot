@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-matrix",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "OpenClaw Matrix channel plugin",
   "type": "module",
   "dependencies": {

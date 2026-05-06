@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-lobster",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "Lobster workflow tool plugin (typed pipelines + resumable approvals)",
   "type": "module",
   "dependencies": {

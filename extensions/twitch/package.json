@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-twitch",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "OpenClaw Twitch channel plugin",
   "type": "module",
   "dependencies": {
