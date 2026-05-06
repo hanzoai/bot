@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-memory-core",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "private": true,
   "description": "Hanzo Bot core memory search plugin",
   "type": "module",
