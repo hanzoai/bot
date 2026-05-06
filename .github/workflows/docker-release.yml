@@ -37,9 +37,11 @@ jobs:
           curl -fsSL https://bun.sh/install | bash
           export PATH="${HOME}/.bun/bin:${PATH}"
         fi
-        # Skip workspace-wide postinstall build; admin-bot builds via Vite
-        # which doesn't need the @hanzogui transform pipeline pre-compiled.
-        bun install --frozen-lockfile --ignore-scripts
+        # @hanzogui/vite-plugin and @hanzogui/babel-plugin-fully-specified
+        # are workspace packages with TS source — admin-bot's Vite config
+        # imports their compiled dist. Run the full workspace install
+        # (including postinstall) so dist is built before the SPA build.
+        bun install --frozen-lockfile
         cd apps/admin-bot
         bun run build
         popd >/dev/null
