@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-google-antigravity-auth",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "private": true,
   "description": "Hanzo Bot Google Antigravity OAuth provider plugin",
   "type": "module",
