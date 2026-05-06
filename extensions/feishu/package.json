@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-feishu",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "OpenClaw Feishu/Lark channel plugin (community maintained by @m1heng)",
   "type": "module",
   "dependencies": {

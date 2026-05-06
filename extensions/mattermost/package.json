@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/bot-mattermost",
-  "version": "2026.4.27",
+  "version": "1.4.2",
   "description": "OpenClaw Mattermost channel plugin",
   "type": "module",
   "dependencies": {
