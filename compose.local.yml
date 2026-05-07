@@ -26,7 +26,7 @@ services:
 
   # ── Playground Control Plane (app.hanzo.bot equivalent) ────────────
   playground:
-    image: ghcr.io/hanzoai/playground:latest
+    image: ghcr.io/hanzoai/playground:0.1.42
     restart: unless-stopped
     networks:
       - default
@@ -74,7 +74,7 @@ services:
 
   # ── Bot Gateway (bot.hanzo.ai equivalent) ──────────────────────────
   bot-gateway:
-    image: ghcr.io/hanzoai/bot:latest
+    image: ghcr.io/hanzoai/bot:1.4.2
     restart: unless-stopped
     environment:
       HOME: /home/node
@@ -124,7 +124,7 @@ services:
 
   # ── WSS Proxy (gw.hanzo.bot → bot-gateway:18789) ──────────────────
   gw-proxy:
-    image: ghcr.io/hanzoai/ingress:latest
+    image: ghcr.io/hanzoai/ingress:1.7.41
     restart: unless-stopped
     ports:
       - "443:443"
