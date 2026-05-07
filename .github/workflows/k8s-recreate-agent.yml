@@ -53,7 +53,7 @@ jobs:
                   - name: ghcr-secret
                 initContainers:
                   - name: write-auth
-                    image: ghcr.io/hanzoai/bot:latest
+                    image: ghcr.io/hanzoai/bot:1.4.2
                     command: ["node", "-e"]
                     args:
                       - |
@@ -79,7 +79,7 @@ jobs:
                         mountPath: /home/node/.openclaw
                 containers:
                   - name: cloud-agent
-                    image: ghcr.io/hanzoai/bot:latest
+                    image: ghcr.io/hanzoai/bot:1.4.2
                     imagePullPolicy: Always
                     command: ["node", "hanzo-bot.mjs", "node", "run", "--host", "bot-gateway.hanzo.svc", "--port", "80", "--name", "cloud-agent-default"]
                     env:

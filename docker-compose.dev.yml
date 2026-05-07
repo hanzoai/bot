@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   bot-gateway:
-    image: ghcr.io/hanzoai/bot:latest
+    image: ghcr.io/hanzoai/bot:1.4.2
     command: ["node", "hanzo-bot.mjs", "gateway", "--allow-unconfigured", "--bind", "lan"]
     ports:
       - "18789:18789"
