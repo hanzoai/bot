@@ -1,3 +1,4 @@
+import os from "node:os";
 import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/device-pair";
 import {
   approveDevicePairing,
@@ -6,7 +7,6 @@ import {
   runPluginCommandWithTimeout,
   resolveTailnetHostWithRunner,
 } from "@hanzo/bot/plugin-sdk/device-pair";
-import os from "node:os";
 import qrcode from "qrcode-terminal";
 import {
   armPairNotifyOnce,
@@ -88,7 +88,7 @@ function parsePositiveInteger(raw: string | undefined): number | null {
 
 function resolveGatewayPort(cfg: BotPluginApi["config"]): number {
   const envPort =
-    parsePositiveInteger(process.env.OPENCLAW_GATEWAY_PORT?.trim()) ??
+    parsePositiveInteger(process.env.BOT_GATEWAY_PORT?.trim()) ??
     parsePositiveInteger(process.env.CLAWDBOT_GATEWAY_PORT?.trim());
   if (envPort) {
     return envPort;
@@ -191,13 +191,13 @@ function resolveAuth(cfg: BotPluginApi["config"]): ResolveAuthResult {
   const mode = cfg.gateway?.auth?.mode;
   const token =
     pickFirstDefined([
-      process.env.OPENCLAW_GATEWAY_TOKEN,
+      process.env.BOT_GATEWAY_TOKEN,
       process.env.CLAWDBOT_GATEWAY_TOKEN,
       cfg.gateway?.auth?.token,
     ]) ?? undefined;
   const password =
     pickFirstDefined([
-      process.env.OPENCLAW_GATEWAY_PASSWORD,
+      process.env.BOT_GATEWAY_PASSWORD,
       process.env.CLAWDBOT_GATEWAY_PASSWORD,
       cfg.gateway?.auth?.password,
     ]) ?? undefined;

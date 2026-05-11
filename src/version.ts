@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
 
-declare const __OPENCLAW_VERSION__: string | undefined;
+declare const __BOT_VERSION__: string | undefined;
 const CORE_PACKAGE_NAME = "openclaw";
 
 const PACKAGE_JSON_CANDIDATES = [
@@ -110,9 +110,9 @@ export function resolveRuntimeServiceVersion(
 
   return (
     firstNonEmpty(
-      env["OPENCLAW_VERSION"],
+      env["BOT_VERSION"],
       runtimeVersion,
-      env["OPENCLAW_SERVICE_VERSION"],
+      env["BOT_SERVICE_VERSION"],
       env["npm_package_version"],
     ) ?? fallback
   );
@@ -123,6 +123,6 @@ export function resolveRuntimeServiceVersion(
 // - Dev/npm builds: package.json.
 export const VERSION = resolveBinaryVersion({
   moduleUrl: import.meta.url,
-  injectedVersion: typeof __OPENCLAW_VERSION__ === "string" ? __OPENCLAW_VERSION__ : undefined,
-  bundledVersion: process.env.OPENCLAW_BUNDLED_VERSION,
+  injectedVersion: typeof __BOT_VERSION__ === "string" ? __BOT_VERSION__ : undefined,
+  bundledVersion: process.env.BOT_BUNDLED_VERSION,
 });

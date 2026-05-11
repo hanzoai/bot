@@ -85,7 +85,7 @@ openclaw nodes rename --node <id|name|ip> --name "Living Room iPad"
 - `~/.openclaw/nodes/paired.json`
 - `~/.openclaw/nodes/pending.json`
 
-如果你覆盖了 `OPENCLAW_STATE_DIR`，`nodes/` 文件夹会随之移动。
+如果你覆盖了 `BOT_STATE_DIR`，`nodes/` 文件夹会随之移动。
 
 安全注意事项：
 

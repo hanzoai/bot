@@ -22,10 +22,10 @@ RUN corepack enable
 WORKDIR /app
 RUN chown node:node /app
 
-ARG OPENCLAW_DOCKER_APT_PACKAGES=""
-RUN if [ -n "$OPENCLAW_DOCKER_APT_PACKAGES" ]; then \
+ARG BOT_DOCKER_APT_PACKAGES=""
+RUN if [ -n "$BOT_DOCKER_APT_PACKAGES" ]; then \
       apt-get update && \
-      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $OPENCLAW_DOCKER_APT_PACKAGES && \
+      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $BOT_DOCKER_APT_PACKAGES && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
     fi
@@ -40,12 +40,12 @@ USER node
 RUN NODE_OPTIONS=--max-old-space-size=2048 pnpm install --frozen-lockfile
 
 # Optionally install Chromium and Xvfb for browser automation.
-# Build with: docker build --build-arg OPENCLAW_INSTALL_BROWSER=1 ...
+# Build with: docker build --build-arg BOT_INSTALL_BROWSER=1 ...
 # Adds ~300MB but eliminates the 60-90s Playwright install on every container start.
 # Must run after pnpm install so playwright-core is available in node_modules.
 USER root
-ARG OPENCLAW_INSTALL_BROWSER=""
-RUN if [ -n "$OPENCLAW_INSTALL_BROWSER" ]; then \
+ARG BOT_INSTALL_BROWSER=""
+RUN if [ -n "$BOT_INSTALL_BROWSER" ]; then \
       apt-get update && \
       DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends xvfb && \
       mkdir -p /home/node/.cache/ms-playwright && \
@@ -57,20 +57,20 @@ RUN if [ -n "$OPENCLAW_INSTALL_BROWSER" ]; then \
     fi
 
 # Optionally install Docker CLI for sandbox container management.
-# Build with: docker build --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1 ...
+# Build with: docker build --build-arg BOT_INSTALL_DOCKER_CLI=1 ...
 # Adds ~50MB. Only the CLI is installed — no Docker daemon.
 # Required for agents.defaults.sandbox to function in Docker deployments.
-ARG OPENCLAW_INSTALL_DOCKER_CLI=""
-ARG OPENCLAW_DOCKER_GPG_FINGERPRINT="9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
-RUN if [ -n "$OPENCLAW_INSTALL_DOCKER_CLI" ]; then \
+ARG BOT_INSTALL_DOCKER_CLI=""
+ARG BOT_DOCKER_GPG_FINGERPRINT="9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
+RUN if [ -n "$BOT_INSTALL_DOCKER_CLI" ]; then \
       apt-get update && \
       DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         ca-certificates curl gnupg && \
       install -m 0755 -d /etc/apt/keyrings && \
       # Verify Docker apt signing key fingerprint before trusting it as a root key.
-      # Update OPENCLAW_DOCKER_GPG_FINGERPRINT when Docker rotates release keys.
+      # Update BOT_DOCKER_GPG_FINGERPRINT when Docker rotates release keys.
       curl -fsSL https://download.docker.com/linux/debian/gpg -o /tmp/docker.gpg.asc && \
-      expected_fingerprint="$(printf '%s' "$OPENCLAW_DOCKER_GPG_FINGERPRINT" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')" && \
+      expected_fingerprint="$(printf '%s' "$BOT_DOCKER_GPG_FINGERPRINT" | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')" && \
       actual_fingerprint="$(gpg --batch --show-keys --with-colons /tmp/docker.gpg.asc | awk -F: '$1 == "fpr" { print toupper($10); exit }')" && \
       if [ -z "$actual_fingerprint" ] || [ "$actual_fingerprint" != "$expected_fingerprint" ]; then \
         echo "ERROR: Docker apt key fingerprint mismatch (expected $expected_fingerprint, got ${actual_fingerprint:-<empty>})" >&2; \

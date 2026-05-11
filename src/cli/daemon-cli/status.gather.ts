@@ -1,22 +1,21 @@
-import type { BotConfig, GatewayBindMode, GatewayControlUiConfig } from "../../config/types.js";
-import type { FindExtraGatewayServicesOptions } from "../../daemon/inspect.js";
-import type { ServiceConfigAudit } from "../../daemon/service-audit.js";
-import type { GatewayServiceRuntime } from "../../daemon/service-runtime.js";
-import type { GatewayRpcOpts } from "./types.js";
 import {
   createConfigIO,
   resolveConfigPath,
   resolveGatewayPort,
   resolveStateDir,
 } from "../../config/config.js";
+import type { BotConfig, GatewayBindMode, GatewayControlUiConfig } from "../../config/types.js";
 import {
   hasConfiguredSecretInput,
   normalizeSecretInputString,
   resolveSecretInputRef,
 } from "../../config/types.secrets.js";
 import { readLastGatewayErrorLine } from "../../daemon/diagnostics.js";
+import type { FindExtraGatewayServicesOptions } from "../../daemon/inspect.js";
 import { findExtraGatewayServices } from "../../daemon/inspect.js";
+import type { ServiceConfigAudit } from "../../daemon/service-audit.js";
 import { auditGatewayServiceConfig } from "../../daemon/service-audit.js";
+import type { GatewayServiceRuntime } from "../../daemon/service-runtime.js";
 import { resolveGatewayService } from "../../daemon/service.js";
 import { resolveGatewayBindHost } from "../../gateway/net.js";
 import {
@@ -31,6 +30,7 @@ import { secretRefKey } from "../../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../../secrets/resolve.js";
 import { probeGatewayStatus } from "./probe.js";
 import { normalizeListenerAddress, parsePortFromArgs, pickProbeHostForBind } from "./shared.js";
+import type { GatewayRpcOpts } from "./types.js";
 
 type ConfigSummary = {
   path: string;
@@ -111,12 +111,12 @@ function trimToUndefined(value: unknown): string | undefined {
 }
 
 function readGatewayTokenEnv(env: Record<string, string | undefined>): string | undefined {
-  return trimToUndefined(env.OPENCLAW_GATEWAY_TOKEN) ?? trimToUndefined(env.CLAWDBOT_GATEWAY_TOKEN);
+  return trimToUndefined(env.BOT_GATEWAY_TOKEN) ?? trimToUndefined(env.CLAWDBOT_GATEWAY_TOKEN);
 }
 
 function readGatewayPasswordEnv(env: Record<string, string | undefined>): string | undefined {
   return (
-    trimToUndefined(env.OPENCLAW_GATEWAY_PASSWORD) ?? trimToUndefined(env.CLAWDBOT_GATEWAY_PASSWORD)
+    trimToUndefined(env.BOT_GATEWAY_PASSWORD) ?? trimToUndefined(env.CLAWDBOT_GATEWAY_PASSWORD)
   );
 }
 

@@ -1,6 +1,6 @@
-import type { RequestPermissionRequest } from "@agentclientprotocol/sdk";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { RequestPermissionRequest } from "@agentclientprotocol/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
@@ -43,22 +43,22 @@ afterEach(async () => {
 });
 
 describe("resolveAcpClientSpawnEnv", () => {
-  it("sets OPENCLAW_SHELL marker and preserves existing env values", () => {
+  it("sets BOT_SHELL marker and preserves existing env values", () => {
     const env = resolveAcpClientSpawnEnv({
       PATH: "/usr/bin",
       USER: "openclaw",
     });
 
-    expect(env.OPENCLAW_SHELL).toBe("acp-client");
+    expect(env.BOT_SHELL).toBe("acp-client");
     expect(env.PATH).toBe("/usr/bin");
     expect(env.USER).toBe("openclaw");
   });
 
-  it("overrides pre-existing OPENCLAW_SHELL to acp-client", () => {
+  it("overrides pre-existing BOT_SHELL to acp-client", () => {
     const env = resolveAcpClientSpawnEnv({
-      OPENCLAW_SHELL: "wrong",
+      BOT_SHELL: "wrong",
     });
-    expect(env.OPENCLAW_SHELL).toBe("acp-client");
+    expect(env.BOT_SHELL).toBe("acp-client");
   });
 });
 

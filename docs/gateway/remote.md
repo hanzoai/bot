@@ -79,7 +79,7 @@ With the tunnel up:
 - `openclaw health` and `openclaw status --deep` now reach the remote gateway via `ws://127.0.0.1:18789`.
 - `openclaw gateway {status,health,send,agent,call}` can also target the forwarded URL via `--url` when needed.
 
-Note: replace `18789` with your configured `gateway.port` (or `--port`/`OPENCLAW_GATEWAY_PORT`).
+Note: replace `18789` with your configured `gateway.port` (or `--port`/`BOT_GATEWAY_PORT`).
 Note: when you pass `--url`, the CLI does not fall back to config or environment credentials.
 Include `--token` or `--password` explicitly. Missing explicit credentials is an error.
 
@@ -107,13 +107,13 @@ Gateway call/probe credential resolution now follows one shared contract:
 
 - Explicit credentials (`--token`, `--password`, or tool `gatewayToken`) always win.
 - Local mode defaults:
-  - token: `OPENCLAW_GATEWAY_TOKEN` -> `gateway.auth.token` -> `gateway.remote.token`
-  - password: `OPENCLAW_GATEWAY_PASSWORD` -> `gateway.auth.password` -> `gateway.remote.password`
+  - token: `BOT_GATEWAY_TOKEN` -> `gateway.auth.token` -> `gateway.remote.token`
+  - password: `BOT_GATEWAY_PASSWORD` -> `gateway.auth.password` -> `gateway.remote.password`
 - Remote mode defaults:
-  - token: `gateway.remote.token` -> `OPENCLAW_GATEWAY_TOKEN` -> `gateway.auth.token`
-  - password: `OPENCLAW_GATEWAY_PASSWORD` -> `gateway.remote.password` -> `gateway.auth.password`
+  - token: `gateway.remote.token` -> `BOT_GATEWAY_TOKEN` -> `gateway.auth.token`
+  - password: `BOT_GATEWAY_PASSWORD` -> `gateway.remote.password` -> `gateway.auth.password`
 - Remote probe/status token checks are strict by default: they use `gateway.remote.token` only (no local token fallback) when targeting remote mode.
-- Legacy `CLAWDBOT_GATEWAY_*` env vars are only used by compatibility call paths; probe/status/auth resolution uses `OPENCLAW_GATEWAY_*` only.
+- Legacy `CLAWDBOT_GATEWAY_*` env vars are only used by compatibility call paths; probe/status/auth resolution uses `BOT_GATEWAY_*` only.
 
 ## Chat UI over SSH
 
@@ -134,7 +134,7 @@ Short version: **keep the Gateway loopback-only** unless you’re sure you need 
 
 - **Loopback + SSH/Tailscale Serve** is the safest default (no public exposure).
 - Plaintext `ws://` is loopback-only by default. For trusted private networks,
-  set `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` on the client process as break-glass.
+  set `BOT_ALLOW_INSECURE_PRIVATE_WS=1` on the client process as break-glass.
 - **Non-loopback binds** (`lan`/`tailnet`/`custom`, or `auto` when loopback is unavailable) must use auth tokens/passwords.
 - `gateway.remote.token` / `.password` are client credential sources. They do **not** configure server auth by themselves.
 - Local call paths can use `gateway.remote.*` as fallback when `gateway.auth.*` is unset.

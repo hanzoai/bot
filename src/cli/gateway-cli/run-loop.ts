@@ -1,5 +1,4 @@
 import type { startGatewayServer } from "../../gateway/server.js";
-import type { defaultRuntime } from "../../runtime.js";
 import { acquireGatewayLock } from "../../infra/gateway-lock.js";
 import { restartGatewayProcessWithFreshPid } from "../../infra/process-respawn.js";
 import {
@@ -15,6 +14,7 @@ import {
   waitForActiveTasks,
 } from "../../process/command-queue.js";
 import { createRestartIterationHook } from "../../process/restart-recovery.js";
+import type { defaultRuntime } from "../../runtime.js";
 
 const gatewayLog = createSubsystemLogger("gateway");
 
@@ -75,7 +75,7 @@ export async function runGatewayLoop(params: {
         `full process restart failed (${respawn.detail ?? "unknown error"}); falling back to in-process restart`,
       );
     } else {
-      gatewayLog.info("restart mode: in-process restart (OPENCLAW_NO_RESPAWN)");
+      gatewayLog.info("restart mode: in-process restart (BOT_NO_RESPAWN)");
     }
     if (hadLock && !(await reacquireLockForInProcessRestart())) {
       return;

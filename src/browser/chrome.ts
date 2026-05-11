@@ -2,7 +2,6 @@ import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { ResolvedBrowserConfig, ResolvedBrowserProfile } from "./config.js";
 import { ensurePortAvailable } from "../infra/ports.js";
 import { rawDataToString } from "../infra/ws.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -29,10 +28,8 @@ import {
   ensureProfileCleanExit,
   isProfileDecorated,
 } from "./chrome.profile-decoration.js";
-import {
-  DEFAULT_OPENCLAW_BROWSER_COLOR,
-  DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
-} from "./constants.js";
+import type { ResolvedBrowserConfig, ResolvedBrowserProfile } from "./config.js";
+import { DEFAULT_BOT_BROWSER_COLOR, DEFAULT_BOT_BROWSER_PROFILE_NAME } from "./constants.js";
 
 const log = createSubsystemLogger("browser").child("chrome");
 
@@ -70,7 +67,7 @@ function resolveBrowserExecutable(resolved: ResolvedBrowserConfig): BrowserExecu
   return resolveBrowserExecutableForPlatform(resolved, process.platform);
 }
 
-export function resolveOpenClawUserDataDir(profileName = DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME) {
+export function resolveOpenClawUserDataDir(profileName = DEFAULT_BOT_BROWSER_PROFILE_NAME) {
   return path.join(CONFIG_DIR, "browser", profileName, "user-data");
 }
 
@@ -234,7 +231,7 @@ export async function launchOpenClawChrome(
   const needsDecorate = !isProfileDecorated(
     userDataDir,
     profile.name,
-    (profile.color ?? DEFAULT_OPENCLAW_BROWSER_COLOR).toUpperCase(),
+    (profile.color ?? DEFAULT_BOT_BROWSER_COLOR).toUpperCase(),
   );
 
   // First launch to create preference files if missing, then decorate and relaunch.

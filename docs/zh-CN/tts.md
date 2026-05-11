@@ -282,7 +282,7 @@ Here you go.
 
 ## 单用户偏好
 
-斜杠命令将本地覆盖写入 `prefsPath`（默认：`~/.openclaw/settings/tts.json`，可通过 `OPENCLAW_TTS_PREFS` 或 `messages.tts.prefsPath` 覆盖）。
+斜杠命令将本地覆盖写入 `prefsPath`（默认：`~/.openclaw/settings/tts.json`，可通过 `BOT_TTS_PREFS` 或 `messages.tts.prefsPath` 覆盖）。
 
 存储的字段：
 

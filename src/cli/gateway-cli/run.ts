@@ -136,7 +136,7 @@ function resolveGatewayRunOptions(opts: GatewayRunOpts, command?: Command): Gate
 }
 
 async function runGatewayCommand(opts: GatewayRunOpts) {
-  const isDevProfile = process.env.OPENCLAW_PROFILE?.trim().toLowerCase() === "dev";
+  const isDevProfile = process.env.BOT_PROFILE?.trim().toLowerCase() === "dev";
   const devMode = Boolean(opts.dev) || isDevProfile;
   if (opts.reset && !devMode) {
     defaultRuntime.error("Use --reset with --dev.");
@@ -148,7 +148,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   setVerbose(Boolean(opts.verbose));
   if (opts.claudeCliLogs) {
     setConsoleSubsystemFilter(["agent/claude-cli"]);
-    process.env.OPENCLAW_CLAUDE_CLI_LOG_OUTPUT = "1";
+    process.env.BOT_CLAUDE_CLI_LOG_OUTPUT = "1";
   }
   const wsLogRaw = (opts.compact ? "compact" : opts.wsLog) as string | undefined;
   const wsLogStyle: GatewayWsLogStyle =
@@ -165,11 +165,11 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   setGatewayWsLogStyle(wsLogStyle);
 
   if (opts.rawStream) {
-    process.env.OPENCLAW_RAW_STREAM = "1";
+    process.env.BOT_RAW_STREAM = "1";
   }
   const rawStreamPath = toOptionString(opts.rawStreamPath);
   if (rawStreamPath) {
-    process.env.OPENCLAW_RAW_STREAM_PATH = rawStreamPath;
+    process.env.BOT_RAW_STREAM_PATH = rawStreamPath;
   }
 
   if (devMode) {
@@ -249,7 +249,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   if (opts.token) {
     const token = toOptionString(opts.token);
     if (token) {
-      process.env.OPENCLAW_GATEWAY_TOKEN = token;
+      process.env.BOT_GATEWAY_TOKEN = token;
     }
   }
   const authModeRaw = toOptionString(opts.auth);
@@ -338,7 +338,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     defaultRuntime.error(
       [
         "Gateway auth is set to password, but no password is configured.",
-        "Set gateway.auth.password (or OPENCLAW_GATEWAY_PASSWORD), or pass --password.",
+        "Set gateway.auth.password (or BOT_GATEWAY_PASSWORD), or pass --password.",
         ...authHints,
       ]
         .filter(Boolean)
@@ -362,7 +362,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     defaultRuntime.error(
       [
         `Refusing to bind gateway to ${bind} without auth.`,
-        "Set gateway.auth.token/password (or OPENCLAW_GATEWAY_TOKEN/OPENCLAW_GATEWAY_PASSWORD) or pass --token/--password.",
+        "Set gateway.auth.token/password (or BOT_GATEWAY_TOKEN/BOT_GATEWAY_PASSWORD) or pass --token/--password.",
         ...authHints,
       ]
         .filter(Boolean)
@@ -427,7 +427,7 @@ export function addGatewayRunCommand(cmd: Command): Command {
     )
     .option(
       "--token <token>",
-      "Shared token required in connect.params.auth.token (default: OPENCLAW_GATEWAY_TOKEN env if set)",
+      "Shared token required in connect.params.auth.token (default: BOT_GATEWAY_TOKEN env if set)",
     )
     .option("--auth <mode>", `Gateway auth mode (${formatModeChoices(GATEWAY_AUTH_MODES)})`)
     .option("--password <password>", "Password for auth mode=password")

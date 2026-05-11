@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { BotConfig } from "../config/config.js";
 import { loadModelCatalog } from "../agents/model-catalog.js";
+import type { BotConfig } from "../config/config.js";
 import { withTempHome as withTempHomeHarness } from "../config/home-env.test-harness.js";
 import { getReplyFromConfig } from "./reply.js";
 
@@ -88,7 +88,7 @@ async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
 
 describe("block streaming", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
     piEmbeddedMock.abortEmbeddedPiRun.mockClear().mockReturnValue(false);
     piEmbeddedMock.queueEmbeddedPiMessage.mockClear().mockReturnValue(false);
     piEmbeddedMock.isEmbeddedPiRunActive.mockClear().mockReturnValue(false);

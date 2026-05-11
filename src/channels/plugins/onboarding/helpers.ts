@@ -1,14 +1,14 @@
-import type { BotConfig } from "../../../config/config.js";
-import type { DmPolicy, GroupPolicy } from "../../../config/types.js";
-import type { SecretInput } from "../../../config/types.secrets.js";
-import type { WizardPrompter } from "../../../wizard/prompts.js";
-import type { PromptAccountId, PromptAccountIdParams } from "../onboarding-types.js";
 import {
   promptSecretRefForOnboarding,
   resolveSecretInputModeForEnvSelection,
 } from "../../../commands/auth-choice.apply-helpers.js";
+import type { BotConfig } from "../../../config/config.js";
+import type { DmPolicy, GroupPolicy } from "../../../config/types.js";
+import type { SecretInput } from "../../../config/types.secrets.js";
 import { promptAccountId as promptAccountIdSdk } from "../../../plugin-sdk/onboarding.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../../routing/session-key.js";
+import type { WizardPrompter } from "../../../wizard/prompts.js";
+import type { PromptAccountId, PromptAccountIdParams } from "../onboarding-types.js";
 import { moveSingleAccountChannelSectionToDefaultAccount } from "../setup-helpers.js";
 
 export const promptAccountId: PromptAccountId = async (params: PromptAccountIdParams) => {
@@ -491,9 +491,9 @@ export async function promptSingleChannelSecretInput(params: {
     preferredEnvVar: params.preferredEnvVar,
     copy: {
       sourceMessage: `Where is this ${params.credentialLabel} stored?`,
-      envVarPlaceholder: params.preferredEnvVar ?? "OPENCLAW_SECRET",
+      envVarPlaceholder: params.preferredEnvVar ?? "BOT_SECRET",
       envVarFormatError:
-        'Use an env var name like "OPENCLAW_SECRET" (uppercase letters, numbers, underscores).',
+        'Use an env var name like "BOT_SECRET" (uppercase letters, numbers, underscores).',
       noProvidersMessage:
         "No file/exec secret providers are configured yet. Add one under secrets.providers, or select Environment variable.",
     },
