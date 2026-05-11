@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { BotConfig } from "./types.js";
 import { loadDotEnv } from "../infra/dotenv.js";
 import { resolveConfigEnvVars } from "./env-substitution.js";
 import { applyConfigEnvVars, collectConfigRuntimeEnvVars } from "./env-vars.js";
 import { withEnvOverride, withTempHome } from "./test-helpers.js";
+import type { BotConfig } from "./types.js";
 
 describe("config env vars", () => {
   it("applies env vars from env block when missing", async () => {
@@ -88,9 +88,9 @@ describe("config env vars", () => {
   it("loads ${VAR} substitutions from ~/.openclaw/.env on repeated runtime loads", async () => {
     await withTempHome(async (_home) => {
       await withEnvOverride({ BRAVE_API_KEY: undefined }, async () => {
-        const stateDir = process.env.OPENCLAW_STATE_DIR?.trim();
+        const stateDir = process.env.BOT_STATE_DIR?.trim();
         if (!stateDir) {
-          throw new Error("Expected OPENCLAW_STATE_DIR to be set by withTempHome");
+          throw new Error("Expected BOT_STATE_DIR to be set by withTempHome");
         }
         await fs.mkdir(stateDir, { recursive: true });
         await fs.writeFile(path.join(stateDir, ".env"), "BRAVE_API_KEY=from-dotenv\n", "utf-8");

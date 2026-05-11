@@ -1,5 +1,5 @@
-import { Command } from "commander";
 import path from "node:path";
+import { Command } from "commander";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { withEnvAsync } from "../test-utils/env.js";
 
@@ -170,7 +170,7 @@ describe("browser extension install (fs-mocked)", () => {
 
   it("copies extension path to clipboard", async () => {
     const tmp = abs("/tmp/openclaw-ext-path");
-    await withEnvAsync({ OPENCLAW_STATE_DIR: tmp }, async () => {
+    await withEnvAsync({ BOT_STATE_DIR: tmp }, async () => {
       copyToClipboard.mockResolvedValue(true);
 
       const dir = path.join(tmp, "browser", "chrome-extension");
