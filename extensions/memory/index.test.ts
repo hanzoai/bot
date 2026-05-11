@@ -4,19 +4,19 @@ import { join } from "node:path";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { SqliteStore } from "./sqlite.js";
 
-describe("memory-postgres: SQLite single-binary mode", () => {
+describe("memory: SQLite (canonical default)", () => {
   let dir: string;
   let store: SqliteStore;
 
   beforeAll(async () => {
     dir = await mkdtemp(join(tmpdir(), "hanzo-brain-test-"));
-    store = new SqliteStore({ url: join(dir, "brain.db") });
+    store = new SqliteStore({ dbPath: join(dir, "brain.db") });
     try {
       await store.init();
     } catch (e: any) {
       // CI runners without bun:sqlite or better-sqlite3 — skip the suite.
       if (String(e.message).includes("neither bun:sqlite nor better-sqlite3")) {
-        console.warn("[memory-postgres test] SQLite driver unavailable, skipping suite");
+        console.warn("[memory test] SQLite driver unavailable, skipping suite");
         // Mark as skipped by short-circuiting subsequent tests.
         store = null as any;
       } else {
@@ -67,5 +67,35 @@ describe("memory-postgres: SQLite single-binary mode", () => {
     const hits = await store.hybridSearch("Acme");
     expect(hits.length).toBeGreaterThan(0);
     expect(hits[0].slug).toBe("people/alice");
+  });
+});
+
+describe("memory: pluggability", () => {
+  it("registerBackend exposes new backends to open()", async () => {
+    const { open, registerBackend, listBackends } = await import("./index.js");
+    // Stub backend that records init() being called.
+    let initialized = false;
+    registerBackend("test-stub", () => ({
+      init: async () => {
+        initialized = true;
+      },
+      upsertPage: async () => {},
+      getPage: async () => null,
+      upsertEdges: async () => {},
+      edgesFor: async () => [],
+      upsertFact: async () => {},
+      recall: async () => [],
+      hybridSearch: async () => [],
+      close: async () => {},
+    }));
+    expect(listBackends()).toContain("test-stub");
+    expect(listBackends()).toContain("sqlite");
+    await open({ backend: "test-stub" });
+    expect(initialized).toBe(true);
+  });
+
+  it("unknown backend throws with a helpful message", async () => {
+    const { open } = await import("./index.js");
+    await expect(open({ backend: "no-such-thing" })).rejects.toThrow(/unknown backend/);
   });
 });
