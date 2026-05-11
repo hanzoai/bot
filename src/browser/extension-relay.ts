@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
+import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import type { Duplex } from "node:stream";
-import { createServer } from "node:http";
 import WebSocket, { WebSocketServer } from "ws";
 import { isLoopbackAddress, isLoopbackHost } from "../gateway/net.js";
 import { rawDataToString } from "../infra/ws.js";
@@ -240,11 +240,11 @@ export async function ensureChromeExtensionRelayServer(opts: {
   }
 
   const extensionReconnectGraceMs = envMsOrDefault(
-    "OPENCLAW_EXTENSION_RELAY_RECONNECT_GRACE_MS",
+    "BOT_EXTENSION_RELAY_RECONNECT_GRACE_MS",
     DEFAULT_EXTENSION_RECONNECT_GRACE_MS,
   );
   const extensionCommandReconnectWaitMs = envMsOrDefault(
-    "OPENCLAW_EXTENSION_RELAY_COMMAND_RECONNECT_WAIT_MS",
+    "BOT_EXTENSION_RELAY_COMMAND_RECONNECT_WAIT_MS",
     DEFAULT_EXTENSION_COMMAND_RECONNECT_WAIT_MS,
   );
 
