@@ -1,13 +1,45 @@
 # @hanzo/bot-memory
 
-> The Hanzo Brain memory layer. Pluggable BrainStore contract. SQLite default — single file, zero infra.
+> The Hanzo Brain memory layer. Pluggable BrainStore contract. SQLite default — single file, zero infra. **Path shared across every Hanzo SDK** at `~/.hanzo/brain/brain.db`.
 
-## What ships
+## Canonical artifact locations
 
-- **SQLite backend** (canonical default) — `~/.hanzo-bot/brain/brain.db`. FTS5 keyword. Optional sqlite-vec for ANN.
-- **Pluggable interface** — `registerBackend("name", factory)`. Anyone can ship Postgres / LanceDB / D1 / libSQL as a sibling extension.
+Every Hanzo SDK on a machine reads/writes the same paths so brains
+compose across the bot, hanzo-mcp, hanzo-dev, and the Python SDK:
 
-No Postgres in core. Solo devs run one binary. Teams that want managed Postgres install a separate `@hanzo/bot-memory-postgres` extension (not shipped here).
+| Path                      | What                                     |
+| ------------------------- | ---------------------------------------- |
+| `~/.hanzo/brain/brain.db` | The brain — pages / edges / facts / FTS5 |
+| `~/.hanzo/workspace/`     | Markdown source — auto-ingested          |
+| `~/.hanzo/config.toml`    | Per-machine bot/mcp config               |
+| `~/.hanzo/cache/`         | Embedding cache, tool-output cache       |
+| `~/.hanzo/logs/`          | Structured logs                          |
+
+## What ships in core
+
+- **SQLite backend** (canonical default) — `~/.hanzo/brain/brain.db`. FTS5 keyword. Optional sqlite-vec for ANN.
+- **Pluggable interface** — `registerBackend("name", factory)`. Anyone can ship Qdrant / Meilisearch / Postgres / LanceDB / D1 / libSQL as a sibling extension.
+
+## Scale-out backends (sibling extensions, not in core)
+
+Hanzo ships the heavy machinery — register them by their canonical names:
+
+| Backend       | Repo                                            | Use                                                                     |
+| ------------- | ----------------------------------------------- | ----------------------------------------------------------------------- |
+| `qdrant`      | [`~/work/hanzo/vector`](../../../vector/)       | Vector ANN at scale (millions of embeddings, multi-replica)             |
+| `meilisearch` | [`~/work/hanzo/search`](../../../search/)       | Fast keyword FTS when SQLite FTS5 stops being enough                    |
+| `replicate`   | [`~/work/hanzo/replicate`](../../../replicate/) | Background SQLite WAL → S3 backup, point-in-time restore                |
+| `vfs`         | [`~/work/hanzo/vfs`](../../../vfs/)             | S3-backed virtual block FS with PQ encryption — unlimited write storage |
+| `postgres`    | (sibling pkg)                                   | Multi-tenant team brain with pgvector                                   |
+
+Default routing:
+
+- **Solo dev, < 100K pages** → SQLite + FTS5 (zero infra)
+- **Solo dev, > 10K pages with vector** → SQLite + `sqlite-vec` (requires better-sqlite3 driver — bun:sqlite has no extension loading)
+- **Durable solo (offsite backup)** → SQLite + `replicate` to S3
+- **Multi-machine personal** → libSQL/Turso embedded replicas (single primary, read replicas everywhere)
+- **Team / Hanzo Node** → Qdrant for vectors + Meilisearch for FTS + SQLite for facts/edges (or Postgres if multi-tenant)
+- **Org-scale streaming** → VFS-backed brain.db, lazy block-level fetch from S3, unlimited size
 
 ## Schema
 
@@ -61,7 +93,7 @@ Environment override: `HANZO_BRAIN_BACKEND=my-store`.
 ## API surface
 
 ```ts
-const store = await open(); // SQLite, ~/.hanzo-bot/brain/brain.db
+const store = await open(); // SQLite, ~/.hanzo/brain/brain.db
 
 await store.upsertPage("people/alice", markdown, { type: "person" });
 await store.upsertEdges("people/alice", edges);
@@ -81,7 +113,7 @@ const out = await store.edgesFor("people/alice", "out");
 ```ts
 interface MemoryConfig {
   backend?: string; // default "sqlite"
-  dataDir?: string; // default ~/.hanzo-bot/brain
+  dataDir?: string; // default ~/.hanzo/brain
   dbPath?: string; // explicit file; overrides dataDir
   embeddingModel?: string; // for the optional vector ANN path
   embeddingApiKey?: string;
