@@ -165,11 +165,11 @@ sequences (e.g. spaces become `\032`).
 
 ## Disabling / configuration
 
-- `OPENCLAW_DISABLE_BONJOUR=1` disables advertising (legacy: `OPENCLAW_DISABLE_BONJOUR`).
+- `BOT_DISABLE_BONJOUR=1` disables advertising (legacy: `BOT_DISABLE_BONJOUR`).
 - `gateway.bind` in `~/.openclaw/openclaw.json` controls the Gateway bind mode.
-- `OPENCLAW_SSH_PORT` overrides the SSH port advertised in TXT (legacy: `OPENCLAW_SSH_PORT`).
-- `OPENCLAW_TAILNET_DNS` publishes a MagicDNS hint in TXT (legacy: `OPENCLAW_TAILNET_DNS`).
-- `OPENCLAW_CLI_PATH` overrides the advertised CLI path (legacy: `OPENCLAW_CLI_PATH`).
+- `BOT_SSH_PORT` overrides the SSH port advertised in TXT (legacy: `BOT_SSH_PORT`).
+- `BOT_TAILNET_DNS` publishes a MagicDNS hint in TXT (legacy: `BOT_TAILNET_DNS`).
+- `BOT_CLI_PATH` overrides the advertised CLI path (legacy: `BOT_CLI_PATH`).
 
 ## Related docs
 
