@@ -1,21 +1,23 @@
 /**
- * Hanzo Brain — Memory (Postgres + pgvector OR SQLite + sqlite-vec)
+ * Hanzo Brain — Memory
  *
- * Dual-mode memory backend. Auto-selects:
- *   - SQLite + sqlite-vec when no DATABASE_URL is set (single-binary solo dev)
- *   - Postgres + pgvector when DATABASE_URL points at a real PG instance
+ * Pluggable memory layer. SQLite by default — single file at
+ * `~/.hanzo-bot/brain/brain.db`, zero infra, ships in the same static
+ * binary as the rest of the bot.
  *
- * Schema mirrors gbrain's brain shape (subjects/pages/embeddings/edges/facts)
- * so the extractor in `@hanzo/bot-graph-links` and recipes in
- * `@hanzo/bot-recipes-brain` work identically against either backend.
+ * Third parties can plug in their own backend (Postgres, LanceDB, D1,
+ * libSQL, etc.) by calling `registerBackend("name", factory)` from
+ * another extension. The default selector picks SQLite unless config
+ * explicitly names another backend.
  *
- * Hybrid search: vector ANN + tsvector keyword + RRF fusion + compiled-truth
- * boost + backlink boost (when graph edges are present).
+ * Schema (pages, edges, facts, FTS5) is documented in `sqlite.ts`.
+ * Anyone implementing `BrainStore` against another store should mirror
+ * that shape so recipes and `@hanzo/bot-graph-links` Just Work.
  */
 
 import type { Edge } from "@hanzo/bot-graph-links";
 
-// ── Backend abstraction ─────────────────────────────────────────────
+// ── Pluggable store contract ────────────────────────────────────────
 
 export interface BrainStore {
   init(): Promise<void>;
@@ -46,40 +48,60 @@ export interface SearchHit {
   source: "vector" | "keyword" | "fused";
 }
 
-// ── Selector ────────────────────────────────────────────────────────
-
 export interface MemoryConfig {
-  url?: string; // "postgres://..." or "sqlite:///path/to/brain.db"
-  embeddingModel?: string; // default text-embedding-3-small
-  embeddingApiKey?: string;
+  backend?: string; // registered backend name. default: "sqlite"
   dataDir?: string; // default ~/.hanzo-bot/brain
+  dbPath?: string; // explicit file path; overrides dataDir
+  embeddingModel?: string;
+  embeddingApiKey?: string;
 }
 
-export async function open(cfg: MemoryConfig = {}): Promise<BrainStore> {
-  const url = cfg.url ?? process.env.HANZO_BRAIN_URL ?? process.env.DATABASE_URL ?? "";
-  if (url.startsWith("postgres://") || url.startsWith("postgresql://")) {
-    const { PgStore } = await import("./pg.js");
-    const store = new PgStore({ url, ...cfg });
-    await store.init();
-    return store;
-  }
-  // Default — embedded SQLite. Single-binary, zero infra.
+export type BackendFactory = (cfg: MemoryConfig) => Promise<BrainStore> | BrainStore;
+
+// ── Backend registry ────────────────────────────────────────────────
+
+const BACKENDS = new Map<string, BackendFactory>();
+
+export function registerBackend(name: string, factory: BackendFactory): void {
+  BACKENDS.set(name, factory);
+}
+
+export function listBackends(): string[] {
+  return Array.from(BACKENDS.keys());
+}
+
+// Register the canonical SQLite backend at module load.
+registerBackend("sqlite", async (cfg) => {
   const { SqliteStore } = await import("./sqlite.js");
-  const store = new SqliteStore({ url: url.replace(/^sqlite:\/\//, ""), ...cfg });
+  return new SqliteStore(cfg);
+});
+
+// ── Open ────────────────────────────────────────────────────────────
+
+export async function open(cfg: MemoryConfig = {}): Promise<BrainStore> {
+  const name = cfg.backend ?? process.env.HANZO_BRAIN_BACKEND ?? "sqlite";
+  const factory = BACKENDS.get(name);
+  if (!factory) {
+    const available = Array.from(BACKENDS.keys()).join(", ");
+    throw new Error(
+      `memory: unknown backend "${name}". Registered backends: ${available}. ` +
+        `Call registerBackend("${name}", factory) from your extension to plug one in.`,
+    );
+  }
+  const store = await factory(cfg);
   await store.init();
   return store;
 }
 
 // ── OpenClaw plugin contract ────────────────────────────────────────
 
-export interface MemoryPostgresApi {
+export interface MemoryApi {
   store: BrainStore;
+  registerBackend: typeof registerBackend;
+  listBackends: typeof listBackends;
 }
 
-export default async function register(
-  api: any,
-  cfg: MemoryConfig = {},
-): Promise<MemoryPostgresApi> {
+export default async function register(api: any, cfg: MemoryConfig = {}): Promise<MemoryApi> {
   const store = await open(cfg);
 
   // Wire bot lifecycle hooks. Each is a soft contract — if the bot core
@@ -106,5 +128,6 @@ export default async function register(
         store.hybridSearch(query, topK),
     });
   }
-  return { store };
+
+  return { store, registerBackend, listBackends };
 }
