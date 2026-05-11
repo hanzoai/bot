@@ -10,8 +10,15 @@
  * extensions, not in core):
  *   • qdrant       — vector ANN at scale (`~/work/hanzo/vector` fork)
  *   • meilisearch  — fast keyword FTS at scale (`~/work/hanzo/search` fork)
+ *   • zapdb        — canonical Hanzo store, ZAP-native, multi-language
+ *                    (`zap-proto/db`; in-flight migration from
+ *                    `luxfi/zapdb` Go + `~/work/luxcpp/zapdb` C++)
  *   • replicate    — SQLite WAL → S3 backup (`~/work/hanzo/replicate`)
  *   • vfs          — S3-backed streaming block FS (`~/work/hanzo/vfs`)
+ *
+ * `luxfi/database` is the Lux-flavored extension of zapdb (adds chain
+ * heads / archival / validator sets) — NOT a generic brain backend.
+ * Brain users pick `zapdb` directly.
  *
  * Third parties can plug in their own backend (Postgres, LanceDB, D1,
  * libSQL, etc.) by calling `registerBackend("name", factory)` from
@@ -92,12 +99,13 @@ registerBackend("sqlite", async (cfg) => {
 // all, you only install what you need.
 const ADVERTISED: Record<string, string> = {
   // Native Hanzo stack — ZAP transport + hanzo-consensus + zapdb storage.
-  // No libSQL / Turso — we ship our own at luxfi/database and luxcpp/zapdb.
+  // No libSQL / Turso — we ship our own. Canonical zapdb home is
+  // `zap-proto/db` (in-flight migration from luxfi/zapdb + luxcpp/zapdb).
   qdrant: "@hanzo/bot-memory-qdrant", // vector ANN at scale, fork at ~/work/hanzo/vector
   meilisearch: "@hanzo/bot-memory-meilisearch", // keyword FTS at scale, fork at ~/work/hanzo/search
   postgres: "@hanzo/bot-memory-postgres", // multi-tenant team brain w/ pgvector
   lancedb: "@hanzo/bot-memory-lancedb", // already shipped — embedded vector DB
-  luxdb: "@hanzo/bot-memory-luxdb", // luxfi/database — canonical Go store over zapdb
+  zapdb: "@hanzo/bot-memory-zapdb", // canonical Hanzo store — zap-proto/db (Go + C++ ports), ZAP-native
   replicate: "@hanzo/bot-memory-replicate", // SQLite WAL → S3 backup, ~/work/hanzo/replicate
   vfs: "@hanzo/bot-memory-vfs", // S3 streaming block FS, ~/work/hanzo/vfs
 };
