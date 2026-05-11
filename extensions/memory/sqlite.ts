@@ -1,10 +1,12 @@
 /**
- * SQLite backend — single-binary, zero-infra default.
+ * SQLite backend — the canonical Hanzo Brain store.
  *
- * Schema mirrors gbrain's brain shape so the Postgres path is a drop-in
- * replacement. Vector ANN via sqlite-vec when available; falls back to
- * brute-force cosine for tiny brains (<10K pages) when sqlite-vec is
- * unavailable on the host.
+ * Single file, zero infra. Schema below is the spec — anyone shipping
+ * a 3rd-party BrainStore against Postgres / LanceDB / D1 / libSQL /
+ * etc. mirrors this shape so recipes + graph-links Just Work.
+ *
+ * Vector ANN via sqlite-vec when available; falls back to brute-force
+ * cosine for brains under ~10K pages (handles the solo-dev case fine).
  */
 
 import { mkdir } from "node:fs/promises";
@@ -21,14 +23,9 @@ export class SqliteStore implements BrainStore {
   private cfg: MemoryConfig;
   private hasVec = false;
 
-  constructor(cfg: MemoryConfig & { url?: string }) {
+  constructor(cfg: MemoryConfig) {
     this.cfg = cfg;
-    this.path =
-      cfg.url && cfg.url !== ""
-        ? cfg.url
-        : cfg.dataDir
-          ? join(cfg.dataDir, "brain.db")
-          : DEFAULT_DB;
+    this.path = cfg.dbPath ? cfg.dbPath : cfg.dataDir ? join(cfg.dataDir, "brain.db") : DEFAULT_DB;
   }
 
   async init(): Promise<void> {
@@ -41,7 +38,7 @@ export class SqliteStore implements BrainStore {
       const mod = await import("better-sqlite3" as any).catch(() => null);
       if (!mod) {
         throw new Error(
-          "memory-postgres (sqlite mode): neither bun:sqlite nor better-sqlite3 is available. " +
+          "memory: neither bun:sqlite nor better-sqlite3 is available. " +
             "Run with bun, or install better-sqlite3.",
         );
       }
