@@ -11,7 +11,7 @@ import { ensureOpenClawModelsJson } from "./models-config.js";
 
 installModelsConfigTestHooks();
 
-const TEST_ENV_VAR = "OPENCLAW_MODELS_CONFIG_TEST_ENV";
+const TEST_ENV_VAR = "BOT_MODELS_CONFIG_TEST_ENV";
 
 describe("models-config", () => {
   it("applies config env.vars entries while ensuring models.json", async () => {
