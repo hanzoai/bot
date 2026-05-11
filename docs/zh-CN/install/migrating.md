@@ -19,7 +19,7 @@ x-i18n:
 
 迁移在概念上很简单：
 
-- 复制**状态目录**（`$OPENCLAW_STATE_DIR`，默认：`~/.openclaw/`）— 这包括配置、认证、会话和渠道状态。
+- 复制**状态目录**（`$BOT_STATE_DIR`，默认：`~/.openclaw/`）— 这包括配置、认证、会话和渠道状态。
 - 复制你的**工作区**（默认 `~/.openclaw/workspace/`）— 这包括你的智能体文件（记忆、提示等）。
 
 但在**配置文件**、**权限**和**部分复制**方面有常见的陷阱。
@@ -35,7 +35,7 @@ x-i18n:
 但如果你使用以下方式，可能会不同：
 
 - `--profile <name>`（通常变成 `~/.openclaw-<profile>/`）
-- `OPENCLAW_STATE_DIR=/some/path`
+- `BOT_STATE_DIR=/some/path`
 
 如果你不确定，在**旧**机器上运行：
 
@@ -43,7 +43,7 @@ x-i18n:
 openclaw status
 ```
 
-在输出中查找 `OPENCLAW_STATE_DIR` / profile 的提及。如果你运行多个 Gateway 网关，对每个配置文件重复此操作。
+在输出中查找 `BOT_STATE_DIR` / profile 的提及。如果你运行多个 Gateway 网关，对每个配置文件重复此操作。
 
 ### 2）确定你的工作区
 
@@ -70,7 +70,7 @@ openclaw status
 - 凭证
 - 渠道登录
 
-这些存储在 `$OPENCLAW_STATE_DIR` 下。
+这些存储在 `$BOT_STATE_DIR` 下。
 
 ## 迁移步骤（推荐）
 
@@ -106,7 +106,7 @@ tar -czf openclaw-workspace.tgz .openclaw/workspace
 
 复制**两者**：
 
-- `$OPENCLAW_STATE_DIR`（默认 `~/.openclaw/`）
+- `$BOT_STATE_DIR`（默认 `~/.openclaw/`）
 - 你的工作区（默认 `~/.openclaw/workspace/`）
 
 常见方法：
@@ -141,7 +141,7 @@ openclaw status
 
 ### 陷阱：配置文件/状态目录不匹配
 
-如果你在旧 Gateway 网关上使用了配置文件（或 `OPENCLAW_STATE_DIR`），而新 Gateway 网关使用了不同的配置，你会看到如下症状：
+如果你在旧 Gateway 网关上使用了配置文件（或 `BOT_STATE_DIR`），而新 Gateway 网关使用了不同的配置，你会看到如下症状：
 
 - 配置更改不生效
 - 渠道丢失/已登出
@@ -157,10 +157,10 @@ openclaw doctor
 
 `openclaw.json` 是不够的。许多提供商在以下位置存储状态：
 
-- `$OPENCLAW_STATE_DIR/credentials/`
-- `$OPENCLAW_STATE_DIR/agents/<agentId>/...`
+- `$BOT_STATE_DIR/credentials/`
+- `$BOT_STATE_DIR/agents/<agentId>/...`
 
-始终迁移整个 `$OPENCLAW_STATE_DIR` 文件夹。
+始终迁移整个 `$BOT_STATE_DIR` 文件夹。
 
 ### 陷阱：权限/所有权
 
@@ -177,7 +177,7 @@ openclaw doctor
 
 ### 陷阱：备份中的密钥
 
-`$OPENCLAW_STATE_DIR` 包含密钥（API 密钥、OAuth 令牌、WhatsApp 凭证）。将备份视为生产密钥：
+`$BOT_STATE_DIR` 包含密钥（API 密钥、OAuth 令牌、WhatsApp 凭证）。将备份视为生产密钥：
 
 - 加密存储
 - 避免通过不安全的渠道共享

@@ -47,7 +47,7 @@ final class TalkModeManager: NSObject {
     private static let redactedConfigSentinel = "__BOT_REDACTED__"
 =======
     private static let defaultTalkProvider = "elevenlabs"
-    private static let redactedConfigSentinel = "__OPENCLAW_REDACTED__"
+    private static let redactedConfigSentinel = "__BOT_REDACTED__"
 >>>>>>> upstream/main
     var isEnabled: Bool = false
     var isListening: Bool = false

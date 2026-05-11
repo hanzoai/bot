@@ -28,7 +28,7 @@
 <<<<<<< HEAD
 	<string>$(BOT_APP_BUNDLE_ID)</string>
 =======
-	<string>$(OPENCLAW_APP_BUNDLE_ID)</string>
+	<string>$(BOT_APP_BUNDLE_ID)</string>
 >>>>>>> upstream/main
 	<key>WKWatchKitApp</key>
 	<true/>

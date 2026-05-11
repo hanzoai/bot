@@ -1,13 +1,6 @@
 import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import type {
-  ExecEventPayload,
-  ExecFinishedEventParams,
-  RunResult,
-  SkillBinsProvider,
-  SystemRunParams,
-} from "./invoke-types.js";
 import { GatewayClient } from "../gateway/client.js";
 import {
   ensureExecApprovals,
@@ -28,6 +21,13 @@ import {
 import { sanitizeHostExecEnv } from "../infra/host-env-security.js";
 import { runBrowserProxyCommand } from "./invoke-browser.js";
 import { buildSystemRunApprovalPlan, handleSystemRunInvoke } from "./invoke-system-run.js";
+import type {
+  ExecEventPayload,
+  ExecFinishedEventParams,
+  RunResult,
+  SkillBinsProvider,
+  SystemRunParams,
+} from "./invoke-types.js";
 import { openVncTunnel } from "./invoke-vnc.js";
 
 const OUTPUT_CAP = 200_000;
@@ -44,9 +44,8 @@ const WINDOWS_CODEPAGE_ENCODING_MAP: Record<number, string> = {
 };
 let cachedWindowsConsoleEncoding: string | null | undefined;
 
-const execHostEnforced = process.env.OPENCLAW_NODE_EXEC_HOST?.trim().toLowerCase() === "app";
-const execHostFallbackAllowed =
-  process.env.OPENCLAW_NODE_EXEC_FALLBACK?.trim().toLowerCase() !== "0";
+const execHostEnforced = process.env.BOT_NODE_EXEC_HOST?.trim().toLowerCase() === "app";
+const execHostFallbackAllowed = process.env.BOT_NODE_EXEC_FALLBACK?.trim().toLowerCase() !== "0";
 const preferMacAppExecHost = process.platform === "darwin" && execHostEnforced;
 
 type SystemWhichParams = {

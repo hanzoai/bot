@@ -26,7 +26,7 @@ export function shouldRequireGatewayTokenForInstall(
   // survive outside the invoking shell.
   const configServiceEnv = collectConfigServiceEnvVars(cfg);
   const hasConfiguredPasswordEnvCandidate = Boolean(
-    configServiceEnv.OPENCLAW_GATEWAY_PASSWORD?.trim() ||
+    configServiceEnv.BOT_GATEWAY_PASSWORD?.trim() ||
     configServiceEnv.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
   );
   if (hasConfiguredPasswordEnvCandidate) {
