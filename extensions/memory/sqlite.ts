@@ -15,7 +15,7 @@ import { dirname, join } from "node:path";
 import type { Edge } from "@hanzo/bot-graph-links";
 import type { BrainStore, Fact, MemoryConfig, SearchHit } from "./index.js";
 
-const DEFAULT_DB = join(homedir(), ".hanzo-bot", "brain", "brain.db");
+const DEFAULT_DB = join(homedir(), ".hanzo", "brain", "brain.db");
 
 export class SqliteStore implements BrainStore {
   private db: any = null;
