@@ -176,12 +176,12 @@ describe("ensureGatewayStartupAuth", () => {
         gateway: {
           auth: {
             mode: "token",
-            token: "${OPENCLAW_GATEWAY_TOKEN}",
+            token: "${BOT_GATEWAY_TOKEN}",
           },
         },
       },
       env: {
-        OPENCLAW_GATEWAY_TOKEN: "resolved-token",
+        BOT_GATEWAY_TOKEN: "resolved-token",
       } as NodeJS.ProcessEnv,
       persist: true,
     });
@@ -190,11 +190,11 @@ describe("ensureGatewayStartupAuth", () => {
     expect(result.persistedGeneratedToken).toBe(false);
     expect(result.auth.mode).toBe("token");
     expect(result.auth.token).toBe("resolved-token");
-    expect(result.cfg.gateway?.auth?.token).toBe("${OPENCLAW_GATEWAY_TOKEN}");
+    expect(result.cfg.gateway?.auth?.token).toBe("${BOT_GATEWAY_TOKEN}");
     expect(mocks.writeConfigFile).not.toHaveBeenCalled();
   });
 
-  it("uses OPENCLAW_GATEWAY_TOKEN without resolving configured token SecretRef", async () => {
+  it("uses BOT_GATEWAY_TOKEN without resolving configured token SecretRef", async () => {
     const result = await ensureGatewayStartupAuth({
       cfg: {
         gateway: {
@@ -210,7 +210,7 @@ describe("ensureGatewayStartupAuth", () => {
         },
       },
       env: {
-        OPENCLAW_GATEWAY_TOKEN: "token-from-env",
+        BOT_GATEWAY_TOKEN: "token-from-env",
       } as NodeJS.ProcessEnv,
       persist: true,
     });
@@ -263,7 +263,7 @@ describe("ensureGatewayStartupAuth", () => {
     expect(mocks.writeConfigFile).not.toHaveBeenCalled();
   });
 
-  it("uses OPENCLAW_GATEWAY_PASSWORD without resolving configured password SecretRef", async () => {
+  it("uses BOT_GATEWAY_PASSWORD without resolving configured password SecretRef", async () => {
     const result = await ensureGatewayStartupAuth({
       cfg: {
         gateway: {
@@ -279,7 +279,7 @@ describe("ensureGatewayStartupAuth", () => {
         },
       },
       env: {
-        OPENCLAW_GATEWAY_PASSWORD: "password-from-env",
+        BOT_GATEWAY_PASSWORD: "password-from-env",
       } as NodeJS.ProcessEnv,
       persist: true,
     });
@@ -406,7 +406,7 @@ describe("ensureGatewayStartupAuth", () => {
           },
         },
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "shared-gateway-token-1234567890",
+          BOT_GATEWAY_TOKEN: "shared-gateway-token-1234567890",
         } as NodeJS.ProcessEnv,
       }),
     ).rejects.toThrow(/hooks\.token must not match gateway auth token/i);

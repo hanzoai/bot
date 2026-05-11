@@ -74,9 +74,9 @@ describe("push APNs env config", () => {
 
   it("resolves inline private key and unescapes newlines", async () => {
     const env = {
-      OPENCLAW_APNS_TEAM_ID: "TEAM123",
-      OPENCLAW_APNS_KEY_ID: "KEY123",
-      OPENCLAW_APNS_PRIVATE_KEY_P8:
+      BOT_APNS_TEAM_ID: "TEAM123",
+      BOT_APNS_KEY_ID: "KEY123",
+      BOT_APNS_PRIVATE_KEY_P8:
         "-----BEGIN PRIVATE KEY-----\\nline-a\\nline-b\\n-----END PRIVATE KEY-----",
     } as NodeJS.ProcessEnv;
     const resolved = await resolveApnsAuthConfigFromEnv(env);
@@ -95,7 +95,7 @@ describe("push APNs env config", () => {
     if (resolved.ok) {
       return;
     }
-    expect(resolved.error).toContain("OPENCLAW_APNS_TEAM_ID");
+    expect(resolved.error).toContain("BOT_APNS_TEAM_ID");
   });
 });
 

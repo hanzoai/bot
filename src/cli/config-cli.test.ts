@@ -212,7 +212,7 @@ describe("config cli", () => {
 
       await runConfigCommand(["config", "get", "gateway.auth.token"]);
 
-      expect(mockLog).toHaveBeenCalledWith("__OPENCLAW_REDACTED__");
+      expect(mockLog).toHaveBeenCalledWith("__BOT_REDACTED__");
     });
   });
 

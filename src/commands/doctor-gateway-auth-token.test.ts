@@ -66,7 +66,7 @@ describe("resolveGatewayAuthTokenForService", () => {
     expect(resolved).toEqual({ token: "resolved-token" });
   });
 
-  it("falls back to OPENCLAW_GATEWAY_TOKEN when SecretRef is unresolved", async () => {
+  it("falls back to BOT_GATEWAY_TOKEN when SecretRef is unresolved", async () => {
     const resolved = await resolveGatewayAuthTokenForService(
       {
         gateway: {
@@ -81,14 +81,14 @@ describe("resolveGatewayAuthTokenForService", () => {
         },
       } as BotConfig,
       {
-        OPENCLAW_GATEWAY_TOKEN: "env-fallback-token",
+        BOT_GATEWAY_TOKEN: "env-fallback-token",
       } as NodeJS.ProcessEnv,
     );
 
     expect(resolved).toEqual({ token: "env-fallback-token" });
   });
 
-  it("falls back to OPENCLAW_GATEWAY_TOKEN when SecretRef resolves to empty", async () => {
+  it("falls back to BOT_GATEWAY_TOKEN when SecretRef resolves to empty", async () => {
     const resolved = await resolveGatewayAuthTokenForService(
       {
         gateway: {
@@ -104,7 +104,7 @@ describe("resolveGatewayAuthTokenForService", () => {
       } as BotConfig,
       {
         CUSTOM_GATEWAY_TOKEN: "   ",
-        OPENCLAW_GATEWAY_TOKEN: "env-fallback-token",
+        BOT_GATEWAY_TOKEN: "env-fallback-token",
       } as NodeJS.ProcessEnv,
     );
 
@@ -163,7 +163,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
   });
 
   it("requires token in inferred mode when password env exists only in shell", async () => {
-    await withEnvAsync({ OPENCLAW_GATEWAY_PASSWORD: "password-from-env" }, async () => {
+    await withEnvAsync({ BOT_GATEWAY_PASSWORD: "password-from-env" }, async () => {
       const required = shouldRequireGatewayTokenForInstall(
         {
           gateway: {
@@ -203,7 +203,7 @@ describe("shouldRequireGatewayTokenForInstall", () => {
         },
         env: {
           vars: {
-            OPENCLAW_GATEWAY_PASSWORD: "configured-password",
+            BOT_GATEWAY_PASSWORD: "configured-password",
           },
         },
       } as BotConfig,

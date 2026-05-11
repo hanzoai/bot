@@ -1,7 +1,7 @@
 import type { ChannelId } from "../channels/plugins/types.js";
-import type { BotConfig } from "./config.js";
 import { resolveAccountEntry } from "../routing/account-lookup.js";
 import { normalizeAccountId } from "../routing/session-key.js";
+import type { BotConfig } from "./config.js";
 import {
   parseToolsBySenderTypedKey,
   type GroupToolPolicyBySenderConfig,
@@ -110,7 +110,7 @@ function warnLegacyToolsBySenderKey(rawKey: string) {
     `toolsBySender key "${trimmed}" is deprecated. Use explicit prefixes (id:, e164:, username:, name:). Legacy unprefixed keys are matched as id only.`,
     {
       type: "DeprecationWarning",
-      code: "OPENCLAW_TOOLS_BY_SENDER_UNTYPED_KEY",
+      code: "BOT_TOOLS_BY_SENDER_UNTYPED_KEY",
     },
   );
 }

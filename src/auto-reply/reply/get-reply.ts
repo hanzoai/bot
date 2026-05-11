@@ -1,5 +1,3 @@
-import type { MsgContext } from "../templating.js";
-import type { GetReplyOptions, ReplyPayload } from "../types.js";
 import {
   resolveAgentDir,
   resolveAgentWorkspaceDir,
@@ -15,7 +13,9 @@ import { applyLinkUnderstanding } from "../../link-understanding/apply.js";
 import { applyMediaUnderstanding } from "../../media-understanding/apply.js";
 import { defaultRuntime } from "../../runtime.js";
 import { resolveCommandAuthorization } from "../command-auth.js";
+import type { MsgContext } from "../templating.js";
 import { SILENT_REPLY_TOKEN } from "../tokens.js";
+import type { GetReplyOptions, ReplyPayload } from "../types.js";
 import { emitResetCommandHooks, type ResetCommandAction } from "./commands-core.js";
 import { resolveDefaultModel } from "./directive-handling.js";
 import { resolveReplyDirectives } from "./get-reply-directives.js";
@@ -58,7 +58,7 @@ export async function getReplyFromConfig(
   opts?: GetReplyOptions,
   configOverride?: BotConfig,
 ): Promise<ReplyPayload | ReplyPayload[] | undefined> {
-  const isFastTestEnv = process.env.OPENCLAW_TEST_FAST === "1";
+  const isFastTestEnv = process.env.BOT_TEST_FAST === "1";
   const cfg = configOverride ?? loadConfig();
   const targetSessionKey =
     ctx.CommandSource === "native" ? ctx.CommandTargetSessionKey?.trim() : undefined;

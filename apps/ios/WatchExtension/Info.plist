@@ -30,7 +30,7 @@
 <<<<<<< HEAD
 			<string>$(BOT_WATCH_APP_BUNDLE_ID)</string>
 =======
-			<string>$(OPENCLAW_WATCH_APP_BUNDLE_ID)</string>
+			<string>$(BOT_WATCH_APP_BUNDLE_ID)</string>
 >>>>>>> upstream/main
 		</dict>
 		<key>NSExtensionPointIdentifier</key>

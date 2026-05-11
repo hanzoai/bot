@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
-import type { BotConfig } from "../../config/config.js";
 import { resolveUserTimezone } from "../../agents/date-time.js";
 import { buildWorkspaceSkillSnapshot } from "../../agents/skills.js";
 import { ensureSkillsWatcher, getSkillsSnapshotVersion } from "../../agents/skills/refresh.js";
+import type { BotConfig } from "../../config/config.js";
 import { type SessionEntry, updateSessionStore } from "../../config/sessions.js";
 import { buildChannelSummary } from "../../infra/channel-summary.js";
 import {
@@ -133,7 +133,7 @@ export async function ensureSkillSnapshot(params: {
   skillsSnapshot?: SessionEntry["skillsSnapshot"];
   systemSent: boolean;
 }> {
-  if (process.env.OPENCLAW_TEST_FAST === "1") {
+  if (process.env.BOT_TEST_FAST === "1") {
     // In fast unit-test runs we skip filesystem scanning, watchers, and session-store writes.
     // Dedicated skills tests cover snapshot generation behavior.
     return {
