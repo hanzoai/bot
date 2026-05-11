@@ -3,8 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BotConfig } from "../config/config.js";
-import type { MemoryIndexManager } from "./index.js";
 import { getEmbedBatchMock, resetEmbeddingMocks } from "./embedding.test-mocks.js";
+import type { MemoryIndexManager } from "./index.js";
 import { getRequiredMemoryIndexManager } from "./test-manager-helpers.js";
 
 let shouldFail = false;
@@ -22,7 +22,7 @@ describe("memory manager atomic reindex", () => {
   });
 
   beforeEach(async () => {
-    vi.stubEnv("OPENCLAW_TEST_MEMORY_UNSAFE_REINDEX", "0");
+    vi.stubEnv("BOT_TEST_MEMORY_UNSAFE_REINDEX", "0");
     resetEmbeddingMocks();
     shouldFail = false;
     embedBatch.mockImplementation(async (texts: string[]) => {

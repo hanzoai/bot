@@ -1,5 +1,4 @@
 import type { BrowserConfig, BrowserProfileConfig, BotConfig } from "../config/config.js";
-import type { SsrFPolicy } from "../infra/net/ssrf.js";
 import { resolveGatewayPort } from "../config/paths.js";
 import {
   deriveDefaultBrowserCdpPortRange,
@@ -7,12 +6,13 @@ import {
   DEFAULT_BROWSER_CONTROL_PORT,
 } from "../config/port-defaults.js";
 import { isLoopbackHost } from "../gateway/net.js";
+import type { SsrFPolicy } from "../infra/net/ssrf.js";
 import {
-  DEFAULT_OPENCLAW_BROWSER_COLOR,
-  DEFAULT_OPENCLAW_BROWSER_ENABLED,
+  DEFAULT_BOT_BROWSER_COLOR,
+  DEFAULT_BOT_BROWSER_ENABLED,
   DEFAULT_BROWSER_EVALUATE_ENABLED,
   DEFAULT_BROWSER_DEFAULT_PROFILE_NAME,
-  DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+  DEFAULT_BOT_BROWSER_PROFILE_NAME,
 } from "./constants.js";
 import { CDP_PORT_RANGE_START, getUsedPorts } from "./profiles.js";
 
@@ -52,11 +52,11 @@ export type ResolvedBrowserProfile = {
 function normalizeHexColor(raw: string | undefined) {
   const value = (raw ?? "").trim();
   if (!value) {
-    return DEFAULT_OPENCLAW_BROWSER_COLOR;
+    return DEFAULT_BOT_BROWSER_COLOR;
   }
   const normalized = value.startsWith("#") ? value : `#${value}`;
   if (!/^#[0-9a-fA-F]{6}$/.test(normalized)) {
-    return DEFAULT_OPENCLAW_BROWSER_COLOR;
+    return DEFAULT_BOT_BROWSER_COLOR;
   }
   return normalized.toUpperCase();
 }
@@ -162,8 +162,8 @@ function ensureDefaultProfile(
   derivedDefaultCdpPort?: number,
 ): Record<string, BrowserProfileConfig> {
   const result = { ...profiles };
-  if (!result[DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME]) {
-    result[DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME] = {
+  if (!result[DEFAULT_BOT_BROWSER_PROFILE_NAME]) {
+    result[DEFAULT_BOT_BROWSER_PROFILE_NAME] = {
       cdpPort: legacyCdpPort ?? derivedDefaultCdpPort ?? CDP_PORT_RANGE_START,
       color: defaultColor,
     };
@@ -205,7 +205,7 @@ export function resolveBrowserConfig(
   cfg: BrowserConfig | undefined,
   rootConfig?: BotConfig,
 ): ResolvedBrowserConfig {
-  const enabled = cfg?.enabled ?? DEFAULT_OPENCLAW_BROWSER_ENABLED;
+  const enabled = cfg?.enabled ?? DEFAULT_BOT_BROWSER_ENABLED;
   const evaluateEnabled = cfg?.evaluateEnabled ?? DEFAULT_BROWSER_EVALUATE_ENABLED;
   const gatewayPort = resolveGatewayPort(rootConfig);
   const controlPort = deriveDefaultBrowserControlPort(gatewayPort ?? DEFAULT_BROWSER_CONTROL_PORT);
@@ -268,8 +268,8 @@ export function resolveBrowserConfig(
     defaultProfileFromConfig ??
     (profiles[DEFAULT_BROWSER_DEFAULT_PROFILE_NAME]
       ? DEFAULT_BROWSER_DEFAULT_PROFILE_NAME
-      : profiles[DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME]
-        ? DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME
+      : profiles[DEFAULT_BOT_BROWSER_PROFILE_NAME]
+        ? DEFAULT_BOT_BROWSER_PROFILE_NAME
         : "chrome");
 
   const extraArgs = Array.isArray(cfg?.extraArgs)

@@ -301,7 +301,7 @@ export async function fetchNpmTagVersion(params: {
   const tag = params.tag;
   try {
     // Use @hanzo/bot package name for update checks (our fork)
-    const pkgName = process.env.OPENCLAW_UPDATE_PKG ?? "@hanzo/bot";
+    const pkgName = process.env.BOT_UPDATE_PKG ?? "@hanzo/bot";
     const res = await fetchWithTimeout(
       `https://registry.npmjs.org/${pkgName.replace("/", "%2F")}/${encodeURIComponent(tag)}`,
       {},

@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { PluginDiagnostic, PluginOrigin } from "./types.js";
 import { openBoundaryFileSync } from "../infra/boundary-file-read.js";
 import { resolveConfigDir, resolveUserPath } from "../utils.js";
 import { resolveBundledPluginsDir } from "./bundled-dir.js";
@@ -12,6 +11,7 @@ import {
   type PackageManifest,
 } from "./manifest.js";
 import { formatPosixMode, isPathInside, safeRealpathSync, safeStatSync } from "./path-safety.js";
+import type { PluginDiagnostic, PluginOrigin } from "./types.js";
 
 const EXTENSION_EXTS = new Set([".ts", ".js", ".mts", ".cts", ".mjs", ".cjs"]);
 
@@ -43,7 +43,7 @@ export function clearPluginDiscoveryCache(): void {
 }
 
 function resolveDiscoveryCacheMs(env: NodeJS.ProcessEnv): number {
-  const raw = env.OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS?.trim();
+  const raw = env.BOT_PLUGIN_DISCOVERY_CACHE_MS?.trim();
   if (raw === "" || raw === "0") {
     return 0;
   }
@@ -58,7 +58,7 @@ function resolveDiscoveryCacheMs(env: NodeJS.ProcessEnv): number {
 }
 
 function shouldUseDiscoveryCache(env: NodeJS.ProcessEnv): boolean {
-  const disabled = env.OPENCLAW_DISABLE_PLUGIN_DISCOVERY_CACHE?.trim();
+  const disabled = env.BOT_DISABLE_PLUGIN_DISCOVERY_CACHE?.trim();
   if (disabled) {
     return false;
   }

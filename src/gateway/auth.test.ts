@@ -91,8 +91,8 @@ describe("gateway auth", () => {
       resolveGatewayAuth({
         authConfig: {},
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "env-token",
-          OPENCLAW_GATEWAY_PASSWORD: "env-password",
+          BOT_GATEWAY_TOKEN: "env-token",
+          BOT_GATEWAY_PASSWORD: "env-password",
         } as NodeJS.ProcessEnv,
       }),
     ).toMatchObject({
@@ -128,8 +128,8 @@ describe("gateway auth", () => {
           password: "config-password",
         },
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "env-token",
-          OPENCLAW_GATEWAY_PASSWORD: "env-password",
+          BOT_GATEWAY_TOKEN: "env-token",
+          BOT_GATEWAY_PASSWORD: "env-password",
         } as NodeJS.ProcessEnv,
       }),
     ).toMatchObject({
@@ -142,12 +142,12 @@ describe("gateway auth", () => {
     expect(
       resolveGatewayAuth({
         authConfig: {
-          token: "${OPENCLAW_GATEWAY_TOKEN}",
-          password: "${OPENCLAW_GATEWAY_PASSWORD}",
+          token: "${BOT_GATEWAY_TOKEN}",
+          password: "${BOT_GATEWAY_PASSWORD}",
         },
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "env-token",
-          OPENCLAW_GATEWAY_PASSWORD: "env-password",
+          BOT_GATEWAY_TOKEN: "env-token",
+          BOT_GATEWAY_PASSWORD: "env-password",
         } as NodeJS.ProcessEnv,
       }),
     ).toMatchObject({

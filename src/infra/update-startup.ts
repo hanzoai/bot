@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { loadConfig } from "../config/config.js";
 import { formatCliCommand } from "../cli/command-format.js";
+import type { loadConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import { VERSION } from "../version.js";
@@ -272,7 +272,7 @@ async function runAutoUpdateCommand(params: {
     const res = await runCommandWithTimeout(argv, {
       timeoutMs: params.timeoutMs,
       env: {
-        OPENCLAW_AUTO_UPDATE: "1",
+        BOT_AUTO_UPDATE: "1",
       },
     });
     return {

@@ -50,13 +50,13 @@ x-i18n:
 ## 环境变量覆盖（一次性）
 
 ```bash
-OPENCLAW_DIAGNOSTICS=telegram.http,telegram.payload
+BOT_DIAGNOSTICS=telegram.http,telegram.payload
 ```
 
 禁用所有标志：
 
 ```bash
-OPENCLAW_DIAGNOSTICS=0
+BOT_DIAGNOSTICS=0
 ```
 
 ## 日志存储位置

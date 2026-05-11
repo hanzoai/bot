@@ -55,7 +55,7 @@ curl -fsSL https://openclaw.ai/install.sh | bash -s -- --verbose
 curl -fsSL https://openclaw.ai/install.sh | bash -s -- --beta --verbose
 ```
 
-你也可以设置 `OPENCLAW_VERBOSE=1` 代替标志。
+你也可以设置 `BOT_VERBOSE=1` 代替标志。
 
 ### Gateway 网关“unauthorized”、无法连接或持续重连
 

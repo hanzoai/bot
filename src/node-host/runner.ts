@@ -1,9 +1,9 @@
-import type { SkillBinTrustEntry } from "../infra/exec-approvals.js";
 import { resolveBrowserConfig } from "../browser/config.js";
 import { loadConfig, type BotConfig } from "../config/config.js";
 import { normalizeSecretInputString, resolveSecretInputRef } from "../config/types.secrets.js";
 import { GatewayClient } from "../gateway/client.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
+import type { SkillBinTrustEntry } from "../infra/exec-approvals.js";
 import { resolveExecutableFromPathEnv } from "../infra/executable-path.js";
 import { getMachineDisplayName } from "../infra/machine-name.js";
 import {
@@ -162,7 +162,7 @@ export async function resolveNodeHostGatewayCredentials(params: {
     : params.config.gateway?.auth?.password;
 
   const token =
-    normalizeSecretInputString(env.OPENCLAW_GATEWAY_TOKEN) ??
+    normalizeSecretInputString(env.BOT_GATEWAY_TOKEN) ??
     (await resolveNodeHostSecretInputString({
       config: params.config,
       value: configuredToken,
@@ -174,11 +174,11 @@ export async function resolveNodeHostGatewayCredentials(params: {
     authMode === "password" ||
     (authMode !== "token" && authMode !== "none" && authMode !== "trusted-proxy" && !tokenCanWin);
   const shouldResolveConfiguredPassword =
-    !normalizeSecretInputString(env.OPENCLAW_GATEWAY_PASSWORD) &&
+    !normalizeSecretInputString(env.BOT_GATEWAY_PASSWORD) &&
     !tokenCanWin &&
     (isRemoteMode || localPasswordCanWin);
   const password =
-    normalizeSecretInputString(env.OPENCLAW_GATEWAY_PASSWORD) ??
+    normalizeSecretInputString(env.BOT_GATEWAY_PASSWORD) ??
     (shouldResolveConfiguredPassword
       ? await resolveNodeHostSecretInputString({
           config: params.config,
@@ -220,8 +220,7 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   });
   // Cloud-provisioned nodes may have BOT_GATEWAY_TOKEN set by the Playground
   // provisioner. Use it as a fallback when no other token was resolved.
-  const token =
-    resolvedToken || process.env.BOT_GATEWAY_TOKEN || undefined;
+  const token = resolvedToken || process.env.BOT_GATEWAY_TOKEN || undefined;
 
   // Cloud-provisioned nodes (BOT_CLOUD_NODE=true) receive the gateway URL
   // and auth token via environment variables set by the Playground provisioner.
@@ -240,7 +239,9 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   // eslint-disable-next-line no-console
   console.log(`node host PATH: ${pathEnv}`);
   // eslint-disable-next-line no-console
-  console.log(`node host gateway: url=${url} nodeId=${nodeId} cloud=${isCloudNode} hasToken=${Boolean(token)}`);
+  console.log(
+    `node host gateway: url=${url} nodeId=${nodeId} cloud=${isCloudNode} hasToken=${Boolean(token)}`,
+  );
 
   const client = new GatewayClient({
     url,
@@ -291,7 +292,9 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     },
     onHelloOk: (hello) => {
       // eslint-disable-next-line no-console
-      console.log(`node host gateway connected: connId=${hello?.server?.connId ?? "?"} protocol=${hello?.protocol ?? "?"}`);
+      console.log(
+        `node host gateway connected: connId=${hello?.server?.connId ?? "?"} protocol=${hello?.protocol ?? "?"}`,
+      );
     },
   });
 
@@ -320,7 +323,8 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
       };
       const registerWithPlayground = async () => {
         try {
-          const teamId = process.env.HANZO_TEAM_ID?.trim() || process.env.AGENT_TEAM_ID?.trim() || "";
+          const teamId =
+            process.env.HANZO_TEAM_ID?.trim() || process.env.AGENT_TEAM_ID?.trim() || "";
           await fetch(`${playgroundServer}/api/v1/nodes/register`, {
             method: "POST",
             headers: playgroundHeaders,
@@ -339,7 +343,9 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
           console.log(`node host: registered with playground as ${agentNodeId}`);
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.warn(`node host: playground registration failed (non-fatal): ${err instanceof Error ? err.message : String(err)}`);
+          console.warn(
+            `node host: playground registration failed (non-fatal): ${err instanceof Error ? err.message : String(err)}`,
+          );
         }
       };
       const sendPlaygroundHeartbeat = async () => {

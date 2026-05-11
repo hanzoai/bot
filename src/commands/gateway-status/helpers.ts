@@ -1,7 +1,7 @@
-import type { BotConfig, ConfigFileSnapshot } from "../../config/types.js";
-import type { GatewayProbeResult } from "../../gateway/probe.js";
 import { resolveGatewayPort } from "../../config/config.js";
+import type { BotConfig, ConfigFileSnapshot } from "../../config/types.js";
 import { hasConfiguredSecretInput } from "../../config/types.secrets.js";
+import type { GatewayProbeResult } from "../../gateway/probe.js";
 import { resolveConfiguredSecretInputString } from "../../gateway/resolve-configured-secret-input-string.js";
 import { pickPrimaryTailnetIPv4 } from "../../infra/tailnet.js";
 import { colorize, theme } from "../../terminal/theme.js";
@@ -147,12 +147,12 @@ export function sanitizeSshTarget(value: unknown): string | null {
 }
 
 function readGatewayTokenEnv(env: NodeJS.ProcessEnv = process.env): string | undefined {
-  const token = env.OPENCLAW_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim();
+  const token = env.BOT_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim();
   return token || undefined;
 }
 
 function readGatewayPasswordEnv(env: NodeJS.ProcessEnv = process.env): string | undefined {
-  const password = env.OPENCLAW_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim();
+  const password = env.BOT_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim();
   return password || undefined;
 }
 

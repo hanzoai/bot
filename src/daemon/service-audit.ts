@@ -212,14 +212,13 @@ function auditGatewayToken(
   if (!expectedToken) {
     return;
   }
-  const serviceToken = command?.environment?.OPENCLAW_GATEWAY_TOKEN?.trim();
+  const serviceToken = command?.environment?.BOT_GATEWAY_TOKEN?.trim();
   if (serviceToken === expectedToken) {
     return;
   }
   issues.push({
     code: SERVICE_AUDIT_CODES.gatewayTokenMismatch,
-    message:
-      "Gateway service OPENCLAW_GATEWAY_TOKEN does not match gateway.auth.token in openclaw.json",
+    message: "Gateway service BOT_GATEWAY_TOKEN does not match gateway.auth.token in openclaw.json",
     detail: serviceToken ? "service token is stale" : "service token is missing",
     level: "recommended",
   });

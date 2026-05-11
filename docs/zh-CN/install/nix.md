@@ -52,13 +52,13 @@ Reference the nix-openclaw README for module options.
 
 ## Nix 模式运行时行为
 
-当设置 `OPENCLAW_NIX_MODE=1` 时（nix-openclaw 会自动设置）：
+当设置 `BOT_NIX_MODE=1` 时（nix-openclaw 会自动设置）：
 
 OpenClaw 支持 **Nix 模式**，使配置确定性并禁用自动安装流程。
 通过导出以下环境变量启用：
 
 ```bash
-OPENCLAW_NIX_MODE=1
+BOT_NIX_MODE=1
 ```
 
 在 macOS 上，GUI 应用不会自动继承 shell 环境变量。你也可以通过 defaults 启用 Nix 模式：
@@ -69,10 +69,10 @@ defaults write bot.molt.mac openclaw.nixMode -bool true
 
 ### 配置 + 状态路径
 
-OpenClaw 从 `OPENCLAW_CONFIG_PATH` 读取 JSON5 配置，并将可变数据存储在 `OPENCLAW_STATE_DIR` 中。
+OpenClaw 从 `BOT_CONFIG_PATH` 读取 JSON5 配置，并将可变数据存储在 `BOT_STATE_DIR` 中。
 
-- `OPENCLAW_STATE_DIR`（默认：`~/.openclaw`）
-- `OPENCLAW_CONFIG_PATH`（默认：`$OPENCLAW_STATE_DIR/openclaw.json`）
+- `BOT_STATE_DIR`（默认：`~/.openclaw`）
+- `BOT_CONFIG_PATH`（默认：`$BOT_STATE_DIR/openclaw.json`）
 
 在 Nix 下运行时，将这些显式设置为 Nix 管理的位置，以便运行时状态和配置不会进入不可变存储。
 

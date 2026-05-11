@@ -3,8 +3,8 @@ import { createServer } from "node:net";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { WebSocket } from "ws";
-import type { ChannelOutboundAdapter } from "../channels/plugins/types.js";
 import { getChannelPlugin } from "../channels/plugins/index.js";
+import type { ChannelOutboundAdapter } from "../channels/plugins/types.js";
 import { clearConfigCache } from "../config/config.js";
 import { resolveCanvasHostUrl } from "../infra/canvas-host-url.js";
 import { GatewayLockError } from "../infra/gateway-lock.js";
@@ -153,9 +153,9 @@ describe("gateway server models + voicewake", () => {
   };
 
   const withModelsConfig = async <T>(config: unknown, run: () => Promise<T>): Promise<T> => {
-    const configPath = process.env.OPENCLAW_CONFIG_PATH;
+    const configPath = process.env.BOT_CONFIG_PATH;
     if (!configPath) {
-      throw new Error("Missing OPENCLAW_CONFIG_PATH");
+      throw new Error("Missing BOT_CONFIG_PATH");
     }
     let previousConfig: string | undefined;
     try {
@@ -367,12 +367,12 @@ describe("gateway server models + voicewake", () => {
 
 describe("gateway server misc", () => {
   test("hello-ok advertises the gateway port for canvas host", async () => {
-    await withEnvAsync({ OPENCLAW_GATEWAY_TOKEN: "secret" }, async () => {
+    await withEnvAsync({ BOT_GATEWAY_TOKEN: "secret" }, async () => {
       testTailnetIPv4.value = "100.64.0.1";
       testState.gatewayBind = "lan";
       const canvasPort = await getFreePort();
       testState.canvasHostPort = canvasPort;
-      await withEnvAsync({ OPENCLAW_CANVAS_HOST_PORT: String(canvasPort) }, async () => {
+      await withEnvAsync({ BOT_CANVAS_HOST_PORT: String(canvasPort) }, async () => {
         const testPort = await getFreePort();
         const canvasHostUrl = resolveCanvasHostUrl({
           canvasPort,
@@ -421,9 +421,9 @@ describe("gateway server misc", () => {
   });
 
   test("auto-enables configured channel plugins on startup", async () => {
-    const configPath = process.env.OPENCLAW_CONFIG_PATH;
+    const configPath = process.env.BOT_CONFIG_PATH;
     if (!configPath) {
-      throw new Error("Missing OPENCLAW_CONFIG_PATH");
+      throw new Error("Missing BOT_CONFIG_PATH");
     }
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.writeFile(

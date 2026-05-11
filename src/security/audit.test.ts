@@ -4,12 +4,12 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../channels/plugins/types.js";
 import type { BotConfig } from "../config/config.js";
-import type { SecurityAuditOptions, SecurityAuditReport } from "./audit.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
   collectInstalledSkillsCodeSafetyFindings,
   collectPluginsCodeSafetyFindings,
 } from "./audit-extra.js";
+import type { SecurityAuditOptions, SecurityAuditReport } from "./audit.js";
 import { runSecurityAudit } from "./audit.js";
 import * as skillScanner from "./skill-scanner.js";
 
@@ -182,7 +182,7 @@ describe("security audit", () => {
     const credentialsDir = path.join(sharedChannelSecurityStateDir, "credentials");
     await fs.rm(credentialsDir, { recursive: true, force: true }).catch(() => undefined);
     await fs.mkdir(credentialsDir, { recursive: true, mode: 0o700 });
-    await withEnvAsync({ OPENCLAW_STATE_DIR: sharedChannelSecurityStateDir }, () =>
+    await withEnvAsync({ BOT_STATE_DIR: sharedChannelSecurityStateDir }, () =>
       fn(sharedChannelSecurityStateDir),
     );
   };
@@ -276,10 +276,10 @@ description: test skill
 
   it("flags non-loopback bind without auth as critical", async () => {
     // Clear env tokens so resolveGatewayAuth defaults to mode=none
-    const prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    const prevPassword = process.env.OPENCLAW_GATEWAY_PASSWORD;
-    delete process.env.OPENCLAW_GATEWAY_TOKEN;
-    delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+    const prevToken = process.env.BOT_GATEWAY_TOKEN;
+    const prevPassword = process.env.BOT_GATEWAY_PASSWORD;
+    delete process.env.BOT_GATEWAY_TOKEN;
+    delete process.env.BOT_GATEWAY_PASSWORD;
 
     try {
       const cfg: BotConfig = {
@@ -295,14 +295,14 @@ description: test skill
     } finally {
       // Restore env
       if (prevToken === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.BOT_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = prevToken;
+        process.env.BOT_GATEWAY_TOKEN = prevToken;
       }
       if (prevPassword === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+        delete process.env.BOT_GATEWAY_PASSWORD;
       } else {
-        process.env.OPENCLAW_GATEWAY_PASSWORD = prevPassword;
+        process.env.BOT_GATEWAY_PASSWORD = prevPassword;
       }
     }
   });
@@ -315,7 +315,7 @@ description: test skill
           password: {
             source: "env",
             provider: "default",
-            id: "OPENCLAW_GATEWAY_PASSWORD",
+            id: "BOT_GATEWAY_PASSWORD",
           },
         },
       },
@@ -1330,7 +1330,7 @@ description: test skill
           password: {
             source: "env",
             provider: "default",
-            id: "OPENCLAW_GATEWAY_PASSWORD",
+            id: "BOT_GATEWAY_PASSWORD",
           },
         },
       },
@@ -2628,8 +2628,8 @@ description: test skill
   });
 
   it("flags hooks token reuse of the gateway env token as critical", async () => {
-    const prevToken = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "shared-gateway-token-1234567890";
+    const prevToken = process.env.BOT_GATEWAY_TOKEN;
+    process.env.BOT_GATEWAY_TOKEN = "shared-gateway-token-1234567890";
     const cfg: BotConfig = {
       hooks: { enabled: true, token: "shared-gateway-token-1234567890" },
     };
@@ -2639,9 +2639,9 @@ description: test skill
       expectFinding(res, "hooks.token_reuse_gateway_token", "critical");
     } finally {
       if (prevToken === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.BOT_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = prevToken;
+        process.env.BOT_GATEWAY_TOKEN = prevToken;
       }
     }
   });
@@ -3377,10 +3377,10 @@ description: test skill
     const makeProbeEnv = (env?: { token?: string; password?: string }) => {
       const probeEnv: NodeJS.ProcessEnv = {};
       if (env?.token !== undefined) {
-        probeEnv.OPENCLAW_GATEWAY_TOKEN = env.token;
+        probeEnv.BOT_GATEWAY_TOKEN = env.token;
       }
       if (env?.password !== undefined) {
-        probeEnv.OPENCLAW_GATEWAY_PASSWORD = env.password;
+        probeEnv.BOT_GATEWAY_PASSWORD = env.password;
       }
       return probeEnv;
     };

@@ -1,6 +1,6 @@
 import type { BotConfig } from "../config/config.js";
 
-const DIAGNOSTICS_ENV = "OPENCLAW_DIAGNOSTICS";
+const DIAGNOSTICS_ENV = "BOT_DIAGNOSTICS";
 
 function normalizeFlag(value: string): string {
   return value.trim().toLowerCase();

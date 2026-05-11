@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import type { BotConfig } from "./types.js";
 import { createConfigIO } from "./io.js";
+import type { BotConfig } from "./types.js";
 
 describe("config io write", () => {
   let fixtureRoot = "";
@@ -516,9 +516,9 @@ describe("config io write", () => {
         initialConfig: { gateway: { mode: "local" } },
         gatewayPatch: { bind: "loopback" },
         env: {
-          OPENCLAW_WATCH_MODE: "1",
-          OPENCLAW_WATCH_SESSION: "watch-session-1",
-          OPENCLAW_WATCH_COMMAND: "gateway --force",
+          BOT_WATCH_MODE: "1",
+          BOT_WATCH_SESSION: "watch-session-1",
+          BOT_WATCH_COMMAND: "gateway --force",
         } as NodeJS.ProcessEnv,
       });
       expect(last.watchMode).toBe(true);

@@ -25,7 +25,7 @@ describe("resolveGatewayConnection", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["OPENCLAW_GATEWAY_TOKEN", "OPENCLAW_GATEWAY_PASSWORD"]);
+    envSnapshot = captureEnv(["BOT_GATEWAY_TOKEN", "BOT_GATEWAY_PASSWORD"]);
     loadConfig.mockClear();
     resolveGatewayPort.mockClear();
     pickPrimaryTailnetIPv4.mockClear();
@@ -33,8 +33,8 @@ describe("resolveGatewayConnection", () => {
     resolveGatewayPort.mockReturnValue(18789);
     pickPrimaryTailnetIPv4.mockReturnValue(undefined);
     pickPrimaryLanIPv4.mockReturnValue(undefined);
-    delete process.env.OPENCLAW_GATEWAY_TOKEN;
-    delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+    delete process.env.BOT_GATEWAY_TOKEN;
+    delete process.env.BOT_GATEWAY_PASSWORD;
   });
 
   afterEach(() => {
@@ -90,17 +90,17 @@ describe("resolveGatewayConnection", () => {
     resolveGatewayPort.mockReturnValue(18800);
     setup();
 
-    const result = await withEnvAsync({ OPENCLAW_GATEWAY_TOKEN: "env-token" }, async () => {
+    const result = await withEnvAsync({ BOT_GATEWAY_TOKEN: "env-token" }, async () => {
       return await resolveGatewayConnection({});
     });
 
     expect(result.url).toBe("ws://127.0.0.1:18800");
   });
 
-  it("uses OPENCLAW_GATEWAY_TOKEN for local mode", async () => {
+  it("uses BOT_GATEWAY_TOKEN for local mode", async () => {
     loadConfig.mockReturnValue({ gateway: { mode: "local" } });
 
-    await withEnvAsync({ OPENCLAW_GATEWAY_TOKEN: "env-token" }, async () => {
+    await withEnvAsync({ BOT_GATEWAY_TOKEN: "env-token" }, async () => {
       const result = await resolveGatewayConnection({});
       expect(result.token).toBe("env-token");
     });
@@ -176,7 +176,7 @@ describe("resolveGatewayConnection", () => {
     );
   });
 
-  it("prefers OPENCLAW_GATEWAY_PASSWORD over remote password fallback", async () => {
+  it("prefers BOT_GATEWAY_PASSWORD over remote password fallback", async () => {
     loadConfig.mockReturnValue({
       gateway: {
         mode: "remote",
@@ -184,7 +184,7 @@ describe("resolveGatewayConnection", () => {
       },
     });
 
-    await withEnvAsync({ OPENCLAW_GATEWAY_PASSWORD: "env-pass" }, async () => {
+    await withEnvAsync({ BOT_GATEWAY_PASSWORD: "env-pass" }, async () => {
       const result = await resolveGatewayConnection({});
       expect(result.password).toBe("env-pass");
     });
