@@ -1,0 +1,23 @@
+{
+  "name": "@hanzo/bot-memory-postgres",
+  "version": "1.4.2",
+  "private": true,
+  "description": "Postgres + pgvector OR SQLite + sqlite-vec memory backend — single-binary brain that mirrors gbrain's schema",
+  "type": "module",
+  "main": "./index.ts",
+  "devDependencies": {
+    "vitest": "^2.1.0"
+  },
+  "peerDependencies": {
+    "@hanzo/bot-graph-links": "*"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.5.0",
+    "pg": "^8.13.0"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
