@@ -5,7 +5,7 @@ import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
 
 function readGatewayTokenEnv(env: NodeJS.ProcessEnv): string | undefined {
-  const value = env.OPENCLAW_GATEWAY_TOKEN ?? env.CLAWDBOT_GATEWAY_TOKEN;
+  const value = env.BOT_GATEWAY_TOKEN ?? env.CLAWDBOT_GATEWAY_TOKEN;
   const trimmed = value?.trim();
   return trimmed || undefined;
 }

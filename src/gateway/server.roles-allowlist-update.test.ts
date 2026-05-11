@@ -3,10 +3,10 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, test, vi } from "vitest";
 import { WebSocket } from "ws";
-import type { DeviceIdentity } from "../infra/device-identity.js";
-import type { GatewayClient } from "./client.js";
 import { CONFIG_PATH } from "../config/config.js";
+import type { DeviceIdentity } from "../infra/device-identity.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
+import type { GatewayClient } from "./client.js";
 
 vi.mock("../infra/update-runner.js", () => ({
   runGatewayUpdate: vi.fn(async () => ({
@@ -44,9 +44,9 @@ const connectNodeClient = async (params: {
   displayName?: string;
   onEvent?: (evt: { event?: string; payload?: unknown }) => void;
 }) => {
-  const token = process.env.OPENCLAW_GATEWAY_TOKEN;
+  const token = process.env.BOT_GATEWAY_TOKEN;
   if (!token) {
-    throw new Error("OPENCLAW_GATEWAY_TOKEN is required for node test clients");
+    throw new Error("BOT_GATEWAY_TOKEN is required for node test clients");
   }
   return await connectGatewayClient({
     url: `ws://127.0.0.1:${params.port}`,

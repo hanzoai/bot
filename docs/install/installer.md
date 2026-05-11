@@ -146,19 +146,19 @@ The script exits with code `2` for invalid method selection or invalid `--instal
 
   <Accordion title="Environment variables reference">
 
-| Variable                                    | Description                                   |
-| ------------------------------------------- | --------------------------------------------- |
-| `OPENCLAW_INSTALL_METHOD=git\|npm`          | Install method                                |
-| `OPENCLAW_VERSION=latest\|next\|<semver>`   | npm version or dist-tag                       |
-| `OPENCLAW_BETA=0\|1`                        | Use beta if available                         |
-| `OPENCLAW_GIT_DIR=<path>`                   | Checkout directory                            |
-| `OPENCLAW_GIT_UPDATE=0\|1`                  | Toggle git updates                            |
-| `OPENCLAW_NO_PROMPT=1`                      | Disable prompts                               |
-| `OPENCLAW_NO_ONBOARD=1`                     | Skip onboarding                               |
-| `OPENCLAW_DRY_RUN=1`                        | Dry run mode                                  |
-| `OPENCLAW_VERBOSE=1`                        | Debug mode                                    |
-| `OPENCLAW_NPM_LOGLEVEL=error\|warn\|notice` | npm log level                                 |
-| `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`          | Control sharp/libvips behavior (default: `1`) |
+| Variable                               | Description                                   |
+| -------------------------------------- | --------------------------------------------- |
+| `BOT_INSTALL_METHOD=git\|npm`          | Install method                                |
+| `BOT_VERSION=latest\|next\|<semver>`   | npm version or dist-tag                       |
+| `BOT_BETA=0\|1`                        | Use beta if available                         |
+| `BOT_GIT_DIR=<path>`                   | Checkout directory                            |
+| `BOT_GIT_UPDATE=0\|1`                  | Toggle git updates                            |
+| `BOT_NO_PROMPT=1`                      | Disable prompts                               |
+| `BOT_NO_ONBOARD=1`                     | Skip onboarding                               |
+| `BOT_DRY_RUN=1`                        | Dry run mode                                  |
+| `BOT_VERBOSE=1`                        | Debug mode                                    |
+| `BOT_NPM_LOGLEVEL=error\|warn\|notice` | npm log level                                 |
+| `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`     | Control sharp/libvips behavior (default: `1`) |
 
   </Accordion>
 </AccordionGroup>
@@ -228,15 +228,15 @@ Designed for environments where you want everything under a local prefix (defaul
 
   <Accordion title="Environment variables reference">
 
-| Variable                                    | Description                                                                       |
-| ------------------------------------------- | --------------------------------------------------------------------------------- |
-| `OPENCLAW_PREFIX=<path>`                    | Install prefix                                                                    |
-| `OPENCLAW_VERSION=<ver>`                    | OpenClaw version or dist-tag                                                      |
-| `OPENCLAW_NODE_VERSION=<ver>`               | Node version                                                                      |
-| `OPENCLAW_NO_ONBOARD=1`                     | Skip onboarding                                                                   |
-| `OPENCLAW_NPM_LOGLEVEL=error\|warn\|notice` | npm log level                                                                     |
-| `OPENCLAW_GIT_DIR=<path>`                   | Legacy cleanup lookup path (used when removing old `Peekaboo` submodule checkout) |
-| `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`          | Control sharp/libvips behavior (default: `1`)                                     |
+| Variable                               | Description                                                                       |
+| -------------------------------------- | --------------------------------------------------------------------------------- |
+| `BOT_PREFIX=<path>`                    | Install prefix                                                                    |
+| `BOT_VERSION=<ver>`                    | OpenClaw version or dist-tag                                                      |
+| `BOT_NODE_VERSION=<ver>`               | Node version                                                                      |
+| `BOT_NO_ONBOARD=1`                     | Skip onboarding                                                                   |
+| `BOT_NPM_LOGLEVEL=error\|warn\|notice` | npm log level                                                                     |
+| `BOT_GIT_DIR=<path>`                   | Legacy cleanup lookup path (used when removing old `Peekaboo` submodule checkout) |
+| `SHARP_IGNORE_GLOBAL_LIBVIPS=0\|1`     | Control sharp/libvips behavior (default: `1`)                                     |
 
   </Accordion>
 </AccordionGroup>
@@ -312,13 +312,13 @@ Designed for environments where you want everything under a local prefix (defaul
 
   <Accordion title="Environment variables reference">
 
-| Variable                           | Description        |
-| ---------------------------------- | ------------------ |
-| `OPENCLAW_INSTALL_METHOD=git\|npm` | Install method     |
-| `OPENCLAW_GIT_DIR=<path>`          | Checkout directory |
-| `OPENCLAW_NO_ONBOARD=1`            | Skip onboarding    |
-| `OPENCLAW_GIT_UPDATE=0`            | Disable git pull   |
-| `OPENCLAW_DRY_RUN=1`               | Dry run mode       |
+| Variable                      | Description        |
+| ----------------------------- | ------------------ |
+| `BOT_INSTALL_METHOD=git\|npm` | Install method     |
+| `BOT_GIT_DIR=<path>`          | Checkout directory |
+| `BOT_NO_ONBOARD=1`            | Skip onboarding    |
+| `BOT_GIT_UPDATE=0`            | Disable git pull   |
+| `BOT_DRY_RUN=1`               | Dry run mode       |
 
   </Accordion>
 </AccordionGroup>
@@ -341,7 +341,7 @@ Use non-interactive flags/env vars for predictable runs.
   </Tab>
   <Tab title="install.sh (non-interactive git)">
     ```bash
-    OPENCLAW_INSTALL_METHOD=git OPENCLAW_NO_PROMPT=1 \
+    BOT_INSTALL_METHOD=git BOT_NO_PROMPT=1 \
       curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install.sh | bash
     ```
   </Tab>

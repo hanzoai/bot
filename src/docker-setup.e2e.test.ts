@@ -79,9 +79,9 @@ function createEnv(
     LC_ALL: process.env.LC_ALL,
     TMPDIR: process.env.TMPDIR,
     DOCKER_STUB_LOG: sandbox.logPath,
-    OPENCLAW_GATEWAY_TOKEN: "test-token",
-    OPENCLAW_CONFIG_DIR: join(sandbox.rootDir, "config"),
-    OPENCLAW_WORKSPACE_DIR: join(sandbox.rootDir, "openclaw"),
+    BOT_GATEWAY_TOKEN: "test-token",
+    BOT_CONFIG_DIR: join(sandbox.rootDir, "config"),
+    BOT_WORKSPACE_DIR: join(sandbox.rootDir, "openclaw"),
   };
 
   for (const [key, value] of Object.entries(overrides)) {
@@ -167,15 +167,15 @@ describe("docker-setup.sh", () => {
     const activeSandbox = requireSandbox(sandbox);
 
     const result = runDockerSetup(activeSandbox, {
-      OPENCLAW_DOCKER_APT_PACKAGES: "ffmpeg build-essential",
-      OPENCLAW_EXTRA_MOUNTS: undefined,
-      OPENCLAW_HOME_VOLUME: "openclaw-home",
+      BOT_DOCKER_APT_PACKAGES: "ffmpeg build-essential",
+      BOT_EXTRA_MOUNTS: undefined,
+      BOT_HOME_VOLUME: "openclaw-home",
     });
     expect(result.status).toBe(0);
     const envFile = await readFile(join(activeSandbox.rootDir, ".env"), "utf8");
-    expect(envFile).toContain("OPENCLAW_DOCKER_APT_PACKAGES=ffmpeg build-essential");
-    expect(envFile).toContain("OPENCLAW_EXTRA_MOUNTS=");
-    expect(envFile).toContain("OPENCLAW_HOME_VOLUME=openclaw-home");
+    expect(envFile).toContain("BOT_DOCKER_APT_PACKAGES=ffmpeg build-essential");
+    expect(envFile).toContain("BOT_EXTRA_MOUNTS=");
+    expect(envFile).toContain("BOT_HOME_VOLUME=openclaw-home");
     const extraCompose = await readFile(
       join(activeSandbox.rootDir, "docker-compose.extra.yml"),
       "utf8",
@@ -184,7 +184,7 @@ describe("docker-setup.sh", () => {
     expect(extraCompose).toContain("volumes:");
     expect(extraCompose).toContain("openclaw-home:");
     const log = await readFile(activeSandbox.logPath, "utf8");
-    expect(log).toContain("--build-arg OPENCLAW_DOCKER_APT_PACKAGES=ffmpeg build-essential");
+    expect(log).toContain("--build-arg BOT_DOCKER_APT_PACKAGES=ffmpeg build-essential");
     expect(log).toContain("run --rm openclaw-cli onboard --mode local --no-install-daemon");
     expect(log).toContain("run --rm openclaw-cli config set gateway.mode local");
     expect(log).toContain("run --rm openclaw-cli config set gateway.bind lan");
@@ -196,8 +196,8 @@ describe("docker-setup.sh", () => {
     const workspaceDir = join(activeSandbox.rootDir, "workspace-identity");
 
     const result = runDockerSetup(activeSandbox, {
-      OPENCLAW_CONFIG_DIR: configDir,
-      OPENCLAW_WORKSPACE_DIR: workspaceDir,
+      BOT_CONFIG_DIR: configDir,
+      BOT_WORKSPACE_DIR: workspaceDir,
     });
 
     expect(result.status).toBe(0);
@@ -211,8 +211,8 @@ describe("docker-setup.sh", () => {
     const workspaceDir = join(activeSandbox.rootDir, "workspace-agent-dirs");
 
     const result = runDockerSetup(activeSandbox, {
-      OPENCLAW_CONFIG_DIR: configDir,
-      OPENCLAW_WORKSPACE_DIR: workspaceDir,
+      BOT_CONFIG_DIR: configDir,
+      BOT_WORKSPACE_DIR: workspaceDir,
     });
 
     expect(result.status).toBe(0);
@@ -229,7 +229,7 @@ describe("docker-setup.sh", () => {
     expect(onboardIdx).toBeGreaterThan(chownIdx);
   });
 
-  it("reuses existing config token when OPENCLAW_GATEWAY_TOKEN is unset", async () => {
+  it("reuses existing config token when BOT_GATEWAY_TOKEN is unset", async () => {
     const activeSandbox = requireSandbox(sandbox);
     const configDir = join(activeSandbox.rootDir, "config-token-reuse");
     const workspaceDir = join(activeSandbox.rootDir, "workspace-token-reuse");
@@ -240,31 +240,31 @@ describe("docker-setup.sh", () => {
     );
 
     const result = runDockerSetup(activeSandbox, {
-      OPENCLAW_GATEWAY_TOKEN: undefined,
-      OPENCLAW_CONFIG_DIR: configDir,
-      OPENCLAW_WORKSPACE_DIR: workspaceDir,
+      BOT_GATEWAY_TOKEN: undefined,
+      BOT_CONFIG_DIR: configDir,
+      BOT_WORKSPACE_DIR: workspaceDir,
     });
 
     expect(result.status).toBe(0);
     const envFile = await readFile(join(activeSandbox.rootDir, ".env"), "utf8");
-    expect(envFile).toContain("OPENCLAW_GATEWAY_TOKEN=config-token-123");
+    expect(envFile).toContain("BOT_GATEWAY_TOKEN=config-token-123");
   });
 
-  it("treats OPENCLAW_SANDBOX=0 as disabled", async () => {
+  it("treats BOT_SANDBOX=0 as disabled", async () => {
     const activeSandbox = requireSandbox(sandbox);
     await writeFile(activeSandbox.logPath, "");
 
     const result = runDockerSetup(activeSandbox, {
-      OPENCLAW_SANDBOX: "0",
+      BOT_SANDBOX: "0",
     });
 
     expect(result.status).toBe(0);
     const envFile = await readFile(join(activeSandbox.rootDir, ".env"), "utf8");
-    expect(envFile).toContain("OPENCLAW_SANDBOX=");
+    expect(envFile).toContain("BOT_SANDBOX=");
 
     const log = await readFile(activeSandbox.logPath, "utf8");
-    expect(log).toContain("--build-arg OPENCLAW_INSTALL_DOCKER_CLI=");
-    expect(log).not.toContain("--build-arg OPENCLAW_INSTALL_DOCKER_CLI=1");
+    expect(log).toContain("--build-arg BOT_INSTALL_DOCKER_CLI=");
+    expect(log).not.toContain("--build-arg BOT_INSTALL_DOCKER_CLI=1");
     expect(log).toContain("config set agents.defaults.sandbox.mode off");
   });
 
@@ -277,7 +277,7 @@ describe("docker-setup.sh", () => {
     );
 
     const result = runDockerSetup(activeSandbox, {
-      OPENCLAW_SANDBOX: "1",
+      BOT_SANDBOX: "1",
       DOCKER_STUB_FAIL_MATCH: "--entrypoint docker openclaw-gateway --version",
     });
 
@@ -295,8 +295,8 @@ describe("docker-setup.sh", () => {
 
     await withUnixSocket(socketPath, async () => {
       const result = runDockerSetup(activeSandbox, {
-        OPENCLAW_SANDBOX: "1",
-        OPENCLAW_DOCKER_SOCKET: socketPath,
+        BOT_SANDBOX: "1",
+        BOT_DOCKER_SOCKET: socketPath,
         DOCKER_STUB_FAIL_MATCH: "config set agents.defaults.sandbox.scope",
       });
 
@@ -329,37 +329,37 @@ describe("docker-setup.sh", () => {
     });
   });
 
-  it("rejects injected multiline OPENCLAW_EXTRA_MOUNTS values", async () => {
+  it("rejects injected multiline BOT_EXTRA_MOUNTS values", async () => {
     const activeSandbox = requireSandbox(sandbox);
 
     const result = runDockerSetup(activeSandbox, {
-      OPENCLAW_EXTRA_MOUNTS: "/tmp:/tmp\n  evil-service:\n    image: alpine",
+      BOT_EXTRA_MOUNTS: "/tmp:/tmp\n  evil-service:\n    image: alpine",
     });
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("OPENCLAW_EXTRA_MOUNTS cannot contain control characters");
+    expect(result.stderr).toContain("BOT_EXTRA_MOUNTS cannot contain control characters");
   });
 
-  it("rejects invalid OPENCLAW_EXTRA_MOUNTS mount format", async () => {
+  it("rejects invalid BOT_EXTRA_MOUNTS mount format", async () => {
     const activeSandbox = requireSandbox(sandbox);
 
     const result = runDockerSetup(activeSandbox, {
-      OPENCLAW_EXTRA_MOUNTS: "bad mount spec",
+      BOT_EXTRA_MOUNTS: "bad mount spec",
     });
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("Invalid mount format");
   });
 
-  it("rejects invalid OPENCLAW_HOME_VOLUME names", async () => {
+  it("rejects invalid BOT_HOME_VOLUME names", async () => {
     const activeSandbox = requireSandbox(sandbox);
 
     const result = runDockerSetup(activeSandbox, {
-      OPENCLAW_HOME_VOLUME: "bad name",
+      BOT_HOME_VOLUME: "bad name",
     });
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("OPENCLAW_HOME_VOLUME must match");
+    expect(result.stderr).toContain("BOT_HOME_VOLUME must match");
   });
 
   it("avoids associative arrays so the script remains Bash 3.2-compatible", async () => {

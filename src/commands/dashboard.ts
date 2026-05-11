@@ -1,8 +1,8 @@
-import type { BotConfig } from "../config/types.js";
-import type { RuntimeEnv } from "../runtime.js";
 import { readConfigFileSnapshot, resolveGatewayPort } from "../config/config.js";
+import type { BotConfig } from "../config/types.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { copyToClipboard } from "../infra/clipboard.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { defaultRuntime } from "../runtime.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
@@ -18,7 +18,7 @@ type DashboardOptions = {
 };
 
 function readGatewayTokenEnv(env: NodeJS.ProcessEnv): string | undefined {
-  const primary = env.OPENCLAW_GATEWAY_TOKEN?.trim();
+  const primary = env.BOT_GATEWAY_TOKEN?.trim();
   if (primary) {
     return primary;
   }
@@ -117,7 +117,7 @@ export async function dashboardCommand(
   if (resolvedToken.unresolvedRefReason) {
     runtime.log(`Token auto-auth unavailable: ${resolvedToken.unresolvedRefReason}`);
     runtime.log(
-      "Set OPENCLAW_GATEWAY_TOKEN in this shell or resolve your secret provider, then rerun `openclaw dashboard`.",
+      "Set BOT_GATEWAY_TOKEN in this shell or resolve your secret provider, then rerun `openclaw dashboard`.",
     );
   }
 
