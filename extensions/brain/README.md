@@ -2,7 +2,7 @@
 
 > The Hanzo Brain meta-pack. Drops `memory + graph-links + recipes` into Hanzo Bot. Single binary, single config, SQLite by default.
 
-What gbrain is to OpenClaw, this is to Hanzo Bot — except we _are_ OpenClaw (forked), so the gateway, channels, voice, mobile apps, and 355 atomic skills come along for free.
+What gbrain is to Hanzo Bot, this is to Hanzo Bot — except we _are_ Hanzo Bot (forked), so the gateway, channels, voice, mobile apps, and 355 atomic skills come along for free.
 
 ## Install
 
@@ -44,7 +44,7 @@ Drop markdown into `~/.hanzo/workspace/`. Edges auto-extract. Facts queryable vi
 ## Architecture
 
 ```
-                  Hanzo Bot (OpenClaw fork)
+                  Hanzo Bot (Hanzo Bot fork)
                   │
                   ▼
              @hanzo/bot-brain  (this pack)
@@ -73,14 +73,14 @@ The `memory` extension exposes `registerBackend(name, factory)`. Anyone can ship
 
 ## Compared to gbrain
 
-|                  | gbrain                         | Hanzo Brain                                                 |
-| ---------------- | ------------------------------ | ----------------------------------------------------------- |
-| Runtime          | OpenClaw mod                   | Hanzo Bot extension (we own the gateway)                    |
-| Default store    | PGLite                         | SQLite                                                      |
-| Schema           | pages/edges/facts              | same — pages/edges/facts/FTS5                               |
-| Graph extraction | regex, zero-LLM                | regex, zero-LLM (same approach)                             |
-| Skills           | 34 curated                     | 355 atomic + 88 specialized agents in `~/work/hanzo/skills` |
-| Channels         | 0 (BYO gateway)                | 30+ (Slack/Discord/WhatsApp/Telegram/iMessage/…)            |
-| Voice            | Twilio + Realtime via OpenClaw | Twilio/Telnyx/Plivo + LiveKit native                        |
-| Mobile apps      | none                           | iOS / Android / macOS ship with the bot                     |
-| Pricing model    | single-user                    | multi-tenant, shared credits via Hanzo Node                 |
+|                  | gbrain                          | Hanzo Brain                                                 |
+| ---------------- | ------------------------------- | ----------------------------------------------------------- |
+| Runtime          | Hanzo Bot mod                   | Hanzo Bot extension (we own the gateway)                    |
+| Default store    | PGLite                          | SQLite                                                      |
+| Schema           | pages/edges/facts               | same — pages/edges/facts/FTS5                               |
+| Graph extraction | regex, zero-LLM                 | regex, zero-LLM (same approach)                             |
+| Skills           | 34 curated                      | 355 atomic + 88 specialized agents in `~/work/hanzo/skills` |
+| Channels         | 0 (BYO gateway)                 | 30+ (Slack/Discord/WhatsApp/Telegram/iMessage/…)            |
+| Voice            | Twilio + Realtime via Hanzo Bot | Twilio/Telnyx/Plivo + LiveKit native                        |
+| Mobile apps      | none                            | iOS / Android / macOS ship with the bot                     |
+| Pricing model    | single-user                     | multi-tenant, shared credits via Hanzo Node                 |
