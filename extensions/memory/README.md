@@ -27,36 +27,36 @@ Native stack uses **ZAP** (zero-copy transport) + **hanzo-consensus** (metastabl
 agent agreement) + **zapdb** (storage primitives) end-to-end. No libSQL,
 no Turso — we ship our own.
 
-| Backend       | Repo                                               | License  | Use                                                                                                                                        |
-| ------------- | -------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `qdrant`      | [`~/work/hanzo/vector`](../../../vector/)          | Apache 2 | Vector ANN at scale (millions of embeddings, multi-replica)                                                                                |
-| `meilisearch` | [`~/work/hanzo/search`](../../../search/)          | (fork)   | Fast keyword FTS when SQLite FTS5 stops being enough                                                                                       |
-| `replicate`   | [`~/work/hanzo/replicate`](../../../replicate/)    | (fork)   | Background SQLite WAL → S3 backup, point-in-time restore                                                                                   |
-| `vfs`         | [`~/work/hanzo/vfs`](../../../vfs/)                | Apache 2 | S3-backed virtual block FS with PQ encryption — unlimited write storage                                                                    |
-| `luxdb`       | [`~/work/lux/database`](../../../../lux/database/) | BSD-3    | Canonical Hanzo storage layer (Go) — wraps internal zapdb primitives. Use `luxfi/database` as the public API; never import zapdb directly. |
-| `zapdb-cpp`   | [`~/work/luxcpp/zapdb`](../../../../luxcpp/zapdb/) | Apache 2 | C++ port of zapdb; same wire format as Go luxdb.                                                                                           |
-| `postgres`    | (sibling pkg)                                      |          | Multi-tenant team brain with pgvector                                                                                                      |
+| Backend       | Repo                                                                   | License  | Use                                                                                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qdrant`      | [`~/work/hanzo/vector`](../../../vector/)                              | Apache 2 | Vector ANN at scale (millions of embeddings, multi-replica)                                                                                                                                          |
+| `meilisearch` | [`~/work/hanzo/search`](../../../search/)                              | MIT      | Fast keyword FTS when SQLite FTS5 stops being enough                                                                                                                                                 |
+| `replicate`   | [`~/work/hanzo/replicate`](../../../replicate/)                        | Apache 2 | Background SQLite WAL → S3 backup, point-in-time restore                                                                                                                                             |
+| `vfs`         | [`~/work/hanzo/vfs`](../../../vfs/)                                    | Apache 2 | S3-backed virtual block FS with PQ encryption — unlimited write storage                                                                                                                              |
+| `zapdb`       | **`zap-proto/db`** (canonical, in-flight migration from `luxfi/zapdb`) | Apache 2 | The canonical Hanzo storage layer. ZAP-native primitives, multi-language. Currently mirrored at `luxfi/zapdb` (Go, badger-derived) and `~/work/luxcpp/zapdb` (C++) — both moving to `zap-proto/db`.  |
+| `luxdb`       | [`~/work/lux/database`](../../../../lux/database/)                     | BSD-3    | **Lux-flavored extension** of zapdb. Adds blockchain-specific concerns (chain heads, archival, validator sets) on top of the base zapdb. Don't use for generic brain stores — pick `zapdb` directly. |
+| `postgres`    | (sibling pkg)                                                          |          | Multi-tenant team brain with pgvector                                                                                                                                                                |
 
 ### The native distributed-SQL story (we ship our own — not libSQL/Turso)
 
 For multi-machine SQLite-shaped semantics with native replication, the
 canonical Hanzo stack is **ZAP + hanzo-consensus + zapdb**, not libSQL/Turso:
 
-- **Wire**: ZAP (zero-copy transport) — same protocol the rest of Hanzo speaks. Carries MCP, A2A, and ACP natively too.
+- **Wire**: ZAP (zero-copy transport) — same protocol the rest of Hanzo speaks. Carries MCP, A2A, and ACP natively too. Repos live under [`zap-proto`](https://github.com/zap-proto) (one per language: `zap-proto/c`, `zap-proto/cpp`, `zap-proto/go`, `zap-proto/py`, `zap-proto/rust`, …).
 - **Consensus**: `hanzo-consensus` for metastable agent agreement. For storage-level write ordering we run the same metastable primitive on a node quorum (one quorum per brain shard).
-- **Storage**: `luxfi/database` is the Go public API, backed by `luxfi/zapdb` (internal — don't import directly). `luxcpp/zapdb` is the C++ port (same wire format).
+- **Storage** — `zap-proto/db` is the canonical home for **zapdb**. It's the base store, multi-language, ZAP-native. Currently mirrored at `luxfi/zapdb` (Go) and `~/work/luxcpp/zapdb` (C++) pending the migration to `zap-proto/db`. `luxfi/database` is a separate Lux-flavored extension of zapdb that adds blockchain concerns (chain heads, archival, validator sets) — generic brain users want `zapdb` directly, not `luxfi/database`.
 - **Backup**: `replicate` ships SQLite WAL → S3 for the solo + small-team cases.
 - **Streaming**: `vfs` for unlimited-size brains backed by S3 blocks with PQ encryption.
 
-The multi-replica SQL primitive is in-flight — track in `~/work/lux/database` (Go) and `~/work/luxcpp` (C++). We deliberately don't pull in libSQL or Turso for this; they would force us off our own ZAP+consensus path.
+We deliberately don't pull in libSQL or Turso; they'd force us off our own ZAP+consensus path. The multi-replica zapdb primitive is in-flight at `luxfi/zapdb` (Go) and `~/work/luxcpp/zapdb` (C++), both migrating to `zap-proto/db`.
 
 Default routing:
 
 - **Solo dev, < 100K pages** → SQLite + FTS5 (zero infra)
 - **Solo dev, > 10K pages with vector** → SQLite + `sqlite-vec` (requires better-sqlite3 driver — bun:sqlite has no extension loading)
 - **Durable solo (offsite backup)** → SQLite + `replicate` to S3
-- **Multi-machine personal** → `luxfi/database` over ZAP + hanzo-consensus (our native distributed-SQL story; in-flight)
-- **Team / Hanzo Node** → Qdrant for vectors + Meilisearch for FTS + `luxfi/database` for facts/edges (or Postgres if multi-tenant + external)
+- **Multi-machine personal** → `zapdb` over ZAP + hanzo-consensus (our native distributed-SQL story; canonical home is `zap-proto/db`, in-flight migration from `luxfi/zapdb`)
+- **Team / Hanzo Node** → Qdrant for vectors + Meilisearch for FTS + `zapdb` for facts/edges (or Postgres if multi-tenant + external)
 - **Org-scale streaming** → VFS-backed brain.db, lazy block-level fetch from S3, unlimited size
 
 ## Schema
