@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { WebSocket, type ClientOptions, type CertMeta } from "ws";
-import type { DeviceIdentity } from "../infra/device-identity.js";
 import {
   clearDeviceAuthToken,
   loadDeviceAuthToken,
   storeDeviceAuthToken,
 } from "../infra/device-auth-store.js";
+import type { DeviceIdentity } from "../infra/device-identity.js";
 import {
   loadOrCreateDeviceIdentity,
   publicKeyRawBase64UrlFromPem,
@@ -103,7 +103,10 @@ export class GatewayClient {
       ...opts,
       // Explicit null means "no device identity" (e.g. cloud nodes).
       // Only fall back to loadOrCreateDeviceIdentity() when the option is omitted (undefined).
-      deviceIdentity: opts.deviceIdentity === null ? undefined : (opts.deviceIdentity ?? loadOrCreateDeviceIdentity()),
+      deviceIdentity:
+        opts.deviceIdentity === null
+          ? undefined
+          : (opts.deviceIdentity ?? loadOrCreateDeviceIdentity()),
     };
   }
 
@@ -113,17 +116,21 @@ export class GatewayClient {
       return;
     }
     const url = this.opts.url ?? "ws://127.0.0.1:18789";
-    logError(`[GWC] start: url=${url} instanceId=${this.opts.instanceId ?? "n/a"} token=${this.opts.token ? "yes" : "no"}`);
+    logError(
+      `[GWC] start: url=${url} instanceId=${this.opts.instanceId ?? "n/a"} token=${this.opts.token ? "yes" : "no"}`,
+    );
     if (this.opts.tlsFingerprint && !url.startsWith("wss://")) {
       this.opts.onConnectError?.(new Error("gateway tls fingerprint requires wss:// gateway url"));
       return;
     }
 
-    const allowPrivateWs = process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1";
+    const allowPrivateWs = process.env.BOT_ALLOW_INSECURE_PRIVATE_WS === "1";
     // Security check: block ALL plaintext ws:// to non-loopback addresses (CWE-319, CVSS 9.8)
     // This protects both credentials AND chat/conversation data from MITM attacks.
     // Device tokens may be loaded later in sendConnect(), so we block regardless of hasCredentials.
-    logError(`[GWC] security check: allowPrivateWs=${allowPrivateWs} isSecure=${isSecureWebSocketUrl(url, { allowPrivateWs })}`);
+    logError(
+      `[GWC] security check: allowPrivateWs=${allowPrivateWs} isSecure=${isSecureWebSocketUrl(url, { allowPrivateWs })}`,
+    );
     if (!isSecureWebSocketUrl(url, { allowPrivateWs })) {
       // Safe hostname extraction - avoid throwing on malformed URLs in error path
       let displayHost = url;
@@ -139,7 +146,7 @@ export class GatewayClient {
           "(ssh -N -L 18789:127.0.0.1:18789 user@gateway-host), or use Tailscale Serve/Funnel. " +
           (allowPrivateWs
             ? ""
-            : "Break-glass (trusted private networks only): set OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1. ") +
+            : "Break-glass (trusted private networks only): set BOT_ALLOW_INSECURE_PRIVATE_WS=1. ") +
           "Run `openclaw doctor --fix` for guidance.",
       );
       this.opts.onConnectError?.(error);
@@ -191,7 +198,9 @@ export class GatewayClient {
       const raw = rawDataToString(data);
       try {
         const parsed = JSON.parse(raw);
-        logError(`[GWC] ws message type=${parsed.type} event=${parsed.event ?? "n/a"} method=${parsed.method ?? "n/a"}`);
+        logError(
+          `[GWC] ws message type=${parsed.type} event=${parsed.event ?? "n/a"} method=${parsed.method ?? "n/a"}`,
+        );
       } catch {
         logError(`[GWC] ws message (unparsed) len=${raw.length}`);
       }
@@ -338,7 +347,9 @@ export class GatewayClient {
       device,
     };
 
-    logError(`[GWC] sendConnect: sending connect request role=${role} hasToken=${!!authToken} hasDevice=${!!device}`);
+    logError(
+      `[GWC] sendConnect: sending connect request role=${role} hasToken=${!!authToken} hasDevice=${!!device}`,
+    );
     void this.request<HelloOk>("connect", params)
       .then((helloOk) => {
         logError(`[GWC] sendConnect: hello-ok received`);
@@ -387,12 +398,16 @@ export class GatewayClient {
             return;
           }
           this.connectNonce = nonce.trim();
-          logError(`[GWC] received connect.challenge nonce=${this.connectNonce.substring(0, 8)}...`);
+          logError(
+            `[GWC] received connect.challenge nonce=${this.connectNonce.substring(0, 8)}...`,
+          );
           try {
             this.sendConnect();
           } catch (connectErr) {
             logError(`gateway client sendConnect error: ${String(connectErr)}`);
-            this.opts.onConnectError?.(connectErr instanceof Error ? connectErr : new Error(String(connectErr)));
+            this.opts.onConnectError?.(
+              connectErr instanceof Error ? connectErr : new Error(String(connectErr)),
+            );
             this.ws?.close(1008, "connect failed");
           }
           return;
@@ -446,10 +461,14 @@ export class GatewayClient {
     }
     this.connectTimer = setTimeout(() => {
       if (this.connectSent || this.ws?.readyState !== WebSocket.OPEN) {
-        logError(`[GWC] queueConnect timeout: connectSent=${this.connectSent} wsState=${this.ws?.readyState}`);
+        logError(
+          `[GWC] queueConnect timeout: connectSent=${this.connectSent} wsState=${this.ws?.readyState}`,
+        );
         return;
       }
-      logError(`[GWC] queueConnect: connect challenge timeout after ${connectChallengeTimeoutMs}ms`);
+      logError(
+        `[GWC] queueConnect: connect challenge timeout after ${connectChallengeTimeoutMs}ms`,
+      );
       this.opts.onConnectError?.(new Error("gateway connect challenge timeout"));
       this.ws?.close(1008, "connect challenge timeout");
     }, connectChallengeTimeoutMs);

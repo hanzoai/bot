@@ -26,7 +26,7 @@ export class GatewaySecretRefUnavailableError extends Error {
     super(
       [
         `${path} is configured as a secret reference but is unavailable in this command path.`,
-        "Fix: set OPENCLAW_GATEWAY_TOKEN/OPENCLAW_GATEWAY_PASSWORD, pass explicit --token/--password,",
+        "Fix: set BOT_GATEWAY_TOKEN/BOT_GATEWAY_PASSWORD, pass explicit --token/--password,",
         "or run a gateway command path that resolves secret references before credential selection.",
       ].join("\n"),
     );
@@ -73,7 +73,7 @@ function readGatewayTokenEnv(
   env: NodeJS.ProcessEnv,
   includeLegacyEnv: boolean,
 ): string | undefined {
-  const primary = trimToUndefined(env.OPENCLAW_GATEWAY_TOKEN);
+  const primary = trimToUndefined(env.BOT_GATEWAY_TOKEN);
   if (primary) {
     return primary;
   }
@@ -92,7 +92,7 @@ function readGatewayPasswordEnv(
   env: NodeJS.ProcessEnv,
   includeLegacyEnv: boolean,
 ): string | undefined {
-  const primary = trimToUndefined(env.OPENCLAW_GATEWAY_PASSWORD);
+  const primary = trimToUndefined(env.BOT_GATEWAY_PASSWORD);
   if (primary) {
     return primary;
   }

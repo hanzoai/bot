@@ -1,8 +1,8 @@
 import { completeSimple, type AssistantMessage } from "@mariozechner/pi-ai";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { BotConfig } from "../config/config.js";
 import { getApiKeyForModel } from "../agents/model-auth.js";
 import { resolveModel } from "../agents/pi-embedded-runner/model.js";
+import type { BotConfig } from "../config/config.js";
 import { withEnv } from "../test-utils/env.js";
 import * as tts from "./tts.js";
 
@@ -535,8 +535,8 @@ describe("tts", () => {
     const withMockedAutoTtsFetch = async (
       run: (fetchMock: ReturnType<typeof vi.fn>) => Promise<void>,
     ) => {
-      const prevPrefs = process.env.OPENCLAW_TTS_PREFS;
-      process.env.OPENCLAW_TTS_PREFS = `/tmp/tts-test-${Date.now()}.json`;
+      const prevPrefs = process.env.BOT_TTS_PREFS;
+      process.env.BOT_TTS_PREFS = `/tmp/tts-test-${Date.now()}.json`;
       const originalFetch = globalThis.fetch;
       const fetchMock = vi.fn(async () => ({
         ok: true,
@@ -547,7 +547,7 @@ describe("tts", () => {
         await run(fetchMock);
       } finally {
         globalThis.fetch = originalFetch;
-        process.env.OPENCLAW_TTS_PREFS = prevPrefs;
+        process.env.BOT_TTS_PREFS = prevPrefs;
       }
     };
 

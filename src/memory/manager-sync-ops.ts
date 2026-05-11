@@ -1,11 +1,9 @@
-import type { DatabaseSync } from "node:sqlite";
-import chokidar, { FSWatcher } from "chokidar";
 import { randomUUID } from "node:crypto";
 import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { SessionFileEntry } from "./session-files.js";
-import type { MemorySource, MemorySyncProgressUpdate } from "./types.js";
+import type { DatabaseSync } from "node:sqlite";
+import chokidar, { FSWatcher } from "chokidar";
 import { resolveAgentDir } from "../agents/agent-scope.js";
 import { ResolvedMemorySearchConfig } from "../agents/memory-search.js";
 import { type BotConfig } from "../config/config.js";
@@ -37,6 +35,7 @@ import {
 } from "./internal.js";
 import { type MemoryFileEntry } from "./internal.js";
 import { ensureMemoryIndexSchema } from "./memory-schema.js";
+import type { SessionFileEntry } from "./session-files.js";
 import {
   buildSessionEntry,
   listSessionFilesForAgent,
@@ -44,6 +43,7 @@ import {
 } from "./session-files.js";
 import { loadSqliteVecExtension } from "./sqlite-vec.js";
 import { requireNodeSqlite } from "./sqlite.js";
+import type { MemorySource, MemorySyncProgressUpdate } from "./types.js";
 
 type MemoryIndexMeta = {
   model: string;
@@ -876,8 +876,8 @@ export abstract class MemoryManagerSyncOps {
     try {
       if (needsFullReindex) {
         if (
-          process.env.OPENCLAW_TEST_FAST === "1" &&
-          process.env.OPENCLAW_TEST_MEMORY_UNSAFE_REINDEX === "1"
+          process.env.BOT_TEST_FAST === "1" &&
+          process.env.BOT_TEST_MEMORY_UNSAFE_REINDEX === "1"
         ) {
           await this.runUnsafeReindex({
             reason: params?.reason,

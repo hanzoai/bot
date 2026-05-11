@@ -5,7 +5,6 @@ import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { GatewayServiceEnv } from "./service-types.js";
 import {
   installLaunchAgent,
   readLaunchAgentRuntime,
@@ -13,6 +12,7 @@ import {
   resolveLaunchAgentPlistPath,
   uninstallLaunchAgent,
 } from "./launchd.js";
+import type { GatewayServiceEnv } from "./service-types.js";
 
 const WAIT_INTERVAL_MS = 200;
 const WAIT_TIMEOUT_MS = 30_000;
@@ -95,8 +95,8 @@ describeLaunchdIntegration("launchd integration", () => {
     homeDir = await fs.mkdtemp(path.join(os.tmpdir(), `openclaw-launchd-int-${testId}-`));
     env = {
       HOME: homeDir,
-      OPENCLAW_LAUNCHD_LABEL: `ai.openclaw.launchd-int-${testId}`,
-      OPENCLAW_LOG_PREFIX: `gateway-launchd-int-${testId}`,
+      BOT_LAUNCHD_LABEL: `ai.openclaw.launchd-int-${testId}`,
+      BOT_LOG_PREFIX: `gateway-launchd-int-${testId}`,
     };
   });
 

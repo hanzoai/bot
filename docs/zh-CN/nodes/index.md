@@ -81,14 +81,14 @@ openclaw node run --host <gateway-host> --port 18789 --display-name "Build Node"
 ssh -N -L 18790:127.0.0.1:18789 user@gateway-host
 
 # 终端 B：导出 Gateway 网关令牌并通过隧道连接
-export OPENCLAW_GATEWAY_TOKEN="<gateway-token>"
+export BOT_GATEWAY_TOKEN="<gateway-token>"
 openclaw node run --host 127.0.0.1 --port 18790 --display-name "Build Node"
 ```
 
 注意事项：
 
 - 令牌是 Gateway 网关配置中的 `gateway.auth.token`（Gateway 网关主机上的 `~/.openclaw/openclaw.json`）。
-- `openclaw node run` 读取 `OPENCLAW_GATEWAY_TOKEN` 进行认证。
+- `openclaw node run` 读取 `BOT_GATEWAY_TOKEN` 进行认证。
 
 ### 启动节点主机（服务）
 
@@ -338,8 +338,8 @@ openclaw node run --host <gateway-host> --port 18789
 - Exec 批准通过 `~/.openclaw/exec-approvals.json` 在本地执行
   （参见 [Exec 批准](/tools/exec-approvals)）。
 - 在 macOS 上，当配套应用 exec 主机可达时，无头节点主机优先使用它，
-  如果应用不可用则回退到本地执行。设置 `OPENCLAW_NODE_EXEC_HOST=app` 要求
-  使用应用，或设置 `OPENCLAW_NODE_EXEC_FALLBACK=0` 禁用回退。
+  如果应用不可用则回退到本地执行。设置 `BOT_NODE_EXEC_HOST=app` 要求
+  使用应用，或设置 `BOT_NODE_EXEC_FALLBACK=0` 禁用回退。
 - 当 Gateway 网关 WS 使用 TLS 时，添加 `--tls` / `--tls-fingerprint`。
 
 ## Mac 节点模式

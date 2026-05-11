@@ -25,7 +25,7 @@ REPO_PATH="${BOT_REPO_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 RUN_SCRIPT_SRC="$REPO_PATH/scripts/run-bot-podman.sh"
 QUADLET_TEMPLATE="$REPO_PATH/scripts/podman/bot.container.in"
 =======
-#   Or set OPENCLAW_PODMAN_QUADLET=1 (or 0) to choose without a flag.
+#   Or set BOT_PODMAN_QUADLET=1 (or 0) to choose without a flag.
 #
 # After this, start the gateway manually:
 #   ./scripts/run-openclaw-podman.sh launch
@@ -34,8 +34,8 @@ QUADLET_TEMPLATE="$REPO_PATH/scripts/podman/bot.container.in"
 # If you used --quadlet, you can also: sudo systemctl --machine openclaw@ --user start openclaw.service
 set -euo pipefail
 
-OPENCLAW_USER="${OPENCLAW_PODMAN_USER:-openclaw}"
-REPO_PATH="${OPENCLAW_REPO_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+BOT_USER="${BOT_PODMAN_USER:-openclaw}"
+REPO_PATH="${BOT_REPO_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 RUN_SCRIPT_SRC="$REPO_PATH/scripts/run-openclaw-podman.sh"
 QUADLET_TEMPLATE="$REPO_PATH/scripts/podman/openclaw.container.in"
 >>>>>>> upstream/main
@@ -77,9 +77,9 @@ run_as_bot() {
   run_as_user "$BOT_USER" env HOME="$BOT_HOME" "$@"
 =======
 run_as_openclaw() {
-  # Avoid root writes into $OPENCLAW_HOME (symlink/hardlink/TOCTOU footguns).
+  # Avoid root writes into $BOT_HOME (symlink/hardlink/TOCTOU footguns).
   # Anything under the target user's home should be created/modified as that user.
-  run_as_user "$OPENCLAW_USER" env HOME="$OPENCLAW_HOME" "$@"
+  run_as_user "$BOT_USER" env HOME="$BOT_HOME" "$@"
 >>>>>>> upstream/main
 }
 
@@ -91,7 +91,7 @@ escape_sed_replacement_pipe_delim() {
 <<<<<<< HEAD
 # Quadlet: opt-in via --quadlet or BOT_PODMAN_QUADLET=1
 =======
-# Quadlet: opt-in via --quadlet or OPENCLAW_PODMAN_QUADLET=1
+# Quadlet: opt-in via --quadlet or BOT_PODMAN_QUADLET=1
 >>>>>>> upstream/main
 INSTALL_QUADLET=false
 for arg in "$@"; do
@@ -104,8 +104,8 @@ done
 if [[ -n "${BOT_PODMAN_QUADLET:-}" ]]; then
   case "${BOT_PODMAN_QUADLET,,}" in
 =======
-if [[ -n "${OPENCLAW_PODMAN_QUADLET:-}" ]]; then
-  case "${OPENCLAW_PODMAN_QUADLET,,}" in
+if [[ -n "${BOT_PODMAN_QUADLET:-}" ]]; then
+  case "${BOT_PODMAN_QUADLET,,}" in
 >>>>>>> upstream/main
     1|yes|true)  INSTALL_QUADLET=true ;;
     0|no|false) INSTALL_QUADLET=false ;;
@@ -120,7 +120,7 @@ if [[ ! -f "$REPO_PATH/Dockerfile" ]]; then
 <<<<<<< HEAD
   echo "Dockerfile not found at $REPO_PATH. Set BOT_REPO_PATH to the repo root." >&2
 =======
-  echo "Dockerfile not found at $REPO_PATH. Set OPENCLAW_REPO_PATH to the repo root." >&2
+  echo "Dockerfile not found at $REPO_PATH. Set BOT_REPO_PATH to the repo root." >&2
 >>>>>>> upstream/main
   exit 1
 fi
@@ -149,7 +149,7 @@ PY
 <<<<<<< HEAD
   echo "Missing dependency: need openssl or python3 (or od) to generate BOT_GATEWAY_TOKEN." >&2
 =======
-  echo "Missing dependency: need openssl or python3 (or od) to generate OPENCLAW_GATEWAY_TOKEN." >&2
+  echo "Missing dependency: need openssl or python3 (or od) to generate BOT_GATEWAY_TOKEN." >&2
 >>>>>>> upstream/main
   exit 1
 }
@@ -211,26 +211,26 @@ BOT_CONFIG="$BOT_HOME/.bot"
 LAUNCH_SCRIPT_DST="$BOT_HOME/run-bot-podman.sh"
 =======
 # Create openclaw user (non-login, with home) if missing
-if ! user_exists "$OPENCLAW_USER"; then
+if ! user_exists "$BOT_USER"; then
   NOLOGIN_SHELL="$(resolve_nologin_shell)"
-  echo "Creating user $OPENCLAW_USER ($NOLOGIN_SHELL, with home)..."
+  echo "Creating user $BOT_USER ($NOLOGIN_SHELL, with home)..."
   if command -v useradd >/dev/null 2>&1; then
-    run_root useradd -m -s "$NOLOGIN_SHELL" "$OPENCLAW_USER"
+    run_root useradd -m -s "$NOLOGIN_SHELL" "$BOT_USER"
   elif command -v adduser >/dev/null 2>&1; then
     # Debian/Ubuntu: adduser supports --disabled-password/--gecos. Busybox adduser differs.
-    run_root adduser --disabled-password --gecos "" --shell "$NOLOGIN_SHELL" "$OPENCLAW_USER"
+    run_root adduser --disabled-password --gecos "" --shell "$NOLOGIN_SHELL" "$BOT_USER"
   else
-    echo "Neither useradd nor adduser found, cannot create user $OPENCLAW_USER." >&2
+    echo "Neither useradd nor adduser found, cannot create user $BOT_USER." >&2
     exit 1
   fi
 else
-  echo "User $OPENCLAW_USER already exists."
+  echo "User $BOT_USER already exists."
 fi
 
-OPENCLAW_HOME="$(resolve_user_home "$OPENCLAW_USER")"
-OPENCLAW_UID="$(id -u "$OPENCLAW_USER" 2>/dev/null || true)"
-OPENCLAW_CONFIG="$OPENCLAW_HOME/.openclaw"
-LAUNCH_SCRIPT_DST="$OPENCLAW_HOME/run-openclaw-podman.sh"
+BOT_HOME="$(resolve_user_home "$BOT_USER")"
+BOT_UID="$(id -u "$BOT_USER" 2>/dev/null || true)"
+BOT_CONFIG="$BOT_HOME/.openclaw"
+LAUNCH_SCRIPT_DST="$BOT_HOME/run-openclaw-podman.sh"
 >>>>>>> upstream/main
 
 # Prefer systemd user services (Quadlet) for production. Enable lingering early so rootless Podman can run
@@ -266,33 +266,33 @@ else
   printf 'BOT_GATEWAY_TOKEN=%s\n' "$TOKEN" | run_as_bot tee "$ENV_FILE" >/dev/null
   run_as_bot chmod 600 "$ENV_FILE" 2>/dev/null || true
 =======
-  run_root loginctl enable-linger "$OPENCLAW_USER" 2>/dev/null || true
+  run_root loginctl enable-linger "$BOT_USER" 2>/dev/null || true
 fi
-if [[ -n "${OPENCLAW_UID:-}" && -d /run/user ]] && command -v systemctl &>/dev/null; then
-  run_root systemctl start "user@${OPENCLAW_UID}.service" 2>/dev/null || true
+if [[ -n "${BOT_UID:-}" && -d /run/user ]] && command -v systemctl &>/dev/null; then
+  run_root systemctl start "user@${BOT_UID}.service" 2>/dev/null || true
 fi
 
 # Rootless Podman needs subuid/subgid for the run user
-if ! grep -q "^${OPENCLAW_USER}:" /etc/subuid 2>/dev/null; then
-  echo "Warning: $OPENCLAW_USER has no subuid range. Rootless Podman may fail." >&2
-  echo "  Add a line to /etc/subuid and /etc/subgid, e.g.: $OPENCLAW_USER:100000:65536" >&2
+if ! grep -q "^${BOT_USER}:" /etc/subuid 2>/dev/null; then
+  echo "Warning: $BOT_USER has no subuid range. Rootless Podman may fail." >&2
+  echo "  Add a line to /etc/subuid and /etc/subgid, e.g.: $BOT_USER:100000:65536" >&2
 fi
 
-echo "Creating $OPENCLAW_CONFIG and workspace..."
-run_as_openclaw mkdir -p "$OPENCLAW_CONFIG/workspace"
-run_as_openclaw chmod 700 "$OPENCLAW_CONFIG" "$OPENCLAW_CONFIG/workspace" 2>/dev/null || true
+echo "Creating $BOT_CONFIG and workspace..."
+run_as_openclaw mkdir -p "$BOT_CONFIG/workspace"
+run_as_openclaw chmod 700 "$BOT_CONFIG" "$BOT_CONFIG/workspace" 2>/dev/null || true
 
-ENV_FILE="$OPENCLAW_CONFIG/.env"
+ENV_FILE="$BOT_CONFIG/.env"
 if run_as_openclaw test -f "$ENV_FILE"; then
-  if ! run_as_openclaw grep -q '^OPENCLAW_GATEWAY_TOKEN=' "$ENV_FILE" 2>/dev/null; then
+  if ! run_as_openclaw grep -q '^BOT_GATEWAY_TOKEN=' "$ENV_FILE" 2>/dev/null; then
     TOKEN="$(generate_token_hex_32)"
-    printf 'OPENCLAW_GATEWAY_TOKEN=%s\n' "$TOKEN" | run_as_openclaw tee -a "$ENV_FILE" >/dev/null
-    echo "Added OPENCLAW_GATEWAY_TOKEN to $ENV_FILE."
+    printf 'BOT_GATEWAY_TOKEN=%s\n' "$TOKEN" | run_as_openclaw tee -a "$ENV_FILE" >/dev/null
+    echo "Added BOT_GATEWAY_TOKEN to $ENV_FILE."
   fi
   run_as_openclaw chmod 600 "$ENV_FILE" 2>/dev/null || true
 else
   TOKEN="$(generate_token_hex_32)"
-  printf 'OPENCLAW_GATEWAY_TOKEN=%s\n' "$TOKEN" | run_as_openclaw tee "$ENV_FILE" >/dev/null
+  printf 'BOT_GATEWAY_TOKEN=%s\n' "$TOKEN" | run_as_openclaw tee "$ENV_FILE" >/dev/null
   run_as_openclaw chmod 600 "$ENV_FILE" 2>/dev/null || true
 >>>>>>> upstream/main
   echo "Created $ENV_FILE with new token."
@@ -318,22 +318,22 @@ podman save bot:local -o "$TMP_IMAGE"
 chmod 644 "$TMP_IMAGE"
 (cd /tmp && run_as_user "$BOT_USER" env HOME="$BOT_HOME" podman load -i "$TMP_IMAGE")
 =======
-OPENCLAW_JSON="$OPENCLAW_CONFIG/openclaw.json"
-if ! run_as_openclaw test -f "$OPENCLAW_JSON"; then
-  printf '%s\n' '{ gateway: { mode: "local" } }' | run_as_openclaw tee "$OPENCLAW_JSON" >/dev/null
-  run_as_openclaw chmod 600 "$OPENCLAW_JSON" 2>/dev/null || true
-  echo "Created $OPENCLAW_JSON (minimal gateway.mode=local)."
+BOT_JSON="$BOT_CONFIG/openclaw.json"
+if ! run_as_openclaw test -f "$BOT_JSON"; then
+  printf '%s\n' '{ gateway: { mode: "local" } }' | run_as_openclaw tee "$BOT_JSON" >/dev/null
+  run_as_openclaw chmod 600 "$BOT_JSON" 2>/dev/null || true
+  echo "Created $BOT_JSON (minimal gateway.mode=local)."
 fi
 
 echo "Building image from $REPO_PATH..."
 podman build -t openclaw:local -f "$REPO_PATH/Dockerfile" "$REPO_PATH"
 
-echo "Loading image into $OPENCLAW_USER's Podman store..."
+echo "Loading image into $BOT_USER's Podman store..."
 TMP_IMAGE="$(mktemp -p /tmp openclaw-image.XXXXXX.tar)"
 trap 'rm -f "$TMP_IMAGE"' EXIT
 podman save openclaw:local -o "$TMP_IMAGE"
 chmod 644 "$TMP_IMAGE"
-(cd /tmp && run_as_user "$OPENCLAW_USER" env HOME="$OPENCLAW_HOME" podman load -i "$TMP_IMAGE")
+(cd /tmp && run_as_user "$BOT_USER" env HOME="$BOT_HOME" podman load -i "$TMP_IMAGE")
 >>>>>>> upstream/main
 rm -f "$TMP_IMAGE"
 trap - EXIT
@@ -361,18 +361,18 @@ run_root cat "$RUN_SCRIPT_SRC" | run_as_openclaw tee "$LAUNCH_SCRIPT_DST" >/dev/
 run_as_openclaw chmod 755 "$LAUNCH_SCRIPT_DST"
 
 # Optionally install systemd quadlet for openclaw user (rootless Podman + systemd)
-QUADLET_DIR="$OPENCLAW_HOME/.config/containers/systemd"
+QUADLET_DIR="$BOT_HOME/.config/containers/systemd"
 if [[ "$INSTALL_QUADLET" == true && -f "$QUADLET_TEMPLATE" ]]; then
-  echo "Installing systemd quadlet for $OPENCLAW_USER..."
+  echo "Installing systemd quadlet for $BOT_USER..."
   run_as_openclaw mkdir -p "$QUADLET_DIR"
-  OPENCLAW_HOME_SED="$(escape_sed_replacement_pipe_delim "$OPENCLAW_HOME")"
-  sed "s|{{OPENCLAW_HOME}}|$OPENCLAW_HOME_SED|g" "$QUADLET_TEMPLATE" | run_as_openclaw tee "$QUADLET_DIR/openclaw.container" >/dev/null
-  run_as_openclaw chmod 700 "$OPENCLAW_HOME/.config" "$OPENCLAW_HOME/.config/containers" "$QUADLET_DIR" 2>/dev/null || true
+  BOT_HOME_SED="$(escape_sed_replacement_pipe_delim "$BOT_HOME")"
+  sed "s|{{BOT_HOME}}|$BOT_HOME_SED|g" "$QUADLET_TEMPLATE" | run_as_openclaw tee "$QUADLET_DIR/openclaw.container" >/dev/null
+  run_as_openclaw chmod 700 "$BOT_HOME/.config" "$BOT_HOME/.config/containers" "$QUADLET_DIR" 2>/dev/null || true
   run_as_openclaw chmod 600 "$QUADLET_DIR/openclaw.container" 2>/dev/null || true
   if command -v systemctl &>/dev/null; then
-    run_root systemctl --machine "${OPENCLAW_USER}@" --user daemon-reload 2>/dev/null || true
-    run_root systemctl --machine "${OPENCLAW_USER}@" --user enable openclaw.service 2>/dev/null || true
-    run_root systemctl --machine "${OPENCLAW_USER}@" --user start openclaw.service 2>/dev/null || true
+    run_root systemctl --machine "${BOT_USER}@" --user daemon-reload 2>/dev/null || true
+    run_root systemctl --machine "${BOT_USER}@" --user enable openclaw.service 2>/dev/null || true
+    run_root systemctl --machine "${BOT_USER}@" --user start openclaw.service 2>/dev/null || true
 >>>>>>> upstream/main
   fi
 fi
@@ -390,13 +390,13 @@ if [[ "$INSTALL_QUADLET" == true ]]; then
   echo "  sudo systemctl --machine ${BOT_USER}@ --user start bot.service"
   echo "  sudo systemctl --machine ${BOT_USER}@ --user status bot.service"
 =======
-echo "Or as $OPENCLAW_USER (e.g. from cron):"
-echo "  sudo -u $OPENCLAW_USER $LAUNCH_SCRIPT_DST"
-echo "  sudo -u $OPENCLAW_USER $LAUNCH_SCRIPT_DST setup"
+echo "Or as $BOT_USER (e.g. from cron):"
+echo "  sudo -u $BOT_USER $LAUNCH_SCRIPT_DST"
+echo "  sudo -u $BOT_USER $LAUNCH_SCRIPT_DST setup"
 if [[ "$INSTALL_QUADLET" == true ]]; then
   echo "Or use systemd (quadlet):"
-  echo "  sudo systemctl --machine ${OPENCLAW_USER}@ --user start openclaw.service"
-  echo "  sudo systemctl --machine ${OPENCLAW_USER}@ --user status openclaw.service"
+  echo "  sudo systemctl --machine ${BOT_USER}@ --user start openclaw.service"
+  echo "  sudo systemctl --machine ${BOT_USER}@ --user status openclaw.service"
 >>>>>>> upstream/main
 else
   echo "To install systemd quadlet later: $0 --quadlet"

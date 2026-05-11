@@ -99,7 +99,7 @@ function setupGatewayTokenRepairScenario(expectedToken: string) {
   mocks.readCommand.mockResolvedValue({
     programArguments: gatewayProgramArguments,
     environment: {
-      OPENCLAW_GATEWAY_TOKEN: "stale-token",
+      BOT_GATEWAY_TOKEN: "stale-token",
     },
   });
   mocks.auditGatewayServiceConfig.mockResolvedValue({
@@ -107,7 +107,7 @@ function setupGatewayTokenRepairScenario(expectedToken: string) {
     issues: [
       {
         code: "gateway-token-mismatch",
-        message: "Gateway service OPENCLAW_GATEWAY_TOKEN does not match gateway.auth.token",
+        message: "Gateway service BOT_GATEWAY_TOKEN does not match gateway.auth.token",
         level: "recommended",
       },
     ],
@@ -116,7 +116,7 @@ function setupGatewayTokenRepairScenario(expectedToken: string) {
     programArguments: gatewayProgramArguments,
     workingDirectory: "/tmp",
     environment: {
-      OPENCLAW_GATEWAY_TOKEN: expectedToken,
+      BOT_GATEWAY_TOKEN: expectedToken,
     },
   });
   mocks.resolveGatewayInstallToken.mockResolvedValue({
@@ -159,8 +159,8 @@ describe("maybeRepairGatewayServiceConfig", () => {
     expect(mocks.install).toHaveBeenCalledTimes(1);
   });
 
-  it("uses OPENCLAW_GATEWAY_TOKEN when config token is missing", async () => {
-    await withEnvAsync({ OPENCLAW_GATEWAY_TOKEN: "env-token" }, async () => {
+  it("uses BOT_GATEWAY_TOKEN when config token is missing", async () => {
+    await withEnvAsync({ BOT_GATEWAY_TOKEN: "env-token" }, async () => {
       setupGatewayTokenRepairScenario("env-token");
 
       const cfg: BotConfig = {
@@ -187,7 +187,7 @@ describe("maybeRepairGatewayServiceConfig", () => {
     mocks.readCommand.mockResolvedValue({
       programArguments: gatewayProgramArguments,
       environment: {
-        OPENCLAW_GATEWAY_TOKEN: "stale-token",
+        BOT_GATEWAY_TOKEN: "stale-token",
       },
     });
     mocks.resolveGatewayInstallToken.mockResolvedValue({
@@ -213,7 +213,7 @@ describe("maybeRepairGatewayServiceConfig", () => {
           token: {
             source: "env",
             provider: "default",
-            id: "OPENCLAW_GATEWAY_TOKEN",
+            id: "BOT_GATEWAY_TOKEN",
           },
         },
       },

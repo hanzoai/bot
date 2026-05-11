@@ -3,11 +3,11 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../../config/sessions.js";
+import * as sessions from "../../config/sessions.js";
 import type { TypingMode } from "../../config/types.js";
+import { withStateDirEnv } from "../../test-helpers/state-dir-env.js";
 import type { TemplateContext } from "../templating.js";
 import type { GetReplyOptions } from "../types.js";
-import * as sessions from "../../config/sessions.js";
-import { withStateDirEnv } from "../../test-helpers/state-dir-env.js";
 import {
   enqueueFollowupRun,
   scheduleFollowupDrain,
@@ -95,7 +95,7 @@ beforeEach(() => {
   state.runCliAgentMock.mockClear();
   vi.mocked(enqueueFollowupRun).mockClear();
   vi.mocked(scheduleFollowupDrain).mockClear();
-  vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+  vi.stubEnv("BOT_TEST_FAST", "1");
 });
 
 function createMinimalRun(params?: {

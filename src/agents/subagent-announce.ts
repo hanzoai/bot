@@ -1,5 +1,3 @@
-import type { ConversationRef } from "../infra/outbound/session-binding-service.js";
-import type { SpawnSubagentMode } from "./subagent-spawn.js";
 import { resolveQueueSettings } from "../auto-reply/reply/queue.js";
 import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
 import { DEFAULT_SUBAGENT_MAX_SPAWN_DEPTH } from "../config/agent-limits.js";
@@ -12,6 +10,7 @@ import {
 } from "../config/sessions.js";
 import { callGateway } from "../gateway/call.js";
 import { createBoundDeliveryRouter } from "../infra/outbound/bound-delivery-router.js";
+import type { ConversationRef } from "../infra/outbound/session-binding-service.js";
 import { getGlobalHookRunner } from "../plugins/hook-runner-global.js";
 import { normalizeAccountId, normalizeMainKey } from "../routing/session-key.js";
 import { defaultRuntime } from "../runtime.js";
@@ -44,11 +43,12 @@ import {
 } from "./subagent-announce-dispatch.js";
 import { type AnnounceQueueItem, enqueueAnnounce } from "./subagent-announce-queue.js";
 import { getSubagentDepthFromSessionStore } from "./subagent-depth.js";
+import type { SpawnSubagentMode } from "./subagent-spawn.js";
 import { readLatestAssistantReply } from "./tools/agent-step.js";
 import { sanitizeTextContent, extractAssistantText } from "./tools/sessions-helpers.js";
 import { isAnnounceSkip } from "./tools/sessions-send-helpers.js";
 
-const FAST_TEST_MODE = process.env.OPENCLAW_TEST_FAST === "1";
+const FAST_TEST_MODE = process.env.BOT_TEST_FAST === "1";
 const FAST_TEST_RETRY_INTERVAL_MS = 8;
 const DEFAULT_SUBAGENT_ANNOUNCE_TIMEOUT_MS = 60_000;
 const MAX_TIMER_SAFE_TIMEOUT_MS = 2_147_000_000;

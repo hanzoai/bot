@@ -6,7 +6,7 @@ import { resolveSecretRefValues } from "../secrets/resolve.js";
 
 const RELAY_TOKEN_CONTEXT = "openclaw-extension-relay-v1";
 const DEFAULT_RELAY_PROBE_TIMEOUT_MS = 500;
-const OPENCLAW_RELAY_BROWSER = "OpenClaw/extension-relay";
+const BOT_RELAY_BROWSER = "OpenClaw/extension-relay";
 
 class SecretRefUnavailableError extends Error {
   readonly isSecretRefUnavailable = true;
@@ -22,7 +22,7 @@ function trimToUndefined(value: unknown): string | undefined {
 
 async function resolveGatewayAuthToken(): Promise<string | null> {
   const envToken =
-    process.env.OPENCLAW_GATEWAY_TOKEN?.trim() ||
+    process.env.BOT_GATEWAY_TOKEN?.trim() ||
     process.env.BOT_GATEWAY_TOKEN?.trim() ||
     process.env.CLAWDBOT_GATEWAY_TOKEN?.trim();
   if (envToken) {
@@ -49,7 +49,7 @@ async function resolveGatewayAuthToken(): Promise<string | null> {
         // handled below
       }
       throw new SecretRefUnavailableError(
-        `extension relay requires a resolved gateway token, but gateway.auth.token SecretRef is unavailable (${refLabel}). Set OPENCLAW_GATEWAY_TOKEN or resolve your secret provider.`,
+        `extension relay requires a resolved gateway token, but gateway.auth.token SecretRef is unavailable (${refLabel}). Set BOT_GATEWAY_TOKEN or resolve your secret provider.`,
       );
     }
     const configToken = normalizeSecretInputString(cfg.gateway?.auth?.token);
@@ -73,7 +73,7 @@ export async function resolveRelayAcceptedTokensForPort(port: number): Promise<s
   const gatewayToken = await resolveGatewayAuthToken();
   if (!gatewayToken) {
     throw new Error(
-      "extension relay requires gateway auth token (set gateway.auth.token or OPENCLAW_GATEWAY_TOKEN)",
+      "extension relay requires gateway auth token (set gateway.auth.token or BOT_GATEWAY_TOKEN)",
     );
   }
   const relayToken = deriveRelayAuthToken(gatewayToken, port);
@@ -106,7 +106,7 @@ export async function probeAuthenticatedOpenClawRelay(params: {
     }
     const body = (await res.json()) as { Browser?: unknown };
     const browserName = typeof body?.Browser === "string" ? body.Browser.trim() : "";
-    return browserName === OPENCLAW_RELAY_BROWSER;
+    return browserName === BOT_RELAY_BROWSER;
   } catch {
     return false;
   } finally {

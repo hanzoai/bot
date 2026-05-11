@@ -50,7 +50,7 @@ From repo root:
 
 This script:
 
-- builds the gateway image locally (or pulls a remote image if `OPENCLAW_IMAGE` is set)
+- builds the gateway image locally (or pulls a remote image if `BOT_IMAGE` is set)
 - runs the onboarding wizard
 - prints optional provider setup hints
 - starts the gateway via Docker Compose
@@ -58,21 +58,21 @@ This script:
 
 Optional env vars:
 
-- `OPENCLAW_IMAGE` — use a remote image instead of building locally (e.g. `ghcr.io/openclaw/openclaw:latest`)
-- `OPENCLAW_DOCKER_APT_PACKAGES` — install extra apt packages during build
-- `OPENCLAW_EXTRA_MOUNTS` — add extra host bind mounts
-- `OPENCLAW_HOME_VOLUME` — persist `/home/node` in a named volume
-- `OPENCLAW_SANDBOX` — opt in to Docker gateway sandbox bootstrap. Only explicit truthy values enable it: `1`, `true`, `yes`, `on`
-- `OPENCLAW_INSTALL_DOCKER_CLI` — build arg passthrough for local image builds (`1` installs Docker CLI in the image). `docker-setup.sh` sets this automatically when `OPENCLAW_SANDBOX=1` for local builds.
-- `OPENCLAW_DOCKER_SOCKET` — override Docker socket path (default: `DOCKER_HOST=unix://...` path, else `/var/run/docker.sock`)
-- `OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` — break-glass: allow trusted private-network
+- `BOT_IMAGE` — use a remote image instead of building locally (e.g. `ghcr.io/openclaw/openclaw:latest`)
+- `BOT_DOCKER_APT_PACKAGES` — install extra apt packages during build
+- `BOT_EXTRA_MOUNTS` — add extra host bind mounts
+- `BOT_HOME_VOLUME` — persist `/home/node` in a named volume
+- `BOT_SANDBOX` — opt in to Docker gateway sandbox bootstrap. Only explicit truthy values enable it: `1`, `true`, `yes`, `on`
+- `BOT_INSTALL_DOCKER_CLI` — build arg passthrough for local image builds (`1` installs Docker CLI in the image). `docker-setup.sh` sets this automatically when `BOT_SANDBOX=1` for local builds.
+- `BOT_DOCKER_SOCKET` — override Docker socket path (default: `DOCKER_HOST=unix://...` path, else `/var/run/docker.sock`)
+- `BOT_ALLOW_INSECURE_PRIVATE_WS=1` — break-glass: allow trusted private-network
   `ws://` targets for CLI/onboarding client paths (default is loopback-only)
-- `OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS=0` — disable container browser hardening flags
+- `BOT_BROWSER_DISABLE_GRAPHICS_FLAGS=0` — disable container browser hardening flags
   `--disable-3d-apis`, `--disable-software-rasterizer`, `--disable-gpu` when you need
   WebGL/3D compatibility.
-- `OPENCLAW_BROWSER_DISABLE_EXTENSIONS=0` — keep extensions enabled when browser
+- `BOT_BROWSER_DISABLE_EXTENSIONS=0` — keep extensions enabled when browser
   flows require them (default keeps extensions disabled in sandbox browser).
-- `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT=<N>` — set Chromium renderer process
+- `BOT_BROWSER_RENDERER_PROCESS_LIMIT=<N>` — set Chromium renderer process
   limit; set to `0` to skip the flag and use Chromium default behavior.
 
 After it finishes:
@@ -89,15 +89,15 @@ deployments.
 Enable with:
 
 ```bash
-export OPENCLAW_SANDBOX=1
+export BOT_SANDBOX=1
 ./docker-setup.sh
 ```
 
 Custom socket path (for example rootless Docker):
 
 ```bash
-export OPENCLAW_SANDBOX=1
-export OPENCLAW_DOCKER_SOCKET=/run/user/1000/docker.sock
+export BOT_SANDBOX=1
+export BOT_DOCKER_SOCKET=/run/user/1000/docker.sock
 ./docker-setup.sh
 ```
 
@@ -110,7 +110,7 @@ Notes:
 - If `Dockerfile.sandbox` is missing, the script prints a warning and continues;
   build `openclaw-sandbox:bookworm-slim` with `scripts/sandbox-setup.sh` if
   needed.
-- For non-local `OPENCLAW_IMAGE` values, the image must already contain Docker
+- For non-local `BOT_IMAGE` values, the image must already contain Docker
   CLI support for sandbox execution.
 
 ### Automation/CI (non-interactive, no TTY noise)
@@ -186,19 +186,19 @@ Release context: this repository's tagged history already uses Bookworm in
 `v2026.2.22` and earlier 2026 tags (for example `v2026.2.21`, `v2026.2.9`).
 
 By default the setup script builds the image from source. To pull a pre-built
-image instead, set `OPENCLAW_IMAGE` before running the script:
+image instead, set `BOT_IMAGE` before running the script:
 
 ```bash
-export OPENCLAW_IMAGE="ghcr.io/openclaw/openclaw:latest"
+export BOT_IMAGE="ghcr.io/openclaw/openclaw:latest"
 ./docker-setup.sh
 ```
 
-The script detects that `OPENCLAW_IMAGE` is not the default `openclaw:local` and
+The script detects that `BOT_IMAGE` is not the default `openclaw:local` and
 runs `docker pull` instead of `docker build`. Everything else (onboarding,
 gateway start, token generation) works the same way.
 
 `docker-setup.sh` still runs from the repository root because it uses the local
-`docker-compose.yml` and helper files. `OPENCLAW_IMAGE` skips local image build
+`docker-compose.yml` and helper files. `BOT_IMAGE` skips local image build
 time; it does not replace the compose/setup workflow.
 
 ### Shell Helpers (optional)
@@ -228,7 +228,7 @@ docker compose up -d openclaw-gateway
 ```
 
 Note: run `docker compose ...` from the repo root. If you enabled
-`OPENCLAW_EXTRA_MOUNTS` or `OPENCLAW_HOME_VOLUME`, the setup script writes
+`BOT_EXTRA_MOUNTS` or `BOT_HOME_VOLUME`, the setup script writes
 `docker-compose.extra.yml`; include it when running Compose elsewhere:
 
 ```bash
@@ -251,14 +251,14 @@ More detail: [Dashboard](/web/dashboard), [Devices](/cli/devices).
 ### Extra mounts (optional)
 
 If you want to mount additional host directories into the containers, set
-`OPENCLAW_EXTRA_MOUNTS` before running `docker-setup.sh`. This accepts a
+`BOT_EXTRA_MOUNTS` before running `docker-setup.sh`. This accepts a
 comma-separated list of Docker bind mounts and applies them to both
 `openclaw-gateway` and `openclaw-cli` by generating `docker-compose.extra.yml`.
 
 Example:
 
 ```bash
-export OPENCLAW_EXTRA_MOUNTS="$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
+export BOT_EXTRA_MOUNTS="$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
 ./docker-setup.sh
 ```
 
@@ -266,58 +266,58 @@ Notes:
 
 - Paths must be shared with Docker Desktop on macOS/Windows.
 - Each entry must be `source:target[:options]` with no spaces, tabs, or newlines.
-- If you edit `OPENCLAW_EXTRA_MOUNTS`, rerun `docker-setup.sh` to regenerate the
+- If you edit `BOT_EXTRA_MOUNTS`, rerun `docker-setup.sh` to regenerate the
   extra compose file.
 - `docker-compose.extra.yml` is generated. Don’t hand-edit it.
 
 ### Persist the entire container home (optional)
 
 If you want `/home/node` to persist across container recreation, set a named
-volume via `OPENCLAW_HOME_VOLUME`. This creates a Docker volume and mounts it at
+volume via `BOT_HOME_VOLUME`. This creates a Docker volume and mounts it at
 `/home/node`, while keeping the standard config/workspace bind mounts. Use a
 named volume here (not a bind path); for bind mounts, use
-`OPENCLAW_EXTRA_MOUNTS`.
+`BOT_EXTRA_MOUNTS`.
 
 Example:
 
 ```bash
-export OPENCLAW_HOME_VOLUME="openclaw_home"
+export BOT_HOME_VOLUME="openclaw_home"
 ./docker-setup.sh
 ```
 
 You can combine this with extra mounts:
 
 ```bash
-export OPENCLAW_HOME_VOLUME="openclaw_home"
-export OPENCLAW_EXTRA_MOUNTS="$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
+export BOT_HOME_VOLUME="openclaw_home"
+export BOT_EXTRA_MOUNTS="$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
 ./docker-setup.sh
 ```
 
 Notes:
 
 - Named volumes must match `^[A-Za-z0-9][A-Za-z0-9_.-]*$`.
-- If you change `OPENCLAW_HOME_VOLUME`, rerun `docker-setup.sh` to regenerate the
+- If you change `BOT_HOME_VOLUME`, rerun `docker-setup.sh` to regenerate the
   extra compose file.
 - The named volume persists until removed with `docker volume rm <name>`.
 
 ### Install extra apt packages (optional)
 
 If you need system packages inside the image (for example, build tools or media
-libraries), set `OPENCLAW_DOCKER_APT_PACKAGES` before running `docker-setup.sh`.
+libraries), set `BOT_DOCKER_APT_PACKAGES` before running `docker-setup.sh`.
 This installs the packages during the image build, so they persist even if the
 container is deleted.
 
 Example:
 
 ```bash
-export OPENCLAW_DOCKER_APT_PACKAGES="ffmpeg build-essential"
+export BOT_DOCKER_APT_PACKAGES="ffmpeg build-essential"
 ./docker-setup.sh
 ```
 
 Notes:
 
 - This accepts a space-separated list of apt package names.
-- If you change `OPENCLAW_DOCKER_APT_PACKAGES`, rerun `docker-setup.sh` to rebuild
+- If you change `BOT_DOCKER_APT_PACKAGES`, rerun `docker-setup.sh` to rebuild
   the image.
 
 ### Power-user / full-featured container (opt-in)
@@ -334,14 +334,14 @@ If you want a more full-featured container, use these opt-in knobs:
 1. **Persist `/home/node`** so browser downloads and tool caches survive:
 
 ```bash
-export OPENCLAW_HOME_VOLUME="openclaw_home"
+export BOT_HOME_VOLUME="openclaw_home"
 ./docker-setup.sh
 ```
 
 2. **Bake system deps into the image** (repeatable + persistent):
 
 ```bash
-export OPENCLAW_DOCKER_APT_PACKAGES="git curl jq"
+export BOT_DOCKER_APT_PACKAGES="git curl jq"
 ./docker-setup.sh
 ```
 
@@ -353,14 +353,14 @@ docker compose run --rm openclaw-cli \
 ```
 
 If you need Playwright to install system deps, rebuild the image with
-`OPENCLAW_DOCKER_APT_PACKAGES` instead of using `--with-deps` at runtime.
+`BOT_DOCKER_APT_PACKAGES` instead of using `--with-deps` at runtime.
 
 4. **Persist Playwright browser downloads**:
 
 - Set `PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright` in
   `docker-compose.yml`.
-- Ensure `/home/node` persists via `OPENCLAW_HOME_VOLUME`, or mount
-  `/home/node/.cache/ms-playwright` via `OPENCLAW_EXTRA_MOUNTS`.
+- Ensure `/home/node` persists via `BOT_HOME_VOLUME`, or mount
+  `/home/node/.cache/ms-playwright` via `BOT_EXTRA_MOUNTS`.
 
 ### Permissions + EACCES
 
@@ -459,7 +459,7 @@ etc.) can automatically restart or replace it.
 Authenticated deep health snapshot (gateway + channels):
 
 ```bash
-docker compose exec openclaw-gateway node dist/index.js health --token "$OPENCLAW_GATEWAY_TOKEN"
+docker compose exec openclaw-gateway node dist/index.js health --token "$BOT_GATEWAY_TOKEN"
 ```
 
 ### E2E smoke test (Docker)
@@ -476,7 +476,7 @@ pnpm test:docker:qr
 
 ### LAN vs loopback (Docker Compose)
 
-`docker-setup.sh` defaults `OPENCLAW_GATEWAY_BIND=lan` so host access to
+`docker-setup.sh` defaults `BOT_GATEWAY_BIND=lan` so host access to
 `http://127.0.0.1:18789` works with Docker port publishing.
 
 - `lan` (default): host browser + host CLI can reach the published gateway port.
@@ -501,7 +501,7 @@ docker compose run --rm openclaw-cli devices list --url ws://127.0.0.1:18789
 
 ### Notes
 
-- Gateway bind defaults to `lan` for container use (`OPENCLAW_GATEWAY_BIND`).
+- Gateway bind defaults to `lan` for container use (`BOT_GATEWAY_BIND`).
 - Dockerfile CMD uses `--allow-unconfigured`; mounted config with `gateway.mode` not `local` will still start. Override CMD to enforce the guard.
 - The gateway container is the source of truth for sessions (`~/.openclaw/agents/<agentId>/sessions/`).
 
@@ -684,7 +684,7 @@ Notes:
 - noVNC observer access is password-protected by default; OpenClaw provides a short-lived observer token URL that serves a local bootstrap page and keeps the password in URL fragment (instead of URL query).
 - Browser container startup defaults are conservative for shared/container workloads, including:
   - `--remote-debugging-address=127.0.0.1`
-  - `--remote-debugging-port=<derived from OPENCLAW_BROWSER_CDP_PORT>`
+  - `--remote-debugging-port=<derived from BOT_BROWSER_CDP_PORT>`
   - `--user-data-dir=${HOME}/.chrome`
   - `--no-first-run`
   - `--no-default-browser-check`
@@ -703,13 +703,13 @@ Notes:
   - If `agents.defaults.sandbox.browser.noSandbox` is set, `--no-sandbox` and
     `--disable-setuid-sandbox` are also appended.
   - The three graphics hardening flags above are optional. If your workload needs
-    WebGL/3D, set `OPENCLAW_BROWSER_DISABLE_GRAPHICS_FLAGS=0` to run without
+    WebGL/3D, set `BOT_BROWSER_DISABLE_GRAPHICS_FLAGS=0` to run without
     `--disable-3d-apis`, `--disable-software-rasterizer`, and `--disable-gpu`.
   - Extension behavior is controlled by `--disable-extensions` and can be disabled
-    (enables extensions) via `OPENCLAW_BROWSER_DISABLE_EXTENSIONS=0` for
+    (enables extensions) via `BOT_BROWSER_DISABLE_EXTENSIONS=0` for
     extension-dependent pages or extensions-heavy workflows.
   - `--renderer-process-limit=2` is also configurable with
-    `OPENCLAW_BROWSER_RENDERER_PROCESS_LIMIT`; set `0` to let Chromium choose its
+    `BOT_BROWSER_RENDERER_PROCESS_LIMIT`; set `0` to let Chromium choose its
     default process limit when browser concurrency needs tuning.
 
 Defaults are applied by default in the bundled image. If you need different

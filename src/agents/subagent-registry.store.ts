@@ -1,9 +1,9 @@
 import os from "node:os";
 import path from "node:path";
-import type { SubagentRunRecord } from "./subagent-registry.types.js";
 import { resolveStateDir } from "../config/paths.js";
 import { loadJsonFile, saveJsonFile } from "../infra/json-file.js";
 import { normalizeDeliveryContext } from "../utils/delivery-context.js";
+import type { SubagentRunRecord } from "./subagent-registry.types.js";
 
 export type PersistedSubagentRegistryVersion = 1 | 2;
 
@@ -31,7 +31,7 @@ type LegacySubagentRunRecord = PersistedSubagentRunRecord & {
 };
 
 function resolveSubagentStateDir(env: NodeJS.ProcessEnv = process.env): string {
-  const explicit = env.OPENCLAW_STATE_DIR?.trim();
+  const explicit = env.BOT_STATE_DIR?.trim();
   if (explicit) {
     return resolveStateDir(env);
   }

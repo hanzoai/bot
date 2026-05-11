@@ -2,7 +2,6 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { AuthProfileStore } from "./types.js";
 import { captureEnv } from "../../test-utils/env.js";
 import { resolveApiKeyForProfile } from "./oauth.js";
 import {
@@ -10,6 +9,7 @@ import {
   ensureAuthProfileStore,
   saveAuthProfileStore,
 } from "./store.js";
+import type { AuthProfileStore } from "./types.js";
 
 const { getOAuthApiKeyMock } = vi.hoisted(() => ({
   getOAuthApiKeyMock: vi.fn(async () => {
@@ -49,11 +49,7 @@ function createExpiredOauthStore(params: {
 }
 
 describe("resolveApiKeyForProfile openai-codex refresh fallback", () => {
-  const envSnapshot = captureEnv([
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_AGENT_DIR",
-    "PI_CODING_AGENT_DIR",
-  ]);
+  const envSnapshot = captureEnv(["BOT_STATE_DIR", "BOT_AGENT_DIR", "PI_CODING_AGENT_DIR"]);
   let tempRoot = "";
   let agentDir = "";
 
@@ -63,8 +59,8 @@ describe("resolveApiKeyForProfile openai-codex refresh fallback", () => {
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-refresh-fallback-"));
     agentDir = path.join(tempRoot, "agents", "main", "agent");
     await fs.mkdir(agentDir, { recursive: true });
-    process.env.OPENCLAW_STATE_DIR = tempRoot;
-    process.env.OPENCLAW_AGENT_DIR = agentDir;
+    process.env.BOT_STATE_DIR = tempRoot;
+    process.env.BOT_AGENT_DIR = agentDir;
     process.env.PI_CODING_AGENT_DIR = agentDir;
   });
 

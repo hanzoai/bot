@@ -1,5 +1,5 @@
-import type { AddressInfo } from "node:net";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const TEST_GATEWAY_TOKEN = "test-gateway-token-1234567890";
@@ -201,8 +201,8 @@ afterAll(async () => {
 });
 
 beforeEach(() => {
-  delete process.env.OPENCLAW_GATEWAY_TOKEN;
-  delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+  delete process.env.BOT_GATEWAY_TOKEN;
+  delete process.env.BOT_GATEWAY_PASSWORD;
   pluginHttpHandlers = [];
   cfg = {};
   lastCreateBotToolsContext = undefined;

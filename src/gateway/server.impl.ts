@@ -73,6 +73,11 @@ import {
 } from "./events.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
 import { NodeRegistry } from "./node-registry.js";
+import {
+  type PlaygroundRegistrationHandle,
+  resolvePlaygroundRegistrationConfig,
+  startPlaygroundRegistration,
+} from "./playground-registration.js";
 import type { startBrowserControlServerIfEnabled } from "./server-browser.js";
 import { createChannelManager } from "./server-channels.js";
 import { createAgentEventHandler } from "./server-chat.js";
@@ -112,11 +117,6 @@ import {
   mergeGatewayAuthConfig,
   mergeGatewayTailscaleConfig,
 } from "./startup-auth.js";
-import {
-  type PlaygroundRegistrationHandle,
-  resolvePlaygroundRegistrationConfig,
-  startPlaygroundRegistration,
-} from "./playground-registration.js";
 import { maybeSeedControlUiAllowedOriginsAtStartup } from "./startup-control-ui-origins.js";
 
 export { __resetModelCatalogCacheForTest } from "./server-model-catalog.js";
@@ -261,16 +261,16 @@ export async function startGatewayServer(
   opts: GatewayServerOptions = {},
 ): Promise<GatewayServer> {
   const minimalTestGateway =
-    process.env.VITEST === "1" && process.env.OPENCLAW_TEST_MINIMAL_GATEWAY === "1";
+    process.env.VITEST === "1" && process.env.BOT_TEST_MINIMAL_GATEWAY === "1";
 
   // Ensure all default port derivations (browser/canvas) see the actual runtime port.
-  process.env.OPENCLAW_GATEWAY_PORT = String(port);
+  process.env.BOT_GATEWAY_PORT = String(port);
   logAcceptedEnvOption({
-    key: "OPENCLAW_RAW_STREAM",
+    key: "BOT_RAW_STREAM",
     description: "raw stream logging enabled",
   });
   logAcceptedEnvOption({
-    key: "OPENCLAW_RAW_STREAM_PATH",
+    key: "BOT_RAW_STREAM_PATH",
     description: "raw stream log path override",
   });
 
