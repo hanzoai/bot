@@ -2,10 +2,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, type Mock, vi } from "vitest";
-import type { ExecHostResponse } from "../infra/exec-host.js";
-import type { HandleSystemRunInvokeOptions } from "./invoke-system-run.js";
 import { saveExecApprovals } from "../infra/exec-approvals.js";
+import type { ExecHostResponse } from "../infra/exec-host.js";
 import { buildSystemRunApprovalPlan } from "./invoke-system-run-plan.js";
+import type { HandleSystemRunInvokeOptions } from "./invoke-system-run.js";
 import { handleSystemRunInvoke, formatSystemRunAllowlistMissMessage } from "./invoke-system-run.js";
 
 type MockedRunCommand = Mock<HandleSystemRunInvokeOptions["runCommand"]>;
@@ -135,16 +135,16 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     run: (ctx: { tempHome: string }) => Promise<T>;
   }): Promise<T> {
     const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-exec-approvals-"));
-    const previousOpenClawHome = process.env.OPENCLAW_HOME;
-    process.env.OPENCLAW_HOME = tempHome;
+    const previousOpenClawHome = process.env.BOT_HOME;
+    process.env.BOT_HOME = tempHome;
     saveExecApprovals(params.approvals);
     try {
       return await params.run({ tempHome });
     } finally {
       if (previousOpenClawHome === undefined) {
-        delete process.env.OPENCLAW_HOME;
+        delete process.env.BOT_HOME;
       } else {
-        process.env.OPENCLAW_HOME = previousOpenClawHome;
+        process.env.BOT_HOME = previousOpenClawHome;
       }
       fs.rmSync(tempHome, { recursive: true, force: true });
     }
