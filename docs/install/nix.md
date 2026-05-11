@@ -45,13 +45,13 @@ Reference the nix-openclaw README for module options.
 
 ## Nix Mode Runtime Behavior
 
-When `OPENCLAW_NIX_MODE=1` is set (automatic with nix-openclaw):
+When `BOT_NIX_MODE=1` is set (automatic with nix-openclaw):
 
 OpenClaw supports a **Nix mode** that makes configuration deterministic and disables auto-install flows.
 Enable it by exporting:
 
 ```bash
-OPENCLAW_NIX_MODE=1
+BOT_NIX_MODE=1
 ```
 
 On macOS, the GUI app does not automatically inherit shell env vars. You can
@@ -63,12 +63,12 @@ defaults write ai.openclaw.mac openclaw.nixMode -bool true
 
 ### Config + state paths
 
-OpenClaw reads JSON5 config from `OPENCLAW_CONFIG_PATH` and stores mutable data in `OPENCLAW_STATE_DIR`.
-When needed, you can also set `OPENCLAW_HOME` to control the base home directory used for internal path resolution.
+OpenClaw reads JSON5 config from `BOT_CONFIG_PATH` and stores mutable data in `BOT_STATE_DIR`.
+When needed, you can also set `BOT_HOME` to control the base home directory used for internal path resolution.
 
-- `OPENCLAW_HOME` (default precedence: `HOME` / `USERPROFILE` / `os.homedir()`)
-- `OPENCLAW_STATE_DIR` (default: `~/.openclaw`)
-- `OPENCLAW_CONFIG_PATH` (default: `$OPENCLAW_STATE_DIR/openclaw.json`)
+- `BOT_HOME` (default precedence: `HOME` / `USERPROFILE` / `os.homedir()`)
+- `BOT_STATE_DIR` (default: `~/.openclaw`)
+- `BOT_CONFIG_PATH` (default: `$BOT_STATE_DIR/openclaw.json`)
 
 When running under Nix, set these explicitly to Nix-managed locations so runtime state and config
 stay out of the immutable store.

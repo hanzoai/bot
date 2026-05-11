@@ -135,13 +135,13 @@ chown -R 1000:1000 /root/.openclaw/workspace
 在仓库根目录创建 `.env`。
 
 ```bash
-OPENCLAW_IMAGE=openclaw:latest
-OPENCLAW_GATEWAY_TOKEN=change-me-now
-OPENCLAW_GATEWAY_BIND=lan
-OPENCLAW_GATEWAY_PORT=18789
+BOT_IMAGE=openclaw:latest
+BOT_GATEWAY_TOKEN=change-me-now
+BOT_GATEWAY_BIND=lan
+BOT_GATEWAY_PORT=18789
 
-OPENCLAW_CONFIG_DIR=/root/.openclaw
-OPENCLAW_WORKSPACE_DIR=/root/.openclaw/workspace
+BOT_CONFIG_DIR=/root/.openclaw
+BOT_WORKSPACE_DIR=/root/.openclaw/workspace
 
 GOG_KEYRING_PASSWORD=change-me-now
 XDG_CONFIG_HOME=/home/node/.openclaw
@@ -164,7 +164,7 @@ openssl rand -hex 32
 ```yaml
 services:
   openclaw-gateway:
-    image: ${OPENCLAW_IMAGE}
+    image: ${BOT_IMAGE}
     build: .
     restart: unless-stopped
     env_file:
@@ -173,19 +173,19 @@ services:
       - HOME=/home/node
       - NODE_ENV=production
       - TERM=xterm-256color
-      - OPENCLAW_GATEWAY_BIND=${OPENCLAW_GATEWAY_BIND}
-      - OPENCLAW_GATEWAY_PORT=${OPENCLAW_GATEWAY_PORT}
-      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - BOT_GATEWAY_BIND=${BOT_GATEWAY_BIND}
+      - BOT_GATEWAY_PORT=${BOT_GATEWAY_PORT}
+      - BOT_GATEWAY_TOKEN=${BOT_GATEWAY_TOKEN}
       - GOG_KEYRING_PASSWORD=${GOG_KEYRING_PASSWORD}
       - XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
       - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     volumes:
-      - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
-      - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+      - ${BOT_CONFIG_DIR}:/home/node/.openclaw
+      - ${BOT_WORKSPACE_DIR}:/home/node/.openclaw/workspace
     ports:
       # 推荐：在 VPS 上保持 Gateway 网关仅限 loopback；通过 SSH 隧道访问。
       # 要公开暴露，移除 `127.0.0.1:` 前缀并相应配置防火墙。
-      - "127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789"
+      - "127.0.0.1:${BOT_GATEWAY_PORT}:18789"
 
       # 可选：仅当你对此 VPS 运行 iOS/Android 节点并需要 Canvas 主机时。
       # 如果你公开暴露此端口，请阅读 /gateway/security 并相应配置防火墙。
@@ -196,9 +196,9 @@ services:
         "dist/index.js",
         "gateway",
         "--bind",
-        "${OPENCLAW_GATEWAY_BIND}",
+        "${BOT_GATEWAY_BIND}",
         "--port",
-        "${OPENCLAW_GATEWAY_PORT}",
+        "${BOT_GATEWAY_PORT}",
       ]
 ```
 

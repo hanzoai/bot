@@ -43,7 +43,7 @@ openclaw plugins install ./extensions/twitch
    - 复制 **Client ID** 和 **Access Token**
 3. 查找你的 Twitch 用户 ID：https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/
 4. 配置令牌：
-   - 环境变量：`OPENCLAW_TWITCH_ACCESS_TOKEN=...`（仅限默认账户）
+   - 环境变量：`BOT_TWITCH_ACCESS_TOKEN=...`（仅限默认账户）
    - 或配置：`channels.twitch.accessToken`
    - 如果两者都设置，配置优先（环境变量回退仅适用于默认账户）。
 5. 启动 Gateway 网关。
@@ -58,7 +58,7 @@ openclaw plugins install ./extensions/twitch
     twitch: {
       enabled: true,
       username: "openclaw", // 机器人的 Twitch 账户
-      accessToken: "oauth:abc123...", // OAuth Access Token（或使用 OPENCLAW_TWITCH_ACCESS_TOKEN 环境变量）
+      accessToken: "oauth:abc123...", // OAuth Access Token（或使用 BOT_TWITCH_ACCESS_TOKEN 环境变量）
       clientId: "xyz789...", // Token Generator 中的 Client ID
       channel: "vevisk", // 要加入的 Twitch 频道聊天（必填）
       allowFrom: ["123456789"], // （推荐）仅限你的 Twitch 用户 ID - 从 https://www.streamweasels.com/tools/convert-twitch-username-to-user-id/ 获取
@@ -91,7 +91,7 @@ openclaw plugins install ./extensions/twitch
 **环境变量（仅限默认账户）：**
 
 ```bash
-OPENCLAW_TWITCH_ACCESS_TOKEN=oauth:abc123...
+BOT_TWITCH_ACCESS_TOKEN=oauth:abc123...
 ```
 
 **或配置：**

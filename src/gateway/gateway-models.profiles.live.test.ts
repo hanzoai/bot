@@ -1,11 +1,10 @@
-import type { Api, Model } from "@mariozechner/pi-ai";
 import { randomBytes, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import { createServer } from "node:net";
 import os from "node:os";
 import path from "node:path";
+import type { Api, Model } from "@mariozechner/pi-ai";
 import { describe, it } from "vitest";
-import type { ModelsConfig, BotConfig, ModelProviderConfig } from "../config/types.js";
 import { resolveOpenClawAgentDir } from "../agents/agent-paths.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import {
@@ -25,6 +24,7 @@ import { ensureOpenClawModelsJson } from "../agents/models-config.js";
 import { isRateLimitErrorMessage } from "../agents/pi-embedded-helpers/errors.js";
 import { discoverAuthStorage, discoverModels } from "../agents/pi-model-discovery.js";
 import { loadConfig } from "../config/config.js";
+import type { ModelsConfig, BotConfig, ModelProviderConfig } from "../config/types.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { DEFAULT_AGENT_ID } from "../routing/session-key.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
@@ -39,10 +39,10 @@ import {
 import { startGatewayServer } from "./server.js";
 import { extractPayloadText } from "./test-helpers.agent-results.js";
 
-const LIVE = isTruthyEnvValue(process.env.LIVE) || isTruthyEnvValue(process.env.OPENCLAW_LIVE_TEST);
-const GATEWAY_LIVE = isTruthyEnvValue(process.env.OPENCLAW_LIVE_GATEWAY);
-const ZAI_FALLBACK = isTruthyEnvValue(process.env.OPENCLAW_LIVE_GATEWAY_ZAI_FALLBACK);
-const PROVIDERS = parseFilter(process.env.OPENCLAW_LIVE_GATEWAY_PROVIDERS);
+const LIVE = isTruthyEnvValue(process.env.LIVE) || isTruthyEnvValue(process.env.BOT_LIVE_TEST);
+const GATEWAY_LIVE = isTruthyEnvValue(process.env.BOT_LIVE_GATEWAY);
+const ZAI_FALLBACK = isTruthyEnvValue(process.env.BOT_LIVE_GATEWAY_ZAI_FALLBACK);
+const PROVIDERS = parseFilter(process.env.BOT_LIVE_GATEWAY_PROVIDERS);
 const THINKING_LEVEL = "high";
 const THINKING_TAG_RE = /<\s*\/?\s*(?:think(?:ing)?|thought|antthinking)\s*>/i;
 const FINAL_TAG_RE = /<\s*\/?\s*final\s*>/i;
@@ -52,7 +52,7 @@ const GATEWAY_LIVE_UNBOUNDED_TIMEOUT_MS = 60 * 60 * 1000;
 const GATEWAY_LIVE_MAX_TIMEOUT_MS = 2 * 60 * 60 * 1000;
 const GATEWAY_LIVE_PROBE_TIMEOUT_MS = Math.max(
   30_000,
-  toInt(process.env.OPENCLAW_LIVE_GATEWAY_STEP_TIMEOUT_MS, 90_000),
+  toInt(process.env.BOT_LIVE_GATEWAY_STEP_TIMEOUT_MS, 90_000),
 );
 const GATEWAY_LIVE_MAX_MODELS = resolveGatewayLiveMaxModels();
 const GATEWAY_LIVE_SUITE_TIMEOUT_MS = resolveGatewayLiveSuiteTimeoutMs(GATEWAY_LIVE_MAX_MODELS);
@@ -81,12 +81,12 @@ function toInt(value: string | undefined, fallback: number): number {
 }
 
 function resolveGatewayLiveMaxModels(): number {
-  const gatewayMax = toInt(process.env.OPENCLAW_LIVE_GATEWAY_MAX_MODELS, -1);
+  const gatewayMax = toInt(process.env.BOT_LIVE_GATEWAY_MAX_MODELS, -1);
   if (gatewayMax >= 0) {
     return gatewayMax;
   }
   // Reuse shared live-model cap when gateway-specific cap is not provided.
-  return Math.max(0, toInt(process.env.OPENCLAW_LIVE_MAX_MODELS, 0));
+  return Math.max(0, toInt(process.env.BOT_LIVE_MAX_MODELS, 0));
 }
 
 function resolveGatewayLiveSuiteTimeoutMs(maxModels: number): number {
@@ -636,26 +636,26 @@ function buildMinimaxProviderOverride(params: {
 
 async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
   const previous = {
-    configPath: process.env.OPENCLAW_CONFIG_PATH,
-    token: process.env.OPENCLAW_GATEWAY_TOKEN,
-    skipChannels: process.env.OPENCLAW_SKIP_CHANNELS,
-    skipGmail: process.env.OPENCLAW_SKIP_GMAIL_WATCHER,
-    skipCron: process.env.OPENCLAW_SKIP_CRON,
-    skipCanvas: process.env.OPENCLAW_SKIP_CANVAS_HOST,
-    agentDir: process.env.OPENCLAW_AGENT_DIR,
+    configPath: process.env.BOT_CONFIG_PATH,
+    token: process.env.BOT_GATEWAY_TOKEN,
+    skipChannels: process.env.BOT_SKIP_CHANNELS,
+    skipGmail: process.env.BOT_SKIP_GMAIL_WATCHER,
+    skipCron: process.env.BOT_SKIP_CRON,
+    skipCanvas: process.env.BOT_SKIP_CANVAS_HOST,
+    agentDir: process.env.BOT_AGENT_DIR,
     piAgentDir: process.env.PI_CODING_AGENT_DIR,
-    stateDir: process.env.OPENCLAW_STATE_DIR,
+    stateDir: process.env.BOT_STATE_DIR,
   };
   let tempAgentDir: string | undefined;
   let tempStateDir: string | undefined;
 
-  process.env.OPENCLAW_SKIP_CHANNELS = "1";
-  process.env.OPENCLAW_SKIP_GMAIL_WATCHER = "1";
-  process.env.OPENCLAW_SKIP_CRON = "1";
-  process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
+  process.env.BOT_SKIP_CHANNELS = "1";
+  process.env.BOT_SKIP_GMAIL_WATCHER = "1";
+  process.env.BOT_SKIP_CRON = "1";
+  process.env.BOT_SKIP_CANVAS_HOST = "1";
 
   const token = `test-${randomUUID()}`;
-  process.env.OPENCLAW_GATEWAY_TOKEN = token;
+  process.env.BOT_GATEWAY_TOKEN = token;
   const agentId = "dev";
 
   const hostAgentDir = resolveOpenClawAgentDir();
@@ -672,14 +672,14 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
     usageStats: hostStore.usageStats ? { ...hostStore.usageStats } : undefined,
   };
   tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-state-"));
-  process.env.OPENCLAW_STATE_DIR = tempStateDir;
+  process.env.BOT_STATE_DIR = tempStateDir;
   tempAgentDir = path.join(tempStateDir, "agents", DEFAULT_AGENT_ID, "agent");
   saveAuthProfileStore(sanitizedStore, tempAgentDir);
   const tempSessionAgentDir = path.join(tempStateDir, "agents", agentId, "agent");
   if (tempSessionAgentDir !== tempAgentDir) {
     saveAuthProfileStore(sanitizedStore, tempSessionAgentDir);
   }
-  process.env.OPENCLAW_AGENT_DIR = tempAgentDir;
+  process.env.BOT_AGENT_DIR = tempAgentDir;
   process.env.PI_CODING_AGENT_DIR = tempAgentDir;
 
   const workspaceDir = resolveAgentWorkspaceDir(params.cfg, agentId);
@@ -702,7 +702,7 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-"));
   const tempConfigPath = path.join(tempDir, "openclaw.json");
   await fs.writeFile(tempConfigPath, `${JSON.stringify(nextCfg, null, 2)}\n`);
-  process.env.OPENCLAW_CONFIG_PATH = tempConfigPath;
+  process.env.BOT_CONFIG_PATH = tempConfigPath;
 
   const liveProviders = nextCfg.models?.providers;
   if (liveProviders && Object.keys(liveProviders).length > 0) {
@@ -1299,15 +1299,15 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
       await fs.rm(tempStateDir, { recursive: true, force: true });
     }
 
-    process.env.OPENCLAW_CONFIG_PATH = previous.configPath;
-    process.env.OPENCLAW_GATEWAY_TOKEN = previous.token;
-    process.env.OPENCLAW_SKIP_CHANNELS = previous.skipChannels;
-    process.env.OPENCLAW_SKIP_GMAIL_WATCHER = previous.skipGmail;
-    process.env.OPENCLAW_SKIP_CRON = previous.skipCron;
-    process.env.OPENCLAW_SKIP_CANVAS_HOST = previous.skipCanvas;
-    process.env.OPENCLAW_AGENT_DIR = previous.agentDir;
+    process.env.BOT_CONFIG_PATH = previous.configPath;
+    process.env.BOT_GATEWAY_TOKEN = previous.token;
+    process.env.BOT_SKIP_CHANNELS = previous.skipChannels;
+    process.env.BOT_SKIP_GMAIL_WATCHER = previous.skipGmail;
+    process.env.BOT_SKIP_CRON = previous.skipCron;
+    process.env.BOT_SKIP_CANVAS_HOST = previous.skipCanvas;
+    process.env.BOT_AGENT_DIR = previous.agentDir;
     process.env.PI_CODING_AGENT_DIR = previous.piAgentDir;
-    process.env.OPENCLAW_STATE_DIR = previous.stateDir;
+    process.env.BOT_STATE_DIR = previous.stateDir;
   }
 }
 
@@ -1326,7 +1326,7 @@ describeLive("gateway live (dev agent, profile keys)", () => {
       const modelRegistry = discoverModels(authStorage, agentDir);
       const all = modelRegistry.getAll();
 
-      const rawModels = process.env.OPENCLAW_LIVE_GATEWAY_MODELS?.trim();
+      const rawModels = process.env.BOT_LIVE_GATEWAY_MODELS?.trim();
       const useModern = !rawModels || rawModels === "modern" || rawModels === "all";
       const useExplicit = Boolean(rawModels) && !useModern;
       const filter = useExplicit ? parseFilter(rawModels) : null;
@@ -1369,7 +1369,7 @@ describeLive("gateway live (dev agent, profile keys)", () => {
       logProgress(`[all-models] selection=${useExplicit ? "explicit" : "modern"}`);
       if (selectedCandidates.length < candidates.length) {
         logProgress(
-          `[all-models] capped to ${selectedCandidates.length}/${candidates.length} via OPENCLAW_LIVE_GATEWAY_MAX_MODELS=${maxModels}`,
+          `[all-models] capped to ${selectedCandidates.length}/${candidates.length} via BOT_LIVE_GATEWAY_MAX_MODELS=${maxModels}`,
         );
       }
       const imageCandidates = selectedCandidates.filter((m) => m.input?.includes("image"));
@@ -1418,21 +1418,21 @@ describeLive("gateway live (dev agent, profile keys)", () => {
       return;
     }
     const previous = {
-      configPath: process.env.OPENCLAW_CONFIG_PATH,
-      token: process.env.OPENCLAW_GATEWAY_TOKEN,
-      skipChannels: process.env.OPENCLAW_SKIP_CHANNELS,
-      skipGmail: process.env.OPENCLAW_SKIP_GMAIL_WATCHER,
-      skipCron: process.env.OPENCLAW_SKIP_CRON,
-      skipCanvas: process.env.OPENCLAW_SKIP_CANVAS_HOST,
+      configPath: process.env.BOT_CONFIG_PATH,
+      token: process.env.BOT_GATEWAY_TOKEN,
+      skipChannels: process.env.BOT_SKIP_CHANNELS,
+      skipGmail: process.env.BOT_SKIP_GMAIL_WATCHER,
+      skipCron: process.env.BOT_SKIP_CRON,
+      skipCanvas: process.env.BOT_SKIP_CANVAS_HOST,
     };
 
-    process.env.OPENCLAW_SKIP_CHANNELS = "1";
-    process.env.OPENCLAW_SKIP_GMAIL_WATCHER = "1";
-    process.env.OPENCLAW_SKIP_CRON = "1";
-    process.env.OPENCLAW_SKIP_CANVAS_HOST = "1";
+    process.env.BOT_SKIP_CHANNELS = "1";
+    process.env.BOT_SKIP_GMAIL_WATCHER = "1";
+    process.env.BOT_SKIP_CRON = "1";
+    process.env.BOT_SKIP_CANVAS_HOST = "1";
 
     const token = `test-${randomUUID()}`;
-    process.env.OPENCLAW_GATEWAY_TOKEN = token;
+    process.env.BOT_GATEWAY_TOKEN = token;
 
     const cfg = loadConfig();
     await ensureOpenClawModelsJson(cfg);
@@ -1589,12 +1589,12 @@ describeLive("gateway live (dev agent, profile keys)", () => {
       await server.close({ reason: "live test complete" });
       await fs.rm(toolProbePath, { force: true });
 
-      process.env.OPENCLAW_CONFIG_PATH = previous.configPath;
-      process.env.OPENCLAW_GATEWAY_TOKEN = previous.token;
-      process.env.OPENCLAW_SKIP_CHANNELS = previous.skipChannels;
-      process.env.OPENCLAW_SKIP_GMAIL_WATCHER = previous.skipGmail;
-      process.env.OPENCLAW_SKIP_CRON = previous.skipCron;
-      process.env.OPENCLAW_SKIP_CANVAS_HOST = previous.skipCanvas;
+      process.env.BOT_CONFIG_PATH = previous.configPath;
+      process.env.BOT_GATEWAY_TOKEN = previous.token;
+      process.env.BOT_SKIP_CHANNELS = previous.skipChannels;
+      process.env.BOT_SKIP_GMAIL_WATCHER = previous.skipGmail;
+      process.env.BOT_SKIP_CRON = previous.skipCron;
+      process.env.BOT_SKIP_CANVAS_HOST = previous.skipCanvas;
     }
   }, 180_000);
 });

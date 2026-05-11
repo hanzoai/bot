@@ -237,7 +237,7 @@ Credential storage mode:
 
 <Note>
 Headless and server tip: complete OAuth on a machine with a browser, then copy
-`~/.openclaw/credentials/oauth.json` (or `$OPENCLAW_STATE_DIR/credentials/oauth.json`)
+`~/.openclaw/credentials/oauth.json` (or `$BOT_STATE_DIR/credentials/oauth.json`)
 to the gateway host.
 </Note>
 

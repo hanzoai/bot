@@ -21,7 +21,7 @@ For model selection rules, see [/concepts/models](/concepts/models).
 
 - Supports generic provider rotation for selected providers.
 - Configure multiple keys via:
-  - `OPENCLAW_LIVE_<PROVIDER>_KEY` (single live override, highest priority)
+  - `BOT_LIVE_<PROVIDER>_KEY` (single live override, highest priority)
   - `<PROVIDER>_API_KEYS` (comma or semicolon list)
   - `<PROVIDER>_API_KEY` (primary key)
   - `<PROVIDER>_API_KEY_*` (numbered list, e.g. `<PROVIDER>_API_KEY_1`)
@@ -40,7 +40,7 @@ OpenClaw ships with the pi‑ai catalog. These providers require **no**
 
 - Provider: `openai`
 - Auth: `OPENAI_API_KEY`
-- Optional rotation: `OPENAI_API_KEYS`, `OPENAI_API_KEY_1`, `OPENAI_API_KEY_2`, plus `OPENCLAW_LIVE_OPENAI_KEY` (single override)
+- Optional rotation: `OPENAI_API_KEYS`, `OPENAI_API_KEY_1`, `OPENAI_API_KEY_2`, plus `BOT_LIVE_OPENAI_KEY` (single override)
 - Example models: `openai/gpt-5.4`, `openai/gpt-5.4-pro`
 - CLI: `openclaw onboard --auth-choice openai-api-key`
 - Default transport is `auto` (WebSocket-first, SSE fallback)
@@ -58,7 +58,7 @@ OpenClaw ships with the pi‑ai catalog. These providers require **no**
 
 - Provider: `anthropic`
 - Auth: `ANTHROPIC_API_KEY` or `claude setup-token`
-- Optional rotation: `ANTHROPIC_API_KEYS`, `ANTHROPIC_API_KEY_1`, `ANTHROPIC_API_KEY_2`, plus `OPENCLAW_LIVE_ANTHROPIC_KEY` (single override)
+- Optional rotation: `ANTHROPIC_API_KEYS`, `ANTHROPIC_API_KEY_1`, `ANTHROPIC_API_KEY_2`, plus `BOT_LIVE_ANTHROPIC_KEY` (single override)
 - Example model: `anthropic/claude-opus-4-6`
 - CLI: `openclaw onboard --auth-choice token` (paste setup-token) or `openclaw models auth paste-token --provider anthropic`
 - Policy note: setup-token support is technical compatibility; Anthropic has blocked some subscription usage outside Claude Code in the past. Verify current Anthropic terms and decide based on your risk tolerance.
@@ -103,7 +103,7 @@ OpenClaw ships with the pi‑ai catalog. These providers require **no**
 
 - Provider: `google`
 - Auth: `GEMINI_API_KEY`
-- Optional rotation: `GEMINI_API_KEYS`, `GEMINI_API_KEY_1`, `GEMINI_API_KEY_2`, `GOOGLE_API_KEY` fallback, and `OPENCLAW_LIVE_GEMINI_KEY` (single override)
+- Optional rotation: `GEMINI_API_KEYS`, `GEMINI_API_KEY_1`, `GEMINI_API_KEY_2`, `GOOGLE_API_KEY` fallback, and `BOT_LIVE_GEMINI_KEY` (single override)
 - Example model: `google/gemini-3-pro-preview`
 - CLI: `openclaw onboard --auth-choice gemini-api-key`
 
