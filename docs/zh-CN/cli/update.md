@@ -66,7 +66,7 @@ openclaw update status --timeout 10
 
 当你显式切换渠道（`--channel ...`）时，OpenClaw 也会保持安装方式一致：
 
-- `dev` → 确保存在 git 检出（默认：`~/openclaw`，可通过 `OPENCLAW_GIT_DIR` 覆盖），更新它，并从该检出安装全局 CLI。
+- `dev` → 确保存在 git 检出（默认：`~/openclaw`，可通过 `BOT_GIT_DIR` 覆盖），更新它，并从该检出安装全局 CLI。
 - `stable`/`beta` → 使用匹配的 dist-tag 从 npm 安装。
 
 ## Git 检出流程

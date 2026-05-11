@@ -10,12 +10,12 @@ IMAGE_NAME="${BOT_IMAGE:-bot:local}"
 EXTRA_MOUNTS="${BOT_EXTRA_MOUNTS:-}"
 HOME_VOLUME_NAME="${BOT_HOME_VOLUME:-}"
 =======
-IMAGE_NAME="${OPENCLAW_IMAGE:-openclaw:local}"
-EXTRA_MOUNTS="${OPENCLAW_EXTRA_MOUNTS:-}"
-HOME_VOLUME_NAME="${OPENCLAW_HOME_VOLUME:-}"
-RAW_SANDBOX_SETTING="${OPENCLAW_SANDBOX:-}"
+IMAGE_NAME="${BOT_IMAGE:-openclaw:local}"
+EXTRA_MOUNTS="${BOT_EXTRA_MOUNTS:-}"
+HOME_VOLUME_NAME="${BOT_HOME_VOLUME:-}"
+RAW_SANDBOX_SETTING="${BOT_SANDBOX:-}"
 SANDBOX_ENABLED=""
-DOCKER_SOCKET_PATH="${OPENCLAW_DOCKER_SOCKET:-}"
+DOCKER_SOCKET_PATH="${BOT_DOCKER_SOCKET:-}"
 
 fail() {
   echo "ERROR: $*" >&2
@@ -42,7 +42,7 @@ is_truthy_value() {
 }
 
 read_config_gateway_token() {
-  local config_path="$OPENCLAW_CONFIG_DIR/openclaw.json"
+  local config_path="$BOT_CONFIG_DIR/openclaw.json"
   if [[ ! -f "$config_path" ]]; then
     return 0
   fi
@@ -90,13 +90,13 @@ NODE
 }
 
 ensure_control_ui_allowed_origins() {
-  if [[ "${OPENCLAW_GATEWAY_BIND}" == "loopback" ]]; then
+  if [[ "${BOT_GATEWAY_BIND}" == "loopback" ]]; then
     return 0
   fi
 
   local allowed_origin_json
   local current_allowed_origins
-  allowed_origin_json="$(printf '["http://127.0.0.1:%s"]' "$OPENCLAW_GATEWAY_PORT")"
+  allowed_origin_json="$(printf '["http://127.0.0.1:%s"]' "$BOT_GATEWAY_PORT")"
   current_allowed_origins="$(
     docker compose "${COMPOSE_ARGS[@]}" run --rm openclaw-cli \
       config get gateway.controlUi.allowedOrigins 2>/dev/null || true
@@ -117,8 +117,8 @@ sync_gateway_mode_and_bind() {
   docker compose "${COMPOSE_ARGS[@]}" run --rm openclaw-cli \
     config set gateway.mode local >/dev/null
   docker compose "${COMPOSE_ARGS[@]}" run --rm openclaw-cli \
-    config set gateway.bind "$OPENCLAW_GATEWAY_BIND" >/dev/null
-  echo "Pinned gateway.mode=local and gateway.bind=$OPENCLAW_GATEWAY_BIND for Docker setup."
+    config set gateway.bind "$BOT_GATEWAY_BIND" >/dev/null
+  echo "Pinned gateway.mode=local and gateway.bind=$BOT_GATEWAY_BIND for Docker setup."
 }
 
 contains_disallowed_chars() {
@@ -143,14 +143,14 @@ validate_mount_path_value() {
 validate_named_volume() {
   local value="$1"
   if [[ ! "$value" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]]; then
-    fail "OPENCLAW_HOME_VOLUME must match [A-Za-z0-9][A-Za-z0-9_.-]* when using a named volume."
+    fail "BOT_HOME_VOLUME must match [A-Za-z0-9][A-Za-z0-9_.-]* when using a named volume."
   fi
 }
 
 validate_mount_spec() {
   local mount="$1"
   if contains_disallowed_chars "$mount"; then
-    fail "OPENCLAW_EXTRA_MOUNTS entries cannot contain control characters."
+    fail "BOT_EXTRA_MOUNTS entries cannot contain control characters."
   fi
   # Keep mount specs strict to avoid YAML structure injection.
   # Expected format: source:target[:options]
@@ -270,45 +270,45 @@ if is_truthy_value "$RAW_SANDBOX_SETTING"; then
   SANDBOX_ENABLED="1"
 fi
 
-OPENCLAW_CONFIG_DIR="${OPENCLAW_CONFIG_DIR:-$HOME/.openclaw}"
-OPENCLAW_WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-$HOME/.openclaw/workspace}"
+BOT_CONFIG_DIR="${BOT_CONFIG_DIR:-$HOME/.openclaw}"
+BOT_WORKSPACE_DIR="${BOT_WORKSPACE_DIR:-$HOME/.openclaw/workspace}"
 
-validate_mount_path_value "OPENCLAW_CONFIG_DIR" "$OPENCLAW_CONFIG_DIR"
-validate_mount_path_value "OPENCLAW_WORKSPACE_DIR" "$OPENCLAW_WORKSPACE_DIR"
+validate_mount_path_value "BOT_CONFIG_DIR" "$BOT_CONFIG_DIR"
+validate_mount_path_value "BOT_WORKSPACE_DIR" "$BOT_WORKSPACE_DIR"
 if [[ -n "$HOME_VOLUME_NAME" ]]; then
   if [[ "$HOME_VOLUME_NAME" == *"/"* ]]; then
-    validate_mount_path_value "OPENCLAW_HOME_VOLUME" "$HOME_VOLUME_NAME"
+    validate_mount_path_value "BOT_HOME_VOLUME" "$HOME_VOLUME_NAME"
   else
     validate_named_volume "$HOME_VOLUME_NAME"
   fi
 fi
 if contains_disallowed_chars "$EXTRA_MOUNTS"; then
-  fail "OPENCLAW_EXTRA_MOUNTS cannot contain control characters."
+  fail "BOT_EXTRA_MOUNTS cannot contain control characters."
 fi
 if [[ -n "$SANDBOX_ENABLED" ]]; then
-  validate_mount_path_value "OPENCLAW_DOCKER_SOCKET" "$DOCKER_SOCKET_PATH"
+  validate_mount_path_value "BOT_DOCKER_SOCKET" "$DOCKER_SOCKET_PATH"
 fi
 
-mkdir -p "$OPENCLAW_CONFIG_DIR"
-mkdir -p "$OPENCLAW_WORKSPACE_DIR"
+mkdir -p "$BOT_CONFIG_DIR"
+mkdir -p "$BOT_WORKSPACE_DIR"
 # Seed directory tree eagerly so bind mounts work even on Docker Desktop/Windows
 # where the container (even as root) cannot create new host subdirectories.
-mkdir -p "$OPENCLAW_CONFIG_DIR/identity"
-mkdir -p "$OPENCLAW_CONFIG_DIR/agents/main/agent"
-mkdir -p "$OPENCLAW_CONFIG_DIR/agents/main/sessions"
+mkdir -p "$BOT_CONFIG_DIR/identity"
+mkdir -p "$BOT_CONFIG_DIR/agents/main/agent"
+mkdir -p "$BOT_CONFIG_DIR/agents/main/sessions"
 
-export OPENCLAW_CONFIG_DIR
-export OPENCLAW_WORKSPACE_DIR
-export OPENCLAW_GATEWAY_PORT="${OPENCLAW_GATEWAY_PORT:-18789}"
-export OPENCLAW_BRIDGE_PORT="${OPENCLAW_BRIDGE_PORT:-18790}"
-export OPENCLAW_GATEWAY_BIND="${OPENCLAW_GATEWAY_BIND:-lan}"
-export OPENCLAW_IMAGE="$IMAGE_NAME"
-export OPENCLAW_DOCKER_APT_PACKAGES="${OPENCLAW_DOCKER_APT_PACKAGES:-}"
-export OPENCLAW_EXTRA_MOUNTS="$EXTRA_MOUNTS"
-export OPENCLAW_HOME_VOLUME="$HOME_VOLUME_NAME"
-export OPENCLAW_ALLOW_INSECURE_PRIVATE_WS="${OPENCLAW_ALLOW_INSECURE_PRIVATE_WS:-}"
-export OPENCLAW_SANDBOX="$SANDBOX_ENABLED"
-export OPENCLAW_DOCKER_SOCKET="$DOCKER_SOCKET_PATH"
+export BOT_CONFIG_DIR
+export BOT_WORKSPACE_DIR
+export BOT_GATEWAY_PORT="${BOT_GATEWAY_PORT:-18789}"
+export BOT_BRIDGE_PORT="${BOT_BRIDGE_PORT:-18790}"
+export BOT_GATEWAY_BIND="${BOT_GATEWAY_BIND:-lan}"
+export BOT_IMAGE="$IMAGE_NAME"
+export BOT_DOCKER_APT_PACKAGES="${BOT_DOCKER_APT_PACKAGES:-}"
+export BOT_EXTRA_MOUNTS="$EXTRA_MOUNTS"
+export BOT_HOME_VOLUME="$HOME_VOLUME_NAME"
+export BOT_ALLOW_INSECURE_PRIVATE_WS="${BOT_ALLOW_INSECURE_PRIVATE_WS:-}"
+export BOT_SANDBOX="$SANDBOX_ENABLED"
+export BOT_DOCKER_SOCKET="$DOCKER_SOCKET_PATH"
 
 # Detect Docker socket GID for sandbox group_add.
 DOCKER_GID=""
@@ -317,15 +317,15 @@ if [[ -n "$SANDBOX_ENABLED" && -S "$DOCKER_SOCKET_PATH" ]]; then
 fi
 export DOCKER_GID
 
-if [[ -z "${OPENCLAW_GATEWAY_TOKEN:-}" ]]; then
+if [[ -z "${BOT_GATEWAY_TOKEN:-}" ]]; then
   EXISTING_CONFIG_TOKEN="$(read_config_gateway_token || true)"
   if [[ -n "$EXISTING_CONFIG_TOKEN" ]]; then
-    OPENCLAW_GATEWAY_TOKEN="$EXISTING_CONFIG_TOKEN"
-    echo "Reusing gateway token from $OPENCLAW_CONFIG_DIR/openclaw.json"
+    BOT_GATEWAY_TOKEN="$EXISTING_CONFIG_TOKEN"
+    echo "Reusing gateway token from $BOT_CONFIG_DIR/openclaw.json"
   elif command -v openssl >/dev/null 2>&1; then
-    OPENCLAW_GATEWAY_TOKEN="$(openssl rand -hex 32)"
+    BOT_GATEWAY_TOKEN="$(openssl rand -hex 32)"
   else
-    OPENCLAW_GATEWAY_TOKEN="$(python3 - <<'PY'
+    BOT_GATEWAY_TOKEN="$(python3 - <<'PY'
 >>>>>>> upstream/main
 import secrets
 print(secrets.token_hex(32))
@@ -336,7 +336,7 @@ fi
 <<<<<<< HEAD
 export BOT_GATEWAY_TOKEN
 =======
-export OPENCLAW_GATEWAY_TOKEN
+export BOT_GATEWAY_TOKEN
 >>>>>>> upstream/main
 
 COMPOSE_FILES=("$COMPOSE_FILE")
@@ -373,8 +373,8 @@ YAML
   for mount in "$@"; do
 =======
     gateway_home_mount="${home_volume}:/home/node"
-    gateway_config_mount="${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw"
-    gateway_workspace_mount="${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace"
+    gateway_config_mount="${BOT_CONFIG_DIR}:/home/node/.openclaw"
+    gateway_workspace_mount="${BOT_WORKSPACE_DIR}:/home/node/.openclaw/workspace"
     validate_mount_spec "$gateway_home_mount"
     validate_mount_spec "$gateway_config_mount"
     validate_mount_spec "$gateway_workspace_mount"
@@ -439,8 +439,8 @@ if [[ -n "$SANDBOX_ENABLED" ]]; then
     export BOT_INSTALL_DOCKER_CLI=1
 =======
 if [[ -n "$SANDBOX_ENABLED" ]]; then
-  if [[ -z "${OPENCLAW_INSTALL_DOCKER_CLI:-}" ]]; then
-    export OPENCLAW_INSTALL_DOCKER_CLI=1
+  if [[ -z "${BOT_INSTALL_DOCKER_CLI:-}" ]]; then
+    export BOT_INSTALL_DOCKER_CLI=1
 >>>>>>> upstream/main
   fi
 fi
@@ -537,27 +537,27 @@ docker build \
   -f "$ROOT_DIR/Dockerfile" \
   "$ROOT_DIR"
 =======
-  OPENCLAW_CONFIG_DIR \
-  OPENCLAW_WORKSPACE_DIR \
-  OPENCLAW_GATEWAY_PORT \
-  OPENCLAW_BRIDGE_PORT \
-  OPENCLAW_GATEWAY_BIND \
-  OPENCLAW_GATEWAY_TOKEN \
-  OPENCLAW_IMAGE \
-  OPENCLAW_EXTRA_MOUNTS \
-  OPENCLAW_HOME_VOLUME \
-  OPENCLAW_DOCKER_APT_PACKAGES \
-  OPENCLAW_SANDBOX \
-  OPENCLAW_DOCKER_SOCKET \
+  BOT_CONFIG_DIR \
+  BOT_WORKSPACE_DIR \
+  BOT_GATEWAY_PORT \
+  BOT_BRIDGE_PORT \
+  BOT_GATEWAY_BIND \
+  BOT_GATEWAY_TOKEN \
+  BOT_IMAGE \
+  BOT_EXTRA_MOUNTS \
+  BOT_HOME_VOLUME \
+  BOT_DOCKER_APT_PACKAGES \
+  BOT_SANDBOX \
+  BOT_DOCKER_SOCKET \
   DOCKER_GID \
-  OPENCLAW_INSTALL_DOCKER_CLI \
-  OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
+  BOT_INSTALL_DOCKER_CLI \
+  BOT_ALLOW_INSECURE_PRIVATE_WS
 
 if [[ "$IMAGE_NAME" == "openclaw:local" ]]; then
   echo "==> Building Docker image: $IMAGE_NAME"
   docker build \
-    --build-arg "OPENCLAW_DOCKER_APT_PACKAGES=${OPENCLAW_DOCKER_APT_PACKAGES}" \
-    --build-arg "OPENCLAW_INSTALL_DOCKER_CLI=${OPENCLAW_INSTALL_DOCKER_CLI:-}" \
+    --build-arg "BOT_DOCKER_APT_PACKAGES=${BOT_DOCKER_APT_PACKAGES}" \
+    --build-arg "BOT_INSTALL_DOCKER_CLI=${BOT_INSTALL_DOCKER_CLI:-}" \
     -t "$IMAGE_NAME" \
     -f "$ROOT_DIR/Dockerfile" \
     "$ROOT_DIR"
@@ -624,9 +624,9 @@ docker compose "${COMPOSE_ARGS[@]}" run --rm --user root --entrypoint sh opencla
 echo ""
 echo "==> Onboarding (interactive)"
 echo "Docker setup pins Gateway mode to local."
-echo "Gateway runtime bind comes from OPENCLAW_GATEWAY_BIND (default: lan)."
-echo "Current runtime bind: $OPENCLAW_GATEWAY_BIND"
-echo "Gateway token: $OPENCLAW_GATEWAY_TOKEN"
+echo "Gateway runtime bind comes from BOT_GATEWAY_BIND (default: lan)."
+echo "Current runtime bind: $BOT_GATEWAY_BIND"
+echo "Gateway token: $BOT_GATEWAY_TOKEN"
 echo "Tailscale exposure: Off (use host-level tailnet/Tailscale setup separately)."
 echo "Install Gateway daemon: No (managed by Docker Compose)"
 echo ""
@@ -654,7 +654,7 @@ echo ""
 echo "==> Starting gateway"
 docker compose "${COMPOSE_ARGS[@]}" up -d openclaw-gateway
 
-# --- Sandbox setup (opt-in via OPENCLAW_SANDBOX=1) ---
+# --- Sandbox setup (opt-in via BOT_SANDBOX=1) ---
 if [[ -n "$SANDBOX_ENABLED" ]]; then
   echo ""
   echo "==> Sandbox setup"
@@ -677,8 +677,8 @@ if [[ -n "$SANDBOX_ENABLED" ]]; then
   # launch sandbox containers.
   if ! docker compose "${COMPOSE_ARGS[@]}" run --rm --entrypoint docker openclaw-gateway --version >/dev/null 2>&1; then
     echo "WARNING: Docker CLI not found inside the container image." >&2
-    echo "  Sandbox requires Docker CLI. Rebuild with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1" >&2
-    echo "  or use a local build (OPENCLAW_IMAGE=openclaw:local). Skipping sandbox setup." >&2
+    echo "  Sandbox requires Docker CLI. Rebuild with --build-arg BOT_INSTALL_DOCKER_CLI=1" >&2
+    echo "  or use a local build (BOT_IMAGE=openclaw:local). Skipping sandbox setup." >&2
     SANDBOX_ENABLED=""
   fi
 fi
@@ -705,7 +705,7 @@ YAML
     COMPOSE_ARGS+=("-f" "$SANDBOX_COMPOSE_FILE")
     echo "==> Sandbox: added Docker socket mount"
   else
-    echo "WARNING: OPENCLAW_SANDBOX enabled but Docker socket not found at $DOCKER_SOCKET_PATH." >&2
+    echo "WARNING: BOT_SANDBOX enabled but Docker socket not found at $DOCKER_SOCKET_PATH." >&2
     echo "  Sandbox requires Docker socket access. Skipping sandbox setup." >&2
 >>>>>>> upstream/main
     SANDBOX_ENABLED=""
@@ -841,11 +841,11 @@ echo "Commands:"
 echo "  ${COMPOSE_HINT} logs -f bot-gateway"
 echo "  ${COMPOSE_HINT} exec bot-gateway node dist/index.js health --token \"$BOT_GATEWAY_TOKEN\""
 =======
-echo "Config: $OPENCLAW_CONFIG_DIR"
-echo "Workspace: $OPENCLAW_WORKSPACE_DIR"
-echo "Token: $OPENCLAW_GATEWAY_TOKEN"
+echo "Config: $BOT_CONFIG_DIR"
+echo "Workspace: $BOT_WORKSPACE_DIR"
+echo "Token: $BOT_GATEWAY_TOKEN"
 echo ""
 echo "Commands:"
 echo "  ${COMPOSE_HINT} logs -f openclaw-gateway"
-echo "  ${COMPOSE_HINT} exec openclaw-gateway node dist/index.js health --token \"$OPENCLAW_GATEWAY_TOKEN\""
+echo "  ${COMPOSE_HINT} exec openclaw-gateway node dist/index.js health --token \"$BOT_GATEWAY_TOKEN\""
 >>>>>>> upstream/main

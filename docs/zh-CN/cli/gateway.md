@@ -52,8 +52,8 @@ openclaw gateway run
 - `--port <port>`：WebSocket 端口（默认来自配置/环境变量；通常为 `18789`）。
 - `--bind <loopback|lan|tailnet|auto|custom>`：监听器绑定模式。
 - `--auth <token|password>`：认证模式覆盖。
-- `--token <token>`：令牌覆盖（同时为进程设置 `OPENCLAW_GATEWAY_TOKEN`）。
-- `--password <password>`：密码覆盖（同时为进程设置 `OPENCLAW_GATEWAY_PASSWORD`）。
+- `--token <token>`：令牌覆盖（同时为进程设置 `BOT_GATEWAY_TOKEN`）。
+- `--password <password>`：密码覆盖（同时为进程设置 `BOT_GATEWAY_PASSWORD`）。
 - `--tailscale <off|serve|funnel>`：通过 Tailscale 暴露 Gateway 网关。
 - `--tailscale-reset-on-exit`：关闭时重置 Tailscale serve/funnel 配置。
 - `--allow-unconfigured`：允许在配置中没有 `gateway.mode=local` 的情况下启动 Gateway 网关。

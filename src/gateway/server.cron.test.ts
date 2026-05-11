@@ -1,9 +1,9 @@
-import type WebSocket from "ws";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { setImmediate as setImmediatePromise } from "node:timers/promises";
 import { afterAll, beforeEach, describe, expect, test, vi } from "vitest";
+import type WebSocket from "ws";
 import type { GuardedFetchOptions } from "../infra/net/fetch-guard.js";
 import {
   connectOk,
@@ -106,10 +106,10 @@ async function cleanupCronTestRun(params: {
   }
   testState.cronEnabled = undefined;
   if (params.prevSkipCron === undefined) {
-    delete process.env.OPENCLAW_SKIP_CRON;
+    delete process.env.BOT_SKIP_CRON;
     return;
   }
-  process.env.OPENCLAW_SKIP_CRON = params.prevSkipCron;
+  process.env.BOT_SKIP_CRON = params.prevSkipCron;
 }
 
 async function setupCronTestRun(params: {
@@ -118,8 +118,8 @@ async function setupCronTestRun(params: {
   sessionConfig?: { mainKey: string };
   jobs?: unknown[];
 }): Promise<{ prevSkipCron: string | undefined; dir: string }> {
-  const prevSkipCron = process.env.OPENCLAW_SKIP_CRON;
-  process.env.OPENCLAW_SKIP_CRON = "0";
+  const prevSkipCron = process.env.BOT_SKIP_CRON;
+  process.env.BOT_SKIP_CRON = "0";
   const { dir, storePath } = await createCronCasePaths(params.tempPrefix);
   testState.cronStorePath = storePath;
   testState.sessionConfig = params.sessionConfig;
@@ -539,7 +539,7 @@ describe("gateway server cron", () => {
       jobs: [legacyNotifyJob],
     });
 
-    const configPath = process.env.OPENCLAW_CONFIG_PATH;
+    const configPath = process.env.BOT_CONFIG_PATH;
     expect(typeof configPath).toBe("string");
     await fs.mkdir(path.dirname(configPath as string), { recursive: true });
     await fs.writeFile(
@@ -721,7 +721,7 @@ describe("gateway server cron", () => {
       cronEnabled: false,
     });
 
-    const configPath = process.env.OPENCLAW_CONFIG_PATH;
+    const configPath = process.env.BOT_CONFIG_PATH;
     expect(typeof configPath).toBe("string");
     await fs.mkdir(path.dirname(configPath as string), { recursive: true });
     await fs.writeFile(

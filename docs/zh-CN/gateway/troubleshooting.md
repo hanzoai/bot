@@ -34,7 +34,7 @@ x-i18n:
 | `openclaw gateway status`          | 监管程序状态（launchd/systemd/schtasks）、运行时 PID/退出、最后的 Gateway 网关错误    | 当服务"看起来已加载"但没有运行时      |
 | `openclaw logs --follow`           | 实时日志（运行时问题的最佳信号）                                                      | 当你需要实际的故障原因时              |
 
-**分享输出：** 优先使用 `openclaw status --all`（它会隐藏令牌）。如果你粘贴 `openclaw status`，考虑先设置 `OPENCLAW_SHOW_SECRETS=0`（令牌预览）。
+**分享输出：** 优先使用 `openclaw status --all`（它会隐藏令牌）。如果你粘贴 `openclaw status`，考虑先设置 `BOT_SHOW_SECRETS=0`（令牌预览）。
 
 另请参阅：[健康检查](/gateway/health) 和 [日志](/logging)。
 
@@ -120,7 +120,7 @@ Doctor/service 将显示运行时状态（PID/最后退出）和日志提示。
 
 - 优先：`openclaw logs --follow`
 - 文件日志（始终）：`/tmp/openclaw/openclaw-YYYY-MM-DD.log`（或你配置的 `logging.file`）
-- macOS LaunchAgent（如果已安装）：`$OPENCLAW_STATE_DIR/logs/gateway.log` 和 `gateway.err.log`
+- macOS LaunchAgent（如果已安装）：`$BOT_STATE_DIR/logs/gateway.log` 和 `gateway.err.log`
 - Linux systemd（如果已安装）：`journalctl --user -u openclaw-gateway[-<profile>].service -n 200 --no-pager`
 - Windows：`schtasks /Query /TN "OpenClaw Gateway (<profile>)" /V /FO LIST`
 
@@ -215,7 +215,7 @@ Gateway 网关可能拒绝绑定。
 - 如果你设置了 `gateway.mode=remote`，**CLI 默认**使用远程 URL。服务可能仍在本地运行，但你的 CLI 可能在探测错误的位置。使用 `openclaw gateway status` 查看服务解析的端口 + 探测目标（或传递 `--url`）。
 - `openclaw gateway status` 和 `openclaw doctor` 在服务看起来正在运行但端口关闭时会显示日志中的**最后 Gateway 网关错误**。
 - 非本地回环绑定（`lan`/`tailnet`/`custom`，或本地回环不可用时的 `auto`）需要认证：
-  `gateway.auth.token`（或 `OPENCLAW_GATEWAY_TOKEN`）。
+  `gateway.auth.token`（或 `BOT_GATEWAY_TOKEN`）。
 - `gateway.remote.token` 仅用于远程 CLI 调用；它**不**启用本地认证。
 - `gateway.token` 被忽略；使用 `gateway.auth.token`。
 
@@ -223,7 +223,7 @@ Gateway 网关可能拒绝绑定。
 
 - `Config (cli): ...` 和 `Config (service): ...` 通常应该匹配。
 - 如果不匹配，你几乎肯定是在编辑一个配置而服务运行的是另一个。
-- 修复：从你希望服务使用的相同 `--profile` / `OPENCLAW_STATE_DIR` 重新运行 `openclaw gateway install --force`。
+- 修复：从你希望服务使用的相同 `--profile` / `BOT_STATE_DIR` 重新运行 `openclaw gateway install --force`。
 
 **如果 `openclaw gateway status` 报告服务配置问题**
 
@@ -233,7 +233,7 @@ Gateway 网关可能拒绝绑定。
 **如果 `Last gateway error:` 提到"refusing to bind … without auth"**
 
 - 你将 `gateway.bind` 设置为非本地回环模式（`lan`/`tailnet`/`custom`，或本地回环不可用时的 `auto`）但没有配置认证。
-- 修复：设置 `gateway.auth.mode` + `gateway.auth.token`（或导出 `OPENCLAW_GATEWAY_TOKEN`）并重启服务。
+- 修复：设置 `gateway.auth.mode` + `gateway.auth.token`（或导出 `BOT_GATEWAY_TOKEN`）并重启服务。
 
 **如果 `openclaw gateway status` 显示 `bind=tailnet` 但未找到 tailnet 接口**
 
@@ -322,7 +322,7 @@ openclaw status
 # 消息必须匹配 mentionPatterns 或显式提及；默认值在渠道 groups/guilds 中。
 # 多智能体：`agents.list[].groupChat.mentionPatterns` 覆盖全局模式。
 grep -n "agents\\|groupChat\\|mentionPatterns\\|channels\\.whatsapp\\.groups\\|channels\\.telegram\\.groups\\|channels\\.imessage\\.groups\\|channels\\.discord\\.guilds" \
-  "${OPENCLAW_CONFIG_PATH:-$HOME/.openclaw/openclaw.json}"
+  "${BOT_CONFIG_PATH:-$HOME/.openclaw/openclaw.json}"
 ```
 
 **检查 3：** 检查日志
@@ -422,7 +422,7 @@ openclaw gateway --verbose
 
 ```bash
 openclaw channels logout
-trash "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/credentials" # 如果 logout 无法完全清除所有内容
+trash "${BOT_STATE_DIR:-$HOME/.openclaw}/credentials" # 如果 logout 无法完全清除所有内容
 openclaw channels login --verbose       # 重新扫描二维码
 ```
 
@@ -674,7 +674,7 @@ npm install -g openclaw@<version>
 
 ```bash
 # 在配置中打开跟踪日志：
-#   ${OPENCLAW_CONFIG_PATH:-$HOME/.openclaw/openclaw.json} -> { logging: { level: "trace" } }
+#   ${BOT_CONFIG_PATH:-$HOME/.openclaw/openclaw.json} -> { logging: { level: "trace" } }
 #
 # 然后运行详细命令将调试输出镜像到标准输出：
 openclaw gateway --verbose
@@ -683,13 +683,13 @@ openclaw channels login --verbose
 
 ## 日志位置
 
-| 日志                             | 位置                                                                                                                                                                                                                                                                                                                      |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gateway 网关文件日志（结构化）   | `/tmp/openclaw/openclaw-YYYY-MM-DD.log`（或 `logging.file`）                                                                                                                                                                                                                                                              |
-| Gateway 网关服务日志（监管程序） | macOS：`$OPENCLAW_STATE_DIR/logs/gateway.log` + `gateway.err.log`（默认：`~/.openclaw/logs/...`；配置文件使用 `~/.openclaw-<profile>/logs/...`）<br />Linux：`journalctl --user -u openclaw-gateway[-<profile>].service -n 200 --no-pager`<br />Windows：`schtasks /Query /TN "OpenClaw Gateway (<profile>)" /V /FO LIST` |
-| 会话文件                         | `$OPENCLAW_STATE_DIR/agents/<agentId>/sessions/`                                                                                                                                                                                                                                                                          |
-| 媒体缓存                         | `$OPENCLAW_STATE_DIR/media/`                                                                                                                                                                                                                                                                                              |
-| 凭证                             | `$OPENCLAW_STATE_DIR/credentials/`                                                                                                                                                                                                                                                                                        |
+| 日志                             | 位置                                                                                                                                                                                                                                                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gateway 网关文件日志（结构化）   | `/tmp/openclaw/openclaw-YYYY-MM-DD.log`（或 `logging.file`）                                                                                                                                                                                                                                                         |
+| Gateway 网关服务日志（监管程序） | macOS：`$BOT_STATE_DIR/logs/gateway.log` + `gateway.err.log`（默认：`~/.openclaw/logs/...`；配置文件使用 `~/.openclaw-<profile>/logs/...`）<br />Linux：`journalctl --user -u openclaw-gateway[-<profile>].service -n 200 --no-pager`<br />Windows：`schtasks /Query /TN "OpenClaw Gateway (<profile>)" /V /FO LIST` |
+| 会话文件                         | `$BOT_STATE_DIR/agents/<agentId>/sessions/`                                                                                                                                                                                                                                                                          |
+| 媒体缓存                         | `$BOT_STATE_DIR/media/`                                                                                                                                                                                                                                                                                              |
+| 凭证                             | `$BOT_STATE_DIR/credentials/`                                                                                                                                                                                                                                                                                        |
 
 ## 健康检查
 
@@ -722,7 +722,7 @@ openclaw gateway stop
 # 如果你安装了服务并想要干净安装：
 # openclaw gateway uninstall
 
-trash "${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
+trash "${BOT_STATE_DIR:-$HOME/.openclaw}"
 openclaw channels login         # 重新配对 WhatsApp
 openclaw gateway restart           # 或：openclaw gateway
 ```

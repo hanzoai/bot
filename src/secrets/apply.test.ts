@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { SecretsApplyPlan } from "./plan.js";
 import { runSecretsApply } from "./apply.js";
+import type { SecretsApplyPlan } from "./plan.js";
 
 const OPENAI_API_KEY_ENV_REF = {
   source: "env",
@@ -70,8 +70,8 @@ async function createApplyFixture(): Promise<ApplyFixture> {
   return {
     ...paths,
     env: {
-      OPENCLAW_STATE_DIR: paths.stateDir,
-      OPENCLAW_CONFIG_PATH: paths.configPath,
+      BOT_STATE_DIR: paths.stateDir,
+      BOT_CONFIG_PATH: paths.configPath,
       OPENAI_API_KEY: "sk-live-env",
     },
   };

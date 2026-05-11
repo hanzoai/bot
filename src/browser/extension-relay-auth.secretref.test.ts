@@ -12,7 +12,7 @@ vi.mock("../config/config.js", () => ({
 const { resolveRelayAcceptedTokensForPort } = await import("./extension-relay-auth.js");
 
 describe("extension-relay-auth SecretRef handling", () => {
-  const ENV_KEYS = ["OPENCLAW_GATEWAY_TOKEN", "CLAWDBOT_GATEWAY_TOKEN", "CUSTOM_GATEWAY_TOKEN"];
+  const ENV_KEYS = ["BOT_GATEWAY_TOKEN", "CLAWDBOT_GATEWAY_TOKEN", "CUSTOM_GATEWAY_TOKEN"];
   const envSnapshot = new Map<string, string | undefined>();
 
   beforeEach(() => {
