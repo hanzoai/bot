@@ -7,7 +7,7 @@
   "main": "./index.ts",
   "peerDependencies": {
     "@hanzo/bot-graph-links": "*",
-    "@hanzo/bot-memory-postgres": "*"
+    "@hanzo/bot-memory": "*"
   },
   "openclaw": {
     "extensions": [
