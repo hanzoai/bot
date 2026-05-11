@@ -18,9 +18,9 @@ function makeTempDir() {
 async function withStateDir<T>(stateDir: string, fn: () => Promise<T>) {
   return await withEnvAsync(
     {
-      OPENCLAW_STATE_DIR: stateDir,
+      BOT_STATE_DIR: stateDir,
       CLAWDBOT_STATE_DIR: undefined,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
+      BOT_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
     },
     fn,
   );
@@ -361,7 +361,7 @@ describe("discoverOpenClawPlugins", () => {
 
     const first = await withEnvAsync(
       {
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
       async () => withStateDir(stateDir, async () => discoverOpenClawPlugins({})),
     );
@@ -371,7 +371,7 @@ describe("discoverOpenClawPlugins", () => {
 
     const second = await withEnvAsync(
       {
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
       async () => withStateDir(stateDir, async () => discoverOpenClawPlugins({})),
     );
@@ -381,7 +381,7 @@ describe("discoverOpenClawPlugins", () => {
 
     const third = await withEnvAsync(
       {
-        OPENCLAW_PLUGIN_DISCOVERY_CACHE_MS: "5000",
+        BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
       async () => withStateDir(stateDir, async () => discoverOpenClawPlugins({})),
     );

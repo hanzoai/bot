@@ -318,7 +318,7 @@ Resolution order:
 
 1. `browser.executablePath` in OpenClaw config.
 2. Environment variables:
-   - `OPENCLAW_BROWSER_EXECUTABLE_PATH`
+   - `BOT_BROWSER_EXECUTABLE_PATH`
    - `BROWSER_EXECUTABLE_PATH`
    - `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`
 3. Platform command/path discovery fallback.

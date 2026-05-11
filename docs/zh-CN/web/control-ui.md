@@ -154,7 +154,7 @@ pnpm ui:build # 首次运行时自动安装 UI 依赖
 可选的绝对基础路径（当你想要固定的资源 URL 时）：
 
 ```bash
-OPENCLAW_CONTROL_UI_BASE_PATH=/openclaw/ pnpm ui:build
+BOT_CONTROL_UI_BASE_PATH=/openclaw/ pnpm ui:build
 ```
 
 用于本地开发（单独的开发服务器）：

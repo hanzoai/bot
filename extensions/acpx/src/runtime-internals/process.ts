@@ -1,3 +1,5 @@
+import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { existsSync } from "node:fs";
 import type {
   WindowsSpawnProgram,
   WindowsSpawnProgramCandidate,
@@ -8,8 +10,6 @@ import {
   materializeWindowsSpawnProgram,
   resolveWindowsSpawnProgramCandidate,
 } from "@hanzo/bot/plugin-sdk/acpx";
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { existsSync } from "node:fs";
 
 export type SpawnExit = {
   code: number | null;
@@ -138,7 +138,7 @@ export function spawnWithResolvedCommand(
 
   return spawn(resolved.command, resolved.args, {
     cwd: params.cwd,
-    env: { ...process.env, OPENCLAW_SHELL: "acp" },
+    env: { ...process.env, BOT_SHELL: "acp" },
     stdio: ["pipe", "pipe", "pipe"],
     shell: resolved.shell,
     windowsHide: resolved.windowsHide,

@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { CliDeps } from "../cli/deps.js";
 import { runSubagentAnnounceFlow } from "../agents/subagent-announce.js";
+import type { CliDeps } from "../cli/deps.js";
 import {
   createCliDeps,
   expectDirectTelegramDelivery,
@@ -20,8 +20,8 @@ type HomeEnvSnapshot = {
   USERPROFILE: string | undefined;
   HOMEDRIVE: string | undefined;
   HOMEPATH: string | undefined;
-  OPENCLAW_HOME: string | undefined;
-  OPENCLAW_STATE_DIR: string | undefined;
+  BOT_HOME: string | undefined;
+  BOT_STATE_DIR: string | undefined;
 };
 
 const TELEGRAM_TARGET = { mode: "announce", channel: "telegram", to: "123" } as const;
@@ -34,8 +34,8 @@ function snapshotHomeEnv(): HomeEnvSnapshot {
     USERPROFILE: process.env.USERPROFILE,
     HOMEDRIVE: process.env.HOMEDRIVE,
     HOMEPATH: process.env.HOMEPATH,
-    OPENCLAW_HOME: process.env.OPENCLAW_HOME,
-    OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
+    BOT_HOME: process.env.BOT_HOME,
+    BOT_STATE_DIR: process.env.BOT_STATE_DIR,
   };
 }
 
@@ -52,8 +52,8 @@ function restoreHomeEnv(snapshot: HomeEnvSnapshot) {
   restoreValue("USERPROFILE");
   restoreValue("HOMEDRIVE");
   restoreValue("HOMEPATH");
-  restoreValue("OPENCLAW_HOME");
-  restoreValue("OPENCLAW_STATE_DIR");
+  restoreValue("BOT_HOME");
+  restoreValue("BOT_STATE_DIR");
 }
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
@@ -62,8 +62,8 @@ async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
   const snapshot = snapshotHomeEnv();
   process.env.HOME = home;
   process.env.USERPROFILE = home;
-  delete process.env.OPENCLAW_HOME;
-  process.env.OPENCLAW_STATE_DIR = path.join(home, ".openclaw");
+  delete process.env.BOT_HOME;
+  process.env.BOT_STATE_DIR = path.join(home, ".openclaw");
   if (process.platform === "win32") {
     const parsed = path.parse(home);
     if (parsed.root) {

@@ -85,11 +85,9 @@ describe("warning filter", () => {
       await new Promise((resolve) => setImmediate(resolve));
       expect(seenWarnings.find((warning) => warning.code === "DEP0060")).toBeUndefined();
 
-      emitWarning("Visible warning", { type: "Warning", code: "OPENCLAW_TEST_WARNING" });
+      emitWarning("Visible warning", { type: "Warning", code: "BOT_TEST_WARNING" });
       await new Promise((resolve) => setImmediate(resolve));
-      expect(
-        seenWarnings.find((warning) => warning.code === "OPENCLAW_TEST_WARNING"),
-      ).toBeDefined();
+      expect(seenWarnings.find((warning) => warning.code === "BOT_TEST_WARNING")).toBeDefined();
     } finally {
       process.off("warning", onWarning);
     }

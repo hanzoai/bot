@@ -3,9 +3,9 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BotConfig } from "../config/config.js";
-import type { DoctorPrompter } from "./doctor-prompter.js";
 import { captureEnv } from "../test-utils/env.js";
 import { maybeRemoveDeprecatedCliAuthProfiles } from "./doctor-auth.js";
+import type { DoctorPrompter } from "./doctor-prompter.js";
 
 let envSnapshot: ReturnType<typeof captureEnv>;
 let tempAgentDir: string | undefined;
@@ -23,9 +23,9 @@ function makePrompter(confirmValue: boolean): DoctorPrompter {
 }
 
 beforeEach(() => {
-  envSnapshot = captureEnv(["OPENCLAW_AGENT_DIR", "PI_CODING_AGENT_DIR"]);
+  envSnapshot = captureEnv(["BOT_AGENT_DIR", "PI_CODING_AGENT_DIR"]);
   tempAgentDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-auth-"));
-  process.env.OPENCLAW_AGENT_DIR = tempAgentDir;
+  process.env.BOT_AGENT_DIR = tempAgentDir;
   process.env.PI_CODING_AGENT_DIR = tempAgentDir;
 });
 

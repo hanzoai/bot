@@ -377,11 +377,11 @@ describe("config strict validation", () => {
   it("does not mark resolved-only gateway.bind aliases as auto-migratable legacy", async () => {
     await withTempHome(async (home) => {
       await writeBotConfig(home, {
-        gateway: { bind: "${OPENCLAW_BIND}" },
+        gateway: { bind: "${BOT_BIND}" },
       });
 
-      const prev = process.env.OPENCLAW_BIND;
-      process.env.OPENCLAW_BIND = "0.0.0.0";
+      const prev = process.env.BOT_BIND;
+      process.env.BOT_BIND = "0.0.0.0";
       try {
         const snap = await readConfigFileSnapshot();
         expect(snap.valid).toBe(false);
@@ -389,9 +389,9 @@ describe("config strict validation", () => {
         expect(snap.issues.some((issue) => issue.path === "gateway.bind")).toBe(true);
       } finally {
         if (prev === undefined) {
-          delete process.env.OPENCLAW_BIND;
+          delete process.env.BOT_BIND;
         } else {
-          process.env.OPENCLAW_BIND = prev;
+          process.env.BOT_BIND = prev;
         }
       }
     });

@@ -95,7 +95,7 @@ openclaw gateway
   gateway: {
     bind: "loopback",
     tailscale: { mode: "funnel" },
-    auth: { mode: "password" }, // 或 OPENCLAW_GATEWAY_PASSWORD
+    auth: { mode: "password" }, // 或 BOT_GATEWAY_PASSWORD
   },
 }
 ```

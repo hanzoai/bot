@@ -1,12 +1,3 @@
-import type { GatewayAuthChoice, SecretInputMode } from "../commands/onboard-types.js";
-import type { GatewayBindMode, GatewayTailscaleMode, BotConfig } from "../config/config.js";
-import type { RuntimeEnv } from "../runtime.js";
-import type {
-  GatewayWizardSettings,
-  QuickstartGatewayDefaults,
-  WizardFlow,
-} from "./onboarding.types.js";
-import type { WizardPrompter } from "./prompts.js";
 import {
   promptSecretRefForOnboarding,
   resolveSecretInputModeForEnvSelection,
@@ -16,6 +7,8 @@ import {
   randomToken,
   validateGatewayPasswordInput,
 } from "../commands/onboard-helpers.js";
+import type { GatewayAuthChoice, SecretInputMode } from "../commands/onboard-types.js";
+import type { GatewayBindMode, GatewayTailscaleMode, BotConfig } from "../config/config.js";
 import { ensureControlUiAllowedOriginsForNonLoopbackBind } from "../config/gateway-control-ui-origins.js";
 import {
   normalizeSecretInputString,
@@ -30,8 +23,15 @@ import {
 } from "../gateway/gateway-config-prompts.shared.js";
 import { DEFAULT_DANGEROUS_NODE_COMMANDS } from "../gateway/node-command-policy.js";
 import { findTailscaleBinary } from "../infra/tailscale.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { validateIPv4AddressInput } from "../shared/net/ipv4.js";
 import { resolveOnboardingSecretInputString } from "./onboarding.secret-input.js";
+import type {
+  GatewayWizardSettings,
+  QuickstartGatewayDefaults,
+  WizardFlow,
+} from "./onboarding.types.js";
+import type { WizardPrompter } from "./prompts.js";
 
 type ConfigureGatewayOptions = {
   flow: WizardFlow;
@@ -194,10 +194,10 @@ export async function configureGatewayForOnboarding(
           provider: "gateway-auth-token",
           config: nextConfig,
           prompter,
-          preferredEnvVar: "OPENCLAW_GATEWAY_TOKEN",
+          preferredEnvVar: "BOT_GATEWAY_TOKEN",
           copy: {
             sourceMessage: "Where is this gateway token stored?",
-            envVarPlaceholder: "OPENCLAW_GATEWAY_TOKEN",
+            envVarPlaceholder: "BOT_GATEWAY_TOKEN",
           },
         });
         gatewayTokenInput = resolved.ref;
@@ -205,7 +205,7 @@ export async function configureGatewayForOnboarding(
       }
     } else if (flow === "quickstart") {
       gatewayToken =
-        (quickstartTokenString ?? normalizeGatewayTokenInput(process.env.OPENCLAW_GATEWAY_TOKEN)) ||
+        (quickstartTokenString ?? normalizeGatewayTokenInput(process.env.BOT_GATEWAY_TOKEN)) ||
         randomToken();
       gatewayTokenInput = gatewayToken;
     } else {
@@ -213,9 +213,7 @@ export async function configureGatewayForOnboarding(
         message: "Gateway token (blank to generate)",
         placeholder: "Needed for multi-machine or non-loopback access",
         initialValue:
-          quickstartTokenString ??
-          normalizeGatewayTokenInput(process.env.OPENCLAW_GATEWAY_TOKEN) ??
-          "",
+          quickstartTokenString ?? normalizeGatewayTokenInput(process.env.BOT_GATEWAY_TOKEN) ?? "",
       });
       gatewayToken = normalizeGatewayTokenInput(tokenInput) || randomToken();
       gatewayTokenInput = gatewayToken;
@@ -240,10 +238,10 @@ export async function configureGatewayForOnboarding(
           provider: "gateway-auth-password",
           config: nextConfig,
           prompter,
-          preferredEnvVar: "OPENCLAW_GATEWAY_PASSWORD",
+          preferredEnvVar: "BOT_GATEWAY_PASSWORD",
           copy: {
             sourceMessage: "Where is this gateway password stored?",
-            envVarPlaceholder: "OPENCLAW_GATEWAY_PASSWORD",
+            envVarPlaceholder: "BOT_GATEWAY_PASSWORD",
           },
         });
         password = resolved.ref;

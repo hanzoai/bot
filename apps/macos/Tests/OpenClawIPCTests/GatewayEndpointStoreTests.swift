@@ -28,14 +28,14 @@ import Testing
 
     @Test func resolveGatewayTokenPrefersEnvAndFallsBackToLaunchd() {
         let snapshot = self.makeLaunchAgentSnapshot(
-            env: ["OPENCLAW_GATEWAY_TOKEN": "launchd-token"],
+            env: ["BOT_GATEWAY_TOKEN": "launchd-token"],
             token: "launchd-token",
             password: nil)
 
         let envToken = GatewayEndpointStore._testResolveGatewayToken(
             isRemote: false,
             root: [:],
-            env: ["OPENCLAW_GATEWAY_TOKEN": "env-token"],
+            env: ["BOT_GATEWAY_TOKEN": "env-token"],
             launchdSnapshot: snapshot)
         #expect(envToken == "env-token")
 
@@ -49,7 +49,7 @@ import Testing
 
     @Test func resolveGatewayTokenIgnoresLaunchdInRemoteMode() {
         let snapshot = self.makeLaunchAgentSnapshot(
-            env: ["OPENCLAW_GATEWAY_TOKEN": "launchd-token"],
+            env: ["BOT_GATEWAY_TOKEN": "launchd-token"],
             token: "launchd-token",
             password: nil)
 
@@ -63,7 +63,7 @@ import Testing
 
     @Test func resolveGatewayPasswordFallsBackToLaunchd() {
         let snapshot = self.makeLaunchAgentSnapshot(
-            env: ["OPENCLAW_GATEWAY_PASSWORD": "launchd-pass"],
+            env: ["BOT_GATEWAY_PASSWORD": "launchd-pass"],
             token: nil,
             password: "launchd-pass")
 

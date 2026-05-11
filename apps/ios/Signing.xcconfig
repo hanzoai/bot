@@ -12,14 +12,14 @@ BOT_SHARE_BUNDLE_ID = ai.bot.ios.share
 BOT_APP_PROFILE = ai.bot.ios Development
 BOT_SHARE_PROFILE = ai.bot.ios.share Development
 =======
-OPENCLAW_CODE_SIGN_STYLE = Manual
-OPENCLAW_DEVELOPMENT_TEAM = Y5PE65HELJ
+BOT_CODE_SIGN_STYLE = Manual
+BOT_DEVELOPMENT_TEAM = Y5PE65HELJ
 
-OPENCLAW_APP_BUNDLE_ID = ai.openclaw.ios
-OPENCLAW_SHARE_BUNDLE_ID = ai.openclaw.ios.share
+BOT_APP_BUNDLE_ID = ai.openclaw.ios
+BOT_SHARE_BUNDLE_ID = ai.openclaw.ios.share
 
-OPENCLAW_APP_PROFILE = ai.openclaw.ios Development
-OPENCLAW_SHARE_PROFILE = ai.openclaw.ios.share Development
+BOT_APP_PROFILE = ai.openclaw.ios Development
+BOT_SHARE_PROFILE = ai.openclaw.ios.share Development
 >>>>>>> upstream/main
 
 // Keep local includes after defaults: xcconfig is evaluated top-to-bottom,

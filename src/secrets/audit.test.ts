@@ -51,8 +51,8 @@ async function createAuditFixture(): Promise<AuditFixture> {
     authJsonPath,
     envPath,
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
+      BOT_STATE_DIR: stateDir,
+      BOT_CONFIG_PATH: configPath,
       OPENAI_API_KEY: "env-openai-key",
       PATH: resolveRuntimePathEnv(),
     },

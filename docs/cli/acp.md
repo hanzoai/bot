@@ -178,9 +178,9 @@ Learn more about session keys at [/concepts/session](/concepts/session).
 Security note:
 
 - `--token` and `--password` can be visible in local process listings on some systems.
-- Prefer `--token-file`/`--password-file` or environment variables (`OPENCLAW_GATEWAY_TOKEN`, `OPENCLAW_GATEWAY_PASSWORD`).
-- ACP runtime backend child processes receive `OPENCLAW_SHELL=acp`, which can be used for context-specific shell/profile rules.
-- `openclaw acp client` sets `OPENCLAW_SHELL=acp-client` on the spawned bridge process.
+- Prefer `--token-file`/`--password-file` or environment variables (`BOT_GATEWAY_TOKEN`, `BOT_GATEWAY_PASSWORD`).
+- ACP runtime backend child processes receive `BOT_SHELL=acp`, which can be used for context-specific shell/profile rules.
+- `openclaw acp client` sets `BOT_SHELL=acp-client` on the spawned bridge process.
 
 ### `acp client` options
 

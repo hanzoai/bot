@@ -1,8 +1,8 @@
 import type { Writable } from "node:stream";
-import type { GatewayService } from "../../daemon/service.js";
 import { loadConfig } from "../../config/config.js";
 import { resolveIsNixMode } from "../../config/paths.js";
 import { checkTokenDrift } from "../../daemon/service-audit.js";
+import type { GatewayService } from "../../daemon/service.js";
 import { renderSystemdUnavailableHints } from "../../daemon/systemd-hints.js";
 import { isSystemdUserServiceAvailable } from "../../daemon/systemd.js";
 import {
@@ -282,7 +282,7 @@ export async function runServiceRestart(params: {
     // Check for token drift before restart (service token vs config token)
     try {
       const command = await params.service.readCommand(process.env);
-      const serviceToken = command?.environment?.OPENCLAW_GATEWAY_TOKEN;
+      const serviceToken = command?.environment?.BOT_GATEWAY_TOKEN;
       const cfg = loadConfig();
       const configToken = resolveGatewayCredentialsFromConfig({
         cfg,

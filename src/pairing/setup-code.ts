@@ -1,6 +1,6 @@
 import os from "node:os";
-import type { BotConfig } from "../config/types.js";
 import { resolveGatewayPort } from "../config/paths.js";
+import type { BotConfig } from "../config/types.js";
 import {
   hasConfiguredSecretInput,
   normalizeSecretInputString,
@@ -167,11 +167,11 @@ function resolveAuth(cfg: BotConfig, env: NodeJS.ProcessEnv): ResolveAuthResult 
     defaults,
   }).ref;
   const token =
-    env.OPENCLAW_GATEWAY_TOKEN?.trim() ||
+    env.BOT_GATEWAY_TOKEN?.trim() ||
     env.CLAWDBOT_GATEWAY_TOKEN?.trim() ||
     (tokenRef ? undefined : normalizeSecretInputString(cfg.gateway?.auth?.token));
   const password =
-    env.OPENCLAW_GATEWAY_PASSWORD?.trim() ||
+    env.BOT_GATEWAY_PASSWORD?.trim() ||
     env.CLAWDBOT_GATEWAY_PASSWORD?.trim() ||
     (passwordRef ? undefined : normalizeSecretInputString(cfg.gateway?.auth?.password));
 
@@ -209,7 +209,7 @@ async function resolveGatewayTokenSecretRef(
     return cfg;
   }
   const hasTokenEnvCandidate = Boolean(
-    env.OPENCLAW_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim(),
+    env.BOT_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim(),
   );
   if (hasTokenEnvCandidate) {
     return cfg;
@@ -220,7 +220,7 @@ async function resolveGatewayTokenSecretRef(
   }
   if (mode !== "token") {
     const hasPasswordEnvCandidate = Boolean(
-      env.OPENCLAW_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
+      env.BOT_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
     );
     if (hasPasswordEnvCandidate) {
       return cfg;
@@ -259,7 +259,7 @@ async function resolveGatewayPasswordSecretRef(
     return cfg;
   }
   const hasPasswordEnvCandidate = Boolean(
-    env.OPENCLAW_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
+    env.BOT_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim(),
   );
   if (hasPasswordEnvCandidate) {
     return cfg;
@@ -270,7 +270,7 @@ async function resolveGatewayPasswordSecretRef(
   }
   if (mode !== "password") {
     const hasTokenCandidate =
-      Boolean(env.OPENCLAW_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim()) ||
+      Boolean(env.BOT_GATEWAY_TOKEN?.trim() || env.CLAWDBOT_GATEWAY_TOKEN?.trim()) ||
       hasConfiguredSecretInput(cfg.gateway?.auth?.token, cfg.secrets?.defaults);
     if (hasTokenCandidate) {
       return cfg;
