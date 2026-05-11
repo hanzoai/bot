@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { RuntimeEnv } from "../runtime.js";
 import { createWizardPrompter as buildWizardPrompter } from "../../test/helpers/wizard-prompter.js";
+import type { RuntimeEnv } from "../runtime.js";
 
 const runTui = vi.hoisted(() => vi.fn(async () => {}));
 const probeGatewayReachable = vi.hoisted(() => vi.fn(async () => ({ ok: true })));
@@ -112,8 +112,8 @@ describe("finalizeOnboardingWizard", () => {
   });
 
   it("resolves gateway password SecretRef for probe and TUI", async () => {
-    const previous = process.env.OPENCLAW_GATEWAY_PASSWORD;
-    process.env.OPENCLAW_GATEWAY_PASSWORD = "resolved-gateway-password";
+    const previous = process.env.BOT_GATEWAY_PASSWORD;
+    process.env.BOT_GATEWAY_PASSWORD = "resolved-gateway-password";
     const select = vi.fn(async (params: { message: string }) => {
       if (params.message === "How do you want to hatch your bot?") {
         return "tui";
@@ -144,7 +144,7 @@ describe("finalizeOnboardingWizard", () => {
               password: {
                 source: "env",
                 provider: "default",
-                id: "OPENCLAW_GATEWAY_PASSWORD",
+                id: "BOT_GATEWAY_PASSWORD",
               },
             },
           },
@@ -170,9 +170,9 @@ describe("finalizeOnboardingWizard", () => {
       });
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+        delete process.env.BOT_GATEWAY_PASSWORD;
       } else {
-        process.env.OPENCLAW_GATEWAY_PASSWORD = previous;
+        process.env.BOT_GATEWAY_PASSWORD = previous;
       }
     }
 
@@ -214,7 +214,7 @@ describe("finalizeOnboardingWizard", () => {
             token: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_GATEWAY_TOKEN",
+              id: "BOT_GATEWAY_TOKEN",
             },
           },
         },

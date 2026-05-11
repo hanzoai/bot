@@ -46,7 +46,7 @@ export async function resolveGatewayInstallToken(
       : cfg.gateway.auth.token.trim() || undefined;
   const explicitToken = options.explicitToken?.trim() || undefined;
   const envToken =
-    options.env.OPENCLAW_GATEWAY_TOKEN?.trim() || options.env.CLAWDBOT_GATEWAY_TOKEN?.trim();
+    options.env.BOT_GATEWAY_TOKEN?.trim() || options.env.CLAWDBOT_GATEWAY_TOKEN?.trim();
 
   if (hasAmbiguousGatewayAuthModeConfig(cfg)) {
     return {

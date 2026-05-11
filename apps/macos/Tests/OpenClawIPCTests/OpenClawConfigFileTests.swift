@@ -15,7 +15,7 @@ struct OpenClawConfigFileTests {
     func configPathRespectsEnvOverride() async {
         let override = makeConfigOverridePath()
 
-        await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
+        await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
             #expect(OpenClawConfigFile.url().path == override)
         }
     }
@@ -25,7 +25,7 @@ struct OpenClawConfigFileTests {
     func remoteGatewayPortParsesAndMatchesHost() async {
         let override = makeConfigOverridePath()
 
-        await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
+        await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
             OpenClawConfigFile.saveDict([
                 "gateway": [
                     "remote": [
@@ -45,7 +45,7 @@ struct OpenClawConfigFileTests {
     func setRemoteGatewayUrlPreservesScheme() async {
         let override = makeConfigOverridePath()
 
-        await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
+        await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
             OpenClawConfigFile.saveDict([
                 "gateway": [
                     "remote": [
@@ -65,7 +65,7 @@ struct OpenClawConfigFileTests {
     func clearRemoteGatewayUrlRemovesOnlyUrlField() async {
         let override = makeConfigOverridePath()
 
-        await TestIsolation.withEnvValues(["OPENCLAW_CONFIG_PATH": override]) {
+        await TestIsolation.withEnvValues(["BOT_CONFIG_PATH": override]) {
             OpenClawConfigFile.saveDict([
                 "gateway": [
                     "remote": [
@@ -89,8 +89,8 @@ struct OpenClawConfigFileTests {
             .path
 
         await TestIsolation.withEnvValues([
-            "OPENCLAW_CONFIG_PATH": nil,
-            "OPENCLAW_STATE_DIR": dir,
+            "BOT_CONFIG_PATH": nil,
+            "BOT_STATE_DIR": dir,
         ]) {
             #expect(OpenClawConfigFile.stateDirURL().path == dir)
             #expect(OpenClawConfigFile.url().path == "\(dir)/openclaw.json")
@@ -108,8 +108,8 @@ struct OpenClawConfigFileTests {
         defer { try? FileManager().removeItem(at: stateDir) }
 
         try await TestIsolation.withEnvValues([
-            "OPENCLAW_STATE_DIR": stateDir.path,
-            "OPENCLAW_CONFIG_PATH": configPath.path,
+            "BOT_STATE_DIR": stateDir.path,
+            "BOT_CONFIG_PATH": configPath.path,
         ]) {
             OpenClawConfigFile.saveDict([
                 "gateway": ["mode": "local"],

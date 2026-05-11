@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BotConfig } from "../config/config.js";
 import type { GatewayBonjourBeacon } from "../infra/bonjour-discovery.js";
-import type { WizardPrompter } from "../wizard/prompts.js";
 import { captureEnv } from "../test-utils/env.js";
+import type { WizardPrompter } from "../wizard/prompts.js";
 import { createWizardPrompter } from "./test-wizard-helpers.js";
 
 const discoverGatewayBeacons = vi.hoisted(() => vi.fn<() => Promise<GatewayBonjourBeacon[]>>());
@@ -40,7 +40,7 @@ function createSelectPrompter(
 }
 
 describe("promptRemoteGatewayConfig", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_ALLOW_INSECURE_PRIVATE_WS"]);
+  const envSnapshot = captureEnv(["BOT_ALLOW_INSECURE_PRIVATE_WS"]);
 
   async function runRemotePrompt(params: {
     text: WizardPrompter["text"];
@@ -132,8 +132,8 @@ describe("promptRemoteGatewayConfig", () => {
     expect(next.gateway?.remote?.token).toBeUndefined();
   });
 
-  it("allows ws:// hostname remote URLs when OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1", async () => {
-    process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS = "1";
+  it("allows ws:// hostname remote URLs when BOT_ALLOW_INSECURE_PRIVATE_WS=1", async () => {
+    process.env.BOT_ALLOW_INSECURE_PRIVATE_WS = "1";
     const text: WizardPrompter["text"] = vi.fn(async (params) => {
       if (params.message === "Gateway WebSocket URL") {
         expect(params.validate?.("ws://openclaw-gateway.ai:18789")).toBeUndefined();
@@ -154,13 +154,13 @@ describe("promptRemoteGatewayConfig", () => {
   });
 
   it("supports storing remote auth as an external env secret ref", async () => {
-    process.env.OPENCLAW_GATEWAY_TOKEN = "remote-token-value";
+    process.env.BOT_GATEWAY_TOKEN = "remote-token-value";
     const text: WizardPrompter["text"] = vi.fn(async (params) => {
       if (params.message === "Gateway WebSocket URL") {
         return "wss://remote.example.com:18789";
       }
       if (params.message === "Environment variable name") {
-        return "OPENCLAW_GATEWAY_TOKEN";
+        return "BOT_GATEWAY_TOKEN";
       }
       return "";
     }) as WizardPrompter["text"];
@@ -192,7 +192,7 @@ describe("promptRemoteGatewayConfig", () => {
     expect(next.gateway?.remote?.token).toEqual({
       source: "env",
       provider: "default",
-      id: "OPENCLAW_GATEWAY_TOKEN",
+      id: "BOT_GATEWAY_TOKEN",
     });
   });
 });

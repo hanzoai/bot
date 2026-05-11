@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import type { BrowserServerState } from "./server-context.js";
 import { appendCdpPath, getHeadersWithAuth } from "./cdp.helpers.js";
 import { __test } from "./client-fetch.js";
 import { resolveBrowserConfig, resolveProfile } from "./config.js";
@@ -9,6 +8,7 @@ import {
   stopChromeExtensionRelayServer,
 } from "./extension-relay.js";
 import { toBoolean } from "./routes/utils.js";
+import type { BrowserServerState } from "./server-context.js";
 import { listKnownProfileNames } from "./server-context.js";
 import { resolveTargetIdFromTabs } from "./target-id.js";
 import { getFreePort } from "./test-port.js";
@@ -175,8 +175,8 @@ describe("cdp.helpers", () => {
   it("adds relay header for known relay ports", async () => {
     const port = await getFreePort();
     const cdpUrl = `http://127.0.0.1:${port}`;
-    const prev = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "test-gateway-token";
+    const prev = process.env.BOT_GATEWAY_TOKEN;
+    process.env.BOT_GATEWAY_TOKEN = "test-gateway-token";
     try {
       await ensureChromeExtensionRelayServer({ cdpUrl });
       const headers = getHeadersWithAuth(`${cdpUrl}/json/version`);
@@ -185,9 +185,9 @@ describe("cdp.helpers", () => {
     } finally {
       await stopChromeExtensionRelayServer({ cdpUrl }).catch(() => {});
       if (prev === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.BOT_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = prev;
+        process.env.BOT_GATEWAY_TOKEN = prev;
       }
     }
   });

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { WizardPrompter } from "../wizard/prompts.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
+import type { WizardPrompter } from "../wizard/prompts.js";
 import { applyAuthChoiceHuggingface } from "./auth-choice.apply.huggingface.js";
 import {
   createAuthTestLifecycle,
@@ -44,8 +44,8 @@ async function runHuggingfaceApply(
 
 describe("applyAuthChoiceHuggingface", () => {
   const lifecycle = createAuthTestLifecycle([
-    "OPENCLAW_STATE_DIR",
-    "OPENCLAW_AGENT_DIR",
+    "BOT_STATE_DIR",
+    "BOT_AGENT_DIR",
     "PI_CODING_AGENT_DIR",
     "HF_TOKEN",
     "HUGGINGFACE_HUB_TOKEN",

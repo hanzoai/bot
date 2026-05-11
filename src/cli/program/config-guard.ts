@@ -1,7 +1,7 @@
-import type { RuntimeEnv } from "../../runtime.js";
 import { loadAndMaybeMigrateDoctorConfig } from "../../commands/doctor-config-flow.js";
 import { readConfigFileSnapshot } from "../../config/config.js";
 import { formatConfigIssueLines } from "../../config/issue-format.js";
+import type { RuntimeEnv } from "../../runtime.js";
 import { colorize, isRich, theme } from "../../terminal/theme.js";
 import { shortenHomePath } from "../../utils.js";
 import { shouldMigrateStateFromPath } from "../argv.js";
@@ -55,17 +55,17 @@ export async function ensureConfigReady(params: {
       await runDoctorConfigFlow();
     } else {
       const originalStdoutWrite = process.stdout.write.bind(process.stdout);
-      const originalSuppressNotes = process.env.OPENCLAW_SUPPRESS_NOTES;
+      const originalSuppressNotes = process.env.BOT_SUPPRESS_NOTES;
       process.stdout.write = (() => true) as unknown as typeof process.stdout.write;
-      process.env.OPENCLAW_SUPPRESS_NOTES = "1";
+      process.env.BOT_SUPPRESS_NOTES = "1";
       try {
         await runDoctorConfigFlow();
       } finally {
         process.stdout.write = originalStdoutWrite;
         if (originalSuppressNotes === undefined) {
-          delete process.env.OPENCLAW_SUPPRESS_NOTES;
+          delete process.env.BOT_SUPPRESS_NOTES;
         } else {
-          process.env.OPENCLAW_SUPPRESS_NOTES = originalSuppressNotes;
+          process.env.BOT_SUPPRESS_NOTES = originalSuppressNotes;
         }
       }
     }
