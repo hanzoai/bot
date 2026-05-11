@@ -1,16 +1,16 @@
 import type { BotConfig } from "../config/config.js";
 import type { SecretInput } from "../config/types.secrets.js";
-import type { GatewayBonjourBeacon } from "../infra/bonjour-discovery.js";
-import type { WizardPrompter } from "../wizard/prompts.js";
-import type { SecretInputMode } from "./onboard-types.js";
 import { isSecureWebSocketUrl } from "../gateway/net.js";
+import type { GatewayBonjourBeacon } from "../infra/bonjour-discovery.js";
 import { discoverGatewayBeacons } from "../infra/bonjour-discovery.js";
 import { resolveWideAreaDiscoveryDomain } from "../infra/widearea-dns.js";
+import type { WizardPrompter } from "../wizard/prompts.js";
 import {
   promptSecretRefForOnboarding,
   resolveSecretInputModeForEnvSelection,
 } from "./auth-choice.apply-helpers.js";
 import { detectBinary } from "./onboard-helpers.js";
+import type { SecretInputMode } from "./onboard-types.js";
 
 const DEFAULT_GATEWAY_URL = "ws://127.0.0.1:18789";
 
@@ -43,12 +43,12 @@ function validateGatewayWebSocketUrl(value: string): string | undefined {
   }
   if (
     !isSecureWebSocketUrl(trimmed, {
-      allowPrivateWs: process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1",
+      allowPrivateWs: process.env.BOT_ALLOW_INSECURE_PRIVATE_WS === "1",
     })
   ) {
     return (
       "Use wss:// for remote hosts, or ws://127.0.0.1/localhost via SSH tunnel. " +
-      "Break-glass: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1 for trusted private networks."
+      "Break-glass: BOT_ALLOW_INSECURE_PRIVATE_WS=1 for trusted private networks."
     );
   }
   return undefined;
@@ -179,10 +179,10 @@ export async function promptRemoteGatewayConfig(
         provider: "gateway-remote-token",
         config: cfg,
         prompter,
-        preferredEnvVar: "OPENCLAW_GATEWAY_TOKEN",
+        preferredEnvVar: "BOT_GATEWAY_TOKEN",
         copy: {
           sourceMessage: "Where is this gateway token stored?",
-          envVarPlaceholder: "OPENCLAW_GATEWAY_TOKEN",
+          envVarPlaceholder: "BOT_GATEWAY_TOKEN",
         },
       });
       token = resolved.ref;
@@ -211,10 +211,10 @@ export async function promptRemoteGatewayConfig(
         provider: "gateway-remote-password",
         config: cfg,
         prompter,
-        preferredEnvVar: "OPENCLAW_GATEWAY_PASSWORD",
+        preferredEnvVar: "BOT_GATEWAY_PASSWORD",
         copy: {
           sourceMessage: "Where is this gateway password stored?",
-          envVarPlaceholder: "OPENCLAW_GATEWAY_PASSWORD",
+          envVarPlaceholder: "BOT_GATEWAY_PASSWORD",
         },
       });
       password = resolved.ref;

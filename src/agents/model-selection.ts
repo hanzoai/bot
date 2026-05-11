@@ -1,9 +1,9 @@
 import type { BotConfig } from "../config/config.js";
-import type { ModelCatalogEntry } from "./model-catalog.js";
 import { resolveAgentModelPrimaryValue, toAgentModelListLike } from "../config/model-input.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { resolveAgentConfig, resolveAgentEffectiveModelPrimary } from "./agent-scope.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "./defaults.js";
+import type { ModelCatalogEntry } from "./model-catalog.js";
 import { splitTrailingAuthProfile } from "./model-ref-profile.js";
 import { normalizeGoogleModelId } from "./models-config.providers.js";
 
@@ -287,11 +287,14 @@ export function resolveConfiguredModelRef(params: {
   defaultProvider: string;
   defaultModel: string;
 }): ModelRef {
-  // Allow env override: HANZO_MODEL="hanzo/claude-sonnet-4-6" (or OPENCLAW_DEFAULT_MODEL_REF) takes priority
-  const envModelRef = typeof process !== "undefined"
-    ? (process.env.HANZO_MODEL ?? process.env.OPENCLAW_DEFAULT_MODEL_REF)
-    : undefined;
-  const rawModel = envModelRef?.trim() || (resolveAgentModelPrimaryValue(params.cfg.agents?.defaults?.model) ?? "");
+  // Allow env override: HANZO_MODEL="hanzo/claude-sonnet-4-6" (or BOT_DEFAULT_MODEL_REF) takes priority
+  const envModelRef =
+    typeof process !== "undefined"
+      ? (process.env.HANZO_MODEL ?? process.env.BOT_DEFAULT_MODEL_REF)
+      : undefined;
+  const rawModel =
+    envModelRef?.trim() ||
+    (resolveAgentModelPrimaryValue(params.cfg.agents?.defaults?.model) ?? "");
   if (rawModel) {
     const trimmed = rawModel.trim();
     const aliasIndex = buildModelAliasIndex({

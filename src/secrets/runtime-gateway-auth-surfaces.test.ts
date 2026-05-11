@@ -43,7 +43,7 @@ describe("evaluateGatewayAuthSurfaceStates", () => {
           },
         },
       } as BotConfig,
-      { OPENCLAW_GATEWAY_TOKEN: "env-token" } as NodeJS.ProcessEnv,
+      { BOT_GATEWAY_TOKEN: "env-token" } as NodeJS.ProcessEnv,
     );
 
     expect(states["gateway.auth.token"]).toMatchObject({
@@ -96,7 +96,7 @@ describe("evaluateGatewayAuthSurfaceStates", () => {
           },
         },
       } as BotConfig,
-      { OPENCLAW_GATEWAY_TOKEN: "env-token" } as NodeJS.ProcessEnv,
+      { BOT_GATEWAY_TOKEN: "env-token" } as NodeJS.ProcessEnv,
     );
 
     expect(states["gateway.auth.password"]).toMatchObject({

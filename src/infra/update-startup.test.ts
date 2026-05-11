@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { UpdateCheckResult } from "./update-check.js";
 import { captureEnv } from "../test-utils/env.js";
+import type { UpdateCheckResult } from "./update-check.js";
 
 vi.mock("./openclaw-root.js", () => ({
   resolveOpenClawPackageRoot: vi.fn(),
@@ -64,8 +64,8 @@ describe("update-startup", () => {
     vi.setSystemTime(new Date("2026-01-17T10:00:00Z"));
     tempDir = path.join(suiteRoot, `case-${++suiteCase}`);
     await fs.mkdir(tempDir);
-    envSnapshot = captureEnv(["OPENCLAW_STATE_DIR", "NODE_ENV", "VITEST"]);
-    process.env.OPENCLAW_STATE_DIR = tempDir;
+    envSnapshot = captureEnv(["BOT_STATE_DIR", "NODE_ENV", "VITEST"]);
+    process.env.BOT_STATE_DIR = tempDir;
 
     process.env.NODE_ENV = "test";
 
@@ -403,7 +403,7 @@ describe("update-startup", () => {
       expect.objectContaining({
         timeoutMs: 45 * 60 * 1000,
         env: expect.objectContaining({
-          OPENCLAW_AUTO_UPDATE: "1",
+          BOT_AUTO_UPDATE: "1",
         }),
       }),
     );

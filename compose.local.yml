@@ -81,9 +81,9 @@ services:
       NODE_ENV: development
       TERM: xterm-256color
       # Auth
-      OPENCLAW_GATEWAY_TOKEN: local-dev-token
+      BOT_GATEWAY_TOKEN: local-dev-token
       # Config file with controlUi.allowedOrigins
-      OPENCLAW_CONFIG_PATH: /etc/bot/config.json
+      BOT_CONFIG_PATH: /etc/bot/config.json
       # Model providers — set at least one to enable chat
       HANZO_API_KEY: "hk-0d2eb9cfafd049389f2904cad770a9d8"
       # ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
