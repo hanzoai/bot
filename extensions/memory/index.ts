@@ -91,11 +91,13 @@ registerBackend("sqlite", async (cfg) => {
 // the "all interfaces supported" contract — listBackends() shows them
 // all, you only install what you need.
 const ADVERTISED: Record<string, string> = {
+  // Native Hanzo stack — ZAP transport + hanzo-consensus + zapdb storage.
+  // No libSQL / Turso — we ship our own at luxfi/database and luxcpp/zapdb.
   qdrant: "@hanzo/bot-memory-qdrant", // vector ANN at scale, fork at ~/work/hanzo/vector
   meilisearch: "@hanzo/bot-memory-meilisearch", // keyword FTS at scale, fork at ~/work/hanzo/search
   postgres: "@hanzo/bot-memory-postgres", // multi-tenant team brain w/ pgvector
   lancedb: "@hanzo/bot-memory-lancedb", // already shipped — embedded vector DB
-  libsql: "@hanzo/bot-memory-libsql", // multi-replica solo (Turso / sqld)
+  luxdb: "@hanzo/bot-memory-luxdb", // luxfi/database — canonical Go store over zapdb
   replicate: "@hanzo/bot-memory-replicate", // SQLite WAL → S3 backup, ~/work/hanzo/replicate
   vfs: "@hanzo/bot-memory-vfs", // S3 streaming block FS, ~/work/hanzo/vfs
 };
