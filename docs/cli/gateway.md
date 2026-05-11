@@ -45,8 +45,8 @@ Notes:
 - `--port <port>`: WebSocket port (default comes from config/env; usually `18789`).
 - `--bind <loopback|lan|tailnet|auto|custom>`: listener bind mode.
 - `--auth <token|password>`: auth mode override.
-- `--token <token>`: token override (also sets `OPENCLAW_GATEWAY_TOKEN` for the process).
-- `--password <password>`: password override (also sets `OPENCLAW_GATEWAY_PASSWORD` for the process).
+- `--token <token>`: token override (also sets `BOT_GATEWAY_TOKEN` for the process).
+- `--password <password>`: password override (also sets `BOT_GATEWAY_PASSWORD` for the process).
 - `--tailscale <off|serve|funnel>`: expose the Gateway via Tailscale.
 - `--tailscale-reset-on-exit`: reset Tailscale serve/funnel config on shutdown.
 - `--allow-unconfigured`: allow gateway start without `gateway.mode=local` in config.
@@ -169,7 +169,7 @@ Notes:
 - `gateway install` supports `--port`, `--runtime`, `--token`, `--force`, `--json`.
 - When token auth requires a token and `gateway.auth.token` is SecretRef-managed, `gateway install` validates that the SecretRef is resolvable but does not persist the resolved token into service environment metadata.
 - If token auth requires a token and the configured token SecretRef is unresolved, install fails closed instead of persisting fallback plaintext.
-- In inferred auth mode, shell-only `OPENCLAW_GATEWAY_PASSWORD`/`CLAWDBOT_GATEWAY_PASSWORD` does not relax install token requirements; use durable config (`gateway.auth.password` or config `env`) when installing a managed service.
+- In inferred auth mode, shell-only `BOT_GATEWAY_PASSWORD`/`CLAWDBOT_GATEWAY_PASSWORD` does not relax install token requirements; use durable config (`gateway.auth.password` or config `env`) when installing a managed service.
 - If both `gateway.auth.token` and `gateway.auth.password` are configured and `gateway.auth.mode` is unset, install is blocked until mode is set explicitly.
 - Lifecycle commands accept `--json` for scripting.
 

@@ -46,7 +46,7 @@ describe("getReplyFromConfig typing (heartbeat)", () => {
   }
 
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
   });
 
   it("starts typing for normal runs", async () => {

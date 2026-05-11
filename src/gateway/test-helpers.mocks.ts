@@ -8,11 +8,11 @@ import type { MsgContext } from "../auto-reply/templating.js";
 import type { GetReplyOptions, ReplyPayload } from "../auto-reply/types.js";
 import type { ChannelPlugin, ChannelOutboundAdapter } from "../channels/plugins/types.js";
 import type { BotConfig } from "../config/config.js";
+import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import type { AgentBinding } from "../config/types.agents.js";
 import type { HooksConfig } from "../config/types.hooks.js";
 import type { TailscaleWhoisIdentity } from "../infra/tailscale.js";
 import type { PluginRegistry } from "../plugins/registry.js";
-import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { DEFAULT_ACCOUNT_ID } from "../routing/session-key.js";
 
@@ -202,7 +202,7 @@ const testConfigRoot = {
 
 export const setTestConfigRoot = (root: string) => {
   testConfigRoot.value = root;
-  process.env.OPENCLAW_CONFIG_PATH = path.join(root, "openclaw.json");
+  process.env.BOT_CONFIG_PATH = path.join(root, "openclaw.json");
 };
 
 export const testTailnetIPv4 = hoisted.testTailnetIPv4;
@@ -608,7 +608,7 @@ vi.mock("../plugins/loader.js", async () => {
   };
 });
 
-process.env.OPENCLAW_SKIP_CHANNELS = "1";
-process.env.OPENCLAW_SKIP_CRON = "1";
-process.env.OPENCLAW_SKIP_CHANNELS = "1";
-process.env.OPENCLAW_SKIP_CRON = "1";
+process.env.BOT_SKIP_CHANNELS = "1";
+process.env.BOT_SKIP_CRON = "1";
+process.env.BOT_SKIP_CHANNELS = "1";
+process.env.BOT_SKIP_CRON = "1";

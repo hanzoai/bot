@@ -1,5 +1,4 @@
 import type { BotConfig } from "../config/config.js";
-import type { RuntimeEnv } from "../runtime.js";
 import { resolveGatewayPort } from "../config/config.js";
 import { isValidEnvSecretRefId, type SecretInput } from "../config/types.secrets.js";
 import {
@@ -9,6 +8,7 @@ import {
   TAILSCALE_MISSING_BIN_NOTE_LINES,
 } from "../gateway/gateway-config-prompts.shared.js";
 import { findTailscaleBinary } from "../infra/tailscale.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { resolveDefaultSecretProviderAlias } from "../secrets/ref-contract.js";
 import { validateIPv4AddressInput } from "../shared/net/ipv4.js";
 import { note } from "../terminal/note.js";
@@ -192,12 +192,12 @@ export async function promptGatewayConfig(
       const envVar = guardCancel(
         await text({
           message: "Gateway token env var",
-          initialValue: "OPENCLAW_GATEWAY_TOKEN",
-          placeholder: "OPENCLAW_GATEWAY_TOKEN",
+          initialValue: "BOT_GATEWAY_TOKEN",
+          placeholder: "BOT_GATEWAY_TOKEN",
           validate: (value) => {
             const candidate = String(value ?? "").trim();
             if (!isValidEnvSecretRefId(candidate)) {
-              return "Use an env var name like OPENCLAW_GATEWAY_TOKEN.";
+              return "Use an env var name like BOT_GATEWAY_TOKEN.";
             }
             const resolved = process.env[candidate]?.trim();
             if (!resolved) {

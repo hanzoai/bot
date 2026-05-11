@@ -1,16 +1,13 @@
-import type { CliDeps } from "../cli/deps.js";
-import type { loadConfig } from "../config/config.js";
-import type { HeartbeatRunner } from "../infra/heartbeat-runner.js";
-import type { ChannelHealthMonitor } from "./channel-health-monitor.js";
-import type { ChannelKind } from "./config-reload-plan.js";
-import type { GatewayReloadPlan } from "./config-reload.js";
 import { getActiveEmbeddedRunCount } from "../agents/pi-embedded-runner/runs.js";
 import { getTotalPendingReplies } from "../auto-reply/reply/dispatcher-registry.js";
+import type { CliDeps } from "../cli/deps.js";
 import { resolveAgentMaxConcurrent, resolveSubagentMaxConcurrent } from "../config/agent-limits.js";
 import { isRestartEnabled } from "../config/commands.js";
+import type { loadConfig } from "../config/config.js";
 import { startGmailWatcherWithLogs } from "../hooks/gmail-watcher-lifecycle.js";
 import { stopGmailWatcher } from "../hooks/gmail-watcher.js";
 import { isTruthyEnvValue } from "../infra/env.js";
+import type { HeartbeatRunner } from "../infra/heartbeat-runner.js";
 import { resetDirectoryCache } from "../infra/outbound/target-resolver.js";
 import {
   deferGatewayRestartUntilIdle,
@@ -19,6 +16,9 @@ import {
 } from "../infra/restart.js";
 import { setCommandLaneConcurrency, getTotalQueueSize } from "../process/command-queue.js";
 import { CommandLane } from "../process/lanes.js";
+import type { ChannelHealthMonitor } from "./channel-health-monitor.js";
+import type { ChannelKind } from "./config-reload-plan.js";
+import type { GatewayReloadPlan } from "./config-reload.js";
 import { resolveHooksConfig } from "./hooks.js";
 import { startBrowserControlServerIfEnabled } from "./server-browser.js";
 import { buildGatewayCronService, type GatewayCronState } from "./server-cron.js";
@@ -107,17 +107,17 @@ export function createGatewayReloadHandlers(params: {
         cfg: nextConfig,
         log: params.logHooks,
         onSkipped: () =>
-          params.logHooks.info("skipping gmail watcher restart (OPENCLAW_SKIP_GMAIL_WATCHER=1)"),
+          params.logHooks.info("skipping gmail watcher restart (BOT_SKIP_GMAIL_WATCHER=1)"),
       });
     }
 
     if (plan.restartChannels.size > 0) {
       if (
-        isTruthyEnvValue(process.env.OPENCLAW_SKIP_CHANNELS) ||
-        isTruthyEnvValue(process.env.OPENCLAW_SKIP_PROVIDERS)
+        isTruthyEnvValue(process.env.BOT_SKIP_CHANNELS) ||
+        isTruthyEnvValue(process.env.BOT_SKIP_PROVIDERS)
       ) {
         params.logChannels.info(
-          "skipping channel reload (OPENCLAW_SKIP_CHANNELS=1 or OPENCLAW_SKIP_PROVIDERS=1)",
+          "skipping channel reload (BOT_SKIP_CHANNELS=1 or BOT_SKIP_PROVIDERS=1)",
         );
       } else {
         const restartChannel = async (name: ChannelKind) => {

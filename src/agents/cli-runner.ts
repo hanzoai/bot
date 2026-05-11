@@ -1,8 +1,7 @@
 import type { ImageContent } from "@mariozechner/pi-ai";
+import { resolveHeartbeatPrompt } from "../auto-reply/heartbeat.js";
 import type { ThinkLevel } from "../auto-reply/thinking.js";
 import type { BotConfig } from "../config/config.js";
-import type { EmbeddedPiRunResult } from "./pi-embedded-runner.js";
-import { resolveHeartbeatPrompt } from "../auto-reply/heartbeat.js";
 import { shouldLogVerbose } from "../globals.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { requestHeartbeatNow } from "../infra/heartbeat-wake.js";
@@ -43,6 +42,7 @@ import {
   resolveBootstrapPromptTruncationWarningMode,
   resolveBootstrapTotalMaxChars,
 } from "./pi-embedded-helpers.js";
+import type { EmbeddedPiRunResult } from "./pi-embedded-runner.js";
 import { buildSystemPromptReport } from "./system-prompt-report.js";
 import { redactRunIdentifier, resolveRunWorkspaceDir } from "./workspace-run.js";
 
@@ -248,7 +248,7 @@ export async function runCliAgent(params: {
         log.info(
           `cli exec: provider=${params.provider} model=${normalizedModel} promptChars=${params.prompt.length}`,
         );
-        const logOutputText = isTruthyEnvValue(process.env.OPENCLAW_CLAUDE_CLI_LOG_OUTPUT);
+        const logOutputText = isTruthyEnvValue(process.env.BOT_CLAUDE_CLI_LOG_OUTPUT);
         if (logOutputText) {
           const logArgs: string[] = [];
           for (let i = 0; i < args.length; i += 1) {
