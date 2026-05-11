@@ -2,8 +2,16 @@
  * Hanzo Brain — Memory
  *
  * Pluggable memory layer. SQLite by default — single file at
- * `~/.hanzo-bot/brain/brain.db`, zero infra, ships in the same static
- * binary as the rest of the bot.
+ * `~/.hanzo/brain/brain.db` (shared with hanzo-mcp, hanzo-dev, and any
+ * other Hanzo SDK on the same machine), zero infra, ships in the same
+ * static binary as the rest of the bot.
+ *
+ * Canonical scale-out backends (register via @hanzo/bot-memory-* sibling
+ * extensions, not in core):
+ *   • qdrant       — vector ANN at scale (`~/work/hanzo/vector` fork)
+ *   • meilisearch  — fast keyword FTS at scale (`~/work/hanzo/search` fork)
+ *   • replicate    — SQLite WAL → S3 backup (`~/work/hanzo/replicate`)
+ *   • vfs          — S3-backed streaming block FS (`~/work/hanzo/vfs`)
  *
  * Third parties can plug in their own backend (Postgres, LanceDB, D1,
  * libSQL, etc.) by calling `registerBackend("name", factory)` from
@@ -50,7 +58,7 @@ export interface SearchHit {
 
 export interface MemoryConfig {
   backend?: string; // registered backend name. default: "sqlite"
-  dataDir?: string; // default ~/.hanzo-bot/brain
+  dataDir?: string; // default ~/.hanzo/brain
   dbPath?: string; // explicit file path; overrides dataDir
   embeddingModel?: string;
   embeddingApiKey?: string;
@@ -75,6 +83,33 @@ registerBackend("sqlite", async (cfg) => {
   const { SqliteStore } = await import("./sqlite.js");
   return new SqliteStore(cfg);
 });
+
+// Advertise canonical scale-out backends. Each is shipped as its own
+// sibling extension (out-of-tree to keep the bot binary small); calling
+// `open({ backend: "<name>" })` without the sibling installed throws a
+// helpful install message rather than failing at lookup time. This is
+// the "all interfaces supported" contract — listBackends() shows them
+// all, you only install what you need.
+const ADVERTISED: Record<string, string> = {
+  qdrant: "@hanzo/bot-memory-qdrant", // vector ANN at scale, fork at ~/work/hanzo/vector
+  meilisearch: "@hanzo/bot-memory-meilisearch", // keyword FTS at scale, fork at ~/work/hanzo/search
+  postgres: "@hanzo/bot-memory-postgres", // multi-tenant team brain w/ pgvector
+  lancedb: "@hanzo/bot-memory-lancedb", // already shipped — embedded vector DB
+  libsql: "@hanzo/bot-memory-libsql", // multi-replica solo (Turso / sqld)
+  replicate: "@hanzo/bot-memory-replicate", // SQLite WAL → S3 backup, ~/work/hanzo/replicate
+  vfs: "@hanzo/bot-memory-vfs", // S3 streaming block FS, ~/work/hanzo/vfs
+};
+
+for (const [name, pkg] of Object.entries(ADVERTISED)) {
+  if (!BACKENDS.has(name)) {
+    registerBackend(name, () => {
+      throw new Error(
+        `memory: backend "${name}" not installed. Run \`pnpm add ${pkg}\` ` +
+          `(or any registerBackend("${name}", factory) caller) to enable.`,
+      );
+    });
+  }
+}
 
 // ── Open ────────────────────────────────────────────────────────────
 

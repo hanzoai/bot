@@ -4,7 +4,7 @@
   "uiHints": {
     "memory.url": {
       "label": "Brain storage URL",
-      "placeholder": "(leave empty for ~/.hanzo-bot/brain/brain.db SQLite)",
+      "placeholder": "(leave empty for ~/.hanzo/brain/brain.db SQLite)",
       "help": "Postgres URL or path. Empty → embedded SQLite single-binary mode."
     },
     "memory.embeddingModel": {
