@@ -15,7 +15,7 @@ enabled = true
 [plugins.brain.memory]
 # Optional. Defaults below.
 # backend = "sqlite"
-# dbPath  = "~/.hanzo-bot/brain/brain.db"
+# dbPath  = "~/.hanzo/brain/brain.db"
 
 [plugins.brain.graph]
 enabled = true        # zero-LLM typed-link extraction on every page write
@@ -31,7 +31,7 @@ Then run the bot — solo dev or multi-tenant, same binary:
 hanzo-bot serve
 ```
 
-Drop markdown into `~/.hanzo-bot/workspace/`. Edges auto-extract. Facts queryable via the `brain.recall` and `brain.search` MCP tools.
+Drop markdown into `~/.hanzo/workspace/`. Edges auto-extract. Facts queryable via the `brain.recall` and `brain.search` MCP tools.
 
 ## What lives inside
 
@@ -55,7 +55,7 @@ Drop markdown into `~/.hanzo-bot/workspace/`. Edges auto-extract. Facts queryabl
    (SQLite)   (regex)       (YAML loader)
         │         │           │
         ▼         ▼           ▼
-   ~/.hanzo-bot/brain/brain.db (one file, the brain)
+   ~/.hanzo/brain/brain.db (one file, the brain)
 ```
 
 ## MCP tools exposed
