@@ -151,7 +151,7 @@ export class GatewayChatClient {
       token: connection.token,
       password: connection.password,
       clientName: GATEWAY_CLIENT_NAMES.GATEWAY_CLIENT,
-      clientDisplayName: "openclaw-tui",
+      clientDisplayName: "bot-tui",
       clientVersion: VERSION,
       platform: process.platform,
       mode: GATEWAY_CLIENT_MODES.UI,

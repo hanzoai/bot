@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { SkillEntry } from "./skills/types.js";
 import { withEnv } from "../test-utils/env.js";
 import { buildWorkspaceSkillStatus } from "./skills-status.js";
+import type { SkillEntry } from "./skills/types.js";
 
 function makeEntry(params: {
   name: string;
@@ -22,7 +22,7 @@ function makeEntry(params: {
     skill: {
       name: params.name,
       description: `desc:${params.name}`,
-      source: params.source ?? "openclaw-workspace",
+      source: params.source ?? "bot-workspace",
       filePath: `/tmp/${params.name}/SKILL.md`,
       baseDir: `/tmp/${params.name}`,
       disableModelInvocation: false,
@@ -93,7 +93,7 @@ describe("buildWorkspaceSkillStatus", () => {
   it("marks bundled skills blocked by allowlist", async () => {
     const entry = makeEntry({
       name: "peekaboo",
-      source: "openclaw-bundled",
+      source: "bot-bundled",
     });
 
     const report = buildWorkspaceSkillStatus("/tmp/ws", {

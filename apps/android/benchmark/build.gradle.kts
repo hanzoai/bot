@@ -4,11 +4,7 @@ plugins {
 }
 
 android {
-<<<<<<< HEAD
     namespace = "ai.hanzo.bot.android.benchmark"
-=======
-    namespace = "ai.openclaw.android.benchmark"
->>>>>>> upstream/main
     compileSdk = 36
 
     defaultConfig {

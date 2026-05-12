@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-IMAGE_NAME="openclaw-onboard-e2e"
+IMAGE_NAME="hanzo-bot-onboard-e2e"
 
 echo "Building Docker image..."
 docker build -t "$IMAGE_NAME" -f "$ROOT_DIR/scripts/e2e/Dockerfile" "$ROOT_DIR"
@@ -26,9 +26,9 @@ docker run --rm -t "$IMAGE_NAME" bash -lc '
 	  export BOT_ENTRY
 
   # Provide a minimal trash shim to avoid noisy "missing trash" logs in containers.
-  export PATH="/tmp/openclaw-bin:$PATH"
-  mkdir -p /tmp/openclaw-bin
-  cat > /tmp/openclaw-bin/trash <<'"'"'TRASH'"'"'
+  export PATH="/tmp/hanzo-bot-bin:$PATH"
+  mkdir -p /tmp/hanzo-bot-bin
+  cat > /tmp/hanzo-bot-bin/trash <<'"'"'TRASH'"'"'
 #!/usr/bin/env bash
 set -euo pipefail
 trash_dir="$HOME/.Trash"
@@ -43,7 +43,7 @@ for target in "$@"; do
   mv "$target" "$dest"
 done
 TRASH
-  chmod +x /tmp/openclaw-bin/trash
+  chmod +x /tmp/hanzo-bot-bin/trash
 
   send() {
     local payload="$1"
@@ -160,11 +160,11 @@ TRASH
     local validate_fn="${6:-}"
 
     echo "== Wizard case: $case_name =="
-    set_isolated_openclaw_env "$home_dir"
+    set_isolated_bot_env "$home_dir"
 
-    input_fifo="$(mktemp -u "/tmp/openclaw-onboard-${case_name}.XXXXXX")"
+    input_fifo="$(mktemp -u "/tmp/hanzo-bot-onboard-${case_name}.XXXXXX")"
     mkfifo "$input_fifo"
-    local log_path="/tmp/openclaw-onboard-${case_name}.log"
+    local log_path="/tmp/hanzo-bot-onboard-${case_name}.log"
     WIZARD_LOG_PATH="$log_path"
     export WIZARD_LOG_PATH
     # Run under script to keep an interactive TTY for clack prompts.
@@ -211,15 +211,15 @@ TRASH
 	  }
 
   make_home() {
-    mktemp -d "/tmp/openclaw-e2e-$1.XXXXXX"
+    mktemp -d "/tmp/hanzo-bot-e2e-$1.XXXXXX"
   }
 
-  set_isolated_openclaw_env() {
+  set_isolated_bot_env() {
     local home_dir="$1"
     export HOME="$home_dir"
     export BOT_HOME="$home_dir"
-    export BOT_STATE_DIR="$home_dir/.openclaw"
-    export BOT_CONFIG_PATH="$BOT_STATE_DIR/openclaw.json"
+    export BOT_STATE_DIR="$home_dir/.hanzo-bot"
+    export BOT_CONFIG_PATH="$BOT_STATE_DIR/hanzo-bot.json"
     mkdir -p "$BOT_STATE_DIR"
   }
 
@@ -293,7 +293,7 @@ TRASH
   run_case_local_basic() {
     local home_dir
     home_dir="$(make_home local-basic)"
-    set_isolated_openclaw_env "$home_dir"
+    set_isolated_bot_env "$home_dir"
     node "$BOT_ENTRY" onboard \
 	      --non-interactive \
 	      --accept-risk \
@@ -368,7 +368,7 @@ NODE
   run_case_remote_non_interactive() {
     local home_dir
     home_dir="$(make_home remote-non-interactive)"
-    set_isolated_openclaw_env "$home_dir"
+    set_isolated_bot_env "$home_dir"
 	    # Smoke test non-interactive remote config write.
 	    node "$BOT_ENTRY" onboard --non-interactive --accept-risk \
 	      --mode remote \
@@ -410,7 +410,7 @@ NODE
   run_case_reset() {
     local home_dir
     home_dir="$(make_home reset-config)"
-    set_isolated_openclaw_env "$home_dir"
+    set_isolated_bot_env "$home_dir"
     # Seed a remote config to exercise reset path.
 	    cat > "$BOT_CONFIG_PATH" <<'"'"'JSON'"'"'
 {
@@ -505,7 +505,7 @@ NODE
   run_case_skills() {
     local home_dir
     home_dir="$(make_home skills)"
-    set_isolated_openclaw_env "$home_dir"
+    set_isolated_bot_env "$home_dir"
     # Seed skills config to ensure it survives the wizard.
 	    cat > "$BOT_CONFIG_PATH" <<'"'"'JSON'"'"'
 {

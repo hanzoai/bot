@@ -9,7 +9,7 @@ import { __testing, loadBotPlugins } from "./loader.js";
 
 type TempPlugin = { dir: string; file: string; id: string };
 
-const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-"));
+const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-plugin-"));
 let tempDirIndex = 0;
 const prevBundledDir = process.env.BOT_BUNDLED_PLUGINS_DIR;
 const EMPTY_PLUGIN_SCHEMA = { type: "object", additionalProperties: false, properties: {} };
@@ -56,7 +56,7 @@ function writePlugin(params: {
   const file = path.join(dir, filename);
   fs.writeFileSync(file, params.body, "utf-8");
   fs.writeFileSync(
-    path.join(dir, "openclaw.plugin.json"),
+    path.join(dir, "bot.plugin.json"),
     JSON.stringify(
       {
         id: params.id,
@@ -105,7 +105,7 @@ function loadBundledMemoryPluginRegistry(options?: {
           name: options.packageMeta.name,
           version: options.packageMeta.version,
           description: options.packageMeta.description,
-          openclaw: { extensions: [`./${pluginFilename}`] },
+          bot: { extensions: [`./${pluginFilename}`] },
         },
         null,
         2,
@@ -207,7 +207,7 @@ function createEscapingEntryFixture(params: { id: string; sourceBody: string }) 
   const linkedEntry = path.join(pluginDir, "entry.cjs");
   fs.writeFileSync(outsideEntry, params.sourceBody, "utf-8");
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "bot.plugin.json"),
     JSON.stringify(
       {
         id: params.id,
@@ -916,7 +916,7 @@ describe("loadBotPlugins", () => {
       body: `module.exports = { id: "memory-b", kind: "memory", register() {} };`,
     });
     fs.writeFileSync(
-      path.join(memoryADir, "openclaw.plugin.json"),
+      path.join(memoryADir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "memory-a",
@@ -929,7 +929,7 @@ describe("loadBotPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(memoryBDir, "openclaw.plugin.json"),
+      path.join(memoryBDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "memory-b",
