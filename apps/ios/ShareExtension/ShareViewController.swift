@@ -1,9 +1,5 @@
 import Foundation
-<<<<<<< HEAD
 import BotKit
-=======
-import OpenClawKit
->>>>>>> upstream/main
 import os
 import UIKit
 import UniformTypeIdentifiers
@@ -21,11 +17,7 @@ final class ShareViewController: UIViewController {
         var attachments: [ShareAttachment]
     }
 
-<<<<<<< HEAD
     private let logger = Logger(subsystem: "ai.hanzo.ios", category: "ShareExtension")
-=======
-    private let logger = Logger(subsystem: "ai.openclaw.ios", category: "ShareExtension")
->>>>>>> upstream/main
     private var statusLabel: UILabel?
     private let draftTextView = UITextView()
     private let sendButton = UIButton(type: .system)
@@ -57,11 +49,7 @@ final class ShareViewController: UIViewController {
         self.draftTextView.textContainerInset = UIEdgeInsets(top: 12, left: 10, bottom: 12, right: 10)
 
         self.sendButton.translatesAutoresizingMaskIntoConstraints = false
-<<<<<<< HEAD
         self.sendButton.setTitle("Send to Bot", for: .normal)
-=======
-        self.sendButton.setTitle("Send to OpenClaw", for: .normal)
->>>>>>> upstream/main
         self.sendButton.titleLabel?.font = .preferredFont(forTextStyle: .headline)
         self.sendButton.addTarget(self, action: #selector(self.handleSendTap), for: .touchUpInside)
         self.sendButton.isEnabled = false
@@ -144,21 +132,13 @@ final class ShareViewController: UIViewController {
             self.sendButton.isEnabled = false
             self.cancelButton.isEnabled = false
         }
-<<<<<<< HEAD
         self.showStatus("Sending to Bot gateway…")
-=======
-        self.showStatus("Sending to OpenClaw gateway…")
->>>>>>> upstream/main
         ShareGatewayRelaySettings.saveLastEvent("Sending to gateway…")
         do {
             try await self.sendMessageToGateway(trimmed, attachments: self.pendingAttachments)
             ShareGatewayRelaySettings.saveLastEvent(
                 "Sent to gateway (\(trimmed.count) chars, \(self.pendingAttachments.count) attachment(s)).")
-<<<<<<< HEAD
             self.showStatus("Sent to Bot.")
-=======
-            self.showStatus("Sent to OpenClaw.")
->>>>>>> upstream/main
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                 self.extensionContext?.completeRequest(returningItems: nil)
             }
@@ -177,7 +157,6 @@ final class ShareViewController: UIViewController {
     private func sendMessageToGateway(_ message: String, attachments: [ShareAttachment]) async throws {
         guard let config = ShareGatewayRelaySettings.loadConfig() else {
             throw NSError(
-<<<<<<< HEAD
                 domain: "BotShare",
                 code: 10,
                 userInfo: [NSLocalizedDescriptionKey: "Bot is not connected to a gateway yet."])
@@ -185,15 +164,6 @@ final class ShareViewController: UIViewController {
         guard let url = URL(string: config.gatewayURLString) else {
             throw NSError(
                 domain: "BotShare",
-=======
-                domain: "OpenClawShare",
-                code: 10,
-                userInfo: [NSLocalizedDescriptionKey: "OpenClaw is not connected to a gateway yet."])
-        }
-        guard let url = URL(string: config.gatewayURLString) else {
-            throw NSError(
-                domain: "OpenClawShare",
->>>>>>> upstream/main
                 code: 11,
                 userInfo: [NSLocalizedDescriptionKey: "Invalid saved gateway URL."])
         }
@@ -211,11 +181,7 @@ final class ShareViewController: UIViewController {
                 permissions: [:],
                 clientId: clientId,
                 clientMode: "node",
-<<<<<<< HEAD
                 clientDisplayName: "Bot Share",
-=======
-                clientDisplayName: "OpenClaw Share",
->>>>>>> upstream/main
                 includeDeviceIdentity: false)
         }
 
@@ -224,11 +190,7 @@ final class ShareViewController: UIViewController {
                 url: url,
                 token: config.token,
                 password: config.password,
-<<<<<<< HEAD
                 connectOptions: makeOptions("bot-ios"),
-=======
-                connectOptions: makeOptions("openclaw-ios"),
->>>>>>> upstream/main
                 sessionBox: nil,
                 onConnected: {},
                 onDisconnected: { _ in },
@@ -236,11 +198,7 @@ final class ShareViewController: UIViewController {
                     BridgeInvokeResponse(
                         id: req.id,
                         ok: false,
-<<<<<<< HEAD
                         error: BotNodeError(
-=======
-                        error: OpenClawNodeError(
->>>>>>> upstream/main
                             code: .invalidRequest,
                             message: "share extension does not support node invoke"))
                 })
@@ -259,11 +217,7 @@ final class ShareViewController: UIViewController {
                     BridgeInvokeResponse(
                         id: req.id,
                         ok: false,
-<<<<<<< HEAD
                         error: BotNodeError(
-=======
-                        error: OpenClawNodeError(
->>>>>>> upstream/main
                             code: .invalidRequest,
                             message: "share extension does not support node invoke"))
                 })
@@ -302,11 +256,7 @@ final class ShareViewController: UIViewController {
         let data = try JSONEncoder().encode(params)
         guard let json = String(data: data, encoding: .utf8) else {
             throw NSError(
-<<<<<<< HEAD
                 domain: "BotShare",
-=======
-                domain: "OpenClawShare",
->>>>>>> upstream/main
                 code: 12,
                 userInfo: [NSLocalizedDescriptionKey: "Failed to encode chat payload."])
         }
@@ -317,11 +267,7 @@ final class ShareViewController: UIViewController {
         let eventData = try JSONEncoder().encode(NodeEventParams(event: "agent.request", payloadJSON: json))
         guard let nodeEventParams = String(data: eventData, encoding: .utf8) else {
             throw NSError(
-<<<<<<< HEAD
                 domain: "BotShare",
-=======
-                domain: "OpenClawShare",
->>>>>>> upstream/main
                 code: 13,
                 userInfo: [NSLocalizedDescriptionKey: "Failed to encode node event payload."])
         }

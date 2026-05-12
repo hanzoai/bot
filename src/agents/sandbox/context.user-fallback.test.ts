@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { SandboxDockerConfig } from "./types.js";
 import { resolveSandboxDockerUser } from "./context.js";
+import type { SandboxDockerConfig } from "./types.js";
 
 const baseDocker: SandboxDockerConfig = {
   image: "ghcr.io/example/sandbox:latest",
-  containerPrefix: "openclaw-sandbox-",
+  containerPrefix: "bot-sandbox-",
   workdir: "/workspace",
   readOnlyRoot: true,
   tmpfs: ["/tmp"],

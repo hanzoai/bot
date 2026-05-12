@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { SandboxDockerConfig } from "./types.js";
 import { computeSandboxBrowserConfigHash, computeSandboxConfigHash } from "./config-hash.js";
+import type { SandboxDockerConfig } from "./types.js";
 
 function createDockerConfig(overrides?: Partial<SandboxDockerConfig>): SandboxDockerConfig {
   return {
-    image: "openclaw-sandbox:test",
-    containerPrefix: "openclaw-sbx-",
+    image: "bot-sandbox:test",
+    containerPrefix: "bot-sbx-",
     workdir: "/workspace",
     readOnlyRoot: true,
     tmpfs: ["/tmp", "/var/tmp", "/run"],

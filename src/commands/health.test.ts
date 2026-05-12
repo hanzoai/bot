@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { HealthSummary } from "./health.js";
 import { stripAnsi } from "../terminal/ansi.js";
 import { formatHealthCheckFailure } from "./health-format.js";
+import type { HealthSummary } from "./health.js";
 import { formatHealthChannelLines, healthCommand } from "./health.js";
 
 const runtime = {
@@ -171,7 +171,7 @@ describe("formatHealthCheckFailure", () => {
         "gateway closed (1006 abnormal closure (no close frame)): no close reason",
         "Gateway target: ws://127.0.0.1:19001",
         "Source: local loopback",
-        "Config: /Users/steipete/.openclaw-dev/openclaw.json",
+        "Config: /Users/steipete/.bot-dev/bot.json",
         "Bind: loopback",
       ].join("\n"),
     );
@@ -181,7 +181,7 @@ describe("formatHealthCheckFailure", () => {
         "Health check failed: gateway closed (1006 abnormal closure (no close frame)): no close reason",
         "  Gateway target: ws://127.0.0.1:19001",
         "  Source: local loopback",
-        "  Config: /Users/steipete/.openclaw-dev/openclaw.json",
+        "  Config: /Users/steipete/.bot-dev/bot.json",
         "  Bind: loopback",
       ].join("\n"),
     );

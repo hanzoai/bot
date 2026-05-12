@@ -1,12 +1,8 @@
-import type { IncomingMessage, ServerResponse } from "node:http";
 import * as fs from "node:fs/promises";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import * as os from "node:os";
 import * as path from "node:path";
 import { describe, expect, it, test, vi } from "vitest";
-import type { RequestFrame } from "./protocol/index.js";
-import type { GatewayClient as GatewayMethodClient } from "./server-methods/types.js";
-import type { GatewayRequestContext, RespondFn } from "./server-methods/types.js";
-import type { GatewayWsClient } from "./server/ws-types.js";
 import { defaultVoiceWakeTriggers } from "../infra/voicewake.js";
 import { GatewayClient } from "./client.js";
 import { handleControlUiHttpRequest } from "./control-ui.js";
@@ -14,11 +10,15 @@ import {
   DEFAULT_DANGEROUS_NODE_COMMANDS,
   resolveNodeCommandAllowlist,
 } from "./node-command-policy.js";
+import type { RequestFrame } from "./protocol/index.js";
 import { createGatewayBroadcaster } from "./server-broadcast.js";
 import { createChatRunRegistry } from "./server-chat.js";
 import { handleNodeInvokeResult } from "./server-methods/nodes.handlers.invoke-result.js";
+import type { GatewayClient as GatewayMethodClient } from "./server-methods/types.js";
+import type { GatewayRequestContext, RespondFn } from "./server-methods/types.js";
 import { createNodeSubscriptionManager } from "./server-node-subscriptions.js";
 import { formatError, normalizeVoiceWakeTriggers } from "./server-utils.js";
+import type { GatewayWsClient } from "./server/ws-types.js";
 
 function makeControlUiResponse() {
   const res = {
@@ -50,7 +50,7 @@ describe("GatewayClient", () => {
     params: { faviconSvg?: string; indexHtml?: string },
     run: (tmp: string) => Promise<void>,
   ) {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ui-"));
     try {
       await fs.writeFile(path.join(tmp, "index.html"), params.indexHtml ?? "<html></html>\n");
       if (typeof params.faviconSvg === "string") {

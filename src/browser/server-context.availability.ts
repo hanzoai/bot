@@ -1,9 +1,3 @@
-import type { ResolvedBrowserProfile } from "./config.js";
-import type {
-  BrowserServerState,
-  ContextOptions,
-  ProfileRuntimeState,
-} from "./server-context.types.js";
 import {
   PROFILE_ATTACH_RETRY_TIMEOUT_MS,
   PROFILE_POST_RESTART_WS_TIMEOUT_MS,
@@ -12,9 +6,10 @@ import {
 import {
   isChromeCdpReady,
   isChromeReachable,
-  launchOpenClawChrome,
-  stopOpenClawChrome,
+  launchHanzoBotChrome,
+  stopHanzoBotChrome,
 } from "./chrome.js";
+import type { ResolvedBrowserProfile } from "./config.js";
 import {
   ensureChromeExtensionRelayServer,
   stopChromeExtensionRelayServer,
@@ -25,6 +20,11 @@ import {
   CDP_READY_AFTER_LAUNCH_POLL_MS,
   CDP_READY_AFTER_LAUNCH_WINDOW_MS,
 } from "./server-context.constants.js";
+import type {
+  BrowserServerState,
+  ContextOptions,
+  ProfileRuntimeState,
+} from "./server-context.types.js";
 
 type AvailabilityDeps = {
   opts: ContextOptions;
@@ -81,7 +81,7 @@ export function createProfileAvailability({
   };
 
   const waitForCdpReadyAfterLaunch = async (): Promise<void> => {
-    // launchOpenClawChrome() can return before Chrome is fully ready to serve /json/version + CDP WS.
+    // launchHanzoBotChrome() can return before Chrome is fully ready to serve /json/version + CDP WS.
     // If a follow-up call races ahead, we can hit PortInUseError trying to launch again on the same port.
     const deadlineMs = Date.now() + CDP_READY_AFTER_LAUNCH_WINDOW_MS;
     while (Date.now() < deadlineMs) {
@@ -143,12 +143,12 @@ export function createProfileAvailability({
             : `Browser attachOnly is enabled and profile "${profile.name}" is not running.`,
         );
       }
-      const launched = await launchOpenClawChrome(current.resolved, profile);
+      const launched = await launchHanzoBotChrome(current.resolved, profile);
       attachRunning(launched);
       try {
         await waitForCdpReadyAfterLaunch();
       } catch (err) {
-        await stopOpenClawChrome(launched).catch(() => {});
+        await stopHanzoBotChrome(launched).catch(() => {});
         setProfileRunning(null);
         throw err;
       }
@@ -179,15 +179,15 @@ export function createProfileAvailability({
     // HTTP responds but WebSocket fails - port in use by something else.
     if (!profileState.running) {
       throw new Error(
-        `Port ${profile.cdpPort} is in use for profile "${profile.name}" but not by openclaw. ` +
+        `Port ${profile.cdpPort} is in use for profile "${profile.name}" but not by bot. ` +
           `Run action=reset-profile profile=${profile.name} to kill the process.`,
       );
     }
 
-    await stopOpenClawChrome(profileState.running);
+    await stopHanzoBotChrome(profileState.running);
     setProfileRunning(null);
 
-    const relaunched = await launchOpenClawChrome(current.resolved, profile);
+    const relaunched = await launchHanzoBotChrome(current.resolved, profile);
     attachRunning(relaunched);
 
     if (!(await isReachable(PROFILE_POST_RESTART_WS_TIMEOUT_MS))) {
@@ -208,7 +208,7 @@ export function createProfileAvailability({
     if (!profileState.running) {
       return { stopped: false };
     }
-    await stopOpenClawChrome(profileState.running);
+    await stopHanzoBotChrome(profileState.running);
     setProfileRunning(null);
     return { stopped: true };
   };

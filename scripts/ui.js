@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/ui.js — replaced after the legacy Lit "openclaw-control-ui"
+// scripts/ui.js — replaced after the legacy Lit "bot-control-ui"
 // was retired in favor of the Hanzo GUI v7 admin SPA at
 // ~/work/hanzo/gui/apps/admin-bot. The bot is the Node-runtime
 // exception in the Hanzo binary contract (see HANZO_BINARY.md).

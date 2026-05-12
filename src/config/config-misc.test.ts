@@ -12,11 +12,11 @@ import { BotSchema } from "./zod-schema.js";
 describe("$schema key in config (#14998)", () => {
   it("accepts config with $schema string", () => {
     const result = BotSchema.safeParse({
-      $schema: "https://openclaw.ai/config.json",
+      $schema: "https://bot.ai/config.json",
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.$schema).toBe("https://openclaw.ai/config.json");
+      expect(result.data.$schema).toBe("https://bot.ai/config.json");
     }
   });
 

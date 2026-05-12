@@ -1,8 +1,8 @@
-import type { BotConfig, PluginRuntime } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import type { BotConfig, PluginRuntime } from "@hanzo/bot/plugin-sdk/bluebubbles";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sendBlueBubblesMedia } from "./media-send.js";
 import { setBlueBubblesRuntime } from "./runtime.js";
@@ -65,7 +65,7 @@ function createConfig(overrides?: Record<string, unknown>): BotConfig {
 }
 
 async function makeTempDir(): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bb-media-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-bb-media-"));
   tempDirs.push(dir);
   return dir;
 }

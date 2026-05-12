@@ -138,7 +138,7 @@ export async function open(cfg: MemoryConfig = {}): Promise<BrainStore> {
   return store;
 }
 
-// ── OpenClaw plugin contract ────────────────────────────────────────
+// ── HanzoBot plugin contract ────────────────────────────────────────
 
 export interface MemoryApi {
   store: BrainStore;

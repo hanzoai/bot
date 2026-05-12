@@ -143,7 +143,7 @@ function expectSecurityConnectError(
     }),
   );
   const error = onConnectError.mock.calls[0]?.[0] as Error;
-  expect(error.message).toContain("openclaw doctor --fix");
+  expect(error.message).toContain("bot doctor --fix");
   if (params?.expectTailscaleHint) {
     expect(error.message).toContain("Tailscale Serve/Funnel");
   }
@@ -233,7 +233,7 @@ describe("GatewayClient security checks", () => {
     process.env.BOT_ALLOW_INSECURE_PRIVATE_WS = "1";
     const onConnectError = vi.fn();
     const client = new GatewayClient({
-      url: "ws://openclaw-gateway.ai:18789",
+      url: "ws://bot-gateway.ai:18789",
       onConnectError,
     });
 
