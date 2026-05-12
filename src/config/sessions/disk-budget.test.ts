@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { SessionEntry } from "./types.js";
 import { formatSessionArchiveTimestamp } from "./artifacts.js";
 import { enforceSessionDiskBudget } from "./disk-budget.js";
+import type { SessionEntry } from "./types.js";
 
 const createdDirs: string[] = [];
 
@@ -21,7 +21,7 @@ afterEach(async () => {
 
 describe("enforceSessionDiskBudget", () => {
   it("does not treat referenced transcripts with marker-like session IDs as archived artifacts", async () => {
-    const dir = await createCaseDir("openclaw-disk-budget-");
+    const dir = await createCaseDir("bot-disk-budget-");
     const storePath = path.join(dir, "sessions.json");
     const sessionId = "keep.deleted.keep";
     const activeKey = "agent:main:main";
@@ -55,7 +55,7 @@ describe("enforceSessionDiskBudget", () => {
   });
 
   it("removes true archived transcript artifacts while preserving referenced primary transcripts", async () => {
-    const dir = await createCaseDir("openclaw-disk-budget-");
+    const dir = await createCaseDir("bot-disk-budget-");
     const storePath = path.join(dir, "sessions.json");
     const sessionId = "keep";
     const transcriptPath = path.join(dir, `${sessionId}.jsonl`);

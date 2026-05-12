@@ -7,19 +7,19 @@
  * Returns: { "ok": true, "response": "Hi!" }
  */
 
-import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
-import { loadConfig } from "../config/config.js";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { resolveSessionAgentId } from "../agents/agent-scope.js";
 import { dispatchInboundMessage } from "../auto-reply/dispatch.js";
 import { createReplyDispatcher } from "../auto-reply/reply/reply-dispatcher.js";
-import { createReplyPrefixOptions } from "../channels/reply-prefix.js";
-import { resolveSessionAgentId } from "../agents/agent-scope.js";
-import { INTERNAL_MESSAGE_CHANNEL } from "../utils/message-channel.js";
 import type { MsgContext } from "../auto-reply/templating.js";
-import { sendJson } from "./http-common.js";
-import type { ResolvedGatewayAuth } from "./auth.js";
+import { createReplyPrefixOptions } from "../channels/reply-prefix.js";
+import { loadConfig } from "../config/config.js";
+import { INTERNAL_MESSAGE_CHANNEL } from "../utils/message-channel.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
+import type { ResolvedGatewayAuth } from "./auth.js";
 import { readJsonBody } from "./hooks.js";
+import { sendJson } from "./http-common.js";
 
 const MAX_BODY_BYTES = 512 * 1024;
 const DEFAULT_TIMEOUT_MS = 120_000;
@@ -27,7 +27,7 @@ const DEFAULT_TIMEOUT_MS = 120_000;
 export async function handleChatBridgeHttpRequest(
   req: IncomingMessage,
   res: ServerResponse,
-  opts: {
+  _opts: {
     auth: ResolvedGatewayAuth;
     trustedProxies?: string[];
     allowRealIpFallback?: boolean;
@@ -51,10 +51,7 @@ export async function handleChatBridgeHttpRequest(
   }
 }
 
-async function handleChatBridge(
-  req: IncomingMessage,
-  res: ServerResponse,
-): Promise<boolean> {
+async function handleChatBridge(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
   // Read body
   const bodyResult = await readJsonBody(req, MAX_BODY_BYTES);
   if (!bodyResult.ok) {
@@ -62,15 +59,15 @@ async function handleChatBridge(
     return true;
   }
 
-  const body = bodyResult.value as Record<string, unknown>;
-  const message = String(body.message ?? "").trim();
+  const body = bodyResult.value as Record<string, string | undefined>;
+  const message = (body.message ?? "").trim();
   if (!message) {
     sendJson(res, 400, { ok: false, error: "message is required" });
     return true;
   }
 
-  const nodeId = String(body.nodeId ?? "");
-  const sessionKey = String(body.sessionKey || (nodeId ? `${nodeId}:main` : ""));
+  const nodeId = body.nodeId ?? "";
+  const sessionKey = body.sessionKey || (nodeId ? `${nodeId}:main` : "");
   if (!sessionKey) {
     sendJson(res, 400, { ok: false, error: "sessionKey or nodeId is required" });
     return true;
@@ -86,7 +83,7 @@ async function handleChatBridge(
     try {
       const { getWalletBalance } = await import("../gateway/billing/iam-billing-client.js");
       const walletBalance = await getWalletBalance(walletBotId);
-      if (walletBalance >= 0 && walletBalance <= 0) {
+      if (walletBalance == 0) {
         sendJson(res, 402, {
           ok: false,
           error: "Bot wallet has insufficient funds. Fund your bot wallet to continue.",
@@ -117,7 +114,7 @@ async function handleChatBridge(
   };
 
   const agentId = resolveSessionAgentId({ sessionKey, config: cfg });
-  const { onModelSelected, ...prefixOptions } = createReplyPrefixOptions({
+  const { onModelSelected: _onModelSelected, ...prefixOptions } = createReplyPrefixOptions({
     cfg,
     agentId,
     channel: INTERNAL_MESSAGE_CHANNEL,
@@ -136,9 +133,13 @@ async function handleChatBridge(
       console.error("[chat-bridge] dispatch error:", err);
     },
     deliver: async (payload, info) => {
-      if (info.kind !== "final") return;
+      if (info.kind !== "final") {
+        return;
+      }
       const text = payload.text?.trim() ?? "";
-      if (text) parts.push(text);
+      if (text) {
+        parts.push(text);
+      }
     },
   });
 

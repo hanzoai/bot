@@ -52,7 +52,7 @@ describe("applyAuthChoiceHuggingface", () => {
   ]);
 
   async function setupTempState() {
-    const env = await setupAuthTestEnv("openclaw-hf-");
+    const env = await setupAuthTestEnv("bot-hf-");
     lifecycle.setStateDir(env.stateDir);
     return env.agentDir;
   }
