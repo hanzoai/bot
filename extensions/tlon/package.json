@@ -1,7 +1,7 @@
 {
   "name": "@hanzo/bot-tlon",
   "version": "1.4.2",
-  "description": "OpenClaw Tlon/Urbit channel plugin",
+  "description": "HanzoBot Tlon/Urbit channel plugin",
   "type": "module",
   "dependencies": {
     "@tloncorp/api": "git+https://github.com/tloncorp/api-beta.git#7eede1c1a756977b09f96aa14a92e2b06318ae87",
@@ -10,7 +10,7 @@
     "@urbit/http-api": "^3.0.0",
     "zod": "^4.3.6"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ],

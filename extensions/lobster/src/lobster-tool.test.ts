@@ -1,9 +1,9 @@
-import type { BotPluginApi, OpenClawPluginToolContext } from "@hanzo/bot/plugin-sdk/lobster";
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
+import type { BotPluginApi, HanzoBotPluginToolContext } from "@hanzo/bot/plugin-sdk/lobster";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createWindowsCmdShimFixture,
@@ -53,7 +53,7 @@ function fakeApi(overrides: Partial<BotPluginApi> = {}): BotPluginApi {
   };
 }
 
-function fakeCtx(overrides: Partial<OpenClawPluginToolContext> = {}): OpenClawPluginToolContext {
+function fakeCtx(overrides: Partial<HanzoBotPluginToolContext> = {}): HanzoBotPluginToolContext {
   return {
     config: {},
     workspaceDir: "/tmp",
@@ -74,7 +74,7 @@ describe("lobster plugin tool", () => {
   beforeAll(async () => {
     ({ createLobsterTool } = await import("./lobster-tool.js"));
 
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-lobster-plugin-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lobster-plugin-"));
   });
 
   afterEach(() => {
@@ -298,7 +298,7 @@ describe("lobster plugin tool", () => {
 
   it("can be gated off in sandboxed contexts", async () => {
     const api = fakeApi();
-    const factoryTool = (ctx: OpenClawPluginToolContext) => {
+    const factoryTool = (ctx: HanzoBotPluginToolContext) => {
       if (ctx.sandboxed) {
         return null;
       }

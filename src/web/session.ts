@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import fsSync from "node:fs";
 import {
   DisconnectReason,
   fetchLatestBaileysVersion,
@@ -5,8 +7,6 @@ import {
   makeWASocket,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
-import { randomUUID } from "node:crypto";
-import fsSync from "node:fs";
 import qrcode from "qrcode-terminal";
 import { formatCliCommand } from "../cli/command-format.js";
 import { danger, success } from "../globals.js";
@@ -113,7 +113,7 @@ export async function createWaSocket(
     version,
     logger,
     printQRInTerminal: false,
-    browser: ["openclaw", "cli", VERSION],
+    browser: ["bot", "cli", VERSION],
     syncFullHistory: false,
     markOnlineOnConnect: false,
   });
@@ -135,9 +135,7 @@ export async function createWaSocket(
           const status = getStatusCode(lastDisconnect?.error);
           if (status === DisconnectReason.loggedOut) {
             console.error(
-              danger(
-                `WhatsApp session logged out. Run: ${formatCliCommand("openclaw channels login")}`,
-              ),
+              danger(`WhatsApp session logged out. Run: ${formatCliCommand("bot channels login")}`),
             );
           }
         }

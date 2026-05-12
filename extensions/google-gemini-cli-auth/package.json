@@ -2,9 +2,9 @@
   "name": "@hanzo/bot-google-gemini-cli-auth",
   "version": "1.4.2",
   "private": true,
-  "description": "OpenClaw Gemini CLI OAuth provider plugin",
+  "description": "HanzoBot Gemini CLI OAuth provider plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

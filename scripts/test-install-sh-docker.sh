@@ -2,10 +2,10 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SMOKE_IMAGE="${BOT_INSTALL_SMOKE_IMAGE:-${CLAWDBOT_INSTALL_SMOKE_IMAGE:-openclaw-install-smoke:local}}"
-NONROOT_IMAGE="${BOT_INSTALL_NONROOT_IMAGE:-${CLAWDBOT_INSTALL_NONROOT_IMAGE:-openclaw-install-nonroot:local}}"
-INSTALL_URL="${BOT_INSTALL_URL:-${CLAWDBOT_INSTALL_URL:-https://openclaw.bot/install.sh}}"
-CLI_INSTALL_URL="${BOT_INSTALL_CLI_URL:-${CLAWDBOT_INSTALL_CLI_URL:-https://openclaw.bot/install-cli.sh}}"
+SMOKE_IMAGE="${BOT_INSTALL_SMOKE_IMAGE:-${CLAWDBOT_INSTALL_SMOKE_IMAGE:-hanzo-bot-install-smoke:local}}"
+NONROOT_IMAGE="${BOT_INSTALL_NONROOT_IMAGE:-${CLAWDBOT_INSTALL_NONROOT_IMAGE:-hanzo-bot-install-nonroot:local}}"
+INSTALL_URL="${BOT_INSTALL_URL:-${CLAWDBOT_INSTALL_URL:-https://hanzo-bot.bot/install.sh}}"
+CLI_INSTALL_URL="${BOT_INSTALL_CLI_URL:-${CLAWDBOT_INSTALL_CLI_URL:-https://hanzo-bot.bot/install-cli.sh}}"
 SKIP_NONROOT="${BOT_INSTALL_SMOKE_SKIP_NONROOT:-${CLAWDBOT_INSTALL_SMOKE_SKIP_NONROOT:-0}}"
 LATEST_DIR="$(mktemp -d)"
 LATEST_FILE="${LATEST_DIR}/latest"

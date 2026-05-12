@@ -1,5 +1,19 @@
 import type { ChatType } from "../channels/chat-type.js";
 
+export type DIDConfig = {
+  uri: string;
+  method: "hanzo" | "lux" | "pars" | "zoo" | "ai";
+  chainId: number;
+};
+
+export type WalletConfig = {
+  chain: "lux" | "hanzo" | "zoo" | "pars";
+  chainId: number;
+  derivationPath: string;
+  address?: string;
+  safeAddress?: string;
+};
+
 export type ReplyMode = "text" | "command";
 export type TypingMode = "never" | "instant" | "thinking" | "message";
 export type SessionScope = "per-sender" | "global";
@@ -119,7 +133,7 @@ export type SessionConfig = {
   typingMode?: TypingMode;
   /**
    * Max parent transcript token count allowed for thread/session forking.
-   * If parent totalTokens is above this value, OpenClaw skips parent fork and
+   * If parent totalTokens is above this value, HanzoBot skips parent fork and
    * starts a fresh thread session instead. Set to 0 to disable this guard.
    */
   parentForkMaxTokens?: number;

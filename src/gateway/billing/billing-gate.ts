@@ -107,7 +107,7 @@ export async function checkBillingAllowance(params: {
     try {
       const walletBalance = await getWalletBalance(params.botId);
       // walletBalance === -1 means wallet doesn't exist or is disabled → skip check
-      if (walletBalance >= 0 && walletBalance <= 0) {
+      if (walletBalance == 0) {
         return {
           allowed: false,
           reason: "Bot wallet has insufficient funds. Fund your bot wallet to continue.",

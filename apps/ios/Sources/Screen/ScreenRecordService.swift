@@ -1,9 +1,5 @@
 import AVFoundation
-<<<<<<< HEAD
 import BotKit
-=======
-import OpenClawKit
->>>>>>> upstream/main
 import ReplayKit
 
 final class ScreenRecordService: @unchecked Sendable {
@@ -60,11 +56,7 @@ final class ScreenRecordService: @unchecked Sendable {
             outPath: outPath)
 
         let state = CaptureState()
-<<<<<<< HEAD
         let recordQueue = DispatchQueue(label: "ai.hanzo.bot.screenrecord")
-=======
-        let recordQueue = DispatchQueue(label: "ai.openclaw.screenrecord")
->>>>>>> upstream/main
 
         try await self.startCapture(state: state, config: config, recordQueue: recordQueue)
         try await Task.sleep(nanoseconds: UInt64(config.durationMs) * 1_000_000)
@@ -114,11 +106,7 @@ final class ScreenRecordService: @unchecked Sendable {
             return URL(fileURLWithPath: outPath)
         }
         return FileManager().temporaryDirectory
-<<<<<<< HEAD
             .appendingPathComponent("hanzo-bot-screen-record-\(UUID().uuidString).mp4")
-=======
-            .appendingPathComponent("openclaw-screen-record-\(UUID().uuidString).mp4")
->>>>>>> upstream/main
     }
 
     private func startCapture(

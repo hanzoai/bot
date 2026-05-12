@@ -94,7 +94,7 @@ function resolveProfileStateDir(
   homedir: () => string,
 ): string {
   const suffix = profile.toLowerCase() === "default" ? "" : `-${profile}`;
-  return path.join(resolveRequiredHomeDir(env as NodeJS.ProcessEnv, homedir), `.openclaw${suffix}`);
+  return path.join(resolveRequiredHomeDir(env as NodeJS.ProcessEnv, homedir), `.bot${suffix}`);
 }
 
 export function applyCliProfileEnv(params: {
@@ -118,7 +118,7 @@ export function applyCliProfileEnv(params: {
   }
 
   if (!env.BOT_CONFIG_PATH?.trim()) {
-    env.BOT_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+    env.BOT_CONFIG_PATH = path.join(stateDir, "bot.json");
   }
 
   if (profile === "dev" && !env.BOT_GATEWAY_PORT?.trim()) {
