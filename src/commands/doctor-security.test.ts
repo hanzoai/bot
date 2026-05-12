@@ -133,7 +133,7 @@ describe("noteSecurityWarnings gateway exposure", () => {
     const message = lastMessage();
     expect(message).toContain("disables approval forwarding only");
     expect(message).toContain("exec-approvals.json");
-    expect(message).toContain("openclaw approvals get --gateway");
+    expect(message).toContain("bot approvals get --gateway");
   });
 
   it("warns when heartbeat delivery relies on implicit directPolicy defaults", async () => {

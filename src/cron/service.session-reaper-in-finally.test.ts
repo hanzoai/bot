@@ -1,15 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { CronJob } from "./types.js";
 import { createNoopLogger, createCronStoreHarness } from "./service.test-harness.js";
 import { createCronServiceState } from "./service/state.js";
 import { onTimer } from "./service/timer.js";
 import { resetReaperThrottle } from "./session-reaper.js";
+import type { CronJob } from "./types.js";
 
 const noopLogger = createNoopLogger();
 const { makeStorePath } = createCronStoreHarness({
-  prefix: "openclaw-cron-reaper-finally-",
+  prefix: "bot-cron-reaper-finally-",
 });
 
 function createDueIsolatedJob(params: { id: string; nowMs: number }): CronJob {

@@ -184,20 +184,20 @@ echo "[cloud-agent] Starting bot agent"
 cd /app
 
 # Create workspace directories.
-# The bot expects its workspace at /home/node/.openclaw/workspace-{nodeId}
+# The bot expects its workspace at /home/node/.hanzo-bot/workspace-{nodeId}
 # (where node is the Node.js HOME). Create both the generic and node-specific
 # workspace paths so the exec tool's canonical cwd check succeeds.
 NODE_ID="${AGENT_NODE_ID:-${HANZO_NODE_ID:-cloud-unknown}}"
-mkdir -p "$HOME/.openclaw/workspace"
-mkdir -p "/home/node/.openclaw/workspace-${NODE_ID}"
+mkdir -p "$HOME/.hanzo-bot/workspace"
+mkdir -p "/home/node/.hanzo-bot/workspace-${NODE_ID}"
 
 # Create exec approvals file with permissive allowlist for cloud agents.
 # Cloud agents need to run desktop commands (firefox, ls, etc.) without
 # manual approval prompts.
-# Write to $HOME/.openclaw/ (the path the bot process actually reads).
+# Write to $HOME/.hanzo-bot/ (the path the bot process actually reads).
 # HOME is /home/operative in the combined bot-cloud image.
-mkdir -p "$HOME/.openclaw"
-cat > "$HOME/.openclaw/exec-approvals.json" << 'APPROVALS'
+mkdir -p "$HOME/.hanzo-bot"
+cat > "$HOME/.hanzo-bot/exec-approvals.json" << 'APPROVALS'
 {
   "version": 1,
   "defaults": {
@@ -219,7 +219,7 @@ APPROVALS
 # Write auth-profiles.json so the agent can authenticate LLM calls.
 # Provisioned pods get HANZO_API_KEY from the playground provisioner.
 # Writing to the "main" agent dir lets all per-agent dirs inherit it.
-mkdir -p "/home/node/.openclaw/agents/main/agent"
+mkdir -p "/home/node/.hanzo-bot/agents/main/agent"
 AUTH_JSON="{\"version\":1,\"profiles\":{"
 FIRST=1
 if [ -n "$HANZO_API_KEY" ]; then
@@ -236,7 +236,7 @@ if [ -n "$OPENAI_API_KEY" ]; then
   AUTH_JSON="${AUTH_JSON}\"openai:default\":{\"type\":\"api_key\",\"provider\":\"openai\",\"key\":\"${OPENAI_API_KEY}\"}"
 fi
 AUTH_JSON="${AUTH_JSON}},\"default\":\"hanzo:default\"}"
-echo "$AUTH_JSON" > "/home/node/.openclaw/agents/main/agent/auth-profiles.json"
+echo "$AUTH_JSON" > "/home/node/.hanzo-bot/agents/main/agent/auth-profiles.json"
 echo "[cloud-agent] auth-profiles.json written to main agent dir"
 
 # Create bot config that routes exec to the local node (not sandbox).
@@ -244,7 +244,7 @@ echo "[cloud-agent] auth-profiles.json written to main agent dir"
 # fails because cloud pods don't have sandbox configured. Setting host="node"
 # makes the agent dispatch commands through the gateway back to this node,
 # where they execute in the same environment as the VNC desktop.
-cat > "$HOME/.openclaw/openclaw.json" << 'BOTCONFIG'
+cat > "$HOME/.hanzo-bot/hanzo-bot.json" << 'BOTCONFIG'
 {
   "tools": {
     "exec": {

@@ -1,8 +1,7 @@
 import fs from "node:fs";
-import type { SafeOpenSyncAllowedType } from "../../infra/safe-open-sync.js";
-import type { SandboxContext, SandboxWorkspaceAccess } from "./types.js";
 import { openBoundaryFile } from "../../infra/boundary-file-read.js";
 import { PATH_ALIAS_POLICIES, type PathAliasPolicy } from "../../infra/path-alias-guards.js";
+import type { SafeOpenSyncAllowedType } from "../../infra/safe-open-sync.js";
 import { execDockerRaw, type ExecDockerRawResult } from "./docker.js";
 import {
   buildSandboxFsMounts,
@@ -11,6 +10,7 @@ import {
   type SandboxFsMount,
 } from "./fs-paths.js";
 import { isPathInsideContainerRoot, normalizeContainerPath } from "./path-utils.js";
+import type { SandboxContext, SandboxWorkspaceAccess } from "./types.js";
 
 type RunCommandOptions = {
   args?: string[];
@@ -429,7 +429,7 @@ class SandboxFsBridgeImpl implements SandboxFsBridge {
           'dir=$(dirname -- "$target")',
           'if [ "$dir" != "." ]; then mkdir -p -- "$dir"; fi',
           'base=$(basename -- "$target")',
-          'tmp=$(mktemp "$dir/.openclaw-write-$base.XXXXXX")',
+          'tmp=$(mktemp "$dir/.bot-write-$base.XXXXXX")',
           'cat >"$tmp"',
           'printf "%s\\n" "$tmp"',
         ].join("\n")
@@ -438,7 +438,7 @@ class SandboxFsBridgeImpl implements SandboxFsBridge {
           'target="$1"',
           'dir=$(dirname -- "$target")',
           'base=$(basename -- "$target")',
-          'tmp=$(mktemp "$dir/.openclaw-write-$base.XXXXXX")',
+          'tmp=$(mktemp "$dir/.bot-write-$base.XXXXXX")',
           'cat >"$tmp"',
           'printf "%s\\n" "$tmp"',
         ].join("\n");

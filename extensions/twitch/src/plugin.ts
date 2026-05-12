@@ -1,5 +1,5 @@
 /**
- * Twitch channel plugin for OpenClaw.
+ * Twitch channel plugin for HanzoBot.
  *
  * Main plugin export combining all adapters (outbound, actions, status, gateway).
  * This is the primary entry point for the Twitch channel integration.
@@ -7,16 +7,6 @@
 
 import type { BotConfig } from "@hanzo/bot/plugin-sdk/twitch";
 import { buildChannelConfigSchema } from "@hanzo/bot/plugin-sdk/twitch";
-import type {
-  ChannelAccountSnapshot,
-  ChannelCapabilities,
-  ChannelLogSink,
-  ChannelMeta,
-  ChannelPlugin,
-  ChannelResolveKind,
-  ChannelResolveResult,
-  TwitchAccountConfig,
-} from "./types.js";
 import { twitchMessageActions } from "./actions.js";
 import { removeClientManager } from "./client-manager-registry.js";
 import { TwitchConfigSchema } from "./config-schema.js";
@@ -27,13 +17,23 @@ import { probeTwitch } from "./probe.js";
 import { resolveTwitchTargets } from "./resolver.js";
 import { collectTwitchStatusIssues } from "./status.js";
 import { resolveTwitchToken } from "./token.js";
+import type {
+  ChannelAccountSnapshot,
+  ChannelCapabilities,
+  ChannelLogSink,
+  ChannelMeta,
+  ChannelPlugin,
+  ChannelResolveKind,
+  ChannelResolveResult,
+  TwitchAccountConfig,
+} from "./types.js";
 import { isAccountConfigured } from "./utils/twitch.js";
 
 /**
  * Twitch channel plugin.
  *
  * Implements the ChannelPlugin interface to provide Twitch chat integration
- * for OpenClaw. Supports message sending, receiving, access control, and
+ * for HanzoBot. Supports message sending, receiving, access control, and
  * status monitoring.
  */
 export const twitchPlugin: ChannelPlugin<TwitchAccountConfig> = {

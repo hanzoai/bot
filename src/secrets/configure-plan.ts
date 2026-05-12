@@ -1,12 +1,12 @@
 import { isDeepStrictEqual } from "node:util";
 import type { AuthProfileStore } from "../agents/auth-profiles.js";
 import type { BotConfig } from "../config/config.js";
-import type { SecretsApplyPlan } from "./plan.js";
 import {
   resolveSecretInputRef,
   type SecretProviderConfig,
   type SecretRef,
 } from "../config/types.secrets.js";
+import type { SecretsApplyPlan } from "./plan.js";
 import { isRecord } from "./shared.js";
 import {
   discoverAuthProfileSecretTargets,
@@ -18,7 +18,7 @@ export type ConfigureCandidate = {
   path: string;
   pathSegments: string[];
   label: string;
-  configFile: "openclaw.json" | "auth-profiles.json";
+  configFile: "bot.json" | "auth-profiles.json";
   expectedResolvedValue: "string" | "string-or-object";
   existingRef?: SecretRef;
   isDerived?: boolean;
@@ -53,7 +53,7 @@ function configureCandidateSortKey(candidate: ConfigureCandidate): string {
     const agentId = candidate.agentId ?? "";
     return `auth-profiles:${agentId}:${candidate.path}`;
   }
-  return `openclaw:${candidate.path}`;
+  return `bot:${candidate.path}`;
 }
 
 function resolveAuthProfileProvider(
@@ -85,7 +85,7 @@ export function buildConfigureCandidatesForScope(params: {
   const hasPathInAuthoredConfig = (pathSegments: string[]): boolean =>
     hasPath(authoredConfig, pathSegments);
 
-  const openclawCandidates = discoverConfigSecretTargets(params.config)
+  const botCandidates = discoverConfigSecretTargets(params.config)
     .filter((entry) => entry.entry.includeInConfigure)
     .map((entry) => {
       const resolved = resolveSecretInputRef({
@@ -102,7 +102,7 @@ export function buildConfigureCandidatesForScope(params: {
         path: entry.path,
         pathSegments: [...entry.pathSegments],
         label: entry.path,
-        configFile: "openclaw.json" as const,
+        configFile: "bot.json" as const,
         expectedResolvedValue: entry.entry.expectedResolvedValue,
         ...(resolved.ref ? { existingRef: resolved.ref } : {}),
         ...(pathExists || refPathExists ? {} : { isDerived: true }),
@@ -143,7 +143,7 @@ export function buildConfigureCandidatesForScope(params: {
             };
           });
 
-  return [...openclawCandidates, ...authCandidates].toSorted((a, b) =>
+  return [...botCandidates, ...authCandidates].toSorted((a, b) =>
     configureCandidateSortKey(a).localeCompare(configureCandidateSortKey(b)),
   );
 }
@@ -233,7 +233,7 @@ export function buildSecretsConfigurePlan(params: {
     version: 1,
     protocolVersion: 1,
     generatedAt: params.generatedAt ?? new Date().toISOString(),
-    generatedBy: "openclaw secrets configure",
+    generatedBy: "bot secrets configure",
     targets: [...params.selectedTargets.values()].map((entry) => ({
       type: entry.type,
       path: entry.path,

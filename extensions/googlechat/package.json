@@ -10,7 +10,7 @@
   "devDependencies": {
     "@hanzo/bot": "workspace:*"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ],

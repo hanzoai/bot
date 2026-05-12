@@ -1,16 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { BotConfig } from "../config/config.js";
-import type { RuntimeEnv } from "../runtime.js";
-import type { DoctorPrompter } from "./doctor-prompter.js";
 import {
   DEFAULT_SANDBOX_BROWSER_IMAGE,
   DEFAULT_SANDBOX_COMMON_IMAGE,
   DEFAULT_SANDBOX_IMAGE,
   resolveSandboxScope,
 } from "../agents/sandbox.js";
+import type { BotConfig } from "../config/config.js";
 import { runCommandWithTimeout, runExec } from "../process/exec.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { note } from "../terminal/note.js";
+import type { DoctorPrompter } from "./doctor-prompter.js";
 
 type SandboxScriptInfo = {
   scriptPath: string;
@@ -195,7 +195,7 @@ export async function maybeRepairSandboxImages(
       "",
       "Options:",
       "- Install Docker and restart the gateway",
-      "- Disable sandbox mode: openclaw config set agents.defaults.sandbox.mode off",
+      "- Disable sandbox mode: bot config set agents.defaults.sandbox.mode off",
     ];
     note(lines.join("\n"), "Sandbox");
     return cfg;

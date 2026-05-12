@@ -91,7 +91,7 @@ export function installTestEnv(): { cleanup: () => void; tempHome: string } {
     { key: "NODE_OPTIONS", value: process.env.NODE_OPTIONS },
   ];
 
-  const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-test-home-"));
+  const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "bot-test-home-"));
 
   process.env.HOME = tempHome;
   process.env.USERPROFILE = tempHome;
@@ -122,7 +122,7 @@ export function installTestEnv(): { cleanup: () => void; tempHome: string } {
 
   // Windows: prefer the default state dir so auth/profile tests match real paths.
   if (process.platform === "win32") {
-    process.env.BOT_STATE_DIR = path.join(tempHome, ".openclaw");
+    process.env.BOT_STATE_DIR = path.join(tempHome, ".bot");
   }
 
   process.env.XDG_CONFIG_HOME = path.join(tempHome, ".config");

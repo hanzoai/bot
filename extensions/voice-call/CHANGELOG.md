@@ -4,127 +4,127 @@
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.4.27
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.26
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.17
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.16
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.15
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.14
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.13
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.12
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.11
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.10
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.9
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.8
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.7
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.6
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.2
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.3.1
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.2.26
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.2.25
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.2.24
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.2.22
 
 ### Changes
 
-- Version alignment with core OpenClaw release numbers.
+- Version alignment with core HanzoBot release numbers.
 
 ## 2026.1.26
 
@@ -152,6 +152,6 @@
 - Speech: OpenAI TTS (model/voice/instructions) with Twilio `<Say>` fallback.
 - Tooling: `voice_call` tool actions for initiate/continue/speak/end/status.
 - Gateway RPC: `voicecall.initiate|continue|speak|end|status` (+ legacy `voicecall.start`).
-- CLI: `openclaw voicecall` commands (call/start/continue/speak/end/status/tail/expose).
+- CLI: `hanzo-bot voicecall` commands (call/start/continue/speak/end/status/tail/expose).
 - Observability: JSONL call logs and `voicecall tail` for live inspection.
 - Response controls: `responseModel`, `responseSystemPrompt`, and `responseTimeoutMs` for auto‑responses.

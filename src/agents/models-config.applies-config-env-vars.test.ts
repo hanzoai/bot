@@ -7,7 +7,7 @@ import {
   withModelsTempHome as withTempHome,
   withTempEnv,
 } from "./models-config.e2e-harness.js";
-import { ensureOpenClawModelsJson } from "./models-config.js";
+import { ensureHanzoBotModelsJson } from "./models-config.js";
 
 installModelsConfigTestHooks();
 
@@ -23,7 +23,7 @@ describe("models-config", () => {
           env: { vars: { [TEST_ENV_VAR]: "from-config" } },
         };
 
-        await ensureOpenClawModelsJson(cfg);
+        await ensureHanzoBotModelsJson(cfg);
 
         expect(process.env[TEST_ENV_VAR]).toBe("from-config");
       });
@@ -39,7 +39,7 @@ describe("models-config", () => {
           env: { vars: { [TEST_ENV_VAR]: "from-config" } },
         };
 
-        await ensureOpenClawModelsJson(cfg);
+        await ensureHanzoBotModelsJson(cfg);
 
         expect(process.env[TEST_ENV_VAR]).toBe("from-host");
       });

@@ -1,20 +1,20 @@
-import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/diffs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/diffs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DiffScreenshotter } from "./browser.js";
-import type { DiffRenderOptions } from "./types.js";
 import { DEFAULT_DIFFS_TOOL_DEFAULTS } from "./config.js";
 import { DiffArtifactStore } from "./store.js";
 import { createDiffsTool } from "./tool.js";
+import type { DiffRenderOptions } from "./types.js";
 
 describe("diffs tool", () => {
   let rootDir: string;
   let store: DiffArtifactStore;
 
   beforeEach(async () => {
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-diffs-tool-"));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-diffs-tool-"));
     store = new DiffArtifactStore({ rootDir });
   });
 

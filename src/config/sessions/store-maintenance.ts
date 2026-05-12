@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { SessionMaintenanceConfig, SessionMaintenanceMode } from "../types.base.js";
-import type { SessionEntry } from "./types.js";
 import { parseByteSize } from "../../cli/parse-bytes.js";
 import { parseDurationMs } from "../../cli/parse-duration.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { loadConfig } from "../config.js";
+import type { SessionMaintenanceConfig, SessionMaintenanceMode } from "../types.base.js";
+import type { SessionEntry } from "./types.js";
 
 const log = createSubsystemLogger("sessions/store");
 
@@ -124,7 +124,7 @@ function resolveHighWaterBytes(
 }
 
 /**
- * Resolve maintenance settings from openclaw.json (`session.maintenance`).
+ * Resolve maintenance settings from bot.json (`session.maintenance`).
  * Falls back to built-in defaults when config is missing or unset.
  */
 export function resolveMaintenanceConfig(): ResolvedSessionMaintenanceConfig {

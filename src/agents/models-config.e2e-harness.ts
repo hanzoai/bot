@@ -4,7 +4,7 @@ import type { BotConfig } from "../config/config.js";
 import type { MockFn } from "../test-utils/vitest-mock-fn.js";
 
 export async function withModelsTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
-  return withTempHomeBase(fn, { prefix: "openclaw-models-" });
+  return withTempHomeBase(fn, { prefix: "bot-models-" });
 }
 
 export function installModelsConfigTestHooks(opts?: { restoreFetch?: boolean }) {

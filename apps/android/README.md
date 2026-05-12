@@ -138,7 +138,7 @@ This app is native Kotlin + Jetpack Compose.
 - For Compose UI edits: use Android Studio **Live Edit** on a debug build (works on physical devices; project `minSdk=31` already meets API requirement).
 - For many non-structural code/resource changes: use Android Studio **Apply Changes**.
 - For structural/native/manifest/Gradle changes: do full reinstall (`pnpm android:run`).
-- Canvas web content already supports live reload when loaded from Gateway `__openclaw__/canvas/` (see `docs/platforms/android.md`).
+- Canvas web content already supports live reload when loaded from Gateway `__bot__/canvas/` (see `docs/platforms/android.md`).
 
 ## Connect / Pair
 
@@ -184,7 +184,7 @@ Pre-req checklist:
 4) Open the app **Screen** tab and keep it active during the run (canvas/A2UI commands require the canvas WebView attached there).
 5) Grant runtime permissions for capabilities you expect to pass (camera/mic/location/notification listener/location, etc.).
 6) No interactive system dialogs should be pending before test start.
-7) Canvas host is enabled and reachable from the device (do not run gateway with `BOT_SKIP_CANVAS_HOST=1`; startup logs should include `canvas host mounted at .../__openclaw__/`).
+7) Canvas host is enabled and reachable from the device (do not run gateway with `BOT_SKIP_CANVAS_HOST=1`; startup logs should include `canvas host mounted at .../__bot__/`).
 8) Local operator test client pairing is approved. If first run fails with `pairing required`, approve latest pending device pairing request, then rerun:
 9) For A2UI checks, keep the app on **Screen** tab; the node now auto-refreshes canvas capability once on first A2UI reachability failure (TTL-safe retry).
 

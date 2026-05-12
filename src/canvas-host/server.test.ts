@@ -1,6 +1,6 @@
-import type { AddressInfo } from "node:net";
 import fs from "node:fs/promises";
 import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -85,7 +85,7 @@ describe("canvas host", () => {
   };
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-canvas-fixtures-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-canvas-fixtures-"));
   });
 
   afterAll(async () => {
@@ -96,8 +96,8 @@ describe("canvas host", () => {
     const out = injectCanvasLiveReload("<html><body>Hello</body></html>");
     expect(out).toContain(CANVAS_WS_PATH);
     expect(out).toContain("location.reload");
-    expect(out).toContain("openclawCanvasA2UIAction");
-    expect(out).toContain("openclawSendUserAction");
+    expect(out).toContain("botCanvasA2UIAction");
+    expect(out).toContain("botSendUserAction");
   });
 
   it("creates a default index.html when missing", async () => {
@@ -109,7 +109,7 @@ describe("canvas host", () => {
       const { res, html } = await fetchCanvasHtml(server.port);
       expect(res.status).toBe(200);
       expect(html).toContain("Interactive test page");
-      expect(html).toContain("openclawSendUserAction");
+      expect(html).toContain("botSendUserAction");
       expect(html).toContain(CANVAS_WS_PATH);
     } finally {
       await server.close();
@@ -271,7 +271,7 @@ describe("canvas host", () => {
     try {
       await fs.stat(bundlePath);
     } catch {
-      await fs.writeFile(bundlePath, "window.openclawA2UI = {};", "utf8");
+      await fs.writeFile(bundlePath, "window.botA2UI = {};", "utf8");
       createdBundle = true;
     }
 
@@ -281,18 +281,16 @@ describe("canvas host", () => {
     const server = await startFixtureCanvasHost(dir);
 
     try {
-      const res = await fetch(`http://127.0.0.1:${server.port}/__openclaw__/a2ui/`);
+      const res = await fetch(`http://127.0.0.1:${server.port}/__bot__/a2ui/`);
       const html = await res.text();
       expect(res.status).toBe(200);
-      expect(html).toContain("openclaw-a2ui-host");
-      expect(html).toContain("openclawCanvasA2UIAction");
+      expect(html).toContain("bot-a2ui-host");
+      expect(html).toContain("botCanvasA2UIAction");
 
-      const bundleRes = await fetch(
-        `http://127.0.0.1:${server.port}/__openclaw__/a2ui/a2ui.bundle.js`,
-      );
+      const bundleRes = await fetch(`http://127.0.0.1:${server.port}/__bot__/a2ui/a2ui.bundle.js`);
       const js = await bundleRes.text();
       expect(bundleRes.status).toBe(200);
-      expect(js).toContain("openclawA2UI");
+      expect(js).toContain("botA2UI");
       const traversalRes = await fetch(
         `http://127.0.0.1:${server.port}${A2UI_PATH}/%2e%2e%2fpackage.json`,
       );

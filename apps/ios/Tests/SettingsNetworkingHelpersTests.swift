@@ -1,9 +1,5 @@
 import Testing
-<<<<<<< HEAD
 @testable import HanzoBot
-=======
-@testable import OpenClaw
->>>>>>> upstream/main
 
 @Suite struct SettingsNetworkingHelpersTests {
     @Test func parseHostPortParsesIPv4() {
