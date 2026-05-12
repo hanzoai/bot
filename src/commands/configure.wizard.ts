@@ -107,8 +107,8 @@ async function runGatewayHealthCheck(params: {
     note(
       [
         "Docs:",
-        "https://docs.openclaw.ai/gateway/health",
-        "https://docs.openclaw.ai/gateway/troubleshooting",
+        "https://docs.bot.ai/gateway/health",
+        "https://docs.bot.ai/gateway/troubleshooting",
       ].join("\n"),
       "Health check help",
     );
@@ -149,7 +149,7 @@ async function promptChannelMode(runtime: RuntimeEnv): Promise<ChannelsWizardMod
         {
           value: "remove",
           label: "Remove channel config",
-          hint: "Delete channel tokens/settings from openclaw.json",
+          hint: "Delete channel tokens/settings from bot.json",
         },
       ],
       initialValue: "configure",
@@ -176,7 +176,7 @@ async function promptWebToolsConfig(
       "Web search lets your agent look things up online using the `web_search` tool.",
       "Choose a provider: Perplexity Search (recommended) or Brave Search.",
       "Both return structured results (title, URL, snippet) for fast research.",
-      "Docs: https://docs.openclaw.ai/tools/web",
+      "Docs: https://docs.bot.ai/tools/web",
     ].join("\n"),
     "Web search",
   );
@@ -238,7 +238,7 @@ async function promptWebToolsConfig(
             "No key stored yet, so web_search will stay unavailable.",
             "Store a key here or set PERPLEXITY_API_KEY in the Gateway environment.",
             "Get your API key at: https://www.perplexity.ai/settings/api",
-            "Docs: https://docs.openclaw.ai/tools/web",
+            "Docs: https://docs.bot.ai/tools/web",
           ].join("\n"),
           "Web search",
         );
@@ -263,7 +263,7 @@ async function promptWebToolsConfig(
             "No key stored yet, so web_search will stay unavailable.",
             "Store a key here or set BRAVE_API_KEY in the Gateway environment.",
             "Get your API key at: https://brave.com/search/api/",
-            "Docs: https://docs.openclaw.ai/tools/web",
+            "Docs: https://docs.bot.ai/tools/web",
           ].join("\n"),
           "Web search",
         );
@@ -303,7 +303,7 @@ export async function runConfigureWizard(
 ) {
   try {
     printWizardHeader(runtime);
-    intro(opts.command === "update" ? "OpenClaw update wizard" : "OpenClaw configure");
+    intro(opts.command === "update" ? "HanzoBot update wizard" : "HanzoBot configure");
     const prompter = createClackPrompter();
 
     const snapshot = await readConfigFileSnapshot();
@@ -317,14 +317,14 @@ export async function runConfigureWizard(
           [
             ...snapshot.issues.map((iss) => `- ${iss.path}: ${iss.message}`),
             "",
-            "Docs: https://docs.openclaw.ai/gateway/configuration",
+            "Docs: https://docs.bot.ai/gateway/configuration",
           ].join("\n"),
           "Config issues",
         );
       }
       if (!snapshot.valid) {
         outro(
-          `Config invalid. Run \`${formatCliCommand("openclaw doctor")}\` to repair it, then re-run configure.`,
+          `Config invalid. Run \`${formatCliCommand("bot doctor")}\` to repair it, then re-run configure.`,
         );
         runtime.exit(1);
         return;
@@ -681,7 +681,7 @@ export async function runConfigureWizard(
         `Web UI: ${links.httpUrl}`,
         `Gateway WS: ${links.wsUrl}`,
         gatewayStatusLine,
-        "Docs: https://docs.openclaw.ai/web/control-ui",
+        "Docs: https://docs.bot.ai/web/control-ui",
       ].join("\n"),
       "Control UI",
     );

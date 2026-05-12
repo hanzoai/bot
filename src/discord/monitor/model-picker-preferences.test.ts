@@ -10,7 +10,7 @@ import {
 const tempDirs: string[] = [];
 
 async function createStateEnv(): Promise<NodeJS.ProcessEnv> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-model-picker-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-model-picker-"));
   tempDirs.push(dir);
   return { ...process.env, BOT_STATE_DIR: dir };
 }

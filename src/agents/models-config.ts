@@ -3,7 +3,7 @@ import path from "node:path";
 import { type BotConfig, loadConfig } from "../config/config.js";
 import { applyConfigEnvVars } from "../config/env-vars.js";
 import { isRecord } from "../utils.js";
-import { resolveOpenClawAgentDir } from "./agent-paths.js";
+import { resolveHanzoBotAgentDir } from "./agent-paths.js";
 import {
   HANZO_BASE_URL,
   normalizeProviders,
@@ -149,12 +149,7 @@ function mergeWithExistingProviderSecrets(params: {
     mergedProviders[key] = entry;
   }
   for (const [key, newEntry] of Object.entries(nextProviders)) {
-    const existing = existingProviders[key] as
-      | (NonNullable<ModelsConfig["providers"]>[string] & {
-          apiKey?: string;
-          baseUrl?: string;
-        })
-      | undefined;
+    const existing = existingProviders[key];
     if (!existing) {
       mergedProviders[key] = newEntry;
       continue;
@@ -201,12 +196,12 @@ async function readRawFile(pathname: string): Promise<string> {
   }
 }
 
-export async function ensureOpenClawModelsJson(
+export async function ensureHanzoBotModelsJson(
   config?: BotConfig,
   agentDirOverride?: string,
 ): Promise<{ agentDir: string; wrote: boolean }> {
   const cfg = config ?? loadConfig();
-  const agentDir = agentDirOverride?.trim() ? agentDirOverride.trim() : resolveOpenClawAgentDir();
+  const agentDir = agentDirOverride?.trim() ? agentDirOverride.trim() : resolveHanzoBotAgentDir();
 
   // Ensure config env vars (e.g. AWS_PROFILE, AWS_ACCESS_KEY_ID) are
   // available in process.env before implicit provider discovery.  Some
@@ -239,9 +234,9 @@ export async function ensureOpenClawModelsJson(
   if (normalizedProviders && envBaseUrl) {
     for (const name of ["hanzo", "zen"]) {
       if (normalizedProviders[name]) {
-        normalizedProviders[name]!.baseUrl = envBaseUrl;
+        normalizedProviders[name].baseUrl = envBaseUrl;
         // Hanzo gateway uses OpenAI chat completions, not responses API
-        normalizedProviders[name]!.api = "openai-completions";
+        normalizedProviders[name].api = "openai-completions";
       }
     }
   }

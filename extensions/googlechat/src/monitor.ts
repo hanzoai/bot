@@ -1,5 +1,5 @@
-import type { BotConfig } from "@hanzo/bot/plugin-sdk/googlechat";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/googlechat";
 import {
   createWebhookInFlightLimiter,
   createReplyPrefixOptions,
@@ -7,13 +7,6 @@ import {
   resolveInboundRouteEnvelopeBuilderWithRuntime,
   resolveWebhookPath,
 } from "@hanzo/bot/plugin-sdk/googlechat";
-import type {
-  GoogleChatCoreRuntime,
-  GoogleChatMonitorOptions,
-  GoogleChatRuntimeEnv,
-  WebhookTarget,
-} from "./monitor-types.js";
-import type { GoogleChatAttachment, GoogleChatEvent } from "./types.js";
 import { type ResolvedGoogleChatAccount } from "./accounts.js";
 import {
   downloadGoogleChatMedia,
@@ -23,8 +16,15 @@ import {
 } from "./api.js";
 import { type GoogleChatAudienceType } from "./auth.js";
 import { applyGoogleChatInboundAccessPolicy, isSenderAllowed } from "./monitor-access.js";
+import type {
+  GoogleChatCoreRuntime,
+  GoogleChatMonitorOptions,
+  GoogleChatRuntimeEnv,
+  WebhookTarget,
+} from "./monitor-types.js";
 import { createGoogleChatWebhookRequestHandler } from "./monitor-webhook.js";
 import { getGoogleChatRuntime } from "./runtime.js";
+import type { GoogleChatAttachment, GoogleChatEvent } from "./types.js";
 export type { GoogleChatMonitorOptions, GoogleChatRuntimeEnv } from "./monitor-types.js";
 export { isSenderAllowed };
 
@@ -113,7 +113,7 @@ async function processGoogleChatEvent(event: GoogleChatEvent, target: WebhookTar
  * Resolve bot display name with fallback chain:
  * 1. Account config name
  * 2. Agent name from config
- * 3. "OpenClaw" as generic fallback
+ * 3. "HanzoBot" as generic fallback
  */
 function resolveBotDisplayName(params: {
   accountName?: string;
@@ -128,7 +128,7 @@ function resolveBotDisplayName(params: {
   if (agent?.name?.trim()) {
     return agent.name.trim();
   }
-  return "OpenClaw";
+  return "HanzoBot";
 }
 
 async function processMessageWithPipeline(params: {

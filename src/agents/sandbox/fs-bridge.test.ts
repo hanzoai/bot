@@ -15,11 +15,11 @@ vi.mock("../../infra/boundary-file-read.js", async (importOriginal) => {
   };
 });
 
-import type { SandboxContext } from "./types.js";
 import { openBoundaryFile } from "../../infra/boundary-file-read.js";
 import { execDockerRaw } from "./docker.js";
 import { createSandboxFsBridge } from "./fs-bridge.js";
 import { createSandboxTestContext } from "./test-fixtures.js";
+import type { SandboxContext } from "./types.js";
 
 const mockedExecDockerRaw = vi.mocked(execDockerRaw);
 const mockedOpenBoundaryFile = vi.mocked(openBoundaryFile);
@@ -90,7 +90,7 @@ function installDockerReadMock(params?: { canonicalPath?: string }) {
       return dockerExecResult("content");
     }
     if (script.includes("mktemp")) {
-      return dockerExecResult("/workspace/.openclaw-write-b.txt.ABC123\n");
+      return dockerExecResult("/workspace/.bot-write-b.txt.ABC123\n");
     }
     return dockerExecResult("");
   });
@@ -107,7 +107,7 @@ async function createHostEscapeFixture(stateDir: string) {
 }
 
 async function expectMkdirpAllowsExistingDirectory(params?: { forceBoundaryIoFallback?: boolean }) {
-  await withTempDir("openclaw-fs-bridge-mkdirp-", async (stateDir) => {
+  await withTempDir("bot-fs-bridge-mkdirp-", async (stateDir) => {
     const workspaceDir = path.join(stateDir, "workspace");
     const nestedDir = path.join(workspaceDir, "memory", "kemik");
     await fs.mkdir(nestedDir, { recursive: true });
@@ -273,7 +273,7 @@ describe("sandbox fs bridge shell compatibility", () => {
   });
 
   it("rejects mkdirp when target exists as a file", async () => {
-    await withTempDir("openclaw-fs-bridge-mkdirp-file-", async (stateDir) => {
+    await withTempDir("bot-fs-bridge-mkdirp-file-", async (stateDir) => {
       const workspaceDir = path.join(stateDir, "workspace");
       const filePath = path.join(workspaceDir, "memory", "kemik");
       await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -294,7 +294,7 @@ describe("sandbox fs bridge shell compatibility", () => {
   });
 
   it("rejects pre-existing host symlink escapes before docker exec", async () => {
-    await withTempDir("openclaw-fs-bridge-", async (stateDir) => {
+    await withTempDir("bot-fs-bridge-", async (stateDir) => {
       const { workspaceDir, outsideFile } = await createHostEscapeFixture(stateDir);
       // File symlinks require SeCreateSymbolicLinkPrivilege on Windows.
       if (process.platform === "win32") {
@@ -318,7 +318,7 @@ describe("sandbox fs bridge shell compatibility", () => {
     if (process.platform === "win32") {
       return;
     }
-    await withTempDir("openclaw-fs-bridge-hardlink-", async (stateDir) => {
+    await withTempDir("bot-fs-bridge-hardlink-", async (stateDir) => {
       const { workspaceDir, outsideFile } = await createHostEscapeFixture(stateDir);
       const hardlinkPath = path.join(workspaceDir, "link.txt");
       try {

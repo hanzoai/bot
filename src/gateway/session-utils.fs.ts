@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { SessionPreviewItem } from "./session-utils.types.js";
 import {
   formatSessionArchiveTimestamp,
   parseSessionArchiveTimestamp,
@@ -16,6 +15,7 @@ import { hasInterSessionUserProvenance } from "../sessions/input-provenance.js";
 import { stripInlineDirectiveTagsForDisplay } from "../utils/directive-tags.js";
 import { extractToolCallNames, hasToolCall } from "../utils/transcript-tools.js";
 import { stripEnvelope } from "./chat-sanitize.js";
+import type { SessionPreviewItem } from "./session-utils.types.js";
 
 type SessionTitleFields = {
   firstUserMessage: string | null;
@@ -105,7 +105,7 @@ export function readSessionMessages(
           role: "system",
           content: [{ type: "text", text: "Compaction" }],
           timestamp,
-          __openclaw: {
+          __bot: {
             kind: "compaction",
             id: typeof parsed.id === "string" ? parsed.id : undefined,
           },
@@ -157,7 +157,7 @@ export function resolveSessionTranscriptCandidates(
   }
 
   const home = resolveRequiredHomeDir(process.env, os.homedir);
-  const legacyDir = path.join(home, ".openclaw", "sessions");
+  const legacyDir = path.join(home, ".bot", "sessions");
   pushCandidate(() => resolveSessionTranscriptPathInDir(sessionId, legacyDir));
 
   return Array.from(new Set(candidates));

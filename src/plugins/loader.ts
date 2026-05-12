@@ -1,16 +1,9 @@
-import { createJiti } from "jiti";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createJiti } from "jiti";
 import type { BotConfig } from "../config/config.js";
 import type { GatewayRequestHandler } from "../gateway/server-methods/types.js";
-import type { PluginRuntime } from "./runtime/types.js";
-import type {
-  OpenClawPluginDefinition,
-  OpenClawPluginModule,
-  PluginDiagnostic,
-  PluginLogger,
-} from "./types.js";
 import { openBoundaryFileSync } from "../infra/boundary-file-read.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { resolveUserPath } from "../utils.js";
@@ -22,14 +15,21 @@ import {
   resolveMemorySlotDecision,
   type NormalizedPluginsConfig,
 } from "./config-state.js";
-import { discoverOpenClawPlugins } from "./discovery.js";
+import { discoverHanzoBotPlugins } from "./discovery.js";
 import { initializeGlobalHookRunner } from "./hook-runner-global.js";
 import { loadPluginManifestRegistry } from "./manifest-registry.js";
 import { isPathInside, safeStatSync } from "./path-safety.js";
 import { createPluginRegistry, type PluginRecord, type PluginRegistry } from "./registry.js";
 import { setActivePluginRegistry } from "./runtime.js";
 import { createPluginRuntime, type CreatePluginRuntimeOptions } from "./runtime/index.js";
+import type { PluginRuntime } from "./runtime/types.js";
 import { validateJsonSchemaValue } from "./schema-validator.js";
+import type {
+  HanzoBotPluginDefinition,
+  HanzoBotPluginModule,
+  PluginDiagnostic,
+  PluginLogger,
+} from "./types.js";
 
 export type PluginLoadResult = PluginRegistry;
 
@@ -227,8 +227,8 @@ function validatePluginConfig(params: {
 }
 
 function resolvePluginModuleExport(moduleExport: unknown): {
-  definition?: OpenClawPluginDefinition;
-  register?: OpenClawPluginDefinition["register"];
+  definition?: HanzoBotPluginDefinition;
+  register?: HanzoBotPluginDefinition["register"];
 } {
   const resolved =
     moduleExport &&
@@ -238,11 +238,11 @@ function resolvePluginModuleExport(moduleExport: unknown): {
       : moduleExport;
   if (typeof resolved === "function") {
     return {
-      register: resolved as OpenClawPluginDefinition["register"],
+      register: resolved as HanzoBotPluginDefinition["register"],
     };
   }
   if (resolved && typeof resolved === "object") {
-    const def = resolved as OpenClawPluginDefinition;
+    const def = resolved as HanzoBotPluginDefinition;
     const register = def.register ?? def.activate;
     return { definition: def, register };
   }
@@ -539,7 +539,7 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
     coreGatewayHandlers: options.coreGatewayHandlers as Record<string, GatewayRequestHandler>,
   });
 
-  const discovery = discoverOpenClawPlugins({
+  const discovery = discoverHanzoBotPlugins({
     workspaceDir: options.workspaceDir,
     extraPaths: normalized.loadPaths,
     cache: options.cache,
@@ -705,9 +705,9 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
     const safeSource = opened.path;
     fs.closeSync(opened.fd);
 
-    let mod: OpenClawPluginModule | null = null;
+    let mod: HanzoBotPluginModule | null = null;
     try {
-      mod = getJiti()(safeSource) as OpenClawPluginModule;
+      mod = getJiti()(safeSource) as HanzoBotPluginModule;
     } catch (err) {
       recordPluginError({
         logger,

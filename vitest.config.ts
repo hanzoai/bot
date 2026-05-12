@@ -57,14 +57,14 @@ const pluginSdkSubpaths = [
 
 export default defineConfig({
   resolve: {
-    // Keep this ordered: the base `openclaw/plugin-sdk` alias is a prefix match.
+    // Keep this ordered: the base `bot/plugin-sdk` alias is a prefix match.
     alias: [
       ...pluginSdkSubpaths.map((subpath) => ({
-        find: `openclaw/plugin-sdk/${subpath}`,
+        find: `bot/plugin-sdk/${subpath}`,
         replacement: path.join(repoRoot, "src", "plugin-sdk", `${subpath}.ts`),
       })),
       {
-        find: "openclaw/plugin-sdk",
+        find: "bot/plugin-sdk",
         replacement: path.join(repoRoot, "src", "plugin-sdk", "index.ts"),
       },
       // @hanzo/bot self-reference aliases for bundled extensions
@@ -96,7 +96,7 @@ export default defineConfig({
       "apps/macos/.build/**",
       "**/node_modules/**",
       "**/vendor/**",
-      "dist/OpenClaw.app/**",
+      "dist/HanzoBot.app/**",
       "**/*.live.test.ts",
       "**/*.e2e.test.ts",
     ],

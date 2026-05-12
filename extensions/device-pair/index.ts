@@ -436,7 +436,7 @@ export default function register(api: BotPluginApi) {
             if (send) {
               await send(
                 target,
-                ["Scan this QR code with the OpenClaw iOS app:", "", "```", qrAscii, "```"].join(
+                ["Scan this QR code with the HanzoBot iOS app:", "", "```", qrAscii, "```"].join(
                   "\n",
                 ),
                 {
@@ -490,7 +490,7 @@ export default function register(api: BotPluginApi) {
         // WebUI + CLI/TUI: ASCII QR
         return {
           text: [
-            "Scan this QR code with the OpenClaw iOS app:",
+            "Scan this QR code with the HanzoBot iOS app:",
             "",
             "```",
             qrAscii,

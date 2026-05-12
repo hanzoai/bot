@@ -1,3 +1,8 @@
+import { spawnSync } from "node:child_process";
+import { timingSafeEqual } from "node:crypto";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
+import { join } from "node:path";
 import type { BotPluginApi, BotPluginService, BotPluginServiceContext } from "bot/plugin-sdk";
 import {
   emptyPluginConfigSchema,
@@ -5,11 +10,6 @@ import {
   onDiagnosticEvent,
   jsonResult,
 } from "bot/plugin-sdk";
-import { spawnSync } from "node:child_process";
-import { timingSafeEqual } from "node:crypto";
-import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from "node:fs";
-import { homedir, tmpdir } from "node:os";
-import { join } from "node:path";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -507,7 +507,7 @@ function createFixLoopController(api: BotPluginApi, state: FixLoopState, config:
       writeFileSync(promptFile, prompt, "utf-8");
 
       // Use spawnSync with argument array — no shell interpolation
-      const result = spawnSync("hanzo-bot", ["agent", "--model", model, "--non-interactive"], {
+      const result = spawnSync("bot", ["agent", "--model", model, "--non-interactive"], {
         input: prompt,
         encoding: "utf-8",
         maxBuffer: 1024 * 1024 * 10,

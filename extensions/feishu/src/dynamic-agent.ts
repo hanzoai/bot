@@ -1,7 +1,7 @@
-import type { BotConfig, PluginRuntime } from "@hanzo/bot/plugin-sdk/feishu";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { BotConfig, PluginRuntime } from "@hanzo/bot/plugin-sdk/feishu";
 import type { DynamicAgentCreationConfig } from "./types.js";
 
 export type MaybeCreateDynamicAgentResult = {
@@ -77,8 +77,8 @@ export async function maybeCreateDynamicAgent(params: {
   }
 
   // Resolve path templates with substitutions
-  const workspaceTemplate = dynamicCfg.workspaceTemplate ?? "~/.openclaw/workspace-{agentId}";
-  const agentDirTemplate = dynamicCfg.agentDirTemplate ?? "~/.openclaw/agents/{agentId}/agent";
+  const workspaceTemplate = dynamicCfg.workspaceTemplate ?? "~/.bot/workspace-{agentId}";
+  const agentDirTemplate = dynamicCfg.agentDirTemplate ?? "~/.bot/agents/{agentId}/agent";
 
   const workspace = resolveUserPath(
     workspaceTemplate.replace("{userId}", senderOpenId).replace("{agentId}", agentId),

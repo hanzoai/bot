@@ -8,12 +8,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { BotConfig } from "../config/config.js";
-import type { InternalHookHandler } from "./internal-hooks.js";
 import { openBoundaryFile } from "../infra/boundary-file-read.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { resolveHookConfig } from "./config.js";
 import { shouldIncludeHook } from "./config.js";
 import { buildImportUrl } from "./import-url.js";
+import type { InternalHookHandler } from "./internal-hooks.js";
 import { registerInternalHook } from "./internal-hooks.js";
 import { resolveFunctionModuleExport } from "./module-loader.js";
 import { loadWorkspaceHookEntries } from "./workspace.js";
@@ -27,7 +27,7 @@ const log = createSubsystemLogger("hooks:loader");
  * 1. Directory-based discovery (bundled, managed, workspace)
  * 2. Legacy config handlers (backwards compatibility)
  *
- * @param cfg - OpenClaw configuration
+ * @param cfg - HanzoBot configuration
  * @param workspaceDir - Workspace directory for hook discovery
  * @returns Number of handlers successfully loaded
  *
@@ -170,7 +170,7 @@ export async function loadInternalHooks(
       fs.closeSync(opened.fd);
 
       // Legacy handlers are always workspace-relative, so use mtime-based cache busting
-      const importUrl = buildImportUrl(safeModulePath, "openclaw-workspace");
+      const importUrl = buildImportUrl(safeModulePath, "bot-workspace");
       const mod = (await import(importUrl)) as Record<string, unknown>;
 
       // Get the handler function

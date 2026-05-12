@@ -49,7 +49,7 @@ async function expectBedrockAuthSource(params: {
 
 describe("getApiKeyForModel", () => {
   it("migrates legacy oauth.json into auth-profiles.json", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-oauth-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-oauth-"));
 
     try {
       const agentDir = path.join(tempDir, "agent");
@@ -115,7 +115,7 @@ describe("getApiKeyForModel", () => {
   });
 
   it("suggests openai-codex when only Codex OAuth is configured", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-auth-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-auth-"));
 
     try {
       const agentDir = path.join(tempDir, "agent");

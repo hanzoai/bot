@@ -72,7 +72,7 @@ describe("restart-helper", () => {
       });
       expect(scriptPath.endsWith(".sh")).toBe(true);
       expect(content).toContain("#!/bin/sh");
-      expect(content).toContain("systemctl --user restart 'openclaw-gateway.service'");
+      expect(content).toContain("systemctl --user restart 'bot-gateway.service'");
       // Script should self-cleanup
       expect(content).toContain('rm -f "$0"');
       await cleanupScript(scriptPath);
@@ -110,9 +110,9 @@ describe("restart-helper", () => {
 
       const { scriptPath, content } = await prepareAndReadScript({
         BOT_PROFILE: "default",
-        BOT_LAUNCHD_LABEL: "com.custom.openclaw",
+        BOT_LAUNCHD_LABEL: "com.custom.bot",
       });
-      expect(content).toContain("launchctl kickstart -k 'gui/501/com.custom.openclaw'");
+      expect(content).toContain("launchctl kickstart -k 'gui/501/com.custom.bot'");
       await cleanupScript(scriptPath);
     });
 
@@ -124,8 +124,8 @@ describe("restart-helper", () => {
       });
       expect(scriptPath.endsWith(".bat")).toBe(true);
       expect(content).toContain("@echo off");
-      expect(content).toContain('schtasks /End /TN "OpenClaw Gateway"');
-      expect(content).toContain('schtasks /Run /TN "OpenClaw Gateway"');
+      expect(content).toContain('schtasks /End /TN "HanzoBot Gateway"');
+      expect(content).toContain('schtasks /Run /TN "HanzoBot Gateway"');
       expectWindowsRestartWaitOrdering(content);
       // Batch self-cleanup
       expect(content).toContain('del "%~f0"');
@@ -137,10 +137,10 @@ describe("restart-helper", () => {
 
       const { scriptPath, content } = await prepareAndReadScript({
         BOT_PROFILE: "default",
-        BOT_WINDOWS_TASK_NAME: "OpenClaw Gateway (custom)",
+        BOT_WINDOWS_TASK_NAME: "HanzoBot Gateway (custom)",
       });
-      expect(content).toContain('schtasks /End /TN "OpenClaw Gateway (custom)"');
-      expect(content).toContain('schtasks /Run /TN "OpenClaw Gateway (custom)"');
+      expect(content).toContain('schtasks /End /TN "HanzoBot Gateway (custom)"');
+      expect(content).toContain('schtasks /Run /TN "HanzoBot Gateway (custom)"');
       expectWindowsRestartWaitOrdering(content);
       await cleanupScript(scriptPath);
     });
@@ -168,7 +168,7 @@ describe("restart-helper", () => {
       const { scriptPath, content } = await prepareAndReadScript({
         BOT_PROFILE: "production",
       });
-      expect(content).toContain("openclaw-gateway-production.service");
+      expect(content).toContain("bot-gateway-production.service");
       await cleanupScript(scriptPath);
     });
 
@@ -179,7 +179,7 @@ describe("restart-helper", () => {
       const { scriptPath, content } = await prepareAndReadScript({
         BOT_PROFILE: "staging",
       });
-      expect(content).toContain("gui/502/ai.openclaw.staging");
+      expect(content).toContain("gui/502/ai.hanzo.bot.staging");
       await cleanupScript(scriptPath);
     });
 
@@ -189,7 +189,7 @@ describe("restart-helper", () => {
       const { scriptPath, content } = await prepareAndReadScript({
         BOT_PROFILE: "production",
       });
-      expect(content).toContain('schtasks /End /TN "OpenClaw Gateway (production)"');
+      expect(content).toContain('schtasks /End /TN "HanzoBot Gateway (production)"');
       expectWindowsRestartWaitOrdering(content);
       await cleanupScript(scriptPath);
     });
@@ -257,10 +257,10 @@ describe("restart-helper", () => {
 
       const { scriptPath, content } = await prepareAndReadScript({
         HOME: "/Users/testuser",
-        BOT_LAUNCHD_LABEL: "ai.openclaw.it's-a-test",
+        BOT_LAUNCHD_LABEL: "ai.hanzo.bot.it's-a-test",
       });
       // The plist path must also shell-escape the label to prevent injection
-      expect(content).toContain("ai.openclaw.it'\\''s-a-test.plist");
+      expect(content).toContain("ai.hanzo.bot.it'\\''s-a-test.plist");
       await cleanupScript(scriptPath);
     });
 

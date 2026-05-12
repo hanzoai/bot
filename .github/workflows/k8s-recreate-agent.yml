@@ -58,7 +58,7 @@ jobs:
                     args:
                       - |
                         const fs=require('fs');
-                        const dir='/home/node/.openclaw/agents/main/agent';
+                        const dir='/home/node/.hanzo-bot/agents/main/agent';
                         fs.mkdirSync(dir,{recursive:true});
                         const p={version:1,profiles:{'anthropic:default':{type:'api_key',provider:'anthropic',key:process.env.ANTHROPIC_API_KEY},'hanzo:default':{type:'api_key',provider:'hanzo',key:process.env.HANZO_API_KEY}},default:'anthropic:default'};
                         fs.writeFileSync(dir+'/auth-profiles.json',JSON.stringify(p));
@@ -75,8 +75,8 @@ jobs:
                             name: bot-secrets
                             key: HANZO_API_KEY
                     volumeMounts:
-                      - name: openclaw-state
-                        mountPath: /home/node/.openclaw
+                      - name: hanzo-bot-state
+                        mountPath: /home/node/.hanzo-bot
                 containers:
                   - name: cloud-agent
                     image: ghcr.io/hanzoai/bot:1.4.2
@@ -87,9 +87,9 @@ jobs:
                         value: /home/node
                       - name: NODE_ENV
                         value: production
-                      - name: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
+                      - name: HANZO_BOT_ALLOW_INSECURE_PRIVATE_WS
                         value: "1"
-                      - name: OPENCLAW_GATEWAY_TOKEN
+                      - name: HANZO_BOT_GATEWAY_TOKEN
                         valueFrom:
                           secretKeyRef:
                             name: bot-secrets
@@ -114,8 +114,8 @@ jobs:
                       - name: OPERATIVE_URL
                         value: http://localhost:8501
                     volumeMounts:
-                      - name: openclaw-state
-                        mountPath: /home/node/.openclaw
+                      - name: hanzo-bot-state
+                        mountPath: /home/node/.hanzo-bot
                     resources:
                       requests:
                         cpu: 100m
@@ -157,7 +157,7 @@ jobs:
                         memory: 4Gi
                         cpu: "2"
                 volumes:
-                  - name: openclaw-state
+                  - name: hanzo-bot-state
                     emptyDir: {}
           YAML
 
@@ -175,7 +175,7 @@ jobs:
 
           echo ""
           echo "=== Auth-profiles check ==="
-          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- cat /home/node/.openclaw/agents/main/agent/auth-profiles.json 2>/dev/null | head -1 || echo "No auth-profiles"
+          kubectl exec -n hanzo deploy/cloud-agent -c cloud-agent -- cat /home/node/.hanzo-bot/agents/main/agent/auth-profiles.json 2>/dev/null | head -1 || echo "No auth-profiles"
 
           echo ""
           echo "=== Gateway health ==="

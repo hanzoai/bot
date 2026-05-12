@@ -1,6 +1,6 @@
-import JSZip from "jszip";
 import fs from "node:fs/promises";
 import path from "node:path";
+import JSZip from "jszip";
 import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { isPathWithinBase } from "../../test/helpers/paths.js";
@@ -12,7 +12,7 @@ describe("media store", () => {
   let tempHome: TempHomeEnv;
 
   beforeAll(async () => {
-    tempHome = await createTempHomeEnv("openclaw-test-home-");
+    tempHome = await createTempHomeEnv("bot-test-home-");
     home = tempHome.home;
     store = await import("./store.js");
   });
@@ -35,7 +35,7 @@ describe("media store", () => {
     await withTempStore(async (store, home) => {
       const dir = await store.ensureMediaDir();
       expect(isPathWithinBase(home, dir)).toBe(true);
-      expect(path.normalize(dir)).toContain(`${path.sep}.openclaw${path.sep}media`);
+      expect(path.normalize(dir)).toContain(`${path.sep}.bot${path.sep}media`);
       const stat = await fs.stat(dir);
       expect(stat.isDirectory()).toBe(true);
     });

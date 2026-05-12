@@ -1,9 +1,9 @@
-import type { AgentMessage } from "@mariozechner/pi-agent-core";
-import type { Api, Model } from "@mariozechner/pi-ai";
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { AgentMessage } from "@mariozechner/pi-agent-core";
+import type { Api, Model } from "@mariozechner/pi-ai";
+import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { describe, expect, it, vi } from "vitest";
 import * as compactionModule from "../compaction.js";
 import { castAgentMessage } from "../test-helpers/agent-message-fixtures.js";
@@ -1515,7 +1515,7 @@ describe("compaction-safeguard double-compaction guard", () => {
 async function expectWorkspaceSummaryEmptyForAgentsAlias(
   createAlias: (outsidePath: string, agentsPath: string) => void,
 ) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-compaction-summary-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-compaction-summary-"));
   const prevCwd = process.cwd();
   try {
     const outside = path.join(root, "outside-secret.txt");

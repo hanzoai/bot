@@ -1,7 +1,6 @@
 import type { BrowserFormField } from "../client-actions-core.js";
-import type { BrowserRouteContext } from "../server-context.js";
-import type { BrowserRouteRegistrar } from "./types.js";
 import { normalizeBrowserFormField } from "../form-fields.js";
+import type { BrowserRouteContext } from "../server-context.js";
 import { registerBrowserAgentActDownloadRoutes } from "./agent.act.download.js";
 import { registerBrowserAgentActHookRoutes } from "./agent.act.hooks.js";
 import {
@@ -16,6 +15,7 @@ import {
   withPlaywrightRouteContext,
   SELECTOR_UNSUPPORTED_MESSAGE,
 } from "./agent.shared.js";
+import type { BrowserRouteRegistrar } from "./types.js";
 import { jsonError, toBoolean, toNumber, toStringArray, toStringOrEmpty } from "./utils.js";
 
 export function registerBrowserAgentActRoutes(
@@ -241,7 +241,7 @@ export function registerBrowserAgentActRoutes(
                 403,
                 [
                   "wait --fn is disabled by config (browser.evaluateEnabled=false).",
-                  "Docs: /gateway/configuration#browser-openclaw-managed-browser",
+                  "Docs: /gateway/configuration#browser-bot-managed-browser",
                 ].join("\n"),
               );
             }
@@ -281,7 +281,7 @@ export function registerBrowserAgentActRoutes(
                 403,
                 [
                   "act:evaluate is disabled by config (browser.evaluateEnabled=false).",
-                  "Docs: /gateway/configuration#browser-openclaw-managed-browser",
+                  "Docs: /gateway/configuration#browser-bot-managed-browser",
                 ].join("\n"),
               );
             }

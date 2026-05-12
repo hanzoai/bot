@@ -1,5 +1,5 @@
-import type { AddressInfo } from "node:net";
 import fs from "node:fs/promises";
+import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -46,7 +46,7 @@ describe("media server", () => {
   }
 
   beforeAll(async () => {
-    MEDIA_DIR = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-media-test-"));
+    MEDIA_DIR = await fs.mkdtemp(path.join(os.tmpdir(), "bot-media-test-"));
     server = await startMediaServer(0, 1_000);
     port = (server.address() as AddressInfo).port;
   });

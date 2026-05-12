@@ -4,9 +4,9 @@
 //   1. ui/public/skills-catalog.json  — JSON catalog for the list page
 //   2. ui/public/skills/{slug}.html   — Individual SEO-optimized detail pages
 
-import MarkdownIt from "markdown-it";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import MarkdownIt from "markdown-it";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const SKILLS_DIR = path.join(ROOT, "skills");
@@ -137,8 +137,7 @@ function parseSkillMd(slug: string, filePath: string): SkillData | null {
     metaStr = metaStr.replace(/,(\s*[}\]])/g, "$1");
     try {
       const meta = JSON.parse(metaStr);
-      // Support both "bot" and "hanzo-bot" keys
-      const bot = meta.bot || meta["hanzo-bot"] || {};
+      const bot = meta.bot || {};
       emoji = bot.emoji || "🔧";
       requires = bot.requires || {};
       install = (bot.install || []).map((i: Record<string, unknown>) => ({
