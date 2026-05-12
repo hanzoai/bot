@@ -15,7 +15,7 @@ describe("ACP binding cutover schema", () => {
                 agent: "codex",
                 backend: "acpx",
                 mode: "persistent",
-                cwd: "/workspace/openclaw",
+                cwd: "/workspace/bot",
               },
             },
           },

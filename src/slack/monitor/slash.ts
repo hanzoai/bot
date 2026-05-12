@@ -1,19 +1,19 @@
 import type { SlackActionMiddlewareArgs, SlackCommandMiddlewareArgs } from "@slack/bolt";
-import type { ReplyPayload } from "../../auto-reply/types.js";
-import type { ResolvedSlackAccount } from "../accounts.js";
-import type { SlackMonitorContext } from "./context.js";
 import {
   type ChatCommandDefinition,
   type CommandArgs,
 } from "../../auto-reply/commands-registry.js";
+import type { ReplyPayload } from "../../auto-reply/types.js";
 import { resolveCommandAuthorizedFromAuthorizers } from "../../channels/command-gating.js";
 import { resolveNativeCommandsEnabled, resolveNativeSkillsEnabled } from "../../config/commands.js";
 import { danger, logVerbose } from "../../globals.js";
 import { chunkItems } from "../../utils/chunk-items.js";
+import type { ResolvedSlackAccount } from "../accounts.js";
 import { resolveSlackAllowListMatch, resolveSlackUserAllowed } from "./allow-list.js";
 import { resolveSlackEffectiveAllowFrom } from "./auth.js";
 import { resolveSlackChannelConfig, type SlackChannelConfigResolved } from "./channel-config.js";
 import { buildSlackSlashCommandMatcher, resolveSlackSlashCommandConfig } from "./commands.js";
+import type { SlackMonitorContext } from "./context.js";
 import { normalizeSlackChannelType } from "./context.js";
 import { authorizeSlackDirectMessage } from "./dm-auth.js";
 import {
@@ -27,7 +27,7 @@ import { resolveSlackRoomContextHints } from "./room-context.js";
 
 type SlackBlock = { type: string; [key: string]: unknown };
 
-const SLACK_COMMAND_ARG_ACTION_ID = "openclaw_cmdarg";
+const SLACK_COMMAND_ARG_ACTION_ID = "bot_cmdarg";
 const SLACK_COMMAND_ARG_VALUE_PREFIX = "cmdarg";
 const SLACK_COMMAND_ARG_BUTTON_ROW_SIZE = 5;
 const SLACK_COMMAND_ARG_OVERFLOW_MIN = 3;

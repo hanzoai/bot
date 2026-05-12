@@ -1,4 +1,3 @@
-import type { EditToolOptions } from "@mariozechner/pi-coding-agent";
 /**
  * Tests for edit tool post-write recovery: when the upstream library throws after
  * having already written the file (e.g. generateDiffString fails), we catch and
@@ -7,6 +6,7 @@ import type { EditToolOptions } from "@mariozechner/pi-coding-agent";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import type { EditToolOptions } from "@mariozechner/pi-coding-agent";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -46,7 +46,7 @@ describe("createHostWorkspaceEditTool post-write recovery", () => {
   });
 
   it("returns success when upstream throws but file has newText and no longer has oldText", async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-edit-recovery-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-edit-recovery-"));
     const filePath = path.join(tmpDir, "MEMORY.md");
     const oldText = "# Memory";
     const newText = "Blog Writing";
@@ -64,7 +64,7 @@ describe("createHostWorkspaceEditTool post-write recovery", () => {
   });
 
   it("rethrows when file on disk does not contain newText", async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-edit-recovery-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-edit-recovery-"));
     const filePath = path.join(tmpDir, "other.md");
     await fs.writeFile(filePath, "unchanged content", "utf-8");
 
@@ -75,7 +75,7 @@ describe("createHostWorkspaceEditTool post-write recovery", () => {
   });
 
   it("rethrows when file still contains oldText (pre-write failure; avoid false success)", async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-edit-recovery-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-edit-recovery-"));
     const filePath = path.join(tmpDir, "pre-write-fail.md");
     const oldText = "replace me";
     const newText = "new content";

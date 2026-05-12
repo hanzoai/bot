@@ -23,7 +23,7 @@ describe("cli json stdout contract", () => {
         delete env.BOT_CONFIG_PATH;
         delete env.VITEST;
 
-        const entry = path.resolve(process.cwd(), "openclaw.mjs");
+        const entry = path.resolve(process.cwd(), "bot.mjs");
         const result = spawnSync(
           process.execPath,
           [entry, "update", "status", "--json", "--timeout", "1"],
@@ -38,7 +38,7 @@ describe("cli json stdout contract", () => {
         expect(stdout).not.toContain("Doctor changes");
         expect(stdout).not.toContain("Config invalid");
       },
-      { prefix: "openclaw-json-e2e-" },
+      { prefix: "bot-json-e2e-" },
     );
   });
 });

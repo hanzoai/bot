@@ -1,10 +1,6 @@
 import Contacts
 import Foundation
-<<<<<<< HEAD
 import BotKit
-=======
-import OpenClawKit
->>>>>>> upstream/main
 
 final class ContactsService: ContactsServicing {
     private static var payloadKeys: [CNKeyDescriptor] {
@@ -18,7 +14,6 @@ final class ContactsService: ContactsServicing {
         ]
     }
 
-<<<<<<< HEAD
     func search(params: HanzoBotContactsSearchParams) async throws -> HanzoBotContactsSearchPayload {
         let store = CNContactStore()
         let status = CNContactStore.authorizationStatus(for: .contacts)
@@ -28,10 +23,6 @@ final class ContactsService: ContactsServicing {
                 NSLocalizedDescriptionKey: "CONTACTS_PERMISSION_REQUIRED: grant Contacts permission",
             ])
         }
-=======
-    func search(params: OpenClawContactsSearchParams) async throws -> OpenClawContactsSearchPayload {
-        let store = try await Self.authorizedStore()
->>>>>>> upstream/main
 
         let limit = max(1, min(params.limit ?? 25, 200))
 
@@ -52,7 +43,6 @@ final class ContactsService: ContactsServicing {
         let sliced = Array(contacts.prefix(limit))
         let payload = sliced.map { Self.payload(from: $0) }
 
-<<<<<<< HEAD
         return HanzoBotContactsSearchPayload(contacts: payload)
     }
 
@@ -65,13 +55,6 @@ final class ContactsService: ContactsServicing {
                 NSLocalizedDescriptionKey: "CONTACTS_PERMISSION_REQUIRED: grant Contacts permission",
             ])
         }
-=======
-        return OpenClawContactsSearchPayload(contacts: payload)
-    }
-
-    func add(params: OpenClawContactsAddParams) async throws -> OpenClawContactsAddPayload {
-        let store = try await Self.authorizedStore()
->>>>>>> upstream/main
 
         let givenName = params.givenName?.trimmingCharacters(in: .whitespacesAndNewlines)
         let familyName = params.familyName?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -95,11 +78,7 @@ final class ContactsService: ContactsServicing {
                 phoneNumbers: phoneNumbers,
                 emails: emails)
             {
-<<<<<<< HEAD
                 return HanzoBotContactsAddPayload(contact: Self.payload(from: existing))
-=======
-                return OpenClawContactsAddPayload(contact: Self.payload(from: existing))
->>>>>>> upstream/main
             }
         }
 
@@ -130,11 +109,7 @@ final class ContactsService: ContactsServicing {
             persisted = contact
         }
 
-<<<<<<< HEAD
         return HanzoBotContactsAddPayload(contact: Self.payload(from: persisted))
-=======
-        return OpenClawContactsAddPayload(contact: Self.payload(from: persisted))
->>>>>>> upstream/main
     }
 
     private static func ensureAuthorization(store: CNContactStore, status: CNAuthorizationStatus) async -> Bool {
@@ -229,13 +204,8 @@ final class ContactsService: ContactsServicing {
         return normalized.isEmpty ? trimmed : normalized
     }
 
-<<<<<<< HEAD
     private static func payload(from contact: CNContact) -> HanzoBotContactPayload {
         HanzoBotContactPayload(
-=======
-    private static func payload(from contact: CNContact) -> OpenClawContactPayload {
-        OpenClawContactPayload(
->>>>>>> upstream/main
             identifier: contact.identifier,
             displayName: CNContactFormatter.string(from: contact, style: .fullName)
                 ?? "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespacesAndNewlines),

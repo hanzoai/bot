@@ -33,9 +33,9 @@ function hasFinding(
 }
 
 async function createAuditFixture(): Promise<AuditFixture> {
-  const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-secrets-audit-"));
-  const stateDir = path.join(rootDir, ".openclaw");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-secrets-audit-"));
+  const stateDir = path.join(rootDir, ".bot");
+  const configPath = path.join(stateDir, "bot.json");
   const authStorePath = path.join(stateDir, "agents", "main", "agent", "auth-profiles.json");
   const authJsonPath = path.join(stateDir, "agents", "main", "agent", "auth.json");
   const envPath = path.join(stateDir, ".env");

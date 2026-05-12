@@ -1,14 +1,8 @@
 import Foundation
 import Network
-<<<<<<< HEAD
 import BotKit
 import Testing
 @testable import Bot
-=======
-import OpenClawKit
-import Testing
-@testable import OpenClaw
->>>>>>> upstream/main
 
 @Suite(.serialized) struct GatewayConnectionSecurityTests {
     private func makeController() -> GatewayConnectionController {
@@ -22,11 +16,7 @@ import Testing
         gatewayPort: Int?,
         fingerprint: String?) -> GatewayDiscoveryModel.DiscoveredGateway
     {
-<<<<<<< HEAD
         let endpoint: NWEndpoint = .service(name: "Test", type: "_bot-gw._tcp", domain: "local.", interface: nil)
-=======
-        let endpoint: NWEndpoint = .service(name: "Test", type: "_openclaw-gw._tcp", domain: "local.", interface: nil)
->>>>>>> upstream/main
         return GatewayDiscoveryModel.DiscoveredGateway(
             name: "Test",
             endpoint: endpoint,
@@ -42,11 +32,7 @@ import Testing
     }
 
     private func clearTLSFingerprint(stableID: String) {
-<<<<<<< HEAD
         let suite = UserDefaults(suiteName: "ai.bot.shared") ?? .standard
-=======
-        let suite = UserDefaults(suiteName: "ai.openclaw.shared") ?? .standard
->>>>>>> upstream/main
         suite.removeObject(forKey: "gateway.tls.\(stableID)")
     }
 
@@ -57,14 +43,10 @@ import Testing
 
         GatewayTLSStore.saveFingerprint("11", stableID: stableID)
 
-<<<<<<< HEAD
         let endpoint: NWEndpoint = .service(name: "Test", type: "_bot-gw._tcp", domain: "local.", interface: nil)
         let gateway = GatewayDiscoveryModel.DiscoveredGateway(
             name: "Test",
             endpoint: endpoint,
-=======
-        let gateway = makeDiscoveredGateway(
->>>>>>> upstream/main
             stableID: stableID,
             lanHost: "evil.example.com",
             tailnetDns: "evil.example.com",
@@ -82,14 +64,10 @@ import Testing
         defer { clearTLSFingerprint(stableID: stableID) }
         clearTLSFingerprint(stableID: stableID)
 
-<<<<<<< HEAD
         let endpoint: NWEndpoint = .service(name: "Test", type: "_bot-gw._tcp", domain: "local.", interface: nil)
         let gateway = GatewayDiscoveryModel.DiscoveredGateway(
             name: "Test",
             endpoint: endpoint,
-=======
-        let gateway = makeDiscoveredGateway(
->>>>>>> upstream/main
             stableID: stableID,
             lanHost: nil,
             tailnetDns: nil,
@@ -118,14 +96,10 @@ import Testing
         defaults.removeObject(forKey: "gateway.preferredStableID")
         defaults.set(stableID, forKey: "gateway.lastDiscoveredStableID")
 
-<<<<<<< HEAD
         let endpoint: NWEndpoint = .service(name: "Test", type: "_bot-gw._tcp", domain: "local.", interface: nil)
         let gateway = GatewayDiscoveryModel.DiscoveredGateway(
             name: "Test",
             endpoint: endpoint,
-=======
-        let gateway = makeDiscoveredGateway(
->>>>>>> upstream/main
             stableID: stableID,
             lanHost: "test.local",
             tailnetDns: nil,
@@ -142,11 +116,7 @@ import Testing
         let controller = makeController()
 
         #expect(controller._test_resolveManualUseTLS(host: "gateway.example.com", useTLS: false) == true)
-<<<<<<< HEAD
         #expect(controller._test_resolveManualUseTLS(host: "bot.local", useTLS: false) == true)
-=======
-        #expect(controller._test_resolveManualUseTLS(host: "openclaw.local", useTLS: false) == true)
->>>>>>> upstream/main
         #expect(controller._test_resolveManualUseTLS(host: "127.attacker.example", useTLS: false) == true)
 
         #expect(controller._test_resolveManualUseTLS(host: "localhost", useTLS: false) == false)

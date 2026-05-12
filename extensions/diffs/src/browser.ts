@@ -114,10 +114,10 @@ export class PlaywrightDiffScreenshotter implements DiffScreenshotter {
         await page.setContent(injectBaseHref(params.html), { waitUntil: "load" });
         await page.waitForFunction(
           () => {
-            if (document.documentElement.dataset.openclawDiffsReady === "true") {
+            if (document.documentElement.dataset.botDiffsReady === "true") {
               return true;
             }
-            return [...document.querySelectorAll("[data-openclaw-diff-host]")].every((element) => {
+            return [...document.querySelectorAll("[data-bot-diff-host]")].every((element) => {
               return (
                 element instanceof HTMLElement && element.shadowRoot?.querySelector("[data-diffs]")
               );

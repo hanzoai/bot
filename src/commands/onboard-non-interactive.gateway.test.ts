@@ -105,7 +105,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
     delete process.env.BOT_GATEWAY_TOKEN;
     delete process.env.BOT_GATEWAY_PASSWORD;
 
-    tempHome = await makeTempWorkspace("openclaw-onboard-");
+    tempHome = await makeTempWorkspace("bot-onboard-");
     process.env.HOME = tempHome;
   });
 
@@ -119,7 +119,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
   it("writes gateway token auth into config", async () => {
     await withStateDir("state-noninteractive-", async (stateDir) => {
       const token = "tok_test_123";
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "bot");
 
       await runNonInteractiveOnboarding(
         {
@@ -154,7 +154,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
   it("uses BOT_GATEWAY_TOKEN when --gateway-token is omitted", async () => {
     await withStateDir("state-env-token-", async (stateDir) => {
       const envToken = "tok_env_fallback_123";
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "bot");
       const prevToken = process.env.BOT_GATEWAY_TOKEN;
       process.env.BOT_GATEWAY_TOKEN = envToken;
 
@@ -194,7 +194,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
   it("writes gateway token SecretRef from --gateway-token-ref-env", async () => {
     await withStateDir("state-env-token-ref-", async (stateDir) => {
       const envToken = "tok_env_ref_123";
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "bot");
       const prevToken = process.env.BOT_GATEWAY_TOKEN;
       process.env.BOT_GATEWAY_TOKEN = envToken;
 
@@ -238,7 +238,7 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
 
   it("fails when --gateway-token-ref-env points to a missing env var", async () => {
     await withStateDir("state-env-token-ref-missing-", async (stateDir) => {
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "bot");
       const previous = process.env.MISSING_GATEWAY_TOKEN_ENV;
       delete process.env.MISSING_GATEWAY_TOKEN_ENV;
       try {
@@ -309,10 +309,10 @@ describe("onboard (non-interactive): gateway and remote auth", () => {
     }
     await withStateDir("state-lan-", async (stateDir) => {
       process.env.BOT_STATE_DIR = stateDir;
-      process.env.BOT_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+      process.env.BOT_CONFIG_PATH = path.join(stateDir, "bot.json");
 
       const port = getPseudoPort(40_000);
-      const workspace = path.join(stateDir, "openclaw");
+      const workspace = path.join(stateDir, "bot");
 
       await runNonInteractiveOnboarding(
         {

@@ -19,7 +19,7 @@ export async function noteMacLaunchAgentOverrides() {
     return;
   }
   const home = resolveHomeDir();
-  const markerCandidates = [path.join(home, ".openclaw", "disable-launchagent")];
+  const markerCandidates = [path.join(home, ".bot", "disable-launchagent")];
   const markerPath = markerCandidates.find((candidate) => fs.existsSync(candidate));
   if (!markerPath) {
     return;
@@ -206,8 +206,8 @@ export function noteStartupOptimizationHints(
 
   const suggestions = [
     "- Suggested env for low-power hosts:",
-    "  export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache",
-    "  mkdir -p /var/tmp/openclaw-compile-cache",
+    "  export NODE_COMPILE_CACHE=/var/tmp/bot-compile-cache",
+    "  mkdir -p /var/tmp/bot-compile-cache",
     "  export BOT_NO_RESPAWN=1",
     isTruthyEnvValue(disableCompileCache) ? "  unset NODE_DISABLE_COMPILE_CACHE" : undefined,
   ].filter((line): line is string => Boolean(line));

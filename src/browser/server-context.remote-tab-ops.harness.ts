@@ -1,12 +1,12 @@
 import { vi } from "vitest";
-import type { BrowserServerState } from "./server-context.js";
 import { withFetchPreconnect } from "../test-utils/fetch-mock.js";
+import type { BrowserServerState } from "./server-context.js";
 import { createBrowserRouteContext } from "./server-context.js";
 
 export const originalFetch = globalThis.fetch;
 
 export function makeState(
-  profile: "remote" | "openclaw",
+  profile: "remote" | "bot",
 ): BrowserServerState & { profiles: Map<string, { lastTargetId?: string | null }> } {
   return {
     // oxlint-disable-next-line typescript/no-explicit-any
@@ -36,7 +36,7 @@ export function makeState(
           cdpPort: 443,
           color: "#00AA00",
         },
-        openclaw: { cdpPort: 18800, color: "#FF4500" },
+        bot: { cdpPort: 18800, color: "#FF4500" },
       },
     },
     profiles: new Map(),

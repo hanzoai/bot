@@ -13,9 +13,9 @@ import * as client from "./iam-billing-client.js";
 const IAM_CONFIG = {
   mode: "iam" as const,
   serverUrl: "https://hanzo.id",
-  clientId: "hanzo-bot",
+  clientId: "bot",
   orgName: "hanzo",
-  appName: "hanzo-bot",
+  appName: "bot",
   jwksUrl: "http://iam.hanzo.svc/.well-known/jwks",
 };
 

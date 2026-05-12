@@ -1,7 +1,5 @@
-import type { BotConfig } from "../../../config/config.js";
-import type { WizardPrompter } from "../../../wizard/prompts.js";
-import type { ChannelOnboardingAdapter, ChannelOnboardingDmPolicy } from "../onboarding-types.js";
 import { detectBinary } from "../../../commands/onboard-helpers.js";
+import type { BotConfig } from "../../../config/config.js";
 import {
   listIMessageAccountIds,
   resolveDefaultIMessageAccountId,
@@ -9,6 +7,8 @@ import {
 } from "../../../imessage/accounts.js";
 import { normalizeIMessageHandle } from "../../../imessage/targets.js";
 import { formatDocsLink } from "../../../terminal/links.js";
+import type { WizardPrompter } from "../../../wizard/prompts.js";
+import type { ChannelOnboardingAdapter, ChannelOnboardingDmPolicy } from "../onboarding-types.js";
 import {
   parseOnboardingEntriesAllowingWildcard,
   patchChannelConfigForAccount,
@@ -165,7 +165,7 @@ export const imessageOnboardingAdapter: ChannelOnboardingAdapter = {
     await prompter.note(
       [
         "This is still a work in progress.",
-        "Ensure OpenClaw has Full Disk Access to Messages DB.",
+        "Ensure HanzoBot has Full Disk Access to Messages DB.",
         "Grant Automation permission for Messages when prompted.",
         "List chats with: imsg chats --limit 20",
         `Docs: ${formatDocsLink("/imessage", "imessage")}`,

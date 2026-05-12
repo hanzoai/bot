@@ -1,19 +1,19 @@
 import fs from "node:fs";
 import path from "node:path";
 import { beforeEach, describe, expect, it, type MockInstance, vi } from "vitest";
-import type { BotConfig } from "../config/config.js";
-import "../cron/isolated-agent.mocks.js";
-import type { RuntimeEnv } from "../runtime.js";
 import { withTempHome as withTempHomeBase } from "../../test/helpers/temp-home.js";
+import "../cron/isolated-agent.mocks.js";
 import * as cliRunnerModule from "../agents/cli-runner.js";
 import { FailoverError } from "../agents/failover-error.js";
 import { loadModelCatalog } from "../agents/model-catalog.js";
 import * as modelSelectionModule from "../agents/model-selection.js";
 import { runEmbeddedPiAgent } from "../agents/pi-embedded.js";
+import type { BotConfig } from "../config/config.js";
 import * as configModule from "../config/config.js";
 import * as sessionsModule from "../config/sessions.js";
 import { emitAgentEvent, onAgentEvent } from "../infra/agent-events.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../test-utils/channel-plugins.js";
 import { agentCommand, agentCommandFromIngress } from "./agent.js";
 import * as agentDeliveryModule from "./agent/delivery.js";
@@ -55,7 +55,7 @@ const runCliAgentSpy = vi.spyOn(cliRunnerModule, "runCliAgent");
 const deliverAgentCommandResultSpy = vi.spyOn(agentDeliveryModule, "deliverAgentCommandResult");
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
-  return withTempHomeBase(fn, { prefix: "openclaw-agent-" });
+  return withTempHomeBase(fn, { prefix: "bot-agent-" });
 }
 
 function mockConfig(
@@ -70,7 +70,7 @@ function mockConfig(
       defaults: {
         model: { primary: "anthropic/claude-opus-4-5" },
         models: { "anthropic/claude-opus-4-5": {} },
-        workspace: path.join(home, "openclaw"),
+        workspace: path.join(home, "bot"),
         ...agentOverrides,
       },
       list: agentsList,

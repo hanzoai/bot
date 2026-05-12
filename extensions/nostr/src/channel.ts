@@ -7,10 +7,10 @@ import {
   type ChannelPlugin,
 } from "@hanzo/bot/plugin-sdk/nostr";
 import type { NostrProfile } from "./config-schema.js";
-import type { MetricEvent, MetricsSnapshot } from "./metrics.js";
-import type { ProfilePublishResult } from "./nostr-profile.js";
 import { NostrConfigSchema } from "./config-schema.js";
+import type { MetricEvent, MetricsSnapshot } from "./metrics.js";
 import { normalizePubkey, startNostrBus, type NostrBusHandle } from "./nostr-bus.js";
+import type { ProfilePublishResult } from "./nostr-profile.js";
 import { getNostrRuntime } from "./runtime.js";
 import {
   listNostrAccountIds,
@@ -214,7 +214,7 @@ export const nostrPlugin: ChannelPlugin<ResolvedNostrAccount> = {
             `[${account.accountId}] DM from ${senderPubkey}: ${text.slice(0, 50)}...`,
           );
 
-          // Forward to OpenClaw's message pipeline
+          // Forward to HanzoBot's message pipeline
           await (
             runtime.channel.reply as { handleInboundMessage?: (params: unknown) => Promise<void> }
           ).handleInboundMessage?.({

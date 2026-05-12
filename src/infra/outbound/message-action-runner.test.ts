@@ -2,17 +2,17 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ChannelPlugin } from "../../channels/plugins/types.js";
-import type { BotConfig } from "../../config/config.js";
 import { slackPlugin } from "../../../extensions/slack/src/channel.js";
 import { telegramPlugin } from "../../../extensions/telegram/src/channel.js";
 import { whatsappPlugin } from "../../../extensions/whatsapp/src/channel.js";
 import { jsonResult } from "../../agents/tools/common.js";
+import type { ChannelPlugin } from "../../channels/plugins/types.js";
+import type { BotConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { createIMessageTestPlugin } from "../../test-utils/imessage-test-plugin.js";
 import { loadWebMedia } from "../../web/media.js";
-import { resolvePreferredOpenClawTmpDir } from "../tmp-openclaw-dir.js";
+import { resolvePreferredHanzoBotTmpDir } from "../tmp-bot-dir.js";
 import { runMessageAction } from "./message-action-runner.js";
 
 vi.mock("../../web/media.js", async () => {
@@ -780,8 +780,8 @@ describe("runMessageAction sandboxed media validation", () => {
     });
   });
 
-  it("allows media paths under preferred OpenClaw tmp root", async () => {
-    const tmpRoot = resolvePreferredOpenClawTmpDir();
+  it("allows media paths under preferred HanzoBot tmp root", async () => {
+    const tmpRoot = resolvePreferredHanzoBotTmpDir();
     await fs.mkdir(tmpRoot, { recursive: true });
     const sandboxDir = await fs.mkdtemp(path.join(os.tmpdir(), "msg-sandbox-"));
     try {
@@ -805,7 +805,7 @@ describe("runMessageAction sandboxed media validation", () => {
       }
       // runMessageAction normalizes media paths through platform resolution.
       expect(result.sendResult?.mediaUrl).toBe(path.resolve(tmpFile));
-      const hostTmpOutsideOpenClaw = path.join(os.tmpdir(), "outside-openclaw", "test-media.png");
+      const hostTmpOutsideHanzoBot = path.join(os.tmpdir(), "outside-bot", "test-media.png");
       await expect(
         runMessageAction({
           cfg: slackConfig,
@@ -813,7 +813,7 @@ describe("runMessageAction sandboxed media validation", () => {
           params: {
             channel: "slack",
             target: "#C12345678",
-            media: hostTmpOutsideOpenClaw,
+            media: hostTmpOutsideHanzoBot,
             message: "",
           },
           sandboxRoot: sandboxDir,
