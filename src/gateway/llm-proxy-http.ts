@@ -13,12 +13,12 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { createSubsystemLogger } from "../logging/subsystem.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import type { ResolvedGatewayAuth } from "./auth.js";
 import { authorizeGatewayBearerRequestOrReply } from "./http-auth-helpers.js";
-import { readJsonBodyOrError, sendJson, sendMethodNotAllowed, setSseHeaders } from "./http-common.js";
+import { readJsonBodyOrError, sendJson, sendMethodNotAllowed } from "./http-common.js";
 import { getBearerToken } from "./http-utils.js";
-import { createSubsystemLogger } from "../logging/subsystem.js";
 
 const log = createSubsystemLogger("llm-proxy");
 
@@ -41,11 +41,7 @@ function resolveUpstreamBaseUrl(): string {
 
 /** Extract the upstream API key from environment or fall through to caller's bearer token. */
 function resolveUpstreamApiKey(callerToken: string | undefined): string | undefined {
-  return (
-    process.env.OPENAI_API_KEY?.trim() ||
-    process.env.LLM_API_KEY?.trim() ||
-    callerToken
-  );
+  return process.env.OPENAI_API_KEY?.trim() || process.env.LLM_API_KEY?.trim() || callerToken;
 }
 
 const PROXY_POST_PATHS = new Set(["/v1/completions", "/v1/embeddings", "/v1/messages"]);
@@ -121,7 +117,8 @@ async function proxyPostRequest(
   const headers = buildUpstreamHeaders(pathname, apiKey, "application/json");
 
   const requestBody = JSON.stringify(body);
-  const isStream = typeof body === "object" && body !== null && (body as Record<string, unknown>).stream === true;
+  const isStream =
+    typeof body === "object" && body !== null && (body as Record<string, unknown>).stream === true;
 
   let upstreamRes: Response;
   try {

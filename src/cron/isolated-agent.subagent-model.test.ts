@@ -2,20 +2,20 @@ import "./isolated-agent.mocks.js";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { CliDeps } from "../cli/deps.js";
-import type { BotConfig } from "../config/config.js";
-import type { CronJob } from "./types.js";
 import { withTempHome as withTempHomeHelper } from "../../test/helpers/temp-home.js";
 import { loadModelCatalog } from "../agents/model-catalog.js";
 import { runEmbeddedPiAgent } from "../agents/pi-embedded.js";
+import type { CliDeps } from "../cli/deps.js";
+import type { BotConfig } from "../config/config.js";
 import { runCronIsolatedAgentTurn } from "./isolated-agent.js";
+import type { CronJob } from "./types.js";
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
-  return withTempHomeHelper(fn, { prefix: "openclaw-cron-submodel-" });
+  return withTempHomeHelper(fn, { prefix: "bot-cron-submodel-" });
 }
 
 async function writeSessionStore(home: string) {
-  const dir = path.join(home, ".openclaw", "sessions");
+  const dir = path.join(home, ".bot", "sessions");
   await fs.mkdir(dir, { recursive: true });
   const storePath = path.join(dir, "sessions.json");
   await fs.writeFile(
@@ -42,7 +42,7 @@ function makeCfg(home: string, storePath: string, overrides: Partial<BotConfig> 
     agents: {
       defaults: {
         model: "anthropic/claude-sonnet-4-5",
-        workspace: path.join(home, "openclaw"),
+        workspace: path.join(home, "bot"),
       },
     },
     session: { store: storePath, mainKey: "main" },
@@ -159,7 +159,7 @@ describe("runCronIsolatedAgentTurn: subagent model resolution (#11461)", () => {
               agents: {
                 defaults: {
                   ...cfgOverrides.agents?.defaults,
-                  workspace: path.join(home, "openclaw"),
+                  workspace: path.join(home, "bot"),
                 },
               },
             } satisfies Partial<BotConfig>);
@@ -177,7 +177,7 @@ describe("runCronIsolatedAgentTurn: subagent model resolution (#11461)", () => {
           agents: {
             defaults: {
               model: "anthropic/claude-sonnet-4-5",
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
               subagents: { model: "ollama/llama3.2:3b" },
             },
           },
