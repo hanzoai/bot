@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference for `openclaw secrets` (reload, audit, configure, apply)"
+summary: "CLI reference for `hanzo-bot secrets` (reload, audit, configure, apply)"
 read_when:
   - Re-resolving secret refs at runtime
   - Auditing plaintext residues and unresolved refs
@@ -7,9 +7,9 @@ read_when:
 title: "secrets"
 ---
 
-# `openclaw secrets`
+# `hanzo-bot secrets`
 
-Use `openclaw secrets` to manage SecretRefs and keep the active runtime snapshot healthy.
+Use `hanzo-bot secrets` to manage SecretRefs and keep the active runtime snapshot healthy.
 
 Command roles:
 
@@ -21,12 +21,12 @@ Command roles:
 Recommended operator loop:
 
 ```bash
-openclaw secrets audit --check
-openclaw secrets configure
-openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run
-openclaw secrets apply --from /tmp/openclaw-secrets-plan.json
-openclaw secrets audit --check
-openclaw secrets reload
+hanzo-bot secrets audit --check
+hanzo-bot secrets configure
+hanzo-bot secrets apply --from /tmp/hanzo-bot-secrets-plan.json --dry-run
+hanzo-bot secrets apply --from /tmp/hanzo-bot-secrets-plan.json
+hanzo-bot secrets audit --check
+hanzo-bot secrets reload
 ```
 
 Exit code note for CI/gates:
@@ -45,8 +45,8 @@ Related:
 Re-resolve secret refs and atomically swap runtime snapshot.
 
 ```bash
-openclaw secrets reload
-openclaw secrets reload --json
+hanzo-bot secrets reload
+hanzo-bot secrets reload --json
 ```
 
 Notes:
@@ -57,17 +57,17 @@ Notes:
 
 ## Audit
 
-Scan OpenClaw state for:
+Scan HanzoBot state for:
 
 - plaintext secret storage
 - unresolved refs
-- precedence drift (`auth-profiles.json` credentials shadowing `openclaw.json` refs)
+- precedence drift (`auth-profiles.json` credentials shadowing `hanzo-bot.json` refs)
 - legacy residues (legacy auth store entries, OAuth reminders)
 
 ```bash
-openclaw secrets audit
-openclaw secrets audit --check
-openclaw secrets audit --json
+hanzo-bot secrets audit
+hanzo-bot secrets audit --check
+hanzo-bot secrets audit --json
 ```
 
 Exit behavior:
@@ -90,13 +90,13 @@ Report shape highlights:
 Build provider and SecretRef changes interactively, run preflight, and optionally apply:
 
 ```bash
-openclaw secrets configure
-openclaw secrets configure --plan-out /tmp/openclaw-secrets-plan.json
-openclaw secrets configure --apply --yes
-openclaw secrets configure --providers-only
-openclaw secrets configure --skip-provider-setup
-openclaw secrets configure --agent ops
-openclaw secrets configure --json
+hanzo-bot secrets configure
+hanzo-bot secrets configure --plan-out /tmp/hanzo-bot-secrets-plan.json
+hanzo-bot secrets configure --apply --yes
+hanzo-bot secrets configure --providers-only
+hanzo-bot secrets configure --skip-provider-setup
+hanzo-bot secrets configure --agent ops
+hanzo-bot secrets configure --json
 ```
 
 Flow:
@@ -115,7 +115,7 @@ Notes:
 
 - Requires an interactive TTY.
 - You cannot combine `--providers-only` with `--skip-provider-setup`.
-- `configure` targets secret-bearing fields in `openclaw.json` plus `auth-profiles.json` for the selected agent scope.
+- `configure` targets secret-bearing fields in `hanzo-bot.json` plus `auth-profiles.json` for the selected agent scope.
 - `configure` supports creating new `auth-profiles.json` mappings directly in the picker flow.
 - Canonical supported surface: [SecretRef Credential Surface](/reference/secretref-credential-surface).
 - It performs preflight resolution before apply.
@@ -128,16 +128,16 @@ Exec provider safety note:
 
 - Homebrew installs often expose symlinked binaries under `/opt/homebrew/bin/*`.
 - Set `allowSymlinkCommand: true` only when needed for trusted package-manager paths, and pair it with `trustedDirs` (for example `["/opt/homebrew"]`).
-- On Windows, if ACL verification is unavailable for a provider path, OpenClaw fails closed. For trusted paths only, set `allowInsecurePath: true` on that provider to bypass path security checks.
+- On Windows, if ACL verification is unavailable for a provider path, HanzoBot fails closed. For trusted paths only, set `allowInsecurePath: true` on that provider to bypass path security checks.
 
 ## Apply a saved plan
 
 Apply or preflight a plan generated previously:
 
 ```bash
-openclaw secrets apply --from /tmp/openclaw-secrets-plan.json
-openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --dry-run
-openclaw secrets apply --from /tmp/openclaw-secrets-plan.json --json
+hanzo-bot secrets apply --from /tmp/hanzo-bot-secrets-plan.json
+hanzo-bot secrets apply --from /tmp/hanzo-bot-secrets-plan.json --dry-run
+hanzo-bot secrets apply --from /tmp/hanzo-bot-secrets-plan.json --json
 ```
 
 Plan contract details (allowed target paths, validation rules, and failure semantics):
@@ -146,10 +146,10 @@ Plan contract details (allowed target paths, validation rules, and failure seman
 
 What `apply` may update:
 
-- `openclaw.json` (SecretRef targets + provider upserts/deletes)
+- `hanzo-bot.json` (SecretRef targets + provider upserts/deletes)
 - `auth-profiles.json` (provider-target scrubbing)
 - legacy `auth.json` residues
-- `~/.openclaw/.env` known secret keys whose values were migrated
+- `~/.hanzo-bot/.env` known secret keys whose values were migrated
 
 ## Why no rollback backups
 
@@ -160,9 +160,9 @@ Safety comes from strict preflight + atomic-ish apply with best-effort in-memory
 ## Example
 
 ```bash
-openclaw secrets audit --check
-openclaw secrets configure
-openclaw secrets audit --check
+hanzo-bot secrets audit --check
+hanzo-bot secrets configure
+hanzo-bot secrets audit --check
 ```
 
 If `audit --check` still reports plaintext findings, update the remaining reported target paths and rerun audit.

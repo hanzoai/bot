@@ -1,12 +1,12 @@
 {
   "name": "@hanzo/bot-bluebubbles",
   "version": "1.4.2",
-  "description": "OpenClaw BlueBubbles channel plugin",
+  "description": "HanzoBot BlueBubbles channel plugin",
   "type": "module",
   "dependencies": {
     "zod": "^4.3.6"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ],

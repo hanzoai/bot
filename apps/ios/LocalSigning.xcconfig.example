@@ -1,7 +1,6 @@
 // Copy to LocalSigning.xcconfig for personal local signing overrides.
 // This file is only an example and should stay committed.
 
-<<<<<<< HEAD
 BOT_CODE_SIGN_STYLE = Automatic
 BOT_DEVELOPMENT_TEAM = P5Z8X89DJL
 
@@ -13,16 +12,3 @@ BOT_WATCH_EXTENSION_BUNDLE_ID = ai.bot.ios.test.mariano.watchkitapp.extension
 // Leave empty with automatic signing.
 BOT_APP_PROFILE =
 BOT_SHARE_PROFILE =
-=======
-BOT_CODE_SIGN_STYLE = Automatic
-BOT_DEVELOPMENT_TEAM = P5Z8X89DJL
-
-BOT_APP_BUNDLE_ID = ai.openclaw.ios.test.mariano
-BOT_SHARE_BUNDLE_ID = ai.openclaw.ios.test.mariano.share
-BOT_WATCH_APP_BUNDLE_ID = ai.openclaw.ios.test.mariano.watchkitapp
-BOT_WATCH_EXTENSION_BUNDLE_ID = ai.openclaw.ios.test.mariano.watchkitapp.extension
-
-// Leave empty with automatic signing.
-BOT_APP_PROFILE =
-BOT_SHARE_PROFILE =
->>>>>>> upstream/main

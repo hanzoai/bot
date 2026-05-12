@@ -1,6 +1,5 @@
 import type { AssistantMessage } from "@mariozechner/pi-ai";
 import type { BotConfig } from "../../config/config.js";
-import type { FailoverReason } from "./types.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { formatSandboxToolPolicyBlockedMessage } from "../sandbox.js";
 import { stableStringify } from "../stable-stringify.js";
@@ -14,6 +13,7 @@ import {
   isTimeoutErrorMessage,
   matchesFormatErrorPattern,
 } from "./failover-matches.js";
+import type { FailoverReason } from "./types.js";
 
 export {
   isAuthErrorMessage,
@@ -795,7 +795,7 @@ export function isModelNotFoundErrorMessage(raw: string): boolean {
   }
   const lower = raw.toLowerCase();
 
-  // Direct pattern matches from OpenClaw internals and common providers.
+  // Direct pattern matches from HanzoBot internals and common providers.
   if (
     lower.includes("unknown model") ||
     lower.includes("model not found") ||

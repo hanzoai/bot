@@ -17,9 +17,9 @@ export type {
 } from "../acp/runtime/types.js";
 export type {
   BotPluginApi,
-  OpenClawPluginConfigSchema,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  HanzoBotPluginConfigSchema,
+  HanzoBotPluginService,
+  HanzoBotPluginServiceContext,
   PluginLogger,
 } from "../plugins/types.js";
 export type {

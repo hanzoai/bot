@@ -1,15 +1,15 @@
-import type { Bot } from "grammy";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { RuntimeEnv } from "../runtime.js";
+import type { Bot } from "grammy";
 import { resolveStateDir } from "../config/paths.js";
 import {
   normalizeTelegramCommandName,
   TELEGRAM_COMMAND_NAME_PATTERN,
 } from "../config/telegram-custom-commands.js";
 import { logVerbose } from "../globals.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 
 export const TELEGRAM_MAX_COMMANDS = 100;
@@ -166,7 +166,7 @@ export function syncTelegramMenuCommands(params: {
     // Skip sync if the command list hasn't changed since the last successful
     // sync. This prevents hitting Telegram's 429 rate limit when the gateway
     // is restarted several times in quick succession.
-    // See: openclaw/openclaw#32017
+    // See: bot/bot#32017
     const currentHash = hashCommandList(commandsToRegister);
     const cachedHash = await readCachedCommandHash(accountId, botIdentity);
     if (cachedHash === currentHash) {

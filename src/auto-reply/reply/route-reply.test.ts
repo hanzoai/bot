@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ChannelOutboundAdapter, ChannelPlugin } from "../../channels/plugins/types.js";
-import type { BotConfig } from "../../config/config.js";
-import type { PluginRegistry } from "../../plugins/registry.js";
 import { discordOutbound } from "../../channels/plugins/outbound/discord.js";
 import { imessageOutbound } from "../../channels/plugins/outbound/imessage.js";
 import { signalOutbound } from "../../channels/plugins/outbound/signal.js";
 import { slackOutbound } from "../../channels/plugins/outbound/slack.js";
 import { telegramOutbound } from "../../channels/plugins/outbound/telegram.js";
 import { whatsappOutbound } from "../../channels/plugins/outbound/whatsapp.js";
+import type { ChannelOutboundAdapter, ChannelPlugin } from "../../channels/plugins/types.js";
+import type { BotConfig } from "../../config/config.js";
+import type { PluginRegistry } from "../../plugins/registry.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { createIMessageTestPlugin } from "../../test-utils/imessage-test-plugin.js";
@@ -186,7 +186,7 @@ describe("routeReply", () => {
   it("applies responsePrefix when routing", async () => {
     mocks.sendMessageSlack.mockClear();
     const cfg = {
-      messages: { responsePrefix: "[openclaw]" },
+      messages: { responsePrefix: "[bot]" },
     } as unknown as BotConfig;
     await routeReply({
       payload: { text: "hi" },
@@ -196,7 +196,7 @@ describe("routeReply", () => {
     });
     expect(mocks.sendMessageSlack).toHaveBeenCalledWith(
       "channel:C123",
-      "[openclaw] hi",
+      "[bot] hi",
       expect.any(Object),
     );
   });

@@ -45,7 +45,7 @@ export const linePlugin: ChannelPlugin<ResolvedLineAccount> = {
       if (!account.channelAccessToken) {
         throw new Error("LINE channel access token not configured");
       }
-      await line.pushMessageLine(id, "OpenClaw: your access has been approved.", {
+      await line.pushMessageLine(id, "HanzoBot: your access has been approved.", {
         channelAccessToken: account.channelAccessToken,
       });
     },
@@ -159,7 +159,7 @@ export const linePlugin: ChannelPlugin<ResolvedLineAccount> = {
         allowFrom: account.config.allowFrom ?? [],
         policyPath: `${basePath}dmPolicy`,
         allowFromPath: basePath,
-        approveHint: "openclaw pairing approve line <code>",
+        approveHint: "bot pairing approve line <code>",
         normalizeEntry: (raw) => raw.replace(/^line:(?:user:)?/i, ""),
       };
     },

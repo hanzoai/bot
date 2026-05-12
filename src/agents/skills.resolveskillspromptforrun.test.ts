@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { SkillEntry } from "./skills/types.js";
 import { resolveSkillsPromptForRun } from "./skills.js";
+import type { SkillEntry } from "./skills/types.js";
 
 describe("resolveSkillsPromptForRun", () => {
   it("prefers snapshot prompt when available", () => {
     const prompt = resolveSkillsPromptForRun({
       skillsSnapshot: { prompt: "SNAPSHOT", skills: [] },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
     });
     expect(prompt).toBe("SNAPSHOT");
   });
@@ -17,14 +17,14 @@ describe("resolveSkillsPromptForRun", () => {
         description: "Demo",
         filePath: "/app/skills/demo-skill/SKILL.md",
         baseDir: "/app/skills/demo-skill",
-        source: "openclaw-bundled",
+        source: "bot-bundled",
         disableModelInvocation: false,
       },
       frontmatter: {},
     };
     const prompt = resolveSkillsPromptForRun({
       entries: [entry],
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
     });
     expect(prompt).toContain("<available_skills>");
     expect(prompt).toContain("/app/skills/demo-skill/SKILL.md");

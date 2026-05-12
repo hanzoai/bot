@@ -12,7 +12,7 @@ import {
 } from "../test-utils/npm-spec-install-test-helpers.js";
 import { isAddressInUseError } from "./gmail-watcher.js";
 
-const fixtureRoot = path.join(os.tmpdir(), `openclaw-hook-install-${randomUUID()}`);
+const fixtureRoot = path.join(os.tmpdir(), `bot-hook-install-${randomUUID()}`);
 const sharedArchiveDir = path.join(fixtureRoot, "_archives");
 let tempDirIndex = 0;
 const sharedArchivePathByName = new Map<string, string>();
@@ -97,7 +97,7 @@ function writeHookPackManifest(params: {
     JSON.stringify({
       name: "@hanzo/bot-test-hooks",
       version: "0.0.1",
-      openclaw: { hooks: params.hooks },
+      bot: { hooks: params.hooks },
       ...(params.dependencies ? { dependencies: params.dependencies } : {}),
     }),
     "utf-8",
@@ -214,7 +214,7 @@ describe("installHooksFromPath", () => {
         "---",
         "name: one-hook",
         "description: One hook",
-        'metadata: {"openclaw":{"events":["command:new"]}}',
+        'metadata: {"bot":{"events":["command:new"]}}',
         "---",
         "",
         "# One Hook",
@@ -249,7 +249,7 @@ describe("installHooksFromPath", () => {
         "---",
         "name: my-hook",
         "description: My hook",
-        'metadata: {"openclaw":{"events":["command:new"]}}',
+        'metadata: {"bot":{"events":["command:new"]}}',
         "---",
         "",
         "# My Hook",
@@ -290,7 +290,7 @@ describe("installHooksFromPath", () => {
       hooksDir: path.join(stateDir, "hooks"),
     });
 
-    expectPathInstallFailureContains(result, "openclaw.hooks entry escapes package directory");
+    expectPathInstallFailureContains(result, "bot.hooks entry escapes package directory");
   });
 
   it("rejects hook pack entries that escape via symlink", async () => {
@@ -318,10 +318,7 @@ describe("installHooksFromPath", () => {
       hooksDir: path.join(stateDir, "hooks"),
     });
 
-    expectPathInstallFailureContains(
-      result,
-      "openclaw.hooks entry resolves outside package directory",
-    );
+    expectPathInstallFailureContains(result, "bot.hooks entry resolves outside package directory");
   });
 });
 

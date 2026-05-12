@@ -1,7 +1,7 @@
 import path from "node:path";
 import type { BotConfig } from "../config/config.js";
-import type { RequirementConfigCheck, Requirements } from "../shared/requirements.js";
 import { evaluateEntryRequirementsForCurrentPlatform } from "../shared/entry-status.js";
+import type { RequirementConfigCheck, Requirements } from "../shared/requirements.js";
 import { CONFIG_DIR } from "../utils.js";
 import {
   hasBinary,
@@ -189,7 +189,7 @@ function buildSkillStatus(
   const bundled =
     bundledNames && bundledNames.size > 0
       ? bundledNames.has(entry.skill.name)
-      : entry.skill.source === "openclaw-bundled";
+      : entry.skill.source === "bot-bundled";
 
   const { emoji, homepage, required, missing, requirementsSatisfied, configChecks } =
     evaluateEntryRequirementsForCurrentPlatform({

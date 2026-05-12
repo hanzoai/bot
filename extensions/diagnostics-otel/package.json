@@ -1,7 +1,7 @@
 {
   "name": "@hanzo/bot-diagnostics-otel",
   "version": "1.4.2",
-  "description": "OpenClaw diagnostics OpenTelemetry exporter",
+  "description": "HanzoBot diagnostics OpenTelemetry exporter",
   "type": "module",
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
@@ -16,7 +16,7 @@
     "@opentelemetry/sdk-trace-base": "^2.5.1",
     "@opentelemetry/semantic-conventions": "^1.40.0"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

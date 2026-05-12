@@ -17,7 +17,7 @@ describe("applyAuthChoiceOpenAI", () => {
   ]);
 
   async function setupTempState() {
-    const env = await setupAuthTestEnv("openclaw-openai-");
+    const env = await setupAuthTestEnv("bot-openai-");
     lifecycle.setStateDir(env.stateDir);
     return env.agentDir;
   }

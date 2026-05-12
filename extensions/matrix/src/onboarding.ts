@@ -12,11 +12,11 @@ import {
   type ChannelOnboardingDmPolicy,
   type WizardPrompter,
 } from "@hanzo/bot/plugin-sdk/matrix";
-import type { CoreConfig } from "./types.js";
 import { listMatrixDirectoryGroupsLive } from "./directory-live.js";
 import { resolveMatrixAccount } from "./matrix/accounts.js";
 import { ensureMatrixSdkInstalled, isMatrixSdkAvailable } from "./matrix/deps.js";
 import { resolveMatrixTargets } from "./resolve-targets.js";
+import type { CoreConfig } from "./types.js";
 
 const channel = "matrix" as const;
 
@@ -352,7 +352,7 @@ export const matrixOnboardingAdapter: ChannelOnboardingAdapter = {
     const deviceName = String(
       await prompter.text({
         message: "Matrix device name (optional)",
-        initialValue: existing.deviceName ?? "OpenClaw Gateway",
+        initialValue: existing.deviceName ?? "HanzoBot Gateway",
       }),
     ).trim();
 

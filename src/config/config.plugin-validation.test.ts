@@ -25,7 +25,7 @@ async function writePluginFixture(params: {
     manifest.channels = params.channels;
   }
   await fs.writeFile(
-    path.join(params.dir, "openclaw.plugin.json"),
+    path.join(params.dir, "bot.plugin.json"),
     JSON.stringify(manifest, null, 2),
     "utf-8",
   );
@@ -45,7 +45,7 @@ describe("config plugin validation", () => {
   const validateInSuite = (raw: unknown) => validateConfigObjectWithPlugins(raw);
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-config-plugin-validation-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-config-plugin-validation-"));
     suiteHome = path.join(fixtureRoot, "home");
     await fs.mkdir(suiteHome, { recursive: true });
     badPluginDir = path.join(suiteHome, "bad-plugin");
@@ -83,7 +83,7 @@ describe("config plugin validation", () => {
       channels: ["bluebubbles"],
       schema: { type: "object" },
     });
-    process.env.BOT_STATE_DIR = path.join(suiteHome, ".openclaw");
+    process.env.BOT_STATE_DIR = path.join(suiteHome, ".bot");
     process.env.BOT_PLUGIN_MANIFEST_CACHE_MS = "10000";
     clearPluginManifestRegistryCache();
     // Warm the plugin manifest cache once so path-based validations can reuse

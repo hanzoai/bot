@@ -74,7 +74,7 @@ export async function promptRemoteGatewayConfig(
     await prompter.note(
       [
         "Bonjour discovery requires dns-sd (macOS) or avahi-browse (Linux).",
-        "Docs: https://docs.openclaw.ai/gateway/discovery",
+        "Docs: https://docs.bot.ai/gateway/discovery",
       ].join("\n"),
       "Discovery",
     );
@@ -138,7 +138,7 @@ export async function promptRemoteGatewayConfig(
             `ssh -N -L 18789:127.0.0.1:18789 <user>@${host}${
               selectedBeacon.sshPort ? ` -p ${selectedBeacon.sshPort}` : ""
             }`,
-            "Docs: https://docs.openclaw.ai/gateway/remote",
+            "Docs: https://docs.bot.ai/gateway/remote",
           ].join("\n"),
           "SSH tunnel",
         );
@@ -171,7 +171,7 @@ export async function promptRemoteGatewayConfig(
       copy: {
         modeMessage: "How do you want to provide this gateway token?",
         plaintextLabel: "Enter token now",
-        plaintextHint: "Stores the token directly in OpenClaw config",
+        plaintextHint: "Stores the token directly in HanzoBot config",
       },
     });
     if (selectedMode === "ref") {
@@ -203,7 +203,7 @@ export async function promptRemoteGatewayConfig(
       copy: {
         modeMessage: "How do you want to provide this gateway password?",
         plaintextLabel: "Enter password now",
-        plaintextHint: "Stores the password directly in OpenClaw config",
+        plaintextHint: "Stores the password directly in HanzoBot config",
       },
     });
     if (selectedMode === "ref") {

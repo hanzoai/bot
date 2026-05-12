@@ -2,20 +2,20 @@ import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { BotConfig } from "../../config/config.js";
-import type { MsgContext, TemplateContext } from "../templating.js";
 import { assertSandboxPath } from "../../agents/sandbox-paths.js";
 import { ensureSandboxWorkspaceForSession } from "../../agents/sandbox.js";
+import type { BotConfig } from "../../config/config.js";
 import { logVerbose } from "../../globals.js";
 import { copyFileWithinRoot, SafeOpenError } from "../../infra/fs-safe.js";
 import { normalizeScpRemoteHost } from "../../infra/scp-host.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredHanzoBotTmpDir } from "../../infra/tmp-bot-dir.js";
 import {
   isInboundPathAllowed,
   resolveIMessageRemoteAttachmentRoots,
 } from "../../media/inbound-path-policy.js";
 import { getMediaDir, MEDIA_MAX_BYTES } from "../../media/store.js";
 import { CONFIG_DIR } from "../../utils.js";
+import type { MsgContext, TemplateContext } from "../templating.js";
 
 const STAGED_MEDIA_MAX_BYTES = MEDIA_MAX_BYTES;
 
@@ -39,7 +39,7 @@ export async function stageSandboxMedia(params: {
     workspaceDir,
   });
 
-  // For remote attachments without sandbox, use ~/.openclaw/media (not agent workspace for privacy)
+  // For remote attachments without sandbox, use ~/.bot/media (not agent workspace for privacy)
   const remoteMediaCacheDir = ctx.MediaRemoteHost
     ? path.join(CONFIG_DIR, "media", "remote-cache", sessionKey)
     : null;
@@ -140,7 +140,7 @@ async function stageRemoteFileIntoRoot(params: {
   relativeDestPath: string;
   maxBytes?: number;
 }): Promise<void> {
-  const tmpRoot = resolvePreferredOpenClawTmpDir();
+  const tmpRoot = resolvePreferredHanzoBotTmpDir();
   await fs.mkdir(tmpRoot, { recursive: true });
   const tmpDir = await fs.mkdtemp(path.join(tmpRoot, "stage-sandbox-media-"));
   const tmpPath = path.join(tmpDir, "download");

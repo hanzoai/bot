@@ -18,7 +18,7 @@ describe("memory manager atomic reindex", () => {
   const embedBatch = getEmbedBatchMock();
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mem-atomic-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-mem-atomic-"));
   });
 
   beforeEach(async () => {

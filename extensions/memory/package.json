@@ -14,7 +14,7 @@
   "optionalDependencies": {
     "better-sqlite3": "^11.5.0"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

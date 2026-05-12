@@ -2,9 +2,9 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-IMAGE_NAME="${BOT_IMAGE:-${CLAWDBOT_IMAGE:-openclaw:local}}"
-CONFIG_DIR="${BOT_CONFIG_DIR:-${CLAWDBOT_CONFIG_DIR:-$HOME/.openclaw}}"
-WORKSPACE_DIR="${BOT_WORKSPACE_DIR:-${CLAWDBOT_WORKSPACE_DIR:-$HOME/.openclaw/workspace}}"
+IMAGE_NAME="${BOT_IMAGE:-${CLAWDBOT_IMAGE:-hanzo-bot:local}}"
+CONFIG_DIR="${BOT_CONFIG_DIR:-${CLAWDBOT_CONFIG_DIR:-$HOME/.hanzo-bot}}"
+WORKSPACE_DIR="${BOT_WORKSPACE_DIR:-${CLAWDBOT_WORKSPACE_DIR:-$HOME/.hanzo-bot/workspace}}"
 PROFILE_FILE="${BOT_PROFILE_FILE:-${CLAWDBOT_PROFILE_FILE:-$HOME/.profile}}"
 
 PROFILE_MOUNT=()
@@ -26,8 +26,8 @@ docker run --rm -t \
   -e BOT_LIVE_GATEWAY_PROVIDERS="${BOT_LIVE_GATEWAY_PROVIDERS:-${CLAWDBOT_LIVE_GATEWAY_PROVIDERS:-}}" \
   -e BOT_LIVE_GATEWAY_MAX_MODELS="${BOT_LIVE_GATEWAY_MAX_MODELS:-${CLAWDBOT_LIVE_GATEWAY_MAX_MODELS:-24}}" \
   -e BOT_LIVE_GATEWAY_MODEL_TIMEOUT_MS="${BOT_LIVE_GATEWAY_MODEL_TIMEOUT_MS:-${CLAWDBOT_LIVE_GATEWAY_MODEL_TIMEOUT_MS:-}}" \
-  -v "$CONFIG_DIR":/home/node/.openclaw \
-  -v "$WORKSPACE_DIR":/home/node/.openclaw/workspace \
+  -v "$CONFIG_DIR":/home/node/.hanzo-bot \
+  -v "$WORKSPACE_DIR":/home/node/.hanzo-bot/workspace \
   "${PROFILE_MOUNT[@]}" \
   "$IMAGE_NAME" \
   -lc "set -euo pipefail; [ -f \"$HOME/.profile\" ] && source \"$HOME/.profile\" || true; cd /app && pnpm test:live"

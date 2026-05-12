@@ -1,7 +1,6 @@
-import type { GatewayRequestHandlers } from "./types.js";
 import { loadConfig } from "../../config/config.js";
 import { extractDeliveryInfo } from "../../config/sessions.js";
-import { resolveOpenClawPackageRoot } from "../../infra/openclaw-root.js";
+import { resolveHanzoBotPackageRoot } from "../../infra/bot-root.js";
 import {
   formatDoctorNonInteractiveHint,
   type RestartSentinelPayload,
@@ -13,6 +12,7 @@ import { runGatewayUpdate } from "../../infra/update-runner.js";
 import { formatControlPlaneActor, resolveControlPlaneActor } from "../control-plane-audit.js";
 import { validateUpdateRunParams } from "../protocol/index.js";
 import { parseRestartRequestParams } from "./restart-request.js";
+import type { GatewayRequestHandlers } from "./types.js";
 import { assertValidParams } from "./validation.js";
 
 export const updateHandlers: GatewayRequestHandlers = {
@@ -34,7 +34,7 @@ export const updateHandlers: GatewayRequestHandlers = {
       const config = loadConfig();
       const configChannel = normalizeUpdateChannel(config.update?.channel);
       const root =
-        (await resolveOpenClawPackageRoot({
+        (await resolveHanzoBotPackageRoot({
           moduleUrl: import.meta.url,
           argv1: process.argv[1],
           cwd: process.cwd(),

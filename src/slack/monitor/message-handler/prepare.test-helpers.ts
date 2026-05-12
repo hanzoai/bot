@@ -40,7 +40,7 @@ export function createInboundSlackTestContext(params: {
     threadInheritParent: false,
     slashCommand: {
       enabled: false,
-      name: "openclaw",
+      name: "bot",
       sessionPrefix: "slack:slash",
       ephemeral: true,
     },

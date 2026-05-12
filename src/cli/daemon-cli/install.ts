@@ -1,4 +1,3 @@
-import type { DaemonInstallOptions } from "./types.js";
 import { buildGatewayInstallPlan } from "../../commands/daemon-install-helpers.js";
 import {
   DEFAULT_GATEWAY_DAEMON_RUNTIME,
@@ -16,6 +15,7 @@ import {
   installDaemonServiceAndEmit,
 } from "./response.js";
 import { parsePort } from "./shared.js";
+import type { DaemonInstallOptions } from "./types.js";
 
 export async function runDaemonInstall(opts: DaemonInstallOptions) {
   const json = Boolean(opts.json);
@@ -61,9 +61,7 @@ export async function runDaemonInstall(opts: DaemonInstallOptions) {
       });
       if (!json) {
         defaultRuntime.log(`Gateway service already ${service.loadedText}.`);
-        defaultRuntime.log(
-          `Reinstall with: ${formatCliCommand("openclaw gateway install --force")}`,
-        );
+        defaultRuntime.log(`Reinstall with: ${formatCliCommand("bot gateway install --force")}`);
       }
       return;
     }

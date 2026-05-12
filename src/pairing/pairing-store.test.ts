@@ -24,7 +24,7 @@ let fixtureRoot = "";
 let caseId = 0;
 
 beforeAll(async () => {
-  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pairing-"));
+  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-pairing-"));
 });
 
 afterAll(async () => {

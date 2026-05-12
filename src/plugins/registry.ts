@@ -2,26 +2,31 @@ import path from "node:path";
 import type { AnyAgentTool } from "../agents/tools/common.js";
 import type { ChannelDock } from "../channels/dock.js";
 import type { ChannelPlugin } from "../channels/plugins/types.js";
+import { registerContextEngine } from "../context-engine/registry.js";
 import type {
   GatewayRequestHandler,
   GatewayRequestHandlers,
 } from "../gateway/server-methods/types.js";
+import { registerInternalHook } from "../hooks/internal-hooks.js";
 import type { HookEntry } from "../hooks/types.js";
+import { resolveUserPath } from "../utils.js";
+import { registerPluginCommand } from "./commands.js";
+import { normalizePluginHttpPath } from "./http-path.js";
 import type { PluginRuntime } from "./runtime/types.js";
 import type {
   BotPluginApi,
-  OpenClawPluginChannelRegistration,
-  OpenClawPluginCliRegistrar,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginHttpRouteAuth,
-  OpenClawPluginHttpRouteMatch,
-  OpenClawPluginHttpRouteHandler,
-  OpenClawPluginHttpRouteParams,
-  OpenClawPluginHookOptions,
+  HanzoBotPluginChannelRegistration,
+  HanzoBotPluginCliRegistrar,
+  HanzoBotPluginCommandDefinition,
+  HanzoBotPluginHttpRouteAuth,
+  HanzoBotPluginHttpRouteMatch,
+  HanzoBotPluginHttpRouteHandler,
+  HanzoBotPluginHttpRouteParams,
+  HanzoBotPluginHookOptions,
   ProviderPlugin,
-  OpenClawPluginService,
-  OpenClawPluginToolContext,
-  OpenClawPluginToolFactory,
+  HanzoBotPluginService,
+  HanzoBotPluginToolContext,
+  HanzoBotPluginToolFactory,
   PluginConfigUiHint,
   PluginDiagnostic,
   PluginLogger,
@@ -31,11 +36,6 @@ import type {
   PluginHookHandlerMap,
   PluginHookRegistration as TypedPluginHookRegistration,
 } from "./types.js";
-import { registerContextEngine } from "../context-engine/registry.js";
-import { registerInternalHook } from "../hooks/internal-hooks.js";
-import { resolveUserPath } from "../utils.js";
-import { registerPluginCommand } from "./commands.js";
-import { normalizePluginHttpPath } from "./http-path.js";
 import {
   isPluginHookName,
   isPromptInjectionHookName,
@@ -44,7 +44,7 @@ import {
 
 export type PluginToolRegistration = {
   pluginId: string;
-  factory: OpenClawPluginToolFactory;
+  factory: HanzoBotPluginToolFactory;
   names: string[];
   optional: boolean;
   source: string;
@@ -52,7 +52,7 @@ export type PluginToolRegistration = {
 
 export type PluginCliRegistration = {
   pluginId: string;
-  register: OpenClawPluginCliRegistrar;
+  register: HanzoBotPluginCliRegistrar;
   commands: string[];
   source: string;
 };
@@ -60,9 +60,9 @@ export type PluginCliRegistration = {
 export type PluginHttpRouteRegistration = {
   pluginId?: string;
   path: string;
-  handler: OpenClawPluginHttpRouteHandler;
-  auth: OpenClawPluginHttpRouteAuth;
-  match: OpenClawPluginHttpRouteMatch;
+  handler: HanzoBotPluginHttpRouteHandler;
+  auth: HanzoBotPluginHttpRouteAuth;
+  match: HanzoBotPluginHttpRouteMatch;
   source?: string;
 };
 
@@ -88,13 +88,13 @@ export type PluginHookRegistration = {
 
 export type PluginServiceRegistration = {
   pluginId: string;
-  service: OpenClawPluginService;
+  service: HanzoBotPluginService;
   source: string;
 };
 
 export type PluginCommandRegistration = {
   pluginId: string;
-  command: OpenClawPluginCommandDefinition;
+  command: HanzoBotPluginCommandDefinition;
   source: string;
 };
 
@@ -191,13 +191,13 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
 
   const registerTool = (
     record: PluginRecord,
-    tool: AnyAgentTool | OpenClawPluginToolFactory,
+    tool: AnyAgentTool | HanzoBotPluginToolFactory,
     opts?: { name?: string; names?: string[]; optional?: boolean },
   ) => {
     const names = opts?.names ?? (opts?.name ? [opts.name] : []);
     const optional = opts?.optional === true;
-    const factory: OpenClawPluginToolFactory =
-      typeof tool === "function" ? tool : (_ctx: OpenClawPluginToolContext) => tool;
+    const factory: HanzoBotPluginToolFactory =
+      typeof tool === "function" ? tool : (_ctx: HanzoBotPluginToolContext) => tool;
 
     if (typeof tool !== "function") {
       names.push(tool.name);
@@ -220,7 +220,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     record: PluginRecord,
     events: string | string[],
     handler: Parameters<typeof registerInternalHook>[1],
-    opts: OpenClawPluginHookOptions | undefined,
+    opts: HanzoBotPluginHookOptions | undefined,
     config: BotPluginApi["config"],
   ) => {
     const eventList = Array.isArray(events) ? events : [events];
@@ -245,7 +245,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
             ...entry.hook,
             name,
             description,
-            source: "openclaw-plugin",
+            source: "bot-plugin",
             pluginId: record.id,
           },
           metadata: {
@@ -257,7 +257,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
           hook: {
             name,
             description,
-            source: "openclaw-plugin",
+            source: "bot-plugin",
             pluginId: record.id,
             filePath: record.source,
             baseDir: path.dirname(record.source),
@@ -314,7 +314,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     return `${plugin} (${source})`;
   };
 
-  const registerHttpRoute = (record: PluginRecord, params: OpenClawPluginHttpRouteParams) => {
+  const registerHttpRoute = (record: PluginRecord, params: HanzoBotPluginHttpRouteParams) => {
     const normalizedPath = normalizePluginHttpPath(params.path);
     if (!normalizedPath) {
       pushDiagnostic({
@@ -384,11 +384,11 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
 
   const registerChannel = (
     record: PluginRecord,
-    registration: OpenClawPluginChannelRegistration | ChannelPlugin,
+    registration: HanzoBotPluginChannelRegistration | ChannelPlugin,
   ) => {
     const normalized =
-      typeof (registration as OpenClawPluginChannelRegistration).plugin === "object"
-        ? (registration as OpenClawPluginChannelRegistration)
+      typeof (registration as HanzoBotPluginChannelRegistration).plugin === "object"
+        ? (registration as HanzoBotPluginChannelRegistration)
         : { plugin: registration as ChannelPlugin };
     const plugin = normalized.plugin;
     const id = typeof plugin?.id === "string" ? plugin.id.trim() : String(plugin?.id ?? "").trim();
@@ -441,7 +441,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
 
   const registerCli = (
     record: PluginRecord,
-    registrar: OpenClawPluginCliRegistrar,
+    registrar: HanzoBotPluginCliRegistrar,
     opts?: { commands?: string[] },
   ) => {
     const commands = (opts?.commands ?? []).map((cmd) => cmd.trim()).filter(Boolean);
@@ -454,7 +454,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     });
   };
 
-  const registerService = (record: PluginRecord, service: OpenClawPluginService) => {
+  const registerService = (record: PluginRecord, service: HanzoBotPluginService) => {
     const id = service.id.trim();
     if (!id) {
       return;
@@ -467,7 +467,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     });
   };
 
-  const registerCommand = (record: PluginRecord, command: OpenClawPluginCommandDefinition) => {
+  const registerCommand = (record: PluginRecord, command: HanzoBotPluginCommandDefinition) => {
     const name = command.name.trim();
     if (!name) {
       pushDiagnostic({

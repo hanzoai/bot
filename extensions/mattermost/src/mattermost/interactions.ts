@@ -1,6 +1,6 @@
-import type { BotConfig } from "@hanzo/bot/plugin-sdk/mattermost";
-import type { IncomingMessage, ServerResponse } from "node:http";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/mattermost";
 import { getMattermostRuntime } from "../runtime.js";
 import { updateMattermostPost, type MattermostClient } from "./client.js";
 
@@ -119,7 +119,7 @@ const interactionSecrets = new Map<string, string>();
 let defaultInteractionSecret: string | undefined;
 
 function deriveInteractionSecret(botToken: string): string {
-  return createHmac("sha256", "openclaw-mattermost-interactions").update(botToken).digest("hex");
+  return createHmac("sha256", "bot-mattermost-interactions").update(botToken).digest("hex");
 }
 
 export function setInteractionSecret(accountIdOrBotToken: string, botToken?: string): void {

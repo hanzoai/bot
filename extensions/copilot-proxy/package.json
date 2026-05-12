@@ -2,9 +2,9 @@
   "name": "@hanzo/bot-copilot-proxy",
   "version": "1.4.2",
   "private": true,
-  "description": "OpenClaw Copilot Proxy provider plugin",
+  "description": "HanzoBot Copilot Proxy provider plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

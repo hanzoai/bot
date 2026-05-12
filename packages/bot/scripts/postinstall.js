@@ -1,1 +1,1 @@
-console.warn("hanzo-bot-compat: this package is a compatibility shim for hanzo-bot");
+console.warn("bot-compat: this package is a compatibility shim for bot");

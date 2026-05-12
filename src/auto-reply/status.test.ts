@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { BotConfig } from "../config/config.js";
 import { normalizeTestText } from "../../test/helpers/normalize-text.js";
 import { withTempHome } from "../../test/helpers/temp-home.js";
+import type { BotConfig } from "../config/config.js";
 import { createSuccessfulImageMediaDecision } from "./media-understanding.test-fixtures.js";
 import {
   buildCommandsMessage,
@@ -74,7 +74,7 @@ describe("buildStatusMessage", () => {
     });
     const normalized = normalizeTestText(text);
 
-    expect(normalized).toContain("OpenClaw");
+    expect(normalized).toContain("HanzoBot");
     expect(normalized).toContain("Model: anthropic/pi:opus");
     expect(normalized).toContain("api-key");
     expect(normalized).toContain("Tokens: 1.2k in / 800 out");
@@ -485,7 +485,7 @@ describe("buildStatusMessage", () => {
   }) {
     const logPath = path.join(
       params.dir,
-      ".openclaw",
+      ".bot",
       "agents",
       params.agentId,
       "sessions",
@@ -564,7 +564,7 @@ describe("buildStatusMessage", () => {
 
         expect(normalizeTestText(text)).toContain("Context: 1.0k/32k");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "bot-status-" },
     );
   });
 
@@ -585,7 +585,7 @@ describe("buildStatusMessage", () => {
 
         expect(normalizeTestText(text)).toContain("Context: 1.0k/32k");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "bot-status-" },
     );
   });
 
@@ -627,7 +627,7 @@ describe("buildStatusMessage", () => {
 
         expect(normalizeTestText(text)).toContain("Context: 1.2k/32k");
       },
-      { prefix: "openclaw-status-" },
+      { prefix: "bot-status-" },
     );
   });
 });

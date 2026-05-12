@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { SessionEntry } from "../../config/sessions.js";
 import { DEFAULT_PI_COMPACTION_RESERVE_TOKENS_FLOOR } from "../../agents/pi-settings.js";
+import type { SessionEntry } from "../../config/sessions.js";
 import {
   appendHistoryEntry,
   buildHistoryContext,
@@ -45,7 +45,7 @@ async function seedSessionStore(params: {
 }
 
 async function createCompactionSessionFixture(entry: SessionEntry) {
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compact-"));
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-compact-"));
   tempDirs.push(tmp);
   const storePath = path.join(tmp, "sessions.json");
   const sessionKey = "main";

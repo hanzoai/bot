@@ -38,7 +38,7 @@ describe("createBotCodingTools", () => {
       expect(image?.mimeType).toBe("image/png");
 
       const textPath = path.join(tmpDir, "sample.txt");
-      const contents = "Hello from hanzo-bot read tool.";
+      const contents = "Hello from bot read tool.";
       await fs.writeFile(textPath, contents, "utf8");
 
       const textResult = await readTool?.execute("tool-2", {

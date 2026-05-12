@@ -1,10 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { BrowserProfileConfig, BotConfig } from "../config/config.js";
-import type { BrowserRouteContext, ProfileStatus } from "./server-context.js";
 import { loadConfig, writeConfigFile } from "../config/config.js";
 import { deriveDefaultBrowserCdpPortRange } from "../config/port-defaults.js";
-import { resolveOpenClawUserDataDir } from "./chrome.js";
+import { resolveHanzoBotUserDataDir } from "./chrome.js";
 import { parseHttpUrl, resolveProfile } from "./config.js";
 import { DEFAULT_BROWSER_DEFAULT_PROFILE_NAME } from "./constants.js";
 import {
@@ -14,13 +13,14 @@ import {
   getUsedPorts,
   isValidProfileName,
 } from "./profiles.js";
+import type { BrowserRouteContext, ProfileStatus } from "./server-context.js";
 import { movePathToTrash } from "./trash.js";
 
 export type CreateProfileParams = {
   name: string;
   color?: string;
   cdpUrl?: string;
-  driver?: "openclaw" | "extension";
+  driver?: "bot" | "extension";
 };
 
 export type CreateProfileResult = {
@@ -178,7 +178,7 @@ export function createBrowserProfilesService(ctx: BrowserRouteContext) {
         // ignore
       }
 
-      const userDataDir = resolveOpenClawUserDataDir(name);
+      const userDataDir = resolveHanzoBotUserDataDir(name);
       const profileDir = path.dirname(userDataDir);
       if (fs.existsSync(profileDir)) {
         await movePathToTrash(profileDir);

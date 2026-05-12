@@ -62,7 +62,7 @@ final class CLIInstallPrompter {
         SettingsTabRouter.request(tab)
         SettingsWindowOpener.shared.open()
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .hanzo-botSelectSettingsTab, object: tab)
+            NotificationCenter.default.post(name: .botSelectSettingsTab, object: tab)
         }
     }
 

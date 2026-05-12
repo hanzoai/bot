@@ -86,7 +86,7 @@ describe("gateway auth", () => {
     expect(res.user).toBe(params.expected.user);
   }
 
-  it("resolves token/password from OPENCLAW gateway env vars", () => {
+  it("resolves token/password from HANZO_BOT gateway env vars", () => {
     expect(
       resolveGatewayAuth({
         authConfig: {},

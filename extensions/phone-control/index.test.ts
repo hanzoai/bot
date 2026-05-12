@@ -1,11 +1,11 @@
-import type {
-  BotPluginApi,
-  OpenClawPluginCommandDefinition,
-  PluginCommandContext,
-} from "@hanzo/bot/plugin-sdk/phone-control";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import type {
+  BotPluginApi,
+  HanzoBotPluginCommandDefinition,
+  PluginCommandContext,
+} from "@hanzo/bot/plugin-sdk/phone-control";
 import { describe, expect, it, vi } from "vitest";
 import registerPhoneControl from "./index.js";
 
@@ -13,7 +13,7 @@ function createApi(params: {
   stateDir: string;
   getConfig: () => Record<string, unknown>;
   writeConfig: (next: Record<string, unknown>) => Promise<void>;
-  registerCommand: (command: OpenClawPluginCommandDefinition) => void;
+  registerCommand: (command: HanzoBotPluginCommandDefinition) => void;
 }): BotPluginApi {
   return {
     id: "phone-control",
@@ -60,7 +60,7 @@ function createCommandContext(args: string): PluginCommandContext {
 
 describe("phone-control plugin", () => {
   it("arms sms.send as part of the writes group", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-phone-control-test-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-phone-control-test-"));
     try {
       let config: Record<string, unknown> = {
         gateway: {
@@ -74,7 +74,7 @@ describe("phone-control plugin", () => {
         config = next;
       });
 
-      let command: OpenClawPluginCommandDefinition | undefined;
+      let command: HanzoBotPluginCommandDefinition | undefined;
       registerPhoneControl(
         createApi({
           stateDir,
