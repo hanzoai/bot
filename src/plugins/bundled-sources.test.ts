@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { findBundledPluginSource, resolveBundledPluginSources } from "./bundled-sources.js";
 
-const discoverOpenClawPluginsMock = vi.fn();
+const discoverHanzoBotPluginsMock = vi.fn();
 const loadPluginManifestMock = vi.fn();
 
 vi.mock("./discovery.js", () => ({
-  discoverOpenClawPlugins: (...args: unknown[]) => discoverOpenClawPluginsMock(...args),
+  discoverHanzoBotPlugins: (...args: unknown[]) => discoverHanzoBotPluginsMock(...args),
 }));
 
 vi.mock("./manifest.js", () => ({
@@ -14,12 +14,12 @@ vi.mock("./manifest.js", () => ({
 
 describe("bundled plugin sources", () => {
   beforeEach(() => {
-    discoverOpenClawPluginsMock.mockReset();
+    discoverHanzoBotPluginsMock.mockReset();
     loadPluginManifestMock.mockReset();
   });
 
   it("resolves bundled sources keyed by plugin id", () => {
-    discoverOpenClawPluginsMock.mockReturnValue({
+    discoverHanzoBotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "global",
@@ -59,7 +59,7 @@ describe("bundled plugin sources", () => {
       return {
         ok: false,
         error: "invalid manifest",
-        manifestPath: `${rootDir}/openclaw.plugin.json`,
+        manifestPath: `${rootDir}/bot.plugin.json`,
       };
     });
 
@@ -74,7 +74,7 @@ describe("bundled plugin sources", () => {
   });
 
   it("finds bundled source by npm spec", () => {
-    discoverOpenClawPluginsMock.mockReturnValue({
+    discoverHanzoBotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "bundled",
@@ -100,7 +100,7 @@ describe("bundled plugin sources", () => {
   });
 
   it("finds bundled source by plugin id", () => {
-    discoverOpenClawPluginsMock.mockReturnValue({
+    discoverHanzoBotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "bundled",

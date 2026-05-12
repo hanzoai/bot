@@ -1,12 +1,12 @@
-import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { CommandHandlerResult, HandleCommandsParams } from "../commands-types.js";
 import { getAcpSessionManager } from "../../../acp/control-plane/manager.js";
 import { formatAcpRuntimeErrorText } from "../../../acp/runtime/error-text.js";
 import { toAcpRuntimeError } from "../../../acp/runtime/errors.js";
 import { getAcpRuntimeBackend, requireAcpRuntimeBackend } from "../../../acp/runtime/registry.js";
 import { resolveSessionStorePathForAcp } from "../../../acp/runtime/session-meta.js";
 import { loadSessionStore } from "../../../config/sessions.js";
+import type { SessionEntry } from "../../../config/sessions/types.js";
 import { getSessionBindingService } from "../../../infra/outbound/session-binding-service.js";
+import type { CommandHandlerResult, HandleCommandsParams } from "../commands-types.js";
 import { resolveAcpCommandBindingContext } from "./context.js";
 import {
   ACP_DOCTOR_USAGE,
@@ -100,7 +100,7 @@ export async function handleAcpDoctorAction(
     lines.push("healthy: no");
     lines.push(formatAcpRuntimeErrorText(acpError));
     lines.push(`next: ${installHint}`);
-    lines.push(`next: openclaw config set plugins.entries.${backendId}.enabled true`);
+    lines.push(`next: bot config set plugins.entries.${backendId}.enabled true`);
     if (backendId.toLowerCase() === "acpx") {
       lines.push("next: verify acpx is installed (`acpx --help`).");
     }
@@ -122,7 +122,7 @@ export function handleAcpInstallAction(
     "-----",
     `configuredBackend: ${backendId}`,
     `run: ${installHint}`,
-    `then: openclaw config set plugins.entries.${backendId}.enabled true`,
+    `then: bot config set plugins.entries.${backendId}.enabled true`,
     "then: /acp doctor",
   ];
   return stopWithText(lines.join("\n"));

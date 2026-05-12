@@ -1,7 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { RuntimeEnv } from "../runtime.js";
-import type { ChannelChoice } from "./onboard-types.js";
 import {
   resolveAgentDir,
   resolveAgentWorkspaceDir,
@@ -12,6 +10,7 @@ import { resolveAuthStorePath } from "../agents/auth-profiles/paths.js";
 import { writeConfigFile } from "../config/config.js";
 import { logConfigUpdated } from "../config/logging.js";
 import { DEFAULT_AGENT_ID, normalizeAgentId } from "../routing/session-key.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { defaultRuntime } from "../runtime.js";
 import { resolveUserPath, shortenHomePath } from "../utils.js";
 import { createClackPrompter } from "../wizard/clack-prompter.js";
@@ -28,6 +27,7 @@ import { promptAuthChoiceGrouped } from "./auth-choice-prompt.js";
 import { applyAuthChoice, warnIfModelConfigLooksOff } from "./auth-choice.js";
 import { setupChannels } from "./onboard-channels.js";
 import { ensureWorkspaceAndSessions } from "./onboard-helpers.js";
+import type { ChannelChoice } from "./onboard-types.js";
 
 type AgentsAddOptions = {
   name?: string;
@@ -178,7 +178,7 @@ export async function agentsAddCommand(
 
   const prompter = createClackPrompter();
   try {
-    await prompter.intro("Add OpenClaw agent");
+    await prompter.intro("Add HanzoBot agent");
     const name =
       nameInput ??
       (await prompter.text({
@@ -334,7 +334,7 @@ export async function agentsAddCommand(
         await prompter.note(
           [
             "Routing unchanged. Add bindings when you're ready.",
-            "Docs: https://docs.openclaw.ai/concepts/multi-agent",
+            "Docs: https://docs.bot.ai/concepts/multi-agent",
           ].join("\n"),
           "Routing",
         );

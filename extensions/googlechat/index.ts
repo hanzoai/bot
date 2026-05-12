@@ -6,7 +6,7 @@ import { setGoogleChatRuntime } from "./src/runtime.js";
 const plugin = {
   id: "googlechat",
   name: "Google Chat",
-  description: "OpenClaw Google Chat channel plugin",
+  description: "HanzoBot Google Chat channel plugin",
   configSchema: emptyPluginConfigSchema(),
   register(api: BotPluginApi) {
     setGoogleChatRuntime(api.runtime);

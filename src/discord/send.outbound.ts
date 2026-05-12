@@ -1,20 +1,19 @@
-import { serializePayload, type MessagePayloadObject, type RequestClient } from "@buape/carbon";
-import { ChannelType, Routes } from "discord-api-types/v10";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { RetryConfig } from "../infra/retry.js";
-import type { PollInput } from "../polls.js";
-import type { DiscordSendResult } from "./send.types.js";
+import { serializePayload, type MessagePayloadObject, type RequestClient } from "@buape/carbon";
+import { ChannelType, Routes } from "discord-api-types/v10";
 import { resolveChunkMode } from "../auto-reply/chunk.js";
 import { loadConfig, type BotConfig } from "../config/config.js";
 import { resolveMarkdownTableMode } from "../config/markdown-tables.js";
 import { recordChannelActivity } from "../infra/channel-activity.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import type { RetryConfig } from "../infra/retry.js";
+import { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-bot-dir.js";
 import { convertMarkdownTables } from "../markdown/tables.js";
 import { maxBytesForKind } from "../media/constants.js";
 import { extensionForMime } from "../media/mime.js";
 import { unlinkIfExists } from "../media/temp-files.js";
+import type { PollInput } from "../polls.js";
 import { loadWebMediaRaw } from "../web/media.js";
 import { resolveDiscordAccount } from "./accounts.js";
 import { rewriteDiscordKnownMentions } from "./mentions.js";
@@ -37,6 +36,7 @@ import {
   type DiscordSendComponents,
   type DiscordSendEmbeds,
 } from "./send.shared.js";
+import type { DiscordSendResult } from "./send.types.js";
 import {
   ensureOggOpus,
   getVoiceMessageMetadata,
@@ -483,7 +483,7 @@ async function materializeVoiceMessageInput(mediaUrl: string): Promise<{ filePat
   const extFromName = media.fileName ? path.extname(media.fileName) : "";
   const extFromMime = media.contentType ? extensionForMime(media.contentType) : "";
   const ext = extFromName || extFromMime || ".bin";
-  const tempDir = resolvePreferredOpenClawTmpDir();
+  const tempDir = resolvePreferredHanzoBotTmpDir();
   const filePath = path.join(tempDir, `voice-src-${crypto.randomUUID()}${ext}`);
   await fs.writeFile(filePath, media.buffer, { mode: 0o600 });
   return { filePath };

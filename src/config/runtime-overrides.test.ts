@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { BotConfig } from "./types.js";
 import {
   applyConfigOverrides,
   getConfigOverrides,
@@ -7,6 +6,7 @@ import {
   setConfigOverride,
   unsetConfigOverride,
 } from "./runtime-overrides.js";
+import type { BotConfig } from "./types.js";
 
 describe("runtime overrides", () => {
   beforeEach(() => {
@@ -15,7 +15,7 @@ describe("runtime overrides", () => {
 
   it("sets and applies nested overrides", () => {
     const cfg = {
-      messages: { responsePrefix: "[openclaw]" },
+      messages: { responsePrefix: "[bot]" },
     } as BotConfig;
     setConfigOverride("messages.responsePrefix", "[debug]");
     const next = applyConfigOverrides(cfg);

@@ -4,15 +4,15 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+import * as querystring from "node:querystring";
 import {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   requestBodyErrorToText,
 } from "@hanzo/bot/plugin-sdk/synology-chat";
-import * as querystring from "node:querystring";
-import type { SynologyWebhookPayload, ResolvedSynologyChatAccount } from "./types.js";
 import { sendMessage, resolveChatUserId } from "./client.js";
 import { validateToken, authorizeUserForDm, sanitizeInput, RateLimiter } from "./security.js";
+import type { SynologyWebhookPayload, ResolvedSynologyChatAccount } from "./types.js";
 
 // One rate limiter per account, created lazily
 const rateLimiters = new Map<string, RateLimiter>();
@@ -124,7 +124,7 @@ function extractTokenFromHeaders(req: IncomingMessage): string | undefined {
   const explicit =
     headerValue(req.headers["x-synology-token"]) ??
     headerValue(req.headers["x-webhook-token"]) ??
-    headerValue(req.headers["x-openclaw-token"]);
+    headerValue(req.headers["x-bot-token"]);
   if (explicit) return explicit;
 
   const auth = headerValue(req.headers.authorization);

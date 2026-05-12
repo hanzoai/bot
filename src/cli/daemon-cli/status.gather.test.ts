@@ -21,8 +21,8 @@ const serviceReadRuntime = vi.fn(async (_env?: NodeJS.ProcessEnv) => ({ status: 
 const serviceReadCommand = vi.fn(async (_env?: NodeJS.ProcessEnv) => ({
   programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
   environment: {
-    BOT_STATE_DIR: "/tmp/openclaw-daemon",
-    BOT_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
+    BOT_STATE_DIR: "/tmp/bot-daemon",
+    BOT_CONFIG_PATH: "/tmp/bot-daemon/bot.json",
   },
 }));
 const resolveGatewayBindHost = vi.fn(
@@ -30,9 +30,9 @@ const resolveGatewayBindHost = vi.fn(
 );
 const pickPrimaryTailnetIPv4 = vi.fn(() => "100.64.0.9");
 const resolveGatewayPort = vi.fn((_cfg?: unknown, _env?: unknown) => 18789);
-const resolveStateDir = vi.fn((env: NodeJS.ProcessEnv) => env.BOT_STATE_DIR ?? "/tmp/openclaw-cli");
+const resolveStateDir = vi.fn((env: NodeJS.ProcessEnv) => env.BOT_STATE_DIR ?? "/tmp/bot-cli");
 const resolveConfigPath = vi.fn((env: NodeJS.ProcessEnv, stateDir: string) => {
-  return env.BOT_CONFIG_PATH ?? `${stateDir}/openclaw.json`;
+  return env.BOT_CONFIG_PATH ?? `${stateDir}/bot.json`;
 });
 let daemonLoadedConfig: Record<string, unknown> = {
   gateway: {
@@ -49,7 +49,7 @@ let cliLoadedConfig: Record<string, unknown> = {
 
 vi.mock("../../config/config.js", () => ({
   createConfigIO: ({ configPath }: { configPath: string }) => {
-    const isDaemon = configPath.includes("/openclaw-daemon/");
+    const isDaemon = configPath.includes("/bot-daemon/");
     return {
       readConfigFileSnapshot: async () => ({
         path: configPath,
@@ -124,8 +124,8 @@ describe("gatherDaemonStatus", () => {
       "DAEMON_GATEWAY_TOKEN",
       "DAEMON_GATEWAY_PASSWORD",
     ]);
-    process.env.BOT_STATE_DIR = "/tmp/openclaw-cli";
-    process.env.BOT_CONFIG_PATH = "/tmp/openclaw-cli/openclaw.json";
+    process.env.BOT_STATE_DIR = "/tmp/bot-cli";
+    process.env.BOT_CONFIG_PATH = "/tmp/bot-cli/bot.json";
     delete process.env.BOT_GATEWAY_TOKEN;
     delete process.env.BOT_GATEWAY_PASSWORD;
     delete process.env.DAEMON_GATEWAY_TOKEN;

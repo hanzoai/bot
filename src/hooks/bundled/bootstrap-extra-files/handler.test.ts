@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { BotConfig } from "../../../config/config.js";
-import type { AgentBootstrapHookContext } from "../../hooks.js";
 import { makeTempWorkspace, writeWorkspaceFile } from "../../../test-helpers/workspace.js";
+import type { AgentBootstrapHookContext } from "../../hooks.js";
 import { createHookEvent } from "../../hooks.js";
 import handler from "./handler.js";
 
@@ -50,7 +50,7 @@ async function createBootstrapContext(params: {
 
 describe("bootstrap-extra-files hook", () => {
   it("appends extra bootstrap files from configured patterns", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-bootstrap-extra-");
+    const tempDir = await makeTempWorkspace("bot-bootstrap-extra-");
     const extraDir = path.join(tempDir, "packages", "core");
     await fs.mkdir(extraDir, { recursive: true });
     await fs.writeFile(path.join(extraDir, "AGENTS.md"), "extra agents", "utf-8");
@@ -74,7 +74,7 @@ describe("bootstrap-extra-files hook", () => {
   });
 
   it("re-applies subagent bootstrap allowlist after extras are added", async () => {
-    const tempDir = await makeTempWorkspace("openclaw-bootstrap-extra-subagent-");
+    const tempDir = await makeTempWorkspace("bot-bootstrap-extra-subagent-");
     const extraDir = path.join(tempDir, "packages", "persona");
     await fs.mkdir(extraDir, { recursive: true });
     await fs.writeFile(path.join(extraDir, "SOUL.md"), "evil", "utf-8");

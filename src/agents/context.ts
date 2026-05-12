@@ -5,8 +5,8 @@ import type { BotConfig } from "../config/config.js";
 import { loadConfig } from "../config/config.js";
 import { computeBackoff, type BackoffPolicy } from "../infra/backoff.js";
 import { consumeRootOptionToken, FLAG_TERMINATOR } from "../infra/cli-root-options.js";
-import { resolveOpenClawAgentDir } from "./agent-paths.js";
-import { ensureOpenClawModelsJson } from "./models-config.js";
+import { resolveHanzoBotAgentDir } from "./agent-paths.js";
+import { ensureHanzoBotModelsJson } from "./models-config.js";
 
 type ModelEntry = { id: string; contextWindow?: number };
 type ModelRegistryLike = {
@@ -146,14 +146,14 @@ function ensureContextWindowCacheLoaded(): Promise<void> {
 
   loadPromise = (async () => {
     try {
-      await ensureOpenClawModelsJson(cfg);
+      await ensureHanzoBotModelsJson(cfg);
     } catch {
       // Continue with best-effort discovery/overrides.
     }
 
     try {
       const { discoverAuthStorage, discoverModels } = await import("./pi-model-discovery.js");
-      const agentDir = resolveOpenClawAgentDir();
+      const agentDir = resolveHanzoBotAgentDir();
       const authStorage = discoverAuthStorage(agentDir);
       const modelRegistry = discoverModels(authStorage, agentDir) as unknown as ModelRegistryLike;
       const models =

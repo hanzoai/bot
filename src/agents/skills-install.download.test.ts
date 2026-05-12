@@ -2,7 +2,6 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { SkillEntry, SkillInstallSpec } from "./skills/types.js";
 import { installDownloadSpec } from "./skills-install-download.js";
 import { setTempStateDir } from "./skills-install.download-test-utils.js";
 import {
@@ -11,6 +10,7 @@ import {
   runCommandWithTimeoutMock,
 } from "./skills-install.test-mocks.js";
 import { resolveSkillToolsRootDir } from "./skills/tools-dir.js";
+import type { SkillEntry, SkillInstallSpec } from "./skills/types.js";
 
 vi.mock("../process/exec.js", () => ({
   runCommandWithTimeout: (...args: unknown[]) => runCommandWithTimeoutMock(...args),
@@ -58,7 +58,7 @@ function buildEntry(name: string): SkillEntry {
     skill: {
       name,
       description: `${name} test skill`,
-      source: "openclaw-workspace",
+      source: "bot-workspace",
       filePath: path.join(skillDir, "SKILL.md"),
       baseDir: skillDir,
       disableModelInvocation: false,
@@ -146,7 +146,7 @@ let workspaceDir = "";
 let stateDir = "";
 
 beforeAll(async () => {
-  workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skills-install-"));
+  workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-skills-install-"));
   stateDir = setTempStateDir(workspaceDir);
 });
 

@@ -1,7 +1,7 @@
-import type { BotConfig } from "@hanzo/bot/plugin-sdk/diffs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import type { BotConfig } from "@hanzo/bot/plugin-sdk/diffs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { launchMock } = vi.hoisted(() => ({
@@ -20,7 +20,7 @@ describe("PlaywrightDiffScreenshotter", () => {
 
   beforeEach(async () => {
     vi.useFakeTimers();
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-diffs-browser-"));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-diffs-browser-"));
     outputPath = path.join(rootDir, "preview.png");
     launchMock.mockReset();
     const browserModule = await import("./browser.js");

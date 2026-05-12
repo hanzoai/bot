@@ -1,8 +1,8 @@
-import type { IncomingMessage, ServerResponse } from "node:http";
-import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/team";
-import { resolvePreferredOpenClawTmpDir } from "@hanzo/bot/plugin-sdk/team";
 import fs from "node:fs/promises";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/team";
+import { resolvePreferredHanzoBotTmpDir } from "@hanzo/bot/plugin-sdk/team";
 import { connectWorkspace, getWorkspace, listWorkspaces } from "./workspace.js";
 
 // ---------------------------------------------------------------------------
@@ -94,7 +94,7 @@ async function runLlmPrompt(
   const runAgent = await loadRunEmbeddedPiAgent();
   let tmpDir: string | null = null;
   try {
-    tmpDir = await fs.mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), "team-llm-"));
+    tmpDir = await fs.mkdtemp(path.join(resolvePreferredHanzoBotTmpDir(), "team-llm-"));
     const sessionId = `team-${Date.now()}`;
     const sessionFile = path.join(tmpDir, "session.json");
 
@@ -291,7 +291,10 @@ export function createChatCompletionsProxyHandler(api: BotPluginApi): RouteHandl
 
       if (!userMessages.trim()) {
         sendJson(res, 400, {
-          error: { message: "messages array must contain at least one message", type: "invalid_request_error" },
+          error: {
+            message: "messages array must contain at least one message",
+            type: "invalid_request_error",
+          },
         });
         return true;
       }
@@ -340,7 +343,8 @@ export function createMessagesProxyHandler(api: BotPluginApi): RouteHandler {
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const messagesRaw = Array.isArray(body.messages) ? body.messages : [];
       const model = typeof body.model === "string" ? body.model : "claude-sonnet-4-6";
-      const systemRaw = typeof body.system === "string" ? body.system : "You are a helpful assistant.";
+      const systemRaw =
+        typeof body.system === "string" ? body.system : "You are a helpful assistant.";
 
       const userMessages = messagesRaw
         .filter((m: any) => typeof m === "object" && m !== null)

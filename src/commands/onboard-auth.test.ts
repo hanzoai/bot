@@ -132,7 +132,7 @@ describe("writeOAuthCredentials", () => {
   });
 
   it("writes auth-profiles.json under BOT_AGENT_DIR when set", async () => {
-    const env = await setupAuthTestEnv("openclaw-oauth-");
+    const env = await setupAuthTestEnv("bot-oauth-");
     lifecycle.setStateDir(env.stateDir);
 
     const creds = {
@@ -158,7 +158,7 @@ describe("writeOAuthCredentials", () => {
   });
 
   it("writes OAuth credentials to all sibling agent dirs when syncSiblingAgents=true", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-oauth-sync-"));
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-oauth-sync-"));
     process.env.BOT_STATE_DIR = tempStateDir;
 
     const mainAgentDir = path.join(tempStateDir, "agents", "main", "agent");
@@ -195,7 +195,7 @@ describe("writeOAuthCredentials", () => {
   });
 
   it("writes OAuth credentials only to target dir by default", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-oauth-nosync-"));
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-oauth-nosync-"));
     process.env.BOT_STATE_DIR = tempStateDir;
 
     const mainAgentDir = path.join(tempStateDir, "agents", "main", "agent");
@@ -227,7 +227,7 @@ describe("writeOAuthCredentials", () => {
   });
 
   it("syncs siblings from explicit agentDir outside BOT_STATE_DIR", async () => {
-    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-oauth-external-"));
+    tempStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-oauth-external-"));
     process.env.BOT_STATE_DIR = tempStateDir;
 
     // Create standard-layout agents tree *outside* BOT_STATE_DIR
@@ -280,7 +280,7 @@ describe("setMinimaxApiKey", () => {
   });
 
   it("writes to BOT_AGENT_DIR when set", async () => {
-    const env = await setupAuthTestEnv("openclaw-minimax-", { agentSubdir: "custom-agent" });
+    const env = await setupAuthTestEnv("bot-minimax-", { agentSubdir: "custom-agent" });
     lifecycle.setStateDir(env.stateDir);
 
     await setMinimaxApiKey("sk-minimax-test");

@@ -1,5 +1,10 @@
 import type { CronConfig, CronRetryOn } from "../../config/types.cron.js";
+import { isCronSystemEvent } from "../../infra/heartbeat-events-filter.js";
 import type { HeartbeatRunResult } from "../../infra/heartbeat-wake.js";
+import { DEFAULT_AGENT_ID } from "../../routing/session-key.js";
+import { resolveCronDeliveryPlan } from "../delivery.js";
+import { shouldEnqueueCronMainSummary } from "../heartbeat-policy.js";
+import { sweepCronRunSessions } from "../session-reaper.js";
 import type {
   CronDeliveryStatus,
   CronJob,
@@ -8,12 +13,6 @@ import type {
   CronRunStatus,
   CronRunTelemetry,
 } from "../types.js";
-import type { CronEvent, CronServiceState } from "./state.js";
-import { isCronSystemEvent } from "../../infra/heartbeat-events-filter.js";
-import { DEFAULT_AGENT_ID } from "../../routing/session-key.js";
-import { resolveCronDeliveryPlan } from "../delivery.js";
-import { shouldEnqueueCronMainSummary } from "../heartbeat-policy.js";
-import { sweepCronRunSessions } from "../session-reaper.js";
 import {
   computeJobPreviousRunAtMs,
   computeJobNextRunAtMs,
@@ -23,6 +22,7 @@ import {
   resolveJobPayloadTextForMain,
 } from "./jobs.js";
 import { locked } from "./locked.js";
+import type { CronEvent, CronServiceState } from "./state.js";
 import { ensureLoaded, persist } from "./store.js";
 import { DEFAULT_JOB_TIMEOUT_MS, resolveCronJobTimeoutMs } from "./timeout-policy.js";
 
@@ -561,7 +561,7 @@ export async function onTimer(state: CronServiceState) {
     // We use MAX_TIMER_DELAY_MS as a fixed re-check interval to avoid a
     // zero-delay hot-loop when past-due jobs are waiting for the current
     // execution to finish.
-    // See: https://github.com/openclaw/openclaw/issues/12025
+    // See: https://github.com/bot/bot/issues/12025
     armRunningRecheckTimer(state);
     return;
   }
@@ -992,7 +992,7 @@ export async function executeJobCore(
           // Cron-triggered heartbeats should deliver to the last active channel.
           // Without this override, heartbeat target defaults to "none" (since
           // e2362d35) and cron main-session responses are silently swallowed.
-          // See: https://github.com/openclaw/openclaw/issues/28508
+          // See: https://github.com/bot/bot/issues/28508
           heartbeat: { target: "last" },
         });
         if (
@@ -1059,11 +1059,11 @@ export async function executeJobCore(
   // delivery was requested and we are confident no outbound delivery path
   // ran. If delivery was attempted but final ack is uncertain, suppress the
   // main summary to avoid duplicate user-facing sends.
-  // See: https://github.com/openclaw/openclaw/issues/15692
+  // See: https://github.com/bot/bot/issues/15692
   //
   // Also suppress heartbeat-only summaries (e.g. "HEARTBEAT_OK") — these
   // are internal ack tokens that should never leak into user conversations.
-  // See: https://github.com/openclaw/openclaw/issues/32013
+  // See: https://github.com/bot/bot/issues/32013
   const summaryText = res.summary?.trim();
   const deliveryPlan = resolveCronDeliveryPlan(job);
   const suppressMainSummary =

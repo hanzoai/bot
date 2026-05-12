@@ -2,9 +2,9 @@
   "name": "@hanzo/bot-line",
   "version": "1.4.2",
   "private": true,
-  "description": "OpenClaw LINE channel plugin",
+  "description": "HanzoBot LINE channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ],

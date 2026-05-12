@@ -1,9 +1,5 @@
 # ── App classes ───────────────────────────────────────────────────
-<<<<<<< HEAD
 -keep class ai.hanzo.bot.android.** { *; }
-=======
--keep class ai.openclaw.android.** { *; }
->>>>>>> upstream/main
 
 # ── Bouncy Castle ─────────────────────────────────────────────────
 -keep class org.bouncycastle.** { *; }

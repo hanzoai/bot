@@ -1,10 +1,6 @@
 import CoreLocation
 import Foundation
-<<<<<<< HEAD
 import BotKit
-=======
-import OpenClawKit
->>>>>>> upstream/main
 
 /// Monitors significant location changes and pushes `location.update`
 /// events to the gateway so the severance hook can determine whether
@@ -13,14 +9,8 @@ import OpenClawKit
 enum SignificantLocationMonitor {
     static func startIfNeeded(
         locationService: any LocationServicing,
-<<<<<<< HEAD
         locationMode: BotLocationMode,
         gateway: GatewayNodeSession
-=======
-        locationMode: OpenClawLocationMode,
-        gateway: GatewayNodeSession,
-        beforeSend: (@MainActor @Sendable () async -> Void)? = nil
->>>>>>> upstream/main
     ) {
         guard locationMode == .always else { return }
         let status = locationService.authorizationStatus()
@@ -41,12 +31,6 @@ enum SignificantLocationMonitor {
                   let json = String(data: data, encoding: .utf8)
             else { return }
             Task { @MainActor in
-<<<<<<< HEAD
-=======
-                if let beforeSend {
-                    await beforeSend()
-                }
->>>>>>> upstream/main
                 await gateway.sendEvent(event: "location.update", payloadJSON: json)
             }
         }

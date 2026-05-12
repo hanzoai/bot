@@ -1,4 +1,3 @@
-import type { GatewayRequestHandlers } from "./types.js";
 import {
   loadApnsRegistration,
   normalizeApnsEnvironment,
@@ -7,6 +6,7 @@ import {
 } from "../../infra/push-apns.js";
 import { ErrorCodes, errorShape, validatePushTestParams } from "../protocol/index.js";
 import { respondInvalidParams, respondUnavailableOnThrow } from "./nodes.helpers.js";
+import type { GatewayRequestHandlers } from "./types.js";
 
 function normalizeOptionalString(value: unknown): string | undefined {
   if (typeof value !== "string") {
@@ -33,7 +33,7 @@ export const pushHandlers: GatewayRequestHandlers = {
       return;
     }
 
-    const title = normalizeOptionalString(params.title) ?? "OpenClaw";
+    const title = normalizeOptionalString(params.title) ?? "HanzoBot";
     const body = normalizeOptionalString(params.body) ?? `Push test for node ${nodeId}`;
 
     await respondUnavailableOnThrow(respond, async () => {

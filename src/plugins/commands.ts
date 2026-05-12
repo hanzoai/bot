@@ -6,14 +6,14 @@
  */
 
 import type { BotConfig } from "../config/config.js";
+import { logVerbose } from "../globals.js";
 import type {
-  OpenClawPluginCommandDefinition,
+  HanzoBotPluginCommandDefinition,
   PluginCommandContext,
   PluginCommandResult,
 } from "./types.js";
-import { logVerbose } from "../globals.js";
 
-type RegisteredPluginCommand = OpenClawPluginCommandDefinition & {
+type RegisteredPluginCommand = HanzoBotPluginCommandDefinition & {
   pluginId: string;
 };
 
@@ -107,7 +107,7 @@ export type CommandRegistrationResult = {
  */
 export function registerPluginCommand(
   pluginId: string,
-  command: OpenClawPluginCommandDefinition,
+  command: HanzoBotPluginCommandDefinition,
 ): CommandRegistrationResult {
   // Prevent registration while commands are being processed
   if (registryLocked) {

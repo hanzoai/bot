@@ -2,14 +2,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { VoiceCallConfigSchema } from "../config.js";
 import type { VoiceCallProvider } from "../providers/base.js";
 import type { HangupCallInput, NormalizedEvent } from "../types.js";
 import type { CallManagerContext } from "./context.js";
-import { VoiceCallConfigSchema } from "../config.js";
 import { processEvent } from "./events.js";
 
 function createContext(overrides: Partial<CallManagerContext> = {}): CallManagerContext {
-  const storePath = path.join(os.tmpdir(), `openclaw-voice-call-events-test-${Date.now()}`);
+  const storePath = path.join(os.tmpdir(), `bot-voice-call-events-test-${Date.now()}`);
   fs.mkdirSync(storePath, { recursive: true });
   return {
     activeCalls: new Map(),

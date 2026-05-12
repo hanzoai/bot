@@ -24,7 +24,7 @@ function toConcretePathSegments(pathPattern: string): string[] {
   return out;
 }
 
-function buildConfigForOpenClawTarget(entry: SecretRegistryEntry, envId: string): BotConfig {
+function buildConfigForHanzoBotTarget(entry: SecretRegistryEntry, envId: string): BotConfig {
   const config = {} as BotConfig;
   const refTargetPath =
     entry.secretShape === "sibling_ref" && entry.refPathPattern
@@ -133,17 +133,17 @@ describe("secrets runtime target coverage", () => {
     clearSecretsRuntimeSnapshot();
   });
 
-  it("handles every openclaw.json registry target when configured as active", async () => {
+  it("handles every bot.json registry target when configured as active", async () => {
     const entries = listSecretTargetRegistryEntries().filter(
-      (entry) => entry.configFile === "openclaw.json",
+      (entry) => entry.configFile === "bot.json",
     );
     for (const [index, entry] of entries.entries()) {
       const envId = `BOT_SECRET_TARGET_${index}`;
       const expectedValue = `resolved-${entry.id}`;
       const snapshot = await prepareSecretsRuntimeSnapshot({
-        config: buildConfigForOpenClawTarget(entry, envId),
+        config: buildConfigForHanzoBotTarget(entry, envId),
         env: { [envId]: expectedValue },
-        agentDirs: ["/tmp/openclaw-agent-main"],
+        agentDirs: ["/tmp/bot-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),
       });
       const resolved = getPath(snapshot.config, toConcretePathSegments(entry.pathPattern));
@@ -167,7 +167,7 @@ describe("secrets runtime target coverage", () => {
       const snapshot = await prepareSecretsRuntimeSnapshot({
         config: {} as BotConfig,
         env: { [envId]: expectedValue },
-        agentDirs: ["/tmp/openclaw-agent-main"],
+        agentDirs: ["/tmp/bot-agent-main"],
         loadAuthStore: () => buildAuthStoreForTarget(entry, envId),
       });
       const store = snapshot.authStores[0]?.store;

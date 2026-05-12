@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import type { ResolvedBrowserProfile } from "./config.js";
-import type { ProfileRuntimeState } from "./server-context.types.js";
 import { stopChromeExtensionRelayServer } from "./extension-relay.js";
+import type { ProfileRuntimeState } from "./server-context.types.js";
 import { movePathToTrash } from "./trash.js";
 
 type ResetDeps = {
@@ -9,7 +9,7 @@ type ResetDeps = {
   getProfileState: () => ProfileRuntimeState;
   stopRunningBrowser: () => Promise<{ stopped: boolean }>;
   isHttpReachable: (timeoutMs?: number) => Promise<boolean>;
-  resolveOpenClawUserDataDir: (profileName: string) => string;
+  resolveHanzoBotUserDataDir: (profileName: string) => string;
 };
 
 type ResetOps = {
@@ -30,7 +30,7 @@ export function createProfileResetOps({
   getProfileState,
   stopRunningBrowser,
   isHttpReachable,
-  resolveOpenClawUserDataDir,
+  resolveHanzoBotUserDataDir,
 }: ResetDeps): ResetOps {
   const resetProfile = async () => {
     if (profile.driver === "extension") {
@@ -43,7 +43,7 @@ export function createProfileResetOps({
       );
     }
 
-    const userDataDir = resolveOpenClawUserDataDir(profile.name);
+    const userDataDir = resolveHanzoBotUserDataDir(profile.name);
     const profileState = getProfileState();
     const httpReachable = await isHttpReachable(300);
     if (httpReachable && !profileState.running) {

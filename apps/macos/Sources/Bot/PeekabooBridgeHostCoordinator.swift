@@ -13,7 +13,7 @@ final class PeekabooBridgeHostCoordinator {
 
     private var host: PeekabooBridgeHost?
     private var services: HanzoBotPeekabooBridgeServices?
-    private static var hanzo-botSocketPath: String {
+    private static var botSocketPath: String {
         let fileManager = FileManager.default
         let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? fileManager.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
@@ -54,7 +54,7 @@ final class PeekabooBridgeHostCoordinator {
             allowlistedBundles: allowlistedBundles)
 
         let host = PeekabooBridgeHost(
-            socketPath: Self.hanzo-botSocketPath,
+            socketPath: Self.botSocketPath,
             server: server,
             allowedTeamIDs: allowlistedTeamIDs,
             requestTimeoutSec: 10)
@@ -64,7 +64,7 @@ final class PeekabooBridgeHostCoordinator {
 
         await host.start()
         self.logger
-            .info("PeekabooBridge host started at \(Self.hanzo-botSocketPath, privacy: .public)")
+            .info("PeekabooBridge host started at \(Self.botSocketPath, privacy: .public)")
     }
 
     private static func currentTeamID() -> String? {

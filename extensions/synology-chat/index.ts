@@ -6,7 +6,7 @@ import { setSynologyRuntime } from "./src/runtime.js";
 const plugin = {
   id: "synology-chat",
   name: "Synology Chat",
-  description: "Native Synology Chat channel plugin for OpenClaw",
+  description: "Native Synology Chat channel plugin for HanzoBot",
   configSchema: emptyPluginConfigSchema(),
   register(api: BotPluginApi) {
     setSynologyRuntime(api.runtime);

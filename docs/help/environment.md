@@ -1,5 +1,5 @@
 ---
-summary: "Where OpenClaw loads environment variables and the precedence order"
+summary: "Where HanzoBot loads environment variables and the precedence order"
 read_when:
   - You need to know which env vars are loaded, and in what order
   - You are debugging missing API keys in the Gateway
@@ -9,14 +9,14 @@ title: "Environment Variables"
 
 # Environment variables
 
-OpenClaw pulls environment variables from multiple sources. The rule is **never override existing values**.
+HanzoBot pulls environment variables from multiple sources. The rule is **never override existing values**.
 
 ## Precedence (highest → lowest)
 
 1. **Process environment** (what the Gateway process already has from the parent shell/daemon).
 2. **`.env` in the current working directory** (dotenv default; does not override).
-3. **Global `.env`** at `~/.openclaw/.env` (aka `$BOT_STATE_DIR/.env`; does not override).
-4. **Config `env` block** in `~/.openclaw/openclaw.json` (applied only if missing).
+3. **Global `.env`** at `~/.hanzo-bot/.env` (aka `$BOT_STATE_DIR/.env`; does not override).
+4. **Config `env` block** in `~/.hanzo-bot/hanzo-bot.json` (applied only if missing).
 5. **Optional login-shell import** (`env.shellEnv.enabled` or `BOT_LOAD_SHELL_ENV=1`), applied only for missing expected keys.
 
 If the config file is missing entirely, step 4 is skipped; shell import still runs if enabled.
@@ -58,11 +58,11 @@ Env var equivalents:
 
 ## Runtime-injected env vars
 
-OpenClaw also injects context markers into spawned child processes:
+HanzoBot also injects context markers into spawned child processes:
 
 - `BOT_SHELL=exec`: set for commands run through the `exec` tool.
 - `BOT_SHELL=acp`: set for ACP runtime backend process spawns (for example `acpx`).
-- `BOT_SHELL=acp-client`: set for `openclaw acp client` when it spawns the ACP bridge process.
+- `BOT_SHELL=acp-client`: set for `hanzo-bot acp client` when it spawns the ACP bridge process.
 - `BOT_SHELL=tui-local`: set for local TUI `!` shell commands.
 
 These are runtime markers (not required user config). They can be used in shell/profile logic
@@ -88,7 +88,7 @@ See [Configuration: Env var substitution](/gateway/configuration#env-var-substit
 
 ## Secret refs vs `${ENV}` strings
 
-OpenClaw supports two env-driven patterns:
+HanzoBot supports two env-driven patterns:
 
 - `${VAR}` string substitution in config values.
 - SecretRef objects (`{ source: "env", provider: "default", id: "VAR" }`) for fields that support secrets references.
@@ -97,11 +97,11 @@ Both resolve from process env at activation time. SecretRef details are document
 
 ## Path-related env vars
 
-| Variable          | Purpose                                                                                                                                                                          |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BOT_HOME`        | Override the home directory used for all internal path resolution (`~/.openclaw/`, agent dirs, sessions, credentials). Useful when running OpenClaw as a dedicated service user. |
-| `BOT_STATE_DIR`   | Override the state directory (default `~/.openclaw`).                                                                                                                            |
-| `BOT_CONFIG_PATH` | Override the config file path (default `~/.openclaw/openclaw.json`).                                                                                                             |
+| Variable          | Purpose                                                                                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BOT_HOME`        | Override the home directory used for all internal path resolution (`~/.hanzo-bot/`, agent dirs, sessions, credentials). Useful when running HanzoBot as a dedicated service user. |
+| `BOT_STATE_DIR`   | Override the state directory (default `~/.hanzo-bot`).                                                                                                                            |
+| `BOT_CONFIG_PATH` | Override the config file path (default `~/.hanzo-bot/hanzo-bot.json`).                                                                                                            |
 
 ## Logging
 

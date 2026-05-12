@@ -22,7 +22,7 @@ describe("installScheduledTask", () => {
   async function withUserProfileDir(
     run: (tmpDir: string, env: Record<string, string>) => Promise<void>,
   ) {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-schtasks-install-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-schtasks-install-"));
     const env = {
       USERPROFILE: tmpDir,
       BOT_PROFILE: "default",
@@ -98,7 +98,7 @@ describe("installScheduledTask", () => {
 
       expect(schtasksCalls[0]).toEqual(["/Query"]);
       expect(schtasksCalls[1]?.[0]).toBe("/Create");
-      expect(schtasksCalls[2]).toEqual(["/Run", "/TN", "OpenClaw Gateway"]);
+      expect(schtasksCalls[2]).toEqual(["/Run", "/TN", "HanzoBot Gateway"]);
     });
   });
 

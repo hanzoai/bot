@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { StatusSummary } from "./status.types.js";
 import { redactSensitiveStatusSummary } from "./status.summary.js";
+import type { StatusSummary } from "./status.types.js";
 
 function createRecentSessionRow() {
   return {
@@ -29,14 +29,14 @@ describe("redactSensitiveStatusSummary", () => {
       channelSummary: ["ok"],
       queuedSystemEvents: ["none"],
       sessions: {
-        paths: ["/tmp/openclaw/sessions.json"],
+        paths: ["/tmp/bot/sessions.json"],
         count: 1,
         defaults: { model: "gpt-5", contextTokens: 200_000 },
         recent: [createRecentSessionRow()],
         byAgent: [
           {
             agentId: "main",
-            path: "/tmp/openclaw/main-sessions.json",
+            path: "/tmp/bot/main-sessions.json",
             count: 1,
             recent: [createRecentSessionRow()],
           },

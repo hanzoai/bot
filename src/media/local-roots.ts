@@ -1,8 +1,8 @@
 import path from "node:path";
-import type { BotConfig } from "../config/config.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
+import type { BotConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-bot-dir.js";
 
 type BuildMediaLocalRootsOptions = {
   preferredTmpDir?: string;
@@ -12,7 +12,7 @@ let cachedPreferredTmpDir: string | undefined;
 
 function resolveCachedPreferredTmpDir(): string {
   if (!cachedPreferredTmpDir) {
-    cachedPreferredTmpDir = resolvePreferredOpenClawTmpDir();
+    cachedPreferredTmpDir = resolvePreferredHanzoBotTmpDir();
   }
   return cachedPreferredTmpDir;
 }

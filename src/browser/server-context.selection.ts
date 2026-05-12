@@ -1,9 +1,9 @@
-import type { ResolvedBrowserProfile } from "./config.js";
-import type { PwAiModule } from "./pw-ai-module.js";
-import type { BrowserTab, ProfileRuntimeState } from "./server-context.types.js";
 import { fetchOk } from "./cdp.helpers.js";
 import { appendCdpPath } from "./cdp.js";
+import type { ResolvedBrowserProfile } from "./config.js";
+import type { PwAiModule } from "./pw-ai-module.js";
 import { getPwAiModule } from "./pw-ai-module.js";
+import type { BrowserTab, ProfileRuntimeState } from "./server-context.types.js";
 import { resolveTargetIdFromTabs } from "./target-id.js";
 
 type SelectionDeps = {
@@ -35,7 +35,7 @@ export function createProfileSelectionOps({
       if (profile.driver === "extension") {
         throw new Error(
           `tab not found (no attached Chrome tabs for profile "${profile.name}"). ` +
-            "Click the OpenClaw Browser Relay toolbar icon on the tab you want to control (badge ON).",
+            "Click the HanzoBot Browser Relay toolbar icon on the tab you want to control (badge ON).",
         );
       }
       await openTab("about:blank");

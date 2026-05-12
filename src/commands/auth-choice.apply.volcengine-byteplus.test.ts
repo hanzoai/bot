@@ -19,7 +19,7 @@ describe("volcengine/byteplus auth choice", () => {
   ]);
 
   async function setupTempState() {
-    const env = await setupAuthTestEnv("openclaw-volc-byte-");
+    const env = await setupAuthTestEnv("bot-volc-byte-");
     lifecycle.setStateDir(env.stateDir);
     return env.agentDir;
   }

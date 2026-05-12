@@ -36,7 +36,7 @@ function makePermissionRequest(
 }
 
 const tempDirs = createTrackedTempDirs();
-const createTempDir = () => tempDirs.make("openclaw-acp-client-test-");
+const createTempDir = () => tempDirs.make("bot-acp-client-test-");
 
 afterEach(async () => {
   await tempDirs.cleanup();
@@ -46,12 +46,12 @@ describe("resolveAcpClientSpawnEnv", () => {
   it("sets BOT_SHELL marker and preserves existing env values", () => {
     const env = resolveAcpClientSpawnEnv({
       PATH: "/usr/bin",
-      USER: "openclaw",
+      USER: "bot",
     });
 
     expect(env.BOT_SHELL).toBe("acp-client");
     expect(env.PATH).toBe("/usr/bin");
-    expect(env.USER).toBe("openclaw");
+    expect(env.USER).toBe("bot");
   });
 
   it("overrides pre-existing BOT_SHELL to acp-client", () => {
@@ -65,7 +65,7 @@ describe("resolveAcpClientSpawnEnv", () => {
 describe("resolveAcpClientSpawnInvocation", () => {
   it("keeps non-windows invocation unchanged", () => {
     const resolved = resolveAcpClientSpawnInvocation(
-      { serverCommand: "openclaw", serverArgs: ["acp", "--verbose"] },
+      { serverCommand: "bot", serverArgs: ["acp", "--verbose"] },
       {
         platform: "darwin",
         env: {},
@@ -73,7 +73,7 @@ describe("resolveAcpClientSpawnInvocation", () => {
       },
     );
     expect(resolved).toEqual({
-      command: "openclaw",
+      command: "bot",
       args: ["acp", "--verbose"],
       shell: undefined,
       windowsHide: undefined,
@@ -82,11 +82,11 @@ describe("resolveAcpClientSpawnInvocation", () => {
 
   it("unwraps .cmd shim entrypoint on windows", async () => {
     const dir = await createTempDir();
-    const scriptPath = path.join(dir, "openclaw", "dist", "entry.js");
-    const shimPath = path.join(dir, "openclaw.cmd");
+    const scriptPath = path.join(dir, "bot", "dist", "entry.js");
+    const shimPath = path.join(dir, "bot.cmd");
     await mkdir(path.dirname(scriptPath), { recursive: true });
     await writeFile(scriptPath, "console.log('ok')\n", "utf8");
-    await writeFile(shimPath, `@ECHO off\r\n"%~dp0\\openclaw\\dist\\entry.js" %*\r\n`, "utf8");
+    await writeFile(shimPath, `@ECHO off\r\n"%~dp0\\bot\\dist\\entry.js" %*\r\n`, "utf8");
 
     const resolved = resolveAcpClientSpawnInvocation(
       { serverCommand: shimPath, serverArgs: ["acp", "--verbose"] },
@@ -104,7 +104,7 @@ describe("resolveAcpClientSpawnInvocation", () => {
 
   it("falls back to shell mode for unresolved wrappers on windows", async () => {
     const dir = await createTempDir();
-    const shimPath = path.join(dir, "openclaw.cmd");
+    const shimPath = path.join(dir, "bot.cmd");
     await writeFile(shimPath, "@ECHO off\r\necho wrapper\r\n", "utf8");
 
     const resolved = resolveAcpClientSpawnInvocation(
@@ -223,7 +223,7 @@ describe("resolvePermissionRequest", () => {
           rawInput: { path: "docs/security.md" },
         },
       },
-      cwd: "/tmp/openclaw-acp-cwd",
+      cwd: "/tmp/bot-acp-cwd",
     });
   });
 
@@ -234,10 +234,10 @@ describe("resolvePermissionRequest", () => {
           toolCallId: "tool-read-inside-cwd-file-url",
           title: "read: ignored-by-raw-input",
           status: "pending",
-          rawInput: { path: "file:///tmp/openclaw-acp-cwd/docs/security.md" },
+          rawInput: { path: "file:///tmp/bot-acp-cwd/docs/security.md" },
         },
       },
-      cwd: "/tmp/openclaw-acp-cwd",
+      cwd: "/tmp/bot-acp-cwd",
     });
   });
 
@@ -252,7 +252,7 @@ describe("resolvePermissionRequest", () => {
           rawInput: { path: "../.ssh/id_rsa" },
         },
       }),
-      { prompt, log: () => {}, cwd: "/tmp/openclaw-acp-cwd/workspace" },
+      { prompt, log: () => {}, cwd: "/tmp/bot-acp-cwd/workspace" },
     );
     expect(prompt).toHaveBeenCalledTimes(1);
     expect(prompt).toHaveBeenCalledWith("read", "read: ignored-by-raw-input");

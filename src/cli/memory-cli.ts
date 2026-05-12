@@ -1,8 +1,8 @@
-import type { Command } from "commander";
 import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import type { Command } from "commander";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { loadConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
@@ -581,11 +581,11 @@ export function registerMemoryCli(program: Command) {
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["openclaw memory status", "Show index and provider status."],
-          ["openclaw memory index --force", "Force a full reindex."],
-          ['openclaw memory search --query "deployment notes"', "Search indexed memory entries."],
-          ["openclaw memory status --json", "Output machine-readable JSON."],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/memory", "docs.openclaw.ai/cli/memory")}\n`,
+          ["bot memory status", "Show index and provider status."],
+          ["bot memory index --force", "Force a full reindex."],
+          ['bot memory search --query "deployment notes"', "Search indexed memory entries."],
+          ["bot memory status --json", "Output machine-readable JSON."],
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/memory", "docs.bot.ai/cli/memory")}\n`,
     );
 
   memory

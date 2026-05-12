@@ -16,13 +16,13 @@ async function createTempDir(prefix: string) {
 }
 
 async function setupBundledDiffsPlugin() {
-  const bundledPluginsDir = await createTempDir("openclaw-bundled-");
-  const workspaceDir = await createTempDir("openclaw-workspace-");
+  const bundledPluginsDir = await createTempDir("bot-bundled-");
+  const workspaceDir = await createTempDir("bot-workspace-");
   const pluginRoot = path.join(bundledPluginsDir, "diffs");
 
   await fs.mkdir(path.join(pluginRoot, "skills", "diffs"), { recursive: true });
   await fs.writeFile(
-    path.join(pluginRoot, "openclaw.plugin.json"),
+    path.join(pluginRoot, "bot.plugin.json"),
     JSON.stringify(
       {
         id: "diffs",

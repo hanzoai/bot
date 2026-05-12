@@ -20,9 +20,9 @@ function resolveStateDirFromEnv(env: NodeJS.ProcessEnv = process.env): string {
     return stateOverride;
   }
   if (env.VITEST || env.NODE_ENV === "test") {
-    return path.join(os.tmpdir(), ["openclaw-vitest", String(process.pid)].join("-"));
+    return path.join(os.tmpdir(), ["bot-vitest", String(process.pid)].join("-"));
   }
-  return path.join(os.homedir(), ".openclaw");
+  return path.join(os.homedir(), ".bot");
 }
 
 function resolveNamespaceFilePath(namespace: string): string {

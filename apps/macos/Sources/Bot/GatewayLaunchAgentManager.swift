@@ -144,7 +144,7 @@ extension GatewayLaunchAgentManager {
         timeout: Double,
         quiet: Bool) async -> CommandResult
     {
-        let command = CommandResolver.hanzo-botCommand(
+        let command = CommandResolver.botCommand(
             subcommand: "gateway",
             extraArgs: self.withJsonFlag(args),
             // Launchd management must always run locally, even if remote mode is configured.

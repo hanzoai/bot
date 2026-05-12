@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import type { SessionBindingRecord } from "../infra/outbound/session-binding-service.js";
-import type { AcpRuntimeSessionMode } from "./runtime/types.js";
 import { sanitizeAgentId } from "../routing/session-key.js";
+import type { AcpRuntimeSessionMode } from "./runtime/types.js";
 
 export type ConfiguredAcpBindingChannel = "discord" | "telegram";
 
@@ -10,7 +10,7 @@ export type ConfiguredAcpBindingSpec = {
   accountId: string;
   conversationId: string;
   parentConversationId?: string;
-  /** Owning OpenClaw agent id (used for session identity/storage). */
+  /** Owning HanzoBot agent id (used for session identity/storage). */
   agentId: string;
   /** ACP harness agent id override (falls back to agentId when omitted). */
   acpAgentId?: string;

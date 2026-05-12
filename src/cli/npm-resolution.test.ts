@@ -67,7 +67,7 @@ describe("npm-resolution helpers", () => {
     expect(
       buildNpmInstallRecordFields({
         spec: "@hanzo/bot-plugin-alpha@1.2.3",
-        installPath: "/tmp/openclaw/extensions/alpha",
+        installPath: "/tmp/bot/extensions/alpha",
         version: "1.2.3",
         resolution: {
           name: "@hanzo/bot-plugin-alpha",
@@ -79,7 +79,7 @@ describe("npm-resolution helpers", () => {
     ).toEqual({
       source: "npm",
       spec: "@hanzo/bot-plugin-alpha@1.2.3",
-      installPath: "/tmp/openclaw/extensions/alpha",
+      installPath: "/tmp/bot/extensions/alpha",
       version: "1.2.3",
       resolvedName: "@hanzo/bot-plugin-alpha",
       resolvedVersion: "1.2.3",
@@ -112,7 +112,7 @@ describe("npm-resolution helpers", () => {
     const record = resolvePinnedNpmInstallRecord({
       rawSpec: "@hanzo/bot-plugin-alpha@latest",
       pin: true,
-      installPath: "/tmp/openclaw/extensions/alpha",
+      installPath: "/tmp/bot/extensions/alpha",
       version: "1.2.3",
       resolution: {
         name: "@hanzo/bot-plugin-alpha",
@@ -126,7 +126,7 @@ describe("npm-resolution helpers", () => {
     expect(record).toEqual({
       source: "npm",
       spec: "@hanzo/bot-plugin-alpha@1.2.3",
-      installPath: "/tmp/openclaw/extensions/alpha",
+      installPath: "/tmp/bot/extensions/alpha",
       version: "1.2.3",
       resolvedName: "@hanzo/bot-plugin-alpha",
       resolvedVersion: "1.2.3",
@@ -144,7 +144,7 @@ describe("npm-resolution helpers", () => {
     const record = resolvePinnedNpmInstallRecordForCli(
       "@hanzo/bot-plugin-alpha@latest",
       true,
-      "/tmp/openclaw/extensions/alpha",
+      "/tmp/bot/extensions/alpha",
       "1.2.3",
       undefined,
       (message) => logs.push(message),
@@ -154,7 +154,7 @@ describe("npm-resolution helpers", () => {
     expect(record).toEqual({
       source: "npm",
       spec: "@hanzo/bot-plugin-alpha@latest",
-      installPath: "/tmp/openclaw/extensions/alpha",
+      installPath: "/tmp/bot/extensions/alpha",
       version: "1.2.3",
       resolvedName: undefined,
       resolvedVersion: undefined,

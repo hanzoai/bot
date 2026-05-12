@@ -89,7 +89,7 @@ async function runRepair(cfg: BotConfig) {
 
 const gatewayProgramArguments = [
   "/usr/bin/node",
-  "/usr/local/bin/openclaw",
+  "/usr/local/bin/bot",
   "gateway",
   "--port",
   "18789",
@@ -285,7 +285,7 @@ describe("maybeScanExtraGatewayServices", () => {
       "Legacy gateway removed",
     );
     expect(runtime.log).toHaveBeenCalledWith(
-      "Legacy gateway services removed. Installing OpenClaw gateway next.",
+      "Legacy gateway services removed. Installing HanzoBot gateway next.",
     );
   });
 });

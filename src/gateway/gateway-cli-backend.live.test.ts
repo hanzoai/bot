@@ -226,7 +226,7 @@ describeLive("gateway live (cli backend)", () => {
       throw new Error("BOT_LIVE_CLI_BACKEND_IMAGE_MODE requires BOT_LIVE_CLI_BACKEND_IMAGE_ARG.");
     }
 
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-cli-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-live-cli-"));
     const disableMcpConfig = process.env.BOT_LIVE_CLI_BACKEND_DISABLE_MCP_CONFIG !== "0";
     let cliArgs = baseCliArgs;
     if (providerId === "claude-cli" && disableMcpConfig) {
@@ -261,7 +261,7 @@ describeLive("gateway live (cli backend)", () => {
         },
       },
     };
-    const tempConfigPath = path.join(tempDir, "openclaw.json");
+    const tempConfigPath = path.join(tempDir, "bot.json");
     await fs.writeFile(tempConfigPath, `${JSON.stringify(nextCfg, null, 2)}\n`);
     process.env.BOT_CONFIG_PATH = tempConfigPath;
 

@@ -3,13 +3,13 @@ import { captureFullEnv } from "../test-utils/env.js";
 import { SUPERVISOR_HINT_ENV_VARS } from "./supervisor-markers.js";
 
 const spawnMock = vi.hoisted(() => vi.fn());
-const triggerOpenClawRestartMock = vi.hoisted(() => vi.fn());
+const triggerHanzoBotRestartMock = vi.hoisted(() => vi.fn());
 
 vi.mock("node:child_process", () => ({
   spawn: (...args: unknown[]) => spawnMock(...args),
 }));
 vi.mock("./restart.js", () => ({
-  triggerOpenClawRestart: (...args: unknown[]) => triggerOpenClawRestartMock(...args),
+  triggerHanzoBotRestart: (...args: unknown[]) => triggerHanzoBotRestartMock(...args),
 }));
 
 import { restartGatewayProcessWithFreshPid } from "./process-respawn.js";
@@ -34,7 +34,7 @@ afterEach(() => {
   process.argv = [...originalArgv];
   process.execArgv = [...originalExecArgv];
   spawnMock.mockClear();
-  triggerOpenClawRestartMock.mockClear();
+  triggerHanzoBotRestartMock.mockClear();
   if (originalPlatformDescriptor) {
     Object.defineProperty(process, "platform", originalPlatformDescriptor);
   }
@@ -52,10 +52,10 @@ function expectLaunchdKickstartSupervised(params?: { launchJobLabel?: string }) 
     process.env.LAUNCH_JOB_LABEL = params.launchJobLabel;
   }
   process.env.BOT_LAUNCHD_LABEL = "ai.bot.gateway";
-  triggerOpenClawRestartMock.mockReturnValue({ ok: true, method: "launchctl" });
+  triggerHanzoBotRestartMock.mockReturnValue({ ok: true, method: "launchctl" });
   const result = restartGatewayProcessWithFreshPid();
   expect(result.mode).toBe("supervised");
-  expect(triggerOpenClawRestartMock).toHaveBeenCalledOnce();
+  expect(triggerHanzoBotRestartMock).toHaveBeenCalledOnce();
   expect(spawnMock).not.toHaveBeenCalled();
 }
 
@@ -83,7 +83,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
     setPlatform("darwin");
     process.env.LAUNCH_JOB_LABEL = "ai.bot.gateway";
     process.env.BOT_LAUNCHD_LABEL = "ai.bot.gateway";
-    triggerOpenClawRestartMock.mockReturnValue({
+    triggerHanzoBotRestartMock.mockReturnValue({
       ok: false,
       method: "launchctl",
       detail: "spawn failed",
@@ -103,7 +103,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
     const result = restartGatewayProcessWithFreshPid();
 
     expect(result.mode).toBe("supervised");
-    expect(triggerOpenClawRestartMock).not.toHaveBeenCalled();
+    expect(triggerHanzoBotRestartMock).not.toHaveBeenCalled();
     expect(spawnMock).not.toHaveBeenCalled();
   });
 
@@ -134,7 +134,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
 
   it("returns supervised when BOT_SYSTEMD_UNIT is set", () => {
     clearSupervisorHints();
-    process.env.BOT_SYSTEMD_UNIT = "openclaw-gateway.service";
+    process.env.BOT_SYSTEMD_UNIT = "bot-gateway.service";
     const result = restartGatewayProcessWithFreshPid();
     expect(result.mode).toBe("supervised");
     expect(spawnMock).not.toHaveBeenCalled();

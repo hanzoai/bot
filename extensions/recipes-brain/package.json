@@ -12,7 +12,7 @@
   "peerDependencies": {
     "yaml": "^2.8.2"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

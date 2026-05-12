@@ -15,9 +15,9 @@
 
 import os from "node:os";
 import path from "node:path";
+import { upsertAuthProfile } from "../agents/auth-profiles.js";
 import { writeConfigFile } from "../config/io.js";
 import { openUrl } from "./onboard-helpers.js";
-import { upsertAuthProfile } from "../agents/auth-profiles.js";
 
 /** Hanzo API proxy endpoint — accepts IAM tokens, proxies to model providers. */
 const HANZO_API_BASE_URL = "https://api.hanzo.ai";
@@ -95,7 +95,7 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
         // Start the gateway with auth disabled.  We bind to loopback only,
         // so only local processes can connect — no token needed.  The auth
         // override is a runtime-only option and does NOT get persisted to
-        // the config file, so `openclaw gateway run` still defaults to
+        // the config file, so `bot gateway run` still defaults to
         // token auth on subsequent invocations.
         const server = await startGatewayServer(port, {
           bind: "loopback",

@@ -156,8 +156,8 @@ describe("QmdMemoryManager", () => {
   afterEach(() => {
     vi.useRealTimers();
     delete process.env.BOT_STATE_DIR;
-    delete (globalThis as Record<string, unknown>).__openclawMcporterDaemonStart;
-    delete (globalThis as Record<string, unknown>).__openclawMcporterColdStartWarned;
+    delete (globalThis as Record<string, unknown>).__botMcporterDaemonStart;
+    delete (globalThis as Record<string, unknown>).__botMcporterColdStartWarned;
   });
 
   it("debounces back-to-back sync calls", async () => {

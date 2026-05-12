@@ -6,7 +6,7 @@
  *
  * Env vars:
  *   PLAYGROUND_URL   — base URL of the playground control-plane (default: http://playground:8080)
- *   HANZO_NODE_ID    — stable node identifier (default: hanzo-bot-gateway)
+ *   HANZO_NODE_ID    — stable node identifier (default: bot-gateway)
  */
 
 import type { SubsystemLogger } from "../logging/subsystem.js";
@@ -69,9 +69,7 @@ export async function startPlaygroundRegistration(
         signal: AbortSignal.timeout(10_000),
       });
       if (!res.ok) {
-        log.warn(
-          `playground ${path} responded ${res.status}: ${await res.text().catch(() => "")}`,
-        );
+        log.warn(`playground ${path} responded ${res.status}: ${await res.text().catch(() => "")}`);
         return false;
       }
       return true;
@@ -103,7 +101,9 @@ export async function startPlaygroundRegistration(
   let stopped = false;
 
   async function heartbeat(): Promise<void> {
-    if (stopped) return;
+    if (stopped) {
+      return;
+    }
     await post(`/api/v1/nodes/${encodeURIComponent(nodeId)}/heartbeat`, {
       status: "ready",
       timestamp: new Date().toISOString(),
@@ -120,7 +120,9 @@ export async function startPlaygroundRegistration(
   // -- shutdown -------------------------------------------------------------
 
   async function stop(): Promise<void> {
-    if (stopped) return;
+    if (stopped) {
+      return;
+    }
     stopped = true;
     clearInterval(timer);
     // Best-effort deregister. The playground SDK does not expose a dedicated
@@ -150,7 +152,7 @@ export function resolvePlaygroundRegistrationConfig(params: {
     return null;
   }
 
-  const nodeId = params.env.HANZO_NODE_ID || "hanzo-bot-gateway";
+  const nodeId = params.env.HANZO_NODE_ID || "bot-gateway";
   const baseUrl =
     params.env.HANZO_NODE_BASE_URL ||
     `http://bot-gateway.hanzo.svc:${params.gatewayPort === 18789 ? 80 : params.gatewayPort}`;
@@ -165,8 +167,17 @@ export function resolvePlaygroundRegistrationConfig(params: {
       { id: "chat", input_schema: { type: "object", properties: { message: { type: "string" } } } },
     ],
     skills: [
-      { id: "translate", input_schema: { type: "object", properties: { text: { type: "string" }, target_language: { type: "string" } } } },
-      { id: "summarize", input_schema: { type: "object", properties: { text: { type: "string" } } } },
+      {
+        id: "translate",
+        input_schema: {
+          type: "object",
+          properties: { text: { type: "string" }, target_language: { type: "string" } },
+        },
+      },
+      {
+        id: "summarize",
+        input_schema: { type: "object", properties: { text: { type: "string" } } },
+      },
     ],
     heartbeatIntervalMs: 30_000,
     log: params.log,

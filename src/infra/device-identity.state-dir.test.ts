@@ -6,7 +6,7 @@ import { loadOrCreateDeviceIdentity } from "./device-identity.js";
 
 describe("device identity state dir defaults", () => {
   it("writes the default identity file under BOT_STATE_DIR", async () => {
-    await withStateDirEnv("openclaw-identity-state-", async ({ stateDir }) => {
+    await withStateDirEnv("bot-identity-state-", async ({ stateDir }) => {
       const identity = loadOrCreateDeviceIdentity();
       const identityPath = path.join(stateDir, "identity", "device.json");
       const raw = JSON.parse(await fs.readFile(identityPath, "utf8")) as { deviceId?: string };

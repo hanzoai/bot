@@ -1,15 +1,15 @@
 /**
- * OpenClaw Memory (LanceDB) Plugin
+ * HanzoBot Memory (LanceDB) Plugin
  *
  * Long-term memory with vector search for AI conversations.
  * Uses LanceDB for storage and OpenAI for embeddings.
  * Provides seamless auto-recall and auto-capture via lifecycle hooks.
  */
 
+import { randomUUID } from "node:crypto";
 import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/memory-lancedb";
 import type * as LanceDB from "@lancedb/lancedb";
 import { Type } from "@sinclair/typebox";
-import { randomUUID } from "node:crypto";
 import OpenAI from "openai";
 import {
   DEFAULT_CAPTURE_MAX_CHARS,

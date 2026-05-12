@@ -72,7 +72,9 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
     let gatewayWs: WebSocket | null = null;
 
     const cleanup = () => {
-      if (disposed) return;
+      if (disposed) {
+        return;
+      }
       disposed = true;
       // eslint-disable-next-line no-console
       console.log("vnc tunnel: cleanup");
@@ -109,7 +111,12 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
         vncBytes += data.length;
         if (vncBytes <= data.length) {
           // eslint-disable-next-line no-console
-          console.log(`vnc tunnel: first vnc→gw data: ${data.length} bytes (first 20: ${data.subarray(0, 20).toString("utf8").replace(/[^\x20-\x7E]/g, ".")})`);
+          console.log(
+            `vnc tunnel: first vnc→gw data: ${data.length} bytes (first 20: ${data
+              .subarray(0, 20)
+              .toString("utf8")
+              .replace(/[^\x20-\x7E]/g, ".")})`,
+          );
         }
         if (wsReady && !disposed && gatewayWs?.readyState === WebSocket.OPEN) {
           gatewayWs.send(data, (err) => {
@@ -144,7 +151,9 @@ export async function openVncTunnel(params: VncTunnelParams): Promise<() => void
         if (pendingVncData.length > 0) {
           const totalBytes = pendingVncData.reduce((s, b) => s + b.length, 0);
           // eslint-disable-next-line no-console
-          console.log(`vnc tunnel: flushing ${pendingVncData.length} buffered chunks (${totalBytes} bytes) to gateway`);
+          console.log(
+            `vnc tunnel: flushing ${pendingVncData.length} buffered chunks (${totalBytes} bytes) to gateway`,
+          );
           for (const buf of pendingVncData) {
             if (!disposed && gatewayWs?.readyState === WebSocket.OPEN) {
               gatewayWs.send(buf);

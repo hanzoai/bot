@@ -2,9 +2,9 @@
   "name": "@hanzo/bot-signal",
   "version": "1.4.2",
   "private": true,
-  "description": "OpenClaw Signal channel plugin",
+  "description": "HanzoBot Signal channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

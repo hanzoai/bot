@@ -1,13 +1,12 @@
-import { confirm, select, text } from "@clack/prompts";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import type { AuthProfileStore } from "../agents/auth-profiles.js";
-import type { BotConfig } from "../config/config.js";
-import type { SecretProviderConfig, SecretRef, SecretRefSource } from "../config/types.secrets.js";
-import type { SecretsApplyPlan } from "./plan.js";
+import { confirm, select, text } from "@clack/prompts";
 import { listAgentIds, resolveAgentDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
+import type { AuthProfileStore } from "../agents/auth-profiles.js";
 import { AUTH_STORE_VERSION } from "../agents/auth-profiles/constants.js";
 import { resolveAuthStorePath } from "../agents/auth-profiles/paths.js";
+import type { BotConfig } from "../config/config.js";
+import type { SecretProviderConfig, SecretRef, SecretRefSource } from "../config/types.secrets.js";
 import { isSafeExecutableValue } from "../infra/exec-safety.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { runSecretsApply, type SecretsApplyResult } from "./apply.js";
@@ -19,6 +18,7 @@ import {
   hasConfigurePlanChanges,
   type ConfigureCandidate,
 } from "./configure-plan.js";
+import type { SecretsApplyPlan } from "./plan.js";
 import { PROVIDER_ENV_VARS } from "./provider-env-vars.js";
 import { isValidSecretProviderAlias, resolveDefaultSecretProviderAlias } from "./ref-contract.js";
 import { resolveSecretRefValue } from "./resolve.js";
@@ -210,14 +210,14 @@ async function promptOptionalPositiveInt(params: {
 }
 
 function configureCandidateKey(candidate: {
-  configFile: "openclaw.json" | "auth-profiles.json";
+  configFile: "bot.json" | "auth-profiles.json";
   path: string;
   agentId?: string;
 }): string {
   if (candidate.configFile === "auth-profiles.json") {
     return `auth-profiles:${String(candidate.agentId ?? "").trim()}:${candidate.path}`;
   }
-  return `openclaw:${candidate.path}`;
+  return `bot:${candidate.path}`;
 }
 
 function hasSourceChoice(
@@ -800,7 +800,7 @@ export async function runSecretsConfigureInteractive(
         value: configureCandidateKey(candidate),
         label: candidate.label,
         hint: [
-          candidate.configFile === "auth-profiles.json" ? "auth-profiles.json" : "openclaw.json",
+          candidate.configFile === "auth-profiles.json" ? "auth-profiles.json" : "bot.json",
           candidate.isDerived === true ? "derived" : undefined,
         ]
           .filter(Boolean)
