@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { SubsystemLogger } from "../logging/subsystem.js";
 import {
   resolvePlaygroundRegistrationConfig,
   startPlaygroundRegistration,
   type PlaygroundRegistrationConfig,
 } from "./playground-registration.js";
-import type { SubsystemLogger } from "../logging/subsystem.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -62,7 +62,7 @@ describe("resolvePlaygroundRegistrationConfig", () => {
       gatewayPort: 18789,
       log: createMockLogger(),
     });
-    expect(result!.nodeId).toBe("hanzo-bot-gateway");
+    expect(result!.nodeId).toBe("bot-gateway");
   });
 
   it("uses raw port when gatewayPort is not 18789", () => {
@@ -105,7 +105,9 @@ describe("startPlaygroundRegistration", () => {
     vi.useRealTimers();
   });
 
-  function makeConfig(overrides?: Partial<PlaygroundRegistrationConfig>): PlaygroundRegistrationConfig {
+  function makeConfig(
+    overrides?: Partial<PlaygroundRegistrationConfig>,
+  ): PlaygroundRegistrationConfig {
     return {
       playgroundUrl: "http://playground:8080",
       nodeId: "test-node",
@@ -184,22 +186,22 @@ describe("startPlaygroundRegistration", () => {
 
     const handle = await startPlaygroundRegistration(makeConfig({ log }));
 
-    expect(log.warn).toHaveBeenCalledWith(
-      expect.stringContaining("connection refused"),
-    );
+    expect(log.warn).toHaveBeenCalledWith(expect.stringContaining("connection refused"));
 
     await handle.stop();
   });
 
   it("logs warning on non-ok response", async () => {
-    fetchSpy.mockResolvedValueOnce({ ok: false, status: 503, text: async () => "Service Unavailable" });
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+      text: async () => "Service Unavailable",
+    });
     const log = createMockLogger();
 
     const handle = await startPlaygroundRegistration(makeConfig({ log }));
 
-    expect(log.warn).toHaveBeenCalledWith(
-      expect.stringContaining("503"),
-    );
+    expect(log.warn).toHaveBeenCalledWith(expect.stringContaining("503"));
 
     await handle.stop();
   });

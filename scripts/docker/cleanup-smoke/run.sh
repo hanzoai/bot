@@ -3,8 +3,8 @@ set -euo pipefail
 
 cd /repo
 
-export BOT_STATE_DIR="/tmp/openclaw-test"
-export BOT_CONFIG_PATH="${BOT_STATE_DIR}/openclaw.json"
+export BOT_STATE_DIR="/tmp/hanzo-bot-test"
+export BOT_CONFIG_PATH="${BOT_STATE_DIR}/hanzo-bot.json"
 
 echo "==> Build"
 pnpm build
@@ -17,7 +17,7 @@ echo 'creds' >"${BOT_STATE_DIR}/credentials/marker.txt"
 echo 'session' >"${BOT_STATE_DIR}/agents/main/sessions/sessions.json"
 
 echo "==> Reset (config+creds+sessions)"
-pnpm openclaw reset --scope config+creds+sessions --yes --non-interactive
+pnpm hanzo-bot reset --scope config+creds+sessions --yes --non-interactive
 
 test ! -f "${BOT_CONFIG_PATH}"
 test ! -d "${BOT_STATE_DIR}/credentials"
@@ -28,7 +28,7 @@ mkdir -p "${BOT_STATE_DIR}/credentials"
 echo '{}' >"${BOT_CONFIG_PATH}"
 
 echo "==> Uninstall (state only)"
-pnpm openclaw uninstall --state --yes --non-interactive
+pnpm hanzo-bot uninstall --state --yes --non-interactive
 
 test ! -d "${BOT_STATE_DIR}"
 
