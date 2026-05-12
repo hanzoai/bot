@@ -1,6 +1,6 @@
-import type { OpenClawPluginConfigSchema } from "@hanzo/bot/plugin-sdk/acpx";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import type { HanzoBotPluginConfigSchema } from "@hanzo/bot/plugin-sdk/acpx";
 
 export const ACPX_PERMISSION_MODES = ["approve-all", "approve-reads", "deny-all"] as const;
 export type AcpxPermissionMode = (typeof ACPX_PERMISSION_MODES)[number];
@@ -182,7 +182,7 @@ function resolveConfiguredCommand(params: { configured?: string; workspaceDir?: 
   return configured;
 }
 
-export function createAcpxPluginConfigSchema(): OpenClawPluginConfigSchema {
+export function createAcpxPluginConfigSchema(): HanzoBotPluginConfigSchema {
   return {
     safeParse(value: unknown):
       | { success: true; data?: unknown }

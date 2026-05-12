@@ -59,7 +59,7 @@ function formatMs(ms) {
 }
 
 const opts = parseArgs(process.argv.slice(2));
-const reportPath = path.join(os.tmpdir(), `openclaw-vitest-perf-${Date.now()}.json`);
+const reportPath = path.join(os.tmpdir(), `bot-vitest-perf-${Date.now()}.json`);
 const cmd = [
   "vitest",
   "run",

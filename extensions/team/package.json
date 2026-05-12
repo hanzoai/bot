@@ -4,7 +4,7 @@
   "private": true,
   "description": "Hanzo Team workspace AI bot channel extension",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]
