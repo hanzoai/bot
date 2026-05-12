@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 
 declare const __BOT_VERSION__: string | undefined;
-const CORE_PACKAGE_NAME = "openclaw";
+const CORE_PACKAGE_NAME = "bot";
 
 const PACKAGE_JSON_CANDIDATES = [
   "../package.json",
@@ -118,7 +118,7 @@ export function resolveRuntimeServiceVersion(
   );
 }
 
-// Single source of truth for the current OpenClaw version.
+// Single source of truth for the current HanzoBot version.
 // - Embedded/bundled builds: injected define or env var.
 // - Dev/npm builds: package.json.
 export const VERSION = resolveBinaryVersion({

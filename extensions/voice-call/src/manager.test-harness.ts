@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { VoiceCallConfigSchema } from "./config.js";
+import { CallManager } from "./manager.js";
 import type { VoiceCallProvider } from "./providers/base.js";
 import type {
   GetCallStatusInput,
@@ -15,8 +17,6 @@ import type {
   WebhookContext,
   WebhookVerificationResult,
 } from "./types.js";
-import { VoiceCallConfigSchema } from "./config.js";
-import { CallManager } from "./manager.js";
 
 export class FakeProvider implements VoiceCallProvider {
   readonly name: "plivo" | "twilio";
@@ -67,7 +67,7 @@ let storeSeq = 0;
 
 export function createTestStorePath(): string {
   storeSeq += 1;
-  return path.join(os.tmpdir(), `openclaw-voice-call-test-${Date.now()}-${storeSeq}`);
+  return path.join(os.tmpdir(), `bot-voice-call-test-${Date.now()}-${storeSeq}`);
 }
 
 export async function createManagerHarness(

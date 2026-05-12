@@ -56,7 +56,7 @@ describe("resolveApiKeyForProfile openai-codex refresh fallback", () => {
   beforeEach(async () => {
     getOAuthApiKeyMock.mockClear();
     clearRuntimeAuthProfileStoreSnapshots();
-    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-refresh-fallback-"));
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-codex-refresh-fallback-"));
     agentDir = path.join(tempRoot, "agents", "main", "agent");
     await fs.mkdir(agentDir, { recursive: true });
     process.env.BOT_STATE_DIR = tempRoot;

@@ -77,7 +77,7 @@ struct SettingsRootView: View {
         .padding(.vertical, 22)
         .frame(width: SettingsTab.windowWidth, height: SettingsTab.windowHeight, alignment: .topLeading)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .onReceive(NotificationCenter.default.publisher(for: .hanzo-botSelectSettingsTab)) { note in
+        .onReceive(NotificationCenter.default.publisher(for: .botSelectSettingsTab)) { note in
             if let tab = note.object as? SettingsTab {
                 withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) {
                     self.selectedTab = tab
@@ -218,7 +218,7 @@ enum SettingsTabRouter {
 }
 
 extension Notification.Name {
-    static let hanzo-botSelectSettingsTab = Notification.Name("hanzo-botSelectSettingsTab")
+    static let botSelectSettingsTab = Notification.Name("botSelectSettingsTab")
 }
 
 #if DEBUG

@@ -227,8 +227,8 @@ describe("chrome extension relay server", () => {
     const sharedUrl = await ensureSharedRelayServer();
 
     const headers = getChromeExtensionRelayAuthHeaders(sharedUrl);
-    expect(Object.keys(headers)).toContain("x-openclaw-relay-token");
-    expect(headers["x-openclaw-relay-token"]).not.toBe(TEST_GATEWAY_TOKEN);
+    expect(Object.keys(headers)).toContain("x-bot-relay-token");
+    expect(headers["x-bot-relay-token"]).not.toBe(TEST_GATEWAY_TOKEN);
   });
 
   it("rejects CDP access without relay auth token", async () => {
@@ -273,15 +273,13 @@ describe("chrome extension relay server", () => {
       headers: {
         Origin: origin,
         "Access-Control-Request-Method": "GET",
-        "Access-Control-Request-Headers": "x-openclaw-relay-token",
+        "Access-Control-Request-Headers": "x-bot-relay-token",
       },
     });
 
     expect(res.status).toBe(204);
     expect(res.headers.get("access-control-allow-origin")).toBe(origin);
-    expect(res.headers.get("access-control-allow-headers") ?? "").toContain(
-      "x-openclaw-relay-token",
-    );
+    expect(res.headers.get("access-control-allow-headers") ?? "").toContain("x-bot-relay-token");
   });
 
   it("rejects CORS preflight from non-extension origins", async () => {
@@ -577,9 +575,7 @@ describe("chrome extension relay server", () => {
     const sharedUrl = await ensureSharedRelayServer();
     const sharedPort = new URL(sharedUrl).port;
 
-    const token = relayAuthHeaders(`ws://127.0.0.1:${sharedPort}/extension`)[
-      "x-openclaw-relay-token"
-    ];
+    const token = relayAuthHeaders(`ws://127.0.0.1:${sharedPort}/extension`)["x-bot-relay-token"];
     expect(token).toBeTruthy();
     const ext = new WebSocket(
       `ws://127.0.0.1:${sharedPort}/extension?token=${encodeURIComponent(String(token))}`,
@@ -591,7 +587,7 @@ describe("chrome extension relay server", () => {
   it("accepts /json endpoints with relay token query param", async () => {
     const sharedUrl = await ensureSharedRelayServer();
 
-    const token = relayAuthHeaders(sharedUrl)["x-openclaw-relay-token"];
+    const token = relayAuthHeaders(sharedUrl)["x-bot-relay-token"];
     expect(token).toBeTruthy();
     const versionRes = await fetch(
       `${sharedUrl}/json/version?token=${encodeURIComponent(String(token))}`,
@@ -604,7 +600,7 @@ describe("chrome extension relay server", () => {
     const sharedPort = new URL(sharedUrl).port;
 
     const versionRes = await fetch(`${sharedUrl}/json/version`, {
-      headers: { "x-openclaw-relay-token": TEST_GATEWAY_TOKEN },
+      headers: { "x-bot-relay-token": TEST_GATEWAY_TOKEN },
     });
     expect(versionRes.status).toBe(200);
 
@@ -944,7 +940,7 @@ describe("chrome extension relay server", () => {
     let probeToken: string | undefined;
     const fakeRelay = createServer((req, res) => {
       if (req.url?.startsWith("/json/version")) {
-        const header = req.headers["x-openclaw-relay-token"];
+        const header = req.headers["x-bot-relay-token"];
         probeToken = Array.isArray(header) ? header[0] : header;
         if (!probeToken) {
           res.writeHead(401);
@@ -952,7 +948,7 @@ describe("chrome extension relay server", () => {
           return;
         }
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ Browser: "OpenClaw/extension-relay" }));
+        res.end(JSON.stringify({ Browser: "HanzoBot/extension-relay" }));
         return;
       }
       if (req.url?.startsWith("/extension/status")) {
@@ -1152,7 +1148,7 @@ describe("chrome extension relay server", () => {
     RELAY_TEST_TIMEOUT_MS,
   );
 
-  it("does not swallow EADDRINUSE when occupied port is not an openclaw relay", async () => {
+  it("does not swallow EADDRINUSE when occupied port is not an bot relay", async () => {
     const port = await getFreePort();
     const blocker = createServer((_, res) => {
       res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });

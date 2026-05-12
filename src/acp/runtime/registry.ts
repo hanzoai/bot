@@ -1,5 +1,5 @@
-import type { AcpRuntime } from "./types.js";
 import { AcpRuntimeError } from "./errors.js";
+import type { AcpRuntime } from "./types.js";
 
 export type AcpRuntimeBackend = {
   id: string;
@@ -11,7 +11,7 @@ type AcpRuntimeRegistryGlobalState = {
   backendsById: Map<string, AcpRuntimeBackend>;
 };
 
-const ACP_RUNTIME_REGISTRY_STATE_KEY = Symbol.for("openclaw.acpRuntimeRegistryState");
+const ACP_RUNTIME_REGISTRY_STATE_KEY = Symbol.for("bot.acpRuntimeRegistryState");
 
 function createAcpRuntimeRegistryGlobalState(): AcpRuntimeRegistryGlobalState {
   return {

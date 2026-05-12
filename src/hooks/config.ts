@@ -1,5 +1,4 @@
 import type { BotConfig, HookConfig } from "../config/config.js";
-import type { HookEligibilityContext, HookEntry } from "./types.js";
 import {
   evaluateRuntimeEligibility,
   hasBinary,
@@ -8,6 +7,7 @@ import {
   resolveRuntimePlatform,
 } from "../shared/config-eval.js";
 import { resolveHookKey } from "./frontmatter.js";
+import type { HookEligibilityContext, HookEntry } from "./types.js";
 
 const DEFAULT_CONFIG_VALUES: Record<string, boolean> = {
   "browser.enabled": true,
@@ -68,7 +68,7 @@ export function shouldIncludeHook(params: {
   const { entry, config, eligibility } = params;
   const hookKey = resolveHookKey(entry.hook.name, entry);
   const hookConfig = resolveHookConfig(config, hookKey);
-  const pluginManaged = entry.hook.source === "openclaw-plugin";
+  const pluginManaged = entry.hook.source === "bot-plugin";
 
   // Check if explicitly disabled
   if (!pluginManaged && hookConfig?.enabled === false) {

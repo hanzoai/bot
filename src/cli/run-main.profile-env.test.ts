@@ -25,7 +25,7 @@ vi.mock("../infra/runtime-guard.js", () => ({
 }));
 
 vi.mock("../infra/path-env.js", () => ({
-  ensureOpenClawCliOnPath: vi.fn(),
+  ensureHanzoBotCliOnPath: vi.fn(),
 }));
 
 vi.mock("./route.js", () => ({
@@ -70,7 +70,7 @@ describe("runCli profile env bootstrap", () => {
   });
 
   it("applies --profile before dotenv loading", async () => {
-    await runCli(["node", "openclaw", "--profile", "rawdog", "status"]);
+    await runCli(["node", "bot", "--profile", "rawdog", "status"]);
 
     expect(dotenvState.loadDotEnv).toHaveBeenCalledOnce();
     expect(dotenvState.state.profileAtDotenvLoad).toBe("rawdog");

@@ -6,7 +6,7 @@ import { saveAuthProfileStore } from "./auth-profiles.js";
 import { discoverAuthStorage } from "./pi-model-discovery.js";
 
 async function createAgentDir(): Promise<string> {
-  return await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pi-auth-storage-"));
+  return await fs.mkdtemp(path.join(os.tmpdir(), "bot-pi-auth-storage-"));
 }
 
 async function withAgentDir(run: (agentDir: string) => Promise<void>): Promise<void> {

@@ -424,6 +424,6 @@ private class RootCanvasA2UIActionBridge(private val onMessage: (String) -> Unit
   }
 
   companion object {
-    const val interfaceName: String = "hanzo-botCanvasA2UIAction"
+    const val interfaceName: String = "botCanvasA2UIAction"
   }
 }

@@ -1,5 +1,5 @@
 import Testing
-@testable import OpenClaw
+@testable import HanzoBot
 
 @MainActor
 @Suite struct TalkModeIncrementalSpeechBufferTests {

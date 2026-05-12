@@ -1,17 +1,17 @@
 export const GATEWAY_CLIENT_IDS = {
   WEBCHAT_UI: "webchat-ui",
-  CONTROL_UI: "openclaw-control-ui",
+  CONTROL_UI: "bot-control-ui",
   BOT_CONTROL_UI: "bot-control-ui",
   WEBCHAT: "webchat",
   CLI: "cli",
   GATEWAY_CLIENT: "gateway-client",
-  MACOS_APP: "openclaw-macos",
-  IOS_APP: "openclaw-ios",
-  ANDROID_APP: "openclaw-android",
+  MACOS_APP: "bot-macos",
+  IOS_APP: "bot-ios",
+  ANDROID_APP: "bot-android",
   NODE_HOST: "node-host",
   TEST: "test",
   FINGERPRINT: "fingerprint",
-  PROBE: "openclaw-probe",
+  PROBE: "bot-probe",
 } as const;
 
 export type GatewayClientId = (typeof GATEWAY_CLIENT_IDS)[keyof typeof GATEWAY_CLIENT_IDS];
@@ -57,7 +57,7 @@ const CONTROL_UI_IDS: ReadonlySet<string> = new Set<string>([
   GATEWAY_CLIENT_IDS.BOT_CONTROL_UI,
 ]);
 
-/** Returns true for any control-UI client id variant (openclaw-control-ui, bot-control-ui). */
+/** Returns true for any control-UI client id variant (bot-control-ui, bot-control-ui). */
 export function isControlUiClientId(id: string | null | undefined): boolean {
   return typeof id === "string" && CONTROL_UI_IDS.has(id);
 }

@@ -333,7 +333,7 @@ struct MenuContent: View {
         NSApp.activate(ignoringOtherApps: true)
         self.openSettings()
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .hanzo-botSelectSettingsTab, object: tab)
+            NotificationCenter.default.post(name: .botSelectSettingsTab, object: tab)
         }
     }
 

@@ -1,11 +1,11 @@
-import type { MessageEvent, PostbackEvent } from "@line/bot-sdk";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import type { MessageEvent, PostbackEvent } from "@line/bot-sdk";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { BotConfig } from "../config/config.js";
-import type { ResolvedLineAccount } from "./types.js";
 import { buildLineMessageContext, buildLinePostbackContext } from "./bot-message-context.js";
+import type { ResolvedLineAccount } from "./types.js";
 
 describe("buildLineMessageContext", () => {
   let tmpDir: string;
@@ -53,7 +53,7 @@ describe("buildLineMessageContext", () => {
     }) as PostbackEvent;
 
   beforeEach(async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-line-context-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-line-context-"));
     storePath = path.join(tmpDir, "sessions.json");
     cfg = { session: { store: storePath } };
   });

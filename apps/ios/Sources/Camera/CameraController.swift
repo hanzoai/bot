@@ -1,9 +1,5 @@
 import AVFoundation
-<<<<<<< HEAD
 import BotKit
-=======
-import OpenClawKit
->>>>>>> upstream/main
 import Foundation
 import os
 
@@ -41,11 +37,7 @@ actor CameraController {
         }
     }
 
-<<<<<<< HEAD
     func snap(params: HanzoBotCameraSnapParams) async throws -> (
-=======
-    func snap(params: OpenClawCameraSnapParams) async throws -> (
->>>>>>> upstream/main
         format: String,
         base64: String,
         width: Int,
@@ -95,11 +87,7 @@ actor CameraController {
             height: res.heightPx)
     }
 
-<<<<<<< HEAD
     func clip(params: HanzoBotCameraClipParams) async throws -> (
-=======
-    func clip(params: OpenClawCameraClipParams) async throws -> (
->>>>>>> upstream/main
         format: String,
         base64: String,
         durationMs: Int,
@@ -116,16 +104,10 @@ actor CameraController {
         }
 
         let movURL = FileManager().temporaryDirectory
-<<<<<<< HEAD
             .appendingPathComponent("hanzo-bot-camera-\(UUID().uuidString).mov")
         let mp4URL = FileManager().temporaryDirectory
             .appendingPathComponent("hanzo-bot-camera-\(UUID().uuidString).mp4")
 
-=======
-            .appendingPathComponent("openclaw-camera-\(UUID().uuidString).mov")
-        let mp4URL = FileManager().temporaryDirectory
-            .appendingPathComponent("openclaw-camera-\(UUID().uuidString).mp4")
->>>>>>> upstream/main
         defer {
             try? FileManager().removeItem(at: movURL)
             try? FileManager().removeItem(at: mp4URL)
@@ -177,11 +159,7 @@ actor CameraController {
     }
 
     private nonisolated static func pickCamera(
-<<<<<<< HEAD
         facing: HanzoBotCameraFacing,
-=======
-        facing: OpenClawCameraFacing,
->>>>>>> upstream/main
         deviceId: String?) -> AVCaptureDevice?
     {
         if let deviceId, !deviceId.isEmpty {

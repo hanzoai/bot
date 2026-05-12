@@ -1,4 +1,3 @@
-import { fetchWithSsrFGuard } from "@hanzo/bot/plugin-sdk/tlon";
 import { randomUUID } from "node:crypto";
 import { createWriteStream } from "node:fs";
 import { mkdir } from "node:fs/promises";
@@ -6,10 +5,11 @@ import { homedir } from "node:os";
 import * as path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
+import { fetchWithSsrFGuard } from "@hanzo/bot/plugin-sdk/tlon";
 import { getDefaultSsrFPolicy } from "../urbit/context.js";
 
-// Default to OpenClaw workspace media directory
-const DEFAULT_MEDIA_DIR = path.join(homedir(), ".openclaw", "workspace", "media", "inbound");
+// Default to HanzoBot workspace media directory
+const DEFAULT_MEDIA_DIR = path.join(homedir(), ".bot", "workspace", "media", "inbound");
 
 export interface ExtractedImage {
   url: string;
@@ -139,7 +139,7 @@ function getExtensionFromUrl(url: string): string | null {
 
 /**
  * Download all images from a message and return attachment metadata.
- * Format matches OpenClaw's expected attachment structure.
+ * Format matches HanzoBot's expected attachment structure.
  */
 export async function downloadMessageImages(
   content: unknown,

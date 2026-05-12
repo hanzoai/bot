@@ -193,7 +193,7 @@ describe("resolveGatewayConnection", () => {
   it.runIf(process.platform !== "win32")(
     "resolves file-backed SecretRef token for local mode",
     async () => {
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tui-file-secret-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-tui-file-secret-"));
       const secretFile = path.join(tempDir, "secrets.json");
       await fs.writeFile(secretFile, JSON.stringify({ gatewayToken: "file-secret-token" }), "utf8");
       await fs.chmod(secretFile, 0o600);
@@ -257,7 +257,7 @@ describe("resolveGatewayConnection", () => {
   });
 
   it("resolves only token SecretRef when gateway.auth.mode is token", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tui-mode-token-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-tui-mode-token-"));
     const tokenMarker = path.join(tempDir, "token-provider-ran");
     const passwordMarker = path.join(tempDir, "password-provider-ran");
     const tokenExecProgram = [
@@ -310,7 +310,7 @@ describe("resolveGatewayConnection", () => {
   });
 
   it("resolves only password SecretRef when gateway.auth.mode is password", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tui-mode-password-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-tui-mode-password-"));
     const tokenMarker = path.join(tempDir, "token-provider-ran");
     const passwordMarker = path.join(tempDir, "password-provider-ran");
     const tokenExecProgram = [

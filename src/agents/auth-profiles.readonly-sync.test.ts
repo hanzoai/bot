@@ -2,8 +2,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { AuthProfileStore } from "./auth-profiles/types.js";
 import { AUTH_STORE_VERSION } from "./auth-profiles/constants.js";
+import type { AuthProfileStore } from "./auth-profiles/types.js";
 
 const mocks = vi.hoisted(() => ({
   syncExternalCliCredentials: vi.fn((store: AuthProfileStore) => {
@@ -30,7 +30,7 @@ describe("auth profiles read-only external CLI sync", () => {
   });
 
   it("syncs external CLI credentials in-memory without writing auth-profiles.json in read-only mode", () => {
-    const agentDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-auth-readonly-sync-"));
+    const agentDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-auth-readonly-sync-"));
     try {
       const authPath = path.join(agentDir, "auth-profiles.json");
       const baseline: AuthProfileStore = {

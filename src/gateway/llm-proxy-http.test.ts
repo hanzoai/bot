@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import { handleLlmProxyHttpRequest, type LlmProxyHttpOptions } from "./llm-proxy-http.js";
 
 // Minimal auth that always succeeds for unit tests.
@@ -73,7 +73,9 @@ describe("LLM Proxy HTTP handler", () => {
       },
       setHeader: (k: string, v: string) => mock._headers.set(k, v),
       end: (body?: string) => {
-        if (body) mock._body.push(body);
+        if (body) {
+          mock._body.push(body);
+        }
       },
     };
     return mock as unknown as ServerResponse & { _statusCode: number };
@@ -123,9 +125,7 @@ describe("LLM Proxy HTTP handler (upstream integration)", () => {
   it("proxies GET /v1/models to upstream", async () => {
     const mockModels = {
       object: "list",
-      data: [
-        { id: "claude-opus-4-6", object: "model", created: 1700000000, owned_by: "hanzo" },
-      ],
+      data: [{ id: "claude-opus-4-6", object: "model", created: 1700000000, owned_by: "hanzo" }],
     };
 
     let receivedHeaders: Record<string, string | string[] | undefined> = {};

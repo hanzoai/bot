@@ -1,24 +1,24 @@
 ---
-summary: "CLI reference for `openclaw completion` (generate/install shell completion scripts)"
+summary: "CLI reference for `hanzo-bot completion` (generate/install shell completion scripts)"
 read_when:
   - You want shell completions for zsh/bash/fish/PowerShell
-  - You need to cache completion scripts under OpenClaw state
+  - You need to cache completion scripts under HanzoBot state
 title: "completion"
 ---
 
-# `openclaw completion`
+# `hanzo-bot completion`
 
 Generate shell completion scripts and optionally install them into your shell profile.
 
 ## Usage
 
 ```bash
-openclaw completion
-openclaw completion --shell zsh
-openclaw completion --install
-openclaw completion --shell fish --install
-openclaw completion --write-state
-openclaw completion --shell bash --write-state
+hanzo-bot completion
+hanzo-bot completion --shell zsh
+hanzo-bot completion --install
+hanzo-bot completion --shell fish --install
+hanzo-bot completion --write-state
+hanzo-bot completion --shell bash --write-state
 ```
 
 ## Options
@@ -30,6 +30,6 @@ openclaw completion --shell bash --write-state
 
 ## Notes
 
-- `--install` writes a small "OpenClaw Completion" block into your shell profile and points it at the cached script.
+- `--install` writes a small "HanzoBot Completion" block into your shell profile and points it at the cached script.
 - Without `--install` or `--write-state`, the command prints the script to stdout.
 - Completion generation eagerly loads command trees so nested subcommands are included.
