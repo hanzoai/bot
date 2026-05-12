@@ -101,7 +101,7 @@ services:
     command:
       [
         "node",
-        "openclaw.mjs",
+        "hanzo-bot.mjs",
         "gateway",
         "--allow-unconfigured",
         "--bind",

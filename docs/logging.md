@@ -9,7 +9,7 @@ title: "Logging"
 
 # Logging
 
-OpenClaw logs in two places:
+HanzoBot logs in two places:
 
 - **File logs** (JSON lines) written by the Gateway.
 - **Console output** shown in terminals and the Control UI.
@@ -21,16 +21,16 @@ levels and formats.
 
 By default, the Gateway writes a rolling log file under:
 
-`/tmp/openclaw/openclaw-YYYY-MM-DD.log`
+`/tmp/hanzo-bot/hanzo-bot-YYYY-MM-DD.log`
 
 The date uses the gateway host's local timezone.
 
-You can override this in `~/.openclaw/openclaw.json`:
+You can override this in `~/.hanzo-bot/hanzo-bot.json`:
 
 ```json
 {
   "logging": {
-    "file": "/path/to/openclaw.log"
+    "file": "/path/to/hanzo-bot.log"
   }
 }
 ```
@@ -42,7 +42,7 @@ You can override this in `~/.openclaw/openclaw.json`:
 Use the CLI to tail the gateway log file via RPC:
 
 ```bash
-openclaw logs --follow
+hanzo-bot logs --follow
 ```
 
 Output modes:
@@ -63,7 +63,7 @@ In JSON mode, the CLI emits `type`-tagged objects:
 If the Gateway is unreachable, the CLI prints a short hint to run:
 
 ```bash
-openclaw doctor
+hanzo-bot doctor
 ```
 
 ### Control UI (web)
@@ -76,7 +76,7 @@ See [/web/control-ui](/web/control-ui) for how to open it.
 To filter channel activity (WhatsApp/Telegram/etc), use:
 
 ```bash
-openclaw channels logs --channel whatsapp
+hanzo-bot channels logs --channel whatsapp
 ```
 
 ## Log formats
@@ -98,13 +98,13 @@ Console formatting is controlled by `logging.consoleStyle`.
 
 ## Configuring logging
 
-All logging configuration lives under `logging` in `~/.openclaw/openclaw.json`.
+All logging configuration lives under `logging` in `~/.hanzo-bot/hanzo-bot.json`.
 
 ```json
 {
   "logging": {
     "level": "info",
-    "file": "/tmp/openclaw/openclaw-YYYY-MM-DD.log",
+    "file": "/tmp/hanzo-bot/hanzo-bot-YYYY-MM-DD.log",
     "consoleLevel": "info",
     "consoleStyle": "pretty",
     "redactSensitive": "tools",
@@ -118,7 +118,7 @@ All logging configuration lives under `logging` in `~/.openclaw/openclaw.json`.
 - `logging.level`: **file logs** (JSONL) level.
 - `logging.consoleLevel`: **console** verbosity level.
 
-You can override both via the **`BOT_LOG_LEVEL`** environment variable (e.g. `BOT_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `openclaw.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `openclaw --log-level debug gateway run`), which overrides the environment variable for that command.
+You can override both via the **`BOT_LOG_LEVEL`** environment variable (e.g. `BOT_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `hanzo-bot.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `hanzo-bot --log-level debug gateway run`), which overrides the environment variable for that command.
 
 `--verbose` only affects console output; it does not change file log levels.
 
@@ -152,7 +152,7 @@ diagnostics + the exporter plugin are enabled.
 
 - **OpenTelemetry (OTel)**: the data model + SDKs for traces, metrics, and logs.
 - **OTLP**: the wire protocol used to export OTel data to a collector/backend.
-- OpenClaw exports via **OTLP/HTTP (protobuf)** today.
+- HanzoBot exports via **OTLP/HTTP (protobuf)** today.
 
 ### Signals exported
 
@@ -242,7 +242,7 @@ works with any OpenTelemetry collector/backend that accepts OTLP/HTTP.
       "enabled": true,
       "endpoint": "http://otel-collector:4318",
       "protocol": "http/protobuf",
-      "serviceName": "openclaw-gateway",
+      "serviceName": "hanzo-bot-gateway",
       "traces": true,
       "metrics": true,
       "logs": true,
@@ -255,7 +255,7 @@ works with any OpenTelemetry collector/backend that accepts OTLP/HTTP.
 
 Notes:
 
-- You can also enable the plugin with `openclaw plugins enable diagnostics-otel`.
+- You can also enable the plugin with `hanzo-bot plugins enable diagnostics-otel`.
 - `protocol` currently supports `http/protobuf` only. `grpc` is ignored.
 - Metrics include token usage, cost, context size, run duration, and message-flow
   counters/histograms (webhooks, queueing, session state, queue depth/wait).
@@ -269,60 +269,60 @@ Notes:
 
 Model usage:
 
-- `openclaw.tokens` (counter, attrs: `openclaw.token`, `openclaw.channel`,
-  `openclaw.provider`, `openclaw.model`)
-- `openclaw.cost.usd` (counter, attrs: `openclaw.channel`, `openclaw.provider`,
-  `openclaw.model`)
-- `openclaw.run.duration_ms` (histogram, attrs: `openclaw.channel`,
-  `openclaw.provider`, `openclaw.model`)
-- `openclaw.context.tokens` (histogram, attrs: `openclaw.context`,
-  `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
+- `hanzo-bot.tokens` (counter, attrs: `hanzo-bot.token`, `hanzo-bot.channel`,
+  `hanzo-bot.provider`, `hanzo-bot.model`)
+- `hanzo-bot.cost.usd` (counter, attrs: `hanzo-bot.channel`, `hanzo-bot.provider`,
+  `hanzo-bot.model`)
+- `hanzo-bot.run.duration_ms` (histogram, attrs: `hanzo-bot.channel`,
+  `hanzo-bot.provider`, `hanzo-bot.model`)
+- `hanzo-bot.context.tokens` (histogram, attrs: `hanzo-bot.context`,
+  `hanzo-bot.channel`, `hanzo-bot.provider`, `hanzo-bot.model`)
 
 Message flow:
 
-- `openclaw.webhook.received` (counter, attrs: `openclaw.channel`,
-  `openclaw.webhook`)
-- `openclaw.webhook.error` (counter, attrs: `openclaw.channel`,
-  `openclaw.webhook`)
-- `openclaw.webhook.duration_ms` (histogram, attrs: `openclaw.channel`,
-  `openclaw.webhook`)
-- `openclaw.message.queued` (counter, attrs: `openclaw.channel`,
-  `openclaw.source`)
-- `openclaw.message.processed` (counter, attrs: `openclaw.channel`,
-  `openclaw.outcome`)
-- `openclaw.message.duration_ms` (histogram, attrs: `openclaw.channel`,
-  `openclaw.outcome`)
+- `hanzo-bot.webhook.received` (counter, attrs: `hanzo-bot.channel`,
+  `hanzo-bot.webhook`)
+- `hanzo-bot.webhook.error` (counter, attrs: `hanzo-bot.channel`,
+  `hanzo-bot.webhook`)
+- `hanzo-bot.webhook.duration_ms` (histogram, attrs: `hanzo-bot.channel`,
+  `hanzo-bot.webhook`)
+- `hanzo-bot.message.queued` (counter, attrs: `hanzo-bot.channel`,
+  `hanzo-bot.source`)
+- `hanzo-bot.message.processed` (counter, attrs: `hanzo-bot.channel`,
+  `hanzo-bot.outcome`)
+- `hanzo-bot.message.duration_ms` (histogram, attrs: `hanzo-bot.channel`,
+  `hanzo-bot.outcome`)
 
 Queues + sessions:
 
-- `openclaw.queue.lane.enqueue` (counter, attrs: `openclaw.lane`)
-- `openclaw.queue.lane.dequeue` (counter, attrs: `openclaw.lane`)
-- `openclaw.queue.depth` (histogram, attrs: `openclaw.lane` or
-  `openclaw.channel=heartbeat`)
-- `openclaw.queue.wait_ms` (histogram, attrs: `openclaw.lane`)
-- `openclaw.session.state` (counter, attrs: `openclaw.state`, `openclaw.reason`)
-- `openclaw.session.stuck` (counter, attrs: `openclaw.state`)
-- `openclaw.session.stuck_age_ms` (histogram, attrs: `openclaw.state`)
-- `openclaw.run.attempt` (counter, attrs: `openclaw.attempt`)
+- `hanzo-bot.queue.lane.enqueue` (counter, attrs: `hanzo-bot.lane`)
+- `hanzo-bot.queue.lane.dequeue` (counter, attrs: `hanzo-bot.lane`)
+- `hanzo-bot.queue.depth` (histogram, attrs: `hanzo-bot.lane` or
+  `hanzo-bot.channel=heartbeat`)
+- `hanzo-bot.queue.wait_ms` (histogram, attrs: `hanzo-bot.lane`)
+- `hanzo-bot.session.state` (counter, attrs: `hanzo-bot.state`, `hanzo-bot.reason`)
+- `hanzo-bot.session.stuck` (counter, attrs: `hanzo-bot.state`)
+- `hanzo-bot.session.stuck_age_ms` (histogram, attrs: `hanzo-bot.state`)
+- `hanzo-bot.run.attempt` (counter, attrs: `hanzo-bot.attempt`)
 
 ### Exported spans (names + key attributes)
 
-- `openclaw.model.usage`
-  - `openclaw.channel`, `openclaw.provider`, `openclaw.model`
-  - `openclaw.sessionKey`, `openclaw.sessionId`
-  - `openclaw.tokens.*` (input/output/cache_read/cache_write/total)
-- `openclaw.webhook.processed`
-  - `openclaw.channel`, `openclaw.webhook`, `openclaw.chatId`
-- `openclaw.webhook.error`
-  - `openclaw.channel`, `openclaw.webhook`, `openclaw.chatId`,
-    `openclaw.error`
-- `openclaw.message.processed`
-  - `openclaw.channel`, `openclaw.outcome`, `openclaw.chatId`,
-    `openclaw.messageId`, `openclaw.sessionKey`, `openclaw.sessionId`,
-    `openclaw.reason`
-- `openclaw.session.stuck`
-  - `openclaw.state`, `openclaw.ageMs`, `openclaw.queueDepth`,
-    `openclaw.sessionKey`, `openclaw.sessionId`
+- `hanzo-bot.model.usage`
+  - `hanzo-bot.channel`, `hanzo-bot.provider`, `hanzo-bot.model`
+  - `hanzo-bot.sessionKey`, `hanzo-bot.sessionId`
+  - `hanzo-bot.tokens.*` (input/output/cache_read/cache_write/total)
+- `hanzo-bot.webhook.processed`
+  - `hanzo-bot.channel`, `hanzo-bot.webhook`, `hanzo-bot.chatId`
+- `hanzo-bot.webhook.error`
+  - `hanzo-bot.channel`, `hanzo-bot.webhook`, `hanzo-bot.chatId`,
+    `hanzo-bot.error`
+- `hanzo-bot.message.processed`
+  - `hanzo-bot.channel`, `hanzo-bot.outcome`, `hanzo-bot.chatId`,
+    `hanzo-bot.messageId`, `hanzo-bot.sessionKey`, `hanzo-bot.sessionId`,
+    `hanzo-bot.reason`
+- `hanzo-bot.session.stuck`
+  - `hanzo-bot.state`, `hanzo-bot.ageMs`, `hanzo-bot.queueDepth`,
+    `hanzo-bot.sessionKey`, `hanzo-bot.sessionId`
 
 ### Sampling + flushing
 
@@ -346,7 +346,7 @@ Queues + sessions:
 
 ## Troubleshooting tips
 
-- **Gateway not reachable?** Run `openclaw doctor` first.
+- **Gateway not reachable?** Run `hanzo-bot doctor` first.
 - **Logs empty?** Check that the Gateway is running and writing to the file path
   in `logging.file`.
 - **Need more detail?** Set `logging.level` to `debug` or `trace` and retry.

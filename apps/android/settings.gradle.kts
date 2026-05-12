@@ -14,11 +14,5 @@ dependencyResolutionManagement {
   }
 }
 
-<<<<<<< HEAD
 rootProject.name = "HanzoBotNodeAndroid"
 include(":app")
-=======
-rootProject.name = "OpenClawNodeAndroid"
-include(":app")
-include(":benchmark")
->>>>>>> upstream/main

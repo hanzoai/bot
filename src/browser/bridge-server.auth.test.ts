@@ -64,10 +64,10 @@ describe("startBrowserBridgeServer auth", () => {
     await expectAuthFlow({ authToken: "secret-token" }, { Authorization: "Bearer secret-token" });
   });
 
-  it("accepts x-openclaw-password when authPassword is set", async () => {
+  it("accepts x-bot-password when authPassword is set", async () => {
     await expectAuthFlow(
       { authPassword: "secret-password" },
-      { "x-openclaw-password": "secret-password" },
+      { "x-bot-password": "secret-password" },
     );
   });
 

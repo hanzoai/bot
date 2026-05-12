@@ -1,13 +1,13 @@
 import JSON5 from "json5";
 import { describe, expect, it } from "vitest";
-import type { ConfigUiHints } from "./schema.js";
-import type { ConfigFileSnapshot } from "./types.openclaw.js";
 import {
   REDACTED_SENTINEL,
   redactConfigSnapshot,
   restoreRedactedValues as restoreRedactedValues_orig,
 } from "./redact-snapshot.js";
 import { __test__ } from "./schema.hints.js";
+import type { ConfigUiHints } from "./schema.js";
+import type { ConfigFileSnapshot } from "./types.bot.js";
 import { BotSchema } from "./zod-schema.js";
 
 const { mapSensitivePaths } = __test__;
@@ -24,7 +24,7 @@ function makeSnapshot<TConfig extends Record<string, unknown>>(
   raw?: string,
 ): TestSnapshot<TConfig> {
   return {
-    path: "/home/user/.openclaw/config.json5",
+    path: "/home/user/.bot/config.json5",
     exists: true,
     raw: raw ?? JSON.stringify(config),
     parsed: config,
@@ -98,7 +98,7 @@ describe("redactConfigSnapshot", () => {
       shortSecret: { token: "short" },
     });
     const result = redactConfigSnapshot(snapshot);
-    const cfg = result.config as typeof snapshot.config;
+    const cfg = result.config;
 
     expect(cfg.gateway.auth.token).toBe(REDACTED_SENTINEL);
     expect(cfg.gateway.auth.password).toBe(REDACTED_SENTINEL);
@@ -221,9 +221,9 @@ describe("redactConfigSnapshot", () => {
     const snapshot = makeSnapshot({
       channels: {
         irc: {
-          passwordFile: "/etc/openclaw/irc-password.txt",
+          passwordFile: "/etc/bot/irc-password.txt",
           nickserv: {
-            passwordFile: "/etc/openclaw/nickserv-password.txt",
+            passwordFile: "/etc/bot/nickserv-password.txt",
             password: "super-secret-nickserv-password",
           },
         },
@@ -235,8 +235,8 @@ describe("redactConfigSnapshot", () => {
     const irc = channels.irc;
     const nickserv = irc.nickserv as Record<string, unknown>;
 
-    expect(irc.passwordFile).toBe("/etc/openclaw/irc-password.txt");
-    expect(nickserv.passwordFile).toBe("/etc/openclaw/nickserv-password.txt");
+    expect(irc.passwordFile).toBe("/etc/bot/irc-password.txt");
+    expect(nickserv.passwordFile).toBe("/etc/bot/nickserv-password.txt");
     expect(nickserv.password).toBe(REDACTED_SENTINEL);
   });
 
@@ -455,7 +455,7 @@ describe("redactConfigSnapshot", () => {
       custom: { mySecret: "this-is-a-custom-secret-value" },
     });
     const result = redactConfigSnapshot(snapshot, hints);
-    const config = result.config as typeof snapshot.config;
+    const config = result.config;
     const custom = config.custom as Record<string, string>;
     const resolved = result.resolved as Record<string, Record<string, string>>;
     expect(custom.mySecret).toBe(REDACTED_SENTINEL);
@@ -487,7 +487,7 @@ describe("redactConfigSnapshot", () => {
     });
 
     const redacted = redactConfigSnapshot(snapshot, hints);
-    const config = redacted.config as typeof snapshot.config;
+    const config = redacted.config;
     expect(config.plugins.entries["voice-call"].config.apiToken).toBe(REDACTED_SENTINEL);
     expect(config.plugins.entries["voice-call"].config.displayName).toBe("Voice call extension");
     expect(config.channels["my-channel"].accessToken).toBe(REDACTED_SENTINEL);
@@ -515,7 +515,7 @@ describe("redactConfigSnapshot", () => {
     });
 
     const redacted = redactConfigSnapshot(snapshot, hints);
-    const config = redacted.config as typeof snapshot.config;
+    const config = redacted.config;
     expect(config.plugins.entries["voice-call"].config.apiToken).toBe("not-secret-on-purpose");
   });
 
@@ -1127,7 +1127,7 @@ describe("realredactConfigSnapshot_real", () => {
     });
 
     const result = redactConfigSnapshot(snapshot, hints);
-    const config = result.config as typeof snapshot.config;
+    const config = result.config;
     expect(config.agents.defaults.memorySearch.remote.apiKey).toBe(REDACTED_SENTINEL);
     expect(config.agents.list[0].memorySearch.remote.apiKey).toBe(REDACTED_SENTINEL);
     const restored = restoreRedactedValues(result.config, snapshot.config, hints);

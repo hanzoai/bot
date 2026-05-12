@@ -1,8 +1,5 @@
-import type { BotConfig } from "../config/types.js";
-import type { WizardPrompter } from "../wizard/prompts.js";
-import type { ApplyAuthChoiceParams } from "./auth-choice.apply.js";
-import type { SecretInputMode } from "./onboard-types.js";
 import { resolveEnvApiKey } from "../agents/model-auth.js";
+import type { BotConfig } from "../config/types.js";
 import {
   isValidEnvSecretRefId,
   type SecretInput,
@@ -15,8 +12,11 @@ import {
   resolveDefaultSecretProviderAlias,
 } from "../secrets/ref-contract.js";
 import { resolveSecretRefString } from "../secrets/resolve.js";
+import type { WizardPrompter } from "../wizard/prompts.js";
 import { formatApiKeyPreview } from "./auth-choice.api-key.js";
+import type { ApplyAuthChoiceParams } from "./auth-choice.apply.js";
 import { applyDefaultModelChoice } from "./auth-choice.default-model.js";
+import type { SecretInputMode } from "./onboard-types.js";
 
 const ENV_SOURCE_LABEL_RE = /(?:^|:\s)([A-Z][A-Z0-9_]*)$/;
 
@@ -166,7 +166,7 @@ export async function promptSecretRefForOnboarding(params: {
       });
       await params.prompter.note(
         params.copy?.envValidatedMessage?.(envVar) ??
-          `Validated environment variable ${envVar}. OpenClaw will store a reference, not the key value.`,
+          `Validated environment variable ${envVar}. HanzoBot will store a reference, not the key value.`,
         "Reference validated",
       );
       return { ref, resolvedValue };
@@ -254,7 +254,7 @@ export async function promptSecretRefForOnboarding(params: {
       });
       await params.prompter.note(
         params.copy?.providerValidatedMessage?.(selectedProvider, id, providerEntry.source) ??
-          `Validated ${providerEntry.source} reference ${selectedProvider}:${id}. OpenClaw will store a reference, not the key value.`,
+          `Validated ${providerEntry.source} reference ${selectedProvider}:${id}. HanzoBot will store a reference, not the key value.`,
         "Reference validated",
       );
       return { ref, resolvedValue };
@@ -395,7 +395,7 @@ export async function resolveSecretInputModeForEnvSelection(params: {
       {
         value: "plaintext",
         label: params.copy?.plaintextLabel ?? "Paste API key now",
-        hint: params.copy?.plaintextHint ?? "Stores the key directly in OpenClaw config",
+        hint: params.copy?.plaintextHint ?? "Stores the key directly in HanzoBot config",
       },
       {
         value: "ref",

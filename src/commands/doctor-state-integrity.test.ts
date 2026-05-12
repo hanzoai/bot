@@ -85,10 +85,10 @@ describe("doctor state integrity oauth dir checks", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv();
-    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-doctor-state-integrity-"));
+    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "bot-doctor-state-integrity-"));
     process.env.HOME = tempHome;
     process.env.BOT_HOME = tempHome;
-    process.env.BOT_STATE_DIR = path.join(tempHome, ".openclaw");
+    process.env.BOT_STATE_DIR = path.join(tempHome, ".bot");
     delete process.env.BOT_OAUTH_DIR;
     fs.mkdirSync(process.env.BOT_STATE_DIR, { recursive: true, mode: 0o700 });
     vi.mocked(note).mockClear();
@@ -158,7 +158,7 @@ describe("doctor state integrity oauth dir checks", () => {
     expect(files.some((name) => name.startsWith("orphan-session.jsonl.deleted."))).toBe(true);
   });
 
-  it("prints openclaw-only verification hints when recent sessions are missing transcripts", async () => {
+  it("prints bot-only verification hints when recent sessions are missing transcripts", async () => {
     const cfg: BotConfig = {};
     writeSessionStore(cfg, {
       "agent:main:main": {
@@ -168,11 +168,9 @@ describe("doctor state integrity oauth dir checks", () => {
     });
     const text = await runStateIntegrityText(cfg);
     expect(text).toContain("recent sessions are missing transcripts");
-    expect(text).toMatch(/openclaw sessions --store ".*sessions\.json"/);
-    expect(text).toMatch(/openclaw sessions cleanup --store ".*sessions\.json" --dry-run/);
-    expect(text).toMatch(
-      /openclaw sessions cleanup --store ".*sessions\.json" --enforce --fix-missing/,
-    );
+    expect(text).toMatch(/bot sessions --store ".*sessions\.json"/);
+    expect(text).toMatch(/bot sessions cleanup --store ".*sessions\.json" --dry-run/);
+    expect(text).toMatch(/bot sessions cleanup --store ".*sessions\.json" --enforce --fix-missing/);
     expect(text).not.toContain("--active");
     expect(text).not.toContain(" ls ");
   });

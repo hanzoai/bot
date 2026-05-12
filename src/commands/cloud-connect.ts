@@ -1,13 +1,13 @@
-import { isCancel, select } from "@clack/prompts";
 import { createHash, randomBytes } from "node:crypto";
 import { createServer } from "node:http";
+import { isCancel, select } from "@clack/prompts";
 import { isRemoteEnvironment } from "./oauth-env.js";
 import { writeOAuthCredentials } from "./onboard-auth.credentials.js";
 import { openUrl } from "./onboard-helpers.js";
 
 const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
 const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
-const HANZO_CLIENT_ID = "hanzo-bot";
+const HANZO_CLIENT_ID = "bot";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 
@@ -109,7 +109,7 @@ async function waitForCallback(params: {
       try {
         server.close();
       } catch {}
-      reject(new Error("OAuth callback timeout — try running 'hanzo-bot onboard' manually"));
+      reject(new Error("OAuth callback timeout — try running 'bot onboard' manually"));
     }, params.timeoutMs);
   });
 }

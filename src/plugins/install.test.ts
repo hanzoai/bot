@@ -36,7 +36,7 @@ const DYNAMIC_ARCHIVE_TEMPLATE_PRESETS = [
     packageJson: {
       name: "@evil/..",
       version: "0.0.1",
-      openclaw: { extensions: ["./dist/index.js"] },
+      bot: { extensions: ["./dist/index.js"] },
     } as Record<string, unknown>,
   },
   {
@@ -45,7 +45,7 @@ const DYNAMIC_ARCHIVE_TEMPLATE_PRESETS = [
     packageJson: {
       name: "@evil/.",
       version: "0.0.1",
-      openclaw: { extensions: ["./dist/index.js"] },
+      bot: { extensions: ["./dist/index.js"] },
     } as Record<string, unknown>,
   },
   {
@@ -62,7 +62,7 @@ function ensureSuiteTempRoot() {
   if (suiteTempRoot) {
     return suiteTempRoot;
   }
-  suiteTempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-install-"));
+  suiteTempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-plugin-install-"));
   return suiteTempRoot;
 }
 
@@ -221,7 +221,7 @@ function setupManifestInstallFixture(params: { manifestId: string }) {
   fs.mkdirSync(stateDir, { recursive: true });
   fs.cpSync(manifestInstallTemplateDir, pluginDir, { recursive: true });
   fs.writeFileSync(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "bot.plugin.json"),
     JSON.stringify({
       id: params.manifestId,
       configSchema: { type: "object", properties: {} },
@@ -239,7 +239,7 @@ async function expectArchiveInstallReservedSegmentRejection(params: {
     packageJson: {
       name: params.packageName,
       version: "0.0.1",
-      openclaw: { extensions: ["./dist/index.js"] },
+      bot: { extensions: ["./dist/index.js"] },
     },
     outName: params.outName,
     withDistIndex: true,
@@ -344,7 +344,7 @@ beforeAll(async () => {
     JSON.stringify({
       name: "@hanzo/bot-test-plugin",
       version: "0.0.1",
-      openclaw: { extensions: ["./dist/index.js"] },
+      bot: { extensions: ["./dist/index.js"] },
       dependencies: { "left-pad": "1.3.0" },
     }),
     "utf-8",
@@ -360,9 +360,9 @@ beforeAll(async () => {
   fs.writeFileSync(
     path.join(manifestInstallTemplateDir, "package.json"),
     JSON.stringify({
-      name: "@hanzo/bot-cognee-openclaw",
+      name: "@hanzo/bot-cognee-bot",
       version: "0.0.1",
-      openclaw: { extensions: ["./dist/index.js"] },
+      bot: { extensions: ["./dist/index.js"] },
     }),
     "utf-8",
   );
@@ -372,7 +372,7 @@ beforeAll(async () => {
     "utf-8",
   );
   fs.writeFileSync(
-    path.join(manifestInstallTemplateDir, "openclaw.plugin.json"),
+    path.join(manifestInstallTemplateDir, "bot.plugin.json"),
     JSON.stringify({
       id: "manifest-template",
       configSchema: { type: "object", properties: {} },
@@ -394,7 +394,7 @@ beforeEach(() => {
 });
 
 describe("installPluginFromArchive", () => {
-  it("installs into ~/.openclaw/extensions and uses unscoped id", async () => {
+  it("installs into ~/.bot/extensions and uses unscoped id", async () => {
     const { stateDir, archivePath, extensionsDir } = await setupVoiceCallArchiveInstall({
       outName: "plugin.tgz",
       version: "0.0.1",
@@ -495,7 +495,7 @@ describe("installPluginFromArchive", () => {
     });
   });
 
-  it("rejects packages without openclaw.extensions", async () => {
+  it("rejects packages without bot.extensions", async () => {
     const result = await installArchivePackageAndReturnResult({
       packageJson: { name: "@hanzo/bot-nope", version: "0.0.1" },
       outName: "bad.tgz",
@@ -504,11 +504,11 @@ describe("installPluginFromArchive", () => {
     if (result.ok) {
       return;
     }
-    expect(result.error).toContain("openclaw.extensions");
+    expect(result.error).toContain("bot.extensions");
     expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_BOT_EXTENSIONS);
   });
 
-  it("rejects legacy plugin package shape when openclaw.extensions is missing", async () => {
+  it("rejects legacy plugin package shape when bot.extensions is missing", async () => {
     const { pluginDir, extensionsDir } = setupPluginInstallDirs();
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
@@ -519,7 +519,7 @@ describe("installPluginFromArchive", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify({
         id: "legacy-entry-fallback",
         configSchema: { type: "object", properties: {} },
@@ -535,12 +535,12 @@ describe("installPluginFromArchive", () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error).toContain("package.json missing openclaw.extensions");
+      expect(result.error).toContain("package.json missing bot.extensions");
       expect(result.error).toContain("update the plugin package");
       expect(result.code).toBe(PLUGIN_INSTALL_ERROR_CODE.MISSING_BOT_EXTENSIONS);
       return;
     }
-    expect.unreachable("expected install to fail without openclaw.extensions");
+    expect.unreachable("expected install to fail without bot.extensions");
   });
 
   it("warns when plugin contains dangerous code patterns", async () => {
@@ -551,7 +551,7 @@ describe("installPluginFromArchive", () => {
       JSON.stringify({
         name: "dangerous-plugin",
         version: "1.0.0",
-        openclaw: { extensions: ["index.js"] },
+        bot: { extensions: ["index.js"] },
       }),
     );
     fs.writeFileSync(
@@ -574,7 +574,7 @@ describe("installPluginFromArchive", () => {
       JSON.stringify({
         name: "hidden-entry-plugin",
         version: "1.0.0",
-        openclaw: { extensions: [".hidden/index.js"] },
+        bot: { extensions: [".hidden/index.js"] },
       }),
     );
     fs.writeFileSync(
@@ -601,7 +601,7 @@ describe("installPluginFromArchive", () => {
       JSON.stringify({
         name: "scan-fail-plugin",
         version: "1.0.0",
-        openclaw: { extensions: ["index.js"] },
+        bot: { extensions: ["index.js"] },
       }),
     );
     fs.writeFileSync(path.join(pluginDir, "index.js"), "export {};");
@@ -644,7 +644,7 @@ describe("installPluginFromDir", () => {
   it("strips workspace devDependencies before npm install", async () => {
     const { pluginDir, extensionsDir } = setupInstallPluginFromDirFixture({
       devDependencies: {
-        openclaw: "workspace:*",
+        bot: "workspace:*",
         vitest: "^3.0.0",
       },
     });
@@ -673,11 +673,11 @@ describe("installPluginFromDir", () => {
     ) as {
       devDependencies?: Record<string, string>;
     };
-    expect(manifest.devDependencies?.openclaw).toBeUndefined();
+    expect(manifest.devDependencies?.bot).toBeUndefined();
     expect(manifest.devDependencies?.vitest).toBe("^3.0.0");
   });
 
-  it("uses openclaw.plugin.json id as install key when it differs from package name", async () => {
+  it("uses bot.plugin.json id as install key when it differs from package name", async () => {
     const { pluginDir, extensionsDir } = setupManifestInstallFixture({
       manifestId: "memory-cognee",
     });
@@ -693,7 +693,7 @@ describe("installPluginFromDir", () => {
     expect(
       infoMessages.some((msg) =>
         msg.includes(
-          'Plugin manifest id "memory-cognee" differs from npm package name "cognee-openclaw"',
+          'Plugin manifest id "memory-cognee" differs from npm package name "cognee-bot"',
         ),
       ),
     ).toBe(true);

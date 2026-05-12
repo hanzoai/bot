@@ -1,5 +1,4 @@
 import type { BotConfig, SkillConfig } from "../../config/config.js";
-import type { SkillEligibilityContext, SkillEntry } from "./types.js";
 import {
   evaluateRuntimeEligibility,
   hasBinary,
@@ -8,6 +7,7 @@ import {
   resolveRuntimePlatform,
 } from "../../shared/config-eval.js";
 import { resolveSkillKey } from "./frontmatter.js";
+import type { SkillEligibilityContext, SkillEntry } from "./types.js";
 
 const DEFAULT_CONFIG_VALUES: Record<string, boolean> = {
   "browser.enabled": true,
@@ -46,7 +46,7 @@ function normalizeAllowlist(input: unknown): string[] | undefined {
   return normalized.length > 0 ? normalized : undefined;
 }
 
-const BUNDLED_SOURCES = new Set(["openclaw-bundled"]);
+const BUNDLED_SOURCES = new Set(["bot-bundled"]);
 
 function isBundledSkill(entry: SkillEntry): boolean {
   return BUNDLED_SOURCES.has(entry.skill.source);

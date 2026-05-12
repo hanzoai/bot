@@ -2,9 +2,9 @@
   "name": "@hanzo/bot-whatsapp",
   "version": "1.4.2",
   "private": true,
-  "description": "OpenClaw WhatsApp channel plugin",
+  "description": "HanzoBot WhatsApp channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

@@ -1,16 +1,8 @@
-<<<<<<< HEAD
 import BotKit
 import SwiftUI
 import Testing
 import UIKit
 @testable import HanzoBot
-=======
-import OpenClawKit
-import SwiftUI
-import Testing
-import UIKit
-@testable import OpenClaw
->>>>>>> upstream/main
 
 @Suite struct SwiftUIRenderSmokeTests {
     @MainActor private static func host(_ view: some View) -> UIWindow {
@@ -83,11 +75,7 @@ import UIKit
     }
 
     @Test @MainActor func voiceWakeToastBuildsAViewHierarchy() {
-<<<<<<< HEAD
         let root = VoiceWakeToast(command: "hanzo-bot: do something")
-=======
-        let root = VoiceWakeToast(command: "openclaw: do something")
->>>>>>> upstream/main
         _ = Self.host(root)
     }
 }

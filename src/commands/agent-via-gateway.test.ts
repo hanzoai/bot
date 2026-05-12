@@ -12,9 +12,9 @@ vi.mock("./agent.js", () => ({
 }));
 
 import type { BotConfig } from "../config/config.js";
-import type { RuntimeEnv } from "../runtime.js";
 import * as configModule from "../config/config.js";
 import { callGateway } from "../gateway/call.js";
+import type { RuntimeEnv } from "../runtime.js";
 import { agentCliCommand } from "./agent-via-gateway.js";
 import { agentCommand } from "./agent.js";
 
@@ -47,7 +47,7 @@ async function withTempStore(
   fn: (ctx: { dir: string; store: string }) => Promise<void>,
   overrides?: Partial<BotConfig>,
 ) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-agent-cli-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-agent-cli-"));
   const store = path.join(dir, "sessions.json");
   mockConfig(store, overrides);
   try {

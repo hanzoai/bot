@@ -286,7 +286,7 @@ describe("launchd install", () => {
     }
     expect(message).toContain("logged-in macOS GUI session");
     expect(message).toContain("wrong user (including sudo)");
-    expect(message).toContain("https://docs.openclaw.ai/gateway");
+    expect(message).toContain("https://docs.bot.ai/gateway");
   });
 
   it("surfaces generic bootstrap failures without GUI-specific guidance", async () => {
@@ -313,7 +313,7 @@ describe("resolveLaunchAgentPlistPath", () => {
     {
       name: "uses profile-specific label when BOT_PROFILE is set to a custom value",
       env: { HOME: "/Users/test", BOT_PROFILE: "jbphoenix" },
-      expected: "/Users/test/Library/LaunchAgents/ai.openclaw.jbphoenix.plist",
+      expected: "/Users/test/Library/LaunchAgents/ai.hanzo.bot.jbphoenix.plist",
     },
     {
       name: "prefers BOT_LAUNCHD_LABEL over BOT_PROFILE",
@@ -339,7 +339,7 @@ describe("resolveLaunchAgentPlistPath", () => {
         BOT_PROFILE: "myprofile",
         BOT_LAUNCHD_LABEL: "   ",
       },
-      expected: "/Users/test/Library/LaunchAgents/ai.openclaw.myprofile.plist",
+      expected: "/Users/test/Library/LaunchAgents/ai.hanzo.bot.myprofile.plist",
     },
   ])("$name", ({ env, expected }) => {
     expect(resolveLaunchAgentPlistPath(env)).toBe(expected);

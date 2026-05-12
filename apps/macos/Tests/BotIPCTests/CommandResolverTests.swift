@@ -31,11 +31,11 @@ import Testing
         let tmp = try makeTempDir()
         CommandResolver.setProjectRoot(tmp.path)
 
-        let hanzo-botPath = tmp.appendingPathComponent("node_modules/.bin/hanzo-bot")
-        try self.makeExec(at: hanzo-botPath)
+        let botPath = tmp.appendingPathComponent("node_modules/.bin/hanzo-bot")
+        try self.makeExec(at: botPath)
 
-        let cmd = CommandResolver.hanzo-botCommand(subcommand: "gateway", defaults: defaults, configRoot: [:])
-        #expect(cmd.prefix(2).elementsEqual([hanzo-botPath.path, "gateway"]))
+        let cmd = CommandResolver.botCommand(subcommand: "gateway", defaults: defaults, configRoot: [:])
+        #expect(cmd.prefix(2).elementsEqual([botPath.path, "gateway"]))
     }
 
     @Test func fallsBackToNodeAndScript() async throws {
@@ -52,7 +52,7 @@ import Testing
         try FileManager().setAttributes([.posixPermissions: 0o755], ofItemAtPath: nodePath.path)
         try self.makeExec(at: scriptPath)
 
-        let cmd = CommandResolver.hanzo-botCommand(
+        let cmd = CommandResolver.botCommand(
             subcommand: "rpc",
             defaults: defaults,
             configRoot: [:],
@@ -76,7 +76,7 @@ import Testing
         let pnpmPath = tmp.appendingPathComponent("node_modules/.bin/pnpm")
         try self.makeExec(at: pnpmPath)
 
-        let cmd = CommandResolver.hanzo-botCommand(subcommand: "rpc", defaults: defaults, configRoot: [:])
+        let cmd = CommandResolver.botCommand(subcommand: "rpc", defaults: defaults, configRoot: [:])
 
         #expect(cmd.prefix(4).elementsEqual([pnpmPath.path, "--silent", "hanzo-bot", "rpc"]))
     }
@@ -91,7 +91,7 @@ import Testing
         let pnpmPath = tmp.appendingPathComponent("node_modules/.bin/pnpm")
         try self.makeExec(at: pnpmPath)
 
-        let cmd = CommandResolver.hanzo-botCommand(
+        let cmd = CommandResolver.botCommand(
             subcommand: "health",
             extraArgs: ["--json", "--timeout", "5"],
             defaults: defaults,
@@ -116,7 +116,7 @@ import Testing
         defaults.set("/tmp/id_ed25519", forKey: remoteIdentityKey)
         defaults.set("/srv/hanzo-bot", forKey: remoteProjectRootKey)
 
-        let cmd = CommandResolver.hanzo-botCommand(
+        let cmd = CommandResolver.botCommand(
             subcommand: "status",
             extraArgs: ["--json"],
             defaults: defaults,
@@ -154,15 +154,15 @@ import Testing
         let tmp = try makeTempDir()
         CommandResolver.setProjectRoot(tmp.path)
 
-        let hanzo-botPath = tmp.appendingPathComponent("node_modules/.bin/hanzo-bot")
-        try self.makeExec(at: hanzo-botPath)
+        let botPath = tmp.appendingPathComponent("node_modules/.bin/hanzo-bot")
+        try self.makeExec(at: botPath)
 
-        let cmd = CommandResolver.hanzo-botCommand(
+        let cmd = CommandResolver.botCommand(
             subcommand: "daemon",
             defaults: defaults,
             configRoot: ["gateway": ["mode": "local"]])
 
-        #expect(cmd.first == hanzo-botPath.path)
+        #expect(cmd.first == botPath.path)
         #expect(cmd.count >= 2)
         if cmd.count >= 2 {
             #expect(cmd[1] == "daemon")

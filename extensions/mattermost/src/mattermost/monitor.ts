@@ -325,7 +325,7 @@ export async function monitorMattermostProvider(opts: MonitorMattermostOpts = {}
     try {
       const teams = await fetchMattermostUserTeams(client, botUserId);
 
-      // Use the *runtime* listener port when available (e.g. `openclaw gateway run --port <port>`).
+      // Use the *runtime* listener port when available (e.g. `bot gateway run --port <port>`).
       // The gateway sets BOT_GATEWAY_PORT when it boots, but the config file may still contain
       // a different port.
       const envPortRaw = process.env.BOT_GATEWAY_PORT?.trim();
