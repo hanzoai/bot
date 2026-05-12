@@ -36,11 +36,7 @@ struct VoiceWakeWordsSettingsView: View {
                 Text("Wake Words")
             } footer: {
                 Text(
-<<<<<<< HEAD
                     "HanzoBot reacts when any trigger appears in a transcription. "
-=======
-                    "OpenClaw reacts when any trigger appears in a transcription. "
->>>>>>> upstream/main
                         + "Keep them short to avoid false positives.")
             }
         }

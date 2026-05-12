@@ -1,6 +1,6 @@
-import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/diffs";
-import { resolvePreferredOpenClawTmpDir } from "@hanzo/bot/plugin-sdk/diffs";
 import path from "node:path";
+import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/diffs";
+import { resolvePreferredHanzoBotTmpDir } from "@hanzo/bot/plugin-sdk/diffs";
 import {
   diffsPluginConfigSchema,
   resolveDiffsPluginDefaults,
@@ -20,7 +20,7 @@ const plugin = {
     const defaults = resolveDiffsPluginDefaults(api.pluginConfig);
     const security = resolveDiffsPluginSecurity(api.pluginConfig);
     const store = new DiffArtifactStore({
-      rootDir: path.join(resolvePreferredOpenClawTmpDir(), "openclaw-diffs"),
+      rootDir: path.join(resolvePreferredHanzoBotTmpDir(), "bot-diffs"),
       logger: api.logger,
     });
 

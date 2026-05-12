@@ -4,9 +4,9 @@ import { normalizeSecretInputString, resolveSecretInputRef } from "../config/typ
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
 
-const RELAY_TOKEN_CONTEXT = "openclaw-extension-relay-v1";
+const RELAY_TOKEN_CONTEXT = "bot-extension-relay-v1";
 const DEFAULT_RELAY_PROBE_TIMEOUT_MS = 500;
-const BOT_RELAY_BROWSER = "OpenClaw/extension-relay";
+const BOT_RELAY_BROWSER = "HanzoBot/extension-relay";
 
 class SecretRefUnavailableError extends Error {
   readonly isSecretRefUnavailable = true;
@@ -87,7 +87,7 @@ export async function resolveRelayAuthTokenForPort(port: number): Promise<string
   return (await resolveRelayAcceptedTokensForPort(port))[0];
 }
 
-export async function probeAuthenticatedOpenClawRelay(params: {
+export async function probeAuthenticatedHanzoBotRelay(params: {
   baseUrl: string;
   relayAuthHeader: string;
   relayAuthToken: string;

@@ -18,7 +18,7 @@ describe("restart sentinel", () => {
 
   beforeEach(async () => {
     envSnapshot = captureEnv(["BOT_STATE_DIR"]);
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sentinel-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-sentinel-"));
     process.env.BOT_STATE_DIR = tempDir;
   });
 
