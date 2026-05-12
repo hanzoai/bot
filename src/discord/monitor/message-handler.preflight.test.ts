@@ -124,7 +124,7 @@ describe("preflightDiscordMessage", () => {
       author: {
         id: "relay-bot-1",
         bot: true,
-        username: "OpenClaw",
+        username: "HanzoBot",
       },
     } as unknown as import("@buape/carbon").Message;
 
@@ -141,7 +141,7 @@ describe("preflightDiscordMessage", () => {
       accountId: "default",
       token: "token",
       runtime: {} as import("../../runtime.js").RuntimeEnv,
-      botUserId: "openclaw-bot",
+      botUserId: "bot",
       guildHistories: new Map(),
       historyLimit: 0,
       mediaMaxBytes: 1_000_000,
@@ -234,7 +234,7 @@ describe("preflightDiscordMessage", () => {
       accountId: "default",
       token: "token",
       runtime: {} as import("../../runtime.js").RuntimeEnv,
-      botUserId: "openclaw-bot",
+      botUserId: "bot",
       guildHistories: new Map(),
       historyLimit: 0,
       mediaMaxBytes: 1_000_000,
@@ -325,7 +325,7 @@ describe("preflightDiscordMessage", () => {
       accountId: "default",
       token: "token",
       runtime: {} as import("../../runtime.js").RuntimeEnv,
-      botUserId: "openclaw-bot",
+      botUserId: "bot",
       guildHistories: new Map(),
       historyLimit: 0,
       mediaMaxBytes: 1_000_000,
@@ -398,7 +398,7 @@ describe("preflightDiscordMessage", () => {
       accountId: "default",
       token: "token",
       runtime: {} as import("../../runtime.js").RuntimeEnv,
-      botUserId: "openclaw-bot",
+      botUserId: "bot",
       guildHistories: new Map(),
       historyLimit: 0,
       mediaMaxBytes: 1_000_000,
@@ -442,11 +442,11 @@ describe("preflightDiscordMessage", () => {
     } as unknown as import("@buape/carbon").Client;
     const message = {
       id: "m-bot-mentions-on",
-      content: "hi <@openclaw-bot>",
+      content: "hi <@bot>",
       timestamp: new Date().toISOString(),
       channelId,
       attachments: [],
-      mentionedUsers: [{ id: "openclaw-bot" }],
+      mentionedUsers: [{ id: "bot" }],
       mentionedRoles: [],
       mentionedEveryone: false,
       author: {
@@ -469,7 +469,7 @@ describe("preflightDiscordMessage", () => {
       accountId: "default",
       token: "token",
       runtime: {} as import("../../runtime.js").RuntimeEnv,
-      botUserId: "openclaw-bot",
+      botUserId: "bot",
       guildHistories: new Map(),
       historyLimit: 0,
       mediaMaxBytes: 1_000_000,
@@ -540,7 +540,7 @@ describe("preflightDiscordMessage", () => {
       accountId: "default",
       token: "token",
       runtime: {} as import("../../runtime.js").RuntimeEnv,
-      botUserId: "openclaw-bot",
+      botUserId: "bot",
       guildHistories: new Map(),
       historyLimit: 0,
       mediaMaxBytes: 1_000_000,
@@ -617,7 +617,7 @@ describe("preflightDiscordMessage", () => {
       accountId: "default",
       token: "token",
       runtime: {} as import("../../runtime.js").RuntimeEnv,
-      botUserId: "openclaw-bot",
+      botUserId: "bot",
       guildHistories: new Map(),
       historyLimit: 0,
       mediaMaxBytes: 1_000_000,
@@ -695,7 +695,7 @@ describe("preflightDiscordMessage", () => {
       accountId: "default",
       token: "token",
       runtime: {} as import("../../runtime.js").RuntimeEnv,
-      botUserId: "openclaw-bot",
+      botUserId: "bot",
       guildHistories: new Map(),
       historyLimit: 0,
       mediaMaxBytes: 1_000_000,
@@ -729,7 +729,7 @@ describe("preflightDiscordMessage", () => {
   });
 
   it("uses attachment content_type for guild audio preflight mention detection", async () => {
-    transcribeFirstAudioMock.mockResolvedValue("hey openclaw");
+    transcribeFirstAudioMock.mockResolvedValue("hey bot");
 
     const channelId = "channel-audio-1";
     const client = {
@@ -776,7 +776,7 @@ describe("preflightDiscordMessage", () => {
         },
         messages: {
           groupChat: {
-            mentionPatterns: ["openclaw"],
+            mentionPatterns: ["bot"],
           },
         },
       } as import("../../config/config.js").BotConfig,
@@ -786,7 +786,7 @@ describe("preflightDiscordMessage", () => {
       accountId: "default",
       token: "token",
       runtime: {} as import("../../runtime.js").RuntimeEnv,
-      botUserId: "openclaw-bot",
+      botUserId: "bot",
       guildHistories: new Map(),
       historyLimit: 0,
       mediaMaxBytes: 1_000_000,

@@ -1,6 +1,6 @@
-import type { GatewayRequestHandler } from "./types.js";
 import { ErrorCodes, errorShape, validateNodeInvokeResultParams } from "../protocol/index.js";
 import { respondInvalidParams } from "./nodes.helpers.js";
+import type { GatewayRequestHandler } from "./types.js";
 
 function normalizeNodeInvokeResultParams(params: unknown): unknown {
   if (!params || typeof params !== "object") {
@@ -49,12 +49,12 @@ export const handleNodeInvokeResult: GatewayRequestHandler = async ({
   // prefer device.id (local nodes with key pairs), then instanceId (cloud nodes),
   // then client.id (client name — last resort, may differ from the nodeId).
   const callerConnect = client?.connect;
+  const callerClientCast = callerConnect?.client as { instanceId?: string } | undefined;
   const callerInstanceId =
-    typeof (callerConnect?.client as { instanceId?: string })?.instanceId === "string"
-      ? ((callerConnect?.client as { instanceId?: string }).instanceId?.trim() ?? "")
+    typeof callerClientCast?.instanceId === "string"
+      ? (callerClientCast.instanceId.trim() ?? "")
       : "";
-  const callerNodeId =
-    callerConnect?.device?.id ?? (callerInstanceId || callerConnect?.client?.id);
+  const callerNodeId = callerConnect?.device?.id ?? (callerInstanceId || callerConnect?.client?.id);
   if (callerNodeId && callerNodeId !== p.nodeId) {
     respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "nodeId mismatch"));
     return;

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { BotConfig } from "../config/config.js";
 import { CONTEXT_WINDOW_HARD_MIN_TOKENS } from "../agents/context-window-guard.js";
+import type { BotConfig } from "../config/config.js";
 import { defaultRuntime } from "../runtime.js";
 import {
   applyCustomApiConfig,
@@ -345,7 +345,7 @@ describe("promptCustomApiConfig", () => {
         providers: {
           filemain: {
             source: "file",
-            path: "/tmp/openclaw-missing-provider.json",
+            path: "/tmp/bot-missing-provider.json",
             mode: "json",
           },
         },

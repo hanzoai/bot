@@ -18,7 +18,7 @@ describe("applyAuthChoiceAnthropic", () => {
   ]);
 
   async function setupTempState() {
-    const env = await setupAuthTestEnv("openclaw-anthropic-");
+    const env = await setupAuthTestEnv("bot-anthropic-");
     lifecycle.setStateDir(env.stateDir);
     return env.agentDir;
   }
