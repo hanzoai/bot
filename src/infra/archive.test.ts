@@ -1,11 +1,11 @@
-import JSZip from "jszip";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import JSZip from "jszip";
 import * as tar from "tar";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { ArchiveSecurityError } from "./archive.js";
 import { withRealpathSymlinkRebindRace } from "../test-utils/symlink-rebind-race.js";
+import type { ArchiveSecurityError } from "./archive.js";
 import { extractArchive, resolveArchiveKind, resolvePackedRootDir } from "./archive.js";
 
 let fixtureRoot = "";
@@ -65,7 +65,7 @@ async function expectExtractedSizeBudgetExceeded(params: {
 }
 
 beforeAll(async () => {
-  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-archive-"));
+  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-archive-"));
 });
 
 afterAll(async () => {

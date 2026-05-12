@@ -1,9 +1,9 @@
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { BotConfig } from "../../config/config.js";
 import { signalOutbound } from "../../channels/plugins/outbound/signal.js";
 import { telegramOutbound } from "../../channels/plugins/outbound/telegram.js";
 import { whatsappOutbound } from "../../channels/plugins/outbound/whatsapp.js";
+import type { BotConfig } from "../../config/config.js";
 import { STATE_DIR } from "../../config/paths.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { markdownToSignalTextChunks } from "../../signal/format.js";
@@ -11,7 +11,7 @@ import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/c
 import { withEnvAsync } from "../../test-utils/env.js";
 import { createIMessageTestPlugin } from "../../test-utils/imessage-test-plugin.js";
 import { createInternalHookEventPayload } from "../../test-utils/internal-hook-event-payload.js";
-import { resolvePreferredOpenClawTmpDir } from "../tmp-openclaw-dir.js";
+import { resolvePreferredHanzoBotTmpDir } from "../tmp-bot-dir.js";
 
 const mocks = vi.hoisted(() => ({
   appendAssistantMessageToSessionTranscript: vi.fn(async () => ({ ok: true, sessionFile: "x" })),
@@ -326,7 +326,7 @@ describe("deliverOutboundPayloads", () => {
     );
   });
 
-  it("includes OpenClaw tmp root in telegram mediaLocalRoots", async () => {
+  it("includes HanzoBot tmp root in telegram mediaLocalRoots", async () => {
     const sendTelegram = vi.fn().mockResolvedValue({ messageId: "m1", chatId: "c1" });
 
     await deliverTelegramPayload({
@@ -338,12 +338,12 @@ describe("deliverOutboundPayloads", () => {
       "123",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredOpenClawTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredHanzoBotTmpDir()]),
       }),
     );
   });
 
-  it("includes OpenClaw tmp root in signal mediaLocalRoots", async () => {
+  it("includes HanzoBot tmp root in signal mediaLocalRoots", async () => {
     const sendSignal = vi.fn().mockResolvedValue({ messageId: "s1", timestamp: 123 });
 
     await deliverOutboundPayloads({
@@ -358,12 +358,12 @@ describe("deliverOutboundPayloads", () => {
       "+1555",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredOpenClawTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredHanzoBotTmpDir()]),
       }),
     );
   });
 
-  it("includes OpenClaw tmp root in whatsapp mediaLocalRoots", async () => {
+  it("includes HanzoBot tmp root in whatsapp mediaLocalRoots", async () => {
     const sendWhatsApp = vi.fn().mockResolvedValue({ messageId: "w1", toJid: "jid" });
 
     await deliverOutboundPayloads({
@@ -378,12 +378,12 @@ describe("deliverOutboundPayloads", () => {
       "+1555",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredOpenClawTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredHanzoBotTmpDir()]),
       }),
     );
   });
 
-  it("includes OpenClaw tmp root in imessage mediaLocalRoots", async () => {
+  it("includes HanzoBot tmp root in imessage mediaLocalRoots", async () => {
     const sendIMessage = vi.fn().mockResolvedValue({ messageId: "i1", chatId: "chat-1" });
 
     await deliverOutboundPayloads({
@@ -398,7 +398,7 @@ describe("deliverOutboundPayloads", () => {
       "imessage:+15551234567",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredOpenClawTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredHanzoBotTmpDir()]),
       }),
     );
   });

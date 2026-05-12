@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
+import { toAcpRuntimeErrorText } from "../../../acp/runtime/error-text.js";
 import type { AcpRuntimeError } from "../../../acp/runtime/errors.js";
 import type { AcpRuntimeSessionMode } from "../../../acp/runtime/types.js";
-import type { AcpSessionRuntimeOptions } from "../../../config/sessions/types.js";
-import type { CommandHandlerResult, HandleCommandsParams } from "../commands-types.js";
-import { toAcpRuntimeErrorText } from "../../../acp/runtime/error-text.js";
 import { DISCORD_THREAD_BINDING_CHANNEL } from "../../../channels/thread-bindings-policy.js";
+import type { AcpSessionRuntimeOptions } from "../../../config/sessions/types.js";
 import { normalizeAgentId } from "../../../routing/session-key.js";
+import type { CommandHandlerResult, HandleCommandsParams } from "../commands-types.js";
 import { resolveAcpCommandChannel, resolveAcpCommandThreadId } from "./context.js";
 export { resolveAcpInstallCommandHint, resolveConfiguredAcpBackendId } from "./install-hints.js";
 
@@ -418,7 +418,7 @@ export function resolveAcpHelpText(): string {
     "/acp sessions",
     "",
     "Notes:",
-    "- /acp spawn harness-id is an ACP runtime harness alias (for example codex), not an OpenClaw agents.list id.",
+    "- /acp spawn harness-id is an ACP runtime harness alias (for example codex), not an HanzoBot agents.list id.",
     "- /focus and /unfocus also work with ACP session keys.",
     "- ACP dispatch of normal thread messages is controlled by acp.dispatch.enabled.",
   ].join("\n");

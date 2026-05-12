@@ -1,6 +1,6 @@
-import type { ElevatedLevel, ReasoningLevel } from "./directives.js";
 import { formatCliCommand } from "../../cli/command-format.js";
 import { SYSTEM_MARK, prefixSystemMessage } from "../../infra/system-message.js";
+import type { ElevatedLevel, ReasoningLevel } from "./directives.js";
 
 export const formatDirectiveAck = (text: string): string => {
   return prefixSystemMessage(text);
@@ -74,9 +74,7 @@ export function formatElevatedUnavailableText(params: {
     );
   }
   if (params.sessionKey) {
-    lines.push(
-      `See: ${formatCliCommand(`openclaw sandbox explain --session ${params.sessionKey}`)}`,
-    );
+    lines.push(`See: ${formatCliCommand(`bot sandbox explain --session ${params.sessionKey}`)}`);
   }
   return lines.join("\n");
 }

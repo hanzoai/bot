@@ -5,46 +5,40 @@ import { applyCliProfileEnv, parseCliProfileArgs } from "./profile.js";
 
 describe("parseCliProfileArgs", () => {
   it("leaves gateway --dev for subcommands", () => {
-    const res = parseCliProfileArgs([
-      "node",
-      "openclaw",
-      "gateway",
-      "--dev",
-      "--allow-unconfigured",
-    ]);
+    const res = parseCliProfileArgs(["node", "bot", "gateway", "--dev", "--allow-unconfigured"]);
     if (!res.ok) {
       throw new Error(res.error);
     }
     expect(res.profile).toBeNull();
-    expect(res.argv).toEqual(["node", "openclaw", "gateway", "--dev", "--allow-unconfigured"]);
+    expect(res.argv).toEqual(["node", "bot", "gateway", "--dev", "--allow-unconfigured"]);
   });
 
   it("still accepts global --dev before subcommand", () => {
-    const res = parseCliProfileArgs(["node", "openclaw", "--dev", "gateway"]);
+    const res = parseCliProfileArgs(["node", "bot", "--dev", "gateway"]);
     if (!res.ok) {
       throw new Error(res.error);
     }
     expect(res.profile).toBe("dev");
-    expect(res.argv).toEqual(["node", "openclaw", "gateway"]);
+    expect(res.argv).toEqual(["node", "bot", "gateway"]);
   });
 
   it("parses --profile value and strips it", () => {
-    const res = parseCliProfileArgs(["node", "openclaw", "--profile", "work", "status"]);
+    const res = parseCliProfileArgs(["node", "bot", "--profile", "work", "status"]);
     if (!res.ok) {
       throw new Error(res.error);
     }
     expect(res.profile).toBe("work");
-    expect(res.argv).toEqual(["node", "openclaw", "status"]);
+    expect(res.argv).toEqual(["node", "bot", "status"]);
   });
 
   it("rejects missing profile value", () => {
-    const res = parseCliProfileArgs(["node", "openclaw", "--profile"]);
+    const res = parseCliProfileArgs(["node", "bot", "--profile"]);
     expect(res.ok).toBe(false);
   });
 
   it.each([
-    ["--dev first", ["node", "openclaw", "--dev", "--profile", "work", "status"]],
-    ["--profile first", ["node", "openclaw", "--profile", "work", "--dev", "status"]],
+    ["--dev first", ["node", "bot", "--dev", "--profile", "work", "status"]],
+    ["--profile first", ["node", "bot", "--profile", "work", "--dev", "status"]],
   ])("rejects combining --dev with --profile (%s)", (_name, argv) => {
     const res = parseCliProfileArgs(argv);
     expect(res.ok).toBe(false);
@@ -59,10 +53,10 @@ describe("applyCliProfileEnv", () => {
       env,
       homedir: () => "/home/peter",
     });
-    const expectedStateDir = path.join(path.resolve("/home/peter"), ".openclaw-dev");
+    const expectedStateDir = path.join(path.resolve("/home/peter"), ".bot-dev");
     expect(env.BOT_PROFILE).toBe("dev");
     expect(env.BOT_STATE_DIR).toBe(expectedStateDir);
-    expect(env.BOT_CONFIG_PATH).toBe(path.join(expectedStateDir, "openclaw.json"));
+    expect(env.BOT_CONFIG_PATH).toBe(path.join(expectedStateDir, "bot.json"));
     expect(env.BOT_GATEWAY_PORT).toBe("19001");
   });
 
@@ -78,12 +72,12 @@ describe("applyCliProfileEnv", () => {
     });
     expect(env.BOT_STATE_DIR).toBe("/custom");
     expect(env.BOT_GATEWAY_PORT).toBe("19099");
-    expect(env.BOT_CONFIG_PATH).toBe(path.join("/custom", "openclaw.json"));
+    expect(env.BOT_CONFIG_PATH).toBe(path.join("/custom", "bot.json"));
   });
 
   it("uses BOT_HOME when deriving profile state dir", () => {
     const env: Record<string, string | undefined> = {
-      BOT_HOME: "/srv/openclaw-home",
+      BOT_HOME: "/srv/bot-home",
       HOME: "/home/other",
     };
     applyCliProfileEnv({
@@ -92,9 +86,9 @@ describe("applyCliProfileEnv", () => {
       homedir: () => "/home/fallback",
     });
 
-    const resolvedHome = path.resolve("/srv/openclaw-home");
-    expect(env.BOT_STATE_DIR).toBe(path.join(resolvedHome, ".openclaw-work"));
-    expect(env.BOT_CONFIG_PATH).toBe(path.join(resolvedHome, ".openclaw-work", "openclaw.json"));
+    const resolvedHome = path.resolve("/srv/bot-home");
+    expect(env.BOT_STATE_DIR).toBe(path.join(resolvedHome, ".bot-work"));
+    expect(env.BOT_CONFIG_PATH).toBe(path.join(resolvedHome, ".bot-work", "bot.json"));
   });
 });
 
@@ -102,63 +96,63 @@ describe("formatCliCommand", () => {
   it.each([
     {
       name: "no profile is set",
-      cmd: "openclaw doctor --fix",
+      cmd: "bot doctor --fix",
       env: {},
-      expected: "openclaw doctor --fix",
+      expected: "bot doctor --fix",
     },
     {
       name: "profile is default",
-      cmd: "openclaw doctor --fix",
+      cmd: "bot doctor --fix",
       env: { BOT_PROFILE: "default" },
-      expected: "openclaw doctor --fix",
+      expected: "bot doctor --fix",
     },
     {
       name: "profile is Default (case-insensitive)",
-      cmd: "openclaw doctor --fix",
+      cmd: "bot doctor --fix",
       env: { BOT_PROFILE: "Default" },
-      expected: "openclaw doctor --fix",
+      expected: "bot doctor --fix",
     },
     {
       name: "profile is invalid",
-      cmd: "openclaw doctor --fix",
+      cmd: "bot doctor --fix",
       env: { BOT_PROFILE: "bad profile" },
-      expected: "openclaw doctor --fix",
+      expected: "bot doctor --fix",
     },
     {
       name: "--profile is already present",
-      cmd: "openclaw --profile work doctor --fix",
+      cmd: "bot --profile work doctor --fix",
       env: { BOT_PROFILE: "work" },
-      expected: "openclaw --profile work doctor --fix",
+      expected: "bot --profile work doctor --fix",
     },
     {
       name: "--dev is already present",
-      cmd: "openclaw --dev doctor",
+      cmd: "bot --dev doctor",
       env: { BOT_PROFILE: "dev" },
-      expected: "openclaw --dev doctor",
+      expected: "bot --dev doctor",
     },
   ])("returns command unchanged when $name", ({ cmd, env, expected }) => {
     expect(formatCliCommand(cmd, env)).toBe(expected);
   });
 
   it("inserts --profile flag when profile is set", () => {
-    expect(formatCliCommand("openclaw doctor --fix", { BOT_PROFILE: "work" })).toBe(
-      "openclaw --profile work doctor --fix",
+    expect(formatCliCommand("bot doctor --fix", { BOT_PROFILE: "work" })).toBe(
+      "bot --profile work doctor --fix",
     );
   });
 
   it("trims whitespace from profile", () => {
-    expect(formatCliCommand("openclaw doctor --fix", { BOT_PROFILE: "  jbopenclaw  " })).toBe(
-      "openclaw --profile jbopenclaw doctor --fix",
+    expect(formatCliCommand("bot doctor --fix", { BOT_PROFILE: "  jbhanzo-bot  " })).toBe(
+      "bot --profile jbhanzo-bot doctor --fix",
     );
   });
 
-  it("handles command with no args after openclaw", () => {
-    expect(formatCliCommand("openclaw", { BOT_PROFILE: "test" })).toBe("openclaw --profile test");
+  it("handles command with no args after bot", () => {
+    expect(formatCliCommand("bot", { BOT_PROFILE: "test" })).toBe("bot --profile test");
   });
 
   it("handles pnpm wrapper", () => {
-    expect(formatCliCommand("pnpm openclaw doctor", { BOT_PROFILE: "work" })).toBe(
-      "pnpm openclaw --profile work doctor",
+    expect(formatCliCommand("pnpm bot doctor", { BOT_PROFILE: "work" })).toBe(
+      "pnpm bot --profile work doctor",
     );
   });
 });

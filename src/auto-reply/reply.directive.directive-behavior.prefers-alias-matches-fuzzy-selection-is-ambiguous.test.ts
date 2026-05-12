@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { BotConfig } from "../config/config.js";
-import type { ModelDefinitionConfig } from "../config/types.models.js";
 import { loadSessionStore } from "../config/sessions.js";
+import type { ModelDefinitionConfig } from "../config/types.models.js";
 import { drainSystemEvents } from "../infra/system-events.js";
 import {
   assertModelSelection,
@@ -45,7 +45,7 @@ function makeMoonshotConfig(home: string, storePath: string) {
     agents: {
       defaults: {
         model: { primary: "anthropic/claude-opus-4-5" },
-        workspace: path.join(home, "openclaw"),
+        workspace: path.join(home, "bot"),
         models: {
           "anthropic/claude-opus-4-5": {},
           "moonshot/kimi-k2-0905-preview": {},
@@ -120,7 +120,7 @@ describe("directive behavior", () => {
             agents: {
               defaults: {
                 model: { primary: "minimax/MiniMax-M2.5" },
-                workspace: path.join(home, "openclaw"),
+                workspace: path.join(home, "bot"),
                 models: {
                   "minimax/MiniMax-M2.5": {},
                   "minimax/MiniMax-M2.5-Lightning": {},
@@ -154,7 +154,7 @@ describe("directive behavior", () => {
             agents: {
               defaults: {
                 model: { primary: "minimax/MiniMax-M2.5" },
-                workspace: path.join(home, "openclaw"),
+                workspace: path.join(home, "bot"),
                 models: {
                   "minimax/MiniMax-M2.5": {},
                   "minimax/MiniMax-M2.5-Lightning": {},
@@ -202,7 +202,7 @@ describe("directive behavior", () => {
           agents: {
             defaults: {
               model: { primary: "anthropic/claude-opus-4-5" },
-              workspace: path.join(home, "openclaw"),
+              workspace: path.join(home, "bot"),
               models: {
                 "anthropic/claude-opus-4-5": {},
                 "moonshot/kimi-k2-0905-preview": { alias: "Kimi" },
@@ -243,7 +243,7 @@ describe("directive behavior", () => {
   it("stores auth profile overrides on /model directive", async () => {
     await withTempHome(async (home) => {
       const storePath = sessionStorePath(home);
-      const authDir = path.join(home, ".openclaw", "agents", "main", "agent");
+      const authDir = path.join(home, ".bot", "agents", "main", "agent");
       await fs.mkdir(authDir, { recursive: true, mode: 0o700 });
       await fs.writeFile(
         path.join(authDir, "auth-profiles.json"),

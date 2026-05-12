@@ -53,8 +53,8 @@ describe("Nix integration (U3, U5, U9)", () => {
   });
 
   describe("U5: CONFIG_PATH and STATE_DIR env var overrides", () => {
-    it("STATE_DIR defaults to ~/.openclaw when env not set", () => {
-      expect(resolveStateDir(envWith({ BOT_STATE_DIR: undefined }))).toMatch(/\.openclaw$/);
+    it("STATE_DIR defaults to ~/.bot when env not set", () => {
+      expect(resolveStateDir(envWith({ BOT_STATE_DIR: undefined }))).toMatch(/\.bot$/);
     });
 
     it("STATE_DIR respects BOT_STATE_DIR override", () => {
@@ -66,11 +66,11 @@ describe("Nix integration (U3, U5, U9)", () => {
     it("STATE_DIR respects BOT_HOME when state override is unset", () => {
       const customHome = path.join(path.sep, "custom", "home");
       expect(resolveStateDir(envWith({ BOT_HOME: customHome, BOT_STATE_DIR: undefined }))).toBe(
-        path.join(path.resolve(customHome), ".openclaw"),
+        path.join(path.resolve(customHome), ".bot"),
       );
     });
 
-    it("CONFIG_PATH defaults to BOT_HOME/.openclaw/openclaw.json", () => {
+    it("CONFIG_PATH defaults to BOT_HOME/.bot/bot.json", () => {
       const customHome = path.join(path.sep, "custom", "home");
       expect(
         resolveConfigPathCandidate(
@@ -80,37 +80,37 @@ describe("Nix integration (U3, U5, U9)", () => {
             BOT_STATE_DIR: undefined,
           }),
         ),
-      ).toBe(path.join(path.resolve(customHome), ".openclaw", "openclaw.json"));
+      ).toBe(path.join(path.resolve(customHome), ".bot", "bot.json"));
     });
 
-    it("CONFIG_PATH defaults to ~/.openclaw/openclaw.json when env not set", () => {
+    it("CONFIG_PATH defaults to ~/.bot/bot.json when env not set", () => {
       expect(
         resolveConfigPathCandidate(
           envWith({ BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined }),
         ),
-      ).toMatch(/\.openclaw[\\/]openclaw\.json$/);
+      ).toMatch(/\.bot[\\/]bot\.json$/);
     });
 
     it("CONFIG_PATH respects BOT_CONFIG_PATH override", () => {
       expect(
-        resolveConfigPathCandidate(envWith({ BOT_CONFIG_PATH: "/nix/store/abc/openclaw.json" })),
-      ).toBe(path.resolve("/nix/store/abc/openclaw.json"));
+        resolveConfigPathCandidate(envWith({ BOT_CONFIG_PATH: "/nix/store/abc/bot.json" })),
+      ).toBe(path.resolve("/nix/store/abc/bot.json"));
     });
 
     it("CONFIG_PATH expands ~ in BOT_CONFIG_PATH override", async () => {
       await withTempHome(async (home) => {
         expect(
           resolveConfigPathCandidate(
-            envWith({ BOT_HOME: home, BOT_CONFIG_PATH: "~/.openclaw/custom.json" }),
+            envWith({ BOT_HOME: home, BOT_CONFIG_PATH: "~/.bot/custom.json" }),
             () => home,
           ),
-        ).toBe(path.join(home, ".openclaw", "custom.json"));
+        ).toBe(path.join(home, ".bot", "custom.json"));
       });
     });
 
     it("CONFIG_PATH uses STATE_DIR when only state dir is overridden", () => {
       expect(resolveConfigPathCandidate(envWith({ BOT_STATE_DIR: "/custom/state" }))).toBe(
-        path.join(path.resolve("/custom/state"), "openclaw.json"),
+        path.join(path.resolve("/custom/state"), "bot.json"),
       );
     });
   });
@@ -118,7 +118,7 @@ describe("Nix integration (U3, U5, U9)", () => {
   describe("U5b: tilde expansion for config paths", () => {
     it("expands ~ in common path-ish config fields", async () => {
       await withTempHome(async (home) => {
-        const configDir = path.join(home, ".openclaw");
+        const configDir = path.join(home, ".bot");
         await fs.mkdir(configDir, { recursive: true });
         const pluginDir = path.join(home, "plugins", "demo-plugin");
         await fs.mkdir(pluginDir, { recursive: true });
@@ -128,7 +128,7 @@ describe("Nix integration (U3, U5, U9)", () => {
           "utf-8",
         );
         await fs.writeFile(
-          path.join(pluginDir, "openclaw.plugin.json"),
+          path.join(pluginDir, "bot.plugin.json"),
           JSON.stringify(
             {
               id: "demo-plugin",
@@ -140,7 +140,7 @@ describe("Nix integration (U3, U5, U9)", () => {
           "utf-8",
         );
         await fs.writeFile(
-          path.join(configDir, "openclaw.json"),
+          path.join(configDir, "bot.json"),
           JSON.stringify(
             {
               plugins: {
@@ -154,7 +154,7 @@ describe("Nix integration (U3, U5, U9)", () => {
                   {
                     id: "main",
                     workspace: "~/ws-agent",
-                    agentDir: "~/.openclaw/agents/main",
+                    agentDir: "~/.bot/agents/main",
                     sandbox: { workspaceRoot: "~/sandbox-root" },
                   },
                 ],
@@ -163,7 +163,7 @@ describe("Nix integration (U3, U5, U9)", () => {
                 whatsapp: {
                   accounts: {
                     personal: {
-                      authDir: "~/.openclaw/credentials/wa-personal",
+                      authDir: "~/.bot/credentials/wa-personal",
                     },
                   },
                 },
@@ -180,12 +180,10 @@ describe("Nix integration (U3, U5, U9)", () => {
         expect(cfg.plugins?.load?.paths?.[0]).toBe(path.join(home, "plugins", "demo-plugin"));
         expect(cfg.agents?.defaults?.workspace).toBe(path.join(home, "ws-default"));
         expect(cfg.agents?.list?.[0]?.workspace).toBe(path.join(home, "ws-agent"));
-        expect(cfg.agents?.list?.[0]?.agentDir).toBe(
-          path.join(home, ".openclaw", "agents", "main"),
-        );
+        expect(cfg.agents?.list?.[0]?.agentDir).toBe(path.join(home, ".bot", "agents", "main"));
         expect(cfg.agents?.list?.[0]?.sandbox?.workspaceRoot).toBe(path.join(home, "sandbox-root"));
         expect(cfg.channels?.whatsapp?.accounts?.personal?.authDir).toBe(
-          path.join(home, ".openclaw", "credentials", "wa-personal"),
+          path.join(home, ".bot", "credentials", "wa-personal"),
         );
       });
     });

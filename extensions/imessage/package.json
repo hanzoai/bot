@@ -2,9 +2,9 @@
   "name": "@hanzo/bot-imessage",
   "version": "1.4.2",
   "private": true,
-  "description": "OpenClaw iMessage channel plugin",
+  "description": "HanzoBot iMessage channel plugin",
   "type": "module",
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]
