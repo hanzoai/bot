@@ -1,5 +1,5 @@
-import { Command } from "commander";
 import process from "node:process";
+import { Command } from "commander";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ProgramContext } from "./context.js";
 
@@ -43,7 +43,7 @@ describe("buildProgram", () => {
   });
 
   it("wires context/help/preaction/command registration with shared context", () => {
-    const argv = ["node", "openclaw", "status"];
+    const argv = ["node", "bot", "status"];
     const originalArgv = process.argv;
     process.argv = argv;
     try {

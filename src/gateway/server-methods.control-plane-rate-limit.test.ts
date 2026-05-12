@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { GatewayRequestHandler } from "./server-methods/types.js";
 import {
   __testing as controlPlaneRateLimitTesting,
   resolveControlPlaneRateLimitKey,
 } from "./control-plane-rate-limit.js";
 import { handleGatewayRequest } from "./server-methods.js";
+import type { GatewayRequestHandler } from "./server-methods/types.js";
 
 const noWebchat = () => false;
 
@@ -35,7 +35,7 @@ describe("gateway control-plane write rate limit", () => {
       role: "operator",
       scopes: ["operator.admin"],
       client: {
-        id: "openclaw-control-ui",
+        id: "bot-control-ui",
         version: "1.0.0",
         platform: "darwin",
         mode: "ui",

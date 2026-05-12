@@ -1,6 +1,6 @@
-import type { Command } from "commander";
-import { confirm } from "@clack/prompts";
 import fs from "node:fs";
+import { confirm } from "@clack/prompts";
+import type { Command } from "commander";
 import { danger } from "../globals.js";
 import { defaultRuntime } from "../runtime.js";
 import { runSecretsApply } from "../secrets/apply.js";
@@ -47,7 +47,7 @@ export function registerSecretsCli(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/gateway/security", "docs.openclaw.ai/gateway/security")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/gateway/security", "docs.bot.ai/gateway/security")}\n`,
     );
 
   addGatewayClientOptions(

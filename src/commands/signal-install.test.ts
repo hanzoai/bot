@@ -1,7 +1,7 @@
-import JSZip from "jszip";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import JSZip from "jszip";
 import * as tar from "tar";
 import { describe, expect, it } from "vitest";
 import type { ReleaseAsset } from "./signal-install.js";
@@ -134,7 +134,7 @@ describe("pickAsset", () => {
 
 describe("extractSignalCliArchive", () => {
   async function withArchiveWorkspace(run: (workDir: string) => Promise<void>) {
-    const workDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-signal-install-"));
+    const workDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-signal-install-"));
     try {
       await run(workDir);
     } finally {

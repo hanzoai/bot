@@ -1,6 +1,6 @@
 services:
-  openclaw-gateway:
-    image: ${BOT_IMAGE:-openclaw:local}
+  hanzo-bot-gateway:
+    image: ${BOT_IMAGE:-hanzo-bot:local}
     environment:
       HOME: /home/node
       TERM: xterm-256color
@@ -10,8 +10,8 @@ services:
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
     volumes:
-      - ${BOT_CONFIG_DIR}:/home/node/.openclaw
-      - ${BOT_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+      - ${BOT_CONFIG_DIR}:/home/node/.hanzo-bot
+      - ${BOT_WORKSPACE_DIR}:/home/node/.hanzo-bot/workspace
       ## Uncomment the lines below to enable sandbox isolation
       ## (agents.defaults.sandbox). Requires Docker CLI in the image
       ## (build with --build-arg BOT_INSTALL_DOCKER_CLI=1) or use
@@ -48,9 +48,9 @@ services:
       retries: 5
       start_period: 20s
 
-  openclaw-cli:
-    image: ${BOT_IMAGE:-openclaw:local}
-    network_mode: "service:openclaw-gateway"
+  hanzo-bot-cli:
+    image: ${BOT_IMAGE:-hanzo-bot:local}
+    network_mode: "service:hanzo-bot-gateway"
     cap_drop:
       - NET_RAW
       - NET_ADMIN
@@ -66,11 +66,11 @@ services:
       CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
     volumes:
-      - ${BOT_CONFIG_DIR}:/home/node/.openclaw
-      - ${BOT_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+      - ${BOT_CONFIG_DIR}:/home/node/.hanzo-bot
+      - ${BOT_WORKSPACE_DIR}:/home/node/.hanzo-bot/workspace
     stdin_open: true
     tty: true
     init: true
     entrypoint: ["node", "dist/index.js"]
     depends_on:
-      - openclaw-gateway
+      - hanzo-bot-gateway
