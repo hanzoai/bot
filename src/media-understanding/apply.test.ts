@@ -5,7 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { resolveApiKeyForProvider } from "../agents/model-auth.js";
 import type { MsgContext } from "../auto-reply/templating.js";
 import type { BotConfig } from "../config/config.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-bot-dir.js";
 import { fetchRemoteMedia } from "../media/fetch.js";
 import { runExec } from "../process/exec.js";
 import { withEnvAsync } from "../test-utils/env.js";
@@ -37,7 +37,7 @@ vi.mock("../process/exec.js", () => ({
 let applyMediaUnderstanding: typeof import("./apply.js").applyMediaUnderstanding;
 const mockedRunExec = vi.mocked(runExec);
 
-const TEMP_MEDIA_PREFIX = "openclaw-media-";
+const TEMP_MEDIA_PREFIX = "bot-media-";
 let suiteTempMediaRootDir = "";
 let tempMediaDirCounter = 0;
 let sharedTempMediaCacheDir = "";
@@ -234,7 +234,7 @@ describe("applyMediaUnderstanding", () => {
   const mockedFetchRemoteMedia = vi.mocked(fetchRemoteMedia);
 
   beforeAll(async () => {
-    const baseDir = resolvePreferredOpenClawTmpDir();
+    const baseDir = resolvePreferredHanzoBotTmpDir();
     await fs.mkdir(baseDir, { recursive: true });
     suiteTempMediaRootDir = await fs.mkdtemp(path.join(baseDir, TEMP_MEDIA_PREFIX));
     ({ applyMediaUnderstanding } = await import("./apply.js"));

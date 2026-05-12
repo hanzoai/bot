@@ -150,7 +150,7 @@ export function reconcile(prior: Edge[], next: Edge[]): { add: Edge[]; remove: E
   };
 }
 
-// ── OpenClaw plugin contract ────────────────────────────────────────
+// ── HanzoBot plugin contract ────────────────────────────────────────
 
 export interface GraphLinksApi {
   hooks: {

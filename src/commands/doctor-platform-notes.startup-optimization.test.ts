@@ -7,7 +7,7 @@ describe("noteStartupOptimizationHints", () => {
 
     noteStartupOptimizationHints(
       {
-        NODE_COMPILE_CACHE: "/var/tmp/openclaw-compile-cache",
+        NODE_COMPILE_CACHE: "/var/tmp/bot-compile-cache",
         BOT_NO_RESPAWN: "1",
       },
       { platform: "linux", arch: "arm64", totalMemBytes: 4 * 1024 ** 3, noteFn },
@@ -21,7 +21,7 @@ describe("noteStartupOptimizationHints", () => {
 
     noteStartupOptimizationHints(
       {
-        NODE_COMPILE_CACHE: "/tmp/openclaw-compile-cache",
+        NODE_COMPILE_CACHE: "/tmp/bot-compile-cache",
       },
       { platform: "linux", arch: "arm64", totalMemBytes: 4 * 1024 ** 3, noteFn },
     );
@@ -31,7 +31,7 @@ describe("noteStartupOptimizationHints", () => {
     expect(title).toBe("Startup optimization");
     expect(message).toContain("NODE_COMPILE_CACHE points to /tmp");
     expect(message).toContain("BOT_NO_RESPAWN is not set to 1");
-    expect(message).toContain("export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache");
+    expect(message).toContain("export NODE_COMPILE_CACHE=/var/tmp/bot-compile-cache");
     expect(message).toContain("export BOT_NO_RESPAWN=1");
   });
 
@@ -40,7 +40,7 @@ describe("noteStartupOptimizationHints", () => {
 
     noteStartupOptimizationHints(
       {
-        NODE_COMPILE_CACHE: "/var/tmp/openclaw-compile-cache",
+        NODE_COMPILE_CACHE: "/var/tmp/bot-compile-cache",
         BOT_NO_RESPAWN: "1",
         NODE_DISABLE_COMPILE_CACHE: "1",
       },
@@ -58,7 +58,7 @@ describe("noteStartupOptimizationHints", () => {
 
     noteStartupOptimizationHints(
       {
-        NODE_COMPILE_CACHE: "/tmp/openclaw-compile-cache",
+        NODE_COMPILE_CACHE: "/tmp/bot-compile-cache",
       },
       { platform: "win32", arch: "arm64", totalMemBytes: 4 * 1024 ** 3, noteFn },
     );
@@ -71,7 +71,7 @@ describe("noteStartupOptimizationHints", () => {
 
     noteStartupOptimizationHints(
       {
-        NODE_COMPILE_CACHE: "/tmp/openclaw-compile-cache",
+        NODE_COMPILE_CACHE: "/tmp/bot-compile-cache",
       },
       { platform: "linux", arch: "x64", totalMemBytes: 32 * 1024 ** 3, noteFn },
     );

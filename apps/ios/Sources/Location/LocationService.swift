@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import BotKit
-=======
-import OpenClawKit
->>>>>>> upstream/main
 import CoreLocation
 import Foundation
 
@@ -35,7 +31,6 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationServic
         self.configureLocationManager()
     }
 
-<<<<<<< HEAD
     func authorizationStatus() -> CLAuthorizationStatus {
         self.manager.authorizationStatus
     }
@@ -48,9 +43,6 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationServic
     }
 
     func ensureAuthorization(mode: HanzoBotLocationMode) async -> CLAuthorizationStatus {
-=======
-    func ensureAuthorization(mode: OpenClawLocationMode) async -> CLAuthorizationStatus {
->>>>>>> upstream/main
         guard CLLocationManager.locationServicesEnabled() else { return .denied }
 
         let status = self.manager.authorizationStatus
@@ -73,13 +65,8 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationServic
     }
 
     func currentLocation(
-<<<<<<< HEAD
         params: HanzoBotLocationGetParams,
         desiredAccuracy: HanzoBotLocationAccuracy,
-=======
-        params: OpenClawLocationGetParams,
-        desiredAccuracy: OpenClawLocationAccuracy,
->>>>>>> upstream/main
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     {
@@ -108,7 +95,6 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationServic
         try await AsyncTimeout.withTimeoutMs(timeoutMs: timeoutMs, onTimeout: { Error.timeout }, operation: operation)
     }
 
-<<<<<<< HEAD
     private static func accuracyValue(_ accuracy: HanzoBotLocationAccuracy) -> CLLocationAccuracy {
         switch accuracy {
         case .coarse:
@@ -122,10 +108,6 @@ final class LocationService: NSObject, CLLocationManagerDelegate, LocationServic
 
     func startLocationUpdates(
         desiredAccuracy: BotLocationAccuracy,
-=======
-    func startLocationUpdates(
-        desiredAccuracy: OpenClawLocationAccuracy,
->>>>>>> upstream/main
         significantChangesOnly: Bool) -> AsyncStream<CLLocation>
     {
         self.stopLocationUpdates()

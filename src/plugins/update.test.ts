@@ -18,8 +18,8 @@ describe("updateNpmInstalledPlugins", () => {
   it("skips integrity drift checks for unpinned npm specs during dry-run updates", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue({
       ok: true,
-      pluginId: "opik-openclaw",
-      targetDir: "/tmp/opik-openclaw",
+      pluginId: "opik-bot",
+      targetDir: "/tmp/opik-bot",
       version: "0.2.6",
       extensions: ["index.ts"],
     });
@@ -29,22 +29,22 @@ describe("updateNpmInstalledPlugins", () => {
       config: {
         plugins: {
           installs: {
-            "opik-openclaw": {
+            "opik-bot": {
               source: "npm",
-              spec: "@opik/opik-openclaw",
+              spec: "@opik/opik-bot",
               integrity: "sha512-old",
-              installPath: "/tmp/opik-openclaw",
+              installPath: "/tmp/opik-bot",
             },
           },
         },
       },
-      pluginIds: ["opik-openclaw"],
+      pluginIds: ["opik-bot"],
       dryRun: true,
     });
 
     expect(installPluginFromNpmSpecMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        spec: "@opik/opik-openclaw",
+        spec: "@opik/opik-bot",
         expectedIntegrity: undefined,
       }),
     );
@@ -53,8 +53,8 @@ describe("updateNpmInstalledPlugins", () => {
   it("keeps integrity drift checks for exact-version npm specs during dry-run updates", async () => {
     installPluginFromNpmSpecMock.mockResolvedValue({
       ok: true,
-      pluginId: "opik-openclaw",
-      targetDir: "/tmp/opik-openclaw",
+      pluginId: "opik-bot",
+      targetDir: "/tmp/opik-bot",
       version: "0.2.6",
       extensions: ["index.ts"],
     });
@@ -64,22 +64,22 @@ describe("updateNpmInstalledPlugins", () => {
       config: {
         plugins: {
           installs: {
-            "opik-openclaw": {
+            "opik-bot": {
               source: "npm",
-              spec: "@opik/opik-openclaw@0.2.5",
+              spec: "@opik/opik-bot@0.2.5",
               integrity: "sha512-old",
-              installPath: "/tmp/opik-openclaw",
+              installPath: "/tmp/opik-bot",
             },
           },
         },
       },
-      pluginIds: ["opik-openclaw"],
+      pluginIds: ["opik-bot"],
       dryRun: true,
     });
 
     expect(installPluginFromNpmSpecMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        spec: "@opik/opik-openclaw@0.2.5",
+        spec: "@opik/opik-bot@0.2.5",
         expectedIntegrity: "sha512-old",
       }),
     );

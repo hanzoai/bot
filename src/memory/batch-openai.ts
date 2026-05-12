@@ -1,4 +1,3 @@
-import type { OpenAiEmbeddingClient } from "./embeddings-openai.js";
 import {
   applyEmbeddingBatchOutputLine,
   buildBatchHeaders,
@@ -15,6 +14,7 @@ import {
   uploadBatchJsonlFile,
   withRemoteHttpResponse,
 } from "./batch-embedding-common.js";
+import type { OpenAiEmbeddingClient } from "./embeddings-openai.js";
 
 export type OpenAiBatchRequest = {
   custom_id: string;
@@ -54,7 +54,7 @@ async function submitOpenAiBatch(params: {
       endpoint: OPENAI_BATCH_ENDPOINT,
       completion_window: OPENAI_BATCH_COMPLETION_WINDOW,
       metadata: {
-        source: "openclaw-memory",
+        source: "bot-memory",
         agent: params.agentId,
       },
     },

@@ -151,7 +151,7 @@ describe("sessions.usage", () => {
 
   it("resolves store entries by sessionId when queried via discovered agent-prefixed key", async () => {
     const storeKey = "agent:opus:slack:dm:u123";
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-usage-test-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-usage-test-"));
 
     try {
       await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
