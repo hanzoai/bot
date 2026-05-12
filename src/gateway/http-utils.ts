@@ -1,5 +1,5 @@
-import type { IncomingMessage } from "node:http";
 import { randomUUID } from "node:crypto";
+import type { IncomingMessage } from "node:http";
 import { buildAgentMainSessionKey, normalizeAgentId } from "../routing/session-key.js";
 import { normalizeMessageChannel } from "../utils/message-channel.js";
 
@@ -18,13 +18,17 @@ export function getBearerToken(req: IncomingMessage): string | undefined {
   const raw = getHeader(req, "authorization")?.trim() ?? "";
   if (raw.toLowerCase().startsWith("bearer ")) {
     const token = raw.slice(7).trim();
-    if (token) return token;
+    if (token) {
+      return token;
+    }
   }
   // Fallback: check ?token= query parameter (used by iframes that can't set headers)
   try {
     const url = new URL(req.url ?? "", `http://${req.headers.host ?? "localhost"}`);
     const qToken = url.searchParams.get("token")?.trim();
-    if (qToken) return qToken;
+    if (qToken) {
+      return qToken;
+    }
   } catch {
     // ignore URL parse errors
   }
@@ -33,9 +37,7 @@ export function getBearerToken(req: IncomingMessage): string | undefined {
 
 export function resolveAgentIdFromHeader(req: IncomingMessage): string | undefined {
   const raw =
-    getHeader(req, "x-openclaw-agent-id")?.trim() ||
-    getHeader(req, "x-openclaw-agent")?.trim() ||
-    "";
+    getHeader(req, "x-bot-agent-id")?.trim() || getHeader(req, "x-bot-agent")?.trim() || "";
   if (!raw) {
     return undefined;
   }
@@ -49,7 +51,7 @@ export function resolveAgentIdFromModel(model: string | undefined): string | und
   }
 
   const m =
-    raw.match(/^openclaw[:/](?<agentId>[a-z0-9][a-z0-9_-]{0,63})$/i) ??
+    raw.match(/^bot[:/](?<agentId>[a-z0-9][a-z0-9_-]{0,63})$/i) ??
     raw.match(/^agent:(?<agentId>[a-z0-9][a-z0-9_-]{0,63})$/i);
   const agentId = m?.groups?.agentId;
   if (!agentId) {
@@ -77,7 +79,7 @@ export function resolveSessionKey(params: {
   user?: string | undefined;
   prefix: string;
 }): string {
-  const explicit = getHeader(params.req, "x-openclaw-session-key")?.trim();
+  const explicit = getHeader(params.req, "x-bot-session-key")?.trim();
   if (explicit) {
     return explicit;
   }
@@ -104,7 +106,7 @@ export function resolveGatewayRequestContext(params: {
   });
 
   const messageChannel = params.useMessageChannelHeader
-    ? (normalizeMessageChannel(getHeader(params.req, "x-openclaw-message-channel")) ??
+    ? (normalizeMessageChannel(getHeader(params.req, "x-bot-message-channel")) ??
       params.defaultMessageChannel)
     : params.defaultMessageChannel;
 

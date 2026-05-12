@@ -42,7 +42,7 @@ type DiscordUser = {
 
 const execFileAsync = promisify(execFile);
 
-type DriverMode = "token" | "webhook" | "openclaw";
+type DriverMode = "token" | "webhook" | "bot";
 
 type Args = {
   channelId: string;
@@ -57,7 +57,7 @@ type Args = {
   mentionUserId?: string;
   instruction?: string;
   threadBindingsPath: string;
-  openclawBin: string;
+  botBin: string;
   json: boolean;
 };
 
@@ -128,7 +128,7 @@ function resolveStateDir(): string {
       : path.resolve(override);
   }
   const home = process.env.BOT_HOME?.trim() || process.env.HOME || "";
-  return path.join(home, ".openclaw");
+  return path.join(home, ".bot");
 }
 
 function resolveArg(flag: string): string | undefined {
@@ -151,13 +151,13 @@ function hasFlag(flag: string): boolean {
 function usage(): string {
   return (
     "Usage: bun scripts/dev/discord-acp-plain-language-smoke.ts " +
-    "--channel <discord-channel-id> [--token <driver-token> | --driver webhook --bot-token <bot-token> | --driver openclaw] [options]\n\n" +
+    "--channel <discord-channel-id> [--token <driver-token> | --driver webhook --bot-token <bot-token> | --driver bot] [options]\n\n" +
     "Manual live smoke only (not CI). Sends a plain-language instruction in Discord and verifies:\n" +
-    "1) OpenClaw spawned an ACP thread binding\n" +
+    "1) HanzoBot spawned an ACP thread binding\n" +
     "2) agent replied in that bound thread with the expected ACK token\n\n" +
     "Options:\n" +
     "  --channel <id>               Parent Discord channel id (required)\n" +
-    "  --driver <token|webhook|openclaw> Driver transport mode (default: token)\n" +
+    "  --driver <token|webhook|bot> Driver transport mode (default: token)\n" +
     "  --token <token>              Driver Discord token (required for driver=token)\n" +
     "  --token-prefix <prefix>      Auth prefix for --token (default: Bot)\n" +
     "  --bot-token <token>          Bot token for webhook driver mode\n" +
@@ -168,7 +168,7 @@ function usage(): string {
     "  --timeout-ms <n>             Total timeout in ms (default: 240000)\n" +
     "  --poll-ms <n>                Poll interval in ms (default: 1500)\n" +
     "  --thread-bindings-path <p>   Override thread-bindings json path\n" +
-    "  --openclaw-bin <path>        OpenClaw CLI binary for driver=openclaw (default: openclaw)\n" +
+    "  --bot-bin <path>        HanzoBot CLI binary for driver=bot (default: bot)\n" +
     "  --json                       Emit JSON output\n" +
     "\n" +
     "Environment fallbacks:\n" +
@@ -202,8 +202,8 @@ function parseArgs(): Args {
   const driverMode: DriverMode =
     normalizedDriverMode === "webhook"
       ? "webhook"
-      : normalizedDriverMode === "openclaw"
-        ? "openclaw"
+      : normalizedDriverMode === "bot"
+        ? "bot"
         : normalizedDriverMode === "token"
           ? "token"
           : "token";
@@ -250,8 +250,7 @@ function parseArgs(): Args {
     resolveArg("--thread-bindings-path") ||
     process.env.BOT_DISCORD_SMOKE_THREAD_BINDINGS_PATH ||
     defaultBindingsPath;
-  const openclawBin =
-    resolveArg("--openclaw-bin") || process.env.BOT_DISCORD_SMOKE_BOT_BIN || "openclaw";
+  const botBin = resolveArg("--bot-bin") || process.env.BOT_DISCORD_SMOKE_BOT_BIN || "bot";
   const json = hasFlag("--json");
 
   if (!channelId) {
@@ -277,34 +276,34 @@ function parseArgs(): Args {
     mentionUserId,
     instruction,
     threadBindingsPath,
-    openclawBin,
+    botBin,
     json,
   };
 }
 
-async function openclawCliJson<T>(params: { openclawBin: string; args: string[] }): Promise<T> {
-  const result = await execFileAsync(params.openclawBin, params.args, {
+async function botCliJson<T>(params: { botBin: string; args: string[] }): Promise<T> {
+  const result = await execFileAsync(params.botBin, params.args, {
     maxBuffer: 8 * 1024 * 1024,
     env: process.env,
   });
   const stdout = (result.stdout || "").trim();
   if (!stdout) {
-    throw new Error(`openclaw ${params.args.join(" ")} returned empty stdout`);
+    throw new Error(`bot ${params.args.join(" ")} returned empty stdout`);
   }
   return JSON.parse(stdout) as T;
 }
 
-async function readMessagesWithOpenclaw(params: {
-  openclawBin: string;
+async function readMessagesWithHanzoBot(params: {
+  botBin: string;
   target: string;
   limit: number;
 }): Promise<DiscordMessage[]> {
-  const response = await openclawCliJson<{
+  const response = await botCliJson<{
     payload?: {
       messages?: DiscordMessage[];
     };
   }>({
-    openclawBin: params.openclawBin,
+    botBin: params.botBin,
     args: [
       "message",
       "read",
@@ -485,9 +484,9 @@ async function loadParentRecentMessages(params: {
   args: Args;
   readAuthHeader: string;
 }): Promise<DiscordMessage[]> {
-  if (params.args.driverMode === "openclaw") {
-    return await readMessagesWithOpenclaw({
-      openclawBin: params.args.openclawBin,
+  if (params.args.driverMode === "bot") {
+    return await readMessagesWithHanzoBot({
+      botBin: params.args.botBin,
       target: params.args.channelId,
       limit: 20,
     });
@@ -635,7 +634,7 @@ async function run(): Promise<SuccessResult | FailureResult> {
         path: `/channels/${encodeURIComponent(args.channelId)}/webhooks`,
         authHeader: botAuthHeader,
         body: {
-          name: `openclaw-acp-smoke-${smokeId.slice(-8)}`,
+          name: `bot-acp-smoke-${smokeId.slice(-8)}`,
         },
       });
       if (!webhook.id || !webhook.token) {
@@ -665,14 +664,14 @@ async function run(): Promise<SuccessResult | FailureResult> {
       senderAuthorId = sent.author?.id;
     } else {
       setupStage = "send-message";
-      const sent = await openclawCliJson<{
+      const sent = await botCliJson<{
         payload?: {
           result?: {
             messageId?: string;
           };
         };
       }>({
-        openclawBin: args.openclawBin,
+        botBin: args.botBin,
         args: [
           "message",
           "send",
@@ -687,7 +686,7 @@ async function run(): Promise<SuccessResult | FailureResult> {
       });
       sentMessageId = String(sent.payload?.result?.messageId || "");
       if (!sentMessageId) {
-        throw new Error("openclaw message send did not return payload.result.messageId");
+        throw new Error("bot message send did not return payload.result.messageId");
       }
     }
   } catch (err) {
@@ -753,9 +752,9 @@ async function run(): Promise<SuccessResult | FailureResult> {
     while (Date.now() < deadline && !ackMessage) {
       try {
         const threadMessages =
-          args.driverMode === "openclaw"
-            ? await readMessagesWithOpenclaw({
-                openclawBin: args.openclawBin,
+          args.driverMode === "bot"
+            ? await readMessagesWithHanzoBot({
+                botBin: args.botBin,
                 target: threadId,
                 limit: 50,
               })
@@ -792,7 +791,7 @@ async function run(): Promise<SuccessResult | FailureResult> {
         ok: false,
         stage: "wait-ack",
         smokeId,
-        error: `Thread bound (${threadId}) but timed out waiting for ACK token "${ackToken}" from OpenClaw.`,
+        error: `Thread bound (${threadId}) but timed out waiting for ACK token "${ackToken}" from HanzoBot.`,
         diagnostics: {
           bindingCandidates: [
             {

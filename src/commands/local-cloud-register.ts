@@ -40,12 +40,15 @@ export async function registerLocalBot(params: {
       }),
     });
     if (res.ok) {
-      console.log(`[openclaw] Registered with Hanzo Cloud as ${nodeId}`);
+      console.log(`[bot] Registered with Hanzo Cloud as ${nodeId}`);
     } else {
-      console.warn(`[openclaw] Cloud registration returned ${res.status}`);
+      console.warn(`[bot] Cloud registration returned ${res.status}`);
     }
   } catch (err) {
-    console.warn(`[openclaw] Cloud registration failed (non-fatal):`, err instanceof Error ? err.message : err);
+    console.warn(
+      `[bot] Cloud registration failed (non-fatal):`,
+      err instanceof Error ? err.message : err,
+    );
   }
 
   // Heartbeat every 30s

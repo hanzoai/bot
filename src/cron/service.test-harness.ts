@@ -4,9 +4,9 @@ import path from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
 import type { MockFn } from "../test-utils/vitest-mock-fn.js";
 import type { CronEvent, CronServiceDeps } from "./service.js";
-import type { CronJob } from "./types.js";
 import { CronService } from "./service.js";
 import { createCronServiceState, type CronServiceState } from "./service/state.js";
+import type { CronJob } from "./types.js";
 
 export type NoopLogger = {
   debug: MockFn;
@@ -29,7 +29,7 @@ export function createCronStoreHarness(options?: { prefix?: string }) {
   let caseId = 0;
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), options?.prefix ?? "openclaw-cron-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), options?.prefix ?? "bot-cron-"));
   });
 
   afterAll(async () => {

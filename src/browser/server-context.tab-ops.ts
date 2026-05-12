@@ -1,24 +1,24 @@
-import type { ResolvedBrowserProfile } from "./config.js";
-import type { PwAiModule } from "./pw-ai-module.js";
-import type {
-  BrowserServerState,
-  BrowserTab,
-  ProfileRuntimeState,
-} from "./server-context.types.js";
 import { CDP_JSON_NEW_TIMEOUT_MS } from "./cdp-timeouts.js";
 import { fetchJson, fetchOk } from "./cdp.helpers.js";
 import { appendCdpPath, createTargetViaCdp, normalizeCdpWsUrl } from "./cdp.js";
+import type { ResolvedBrowserProfile } from "./config.js";
 import {
   assertBrowserNavigationAllowed,
   assertBrowserNavigationResultAllowed,
   withBrowserNavigationPolicy,
 } from "./navigation-guard.js";
+import type { PwAiModule } from "./pw-ai-module.js";
 import { getPwAiModule } from "./pw-ai-module.js";
 import {
   MANAGED_BROWSER_PAGE_TAB_LIMIT,
   OPEN_TAB_DISCOVERY_POLL_MS,
   OPEN_TAB_DISCOVERY_WINDOW_MS,
 } from "./server-context.constants.js";
+import type {
+  BrowserServerState,
+  BrowserTab,
+  ProfileRuntimeState,
+} from "./server-context.types.js";
 
 type TabOpsDeps = {
   profile: ResolvedBrowserProfile;
@@ -97,7 +97,7 @@ export function createProfileTabOps({
   const enforceManagedTabLimit = async (keepTargetId: string): Promise<void> => {
     const profileState = getProfileState();
     if (
-      profile.driver !== "openclaw" ||
+      profile.driver !== "bot" ||
       !profile.cdpIsLoopback ||
       state().resolved.attachOnly ||
       !profileState.running

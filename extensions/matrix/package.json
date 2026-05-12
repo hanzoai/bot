@@ -1,7 +1,7 @@
 {
   "name": "@hanzo/bot-matrix",
   "version": "1.4.2",
-  "description": "OpenClaw Matrix channel plugin",
+  "description": "HanzoBot Matrix channel plugin",
   "type": "module",
   "dependencies": {
     "@mariozechner/pi-agent-core": "0.55.3",
@@ -11,7 +11,7 @@
     "music-metadata": "^11.12.1",
     "zod": "^4.3.6"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ],

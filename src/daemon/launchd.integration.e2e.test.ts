@@ -92,10 +92,10 @@ describeLaunchdIntegration("launchd integration", () => {
 
   beforeAll(async () => {
     const testId = randomUUID().slice(0, 8);
-    homeDir = await fs.mkdtemp(path.join(os.tmpdir(), `openclaw-launchd-int-${testId}-`));
+    homeDir = await fs.mkdtemp(path.join(os.tmpdir(), `bot-launchd-int-${testId}-`));
     env = {
       HOME: homeDir,
-      BOT_LAUNCHD_LABEL: `ai.openclaw.launchd-int-${testId}`,
+      BOT_LAUNCHD_LABEL: `ai.hanzo.bot.launchd-int-${testId}`,
       BOT_LOG_PREFIX: `gateway-launchd-int-${testId}`,
     };
   });

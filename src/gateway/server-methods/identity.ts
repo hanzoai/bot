@@ -1,5 +1,3 @@
-import type { DIDConfig, WalletConfig } from "../../config/types.base.js";
-import type { GatewayRequestHandlers } from "./types.js";
 import { CHAIN_IDS } from "../../agents/team-presets.js";
 import {
   applyAgentConfig,
@@ -7,8 +5,10 @@ import {
   listAgentEntries,
 } from "../../commands/agents.config.js";
 import { loadConfig, writeConfigFile } from "../../config/config.js";
+import type { DIDConfig, WalletConfig } from "../../config/types.base.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import { ErrorCodes, errorShape } from "../protocol/index.js";
+import type { GatewayRequestHandlers } from "./types.js";
 
 /**
  * Build a DID URI from method + identifier.
@@ -74,7 +74,7 @@ export const identityHandlers: GatewayRequestHandlers = {
       (params.method as string) ?? "hanzo",
     ).toLowerCase() as DIDConfig["method"];
     const validMethods = ["hanzo", "lux", "pars", "zoo", "ai"];
-    if (!validMethods.includes(method!)) {
+    if (!validMethods.includes(method)) {
       respond(
         false,
         undefined,
@@ -98,8 +98,8 @@ export const identityHandlers: GatewayRequestHandlers = {
     }
 
     const identifier = deriveAgentIdentifier(agentId);
-    const chainId = CHAIN_IDS[method as keyof typeof CHAIN_IDS] ?? CHAIN_IDS.hanzo;
-    const uri = buildDIDUri(method!, identifier);
+    const chainId = CHAIN_IDS[method] ?? CHAIN_IDS.hanzo;
+    const uri = buildDIDUri(method, identifier);
 
     const did: DIDConfig = { uri, method, chainId };
 
@@ -173,7 +173,7 @@ export const identityHandlers: GatewayRequestHandlers = {
       (params.chain as string) ?? "hanzo",
     ).toLowerCase() as WalletConfig["chain"];
     const validChains = ["lux", "hanzo", "zoo", "pars"];
-    if (!validChains.includes(chain!)) {
+    if (!validChains.includes(chain)) {
       respond(
         false,
         undefined,

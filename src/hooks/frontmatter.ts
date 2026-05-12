@@ -1,28 +1,28 @@
+import { parseFrontmatterBlock } from "../markdown/frontmatter.js";
+import {
+  getFrontmatterString,
+  normalizeStringList,
+  parseHanzoBotManifestInstallBase,
+  parseFrontmatterBool,
+  resolveHanzoBotManifestBlock,
+  resolveHanzoBotManifestInstall,
+  resolveHanzoBotManifestOs,
+  resolveHanzoBotManifestRequires,
+} from "../shared/frontmatter.js";
 import type {
-  OpenClawHookMetadata,
+  HanzoBotHookMetadata,
   HookEntry,
   HookInstallSpec,
   HookInvocationPolicy,
   ParsedHookFrontmatter,
 } from "./types.js";
-import { parseFrontmatterBlock } from "../markdown/frontmatter.js";
-import {
-  getFrontmatterString,
-  normalizeStringList,
-  parseOpenClawManifestInstallBase,
-  parseFrontmatterBool,
-  resolveOpenClawManifestBlock,
-  resolveOpenClawManifestInstall,
-  resolveOpenClawManifestOs,
-  resolveOpenClawManifestRequires,
-} from "../shared/frontmatter.js";
 
 export function parseFrontmatter(content: string): ParsedHookFrontmatter {
   return parseFrontmatterBlock(content);
 }
 
 function parseInstallSpec(input: unknown): HookInstallSpec | undefined {
-  const parsed = parseOpenClawManifestInstallBase(input, ["bundled", "npm", "git"]);
+  const parsed = parseHanzoBotManifestInstallBase(input, ["bundled", "npm", "git"]);
   if (!parsed) {
     return undefined;
   }
@@ -50,16 +50,16 @@ function parseInstallSpec(input: unknown): HookInstallSpec | undefined {
   return spec;
 }
 
-export function resolveOpenClawMetadata(
+export function resolveHanzoBotMetadata(
   frontmatter: ParsedHookFrontmatter,
-): OpenClawHookMetadata | undefined {
-  const metadataObj = resolveOpenClawManifestBlock({ frontmatter });
+): HanzoBotHookMetadata | undefined {
+  const metadataObj = resolveHanzoBotManifestBlock({ frontmatter });
   if (!metadataObj) {
     return undefined;
   }
-  const requires = resolveOpenClawManifestRequires(metadataObj);
-  const install = resolveOpenClawManifestInstall(metadataObj, parseInstallSpec);
-  const osRaw = resolveOpenClawManifestOs(metadataObj);
+  const requires = resolveHanzoBotManifestRequires(metadataObj);
+  const install = resolveHanzoBotManifestInstall(metadataObj, parseInstallSpec);
+  const osRaw = resolveHanzoBotManifestOs(metadataObj);
   const eventsRaw = normalizeStringList(metadataObj.events);
   return {
     always: typeof metadataObj.always === "boolean" ? metadataObj.always : undefined,

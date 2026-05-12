@@ -11,10 +11,10 @@
  * data is then relayed between the two WebSocket connections.
  */
 
-import type { IncomingMessage } from "node:http";
-import type { Duplex } from "node:stream";
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
+import type { IncomingMessage } from "node:http";
 import { createConnection, type Socket } from "node:net";
+import type { Duplex } from "node:stream";
 import { WebSocket, WebSocketServer } from "ws";
 import type { NodeRegistry } from "../node-registry.js";
 import type { GatewayRequestHandlers } from "./types.js";
@@ -192,7 +192,9 @@ export function createVncProxy(opts?: {
 
     const cleanup = () => {
       // eslint-disable-next-line no-console
-      console.log(`[vnc-proxy] tunnel cleanup: tunnelId=${tunnelId} browserBytes=${browserBytes} nodeBytes=${nodeBytes} browserState=${browserWs.readyState} nodeState=${nodeWs.readyState}`);
+      console.log(
+        `[vnc-proxy] tunnel cleanup: tunnelId=${tunnelId} browserBytes=${browserBytes} nodeBytes=${nodeBytes} browserState=${browserWs.readyState} nodeState=${nodeWs.readyState}`,
+      );
       activeTunnels.delete(tunnelId);
       if (browserWs.readyState === WebSocket.OPEN) {
         browserWs.close(1000, "tunnel closed");
@@ -234,7 +236,9 @@ export function createVncProxy(opts?: {
     const nodeId = url.searchParams.get("nodeId");
     const registry = getRegistry();
     // eslint-disable-next-line no-console
-    console.log(`[vnc-proxy] /vnc upgrade: nodeId=${nodeId} hasRegistry=${!!registry} registrySize=${registry?.listConnected().length ?? 0}`);
+    console.log(
+      `[vnc-proxy] /vnc upgrade: nodeId=${nodeId} hasRegistry=${!!registry} registrySize=${registry?.listConnected().length ?? 0}`,
+    );
     if (nodeId && registry) {
       const node = registry.get(nodeId);
       // eslint-disable-next-line no-console
@@ -301,43 +305,47 @@ export function createVncProxy(opts?: {
       // Invoke the node to open a VNC tunnel.
       // Handle errors so the browser WS gets closed immediately instead of
       // hanging until the tunnel timeout fires.
-      registry!.invoke({
-        nodeId,
-        command: "vnc.tunnel.open",
-        params: { tunnelId: signedToken, tunnelUrl },
-        timeoutMs: TUNNEL_TIMEOUT_MS,
-      }).then((result) => {
-        if (!result.ok) {
-          const errCode = (result as any).error?.code ?? "UNKNOWN";
-          const errMsg = (result as any).error?.message ?? "invoke failed";
+      registry!
+        .invoke({
+          nodeId,
+          command: "vnc.tunnel.open",
+          params: { tunnelId: signedToken, tunnelUrl },
+          timeoutMs: TUNNEL_TIMEOUT_MS,
+        })
+        .then((result) => {
+          if (!result.ok) {
+            const err = (result as { error?: { code?: string; message?: string } }).error;
+            const errCode = err?.code ?? "UNKNOWN";
+            const errMsg = err?.message ?? "invoke failed";
+            // eslint-disable-next-line no-console
+            console.log(
+              `[vnc-proxy] tunnel invoke failed: tunnelId=${tunnelId} nodeId=${nodeId} code=${errCode} msg=${errMsg}`,
+            );
+            const pending = pendingTunnels.get(tunnelId);
+            if (pending) {
+              clearTimeout(pending.timer);
+              pendingTunnels.delete(tunnelId);
+              if (browserWs.readyState === WebSocket.OPEN) {
+                browserWs.close(1011, `tunnel invoke failed: ${errCode}`);
+              }
+            }
+          }
+        })
+        .catch((err: unknown) => {
           // eslint-disable-next-line no-console
-          console.log(
-            `[vnc-proxy] tunnel invoke failed: tunnelId=${tunnelId} nodeId=${nodeId} code=${errCode} msg=${errMsg}`,
+          console.error(
+            `[vnc-proxy] tunnel invoke exception: tunnelId=${tunnelId} nodeId=${nodeId}`,
+            err,
           );
           const pending = pendingTunnels.get(tunnelId);
           if (pending) {
             clearTimeout(pending.timer);
             pendingTunnels.delete(tunnelId);
             if (browserWs.readyState === WebSocket.OPEN) {
-              browserWs.close(1011, `tunnel invoke failed: ${errCode}`);
+              browserWs.close(1011, "tunnel invoke exception");
             }
           }
-        }
-      }).catch((err: unknown) => {
-        // eslint-disable-next-line no-console
-        console.error(
-          `[vnc-proxy] tunnel invoke exception: tunnelId=${tunnelId} nodeId=${nodeId}`,
-          err,
-        );
-        const pending = pendingTunnels.get(tunnelId);
-        if (pending) {
-          clearTimeout(pending.timer);
-          pendingTunnels.delete(tunnelId);
-          if (browserWs.readyState === WebSocket.OPEN) {
-            browserWs.close(1011, "tunnel invoke exception");
-          }
-        }
-      });
+        });
     });
   }
 
@@ -361,7 +369,9 @@ export function createVncProxy(opts?: {
     // Verify HMAC signature before looking up the tunnel.
     const tunnelId = verifyTunnelToken(signedToken);
     // eslint-disable-next-line no-console
-    console.log(`[vnc-proxy] /vnc-tunnel: verified=${!!tunnelId} pending=${tunnelId ? pendingTunnels.has(tunnelId) : false}`);
+    console.log(
+      `[vnc-proxy] /vnc-tunnel: verified=${!!tunnelId} pending=${tunnelId ? pendingTunnels.has(tunnelId) : false}`,
+    );
     if (!tunnelId || !pendingTunnels.has(tunnelId)) {
       // eslint-disable-next-line no-console
       console.log(`[vnc-proxy] /vnc-tunnel: rejecting — invalid token or no pending tunnel`);

@@ -7,8 +7,8 @@ enum CommandResolver {
     static func gatewayEntrypoint(in root: URL) -> String? {
         let distEntry = root.appendingPathComponent("dist/index.js").path
         if FileManager().isReadableFile(atPath: distEntry) { return distEntry }
-        let hanzo-botEntry = root.appendingPathComponent("bot.mjs").path
-        if FileManager().isReadableFile(atPath: hanzo-botEntry) { return hanzo-botEntry }
+        let botEntry = root.appendingPathComponent("bot.mjs").path
+        if FileManager().isReadableFile(atPath: botEntry) { return botEntry }
         let binEntry = root.appendingPathComponent("bin/hanzo-bot.js").path
         if FileManager().isReadableFile(atPath: binEntry) { return binEntry }
         return nil
@@ -89,17 +89,17 @@ enum CommandResolver {
         // Dev-only convenience. Avoid project-local PATH hijacking in release builds.
         extras.insert(projectRoot.appendingPathComponent("node_modules/.bin").path, at: 0)
         #endif
-        let hanzo-botPaths = self.hanzo-botManagedPaths(home: home)
-        if !hanzo-botPaths.isEmpty {
-            extras.insert(contentsOf: hanzo-botPaths, at: 1)
+        let botPaths = self.botManagedPaths(home: home)
+        if !botPaths.isEmpty {
+            extras.insert(contentsOf: botPaths, at: 1)
         }
-        extras.insert(contentsOf: self.nodeManagerBinPaths(home: home), at: 1 + hanzo-botPaths.count)
+        extras.insert(contentsOf: self.nodeManagerBinPaths(home: home), at: 1 + botPaths.count)
         var seen = Set<String>()
         // Preserve order while stripping duplicates so PATH lookups remain deterministic.
         return (extras + current).filter { seen.insert($0).inserted }
     }
 
-    private static func hanzo-botManagedPaths(home: URL) -> [String] {
+    private static func botManagedPaths(home: URL) -> [String] {
         let bases = [
             home.appendingPathComponent(".hanzo-bot"),
         ]
@@ -193,7 +193,7 @@ enum CommandResolver {
         return nil
     }
 
-    static func hanzo-botExecutable(searchPaths: [String]? = nil) -> String? {
+    static func botExecutable(searchPaths: [String]? = nil) -> String? {
         self.findExecutable(named: self.helperName, searchPaths: searchPaths)
     }
 
@@ -220,7 +220,7 @@ enum CommandResolver {
     }
 
     static func hasAnyHanzoBotInvoker(searchPaths: [String]? = nil) -> Bool {
-        if self.hanzo-botExecutable(searchPaths: searchPaths) != nil { return true }
+        if self.botExecutable(searchPaths: searchPaths) != nil { return true }
         if self.findExecutable(named: "pnpm", searchPaths: searchPaths) != nil { return true }
         if self.findExecutable(named: "node", searchPaths: searchPaths) != nil,
            self.nodeCliPath() != nil
@@ -230,7 +230,7 @@ enum CommandResolver {
         return false
     }
 
-    static func hanzo-botNodeCommand(
+    static func botNodeCommand(
         subcommand: String,
         extraArgs: [String] = [],
         defaults: UserDefaults = .standard,
@@ -251,8 +251,8 @@ enum CommandResolver {
         switch runtimeResult {
         case let .success(runtime):
             let root = self.projectRoot()
-            if let hanzo-botPath = self.projectHanzoBotExecutable(projectRoot: root) {
-                return [hanzo-botPath, subcommand] + extraArgs
+            if let botPath = self.projectHanzoBotExecutable(projectRoot: root) {
+                return [botPath, subcommand] + extraArgs
             }
 
             if let entry = self.gatewayEntrypoint(in: root) {
@@ -266,8 +266,8 @@ enum CommandResolver {
                 // Use --silent to avoid pnpm lifecycle banners that would corrupt JSON outputs.
                 return [pnpm, "--silent", "hanzo-bot", subcommand] + extraArgs
             }
-            if let hanzo-botPath = self.hanzo-botExecutable(searchPaths: searchPaths) {
-                return [hanzo-botPath, subcommand] + extraArgs
+            if let botPath = self.botExecutable(searchPaths: searchPaths) {
+                return [botPath, subcommand] + extraArgs
             }
 
             let missingEntry = """
@@ -280,14 +280,14 @@ enum CommandResolver {
         }
     }
 
-    static func hanzo-botCommand(
+    static func botCommand(
         subcommand: String,
         extraArgs: [String] = [],
         defaults: UserDefaults = .standard,
         configRoot: [String: Any]? = nil,
         searchPaths: [String]? = nil) -> [String]
     {
-        self.hanzo-botNodeCommand(
+        self.botNodeCommand(
             subcommand: subcommand,
             extraArgs: extraArgs,
             defaults: defaults,

@@ -1,9 +1,5 @@
 import Foundation
-<<<<<<< HEAD
 import BotKit
-=======
-import OpenClawKit
->>>>>>> upstream/main
 
 /// Single source of truth for "how we connect" to the current gateway.
 ///

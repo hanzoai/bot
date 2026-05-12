@@ -96,10 +96,10 @@ export { ACP_ERROR_CODES, AcpRuntimeError } from "../acp/runtime/errors.js";
 export type { AcpRuntimeErrorCode } from "../acp/runtime/errors.js";
 export type {
   AnyAgentTool,
-  OpenClawPluginConfigSchema,
+  HanzoBotPluginConfigSchema,
   BotPluginApi,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  HanzoBotPluginService,
+  HanzoBotPluginServiceContext,
   PluginLogger,
   ProviderAuthContext,
   ProviderAuthResult,
@@ -320,7 +320,7 @@ export type {
   WindowsSpawnProgram,
   WindowsSpawnResolution,
 } from "./windows-spawn.js";
-export { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+export { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-bot-dir.js";
 export {
   runPluginCommandWithTimeout,
   type PluginCommandRunOptions,

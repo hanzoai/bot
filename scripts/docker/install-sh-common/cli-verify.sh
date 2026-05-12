@@ -32,7 +32,7 @@ verify_installed_cli() {
   else
     raw_version="$(node "$entry_path" --version 2>/dev/null | head -n 1 | tr -d '\r')"
   fi
-  # Extract the semver portion — --version may print e.g. "OpenClaw 2026.3.11 (abc1234)"
+  # Extract the semver portion — --version may print e.g. "HanzoBot 2026.3.11 (abc1234)"
   installed_version="$(echo "$raw_version" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?' | head -n 1)"
   if [[ -z "$installed_version" ]]; then
     installed_version="$raw_version"

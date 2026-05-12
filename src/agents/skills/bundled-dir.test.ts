@@ -19,7 +19,7 @@ describe("resolveBundledSkillsDir", () => {
   });
 
   it("returns BOT_BUNDLED_SKILLS_DIR override when set", async () => {
-    const overrideDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bundled-override-"));
+    const overrideDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-bundled-override-"));
     process.env.BOT_BUNDLED_SKILLS_DIR = ` ${overrideDir} `;
     expect(resolveBundledSkillsDir()).toBe(overrideDir);
   });
@@ -27,8 +27,8 @@ describe("resolveBundledSkillsDir", () => {
   it("resolves bundled skills under a flattened dist layout", async () => {
     delete process.env.BOT_BUNDLED_SKILLS_DIR;
 
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-bundled-"));
-    await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "openclaw" }));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-bundled-"));
+    await fs.writeFile(path.join(root, "package.json"), JSON.stringify({ name: "bot" }));
 
     await writeSkill({
       dir: path.join(root, "skills", "peekaboo"),

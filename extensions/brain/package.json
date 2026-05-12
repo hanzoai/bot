@@ -9,7 +9,7 @@
     "@hanzo/bot-graph-links": "*",
     "@hanzo/bot-memory": "*"
   },
-  "openclaw": {
+  "hanzo-bot": {
     "extensions": [
       "./index.ts"
     ]

@@ -1,7 +1,7 @@
 import path from "node:path";
-import type { PluginRecord } from "./registry.js";
 import { resolveConfigDir, shortenHomeInString } from "../utils.js";
 import { resolveBundledPluginsDir } from "./bundled-dir.js";
+import type { PluginRecord } from "./registry.js";
 
 export type PluginSourceRoots = {
   stock?: string;
@@ -31,7 +31,7 @@ export function resolvePluginSourceRoots(params: { workspaceDir?: string }): Plu
   const stock = resolveBundledPluginsDir();
   const global = path.join(resolveConfigDir(), "extensions");
   const workspace = params.workspaceDir
-    ? path.join(params.workspaceDir, ".openclaw", "extensions")
+    ? path.join(params.workspaceDir, ".bot", "extensions")
     : undefined;
   return { stock, global, workspace };
 }
