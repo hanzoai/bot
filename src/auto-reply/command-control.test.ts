@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { BotConfig } from "../config/config.js";
-import type { MsgContext } from "./templating.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../test-utils/channel-plugins.js";
 import { resolveCommandAuthorization } from "./command-auth.js";
@@ -8,6 +7,7 @@ import { hasControlCommand, hasInlineCommandTokens } from "./command-detection.j
 import { listChatCommands } from "./commands-registry.js";
 import { parseActivationCommand } from "./group-activation.js";
 import { parseSendPolicyCommand } from "./send-policy.js";
+import type { MsgContext } from "./templating.js";
 
 const createRegistry = () =>
   createTestRegistry([
@@ -182,7 +182,7 @@ describe("resolveCommandAuthorization", () => {
       Provider: "webchat",
       Surface: "webchat",
       OriginatingChannel: "webchat",
-      SenderId: "openclaw-control-ui",
+      SenderId: "bot-control-ui",
     } as MsgContext;
 
     const auth = resolveCommandAuthorization({
@@ -585,12 +585,12 @@ describe("control command parsing", () => {
   it("ignores telegram commands addressed to other bots", () => {
     expect(
       hasControlCommand("/help@otherbot", undefined, {
-        botUsername: "openclaw",
+        botUsername: "bot",
       }),
     ).toBe(false);
     expect(
-      hasControlCommand("/help@openclaw", undefined, {
-        botUsername: "openclaw",
+      hasControlCommand("/help@bot", undefined, {
+        botUsername: "bot",
       }),
     ).toBe(true);
   });

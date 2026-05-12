@@ -838,7 +838,7 @@ function buildOpenrouterProvider(): ProviderConfig {
         // applyExtraParamsToAgent skips the reasoning effort injection for
         // model id "auto" because it dynamically routes to any OpenRouter model
         // (including ones where reasoning is mandatory and cannot be disabled).
-        // See: openclaw/openclaw#24851
+        // See: bot/bot#24851
         reasoning: false,
         input: ["text", "image"],
         cost: OPENROUTER_DEFAULT_COST,
@@ -1273,7 +1273,7 @@ export async function resolveImplicitCopilotProvider(params: {
   }
 
   // We deliberately do not write pi-coding-agent auth.json here.
-  // OpenClaw keeps auth in auth-profiles and resolves runtime availability from that store.
+  // HanzoBot keeps auth in auth-profiles and resolves runtime availability from that store.
 
   // We intentionally do NOT define custom models for Copilot in models.json.
   // pi-coding-agent treats providers with models as replacements requiring apiKey.

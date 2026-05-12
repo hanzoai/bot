@@ -104,9 +104,9 @@ describe("modelsAuthLoginCommand", () => {
     lastUpdatedConfig = null;
 
     mocks.resolveDefaultAgentId.mockReturnValue("main");
-    mocks.resolveAgentDir.mockReturnValue("/tmp/openclaw/agents/main");
-    mocks.resolveAgentWorkspaceDir.mockReturnValue("/tmp/openclaw/workspace");
-    mocks.resolveDefaultAgentWorkspaceDir.mockReturnValue("/tmp/openclaw/workspace");
+    mocks.resolveAgentDir.mockReturnValue("/tmp/bot/agents/main");
+    mocks.resolveAgentWorkspaceDir.mockReturnValue("/tmp/bot/workspace");
+    mocks.resolveDefaultAgentWorkspaceDir.mockReturnValue("/tmp/bot/workspace");
     mocks.loadValidConfigOrThrow.mockImplementation(async () => currentConfig);
     mocks.updateConfig.mockImplementation(async (mutator: (cfg: BotConfig) => BotConfig) => {
       lastUpdatedConfig = mutator(currentConfig);
@@ -143,7 +143,7 @@ describe("modelsAuthLoginCommand", () => {
     expect(mocks.writeOAuthCredentials).toHaveBeenCalledWith(
       "openai-codex",
       expect.any(Object),
-      "/tmp/openclaw/agents/main",
+      "/tmp/bot/agents/main",
       { syncSiblingAgents: true },
     );
     expect(mocks.resolvePluginProviders).not.toHaveBeenCalled();

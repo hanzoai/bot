@@ -1,11 +1,9 @@
-import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
-import type { ImageContent } from "../commands/agent/types.js";
-import type { GatewayHttpChatCompletionsConfig } from "../config/types.gateway.js";
-import type { AuthRateLimiter } from "./auth-rate-limit.js";
-import type { ResolvedGatewayAuth } from "./auth.js";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { createDefaultDeps } from "../cli/deps.js";
 import { agentCommandFromIngress } from "../commands/agent.js";
+import type { ImageContent } from "../commands/agent/types.js";
+import type { GatewayHttpChatCompletionsConfig } from "../config/types.gateway.js";
 import { emitAgentEvent, onAgentEvent } from "../infra/agent-events.js";
 import { logWarn } from "../logger.js";
 import { estimateBase64DecodedBytes } from "../media/base64.js";
@@ -25,6 +23,8 @@ import {
   buildAgentMessageFromConversationEntries,
   type ConversationEntry,
 } from "./agent-prompt.js";
+import type { AuthRateLimiter } from "./auth-rate-limit.js";
+import type { ResolvedGatewayAuth } from "./auth.js";
 import { sendJson, setSseHeaders, writeDone } from "./http-common.js";
 import { handleGatewayPostJsonEndpoint } from "./http-endpoint-helpers.js";
 import { resolveGatewayRequestContext } from "./http-utils.js";
@@ -400,13 +400,13 @@ function coerceRequest(val: unknown): OpenAiChatCompletionRequest {
 function resolveAgentResponseText(result: unknown): string {
   const payloads = (result as { payloads?: Array<{ text?: string }> } | null)?.payloads;
   if (!Array.isArray(payloads) || payloads.length === 0) {
-    return "No response from OpenClaw.";
+    return "No response from HanzoBot.";
   }
   const content = payloads
     .map((p) => (typeof p.text === "string" ? p.text : ""))
     .filter(Boolean)
     .join("\n\n");
-  return content || "No response from OpenClaw.";
+  return content || "No response from HanzoBot.";
 }
 
 export async function handleOpenAiHttpRequest(
@@ -432,7 +432,7 @@ export async function handleOpenAiHttpRequest(
 
   const payload = coerceRequest(handled.body);
   const stream = Boolean(payload.stream);
-  const model = typeof payload.model === "string" ? payload.model : "openclaw";
+  const model = typeof payload.model === "string" ? payload.model : "bot";
   const user = typeof payload.user === "string" ? payload.user : undefined;
 
   const { sessionKey, messageChannel } = resolveGatewayRequestContext({

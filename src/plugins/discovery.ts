@@ -7,7 +7,7 @@ import {
   DEFAULT_PLUGIN_ENTRY_CANDIDATES,
   getPackageManifestMetadata,
   resolvePackageExtensionEntries,
-  type OpenClawPackageManifest,
+  type HanzoBotPackageManifest,
   type PackageManifest,
 } from "./manifest.js";
 import { formatPosixMode, isPathInside, safeRealpathSync, safeStatSync } from "./path-safety.js";
@@ -25,7 +25,7 @@ export type PluginCandidate = {
   packageVersion?: string;
   packageDescription?: string;
   packageDir?: string;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: HanzoBotPackageManifest;
 };
 
 export type PluginDiscoveryResult = {
@@ -615,7 +615,7 @@ function discoverFromPath(params: {
   }
 }
 
-export function discoverOpenClawPlugins(params: {
+export function discoverHanzoBotPlugins(params: {
   workspaceDir?: string;
   extraPaths?: string[];
   ownershipUid?: number | null;
@@ -662,7 +662,7 @@ export function discoverOpenClawPlugins(params: {
   }
   if (workspaceDir) {
     const workspaceRoot = resolveUserPath(workspaceDir);
-    const workspaceExtDirs = [path.join(workspaceRoot, ".openclaw", "extensions")];
+    const workspaceExtDirs = [path.join(workspaceRoot, ".bot", "extensions")];
     for (const dir of workspaceExtDirs) {
       discoverInDirectory({
         dir,

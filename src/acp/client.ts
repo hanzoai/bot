@@ -14,7 +14,7 @@ import {
   type SessionNotification,
 } from "@agentclientprotocol/sdk";
 import { isKnownCoreToolId } from "../agents/tool-catalog.js";
-import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
+import { ensureHanzoBotCliOnPath } from "../infra/path-env.js";
 import {
   materializeWindowsSpawnProgram,
   resolveWindowsSpawnProgram,
@@ -373,7 +373,7 @@ export function resolveAcpClientSpawnInvocation(
     platform: runtime.platform,
     env: runtime.env,
     execPath: runtime.execPath,
-    packageName: "openclaw",
+    packageName: "bot",
     allowShellFallback: true,
   });
   const resolved = materializeWindowsSpawnProgram(program, params.serverArgs);
@@ -444,11 +444,11 @@ export async function createAcpClient(opts: AcpClientOptions = {}): Promise<AcpC
   const verbose = Boolean(opts.verbose);
   const log = verbose ? (msg: string) => console.error(`[acp-client] ${msg}`) : () => {};
 
-  ensureOpenClawCliOnPath();
+  ensureHanzoBotCliOnPath();
   const serverArgs = buildServerArgs(opts);
 
   const entryPath = resolveSelfEntryPath();
-  const serverCommand = opts.serverCommand ?? (entryPath ? process.execPath : "openclaw");
+  const serverCommand = opts.serverCommand ?? (entryPath ? process.execPath : "bot");
   const effectiveArgs = opts.serverCommand || !entryPath ? serverArgs : [entryPath, ...serverArgs];
   const spawnEnv = resolveAcpClientSpawnEnv();
   const spawnInvocation = resolveAcpClientSpawnInvocation(
@@ -497,7 +497,7 @@ export async function createAcpClient(opts: AcpClientOptions = {}): Promise<AcpC
       fs: { readTextFile: true, writeTextFile: true },
       terminal: true,
     },
-    clientInfo: { name: "openclaw-acp-client", version: "1.0.0" },
+    clientInfo: { name: "bot-acp-client", version: "1.0.0" },
   });
 
   log("creating session");
@@ -521,7 +521,7 @@ export async function runAcpClientInteractive(opts: AcpClientOptions = {}): Prom
     output: process.stdout,
   });
 
-  console.log("OpenClaw ACP client");
+  console.log("HanzoBot ACP client");
   console.log(`Session: ${sessionId}`);
   console.log('Type a prompt, or "exit" to quit.\n');
 

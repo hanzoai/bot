@@ -1,4 +1,3 @@
-import type { GatewayRequestHandlers } from "./types.js";
 import { loadConfig } from "../../config/config.js";
 import { listDevicePairing } from "../../infra/device-pairing.js";
 import {
@@ -45,6 +44,7 @@ import {
   safeParseJson,
   uniqueSortedStrings,
 } from "./nodes.helpers.js";
+import type { GatewayRequestHandlers } from "./types.js";
 
 const NODE_WAKE_RECONNECT_WAIT_MS = 3_000;
 const NODE_WAKE_RECONNECT_RETRY_WAIT_MS = 12_000;
@@ -215,8 +215,8 @@ async function maybeSendNodeWakeNudge(nodeId: string): Promise<NodeWakeNudgeAtte
       auth: auth.value,
       registration,
       nodeId,
-      title: "OpenClaw needs a quick reopen",
-      body: "Tap to reopen OpenClaw and restore the node connection.",
+      title: "HanzoBot needs a quick reopen",
+      body: "Tap to reopen HanzoBot and restore the node connection.",
     });
     if (!result.ok) {
       return withDuration({
@@ -438,7 +438,11 @@ export const nodeHandlers: GatewayRequestHandlers = {
     await respondUnavailableOnThrow(respond, async () => {
       const removed = await unpairNode(nodeId);
       if (!removed) {
-        respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "unknown nodeId or not paired"));
+        respond(
+          false,
+          undefined,
+          errorShape(ErrorCodes.INVALID_REQUEST, "unknown nodeId or not paired"),
+        );
         return;
       }
       // Also disconnect the node from the live registry if it's connected
