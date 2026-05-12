@@ -7,7 +7,7 @@ written by any runtime is consumed by any other runtime, and bot
 extensions cross-port mechanically.
 
 Status: draft v0. The TS reference implementation is `hanzoai/bot`
-(OpenClaw fork). The Go port is `hanzoai/bot-go`.
+(OpenClaw fork). The Go port is `hanzobot/go`.
 
 ---
 

@@ -14,9 +14,9 @@ implements it.
 | Port | Repo | Status |
 |---|---|---|
 | TypeScript (canonical reference) | [`hanzoai/bot`](https://github.com/hanzoai/bot) | live, OpenClaw fork |
-| Go | [`hanzoai/bot-go`](https://github.com/hanzoai/bot-go) | scaffold |
+| Go | [`hanzobot/go`](https://github.com/hanzobot/go) | scaffold |
 | Rust | `hanzoai/bot-rust` | planned |
-| C++ | `hanzoai/bot-cpp` | planned |
+| C++ | `hanzobot/cpp` | planned |
 | Python SDK | [`hanzoai/python-sdk/pkg/hanzo-memory`](https://github.com/hanzoai/python-sdk) (brain + recipes ported) | partial |
 
 ## What's defined
