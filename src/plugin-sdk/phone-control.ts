@@ -3,7 +3,7 @@
 
 export type {
   BotPluginApi,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginService,
+  HanzoBotPluginCommandDefinition,
+  HanzoBotPluginService,
   PluginCommandContext,
 } from "../plugins/types.js";

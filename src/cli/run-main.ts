@@ -4,7 +4,7 @@ import { loadDotEnv } from "../infra/dotenv.js";
 import { normalizeEnv } from "../infra/env.js";
 import { formatUncaughtError } from "../infra/errors.js";
 import { isMainModule } from "../infra/is-main.js";
-import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
+import { ensureHanzoBotCliOnPath } from "../infra/path-env.js";
 import { assertSupportedRuntime } from "../infra/runtime-guard.js";
 import { installUnhandledRejectionHandler } from "../infra/unhandled-rejections.js";
 import { enableConsoleCapture } from "../logging.js";
@@ -76,7 +76,7 @@ export async function runCli(argv: string[] = process.argv) {
   loadDotEnv({ quiet: true });
   normalizeEnv();
   if (shouldEnsureCliPath(normalizedArgv)) {
-    ensureOpenClawCliOnPath();
+    ensureHanzoBotCliOnPath();
   }
 
   // Enforce the minimum supported runtime before doing any work.
@@ -93,7 +93,12 @@ export async function runCli(argv: string[] = process.argv) {
   // OAuth — there is no TTY inside K8s pods.
   const isCloudNode = process.env.BOT_CLOUD_NODE === "true";
   const primaryCmd = getPrimaryCommand(normalizedArgv);
-  if (!hasHelpOrVersion(normalizedArgv) && !isCloudNode && primaryCmd !== "node" && primaryCmd !== "gateway") {
+  if (
+    !hasHelpOrVersion(normalizedArgv) &&
+    !isCloudNode &&
+    primaryCmd !== "node" &&
+    primaryCmd !== "gateway"
+  ) {
     const { readConfigFileSnapshot } = await import("../config/config.js");
     const snapshot = await readConfigFileSnapshot();
     if (!snapshot.exists) {
@@ -127,7 +132,7 @@ export async function runCli(argv: string[] = process.argv) {
   installUnhandledRejectionHandler();
 
   process.on("uncaughtException", (error) => {
-    console.error("[openclaw] Uncaught exception:", formatUncaughtError(error));
+    console.error("[bot] Uncaught exception:", formatUncaughtError(error));
     process.exit(1);
   });
 

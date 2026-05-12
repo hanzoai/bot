@@ -1,16 +1,9 @@
 import EventKit
 import Foundation
-<<<<<<< HEAD
 import BotKit
 
 final class CalendarService: CalendarServicing {
     func events(params: HanzoBotCalendarEventsParams) async throws -> HanzoBotCalendarEventsPayload {
-=======
-import OpenClawKit
-
-final class CalendarService: CalendarServicing {
-    func events(params: OpenClawCalendarEventsParams) async throws -> OpenClawCalendarEventsPayload {
->>>>>>> upstream/main
         let store = EKEventStore()
         let status = EKEventStore.authorizationStatus(for: .event)
         let authorized = EventKitAuthorization.allowsRead(status: status)
@@ -30,11 +23,7 @@ final class CalendarService: CalendarServicing {
 
         let formatter = ISO8601DateFormatter()
         let payload = selected.map { event in
-<<<<<<< HEAD
             HanzoBotCalendarEventPayload(
-=======
-            OpenClawCalendarEventPayload(
->>>>>>> upstream/main
                 identifier: event.eventIdentifier ?? UUID().uuidString,
                 title: event.title ?? "(untitled)",
                 startISO: formatter.string(from: event.startDate),
@@ -44,17 +33,10 @@ final class CalendarService: CalendarServicing {
                 calendarTitle: event.calendar.title)
         }
 
-<<<<<<< HEAD
         return HanzoBotCalendarEventsPayload(events: payload)
     }
 
     func add(params: HanzoBotCalendarAddParams) async throws -> HanzoBotCalendarAddPayload {
-=======
-        return OpenClawCalendarEventsPayload(events: payload)
-    }
-
-    func add(params: OpenClawCalendarAddParams) async throws -> OpenClawCalendarAddPayload {
->>>>>>> upstream/main
         let store = EKEventStore()
         let status = EKEventStore.authorizationStatus(for: .event)
         let authorized = EventKitAuthorization.allowsWrite(status: status)
@@ -101,11 +83,7 @@ final class CalendarService: CalendarServicing {
 
         try store.save(event, span: .thisEvent)
 
-<<<<<<< HEAD
         let payload = HanzoBotCalendarEventPayload(
-=======
-        let payload = OpenClawCalendarEventPayload(
->>>>>>> upstream/main
             identifier: event.eventIdentifier ?? UUID().uuidString,
             title: event.title ?? title,
             startISO: formatter.string(from: event.startDate),
@@ -114,11 +92,7 @@ final class CalendarService: CalendarServicing {
             location: event.location,
             calendarTitle: event.calendar.title)
 
-<<<<<<< HEAD
         return HanzoBotCalendarAddPayload(event: payload)
-=======
-        return OpenClawCalendarAddPayload(event: payload)
->>>>>>> upstream/main
     }
 
     private static func resolveCalendar(

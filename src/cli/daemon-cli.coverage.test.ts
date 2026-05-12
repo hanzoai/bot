@@ -118,8 +118,8 @@ describe("daemon-cli coverage", () => {
       "BOT_GATEWAY_PORT",
       "BOT_PROFILE",
     ]);
-    process.env.BOT_STATE_DIR = "/tmp/openclaw-cli-state";
-    process.env.BOT_CONFIG_PATH = "/tmp/openclaw-cli-state/openclaw.json";
+    process.env.BOT_STATE_DIR = "/tmp/bot-cli-state";
+    process.env.BOT_CONFIG_PATH = "/tmp/bot-cli-state/bot.json";
     delete process.env.BOT_GATEWAY_PORT;
     delete process.env.BOT_PROFILE;
     serviceReadCommand.mockResolvedValue(null);
@@ -151,8 +151,8 @@ describe("daemon-cli coverage", () => {
       programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
       environment: {
         BOT_PROFILE: "dev",
-        BOT_STATE_DIR: "/tmp/openclaw-daemon-state",
-        BOT_CONFIG_PATH: "/tmp/openclaw-daemon-state/openclaw.json",
+        BOT_STATE_DIR: "/tmp/bot-daemon-state",
+        BOT_CONFIG_PATH: "/tmp/bot-daemon-state/bot.json",
         BOT_GATEWAY_PORT: "19001",
       },
       sourcePath: "/tmp/ai.bot.gateway.plist",
