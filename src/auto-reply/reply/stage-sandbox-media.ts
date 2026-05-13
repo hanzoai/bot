@@ -8,7 +8,7 @@ import type { BotConfig } from "../../config/config.js";
 import { logVerbose } from "../../globals.js";
 import { copyFileWithinRoot, SafeOpenError } from "../../infra/fs-safe.js";
 import { normalizeScpRemoteHost } from "../../infra/scp-host.js";
-import { resolvePreferredHanzoBotTmpDir } from "../../infra/tmp-bot-dir.js";
+import { resolvePreferredBotTmpDir } from "../../infra/tmp-bot-dir.js";
 import {
   isInboundPathAllowed,
   resolveIMessageRemoteAttachmentRoots,
@@ -140,7 +140,7 @@ async function stageRemoteFileIntoRoot(params: {
   relativeDestPath: string;
   maxBytes?: number;
 }): Promise<void> {
-  const tmpRoot = resolvePreferredHanzoBotTmpDir();
+  const tmpRoot = resolvePreferredBotTmpDir();
   await fs.mkdir(tmpRoot, { recursive: true });
   const tmpDir = await fs.mkdtemp(path.join(tmpRoot, "stage-sandbox-media-"));
   const tmpPath = path.join(tmpDir, "download");

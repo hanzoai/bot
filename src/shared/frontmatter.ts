@@ -31,7 +31,7 @@ export function parseFrontmatterBool(value: string | undefined, fallback: boolea
   return parsed === undefined ? fallback : parsed;
 }
 
-export function resolveHanzoBotManifestBlock(params: {
+export function resolveBotManifestBlock(params: {
   frontmatter: Record<string, unknown>;
   key?: string;
 }): Record<string, unknown> | undefined {
@@ -59,16 +59,16 @@ export function resolveHanzoBotManifestBlock(params: {
   }
 }
 
-export type HanzoBotManifestRequires = {
+export type BotManifestRequires = {
   bins: string[];
   anyBins: string[];
   env: string[];
   config: string[];
 };
 
-export function resolveHanzoBotManifestRequires(
+export function resolveBotManifestRequires(
   metadataObj: Record<string, unknown>,
-): HanzoBotManifestRequires | undefined {
+): BotManifestRequires | undefined {
   const requiresRaw =
     typeof metadataObj.requires === "object" && metadataObj.requires !== null
       ? (metadataObj.requires as Record<string, unknown>)
@@ -84,7 +84,7 @@ export function resolveHanzoBotManifestRequires(
   };
 }
 
-export function resolveHanzoBotManifestInstall<T>(
+export function resolveBotManifestInstall<T>(
   metadataObj: Record<string, unknown>,
   parseInstallSpec: (input: unknown) => T | undefined,
 ): T[] {
@@ -94,11 +94,11 @@ export function resolveHanzoBotManifestInstall<T>(
     .filter((entry): entry is T => Boolean(entry));
 }
 
-export function resolveHanzoBotManifestOs(metadataObj: Record<string, unknown>): string[] {
+export function resolveBotManifestOs(metadataObj: Record<string, unknown>): string[] {
   return normalizeStringList(metadataObj.os);
 }
 
-export type ParsedHanzoBotManifestInstallBase = {
+export type ParsedBotManifestInstallBase = {
   raw: Record<string, unknown>;
   kind: string;
   id?: string;
@@ -106,10 +106,10 @@ export type ParsedHanzoBotManifestInstallBase = {
   bins?: string[];
 };
 
-export function parseHanzoBotManifestInstallBase(
+export function parseBotManifestInstallBase(
   input: unknown,
   allowedKinds: readonly string[],
-): ParsedHanzoBotManifestInstallBase | undefined {
+): ParsedBotManifestInstallBase | undefined {
   if (!input || typeof input !== "object") {
     return undefined;
   }
@@ -121,7 +121,7 @@ export function parseHanzoBotManifestInstallBase(
     return undefined;
   }
 
-  const spec: ParsedHanzoBotManifestInstallBase = {
+  const spec: ParsedBotManifestInstallBase = {
     raw,
     kind,
   };

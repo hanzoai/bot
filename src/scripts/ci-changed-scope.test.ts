@@ -60,7 +60,7 @@ describe("detectChangedScope", () => {
       runAndroid: false,
       runWindows: false,
     });
-    expect(detectChangedScope(["apps/shared/HanzoBotKit/Sources/Foo.swift"])).toEqual({
+    expect(detectChangedScope(["apps/shared/BotKit/Sources/Foo.swift"])).toEqual({
       runNode: false,
       runMacos: true,
       runAndroid: true,
@@ -69,14 +69,12 @@ describe("detectChangedScope", () => {
   });
 
   it("does not force macOS for generated protocol model-only changes", () => {
-    expect(detectChangedScope(["apps/macos/Sources/HanzoBotProtocol/GatewayModels.swift"])).toEqual(
-      {
-        runNode: false,
-        runMacos: false,
-        runAndroid: false,
-        runWindows: false,
-      },
-    );
+    expect(detectChangedScope(["apps/macos/Sources/BotProtocol/GatewayModels.swift"])).toEqual({
+      runNode: false,
+      runMacos: false,
+      runAndroid: false,
+      runWindows: false,
+    });
   });
 
   it("enables node lane for non-native non-doc files by fallback", () => {

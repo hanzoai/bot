@@ -1,7 +1,7 @@
 import { type BotConfig, loadConfig } from "../config/config.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
-import { resolveHanzoBotAgentDir } from "./agent-paths.js";
-import { ensureHanzoBotModelsJson } from "./models-config.js";
+import { resolveBotAgentDir } from "./agent-paths.js";
+import { ensureBotModelsJson } from "./models-config.js";
 
 const log = createSubsystemLogger("model-catalog");
 
@@ -213,13 +213,13 @@ export async function loadModelCatalog(params?: {
       });
     try {
       const cfg = params?.config ?? loadConfig();
-      await ensureHanzoBotModelsJson(cfg);
+      await ensureBotModelsJson(cfg);
       // IMPORTANT: keep the dynamic import *inside* the try/catch.
       // If this fails once (e.g. during a pnpm install that temporarily swaps node_modules),
       // we must not poison the cache with a rejected promise (otherwise all channel handlers
       // will keep failing until restart).
       const piSdk = await importPiSdk();
-      const agentDir = resolveHanzoBotAgentDir();
+      const agentDir = resolveBotAgentDir();
       const { join } = await import("node:path");
       const authStorage = piSdk.discoverAuthStorage(agentDir);
       const registry = new (piSdk.ModelRegistry as unknown as {

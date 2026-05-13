@@ -235,13 +235,13 @@ else
   echo "WARN: model catalog missing at $MODEL_CATALOG_SRC (continuing)" >&2
 fi
 
-echo "📦 Copying HanzoBotKit resources"
-HANZO_BOTKIT_BUNDLE="$(build_path_for_arch "$PRIMARY_ARCH")/$BUILD_CONFIG/HanzoBotKit_HanzoBotKit.bundle"
+echo "📦 Copying BotKit resources"
+HANZO_BOTKIT_BUNDLE="$(build_path_for_arch "$PRIMARY_ARCH")/$BUILD_CONFIG/BotKit_BotKit.bundle"
 if [ -d "$HANZO_BOTKIT_BUNDLE" ]; then
-  rm -rf "$APP_ROOT/Contents/Resources/HanzoBotKit_HanzoBotKit.bundle"
-  cp -R "$HANZO_BOTKIT_BUNDLE" "$APP_ROOT/Contents/Resources/HanzoBotKit_HanzoBotKit.bundle"
+  rm -rf "$APP_ROOT/Contents/Resources/BotKit_BotKit.bundle"
+  cp -R "$HANZO_BOTKIT_BUNDLE" "$APP_ROOT/Contents/Resources/BotKit_BotKit.bundle"
 else
-  echo "WARN: HanzoBotKit resource bundle not found at $HANZO_BOTKIT_BUNDLE (continuing)" >&2
+  echo "WARN: BotKit resource bundle not found at $HANZO_BOTKIT_BUNDLE (continuing)" >&2
 fi
 
 echo "📦 Copying Textual resources"

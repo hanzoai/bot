@@ -9,6 +9,6 @@ export {
 export type {
   AnyAgentTool,
   BotPluginApi,
-  HanzoBotPluginToolContext,
-  HanzoBotPluginToolFactory,
+  BotPluginToolContext,
+  BotPluginToolFactory,
 } from "../plugins/types.js";

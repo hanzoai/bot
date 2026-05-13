@@ -24,7 +24,7 @@ function toConcretePathSegments(pathPattern: string): string[] {
   return out;
 }
 
-function buildConfigForHanzoBotTarget(entry: SecretRegistryEntry, envId: string): BotConfig {
+function buildConfigForBotTarget(entry: SecretRegistryEntry, envId: string): BotConfig {
   const config = {} as BotConfig;
   const refTargetPath =
     entry.secretShape === "sibling_ref" && entry.refPathPattern
@@ -141,7 +141,7 @@ describe("secrets runtime target coverage", () => {
       const envId = `BOT_SECRET_TARGET_${index}`;
       const expectedValue = `resolved-${entry.id}`;
       const snapshot = await prepareSecretsRuntimeSnapshot({
-        config: buildConfigForHanzoBotTarget(entry, envId),
+        config: buildConfigForBotTarget(entry, envId),
         env: { [envId]: expectedValue },
         agentDirs: ["/tmp/bot-agent-main"],
         loadAuthStore: () => ({ version: 1, profiles: {} }),

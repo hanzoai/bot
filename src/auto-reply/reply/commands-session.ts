@@ -13,7 +13,7 @@ import {
 import { logVerbose } from "../../globals.js";
 import type { SessionBindingRecord } from "../../infra/outbound/session-binding-service.js";
 import { getSessionBindingService } from "../../infra/outbound/session-binding-service.js";
-import { scheduleGatewaySigusr1Restart, triggerHanzoBotRestart } from "../../infra/restart.js";
+import { scheduleGatewaySigusr1Restart, triggerBotRestart } from "../../infra/restart.js";
 import { loadCostUsageSummary, loadSessionCostSummary } from "../../infra/session-cost-usage.js";
 import {
   setTelegramThreadBindingIdleTimeoutBySessionKey,
@@ -573,7 +573,7 @@ export const handleRestartCommand: CommandHandler = async (params, allowTextComm
       },
     };
   }
-  const restartMethod = triggerHanzoBotRestart();
+  const restartMethod = triggerBotRestart();
   if (!restartMethod.ok) {
     const detail = restartMethod.detail ? ` Details: ${restartMethod.detail}` : "";
     return {

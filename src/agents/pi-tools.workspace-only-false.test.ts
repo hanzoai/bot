@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createHanzoBotCodingTools } from "./pi-tools.js";
+import { createBotCodingTools } from "./pi-tools.js";
 
 describe("FS tools with workspaceOnly=false", () => {
   let tmpDir: string;
@@ -18,7 +18,7 @@ describe("FS tools with workspaceOnly=false", () => {
     });
 
   const toolsFor = (workspaceOnly: boolean | undefined) =>
-    createHanzoBotCodingTools({
+    createBotCodingTools({
       workspaceDir,
       config:
         workspaceOnly === undefined

@@ -78,7 +78,7 @@ vi.mock("node:child_process", async (importOriginal) => {
 });
 
 vi.mock("../infra/tmp-bot-dir.js", () => ({
-  resolvePreferredHanzoBotTmpDir: () => "/tmp",
+  resolvePreferredBotTmpDir: () => "/tmp",
 }));
 
 const { ensureOggOpus } = await import("./voice-message.js");

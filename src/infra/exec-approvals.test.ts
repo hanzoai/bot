@@ -163,7 +163,7 @@ describe("mergeExecApprovalsSocketDefaults", () => {
 describe("resolve exec approvals defaults", () => {
   it("expands home-prefixed default file and socket paths", () => {
     const dir = makeTempDir();
-    const prevHanzoBotHome = process.env.BOT_HOME;
+    const prevBotHome = process.env.BOT_HOME;
     try {
       process.env.BOT_HOME = dir;
       expect(path.normalize(resolveExecApprovalsPath())).toBe(
@@ -173,10 +173,10 @@ describe("resolve exec approvals defaults", () => {
         path.normalize(path.join(dir, ".bot", "exec-approvals.sock")),
       );
     } finally {
-      if (prevHanzoBotHome === undefined) {
+      if (prevBotHome === undefined) {
         delete process.env.BOT_HOME;
       } else {
-        process.env.BOT_HOME = prevHanzoBotHome;
+        process.env.BOT_HOME = prevBotHome;
       }
     }
   });

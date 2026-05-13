@@ -24,7 +24,7 @@ import {
   resolveBrowserExecutableForPlatform,
 } from "./chrome.executables.js";
 import {
-  decorateHanzoBotProfile,
+  decorateBotProfile,
   ensureProfileCleanExit,
   isProfileDecorated,
 } from "./chrome.profile-decoration.js";
@@ -41,7 +41,7 @@ export {
   resolveBrowserExecutableForPlatform,
 } from "./chrome.executables.js";
 export {
-  decorateHanzoBotProfile,
+  decorateBotProfile,
   ensureProfileCleanExit,
   isProfileDecorated,
 } from "./chrome.profile-decoration.js";
@@ -67,7 +67,7 @@ function resolveBrowserExecutable(resolved: ResolvedBrowserConfig): BrowserExecu
   return resolveBrowserExecutableForPlatform(resolved, process.platform);
 }
 
-export function resolveHanzoBotUserDataDir(profileName = DEFAULT_BOT_BROWSER_PROFILE_NAME) {
+export function resolveBotUserDataDir(profileName = DEFAULT_BOT_BROWSER_PROFILE_NAME) {
   return path.join(CONFIG_DIR, "browser", profileName, "user-data");
 }
 
@@ -209,7 +209,7 @@ export async function isChromeCdpReady(
   return await canRunCdpHealthCommand(wsUrl, handshakeTimeoutMs);
 }
 
-export async function launchHanzoBotChrome(
+export async function launchBotChrome(
   resolved: ResolvedBrowserConfig,
   profile: ResolvedBrowserProfile,
 ): Promise<RunningChrome> {
@@ -225,7 +225,7 @@ export async function launchHanzoBotChrome(
     );
   }
 
-  const userDataDir = resolveHanzoBotUserDataDir(profile.name);
+  const userDataDir = resolveBotUserDataDir(profile.name);
   fs.mkdirSync(userDataDir, { recursive: true });
 
   const needsDecorate = !isProfileDecorated(
@@ -314,7 +314,7 @@ export async function launchHanzoBotChrome(
 
   if (needsDecorate) {
     try {
-      decorateHanzoBotProfile(userDataDir, {
+      decorateBotProfile(userDataDir, {
         name: profile.name,
         color: profile.color,
       });
@@ -388,10 +388,7 @@ export async function launchHanzoBotChrome(
   };
 }
 
-export async function stopHanzoBotChrome(
-  running: RunningChrome,
-  timeoutMs = CHROME_STOP_TIMEOUT_MS,
-) {
+export async function stopBotChrome(running: RunningChrome, timeoutMs = CHROME_STOP_TIMEOUT_MS) {
   const proc = running.proc;
   if (proc.killed) {
     return;

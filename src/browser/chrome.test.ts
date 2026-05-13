@@ -7,18 +7,18 @@ import path from "node:path";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { WebSocketServer } from "ws";
 import {
-  decorateHanzoBotProfile,
+  decorateBotProfile,
   ensureProfileCleanExit,
   findChromeExecutableMac,
   findChromeExecutableWindows,
   isChromeCdpReady,
   isChromeReachable,
   resolveBrowserExecutableForPlatform,
-  stopHanzoBotChrome,
+  stopBotChrome,
 } from "./chrome.js";
 import { DEFAULT_BOT_BROWSER_COLOR, DEFAULT_BOT_BROWSER_PROFILE_NAME } from "./constants.js";
 
-type StopChromeTarget = Parameters<typeof stopHanzoBotChrome>[0];
+type StopChromeTarget = Parameters<typeof stopBotChrome>[0];
 
 async function readJson(filePath: string): Promise<Record<string, unknown>> {
   const raw = await fsp.readFile(filePath, "utf-8");
@@ -78,7 +78,7 @@ async function withMockChromeCdpServer(params: {
 }
 
 async function stopChromeWithProc(proc: ReturnType<typeof makeChromeTestProc>, timeoutMs: number) {
-  await stopHanzoBotChrome(
+  await stopBotChrome(
     {
       proc,
       cdpPort: 12345,
@@ -122,7 +122,7 @@ describe("browser chrome profile decoration", () => {
 
   it("writes expected name + signed ARGB seed to Chrome prefs", async () => {
     const userDataDir = await createUserDataDir();
-    decorateHanzoBotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
+    decorateBotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
 
     const expectedSignedArgb = ((0xff << 24) | 0xff4500) >> 0;
 
@@ -150,7 +150,7 @@ describe("browser chrome profile decoration", () => {
 
   it("best-effort writes name when color is invalid", async () => {
     const userDataDir = await createUserDataDir();
-    decorateHanzoBotProfile(userDataDir, { color: "lobster-orange" });
+    decorateBotProfile(userDataDir, { color: "lobster-orange" });
     const def = await readDefaultProfileFromLocalState(userDataDir);
 
     expect(def.name).toBe(DEFAULT_BOT_BROWSER_PROFILE_NAME);
@@ -167,7 +167,7 @@ describe("browser chrome profile decoration", () => {
       "utf-8",
     );
 
-    decorateHanzoBotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
+    decorateBotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
 
     const localState = await readJson(path.join(userDataDir, "Local State"));
     expect(typeof localState.profile).toBe("object");
@@ -186,8 +186,8 @@ describe("browser chrome profile decoration", () => {
 
   it("is idempotent when rerun on an existing profile", async () => {
     const userDataDir = await createUserDataDir();
-    decorateHanzoBotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
-    decorateHanzoBotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
+    decorateBotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
+    decorateBotProfile(userDataDir, { color: DEFAULT_BOT_BROWSER_COLOR });
 
     const prefs = await readJson(path.join(userDataDir, "Default", "Preferences"));
     const profile = prefs.profile as Record<string, unknown>;
@@ -344,20 +344,20 @@ describe("browser chrome helpers", () => {
     });
   });
 
-  it("stopHanzoBotChrome no-ops when process is already killed", async () => {
+  it("stopBotChrome no-ops when process is already killed", async () => {
     const proc = makeChromeTestProc({ killed: true });
     await stopChromeWithProc(proc, 10);
     expect(proc.kill).not.toHaveBeenCalled();
   });
 
-  it("stopHanzoBotChrome sends SIGTERM and returns once CDP is down", async () => {
+  it("stopBotChrome sends SIGTERM and returns once CDP is down", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("down")));
     const proc = makeChromeTestProc();
     await stopChromeWithProc(proc, 10);
     expect(proc.kill).toHaveBeenCalledWith("SIGTERM");
   });
 
-  it("stopHanzoBotChrome escalates to SIGKILL when CDP stays reachable", async () => {
+  it("stopBotChrome escalates to SIGKILL when CDP stays reachable", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({

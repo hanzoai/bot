@@ -8,12 +8,12 @@
 import type { BotConfig } from "../config/config.js";
 import { logVerbose } from "../globals.js";
 import type {
-  HanzoBotPluginCommandDefinition,
+  BotPluginCommandDefinition,
   PluginCommandContext,
   PluginCommandResult,
 } from "./types.js";
 
-type RegisteredPluginCommand = HanzoBotPluginCommandDefinition & {
+type RegisteredPluginCommand = BotPluginCommandDefinition & {
   pluginId: string;
 };
 
@@ -107,7 +107,7 @@ export type CommandRegistrationResult = {
  */
 export function registerPluginCommand(
   pluginId: string,
-  command: HanzoBotPluginCommandDefinition,
+  command: BotPluginCommandDefinition,
 ): CommandRegistrationResult {
   // Prevent registration while commands are being processed
   if (registryLocked) {

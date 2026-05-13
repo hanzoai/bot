@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import type { Api, Model } from "@mariozechner/pi-ai";
 import { describe, it } from "vitest";
-import { resolveHanzoBotAgentDir } from "../agents/agent-paths.js";
+import { resolveBotAgentDir } from "../agents/agent-paths.js";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import {
   type AuthProfileStore,
@@ -20,7 +20,7 @@ import {
 } from "../agents/live-auth-keys.js";
 import { isModernModelRef } from "../agents/live-model-filter.js";
 import { getApiKeyForModel } from "../agents/model-auth.js";
-import { ensureHanzoBotModelsJson } from "../agents/models-config.js";
+import { ensureBotModelsJson } from "../agents/models-config.js";
 import { isRateLimitErrorMessage } from "../agents/pi-embedded-helpers/errors.js";
 import { discoverAuthStorage, discoverModels } from "../agents/pi-model-discovery.js";
 import { loadConfig } from "../config/config.js";
@@ -658,7 +658,7 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
   process.env.BOT_GATEWAY_TOKEN = token;
   const agentId = "dev";
 
-  const hostAgentDir = resolveHanzoBotAgentDir();
+  const hostAgentDir = resolveBotAgentDir();
   const hostStore = ensureAuthProfileStore(hostAgentDir, {
     allowKeychainPrompt: false,
   });
@@ -689,7 +689,7 @@ async function runGatewayModelSuite(params: GatewayModelSuiteParams) {
   const toolProbePath = path.join(workspaceDir, `.bot-live-tool-probe.${nonceA}.txt`);
   await fs.writeFile(toolProbePath, `nonceA=${nonceA}\nnonceB=${nonceB}\n`);
 
-  const agentDir = resolveHanzoBotAgentDir();
+  const agentDir = resolveBotAgentDir();
   const sanitizedCfg: BotConfig = {
     ...params.cfg,
     auth: sanitizeAuthConfig({ cfg: params.cfg, agentDir }),
@@ -1316,9 +1316,9 @@ describeLive("gateway live (dev agent, profile keys)", () => {
     "runs meaningful prompts across models with available keys",
     async () => {
       const cfg = loadConfig();
-      await ensureHanzoBotModelsJson(cfg);
+      await ensureBotModelsJson(cfg);
 
-      const agentDir = resolveHanzoBotAgentDir();
+      const agentDir = resolveBotAgentDir();
       const authStore = ensureAuthProfileStore(agentDir, {
         allowKeychainPrompt: false,
       });
@@ -1435,9 +1435,9 @@ describeLive("gateway live (dev agent, profile keys)", () => {
     process.env.BOT_GATEWAY_TOKEN = token;
 
     const cfg = loadConfig();
-    await ensureHanzoBotModelsJson(cfg);
+    await ensureBotModelsJson(cfg);
 
-    const agentDir = resolveHanzoBotAgentDir();
+    const agentDir = resolveBotAgentDir();
     const authStorage = discoverAuthStorage(agentDir);
     const modelRegistry = discoverModels(authStorage, agentDir);
     const anthropic = modelRegistry.find("anthropic", "claude-opus-4-5") as Model<Api> | null;

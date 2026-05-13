@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { MANIFEST_KEY } from "../../compat/legacy-names.js";
-import { discoverHanzoBotPlugins } from "../../plugins/discovery.js";
-import type { HanzoBotPackageManifest } from "../../plugins/manifest.js";
+import { discoverBotPlugins } from "../../plugins/discovery.js";
+import type { BotPackageManifest } from "../../plugins/manifest.js";
 import type { PluginOrigin } from "../../plugins/types.js";
 import { CONFIG_DIR, isRecord, resolveUserPath } from "../../utils.js";
 import type { ChannelMeta } from "./types.js";
@@ -49,7 +49,7 @@ type ExternalCatalogEntry = {
   name?: string;
   version?: string;
   description?: string;
-} & Partial<Record<ManifestKey, HanzoBotPackageManifest>>;
+} & Partial<Record<ManifestKey, BotPackageManifest>>;
 
 const DEFAULT_CATALOG_PATHS = [
   path.join(CONFIG_DIR, "mpm", "plugins.json"),
@@ -119,7 +119,7 @@ function loadExternalCatalogEntries(options: CatalogOptions): ExternalCatalogEnt
 }
 
 function toChannelMeta(params: {
-  channel: NonNullable<HanzoBotPackageManifest["channel"]>;
+  channel: NonNullable<BotPackageManifest["channel"]>;
   id: string;
 }): ChannelMeta | null {
   const label = params.channel.label?.trim();
@@ -169,7 +169,7 @@ function toChannelMeta(params: {
 }
 
 function resolveInstallInfo(params: {
-  manifest: HanzoBotPackageManifest;
+  manifest: BotPackageManifest;
   packageName?: string;
   packageDir?: string;
   workspaceDir?: string;
@@ -194,7 +194,7 @@ function buildCatalogEntry(candidate: {
   packageName?: string;
   packageDir?: string;
   workspaceDir?: string;
-  packageManifest?: HanzoBotPackageManifest;
+  packageManifest?: BotPackageManifest;
 }): ChannelPluginCatalogEntry | null {
   const manifest = candidate.packageManifest;
   if (!manifest?.channel) {
@@ -259,7 +259,7 @@ export function buildChannelUiCatalog(
 export function listChannelPluginCatalogEntries(
   options: CatalogOptions = {},
 ): ChannelPluginCatalogEntry[] {
-  const discovery = discoverHanzoBotPlugins({ workspaceDir: options.workspaceDir });
+  const discovery = discoverBotPlugins({ workspaceDir: options.workspaceDir });
   const resolved = new Map<string, { entry: ChannelPluginCatalogEntry; priority: number }>();
 
   for (const candidate of discovery.candidates) {

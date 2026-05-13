@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { withEnvAsync } from "../test-utils/env.js";
-import { clearPluginDiscoveryCache, discoverHanzoBotPlugins } from "./discovery.js";
+import { clearPluginDiscoveryCache, discoverBotPlugins } from "./discovery.js";
 
 const tempDirs: string[] = [];
 
@@ -28,10 +28,10 @@ async function withStateDir<T>(stateDir: string, fn: () => Promise<T>) {
 
 async function discoverWithStateDir(
   stateDir: string,
-  params: Parameters<typeof discoverHanzoBotPlugins>[0],
+  params: Parameters<typeof discoverBotPlugins>[0],
 ) {
   return await withStateDir(stateDir, async () => {
-    return discoverHanzoBotPlugins(params);
+    return discoverBotPlugins(params);
   });
 }
 
@@ -67,7 +67,7 @@ afterEach(() => {
   }
 });
 
-describe("discoverHanzoBotPlugins", () => {
+describe("discoverBotPlugins", () => {
   it("discovers global and workspace extensions", async () => {
     const stateDir = makeTempDir();
     const workspaceDir = path.join(stateDir, "workspace");
@@ -81,7 +81,7 @@ describe("discoverHanzoBotPlugins", () => {
     fs.writeFileSync(path.join(workspaceExt, "beta.ts"), "export default function () {}", "utf-8");
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      return discoverHanzoBotPlugins({ workspaceDir });
+      return discoverBotPlugins({ workspaceDir });
     });
 
     const ids = candidates.map((c) => c.idHint);
@@ -111,7 +111,7 @@ describe("discoverHanzoBotPlugins", () => {
     fs.writeFileSync(path.join(liveDir, "index.ts"), "export default function () {}", "utf-8");
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      return discoverHanzoBotPlugins({});
+      return discoverBotPlugins({});
     });
 
     const ids = candidates.map((candidate) => candidate.idHint);
@@ -143,7 +143,7 @@ describe("discoverHanzoBotPlugins", () => {
     );
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      return discoverHanzoBotPlugins({});
+      return discoverBotPlugins({});
     });
 
     const ids = candidates.map((c) => c.idHint);
@@ -168,7 +168,7 @@ describe("discoverHanzoBotPlugins", () => {
     );
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      return discoverHanzoBotPlugins({});
+      return discoverBotPlugins({});
     });
 
     const ids = candidates.map((c) => c.idHint);
@@ -188,7 +188,7 @@ describe("discoverHanzoBotPlugins", () => {
     fs.writeFileSync(path.join(packDir, "index.js"), "module.exports = {}", "utf-8");
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      return discoverHanzoBotPlugins({ extraPaths: [packDir] });
+      return discoverBotPlugins({ extraPaths: [packDir] });
     });
 
     const ids = candidates.map((c) => c.idHint);
@@ -267,7 +267,7 @@ describe("discoverHanzoBotPlugins", () => {
     });
 
     const { candidates, diagnostics } = await withStateDir(stateDir, async () => {
-      return discoverHanzoBotPlugins({});
+      return discoverBotPlugins({});
     });
 
     expect(candidates.some((candidate) => candidate.idHint === "pack")).toBe(false);
@@ -304,7 +304,7 @@ describe("discoverHanzoBotPlugins", () => {
     }
 
     const { candidates } = await withStateDir(stateDir, async () => {
-      return discoverHanzoBotPlugins({});
+      return discoverBotPlugins({});
     });
 
     expect(candidates.some((candidate) => candidate.idHint === "pack")).toBe(false);
@@ -319,7 +319,7 @@ describe("discoverHanzoBotPlugins", () => {
     fs.chmodSync(pluginPath, 0o777);
 
     const result = await withStateDir(stateDir, async () => {
-      return discoverHanzoBotPlugins({});
+      return discoverBotPlugins({});
     });
 
     expect(result.candidates).toHaveLength(0);
@@ -342,7 +342,7 @@ describe("discoverHanzoBotPlugins", () => {
 
       const actualUid = (process as NodeJS.Process & { getuid: () => number }).getuid();
       const result = await withStateDir(stateDir, async () => {
-        return discoverHanzoBotPlugins({ ownershipUid: actualUid + 1 });
+        return discoverBotPlugins({ ownershipUid: actualUid + 1 });
       });
       const shouldBlockForMismatch = actualUid !== 0;
       expect(result.candidates).toHaveLength(shouldBlockForMismatch ? 0 : 1);
@@ -363,7 +363,7 @@ describe("discoverHanzoBotPlugins", () => {
       {
         BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
-      async () => withStateDir(stateDir, async () => discoverHanzoBotPlugins({})),
+      async () => withStateDir(stateDir, async () => discoverBotPlugins({})),
     );
     expect(first.candidates.some((candidate) => candidate.idHint === "cached")).toBe(true);
 
@@ -373,7 +373,7 @@ describe("discoverHanzoBotPlugins", () => {
       {
         BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
-      async () => withStateDir(stateDir, async () => discoverHanzoBotPlugins({})),
+      async () => withStateDir(stateDir, async () => discoverBotPlugins({})),
     );
     expect(second.candidates.some((candidate) => candidate.idHint === "cached")).toBe(true);
 
@@ -383,7 +383,7 @@ describe("discoverHanzoBotPlugins", () => {
       {
         BOT_PLUGIN_DISCOVERY_CACHE_MS: "5000",
       },
-      async () => withStateDir(stateDir, async () => discoverHanzoBotPlugins({})),
+      async () => withStateDir(stateDir, async () => discoverBotPlugins({})),
     );
     expect(third.candidates.some((candidate) => candidate.idHint === "cached")).toBe(false);
   });

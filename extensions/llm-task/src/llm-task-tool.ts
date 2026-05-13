@@ -5,7 +5,7 @@ import path from "node:path";
 // When running from a built install, internals live under dist/ (no src/ tree).
 // So we resolve internal imports dynamically with src-first, dist-fallback.
 import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/llm-task";
-import { resolvePreferredHanzoBotTmpDir } from "@hanzo/bot/plugin-sdk/llm-task";
+import { resolvePreferredBotTmpDir } from "@hanzo/bot/plugin-sdk/llm-task";
 import { Type } from "@sinclair/typebox";
 import Ajv from "ajv";
 
@@ -184,7 +184,7 @@ export function createLlmTaskTool(api: BotPluginApi) {
 
       let tmpDir: string | null = null;
       try {
-        tmpDir = await fs.mkdtemp(path.join(resolvePreferredHanzoBotTmpDir(), "bot-llm-task-"));
+        tmpDir = await fs.mkdtemp(path.join(resolvePreferredBotTmpDir(), "bot-llm-task-"));
         const sessionId = `llm-task-${Date.now()}`;
         const sessionFile = path.join(tmpDir, "session.json");
 
