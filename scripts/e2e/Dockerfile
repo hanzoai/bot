@@ -16,8 +16,8 @@ COPY patches ./patches
 COPY ui ./ui
 COPY extensions/memory-core ./extensions/memory-core
 COPY vendor/a2ui/renderers/lit ./vendor/a2ui/renderers/lit
-COPY apps/shared/HanzoBotKit/Sources/HanzoBotKit/Resources ./apps/shared/HanzoBotKit/Sources/HanzoBotKit/Resources
-COPY apps/shared/HanzoBotKit/Tools/CanvasA2UI ./apps/shared/HanzoBotKit/Tools/CanvasA2UI
+COPY apps/shared/BotKit/Sources/BotKit/Resources ./apps/shared/BotKit/Sources/BotKit/Resources
+COPY apps/shared/BotKit/Tools/CanvasA2UI ./apps/shared/BotKit/Tools/CanvasA2UI
 
 RUN pnpm install --frozen-lockfile
 RUN pnpm build
