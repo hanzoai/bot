@@ -5,7 +5,7 @@
   "description": "Hanzo Bot core memory search plugin",
   "type": "module",
   "devDependencies": {
-    "@hanzobot/ts": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "hanzo-bot": {
     "extensions": [
