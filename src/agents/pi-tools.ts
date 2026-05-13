@@ -30,7 +30,7 @@ import {
   assertRequiredParams,
   createHostWorkspaceEditTool,
   createHostWorkspaceWriteTool,
-  createHanzoBotReadTool,
+  createBotReadTool,
   createSandboxedEditTool,
   createSandboxedReadTool,
   createSandboxedWriteTool,
@@ -201,7 +201,7 @@ export const __testing = {
   applyModelProviderToolPolicy,
 } as const;
 
-export function createHanzoBotCodingTools(options?: {
+export function createBotCodingTools(options?: {
   agentId?: string;
   exec?: ExecToolDefaults & ProcessToolDefaults;
   messageProvider?: string;
@@ -372,7 +372,7 @@ export function createHanzoBotCodingTools(options?: {
         ];
       }
       const freshReadTool = createReadTool(workspaceRoot);
-      const wrapped = createHanzoBotReadTool(freshReadTool, {
+      const wrapped = createBotReadTool(freshReadTool, {
         modelContextWindowTokens: options?.modelContextWindowTokens,
         imageSanitization,
       });
@@ -517,7 +517,7 @@ export function createHanzoBotCodingTools(options?: {
       requireExplicitMessageTarget: options?.requireExplicitMessageTarget,
       disableMessageTool: options?.disableMessageTool,
       requesterAgentIdOverride: agentId,
-      requesterSenderId: options?.senderId,
+      requesterSenderId: options?.senderId ?? undefined,
       senderIsOwner: options?.senderIsOwner,
       sessionId: options?.sessionId,
     }),

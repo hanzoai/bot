@@ -112,7 +112,7 @@ export function resolveHookInstallDir(hookId: string, hooksDir?: string): string
   return targetDirResult.path;
 }
 
-async function ensureHanzoBotHooks(manifest: HookPackageManifest) {
+async function ensureBotHooks(manifest: HookPackageManifest) {
   const hooks = manifest[MANIFEST_KEY]?.hooks;
   if (!Array.isArray(hooks)) {
     throw new Error("package.json missing bot.hooks");
@@ -230,7 +230,7 @@ async function installHookPackageFromDir(
 
   let hookEntries: string[];
   try {
-    hookEntries = await ensureHanzoBotHooks(manifest);
+    hookEntries = await ensureBotHooks(manifest);
   } catch (err) {
     return { ok: false, error: String(err) };
   }
