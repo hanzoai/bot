@@ -5,7 +5,7 @@
   "description": "Hanzo Bot Google Antigravity OAuth provider plugin",
   "type": "module",
   "devDependencies": {
-    "@hanzobot/ts": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "bot": {
     "extensions": [
