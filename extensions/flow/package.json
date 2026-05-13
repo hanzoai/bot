@@ -4,7 +4,7 @@
   "description": "Flow workflow tool plugin (typed pipelines + resumable approvals)",
   "type": "module",
   "devDependencies": {
-    "@hanzobot/ts": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "hanzo-bot": {
     "extensions": [
