@@ -6,7 +6,7 @@ This repo doesn't ship code. It wires the pieces that other repos own:
 
 | Concern | Lives in | Ships as |
 |---|---|---|
-| TypeScript runtime (canonical) | [`hanzobot/ts`](https://github.com/hanzobot/ts) | npm `@hanzo/bot` |
+| TypeScript runtime (canonical) | [`hanzobot/core`](https://github.com/hanzobot/core) | npm `@hanzo/bot` |
 | Go runtime (single static binary) | [`hanzobot/go`](https://github.com/hanzobot/go) | `go install github.com/hanzobot/go/cmd/hanzo-bot@latest` |
 | C++ runtime (header-only) | [`hanzobot/cpp`](https://github.com/hanzobot/cpp) | `cmake -S . -B build && cmake --build build` |
 | Language-agnostic spec | [`hanzobot/core`](https://github.com/hanzobot/core) | reference / contract |
@@ -41,10 +41,9 @@ docker compose up -d          # bot + brain
 
 ```
 hanzoai/bot               ← ops / compose (you are here)
-├── hanzobot/ts           ← TS canonical, ships @hanzo/bot
+├── hanzobot/core         ← TS canonical, ships @hanzo/bot
 ├── hanzobot/go           ← Go runtime, single static binary
 ├── hanzobot/cpp          ← C++17 header-only
-├── hanzobot/core         ← language-agnostic spec
 │
 ├── hanzoai/brain         ← 5-runtime brain monorepo (algorithms)
 ├── hanzoai/mcp           ← Model Context Protocol server (Rust mirror of brain)
