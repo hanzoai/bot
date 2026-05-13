@@ -1,5 +1,9 @@
 name: Release
 
+# hanzoai/bot is the ops/orchestration repo. The npm @hanzo/bot package
+# publishes from hanzobot/ts. This workflow only ships container images
+# for the bits this repo actually owns (compose stack helpers, infra).
+
 on:
   push:
     tags: ["v*"]
@@ -7,19 +11,11 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+  packages: write
 
 jobs:
-  npm:
+  compose-check:
     runs-on: ubuntu-latest
-    environment: npm-publish
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          registry-url: "https://registry.npmjs.org"
-      - run: npm install --no-audit --no-fund
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: docker compose -f compose.yml config --quiet
