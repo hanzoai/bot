@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { findBundledPluginSource, resolveBundledPluginSources } from "./bundled-sources.js";
 
-const discoverHanzoBotPluginsMock = vi.fn();
+const discoverBotPluginsMock = vi.fn();
 const loadPluginManifestMock = vi.fn();
 
 vi.mock("./discovery.js", () => ({
-  discoverHanzoBotPlugins: (...args: unknown[]) => discoverHanzoBotPluginsMock(...args),
+  discoverBotPlugins: (...args: unknown[]) => discoverBotPluginsMock(...args),
 }));
 
 vi.mock("./manifest.js", () => ({
@@ -14,12 +14,12 @@ vi.mock("./manifest.js", () => ({
 
 describe("bundled plugin sources", () => {
   beforeEach(() => {
-    discoverHanzoBotPluginsMock.mockReset();
+    discoverBotPluginsMock.mockReset();
     loadPluginManifestMock.mockReset();
   });
 
   it("resolves bundled sources keyed by plugin id", () => {
-    discoverHanzoBotPluginsMock.mockReturnValue({
+    discoverBotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "global",
@@ -74,7 +74,7 @@ describe("bundled plugin sources", () => {
   });
 
   it("finds bundled source by npm spec", () => {
-    discoverHanzoBotPluginsMock.mockReturnValue({
+    discoverBotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "bundled",
@@ -100,7 +100,7 @@ describe("bundled plugin sources", () => {
   });
 
   it("finds bundled source by plugin id", () => {
-    discoverHanzoBotPluginsMock.mockReturnValue({
+    discoverBotPluginsMock.mockReturnValue({
       candidates: [
         {
           origin: "bundled",

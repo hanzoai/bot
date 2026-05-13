@@ -12,7 +12,7 @@ import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { createIMessageTestPlugin } from "../../test-utils/imessage-test-plugin.js";
 import { loadWebMedia } from "../../web/media.js";
-import { resolvePreferredHanzoBotTmpDir } from "../tmp-bot-dir.js";
+import { resolvePreferredBotTmpDir } from "../tmp-bot-dir.js";
 import { runMessageAction } from "./message-action-runner.js";
 
 vi.mock("../../web/media.js", async () => {
@@ -781,7 +781,7 @@ describe("runMessageAction sandboxed media validation", () => {
   });
 
   it("allows media paths under preferred HanzoBot tmp root", async () => {
-    const tmpRoot = resolvePreferredHanzoBotTmpDir();
+    const tmpRoot = resolvePreferredBotTmpDir();
     await fs.mkdir(tmpRoot, { recursive: true });
     const sandboxDir = await fs.mkdtemp(path.join(os.tmpdir(), "msg-sandbox-"));
     try {

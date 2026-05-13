@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveHanzoBotPackageRootSync } from "../../infra/bot-root.js";
+import { resolveBotPackageRootSync } from "../../infra/bot-root.js";
 
 function looksLikeSkillsDir(dir: string): boolean {
   try {
@@ -59,7 +59,7 @@ export function resolveBundledSkillsDir(
     const moduleDir = path.dirname(fileURLToPath(moduleUrl));
     const argv1 = opts.argv1 ?? process.argv[1];
     const cwd = opts.cwd ?? process.cwd();
-    const packageRoot = resolveHanzoBotPackageRootSync({
+    const packageRoot = resolveBotPackageRootSync({
       argv1,
       moduleUrl,
       cwd,

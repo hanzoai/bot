@@ -2,10 +2,10 @@
 // Keep this list additive and scoped to symbols used under extensions/diffs.
 
 export type { BotConfig } from "../config/config.js";
-export { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-bot-dir.js";
+export { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 export type {
   AnyAgentTool,
   BotPluginApi,
-  HanzoBotPluginConfigSchema,
+  BotPluginConfigSchema,
   PluginLogger,
 } from "../plugins/types.js";

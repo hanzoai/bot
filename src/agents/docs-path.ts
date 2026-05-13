@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { resolveHanzoBotPackageRoot } from "../infra/bot-root.js";
+import { resolveBotPackageRoot } from "../infra/bot-root.js";
 
-export async function resolveHanzoBotDocsPath(params: {
+export async function resolveBotDocsPath(params: {
   workspaceDir?: string;
   argv1?: string;
   cwd?: string;
@@ -16,7 +16,7 @@ export async function resolveHanzoBotDocsPath(params: {
     }
   }
 
-  const packageRoot = await resolveHanzoBotPackageRoot({
+  const packageRoot = await resolveBotPackageRoot({
     cwd: params.cwd,
     argv1: params.argv1,
     moduleUrl: params.moduleUrl,

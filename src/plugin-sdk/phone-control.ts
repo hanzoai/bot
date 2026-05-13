@@ -3,7 +3,7 @@
 
 export type {
   BotPluginApi,
-  HanzoBotPluginCommandDefinition,
-  HanzoBotPluginService,
+  BotPluginCommandDefinition,
+  BotPluginService,
   PluginCommandContext,
 } from "../plugins/types.js";

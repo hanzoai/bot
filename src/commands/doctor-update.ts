@@ -6,7 +6,7 @@ import type { RuntimeEnv } from "../runtime.js";
 import { note } from "../terminal/note.js";
 import type { DoctorOptions } from "./doctor-prompter.js";
 
-async function detectHanzoBotGitCheckout(root: string): Promise<"git" | "not-git" | "unknown"> {
+async function detectBotGitCheckout(root: string): Promise<"git" | "not-git" | "unknown"> {
   const res = await runCommandWithTimeout(["git", "-C", root, "rev-parse", "--show-toplevel"], {
     timeoutMs: 5000,
   }).catch(() => null);
@@ -42,7 +42,7 @@ export async function maybeOfferUpdateBeforeDoctor(params: {
     return { updated: false };
   }
 
-  const git = await detectHanzoBotGitCheckout(params.root);
+  const git = await detectBotGitCheckout(params.root);
   if (git === "git") {
     const shouldUpdate = await params.confirm({
       message: "Update HanzoBot from git before running doctor?",
