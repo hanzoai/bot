@@ -17,9 +17,9 @@ export type {
 } from "../acp/runtime/types.js";
 export type {
   BotPluginApi,
-  HanzoBotPluginConfigSchema,
-  HanzoBotPluginService,
-  HanzoBotPluginServiceContext,
+  BotPluginConfigSchema,
+  BotPluginService,
+  BotPluginServiceContext,
   PluginLogger,
 } from "../plugins/types.js";
 export type {

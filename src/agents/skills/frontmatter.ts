@@ -4,15 +4,15 @@ import { parseFrontmatterBlock } from "../../markdown/frontmatter.js";
 import {
   getFrontmatterString,
   normalizeStringList,
-  parseHanzoBotManifestInstallBase,
+  parseBotManifestInstallBase,
   parseFrontmatterBool,
-  resolveHanzoBotManifestBlock,
-  resolveHanzoBotManifestInstall,
-  resolveHanzoBotManifestOs,
-  resolveHanzoBotManifestRequires,
+  resolveBotManifestBlock,
+  resolveBotManifestInstall,
+  resolveBotManifestOs,
+  resolveBotManifestRequires,
 } from "../../shared/frontmatter.js";
 import type {
-  HanzoBotSkillMetadata,
+  BotSkillMetadata,
   ParsedSkillFrontmatter,
   SkillEntry,
   SkillInstallSpec,
@@ -108,7 +108,7 @@ function normalizeSafeDownloadUrl(raw: unknown): string | undefined {
 }
 
 function parseInstallSpec(input: unknown): SkillInstallSpec | undefined {
-  const parsed = parseHanzoBotManifestInstallBase(input, ["brew", "node", "go", "uv", "download"]);
+  const parsed = parseBotManifestInstallBase(input, ["brew", "node", "go", "uv", "download"]);
   if (!parsed) {
     return undefined;
   }
@@ -189,16 +189,16 @@ function parseInstallSpec(input: unknown): SkillInstallSpec | undefined {
   return spec;
 }
 
-export function resolveHanzoBotMetadata(
+export function resolveBotMetadata(
   frontmatter: ParsedSkillFrontmatter,
-): HanzoBotSkillMetadata | undefined {
-  const metadataObj = resolveHanzoBotManifestBlock({ frontmatter });
+): BotSkillMetadata | undefined {
+  const metadataObj = resolveBotManifestBlock({ frontmatter });
   if (!metadataObj) {
     return undefined;
   }
-  const requires = resolveHanzoBotManifestRequires(metadataObj);
-  const install = resolveHanzoBotManifestInstall(metadataObj, parseInstallSpec);
-  const osRaw = resolveHanzoBotManifestOs(metadataObj);
+  const requires = resolveBotManifestRequires(metadataObj);
+  const install = resolveBotManifestInstall(metadataObj, parseInstallSpec);
+  const osRaw = resolveBotManifestOs(metadataObj);
   return {
     always: typeof metadataObj.always === "boolean" ? metadataObj.always : undefined,
     emoji: typeof metadataObj.emoji === "string" ? metadataObj.emoji : undefined,

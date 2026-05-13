@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BotConfig } from "../../config/config.js";
 import type { ModelDefinitionConfig } from "../../config/types.models.js";
 import { withFetchPreconnect } from "../../test-utils/fetch-mock.js";
-import { createHanzoBotCodingTools } from "../pi-tools.js";
+import { createBotCodingTools } from "../pi-tools.js";
 import { createHostSandboxFsBridge } from "../test-helpers/host-sandbox-fs-bridge.js";
 import { createUnsafeMountedSandbox } from "../test-helpers/unsafe-mounted-sandbox.js";
 import { makeZeroUsageSnapshot } from "../usage.js";
@@ -527,13 +527,13 @@ describe("image tool implicit imageModel config", () => {
     });
   });
 
-  it("allows workspace images via createHanzoBotCodingTools default workspace root", async () => {
+  it("allows workspace images via createBotCodingTools default workspace root", async () => {
     await withTempWorkspacePng(async ({ imagePath }) => {
       const fetch = stubMinimaxOkFetch();
       await withTempAgentDir(async (agentDir) => {
         const cfg = createMinimaxImageConfig();
 
-        const tools = createHanzoBotCodingTools({ config: cfg, agentDir });
+        const tools = createBotCodingTools({ config: cfg, agentDir });
         const tool = requireImageTool(tools.find((candidate) => candidate.name === "image"));
 
         await expectImageToolExecOk(tool, imagePath);
@@ -577,7 +577,7 @@ describe("image tool implicit imageModel config", () => {
         tools: { fs: { workspaceOnly: true } },
       };
 
-      const tools = createHanzoBotCodingTools({
+      const tools = createBotCodingTools({
         config: cfg,
         agentDir,
         sandbox,

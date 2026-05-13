@@ -2,15 +2,15 @@ import { parseFrontmatterBlock } from "../markdown/frontmatter.js";
 import {
   getFrontmatterString,
   normalizeStringList,
-  parseHanzoBotManifestInstallBase,
+  parseBotManifestInstallBase,
   parseFrontmatterBool,
-  resolveHanzoBotManifestBlock,
-  resolveHanzoBotManifestInstall,
-  resolveHanzoBotManifestOs,
-  resolveHanzoBotManifestRequires,
+  resolveBotManifestBlock,
+  resolveBotManifestInstall,
+  resolveBotManifestOs,
+  resolveBotManifestRequires,
 } from "../shared/frontmatter.js";
 import type {
-  HanzoBotHookMetadata,
+  BotHookMetadata,
   HookEntry,
   HookInstallSpec,
   HookInvocationPolicy,
@@ -22,7 +22,7 @@ export function parseFrontmatter(content: string): ParsedHookFrontmatter {
 }
 
 function parseInstallSpec(input: unknown): HookInstallSpec | undefined {
-  const parsed = parseHanzoBotManifestInstallBase(input, ["bundled", "npm", "git"]);
+  const parsed = parseBotManifestInstallBase(input, ["bundled", "npm", "git"]);
   if (!parsed) {
     return undefined;
   }
@@ -50,16 +50,16 @@ function parseInstallSpec(input: unknown): HookInstallSpec | undefined {
   return spec;
 }
 
-export function resolveHanzoBotMetadata(
+export function resolveBotMetadata(
   frontmatter: ParsedHookFrontmatter,
-): HanzoBotHookMetadata | undefined {
-  const metadataObj = resolveHanzoBotManifestBlock({ frontmatter });
+): BotHookMetadata | undefined {
+  const metadataObj = resolveBotManifestBlock({ frontmatter });
   if (!metadataObj) {
     return undefined;
   }
-  const requires = resolveHanzoBotManifestRequires(metadataObj);
-  const install = resolveHanzoBotManifestInstall(metadataObj, parseInstallSpec);
-  const osRaw = resolveHanzoBotManifestOs(metadataObj);
+  const requires = resolveBotManifestRequires(metadataObj);
+  const install = resolveBotManifestInstall(metadataObj, parseInstallSpec);
+  const osRaw = resolveBotManifestOs(metadataObj);
   const eventsRaw = normalizeStringList(metadataObj.events);
   return {
     always: typeof metadataObj.always === "boolean" ? metadataObj.always : undefined,

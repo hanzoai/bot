@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   parseFrontmatter,
-  resolveHanzoBotMetadata,
+  resolveBotMetadata,
   resolveHookInvocationPolicy,
 } from "./frontmatter.js";
 
@@ -148,7 +148,7 @@ description: 'single-quoted'
   });
 });
 
-describe("resolveHanzoBotMetadata", () => {
+describe("resolveBotMetadata", () => {
   it("extracts bot metadata from parsed frontmatter", () => {
     const frontmatter = {
       name: "test-hook",
@@ -164,7 +164,7 @@ describe("resolveHanzoBotMetadata", () => {
       }),
     };
 
-    const result = resolveHanzoBotMetadata(frontmatter);
+    const result = resolveBotMetadata(frontmatter);
     expect(result).toBeDefined();
     expect(result?.emoji).toBe("🔥");
     expect(result?.events).toEqual(["command:new", "command:reset"]);
@@ -174,7 +174,7 @@ describe("resolveHanzoBotMetadata", () => {
 
   it("returns undefined when metadata is missing", () => {
     const frontmatter = { name: "no-metadata" };
-    const result = resolveHanzoBotMetadata(frontmatter);
+    const result = resolveBotMetadata(frontmatter);
     expect(result).toBeUndefined();
   });
 
@@ -182,7 +182,7 @@ describe("resolveHanzoBotMetadata", () => {
     const frontmatter = {
       metadata: JSON.stringify({ other: "data" }),
     };
-    const result = resolveHanzoBotMetadata(frontmatter);
+    const result = resolveBotMetadata(frontmatter);
     expect(result).toBeUndefined();
   });
 
@@ -190,7 +190,7 @@ describe("resolveHanzoBotMetadata", () => {
     const frontmatter = {
       metadata: "not valid json {",
     };
-    const result = resolveHanzoBotMetadata(frontmatter);
+    const result = resolveBotMetadata(frontmatter);
     expect(result).toBeUndefined();
   });
 
@@ -207,7 +207,7 @@ describe("resolveHanzoBotMetadata", () => {
       }),
     };
 
-    const result = resolveHanzoBotMetadata(frontmatter);
+    const result = resolveBotMetadata(frontmatter);
     expect(result?.install).toHaveLength(2);
     expect(result?.install?.[0].kind).toBe("bundled");
     expect(result?.install?.[1].kind).toBe("npm");
@@ -224,7 +224,7 @@ describe("resolveHanzoBotMetadata", () => {
       }),
     };
 
-    const result = resolveHanzoBotMetadata(frontmatter);
+    const result = resolveBotMetadata(frontmatter);
     expect(result?.os).toEqual(["darwin", "linux"]);
   });
 
@@ -253,7 +253,7 @@ metadata:
     expect(frontmatter.name).toBe("session-memory");
     expect(frontmatter.metadata).toBeDefined();
 
-    const bot = resolveHanzoBotMetadata(frontmatter);
+    const bot = resolveBotMetadata(frontmatter);
     expect(bot).toBeDefined();
     expect(bot?.emoji).toBe("💾");
     expect(bot?.events).toEqual(["command:new", "command:reset"]);
@@ -272,7 +272,7 @@ metadata:
 ---
 `;
     const frontmatter = parseFrontmatter(content);
-    const bot = resolveHanzoBotMetadata(frontmatter);
+    const bot = resolveBotMetadata(frontmatter);
     expect(bot?.emoji).toBe("disk");
     expect(bot?.events).toEqual(["command:new"]);
   });

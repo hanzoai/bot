@@ -25,7 +25,7 @@ vi.mock("../infra/runtime-guard.js", () => ({
 }));
 
 vi.mock("../infra/path-env.js", () => ({
-  ensureHanzoBotCliOnPath: vi.fn(),
+  ensureBotCliOnPath: vi.fn(),
 }));
 
 vi.mock("./route.js", () => ({

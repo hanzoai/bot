@@ -26,7 +26,7 @@ function ensureChangelogEntry(changelogPath: string, version: string): boolean {
   return true;
 }
 
-function stripWorkspaceHanzoBotDevDependency(pkg: PackageJson): boolean {
+function stripWorkspaceBotDevDependency(pkg: PackageJson): boolean {
   const devDeps = pkg.devDependencies;
   if (!devDeps || devDeps.bot !== "workspace:*") {
     return false;
@@ -75,7 +75,7 @@ export function syncPluginVersions(rootDir = resolve(".")) {
       changelogged.push(pkg.name);
     }
 
-    const removedWorkspaceDevDependency = stripWorkspaceHanzoBotDevDependency(pkg);
+    const removedWorkspaceDevDependency = stripWorkspaceBotDevDependency(pkg);
     if (removedWorkspaceDevDependency) {
       strippedWorkspaceDevDeps.push(pkg.name);
     }

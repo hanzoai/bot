@@ -7,9 +7,9 @@ installChromeUserDataDirHooks(chromeUserDataDir);
 vi.mock("./chrome.js", () => ({
   isChromeCdpReady: vi.fn(async () => true),
   isChromeReachable: vi.fn(async () => true),
-  launchHanzoBotChrome: vi.fn(async () => {
+  launchBotChrome: vi.fn(async () => {
     throw new Error("unexpected launch");
   }),
-  resolveHanzoBotUserDataDir: vi.fn(() => chromeUserDataDir.dir),
-  stopHanzoBotChrome: vi.fn(async () => {}),
+  resolveBotUserDataDir: vi.fn(() => chromeUserDataDir.dir),
+  stopBotChrome: vi.fn(async () => {}),
 }));

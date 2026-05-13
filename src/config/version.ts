@@ -1,4 +1,4 @@
-export type HanzoBotVersion = {
+export type BotVersion = {
   major: number;
   minor: number;
   patch: number;
@@ -7,7 +7,7 @@ export type HanzoBotVersion = {
 
 const VERSION_RE = /^v?(\d+)\.(\d+)\.(\d+)(?:-(\d+))?/;
 
-export function parseHanzoBotVersion(raw: string | null | undefined): HanzoBotVersion | null {
+export function parseBotVersion(raw: string | null | undefined): BotVersion | null {
   if (!raw) {
     return null;
   }
@@ -24,12 +24,12 @@ export function parseHanzoBotVersion(raw: string | null | undefined): HanzoBotVe
   };
 }
 
-export function compareHanzoBotVersions(
+export function compareBotVersions(
   a: string | null | undefined,
   b: string | null | undefined,
 ): number | null {
-  const parsedA = parseHanzoBotVersion(a);
-  const parsedB = parseHanzoBotVersion(b);
+  const parsedA = parseBotVersion(a);
+  const parsedB = parseBotVersion(b);
   if (!parsedA || !parsedB) {
     return null;
   }
