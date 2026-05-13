@@ -1,0 +1,35 @@
+{
+  "name": "@hanzo/bot",
+  "version": "1.0.0",
+  "description": "Meta-package for the Hanzo Bot ecosystem — aggregates implementations and wires the runtime.",
+  "license": "MIT",
+  "type": "module",
+  "homepage": "https://github.com/hanzoai/bot",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanzoai/bot.git"
+  },
+  "bugs": "https://github.com/hanzoai/bot/issues",
+  "keywords": [
+    "hanzo",
+    "bot",
+    "ai",
+    "agent",
+    "gateway",
+    "meta"
+  ],
+  "bin": {
+    "hanzo-bot": "./bin/hanzo-bot.mjs"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@hanzobot/ts": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

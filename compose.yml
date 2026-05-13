@@ -1,0 +1,27 @@
+# Local orchestration of the Hanzo Bot ecosystem.
+# One container per concern; no impl logic lives in this file.
+# Each image is published from its own repo — this compose only wires them.
+services:
+  bot:
+    image: ghcr.io/hanzobot/ts:latest
+    restart: unless-stopped
+    ports:
+      - "18789:18789"   # gateway WS + HTTP
+    environment:
+      BOT_GATEWAY_BIND: 0.0.0.0:18789
+    depends_on:
+      - brain
+    volumes:
+      - bot-state:/var/lib/hanzo-bot
+
+  brain:
+    image: ghcr.io/hanzoai/brain:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"     # brain RPC
+    volumes:
+      - brain-data:/var/lib/hanzo-brain
+
+volumes:
+  bot-state:
+  brain-data:
