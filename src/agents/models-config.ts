@@ -3,7 +3,7 @@ import path from "node:path";
 import { type BotConfig, loadConfig } from "../config/config.js";
 import { applyConfigEnvVars } from "../config/env-vars.js";
 import { isRecord } from "../utils.js";
-import { resolveHanzoBotAgentDir } from "./agent-paths.js";
+import { resolveBotAgentDir } from "./agent-paths.js";
 import {
   HANZO_BASE_URL,
   normalizeProviders,
@@ -196,12 +196,12 @@ async function readRawFile(pathname: string): Promise<string> {
   }
 }
 
-export async function ensureHanzoBotModelsJson(
+export async function ensureBotModelsJson(
   config?: BotConfig,
   agentDirOverride?: string,
 ): Promise<{ agentDir: string; wrote: boolean }> {
   const cfg = config ?? loadConfig();
-  const agentDir = agentDirOverride?.trim() ? agentDirOverride.trim() : resolveHanzoBotAgentDir();
+  const agentDir = agentDirOverride?.trim() ? agentDirOverride.trim() : resolveBotAgentDir();
 
   // Ensure config env vars (e.g. AWS_PROFILE, AWS_ACCESS_KEY_ID) are
   // available in process.env before implicit provider discovery.  Some
