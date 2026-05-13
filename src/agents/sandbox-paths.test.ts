@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
-import { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-bot-dir.js";
+import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 import { resolveSandboxedMediaSource } from "./sandbox-paths.js";
 
 async function withSandboxRoot<T>(run: (sandboxDir: string) => Promise<T>) {
@@ -28,9 +28,9 @@ function makeTmpProbePath(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}.txt`;
 }
 
-async function withOutsideHardlinkInHanzoBotTmp<T>(
+async function withOutsideHardlinkInBotTmp<T>(
   params: {
-    hanzoBotTmpDir: string;
+    botTmpDir: string;
     hardlinkPrefix: string;
     symlinkPrefix?: string;
   },
@@ -38,16 +38,16 @@ async function withOutsideHardlinkInHanzoBotTmp<T>(
 ): Promise<void> {
   const outsideDir = await fs.mkdtemp(path.join(process.cwd(), "sandbox-media-hardlink-outside-"));
   const outsideFile = path.join(outsideDir, "outside-secret.txt");
-  const hardlinkPath = path.join(params.hanzoBotTmpDir, makeTmpProbePath(params.hardlinkPrefix));
+  const hardlinkPath = path.join(params.botTmpDir, makeTmpProbePath(params.hardlinkPrefix));
   const symlinkPath = params.symlinkPrefix
-    ? path.join(params.hanzoBotTmpDir, makeTmpProbePath(params.symlinkPrefix))
+    ? path.join(params.botTmpDir, makeTmpProbePath(params.symlinkPrefix))
     : undefined;
   try {
-    if (isPathInside(params.hanzoBotTmpDir, outsideFile)) {
+    if (isPathInside(params.botTmpDir, outsideFile)) {
       return;
     }
     await fs.writeFile(outsideFile, "secret", "utf8");
-    await fs.mkdir(params.hanzoBotTmpDir, { recursive: true });
+    await fs.mkdir(params.botTmpDir, { recursive: true });
     try {
       await fs.link(outsideFile, hardlinkPath);
     } catch (err) {
@@ -70,24 +70,24 @@ async function withOutsideHardlinkInHanzoBotTmp<T>(
 }
 
 describe("resolveSandboxedMediaSource", () => {
-  const hanzoBotTmpDir = resolvePreferredHanzoBotTmpDir();
+  const botTmpDir = resolvePreferredBotTmpDir();
 
   // Group 1: /tmp paths (the bug fix)
   it.each([
     {
       name: "absolute paths under preferred HanzoBot tmp root",
-      media: path.join(hanzoBotTmpDir, "image.png"),
-      expected: path.join(hanzoBotTmpDir, "image.png"),
+      media: path.join(botTmpDir, "image.png"),
+      expected: path.join(botTmpDir, "image.png"),
     },
     {
       name: "file:// URLs pointing to preferred HanzoBot tmp root",
-      media: pathToFileURL(path.join(hanzoBotTmpDir, "photo.png")).href,
-      expected: path.join(hanzoBotTmpDir, "photo.png"),
+      media: pathToFileURL(path.join(botTmpDir, "photo.png")).href,
+      expected: path.join(botTmpDir, "photo.png"),
     },
     {
       name: "nested paths under preferred HanzoBot tmp root",
-      media: path.join(hanzoBotTmpDir, "subdir", "deep", "file.png"),
-      expected: path.join(hanzoBotTmpDir, "subdir", "deep", "file.png"),
+      media: path.join(botTmpDir, "subdir", "deep", "file.png"),
+      expected: path.join(botTmpDir, "subdir", "deep", "file.png"),
     },
   ])("allows $name", async ({ media, expected }) => {
     await withSandboxRoot(async (sandboxDir) => {
@@ -144,7 +144,7 @@ describe("resolveSandboxedMediaSource", () => {
     },
     {
       name: "path traversal through tmpdir",
-      media: path.join(hanzoBotTmpDir, "..", "etc", "passwd"),
+      media: path.join(botTmpDir, "..", "etc", "passwd"),
       expected: /sandbox/i,
     },
     {
@@ -178,14 +178,14 @@ describe("resolveSandboxedMediaSource", () => {
       return;
     }
     const outsideTmpTarget = path.resolve(process.cwd(), "package.json");
-    if (isPathInside(hanzoBotTmpDir, outsideTmpTarget)) {
+    if (isPathInside(botTmpDir, outsideTmpTarget)) {
       return;
     }
 
     await withSandboxRoot(async (sandboxDir) => {
       await fs.access(outsideTmpTarget);
-      await fs.mkdir(hanzoBotTmpDir, { recursive: true });
-      const symlinkPath = path.join(hanzoBotTmpDir, `tmp-link-escape-${process.pid}`);
+      await fs.mkdir(botTmpDir, { recursive: true });
+      const symlinkPath = path.join(botTmpDir, `tmp-link-escape-${process.pid}`);
       await fs.symlink(outsideTmpTarget, symlinkPath);
       try {
         await expectSandboxRejection(symlinkPath, sandboxDir, /symlink|sandbox/i);
@@ -219,9 +219,9 @@ describe("resolveSandboxedMediaSource", () => {
     if (process.platform === "win32") {
       return;
     }
-    await withOutsideHardlinkInHanzoBotTmp(
+    await withOutsideHardlinkInBotTmp(
       {
-        hanzoBotTmpDir,
+        botTmpDir,
         hardlinkPrefix: "sandbox-media-hardlink",
       },
       async ({ hardlinkPath }) => {
@@ -236,9 +236,9 @@ describe("resolveSandboxedMediaSource", () => {
     if (process.platform === "win32") {
       return;
     }
-    await withOutsideHardlinkInHanzoBotTmp(
+    await withOutsideHardlinkInBotTmp(
       {
-        hanzoBotTmpDir,
+        botTmpDir,
         hardlinkPrefix: "sandbox-media-hardlink-target",
         symlinkPrefix: "sandbox-media-hardlink-symlink",
       },

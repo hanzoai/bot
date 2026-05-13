@@ -15,7 +15,7 @@ import { shouldIncludeSkill } from "./config.js";
 import { normalizeSkillFilter } from "./filter.js";
 import {
   parseFrontmatter,
-  resolveHanzoBotMetadata,
+  resolveBotMetadata,
   resolveSkillInvocationPolicy,
 } from "./frontmatter.js";
 import { resolvePluginSkillDirs } from "./plugin-skills.js";
@@ -398,7 +398,7 @@ function loadSkillEntries(
     return {
       skill,
       frontmatter,
-      metadata: resolveHanzoBotMetadata(frontmatter),
+      metadata: resolveBotMetadata(frontmatter),
       invocation: resolveSkillInvocationPolicy(frontmatter),
     };
   });
