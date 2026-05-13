@@ -2,7 +2,7 @@ import path from "node:path";
 import { resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import type { BotConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
-import { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-bot-dir.js";
+import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 
 type BuildMediaLocalRootsOptions = {
   preferredTmpDir?: string;
@@ -12,7 +12,7 @@ let cachedPreferredTmpDir: string | undefined;
 
 function resolveCachedPreferredTmpDir(): string {
   if (!cachedPreferredTmpDir) {
-    cachedPreferredTmpDir = resolvePreferredHanzoBotTmpDir();
+    cachedPreferredTmpDir = resolvePreferredBotTmpDir();
   }
   return cachedPreferredTmpDir;
 }

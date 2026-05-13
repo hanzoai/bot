@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { discoverHanzoBotPlugins } from "../src/plugins/discovery.js";
+import { discoverBotPlugins } from "../src/plugins/discovery.js";
 
 // Match exact monolithic-root specifier in any code path:
 // imports/exports, require/dynamic import, and test mocks (vi.mock/jest.mock).
@@ -60,7 +60,7 @@ function collectPluginSourceFiles(rootDir: string): string[] {
 }
 
 function main() {
-  const discovery = discoverHanzoBotPlugins({});
+  const discovery = discoverBotPlugins({});
   const bundledCandidates = discovery.candidates.filter((c) => c.origin === "bundled");
   const filesToCheck = new Set<string>();
   for (const candidate of bundledCandidates) {

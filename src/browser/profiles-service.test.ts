@@ -19,11 +19,11 @@ vi.mock("./trash.js", () => ({
 }));
 
 vi.mock("./chrome.js", () => ({
-  resolveHanzoBotUserDataDir: vi.fn(() => "/tmp/bot-test/bot/user-data"),
+  resolveBotUserDataDir: vi.fn(() => "/tmp/bot-test/bot/user-data"),
 }));
 
 import { loadConfig, writeConfigFile } from "../config/config.js";
-import { resolveHanzoBotUserDataDir } from "./chrome.js";
+import { resolveBotUserDataDir } from "./chrome.js";
 import { movePathToTrash } from "./trash.js";
 
 function createCtx(resolved: BrowserServerState["resolved"]) {
@@ -179,7 +179,7 @@ describe("BrowserProfilesService", () => {
     const tempDir = fs.mkdtempSync(path.join("/tmp", "bot-profile-"));
     const userDataDir = path.join(tempDir, "work", "user-data");
     fs.mkdirSync(path.dirname(userDataDir), { recursive: true });
-    vi.mocked(resolveHanzoBotUserDataDir).mockReturnValue(userDataDir);
+    vi.mocked(resolveBotUserDataDir).mockReturnValue(userDataDir);
 
     const service = createBrowserProfilesService(ctx);
     const result = await service.deleteProfile("work");

@@ -24,7 +24,7 @@ import { isDangerousNameMatchingEnabled } from "../../config/dangerous-name-matc
 import type { DiscordAccountConfig, TtsConfig } from "../../config/types.js";
 import { logVerbose, shouldLogVerbose } from "../../globals.js";
 import { formatErrorMessage } from "../../infra/errors.js";
-import { resolvePreferredHanzoBotTmpDir } from "../../infra/tmp-bot-dir.js";
+import { resolvePreferredBotTmpDir } from "../../infra/tmp-bot-dir.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import {
   buildProviderRegistry,
@@ -212,7 +212,7 @@ function estimateDurationSeconds(pcm: Buffer): number {
 }
 
 async function writeWavFile(pcm: Buffer): Promise<{ path: string; durationSeconds: number }> {
-  const tempDir = await fs.mkdtemp(path.join(resolvePreferredHanzoBotTmpDir(), "discord-voice-"));
+  const tempDir = await fs.mkdtemp(path.join(resolvePreferredBotTmpDir(), "discord-voice-"));
   const filePath = path.join(tempDir, `segment-${randomUUID()}.wav`);
   const wav = buildWavBuffer(pcm);
   await fs.writeFile(filePath, wav);

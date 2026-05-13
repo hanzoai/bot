@@ -9,7 +9,7 @@ import {
   resolveShellFromEnv,
   usesSlowDynamicCompletion,
 } from "../cli/completion-cli.js";
-import { resolveHanzoBotPackageRoot } from "../infra/bot-root.js";
+import { resolveBotPackageRoot } from "../infra/bot-root.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { note } from "../terminal/note.js";
 import type { DoctorPrompter } from "./doctor-prompter.js";
@@ -18,7 +18,7 @@ type CompletionShell = "zsh" | "bash" | "fish" | "powershell";
 
 /** Generate the completion cache by spawning the CLI. */
 async function generateCompletionCache(): Promise<boolean> {
-  const root = await resolveHanzoBotPackageRoot({
+  const root = await resolveBotPackageRoot({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
     cwd: process.cwd(),

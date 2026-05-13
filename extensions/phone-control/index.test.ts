@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import type {
   BotPluginApi,
-  HanzoBotPluginCommandDefinition,
+  BotPluginCommandDefinition,
   PluginCommandContext,
 } from "@hanzo/bot/plugin-sdk/phone-control";
 import { describe, expect, it, vi } from "vitest";
@@ -13,7 +13,7 @@ function createApi(params: {
   stateDir: string;
   getConfig: () => Record<string, unknown>;
   writeConfig: (next: Record<string, unknown>) => Promise<void>;
-  registerCommand: (command: HanzoBotPluginCommandDefinition) => void;
+  registerCommand: (command: BotPluginCommandDefinition) => void;
 }): BotPluginApi {
   return {
     id: "phone-control",
@@ -74,7 +74,7 @@ describe("phone-control plugin", () => {
         config = next;
       });
 
-      let command: HanzoBotPluginCommandDefinition | undefined;
+      let command: BotPluginCommandDefinition | undefined;
       registerPhoneControl(
         createApi({
           stateDir,

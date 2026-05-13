@@ -16,7 +16,7 @@ vi.mock("./node-require.js", () => ({
 }));
 
 let originalTestFileLog: string | undefined;
-let originalHanzoBotLogLevel: string | undefined;
+let originalBotLogLevel: string | undefined;
 let logging: typeof import("../logging.js");
 
 beforeAll(async () => {
@@ -25,7 +25,7 @@ beforeAll(async () => {
 
 beforeEach(() => {
   originalTestFileLog = process.env.BOT_TEST_FILE_LOG;
-  originalHanzoBotLogLevel = process.env.BOT_LOG_LEVEL;
+  originalBotLogLevel = process.env.BOT_LOG_LEVEL;
   delete process.env.BOT_TEST_FILE_LOG;
   delete process.env.BOT_LOG_LEVEL;
   readLoggingConfigMock.mockClear();
@@ -40,10 +40,10 @@ afterEach(() => {
   } else {
     process.env.BOT_TEST_FILE_LOG = originalTestFileLog;
   }
-  if (originalHanzoBotLogLevel === undefined) {
+  if (originalBotLogLevel === undefined) {
     delete process.env.BOT_LOG_LEVEL;
   } else {
-    process.env.BOT_LOG_LEVEL = originalHanzoBotLogLevel;
+    process.env.BOT_LOG_LEVEL = originalBotLogLevel;
   }
   logging.resetLogger();
   logging.setLoggerOverride(null);

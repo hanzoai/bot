@@ -2,7 +2,7 @@ import type { Api, Context, Model } from "@mariozechner/pi-ai";
 import { complete } from "@mariozechner/pi-ai";
 import { minimaxUnderstandImage } from "../../agents/minimax-vlm.js";
 import { getApiKeyForModel, requireApiKey } from "../../agents/model-auth.js";
-import { ensureHanzoBotModelsJson } from "../../agents/models-config.js";
+import { ensureBotModelsJson } from "../../agents/models-config.js";
 import { coerceImageAssistantText } from "../../agents/tools/image-tool.helpers.js";
 import type { ImageDescriptionRequest, ImageDescriptionResult } from "../types.js";
 
@@ -18,7 +18,7 @@ function loadPiModelDiscoveryRuntime() {
 export async function describeImageWithModel(
   params: ImageDescriptionRequest,
 ): Promise<ImageDescriptionResult> {
-  await ensureHanzoBotModelsJson(params.cfg, params.agentDir);
+  await ensureBotModelsJson(params.cfg, params.agentDir);
   const { discoverAuthStorage, discoverModels } = await loadPiModelDiscoveryRuntime();
   const authStorage = discoverAuthStorage(params.agentDir);
   const modelRegistry = discoverModels(authStorage, params.agentDir);

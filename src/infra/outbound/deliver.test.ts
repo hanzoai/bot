@@ -11,7 +11,7 @@ import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/c
 import { withEnvAsync } from "../../test-utils/env.js";
 import { createIMessageTestPlugin } from "../../test-utils/imessage-test-plugin.js";
 import { createInternalHookEventPayload } from "../../test-utils/internal-hook-event-payload.js";
-import { resolvePreferredHanzoBotTmpDir } from "../tmp-bot-dir.js";
+import { resolvePreferredBotTmpDir } from "../tmp-bot-dir.js";
 
 const mocks = vi.hoisted(() => ({
   appendAssistantMessageToSessionTranscript: vi.fn(async () => ({ ok: true, sessionFile: "x" })),
@@ -338,7 +338,7 @@ describe("deliverOutboundPayloads", () => {
       "123",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredHanzoBotTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredBotTmpDir()]),
       }),
     );
   });
@@ -358,7 +358,7 @@ describe("deliverOutboundPayloads", () => {
       "+1555",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredHanzoBotTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredBotTmpDir()]),
       }),
     );
   });
@@ -378,7 +378,7 @@ describe("deliverOutboundPayloads", () => {
       "+1555",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredHanzoBotTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredBotTmpDir()]),
       }),
     );
   });
@@ -398,7 +398,7 @@ describe("deliverOutboundPayloads", () => {
       "imessage:+15551234567",
       "hi",
       expect.objectContaining({
-        mediaLocalRoots: expect.arrayContaining([resolvePreferredHanzoBotTmpDir()]),
+        mediaLocalRoots: expect.arrayContaining([resolvePreferredBotTmpDir()]),
       }),
     );
   });
