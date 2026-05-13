@@ -1,4 +1,4 @@
-import { resolveHanzoBotAgentDir } from "../agents/agent-paths.js";
+import { resolveBotAgentDir } from "../agents/agent-paths.js";
 import { listAgentIds, resolveAgentDir } from "../agents/agent-scope.js";
 import type { AuthProfileStore } from "../agents/auth-profiles.js";
 import {
@@ -50,7 +50,7 @@ function cloneSnapshot(snapshot: PreparedSecretsRuntimeSnapshot): PreparedSecret
 
 function collectCandidateAgentDirs(config: BotConfig): string[] {
   const dirs = new Set<string>();
-  dirs.add(resolveUserPath(resolveHanzoBotAgentDir()));
+  dirs.add(resolveUserPath(resolveBotAgentDir()));
   for (const agentId of listAgentIds(config)) {
     dirs.add(resolveUserPath(resolveAgentDir(config, agentId)));
   }

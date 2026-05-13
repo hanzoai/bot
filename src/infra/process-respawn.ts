@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { triggerHanzoBotRestart } from "./restart.js";
+import { triggerBotRestart } from "./restart.js";
 import { hasSupervisorHint } from "./supervisor-markers.js";
 
 type RespawnMode = "spawned" | "supervised" | "disabled" | "failed";
@@ -36,7 +36,7 @@ export function restartGatewayProcessWithFreshPid(): GatewayRespawnResult {
     // On macOS under launchd, actively kickstart the supervised service to
     // bypass ThrottleInterval delays for intentional restarts.
     if (process.platform === "darwin" && process.env.BOT_LAUNCHD_LABEL?.trim()) {
-      const restart = triggerHanzoBotRestart();
+      const restart = triggerBotRestart();
       if (!restart.ok) {
         return {
           mode: "failed",

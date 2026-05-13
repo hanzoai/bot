@@ -4,7 +4,7 @@ import {
   getFrontmatterString,
   normalizeStringList,
   parseFrontmatterBool,
-  resolveHanzoBotManifestBlock,
+  resolveBotManifestBlock,
 } from "./frontmatter.js";
 import { resolveNodeIdFromCandidates } from "./node-match.js";
 
@@ -66,20 +66,18 @@ describe("shared/frontmatter", () => {
     expect(parseFrontmatterBool(undefined, true)).toBe(true);
   });
 
-  test("resolveHanzoBotManifestBlock parses JSON5 metadata and picks bot block", () => {
+  test("resolveBotManifestBlock parses JSON5 metadata and picks bot block", () => {
     const frontmatter = {
       metadata: "{ bot: { foo: 1, bar: 'baz' } }",
     };
-    expect(resolveHanzoBotManifestBlock({ frontmatter })).toEqual({ foo: 1, bar: "baz" });
+    expect(resolveBotManifestBlock({ frontmatter })).toEqual({ foo: 1, bar: "baz" });
   });
 
-  test("resolveHanzoBotManifestBlock returns undefined for invalid input", () => {
-    expect(resolveHanzoBotManifestBlock({ frontmatter: {} })).toBeUndefined();
+  test("resolveBotManifestBlock returns undefined for invalid input", () => {
+    expect(resolveBotManifestBlock({ frontmatter: {} })).toBeUndefined();
+    expect(resolveBotManifestBlock({ frontmatter: { metadata: "not-json5" } })).toBeUndefined();
     expect(
-      resolveHanzoBotManifestBlock({ frontmatter: { metadata: "not-json5" } }),
-    ).toBeUndefined();
-    expect(
-      resolveHanzoBotManifestBlock({ frontmatter: { metadata: "{ nope: { a: 1 } }" } }),
+      resolveBotManifestBlock({ frontmatter: { metadata: "{ nope: { a: 1 } }" } }),
     ).toBeUndefined();
   });
 });

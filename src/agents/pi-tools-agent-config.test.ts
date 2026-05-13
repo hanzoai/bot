@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import "./test-helpers/fast-coding-tools.js";
 import type { BotConfig } from "../config/config.js";
-import { createHanzoBotCodingTools } from "./pi-tools.js";
+import { createBotCodingTools } from "./pi-tools.js";
 import type { SandboxDockerConfig } from "./sandbox.js";
 import type { SandboxFsBridge } from "./sandbox/fs-bridge.js";
 import { createRestrictedAgentSandboxConfig } from "./test-helpers/sandbox-agent-config-fixtures.js";
@@ -66,7 +66,7 @@ describe("Agent-specific tool filtering", () => {
         },
       };
 
-      const tools = createHanzoBotCodingTools({
+      const tools = createBotCodingTools({
         config: cfg,
         sessionKey: "agent:main:main",
         workspaceDir,
@@ -97,7 +97,7 @@ describe("Agent-specific tool filtering", () => {
   }
 
   function createMainSessionTools(cfg: BotConfig) {
-    return createHanzoBotCodingTools({
+    return createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test",
@@ -198,7 +198,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test",
@@ -253,7 +253,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:restricted:main",
       workspaceDir: "/tmp/test-restricted",
@@ -278,7 +278,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-provider",
@@ -302,7 +302,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-provider-profile",
@@ -337,7 +337,7 @@ describe("Agent-specific tool filtering", () => {
     };
 
     // main agent: all tools
-    const mainTools = createHanzoBotCodingTools({
+    const mainTools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main",
@@ -350,7 +350,7 @@ describe("Agent-specific tool filtering", () => {
     expect(mainToolNames).not.toContain("apply_patch");
 
     // family agent: restricted
-    const familyTools = createHanzoBotCodingTools({
+    const familyTools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:family:whatsapp:group:123",
       workspaceDir: "/tmp/test-family",
@@ -380,7 +380,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const trustedTools = createHanzoBotCodingTools({
+    const trustedTools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:trusted",
       messageProvider: "whatsapp",
@@ -391,7 +391,7 @@ describe("Agent-specific tool filtering", () => {
     expect(trustedNames).toContain("read");
     expect(trustedNames).toContain("exec");
 
-    const defaultTools = createHanzoBotCodingTools({
+    const defaultTools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:unknown",
       messageProvider: "whatsapp",
@@ -419,7 +419,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const aliceTools = createHanzoBotCodingTools({
+    const aliceTools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:family",
       senderId: "alice",
@@ -430,7 +430,7 @@ describe("Agent-specific tool filtering", () => {
     expect(aliceNames).toContain("read");
     expect(aliceNames).toContain("exec");
 
-    const bobTools = createHanzoBotCodingTools({
+    const bobTools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:family",
       senderId: "bob",
@@ -460,7 +460,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const adminTools = createHanzoBotCodingTools({
+    const adminTools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:whatsapp:group:locked",
       senderId: "admin",
@@ -485,7 +485,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:telegram:group:123:topic:456",
       messageProvider: "telegram",
@@ -510,7 +510,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:subagent:test",
       spawnedBy: "agent:main:whatsapp:group:trusted",
@@ -540,7 +540,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:work:slack:dm:user123",
       workspaceDir: "/tmp/test-work",
@@ -567,7 +567,7 @@ describe("Agent-specific tool filtering", () => {
       },
     });
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:restricted:main",
       workspaceDir: "/tmp/test-restricted",
@@ -618,7 +618,7 @@ describe("Agent-specific tool filtering", () => {
       },
     };
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main",
@@ -637,7 +637,7 @@ describe("Agent-specific tool filtering", () => {
   });
 
   it("keeps sandbox as the implicit exec host default without forcing gateway approvals", async () => {
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: {},
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main-implicit-sandbox",
@@ -661,7 +661,7 @@ describe("Agent-specific tool filtering", () => {
   });
 
   it("fails closed when exec host=sandbox is requested without sandbox runtime", async () => {
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: {},
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main-fail-closed",
@@ -683,7 +683,7 @@ describe("Agent-specific tool filtering", () => {
       { id: "helper" },
     ]);
 
-    const mainTools = createHanzoBotCodingTools({
+    const mainTools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:main:main",
       workspaceDir: "/tmp/test-main-exec-defaults",
@@ -704,7 +704,7 @@ describe("Agent-specific tool filtering", () => {
       }),
     ).rejects.toThrow("exec host not allowed");
 
-    const helperTools = createHanzoBotCodingTools({
+    const helperTools = createBotCodingTools({
       config: cfg,
       sessionKey: "agent:helper:main",
       workspaceDir: "/tmp/test-helper-exec-defaults",
@@ -730,7 +730,7 @@ describe("Agent-specific tool filtering", () => {
   it("applies explicit agentId exec defaults when sessionKey is opaque", async () => {
     const cfg = createExecHostDefaultsConfig([{ id: "main", execHost: "gateway" }]);
 
-    const tools = createHanzoBotCodingTools({
+    const tools = createBotCodingTools({
       config: cfg,
       agentId: "main",
       sessionKey: "run-opaque-123",
