@@ -56,7 +56,7 @@ import {
   validateConfigObjectRawWithPlugins,
   validateConfigObjectWithPlugins,
 } from "./validation.js";
-import { compareHanzoBotVersions } from "./version.js";
+import { compareBotVersions } from "./version.js";
 
 // Re-export for backwards compatibility
 export { CircularIncludeError, ConfigIncludeError } from "./includes.js";
@@ -581,7 +581,7 @@ function warnIfConfigFromFuture(cfg: BotConfig, logger: Pick<typeof console, "wa
   if (!touched) {
     return;
   }
-  const cmp = compareHanzoBotVersions(VERSION, touched);
+  const cmp = compareBotVersions(VERSION, touched);
   if (cmp === null) {
     return;
   }

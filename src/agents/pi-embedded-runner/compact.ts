@@ -28,7 +28,7 @@ import { buildTtsSystemPromptHint } from "../../tts/tts.js";
 import { resolveUserPath } from "../../utils.js";
 import { normalizeMessageChannel } from "../../utils/message-channel.js";
 import { isReasoningTagProvider } from "../../utils/provider-utils.js";
-import { resolveHanzoBotAgentDir } from "../agent-paths.js";
+import { resolveBotAgentDir } from "../agent-paths.js";
 import { resolveSessionAgentIds } from "../agent-scope.js";
 import type { ExecElevatedDefaults } from "../bash-tools.js";
 import { makeBootstrapWarn, resolveBootstrapContextForRun } from "../bootstrap-files.js";
@@ -36,9 +36,9 @@ import { listChannelSupportedActions, resolveChannelMessageToolHints } from "../
 import { resolveContextWindowInfo } from "../context-window-guard.js";
 import { formatUserTime, resolveUserTimeFormat, resolveUserTimezone } from "../date-time.js";
 import { DEFAULT_CONTEXT_TOKENS, DEFAULT_MODEL, DEFAULT_PROVIDER } from "../defaults.js";
-import { resolveHanzoBotDocsPath } from "../docs-path.js";
+import { resolveBotDocsPath } from "../docs-path.js";
 import { getApiKeyForModel, resolveModelAuthMode } from "../model-auth.js";
-import { ensureHanzoBotModelsJson } from "../models-config.js";
+import { ensureBotModelsJson } from "../models-config.js";
 import { resolveOwnerDisplaySetting } from "../owner-display.js";
 import {
   ensureSessionHeader,
@@ -46,7 +46,7 @@ import {
   validateGeminiTurns,
 } from "../pi-embedded-helpers.js";
 import { createPreparedEmbeddedPiSettingsManager } from "../pi-project-settings.js";
-import { createHanzoBotCodingTools } from "../pi-tools.js";
+import { createBotCodingTools } from "../pi-tools.js";
 import { resolveSandboxContext } from "../sandbox.js";
 import { repairSessionFileIfNeeded } from "../session-file-repair.js";
 import { guardSessionManager } from "../session-tool-result-guard-wrapper.js";
@@ -283,8 +283,8 @@ export async function compactEmbeddedPiSessionDirect(
       reason,
     };
   };
-  const agentDir = params.agentDir ?? resolveHanzoBotAgentDir();
-  await ensureHanzoBotModelsJson(params.config, agentDir);
+  const agentDir = params.agentDir ?? resolveBotAgentDir();
+  await ensureBotModelsJson(params.config, agentDir);
   const { model, error, authStorage, modelRegistry } = resolveModel(
     provider,
     modelId,
@@ -376,7 +376,7 @@ export async function compactEmbeddedPiSessionDirect(
       warn: makeBootstrapWarn({ sessionLabel, warn: (message) => log.warn(message) }),
     });
     const runAbortController = new AbortController();
-    const toolsRaw = createHanzoBotCodingTools({
+    const toolsRaw = createBotCodingTools({
       exec: {
         elevated: params.bashElevated,
       },
@@ -490,7 +490,7 @@ export async function compactEmbeddedPiSessionDirect(
       isSubagentSessionKey(params.sessionKey) || isCronSessionKey(params.sessionKey)
         ? "minimal"
         : "full";
-    const docsPath = await resolveHanzoBotDocsPath({
+    const docsPath = await resolveBotDocsPath({
       workspaceDir: effectiveWorkspace,
       argv1: process.argv[1],
       cwd: process.cwd(),
@@ -862,7 +862,7 @@ export async function compactEmbeddedPiSession(
         // automatically, but the /compact command path needs to compute it here.
         const ceProvider = (params.provider ?? DEFAULT_PROVIDER).trim() || DEFAULT_PROVIDER;
         const ceModelId = (params.model ?? DEFAULT_MODEL).trim() || DEFAULT_MODEL;
-        const agentDir = params.agentDir ?? resolveHanzoBotAgentDir();
+        const agentDir = params.agentDir ?? resolveBotAgentDir();
         const { model: ceModel } = resolveModel(ceProvider, ceModelId, agentDir, params.config);
         const ceCtxInfo = resolveContextWindowInfo({
           cfg: params.config,

@@ -86,7 +86,7 @@ describe("detectMacCloudSyncedStateDir", () => {
 
   it("anchors cloud detection to OS homedir when BOT_HOME is overridden", () => {
     const stateDir = path.join(home, "Library", "CloudStorage", "iCloud Drive", ".bot");
-    const originalHanzoBotHome = process.env.BOT_HOME;
+    const originalBotHome = process.env.BOT_HOME;
     process.env.BOT_HOME = "/tmp/bot-home-override";
     const homedirSpy = vi.spyOn(os, "homedir").mockReturnValue(home);
     try {
@@ -100,10 +100,10 @@ describe("detectMacCloudSyncedStateDir", () => {
       });
     } finally {
       homedirSpy.mockRestore();
-      if (originalHanzoBotHome === undefined) {
+      if (originalBotHome === undefined) {
         delete process.env.BOT_HOME;
       } else {
-        process.env.BOT_HOME = originalHanzoBotHome;
+        process.env.BOT_HOME = originalBotHome;
       }
     }
   });

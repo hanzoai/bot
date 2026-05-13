@@ -97,7 +97,7 @@ function validatePluginId(pluginId: string): string | null {
   return null;
 }
 
-function ensureHanzoBotExtensions(params: { manifest: PackageManifest }):
+function ensureBotExtensions(params: { manifest: PackageManifest }):
   | {
       ok: true;
       entries: string[];
@@ -221,7 +221,7 @@ async function installPluginFromPackageDir(
     return { ok: false, error: `invalid package.json: ${String(err)}` };
   }
 
-  const extensionsResult = ensureHanzoBotExtensions({
+  const extensionsResult = ensureBotExtensions({
     manifest,
   });
   if (!extensionsResult.ok) {
