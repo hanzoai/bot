@@ -5,8 +5,8 @@ let loadModelRegistry: typeof import("./models/list.registry.js").loadModelRegis
 let toModelRow: typeof import("./models/list.registry.js").toModelRow;
 
 const loadConfig = vi.fn();
-const ensureHanzoBotModelsJson = vi.fn().mockResolvedValue(undefined);
-const resolveHanzoBotAgentDir = vi.fn().mockReturnValue("/tmp/bot-agent");
+const ensureBotModelsJson = vi.fn().mockResolvedValue(undefined);
+const resolveBotAgentDir = vi.fn().mockReturnValue("/tmp/bot-agent");
 const ensureAuthProfileStore = vi.fn().mockReturnValue({ version: 1, profiles: {} });
 const listProfilesForProvider = vi.fn().mockReturnValue([]);
 const resolveAuthProfileDisplayLabel = vi.fn(({ profileId }: { profileId: string }) => profileId);
@@ -30,11 +30,11 @@ vi.mock("../config/config.js", () => ({
 }));
 
 vi.mock("../agents/models-config.js", () => ({
-  ensureHanzoBotModelsJson,
+  ensureBotModelsJson,
 }));
 
 vi.mock("../agents/agent-paths.js", () => ({
-  resolveHanzoBotAgentDir,
+  resolveBotAgentDir,
 }));
 
 vi.mock("../agents/auth-profiles.js", () => ({

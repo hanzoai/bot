@@ -65,7 +65,7 @@ vi.mock("../infra/exec-approvals.js", async (importOriginal) => {
   return { ...mod, resolveExecApprovals: () => approvals };
 });
 
-const { createHanzoBotCodingTools } = await import("./pi-tools.js");
+const { createBotCodingTools } = await import("./pi-tools.js");
 
 type ExecToolResult = {
   content: Array<{ type: string; text?: string }>;
@@ -106,7 +106,7 @@ async function createSafeBinsExecTool(params: {
     },
   };
 
-  const tools = createHanzoBotCodingTools({
+  const tools = createBotCodingTools({
     config: cfg,
     sessionKey: "agent:main:main",
     workspaceDir: tmpDir,
@@ -134,7 +134,7 @@ async function withSafeBinsExecTool(
   }
 }
 
-describe("createHanzoBotCodingTools safeBins", () => {
+describe("createBotCodingTools safeBins", () => {
   it("threads tools.exec.safeBins into exec allowlist checks", async () => {
     await withSafeBinsExecTool(
       {

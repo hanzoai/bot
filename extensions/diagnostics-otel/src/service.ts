@@ -1,6 +1,6 @@
 import type {
   DiagnosticEventPayload,
-  HanzoBotPluginService,
+  BotPluginService,
 } from "@hanzo/bot/plugin-sdk/diagnostics-otel";
 import {
   onDiagnosticEvent,
@@ -69,7 +69,7 @@ function redactOtelAttributes(attributes: Record<string, string | number | boole
   return redactedAttributes;
 }
 
-export function createDiagnosticsOtelService(): HanzoBotPluginService {
+export function createDiagnosticsOtelService(): BotPluginService {
   let sdk: NodeSDK | null = null;
   let logProvider: LoggerProvider | null = null;
   let stopLogTransport: (() => void) | null = null;
@@ -681,5 +681,5 @@ export function createDiagnosticsOtelService(): HanzoBotPluginService {
         sdk = null;
       }
     },
-  } satisfies HanzoBotPluginService;
+  } satisfies BotPluginService;
 }

@@ -96,10 +96,10 @@ export { ACP_ERROR_CODES, AcpRuntimeError } from "../acp/runtime/errors.js";
 export type { AcpRuntimeErrorCode } from "../acp/runtime/errors.js";
 export type {
   AnyAgentTool,
-  HanzoBotPluginConfigSchema,
+  BotPluginConfigSchema,
   BotPluginApi,
-  HanzoBotPluginService,
-  HanzoBotPluginServiceContext,
+  BotPluginService,
+  BotPluginServiceContext,
   PluginLogger,
   ProviderAuthContext,
   ProviderAuthResult,
@@ -320,7 +320,7 @@ export type {
   WindowsSpawnProgram,
   WindowsSpawnResolution,
 } from "./windows-spawn.js";
-export { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-bot-dir.js";
+export { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 export {
   runPluginCommandWithTimeout,
   type PluginCommandRunOptions,

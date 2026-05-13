@@ -6,7 +6,7 @@ import { captureEnv } from "../test-utils/env.js";
 import type { UpdateCheckResult } from "./update-check.js";
 
 vi.mock("./bot-root.js", () => ({
-  resolveHanzoBotPackageRoot: vi.fn(),
+  resolveBotPackageRoot: vi.fn(),
 }));
 
 vi.mock("./update-check.js", async () => {
@@ -45,7 +45,7 @@ describe("update-startup", () => {
   let tempDir: string;
   let envSnapshot: ReturnType<typeof captureEnv>;
 
-  let resolveHanzoBotPackageRoot: (typeof import("./bot-root.js"))["resolveHanzoBotPackageRoot"];
+  let resolveBotPackageRoot: (typeof import("./bot-root.js"))["resolveBotPackageRoot"];
   let checkUpdateStatus: (typeof import("./update-check.js"))["checkUpdateStatus"];
   let resolveNpmChannelTag: (typeof import("./update-check.js"))["resolveNpmChannelTag"];
   let runCommandWithTimeout: (typeof import("../process/exec.js"))["runCommandWithTimeout"];
@@ -74,7 +74,7 @@ describe("update-startup", () => {
 
     // Perf: load mocked modules once (after timers/env are set up).
     if (!loaded) {
-      ({ resolveHanzoBotPackageRoot } = await import("./bot-root.js"));
+      ({ resolveBotPackageRoot } = await import("./bot-root.js"));
       ({ checkUpdateStatus, resolveNpmChannelTag } = await import("./update-check.js"));
       ({ runCommandWithTimeout } = await import("../process/exec.js"));
       ({
@@ -85,7 +85,7 @@ describe("update-startup", () => {
       } = await import("./update-startup.js"));
       loaded = true;
     }
-    vi.mocked(resolveHanzoBotPackageRoot).mockClear();
+    vi.mocked(resolveBotPackageRoot).mockClear();
     vi.mocked(checkUpdateStatus).mockClear();
     vi.mocked(resolveNpmChannelTag).mockClear();
     vi.mocked(runCommandWithTimeout).mockClear();
@@ -112,7 +112,7 @@ describe("update-startup", () => {
   }
 
   function mockPackageInstallStatus() {
-    vi.mocked(resolveHanzoBotPackageRoot).mockResolvedValue("/opt/bot");
+    vi.mocked(resolveBotPackageRoot).mockResolvedValue("/opt/bot");
     vi.mocked(checkUpdateStatus).mockResolvedValue({
       root: "/opt/bot",
       installKind: "package",
