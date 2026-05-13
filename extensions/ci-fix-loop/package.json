@@ -5,10 +5,10 @@
   "description": "Autonomous CI failure detection, classification, and fix loop with budget controls",
   "type": "module",
   "devDependencies": {
-    "@hanzo/bot": "workspace:*"
+    "@hanzobot/ts": "workspace:*"
   },
   "peerDependencies": {
-    "@hanzo/bot": ">=2026.1.26"
+    "@hanzobot/ts": ">=2026.1.26"
   },
   "bot": {
     "extensions": [
