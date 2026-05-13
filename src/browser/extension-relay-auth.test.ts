@@ -2,7 +2,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import type { AddressInfo } from "node:net";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-  probeAuthenticatedHanzoBotRelay,
+  probeAuthenticatedBotRelay,
   resolveRelayAcceptedTokensForPort,
   resolveRelayAuthTokenForPort,
 } from "./extension-relay-auth.js";
@@ -36,7 +36,7 @@ function handleNonVersionRequest(req: IncomingMessage, res: ServerResponse): boo
 }
 
 async function probeRelay(baseUrl: string, relayAuthToken: string): Promise<boolean> {
-  return await probeAuthenticatedHanzoBotRelay({
+  return await probeAuthenticatedBotRelay({
     baseUrl,
     relayAuthHeader: "x-bot-relay-token",
     relayAuthToken,

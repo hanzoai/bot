@@ -69,8 +69,8 @@ vi.mock("node:fs", async (importOriginal) => {
 });
 
 vi.mock("./bot-root.js", () => ({
-  resolveHanzoBotPackageRoot: vi.fn(async () => null),
-  resolveHanzoBotPackageRootSync: vi.fn(() => null),
+  resolveBotPackageRoot: vi.fn(async () => null),
+  resolveBotPackageRootSync: vi.fn(() => null),
 }));
 
 let resolveControlUiRepoRoot: typeof import("./control-ui-assets.js").resolveControlUiRepoRoot;
@@ -124,11 +124,11 @@ describe("control UI assets helpers (fs-mocked)", () => {
     );
   });
 
-  it("uses resolveHanzoBotPackageRoot when available", async () => {
+  it("uses resolveBotPackageRoot when available", async () => {
     const pkgRoot = abs("fixtures/bot");
-    (
-      botRoot.resolveHanzoBotPackageRoot as unknown as ReturnType<typeof vi.fn>
-    ).mockResolvedValueOnce(pkgRoot);
+    (botRoot.resolveBotPackageRoot as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      pkgRoot,
+    );
 
     await expect(resolveControlUiDistIndexPath(abs("fixtures/bin/bot"))).resolves.toBe(
       path.join(pkgRoot, "dist", "control-ui", "index.html"),
@@ -184,9 +184,9 @@ describe("control UI assets helpers (fs-mocked)", () => {
 
   it("resolves control-ui root for dist bundle argv1 and moduleUrl candidates", async () => {
     const pkgRoot = abs("fixtures/bot-bundle");
-    (
-      botRoot.resolveHanzoBotPackageRootSync as unknown as ReturnType<typeof vi.fn>
-    ).mockReturnValueOnce(pkgRoot);
+    (botRoot.resolveBotPackageRootSync as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+      pkgRoot,
+    );
 
     const uiDir = path.join(pkgRoot, "dist", "control-ui");
     setFile(path.join(uiDir, "index.html"), "<html></html>\n");

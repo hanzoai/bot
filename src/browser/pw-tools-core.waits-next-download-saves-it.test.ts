@@ -12,7 +12,7 @@ import {
 installPwToolsCoreTestHooks();
 const sessionMocks = getPwToolsCoreSessionMocks();
 const tmpDirMocks = vi.hoisted(() => ({
-  resolvePreferredHanzoBotTmpDir: vi.fn(() => "/tmp/bot"),
+  resolvePreferredBotTmpDir: vi.fn(() => "/tmp/bot"),
 }));
 vi.mock("../infra/tmp-bot-dir.js", () => tmpDirMocks);
 const mod = await import("./pw-tools-core.js");
@@ -22,7 +22,7 @@ describe("pw-tools-core", () => {
     for (const fn of Object.values(tmpDirMocks)) {
       fn.mockClear();
     }
-    tmpDirMocks.resolvePreferredHanzoBotTmpDir.mockReturnValue("/tmp/bot");
+    tmpDirMocks.resolvePreferredBotTmpDir.mockReturnValue("/tmp/bot");
   });
 
   async function withTempDir<T>(run: (tempDir: string) => Promise<T>): Promise<T> {
@@ -200,7 +200,7 @@ describe("pw-tools-core", () => {
   );
 
   it("uses preferred tmp dir when waiting for download without explicit path", async () => {
-    tmpDirMocks.resolvePreferredHanzoBotTmpDir.mockReturnValue("/tmp/bot-preferred");
+    tmpDirMocks.resolvePreferredBotTmpDir.mockReturnValue("/tmp/bot-preferred");
     const { res, outPath } = await waitForImplicitDownloadOutput({
       downloadUrl: "https://example.com/file.bin",
       suggestedFilename: "file.bin",
@@ -213,11 +213,11 @@ describe("pw-tools-core", () => {
     expect(path.dirname(String(outPath))).toBe(expectedRootedDownloadsDir);
     expect(path.basename(String(outPath))).toMatch(/-file\.bin$/);
     expect(path.normalize(res.path)).toContain(path.normalize(expectedDownloadsTail));
-    expect(tmpDirMocks.resolvePreferredHanzoBotTmpDir).toHaveBeenCalled();
+    expect(tmpDirMocks.resolvePreferredBotTmpDir).toHaveBeenCalled();
   });
 
   it("sanitizes suggested download filenames to prevent traversal escapes", async () => {
-    tmpDirMocks.resolvePreferredHanzoBotTmpDir.mockReturnValue("/tmp/bot-preferred");
+    tmpDirMocks.resolvePreferredBotTmpDir.mockReturnValue("/tmp/bot-preferred");
     const { res, outPath } = await waitForImplicitDownloadOutput({
       downloadUrl: "https://example.com/evil",
       suggestedFilename: "../../../../etc/passwd",

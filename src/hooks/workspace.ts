@@ -10,7 +10,7 @@ import { resolveBundledHooksDir } from "./bundled-dir.js";
 import { shouldIncludeHook } from "./config.js";
 import {
   parseFrontmatter,
-  resolveHanzoBotMetadata,
+  resolveBotMetadata,
   resolveHookInvocationPolicy,
 } from "./frontmatter.js";
 import type {
@@ -220,7 +220,7 @@ export function loadHookEntriesFromDir(params: {
         pluginId: params.pluginId,
       },
       frontmatter,
-      metadata: resolveHanzoBotMetadata(frontmatter),
+      metadata: resolveBotMetadata(frontmatter),
       invocation: resolveHookInvocationPolicy(frontmatter),
     };
     return entry;
@@ -293,7 +293,7 @@ function loadHookEntries(
     return {
       hook,
       frontmatter,
-      metadata: resolveHanzoBotMetadata(frontmatter),
+      metadata: resolveBotMetadata(frontmatter),
       invocation: resolveHookInvocationPolicy(frontmatter),
     };
   });

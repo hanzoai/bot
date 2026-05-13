@@ -1,4 +1,4 @@
-import type { AcpRuntime, HanzoBotPluginServiceContext } from "@hanzo/bot/plugin-sdk/acpx";
+import type { AcpRuntime, BotPluginServiceContext } from "@hanzo/bot/plugin-sdk/acpx";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AcpRuntimeError } from "../../../src/acp/runtime/errors.js";
 import {
@@ -54,8 +54,8 @@ function createRuntimeStub(healthy: boolean): {
 }
 
 function createServiceContext(
-  overrides: Partial<HanzoBotPluginServiceContext> = {},
-): HanzoBotPluginServiceContext {
+  overrides: Partial<BotPluginServiceContext> = {},
+): BotPluginServiceContext {
   return {
     config: {},
     workspaceDir: "/tmp/workspace",

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { resolvePreferredHanzoBotTmpDir } from "../../../../src/infra/tmp-bot-dir.js";
+import { resolvePreferredBotTmpDir } from "../../../../src/infra/tmp-bot-dir.js";
 import type { ResolvedAcpxPluginConfig } from "../config.js";
 import { ACPX_PINNED_VERSION } from "../config.js";
 import { AcpxRuntime } from "../runtime.js";
@@ -321,9 +321,7 @@ async function ensureMockCliScriptPath(): Promise<string> {
     return await sharedMockCliScriptPath;
   }
   sharedMockCliScriptPath = (async () => {
-    const dir = await mkdtemp(
-      path.join(resolvePreferredHanzoBotTmpDir(), "bot-acpx-runtime-test-"),
-    );
+    const dir = await mkdtemp(path.join(resolvePreferredBotTmpDir(), "bot-acpx-runtime-test-"));
     tempDirs.push(dir);
     const scriptPath = path.join(dir, "mock-acpx.cjs");
     await writeFile(scriptPath, MOCK_CLI_SCRIPT, "utf8");
