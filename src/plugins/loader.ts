@@ -15,7 +15,7 @@ import {
   resolveMemorySlotDecision,
   type NormalizedPluginsConfig,
 } from "./config-state.js";
-import { discoverHanzoBotPlugins } from "./discovery.js";
+import { discoverBotPlugins } from "./discovery.js";
 import { initializeGlobalHookRunner } from "./hook-runner-global.js";
 import { loadPluginManifestRegistry } from "./manifest-registry.js";
 import { isPathInside, safeStatSync } from "./path-safety.js";
@@ -25,8 +25,8 @@ import { createPluginRuntime, type CreatePluginRuntimeOptions } from "./runtime/
 import type { PluginRuntime } from "./runtime/types.js";
 import { validateJsonSchemaValue } from "./schema-validator.js";
 import type {
-  HanzoBotPluginDefinition,
-  HanzoBotPluginModule,
+  BotPluginDefinition,
+  BotPluginModule,
   PluginDiagnostic,
   PluginLogger,
 } from "./types.js";
@@ -227,8 +227,8 @@ function validatePluginConfig(params: {
 }
 
 function resolvePluginModuleExport(moduleExport: unknown): {
-  definition?: HanzoBotPluginDefinition;
-  register?: HanzoBotPluginDefinition["register"];
+  definition?: BotPluginDefinition;
+  register?: BotPluginDefinition["register"];
 } {
   const resolved =
     moduleExport &&
@@ -238,11 +238,11 @@ function resolvePluginModuleExport(moduleExport: unknown): {
       : moduleExport;
   if (typeof resolved === "function") {
     return {
-      register: resolved as HanzoBotPluginDefinition["register"],
+      register: resolved as BotPluginDefinition["register"],
     };
   }
   if (resolved && typeof resolved === "object") {
-    const def = resolved as HanzoBotPluginDefinition;
+    const def = resolved as BotPluginDefinition;
     const register = def.register ?? def.activate;
     return { definition: def, register };
   }
@@ -539,7 +539,7 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
     coreGatewayHandlers: options.coreGatewayHandlers as Record<string, GatewayRequestHandler>,
   });
 
-  const discovery = discoverHanzoBotPlugins({
+  const discovery = discoverBotPlugins({
     workspaceDir: options.workspaceDir,
     extraPaths: normalized.loadPaths,
     cache: options.cache,
@@ -705,9 +705,9 @@ export function loadBotPlugins(options: PluginLoadOptions = {}): PluginRegistry 
     const safeSource = opened.path;
     fs.closeSync(opened.fd);
 
-    let mod: HanzoBotPluginModule | null = null;
+    let mod: BotPluginModule | null = null;
     try {
-      mod = getJiti()(safeSource) as HanzoBotPluginModule;
+      mod = getJiti()(safeSource) as BotPluginModule;
     } catch (err) {
       recordPluginError({
         logger,

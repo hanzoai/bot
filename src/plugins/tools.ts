@@ -4,7 +4,7 @@ import { createSubsystemLogger } from "../logging/subsystem.js";
 import { applyTestPluginDefaults, normalizePluginsConfig } from "./config-state.js";
 import { loadBotPlugins } from "./loader.js";
 import { createPluginLoaderLogger } from "./logger.js";
-import type { HanzoBotPluginToolContext } from "./types.js";
+import type { BotPluginToolContext } from "./types.js";
 
 const log = createSubsystemLogger("plugins");
 
@@ -43,7 +43,7 @@ function isOptionalToolAllowed(params: {
 }
 
 export function resolvePluginTools(params: {
-  context: HanzoBotPluginToolContext;
+  context: BotPluginToolContext;
   existingToolNames?: Set<string>;
   toolAllowlist?: string[];
   suppressNameConflicts?: boolean;
