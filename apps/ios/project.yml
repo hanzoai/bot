@@ -11,8 +11,8 @@ settings:
     ENABLE_APP_INTENTS_METADATA_GENERATION: NO
 
 packages:
-  HanzoBotKit:
-    path: ../shared/HanzoBotKit
+  BotKit:
+    path: ../shared/BotKit
   Swabble:
     path: ../../Swabble
 
@@ -41,10 +41,10 @@ targets:
       - target: HanzoBotActivityWidget
         embed: true
       - target: HanzoBotWatchApp
-      - package: HanzoBotKit
-      - package: HanzoBotKit
+      - package: BotKit
+      - package: BotKit
         product: HanzoBotChatUI
-      - package: HanzoBotKit
+      - package: BotKit
         product: HanzoBotProtocol
       - package: Swabble
         product: SwabbleKit
@@ -139,7 +139,7 @@ targets:
     sources:
       - path: ShareExtension
     dependencies:
-      - package: HanzoBotKit
+      - package: BotKit
       - sdk: AppIntents.framework
     settings:
       base:

@@ -6,7 +6,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import { isLoopbackAddress, isLoopbackHost } from "../gateway/net.js";
 import { rawDataToString } from "../infra/ws.js";
 import {
-  probeAuthenticatedHanzoBotRelay,
+  probeAuthenticatedBotRelay,
   resolveRelayAcceptedTokensForPort,
   resolveRelayAuthTokenForPort,
 } from "./extension-relay-auth.js";
@@ -968,7 +968,7 @@ export async function ensureChromeExtensionRelayServer(opts: {
     } catch (err) {
       if (
         isAddrInUseError(err) &&
-        (await probeAuthenticatedHanzoBotRelay({
+        (await probeAuthenticatedBotRelay({
           baseUrl: info.baseUrl,
           relayAuthHeader: RELAY_AUTH_HEADER,
           relayAuthToken,
