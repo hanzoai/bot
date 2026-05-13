@@ -5,10 +5,10 @@
   "description": "Continuous learning via GRPO experience management and telemetry feedback",
   "type": "module",
   "devDependencies": {
-    "@hanzo/bot": "workspace:*"
+    "@hanzobot/ts": "workspace:*"
   },
   "peerDependencies": {
-    "@hanzo/bot": ">=2026.1.26"
+    "@hanzobot/ts": ">=2026.1.26"
   },
   "bot": {
     "extensions": [
