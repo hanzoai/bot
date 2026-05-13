@@ -33,7 +33,7 @@ import {
   resolveSystemPromptUsage,
   writeCliImages,
 } from "./cli-runner/helpers.js";
-import { resolveHanzoBotDocsPath } from "./docs-path.js";
+import { resolveBotDocsPath } from "./docs-path.js";
 import { FailoverError, resolveFailoverStatus } from "./failover-error.js";
 import {
   classifyFailoverReason,
@@ -138,7 +138,7 @@ export async function runCliAgent(params: {
     sessionAgentId === defaultAgentId
       ? resolveHeartbeatPrompt(params.config?.agents?.defaults?.heartbeat?.prompt)
       : undefined;
-  const docsPath = await resolveHanzoBotDocsPath({
+  const docsPath = await resolveBotDocsPath({
     workspaceDir,
     argv1: process.argv[1],
     cwd: process.cwd(),

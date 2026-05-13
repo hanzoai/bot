@@ -16,7 +16,7 @@ export type SkillInstallSpec = {
   targetDir?: string;
 };
 
-export type HanzoBotSkillMetadata = {
+export type BotSkillMetadata = {
   always?: boolean;
   skillKey?: string;
   primaryEnv?: string;
@@ -66,7 +66,7 @@ export type ParsedSkillFrontmatter = Record<string, string>;
 export type SkillEntry = {
   skill: Skill;
   frontmatter: ParsedSkillFrontmatter;
-  metadata?: HanzoBotSkillMetadata;
+  metadata?: BotSkillMetadata;
   invocation?: SkillInvocationPolicy;
 };
 

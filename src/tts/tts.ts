@@ -23,7 +23,7 @@ import type {
   TtsModelOverrideConfig,
 } from "../config/types.tts.js";
 import { logVerbose } from "../globals.js";
-import { resolvePreferredHanzoBotTmpDir } from "../infra/tmp-bot-dir.js";
+import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 import { stripMarkdown } from "../line/markdown-to-line.js";
 import { isVoiceCompatibleAudio } from "../media/audio.js";
 import { CONFIG_DIR, resolveUserPath } from "../utils.js";
@@ -589,7 +589,7 @@ export async function textToSpeech(params: {
           continue;
         }
 
-        const tempRoot = resolvePreferredHanzoBotTmpDir();
+        const tempRoot = resolvePreferredBotTmpDir();
         mkdirSync(tempRoot, { recursive: true, mode: 0o700 });
         const tempDir = mkdtempSync(path.join(tempRoot, "tts-"));
         let edgeOutputFormat = resolveEdgeOutputFormat(config);
@@ -699,7 +699,7 @@ export async function textToSpeech(params: {
 
       const latencyMs = Date.now() - providerStart;
 
-      const tempRoot = resolvePreferredHanzoBotTmpDir();
+      const tempRoot = resolvePreferredBotTmpDir();
       mkdirSync(tempRoot, { recursive: true, mode: 0o700 });
       const tempDir = mkdtempSync(path.join(tempRoot, "tts-"));
       const audioPath = path.join(tempDir, `voice-${Date.now()}${output.extension}`);
