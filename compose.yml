@@ -3,7 +3,7 @@
 # Each image is published from its own repo — this compose only wires them.
 services:
   bot:
-    image: ghcr.io/hanzobot/ts:latest
+    image: ghcr.io/hanzobot/core:latest
     restart: unless-stopped
     ports:
       - "18789:18789"   # gateway WS + HTTP
