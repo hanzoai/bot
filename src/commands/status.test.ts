@@ -307,7 +307,7 @@ vi.mock("../gateway/session-utils.js", async (importOriginal) => {
   };
 });
 vi.mock("../infra/bot-root.js", () => ({
-  resolveHanzoBotPackageRoot: vi.fn().mockResolvedValue("/tmp/bot"),
+  resolveBotPackageRoot: vi.fn().mockResolvedValue("/tmp/bot"),
 }));
 vi.mock("../infra/os-summary.js", () => ({
   resolveOsSummary: () => ({

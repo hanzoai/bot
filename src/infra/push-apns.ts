@@ -424,7 +424,7 @@ function toApnsPushResult(params: {
   };
 }
 
-function createHanzoBotPushMetadata(params: {
+function createBotPushMetadata(params: {
   kind: "push.test" | "node.wake";
   nodeId: string;
   reason?: string;
@@ -481,7 +481,7 @@ export async function sendApnsAlert(params: {
       },
       sound: "default",
     },
-    bot: createHanzoBotPushMetadata({
+    bot: createBotPushMetadata({
       kind: "push.test",
       nodeId: params.nodeId,
     }),
@@ -510,7 +510,7 @@ export async function sendApnsBackgroundWake(params: {
     aps: {
       "content-available": 1,
     },
-    bot: createHanzoBotPushMetadata({
+    bot: createBotPushMetadata({
       kind: "node.wake",
       reason: params.wakeReason ?? "node.invoke",
       nodeId: params.nodeId,

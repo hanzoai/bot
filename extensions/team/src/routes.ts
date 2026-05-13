@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/team";
-import { resolvePreferredHanzoBotTmpDir } from "@hanzo/bot/plugin-sdk/team";
+import { resolvePreferredBotTmpDir } from "@hanzo/bot/plugin-sdk/team";
 import { connectWorkspace, getWorkspace, listWorkspaces } from "./workspace.js";
 
 // ---------------------------------------------------------------------------
@@ -94,7 +94,7 @@ async function runLlmPrompt(
   const runAgent = await loadRunEmbeddedPiAgent();
   let tmpDir: string | null = null;
   try {
-    tmpDir = await fs.mkdtemp(path.join(resolvePreferredHanzoBotTmpDir(), "team-llm-"));
+    tmpDir = await fs.mkdtemp(path.join(resolvePreferredBotTmpDir(), "team-llm-"));
     const sessionId = `team-${Date.now()}`;
     const sessionFile = path.join(tmpDir, "session.json");
 
