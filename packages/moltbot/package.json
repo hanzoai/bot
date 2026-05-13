@@ -11,6 +11,6 @@
     "./cli-entry": "./bin/moltbot.js"
   },
   "dependencies": {
-    "@hanzobot/ts": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   }
 }
