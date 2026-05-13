@@ -27,7 +27,7 @@ describe("browser server-context remote profile tab operations", () => {
     };
 
     const reachableMock = vi.mocked(chromeModule.isChromeReachable).mockResolvedValueOnce(false);
-    const launchMock = vi.mocked(chromeModule.launchHanzoBotChrome);
+    const launchMock = vi.mocked(chromeModule.launchBotChrome);
     const ctx = createBrowserRouteContext({ getState: () => state });
 
     await expect(ctx.forProfile("bot").ensureBrowserAvailable()).rejects.toThrow(
@@ -48,7 +48,7 @@ describe("browser server-context remote profile tab operations", () => {
 
     const httpReachableMock = vi.mocked(chromeModule.isChromeReachable).mockResolvedValueOnce(true);
     const wsReachableMock = vi.mocked(chromeModule.isChromeCdpReady).mockResolvedValueOnce(false);
-    const launchMock = vi.mocked(chromeModule.launchHanzoBotChrome);
+    const launchMock = vi.mocked(chromeModule.launchBotChrome);
     const ctx = createBrowserRouteContext({ getState: () => state });
 
     await expect(ctx.forProfile("bot").ensureBrowserAvailable()).rejects.toThrow(

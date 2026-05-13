@@ -30,7 +30,7 @@ const mocks = vi.hoisted(() => {
 
   return {
     store,
-    resolveHanzoBotAgentDir: vi.fn().mockReturnValue("/tmp/bot-agent"),
+    resolveBotAgentDir: vi.fn().mockReturnValue("/tmp/bot-agent"),
     resolveAgentDir: vi.fn().mockReturnValue("/tmp/bot-agent"),
     resolveAgentExplicitModelPrimary: vi.fn().mockReturnValue(undefined),
     resolveAgentEffectiveModelPrimary: vi.fn().mockReturnValue(undefined),
@@ -77,7 +77,7 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock("../../agents/agent-paths.js", () => ({
-  resolveHanzoBotAgentDir: mocks.resolveHanzoBotAgentDir,
+  resolveBotAgentDir: mocks.resolveBotAgentDir,
 }));
 
 vi.mock("../../agents/agent-scope.js", () => ({
@@ -196,7 +196,7 @@ describe("modelsStatusCommand auth overview", () => {
     await modelsStatusCommand({ json: true }, runtime as never);
     const payload = JSON.parse(String((runtime.log as Mock).mock.calls[0]?.[0]));
 
-    expect(mocks.resolveHanzoBotAgentDir).toHaveBeenCalled();
+    expect(mocks.resolveBotAgentDir).toHaveBeenCalled();
     expect(payload.defaultModel).toBe("anthropic/claude-opus-4-5");
     expect(payload.auth.storePath).toBe("/tmp/bot-agent/auth-profiles.json");
     expect(payload.auth.shellEnvFallback.enabled).toBe(true);
