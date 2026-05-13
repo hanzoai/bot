@@ -6,8 +6,8 @@
   "type": "module",
   "main": "./index.ts",
   "peerDependencies": {
-    "@hanzo/bot-graph-links": "*",
-    "@hanzo/bot-memory": "*"
+    "@hanzo/bot-graph-links": "workspace:*",
+    "@hanzo/bot-memory": "workspace:*"
   },
   "hanzo-bot": {
     "extensions": [
