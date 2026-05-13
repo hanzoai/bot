@@ -46,7 +46,7 @@ describe("state + config path candidates", () => {
     }
   }
 
-  function expectHanzoBotHomeDefaults(env: NodeJS.ProcessEnv): void {
+  function expectBotHomeDefaults(env: NodeJS.ProcessEnv): void {
     const configuredHome = env.BOT_HOME;
     if (!configuredHome) {
       throw new Error("BOT_HOME must be set for this assertion helper");
@@ -70,7 +70,7 @@ describe("state + config path candidates", () => {
     const env = {
       BOT_HOME: "/srv/bot-home",
     } as NodeJS.ProcessEnv;
-    expectHanzoBotHomeDefaults(env);
+    expectBotHomeDefaults(env);
   });
 
   it("prefers BOT_HOME over HOME for default state/config locations", () => {
@@ -78,7 +78,7 @@ describe("state + config path candidates", () => {
       BOT_HOME: "/srv/bot-home",
       HOME: "/home/other",
     } as NodeJS.ProcessEnv;
-    expectHanzoBotHomeDefaults(env);
+    expectBotHomeDefaults(env);
   });
 
   it("orders default config candidates in a stable order", () => {

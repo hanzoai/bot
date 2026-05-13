@@ -7,7 +7,7 @@ export type HookInstallSpec = {
   bins?: string[];
 };
 
-export type HanzoBotHookMetadata = {
+export type BotHookMetadata = {
   always?: boolean;
   hookKey?: string;
   emoji?: string;
@@ -47,7 +47,7 @@ export type HookSource = Hook["source"];
 export type HookEntry = {
   hook: Hook;
   frontmatter: ParsedHookFrontmatter;
-  metadata?: HanzoBotHookMetadata;
+  metadata?: BotHookMetadata;
   invocation?: HookInvocationPolicy;
 };
 

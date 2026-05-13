@@ -15,18 +15,18 @@ import { normalizePluginHttpPath } from "./http-path.js";
 import type { PluginRuntime } from "./runtime/types.js";
 import type {
   BotPluginApi,
-  HanzoBotPluginChannelRegistration,
-  HanzoBotPluginCliRegistrar,
-  HanzoBotPluginCommandDefinition,
-  HanzoBotPluginHttpRouteAuth,
-  HanzoBotPluginHttpRouteMatch,
-  HanzoBotPluginHttpRouteHandler,
-  HanzoBotPluginHttpRouteParams,
-  HanzoBotPluginHookOptions,
+  BotPluginChannelRegistration,
+  BotPluginCliRegistrar,
+  BotPluginCommandDefinition,
+  BotPluginHttpRouteAuth,
+  BotPluginHttpRouteMatch,
+  BotPluginHttpRouteHandler,
+  BotPluginHttpRouteParams,
+  BotPluginHookOptions,
   ProviderPlugin,
-  HanzoBotPluginService,
-  HanzoBotPluginToolContext,
-  HanzoBotPluginToolFactory,
+  BotPluginService,
+  BotPluginToolContext,
+  BotPluginToolFactory,
   PluginConfigUiHint,
   PluginDiagnostic,
   PluginLogger,
@@ -44,7 +44,7 @@ import {
 
 export type PluginToolRegistration = {
   pluginId: string;
-  factory: HanzoBotPluginToolFactory;
+  factory: BotPluginToolFactory;
   names: string[];
   optional: boolean;
   source: string;
@@ -52,7 +52,7 @@ export type PluginToolRegistration = {
 
 export type PluginCliRegistration = {
   pluginId: string;
-  register: HanzoBotPluginCliRegistrar;
+  register: BotPluginCliRegistrar;
   commands: string[];
   source: string;
 };
@@ -60,9 +60,9 @@ export type PluginCliRegistration = {
 export type PluginHttpRouteRegistration = {
   pluginId?: string;
   path: string;
-  handler: HanzoBotPluginHttpRouteHandler;
-  auth: HanzoBotPluginHttpRouteAuth;
-  match: HanzoBotPluginHttpRouteMatch;
+  handler: BotPluginHttpRouteHandler;
+  auth: BotPluginHttpRouteAuth;
+  match: BotPluginHttpRouteMatch;
   source?: string;
 };
 
@@ -88,13 +88,13 @@ export type PluginHookRegistration = {
 
 export type PluginServiceRegistration = {
   pluginId: string;
-  service: HanzoBotPluginService;
+  service: BotPluginService;
   source: string;
 };
 
 export type PluginCommandRegistration = {
   pluginId: string;
-  command: HanzoBotPluginCommandDefinition;
+  command: BotPluginCommandDefinition;
   source: string;
 };
 
@@ -191,13 +191,13 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
 
   const registerTool = (
     record: PluginRecord,
-    tool: AnyAgentTool | HanzoBotPluginToolFactory,
+    tool: AnyAgentTool | BotPluginToolFactory,
     opts?: { name?: string; names?: string[]; optional?: boolean },
   ) => {
     const names = opts?.names ?? (opts?.name ? [opts.name] : []);
     const optional = opts?.optional === true;
-    const factory: HanzoBotPluginToolFactory =
-      typeof tool === "function" ? tool : (_ctx: HanzoBotPluginToolContext) => tool;
+    const factory: BotPluginToolFactory =
+      typeof tool === "function" ? tool : (_ctx: BotPluginToolContext) => tool;
 
     if (typeof tool !== "function") {
       names.push(tool.name);
@@ -220,7 +220,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     record: PluginRecord,
     events: string | string[],
     handler: Parameters<typeof registerInternalHook>[1],
-    opts: HanzoBotPluginHookOptions | undefined,
+    opts: BotPluginHookOptions | undefined,
     config: BotPluginApi["config"],
   ) => {
     const eventList = Array.isArray(events) ? events : [events];
@@ -314,7 +314,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     return `${plugin} (${source})`;
   };
 
-  const registerHttpRoute = (record: PluginRecord, params: HanzoBotPluginHttpRouteParams) => {
+  const registerHttpRoute = (record: PluginRecord, params: BotPluginHttpRouteParams) => {
     const normalizedPath = normalizePluginHttpPath(params.path);
     if (!normalizedPath) {
       pushDiagnostic({
@@ -384,11 +384,11 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
 
   const registerChannel = (
     record: PluginRecord,
-    registration: HanzoBotPluginChannelRegistration | ChannelPlugin,
+    registration: BotPluginChannelRegistration | ChannelPlugin,
   ) => {
     const normalized =
-      typeof (registration as HanzoBotPluginChannelRegistration).plugin === "object"
-        ? (registration as HanzoBotPluginChannelRegistration)
+      typeof (registration as BotPluginChannelRegistration).plugin === "object"
+        ? (registration as BotPluginChannelRegistration)
         : { plugin: registration as ChannelPlugin };
     const plugin = normalized.plugin;
     const id = typeof plugin?.id === "string" ? plugin.id.trim() : String(plugin?.id ?? "").trim();
@@ -441,7 +441,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
 
   const registerCli = (
     record: PluginRecord,
-    registrar: HanzoBotPluginCliRegistrar,
+    registrar: BotPluginCliRegistrar,
     opts?: { commands?: string[] },
   ) => {
     const commands = (opts?.commands ?? []).map((cmd) => cmd.trim()).filter(Boolean);
@@ -454,7 +454,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     });
   };
 
-  const registerService = (record: PluginRecord, service: HanzoBotPluginService) => {
+  const registerService = (record: PluginRecord, service: BotPluginService) => {
     const id = service.id.trim();
     if (!id) {
       return;
@@ -467,7 +467,7 @@ export function createPluginRegistry(registryParams: PluginRegistryParams) {
     });
   };
 
-  const registerCommand = (record: PluginRecord, command: HanzoBotPluginCommandDefinition) => {
+  const registerCommand = (record: PluginRecord, command: BotPluginCommandDefinition) => {
     const name = command.name.trim();
     if (!name) {
       pushDiagnostic({

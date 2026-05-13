@@ -146,7 +146,7 @@ export type PluginPackageInstall = {
   defaultChoice?: "npm" | "local";
 };
 
-export type HanzoBotPackageManifest = {
+export type BotPackageManifest = {
   extensions?: string[];
   channel?: PluginPackageChannel;
   install?: PluginPackageInstall;
@@ -170,11 +170,11 @@ export type PackageManifest = {
   name?: string;
   version?: string;
   description?: string;
-} & Partial<Record<ManifestKey, HanzoBotPackageManifest>>;
+} & Partial<Record<ManifestKey, BotPackageManifest>>;
 
 export function getPackageManifestMetadata(
   manifest: PackageManifest | undefined,
-): HanzoBotPackageManifest | undefined {
+): BotPackageManifest | undefined {
   if (!manifest) {
     return undefined;
   }

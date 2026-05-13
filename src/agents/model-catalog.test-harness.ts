@@ -4,11 +4,11 @@ import { __setModelCatalogImportForTest, resetModelCatalogCacheForTest } from ".
 export type PiSdkModule = typeof import("./pi-model-discovery.js");
 
 vi.mock("./models-config.js", () => ({
-  ensureHanzoBotModelsJson: vi.fn().mockResolvedValue({ agentDir: "/tmp", wrote: false }),
+  ensureBotModelsJson: vi.fn().mockResolvedValue({ agentDir: "/tmp", wrote: false }),
 }));
 
 vi.mock("./agent-paths.js", () => ({
-  resolveHanzoBotAgentDir: () => "/tmp/bot",
+  resolveBotAgentDir: () => "/tmp/bot",
 }));
 
 export function installModelCatalogTestHooks() {

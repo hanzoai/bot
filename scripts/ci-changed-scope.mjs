@@ -5,7 +5,7 @@ import { appendFileSync } from "node:fs";
 
 const DOCS_PATH_RE = /^(docs\/|.*\.mdx?$)/;
 const MACOS_PROTOCOL_GEN_RE =
-  /^(apps\/macos\/Sources\/HanzoBotProtocol\/|apps\/shared\/HanzoBotKit\/Sources\/HanzoBotProtocol\/)/;
+  /^(apps\/macos\/Sources\/BotProtocol\/|apps\/shared\/BotKit\/Sources\/BotProtocol\/)/;
 const MACOS_NATIVE_RE = /^(apps\/macos\/|apps\/ios\/|apps\/shared\/|Swabble\/)/;
 const ANDROID_NATIVE_RE = /^(apps\/android\/|apps\/shared\/)/;
 const NODE_SCOPE_RE =

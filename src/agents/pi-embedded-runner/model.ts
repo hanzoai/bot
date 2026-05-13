@@ -2,7 +2,7 @@ import type { Api, Model } from "@mariozechner/pi-ai";
 import type { AuthStorage, ModelRegistry } from "@mariozechner/pi-coding-agent";
 import type { BotConfig } from "../../config/config.js";
 import type { ModelDefinitionConfig } from "../../config/types.js";
-import { resolveHanzoBotAgentDir } from "../agent-paths.js";
+import { resolveBotAgentDir } from "../agent-paths.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../defaults.js";
 import { buildModelAliasLines } from "../model-alias-lines.js";
 import { normalizeModelCompat } from "../model-compat.js";
@@ -219,7 +219,7 @@ export function resolveModel(
   authStorage: AuthStorage;
   modelRegistry: ModelRegistry;
 } {
-  const resolvedAgentDir = agentDir ?? resolveHanzoBotAgentDir();
+  const resolvedAgentDir = agentDir ?? resolveBotAgentDir();
   const authStorage = discoverAuthStorage(resolvedAgentDir);
   const modelRegistry = discoverModels(authStorage, resolvedAgentDir);
   const model = resolveModelWithRegistry({ provider, modelId, modelRegistry, cfg });

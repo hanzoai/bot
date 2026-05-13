@@ -3,9 +3,9 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { withEnv } from "../test-utils/env.js";
-import { resolveHanzoBotAgentDir } from "./agent-paths.js";
+import { resolveBotAgentDir } from "./agent-paths.js";
 
-describe("resolveHanzoBotAgentDir", () => {
+describe("resolveBotAgentDir", () => {
   const withTempStateDir = async (run: (stateDir: string) => void) => {
     const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-agent-"));
     try {
@@ -24,7 +24,7 @@ describe("resolveHanzoBotAgentDir", () => {
           PI_CODING_AGENT_DIR: undefined,
         },
         () => {
-          const resolved = resolveHanzoBotAgentDir();
+          const resolved = resolveBotAgentDir();
           expect(resolved).toBe(path.join(stateDir, "agents", "main", "agent"));
         },
       );
@@ -41,7 +41,7 @@ describe("resolveHanzoBotAgentDir", () => {
           PI_CODING_AGENT_DIR: undefined,
         },
         () => {
-          const resolved = resolveHanzoBotAgentDir();
+          const resolved = resolveBotAgentDir();
           expect(resolved).toBe(path.resolve(override));
         },
       );
@@ -58,7 +58,7 @@ describe("resolveHanzoBotAgentDir", () => {
           PI_CODING_AGENT_DIR: override,
         },
         () => {
-          const resolved = resolveHanzoBotAgentDir();
+          const resolved = resolveBotAgentDir();
           expect(resolved).toBe(path.resolve(override));
         },
       );
@@ -76,7 +76,7 @@ describe("resolveHanzoBotAgentDir", () => {
           PI_CODING_AGENT_DIR: fallbackOverride,
         },
         () => {
-          const resolved = resolveHanzoBotAgentDir();
+          const resolved = resolveBotAgentDir();
           expect(resolved).toBe(path.resolve(primaryOverride));
         },
       );
