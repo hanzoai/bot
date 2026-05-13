@@ -1,6 +1,6 @@
 module github.com/hanzo-bot/hanzo-bot/scripts/docs-i18n
 
-go 1.24.0
+go 1.26.3
 
 require (
 	github.com/joshp123/pi-golang v0.0.4
