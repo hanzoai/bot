@@ -1,6 +1,6 @@
 import type { Api, Model } from "@mariozechner/pi-ai";
 import type { ModelRegistry } from "@mariozechner/pi-coding-agent";
-import { resolveHanzoBotAgentDir } from "../../agents/agent-paths.js";
+import { resolveBotAgentDir } from "../../agents/agent-paths.js";
 import type { AuthProfileStore } from "../../agents/auth-profiles.js";
 import { listProfilesForProvider } from "../../agents/auth-profiles.js";
 import {
@@ -8,7 +8,7 @@ import {
   resolveAwsSdkEnvVarName,
   resolveEnvApiKey,
 } from "../../agents/model-auth.js";
-import { ensureHanzoBotModelsJson } from "../../agents/models-config.js";
+import { ensureBotModelsJson } from "../../agents/models-config.js";
 import { discoverAuthStorage, discoverModels } from "../../agents/pi-model-discovery.js";
 import type { BotConfig } from "../../config/config.js";
 import {
@@ -91,8 +91,8 @@ function loadAvailableModels(registry: ModelRegistry): Model<Api>[] {
 }
 
 export async function loadModelRegistry(cfg: BotConfig) {
-  await ensureHanzoBotModelsJson(cfg);
-  const agentDir = resolveHanzoBotAgentDir();
+  await ensureBotModelsJson(cfg);
+  const agentDir = resolveBotAgentDir();
   const authStorage = discoverAuthStorage(agentDir);
   const registry = discoverModels(authStorage, agentDir);
   const models = registry.getAll();

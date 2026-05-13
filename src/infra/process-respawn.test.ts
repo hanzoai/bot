@@ -3,13 +3,13 @@ import { captureFullEnv } from "../test-utils/env.js";
 import { SUPERVISOR_HINT_ENV_VARS } from "./supervisor-markers.js";
 
 const spawnMock = vi.hoisted(() => vi.fn());
-const triggerHanzoBotRestartMock = vi.hoisted(() => vi.fn());
+const triggerBotRestartMock = vi.hoisted(() => vi.fn());
 
 vi.mock("node:child_process", () => ({
   spawn: (...args: unknown[]) => spawnMock(...args),
 }));
 vi.mock("./restart.js", () => ({
-  triggerHanzoBotRestart: (...args: unknown[]) => triggerHanzoBotRestartMock(...args),
+  triggerBotRestart: (...args: unknown[]) => triggerBotRestartMock(...args),
 }));
 
 import { restartGatewayProcessWithFreshPid } from "./process-respawn.js";
@@ -34,7 +34,7 @@ afterEach(() => {
   process.argv = [...originalArgv];
   process.execArgv = [...originalExecArgv];
   spawnMock.mockClear();
-  triggerHanzoBotRestartMock.mockClear();
+  triggerBotRestartMock.mockClear();
   if (originalPlatformDescriptor) {
     Object.defineProperty(process, "platform", originalPlatformDescriptor);
   }
@@ -52,10 +52,10 @@ function expectLaunchdKickstartSupervised(params?: { launchJobLabel?: string }) 
     process.env.LAUNCH_JOB_LABEL = params.launchJobLabel;
   }
   process.env.BOT_LAUNCHD_LABEL = "ai.bot.gateway";
-  triggerHanzoBotRestartMock.mockReturnValue({ ok: true, method: "launchctl" });
+  triggerBotRestartMock.mockReturnValue({ ok: true, method: "launchctl" });
   const result = restartGatewayProcessWithFreshPid();
   expect(result.mode).toBe("supervised");
-  expect(triggerHanzoBotRestartMock).toHaveBeenCalledOnce();
+  expect(triggerBotRestartMock).toHaveBeenCalledOnce();
   expect(spawnMock).not.toHaveBeenCalled();
 }
 
@@ -83,7 +83,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
     setPlatform("darwin");
     process.env.LAUNCH_JOB_LABEL = "ai.bot.gateway";
     process.env.BOT_LAUNCHD_LABEL = "ai.bot.gateway";
-    triggerHanzoBotRestartMock.mockReturnValue({
+    triggerBotRestartMock.mockReturnValue({
       ok: false,
       method: "launchctl",
       detail: "spawn failed",
@@ -103,7 +103,7 @@ describe("restartGatewayProcessWithFreshPid", () => {
     const result = restartGatewayProcessWithFreshPid();
 
     expect(result.mode).toBe("supervised");
-    expect(triggerHanzoBotRestartMock).not.toHaveBeenCalled();
+    expect(triggerBotRestartMock).not.toHaveBeenCalled();
     expect(spawnMock).not.toHaveBeenCalled();
   });
 
