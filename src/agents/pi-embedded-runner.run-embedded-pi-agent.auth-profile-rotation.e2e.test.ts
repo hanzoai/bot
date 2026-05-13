@@ -29,7 +29,7 @@ vi.mock("./models-config.js", async (importOriginal) => {
   const mod = await importOriginal<typeof import("./models-config.js")>();
   return {
     ...mod,
-    ensureHanzoBotModelsJson: vi.fn(async () => ({ wrote: false })),
+    ensureBotModelsJson: vi.fn(async () => ({ wrote: false })),
   };
 });
 

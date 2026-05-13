@@ -135,16 +135,16 @@ describe("handleSystemRunInvoke mac app exec host routing", () => {
     run: (ctx: { tempHome: string }) => Promise<T>;
   }): Promise<T> {
     const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "bot-exec-approvals-"));
-    const previousHanzoBotHome = process.env.BOT_HOME;
+    const previousBotHome = process.env.BOT_HOME;
     process.env.BOT_HOME = tempHome;
     saveExecApprovals(params.approvals);
     try {
       return await params.run({ tempHome });
     } finally {
-      if (previousHanzoBotHome === undefined) {
+      if (previousBotHome === undefined) {
         delete process.env.BOT_HOME;
       } else {
-        process.env.BOT_HOME = previousHanzoBotHome;
+        process.env.BOT_HOME = previousBotHome;
       }
       fs.rmSync(tempHome, { recursive: true, force: true });
     }

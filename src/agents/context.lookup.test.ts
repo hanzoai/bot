@@ -18,10 +18,10 @@ describe("lookupContextTokens", () => {
       }),
     }));
     vi.doMock("./models-config.js", () => ({
-      ensureHanzoBotModelsJson: vi.fn(async () => {}),
+      ensureBotModelsJson: vi.fn(async () => {}),
     }));
     vi.doMock("./agent-paths.js", () => ({
-      resolveHanzoBotAgentDir: () => "/tmp/bot-agent",
+      resolveBotAgentDir: () => "/tmp/bot-agent",
     }));
     vi.doMock("./pi-model-discovery.js", () => ({
       discoverAuthStorage: vi.fn(() => ({})),
@@ -40,10 +40,10 @@ describe("lookupContextTokens", () => {
       loadConfig: loadConfigMock,
     }));
     vi.doMock("./models-config.js", () => ({
-      ensureHanzoBotModelsJson: vi.fn(async () => {}),
+      ensureBotModelsJson: vi.fn(async () => {}),
     }));
     vi.doMock("./agent-paths.js", () => ({
-      resolveHanzoBotAgentDir: () => "/tmp/bot-agent",
+      resolveBotAgentDir: () => "/tmp/bot-agent",
     }));
     vi.doMock("./pi-model-discovery.js", () => ({
       discoverAuthStorage: vi.fn(() => ({})),
@@ -83,10 +83,10 @@ describe("lookupContextTokens", () => {
       loadConfig: loadConfigMock,
     }));
     vi.doMock("./models-config.js", () => ({
-      ensureHanzoBotModelsJson: vi.fn(async () => {}),
+      ensureBotModelsJson: vi.fn(async () => {}),
     }));
     vi.doMock("./agent-paths.js", () => ({
-      resolveHanzoBotAgentDir: () => "/tmp/bot-agent",
+      resolveBotAgentDir: () => "/tmp/bot-agent",
     }));
     vi.doMock("./pi-model-discovery.js", () => ({
       discoverAuthStorage: vi.fn(() => ({})),
