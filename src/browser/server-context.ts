@@ -1,5 +1,5 @@
 import { SsrFBlockedError } from "../infra/net/ssrf.js";
-import { isChromeReachable, resolveHanzoBotUserDataDir } from "./chrome.js";
+import { isChromeReachable, resolveBotUserDataDir } from "./chrome.js";
 import type { ResolvedBrowserProfile } from "./config.js";
 import { resolveProfile } from "./config.js";
 import { InvalidBrowserNavigationUrlError } from "./navigation-guard.js";
@@ -96,7 +96,7 @@ function createProfileContext(
     getProfileState,
     stopRunningBrowser,
     isHttpReachable,
-    resolveHanzoBotUserDataDir,
+    resolveBotUserDataDir,
   });
 
   return {

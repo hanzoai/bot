@@ -14,7 +14,7 @@ import {
   normalizeAccountId,
   promptAccountId,
   promptChannelAccessConfig,
-  resolvePreferredHanzoBotTmpDir,
+  resolvePreferredBotTmpDir,
 } from "@hanzo/bot/plugin-sdk/zalouser";
 import {
   listZalouserAccountIds,
@@ -114,10 +114,7 @@ async function writeQrDataUrlToTempFile(
     return null;
   }
   const safeProfile = profile.replace(/[^a-zA-Z0-9_-]+/g, "-") || "default";
-  const filePath = path.join(
-    resolvePreferredHanzoBotTmpDir(),
-    `bot-zalouser-qr-${safeProfile}.png`,
-  );
+  const filePath = path.join(resolvePreferredBotTmpDir(), `bot-zalouser-qr-${safeProfile}.png`);
   await fsp.writeFile(filePath, Buffer.from(base64, "base64"));
   return filePath;
 }

@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { BotPluginApi, HanzoBotPluginService } from "@hanzo/bot/plugin-sdk/phone-control";
+import type { BotPluginApi, BotPluginService } from "@hanzo/bot/plugin-sdk/phone-control";
 
 type ArmGroup = "camera" | "screen" | "writes" | "all";
 
@@ -286,7 +286,7 @@ function formatStatus(state: ArmStateFile | null): string {
 export default function register(api: BotPluginApi) {
   let expiryInterval: ReturnType<typeof setInterval> | null = null;
 
-  const timerService: HanzoBotPluginService = {
+  const timerService: BotPluginService = {
     id: "phone-control-expiry",
     start: async (ctx) => {
       const statePath = resolveStatePath(ctx.stateDir);
