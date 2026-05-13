@@ -1,26 +1,47 @@
 # bot
 
-> Hanzo Bot — the entry point to every Hanzo runtime, SDK, and channel.
+> Ops + orchestration for the Hanzo Bot ecosystem.
 
-This repo is the **wrapper**. The actual bot runtimes live in
-[`hanzobot`](https://github.com/hanzobot):
+This repo doesn't ship code. It wires the pieces that other repos own:
 
-| Runtime | Repo | Install |
+| Concern | Lives in | Ships as |
 |---|---|---|
-| TypeScript (canonical) | [`hanzobot/ts`](https://github.com/hanzobot/ts) | `npm install -g @hanzo/bot` |
-| Go (single static binary) | [`hanzobot/go`](https://github.com/hanzobot/go) | `go install github.com/hanzobot/go/cmd/hanzo-bot@latest` |
-| C++ (header-only, embeddable) | [`hanzobot/cpp`](https://github.com/hanzobot/cpp) | `cmake -S . -B build && cmake --build build` |
-| Spec (language-agnostic) | [`hanzobot/core`](https://github.com/hanzobot/core) | reference / contract |
+| TypeScript runtime (canonical) | [`hanzobot/ts`](https://github.com/hanzobot/ts) | npm `@hanzo/bot` |
+| Go runtime (single static binary) | [`hanzobot/go`](https://github.com/hanzobot/go) | `go install github.com/hanzobot/go/cmd/hanzo-bot@latest` |
+| C++ runtime (header-only) | [`hanzobot/cpp`](https://github.com/hanzobot/cpp) | `cmake -S . -B build && cmake --build build` |
+| Language-agnostic spec | [`hanzobot/core`](https://github.com/hanzobot/core) | reference / contract |
 
-A `~/.hanzo/brain/brain.db` written by any runtime is byte-identical to
-one written by every other. Same schema, same FTS5, same wallet
+One concern per repo. The `~/.hanzo/brain/brain.db` written by any
+runtime is byte-identical — same schema, same FTS5, same wallet
 addresses (BLAKE3 via [`luxfi/blake3`](https://github.com/luxfi/blake3)).
 
-## The whole ecosystem
+## What this repo owns
+
+- `compose.yml` — local orchestration of the published images
+- `.github/workflows/` — release / sanity checks for the compose stack
+- this README
+
+That's it. No `package.json`, no `bin/`, no impl. Anything that looks
+like product code belongs in one of the runtime repos above.
+
+## Install the canonical TS runtime
+
+```bash
+npm install -g @hanzo/bot     # ships from hanzobot/ts
+hanzo-bot serve
+```
+
+## Local stack
+
+```bash
+docker compose up -d          # bot + brain
+```
+
+## The wider ecosystem
 
 ```
-hanzoai/bot               ← you are here (entry / wrapper)
-├── hanzobot/ts           ← TS canonical, ships @hanzo/bot meta-pack
+hanzoai/bot               ← ops / compose (you are here)
+├── hanzobot/ts           ← TS canonical, ships @hanzo/bot
 ├── hanzobot/go           ← Go runtime, single static binary
 ├── hanzobot/cpp          ← C++17 header-only
 ├── hanzobot/core         ← language-agnostic spec
@@ -46,37 +67,6 @@ luxfi/crypto/blake3       ← Go BLAKE3 (zeebo wrapper + GPU batch)
 luxcpp/blake3-reference   ← vendored C reference impl
 ```
 
-## Quick start
-
-```bash
-# TypeScript canonical (multi-channel, mobile apps, 30+ adapters):
-npm install -g @hanzo/bot
-hanzo-bot serve
-
-# Go (server / embedded):
-go install github.com/hanzobot/go/cmd/hanzo-bot@latest
-hanzo-bot brain init
-hanzo-bot brain ingest README.md
-hanzo-bot brain search "founded"
-
-# Python (memory + tools):
-pip install hanzo-memory
-
-# Rust (via hanzo-mcp):
-cargo add hanzo-mcp
-```
-
-## Brain is the substrate
-
-Every runtime hosts the same `BrainStore` contract: pages + edges +
-facts + FTS5 hybrid search. Wallet-style content-addressable ids
-(`hanzo:UFC8qCW8LRUmpfyRq2qnAvYi11cqftY3b`) are byte-identical across
-all five runtimes — BLAKE3, base58check.
-
-See [`hanzoai/brain`](https://github.com/hanzoai/brain) for the
-algorithm surface (RRF + RSF + MMR + dedup + Unicode script detection
-+ MRL truncation + UUIDv7 + WebVTT/SRT/RTTM + …).
-
 ## Strict post-quantum
 
 The Lux EVM gates every classical precompile through
@@ -86,6 +76,7 @@ pairing, BLS12-381 pairing, and KZG point evaluation; PQ-native
 primitives (ML-KEM, ML-DSA, SLH-DSA, Pulsar, P3Q) stay enabled.
 
 Strict profile hash (consensus contract):
+
 ```
 9efdbf424085b0557866c22b0a4e0c48e2ed90c8c9e3f699d17a3e0783cb2128
 ```
