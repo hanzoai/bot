@@ -5,9 +5,9 @@ import { isRemoteEnvironment } from "./oauth-env.js";
 import { writeOAuthCredentials } from "./onboard-auth.credentials.js";
 import { openUrl } from "./onboard-helpers.js";
 
-const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
-const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
-const HANZO_CLIENT_ID = "bot";
+const IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
+const IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
+const IAM_CLIENT_ID = "bot";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 
@@ -23,7 +23,7 @@ function computeCodeChallenge(verifier: string): string {
 
 function buildAuthorizeUrl(state: string, codeChallenge: string): string {
   const qs = new URLSearchParams({
-    client_id: process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID,
+    client_id: process.env.IAM_CLIENT_ID?.trim() || IAM_CLIENT_ID,
     redirect_uri: process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI,
     response_type: "code",
     scope: HANZO_SCOPES,
@@ -31,7 +31,7 @@ function buildAuthorizeUrl(state: string, codeChallenge: string): string {
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
   });
-  return `${HANZO_IAM_AUTHORIZE_ENDPOINT}?${qs.toString()}`;
+  return `${IAM_AUTHORIZE_ENDPOINT}?${qs.toString()}`;
 }
 
 async function waitForCallback(params: {
@@ -123,7 +123,7 @@ async function exchangeCode(
   token_type: string;
   expires_in?: number;
 }> {
-  const clientId = process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID;
+  const clientId = process.env.IAM_CLIENT_ID?.trim() || IAM_CLIENT_ID;
   const redirectUri = process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI;
 
   const body = new URLSearchParams({
@@ -134,7 +134,7 @@ async function exchangeCode(
     code_verifier: codeVerifier,
   });
 
-  const res = await fetch(HANZO_IAM_TOKEN_ENDPOINT, {
+  const res = await fetch(IAM_TOKEN_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
