@@ -6,23 +6,23 @@ import { createVpsAwareOAuthHandlers } from "./oauth-flow.js";
 import { applyAuthProfileConfig, writeOAuthCredentials } from "./onboard-auth.js";
 import { openUrl } from "./onboard-helpers.js";
 
-const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
-const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
-const HANZO_CLIENT_ID = "bot";
-const HANZO_CLIENT_SECRET = "";
+const IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
+const IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
+const IAM_CLIENT_ID = "bot";
+const IAM_CLIENT_SECRET = "";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 const HANZO_API_BASE_URL = "https://api.hanzo.ai/v1";
 
 function buildHanzoAuthorizeUrl(state: string): string {
   const qs = new URLSearchParams({
-    client_id: process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID,
+    client_id: process.env.IAM_CLIENT_ID?.trim() || IAM_CLIENT_ID,
     redirect_uri: process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI,
     response_type: "code",
     scope: HANZO_SCOPES,
     state,
   });
-  return `${HANZO_IAM_AUTHORIZE_ENDPOINT}?${qs.toString()}`;
+  return `${IAM_AUTHORIZE_ENDPOINT}?${qs.toString()}`;
 }
 
 async function waitForLocalCallback(params: {
@@ -114,8 +114,8 @@ async function exchangeCodeForTokens(code: string): Promise<{
   token_type: string;
   expires_in?: number;
 }> {
-  const clientId = process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID;
-  const clientSecret = process.env.HANZO_CLIENT_SECRET?.trim() || HANZO_CLIENT_SECRET;
+  const clientId = process.env.IAM_CLIENT_ID?.trim() || IAM_CLIENT_ID;
+  const clientSecret = process.env.IAM_CLIENT_SECRET?.trim() || IAM_CLIENT_SECRET;
   const redirectUri = process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI;
 
   const body = new URLSearchParams({
@@ -126,7 +126,7 @@ async function exchangeCodeForTokens(code: string): Promise<{
     redirect_uri: redirectUri,
   });
 
-  const res = await fetch(HANZO_IAM_TOKEN_ENDPOINT, {
+  const res = await fetch(IAM_TOKEN_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
