@@ -11,7 +11,7 @@ metadata:
             {
               "id": "pip",
               "kind": "pip",
-              "package": "hanzo-iam",
+              "package": "hanzoai-iam",
               "label": "Install Hanzo IAM SDK (pip)",
             },
           ],
@@ -21,7 +21,7 @@ metadata:
 
 # Hanzo IAM — Identity & Access Management
 
-`pip install hanzo-iam`
+`pip install hanzoai-iam`
 
 ## Quick Start
 
