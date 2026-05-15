@@ -12,10 +12,10 @@ import { ensureAuthProfileStore } from "../agents/auth-profiles/store.js";
 import { writeOAuthCredentials } from "../commands/onboard-auth.credentials.js";
 import { openUrl } from "../commands/onboard-helpers.js";
 
-const HANZO_IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
-const HANZO_IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
-const HANZO_CLIENT_ID = process.env.HANZO_CLIENT_ID ?? "bot";
-const HANZO_CLIENT_SECRET = process.env.HANZO_CLIENT_SECRET ?? "";
+const IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
+const IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
+const IAM_CLIENT_ID = process.env.IAM_CLIENT_ID ?? "bot";
+const IAM_CLIENT_SECRET = process.env.IAM_CLIENT_SECRET ?? "";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 const OAUTH_TIMEOUT_MS = 3 * 60 * 1000;
@@ -89,7 +89,7 @@ function findExistingIamToken(): string | null {
  */
 async function runBrowserOAuth(): Promise<string> {
   const state = randomBytes(16).toString("hex");
-  const clientId = process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID;
+  const clientId = process.env.IAM_CLIENT_ID?.trim() || IAM_CLIENT_ID;
   const redirectUri = process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI;
   const qs = new URLSearchParams({
     client_id: clientId,
@@ -98,7 +98,7 @@ async function runBrowserOAuth(): Promise<string> {
     scope: HANZO_SCOPES,
     state,
   });
-  const authorizeUrl = `${HANZO_IAM_AUTHORIZE_ENDPOINT}?${qs.toString()}`;
+  const authorizeUrl = `${IAM_AUTHORIZE_ENDPOINT}?${qs.toString()}`;
 
   const callbackPromise = waitForOAuthCallback(redirectUri, state);
 
@@ -217,8 +217,8 @@ async function exchangeCodeForTokens(code: string): Promise<{
   token_type: string;
   expires_in?: number;
 }> {
-  const clientId = process.env.HANZO_CLIENT_ID?.trim() || HANZO_CLIENT_ID;
-  const clientSecret = process.env.HANZO_CLIENT_SECRET?.trim() || HANZO_CLIENT_SECRET;
+  const clientId = process.env.IAM_CLIENT_ID?.trim() || IAM_CLIENT_ID;
+  const clientSecret = process.env.IAM_CLIENT_SECRET?.trim() || IAM_CLIENT_SECRET;
   const redirectUri = process.env.HANZO_OAUTH_REDIRECT_URI?.trim() || HANZO_REDIRECT_URI;
 
   const body = new URLSearchParams({
@@ -229,7 +229,7 @@ async function exchangeCodeForTokens(code: string): Promise<{
     redirect_uri: redirectUri,
   });
 
-  const res = await fetch(HANZO_IAM_TOKEN_ENDPOINT, {
+  const res = await fetch(IAM_TOKEN_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString(),
