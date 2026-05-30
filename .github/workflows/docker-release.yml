@@ -17,6 +17,7 @@ jobs:
     with:
       image: ghcr.io/hanzoai/bot
       platforms: linux/amd64
+      runner-amd64: hanzobot-build-linux-amd64
       # Build the @hanzo/gui v7 admin-bot SPA from the sibling gui
       # repo, then run scripts/sync-admin-ui.sh to drop the bundle into
       # dist/control-ui/ before docker buildx COPYs the source. The

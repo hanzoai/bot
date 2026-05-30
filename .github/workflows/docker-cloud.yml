@@ -19,4 +19,5 @@ jobs:
     with:
       image: ghcr.io/hanzoai/bot-cloud
       dockerfile: Dockerfile.cloud
+      runner-amd64: hanzobot-build-linux-amd64
     secrets: inherit
