@@ -243,6 +243,15 @@ const entries: SubCliEntry[] = [
     },
   },
   {
+    name: "social",
+    description: "Hanzo Social — post and schedule across 28+ channels via social.hanzo.ai",
+    hasSubcommands: true,
+    register: async (program) => {
+      const mod = await import("../social-cli.js");
+      mod.registerSocialCli(program);
+    },
+  },
+  {
     name: "directory",
     description: "Lookup contact and group IDs (self, peers, groups) for supported chat channels",
     hasSubcommands: true,
