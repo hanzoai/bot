@@ -228,17 +228,26 @@ export async function handleBotsCallHttpRequest(
 
   const cfg = loadConfig();
   const token = getBearerToken(req);
-  const authResult = await authorizeHttpGatewayConnect({
-    auth: opts.auth,
-    connectAuth: token ? { token, password: token } : null,
-    req,
-    trustedProxies: opts.trustedProxies ?? cfg.gateway?.trustedProxies,
-    allowRealIpFallback: opts.allowRealIpFallback ?? cfg.gateway?.allowRealIpFallback,
-    rateLimiter: opts.rateLimiter,
-  });
-  if (!authResult.ok) {
-    sendGatewayAuthFailure(res, authResult);
-    return true;
+
+  // Service-to-service auth: the console calls this endpoint server-side with a
+  // shared secret (BOT_TOOLS_TOKEN). The gateway's primary auth is IAM (JWT),
+  // which a static console token can't satisfy; accept the shared secret here
+  // for the bot-management tools without affecting IAM/device auth elsewhere.
+  const sharedToken = process.env.BOT_TOOLS_TOKEN ?? process.env.ZAP_BOT_GATEWAY_TOKEN;
+  const sharedOk = Boolean(sharedToken && token && token === sharedToken);
+  if (!sharedOk) {
+    const authResult = await authorizeHttpGatewayConnect({
+      auth: opts.auth,
+      connectAuth: token ? { token, password: token } : null,
+      req,
+      trustedProxies: opts.trustedProxies ?? cfg.gateway?.trustedProxies,
+      allowRealIpFallback: opts.allowRealIpFallback ?? cfg.gateway?.allowRealIpFallback,
+      rateLimiter: opts.rateLimiter,
+    });
+    if (!authResult.ok) {
+      sendGatewayAuthFailure(res, authResult);
+      return true;
+    }
   }
 
   const bodyUnknown = await readJsonBodyOrError(req, res, opts.maxBodyBytes ?? DEFAULT_BODY_BYTES);
