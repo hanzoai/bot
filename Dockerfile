@@ -36,6 +36,12 @@ COPY --chown=node:node patches ./patches
 COPY --chown=node:node scripts ./scripts
 
 USER node
+# Auth for private GitHub tarball deps (e.g. @hanzo/iam = github:hanzo-js/iam).
+# Build-only: pass --build-arg GIT_TOKEN=<pat> so pnpm can fetch codeload tarballs.
+ARG GIT_TOKEN=""
+RUN if [ -n "$GIT_TOKEN" ]; then \
+      printf '//codeload.github.com/:_authToken=%s\n//github.com/:_authToken=%s\n' "$GIT_TOKEN" "$GIT_TOKEN" >> /app/.npmrc; \
+    fi
 # Reduce OOM risk on low-memory hosts during dependency installation.
 # Docker builds on small VMs may otherwise fail with "Killed" (exit 137).
 RUN NODE_OPTIONS=--max-old-space-size=2048 pnpm install --frozen-lockfile
