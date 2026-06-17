@@ -1,21 +1,21 @@
 import { randomUUID } from "node:crypto";
-import { Redis as KV } from "iovalkey";
+import { promises as fs } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, join } from "node:path";
 
 // ---------------------------------------------------------------------------
-// Bots store (KV / Redis backed)
+// Bots store (filesystem backed, zero external deps)
 //
 // Persists the "bots" data model behind the console /bots page (ZAP tools
-// bots.*, team.*, agent.*). Records are JSON blobs in Redis under per-project
-// keys; logs are capped Redis lists. Identity (DID/wallet) is stored per agent.
+// bots.*, team.*, agent.*) as JSON files. No Redis/KV client is available in
+// the gateway's dependency set, so this uses node:fs only.
 //
-// This is the source of truth for the gateway's ZAP `/v1/tools/call` tools.
+// Durability: files live under BOTS_STORE_DIR (default ~/.hanzo-bots). On the
+// current deployment that path is pod-local (no PVC), so records persist for
+// the pod's lifetime. Mount a PVC at BOTS_STORE_DIR for cross-restart durability.
 // ---------------------------------------------------------------------------
 
-const PREFIX = "bot:store:";
-const botKey = (projectId: string, botId: string) => `${PREFIX}bot:${projectId}:${botId}`;
-const botScan = (projectId: string) => `${PREFIX}bot:${projectId}:*`;
-const logsKey = (projectId: string, botId: string) => `${PREFIX}logs:${projectId}:${botId}`;
-const identityKey = (agentId: string) => `${PREFIX}identity:${agentId}`;
+const BASE_DIR = process.env.BOTS_STORE_DIR ?? join(homedir() || "/tmp", ".hanzo-bots");
 const LOG_CAP = 500;
 
 export type BotStatus = "running" | "stopped" | "provisioning" | "error";
@@ -73,24 +73,31 @@ const INSTANCE_TYPE: Record<BotPlatform, string> = {
   windows: "t3.medium",
 };
 
-let client: KV | null = null;
-function kv(): KV {
-  if (!client) {
-    const url =
-      process.env.KV_URL ??
-      process.env.REDIS_URL ??
-      process.env.REDIS_CONNECTION_STRING ??
-      "redis://localhost:6379";
-    client = new KV(url, { lazyConnect: false, maxRetriesPerRequest: 2 });
-    client.on("error", (err: unknown) => {
-      console.log("[bots-store] kv error:", (err as Error)?.message ?? err);
-    });
-  }
-  return client;
+// Filesystem keys are sanitized to avoid path traversal from ids.
+function safe(seg: string): string {
+  return String(seg).replace(/[^a-zA-Z0-9._-]/g, "_");
 }
+const botPath = (p: string, b: string) => join(BASE_DIR, "bots", safe(p), `${safe(b)}.json`);
+const projDir = (p: string) => join(BASE_DIR, "bots", safe(p));
+const logPath = (p: string, b: string) => join(BASE_DIR, "logs", safe(p), `${safe(b)}.json`);
+const identityPath = (a: string) => join(BASE_DIR, "identity", `${safe(a)}.json`);
 
 function nowIso(): string {
   return new Date().toISOString();
+}
+
+async function readJson<T>(file: string): Promise<T | null> {
+  try {
+    const raw = await fs.readFile(file, "utf8");
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+async function writeJson(file: string, value: unknown): Promise<void> {
+  await fs.mkdir(dirname(file), { recursive: true });
+  await fs.writeFile(file, JSON.stringify(value), "utf8");
 }
 
 async function appendLog(
@@ -99,50 +106,39 @@ async function appendLog(
   level: BotLogEntry["level"],
   message: string,
 ): Promise<void> {
-  const entry: BotLogEntry = { id: randomUUID(), timestamp: nowIso(), level, message };
   try {
-    const k = logsKey(projectId, botId);
-    await kv().lpush(k, JSON.stringify(entry));
-    await kv().ltrim(k, 0, LOG_CAP - 1);
+    const file = logPath(projectId, botId);
+    const existing = (await readJson<BotLogEntry[]>(file)) ?? [];
+    existing.unshift({ id: randomUUID(), timestamp: nowIso(), level, message });
+    await writeJson(file, existing.slice(0, LOG_CAP));
   } catch (err) {
     console.log("[bots-store] appendLog failed:", (err as Error)?.message ?? err);
   }
 }
 
 export async function listBots(projectId: string): Promise<Bot[]> {
+  let names: string[];
+  try {
+    names = await fs.readdir(projDir(projectId));
+  } catch {
+    return [];
+  }
   const bots: Bot[] = [];
-  let cursor = "0";
-  do {
-    const [next, keys] = await kv().scan(cursor, "MATCH", botScan(projectId), "COUNT", 200);
-    cursor = next;
-    if (keys.length > 0) {
-      const vals = await kv().mget(...keys);
-      for (const v of vals) {
-        if (!v) continue;
-        try {
-          bots.push(JSON.parse(v) as Bot);
-        } catch {
-          /* skip malformed */
-        }
-      }
-    }
-  } while (cursor !== "0");
+  for (const name of names) {
+    if (!name.endsWith(".json")) continue;
+    const bot = await readJson<Bot>(join(projDir(projectId), name));
+    if (bot) bots.push(bot);
+  }
   bots.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   return bots;
 }
 
 export async function getBot(projectId: string, botId: string): Promise<Bot | null> {
-  const v = await kv().get(botKey(projectId, botId));
-  if (!v) return null;
-  try {
-    return JSON.parse(v) as Bot;
-  } catch {
-    return null;
-  }
+  return readJson<Bot>(botPath(projectId, botId));
 }
 
 async function putBot(projectId: string, bot: Bot): Promise<Bot> {
-  await kv().set(botKey(projectId, bot.id), JSON.stringify(bot));
+  await writeJson(botPath(projectId, bot.id), bot);
   return bot;
 }
 
@@ -203,9 +199,13 @@ export async function updateBot(
 }
 
 export async function deleteBot(projectId: string, botId: string): Promise<boolean> {
-  const removed = await kv().del(botKey(projectId, botId));
-  await kv().del(logsKey(projectId, botId)).catch(() => 0);
-  return removed > 0;
+  try {
+    await fs.unlink(botPath(projectId, botId));
+  } catch {
+    return false;
+  }
+  await fs.unlink(logPath(projectId, botId)).catch(() => undefined);
+  return true;
 }
 
 export async function setBotStatus(
@@ -228,16 +228,8 @@ export async function getBotLogs(
   botId: string,
   limit: number,
 ): Promise<BotLogEntry[]> {
-  const raw = await kv().lrange(logsKey(projectId, botId), 0, Math.max(0, limit - 1));
-  const out: BotLogEntry[] = [];
-  for (const r of raw) {
-    try {
-      out.push(JSON.parse(r) as BotLogEntry);
-    } catch {
-      /* skip */
-    }
-  }
-  return out;
+  const all = (await readJson<BotLogEntry[]>(logPath(projectId, botId))) ?? [];
+  return all.slice(0, Math.max(0, limit));
 }
 
 // ── Identity (DID + wallet), stored per agentId ─────────────────────────────
@@ -254,19 +246,12 @@ interface AgentIdentity {
 const CHAIN_IDS: Record<string, number> = { hanzo: 7117, lux: 96369, zoo: 200200, pars: 7777 };
 
 async function getIdentity(agentId: string): Promise<AgentIdentity> {
-  const v = await kv().get(identityKey(agentId));
-  if (v) {
-    try {
-      return JSON.parse(v) as AgentIdentity;
-    } catch {
-      /* fall through */
-    }
-  }
-  return { agentId, name: null, emoji: null, avatar: null, did: null, wallet: null };
+  const existing = await readJson<AgentIdentity>(identityPath(agentId));
+  return existing ?? { agentId, name: null, emoji: null, avatar: null, did: null, wallet: null };
 }
 
 async function putIdentity(identity: AgentIdentity): Promise<AgentIdentity> {
-  await kv().set(identityKey(identity.agentId), JSON.stringify(identity));
+  await writeJson(identityPath(identity.agentId), identity);
   return identity;
 }
 
@@ -302,7 +287,6 @@ export async function createAgentWallet(
   chain: BotWallet["chain"] = "hanzo",
 ): Promise<{ agentId: string; wallet: BotWallet }> {
   const id = await getIdentity(agentId);
-  // Deterministic placeholder address derived from agentId (not a signing key).
   const hex = Buffer.from(`${chain}:${agentId}`).toString("hex").padEnd(40, "0").slice(0, 40);
   const wallet: BotWallet = {
     address: `0x${hex}`,
