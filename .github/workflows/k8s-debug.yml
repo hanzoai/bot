@@ -8,7 +8,7 @@ env:
   GH_TOKEN: ${{ secrets.GH_PAT }}
 jobs:
   debug:
-    runs-on: ubuntu-latest
+    runs-on: hanzo-deploy-linux-amd64
     timeout-minutes: 10
     steps:
       - uses: digitalocean/action-doctl@v2
