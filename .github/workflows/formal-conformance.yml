@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   formal_conformance:
-    runs-on: ubuntu-latest
+    runs-on: hanzo-build-linux-amd64
     continue-on-error: true
     timeout-minutes: 20
     permissions:
