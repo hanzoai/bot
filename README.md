@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="bot" width="880"></p>
+
 # 🦞 Hanzo Bot — Personal AI Assistant
 
 <p align="center">
