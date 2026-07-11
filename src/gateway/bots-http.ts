@@ -6,10 +6,13 @@
  *   GET  /v1/bots               — list the caller org's bot runs
  *   POST /v1/bots/:runId/stop   — stop one of the caller org's runs
  *
- * Auth: pure-trust identity headers (getIamIdentity) — the same contract every
- * gateway handler uses. hanzoai/gateway validates the IAM JWT upstream and mints
- * X-Org-Id; the cloud control plane forwards it server-side. Isolation is the
- * tenant path: a run lives in that org's session store under
+ * Auth: the pod-boundary gate (authorizeHttpGatewayConnect) runs FIRST — parity
+ * with tools-invoke/chat-bridge — because this server is reachable off-gateway
+ * (in-cluster / SSRF), so the forwarded X-Org-Id must not be trusted until the
+ * caller is proven authorized. Only after the gate passes is the minted X-Org-Id
+ * (getIamIdentity) trustworthy. hanzoai/gateway validates the IAM JWT upstream and
+ * mints X-Org-Id; the cloud control plane forwards it + the bearer server-side.
+ * Isolation is the tenant path: a run lives in that org's session store under
  * ~/.bot/tenants/{orgId}/agents/{agentId}/sessions/, so one org can never see or
  * stop another's runs. No org header (self-hosted / no gateway) => empty list,
  * 404 stop.
@@ -21,8 +24,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { sendJson } from "./http-common.js";
+import { sendJson, sendGatewayAuthFailure } from "./http-common.js";
 import { getIamIdentity } from "./iam-identity.js";
+import { authorizeHttpGatewayConnect, type ResolvedGatewayAuth } from "./auth.js";
+import type { AuthRateLimiter } from "./auth-rate-limit.js";
+import { getBearerToken } from "./http-utils.js";
+import { loadConfig } from "../config/config.js";
 import { loadSessionStore, updateSessionStore } from "../config/sessions.js";
 import type { SessionEntry } from "../config/sessions/types.js";
 import { resolveTenantStateDir } from "../config/tenant-paths.js";
@@ -111,7 +118,10 @@ async function stopOrgBot(orgId: string, userId: string, runId: string): Promise
   }
   for (const storePath of tenantStorePaths(orgId, userId)) {
     const removed = await updateSessionStore(storePath, (store) => {
-      if (!store[runId]) {
+      // hasOwnProperty (not `store[runId]`) so a runId naming an Object.prototype
+      // member (__proto__, constructor, toString, …) can't resolve to an inherited
+      // value and yield a false "stopped" for a run that never existed.
+      if (!Object.prototype.hasOwnProperty.call(store, runId)) {
         return false;
       }
       delete store[runId];
@@ -131,12 +141,36 @@ async function stopOrgBot(orgId: string, userId: string, runId: string): Promise
 export async function handleBotsHttpRequest(
   req: IncomingMessage,
   res: ServerResponse,
+  opts: {
+    auth: ResolvedGatewayAuth;
+    trustedProxies?: string[];
+    allowRealIpFallback?: boolean;
+    rateLimiter?: AuthRateLimiter;
+  },
 ): Promise<boolean> {
   const url = new URL(req.url ?? "/", "http://localhost");
   const pathname = url.pathname;
   const stopMatch = pathname.match(STOP_RE);
   if (pathname !== BOTS_PATH && !stopMatch) {
     return false;
+  }
+
+  // Pod-boundary auth — parity with tools-invoke/chat-bridge. This server is
+  // reachable off-gateway (in-cluster / SSRF), so a caller must be proven
+  // authorized before its forwarded X-Org-Id is trusted for tenant scoping.
+  const cfg = loadConfig();
+  const token = getBearerToken(req);
+  const authResult = await authorizeHttpGatewayConnect({
+    auth: opts.auth,
+    connectAuth: token ? { token, password: token } : null,
+    req,
+    trustedProxies: opts.trustedProxies ?? cfg.gateway?.trustedProxies,
+    allowRealIpFallback: opts.allowRealIpFallback ?? cfg.gateway?.allowRealIpFallback,
+    rateLimiter: opts.rateLimiter,
+  });
+  if (!authResult.ok) {
+    sendGatewayAuthFailure(res, authResult);
+    return true;
   }
 
   const method = (req.method ?? "GET").toUpperCase();
