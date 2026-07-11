@@ -607,7 +607,13 @@ export function createGatewayHttpServer(opts: {
         },
         {
           name: "bots",
-          run: () => handleBotsHttpRequest(req, res),
+          run: () =>
+            handleBotsHttpRequest(req, res, {
+              auth: resolvedAuth,
+              trustedProxies,
+              allowRealIpFallback,
+              rateLimiter,
+            }),
         },
         {
           name: "tools-invoke",
