@@ -52,6 +52,7 @@ import {
   resolveHookChannel,
   resolveHookDeliver,
 } from "./hooks.js";
+import { handleBotsHttpRequest } from "./bots-http.js";
 import { sendGatewayAuthFailure, setDefaultSecurityHeaders } from "./http-common.js";
 import { attachIamIdentity } from "./iam-identity.js";
 import { handleLlmProxyHttpRequest } from "./llm-proxy-http.js";
@@ -603,6 +604,10 @@ export function createGatewayHttpServer(opts: {
         {
           name: "hooks",
           run: () => handleHooksRequest(req, res),
+        },
+        {
+          name: "bots",
+          run: () => handleBotsHttpRequest(req, res),
         },
         {
           name: "tools-invoke",
