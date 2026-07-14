@@ -1,24 +1,23 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { loadConfig } from "../config/config.js";
+import { logWarn } from "../logger.js";
+import type { AuthRateLimiter } from "./auth-rate-limit.js";
+import { authorizeHttpGatewayConnect, type ResolvedGatewayAuth } from "./auth.js";
+import {
+  type CodingEvent,
+  type CodingRuntime,
+  createDockerRuntime,
+  runCodingTask,
+} from "./coding-task.js";
 import {
   readJsonBodyOrError,
   sendGatewayAuthFailure,
   sendInvalidRequest,
+  sendJson,
   sendMethodNotAllowed,
 } from "./http-common.js";
-import { getIamIdentity } from "./iam-identity.js";
-import { authorizeHttpGatewayConnect, type ResolvedGatewayAuth } from "./auth.js";
-import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import { getBearerToken } from "./http-utils.js";
-import { loadConfig } from "../config/config.js";
-import { logWarn } from "../logger.js";
-import {
-  type CodingDeps,
-  type CodingEvent,
-  devAgentRunner,
-  hostExecFn,
-  makeHostWorkdir,
-  runCodingTask,
-} from "./coding-task.js";
+import { getIamIdentity } from "./iam-identity.js";
 
 /**
  * coding-tasks-http.ts — POST /v1/coding-tasks: the native coding-task runner the
@@ -27,18 +26,18 @@ import {
  * NDJSON progress + a terminal result back so cloud mirrors it into the agent
  * session and reports to Slack.
  *
- * AUTH: the pod-boundary gate (authorizeHttpGatewayConnect) runs FIRST — this
- * server is reachable off-gateway (in-cluster / SSRF), so the forwarded X-Org-Id
- * is trusted ONLY after the caller is proven authorized (parity with bots /
- * tools-invoke). The org boundary then comes from the minted X-Org-Id, and the
- * body's clone URL org segment must match it — a forged body cannot point the
- * sandbox at another org's repo.
+ * AUTH (fail-closed): the gateway service auth mode must be token|iam — a "none"
+ * mode would make the pod-boundary gate a no-op and let any in-cluster caller / SSRF
+ * forge X-Org-Id, so this handler refuses to serve under it. Then the gate
+ * (authorizeHttpGatewayConnect) runs; X-Org-Id is trusted ONLY after it passes.
  *
- * ISOLATION NOTE: the run currently executes in a per-request temp workdir on the
- * pod (hostRuntime), confined + cleaned up. Per-task container isolation (a
- * workspace-write docker sandbox) is a swap of the injected {@link CodingDeps}
- * ExecFn to a `docker exec` runner — the runner (coding-task.ts) is already
- * sandbox-agnostic — and is the multi-tenant hardening follow-on.
+ * ISOLATION (fail-closed): the run executes inside a PER-TASK docker container
+ * (createDockerRuntime) — the real boundary against the crown-jewel exfil, since a
+ * model-driven `dev` run can otherwise read the pod env (BOT_GATEWAY_TOKEN) and the
+ * pod service-account token and commit them out via the push. If the container
+ * runtime is unavailable the handler REFUSES (503) — it never falls back to the
+ * shared pod host. The clone URL is host-pinned to the git edge and its org segment
+ * must equal the authenticated org.
  */
 
 const CODING_PATH = "/v1/coding-tasks";
@@ -46,9 +45,51 @@ const MAX_BODY_BYTES = 256 * 1024;
 const DEFAULT_TIMEOUT_SECONDS = 1200;
 const MAX_TIMEOUT_SECONDS = 3600;
 
-// A safe, agent-owned branch: never a delete/refspec, never HEAD, never a path
-// escape. Cloud always names it agent/<id>.
-const BRANCH_RE = /^[A-Za-z][A-Za-z0-9._/-]{0,100}$/;
+// The branch is minted by cloud as agent/<hex session suffix>; constrain to exactly
+// that shape so no delete refspec, HEAD, or path escape can slip through.
+const BRANCH_RE = /^agent\/[a-f0-9]{6,64}$/;
+
+// The git hosts a clone URL may target — pinned to cloud's git edge so the
+// credential can never be aimed at an attacker host. Override via HANZO_CODING_GIT_HOSTS.
+function gitHostAllow(): string[] {
+  const raw = (process.env.HANZO_CODING_GIT_HOSTS ?? "git.hanzo.ai,api.hanzo.ai")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  return raw;
+}
+
+// Bot-side concurrency caps (mirror cloud's 8-global / 2-org) so one tenant can't
+// exhaust the sandbox pool. Read at call time for testability.
+function globalCap(): number {
+  return envInt("HANZO_CODING_CONCURRENCY", 8);
+}
+function orgCap(): number {
+  return envInt("HANZO_CODING_ORG_CONCURRENCY", 2);
+}
+let inflightGlobal = 0;
+const inflightByOrg = new Map<string, number>();
+function acquire(org: string): boolean {
+  if (inflightGlobal >= globalCap()) {
+    return false;
+  }
+  const o = inflightByOrg.get(org) ?? 0;
+  if (o >= orgCap()) {
+    return false;
+  }
+  inflightGlobal++;
+  inflightByOrg.set(org, o + 1);
+  return true;
+}
+function release(org: string): void {
+  inflightGlobal = Math.max(0, inflightGlobal - 1);
+  const o = (inflightByOrg.get(org) ?? 1) - 1;
+  if (o <= 0) {
+    inflightByOrg.delete(org);
+  } else {
+    inflightByOrg.set(org, o);
+  }
+}
 
 type CodingTaskBody = {
   cloneUrl: string;
@@ -61,25 +102,23 @@ type CodingTaskBody = {
 };
 
 /**
- * A runtime provides a working dir, the command ExecFn, the agent runner, and a
- * disposer. Injectable so a test drives the full handler (auth + parse + stream)
- * with a host runtime + stub agent, no docker.
+ * authModeAllowed asserts the gateway service auth is actually enforcing — mode
+ * iam, or mode token WITH a token set. A "none"/tokenless mode is fail-closed here.
  */
-export type CodingRuntime = {
-  workdir: string;
-  deps: CodingDeps;
-  cleanup: () => Promise<void>;
-};
-
-/** hostRuntime confines a run to a fresh temp dir and runs the real `dev` agent. */
-async function hostRuntime(): Promise<CodingRuntime> {
-  const { dir, cleanup } = await makeHostWorkdir();
-  return { workdir: dir, deps: { exec: hostExecFn(), runAgent: devAgentRunner() }, cleanup };
+function authModeAllowed(auth: ResolvedGatewayAuth): boolean {
+  const a = auth as { mode?: string; token?: string };
+  if (a.mode === "iam") {
+    return true;
+  }
+  if (a.mode === "token" && typeof a.token === "string" && a.token.length > 0) {
+    return true;
+  }
+  return false;
 }
 
 /**
  * handleCodingTasksHttpRequest is the gateway stage for POST /v1/coding-tasks.
- * makeRuntime is injectable for tests (default = hostRuntime).
+ * makeRuntime is injectable for tests (default = a fail-closed docker container).
  */
 export async function handleCodingTasksHttpRequest(
   req: IncomingMessage,
@@ -90,12 +129,25 @@ export async function handleCodingTasksHttpRequest(
     allowRealIpFallback?: boolean;
     rateLimiter?: AuthRateLimiter;
   },
-  makeRuntime: () => Promise<CodingRuntime> = hostRuntime,
+  makeRuntime: (timeoutSec: number) => Promise<CodingRuntime> = createDockerRuntime,
 ): Promise<boolean> {
   const url = new URL(req.url ?? "/", "http://localhost");
-  if (url.pathname !== CODING_PATH) return false;
+  if (url.pathname !== CODING_PATH) {
+    return false;
+  }
 
-  // Pod-boundary auth FIRST — X-Org-Id is untrusted until the caller is authorized.
+  // HIGH-2: refuse to serve if the pod-boundary auth is not actually enforcing.
+  if (!authModeAllowed(opts.auth)) {
+    sendJson(res, 503, {
+      error: {
+        message: "coding tasks require an enforcing gateway auth mode",
+        type: "server_error",
+      },
+    });
+    return true;
+  }
+
+  // Pod-boundary auth — X-Org-Id is untrusted until the caller is authorized.
   const cfg = loadConfig();
   const token = getBearerToken(req);
   const authResult = await authorizeHttpGatewayConnect({
@@ -116,7 +168,9 @@ export async function handleCodingTasksHttpRequest(
   }
 
   const raw = await readJsonBodyOrError(req, res, MAX_BODY_BYTES);
-  if (raw === undefined) return true;
+  if (raw === undefined) {
+    return true;
+  }
 
   const { orgId } = getIamIdentity(req);
   if (!orgId) {
@@ -130,17 +184,37 @@ export async function handleCodingTasksHttpRequest(
   }
   const body = parsed.value;
 
+  // MEDIUM-5: bound concurrent runs (global + per-org) before doing any work.
+  if (!acquire(orgId)) {
+    sendJson(res, 429, {
+      error: { message: "coding tasks at capacity, retry shortly", type: "rate_limit_error" },
+    });
+    return true;
+  }
+
+  // CRITICAL-1(e): boot the isolated runtime BEFORE streaming; if it can't be
+  // created (no container runtime / no image), REFUSE — never run on the host.
+  let runtime: CodingRuntime;
+  try {
+    runtime = await makeRuntime(body.runTimeoutSeconds);
+  } catch (err) {
+    release(orgId);
+    logWarn(`coding-task: runtime unavailable: ${errText(err)}`);
+    sendJson(res, 503, { error: { message: "coding sandbox unavailable", type: "server_error" } });
+    return true;
+  }
+
   // Stream NDJSON: one JSON object per line, terminal line is result|error.
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/x-ndjson");
   res.setHeader("Cache-Control", "no-cache");
   const emit = (e: CodingEvent) => {
-    if (!res.writableEnded) res.write(JSON.stringify(e) + "\n");
+    if (!res.writableEnded) {
+      res.write(JSON.stringify(e) + "\n");
+    }
   };
 
-  let runtime: CodingRuntime | undefined;
   try {
-    runtime = await makeRuntime();
     await runCodingTask(
       {
         cloneUrl: body.cloneUrl,
@@ -155,29 +229,31 @@ export async function handleCodingTasksHttpRequest(
       emit,
     );
   } catch (err) {
-    // A credential can never be in an error message (it lives only in git subprocess
-    // env), so surfacing the message is safe; still, keep it terse.
     logWarn(`coding-task: run error: ${errText(err)}`);
     emit({ type: "error", ok: false, message: "coding task crashed" });
   } finally {
-    await runtime?.cleanup().catch(() => {});
-    if (!res.writableEnded) res.end();
+    await runtime.cleanup().catch(() => {});
+    release(orgId);
+    if (!res.writableEnded) {
+      res.end();
+    }
   }
   return true;
 }
 
-type ParseResult =
-  | { ok: true; value: CodingTaskBody }
-  | { ok: false; error: string };
+type ParseResult = { ok: true; value: CodingTaskBody } | { ok: false; error: string };
 
 /**
- * parseBody validates the request and — critically — enforces that the clone URL's
- * org segment matches the authenticated org (orgId). A forged body pointing at
- * another org's repo is refused here (defense in depth; the org-scoped credential
- * would also fail at the git edge).
+ * parseBody validates the request and — critically — enforces (a) the clone URL is
+ * https on an ALLOWLISTED git host, and (b) its org segment matches the
+ * authenticated org. A forged body pointing the sandbox at another org's repo or an
+ * attacker host is refused here (defense in depth; the org-scoped credential would
+ * also fail at the git edge, and followRedirects=false blocks a redirect bounce).
  */
 function parseBody(raw: unknown, orgId: string): ParseResult {
-  if (typeof raw !== "object" || raw === null) return { ok: false, error: "body must be an object" };
+  if (typeof raw !== "object" || raw === null) {
+    return { ok: false, error: "body must be an object" };
+  }
   const b = raw as Record<string, unknown>;
   const cloneUrl = str(b.cloneUrl);
   const branch = str(b.branch);
@@ -185,13 +261,34 @@ function parseBody(raw: unknown, orgId: string): ParseResult {
   const cred = b.credential as Record<string, unknown> | undefined;
   const token = str(cred?.token);
 
-  if (!cloneUrl || !/^https:\/\//.test(cloneUrl)) return { ok: false, error: "cloneUrl must be https" };
-  const orgInUrl = cloneOrg(cloneUrl);
-  if (!orgInUrl) return { ok: false, error: "cloneUrl is not a /v1/git URL" };
-  if (orgInUrl !== orgId) return { ok: false, error: "cloneUrl org does not match authenticated org" };
-  if (!branch || !BRANCH_RE.test(branch)) return { ok: false, error: "invalid branch" };
-  if (!prompt.trim()) return { ok: false, error: "empty prompt" };
-  if (!token) return { ok: false, error: "missing credential" };
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(cloneUrl);
+  } catch {
+    return { ok: false, error: "invalid cloneUrl" };
+  }
+  if (parsedUrl.protocol !== "https:") {
+    return { ok: false, error: "cloneUrl must be https" };
+  }
+  if (!gitHostAllow().includes(parsedUrl.hostname.toLowerCase())) {
+    return { ok: false, error: "cloneUrl host is not an allowed git host" };
+  }
+  const orgInUrl = cloneOrg(parsedUrl);
+  if (!orgInUrl) {
+    return { ok: false, error: "cloneUrl is not a /v1/git URL" };
+  }
+  if (orgInUrl !== orgId) {
+    return { ok: false, error: "cloneUrl org does not match authenticated org" };
+  }
+  if (!branch || !BRANCH_RE.test(branch)) {
+    return { ok: false, error: "invalid branch" };
+  }
+  if (!prompt.trim()) {
+    return { ok: false, error: "empty prompt" };
+  }
+  if (!token) {
+    return { ok: false, error: "missing credential" };
+  }
 
   const requested = num(b.runTimeoutSeconds, DEFAULT_TIMEOUT_SECONDS);
   return {
@@ -209,13 +306,9 @@ function parseBody(raw: unknown, orgId: string): ParseResult {
 }
 
 /** cloneOrg extracts <org> from https://host/v1/git/<org>/<repo>.git. */
-function cloneOrg(cloneUrl: string): string | null {
-  try {
-    const m = new URL(cloneUrl).pathname.match(/^\/v1\/git\/([^/]+)\//);
-    return m ? decodeURIComponent(m[1]!) : null;
-  } catch {
-    return null;
-  }
+function cloneOrg(u: URL): string | null {
+  const m = u.pathname.match(/^\/v1\/git\/([^/]+)\//);
+  return m ? decodeURIComponent(m[1]) : null;
 }
 
 function str(v: unknown): string {
@@ -223,6 +316,10 @@ function str(v: unknown): string {
 }
 function num(v: unknown, dflt: number): number {
   return typeof v === "number" && Number.isFinite(v) ? Math.floor(v) : dflt;
+}
+function envInt(name: string, dflt: number): number {
+  const n = parseInt((process.env[name] ?? "").trim(), 10);
+  return Number.isFinite(n) && n > 0 ? n : dflt;
 }
 function errText(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
