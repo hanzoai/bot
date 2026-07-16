@@ -5,13 +5,17 @@
  * iam.hanzo.ai using OIDC/JWKS discovery and extracts user identity.
  */
 
+// The SDK names its server-side types Config/AuthResult/JwtClaims; they are aliased
+// to the Iam* names this wrapper exposes. Config is the one validateToken and
+// IamClient accept — not the similarly named IAMConfig, which configures the SDK's
+// browser entrypoint.
 import {
   validateToken,
   clearJwksCache as clearSdkJwksCache,
   IamClient,
-  type IamConfig,
-  type IamAuthResult,
-  type IamJwtClaims,
+  type Config as IamConfig,
+  type AuthResult as IamAuthResult,
+  type JwtClaims as IamJwtClaims,
 } from "@hanzo/iam";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { GatewayIamConfig } from "../config/types.gateway.js";
@@ -173,7 +177,7 @@ export async function validateIamToken(
 
           if (sub) {
             const ownerParts = sub.split("/");
-            const owner = ownerParts.length > 1 ? ownerParts[0] : config.orgName ?? "unknown";
+            const owner = ownerParts.length > 1 ? ownerParts[0] : (config.orgName ?? "unknown");
             sdkResult = {
               ok: true,
               userId: sub,

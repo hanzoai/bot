@@ -35,22 +35,10 @@ COPY --chown=node:node patches ./patches
 COPY --chown=node:node scripts ./scripts
 
 USER node
-# Auth for private GitHub tarball deps (e.g. @hanzo/iam = github:hanzo-js/iam,
-# which pnpm resolves to a private codeload.github.com tarball). `always-auth`
-# is required so pnpm sends the token on the tarball fetch (a non-registry
-# host); the host-scoped _authToken alone is NOT applied without it. The token
-# is written and then stripped from .npmrc inside the SAME layer so it never
-# persists in the (single-stage) image. Pass --build-arg GIT_TOKEN=<pat>.
-ARG GIT_TOKEN=""
-# Reduce OOM risk on low-memory hosts during dependency installation.
+# Every dependency resolves without credentials, from the npm registry or a public
+# git repo. Reduce OOM risk on low-memory hosts during dependency installation:
 # Docker builds on small VMs may otherwise fail with "Killed" (exit 137).
-RUN if [ -n "$GIT_TOKEN" ]; then \
-      printf 'always-auth=true\n//codeload.github.com/:_authToken=%s\n//github.com/:_authToken=%s\n' "$GIT_TOKEN" "$GIT_TOKEN" >> .npmrc; \
-    fi; \
-    NODE_OPTIONS=--max-old-space-size=2048 pnpm install --frozen-lockfile; \
-    rc=$?; \
-    sed -i '/_authToken/d;/always-auth/d' .npmrc 2>/dev/null || true; \
-    exit $rc
+RUN NODE_OPTIONS=--max-old-space-size=2048 pnpm install --frozen-lockfile
 
 # Optionally install Chromium and Xvfb for browser automation.
 # Build with: docker build --build-arg BOT_INSTALL_BROWSER=1 ...

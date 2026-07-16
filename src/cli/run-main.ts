@@ -1,5 +1,6 @@
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { isCloudNode } from "../infra/cloud-node.js";
 import { loadDotEnv } from "../infra/dotenv.js";
 import { normalizeEnv } from "../infra/env.js";
 import { formatUncaughtError } from "../infra/errors.js";
@@ -88,14 +89,14 @@ export async function runCli(argv: string[] = process.argv) {
 
   // First-run cloud connect: if no config file exists, authenticate with Hanzo Cloud
   // before proceeding. Skip for help/version flags, non-default commands that don't
-  // need cloud credentials, and cloud-provisioned nodes (BOT_CLOUD_NODE=true) which
-  // receive their credentials via environment variables and must not trigger interactive
-  // OAuth — there is no TTY inside K8s pods.
-  const isCloudNode = process.env.BOT_CLOUD_NODE === "true";
+  // need cloud credentials, and cloud-provisioned nodes (HANZO_PLAYGROUND_CLOUD_NODE=true)
+  // which receive their credentials via environment variables and must not trigger
+  // interactive OAuth — there is no TTY inside K8s pods.
+  const cloudNode = isCloudNode();
   const primaryCmd = getPrimaryCommand(normalizedArgv);
   if (
     !hasHelpOrVersion(normalizedArgv) &&
-    !isCloudNode &&
+    !cloudNode &&
     primaryCmd !== "node" &&
     primaryCmd !== "gateway"
   ) {

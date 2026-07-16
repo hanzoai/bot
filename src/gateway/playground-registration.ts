@@ -1,10 +1,14 @@
 /**
  * Playground control-plane registration.
  *
- * On startup the bot gateway registers itself as a node with the playground
- * control-plane, sends periodic heartbeats, and deregisters on shutdown.
+ * A node registers itself with the playground control-plane, sends periodic
+ * heartbeats (which promote it to `active`), and deregisters on shutdown.
+ * Both the in-cluster bot gateway and cloud-provisioned node hosts use this.
  *
- * Env vars:
+ * The playground node API (`/v1/nodes/*`) is unauthenticated: the node id is
+ * the only identity required, so `token` is optional.
+ *
+ * `resolvePlaygroundRegistrationConfig` builds the gateway's config from:
  *   PLAYGROUND_URL   — base URL of the playground control-plane (default: http://playground:8080)
  *   HANZO_NODE_ID    — stable node identifier (default: bot-gateway)
  */
@@ -25,8 +29,14 @@ export type PlaygroundRegistrationConfig = {
   baseUrl: string;
   /** Heartbeat interval in ms (default 30 000). */
   heartbeatIntervalMs?: number;
-  /** Bearer token for authenticating with the playground API. */
+  /** Bearer token for authenticating with the playground API (optional — the node API is unauthenticated). */
   token?: string;
+  /** Organization the node belongs to (optional). */
+  orgId?: string;
+  /** Runtime version advertised to the control-plane (optional). */
+  version?: string;
+  /** Dashboard metadata such as platform and display_name (optional). */
+  metadata?: Record<string, unknown>;
   log: SubsystemLogger;
 };
 
@@ -49,6 +59,9 @@ export async function startPlaygroundRegistration(
     baseUrl,
     heartbeatIntervalMs = 30_000,
     token,
+    orgId,
+    version,
+    metadata,
     log,
   } = config;
 
@@ -81,15 +94,24 @@ export async function startPlaygroundRegistration(
 
   // -- register -------------------------------------------------------------
 
-  const registerPayload = {
+  const registerPayload: Record<string, unknown> = {
     id: nodeId,
     base_url: baseUrl,
     deployment_type: "long_running",
     bots,
     skills,
   };
+  if (orgId) {
+    registerPayload.org_id = orgId;
+  }
+  if (version) {
+    registerPayload.version = version;
+  }
+  if (metadata) {
+    registerPayload.metadata = metadata;
+  }
 
-  const ok = await post("/api/v1/nodes/register", registerPayload);
+  const ok = await post("/v1/nodes/register", registerPayload);
   if (ok) {
     log.info(`registered with playground at ${apiBase} as ${nodeId}`);
   } else {
@@ -104,7 +126,7 @@ export async function startPlaygroundRegistration(
     if (stopped) {
       return;
     }
-    await post(`/api/v1/nodes/${encodeURIComponent(nodeId)}/heartbeat`, {
+    await post(`/v1/nodes/${encodeURIComponent(nodeId)}/heartbeat`, {
       status: "ready",
       timestamp: new Date().toISOString(),
     });
@@ -128,7 +150,7 @@ export async function startPlaygroundRegistration(
     // Best-effort deregister. The playground SDK does not expose a dedicated
     // deregister endpoint, but sending an "offline" heartbeat achieves the
     // same effect — the control-plane marks the node as offline.
-    await post(`/api/v1/nodes/${encodeURIComponent(nodeId)}/heartbeat`, {
+    await post(`/v1/nodes/${encodeURIComponent(nodeId)}/heartbeat`, {
       status: "offline",
       timestamp: new Date().toISOString(),
     });

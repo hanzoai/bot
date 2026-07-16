@@ -61,4 +61,4 @@ cp -a "${SRC}/dist/." "${DST}/"
 } > "${DST}/.sync-stamp"
 
 echo "synced ${SRC}/dist -> ${DST}"
-ls -lh "${DST}/index.html" "${DST}"/assets/*.js "${DST}"/assets/*.css 2>/dev/null
+ls -lh "${DST}/index.html" "${DST}"/assets/*.js "${DST}"/assets/*.css 2>/dev/null || true
