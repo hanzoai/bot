@@ -2,7 +2,7 @@
 set -euo pipefail
 
 INSTALL_URL="${BOT_INSTALL_URL:-https://hanzo-bot.bot/install.sh}"
-DEFAULT_PACKAGE="hanzo-bot"
+DEFAULT_PACKAGE="@hanzo/bot"
 PACKAGE_NAME="${BOT_INSTALL_PACKAGE:-$DEFAULT_PACKAGE}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
