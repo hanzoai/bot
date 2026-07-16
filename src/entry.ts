@@ -7,16 +7,11 @@ import { isRootHelpInvocation, isRootVersionInvocation } from "./cli/argv.js";
 import { applyCliProfileEnv, parseCliProfileArgs } from "./cli/profile.js";
 import { shouldSkipRespawnForArgv } from "./cli/respawn-policy.js";
 import { normalizeWindowsArgv } from "./cli/windows-argv.js";
+import { ENTRY_WRAPPER_PAIRS } from "./infra/entry-wrappers.js";
 import { isTruthyEnvValue, normalizeEnv } from "./infra/env.js";
 import { isMainModule } from "./infra/is-main.js";
 import { installProcessWarningFilter } from "./infra/warning-filter.js";
 import { attachChildProcessBridge } from "./process/child-process-bridge.js";
-
-const ENTRY_WRAPPER_PAIRS = [
-  { wrapperBasename: "bot.mjs", entryBasename: "entry.js" },
-  { wrapperBasename: "bot.js", entryBasename: "entry.js" },
-  { wrapperBasename: "bot.mjs", entryBasename: "entry.js" },
-] as const;
 
 function shouldForceReadOnlyAuthStore(argv: string[]): boolean {
   const tokens = argv.slice(2).filter((token) => token.length > 0 && !token.startsWith("-"));
