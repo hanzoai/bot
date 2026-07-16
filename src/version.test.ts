@@ -44,9 +44,19 @@ function expectVersionMetadataToBeMissing(moduleUrl: string) {
 }
 
 describe("version resolution", () => {
+  // The fixtures below name themselves, so they pass for whatever name the resolver
+  // happens to look for. This one uses the real package.json: it fails if the name
+  // the resolver requires ever drifts from the name this package actually ships,
+  // which leaves every build resolving no version at all.
+  it("resolves this package's own version from its real package.json", async () => {
+    const pkgUrl = new URL("../package.json", import.meta.url);
+    const pkg = JSON.parse(await fs.readFile(pkgUrl, "utf8")) as { version: string };
+    expect(readVersionFromPackageJsonForModuleUrl(import.meta.url)).toBe(pkg.version);
+  });
+
   it("resolves package version from nested dist/plugin-sdk module URL", async () => {
     await withTempDir(async (root) => {
-      await writeJsonFixture(root, "package.json", { name: "bot", version: "1.2.3" });
+      await writeJsonFixture(root, "package.json", { name: "@hanzo/bot", version: "1.2.3" });
       const moduleUrl = await ensureModuleFixture(root);
       expect(readVersionFromPackageJsonForModuleUrl(moduleUrl)).toBe("1.2.3");
       expect(resolveVersionFromModuleUrl(moduleUrl)).toBe("1.2.3");
@@ -55,7 +65,7 @@ describe("version resolution", () => {
 
   it("ignores unrelated nearby package.json files", async () => {
     await withTempDir(async (root) => {
-      await writeJsonFixture(root, "package.json", { name: "bot", version: "2.3.4" });
+      await writeJsonFixture(root, "package.json", { name: "@hanzo/bot", version: "2.3.4" });
       await writeJsonFixture(root, "dist/package.json", {
         name: "other-package",
         version: "9.9.9",
@@ -99,7 +109,7 @@ describe("version resolution", () => {
 
   it("resolves binary version with explicit precedence", async () => {
     await withTempDir(async (root) => {
-      await writeJsonFixture(root, "package.json", { name: "bot", version: "2.3.4" });
+      await writeJsonFixture(root, "package.json", { name: "@hanzo/bot", version: "2.3.4" });
       const moduleUrl = await ensureModuleFixture(root);
       expect(
         resolveBinaryVersion({
