@@ -2,6 +2,8 @@ import { resolveBrowserConfig } from "../browser/config.js";
 import { loadConfig, type BotConfig } from "../config/config.js";
 import { normalizeSecretInputString, resolveSecretInputRef } from "../config/types.secrets.js";
 import { GatewayClient } from "../gateway/client.js";
+import { startPlaygroundRegistration } from "../gateway/playground-registration.js";
+import { isCloudNode } from "../infra/cloud-node.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import type { SkillBinTrustEntry } from "../infra/exec-approvals.js";
 import { resolveExecutableFromPathEnv } from "../infra/executable-path.js";
@@ -13,6 +15,7 @@ import {
   NODE_VNC_TUNNEL_COMMAND,
 } from "../infra/node-commands.js";
 import { ensureBotCliOnPath } from "../infra/path-env.js";
+import { createSubsystemLogger } from "../logging/subsystem.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
 import { resolveSecretRefValues } from "../secrets/resolve.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
@@ -222,8 +225,8 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   // provisioner. Use it as a fallback when no other token was resolved.
   const token = resolvedToken || process.env.BOT_GATEWAY_TOKEN || undefined;
 
-  // Cloud-provisioned nodes (BOT_CLOUD_NODE=true) receive the gateway URL
-  // and auth token via environment variables set by the Playground provisioner.
+  // Cloud-provisioned nodes (HANZO_PLAYGROUND_CLOUD_NODE=true) receive the
+  // gateway URL and auth token via environment variables set by visor.
   const gatewayUrlOverride = process.env.BOT_NODE_GATEWAY_URL;
   let url: string;
   if (gatewayUrlOverride) {
@@ -235,12 +238,12 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     url = `${scheme}://${host}:${port}`;
   }
   const pathEnv = ensureNodePathEnv();
-  const isCloudNode = process.env.BOT_CLOUD_NODE === "true";
+  const isCloud = isCloudNode();
   // eslint-disable-next-line no-console
   console.log(`node host PATH: ${pathEnv}`);
   // eslint-disable-next-line no-console
   console.log(
-    `node host gateway: url=${url} nodeId=${nodeId} cloud=${isCloudNode} hasToken=${Boolean(token)}`,
+    `node host gateway: url=${url} nodeId=${nodeId} cloud=${isCloud} hasToken=${Boolean(token)}`,
   );
 
   const client = new GatewayClient({
@@ -269,7 +272,7 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
     // pairing flow on the gateway, causing the connection to be rejected.
     // Pass null (not undefined) to explicitly opt out — undefined would cause
     // the GatewayClient constructor to fall back to loadOrCreateDeviceIdentity().
-    deviceIdentity: process.env.BOT_CLOUD_NODE === "true" ? null : loadOrCreateDeviceIdentity(),
+    deviceIdentity: isCloud ? null : loadOrCreateDeviceIdentity(),
     tlsFingerprint: gateway.tlsFingerprint,
     onEvent: (evt) => {
       if (evt.event !== "node.invoke.request") {
@@ -310,58 +313,33 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   // eslint-disable-next-line no-console
   console.log("node host: gateway client started, waiting...");
 
-  // Cloud-provisioned nodes: register with the Playground and send heartbeats
-  // so the node shows as active in the dashboard.
-  if (isCloudNode) {
-    const playgroundServer = process.env.PLAYGROUND_SERVER?.trim();
+  // Cloud-provisioned nodes register with the Playground control-plane and send
+  // heartbeats so the node is promoted to `active` in the dashboard. The node
+  // API is unauthenticated, so all that is needed is AGENT_NODE_ID (injected by
+  // visor); the playground URL comes from HANZO_PLAYGROUND_URL, defaulting to
+  // production when visor does not override it.
+  if (isCloud) {
+    const playgroundUrl = process.env.HANZO_PLAYGROUND_URL?.trim() || "https://playground.hanzo.ai";
     const agentNodeId = process.env.AGENT_NODE_ID?.trim() || nodeId;
-    const playgroundToken = token || process.env.BOT_GATEWAY_TOKEN || "";
-    if (playgroundServer && agentNodeId && playgroundToken) {
-      const playgroundHeaders = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${playgroundToken}`,
-      };
-      const registerWithPlayground = async () => {
-        try {
-          const teamId =
-            process.env.HANZO_TEAM_ID?.trim() || process.env.AGENT_TEAM_ID?.trim() || "";
-          await fetch(`${playgroundServer}/api/v1/nodes/register`, {
-            method: "POST",
-            headers: playgroundHeaders,
-            body: JSON.stringify({
-              id: agentNodeId,
-              base_url: "",
-              team_id: teamId,
-              deployment_type: "long_running",
-              version: VERSION,
-              health_status: "active",
-              lifecycle_status: "running",
-              metadata: { platform: process.platform, display_name: displayName },
-            }),
-          });
-          // eslint-disable-next-line no-console
-          console.log(`node host: registered with playground as ${agentNodeId}`);
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `node host: playground registration failed (non-fatal): ${err instanceof Error ? err.message : String(err)}`,
-          );
-        }
-      };
-      const sendPlaygroundHeartbeat = async () => {
-        try {
-          await fetch(`${playgroundServer}/api/v1/nodes/${agentNodeId}/heartbeat`, {
-            method: "POST",
-            headers: playgroundHeaders,
-            body: JSON.stringify({ status: "active" }),
-          });
-        } catch {
-          // non-fatal
-        }
-      };
-      void registerWithPlayground();
-      setInterval(() => void sendPlaygroundHeartbeat(), 25_000);
-    }
+    await startPlaygroundRegistration({
+      playgroundUrl,
+      nodeId: agentNodeId,
+      baseUrl: "",
+      bots: [],
+      skills: [],
+      orgId: process.env.HANZO_ORG?.trim() || undefined,
+      version: VERSION,
+      metadata: { platform: process.platform, display_name: displayName },
+      token: token || process.env.BOT_GATEWAY_TOKEN || undefined,
+      heartbeatIntervalMs: 25_000,
+      log: createSubsystemLogger("node-host/playground"),
+    }).catch((err: unknown) => {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `node host: playground registration failed (non-fatal): ${err instanceof Error ? err.message : String(err)}`,
+      );
+      return null;
+    });
   }
 
   await new Promise(() => {});

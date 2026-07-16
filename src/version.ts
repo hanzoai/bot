@@ -1,7 +1,11 @@
 import { createRequire } from "node:module";
 
 declare const __BOT_VERSION__: string | undefined;
-const CORE_PACKAGE_NAME = "bot";
+// Must match the "name" in package.json. The guard below walks up from the module
+// looking for that package.json and skips any other one it passes on the way (a
+// consumer's own, or an unrelated nested one), so a stale value here silently
+// resolves no version at all.
+const CORE_PACKAGE_NAME = "@hanzo/bot";
 
 const PACKAGE_JSON_CANDIDATES = [
   "../package.json",
