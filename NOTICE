@@ -18,9 +18,9 @@ names — Moltbot, Clawdbot, Warelay — are recorded in CHANGELOG.md.
 
 Changes made by Hanzo AI, Inc. on top of the OpenClaw MIT baseline:
 
-- Rebranded product-facing surfaces to "Hanzo Bot": CLI binary `hanzo-bot`,
-  npm package `@hanzo/bot`, README, and documentation pointing to hanzo.ai and
-  docs.hanzo.ai. Legacy `CLAWDBOT_*` and `BOT_*` environment variables are
+- Rebranded product-facing surfaces to "Hanzo Bot": CLI binaries `hanzo-bot` and
+  `bot`, npm package `@hanzo/bot`, README, and documentation pointing to hanzo.ai
+  and docs.hanzo.ai. Legacy `CLAWDBOT_*` and `BOT_*` environment variables are
   retained for compatibility.
 - Added Hanzo IAM (OIDC) authentication for the Gateway (src/gateway/auth-iam.ts,
   src/commands/auth-choice.apply.hanzo-iam.ts), driven by the canonical
@@ -31,6 +31,10 @@ Changes made by Hanzo AI, Inc. on top of the OpenClaw MIT baseline:
   POST /v1/bots/:runId/stop (src/gateway/bots-http.ts).
 - Added per-tenant LLM billing through IAM (src/gateway/billing/, including
   iam-billing-client.ts and the billing gate).
+- Added Playground control-plane registration (src/gateway/playground-registration.ts):
+  the gateway and cloud-provisioned node hosts register, heartbeat and deregister
+  against /v1/nodes. Cloud provisioning is signalled by HANZO_PLAYGROUND_CLOUD_NODE
+  (src/infra/cloud-node.ts).
 - Added a cloud image, Dockerfile.cloud, layering the bot Gateway on
   ghcr.io/hanzoai/operative for cloud agents, plus render.yaml, hanzo.toml and
   bot.podman.env deployment configuration.

@@ -125,13 +125,13 @@ describe("startPlaygroundRegistration", () => {
 
     // register call
     expect(fetchSpy).toHaveBeenCalledWith(
-      "http://playground:8080/api/v1/nodes/register",
+      "http://playground:8080/v1/nodes/register",
       expect.objectContaining({ method: "POST" }),
     );
 
     // immediate heartbeat
     expect(fetchSpy).toHaveBeenCalledWith(
-      "http://playground:8080/api/v1/nodes/test-node/heartbeat",
+      "http://playground:8080/v1/nodes/test-node/heartbeat",
       expect.objectContaining({ method: "POST" }),
     );
 
@@ -149,7 +149,7 @@ describe("startPlaygroundRegistration", () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(fetchSpy).toHaveBeenCalledWith(
-      "http://playground:8080/api/v1/nodes/test-node/heartbeat",
+      "http://playground:8080/v1/nodes/test-node/heartbeat",
       expect.objectContaining({ method: "POST" }),
     );
 
@@ -164,7 +164,7 @@ describe("startPlaygroundRegistration", () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [url, opts] = fetchSpy.mock.calls[0];
-    expect(url).toBe("http://playground:8080/api/v1/nodes/test-node/heartbeat");
+    expect(url).toBe("http://playground:8080/v1/nodes/test-node/heartbeat");
     const body = JSON.parse(opts.body);
     expect(body.status).toBe("offline");
   });
