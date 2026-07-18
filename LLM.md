@@ -21,6 +21,8 @@ Multi-channel AI messaging gateway (TypeScript ESM). Routes messages between 50+
 - `billing/billing-gate.ts` — Pre-request billing check (fail-closed in production)
 - `billing/usage-reporter.ts` — Async usage reporting (batch 50, flush 5s, retry 3x)
 - `marketplace-http.ts` — P2P inference marketplace
+- `bots-http.ts` — org-scoped `GET /v1/bots` (list the caller org's runs) + `POST /v1/bots/:runId/stop` (own-key stop guard), authenticated at the pod boundary
+- `coding-tasks-http.ts` — `POST /v1/coding-tasks`: native coding-task runner (clone → agent → commit → push); sandbox isolation is fail-closed and OFF by default
 
 ## Model System (`src/agents/`)
 
