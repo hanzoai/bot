@@ -12,10 +12,16 @@ import { isMainModule } from "./infra/is-main.js";
 import { installProcessWarningFilter } from "./infra/warning-filter.js";
 import { attachChildProcessBridge } from "./process/child-process-bridge.js";
 
+// The shipped bin (package.json "bin") is hanzo-bot.mjs; it imports dist/entry.js,
+// so argv[1] is the WRAPPER while import.meta.url is the ENTRY. isMainModule needs
+// this pairing or the CLI silently no-ops (exit 0, no output) — which it did for
+// every `bot`/`hanzo-bot` invocation, including the cloud-bot pods, whose gateway
+// exited immediately and never registered with Playground.
 const ENTRY_WRAPPER_PAIRS = [
+  { wrapperBasename: "hanzo-bot.mjs", entryBasename: "entry.js" },
+  { wrapperBasename: "hanzo-bot.js", entryBasename: "entry.js" },
   { wrapperBasename: "bot.mjs", entryBasename: "entry.js" },
   { wrapperBasename: "bot.js", entryBasename: "entry.js" },
-  { wrapperBasename: "bot.mjs", entryBasename: "entry.js" },
 ] as const;
 
 function shouldForceReadOnlyAuthStore(argv: string[]): boolean {
