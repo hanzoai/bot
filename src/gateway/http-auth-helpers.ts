@@ -15,7 +15,7 @@ export async function authorizeGatewayBearerRequestOrReply(params: {
   const token = getBearerToken(params.req);
   const authResult = await authorizeHttpGatewayConnect({
     auth: params.auth,
-    connectAuth: token ? { token, password: token } : null,
+    connectAuth: token ? { token } : null,
     req: params.req,
     trustedProxies: params.trustedProxies,
     allowRealIpFallback: params.allowRealIpFallback,
