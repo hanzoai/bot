@@ -152,7 +152,7 @@ export async function handleCodingTasksHttpRequest(
   const token = getBearerToken(req);
   const authResult = await authorizeHttpGatewayConnect({
     auth: opts.auth,
-    connectAuth: token ? { token, password: token } : null,
+    connectAuth: token ? { token } : null,
     req,
     trustedProxies: opts.trustedProxies ?? cfg.gateway?.trustedProxies,
     allowRealIpFallback: opts.allowRealIpFallback ?? cfg.gateway?.allowRealIpFallback,

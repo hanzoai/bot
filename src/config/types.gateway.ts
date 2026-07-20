@@ -106,7 +106,7 @@ export type GatewayControlUiConfig = {
   dangerouslyDisableDeviceAuth?: boolean;
 };
 
-export type GatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
+export type GatewayAuthMode = "none" | "token" | "trusted-proxy" | "iam";
 
 export type GatewayIamConfig = {
   /** IAM server URL (e.g. "https://iam.hanzo.ai"). */
@@ -165,8 +165,6 @@ export type GatewayAuthConfig = {
   mode?: GatewayAuthMode;
   /** Shared token for token mode (plaintext or SecretRef). */
   token?: SecretInput;
-  /** Shared password for password mode (consider env instead). */
-  password?: SecretInput;
   /** Allow Tailscale identity headers when serve mode is enabled. */
   allowTailscale?: boolean;
   /** Rate-limit configuration for failed authentication attempts. */
@@ -219,8 +217,6 @@ export type GatewayRemoteConfig = {
   transport?: "ssh" | "direct";
   /** Token for remote auth (when the gateway requires token auth). */
   token?: SecretInput;
-  /** Password for remote auth (when the gateway requires password auth). */
-  password?: SecretInput;
   /** Expected TLS certificate fingerprint (sha256) for remote gateways. */
   tlsFingerprint?: string;
   /** SSH target for tunneling remote Gateway (user@host). */

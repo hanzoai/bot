@@ -1,4 +1,3 @@
-import type { IncomingMessage, ServerResponse } from "node:http";
 /**
  * Marketplace HTTP endpoint — buyer-facing API.
  *
@@ -9,13 +8,11 @@ import type { IncomingMessage, ServerResponse } from "node:http";
  * existing /v1/chat/completions endpoint.
  */
 import { randomUUID } from "node:crypto";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import type { GatewayIamConfig, MarketplaceConfig } from "../config/types.gateway.js";
+import { validateIamToken } from "./auth-iam.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import type { GatewayAuthResult, ResolvedGatewayAuth } from "./auth.js";
-import type { MarketplaceProxyDonePayload } from "./marketplace/events.js";
-import type { MarketplaceScheduler } from "./marketplace/scheduler.js";
-import type { NodeRegistry } from "./node-registry.js";
-import { validateIamToken } from "./auth-iam.js";
 import { authorizeHttpGatewayConnect } from "./auth.js";
 import { checkBillingAllowance } from "./billing/billing-gate.js";
 import { reportUsage } from "./billing/usage-reporter.js";
@@ -30,6 +27,9 @@ import {
 import { getBearerToken } from "./http-utils.js";
 import { calculateMarketplacePrice, type MarketplaceTransaction } from "./marketplace/billing.js";
 import { marketplaceEventBus, type MarketplaceProxyEvent } from "./marketplace/event-bus.js";
+import type { MarketplaceProxyDonePayload } from "./marketplace/events.js";
+import type { MarketplaceScheduler } from "./marketplace/scheduler.js";
+import type { NodeRegistry } from "./node-registry.js";
 import { resolveTenantContext } from "./tenant-context.js";
 
 const MARKETPLACE_PATH = "/v1/marketplace/completions";
@@ -97,7 +97,7 @@ export async function handleMarketplaceHttpRequest(
   const rawToken = getBearerToken(req) ?? undefined;
   const authResult: GatewayAuthResult = await authorizeHttpGatewayConnect({
     auth: opts.auth,
-    connectAuth: rawToken ? { token: rawToken, password: rawToken } : null,
+    connectAuth: rawToken ? { token: rawToken } : null,
     req,
     trustedProxies: opts.trustedProxies,
     allowRealIpFallback: opts.allowRealIpFallback,

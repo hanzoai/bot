@@ -10,7 +10,6 @@ export type QuickstartGatewayDefaults = {
   authMode: GatewayAuthChoice;
   tailscaleMode: "off" | "serve" | "funnel";
   token?: SecretInput;
-  password?: SecretInput;
   customBindHost?: string;
   tailscaleResetOnExit: boolean;
 };
