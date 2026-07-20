@@ -5,11 +5,7 @@ import {
   resolveStateDir,
 } from "../../config/config.js";
 import type { BotConfig, GatewayBindMode, GatewayControlUiConfig } from "../../config/types.js";
-import {
-  hasConfiguredSecretInput,
-  normalizeSecretInputString,
-  resolveSecretInputRef,
-} from "../../config/types.secrets.js";
+import { normalizeSecretInputString, resolveSecretInputRef } from "../../config/types.secrets.js";
 import { readLastGatewayErrorLine } from "../../daemon/diagnostics.js";
 import type { FindExtraGatewayServicesOptions } from "../../daemon/inspect.js";
 import { findExtraGatewayServices } from "../../daemon/inspect.js";
@@ -114,12 +110,6 @@ function readGatewayTokenEnv(env: Record<string, string | undefined>): string | 
   return trimToUndefined(env.BOT_GATEWAY_TOKEN) ?? trimToUndefined(env.CLAWDBOT_GATEWAY_TOKEN);
 }
 
-function readGatewayPasswordEnv(env: Record<string, string | undefined>): string | undefined {
-  return (
-    trimToUndefined(env.BOT_GATEWAY_PASSWORD) ?? trimToUndefined(env.CLAWDBOT_GATEWAY_PASSWORD)
-  );
-}
-
 async function resolveDaemonProbeToken(params: {
   daemonCfg: BotConfig;
   mergedDaemonEnv: Record<string, string | undefined>;
@@ -144,19 +134,8 @@ async function resolveDaemonProbeToken(params: {
     return normalizeSecretInputString(configured);
   }
   const authMode = params.daemonCfg.gateway?.auth?.mode;
-  if (authMode === "password" || authMode === "none" || authMode === "trusted-proxy") {
+  if (authMode === "none" || authMode === "trusted-proxy") {
     return undefined;
-  }
-  if (authMode !== "token") {
-    const passwordCandidate =
-      trimToUndefined(params.explicitPassword) ||
-      readGatewayPasswordEnv(params.mergedDaemonEnv) ||
-      (hasConfiguredSecretInput(params.daemonCfg.gateway?.auth?.password, defaults)
-        ? "__configured__"
-        : undefined);
-    if (passwordCandidate) {
-      return undefined;
-    }
   }
   const resolved = await resolveSecretRefValues([ref], {
     config: params.daemonCfg,
@@ -167,55 +146,6 @@ async function resolveDaemonProbeToken(params: {
     throw new Error("gateway.auth.token resolved to an empty or non-string value.");
   }
   return token;
-}
-
-async function resolveDaemonProbePassword(params: {
-  daemonCfg: BotConfig;
-  mergedDaemonEnv: Record<string, string | undefined>;
-  explicitToken?: string;
-  explicitPassword?: string;
-}): Promise<string | undefined> {
-  const explicitPassword = trimToUndefined(params.explicitPassword);
-  if (explicitPassword) {
-    return explicitPassword;
-  }
-  const envPassword = readGatewayPasswordEnv(params.mergedDaemonEnv);
-  if (envPassword) {
-    return envPassword;
-  }
-  const defaults = params.daemonCfg.secrets?.defaults;
-  const configured = params.daemonCfg.gateway?.auth?.password;
-  const { ref } = resolveSecretInputRef({
-    value: configured,
-    defaults,
-  });
-  if (!ref) {
-    return normalizeSecretInputString(configured);
-  }
-  const authMode = params.daemonCfg.gateway?.auth?.mode;
-  if (authMode === "token" || authMode === "none" || authMode === "trusted-proxy") {
-    return undefined;
-  }
-  if (authMode !== "password") {
-    const tokenCandidate =
-      trimToUndefined(params.explicitToken) ||
-      readGatewayTokenEnv(params.mergedDaemonEnv) ||
-      (hasConfiguredSecretInput(params.daemonCfg.gateway?.auth?.token, defaults)
-        ? "__configured__"
-        : undefined);
-    if (tokenCandidate) {
-      return undefined;
-    }
-  }
-  const resolved = await resolveSecretRefValues([ref], {
-    config: params.daemonCfg,
-    env: params.mergedDaemonEnv as NodeJS.ProcessEnv,
-  });
-  const password = trimToUndefined(resolved.get(secretRefKey(ref)));
-  if (!password) {
-    throw new Error("gateway.auth.password resolved to an empty or non-string value.");
-  }
-  return password;
 }
 
 export async function gatherDaemonStatus(
@@ -339,14 +269,6 @@ export async function gatherDaemonStatus(
   const tlsRuntime = shouldUseLocalTlsRuntime
     ? await loadGatewayTlsRuntime(daemonCfg.gateway?.tls)
     : undefined;
-  const daemonProbePassword = opts.probe
-    ? await resolveDaemonProbePassword({
-        daemonCfg,
-        mergedDaemonEnv,
-        explicitToken: opts.rpc.token,
-        explicitPassword: opts.rpc.password,
-      })
-    : undefined;
   const daemonProbeToken = opts.probe
     ? await resolveDaemonProbeToken({
         daemonCfg,
@@ -360,7 +282,6 @@ export async function gatherDaemonStatus(
     ? await probeGatewayStatus({
         url: probeUrl,
         token: daemonProbeToken,
-        password: daemonProbePassword,
         tlsFingerprint:
           shouldUseLocalTlsRuntime && tlsRuntime?.enabled
             ? tlsRuntime.fingerprintSha256

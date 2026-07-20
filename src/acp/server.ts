@@ -24,7 +24,6 @@ export async function serveAcpGateway(opts: AcpServerOptions = {}): Promise<void
     config: cfg,
     explicitAuth: {
       token: opts.gatewayToken,
-      password: opts.gatewayPassword,
     },
     env: process.env,
   });
@@ -60,7 +59,6 @@ export async function serveAcpGateway(opts: AcpServerOptions = {}): Promise<void
   const gateway = new GatewayClient({
     url: connection.url,
     token: creds.token,
-    password: creds.password,
     clientName: GATEWAY_CLIENT_NAMES.CLI,
     clientDisplayName: "ACP",
     clientVersion: "acp",
@@ -130,7 +128,6 @@ export async function serveAcpGateway(opts: AcpServerOptions = {}): Promise<void
 function parseArgs(args: string[]): AcpServerOptions {
   const opts: AcpServerOptions = {};
   let tokenFile: string | undefined;
-  let passwordFile: string | undefined;
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
     if (arg === "--url" || arg === "--gateway-url") {
@@ -145,16 +142,6 @@ function parseArgs(args: string[]): AcpServerOptions {
     }
     if (arg === "--token-file" || arg === "--gateway-token-file") {
       tokenFile = args[i + 1];
-      i += 1;
-      continue;
-    }
-    if (arg === "--password" || arg === "--gateway-password") {
-      opts.gatewayPassword = args[i + 1];
-      i += 1;
-      continue;
-    }
-    if (arg === "--password-file" || arg === "--gateway-password-file") {
-      passwordFile = args[i + 1];
       i += 1;
       continue;
     }
@@ -192,14 +179,8 @@ function parseArgs(args: string[]): AcpServerOptions {
   if (opts.gatewayToken?.trim() && tokenFile?.trim()) {
     throw new Error("Use either --token or --token-file.");
   }
-  if (opts.gatewayPassword?.trim() && passwordFile?.trim()) {
-    throw new Error("Use either --password or --password-file.");
-  }
   if (tokenFile?.trim()) {
     opts.gatewayToken = readSecretFromFile(tokenFile, "Gateway token");
-  }
-  if (passwordFile?.trim()) {
-    opts.gatewayPassword = readSecretFromFile(passwordFile, "Gateway password");
   }
   return opts;
 }
@@ -213,8 +194,6 @@ Options:
   --url <url>             Gateway WebSocket URL
   --token <token>         Gateway auth token
   --token-file <path>     Read gateway auth token from file
-  --password <password>   Gateway auth password
-  --password-file <path>  Read gateway auth password from file
   --session <key>         Default session key (e.g. "agent:main:main")
   --session-label <label> Default session label to resolve
   --require-existing      Fail if the session key/label does not exist
@@ -230,11 +209,6 @@ if (isMainModule({ currentFile: fileURLToPath(import.meta.url) })) {
   if (argv.includes("--token") || argv.includes("--gateway-token")) {
     console.error(
       "Warning: --token can be exposed via process listings. Prefer --token-file or BOT_GATEWAY_TOKEN.",
-    );
-  }
-  if (argv.includes("--password") || argv.includes("--gateway-password")) {
-    console.error(
-      "Warning: --password can be exposed via process listings. Prefer --password-file or BOT_GATEWAY_PASSWORD.",
     );
   }
   const opts = parseArgs(argv);
