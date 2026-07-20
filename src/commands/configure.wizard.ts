@@ -83,20 +83,12 @@ async function runGatewayHealthCheck(params: {
     value: params.cfg.gateway?.auth?.token,
     path: "gateway.auth.token",
   });
-  const configuredPassword = await resolveGatewaySecretInputForWizard({
-    cfg: params.cfg,
-    value: params.cfg.gateway?.auth?.password,
-    path: "gateway.auth.password",
-  });
   const token =
     process.env.BOT_GATEWAY_TOKEN ?? process.env.CLAWDBOT_GATEWAY_TOKEN ?? configuredToken;
-  const password =
-    process.env.BOT_GATEWAY_PASSWORD ?? process.env.CLAWDBOT_GATEWAY_PASSWORD ?? configuredPassword;
 
   await waitForGatewayReachable({
     url: wsUrl,
     token,
-    password,
     deadlineMs: 15_000,
   });
 
@@ -337,19 +329,10 @@ export async function runConfigureWizard(
       value: baseConfig.gateway?.auth?.token,
       path: "gateway.auth.token",
     });
-    const baseLocalProbePassword = await resolveGatewaySecretInputForWizard({
-      cfg: baseConfig,
-      value: baseConfig.gateway?.auth?.password,
-      path: "gateway.auth.password",
-    });
     const localProbe = await probeGatewayReachable({
       url: localUrl,
       token:
         process.env.BOT_GATEWAY_TOKEN ?? process.env.CLAWDBOT_GATEWAY_TOKEN ?? baseLocalProbeToken,
-      password:
-        process.env.BOT_GATEWAY_PASSWORD ??
-        process.env.CLAWDBOT_GATEWAY_PASSWORD ??
-        baseLocalProbePassword,
     });
     const remoteUrl = baseConfig.gateway?.remote?.url?.trim() ?? "";
     const baseRemoteProbeToken = await resolveGatewaySecretInputForWizard({
@@ -633,23 +616,6 @@ export async function runConfigureWizard(
       customBindHost: nextConfig.gateway?.customBindHost,
       basePath: nextConfig.gateway?.controlUi?.basePath,
     });
-    // Try both new and old passwords since gateway may still have old config.
-    const newPassword =
-      process.env.BOT_GATEWAY_PASSWORD ??
-      process.env.CLAWDBOT_GATEWAY_PASSWORD ??
-      (await resolveGatewaySecretInputForWizard({
-        cfg: nextConfig,
-        value: nextConfig.gateway?.auth?.password,
-        path: "gateway.auth.password",
-      }));
-    const oldPassword =
-      process.env.BOT_GATEWAY_PASSWORD ??
-      process.env.CLAWDBOT_GATEWAY_PASSWORD ??
-      (await resolveGatewaySecretInputForWizard({
-        cfg: baseConfig,
-        value: baseConfig.gateway?.auth?.password,
-        path: "gateway.auth.password",
-      }));
     const token =
       process.env.BOT_GATEWAY_TOKEN ??
       process.env.CLAWDBOT_GATEWAY_TOKEN ??
@@ -659,19 +625,10 @@ export async function runConfigureWizard(
         path: "gateway.auth.token",
       }));
 
-    let gatewayProbe = await probeGatewayReachable({
+    const gatewayProbe = await probeGatewayReachable({
       url: links.wsUrl,
       token,
-      password: newPassword,
     });
-    // If new password failed and it's different from old password, try old too.
-    if (!gatewayProbe.ok && newPassword !== oldPassword && oldPassword) {
-      gatewayProbe = await probeGatewayReachable({
-        url: links.wsUrl,
-        token,
-        password: oldPassword,
-      });
-    }
     const gatewayStatusLine = gatewayProbe.ok
       ? "Gateway: reachable"
       : `Gateway: not detected${gatewayProbe.detail ? ` (${gatewayProbe.detail})` : ""}`;
