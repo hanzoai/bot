@@ -391,7 +391,6 @@ export async function probeGatewayReachable(params: {
     await callGateway({
       url,
       token: params.token,
-      password: params.password,
       method: "health",
       timeoutMs,
       clientName: GATEWAY_CLIENT_NAMES.PROBE,
@@ -424,7 +423,6 @@ export async function waitForGatewayReachable(params: {
     const probe = await probeGatewayReachable({
       url: params.url,
       token: params.token,
-      password: params.password,
       timeoutMs: probeTimeoutMs,
     });
     if (probe.ok) {

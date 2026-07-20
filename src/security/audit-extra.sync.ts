@@ -574,19 +574,6 @@ export function collectSyncedFolderFindings(params: {
 
 export function collectSecretsInConfigFindings(cfg: BotConfig): SecurityAuditFinding[] {
   const findings: SecurityAuditFinding[] = [];
-  const password =
-    typeof cfg.gateway?.auth?.password === "string" ? cfg.gateway.auth.password.trim() : "";
-  if (password && !looksLikeEnvRef(password)) {
-    findings.push({
-      checkId: "config.secrets.gateway_password_in_config",
-      severity: "warn",
-      title: "Gateway password is stored in config",
-      detail:
-        "gateway.auth.password is set in the config file; prefer environment variables for secrets when possible.",
-      remediation: "Prefer BOT_GATEWAY_PASSWORD (env) and remove gateway.auth.password from disk.",
-    });
-  }
-
   const hooksToken = typeof cfg.hooks?.token === "string" ? cfg.hooks.token.trim() : "";
   if (cfg.hooks?.enabled === true && hooksToken && !looksLikeEnvRef(hooksToken)) {
     findings.push({

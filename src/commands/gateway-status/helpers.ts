@@ -151,11 +151,6 @@ function readGatewayTokenEnv(env: NodeJS.ProcessEnv = process.env): string | und
   return token || undefined;
 }
 
-function readGatewayPasswordEnv(env: NodeJS.ProcessEnv = process.env): string | undefined {
-  const password = env.BOT_GATEWAY_PASSWORD?.trim() || env.CLAWDBOT_GATEWAY_PASSWORD?.trim();
-  return password || undefined;
-}
-
 export async function resolveAuthForTarget(
   cfg: BotConfig,
   target: GatewayStatusTarget,
@@ -169,8 +164,6 @@ export async function resolveAuthForTarget(
 
   const diagnostics: string[] = [];
   const authMode = cfg.gateway?.auth?.mode;
-  const tokenOnly = authMode === "token";
-  const passwordOnly = authMode === "password";
 
   const resolveToken = async (value: unknown, path: string): Promise<string | undefined> => {
     const tokenResolution = await resolveConfiguredSecretInputString({
@@ -185,31 +178,12 @@ export async function resolveAuthForTarget(
     }
     return tokenResolution.value;
   };
-  const resolvePassword = async (value: unknown, path: string): Promise<string | undefined> => {
-    const passwordResolution = await resolveConfiguredSecretInputString({
-      config: cfg,
-      env: process.env,
-      value,
-      path,
-      unresolvedReasonStyle: "detailed",
-    });
-    if (passwordResolution.unresolvedRefReason) {
-      diagnostics.push(passwordResolution.unresolvedRefReason);
-    }
-    return passwordResolution.value;
-  };
 
   if (target.kind === "configRemote" || target.kind === "sshTunnel") {
     const remoteTokenValue = cfg.gateway?.remote?.token;
-    const remotePasswordValue = (cfg.gateway?.remote as { password?: unknown } | undefined)
-      ?.password;
     const token = await resolveToken(remoteTokenValue, "gateway.remote.token");
-    const password = token
-      ? undefined
-      : await resolvePassword(remotePasswordValue, "gateway.remote.password");
     return {
       token,
-      password,
       ...(diagnostics.length > 0 ? { diagnostics } : {}),
     };
   }
@@ -220,49 +194,12 @@ export async function resolveAuthForTarget(
   }
 
   const envToken = readGatewayTokenEnv();
-  const envPassword = readGatewayPasswordEnv();
-  if (tokenOnly) {
-    if (envToken) {
-      return { token: envToken };
-    }
-    const token = await resolveToken(cfg.gateway?.auth?.token, "gateway.auth.token");
-    return {
-      token,
-      ...(diagnostics.length > 0 ? { diagnostics } : {}),
-    };
-  }
-  if (passwordOnly) {
-    if (envPassword) {
-      return { password: envPassword };
-    }
-    const password = await resolvePassword(cfg.gateway?.auth?.password, "gateway.auth.password");
-    return {
-      password,
-      ...(diagnostics.length > 0 ? { diagnostics } : {}),
-    };
-  }
-
   if (envToken) {
     return { token: envToken };
   }
   const token = await resolveToken(cfg.gateway?.auth?.token, "gateway.auth.token");
-  if (token) {
-    return {
-      token,
-      ...(diagnostics.length > 0 ? { diagnostics } : {}),
-    };
-  }
-  if (envPassword) {
-    return {
-      password: envPassword,
-      ...(diagnostics.length > 0 ? { diagnostics } : {}),
-    };
-  }
-  const password = await resolvePassword(cfg.gateway?.auth?.password, "gateway.auth.password");
-
   return {
     token,
-    password,
     ...(diagnostics.length > 0 ? { diagnostics } : {}),
   };
 }
