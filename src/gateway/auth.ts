@@ -21,19 +21,13 @@ import {
   resolveClientIp,
 } from "./net.js";
 
-export type ResolvedGatewayAuthMode = "none" | "token" | "password" | "trusted-proxy" | "iam";
-export type ResolvedGatewayAuthModeSource =
-  | "override"
-  | "config"
-  | "password"
-  | "token"
-  | "default";
+export type ResolvedGatewayAuthMode = "none" | "token" | "trusted-proxy" | "iam";
+export type ResolvedGatewayAuthModeSource = "override" | "config" | "token" | "default";
 
 export type ResolvedGatewayAuth = {
   mode: ResolvedGatewayAuthMode;
   modeSource?: ResolvedGatewayAuthModeSource;
   token?: string;
-  password?: string;
   allowTailscale: boolean;
   trustedProxy?: GatewayTrustedProxyConfig;
   iam?: GatewayIamConfig;
@@ -41,7 +35,7 @@ export type ResolvedGatewayAuth = {
 
 export type GatewayAuthResult = {
   ok: boolean;
-  method?: "none" | "token" | "password" | "tailscale" | "device-token" | "trusted-proxy" | "iam";
+  method?: "none" | "token" | "tailscale" | "device-token" | "trusted-proxy" | "iam";
   user?: string;
   reason?: string;
   /** Present when the request was blocked by the rate limiter. */
@@ -52,7 +46,6 @@ export type GatewayAuthResult = {
 
 type ConnectAuth = {
   token?: string;
-  password?: string;
 };
 
 export type GatewayAuthSurface = "http" | "ws-control-ui";
@@ -232,9 +225,6 @@ export function resolveGatewayAuth(params: {
     if (authOverride.token !== undefined) {
       authConfig.token = authOverride.token;
     }
-    if (authOverride.password !== undefined) {
-      authConfig.password = authOverride.password;
-    }
     if (authOverride.allowTailscale !== undefined) {
       authConfig.allowTailscale = authOverride.allowTailscale;
     }
@@ -250,17 +240,13 @@ export function resolveGatewayAuth(params: {
   }
   const env = params.env ?? process.env;
   const tokenRef = resolveSecretInputRef({ value: authConfig.token }).ref;
-  const passwordRef = resolveSecretInputRef({ value: authConfig.password }).ref;
   const resolvedCredentials = resolveGatewayCredentialsFromValues({
     configToken: tokenRef ? undefined : authConfig.token,
-    configPassword: passwordRef ? undefined : authConfig.password,
     env,
     includeLegacyEnv: false,
     tokenPrecedence: "config-first",
-    passwordPrecedence: "config-first",
   });
   const token = resolvedCredentials.token;
-  const password = resolvedCredentials.password;
   const trustedProxy = authConfig.trustedProxy;
   const iam = authConfig.iam;
 
@@ -272,9 +258,6 @@ export function resolveGatewayAuth(params: {
   } else if (authConfig.mode) {
     mode = authConfig.mode;
     modeSource = "config";
-  } else if (password) {
-    mode = "password";
-    modeSource = "password";
   } else if (token) {
     mode = "token";
     modeSource = "token";
@@ -284,14 +267,12 @@ export function resolveGatewayAuth(params: {
   }
 
   const allowTailscale =
-    authConfig.allowTailscale ??
-    (params.tailscaleMode === "serve" && mode !== "password" && mode !== "trusted-proxy");
+    authConfig.allowTailscale ?? (params.tailscaleMode === "serve" && mode !== "trusted-proxy");
 
   return {
     mode,
     modeSource,
     token,
-    password,
     allowTailscale,
     trustedProxy,
     iam,
@@ -306,9 +287,6 @@ export function assertGatewayAuthConfigured(auth: ResolvedGatewayAuth): void {
     throw new Error(
       "gateway auth mode is token, but no token was configured (set gateway.auth.token or BOT_GATEWAY_TOKEN)",
     );
-  }
-  if (auth.mode === "password" && !auth.password) {
-    throw new Error("gateway auth mode is password, but no password was configured");
   }
   if (auth.mode === "trusted-proxy") {
     if (!auth.trustedProxy) {
@@ -514,23 +492,6 @@ export async function authorizeGatewayConnect(
     }
     limiter?.reset(ip, rateLimitScope);
     return { ok: true, method: "token" };
-  }
-
-  if (auth.mode === "password") {
-    const password = connectAuth?.password;
-    if (!auth.password) {
-      return { ok: false, reason: "password_missing_config" };
-    }
-    if (!password) {
-      limiter?.recordFailure(ip, rateLimitScope);
-      return { ok: false, reason: "password_missing" };
-    }
-    if (!safeEqualSecret(password, auth.password)) {
-      limiter?.recordFailure(ip, rateLimitScope);
-      return { ok: false, reason: "password_mismatch" };
-    }
-    limiter?.reset(ip, rateLimitScope);
-    return { ok: true, method: "password" };
   }
 
   limiter?.recordFailure(ip, rateLimitScope);

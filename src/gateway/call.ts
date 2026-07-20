@@ -6,7 +6,7 @@ import {
   resolveGatewayPort,
   resolveStateDir,
 } from "../config/config.js";
-import { hasConfiguredSecretInput, resolveSecretInputRef } from "../config/types.secrets.js";
+import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { loadOrCreateDeviceIdentity } from "../infra/device-identity.js";
 import { loadGatewayTlsRuntime } from "../infra/tls/gateway.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
@@ -31,7 +31,6 @@ import { PROTOCOL_VERSION } from "./protocol/index.js";
 type CallGatewayBaseOptions = {
   url?: string;
   token?: string;
-  password?: string;
   tlsFingerprint?: string;
   config?: BotConfig;
   method: string;
@@ -49,7 +48,7 @@ type CallGatewayBaseOptions = {
   requiredMethods?: string[];
   /**
    * Overrides the config path shown in connection error details.
-   * Does not affect config loading; callers still control auth via opts.token/password/env/config.
+   * Does not affect config loading; callers still control auth via opts.token/env/config.
    */
   configPath?: string;
 };
@@ -76,17 +75,12 @@ export type GatewayConnectionDetails = {
 
 export type ExplicitGatewayAuth = {
   token?: string;
-  password?: string;
 };
 
 export function resolveExplicitGatewayAuth(opts?: ExplicitGatewayAuth): ExplicitGatewayAuth {
   const token =
     typeof opts?.token === "string" && opts.token.trim().length > 0 ? opts.token.trim() : undefined;
-  const password =
-    typeof opts?.password === "string" && opts.password.trim().length > 0
-      ? opts.password.trim()
-      : undefined;
-  return { token, password };
+  return { token };
 }
 
 export function ensureExplicitGatewayAuth(params: {
@@ -103,15 +97,10 @@ export function ensureExplicitGatewayAuth(params: {
   // URL overrides are untrusted redirects and can move WebSocket traffic off the intended host.
   // Never allow an override to silently reuse implicit credentials or device token fallback.
   const explicitToken = params.explicitAuth?.token;
-  const explicitPassword = params.explicitAuth?.password;
-  if (params.urlOverrideSource === "cli" && (explicitToken || explicitPassword)) {
+  if (params.urlOverrideSource === "cli" && explicitToken) {
     return;
   }
-  const hasResolvedAuth =
-    params.resolvedAuth?.token ||
-    params.resolvedAuth?.password ||
-    explicitToken ||
-    explicitPassword;
+  const hasResolvedAuth = params.resolvedAuth?.token || explicitToken;
   // Env overrides are supported for deployment ergonomics, but only when explicit auth is available.
   // This avoids implicit device-token fallback against attacker-controlled WSS endpoints.
   if (params.urlOverrideSource === "env" && hasResolvedAuth) {
@@ -221,7 +210,6 @@ export function buildGatewayConnectionDetails(
 type GatewayRemoteSettings = {
   url?: string;
   token?: string;
-  password?: string;
   tlsFingerprint?: string;
 };
 
@@ -246,12 +234,6 @@ function trimToUndefined(value: unknown): string | undefined {
 
 function readGatewayTokenEnv(env: NodeJS.ProcessEnv): string | undefined {
   return trimToUndefined(env.BOT_GATEWAY_TOKEN) ?? trimToUndefined(env.CLAWDBOT_GATEWAY_TOKEN);
-}
-
-function readGatewayPasswordEnv(env: NodeJS.ProcessEnv): string | undefined {
-  return (
-    trimToUndefined(env.BOT_GATEWAY_PASSWORD) ?? trimToUndefined(env.CLAWDBOT_GATEWAY_PASSWORD)
-  );
 }
 
 function resolveGatewayCallTimeout(timeoutValue: unknown): {
@@ -280,7 +262,7 @@ function resolveGatewayCallContext(opts: CallGatewayBaseOptions): ResolvedGatewa
   const urlOverride = cliUrlOverride ?? envUrlOverride;
   const urlOverrideSource = cliUrlOverride ? "cli" : envUrlOverride ? "env" : undefined;
   const remoteUrl = trimToUndefined(remote?.url);
-  const explicitAuth = resolveExplicitGatewayAuth({ token: opts.token, password: opts.password });
+  const explicitAuth = resolveExplicitGatewayAuth({ token: opts.token });
   return {
     config,
     configPath,
@@ -333,7 +315,6 @@ async function resolveGatewaySecretInputString(params: {
 
 async function resolveGatewayCredentials(context: ResolvedGatewayCallContext): Promise<{
   token?: string;
-  password?: string;
 }> {
   return resolveGatewayCredentialsWithEnv(context, process.env);
 }
@@ -343,13 +324,9 @@ async function resolveGatewayCredentialsWithEnv(
   env: NodeJS.ProcessEnv,
 ): Promise<{
   token?: string;
-  password?: string;
 }> {
-  if (context.explicitAuth.token || context.explicitAuth.password) {
-    return {
-      token: context.explicitAuth.token,
-      password: context.explicitAuth.password,
-    };
+  if (context.explicitAuth.token) {
+    return { token: context.explicitAuth.token };
   }
   if (context.urlOverride) {
     return resolveGatewayCredentialsFromConfig({
@@ -358,125 +335,45 @@ async function resolveGatewayCredentialsWithEnv(
       explicitAuth: context.explicitAuth,
       urlOverride: context.urlOverride,
       urlOverrideSource: context.urlOverrideSource,
-      remotePasswordPrecedence: "env-first",
     });
   }
 
   let resolvedConfig = context.config;
   const envToken = readGatewayTokenEnv(env);
-  const envPassword = readGatewayPasswordEnv(env);
   const defaults = context.config.secrets?.defaults;
   const auth = context.config.gateway?.auth;
-  const remoteConfig = context.config.gateway?.remote;
   const authMode = auth?.mode;
   const localToken = trimToUndefined(auth?.token);
-  const remoteToken = trimToUndefined(remoteConfig?.token);
-  const remoteTokenConfigured = hasConfiguredSecretInput(remoteConfig?.token, defaults);
-  const tokenCanWin = Boolean(envToken || localToken || remoteToken || remoteTokenConfigured);
-  const remotePasswordConfigured =
-    context.isRemoteMode && hasConfiguredSecretInput(remoteConfig?.password, defaults);
-  const localPasswordRef = resolveSecretInputRef({ value: auth?.password, defaults }).ref;
-  const localPasswordCanWinInLocalMode =
-    authMode === "password" ||
-    (authMode !== "token" && authMode !== "none" && authMode !== "trusted-proxy" && !tokenCanWin);
-  const localTokenCanWinInLocalMode =
-    authMode !== "password" && authMode !== "none" && authMode !== "trusted-proxy";
-  const localPasswordCanWinInRemoteMode = !remotePasswordConfigured && !tokenCanWin;
-  const shouldResolveLocalPassword =
-    Boolean(auth) &&
-    !envPassword &&
-    Boolean(localPasswordRef) &&
-    (context.isRemoteMode ? localPasswordCanWinInRemoteMode : localPasswordCanWinInLocalMode);
-  if (shouldResolveLocalPassword) {
+  const localTokenRef = resolveSecretInputRef({ value: auth?.token, defaults }).ref;
+  const localTokenCanWin =
+    authMode === "token" || (authMode !== "none" && authMode !== "trusted-proxy");
+  const shouldResolveLocalToken =
+    Boolean(auth) && !envToken && !localToken && Boolean(localTokenRef) && localTokenCanWin;
+  if (shouldResolveLocalToken) {
     resolvedConfig = structuredClone(context.config);
-    const resolvedPassword = await resolveGatewaySecretInputString({
+    const resolvedToken = await resolveGatewaySecretInputString({
       config: resolvedConfig,
-      value: resolvedConfig.gateway?.auth?.password,
-      path: "gateway.auth.password",
+      value: resolvedConfig.gateway?.auth?.token,
+      path: "gateway.auth.token",
       env,
     });
     if (resolvedConfig.gateway?.auth) {
-      resolvedConfig.gateway.auth.password = resolvedPassword;
+      resolvedConfig.gateway.auth.token = resolvedToken;
     }
   }
-  const remote = context.isRemoteMode ? resolvedConfig.gateway?.remote : undefined;
+  const remote = resolvedConfig.gateway?.remote;
   const resolvedDefaults = resolvedConfig.secrets?.defaults;
   if (remote) {
-    const localToken = trimToUndefined(resolvedConfig.gateway?.auth?.token);
-    const localPassword = trimToUndefined(resolvedConfig.gateway?.auth?.password);
-    const passwordCanWinBeforeRemoteTokenResolution = Boolean(
-      envPassword || localPassword || trimToUndefined(remote.password),
-    );
+    const localTokenNow = trimToUndefined(resolvedConfig.gateway?.auth?.token);
     const remoteTokenRef = resolveSecretInputRef({
       value: remote.token,
       defaults: resolvedDefaults,
     }).ref;
-    if (!passwordCanWinBeforeRemoteTokenResolution && !envToken && !localToken && remoteTokenRef) {
+    if (!envToken && !localTokenNow && remoteTokenRef) {
       remote.token = await resolveGatewaySecretInputString({
         config: resolvedConfig,
         value: remote.token,
         path: "gateway.remote.token",
-        env,
-      });
-    }
-
-    const tokenCanWin = Boolean(envToken || localToken || trimToUndefined(remote.token));
-    const remotePasswordRef = resolveSecretInputRef({
-      value: remote.password,
-      defaults: resolvedDefaults,
-    }).ref;
-    if (!tokenCanWin && !envPassword && !localPassword && remotePasswordRef) {
-      remote.password = await resolveGatewaySecretInputString({
-        config: resolvedConfig,
-        value: remote.password,
-        path: "gateway.remote.password",
-        env,
-      });
-    }
-  }
-  const localModeRemote = !context.isRemoteMode ? resolvedConfig.gateway?.remote : undefined;
-  if (localModeRemote) {
-    const localToken = trimToUndefined(resolvedConfig.gateway?.auth?.token);
-    const localPassword = trimToUndefined(resolvedConfig.gateway?.auth?.password);
-    const localModePasswordSourceConfigured = Boolean(
-      envPassword || localPassword || trimToUndefined(localModeRemote.password),
-    );
-    const passwordCanWinBeforeRemoteTokenResolution =
-      localPasswordCanWinInLocalMode && localModePasswordSourceConfigured;
-    const remoteTokenRef = resolveSecretInputRef({
-      value: localModeRemote.token,
-      defaults: resolvedDefaults,
-    }).ref;
-    if (
-      localTokenCanWinInLocalMode &&
-      !passwordCanWinBeforeRemoteTokenResolution &&
-      !envToken &&
-      !localToken &&
-      remoteTokenRef
-    ) {
-      localModeRemote.token = await resolveGatewaySecretInputString({
-        config: resolvedConfig,
-        value: localModeRemote.token,
-        path: "gateway.remote.token",
-        env,
-      });
-    }
-    const tokenCanWin = Boolean(envToken || localToken || trimToUndefined(localModeRemote.token));
-    const remotePasswordRef = resolveSecretInputRef({
-      value: localModeRemote.password,
-      defaults: resolvedDefaults,
-    }).ref;
-    if (
-      !tokenCanWin &&
-      !envPassword &&
-      !localPassword &&
-      remotePasswordRef &&
-      localPasswordCanWinInLocalMode
-    ) {
-      localModeRemote.password = await resolveGatewaySecretInputString({
-        config: resolvedConfig,
-        value: localModeRemote.password,
-        path: "gateway.remote.password",
         env,
       });
     }
@@ -487,7 +384,6 @@ async function resolveGatewayCredentialsWithEnv(
     explicitAuth: context.explicitAuth,
     urlOverride: context.urlOverride,
     urlOverrideSource: context.urlOverrideSource,
-    remotePasswordPrecedence: "env-first",
   });
 }
 
@@ -496,7 +392,7 @@ export async function resolveGatewayCredentialsWithSecretInputs(params: {
   explicitAuth?: ExplicitGatewayAuth;
   urlOverride?: string;
   env?: NodeJS.ProcessEnv;
-}): Promise<{ token?: string; password?: string }> {
+}): Promise<{ token?: string }> {
   const context: ResolvedGatewayCallContext = {
     config: params.config,
     configPath: resolveConfigPath(process.env, resolveStateDir(process.env)),
@@ -597,14 +493,12 @@ async function executeGatewayRequestWithScopes<T>(params: {
   scopes: OperatorScope[];
   url: string;
   token?: string;
-  password?: string;
   tlsFingerprint?: string;
   timeoutMs: number;
   safeTimerTimeoutMs: number;
   connectionDetails: GatewayConnectionDetails;
 }): Promise<T> {
-  const { opts, scopes, url, token, password, tlsFingerprint, timeoutMs, safeTimerTimeoutMs } =
-    params;
+  const { opts, scopes, url, token, tlsFingerprint, timeoutMs, safeTimerTimeoutMs } = params;
   return await new Promise<T>((resolve, reject) => {
     let settled = false;
     let ignoreClose = false;
@@ -624,7 +518,6 @@ async function executeGatewayRequestWithScopes<T>(params: {
     const client = new GatewayClient({
       url,
       token,
-      password,
       tlsFingerprint,
       instanceId: opts.instanceId ?? randomUUID(),
       clientName: opts.clientName ?? GATEWAY_CLIENT_NAMES.CLI,
@@ -688,7 +581,7 @@ async function callGatewayWithScopes<T = Record<string, unknown>>(
     urlOverrideSource: context.urlOverrideSource,
     explicitAuth: context.explicitAuth,
     resolvedAuth: resolvedCredentials,
-    errorHint: "Fix: pass --token or --password (or gatewayToken in tools).",
+    errorHint: "Fix: pass --token (or gatewayToken in tools).",
     configPath: context.configPath,
   });
   ensureRemoteModeUrlConfigured(context);
@@ -700,13 +593,12 @@ async function callGatewayWithScopes<T = Record<string, unknown>>(
   });
   const url = connectionDetails.url;
   const tlsFingerprint = await resolveGatewayTlsFingerprint({ opts, context, url });
-  const { token, password } = resolvedCredentials;
+  const { token } = resolvedCredentials;
   return await executeGatewayRequestWithScopes<T>({
     opts,
     scopes,
     url,
     token,
-    password,
     tlsFingerprint,
     timeoutMs,
     safeTimerTimeoutMs,
