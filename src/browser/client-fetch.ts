@@ -56,10 +56,6 @@ function withLoopbackBrowserAuthImpl(
       headers.set("Authorization", `Bearer ${auth.token}`);
       return { ...init, headers };
     }
-    if (auth.password) {
-      headers.set("x-bot-password", auth.password);
-      return { ...init, headers };
-    }
   } catch {
     // ignore config/auth lookup failures and continue without auth headers
   }

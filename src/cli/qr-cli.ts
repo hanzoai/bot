@@ -1,12 +1,9 @@
 import type { Command } from "commander";
 import qrcode from "qrcode-terminal";
 import { loadConfig } from "../config/config.js";
-import { hasConfiguredSecretInput, resolveSecretInputRef } from "../config/types.secrets.js";
 import { resolvePairingSetupFromConfig, encodePairingSetupCode } from "../pairing/setup-code.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import { defaultRuntime } from "../runtime.js";
-import { secretRefKey } from "../secrets/ref-contract.js";
-import { resolveSecretRefValues } from "../secrets/resolve.js";
 import { formatDocsLink } from "../terminal/links.js";
 import { theme } from "../terminal/theme.js";
 import { resolveCommandSecretRefsViaGateway } from "./command-secret-gateway.js";
@@ -20,7 +17,6 @@ type QrCliOptions = {
   url?: string;
   publicUrl?: string;
   token?: string;
-  password?: string;
 };
 
 function renderQrAscii(data: string): Promise<string> {
@@ -38,78 +34,6 @@ function readDevicePairPublicUrlFromConfig(cfg: ReturnType<typeof loadConfig>): 
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function readGatewayTokenEnv(env: NodeJS.ProcessEnv): string | undefined {
-  const primary = typeof env.BOT_GATEWAY_TOKEN === "string" ? env.BOT_GATEWAY_TOKEN : "";
-  if (primary.trim().length > 0) {
-    return primary.trim();
-  }
-  const legacy = typeof env.CLAWDBOT_GATEWAY_TOKEN === "string" ? env.CLAWDBOT_GATEWAY_TOKEN : "";
-  if (legacy.trim().length > 0) {
-    return legacy.trim();
-  }
-  return undefined;
-}
-
-function readGatewayPasswordEnv(env: NodeJS.ProcessEnv): string | undefined {
-  const primary = typeof env.BOT_GATEWAY_PASSWORD === "string" ? env.BOT_GATEWAY_PASSWORD : "";
-  if (primary.trim().length > 0) {
-    return primary.trim();
-  }
-  const legacy =
-    typeof env.CLAWDBOT_GATEWAY_PASSWORD === "string" ? env.CLAWDBOT_GATEWAY_PASSWORD : "";
-  if (legacy.trim().length > 0) {
-    return legacy.trim();
-  }
-  return undefined;
-}
-
-function shouldResolveLocalGatewayPasswordSecret(
-  cfg: ReturnType<typeof loadConfig>,
-  env: NodeJS.ProcessEnv,
-): boolean {
-  if (readGatewayPasswordEnv(env)) {
-    return false;
-  }
-  const authMode = cfg.gateway?.auth?.mode;
-  if (authMode === "password") {
-    return true;
-  }
-  if (authMode === "token" || authMode === "none" || authMode === "trusted-proxy") {
-    return false;
-  }
-  const envToken = readGatewayTokenEnv(env);
-  const configTokenConfigured = hasConfiguredSecretInput(
-    cfg.gateway?.auth?.token,
-    cfg.secrets?.defaults,
-  );
-  return !envToken && !configTokenConfigured;
-}
-
-async function resolveLocalGatewayPasswordSecretIfNeeded(
-  cfg: ReturnType<typeof loadConfig>,
-): Promise<void> {
-  const authPassword = cfg.gateway?.auth?.password;
-  const { ref } = resolveSecretInputRef({
-    value: authPassword,
-    defaults: cfg.secrets?.defaults,
-  });
-  if (!ref) {
-    return;
-  }
-  const resolved = await resolveSecretRefValues([ref], {
-    config: cfg,
-    env: process.env,
-  });
-  const value = resolved.get(secretRefKey(ref));
-  if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error("gateway.auth.password resolved to an empty or non-string value.");
-  }
-  if (!cfg.gateway?.auth) {
-    return;
-  }
-  cfg.gateway.auth.password = value.trim();
 }
 
 function emitQrSecretResolveDiagnostics(diagnostics: string[], opts: QrCliOptions): void {
@@ -137,24 +61,18 @@ export function registerQrCli(program: Command) {
     )
     .option(
       "--remote",
-      "Use gateway.remote.url and gateway.remote token/password (ignores device-pair publicUrl)",
+      "Use gateway.remote.url and gateway.remote token (ignores device-pair publicUrl)",
       false,
     )
     .option("--url <url>", "Override gateway URL used in the setup payload")
     .option("--public-url <url>", "Override gateway public URL used in the setup payload")
     .option("--token <token>", "Override gateway token for setup payload")
-    .option("--password <password>", "Override gateway password for setup payload")
     .option("--setup-code-only", "Print only the setup code", false)
     .option("--no-ascii", "Skip ASCII QR rendering")
     .option("--json", "Output JSON", false)
     .action(async (opts: QrCliOptions) => {
       try {
-        if (opts.token && opts.password) {
-          throw new Error("Use either --token or --password, not both.");
-        }
-
         const token = typeof opts.token === "string" ? opts.token.trim() : "";
-        const password = typeof opts.password === "string" ? opts.password.trim() : "";
         const wantsRemote = opts.remote === true;
 
         const loadedRaw = loadConfig();
@@ -171,7 +89,7 @@ export function registerQrCli(program: Command) {
         }
         let loaded = loadedRaw;
         let remoteDiagnostics: string[] = [];
-        if (wantsRemote && !token && !password) {
+        if (wantsRemote && !token) {
           const resolvedRemote = await resolveCommandSecretRefsViaGateway({
             config: loadedRaw,
             commandName: "qr --remote",
@@ -194,37 +112,14 @@ export function registerQrCli(program: Command) {
         if (token) {
           cfg.gateway.auth.mode = "token";
           cfg.gateway.auth.token = token;
-          cfg.gateway.auth.password = undefined;
         }
-        if (password) {
-          cfg.gateway.auth.mode = "password";
-          cfg.gateway.auth.password = password;
-          cfg.gateway.auth.token = undefined;
-        }
-        if (wantsRemote && !token && !password) {
+        if (wantsRemote && !token) {
           const remoteToken =
             typeof cfg.gateway?.remote?.token === "string" ? cfg.gateway.remote.token.trim() : "";
-          const remotePassword =
-            typeof cfg.gateway?.remote?.password === "string"
-              ? cfg.gateway.remote.password.trim()
-              : "";
           if (remoteToken) {
             cfg.gateway.auth.mode = "token";
             cfg.gateway.auth.token = remoteToken;
-            cfg.gateway.auth.password = undefined;
-          } else if (remotePassword) {
-            cfg.gateway.auth.mode = "password";
-            cfg.gateway.auth.password = remotePassword;
-            cfg.gateway.auth.token = undefined;
           }
-        }
-        if (
-          !wantsRemote &&
-          !password &&
-          !token &&
-          shouldResolveLocalGatewayPasswordSecret(cfg, process.env)
-        ) {
-          await resolveLocalGatewayPasswordSecretIfNeeded(cfg);
         }
 
         const explicitUrl =

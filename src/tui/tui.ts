@@ -474,7 +474,6 @@ export async function runTui(opts: TuiOptions) {
   const client = await GatewayChatClient.connect({
     url: opts.url,
     token: opts.token,
-    password: opts.password,
   });
 
   const tui = new TUI(new ProcessTerminal());

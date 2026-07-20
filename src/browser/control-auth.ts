@@ -5,7 +5,6 @@ import { ensureGatewayStartupAuth } from "../gateway/startup-auth.js";
 
 export type BrowserControlAuth = {
   token?: string;
-  password?: string;
 };
 
 export function resolveBrowserControlAuth(
@@ -18,10 +17,8 @@ export function resolveBrowserControlAuth(
     tailscaleMode: cfg?.gateway?.tailscale?.mode,
   });
   const token = typeof auth.token === "string" ? auth.token.trim() : "";
-  const password = typeof auth.password === "string" ? auth.password.trim() : "";
   return {
     token: token || undefined,
-    password: password || undefined,
   };
 }
 
@@ -46,15 +43,10 @@ export async function ensureBrowserControlAuth(params: {
 }> {
   const env = params.env ?? process.env;
   const auth = resolveBrowserControlAuth(params.cfg, env);
-  if (auth.token || auth.password) {
+  if (auth.token) {
     return { auth };
   }
   if (!shouldAutoGenerateBrowserAuth(env)) {
-    return { auth };
-  }
-
-  // Respect explicit password mode even if currently unset.
-  if (params.cfg.gateway?.auth?.mode === "password") {
     return { auth };
   }
 
@@ -69,10 +61,7 @@ export async function ensureBrowserControlAuth(params: {
   // Re-read latest config to avoid racing with concurrent config writers.
   const latestCfg = loadConfig();
   const latestAuth = resolveBrowserControlAuth(latestCfg, env);
-  if (latestAuth.token || latestAuth.password) {
-    return { auth: latestAuth };
-  }
-  if (latestCfg.gateway?.auth?.mode === "password") {
+  if (latestAuth.token) {
     return { auth: latestAuth };
   }
   if (latestCfg.gateway?.auth?.mode === "none") {
@@ -89,7 +78,6 @@ export async function ensureBrowserControlAuth(params: {
   });
   const ensuredAuth = {
     token: ensured.auth.token,
-    password: ensured.auth.password,
   };
   return {
     auth: ensuredAuth,
