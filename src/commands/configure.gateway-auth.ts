@@ -1,8 +1,8 @@
+import { ensureAuthProfileStore } from "../agents/auth-profiles.js";
 import type { BotConfig, GatewayAuthConfig } from "../config/config.js";
+import { isSecretRef, type SecretInput } from "../config/types.secrets.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
-import { ensureAuthProfileStore } from "../agents/auth-profiles.js";
-import { isSecretRef, type SecretInput } from "../config/types.secrets.js";
 import { promptAuthChoiceGrouped } from "./auth-choice-prompt.js";
 import { applyAuthChoice, resolvePreferredProviderForAuthChoice } from "./auth-choice.js";
 import {
@@ -61,10 +61,6 @@ export function buildGatewayAuthConfig(params: {
     // Keep token mode always valid: treat empty/undefined/"undefined"/"null" as missing and generate a token.
     const token = sanitizeTokenValue(params.token) ?? randomToken();
     return { ...base, mode: "token", token };
-  }
-  if (params.mode === "password") {
-    const password = params.password?.trim();
-    return { ...base, mode: "password", ...(password && { password }) };
   }
   if (params.mode === "trusted-proxy") {
     if (!params.trustedProxy) {

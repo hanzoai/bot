@@ -112,7 +112,6 @@ function resolveGatewayOverrideToken(params: {
     env: process.env,
     modeOverride: params.target,
     remoteTokenFallback: params.target === "remote" ? "remote-only" : "remote-env-local",
-    remotePasswordFallback: params.target === "remote" ? "remote-only" : "remote-env-local",
   }).token;
 }
 

@@ -181,7 +181,6 @@ export async function runOnboardingWizard(
       baseConfig.gateway?.bind !== undefined ||
       baseConfig.gateway?.auth?.mode !== undefined ||
       baseConfig.gateway?.auth?.token !== undefined ||
-      baseConfig.gateway?.auth?.password !== undefined ||
       baseConfig.gateway?.customBindHost !== undefined ||
       baseConfig.gateway?.tailscale?.mode !== undefined;
 
@@ -196,15 +195,10 @@ export async function runOnboardingWizard(
         : "loopback";
 
     let authMode: GatewayAuthChoice = "token";
-    if (
-      baseConfig.gateway?.auth?.mode === "token" ||
-      baseConfig.gateway?.auth?.mode === "password"
-    ) {
+    if (baseConfig.gateway?.auth?.mode === "token") {
       authMode = baseConfig.gateway.auth.mode;
     } else if (baseConfig.gateway?.auth?.token) {
       authMode = "token";
-    } else if (baseConfig.gateway?.auth?.password) {
-      authMode = "password";
     }
 
     const tailscaleRaw = baseConfig.gateway?.tailscale?.mode;
@@ -220,7 +214,6 @@ export async function runOnboardingWizard(
       authMode,
       tailscaleMode,
       token: baseConfig.gateway?.auth?.token,
-      password: baseConfig.gateway?.auth?.password,
       customBindHost: baseConfig.gateway?.customBindHost,
       tailscaleResetOnExit: baseConfig.gateway?.tailscale?.resetOnExit ?? false,
     };
@@ -301,32 +294,9 @@ export async function runOnboardingWizard(
       "Gateway auth",
     );
   }
-  let localGatewayPassword =
-    process.env.BOT_GATEWAY_PASSWORD ?? process.env.CLAWDBOT_GATEWAY_PASSWORD;
-  try {
-    const resolvedGatewayPassword = await resolveOnboardingSecretInputString({
-      config: baseConfig,
-      value: baseConfig.gateway?.auth?.password,
-      path: "gateway.auth.password",
-      env: process.env,
-    });
-    if (resolvedGatewayPassword) {
-      localGatewayPassword = resolvedGatewayPassword;
-    }
-  } catch (error) {
-    await prompter.note(
-      [
-        "Could not resolve gateway.auth.password SecretRef for onboarding probe.",
-        error instanceof Error ? error.message : String(error),
-      ].join("\n"),
-      "Gateway auth",
-    );
-  }
-
   const localProbe = await onboardHelpers.probeGatewayReachable({
     url: localUrl,
     token: localGatewayToken,
-    password: localGatewayPassword,
   });
   const remoteUrl = baseConfig.gateway?.remote?.url?.trim() ?? "";
   let remoteGatewayToken = normalizeSecretInputString(baseConfig.gateway?.remote?.token);

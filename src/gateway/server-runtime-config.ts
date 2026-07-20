@@ -106,10 +106,7 @@ export async function resolveGatewayRuntimeConfig(params: {
   });
   const authMode: ResolvedGatewayAuth["mode"] = resolvedAuth.mode;
   const hasToken = typeof resolvedAuth.token === "string" && resolvedAuth.token.trim().length > 0;
-  const hasPassword =
-    typeof resolvedAuth.password === "string" && resolvedAuth.password.trim().length > 0;
-  const hasSharedSecret =
-    (authMode === "token" && hasToken) || (authMode === "password" && hasPassword);
+  const hasSharedSecret = authMode === "token" && hasToken;
   const hooksConfig = resolveHooksConfig(params.cfg);
   const canvasHostEnabled =
     process.env.BOT_SKIP_CANVAS_HOST !== "1" && params.cfg.canvasHost?.enabled !== false;
@@ -122,9 +119,9 @@ export async function resolveGatewayRuntimeConfig(params: {
     params.cfg.gateway?.controlUi?.dangerouslyAllowHostHeaderOriginFallback === true;
 
   assertGatewayAuthConfigured(resolvedAuth);
-  if (tailscaleMode === "funnel" && authMode !== "password") {
+  if (tailscaleMode === "funnel" && authMode !== "token" && authMode !== "iam") {
     throw new Error(
-      "tailscale funnel requires gateway auth mode=password (set gateway.auth.password or BOT_GATEWAY_PASSWORD)",
+      "tailscale funnel requires gateway auth mode=token or iam (set gateway.auth.token or BOT_GATEWAY_TOKEN)",
     );
   }
   if (tailscaleMode !== "off" && !isLoopbackHost(bindHost)) {
@@ -137,7 +134,7 @@ export async function resolveGatewayRuntimeConfig(params: {
     authMode !== "iam"
   ) {
     throw new Error(
-      `refusing to bind gateway to ${bindHost}:${params.port} without auth (set gateway.auth.token/password, or set BOT_GATEWAY_TOKEN/BOT_GATEWAY_PASSWORD)`,
+      `refusing to bind gateway to ${bindHost}:${params.port} without auth (set gateway.auth.token, or set BOT_GATEWAY_TOKEN)`,
     );
   }
   if (

@@ -1,5 +1,4 @@
 import type { BotConfig } from "../config/config.js";
-import { hasConfiguredSecretInput } from "../config/types.secrets.js";
 
 export const EXPLICIT_GATEWAY_AUTH_MODE_REQUIRED_ERROR =
   "Invalid config: gateway.auth.token and gateway.auth.password are both configured, but gateway.auth.mode is unset. Set gateway.auth.mode to token or password.";
@@ -12,10 +11,9 @@ export function hasAmbiguousGatewayAuthModeConfig(cfg: BotConfig): boolean {
   if (typeof auth.mode === "string" && auth.mode.trim().length > 0) {
     return false;
   }
-  const defaults = cfg.secrets?.defaults;
-  const tokenConfigured = hasConfiguredSecretInput(auth.token, defaults);
-  const passwordConfigured = hasConfiguredSecretInput(auth.password, defaults);
-  return tokenConfigured && passwordConfigured;
+  // Token is the only shared-secret auth mode, so two configured secrets can
+  // never collide and an explicit mode is never required to disambiguate.
+  return false;
 }
 
 export function assertExplicitGatewayAuthModeWhenBothConfigured(cfg: BotConfig): void {

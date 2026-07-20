@@ -1,7 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { loadConfig } from "../config/config.js";
-import { hasConfiguredSecretInput } from "../config/types.secrets.js";
-import { assertExplicitGatewayAuthModeWhenBothConfigured } from "../gateway/auth-mode-policy.js";
 import {
   buildGatewayConnectionDetails,
   ensureExplicitGatewayAuth,
@@ -24,7 +22,6 @@ import type { ResponseUsageMode, SessionInfo, SessionScope } from "./tui-types.j
 export type GatewayConnectionOptions = {
   url?: string;
   token?: string;
-  password?: string;
 };
 
 export type ChatSendOptions = {
@@ -45,7 +42,6 @@ export type GatewayEvent = {
 type ResolvedGatewayConnection = {
   url: string;
   token?: string;
-  password?: string;
 };
 
 function trimToUndefined(value: unknown): string | undefined {
@@ -60,7 +56,7 @@ function throwGatewayAuthResolutionError(reason: string): never {
   throw new Error(
     [
       reason,
-      "Fix: set BOT_GATEWAY_TOKEN/BOT_GATEWAY_PASSWORD, pass --token/--password,",
+      "Fix: set BOT_GATEWAY_TOKEN, pass --token,",
       "or resolve the configured secret provider for this credential.",
     ].join("\n"),
   );
@@ -131,7 +127,7 @@ export class GatewayChatClient {
   private client: GatewayClient;
   private readyPromise: Promise<void>;
   private resolveReady?: () => void;
-  readonly connection: { url: string; token?: string; password?: string };
+  readonly connection: { url: string; token?: string };
   hello?: HelloOk;
 
   onEvent?: (evt: GatewayEvent) => void;
@@ -149,7 +145,6 @@ export class GatewayChatClient {
     this.client = new GatewayClient({
       url: connection.url,
       token: connection.token,
-      password: connection.password,
       clientName: GATEWAY_CLIENT_NAMES.GATEWAY_CLIENT,
       clientDisplayName: "bot-tui",
       clientVersion: VERSION,
@@ -274,16 +269,15 @@ export async function resolveGatewayConnection(
   const isRemoteMode = config.gateway?.mode === "remote";
   const remote = config.gateway?.remote;
   const envToken = trimToUndefined(env.BOT_GATEWAY_TOKEN);
-  const envPassword = trimToUndefined(env.BOT_GATEWAY_PASSWORD);
 
   const urlOverride =
     typeof opts.url === "string" && opts.url.trim().length > 0 ? opts.url.trim() : undefined;
-  const explicitAuth = resolveExplicitGatewayAuth({ token: opts.token, password: opts.password });
+  const explicitAuth = resolveExplicitGatewayAuth({ token: opts.token });
   ensureExplicitGatewayAuth({
     urlOverride,
     urlOverrideSource: "cli",
     explicitAuth,
-    errorHint: "Fix: pass --token or --password when using --url.",
+    errorHint: "Fix: pass --token when using --url.",
   });
   const url = buildGatewayConnectionDetails({
     config,
@@ -294,7 +288,6 @@ export async function resolveGatewayConnection(
     return {
       url,
       token: explicitAuth.token,
-      password: explicitAuth.password,
     };
   }
 
@@ -307,114 +300,20 @@ export async function resolveGatewayConnection(
           env,
           config,
         });
-    const remotePassword =
-      explicitAuth.password || envPassword
-        ? { value: explicitAuth.password ?? envPassword }
-        : await resolveConfiguredSecretInputString({
-            value: remote?.password,
-            path: "gateway.remote.password",
-            env,
-            config,
-          });
 
     const token = explicitAuth.token ?? remoteToken.value;
-    const password = explicitAuth.password ?? envPassword ?? remotePassword.value;
-    if (!token && !password) {
+    if (!token) {
       throwGatewayAuthResolutionError(
-        remoteToken.unresolvedRefReason ??
-          remotePassword.unresolvedRefReason ??
-          "Missing gateway auth credentials.",
+        remoteToken.unresolvedRefReason ?? "Missing gateway auth credentials.",
       );
     }
-    return { url, token, password };
+    return { url, token };
   }
 
   if (gatewayAuthMode === "none" || gatewayAuthMode === "trusted-proxy") {
     return {
       url,
       token: explicitAuth.token ?? envToken,
-      password: explicitAuth.password ?? envPassword,
-    };
-  }
-
-  try {
-    assertExplicitGatewayAuthModeWhenBothConfigured(config);
-  } catch (err) {
-    throwGatewayAuthResolutionError(err instanceof Error ? err.message : String(err));
-  }
-
-  const defaults = config.secrets?.defaults;
-  const hasConfiguredToken = hasConfiguredSecretInput(config.gateway?.auth?.token, defaults);
-  const hasConfiguredPassword = hasConfiguredSecretInput(config.gateway?.auth?.password, defaults);
-  if (gatewayAuthMode === "password") {
-    const localPassword =
-      explicitAuth.password || envPassword
-        ? { value: explicitAuth.password ?? envPassword }
-        : await resolveConfiguredSecretInputString({
-            value: config.gateway?.auth?.password,
-            path: "gateway.auth.password",
-            env,
-            config,
-          });
-    const password = explicitAuth.password ?? envPassword ?? localPassword.value;
-    if (!password) {
-      throwGatewayAuthResolutionError(
-        localPassword.unresolvedRefReason ?? "Missing gateway auth password.",
-      );
-    }
-    return {
-      url,
-      token: explicitAuth.token ?? envToken,
-      password,
-    };
-  }
-
-  if (gatewayAuthMode === "token") {
-    const localToken =
-      explicitAuth.token || envToken
-        ? { value: explicitAuth.token ?? envToken }
-        : await resolveConfiguredSecretInputString({
-            value: config.gateway?.auth?.token,
-            path: "gateway.auth.token",
-            env,
-            config,
-          });
-    const token = explicitAuth.token ?? envToken ?? localToken.value;
-    if (!token) {
-      throwGatewayAuthResolutionError(
-        localToken.unresolvedRefReason ?? "Missing gateway auth token.",
-      );
-    }
-    return {
-      url,
-      token,
-      password: explicitAuth.password ?? envPassword,
-    };
-  }
-
-  const passwordCandidate = explicitAuth.password ?? envPassword;
-  const shouldUsePassword =
-    Boolean(passwordCandidate) || (hasConfiguredPassword && !hasConfiguredToken);
-
-  if (shouldUsePassword) {
-    const localPassword = passwordCandidate
-      ? { value: passwordCandidate }
-      : await resolveConfiguredSecretInputString({
-          value: config.gateway?.auth?.password,
-          path: "gateway.auth.password",
-          env,
-          config,
-        });
-    const password = passwordCandidate ?? localPassword.value;
-    if (!password) {
-      throwGatewayAuthResolutionError(
-        localPassword.unresolvedRefReason ?? "Missing gateway auth password.",
-      );
-    }
-    return {
-      url,
-      token: explicitAuth.token ?? envToken,
-      password,
     };
   }
 
@@ -436,6 +335,5 @@ export async function resolveGatewayConnection(
   return {
     url,
     token,
-    password: explicitAuth.password ?? envPassword,
   };
 }

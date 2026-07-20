@@ -622,13 +622,11 @@ export const BotSchema = z
               .union([
                 z.literal("none"),
                 z.literal("token"),
-                z.literal("password"),
                 z.literal("trusted-proxy"),
                 z.literal("iam"),
               ])
               .optional(),
             token: SecretInputSchema.optional().register(sensitive),
-            password: SecretInputSchema.optional().register(sensitive),
             allowTailscale: z.boolean().optional(),
             rateLimit: z
               .object({
@@ -685,7 +683,6 @@ export const BotSchema = z
             url: z.string().optional(),
             transport: z.union([z.literal("ssh"), z.literal("direct")]).optional(),
             token: SecretInputSchema.optional().register(sensitive),
-            password: SecretInputSchema.optional().register(sensitive),
             tlsFingerprint: z.string().optional(),
             sshTarget: z.string().optional(),
             sshIdentity: z.string().optional(),
