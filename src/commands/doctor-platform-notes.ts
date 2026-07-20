@@ -45,14 +45,10 @@ async function launchctlGetenv(name: string): Promise<string | undefined> {
 }
 
 function hasConfigGatewayCreds(cfg: BotConfig): boolean {
-  const localPassword = cfg.gateway?.auth?.password;
   const remoteToken = cfg.gateway?.remote?.token;
-  const remotePassword = cfg.gateway?.remote?.password;
   return Boolean(
     hasConfiguredSecretInput(cfg.gateway?.auth?.token, cfg.secrets?.defaults) ||
-    hasConfiguredSecretInput(localPassword, cfg.secrets?.defaults) ||
-    hasConfiguredSecretInput(remoteToken, cfg.secrets?.defaults) ||
-    hasConfiguredSecretInput(remotePassword, cfg.secrets?.defaults),
+    hasConfiguredSecretInput(remoteToken, cfg.secrets?.defaults),
   );
 }
 
@@ -88,14 +84,10 @@ export async function noteMacLaunchctlGatewayEnvOverrides(
   }
 
   const tokenEntries = [["BOT_GATEWAY_TOKEN", await getenv("BOT_GATEWAY_TOKEN")]] as const;
-  const passwordEntries = [["BOT_GATEWAY_PASSWORD", await getenv("BOT_GATEWAY_PASSWORD")]] as const;
   const tokenEntry = tokenEntries.find(([, value]) => value?.trim());
-  const passwordEntry = passwordEntries.find(([, value]) => value?.trim());
   const envToken = tokenEntry?.[1]?.trim() ?? "";
-  const envPassword = passwordEntry?.[1]?.trim() ?? "";
   const envTokenKey = tokenEntry?.[0];
-  const envPasswordKey = passwordEntry?.[0];
-  if (!envToken && !envPassword) {
+  if (!envToken) {
     return;
   }
 
@@ -104,12 +96,8 @@ export async function noteMacLaunchctlGatewayEnvOverrides(
     envToken && envTokenKey
       ? `- \`${envTokenKey}\` is set; it overrides config tokens.`
       : undefined,
-    envPassword
-      ? `- \`${envPasswordKey ?? "BOT_GATEWAY_PASSWORD"}\` is set; it overrides config passwords.`
-      : undefined,
     "- Clear overrides and restart the app/gateway:",
     envTokenKey ? `  launchctl unsetenv ${envTokenKey}` : undefined,
-    envPasswordKey ? `  launchctl unsetenv ${envPasswordKey}` : undefined,
   ].filter((line): line is string => Boolean(line));
 
   (deps?.noteFn ?? note)(lines.join("\n"), "Gateway (macOS)");

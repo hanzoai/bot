@@ -2,11 +2,7 @@ import {
   promptSecretRefForOnboarding,
   resolveSecretInputModeForEnvSelection,
 } from "../commands/auth-choice.apply-helpers.js";
-import {
-  normalizeGatewayTokenInput,
-  randomToken,
-  validateGatewayPasswordInput,
-} from "../commands/onboard-helpers.js";
+import { normalizeGatewayTokenInput, randomToken } from "../commands/onboard-helpers.js";
 import type { GatewayAuthChoice, SecretInputMode } from "../commands/onboard-types.js";
 import type { GatewayBindMode, GatewayTailscaleMode, BotConfig } from "../config/config.js";
 import { ensureControlUiAllowedOriginsForNonLoopbackBind } from "../config/gateway-control-ui-origins.js";
@@ -108,7 +104,6 @@ export async function configureGatewayForOnboarding(
               label: "Token",
               hint: "Recommended default (local + remote)",
             },
-            { value: "password", label: "Password" },
           ],
           initialValue: "token",
         })) as GatewayAuthChoice);
@@ -149,11 +144,6 @@ export async function configureGatewayForOnboarding(
     await prompter.note("Tailscale requires bind=loopback. Adjusting bind to loopback.", "Note");
     bind = "loopback";
     customBindHost = undefined;
-  }
-
-  if (tailscaleMode === "funnel" && authMode !== "password") {
-    await prompter.note("Tailscale funnel requires password auth.", "Note");
-    authMode = "password";
   }
 
   let gatewayToken: string | undefined;
@@ -220,52 +210,7 @@ export async function configureGatewayForOnboarding(
     }
   }
 
-  if (authMode === "password") {
-    let password: SecretInput | undefined =
-      flow === "quickstart" && quickstartGateway.password ? quickstartGateway.password : undefined;
-    if (!password) {
-      const selectedMode = await resolveSecretInputModeForEnvSelection({
-        prompter,
-        explicitMode: opts.secretInputMode,
-        copy: {
-          modeMessage: "How do you want to provide the gateway password?",
-          plaintextLabel: "Enter password now",
-          plaintextHint: "Stores the password directly in HanzoBot config",
-        },
-      });
-      if (selectedMode === "ref") {
-        const resolved = await promptSecretRefForOnboarding({
-          provider: "gateway-auth-password",
-          config: nextConfig,
-          prompter,
-          preferredEnvVar: "BOT_GATEWAY_PASSWORD",
-          copy: {
-            sourceMessage: "Where is this gateway password stored?",
-            envVarPlaceholder: "BOT_GATEWAY_PASSWORD",
-          },
-        });
-        password = resolved.ref;
-      } else {
-        password = String(
-          (await prompter.text({
-            message: "Gateway password",
-            validate: validateGatewayPasswordInput,
-          })) ?? "",
-        ).trim();
-      }
-    }
-    nextConfig = {
-      ...nextConfig,
-      gateway: {
-        ...nextConfig.gateway,
-        auth: {
-          ...nextConfig.gateway?.auth,
-          mode: "password",
-          password,
-        },
-      },
-    };
-  } else if (authMode === "token") {
+  if (authMode === "token") {
     nextConfig = {
       ...nextConfig,
       gateway: {

@@ -15,7 +15,6 @@ import {
 type HandshakeConnectAuth = {
   token?: string;
   deviceToken?: string;
-  password?: string;
 };
 
 export type DeviceTokenCandidateSource = "explicit-device-token" | "shared-token-fallback";
@@ -48,13 +47,12 @@ function trimToUndefined(value: string | undefined): string | undefined {
 
 function resolveSharedConnectAuth(
   connectAuth: HandshakeConnectAuth | null | undefined,
-): { token?: string; password?: string } | undefined {
+): { token?: string } | undefined {
   const token = trimToUndefined(connectAuth?.token);
-  const password = trimToUndefined(connectAuth?.password);
-  if (!token && !password) {
+  if (!token) {
     return undefined;
   }
-  return { token, password };
+  return { token };
 }
 
 function resolveDeviceTokenCandidate(connectAuth: HandshakeConnectAuth | null | undefined): {
@@ -103,7 +101,7 @@ export async function resolveConnectAuthState(params: {
     hasDeviceTokenCandidate &&
     authResult.ok &&
     params.rateLimiter &&
-    (authResult.method === "token" || authResult.method === "password")
+    authResult.method === "token"
   ) {
     const sharedRateCheck: RateLimitCheckResult = params.rateLimiter.check(
       params.clientIp,
@@ -137,16 +135,14 @@ export async function resolveConnectAuthState(params: {
   // no per-device credential needed. Include them so operator connections
   // can skip device identity via roleCanSkipDeviceIdentity().
   const sharedAuthOk =
-    (sharedAuthResult?.ok === true &&
-      (sharedAuthResult.method === "token" || sharedAuthResult.method === "password")) ||
+    (sharedAuthResult?.ok === true && sharedAuthResult.method === "token") ||
     (authResult.ok && authResult.method === "trusted-proxy") ||
     (authResult.ok && authResult.method === "iam");
 
   return {
     authResult,
     authOk: authResult.ok,
-    authMethod:
-      authResult.method ?? (params.resolvedAuth.mode === "password" ? "password" : "token"),
+    authMethod: authResult.method ?? "token",
     sharedAuthOk,
     sharedAuthProvided,
     deviceTokenCandidate,
