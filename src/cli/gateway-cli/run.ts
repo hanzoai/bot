@@ -78,12 +78,7 @@ const GATEWAY_RUN_BOOLEAN_KEYS = [
   "rawStream",
 ] as const;
 
-const GATEWAY_AUTH_MODES: readonly GatewayAuthMode[] = [
-  "none",
-  "token",
-  "password",
-  "trusted-proxy",
-];
+const GATEWAY_AUTH_MODES: readonly GatewayAuthMode[] = ["none", "token", "trusted-proxy"];
 const GATEWAY_TAILSCALE_MODES: readonly GatewayTailscaleMode[] = ["off", "serve", "funnel"];
 
 function parseEnumOption<T extends string>(
@@ -306,24 +301,14 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   });
   const resolvedAuthMode = resolvedAuth.mode;
   const tokenValue = resolvedAuth.token;
-  const passwordValue = resolvedAuth.password;
   const hasToken = typeof tokenValue === "string" && tokenValue.trim().length > 0;
-  const hasPassword = typeof passwordValue === "string" && passwordValue.trim().length > 0;
   const tokenConfigured =
     hasToken ||
     hasConfiguredSecretInput(
       authOverride?.token ?? cfg.gateway?.auth?.token,
       cfg.secrets?.defaults,
     );
-  const passwordConfigured =
-    hasPassword ||
-    hasConfiguredSecretInput(
-      authOverride?.password ?? cfg.gateway?.auth?.password,
-      cfg.secrets?.defaults,
-    );
-  const hasSharedSecret =
-    (resolvedAuthMode === "token" && tokenConfigured) ||
-    (resolvedAuthMode === "password" && passwordConfigured);
+  const hasSharedSecret = resolvedAuthMode === "token" && tokenConfigured;
   const canBootstrapToken = resolvedAuthMode === "token" && !tokenConfigured;
   const authHints: string[] = [];
   if (miskeys.hasGatewayToken) {
@@ -333,19 +318,6 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     authHints.push(
       '"gateway.remote.token" is for remote CLI calls; it does not enable local gateway auth.',
     );
-  }
-  if (resolvedAuthMode === "password" && !passwordConfigured) {
-    defaultRuntime.error(
-      [
-        "Gateway auth is set to password, but no password is configured.",
-        "Set gateway.auth.password (or BOT_GATEWAY_PASSWORD), or pass --password.",
-        ...authHints,
-      ]
-        .filter(Boolean)
-        .join("\n"),
-    );
-    defaultRuntime.exit(1);
-    return;
   }
   if (resolvedAuthMode === "none") {
     gatewayLog.warn(
@@ -362,7 +334,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     defaultRuntime.error(
       [
         `Refusing to bind gateway to ${bind} without auth.`,
-        "Set gateway.auth.token/password (or BOT_GATEWAY_TOKEN/BOT_GATEWAY_PASSWORD) or pass --token/--password.",
+        "Set gateway.auth.token (or BOT_GATEWAY_TOKEN) or pass --token.",
         ...authHints,
       ]
         .filter(Boolean)

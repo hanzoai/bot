@@ -157,13 +157,11 @@ export async function promptRemoteGatewayConfig(
     message: "Gateway auth",
     options: [
       { value: "token", label: "Token (recommended)" },
-      { value: "password", label: "Password" },
       { value: "off", label: "No auth" },
     ],
   });
 
   let token: SecretInput | undefined = cfg.gateway?.remote?.token;
-  let password: SecretInput | undefined = cfg.gateway?.remote?.password;
   if (authChoice === "token") {
     const selectedMode = await resolveSecretInputModeForEnvSelection({
       prompter,
@@ -195,42 +193,8 @@ export async function promptRemoteGatewayConfig(
         }),
       ).trim();
     }
-    password = undefined;
-  } else if (authChoice === "password") {
-    const selectedMode = await resolveSecretInputModeForEnvSelection({
-      prompter,
-      explicitMode: options?.secretInputMode,
-      copy: {
-        modeMessage: "How do you want to provide this gateway password?",
-        plaintextLabel: "Enter password now",
-        plaintextHint: "Stores the password directly in HanzoBot config",
-      },
-    });
-    if (selectedMode === "ref") {
-      const resolved = await promptSecretRefForOnboarding({
-        provider: "gateway-remote-password",
-        config: cfg,
-        prompter,
-        preferredEnvVar: "BOT_GATEWAY_PASSWORD",
-        copy: {
-          sourceMessage: "Where is this gateway password stored?",
-          envVarPlaceholder: "BOT_GATEWAY_PASSWORD",
-        },
-      });
-      password = resolved.ref;
-    } else {
-      password = String(
-        await prompter.text({
-          message: "Gateway password",
-          initialValue: typeof password === "string" ? password : undefined,
-          validate: (value) => (value?.trim() ? undefined : "Required"),
-        }),
-      ).trim();
-    }
-    token = undefined;
   } else {
     token = undefined;
-    password = undefined;
   }
 
   return {
@@ -241,7 +205,6 @@ export async function promptRemoteGatewayConfig(
       remote: {
         url,
         ...(token !== undefined ? { token } : {}),
-        ...(password !== undefined ? { password } : {}),
       },
     },
   };
