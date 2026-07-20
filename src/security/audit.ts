@@ -355,17 +355,10 @@ function collectGatewayConfigFindings(
     ? cfg.gateway.trustedProxies
     : [];
   const hasToken = typeof auth.token === "string" && auth.token.trim().length > 0;
-  const hasPassword = typeof auth.password === "string" && auth.password.trim().length > 0;
   const envTokenConfigured =
     hasNonEmptyString(env.BOT_GATEWAY_TOKEN) || hasNonEmptyString(env.CLAWDBOT_GATEWAY_TOKEN);
-  const envPasswordConfigured =
-    hasNonEmptyString(env.BOT_GATEWAY_PASSWORD) || hasNonEmptyString(env.CLAWDBOT_GATEWAY_PASSWORD);
   const tokenConfiguredFromConfig = hasConfiguredSecretInput(
     cfg.gateway?.auth?.token,
-    cfg.secrets?.defaults,
-  );
-  const passwordConfiguredFromConfig = hasConfiguredSecretInput(
-    cfg.gateway?.auth?.password,
     cfg.secrets?.defaults,
   );
   const remoteTokenConfigured = hasConfiguredSecretInput(
@@ -375,23 +368,9 @@ function collectGatewayConfigFindings(
   const explicitAuthMode = cfg.gateway?.auth?.mode;
   const tokenCanWin =
     hasToken || envTokenConfigured || tokenConfiguredFromConfig || remoteTokenConfigured;
-  const passwordCanWin =
-    explicitAuthMode === "password" ||
-    (explicitAuthMode !== "token" &&
-      explicitAuthMode !== "none" &&
-      explicitAuthMode !== "trusted-proxy" &&
-      !tokenCanWin);
   const tokenConfigured = tokenCanWin;
-  const passwordConfigured =
-    hasPassword || (passwordCanWin && (envPasswordConfigured || passwordConfiguredFromConfig));
   const hasSharedSecret =
-    explicitAuthMode === "token"
-      ? tokenConfigured
-      : explicitAuthMode === "password"
-        ? passwordConfigured
-        : explicitAuthMode === "none" || explicitAuthMode === "trusted-proxy"
-          ? false
-          : tokenConfigured || passwordConfigured;
+    explicitAuthMode === "none" || explicitAuthMode === "trusted-proxy" ? false : tokenConfigured;
   const hasTailscaleAuth = auth.allowTailscale && tailscaleMode === "serve";
   const hasGatewayAuth = hasSharedSecret || hasTailscaleAuth;
   const allowRealIpFallback = cfg.gateway?.allowRealIpFallback === true;
@@ -421,7 +400,7 @@ function collectGatewayConfigFindings(
         "This can allow remote session spawning / control-plane actions via HTTP and increases RCE blast radius if the gateway is reachable.",
       remediation:
         "Remove these entries from gateway.tools.allow (recommended). " +
-        "If you keep them enabled, keep gateway.bind loopback-only (or tailnet-only), restrict network exposure, and treat the gateway token/password as full-admin.",
+        "If you keep them enabled, keep gateway.bind loopback-only (or tailnet-only), restrict network exposure, and treat the gateway token as full-admin.",
     });
   }
   if (bind !== "loopback" && !hasSharedSecret && auth.mode !== "trusted-proxy") {
@@ -429,7 +408,7 @@ function collectGatewayConfigFindings(
       checkId: "gateway.bind_no_auth",
       severity: "critical",
       title: "Gateway binds beyond loopback without auth",
-      detail: `gateway.bind="${bind}" but no gateway.auth token/password is configured.`,
+      detail: `gateway.bind="${bind}" but no gateway.auth token is configured.`,
       remediation: `Set gateway.auth (token recommended) or bind to loopback.`,
     });
   }
@@ -739,34 +718,21 @@ function collectBrowserControlFindings(
   }
 
   const browserAuth = resolveBrowserControlAuth(cfg, env);
-  const explicitAuthMode = cfg.gateway?.auth?.mode;
   const tokenConfigured =
     Boolean(browserAuth.token) ||
     hasNonEmptyString(env.BOT_GATEWAY_TOKEN) ||
     hasNonEmptyString(env.CLAWDBOT_GATEWAY_TOKEN) ||
     hasConfiguredSecretInput(cfg.gateway?.auth?.token, cfg.secrets?.defaults);
-  const passwordCanWin =
-    explicitAuthMode === "password" ||
-    (explicitAuthMode !== "token" &&
-      explicitAuthMode !== "none" &&
-      explicitAuthMode !== "trusted-proxy" &&
-      !tokenConfigured);
-  const passwordConfigured =
-    Boolean(browserAuth.password) ||
-    (passwordCanWin &&
-      (hasNonEmptyString(env.BOT_GATEWAY_PASSWORD) ||
-        hasNonEmptyString(env.CLAWDBOT_GATEWAY_PASSWORD) ||
-        hasConfiguredSecretInput(cfg.gateway?.auth?.password, cfg.secrets?.defaults)));
-  if (!tokenConfigured && !passwordConfigured) {
+  if (!tokenConfigured) {
     findings.push({
       checkId: "browser.control_no_auth",
       severity: "critical",
       title: "Browser control has no auth",
       detail:
-        "Browser control HTTP routes are enabled but no gateway.auth token/password is configured. " +
+        "Browser control HTTP routes are enabled but no gateway.auth token is configured. " +
         "Any local process (or SSRF to loopback) can call browser control endpoints.",
       remediation:
-        "Set gateway.auth.token (recommended) or gateway.auth.password so browser control HTTP routes require authentication. Restarting the gateway will auto-generate gateway.auth.token when browser control is enabled.",
+        "Set gateway.auth.token so browser control HTTP routes require authentication. Restarting the gateway will auto-generate gateway.auth.token when browser control is enabled.",
     });
   }
 

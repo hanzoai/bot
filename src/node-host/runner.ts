@@ -154,15 +154,10 @@ export async function resolveNodeHostGatewayCredentials(params: {
 }): Promise<{ token?: string; password?: string }> {
   const env = params.env ?? process.env;
   const isRemoteMode = params.config.gateway?.mode === "remote";
-  const authMode = params.config.gateway?.auth?.mode;
   const tokenPath = isRemoteMode ? "gateway.remote.token" : "gateway.auth.token";
-  const passwordPath = isRemoteMode ? "gateway.remote.password" : "gateway.auth.password";
   const configuredToken = isRemoteMode
     ? params.config.gateway?.remote?.token
     : params.config.gateway?.auth?.token;
-  const configuredPassword = isRemoteMode
-    ? params.config.gateway?.remote?.password
-    : params.config.gateway?.auth?.password;
 
   const token =
     normalizeSecretInputString(env.BOT_GATEWAY_TOKEN) ??
@@ -172,26 +167,7 @@ export async function resolveNodeHostGatewayCredentials(params: {
       path: tokenPath,
       env,
     }));
-  const tokenCanWin = Boolean(token);
-  const localPasswordCanWin =
-    authMode === "password" ||
-    (authMode !== "token" && authMode !== "none" && authMode !== "trusted-proxy" && !tokenCanWin);
-  const shouldResolveConfiguredPassword =
-    !normalizeSecretInputString(env.BOT_GATEWAY_PASSWORD) &&
-    !tokenCanWin &&
-    (isRemoteMode || localPasswordCanWin);
-  const password =
-    normalizeSecretInputString(env.BOT_GATEWAY_PASSWORD) ??
-    (shouldResolveConfiguredPassword
-      ? await resolveNodeHostSecretInputString({
-          config: params.config,
-          value: configuredPassword,
-          path: passwordPath,
-          env,
-        })
-      : normalizeSecretInputString(configuredPassword));
-
-  return { token, password };
+  return { token };
 }
 
 export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
@@ -217,7 +193,7 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   const resolvedBrowser = resolveBrowserConfig(cfg.browser, cfg);
   const browserProxyEnabled =
     cfg.nodeHost?.browserProxy?.enabled !== false && resolvedBrowser.enabled;
-  const { token: resolvedToken, password } = await resolveNodeHostGatewayCredentials({
+  const { token: resolvedToken } = await resolveNodeHostGatewayCredentials({
     config: cfg,
     env: process.env,
   });
@@ -249,7 +225,6 @@ export async function runNodeHost(opts: NodeHostRunOptions): Promise<void> {
   const client = new GatewayClient({
     url,
     token: token || undefined,
-    password: password || undefined,
     instanceId: nodeId,
     clientName: GATEWAY_CLIENT_NAMES.NODE_HOST,
     clientDisplayName: displayName,
