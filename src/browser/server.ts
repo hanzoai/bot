@@ -44,7 +44,7 @@ export async function startBrowserControlServerFromConfig(): Promise<BrowserServ
 
   // Fail closed: if auth bootstrap failed and no explicit auth is available,
   // do not start the browser control HTTP server.
-  if (browserAuthBootstrapFailed && !browserAuth.token && !browserAuth.password) {
+  if (browserAuthBootstrapFailed && !browserAuth.token) {
     logServer.error(
       "browser control startup aborted: authentication bootstrap failed and no fallback auth is configured.",
     );
@@ -86,7 +86,7 @@ export async function startBrowserControlServerFromConfig(): Promise<BrowserServ
     onWarn: (message) => logServer.warn(message),
   });
 
-  const authMode = browserAuth.token ? "token" : browserAuth.password ? "password" : "off";
+  const authMode = browserAuth.token ? "token" : "off";
   logServer.info(`Browser control listening on http://127.0.0.1:${port}/ (auth=${authMode})`);
   return state;
 }

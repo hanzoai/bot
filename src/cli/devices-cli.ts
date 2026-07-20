@@ -81,7 +81,6 @@ const callGatewayCli = async (method: string, opts: DevicesRpcOpts, params?: unk
       await callGateway({
         url: opts.url,
         token: opts.token,
-        password: opts.password,
         method,
         params,
         timeoutMs: Number(opts.timeout ?? 10_000),

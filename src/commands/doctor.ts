@@ -14,7 +14,6 @@ import { CONFIG_PATH, readConfigFileSnapshot, writeConfigFile } from "../config/
 import { logConfigUpdated } from "../config/logging.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import { resolveGatewayService } from "../daemon/service.js";
-import { hasAmbiguousGatewayAuthModeConfig } from "../gateway/auth-mode-policy.js";
 import { resolveGatewayAuth } from "../gateway/auth.js";
 import { buildGatewayConnectionDetails } from "../gateway/call.js";
 import { resolveBotPackageRoot } from "../infra/bot-root.js";
@@ -119,17 +118,6 @@ export async function doctorCommand(
     }
     note(lines.join("\n"), "Gateway");
   }
-  if (resolveMode(cfg) === "local" && hasAmbiguousGatewayAuthModeConfig(cfg)) {
-    note(
-      [
-        "gateway.auth.token and gateway.auth.password are both configured while gateway.auth.mode is unset.",
-        "Set an explicit mode to avoid ambiguous auth selection and startup/runtime failures.",
-        `Set token mode: ${formatCliCommand("bot config set gateway.auth.mode token")}`,
-        `Set password mode: ${formatCliCommand("bot config set gateway.auth.mode password")}`,
-      ].join("\n"),
-      "Gateway auth",
-    );
-  }
 
   cfg = await maybeRepairAnthropicOAuthProfileId(cfg, prompter);
   cfg = await maybeRemoveDeprecatedCliAuthProfiles(cfg, prompter);
@@ -151,7 +139,7 @@ export async function doctorCommand(
       authConfig: cfg.gateway?.auth,
       tailscaleMode: cfg.gateway?.tailscale?.mode ?? "off",
     });
-    const needsToken = auth.mode !== "password" && (auth.mode !== "token" || !auth.token);
+    const needsToken = auth.mode !== "token" || !auth.token;
     if (needsToken) {
       if (gatewayTokenRef) {
         note(

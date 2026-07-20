@@ -22,7 +22,6 @@ export async function probeGatewayStatus(opts: {
         await callGateway({
           url: opts.url,
           token: opts.token,
-          password: opts.password,
           tlsFingerprint: opts.tlsFingerprint,
           method: "status",
           timeoutMs: opts.timeoutMs,

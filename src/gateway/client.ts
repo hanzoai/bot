@@ -47,7 +47,6 @@ export type GatewayClientOptions = {
   tickWatchMinIntervalMs?: number;
   token?: string;
   deviceToken?: string;
-  password?: string;
   instanceId?: string;
   clientName?: GatewayClientName;
   clientDisplayName?: string;
@@ -217,7 +216,6 @@ export class GatewayClient {
         code === 1008 &&
         reasonText.toLowerCase().includes("device token mismatch") &&
         !this.opts.token &&
-        !this.opts.password &&
         this.opts.deviceIdentity
       ) {
         const deviceId = this.opts.deviceIdentity.deviceId;
@@ -285,13 +283,11 @@ export class GatewayClient {
     // Legacy compatibility: keep `auth.token` populated for device-token auth when
     // no explicit shared token is present.
     const authToken = explicitGatewayToken ?? resolvedDeviceToken;
-    const authPassword = this.opts.password?.trim() || undefined;
     const auth =
-      authToken || authPassword || resolvedDeviceToken
+      authToken || resolvedDeviceToken
         ? {
             token: authToken,
             deviceToken: resolvedDeviceToken,
-            password: authPassword,
           }
         : undefined;
     const signedAtMs = Date.now();
