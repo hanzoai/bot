@@ -32,7 +32,6 @@ export const callGatewayCli = async (method: string, opts: GatewayRpcOpts, param
       await callGateway({
         url: opts.url,
         token: opts.token,
-        password: opts.password,
         method,
         params,
         expectFinal: Boolean(opts.expectFinal),
