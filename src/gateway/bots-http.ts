@@ -22,18 +22,18 @@
  */
 
 import fs from "node:fs";
-import path from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { sendJson, sendGatewayAuthFailure } from "./http-common.js";
-import { getIamIdentity } from "./iam-identity.js";
-import { authorizeHttpGatewayConnect, type ResolvedGatewayAuth } from "./auth.js";
-import type { AuthRateLimiter } from "./auth-rate-limit.js";
-import { getBearerToken } from "./http-utils.js";
+import path from "node:path";
 import { loadConfig } from "../config/config.js";
 import { loadSessionStore, updateSessionStore } from "../config/sessions.js";
 import type { SessionEntry } from "../config/sessions/types.js";
 import { resolveTenantStateDir } from "../config/tenant-paths.js";
 import { isCronRunSessionKey } from "../sessions/session-key-utils.js";
+import type { AuthRateLimiter } from "./auth-rate-limit.js";
+import { authorizeHttpGatewayConnect, type ResolvedGatewayAuth } from "./auth.js";
+import { sendJson, sendGatewayAuthFailure } from "./http-common.js";
+import { getBearerToken } from "./http-utils.js";
+import { getIamIdentity } from "./iam-identity.js";
 
 const BOTS_PATH = "/v1/bots";
 const STOP_RE = /^\/v1\/bots\/([^/]+)\/stop$/;
@@ -59,9 +59,9 @@ function tenantStorePaths(orgId: string, userId: string): string[] {
   const agentsDir = path.join(stateDir, "agents");
   let agentIds: string[];
   try {
-    agentIds = fs.readdirSync(agentsDir, { withFileTypes: true }).flatMap((e) =>
-      e.isDirectory() ? [e.name] : [],
-    );
+    agentIds = fs
+      .readdirSync(agentsDir, { withFileTypes: true })
+      .flatMap((e) => (e.isDirectory() ? [e.name] : []));
   } catch {
     return [];
   }
@@ -162,7 +162,7 @@ export async function handleBotsHttpRequest(
   const token = getBearerToken(req);
   const authResult = await authorizeHttpGatewayConnect({
     auth: opts.auth,
-    connectAuth: token ? { token, password: token } : null,
+    connectAuth: token ? { token } : null,
     req,
     trustedProxies: opts.trustedProxies ?? cfg.gateway?.trustedProxies,
     allowRealIpFallback: opts.allowRealIpFallback ?? cfg.gateway?.allowRealIpFallback,
