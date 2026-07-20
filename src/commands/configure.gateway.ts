@@ -94,7 +94,6 @@ export async function promptGatewayConfig(
       message: "Gateway auth",
       options: [
         { value: "token", label: "Token", hint: "Recommended default" },
-        { value: "password", label: "Password" },
         {
           value: "trusted-proxy",
           label: "Trusted Proxy",

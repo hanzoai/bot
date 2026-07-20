@@ -110,26 +110,6 @@ export function applyNonInteractiveGatewayConfig(params: {
     }
   }
 
-  if (authMode === "password") {
-    const password = opts.gatewayPassword?.trim();
-    if (!password) {
-      runtime.error("Missing --gateway-password for password auth.");
-      runtime.exit(1);
-      return null;
-    }
-    nextConfig = {
-      ...nextConfig,
-      gateway: {
-        ...nextConfig.gateway,
-        auth: {
-          ...nextConfig.gateway?.auth,
-          mode: "password",
-          password,
-        },
-      },
-    };
-  }
-
   nextConfig = {
     ...nextConfig,
     gateway: {

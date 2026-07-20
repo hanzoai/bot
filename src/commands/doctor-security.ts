@@ -85,16 +85,10 @@ export async function noteSecurityWarnings(cfg: BotConfig) {
     tailscaleMode: cfg.gateway?.tailscale?.mode ?? "off",
   });
   const authToken = resolvedAuth.token?.trim() ?? "";
-  const authPassword = resolvedAuth.password?.trim() ?? "";
   const hasToken =
     authToken.length > 0 ||
     hasConfiguredSecretInput(cfg.gateway?.auth?.token, cfg.secrets?.defaults);
-  const hasPassword =
-    authPassword.length > 0 ||
-    hasConfiguredSecretInput(cfg.gateway?.auth?.password, cfg.secrets?.defaults);
-  const hasSharedSecret =
-    (resolvedAuth.mode === "token" && hasToken) ||
-    (resolvedAuth.mode === "password" && hasPassword);
+  const hasSharedSecret = resolvedAuth.mode === "token" && hasToken;
   const bindDescriptor = `"${gatewayBind}" (${resolvedBindHost})`;
   const saferRemoteAccessLines = [
     "  Safer remote access: keep bind loopback and use Tailscale Serve/Funnel or an SSH tunnel.",
@@ -104,18 +98,10 @@ export async function noteSecurityWarnings(cfg: BotConfig) {
 
   if (isExposed) {
     if (!hasSharedSecret) {
-      const authFixLines =
-        resolvedAuth.mode === "password"
-          ? [
-              `  Fix: ${formatCliCommand("bot configure")} to set a password`,
-              `  Or switch to token: ${formatCliCommand("bot config set gateway.auth.mode token")}`,
-            ]
-          : [
-              `  Fix: ${formatCliCommand("bot doctor --fix")} to generate a token`,
-              `  Or set token directly: ${formatCliCommand(
-                "bot config set gateway.auth.mode token",
-              )}`,
-            ];
+      const authFixLines = [
+        `  Fix: ${formatCliCommand("bot doctor --fix")} to generate a token`,
+        `  Or set token directly: ${formatCliCommand("bot config set gateway.auth.mode token")}`,
+      ];
       warnings.push(
         `- CRITICAL: Gateway bound to ${bindDescriptor} without authentication.`,
         `  Anyone on your network (or internet if port-forwarded) can fully control your agent.`,
