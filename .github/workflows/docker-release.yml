@@ -6,83 +6,99 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
+# Self-contained build+push. hanzoai/bot is a PUBLIC repo and the shared
+# reusable workflow lives in the PRIVATE hanzoai/.github repo; GitHub
+# forbids a public caller from resolving a private reusable workflow and
+# rejects the run at parse time (422 startup_failure, 0 jobs). So the
+# amd64 build/push that the reusable workflow performs is vendored here
+# verbatim (docker-container buildx, GHCR login, gha cache, provenance
+# off) on the same self-hosted arcd pool. NO GitHub-hosted runners.
 permissions:
   contents: read
   packages: write
   id-token: write
 
+env:
+  DOCKER_BUILD_SUMMARY: "false"
+  DOCKER_BUILD_RECORD_UPLOAD: "false"
+
 jobs:
   docker:
-    uses: hanzoai/.github/.github/workflows/docker-build.yml@main
-    with:
-      image: ghcr.io/hanzoai/bot
-      platforms: linux/amd64
-      runner-amd64: '["self-hosted","linux","amd64"]'
-      # Build the @hanzo/gui v7 admin-bot SPA from the sibling gui
-      # repo, then run scripts/sync-admin-ui.sh to drop the bundle into
-      # dist/control-ui/ before docker buildx COPYs the source. The
-      # Dockerfile asserts dist/control-ui/index.html exists and fails
-      # the build loudly if this step is skipped or breaks.
-      #
-      # The token is interpolated at workflow-call time; the reusable
-      # workflow runs the resulting shell verbatim. A plain `${TOKEN}`
-      # would be empty because the reusable workflow does not export
-      # GITHUB_TOKEN to pre-build-command, so we substitute here.
-      pre-build-command: |
-        set -euo pipefail
-        GUI_REF="main"
-        TOKEN="${{ github.token }}"
-        echo "Cloning hanzoai/gui@${GUI_REF} for admin-bot SPA build"
-        git clone --depth=1 --branch="${GUI_REF}" \
-          "https://x-access-token:${TOKEN}@github.com/hanzoai/gui.git" \
-          /tmp/hanzoai-gui
-        pushd /tmp/hanzoai-gui >/dev/null
-        # gui is a Bun workspace (see gui/package.json). Use bun, not
-        # pnpm, to install + build the @hanzo/bot-admin SPA.
-        if ! command -v bun >/dev/null 2>&1; then
-          curl -fsSL https://bun.sh/install | bash
-          export PATH="${HOME}/.bun/bin:${PATH}"
-        fi
-        # @hanzogui/vite-plugin and @hanzogui/babel-plugin-fully-specified
-        # are workspace packages with TS source — admin-bot's Vite config
-        # imports their compiled dist. Run the full workspace install
-        # (including postinstall) so dist is built before the SPA build.
-        bun install --frozen-lockfile
-        cd apps/admin-bot
-        bun run build
-        popd >/dev/null
-        ADMIN_BOT_DIR=/tmp/hanzoai-gui/apps/admin-bot bash scripts/sync-admin-ui.sh
-        test -f dist/control-ui/index.html
-    secrets: inherit
-
-  dispatch-to-universe:
-    needs: docker
     runs-on: hanzo-build-linux-amd64
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     steps:
-      - name: Compute image URI
-        id: meta
-        run: |
-          IMAGE="ghcr.io/hanzoai/bot"
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            TAG="${GITHUB_REF#refs/tags/v}"
-          elif [[ "$GITHUB_REF" == refs/heads/* ]]; then
-            TAG="${GITHUB_REF#refs/heads/}"
-          else
-            TAG="${GITHUB_SHA}"
-          fi
-          echo "image=${IMAGE}:${TAG}" >> "$GITHUB_OUTPUT"
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Dispatch image update to universe
-        uses: peter-evans/repository-dispatch@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
         with:
-          token: ${{ secrets.UNIVERSE_DISPATCH_TOKEN }}
-          repository: hanzoai/universe
-          event-type: image-update
-          client-payload: |
-            {
-              "service": "bot-gateway",
-              "image": "${{ steps.meta.outputs.image }}",
-              "sha": "${{ github.sha }}",
-              "repo": "${{ github.repository }}"
-            }
+          driver: docker-container
+          driver-opts: |
+            network=host
+
+      - name: Reset Docker credential store (runner hygiene)
+        run: |
+          mkdir -p "$HOME/.docker"
+          printf '{}' > "$HOME/.docker/config.json"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Build admin-bot SPA and sync into dist/control-ui
+        # The gateway serves the @hanzo/bot-admin SPA from dist/control-ui/
+        # and the Dockerfile asserts dist/control-ui/index.html exists. The
+        # SPA source lives in the PRIVATE hanzoai/admin bun workspace
+        # (apps/admin-bot == @hanzo/bot-admin); build it, then
+        # scripts/sync-admin-ui.sh mirrors the built dist into
+        # dist/control-ui/ before docker buildx COPYs the context.
+        env:
+          GH_PAT: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone --depth=1 --branch=main \
+            "https://x-access-token:${GH_PAT}@github.com/hanzoai/admin.git" \
+            /tmp/hanzoai-admin
+          if ! command -v bun >/dev/null 2>&1; then
+            curl -fsSL https://bun.sh/install | bash
+            export PATH="${HOME}/.bun/bin:${PATH}"
+          fi
+          pushd /tmp/hanzoai-admin >/dev/null
+          bun install --frozen-lockfile
+          cd apps/admin-bot
+          bun run build
+          popd >/dev/null
+          ADMIN_BOT_DIR=/tmp/hanzoai-admin/apps/admin-bot bash scripts/sync-admin-ui.sh
+          test -f dist/control-ui/index.html
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/hanzoai/bot
+          # v* git tag  → :{{version}} + :latest
+          # branch push → :sha-<sha7> (immutable) + :latest on main
+          # PR push     → :pr-N
+          flavor: |
+            latest=auto
+          tags: |
+            type=semver,pattern={{version}}
+            type=sha,prefix=sha-
+            type=ref,event=pr
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha,scope=ghcr.io/hanzoai/bot-amd64
+          cache-to: type=gha,scope=ghcr.io/hanzoai/bot-amd64,mode=max
+          provenance: false
+          push: true
