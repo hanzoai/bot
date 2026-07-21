@@ -105,7 +105,16 @@ RUN for dir in /app/extensions /app/.agent /app/.agents; do \
 # The COPY above pulls the synced bundle into the image; if the sync
 # step was skipped, the static handler would silently serve a 404 for
 # every admin route. Fail the build loudly instead.
-RUN test -f /app/dist/control-ui/index.html || (echo 'admin-bot SPA not synced; run scripts/sync-admin-ui.sh' && exit 1)
+#
+# REQUIRE_ADMIN_UI gates that assertion. Release builds keep the default
+# (1) so a missing SPA fails loud. The CLI install smoke builds this same
+# Dockerfile without the private admin-bot bundle in context and only
+# exercises the hanzo-bot binary, so it passes REQUIRE_ADMIN_UI=0.
+ARG REQUIRE_ADMIN_UI=1
+RUN if [ "${REQUIRE_ADMIN_UI}" = "1" ]; then \
+      test -f /app/dist/control-ui/index.html || \
+        (echo 'admin-bot SPA not synced; run scripts/sync-admin-ui.sh' && exit 1); \
+    fi
 RUN pnpm build
 
 # Expose the CLI binary without requiring npm global writes as non-root.
