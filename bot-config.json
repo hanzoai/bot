@@ -4,7 +4,7 @@
   },
   "agents": {
     "defaults": {
-      "model": "anthropic/claude-sonnet-4-6"
+      "model": "hanzo/enso"
     }
   },
   "models": {
