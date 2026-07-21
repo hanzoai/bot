@@ -56,7 +56,7 @@ ENV DISPLAY_NUM=1
 
 # Bot configuration for cloud mode
 ENV BOT_DEFAULT_PROVIDER=hanzo
-ENV BOT_DEFAULT_MODEL=claude-sonnet-4-5
+ENV BOT_DEFAULT_MODEL=enso
 ENV HANZO_NODE_ID=""
 
 # The entrypoint starts both the desktop environment and the bot.
