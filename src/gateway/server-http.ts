@@ -28,7 +28,9 @@ import {
   type AuthRateLimiter,
 } from "./auth-rate-limit.js";
 import { type GatewayAuthResult, type ResolvedGatewayAuth } from "./auth.js";
+import { handleBotsHttpRequest } from "./bots-http.js";
 import { normalizeCanvasScopedUrl } from "./canvas-capability.js";
+import { handleCodingTasksHttpRequest } from "./coding-tasks-http.js";
 import {
   handleControlUiAvatarRequest,
   handleControlUiHttpRequest,
@@ -52,9 +54,9 @@ import {
   resolveHookChannel,
   resolveHookDeliver,
 } from "./hooks.js";
-import { handleBotsHttpRequest } from "./bots-http.js";
 import { sendGatewayAuthFailure, setDefaultSecurityHeaders } from "./http-common.js";
 import { attachIamIdentity } from "./iam-identity.js";
+import { handleIamOAuthHttpRequest } from "./iam-oauth-http.js";
 import { handleLlmProxyHttpRequest } from "./llm-proxy-http.js";
 import { handleOpenAiHttpRequest } from "./openai-http.js";
 import { handleOpenResponsesHttpRequest } from "./openresponses-http.js";
@@ -71,7 +73,6 @@ import {
   type PluginRoutePathContext,
 } from "./server/plugins-http.js";
 import { handleToolsInvokeHttpRequest } from "./tools-invoke-http.js";
-import { handleCodingTasksHttpRequest } from "./coding-tasks-http.js";
 
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
 
@@ -602,6 +603,21 @@ export function createGatewayHttpServer(opts: {
         });
       }
       requestStages.push(
+        {
+          // IAM OAuth proxy (/auth/login, /auth/callback, /auth/refresh,
+          // /auth/logout, /auth/userinfo). Runs first and public: the
+          // handler self-guards on the /auth prefix and returns false for
+          // every other path, so it never shadows a downstream route. Only
+          // active when the gateway is in IAM auth mode.
+          name: "iam-oauth",
+          run: () => {
+            const auth = configSnapshot.gateway?.auth;
+            if (auth?.mode !== "iam" || !auth.iam) {
+              return false;
+            }
+            return handleIamOAuthHttpRequest(req, res, auth.iam);
+          },
+        },
         {
           name: "hooks",
           run: () => handleHooksRequest(req, res),
