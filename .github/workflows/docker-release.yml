@@ -4,6 +4,11 @@ on:
   push:
     branches: [main, dev, test]
     tags: ['v*']
+  pull_request:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - .github/workflows/docker-release.yml
   workflow_dispatch:
 
 # Self-contained build+push. hanzoai/bot is a PUBLIC repo and the shared
