@@ -54,7 +54,7 @@ jobs:
 
       - name: Run root Dockerfile CLI smoke
         run: |
-          docker build -t hanzo-bot-dockerfile-smoke:local -f Dockerfile .
+          docker build --build-arg REQUIRE_ADMIN_UI=0 -t hanzo-bot-dockerfile-smoke:local -f Dockerfile .
           docker run --rm --entrypoint sh hanzo-bot-dockerfile-smoke:local -lc 'which hanzo-bot && hanzo-bot --version'
 
       - name: Run installer docker tests
