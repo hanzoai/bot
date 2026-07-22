@@ -1069,6 +1069,15 @@ export function attachGatewayWsMessageHandler(params: {
         };
 
         clearHandshakeTimer();
+        // Retain the viewer's IAM identity (org + raw bearer) so per-viewer
+        // reads (e.g. the cloud agents read-through) scope to THIS org only.
+        // Only IAM handshakes that resolved an org carry it; shared-token,
+        // tailscale, trusted-proxy and bypass connections stay identity-less
+        // and therefore local-only — never a pod-fixed cloud credential.
+        const identity =
+          authOk && authMethod === "iam" && authResult.orgId && authResult.bearer
+            ? { orgId: authResult.orgId, bearer: authResult.bearer, method: "iam" as const }
+            : undefined;
         const nextClient: GatewayWsClient = {
           socket,
           connect: connectParams,
@@ -1078,6 +1087,7 @@ export function attachGatewayWsMessageHandler(params: {
           canvasHostUrl,
           canvasCapability,
           canvasCapabilityExpiresAtMs,
+          ...(identity ? { identity } : {}),
         };
         setClient(nextClient);
         setHandshakeState("connected");
