@@ -42,6 +42,18 @@ export type GatewayAuthResult = {
   rateLimited?: boolean;
   /** Milliseconds the client should wait before retrying (when rate-limited). */
   retryAfterMs?: number;
+  /**
+   * Viewer's org, resolved from the IAM JWT (owner/currentOrgId). Present only
+   * for `method: "iam"`. Used to scope the per-viewer cloud read-through so this
+   * shared gateway never serves one org's cloud agents to another.
+   */
+  orgId?: string;
+  /**
+   * The raw bearer JWT the viewer presented at handshake. Present only for
+   * `method: "iam"`. cloud resolves the org server-side from its `owner` claim;
+   * we never present a pod-fixed credential.
+   */
+  bearer?: string;
 };
 
 type ConnectAuth = {
@@ -456,12 +468,21 @@ export async function authorizeGatewayConnect(
           validateIamToken: (
             token: string,
             config: GatewayIamConfig,
-          ) => Promise<{ ok: true; userId: string } | { ok: false; reason: string }>;
+          ) => Promise<
+            | { ok: true; userId: string; currentOrgId?: string; owner?: string }
+            | { ok: false; reason: string }
+          >;
         };
         const iamResult = await validateIamToken(connectAuth.token, auth.iam);
         if (iamResult.ok) {
           limiter?.reset(ip, rateLimitScope);
-          return { ok: true, method: "iam", user: iamResult.userId };
+          // Retain the viewer's org + raw bearer so the per-viewer cloud
+          // read-through can scope to THIS org only. `owner` is exactly cloud's
+          // server-side scoping key; fall back to it when currentOrgId is absent.
+          const orgId = iamResult.currentOrgId ?? iamResult.owner;
+          return orgId
+            ? { ok: true, method: "iam", user: iamResult.userId, orgId, bearer: connectAuth.token }
+            : { ok: true, method: "iam", user: iamResult.userId };
         }
       } catch {
         // IAM validation threw (network error, JWKS unreachable, etc.)
