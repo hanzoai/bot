@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { GatewayRequestHandlers, RespondFn } from "./types.js";
 import {
   listAgentIds,
   resolveAgentDir,
@@ -34,6 +33,8 @@ import { assertNoPathAliasEscape } from "../../infra/path-alias-guards.js";
 import { isNotFoundPathError } from "../../infra/path-guards.js";
 import { DEFAULT_AGENT_ID, normalizeAgentId } from "../../routing/session-key.js";
 import { resolveUserPath } from "../../utils.js";
+import { fetchCloudAgentRows } from "../cloud-agents.js";
+import type { NodeRegistry } from "../node-registry.js";
 import {
   ErrorCodes,
   errorShape,
@@ -46,8 +47,8 @@ import {
   validateAgentsListParams,
   validateAgentsUpdateParams,
 } from "../protocol/index.js";
-import type { NodeRegistry } from "../node-registry.js";
 import { listAgentsForGateway } from "../session-utils.js";
+import type { GatewayRequestHandlers, RespondFn } from "./types.js";
 
 const BOOTSTRAP_FILE_NAMES = [
   DEFAULT_AGENTS_FILENAME,
@@ -469,7 +470,7 @@ function respondWorkspaceFileMissing(params: {
 }
 
 export const agentsHandlers: GatewayRequestHandlers = {
-  "agents.list": ({ params, respond, context }) => {
+  "agents.list": async ({ params, respond, context }) => {
     if (!validateAgentsListParams(params)) {
       respond(
         false,
@@ -485,6 +486,11 @@ export const agentsHandlers: GatewayRequestHandlers = {
     const cfg = loadConfig();
     const result = listAgentsForGateway(cfg);
 
+    // Tag the gateway's own config/disk agents as local-origin.
+    for (const agent of result.agents) {
+      agent.source ??= "local";
+    }
+
     // Augment with cloud-provisioned agents that are connected via NodeRegistry
     // but not present in the gateway config file.
     const knownIds = new Set(result.agents.map((a) => a.id));
@@ -495,11 +501,25 @@ export const agentsHandlers: GatewayRequestHandlers = {
         result.agents.push({
           id: nodeAgentId,
           name: node.displayName ?? nodeAgentId,
+          source: "node",
           identity: {
             name: node.displayName ?? nodeAgentId,
           },
         });
         knownIds.add(nodeAgentId);
+      }
+    }
+
+    // Read-through the cloud agent registry (the ONE registry-of-record that
+    // hanzo.team projects). Cloud is read-only here; a failed fetch degrades to
+    // the local + node list so this never breaks. Dedup by id — a live runtime
+    // node (source "node") or a local override wins over its cloud definition.
+    const cloudRows = await fetchCloudAgentRows(context.logGateway);
+    for (const row of cloudRows) {
+      const id = normalizeAgentId(row.id);
+      if (id && !knownIds.has(id)) {
+        result.agents.push({ ...row, source: "cloud" });
+        knownIds.add(id);
       }
     }
 
