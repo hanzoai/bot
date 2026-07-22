@@ -470,7 +470,7 @@ function respondWorkspaceFileMissing(params: {
 }
 
 export const agentsHandlers: GatewayRequestHandlers = {
-  "agents.list": async ({ params, respond, context }) => {
+  "agents.list": async ({ params, respond, context, client }) => {
     if (!validateAgentsListParams(params)) {
       respond(
         false,
@@ -511,10 +511,18 @@ export const agentsHandlers: GatewayRequestHandlers = {
     }
 
     // Read-through the cloud agent registry (the ONE registry-of-record that
-    // hanzo.team projects). Cloud is read-only here; a failed fetch degrades to
-    // the local + node list so this never breaks. Dedup by id — a live runtime
-    // node (source "node") or a local override wins over its cloud definition.
-    const cloudRows = await fetchCloudAgentRows(context.logGateway);
+    // hanzo.team projects), scoped to THIS viewer's org. We present the viewer's
+    // own IAM bearer (captured at handshake) and NO fixed pod credential, so a
+    // shared multi-tenant gateway never leaks one org's cloud agents to another.
+    // Non-IAM viewers carry no identity → local-only (cloud is not called).
+    // Cloud is read-only here; a failed fetch degrades to the local + node list
+    // so this never breaks. Dedup by id — a live runtime node (source "node") or
+    // a local override wins over its cloud definition.
+    const cloudRows = await fetchCloudAgentRows({
+      bearer: client?.identity?.bearer,
+      orgKey: client?.identity?.orgId,
+      logger: context.logGateway,
+    });
     for (const row of cloudRows) {
       const id = normalizeAgentId(row.id);
       if (id && !knownIds.has(id)) {
