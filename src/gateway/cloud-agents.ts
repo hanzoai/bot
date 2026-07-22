@@ -6,17 +6,25 @@
  * gateway's `agents.list` merges these rows alongside its local config/disk
  * agents and live runtime nodes.
  *
- * TRUST / SCOPE. The org is resolved SERVER-SIDE from the bearer we present:
- * cloud's identity boundary (SanitizeIdentity) validates the IAM JWT and mints
- * X-User-Id + X-Org-Id from its `owner` claim, then `principal.Org` scopes the
- * query to that org. We therefore pass NO client X-Org-Id — a forged one is
- * refused anyway. An opaque hk-/sk- key never validates to a principal, so the
- * call 401/403s and we degrade to local; only a real JWT surfaces cloud agents.
+ * PER-VIEWER, NEVER POD-FIXED. This gateway is a shared, multi-tenant singleton:
+ * one process serves IAM viewers from many orgs (hanzo, lux, zoo, customers).
+ * cloud `/v1/agents` is per-org-private (HIP-0026) — it scopes the query to the
+ * org resolved SERVER-SIDE from the presented bearer's `owner` claim. So we
+ * present the VIEWER'S OWN bearer and NO client X-Org-Id: org A's viewer only
+ * ever sees org A's agents. There is NO pod-fixed credential fallback — a single
+ * shared token would leak its org's agents to every other org's viewer.
+ *
+ * A viewer without an IAM bearer (shared BOT_GATEWAY_TOKEN nodes, tailscale,
+ * trusted-proxy) has no per-viewer org, so the read-through no-ops and the
+ * listing stays local-only.
+ *
+ * PER-ORG CACHE. Rows are cached under the viewer's `orgKey`; an entry fetched
+ * with org A's bearer is NEVER served to any other org. This is defense-in-depth
+ * on top of the server-side re-scoping above.
  *
  * READ-ONLY + FAIL-SOFT. The gateway never mutates cloud agents. Any failure
- * (no creds, network, auth, timeout) degrades to the last known rows, else an
- * empty list — `agents.list` must never break because the cloud is unreachable.
- * A short TTL keeps the merged listing fast.
+ * (network, auth, timeout) degrades to that org's last known rows, else an empty
+ * list — `agents.list` must never break because the cloud is unreachable.
  */
 
 import type { GatewayAgentRow } from "../shared/session-types.js";
@@ -33,14 +41,18 @@ type CloudAgentDto = {
 };
 
 type CacheEntry = { rows: GatewayAgentRow[]; expiresAt: number };
-let cache: CacheEntry | null = null;
+
+// Per-org cache. Keyed by the viewer's orgKey so org A's rows can never be
+// served to org B. TTL bounds staleness; a failed refresh serves the last
+// known rows for THAT org only.
+const cacheByOrg = new Map<string, CacheEntry>();
 
 /** Reset the module cache. Test-only seam. */
 export function resetCloudAgentsCache(): void {
-  cache = null;
+  cacheByOrg.clear();
 }
 
-/** Base URL of the cloud data plane hosting `/v1/agents`. */
+/** Base URL of the cloud data plane hosting `/v1/agents` (org-neutral). */
 function resolveCloudApiUrl(): string {
   const raw = (
     process.env.CLOUD_AGENTS_URL ??
@@ -48,22 +60,6 @@ function resolveCloudApiUrl(): string {
     DEFAULT_CLOUD_API_URL
   ).trim();
   return raw.replace(/\/+$/, "");
-}
-
-/**
- * Bearer the gateway presents to cloud. Prefers an explicit registry token,
- * else the IAM JWT the node already holds (`HANZO_API_KEY`, set by the node
- * host's OAuth flow). Returns undefined when the node has no cloud credential —
- * the read-through then no-ops and the listing stays local-only.
- */
-function resolveCloudToken(): string | undefined {
-  for (const candidate of [process.env.CLOUD_AGENTS_TOKEN, process.env.HANZO_API_KEY]) {
-    const token = candidate?.trim();
-    if (token) {
-      return token;
-    }
-  }
-  return undefined;
 }
 
 function normalizeCloudAgents(agents: CloudAgentDto[]): GatewayAgentRow[] {
@@ -79,7 +75,7 @@ function normalizeCloudAgents(agents: CloudAgentDto[]): GatewayAgentRow[] {
   return rows;
 }
 
-async function fetchCloudAgentsUncached(base: string, token: string): Promise<GatewayAgentRow[]> {
+async function fetchCloudAgentsUncached(base: string, bearer: string): Promise<GatewayAgentRow[]> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -87,7 +83,7 @@ async function fetchCloudAgentsUncached(base: string, token: string): Promise<Ga
       method: "GET",
       headers: {
         Accept: "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${bearer}`,
       },
       signal: controller.signal,
     });
@@ -103,29 +99,44 @@ async function fetchCloudAgentsUncached(base: string, token: string): Promise<Ga
 
 type MinimalLogger = { warn?: (message: string, meta?: Record<string, unknown>) => void };
 
+export type FetchCloudAgentRowsParams = {
+  /** The viewer's own IAM bearer JWT. cloud resolves the org from its `owner` claim. */
+  bearer?: string;
+  /** The viewer's resolved org; the per-org cache partition key. */
+  orgKey?: string;
+  logger?: MinimalLogger;
+};
+
 /**
- * Fetch the org's cloud agents as `GatewayAgentRow[]` (tagged `source: "cloud"`),
- * cached briefly. Never throws: returns the last known rows on failure, or an
- * empty list when there is no credential or nothing cached.
+ * Fetch the VIEWER'S org cloud agents as `GatewayAgentRow[]` (tagged
+ * `source: "cloud"`), cached briefly per org. Never throws.
+ *
+ * Returns `[]` (local-only) when there is no per-viewer bearer/org — there is no
+ * pod-fixed credential fallback, so a non-IAM viewer never surfaces cloud
+ * agents and no other org's agents can leak through this shared gateway.
  */
-export async function fetchCloudAgentRows(logger?: MinimalLogger): Promise<GatewayAgentRow[]> {
-  const token = resolveCloudToken();
-  if (!token) {
+export async function fetchCloudAgentRows(
+  params?: FetchCloudAgentRowsParams,
+): Promise<GatewayAgentRow[]> {
+  const bearer = params?.bearer?.trim();
+  const orgKey = params?.orgKey?.trim();
+  if (!bearer || !orgKey) {
     return [];
   }
   const now = Date.now();
-  if (cache && cache.expiresAt > now) {
-    return cache.rows;
+  const cached = cacheByOrg.get(orgKey);
+  if (cached && cached.expiresAt > now) {
+    return cached.rows;
   }
   try {
-    const rows = await fetchCloudAgentsUncached(resolveCloudApiUrl(), token);
-    cache = { rows, expiresAt: now + CACHE_TTL_MS };
+    const rows = await fetchCloudAgentsUncached(resolveCloudApiUrl(), bearer);
+    cacheByOrg.set(orgKey, { rows, expiresAt: now + CACHE_TTL_MS });
     return rows;
   } catch (err) {
-    logger?.warn?.(
+    params?.logger?.warn?.(
       `cloud agents read-through failed: ${err instanceof Error ? err.message : String(err)}`,
     );
-    // Degrade to the last known rows (best-effort visibility), else local-only.
-    return cache?.rows ?? [];
+    // Degrade to THIS org's last known rows (best-effort), else local-only.
+    return cached?.rows ?? [];
   }
 }
