@@ -21,6 +21,13 @@ export type GatewayClient = {
   canvasHostUrl?: string;
   canvasCapability?: string;
   canvasCapabilityExpiresAtMs?: number;
+  /**
+   * Viewer identity captured at the IAM handshake (org + raw bearer). Present
+   * only for IAM-authenticated connections whose JWT resolved an org. Drives the
+   * per-viewer cloud read-through so this shared gateway scopes cloud agents to
+   * the viewer's own org.
+   */
+  identity?: { orgId: string; bearer: string; method: "iam" };
 };
 
 export type RespondFn = (
