@@ -7,7 +7,11 @@ import { openUrl } from "./onboard-helpers.js";
 
 const IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
 const IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
-const IAM_CLIENT_ID = "bot";
+// The IAM-registered public client is `hanzo-bot` (<org>-<app> naming), whose
+// redirectUris include this loopback callback and whose grantTypes are
+// authorization_code + refresh_token. Sending the bare "bot" is what produced
+// "Invalid client_id". Matches @hanzo/dev's hanzo.id login.
+const IAM_CLIENT_ID = "hanzo-bot";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
 
