@@ -1320,7 +1320,7 @@ Docs: https://docs.hanzo-bot.ai
 - Security/Agents: make owner-ID obfuscation use a dedicated HMAC secret from configuration (`ownerDisplaySecret`) and update hashing behavior so obfuscation is decoupled from gateway token handling for improved control. (#7343) Thanks @vincentkoc.
 - Security/Infra: switch gateway lock and tool-call synthetic IDs from SHA-1 to SHA-256 with unchanged truncation length to strengthen hash basis while keeping deterministic behavior and lock key format. (#7343) Thanks @vincentkoc.
 - Dependencies/Tooling: add non-blocking dead-code scans in CI via Knip/ts-prune/ts-unused-exports to surface unused dependencies and exports earlier. (#22468) Thanks @vincentkoc.
-- Dependencies/Unused Dependencies: remove or scope unused root and extension deps (`@larksuiteoapi/node-sdk`, `signal-utils`, `ollama`, `lit`, `@lit/context`, `@lit-labs/signals`, `@microsoft/agents-hosting-express`, `@microsoft/agents-hosting-extensions-teams`, and plugin-local `hanzo-bot` devDeps in `extensions/open-prose`, `extensions/lobster`, and `extensions/llm-task`). (#22471, #22495) Thanks @vincentkoc.
+- Dependencies/Unused Dependencies: remove or scope unused root and extension deps (`@larksuiteoapi/node-sdk`, `signal-utils`, `ollama`, `lit`, `@lit/context`, `@lit-labs/signals`, `@microsoft/agents-hosting-express`, `@microsoft/agents-hosting-extensions-teams`, and plugin-local `hanzo-bot` devDeps in `extensions/open-prose`, `extensions/runbook`, and `extensions/llm-task`). (#22471, #22495) Thanks @vincentkoc.
 - Dependencies/A2UI: harden dependency resolution after root cleanup (resolve `lit`, `@lit/context`, `@lit-labs/signals`, and `signal-utils` from workspace/root) and simplify bundling fallback behavior, including `pnpm dlx rolldown` compatibility. (#22481, #22507) Thanks @vincentkoc.
 
 ### Fixes
@@ -1375,7 +1375,7 @@ Docs: https://docs.hanzo-bot.ai
 - Auto-reply/Tool results: serialize tool-result delivery and keep the delivery chain progressing after individual failures so concurrent tool outputs preserve user-visible ordering. (#21231) thanks @ahdernasr.
 - Auto-reply/Prompt caching: restore prefix-cache stability by keeping inbound system metadata session-stable and moving per-message IDs (`message_id`, `message_id_full`, `reply_to_id`, `sender_id`) into untrusted conversation context. (#20597) Thanks @anisoptera.
 - iOS/Watch: add actionable watch approval/reject controls and quick-reply actions so watch-originated approvals and responses can be sent directly from notification flows. (#21996) Thanks @mbelinky.
-- iOS/Watch: refresh iOS and watch app icon assets with the lobster icon set to keep phone/watch branding aligned. (#21997) Thanks @mbelinky.
+- iOS/Watch: refresh iOS and watch app icon assets with the app icon set to keep phone/watch branding aligned. (#21997) Thanks @mbelinky.
 - CLI/Onboarding: fix Anthropic-compatible custom provider verification by normalizing base URLs to avoid duplicate `/v1` paths during setup checks. (#21336) Thanks @17jmumford.
 - iOS/Gateway/Tools: prefer uniquely connected node matches when duplicate display names exist, surface actionable `nodes invoke` pairing-required guidance with request IDs, and refresh active iOS gateway registration after location-capability setting changes so capability updates apply immediately. (#22120) thanks @mbelinky.
 - Gateway/Auth: require `gateway.trustedProxies` to include a loopback proxy address when `auth.mode="trusted-proxy"` and `bind="loopback"`, preventing same-host proxy misconfiguration from silently blocking auth. (#22082, follow-up to #20097) thanks @mbelinky.
@@ -1484,10 +1484,10 @@ Docs: https://docs.hanzo-bot.ai
 - Heartbeat/Cron: skip interval heartbeats when `HEARTBEAT.md` is missing or empty and no tagged cron events are queued, while preserving cron-event fallback for queued tagged reminders. (#20461) thanks @vikpos.
 - Browser/Relay: reuse an already-running extension relay when the relay port is occupied by another HanzoBot process, while still failing on non-relay port collisions to avoid masking unrelated listeners. (#20035) Thanks @mbelinky.
 - Scripts: update clawdock helper command support to include `docker-compose.extra.yml` where available. (#17094) Thanks @zerone0x.
-- Lobster/Config: remove Lobster executable-path overrides (`lobsterPath`), require PATH-based execution, and add focused Windows wrapper-resolution tests to keep shell-free behavior stable.
+- Runbook/Config: remove Runbook executable-path overrides (`runbookPath`), require PATH-based execution, and add focused Windows wrapper-resolution tests to keep shell-free behavior stable.
 - Gateway/WebChat: block `sessions.patch` and `sessions.delete` for WebChat clients so session-store mutations stay restricted to non-WebChat operator flows. Thanks @allsmog for reporting.
 - Gateway: clarify launchctl GUI domain bootstrap failure on macOS. (#13795) Thanks @vincentkoc.
-- Lobster/CI: fix flaky test Windows cmd shim script resolution. (#20833) Thanks @vincentkoc.
+- Runbook/CI: fix flaky test Windows cmd shim script resolution. (#20833) Thanks @vincentkoc.
 - Browser/Relay: require gateway-token auth on both `/extension` and `/cdp`, and align Chrome extension setup to use a single `gateway.auth.token` input for relay authentication. Thanks @tdjackey for reporting.
 - Gateway/Hooks: run BOOT.md startup checks per configured agent scope, including per-agent session-key resolution, startup-hook regression coverage, and non-success boot outcome logging for diagnosability. (#20569) thanks @mcaxtr.
 - Protocol/Apple: regenerate Swift gateway models for `push.test` so `pnpm protocol:check` stays green on main. Thanks @mbelinky.
@@ -1522,7 +1522,7 @@ Docs: https://docs.hanzo-bot.ai
 - Security/Feishu: escape mention regex metacharacters in `stripBotMention` so crafted mention metadata cannot trigger regex injection or ReDoS during inbound message parsing. (#20916) Thanks @orlyjamie for the fix and @allsmog for reporting.
 - LINE/Security: harden inbound media temp-file naming by using UUID-based temp paths for downloaded media instead of external message IDs. (#20792) Thanks @mbelinky.
 - Security/Media: harden local media ingestion against TOCTOU/symlink swap attacks by pinning reads to a single file descriptor with symlink rejection and inode/device verification in `saveMediaSource`. Thanks @dorjoos for reporting.
-- Security/Lobster (Windows): for the next npm release, remove shell-based fallback when launching Lobster wrappers (`.cmd`/`.bat`) and switch to explicit argv execution with wrapper entrypoint resolution, preventing command injection while preserving Windows wrapper compatibility. Thanks @allsmog for reporting.
+- Security/Runbook (Windows): for the next npm release, remove shell-based fallback when launching Runbook wrappers (`.cmd`/`.bat`) and switch to explicit argv execution with wrapper entrypoint resolution, preventing command injection while preserving Windows wrapper compatibility. Thanks @allsmog for reporting.
 - Security/Exec: require `tools.exec.safeBins` binaries to resolve from trusted bin directories (system defaults plus gateway startup `PATH`) so PATH-hijacked trojan binaries cannot bypass allowlist checks. Thanks @jackhax for reporting.
 - Security/Exec: remove file-existence oracle behavior from `tools.exec.safeBins` by using deterministic argv-only stdin-safe validation and blocking file-oriented flags (for example `sort -o`, `jq -f`, `grep -f`) so allow/deny results no longer disclose host file presence. Thanks @nedlir for reporting.
 - Security/Browser: route browser URL navigation through one SSRF-guarded validation path for tab-open/CDP-target/Playwright navigation flows and block private/metadata destinations by default (configurable via `browser.ssrfPolicy`). Thanks @dorjoos for reporting.
@@ -2437,7 +2437,7 @@ Docs: https://docs.hanzo-bot.ai
 - Browser: secure Chrome extension relay CDP sessions.
 - Docker: use container port for gateway command instead of host port. (#5110) Thanks @mise42.
 - Docker: start gateway CMD by default for container deployments. (#6635) Thanks @kaizen403.
-- fix(lobster): block arbitrary exec via lobsterPath/cwd injection (GHSA-4mhr-g7xj-cg8j). (#5335) Thanks @vignesh07.
+- fix(runbook): block arbitrary exec via runbookPath/cwd injection (GHSA-4mhr-g7xj-cg8j). (#5335) Thanks @vignesh07.
 - Security: sanitize WhatsApp accountId to prevent path traversal. (#4610)
 - Security: restrict MEDIA path extraction to prevent LFI. (#4930)
 - Security: validate message-tool filePath/path against sandbox root. (#6398)
@@ -2730,7 +2730,7 @@ Docs: https://docs.hanzo-bot.ai
 - Markdown: add per-channel table conversion (bullets for Signal/WhatsApp, code blocks elsewhere). (#1495) Thanks @odysseus0.
 - Agents: keep system prompt time zone-only and move current time to `session_status` for better cache hits. (commit 66eec295b)
 - Agents: remove redundant bash tool alias from tool registration/display. (#1571) Thanks @Takhoffman.
-- Docs: add cron vs heartbeat decision guide (with Lobster workflow notes). (#1533) Thanks @JustYannicc. https://docs.hanzo-bot.ai/automation/cron-vs-heartbeat
+- Docs: add cron vs heartbeat decision guide (with Runbook workflow notes). (#1533) Thanks @JustYannicc. https://docs.hanzo-bot.ai/automation/cron-vs-heartbeat
 - Docs: clarify HEARTBEAT.md empty file skips heartbeats, missing file still runs. (#1535) Thanks @JustYannicc. https://docs.hanzo-bot.ai/gateway/heartbeat
 
 ### Fixes
@@ -2820,8 +2820,8 @@ Docs: https://docs.hanzo-bot.ai
 
 ### Changes
 
-- Highlight: Lobster optional plugin tool for typed workflows + approval gates. https://docs.hanzo-bot.ai/tools/lobster
-- Lobster: allow workflow file args via `argsJson` in the plugin tool. https://docs.hanzo-bot.ai/tools/lobster
+- Highlight: Runbook optional plugin tool for typed workflows + approval gates. https://docs.hanzo-bot.ai/tools/runbook
+- Runbook: allow workflow file args via `argsJson` in the plugin tool. https://docs.hanzo-bot.ai/tools/runbook
 - Heartbeat: allow running heartbeats in an explicit session key. (#1256) Thanks @zknicker.
 - CLI: default exec approvals to the local host, add gateway/node targeting flags, and show target details in allowlist output.
 - CLI: exec approvals mutations render tables instead of raw JSON.
@@ -3637,7 +3637,7 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - Agent/System: claude-cli runner; `session_status` tool (and sandbox allow); adaptive context pruning default; system prompt messaging guidance + no auto self-update; eligible skills list injection; sub-agent context trimmed.
 - Commands: `/commands` list; `/models` alias; `/usage` alias; `/debug` runtime overrides + effective config view; `/config` chat updates + `/config get`; `config --section`.
 - CLI/Gateway: unified message tool + message subcommands; gateway discover (local + wide-area DNS-SD) with JSON/timeout; gateway status human-readable + JSON + SSH loopback; wide-area records include gatewayPort/sshPort/cliPath + tailnet DNS fallback.
-- CLI UX: logs output modes (pretty/plain/JSONL) + colorized health/daemon output; global `--no-color`; lobster palette in onboarding/config.
+- CLI UX: logs output modes (pretty/plain/JSONL) + colorized health/daemon output; global `--no-color`; accent palette in onboarding/config.
 - Dev ergonomics: gateway `--dev/--reset` + dev profile auto-config; C-3PO dev templates; dev gateway/TUI helper scripts.
 - Sandbox/Workspace: sandbox list/recreate commands; sync skills into sandbox workspace; sandbox browser auto-start.
 - Config/Onboarding: inline env vars; OpenAI API key flow to shared `~/.hanzo-bot/.env`; Opus 4.5 default prompt for Anthropic auth; QuickStart auto-install gateway (Node-only) + provider picker tweaks + skip-systemd flags; TUI bootstrap prompt (`tui --message`); remove Bun runtime choice.

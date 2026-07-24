@@ -1,6 +1,6 @@
 # Contributing to HanzoBot
 
-Welcome to the lobster tank! 🦞
+Welcome to Hanzo Bot!
 
 ## Quick Links
 
@@ -17,7 +17,7 @@ Welcome to the lobster tank! 🦞
 - **Shadow** - Discord subsystem, Discord admin, Clawhub, all community moderation
   - GitHub: [@thewilloftheshadow](https://github.com/thewilloftheshadow) · X: [@4shad0wed](https://x.com/4shad0wed)
 
-- **Vignesh** - Memory (QMD), formal modeling, TUI, IRC, and Lobster
+- **Vignesh** - Memory (QMD), formal modeling, TUI, IRC, and Runbook
   - GitHub: [@vignesh07](https://github.com/vignesh07) · X: [@\_vgnsh](https://x.com/_vgnsh)
 
 - **Jos** - Telegram, API, Nix mode

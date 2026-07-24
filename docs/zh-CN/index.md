@@ -12,7 +12,7 @@ x-i18n:
   workflow: 15
 ---
 
-# HanzoBot 🦞
+# HanzoBot
 
 <p align="center">
     <img
