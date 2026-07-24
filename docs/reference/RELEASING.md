@@ -108,7 +108,7 @@ Current npm plugin list (update as needed):
 - @hanzo/bot-diagnostics-otel
 - @hanzo/bot-discord
 - @hanzo/bot-feishu
-- @hanzo/bot-lobster
+- @hanzo/bot-runbook
 - @hanzo/bot-matrix
 - @hanzo/bot-msteams
 - @hanzo/bot-nextcloud-talk

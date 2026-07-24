@@ -5,7 +5,7 @@ read_when:
 title: "HanzoBot"
 ---
 
-# HanzoBot 🦞
+# HanzoBot
 
 <p align="center">
     <img
@@ -22,7 +22,7 @@ title: "HanzoBot"
     />
 </p>
 
-> _"EXFOLIATE! EXFOLIATE!"_ — A space lobster, probably
+> _All your chats, one bot._
 
 <p align="center">
   <strong>Any OS gateway for AI agents across WhatsApp, Telegram, Discord, iMessage, and more.</strong><br />

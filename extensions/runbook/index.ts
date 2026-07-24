@@ -2,8 +2,8 @@ import type {
   AnyAgentTool,
   BotPluginApi,
   BotPluginToolFactory,
-} from "@hanzo/bot/plugin-sdk/lobster";
-import { createLobsterTool } from "./src/lobster-tool.js";
+} from "@hanzo/bot/plugin-sdk/runbook";
+import { createRunbookTool } from "./src/runbook-tool.js";
 
 export default function register(api: BotPluginApi) {
   api.registerTool(
@@ -11,7 +11,7 @@ export default function register(api: BotPluginApi) {
       if (ctx.sandboxed) {
         return null;
       }
-      return createLobsterTool(api) as AnyAgentTool;
+      return createRunbookTool(api) as AnyAgentTool;
     }) as BotPluginToolFactory,
     { optional: true },
   );

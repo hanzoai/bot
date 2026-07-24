@@ -27,7 +27,7 @@ const pluginSdkEntrypoints = [
   "googlechat",
   "irc",
   "llm-task",
-  "lobster",
+  "runbook",
   "matrix",
   "mattermost",
   "memory-core",

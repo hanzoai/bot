@@ -99,7 +99,7 @@ hanzo-bot agents set-identity --workspace ~/.hanzo-bot/workspace --from-identity
 Override fields explicitly:
 
 ```bash
-hanzo-bot agents set-identity --agent main --name "HanzoBot" --emoji "🦞" --avatar avatars/hanzo-bot.png
+hanzo-bot agents set-identity --agent main --name "HanzoBot" --emoji "🤖" --avatar avatars/hanzo-bot.png
 ```
 
 Config sample:
@@ -112,8 +112,8 @@ Config sample:
         id: "main",
         identity: {
           name: "HanzoBot",
-          theme: "space lobster",
-          emoji: "🦞",
+          theme: "midnight",
+          emoji: "🤖",
           avatar: "avatars/hanzo-bot.png",
         },
       },
