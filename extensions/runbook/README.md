@@ -1,11 +1,11 @@
-# Lobster (plugin)
+# Runbook (plugin)
 
-Adds the `lobster` agent tool as an **optional** plugin tool.
+Adds the `runbook` agent tool as an **optional** plugin tool.
 
 ## What this is
 
-- Lobster is a standalone workflow shell (typed JSON-first pipelines + approvals/resume).
-- This plugin integrates Lobster with Hanzo Bot _without core changes_.
+- Runbook is a standalone workflow shell (typed JSON-first pipelines + approvals/resume).
+- This plugin integrates Runbook with Hanzo Bot _without core changes_.
 
 ## Enable
 
@@ -21,7 +21,7 @@ Enable it in an agent allowlist:
         "id": "main",
         "tools": {
           "allow": [
-            "lobster" // plugin id (enables all tools from this plugin)
+            "runbook" // plugin id (enables all tools from this plugin)
           ]
         }
       }
@@ -30,9 +30,9 @@ Enable it in an agent allowlist:
 }
 ```
 
-## Using `hanzo-bot.invoke` (Lobster → Hanzo Bot tools)
+## Using `hanzo-bot.invoke` (Runbook → Hanzo Bot tools)
 
-Some Lobster pipelines may include a `hanzo-bot.invoke` step to call back into Hanzo Bot tools/plugins (for example: `gog` for Google Workspace, `gh` for GitHub, `message.send`, etc.).
+Some Runbook pipelines may include a `hanzo-bot.invoke` step to call back into Hanzo Bot tools/plugins (for example: `gog` for Google Workspace, `gh` for GitHub, `message.send`, etc.).
 
 For this to work, the Hanzo Bot Gateway must expose the tool bridge endpoint and the target tool must be allowed by policy:
 
@@ -53,7 +53,7 @@ Example (allow only a small set of tools):
       {
         "id": "main",
         "tools": {
-          "allow": ["lobster", "web_fetch", "web_search", "gog", "gh"],
+          "allow": ["runbook", "web_fetch", "web_search", "gog", "gh"],
           "deny": ["gateway"],
         },
       },
@@ -69,7 +69,7 @@ Notes:
 
 ## Security
 
-- Runs the `lobster` executable as a local subprocess.
+- Runs the `runbook` executable as a local subprocess.
 - Does not manage OAuth/tokens.
 - Uses timeouts, stdout caps, and strict JSON envelope parsing.
-- Ensure `lobster` is available on `PATH` for the gateway process.
+- Ensure `runbook` is available on `PATH` for the gateway process.

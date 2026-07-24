@@ -160,7 +160,7 @@ authoring plugins:
   `hanzo-bot/plugin-sdk/feishu`,
   `hanzo-bot/plugin-sdk/google-gemini-cli-auth`, `hanzo-bot/plugin-sdk/googlechat`,
   `hanzo-bot/plugin-sdk/irc`, `hanzo-bot/plugin-sdk/llm-task`,
-  `hanzo-bot/plugin-sdk/lobster`, `hanzo-bot/plugin-sdk/matrix`,
+  `hanzo-bot/plugin-sdk/runbook`, `hanzo-bot/plugin-sdk/matrix`,
   `hanzo-bot/plugin-sdk/mattermost`, `hanzo-bot/plugin-sdk/memory-core`,
   `hanzo-bot/plugin-sdk/memory-lancedb`,
   `hanzo-bot/plugin-sdk/minimax-portal-auth`,

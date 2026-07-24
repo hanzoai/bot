@@ -85,4 +85,4 @@ type ChannelPlugin = {
 ## Git Remotes
 
 - `origin` = `ssh://github.com/hanzoai/bot` (canonical, PRs here)
-- `upstream` = `git@github.com:openclaw/openclaw` (the MIT project this forks; see NOTICE)
+- `upstream` = the upstream MIT project this forks (see NOTICE for provenance and attribution)

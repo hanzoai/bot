@@ -34,7 +34,7 @@ function Write-Host {
 
 function Write-Banner {
     Write-Host ""
-    Write-Host "${ACCENT}  🦞 HanzoBot Installer$NC" -Level info
+    Write-Host "${ACCENT}  HanzoBot Installer$NC" -Level info
     Write-Host "${MUTED}  All your chats, one HanzoBot.$NC" -Level info
     Write-Host ""
 }
@@ -323,7 +323,7 @@ function Main {
     }
     
     Write-Host ""
-    Write-Host "🦞 HanzoBot installed successfully!" -Level success
+    Write-Host "HanzoBot installed successfully!" -Level success
 }
 
 Main
