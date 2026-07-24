@@ -129,9 +129,9 @@
       "types": "./dist/plugin-sdk/llm-task.d.ts",
       "default": "./dist/plugin-sdk/llm-task.js"
     },
-    "./plugin-sdk/lobster": {
-      "types": "./dist/plugin-sdk/lobster.d.ts",
-      "default": "./dist/plugin-sdk/lobster.js"
+    "./plugin-sdk/runbook": {
+      "types": "./dist/plugin-sdk/runbook.d.ts",
+      "default": "./dist/plugin-sdk/runbook.js"
     },
     "./plugin-sdk/matrix": {
       "types": "./dist/plugin-sdk/matrix.d.ts",

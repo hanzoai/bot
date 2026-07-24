@@ -111,7 +111,7 @@ x-i18n:
 - @hanzo/bot-bluebubbles
 - @hanzo/bot-diagnostics-otel
 - @hanzo/bot-discord
-- @hanzo/bot-lobster
+- @hanzo/bot-runbook
 - @hanzo/bot-matrix
 - @hanzo/bot-msteams
 - @hanzo/bot-nextcloud-talk

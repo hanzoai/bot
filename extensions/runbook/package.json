@@ -1,7 +1,7 @@
 {
-  "name": "@hanzo/bot-lobster",
+  "name": "@hanzo/bot-runbook",
   "version": "1.4.2",
-  "description": "Lobster workflow tool plugin (typed pipelines + resumable approvals)",
+  "description": "Runbook workflow tool plugin (typed pipelines + resumable approvals)",
   "type": "module",
   "dependencies": {
     "@sinclair/typebox": "0.34.48"

@@ -63,7 +63,7 @@ const requiredSubpathEntries = [
   "googlechat",
   "irc",
   "llm-task",
-  "lobster",
+  "runbook",
   "matrix",
   "mattermost",
   "memory-core",
