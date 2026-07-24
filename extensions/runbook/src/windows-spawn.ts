@@ -2,7 +2,7 @@ import {
   applyWindowsSpawnProgramPolicy,
   materializeWindowsSpawnProgram,
   resolveWindowsSpawnProgramCandidate,
-} from "@hanzo/bot/plugin-sdk/lobster";
+} from "@hanzo/bot/plugin-sdk/runbook";
 
 type SpawnTarget = {
   command: string;
@@ -10,7 +10,7 @@ type SpawnTarget = {
   windowsHide?: boolean;
 };
 
-export function resolveWindowsLobsterSpawn(
+export function resolveWindowsRunbookSpawn(
   execPath: string,
   argv: string[],
   env: NodeJS.ProcessEnv,
@@ -18,7 +18,7 @@ export function resolveWindowsLobsterSpawn(
   const candidate = resolveWindowsSpawnProgramCandidate({
     command: execPath,
     env,
-    packageName: "lobster",
+    packageName: "runbook",
   });
   const program = applyWindowsSpawnProgramPolicy({
     candidate,
@@ -26,7 +26,7 @@ export function resolveWindowsLobsterSpawn(
   });
   const resolved = materializeWindowsSpawnProgram(program, argv);
   if (resolved.shell) {
-    throw new Error("lobster wrapper resolved to shell fallback unexpectedly");
+    throw new Error("runbook wrapper resolved to shell fallback unexpectedly");
   }
   return {
     command: resolved.command,

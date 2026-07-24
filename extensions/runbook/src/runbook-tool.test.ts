@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
-import type { BotPluginApi, BotPluginToolContext } from "@hanzo/bot/plugin-sdk/lobster";
+import type { BotPluginApi, BotPluginToolContext } from "@hanzo/bot/plugin-sdk/runbook";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createWindowsCmdShimFixture,
@@ -25,12 +25,12 @@ vi.mock("node:child_process", async (importOriginal) => {
   };
 });
 
-let createLobsterTool: typeof import("./lobster-tool.js").createLobsterTool;
+let createRunbookTool: typeof import("./runbook-tool.js").createRunbookTool;
 
 function fakeApi(overrides: Partial<BotPluginApi> = {}): BotPluginApi {
   return {
-    id: "lobster",
-    name: "lobster",
+    id: "runbook",
+    name: "runbook",
     source: "test",
     config: {},
     pluginConfig: {},
@@ -67,14 +67,14 @@ function fakeCtx(overrides: Partial<BotPluginToolContext> = {}): BotPluginToolCo
   };
 }
 
-describe("lobster plugin tool", () => {
+describe("runbook plugin tool", () => {
   let tempDir = "";
   const originalProcessState = snapshotPlatformPathEnv();
 
   beforeAll(async () => {
-    ({ createLobsterTool } = await import("./lobster-tool.js"));
+    ({ createRunbookTool } = await import("./runbook-tool.js"));
 
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lobster-plugin-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-runbook-plugin-"));
   });
 
   afterEach(() => {
@@ -133,7 +133,7 @@ describe("lobster plugin tool", () => {
     });
   };
 
-  it("runs lobster and returns parsed envelope in details", async () => {
+  it("runs runbook and returns parsed envelope in details", async () => {
     spawnState.queue.push({
       stdout: JSON.stringify({
         ok: true,
@@ -143,7 +143,7 @@ describe("lobster plugin tool", () => {
       }),
     });
 
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     const res = await tool.execute("call1", {
       action: "run",
       pipeline: "noop",
@@ -160,7 +160,7 @@ describe("lobster plugin tool", () => {
       stdout: `noise before json\n${JSON.stringify(payload)}`,
     });
 
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     const res = await tool.execute("call-noisy", {
       action: "run",
       pipeline: "noop",
@@ -171,12 +171,12 @@ describe("lobster plugin tool", () => {
   });
 
   it("requires action", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     await expect(tool.execute("call-action-missing", {})).rejects.toThrow(/action required/);
   });
 
   it("requires pipeline for run action", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     await expect(
       tool.execute("call-pipeline-missing", {
         action: "run",
@@ -185,7 +185,7 @@ describe("lobster plugin tool", () => {
   });
 
   it("requires token and approve for resume action", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     await expect(
       tool.execute("call-resume-token-missing", {
         action: "resume",
@@ -201,7 +201,7 @@ describe("lobster plugin tool", () => {
   });
 
   it("rejects unknown action", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     await expect(
       tool.execute("call-action-unknown", {
         action: "explode",
@@ -210,7 +210,7 @@ describe("lobster plugin tool", () => {
   });
 
   it("rejects absolute cwd", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     await expect(
       tool.execute("call2c", {
         action: "run",
@@ -221,7 +221,7 @@ describe("lobster plugin tool", () => {
   });
 
   it("rejects cwd that escapes the gateway working directory", async () => {
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     await expect(
       tool.execute("call2d", {
         action: "run",
@@ -231,10 +231,10 @@ describe("lobster plugin tool", () => {
     ).rejects.toThrow(/must stay within/);
   });
 
-  it("rejects invalid JSON from lobster", async () => {
+  it("rejects invalid JSON from runbook", async () => {
     spawnState.queue.push({ stdout: "nope" });
 
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     await expect(
       tool.execute("call3", {
         action: "run",
@@ -245,18 +245,18 @@ describe("lobster plugin tool", () => {
 
   it("runs Windows cmd shims through Node without enabling shell", async () => {
     setProcessPlatform("win32");
-    const shimScriptPath = path.join(tempDir, "shim-dist", "lobster-cli.cjs");
-    const shimPath = path.join(tempDir, "shim-bin", "lobster.cmd");
+    const shimScriptPath = path.join(tempDir, "shim-dist", "runbook-cli.cjs");
+    const shimPath = path.join(tempDir, "shim-bin", "runbook.cmd");
     await createWindowsCmdShimFixture({
       shimPath,
       scriptPath: shimScriptPath,
-      shimLine: `"%dp0%\\..\\shim-dist\\lobster-cli.cjs" %*`,
+      shimLine: `"%dp0%\\..\\shim-dist\\runbook-cli.cjs" %*`,
     });
     process.env.PATHEXT = ".CMD;.EXE";
     process.env.PATH = `${path.dirname(shimPath)};${process.env.PATH ?? ""}`;
     queueSuccessfulEnvelope();
 
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     await tool.execute("call-win-shim", {
       action: "run",
       pipeline: "noop",
@@ -286,7 +286,7 @@ describe("lobster plugin tool", () => {
       return child;
     });
 
-    const tool = createLobsterTool(fakeApi());
+    const tool = createRunbookTool(fakeApi());
     await expect(
       tool.execute("call-win-no-retry", {
         action: "run",
@@ -302,10 +302,10 @@ describe("lobster plugin tool", () => {
       if (ctx.sandboxed) {
         return null;
       }
-      return createLobsterTool(api);
+      return createRunbookTool(api);
     };
 
     expect(factoryTool(fakeCtx({ sandboxed: true }))).toBeNull();
-    expect(factoryTool(fakeCtx({ sandboxed: false }))?.name).toBe("lobster");
+    expect(factoryTool(fakeCtx({ sandboxed: false }))?.name).toBe("runbook");
   });
 });

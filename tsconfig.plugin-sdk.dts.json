@@ -35,7 +35,7 @@
     "src/plugin-sdk/googlechat.ts",
     "src/plugin-sdk/irc.ts",
     "src/plugin-sdk/llm-task.ts",
-    "src/plugin-sdk/lobster.ts",
+    "src/plugin-sdk/runbook.ts",
     "src/plugin-sdk/matrix.ts",
     "src/plugin-sdk/mattermost.ts",
     "src/plugin-sdk/memory-core.ts",

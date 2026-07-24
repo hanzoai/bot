@@ -1,6 +1,6 @@
 <p align="center"><img src=".github/hero.svg" alt="bot" width="880"></p>
 
-# 🦞 Hanzo Bot — Personal AI Assistant
+# Hanzo Bot — Personal AI Assistant
 
 <p align="center">
   <a href="https://github.com/hanzoai/bot/actions/workflows/ci.yml?branch=main"><img src="https://img.shields.io/github/actions/workflow/status/hanzoai/bot/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
@@ -461,10 +461,9 @@ Use these when you’re past the onboarding flow and want the deeper reference.
 
 - [docs.hanzo.ai/gmail-pubsub](https://docs.hanzo.ai/automation/gmail-pubsub)
 
-## Molty
+## Credits
 
-Hanzo Bot was built for **Molty**, a space lobster AI assistant. 🦞
-by Peter Steinberger and the community.
+Hanzo Bot is maintained by Hanzo AI, building on open-source work by Peter Steinberger and the community.
 
 - [hanzo.ai](https://hanzo.ai)
 - [soul.md](https://soul.md)
@@ -478,9 +477,9 @@ AI/vibe-coded PRs welcome! 🤖
 
 Special thanks to [Mario Zechner](https://mariozechner.at/) for his support and for
 [pi-mono](https://github.com/badlogic/pi-mono).
-Special thanks to Adam Doppelt for lobster.bot.
+Special thanks to Adam Doppelt.
 
-Thanks to all clawtributors:
+Thanks to all contributors:
 
 <p align="left">
   <a href="https://github.com/steipete"><img src="https://avatars.githubusercontent.com/u/58493?v=4&s=48" width="48" height="48" alt="steipete" title="steipete"/></a> <a href="https://github.com/vincentkoc"><img src="https://avatars.githubusercontent.com/u/25068?v=4&s=48" width="48" height="48" alt="vincentkoc" title="vincentkoc"/></a> <a href="https://github.com/vignesh07"><img src="https://avatars.githubusercontent.com/u/1436853?v=4&s=48" width="48" height="48" alt="vignesh07" title="vignesh07"/></a> <a href="https://github.com/obviyus"><img src="https://avatars.githubusercontent.com/u/22031114?v=4&s=48" width="48" height="48" alt="obviyus" title="obviyus"/></a> <a href="https://github.com/mbelinky"><img src="https://avatars.githubusercontent.com/u/132747814?v=4&s=48" width="48" height="48" alt="Mariano Belinky" title="Mariano Belinky"/></a> <a href="https://github.com/sebslight"><img src="https://avatars.githubusercontent.com/u/19554889?v=4&s=48" width="48" height="48" alt="sebslight" title="sebslight"/></a> <a href="https://github.com/gumadeiras"><img src="https://avatars.githubusercontent.com/u/5599352?v=4&s=48" width="48" height="48" alt="gumadeiras" title="gumadeiras"/></a> <a href="https://github.com/Takhoffman"><img src="https://avatars.githubusercontent.com/u/781889?v=4&s=48" width="48" height="48" alt="Takhoffman" title="Takhoffman"/></a> <a href="https://github.com/thewilloftheshadow"><img src="https://avatars.githubusercontent.com/u/35580099?v=4&s=48" width="48" height="48" alt="thewilloftheshadow" title="thewilloftheshadow"/></a> <a href="https://github.com/cpojer"><img src="https://avatars.githubusercontent.com/u/13352?v=4&s=48" width="48" height="48" alt="cpojer" title="cpojer"/></a>

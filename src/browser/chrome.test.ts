@@ -150,7 +150,7 @@ describe("browser chrome profile decoration", () => {
 
   it("best-effort writes name when color is invalid", async () => {
     const userDataDir = await createUserDataDir();
-    decorateBotProfile(userDataDir, { color: "lobster-orange" });
+    decorateBotProfile(userDataDir, { color: "hanzo-orange" });
     const def = await readDefaultProfileFromLocalState(userDataDir);
 
     expect(def.name).toBe(DEFAULT_BOT_BROWSER_PROFILE_NAME);

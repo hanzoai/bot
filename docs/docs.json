@@ -7,8 +7,8 @@
     "library": "lucide"
   },
   "logo": {
-    "light": "/assets/pixel-lobster.svg",
-    "dark": "/assets/pixel-lobster.svg"
+    "light": "/assets/pixel-runbook.svg",
+    "dark": "/assets/pixel-runbook.svg"
   },
   "fonts": {
     "body": {
@@ -18,7 +18,7 @@
       "family": "DM Sans"
     }
   },
-  "favicon": "/assets/pixel-lobster.svg",
+  "favicon": "/assets/pixel-runbook.svg",
   "colors": {
     "primary": "#FF5A36",
     "dark": "#FF5A36",
@@ -1000,7 +1000,7 @@
                   "tools/exec-approvals",
                   "tools/firecrawl",
                   "tools/llm-task",
-                  "tools/lobster",
+                  "tools/runbook",
                   "tools/loop-detection",
                   "tools/reactions",
                   "tools/thinking",
@@ -1597,7 +1597,7 @@
                   "zh-CN/tools/exec-approvals",
                   "zh-CN/tools/firecrawl",
                   "zh-CN/tools/llm-task",
-                  "zh-CN/tools/lobster",
+                  "zh-CN/tools/runbook",
                   "zh-CN/tools/reactions",
                   "zh-CN/tools/thinking",
                   "zh-CN/tools/web"

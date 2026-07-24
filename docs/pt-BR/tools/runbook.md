@@ -2,10 +2,10 @@
 summary: "Página com tradução completa para pt-BR ainda pendente."
 read_when:
   - Você precisa desta página em português
-title: "Lobster"
+title: "Runbook"
 ---
 
-# Lobster
+# Runbook
 
 Esta página ainda não possui tradução completa para pt-BR.
 

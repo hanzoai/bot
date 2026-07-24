@@ -432,12 +432,6 @@ importers:
         specifier: ^8.18.0
         version: 8.18.0
 
-  extensions/lobster:
-    dependencies:
-      '@sinclair/typebox':
-        specifier: 0.34.48
-        version: 0.34.48
-
   extensions/matrix:
     dependencies:
       '@mariozechner/pi-agent-core':
@@ -473,14 +467,14 @@ importers:
       '@hanzo/bot-graph-links':
         specifier: workspace:*
         version: link:../graph-links
-    optionalDependencies:
-      better-sqlite3:
-        specifier: ^11.5.0
-        version: 11.10.0
     devDependencies:
       vitest:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@25.3.3)(@vitest/browser@4.0.18(vite@8.0.12(@types/node@25.3.3)(esbuild@0.27.3)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.9.0))(vitest@4.0.18))(esbuild@0.27.3)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.9.0)
+    optionalDependencies:
+      better-sqlite3:
+        specifier: ^11.5.0
+        version: 11.10.0
 
   extensions/memory-core:
     devDependencies:
@@ -533,6 +527,12 @@ importers:
       yaml:
         specifier: '>=2.8.3'
         version: 2.9.0
+
+  extensions/runbook:
+    dependencies:
+      '@sinclair/typebox':
+        specifier: 0.34.48
+        version: 0.34.48
 
   extensions/self-improvement:
     devDependencies:
@@ -1456,6 +1456,7 @@ packages:
   '@lancedb/lancedb@0.26.2':
     resolution: {integrity: sha512-umk4WMCTwJntLquwvUbpqE+TXREolcQVL9MHcxr8EhRjsha88+ATJ4QuS/hpyiE1CG3R/XcgrMgJAGkziPC/gA==}
     engines: {node: '>= 18'}
+    cpu: [x64, arm64]
     os: [darwin, linux, win32]
     peerDependencies:
       apache-arrow: '>=15.0.0 <=18.1.0'
@@ -1582,20 +1583,24 @@ packages:
   '@mariozechner/pi-agent-core@0.55.3':
     resolution: {integrity: sha512-rqbfpQ9BrP6BDiW+Ps3A8Z/p9+Md/pAfc/ECq8JP6cwnZL/jQgU355KWZKtF8zM9az1p0Q9hIWi9cQygVo6Auw==}
     engines: {node: '>=20.0.0'}
+    deprecated: please use @earendil-works/pi-agent-core instead going forward
 
   '@mariozechner/pi-ai@0.55.3':
     resolution: {integrity: sha512-f9jWoDzJR9Wy/H8JPMbjoM4WvVUeFZ65QdYA9UHIfoOopDfwWE8F8JHQOj5mmmILMacXuzsqA3J7MYqNWZRvvQ==}
     engines: {node: '>=20.0.0'}
+    deprecated: please use @earendil-works/pi-ai instead going forward
     hasBin: true
 
   '@mariozechner/pi-coding-agent@0.55.3':
     resolution: {integrity: sha512-5SFbB7/BIp/Crjre7UNjUeNfpoU1KSW/i6LXa+ikJTBqI5LukWq2avE5l0v0M8Pg/dt1go2XCLrNFlQJiQDSPQ==}
     engines: {node: '>=20.0.0'}
+    deprecated: please use @earendil-works/pi-coding-agent instead going forward
     hasBin: true
 
   '@mariozechner/pi-tui@0.55.3':
     resolution: {integrity: sha512-Gh4wkYgiSPCJJaB/4wEWSL7Ga8bxSq1Crp1RPRT4vKybE/DG0W/MQr5VJDvktarxtJrD16ixScwE4dzdox/PIA==}
     engines: {node: '>=20.0.0'}
+    deprecated: please use @earendil-works/pi-tui instead going forward
 
   '@matrix-org/matrix-sdk-crypto-nodejs@0.4.0':
     resolution: {integrity: sha512-+qqgpn39XFSbsD0dFjssGO9vHEP7sTyfs8yTpt8vuqWpUpF20QMwpCZi0jpYw7GxjErNTsMshopuo8677DfGEA==}
@@ -3274,6 +3279,7 @@ packages:
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+    deprecated: Potential CWE-502 - Update to 1.3.1 or higher
 
   '@urbit/aura@3.0.0':
     resolution: {integrity: sha512-N8/FHc/lmlMDCumMuTXyRHCxlov5KZY6unmJ9QR2GOw+OpROZMBsXYGwE+ZMtvN21ql9+Xb8KhGNBj08IrG3Wg==}
@@ -3382,6 +3388,10 @@ packages:
   '@whiskeysockets/baileys@7.0.0-rc.9':
     resolution: {integrity: sha512-YFm5gKXfDP9byCXCW3OPHKXLzrAKzolzgVUlRosHHgwbnf2YOO3XknkMm6J7+F0ns8OA0uuSBhgkRHTDtqkacw==}
     engines: {node: '>=20.0.0'}
+    deprecated: |-
+      This version is affected by a zero-day vulnerability that allows spoofing of messages, please update to
+        the latest versions (6.7.22^ or 7.0.0-rc12^)! For more information, check out the public advisory at
+        https://github.com/WhiskeySockets/Baileys/security/advisories/GHSA-qvv5-jq5g-4cgg
     peerDependencies:
       audio-decode: ^2.1.3
       jimp: ^1.6.0
@@ -3547,7 +3557,6 @@ packages:
 
   audio-decode@2.2.3:
     resolution: {integrity: sha512-Z0lHvMayR/Pad9+O9ddzaBJE0DrhZkQlStrC1RwcAHF3AhQAsdwKHeLGK8fYKyp2DDU6xHxzGb4CLMui12yVrg==}
-    deprecated: Renamed to @audio/decode — same API; this name remains a thin alias. npm i @audio/decode
 
   audio-type@2.2.1:
     resolution: {integrity: sha512-En9AY6EG1qYqEy5L/quryzbA4akBpJrnBZNxeKTqGHC2xT9Qc4aZ8b7CcbOMFTTc/MGdoNyp+SN4zInZNKxMYA==}
@@ -5535,7 +5544,7 @@ packages:
     resolution: {integrity: sha512-QIs2+ArIGQVp5ZYbWD5ZLCY29D5CfWizP8eWnm8FoGD1TX61veauETVQbrV60662V0oFBkrDOuaBI8XgtuyYAQ==}
     engines: {node: '>=0.10.0'}
     peerDependencies:
-      request: npm:@cypress/request@3.0.10
+      request: ^2.34
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
