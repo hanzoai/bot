@@ -8,7 +8,7 @@ import { openUrl } from "./onboard-helpers.js";
 
 const IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
 const IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
-const IAM_CLIENT_ID = "bot";
+const IAM_CLIENT_ID = "hanzo-bot";
 const IAM_CLIENT_SECRET = "";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
 const HANZO_SCOPES = "openid profile email";
