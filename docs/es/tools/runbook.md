@@ -2,10 +2,10 @@
 summary: "Página pendiente de traducción completa al español."
 read_when:
   - Necesitas esta página en español
-title: "Lobster"
+title: "Runbook"
 ---
 
-# Lobster
+# Runbook
 
 Esta página aún no tiene traducción completa al español.
 

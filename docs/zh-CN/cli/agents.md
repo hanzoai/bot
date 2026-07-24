@@ -58,7 +58,7 @@ hanzo-bot agents set-identity --workspace ~/.hanzo-bot/workspace --from-identity
 显式覆盖字段：
 
 ```bash
-hanzo-bot agents set-identity --agent main --name "HanzoBot" --emoji "🦞" --avatar avatars/hanzo-bot.png
+hanzo-bot agents set-identity --agent main --name "HanzoBot" --emoji "🤖" --avatar avatars/hanzo-bot.png
 ```
 
 配置示例：
@@ -71,8 +71,8 @@ hanzo-bot agents set-identity --agent main --name "HanzoBot" --emoji "🦞" --av
         id: "main",
         identity: {
           name: "HanzoBot",
-          theme: "space lobster",
-          emoji: "🦞",
+          theme: "midnight",
+          emoji: "🤖",
           avatar: "avatars/hanzo-bot.png",
         },
       },

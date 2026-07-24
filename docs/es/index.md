@@ -5,7 +5,7 @@ read_when:
 title: "Hanzo Bot"
 ---
 
-# Hanzo Bot 🦞
+# Hanzo Bot
 
 Hanzo Bot conecta aplicaciones de mensajería (como WhatsApp, Telegram y Discord) con agentes de IA mediante un único Gateway.
 

@@ -113,7 +113,7 @@ struct AgentWorkspaceTests {
         - Name: Hanzo
         - Creature: Ninja
         - Vibe: Helpful
-        - Emoji: lobster
+        - Emoji: rocket
         """.write(to: identityURL, atomically: true, encoding: .utf8)
         let bootstrapURL = tmp.appendingPathComponent(AgentWorkspace.bootstrapFilename)
         try "bootstrap".write(to: bootstrapURL, atomically: true, encoding: .utf8)
