@@ -125,7 +125,7 @@ export type GatewayIamConfig = {
    * Internal JWKS endpoint URL for token signature verification.
    * When set, JWKS fetches are redirected to this URL instead of the public
    * OIDC discovery URL, bypassing Cloudflare/WAF restrictions within K8s.
-   * Example: "http://iam.hanzo.svc.cluster.local/.well-known/jwks"
+   * Example: "http://iam.hanzo.svc.cluster.local/v1/iam/.well-known/jwks"
    */
   jwksUrl?: string;
   /**
