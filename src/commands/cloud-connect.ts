@@ -1,12 +1,11 @@
 import { createHash, randomBytes } from "node:crypto";
 import { createServer } from "node:http";
 import { isCancel, select } from "@clack/prompts";
+import { IAM_AUTHORIZE_ENDPOINT, IAM_TOKEN_ENDPOINT } from "./iam-endpoints.js";
 import { isRemoteEnvironment } from "./oauth-env.js";
 import { writeOAuthCredentials } from "./onboard-auth.credentials.js";
 import { openUrl } from "./onboard-helpers.js";
 
-const IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
-const IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
 // The IAM-registered public client is `hanzo-bot` (<org>-<app> naming), whose
 // redirectUris include this loopback callback and whose grantTypes are
 // authorization_code + refresh_token. Sending the bare "bot" is what produced
