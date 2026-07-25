@@ -12,8 +12,12 @@ import { ensureAuthProfileStore } from "../agents/auth-profiles/store.js";
 import { writeOAuthCredentials } from "../commands/onboard-auth.credentials.js";
 import { openUrl } from "../commands/onboard-helpers.js";
 
-const IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/oauth/authorize";
-const IAM_TOKEN_ENDPOINT = "https://hanzo.id/oauth/token";
+// CANONICAL HIP-0111 paths — exactly what hanzo.id's own
+// /.well-known/openid-configuration advertises. The bare /oauth/* forms were
+// served ONLY by the hanzo.id-worker shim (IAM itself 401s them), so they die
+// with it.
+const IAM_AUTHORIZE_ENDPOINT = "https://hanzo.id/v1/iam/oauth/authorize";
+const IAM_TOKEN_ENDPOINT = "https://hanzo.id/v1/iam/oauth/token";
 const IAM_CLIENT_ID = process.env.IAM_CLIENT_ID ?? "hanzo-bot";
 const IAM_CLIENT_SECRET = process.env.IAM_CLIENT_SECRET ?? "";
 const HANZO_REDIRECT_URI = "http://127.0.0.1:1456/oauth-callback";
