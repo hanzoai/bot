@@ -20,6 +20,9 @@ import {
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { GatewayIamConfig } from "../config/types.gateway.js";
 
+/** Canonical HIP-0111 JWKS path — what IAM's discovery document advertises. */
+const IAM_JWKS_PATH = "/v1/iam/.well-known/jwks";
+
 // ---------------------------------------------------------------------------
 // Re-exports for gateway consumers
 // ---------------------------------------------------------------------------
@@ -81,9 +84,9 @@ export function getIamClient(config: GatewayIamConfig): IamClient {
 
 /**
  * When `jwksUrl` is configured, the OIDC discovery response's `jwks_uri` points
- * to the external URL (e.g. `https://hanzo.id/.well-known/jwks`) which may be
- * blocked by Cloudflare. We intercept `fetch` calls to rewrite the JWKS URL
- * to the internal K8s service URL during token validation.
+ * to the external URL (e.g. `https://hanzo.id/v1/iam/.well-known/jwks`) which
+ * may be blocked by Cloudflare. We intercept `fetch` calls to rewrite the JWKS
+ * URL to the internal K8s service URL during token validation.
  */
 function withJwksRewrite<T>(
   jwksUrl: string,
@@ -91,7 +94,7 @@ function withJwksRewrite<T>(
   fn: () => Promise<T>,
 ): Promise<T> {
   const originalFetch = globalThis.fetch;
-  const externalJwksUrl = `${externalHost.replace(/\/+$/, "")}/.well-known/jwks`;
+  const externalJwksUrl = `${externalHost.replace(/\/+$/, "")}${IAM_JWKS_PATH}`;
 
   globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
@@ -149,7 +152,7 @@ export async function validateIamToken(
           // The token's issuer differs from the configured server URL.
           // Use jose directly with the reachable JWKS endpoint (from config)
           // but accept the token's actual issuer claim.
-          const jwksUrl = config.jwksUrl ?? `${configIssuer}/.well-known/jwks`;
+          const jwksUrl = config.jwksUrl ?? `${configIssuer}${IAM_JWKS_PATH}`;
           const keySet = createRemoteJWKSet(new URL(jwksUrl));
 
           // Try with audience check first, then without
