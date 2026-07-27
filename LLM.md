@@ -84,5 +84,94 @@ type ChannelPlugin = {
 
 ## Git Remotes
 
-- `origin` = `ssh://github.com/hanzoai/bot` (canonical, PRs here)
+- `origin` = `ssh://github.com/hanzoai/bot` (a mirror; refs are carried onward)
 - `upstream` = the upstream MIT project this forks (see NOTICE for provenance and attribution)
+
+## How this ships
+
+One way, and it runs on our own stack:
+
+    push  ->  github.com/hanzoai/bot            (a mirror)
+              .github/workflows/sync.yml         carries refs onward
+      ->  git.hanzo.ai/hanzoai/bot               CANONICAL
+              .hanzo/workflows/ci.yml            the checks
+              .hanzo/workflows/deploy.yml        builds ghcr.io/hanzoai/bot
+              .hanzo/workflows/cloud.yml         builds ghcr.io/hanzoai/bot-cloud
+              .hanzo/workflows/release.yml       publishes npm @hanzo/bot
+      ->  hanzoai/universe crs/bot-gateway.yaml  names the tag that is live
+      ->  hanzoai/operator                       reconciles the App
+      ->  hanzoai/ingress serves bot.hanzo.ai, gw.hanzo.bot, market.hanzo.bot
+
+**git.hanzo.ai is canonical; GitHub is a mirror.** `.github/workflows/` holds
+exactly one file, `sync.yml`, and its only job is getting refs to the forge.
+Every build, check and release is a workflow under `.hanzo/workflows/`, which the
+forge reads. `.hanzo/workflows` uses GitHub Actions syntax, so a workflow moves
+between the two by changing directory and nothing else — `runs-on` included: the
+git-runner advertises `hanzo-build-linux-amd64` alongside `ubuntu-latest`,
+`self-hosted`, `linux` and `amd64`.
+
+`.github/actions/` is untouched and still works: a local composite action path
+like `./.github/actions/setup-node-env` resolves from the repo root, not from the
+workflow's own directory.
+
+### The image cannot be built without the admin SPA
+
+`Dockerfile` asserts `dist/control-ui/index.html` exists (`ARG REQUIRE_ADMIN_UI=1`)
+and fails the build when it does not. `dist/control-ui` is gitignored with
+nothing tracked under it, so the SPA has to be assembled into the build context
+first: `deploy.yml` clones the private `hanzoai/admin` workspace with `GH_PAT`,
+builds `apps/admin-bot` with bun, and runs `scripts/sync-admin-ui.sh`.
+
+This is why `deploy.yml` uses `context: .`. A remote git context cannot see
+anything assembled into the workspace, so the assembly and the build have to
+share one local context. The `.hanzo` deploy that existed before this had
+neither the assembly step nor a local context, so it could not have produced an
+image.
+
+### A build never deploys itself
+
+`deploy.yml` publishes and stops. The tag that runs is `spec.image.tag` in
+`hanzoai/universe` `infra/k8s/operator/crs/bot-gateway.yaml`, which is a reviewed
+change; `crs/kustomization.yaml` lists CRs explicitly, so nothing is picked up by
+a glob. A CI-side `kubectl patch` is reverted within minutes by cd.hanzo.ai's
+selfHeal anyway.
+
+Tags: a `v*` tag publishes `:X.Y.Z` and `:latest`; a push to `main` publishes
+`:sha-<sha7>` and `:latest`; `dev` and `test` publish `:sha-<sha7>` only, so
+`:latest` keeps meaning main. `bot-gateway.yaml` pins a calver tag such as
+`2026.7.22`, which comes from the `v*` path.
+
+### Required forge secrets
+
+| Secret | Used by | Without it |
+|---|---|---|
+| `GIT_TOKEN` | `sync.yml` (on GitHub) | refs never reach the forge, so nothing runs at all |
+| `GH_PAT` | `deploy.yml` | the private admin SPA cannot be cloned; the build fails loud |
+| `GHCR_USER` / `GHCR_TOKEN` | `deploy.yml`, `cloud.yml` | the registry 403s the push |
+| `NPM_TOKEN` | `release.yml` | `@hanzo/bot` cannot be published |
+
+### Known gaps, written down rather than hidden
+
+- **`ghcr.io/hanzoai/bot-browser` has no producer.** `universe`
+  `crs/bot-browser.yaml` pins it at `v0.1.0`, but no workflow builds it — only
+  `scripts/sandbox-browser-setup.sh`, by hand, locally.
+- **`bot-cloud` has no consumer.** Nothing in `universe` references it.
+- **`@hanzo/bot` is two versions behind.** npm has `2026.6.5`, `package.json`
+  says `2026.6.7`; both were cut while the publisher did not exist.
+- **The macOS checks do not run.** They need a macOS runner on the forge; see the
+  header of `ci.yml`.
+
+### Deleted rather than migrated
+
+- `k8s-deploy-bot.yml` — deployed by hand with `kubectl set env` and wrote
+  ANTHROPIC/HANZO API keys as plaintext into a running pod via `kubectl exec`.
+  Secrets live in KMS, and the App CR decides what runs.
+- `k8s-create-iam-app.yml`, `k8s-debug.yml`, `k8s-recreate-agent.yml` —
+  dispatch-only imperative one-shots, superseded by IAM and the universe CRs.
+- `formal-conformance.yml` — `continue-on-error: true` on every job plus a bare
+  `exit 0`. It could not fail, which makes it worse than absent.
+- `auto-response.yml`, `labeler.yml` — upstream's issue/PR triage bots.
+- `workflow-sanity.yml` — hardcoded to `pathlib.Path(".github/workflows")`, so
+  after this move it would lint an empty directory and pass. Its useful half
+  (auditing changed workflows with zizmor) lives in `ci.yml`, now pointed at
+  both directories.

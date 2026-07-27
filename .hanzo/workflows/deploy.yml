@@ -1,26 +1,39 @@
 # Build the image and push it. Nothing else.
 #
-# The previous version called buildctl-daemonless.sh, which does not exist in
-# the job image (catthehacker/ubuntu:act-24.04, per GIT_RUNNER_LABELS) — exit
-# 127 — and read secrets.GIT_CLONE_TOKEN, which exists on neither the repo nor
-# the hanzoai org. It had never produced an image.
+# An earlier version called buildctl-daemonless.sh, which does not exist in the
+# job image (catthehacker/ubuntu:act-24.04, per GIT_RUNNER_LABELS) — exit 127 —
+# and read secrets.GIT_CLONE_TOKEN, which exists on neither the repo nor the
+# hanzoai org. It had never produced an image.
+#
+# What replaced it still could not: the Dockerfile asserts
+# dist/control-ui/index.html exists (ARG REQUIRE_ADMIN_UI=1), dist/control-ui is
+# gitignored with nothing tracked under it, and no step assembled it. Every run
+# would have failed at that assertion. The assembly is restored below from
+# .github/workflows/docker-release.yml, which is where it lived and which was
+# deleted; the local build context is what makes it visible to the build.
 #
 # No deploy step on purpose: kubectl is absent from the job image too, and a
 # CI-side patch is reverted within minutes by cd.hanzo.ai's selfHeal, which
 # restores the App CR from the reviewed pin in hanzoai/universe. CI's job ends
 # at "the tag exists and resolves"; choosing which tag runs is a reviewed change.
 #
-# This matters more than it used to: actions-runner-controller was decommissioned
-# 2026-07-27, so this pipeline is now the ONLY CI this repo has.
+# This matters more than it used to: actions-runner-controller was decommissioned,
+# so this pipeline is now the only CI this repo has.
 name: deploy
+
 on:
   push:
-    branches: [main]
+    branches: [main, dev, test]
+    tags: ['v*']
   workflow_dispatch:
 
 concurrency:
   group: deploy-bot-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   build:
@@ -28,11 +41,61 @@ jobs:
     # hanzo-build-linux-amd64; a label nothing offers does not fail, it queues
     # until the 24h timeout — silence, not an error.
     runs-on: [hanzo-build-linux-amd64]
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
-      - id: meta
-        run: echo "tag=sha-$(echo "$GITHUB_SHA" | cut -c1-7)" >> "$GITHUB_OUTPUT"
+      # Computed in shell so there are no action semantics to guess at.
+      #   v* tag            -> :X.Y.Z + :latest   (this is what a CR pins)
+      #   main push         -> :sha-<sha7> + :latest
+      #   dev / test push   -> :sha-<sha7> only, so :latest keeps meaning main
+      - id: tags
+        run: |
+          set -euo pipefail
+          image=ghcr.io/hanzoai/bot
+          case "${GITHUB_REF}" in
+            refs/tags/v*)     primary="${image}:${GITHUB_REF#refs/tags/v}"; floating=1 ;;
+            refs/heads/main)  primary="${image}:sha-$(printf '%s' "${GITHUB_SHA}" | cut -c1-7)"; floating=1 ;;
+            *)                primary="${image}:sha-$(printf '%s' "${GITHUB_SHA}" | cut -c1-7)"; floating=0 ;;
+          esac
+          {
+            echo 'list<<EOF'
+            echo "${primary}"
+            if [ "${floating}" = 1 ]; then echo "${image}:latest"; fi
+            echo 'EOF'
+          } >> "${GITHUB_OUTPUT}"
+          echo "publishing ${primary}"
+          if [ "${floating}" = 1 ]; then echo "publishing ${image}:latest"; fi
+
+      # The gateway serves the @hanzo/bot-admin SPA out of dist/control-ui/, and
+      # the Dockerfile fails the build when it is absent. The SPA source lives in
+      # the private hanzoai/admin bun workspace (apps/admin-bot), so it is built
+      # here and synced into the context before buildx reads it. GH_PAT is what
+      # reaches that private repo; without it this step fails loudly rather than
+      # producing an image with every admin route 404ing.
+      - name: build the admin-bot SPA into dist/control-ui
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_PAT:-}" ]; then
+            echo "::error::GH_PAT is unset, so the private hanzoai/admin SPA cannot be built. Add the forge secret."
+            exit 1
+          fi
+          git clone --depth=1 --branch=main \
+            "https://x-access-token:${GH_PAT}@github.com/hanzoai/admin.git" \
+            /tmp/hanzoai-admin
+          if ! command -v bun >/dev/null 2>&1; then
+            curl -fsSL https://bun.sh/install | bash
+            export PATH="${HOME}/.bun/bin:${PATH}"
+          fi
+          cd /tmp/hanzoai-admin
+          bun install --frozen-lockfile
+          cd apps/admin-bot
+          bun run build
+          cd "${GITHUB_WORKSPACE}"
+          ADMIN_BOT_DIR=/tmp/hanzoai-admin/apps/admin-bot bash scripts/sync-admin-ui.sh
+          test -f dist/control-ui/index.html
 
       - uses: docker/setup-buildx-action@v3
         with: { driver: docker-container, driver-opts: network=host }
@@ -44,6 +107,9 @@ jobs:
           username: ${{ secrets.GHCR_USER }}
           password: ${{ secrets.GHCR_TOKEN }}
 
+      # context: . — a local context, so the SPA assembled above is in the build.
+      # A remote git context would not see it. REQUIRE_ADMIN_UI keeps its default
+      # of 1, so a silently missing SPA still fails the build.
       - uses: docker/build-push-action@v6
         with:
           context: .
@@ -51,18 +117,23 @@ jobs:
           platforms: linux/amd64
           push: true
           provenance: false
-          tags: ghcr.io/hanzoai/bot:${{ steps.meta.outputs.tag }}
-          secrets: |
-            GIT_AUTH_TOKEN=${{ secrets.GH_PAT }}
+          tags: ${{ steps.tags.outputs.list }}
 
       # build-push-action can exit 0 before the manifest resolves, so a green run
       # could still mean a future ImagePullBackOff. Prove it pulls.
-      - name: Verify the pushed image resolves
+      - name: the pushed image resolves
         run: |
           set -euo pipefail
-          img="ghcr.io/hanzoai/bot:${{ steps.meta.outputs.tag }}"
-          for i in 1 2 3 4 5 6; do
-            docker buildx imagetools inspect "$img" >/dev/null 2>&1 && { echo "resolved $img"; exit 0; }
-            sleep 5
+          for img in ${{ steps.tags.outputs.list }}; do
+            for i in 1 2 3 4 5 6; do
+              if docker buildx imagetools inspect "${img}" >/dev/null 2>&1; then
+                echo "resolved ${img}"
+                break
+              fi
+              if [ "${i}" = 6 ]; then
+                echo "::error::pushed image never resolved: ${img}"
+                exit 1
+              fi
+              sleep 5
+            done
           done
-          echo "::error::pushed image never resolved: $img"; exit 1
