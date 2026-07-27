@@ -124,7 +124,16 @@ jobs:
       - name: the pushed image resolves
         run: |
           set -euo pipefail
-          for img in ${{ steps.tags.outputs.list }}; do
+          # QUOTED, and iterated line-by-line. steps.tags.outputs.list is a
+          # newline-delimited heredoc (that is the shape docker/build-push-action
+          # wants for `tags:`), so an UNQUOTED `for img in ${{ … }}` pastes a raw
+          # newline into the command and bash dies with
+          #   syntax error near unexpected token `ghcr.io/hanzoai/<repo>:latest'
+          # It only breaks when there are TWO tags, so branch builds pass and the
+          # v-tag/main builds that actually publish :latest are the ones that fail
+          # — AFTER the image has already been built and pushed.
+          printf '%s\n' "${{ steps.tags.outputs.list }}" | while read -r img; do
+            [ -n "${img}" ] || continue
             for i in 1 2 3 4 5 6; do
               if docker buildx imagetools inspect "${img}" >/dev/null 2>&1; then
                 echo "resolved ${img}"
