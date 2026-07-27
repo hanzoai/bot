@@ -1,6 +1,10 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { handleLlmProxyHttpRequest, type LlmProxyHttpOptions } from "./llm-proxy-http.js";
+import {
+  handleLlmProxyHttpRequest,
+  isPerTenantUpstreamCredential,
+  type LlmProxyHttpOptions,
+} from "./llm-proxy-http.js";
 
 // Minimal auth that always succeeds for unit tests.
 const ALLOW_ALL_AUTH: LlmProxyHttpOptions = {
@@ -234,6 +238,74 @@ describe("LLM Proxy HTTP handler (upstream integration)", () => {
     }
   });
 
+  it("forwards the caller's OWN hk- credential upstream, NOT the shared env key (multi-tenant billing)", async () => {
+    // The bot authenticated with its own hk- Cloud API key; the gateway also has
+    // a shared OPENAI_API_KEY. The caller's per-tenant key MUST win so the
+    // upstream meter bills the bot's own org — not the shared, single-org key.
+    let receivedAuth: string | string[] | undefined;
+    upstreamMock = createUpstreamMock((req, res) => {
+      receivedAuth = req.headers.authorization;
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ object: "list", data: [] }));
+    });
+    upstreamPort = await upstreamMock.start();
+    process.env.OPENAI_BASE_URL = `http://127.0.0.1:${upstreamPort}`;
+    process.env.OPENAI_API_KEY = "sk-shared-single-org-key";
+
+    const gatewayPort = await getFreePort();
+    const gateway = createServer(async (req, res) => {
+      const handled = await handleLlmProxyHttpRequest(req, res, ALLOW_ALL_AUTH);
+      if (!handled) {
+        res.writeHead(404);
+        res.end("Not Found");
+      }
+    });
+    await new Promise<void>((resolve) => gateway.listen(gatewayPort, "127.0.0.1", resolve));
+
+    try {
+      await fetch(`http://127.0.0.1:${gatewayPort}/v1/models`, {
+        headers: { authorization: "Bearer hk-bot-tenant-key" },
+      });
+      // Per-tenant key forwarded — billed to the bot's org, not the shared key.
+      expect(receivedAuth).toBe("Bearer hk-bot-tenant-key");
+    } finally {
+      await new Promise<void>((resolve) => gateway.close(() => resolve()));
+    }
+  });
+
+  it("falls back to the shared env key when the caller used the shared gateway token", async () => {
+    // An opaque shared gateway token is NOT an upstream credential and must
+    // never be forwarded; the shared env key is used instead.
+    let receivedAuth: string | string[] | undefined;
+    upstreamMock = createUpstreamMock((req, res) => {
+      receivedAuth = req.headers.authorization;
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ object: "list", data: [] }));
+    });
+    upstreamPort = await upstreamMock.start();
+    process.env.OPENAI_BASE_URL = `http://127.0.0.1:${upstreamPort}`;
+    process.env.OPENAI_API_KEY = "sk-shared-fallback-key";
+
+    const gatewayPort = await getFreePort();
+    const gateway = createServer(async (req, res) => {
+      const handled = await handleLlmProxyHttpRequest(req, res, ALLOW_ALL_AUTH);
+      if (!handled) {
+        res.writeHead(404);
+        res.end("Not Found");
+      }
+    });
+    await new Promise<void>((resolve) => gateway.listen(gatewayPort, "127.0.0.1", resolve));
+
+    try {
+      await fetch(`http://127.0.0.1:${gatewayPort}/v1/models`, {
+        headers: { authorization: "Bearer opaque-shared-gateway-token" },
+      });
+      expect(receivedAuth).toBe("Bearer sk-shared-fallback-key");
+    } finally {
+      await new Promise<void>((resolve) => gateway.close(() => resolve()));
+    }
+  });
+
   it("returns 502 when upstream is unreachable", async () => {
     // Point to a port that's not listening
     process.env.OPENAI_BASE_URL = "http://127.0.0.1:1";
@@ -258,5 +330,24 @@ describe("LLM Proxy HTTP handler (upstream integration)", () => {
     } finally {
       await new Promise<void>((resolve) => gateway.close(() => resolve()));
     }
+  });
+});
+
+describe("isPerTenantUpstreamCredential", () => {
+  it("treats an hk- Cloud API key as a per-tenant credential", () => {
+    expect(isPerTenantUpstreamCredential("hk-abc123")).toBe(true);
+  });
+
+  it("treats an IAM JWT (three JWS segments) as a per-tenant credential", () => {
+    expect(isPerTenantUpstreamCredential("eyJhbG.eyJzdWIi.sig")).toBe(true);
+  });
+
+  it("treats an opaque shared gateway token as NOT a per-tenant credential", () => {
+    expect(isPerTenantUpstreamCredential("opaque-shared-gateway-token")).toBe(false);
+    expect(isPerTenantUpstreamCredential("a1b2c3d4e5f6")).toBe(false);
+  });
+
+  it("treats a shared sk- provider env key as NOT a per-tenant credential", () => {
+    expect(isPerTenantUpstreamCredential("sk-shared-single-org-key")).toBe(false);
   });
 });

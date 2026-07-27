@@ -39,8 +39,34 @@ function resolveUpstreamBaseUrl(): string {
   return base.replace(/\/+$/, "");
 }
 
-/** Extract the upstream API key from environment or fall through to caller's bearer token. */
+/**
+ * Whether a caller-presented bearer token is the caller's OWN per-tenant
+ * upstream credential — an `hk-` Hanzo Cloud API key, or an IAM-issued JWT
+ * (three JWS segments) — as opposed to the shared gateway token (an opaque
+ * secret the caller authenticated WITH, which is not an upstream credential and
+ * must never be forwarded to the LLM provider).
+ */
+export function isPerTenantUpstreamCredential(token: string): boolean {
+  return token.startsWith("hk-") || token.split(".").length === 3;
+}
+
+/**
+ * Resolve the upstream API key for a proxied LLM call.
+ *
+ * PREFER the caller's OWN per-tenant credential (its `hk-` key / IAM JWT) so the
+ * upstream meter (api.hanzo.ai) attributes usage to the BOT's own org — not a
+ * shared, single-org key. This is what makes the gateway multi-tenant: the
+ * authenticated caller's identity flows through to billing.
+ *
+ * Only when the caller did NOT present such a credential — e.g. a cloud-
+ * provisioned pod that authenticated with the shared `BOT_GATEWAY_TOKEN` — do we
+ * fall back to the shared env key (`OPENAI_API_KEY` / `LLM_API_KEY`). The shared
+ * gateway token is never forwarded upstream (it is not a valid LLM credential).
+ */
 function resolveUpstreamApiKey(callerToken: string | undefined): string | undefined {
+  if (callerToken && isPerTenantUpstreamCredential(callerToken)) {
+    return callerToken;
+  }
   return process.env.OPENAI_API_KEY?.trim() || process.env.LLM_API_KEY?.trim() || callerToken;
 }
 
