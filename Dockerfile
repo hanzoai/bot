@@ -37,14 +37,32 @@ COPY --chown=node:node scripts ./scripts
 
 USER node
 # Auth for private GitHub tarball deps (e.g. @hanzo/iam = github:hanzo-js/iam).
-# Build-only: pass --build-arg GIT_TOKEN=<pat> so pnpm can fetch codeload tarballs.
-ARG GIT_TOKEN=""
-RUN if [ -n "$GIT_TOKEN" ]; then \
-      printf '//codeload.github.com/:_authToken=%s\n//github.com/:_authToken=%s\n' "$GIT_TOKEN" "$GIT_TOKEN" >> /app/.npmrc; \
-    fi
-# Reduce OOM risk on low-memory hosts during dependency installation.
-# Docker builds on small VMs may otherwise fail with "Killed" (exit 137).
-RUN NODE_OPTIONS=--max-old-space-size=2048 pnpm install --frozen-lockfile
+#
+# The token arrives as a BuildKit secret, not a build arg, and is written to a
+# throwaway user-level npmrc that this same RUN deletes. A build arg is recorded
+# in image history, and appending the token to /app/.npmrc — which this image
+# ships, being single-stage — left a usable credential inside the running
+# container for anyone who could pull it.
+#
+# Build with:
+#   docker build --secret id=git_token,env=GIT_TOKEN .
+#
+# pnpm merges the project .npmrc with NPM_CONFIG_USERCONFIG, so the project file
+# keeps its settings and never carries the credential. The secret mount is tmpfs
+# and the temp file is created and removed in one layer, so neither is committed.
+#
+# NODE_OPTIONS caps the heap: low-memory hosts otherwise fail install with
+# "Killed" (exit 137).
+RUN --mount=type=secret,id=git_token,uid=1000 \
+    set -eu; \
+    if [ -s /run/secrets/git_token ]; then \
+      umask 077; \
+      T="$(cat /run/secrets/git_token)"; \
+      printf '//codeload.github.com/:_authToken=%s\n//github.com/:_authToken=%s\n' "$T" "$T" > /tmp/npmrc-auth; \
+      export NPM_CONFIG_USERCONFIG=/tmp/npmrc-auth; \
+    fi; \
+    NODE_OPTIONS=--max-old-space-size=2048 pnpm install --frozen-lockfile; \
+    rm -f /tmp/npmrc-auth
 
 # Optionally install Chromium and Xvfb for browser automation.
 # Build with: docker build --build-arg OPENCLAW_INSTALL_BROWSER=1 ...

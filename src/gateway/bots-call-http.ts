@@ -1,16 +1,9 @@
+import { timingSafeEqual } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import { loadConfig } from "../config/config.js";
 import { logWarn } from "../logger.js";
+import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import { authorizeHttpGatewayConnect, type ResolvedGatewayAuth } from "./auth.js";
-import {
-  readJsonBodyOrError,
-  sendGatewayAuthFailure,
-  sendInvalidRequest,
-  sendJson,
-  sendMethodNotAllowed,
-} from "./http-common.js";
-import { getBearerToken } from "./http-utils.js";
 import {
   type Bot,
   type BotDID,
@@ -29,6 +22,14 @@ import {
   setBotStatus,
   updateBot,
 } from "./bots-store.js";
+import {
+  readJsonBodyOrError,
+  sendGatewayAuthFailure,
+  sendInvalidRequest,
+  sendJson,
+  sendMethodNotAllowed,
+} from "./http-common.js";
+import { getBearerToken } from "./http-utils.js";
 
 const DEFAULT_BODY_BYTES = 1 * 1024 * 1024;
 
@@ -44,11 +45,41 @@ interface TeamPreset {
 }
 
 const TEAM_PRESETS: TeamPreset[] = [
-  { id: "support", name: "Support Agent", emoji: "🎧", role: "support", description: "Front-line customer support across chat channels." },
-  { id: "sales", name: "Sales Agent", emoji: "💼", role: "sales", description: "Qualifies leads and answers product questions." },
-  { id: "devops", name: "DevOps Agent", emoji: "🛠️", role: "devops", description: "Monitors infrastructure and runs ops playbooks." },
-  { id: "research", name: "Research Agent", emoji: "🔬", role: "research", description: "Gathers and synthesizes information on demand." },
-  { id: "pm", name: "Product Manager", emoji: "📋", role: "product", description: "Tracks roadmap items and triages feedback." },
+  {
+    id: "support",
+    name: "Support Agent",
+    emoji: "🎧",
+    role: "support",
+    description: "Front-line customer support across chat channels.",
+  },
+  {
+    id: "sales",
+    name: "Sales Agent",
+    emoji: "💼",
+    role: "sales",
+    description: "Qualifies leads and answers product questions.",
+  },
+  {
+    id: "devops",
+    name: "DevOps Agent",
+    emoji: "🛠️",
+    role: "devops",
+    description: "Monitors infrastructure and runs ops playbooks.",
+  },
+  {
+    id: "research",
+    name: "Research Agent",
+    emoji: "🔬",
+    role: "research",
+    description: "Gathers and synthesizes information on demand.",
+  },
+  {
+    id: "pm",
+    name: "Product Manager",
+    emoji: "📋",
+    role: "product",
+    description: "Tracks roadmap items and triages feedback.",
+  },
 ];
 
 class ToolError extends Error {
@@ -70,7 +101,9 @@ function strArr(v: unknown): string[] | undefined {
 }
 function reqStr(args: Record<string, unknown>, key: string): string {
   const s = str(args[key]);
-  if (!s) throw new ToolError(400, `missing required arg: ${key}`);
+  if (!s) {
+    throw new ToolError(400, `missing required arg: ${key}`);
+  }
   return s;
 }
 
@@ -82,7 +115,9 @@ async function dispatch(name: string, args: Record<string, unknown>): Promise<un
 
     case "bots.get": {
       const bot = await getBot(reqStr(args, "projectId"), reqStr(args, "botId"));
-      if (!bot) throw new ToolError(404, "bot not found");
+      if (!bot) {
+        throw new ToolError(404, "bot not found");
+      }
       return bot;
     }
 
@@ -101,31 +136,56 @@ async function dispatch(name: string, args: Record<string, unknown>): Promise<un
         channels: strArr(args.channels),
         modelsEnabled: strArr(args.modelsEnabled),
       });
-      if (!bot) throw new ToolError(404, "bot not found");
+      if (!bot) {
+        throw new ToolError(404, "bot not found");
+      }
       return bot;
     }
 
     case "bots.delete": {
       const ok = await deleteBot(reqStr(args, "projectId"), reqStr(args, "botId"));
-      if (!ok) throw new ToolError(404, "bot not found");
+      if (!ok) {
+        throw new ToolError(404, "bot not found");
+      }
       return { ok: true };
     }
 
     case "bots.start": {
-      const bot = await setBotStatus(reqStr(args, "projectId"), reqStr(args, "botId"), "running", "Bot started.");
-      if (!bot) throw new ToolError(404, "bot not found");
+      const bot = await setBotStatus(
+        reqStr(args, "projectId"),
+        reqStr(args, "botId"),
+        "running",
+        "Bot started.",
+      );
+      if (!bot) {
+        throw new ToolError(404, "bot not found");
+      }
       return bot;
     }
 
     case "bots.stop": {
-      const bot = await setBotStatus(reqStr(args, "projectId"), reqStr(args, "botId"), "stopped", "Bot stopped.");
-      if (!bot) throw new ToolError(404, "bot not found");
+      const bot = await setBotStatus(
+        reqStr(args, "projectId"),
+        reqStr(args, "botId"),
+        "stopped",
+        "Bot stopped.",
+      );
+      if (!bot) {
+        throw new ToolError(404, "bot not found");
+      }
       return bot;
     }
 
     case "bots.restart": {
-      const bot = await setBotStatus(reqStr(args, "projectId"), reqStr(args, "botId"), "running", "Bot restarted.");
-      if (!bot) throw new ToolError(404, "bot not found");
+      const bot = await setBotStatus(
+        reqStr(args, "projectId"),
+        reqStr(args, "botId"),
+        "running",
+        "Bot restarted.",
+      );
+      if (!bot) {
+        throw new ToolError(404, "bot not found");
+      }
       return bot;
     }
 
@@ -145,14 +205,18 @@ async function dispatch(name: string, args: Record<string, unknown>): Promise<un
 
     case "team.presets.get": {
       const preset = TEAM_PRESETS.find((p) => p.id === reqStr(args, "presetId"));
-      if (!preset) throw new ToolError(404, "preset not found");
+      if (!preset) {
+        throw new ToolError(404, "preset not found");
+      }
       return preset;
     }
 
     case "team.provision": {
       const presetId = reqStr(args, "presetId");
       const preset = TEAM_PRESETS.find((p) => p.id === presetId);
-      if (!preset) throw new ToolError(404, "preset not found");
+      if (!preset) {
+        throw new ToolError(404, "preset not found");
+      }
       const projectId = str(args.workspace) ?? "team";
       const bot = await provisionPreset(projectId, preset);
       return { ok: true, agentId: bot.id, name: bot.name };
@@ -180,13 +244,19 @@ async function dispatch(name: string, args: Record<string, unknown>): Promise<un
       return getAgentDID(reqStr(args, "agentId"));
 
     case "agent.did.create":
-      return createAgentDID(reqStr(args, "agentId"), (str(args.method) as BotDID["method"]) ?? "hanzo");
+      return createAgentDID(
+        reqStr(args, "agentId"),
+        (str(args.method) as BotDID["method"]) ?? "hanzo",
+      );
 
     case "agent.wallet.get":
       return getAgentWallet(reqStr(args, "agentId"));
 
     case "agent.wallet.create":
-      return createAgentWallet(reqStr(args, "agentId"), (str(args.chain) as BotWallet["chain"]) ?? "hanzo");
+      return createAgentWallet(
+        reqStr(args, "agentId"),
+        (str(args.chain) as BotWallet["chain"]) ?? "hanzo",
+      );
 
     case "agent.identity.full":
       return getAgentIdentityFull(reqStr(args, "agentId"));
@@ -204,6 +274,43 @@ async function provisionPreset(projectId: string, preset: TeamPreset): Promise<B
     channels: ["web"],
     modelsEnabled: [],
   });
+}
+
+/**
+ * Shortest shared secret this gateway will honour. A static bearer that grants
+ * service-to-service access has no second factor and no expiry, so a short one
+ * is guessable offline; refusing it is better than trusting a weak deployment.
+ */
+const MIN_SHARED_SECRET_BYTES = 32;
+
+/**
+ * Compare a presented bearer against the configured shared secret in constant
+ * time. `===` on strings returns as soon as two bytes differ, which leaks the
+ * secret one byte at a time to anyone who can measure the response.
+ *
+ * Returns false when either side is missing or the configured secret is below
+ * MIN_SHARED_SECRET_BYTES. Length is compared first — timingSafeEqual throws on
+ * a length mismatch — which reveals only the length, not the contents.
+ */
+export function sharedSecretMatches(
+  presented: string | undefined,
+  expected: string | undefined,
+): boolean {
+  if (!presented || !expected) {
+    return false;
+  }
+  const want = Buffer.from(expected, "utf8");
+  if (want.length < MIN_SHARED_SECRET_BYTES) {
+    logWarn(
+      `bots-call: shared secret is ${want.length} bytes, below the ${MIN_SHARED_SECRET_BYTES}-byte floor — refusing it`,
+    );
+    return false;
+  }
+  const got = Buffer.from(presented, "utf8");
+  if (got.length !== want.length) {
+    return false;
+  }
+  return timingSafeEqual(got, want);
 }
 
 export async function handleBotsCallHttpRequest(
@@ -233,8 +340,13 @@ export async function handleBotsCallHttpRequest(
   // shared secret (BOT_TOOLS_TOKEN). The gateway's primary auth is IAM (JWT),
   // which a static console token can't satisfy; accept the shared secret here
   // for the bot-management tools without affecting IAM/device auth elsewhere.
+  //
+  // A match here skips the IAM path deliberately, so the comparison itself is
+  // the whole control: it runs in constant time, and a secret shorter than the
+  // floor is refused rather than trusted. A wrong token falls through to
+  // authorizeHttpGatewayConnect, which is where rate limiting accounts for it.
   const sharedToken = process.env.BOT_TOOLS_TOKEN ?? process.env.ZAP_BOT_GATEWAY_TOKEN;
-  const sharedOk = Boolean(sharedToken && token && token === sharedToken);
+  const sharedOk = sharedSecretMatches(token, sharedToken);
   if (!sharedOk) {
     const authResult = await authorizeHttpGatewayConnect({
       auth: opts.auth,
