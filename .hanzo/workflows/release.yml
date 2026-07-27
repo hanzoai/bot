@@ -1,0 +1,65 @@
+# Publishes the npm package @hanzo/bot and cuts the GitHub release.
+#
+# Restored from .github/workflows/release.yml, which was deleted without a
+# replacement. It is the sole publisher of @hanzo/bot, and the gap is already
+# visible: npm has 2026.6.5 while package.json says 2026.6.7, so two versions
+# were cut and never published. Nothing was red — there was simply nothing left
+# to run.
+#
+# Moved unchanged, runs-on included: the forge's git-runner advertises
+# hanzo-build-linux-amd64. NPM_TOKEN must exist as a forge secret or the publish
+# step fails; that is the loud version of the same problem.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v2026.2.10)"
+        required: false
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run release checks
+        run: pnpm release:check
+
+      - name: Publish to npm
+        run: pnpm publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: ${{ github.event.inputs.tag || github.ref_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}

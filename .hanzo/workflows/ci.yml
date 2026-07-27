@@ -1,0 +1,476 @@
+# The checks, restored from .github/workflows/ci.yml, which was deleted without
+# a replacement — this repo had no checks at all until now.
+#
+# Every surviving job is byte-identical to the file it came from, including
+# runs-on: the forge's git-runner advertises hanzo-build-linux-amd64 along with
+# ubuntu-latest, self-hosted, linux and amd64, so a moved workflow keeps working
+# unchanged. Three jobs did not come across:
+#
+#   deadcode, ios   `if: false` in the original. Dead by declaration.
+#   macos           runs-on: macos-latest, which no forge runner advertises. A
+#                   label nothing answers does not fail the run — it queues to
+#                   the timeout. That is silence, which is the failure mode this
+#                   whole migration exists to remove. Nothing `needs:` it.
+#
+# Restoring the macOS checks means giving the forge a macOS runner; until then
+# the honest state is "not run" rather than "queued forever, reported never".
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # Detect docs-only changes to skip heavy jobs (test, build, Windows, macOS, Android).
+  # Lint and format always run. Fail-safe: if detection fails, run everything.
+  docs-scope:
+    runs-on: hanzo-build-linux-amd64
+    outputs:
+      docs_only: ${{ steps.check.outputs.docs_only }}
+      docs_changed: ${{ steps.check.outputs.docs_changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+
+      - name: Detect docs-only changes
+        id: check
+        uses: ./.github/actions/detect-docs-changes
+
+  # Detect which heavy areas are touched so PRs can skip unrelated expensive jobs.
+  # Push to main keeps broad coverage.
+  changed-scope:
+    needs: [docs-scope]
+    if: github.event_name == 'pull_request' && needs.docs-scope.outputs.docs_only != 'true'
+    runs-on: hanzo-build-linux-amd64
+    outputs:
+      run_node: ${{ steps.scope.outputs.run_node }}
+      run_macos: ${{ steps.scope.outputs.run_macos }}
+      run_android: ${{ steps.scope.outputs.run_android }}
+      run_windows: ${{ steps.scope.outputs.run_windows }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+
+      - name: Detect changed scopes
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            BASE="${{ github.event.before }}"
+          else
+            BASE="${{ github.event.pull_request.base.sha }}"
+          fi
+
+          node scripts/ci-changed-scope.mjs --base "$BASE" --head HEAD
+
+  # Build dist once for Node-relevant changes and share it with downstream jobs.
+  build-artifacts:
+    needs: [docs-scope, changed-scope]
+    if: needs.docs-scope.outputs.docs_only != 'true' && (github.event_name == 'push' || needs.changed-scope.outputs.run_node == 'true')
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node-env
+        with:
+          install-bun: "false"
+          use-sticky-disk: "true"
+
+      - name: Build dist
+        run: pnpm build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-build
+          path: dist/
+          retention-days: 1
+
+  # Validate npm pack contents after build (only on push to main, not PRs).
+  release-check:
+    needs: [docs-scope, build-artifacts]
+    if: github.event_name == 'push' && needs.docs-scope.outputs.docs_only != 'true'
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node-env
+        with:
+          install-bun: "false"
+          use-sticky-disk: "true"
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-build
+          path: dist/
+
+      - name: Check release contents
+        run: pnpm release:check
+
+  checks:
+    needs: [docs-scope, changed-scope]
+    if: needs.docs-scope.outputs.docs_only != 'true' && (github.event_name == 'push' || needs.changed-scope.outputs.run_node == 'true')
+    runs-on: hanzo-build-linux-amd64
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runtime: node
+            task: test
+            command: pnpm canvas:a2ui:bundle && pnpm test
+          - runtime: node
+            task: protocol
+            command: pnpm protocol:check
+          - runtime: bun
+            task: test
+            command: pnpm canvas:a2ui:bundle && bunx vitest run --config vitest.unit.config.ts
+    steps:
+      - name: Skip bun lane on push
+        if: github.event_name == 'push' && matrix.runtime == 'bun'
+        run: echo "Skipping bun test lane on push events."
+
+      - name: Checkout
+        if: github.event_name != 'push' || matrix.runtime != 'bun'
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Node environment
+        if: matrix.runtime != 'bun' || github.event_name != 'push'
+        uses: ./.github/actions/setup-node-env
+        with:
+          install-bun: "${{ matrix.runtime == 'bun' }}"
+          use-sticky-disk: "true"
+
+      - name: Configure Node test resources
+        if: (github.event_name != 'push' || matrix.runtime != 'bun') && matrix.task == 'test' && matrix.runtime == 'node'
+        run: |
+          # `pnpm test` runs `scripts/test-parallel.mjs`, which spawns multiple Node processes.
+          # Default heap limits have been too low on Linux CI (V8 OOM near 4GB).
+          echo "HANZO_BOT_TEST_WORKERS=2" >> "$GITHUB_ENV"
+          echo "HANZO_BOT_TEST_MAX_OLD_SPACE_SIZE_MB=6144" >> "$GITHUB_ENV"
+
+      - name: Run ${{ matrix.task }} (${{ matrix.runtime }})
+        if: matrix.runtime != 'bun' || github.event_name != 'push'
+        run: ${{ matrix.command }}
+
+  # Types, lint, and format check.
+  check:
+    name: "check"
+    needs: [docs-scope, changed-scope]
+    if: needs.docs-scope.outputs.docs_only != 'true' && (github.event_name == 'push' || needs.changed-scope.outputs.run_node == 'true')
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node-env
+        with:
+          install-bun: "false"
+          use-sticky-disk: "true"
+
+      - name: Check types and lint and oxfmt
+        run: pnpm check
+
+      - name: Strict TS build smoke
+        run: pnpm build:strict-smoke
+
+      - name: Enforce safe external URL opening policy
+        run: pnpm lint:ui:no-raw-window-open
+  check-docs:
+    needs: [docs-scope]
+    if: needs.docs-scope.outputs.docs_changed == 'true'
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node-env
+        with:
+          install-bun: "false"
+          use-sticky-disk: "true"
+
+      - name: Check docs
+        run: pnpm check:docs
+
+  skills-python:
+    needs: [docs-scope, changed-scope]
+    if: needs.docs-scope.outputs.docs_only != 'true' && (github.event_name == 'push' || needs.changed-scope.outputs.run_node == 'true')
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install Python tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest ruff pyyaml
+
+      - name: Lint Python skill scripts
+        run: python -m ruff check skills
+
+      - name: Test skill Python scripts
+        run: python -m pytest -q skills
+
+  secrets:
+    runs-on: hanzo-build-linux-amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Node environment
+        uses: ./.github/actions/setup-node-env
+        with:
+          install-bun: "false"
+          use-sticky-disk: "false"
+          install-deps: "false"
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install pre-commit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pre-commit detect-secrets==1.5.0
+
+      - name: Detect secrets
+        run: |
+          if ! detect-secrets scan --baseline .secrets.baseline; then
+            echo "::error::Secret scanning failed. See docs/gateway/security.md#secret-scanning-detect-secrets"
+            exit 1
+          fi
+
+      - name: Detect committed private keys
+        run: pre-commit run --all-files detect-private-key
+
+      - name: Audit changed workflows with zizmor
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            BASE="${{ github.event.before }}"
+          else
+            BASE="${{ github.event.pull_request.base.sha }}"
+          fi
+
+          # Both directories: the workflows live in .hanzo/workflows now, and
+          # .github/workflows still holds sync.yml. Auditing only the old path
+          # would report "no workflow changes" forever and pass silently.
+          mapfile -t workflow_files < <(git diff --name-only "$BASE" HEAD -- \
+            '.hanzo/workflows/*.yml' '.hanzo/workflows/*.yaml' \
+            '.github/workflows/*.yml' '.github/workflows/*.yaml')
+          if [ "${#workflow_files[@]}" -eq 0 ]; then
+            echo "No workflow changes detected; skipping zizmor."
+            exit 0
+          fi
+
+          pre-commit run zizmor --files "${workflow_files[@]}"
+
+      - name: Audit production dependencies
+        run: pre-commit run --all-files pnpm-audit-prod
+
+  checks-windows:
+    needs: [docs-scope, changed-scope]
+    if: needs.docs-scope.outputs.docs_only != 'true' && (github.event_name == 'push' || needs.changed-scope.outputs.run_windows == 'true')
+    runs-on: hanzo-build-linux-amd64
+    timeout-minutes: 45
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+      # Keep total concurrency predictable on the 32 vCPU runner.
+      # Windows shard 2 has shown intermittent instability at 2 workers.
+      HANZO_BOT_TEST_WORKERS: 1
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runtime: node
+            task: test
+            shard_index: 1
+            shard_count: 6
+            command: pnpm test
+          - runtime: node
+            task: test
+            shard_index: 2
+            shard_count: 6
+            command: pnpm test
+          - runtime: node
+            task: test
+            shard_index: 3
+            shard_count: 6
+            command: pnpm test
+          - runtime: node
+            task: test
+            shard_index: 4
+            shard_count: 6
+            command: pnpm test
+          - runtime: node
+            task: test
+            shard_index: 5
+            shard_count: 6
+            command: pnpm test
+          - runtime: node
+            task: test
+            shard_index: 6
+            shard_count: 6
+            command: pnpm test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Try to exclude workspace from Windows Defender (best-effort)
+        shell: pwsh
+        run: |
+          $cmd = Get-Command Add-MpPreference -ErrorAction SilentlyContinue
+          if (-not $cmd) {
+            Write-Host "Add-MpPreference not available, skipping Defender exclusions."
+            exit 0
+          }
+
+          try {
+            # Defender sometimes intercepts process spawning (vitest workers). If this fails
+            # (eg hardened images), keep going and rely on worker limiting above.
+            Add-MpPreference -ExclusionPath "$env:GITHUB_WORKSPACE" -ErrorAction Stop
+            Add-MpPreference -ExclusionProcess "node.exe" -ErrorAction Stop
+            Write-Host "Defender exclusions applied."
+          } catch {
+            Write-Warning "Failed to apply Defender exclusions, continuing. $($_.Exception.Message)"
+          }
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.x
+          check-latest: false
+
+      - name: Setup pnpm + cache store
+        uses: ./.github/actions/setup-pnpm-store-cache
+        with:
+          pnpm-version: "10.23.0"
+          cache-key-suffix: "node22"
+          # Sticky disk mount currently retries/fails on every shard and adds ~50s
+          # before install while still yielding zero pnpm store reuse.
+          use-sticky-disk: "false"
+          use-restore-keys: "false"
+          use-actions-cache: "false"
+
+      - name: Runtime versions
+        run: |
+          node -v
+          npm -v
+          pnpm -v
+
+      - name: Capture node path
+        run: echo "NODE_BIN=$(dirname \"$(node -p \"process.execPath\")\")" >> "$GITHUB_ENV"
+
+      - name: Install dependencies
+        env:
+          CI: true
+        run: |
+          export PATH="$NODE_BIN:$PATH"
+          which node
+          node -v
+          pnpm -v
+          pnpm install --frozen-lockfile --prefer-offline --ignore-scripts=false --config.engine-strict=false --config.enable-pre-post-scripts=true || pnpm install --frozen-lockfile --prefer-offline --ignore-scripts=false --config.engine-strict=false --config.enable-pre-post-scripts=true
+
+      - name: Configure test shard (Windows)
+        if: matrix.task == 'test'
+        run: |
+          echo "HANZO_BOT_TEST_SHARDS=${{ matrix.shard_count }}" >> "$GITHUB_ENV"
+          echo "HANZO_BOT_TEST_SHARD_INDEX=${{ matrix.shard_index }}" >> "$GITHUB_ENV"
+
+      - name: Build A2UI bundle (Windows)
+        if: matrix.task == 'test'
+        run: pnpm canvas:a2ui:bundle
+
+      - name: Run ${{ matrix.task }} (${{ matrix.runtime }})
+        run: ${{ matrix.command }}
+  android:
+    needs: [docs-scope, changed-scope]
+    if: needs.docs-scope.outputs.docs_only != 'true' && (github.event_name == 'push' || needs.changed-scope.outputs.run_android == 'true')
+    runs-on: hanzo-build-linux-amd64
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - task: test
+            command: ./gradlew --no-daemon :app:testDebugUnitTest
+          - task: build
+            command: ./gradlew --no-daemon :app:assembleDebug
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # setup-android's sdkmanager currently crashes on JDK 21 in CI.
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          accept-android-sdk-licenses: false
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.11.1
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0"
+
+      - name: Run Android ${{ matrix.task }}
+        working-directory: apps/android
+        run: ${{ matrix.command }}
