@@ -14,6 +14,13 @@ BOT_STATE_DIR = "/data/.bot"
 BOT_WORKSPACE_DIR = "/data/workspace"
 NODE_OPTIONS = "--max-old-space-size=1536"
 
+# Observability goes to our own stack, not a generic sidecar. The
+# diagnostics-otel plugin is endpoint-driven with no baked-in default, so
+# pointing it here is the whole wiring — there is nothing to fork.
+# o11y.hanzo.svc is the in-cluster collector; 4318 is OTLP/HTTP.
+OTEL_EXPORTER_OTLP_ENDPOINT = "http://o11y.hanzo.svc:4318"
+OTEL_SERVICE_NAME = "bot-gateway"
+
 # Secrets are injected from Hanzo KMS at deploy time.
 # Set them with:
 #   hanzo kms set <project> production HANZO_API_KEY hz-...
