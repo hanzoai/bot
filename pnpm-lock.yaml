@@ -66,33 +66,9 @@ importers:
       '@grammyjs/transformer-throttler':
         specifier: 1.2.1
         version: 1.2.1(grammy@1.45.1(supports-color@7.2.0))
-      '@hanzo/bot-acp-core':
-        specifier: workspace:*
-        version: link:packages/acp-core
-      '@hanzo/bot-agent-core':
-        specifier: workspace:*
-        version: link:packages/agent-core
       '@hanzo/bot-ai':
         specifier: workspace:*
         version: link:packages/ai
-      '@hanzo/bot-llm-core':
-        specifier: workspace:*
-        version: link:packages/llm-core
-      '@hanzo/bot-media-core':
-        specifier: workspace:*
-        version: link:packages/media-core
-      '@hanzo/bot-model-catalog-core':
-        specifier: workspace:*
-        version: link:packages/model-catalog-core
-      '@hanzo/bot-net-policy':
-        specifier: workspace:*
-        version: link:packages/net-policy
-      '@hanzo/bot-normalization-core':
-        specifier: workspace:*
-        version: link:packages/normalization-core
-      '@hanzo/bot-plugin-sdk':
-        specifier: workspace:*
-        version: link:packages/plugin-sdk
       '@homebridge/ciao':
         specifier: 1.3.10
         version: 1.3.10(supports-color@7.2.0)
@@ -265,6 +241,30 @@ importers:
       '@copilotkit/aimock':
         specifier: 1.37.2
         version: 1.37.2(vitest@4.1.10)
+      '@hanzo/bot-acp-core':
+        specifier: workspace:*
+        version: link:packages/acp-core
+      '@hanzo/bot-agent-core':
+        specifier: workspace:*
+        version: link:packages/agent-core
+      '@hanzo/bot-llm-core':
+        specifier: workspace:*
+        version: link:packages/llm-core
+      '@hanzo/bot-media-core':
+        specifier: workspace:*
+        version: link:packages/media-core
+      '@hanzo/bot-model-catalog-core':
+        specifier: workspace:*
+        version: link:packages/model-catalog-core
+      '@hanzo/bot-net-policy':
+        specifier: workspace:*
+        version: link:packages/net-policy
+      '@hanzo/bot-normalization-core':
+        specifier: workspace:*
+        version: link:packages/normalization-core
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:packages/plugin-sdk
       '@lit-labs/signals':
         specifier: 0.3.0
         version: 0.3.0

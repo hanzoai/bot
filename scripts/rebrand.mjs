@@ -134,8 +134,13 @@ const declarePhantomWorkspaceDeps = (workspaceNames) => {
   ])
   const missing = [...imported].filter((n) => !declared.has(n)).sort()
   if (!missing.length) return []
-  pkg.dependencies = Object.fromEntries(
-    [...Object.entries(pkg.dependencies || {}), ...missing.map((n) => [n, 'workspace:*'])].sort(
+  // devDependencies, not dependencies: the bundler externalises whatever is in
+  // `dependencies`, and an external import in the CLI bootstrap graph fails
+  // check-cli-bootstrap-imports. These are build inputs that get inlined into
+  // dist — declaring them here keeps them resolvable for tests without
+  // changing what the published package claims to need at runtime.
+  pkg.devDependencies = Object.fromEntries(
+    [...Object.entries(pkg.devDependencies || {}), ...missing.map((n) => [n, 'workspace:*'])].sort(
       ([a], [b]) => a.localeCompare(b),
     ),
   )
