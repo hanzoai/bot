@@ -93,6 +93,11 @@ jobs:
           install-bun: "false"
           use-sticky-disk: "true"
 
+      # Drift here is silent until the next upstream sync, when a hand-edited
+      # brand string turns a mechanical merge back into an unresolvable one.
+      - name: Verify brand transform is current
+        run: node scripts/rebrand.mjs --check
+
       - name: Build dist
         run: pnpm build
 
