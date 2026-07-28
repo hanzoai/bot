@@ -103,6 +103,46 @@ const brandPackageJson = (text) => {
   return touched ? `${JSON.stringify(parsed, null, 2)}\n` : text
 }
 
+// `src/` imports a handful of workspace packages without declaring them.
+// Upstream gets away with that because it publishes every @openclaw/* to npm,
+// so the phantom import resolves off the registry. We do not publish
+// @hanzo/bot-*, so the same import resolves to nothing and only shows up at
+// runtime — the bundler is fine, because it goes through tsconfig paths.
+// Deriving the list rather than pinning it means a sync that adds another
+// phantom import heals itself.
+const declarePhantomWorkspaceDeps = (workspaceNames) => {
+  const imported = new Set()
+  const src = git('ls-files', '-z', 'src').split('\0').filter(Boolean)
+  for (const file of src) {
+    let text
+    try {
+      text = readFileSync(file, 'utf8')
+    } catch {
+      continue
+    }
+    // Import positions only. A bare quoted "@hanzo/bot-discord" is usually a
+    // plugin id or a fixture name, not an edge that has to resolve.
+    const pattern = /(?:\bfrom|\bimport|\brequire)\s*\(?\s*["'](@hanzo\/bot-[a-z0-9-]+)(?:\/[^"']*)?["']/g
+    for (const m of text.matchAll(pattern)) {
+      if (workspaceNames.has(m[1])) imported.add(m[1])
+    }
+  }
+  const pkg = JSON.parse(readFileSync('package.json', 'utf8'))
+  const declared = new Set([
+    ...Object.keys(pkg.dependencies || {}),
+    ...Object.keys(pkg.devDependencies || {}),
+  ])
+  const missing = [...imported].filter((n) => !declared.has(n)).sort()
+  if (!missing.length) return []
+  pkg.dependencies = Object.fromEntries(
+    [...Object.entries(pkg.dependencies || {}), ...missing.map((n) => [n, 'workspace:*'])].sort(
+      ([a], [b]) => a.localeCompare(b),
+    ),
+  )
+  if (!check) writeFileSync('package.json', `${JSON.stringify(pkg, null, 2)}\n`)
+  return missing
+}
+
 const check = process.argv.includes('--check')
 const files = git('ls-files', '-z')
   .split('\0')
@@ -151,10 +191,25 @@ if (!check) {
   }
 }
 
+const workspaceNames = new Set(
+  files
+    .filter((f) => f.endsWith('package.json') && f !== 'package.json')
+    .map((f) => {
+      try {
+        return JSON.parse(readFileSync(f, 'utf8')).name
+      } catch {
+        return null
+      }
+    })
+    .filter(Boolean),
+)
+const declared = declarePhantomWorkspaceDeps(workspaceNames)
+
 console.log(
   check
-    ? `rebrand --check: ${edited} file(s) and ${moves.length} path(s) would change`
-    : `rebrand: ${edited} file(s) rewritten, ${moves.length} path(s) renamed`,
+    ? `rebrand --check: ${edited} file(s), ${moves.length} path(s), ${declared.length} dep(s) would change`
+    : `rebrand: ${edited} file(s) rewritten, ${moves.length} path(s) renamed, ${declared.length} workspace dep(s) declared`,
 )
+if (declared.length) console.log(`  declared: ${declared.join(', ')}`)
 
-if (check && (edited || moves.length)) process.exit(1)
+if (check && (edited || moves.length || declared.length)) process.exit(1)
