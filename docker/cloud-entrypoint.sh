@@ -222,22 +222,43 @@ APPROVALS
 mkdir -p "/home/node/.hanzo-bot/agents/main/agent"
 AUTH_JSON="{\"version\":1,\"profiles\":{"
 FIRST=1
+DEFAULT_PROFILE=""
 if [ -n "$HANZO_API_KEY" ]; then
   AUTH_JSON="${AUTH_JSON}\"hanzo:default\":{\"type\":\"api_key\",\"provider\":\"hanzo\",\"key\":\"${HANZO_API_KEY}\"}"
+  DEFAULT_PROFILE="hanzo:default"
   FIRST=0
 fi
 if [ -n "$ANTHROPIC_API_KEY" ]; then
   [ $FIRST -eq 0 ] && AUTH_JSON="${AUTH_JSON},"
   AUTH_JSON="${AUTH_JSON}\"anthropic:default\":{\"type\":\"api_key\",\"provider\":\"anthropic\",\"key\":\"${ANTHROPIC_API_KEY}\"}"
+  [ -z "$DEFAULT_PROFILE" ] && DEFAULT_PROFILE="anthropic:default"
   FIRST=0
 fi
 if [ -n "$OPENAI_API_KEY" ]; then
   [ $FIRST -eq 0 ] && AUTH_JSON="${AUTH_JSON},"
   AUTH_JSON="${AUTH_JSON}\"openai:default\":{\"type\":\"api_key\",\"provider\":\"openai\",\"key\":\"${OPENAI_API_KEY}\"}"
+  [ -z "$DEFAULT_PROFILE" ] && DEFAULT_PROFILE="openai:default"
 fi
-AUTH_JSON="${AUTH_JSON}},\"default\":\"hanzo:default\"}"
+# Name a default only if that profile was actually WRITTEN. This used to be
+# hardcoded to "hanzo:default", so a pod with no HANZO_API_KEY — or one whose key
+# had been revoked and removed — published a default pointing at a profile that
+# does not exist in the file it points into. The agent then fails on the lookup
+# rather than on the credential, which reads as a bot bug instead of a missing
+# key, and it silently skips the anthropic/openai profiles sitting right there.
+# Prefer hanzo, fall back in order, and say so plainly when there is nothing.
+if [ -n "$DEFAULT_PROFILE" ]; then
+  AUTH_JSON="${AUTH_JSON}},\"default\":\"${DEFAULT_PROFILE}\"}"
+else
+  AUTH_JSON="${AUTH_JSON}}}"
+fi
 echo "$AUTH_JSON" > "/home/node/.hanzo-bot/agents/main/agent/auth-profiles.json"
-echo "[cloud-agent] auth-profiles.json written to main agent dir"
+if [ -n "$DEFAULT_PROFILE" ]; then
+  echo "[cloud-agent] auth-profiles.json written (default: ${DEFAULT_PROFILE})"
+else
+  echo "[cloud-agent] auth-profiles.json written with NO profiles — no HANZO_API_KEY," \
+       "ANTHROPIC_API_KEY or OPENAI_API_KEY in the environment; LLM calls will fail" \
+       "until one is provided (KMS path hanzo/prod/bot)"
+fi
 
 # Create bot config that routes exec to the local node (not sandbox).
 # Without this, the embedded LLM agent defaults to host="sandbox" which
